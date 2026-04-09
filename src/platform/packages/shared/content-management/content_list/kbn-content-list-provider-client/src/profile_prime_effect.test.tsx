@@ -21,7 +21,7 @@ import {
   useUserProfileStoreContext,
 } from '@kbn/content-list-provider';
 import { createPrimingState, primeRelevantProfiles } from './prime_relevant_profiles';
-import { ProfilePrimer } from './profile_primer';
+import { ProfilePrimeEffect } from './profile_prime_effect';
 
 jest.mock('@kbn/content-list-provider', () => ({
   useContentListState: jest.fn(),
@@ -88,10 +88,11 @@ const setMockContentListState = (queryText: string, items: ContentListItem[]) =>
     },
     dispatch: jest.fn(),
     refetch: jest.fn().mockResolvedValue(undefined),
+    refresh: jest.fn().mockResolvedValue(undefined),
   });
 };
 
-describe('ProfilePrimer', () => {
+describe('ProfilePrimeEffect', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -110,7 +111,7 @@ describe('ProfilePrimer', () => {
     mockedPrimeRelevantProfiles.mockResolvedValue(undefined);
 
     render(
-      <ProfilePrimer
+      <ProfilePrimeEffect
         getItems={getItems}
         getDatasetVersion={getDatasetVersion}
         primingState={primingState}
@@ -135,7 +136,7 @@ describe('ProfilePrimer', () => {
     mockedUseUserProfileStoreContext.mockReturnValue(store);
 
     render(
-      <ProfilePrimer
+      <ProfilePrimeEffect
         getItems={jest.fn(() => createRawItems('1'))}
         getDatasetVersion={jest.fn(() => 3)}
         primingState={primingState}
@@ -157,7 +158,7 @@ describe('ProfilePrimer', () => {
     mockedUseUserProfileStoreContext.mockReturnValue(store);
 
     render(
-      <ProfilePrimer
+      <ProfilePrimeEffect
         getItems={jest.fn(() => [])}
         getDatasetVersion={jest.fn(() => 3)}
         primingState={primingState}
@@ -192,6 +193,7 @@ describe('ProfilePrimer', () => {
       },
       dispatch: jest.fn(),
       refetch: jest.fn().mockResolvedValue(undefined),
+      refresh: jest.fn().mockResolvedValue(undefined),
     }));
     mockedUseQueryModel.mockReturnValue(createQueryModel(['createdBy']));
     mockedUseUserProfileStoreContext.mockReturnValue(store);
@@ -201,7 +203,7 @@ describe('ProfilePrimer', () => {
     const getDatasetVersion = jest.fn(() => datasetVersion);
 
     const { rerender } = render(
-      <ProfilePrimer
+      <ProfilePrimeEffect
         getItems={getItems}
         getDatasetVersion={getDatasetVersion}
         primingState={primingState}
@@ -224,7 +226,7 @@ describe('ProfilePrimer', () => {
     datasetVersion = 2;
 
     rerender(
-      <ProfilePrimer
+      <ProfilePrimeEffect
         getItems={getItems}
         getDatasetVersion={getDatasetVersion}
         primingState={primingState}

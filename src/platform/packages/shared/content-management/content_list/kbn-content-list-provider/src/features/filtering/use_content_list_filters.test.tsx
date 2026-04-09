@@ -73,7 +73,7 @@ describe('useContentListFilters', () => {
         result.current.search.setQueryFromText('is:starred');
       });
 
-      expect(result.current.filters.filters).toEqual({ starredOnly: true });
+      expect(result.current.filters.filters).toEqual({ starred: { state: 'include' } });
 
       act(() => {
         result.current.filters.clearFilters();
@@ -95,7 +95,7 @@ describe('useContentListFilters', () => {
 
       expect(result.current.filters.filters).toEqual({
         search: 'my search',
-        starredOnly: true,
+        starred: { state: 'include' },
       });
 
       act(() => {

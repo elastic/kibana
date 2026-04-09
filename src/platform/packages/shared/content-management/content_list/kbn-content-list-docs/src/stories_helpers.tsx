@@ -84,7 +84,7 @@ export const buildMockItems = (count: number): typeof MOCK_DASHBOARDS => {
  *
  * Pass the same `favoritesClient` instance used for `services.favorites`
  * on the provider so that starred items are immediately visible when the
- * `starredOnly` filter is toggled (both sides share the same in-memory set).
+ * `starred` filter is toggled (both sides share the same in-memory set).
  */
 export const createStoryFindItems = (options?: {
   totalItems?: number;

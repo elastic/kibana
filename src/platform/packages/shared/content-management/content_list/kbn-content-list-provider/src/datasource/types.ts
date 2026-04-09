@@ -19,6 +19,11 @@ export interface IncludeExcludeFilter {
   exclude?: string[];
 }
 
+/**
+ * Discriminated union for boolean flag filters (e.g. `starred`).
+ */
+export type IncludeExcludeFlag = { state: 'include' } | { state: 'exclude' };
+
 /** Filter dimension key for tag-based filtering. Matches the `fieldName` used in tag filter popovers. */
 export const TAG_FILTER_ID = 'tag';
 
@@ -29,29 +34,41 @@ export const CREATED_BY_FILTER_ID = 'createdBy';
  * Active filters applied to the content list.
  *
  * Filter dimensions (e.g. `tag`, `type`, `lastResponse`) are keyed by their
- * `fieldName` and hold an {@link IncludeExcludeFilter}. The index signature is
+ * `fieldName` and hold an {@link IncludeExcludeFilter}. Boolean flag filters
+ * (e.g. `starred`) use {@link IncludeExcludeFlag}. The index signature is
  * required to allow arbitrary filter dimensions, but note:
  *
  * - The `search` key is always `string | undefined` — access it directly.
- * - All other keys return `IncludeExcludeFilter | string | undefined`; use
- *   {@link getIncludeExcludeFilter} to safely narrow them to `IncludeExcludeFilter`.
+ * - Use {@link getIncludeExcludeFilter} to narrow to `IncludeExcludeFilter`.
+ * - Use {@link getIncludeExcludeFlag} to narrow to `IncludeExcludeFlag`.
  */
 export interface ActiveFilters {
   /** Search text extracted from the search bar, without filter syntax. */
   search?: string;
-  /** When `true`, restrict results to starred items only. */
-  starredOnly?: boolean;
-  [filterId: string]: IncludeExcludeFilter | string | boolean | undefined;
+  [filterId: string]: IncludeExcludeFilter | IncludeExcludeFlag | string | undefined;
 }
 
 /**
- * Returns the filter value as `IncludeExcludeFilter` if it is an object; otherwise `undefined`.
- * Use when accessing `include`/`exclude` on a filter dimension, since the index signature
- * allows `string`, `boolean`, and `IncludeExcludeFilter`.
+ * Returns the filter value as {@link IncludeExcludeFilter} if it has `include` or `exclude`
+ * arrays; otherwise `undefined`.
  */
 export const getIncludeExcludeFilter = (
-  value: IncludeExcludeFilter | string | boolean | undefined
-): IncludeExcludeFilter | undefined => (value && typeof value === 'object' ? value : undefined);
+  value: IncludeExcludeFilter | IncludeExcludeFlag | string | undefined
+): IncludeExcludeFilter | undefined =>
+  value != null && typeof value === 'object' && ('include' in value || 'exclude' in value)
+    ? (value as IncludeExcludeFilter)
+    : undefined;
+
+/**
+ * Returns the filter value as {@link IncludeExcludeFlag} if it has a `state` field;
+ * otherwise `undefined`.
+ */
+export const getIncludeExcludeFlag = (
+  value: IncludeExcludeFilter | IncludeExcludeFlag | string | undefined
+): IncludeExcludeFlag | undefined =>
+  value != null && typeof value === 'object' && 'state' in value
+    ? (value as IncludeExcludeFlag)
+    : undefined;
 
 /**
  * Parameters for the `findItems` function.
@@ -138,6 +155,12 @@ export interface DataSourceConfig {
    * always call through can omit it.
    */
   onInvalidate?: () => void;
+
+  /**
+   * Lightweight refresh: re-decorates cached items with external data
+   * (e.g. starred status) without a full server refetch.
+   */
+  onRefresh?: () => Promise<void>;
 
   /** Called after successful fetch. */
   onFetchSuccess?: (result: FindItemsResult) => void;

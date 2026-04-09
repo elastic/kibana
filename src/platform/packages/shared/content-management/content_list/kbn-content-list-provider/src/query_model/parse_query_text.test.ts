@@ -144,7 +144,7 @@ describe('parseQueryText', () => {
       expect(result.filters.tag?.include).toEqual(['tag-1']);
     });
 
-    it('omits a field when the display value cannot be resolved.', () => {
+    it('keeps the raw display value when resolution fails so the filter still applies.', () => {
       const fieldWithNoFuzzy: FieldDefinition = {
         fieldName: 'tag',
         resolveIdToDisplay: (id) => id,
@@ -156,10 +156,10 @@ describe('parseQueryText', () => {
         flags,
         buildSchema([fieldWithNoFuzzy])
       );
-      expect(result.filters.tag).toBeUndefined();
+      expect(result.filters.tag).toEqual({ include: ['nonexistent'], exclude: [] });
     });
 
-    it('tracks referenced fields even when the value cannot be resolved.', () => {
+    it('tracks referenced fields when the value cannot be resolved.', () => {
       const fieldWithNoFuzzy: FieldDefinition = {
         fieldName: 'createdBy',
         resolveIdToDisplay: (id) => id,
@@ -171,7 +171,10 @@ describe('parseQueryText', () => {
         flags,
         buildSchema([fieldWithNoFuzzy])
       );
-      expect(result.filters.createdBy).toBeUndefined();
+      expect(result.filters.createdBy).toEqual({
+        include: ['someone@example.com'],
+        exclude: [],
+      });
       expect(result.referencedFields).toEqual(new Set(['createdBy']));
     });
   });

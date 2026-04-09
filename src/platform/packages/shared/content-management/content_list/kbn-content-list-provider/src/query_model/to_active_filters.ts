@@ -16,24 +16,22 @@ import type { ContentListQueryModel } from './types';
  *
  * Maps:
  * - `model.search` → `filters.search`
- * - `model.flags.starred` → `filters.starredOnly`
+ * - `model.flags[key]` → `filters[key]` as `IncludeExcludeFlag`
  * - `model.filters[field]` → `filters[field]` as `IncludeExcludeFilter`
  */
 export const toFindItemsFilters = (model: ContentListQueryModel): ActiveFilters => {
   const result: ActiveFilters = {};
 
-  // Free text search.
   if (model.search) {
     result.search = model.search;
   }
 
-  // Boolean flags.
-  if (model.flags.starred) {
-    result.starredOnly = true;
+  for (const [key, value] of Object.entries(model.flags)) {
+    if (value) {
+      result[key] = { state: 'include' };
+    }
   }
 
-  // Field filters — always emit arrays so downstream consumers can safely
-  // access `.include.length` / `.exclude.length` without null checks.
   for (const [fieldName, filter] of Object.entries(model.filters)) {
     if (filter.include.length > 0 || filter.exclude.length > 0) {
       result[fieldName] = {

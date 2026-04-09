@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getIncludeExcludeFilter, TAG_FILTER_ID, CREATED_BY_FILTER_ID } from './types';
-import type { IncludeExcludeFilter } from './types';
+import {
+  getIncludeExcludeFilter,
+  getIncludeExcludeFlag,
+  TAG_FILTER_ID,
+  CREATED_BY_FILTER_ID,
+} from './types';
+import type { IncludeExcludeFilter, IncludeExcludeFlag } from './types';
 
 describe('datasource type utilities', () => {
   describe('getIncludeExcludeFilter', () => {
@@ -26,16 +31,38 @@ describe('datasource type utilities', () => {
       expect(getIncludeExcludeFilter('search text')).toBeUndefined();
     });
 
-    it('returns `undefined` for a boolean value.', () => {
-      expect(getIncludeExcludeFilter(true)).toBeUndefined();
-    });
-
     it('returns `undefined` for `undefined`.', () => {
       expect(getIncludeExcludeFilter(undefined)).toBeUndefined();
     });
 
-    it('returns `undefined` for `false`.', () => {
-      expect(getIncludeExcludeFilter(false)).toBeUndefined();
+    it('returns `undefined` for an `IncludeExcludeFlag`.', () => {
+      const flag: IncludeExcludeFlag = { state: 'include' };
+      expect(getIncludeExcludeFilter(flag)).toBeUndefined();
+    });
+  });
+
+  describe('getIncludeExcludeFlag', () => {
+    it('returns the flag when the value has a `state` field.', () => {
+      const flag: IncludeExcludeFlag = { state: 'include' };
+      expect(getIncludeExcludeFlag(flag)).toBe(flag);
+    });
+
+    it('returns the flag for `{ state: "exclude" }`.', () => {
+      const flag: IncludeExcludeFlag = { state: 'exclude' };
+      expect(getIncludeExcludeFlag(flag)).toBe(flag);
+    });
+
+    it('returns `undefined` for a string value.', () => {
+      expect(getIncludeExcludeFlag('search text')).toBeUndefined();
+    });
+
+    it('returns `undefined` for `undefined`.', () => {
+      expect(getIncludeExcludeFlag(undefined)).toBeUndefined();
+    });
+
+    it('returns `undefined` for an `IncludeExcludeFilter`.', () => {
+      const filter: IncludeExcludeFilter = { include: ['a'] };
+      expect(getIncludeExcludeFlag(filter)).toBeUndefined();
     });
   });
 

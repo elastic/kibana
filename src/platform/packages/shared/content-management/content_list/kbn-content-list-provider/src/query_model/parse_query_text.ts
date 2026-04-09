@@ -64,9 +64,12 @@ const resolveDisplayValue = (displayValue: string, field: FieldDefinition): stri
     return [exactId];
   }
   if (field.resolveFuzzyDisplayToIds) {
-    return field.resolveFuzzyDisplayToIds(displayValue);
+    const fuzzyIds = field.resolveFuzzyDisplayToIds(displayValue);
+    if (fuzzyIds.length > 0) {
+      return fuzzyIds;
+    }
   }
-  return [];
+  return [displayValue];
 };
 
 /** Extract include/exclude IDs for a field from the parsed query. */

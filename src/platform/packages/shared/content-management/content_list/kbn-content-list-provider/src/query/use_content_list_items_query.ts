@@ -32,7 +32,7 @@ const DEFAULT_PAGE = { index: 0, size: 20 };
  */
 export const useContentListItemsQuery = (
   clientState: ContentListClientState
-): ContentListQueryData & { refetch: () => Promise<void> } => {
+): ContentListQueryData & { refetch: () => Promise<void>; requery: () => Promise<void> } => {
   const { dataSource, queryKeyScope, supports } = useContentListConfig();
   const userProfileStore = useUserProfileStoreContext();
 
@@ -114,6 +114,13 @@ export const useContentListItemsQuery = (
     await query.refetch();
   }, [dataSource, query]);
 
+  // Re-run the query function without invalidating the data-source cache.
+  // Used by `refresh()` after external decoration data changes (e.g. favorites)
+  // so `findItems` reads freshly decorated items without a server round-trip.
+  const requery = useCallback(async () => {
+    await query.refetch();
+  }, [query]);
+
   const error = useMemo(() => {
     if (!query.error) {
       return undefined;
@@ -128,5 +135,6 @@ export const useContentListItemsQuery = (
     isFetching: query.isFetching,
     error,
     refetch,
+    requery,
   };
 };

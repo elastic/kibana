@@ -7,20 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useRef, useState, type ReactNode } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type {
   ContentListCoreConfig,
   ContentListFeatures,
-  ContentListServices,
   DataSourceConfig,
   FilterFacetConfig,
   UserProfileEntry,
   UserProfileStore,
 } from '@kbn/content-list-provider';
-import { ContentListProvider, isPaginationConfig } from '@kbn/content-list-provider';
+import {
+  ContentListProvider,
+  isPaginationConfig,
+  useContentListState,
+} from '@kbn/content-list-provider';
 import { SAVED_OBJECTS_PER_PAGE_ID } from '@kbn/management-settings-ids';
+import { useFavorites } from '@kbn/content-management-favorites-public';
 import type { Tag } from '@kbn/content-management-tags';
 import type { TableListViewFindItemsFn, ContentListClientServices } from './types';
 import {
@@ -30,7 +34,8 @@ import {
   MANAGED_USER_FILTER,
   NO_CREATOR_USER_FILTER,
 } from './strategy';
-import { ProfilePrimer } from './profile_primer';
+import type { ItemDecorator } from './strategy';
+import { ProfilePrimeEffect } from './profile_prime_effect';
 import { createPrimingState, type PrimingState } from './prime_relevant_profiles';
 
 /**
@@ -58,6 +63,30 @@ const tagKeys = (item: UserContentCommonSchema): string[] =>
 
 /** Extract the creator key for an item, aligned with {@link getCreatorKey} in `strategy.ts`. */
 const createdByKeys = (item: UserContentCommonSchema): string[] => [getCreatorKey(item)];
+
+/**
+ * Monitors the `FavoritesContext` query data and calls `refresh()` whenever
+ * the favorites list changes (star/unstar). This keeps the strategy's
+ * `decoratedItems` in sync without a full server refetch.
+ *
+ * Renders nothing — exists only for side-effects. Rendered as a child of
+ * `ContentListProvider` so both `useFavorites()` and `useContentListState()`
+ * are available in the React tree.
+ */
+const FavoritesSyncEffect = () => {
+  const { refresh } = useContentListState();
+  const { dataUpdatedAt } = useFavorites();
+  const prevUpdatedAtRef = useRef(dataUpdatedAt);
+
+  useEffect(() => {
+    if (dataUpdatedAt && dataUpdatedAt !== prevUpdatedAtRef.current) {
+      prevUpdatedAtRef.current = dataUpdatedAt;
+      refresh();
+    }
+  }, [dataUpdatedAt, refresh]);
+
+  return null;
+};
 
 /**
  * Props for the Client provider.
@@ -119,28 +148,45 @@ export const ContentListClientProvider = ({
   ...rest
 }: ContentListClientProviderProps): JSX.Element => {
   const favoritesClient = services?.favorites;
+  const starredEnabled = featuresProp.starred !== false && !!favoritesClient;
 
-  const { findItems, onInvalidate, getItems, getDatasetVersion } = useMemo(
-    () => createClientStrategy(tableListViewFindItems, favoritesClient),
-    [tableListViewFindItems, favoritesClient]
+  const decorate: ItemDecorator | undefined = useCallback(
+    async (items: UserContentCommonSchema[]) => {
+      if (!favoritesClient) {
+        return items;
+      }
+      try {
+        const { favoriteIds } = await favoritesClient.getFavorites();
+        const favoriteSet = new Set(favoriteIds);
+        return items.map((item) => ({ ...item, starred: favoriteSet.has(item.id) }));
+      } catch {
+        return items;
+      }
+    },
+    [favoritesClient]
+  );
+
+  const { findItems, onInvalidate, onRefresh, getItems, getDatasetVersion } = useMemo(
+    () => createClientStrategy(tableListViewFindItems, starredEnabled ? decorate : undefined),
+    [tableListViewFindItems, starredEnabled, decorate]
   );
 
   const dataSource: DataSourceConfig = useMemo(
-    () => ({ findItems, onInvalidate, onFetchSuccess }),
-    [findItems, onInvalidate, onFetchSuccess]
+    () => ({ findItems, onInvalidate, onRefresh, onFetchSuccess }),
+    [findItems, onInvalidate, onRefresh, onFetchSuccess]
   );
 
   const tagsService = services?.tags;
   const userProfilesService = services?.userProfiles;
 
-  // Shared priming state — passed to both the ProfilePrimer component and
-  // `getFacets` so they share dedup / version tracking.
+  // Shared priming state — passed to both the `ProfilePrimeEffect` component
+  // and `getFacets` so they share dedup / version tracking.
   const primingStateRef = useRef<PrimingState>(createPrimingState());
   const primingState = primingStateRef.current;
 
   // Ref bridge for the `UserProfileStore`. The store lives inside
-  // `ContentListProvider`'s context tree; `ProfilePrimer` (rendered as a
-  // child) writes the store here so `getFacets` (defined before the tree
+  // `ContentListProvider`'s context tree; `ProfilePrimeEffect` (rendered as
+  // a child) writes the store here so `getFacets` (defined before the tree
   // mounts) can read it.
   const storeRef = useRef<UserProfileStore | undefined>(undefined);
 
@@ -160,12 +206,7 @@ export const ContentListClientProvider = ({
     const { getTagList } = tagsService;
     const config: FilterFacetConfig<Tag> = {
       getFacets: async ({ filters }) => {
-        let favoriteIds: Set<string> | undefined;
-        if (filters.starredOnly && favoritesClient) {
-          const { favoriteIds: ids } = await favoritesClient.getFavorites();
-          favoriteIds = new Set(ids);
-        }
-        const narrowed = filterItems(getItems(), filters, favoriteIds);
+        const narrowed = filterItems(getItems(), filters);
         const tagCounts = computeCounts(narrowed, tagKeys);
         const tags = getTagList();
         return tags.map((tag) => ({
@@ -177,14 +218,14 @@ export const ContentListClientProvider = ({
       },
     };
     return config;
-  }, [featuresProp.tags, tagsService, getItems, favoritesClient]);
+  }, [featuresProp.tags, tagsService, getItems]);
 
   // Build `FilterFacetConfig<UserProfileEntry>` for user profiles when the
   // service is available and the feature isn't explicitly disabled or already
   // configured.
   //
   // `getFacets` delegates profile loading to the shared priming routine so
-  // that all trigger sites (ProfilePrimer, popover, avatar) feed the same
+  // that all trigger sites (`ProfilePrimeEffect`, popover, avatar) feed the same
   // `UserProfileStore`. After priming, facet labels are read from the store.
   const userProfilesFeature = useMemo((): ContentListFeatures['userProfiles'] => {
     if (featuresProp.userProfiles === false) {
@@ -200,13 +241,7 @@ export const ContentListClientProvider = ({
     const sentinelKeys = new Set([MANAGED_USER_FILTER, NO_CREATOR_USER_FILTER]);
     const config: FilterFacetConfig<UserProfileEntry> = {
       getFacets: async ({ filters }) => {
-        let favoriteIds: Set<string> | undefined;
-        if (filters.starredOnly && favoritesClient) {
-          const { favoriteIds: ids } = await favoritesClient.getFavorites();
-          favoriteIds = new Set(ids);
-        }
-
-        const narrowed = filterItems(getItems(), filters, favoriteIds);
+        const narrowed = filterItems(getItems(), filters);
         const userCounts = computeCounts(narrowed, createdByKeys);
         const allKeys = Object.keys(userCounts);
         if (allKeys.length === 0) {
@@ -259,7 +294,7 @@ export const ContentListClientProvider = ({
       },
     };
     return config;
-  }, [featuresProp.userProfiles, userProfilesService, getItems, favoritesClient]);
+  }, [featuresProp.userProfiles, userProfilesService, getItems]);
 
   const features: ContentListFeatures = useMemo(
     () => ({
@@ -306,8 +341,9 @@ export const ContentListClientProvider = ({
       services={services}
       {...rest}
     >
+      {starredEnabled && <FavoritesSyncEffect />}
       {userProfilesService && (
-        <ProfilePrimer
+        <ProfilePrimeEffect
           getItems={getItems}
           getDatasetVersion={getDatasetVersion}
           primingState={primingState}

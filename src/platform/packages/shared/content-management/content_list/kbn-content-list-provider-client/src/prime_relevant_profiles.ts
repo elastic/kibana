@@ -35,7 +35,7 @@ export const collectRealUids = (items: UserContentCommonSchema[]): string[] => {
 /**
  * State tracked across priming cycles to avoid redundant `ensureLoaded` calls.
  *
- * A single instance is shared by the ProfilePrimer component and `getFacets`.
+ * A single instance is shared by the `ProfilePrimeEffect` component and `getFacets`.
  */
 export interface PrimingState {
   /** The dataset version that was last primed. */

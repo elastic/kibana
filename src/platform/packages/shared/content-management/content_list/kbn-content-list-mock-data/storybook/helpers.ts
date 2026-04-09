@@ -21,7 +21,7 @@ interface MockFindItemsFilters {
   search?: string;
   tag?: { include?: string[]; exclude?: string[] };
   createdBy?: { include?: string[]; exclude?: string[] };
-  starredOnly?: boolean;
+  starred?: { state: 'include' | 'exclude' };
 }
 
 /**
@@ -62,7 +62,7 @@ export interface MockFindItemsConfig<T extends UserContentCommonSchema> {
    * Defaults to the module-level {@link mockFavoritesClient} singleton.
    * Pass a story-specific client to ensure the same instance is shared
    * between the provider (`services.favorites`) and `findItems`, so that
-   * starred items are immediately visible when `starredOnly` is toggled.
+   * starred items are immediately visible when the `starred` filter is toggled.
    */
   favoritesClient?: FavoritesClientPublic;
 }
@@ -139,7 +139,7 @@ export function createMockFindItems<T extends UserContentCommonSchema>(
     }
 
     // Apply starred filter.
-    if (filters.starredOnly) {
+    if (filters.starred?.state === 'include') {
       const client = configFavoritesClient ?? mockFavoritesClient;
       const favorites = await client.getFavorites();
       items = items.filter((item) => favorites.favoriteIds.includes(item.id));
@@ -499,7 +499,7 @@ export const createSimpleMockFindItems = (
     }
 
     // Apply starred filter.
-    if (filters.starredOnly) {
+    if (filters.starred?.state === 'include') {
       const client = favoritesClient ?? mockFavoritesClient;
       const favorites = await client.getFavorites();
       items = items.filter((item) => favorites.favoriteIds.includes(item.id));

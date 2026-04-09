@@ -109,12 +109,18 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
     isFetching,
     error,
     refetch: queryRefetch,
+    requery: queryRequery,
   } = useContentListItemsQuery(clientState);
 
-  // Expose refetch for manual refresh.
+  const { dataSource } = useContentListConfig();
+
   const refetch = useCallback(() => queryRefetch(), [queryRefetch]);
 
-  // Combine client state with query data for unified state interface.
+  const refresh = useCallback(async () => {
+    await dataSource.onRefresh?.();
+    await queryRequery();
+  }, [dataSource, queryRequery]);
+
   const contextValue: ContentListStateContextValue = useMemo(
     () => ({
       state: {
@@ -127,8 +133,9 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
       },
       dispatch,
       refetch,
+      refresh,
     }),
-    [clientState, items, totalItems, isLoading, isFetching, error, dispatch, refetch]
+    [clientState, items, totalItems, isLoading, isFetching, error, dispatch, refetch, refresh]
   );
 
   return (

@@ -16,12 +16,28 @@ import type {
   FindItemsResult,
   ContentListItem,
 } from '@kbn/content-list-provider';
-import { TAG_FILTER_ID } from '@kbn/content-list-provider';
-import type { FavoritesClientPublic } from '@kbn/content-management-favorites-public';
+import { TAG_FILTER_ID, getIncludeExcludeFlag } from '@kbn/content-list-provider';
 import type { TableListViewFindItemsFn } from './types';
 
 export const MANAGED_USER_FILTER = '__managed__';
 export const NO_CREATOR_USER_FILTER = '__no_creator__';
+
+/**
+ * A `UserContentCommonSchema` item that may carry decorator-added properties
+ * (e.g. `starred`). Used where {@link filterItems} reads dynamic keys set by
+ * an {@link ItemDecorator}.
+ */
+type DecoratedItem = UserContentCommonSchema & Record<string, unknown>;
+
+/**
+ * Enriches raw items with external data (e.g. `starred` status).
+ *
+ * Called at cache-fill time and on {@link ClientStrategy.onRefresh}.
+ * The returned array must have the same length and order as the input.
+ */
+export type ItemDecorator = (
+  items: UserContentCommonSchema[]
+) => Promise<UserContentCommonSchema[]>;
 
 /**
  * Return type from {@link createClientStrategy}.
@@ -45,7 +61,13 @@ export interface ClientStrategy {
    * will fetch from the server regardless of `searchQuery`.
    */
   onInvalidate: () => void;
-  /** Returns the full (unfiltered) item set from the most recent server fetch. */
+  /**
+   * Re-runs the `decorate` callback on existing raw items without a
+   * server round-trip. Call after external data mutations (e.g. star/unstar)
+   * so the cached decorated items are refreshed.
+   */
+  onRefresh: () => Promise<void>;
+  /** Returns the full (unfiltered, decorated) item set from the most recent fetch. */
   getItems: () => UserContentCommonSchema[];
   /**
    * Monotonic counter that increments each time the cached item universe
@@ -163,10 +185,8 @@ const extractTagIds = (refs?: Array<{ type: string; id: string }>): string[] | u
 /**
  * Safely narrow an `ActiveFilters` value to an {@link IncludeExcludeFilter}.
  */
-const asIncludeExclude = (
-  value: IncludeExcludeFilter | string | boolean | undefined
-): IncludeExcludeFilter | undefined =>
-  value && typeof value === 'object' && ('include' in value || 'exclude' in value)
+const asIncludeExclude = (value: ActiveFilters[string]): IncludeExcludeFilter | undefined =>
+  value != null && typeof value === 'object' && ('include' in value || 'exclude' in value)
     ? (value as IncludeExcludeFilter)
     : undefined;
 
@@ -182,21 +202,21 @@ export const getCreatorKey = (item: UserContentCommonSchema): string => {
 };
 
 /**
- * Apply client-side tag and createdBy filters to the item set.
+ * Apply client-side filters to the item set.
  *
- * Tag filters use `filters[TAG_FILTER_ID]` (include/exclude arrays of tag IDs).
- * Creator filters use `filters.user` (include/exclude arrays of UIDs + sentinels).
- * Starred filtering requires the set of favorite item IDs.
+ * - Tag filters use `filters[TAG_FILTER_ID]` (include/exclude arrays of tag IDs).
+ * - Creator filters use `filters.createdBy` (include/exclude arrays of UIDs + sentinels).
+ * - Boolean flag filters (e.g. `starred`) are detected generically via
+ *   {@link getIncludeExcludeFlag} and matched against `item[key]`.
  *
  * Exported so that {@link ContentListClientProvider} facet implementations can
  * apply the same filtering to compute faceted counts.
  */
 export const filterItems = (
   items: UserContentCommonSchema[],
-  filters: ActiveFilters,
-  favoriteIds?: Set<string>
+  filters: ActiveFilters
 ): UserContentCommonSchema[] => {
-  let result = items;
+  let result = items as DecoratedItem[];
 
   const tagFilter = asIncludeExclude(filters[TAG_FILTER_ID]);
   if (tagFilter) {
@@ -228,8 +248,16 @@ export const filterItems = (
     }
   }
 
-  if (filters.starredOnly && favoriteIds) {
-    result = result.filter((item) => favoriteIds.has(item.id));
+  // Flag keys must match the decorated property name set by the `ItemDecorator`
+  // (e.g. `starred` in `ActiveFilters` corresponds to `item.starred`).
+  for (const [key, value] of Object.entries(filters)) {
+    const flag = getIncludeExcludeFlag(value);
+    if (flag) {
+      result = result.filter((item) => {
+        const v = item[key];
+        return flag.state === 'include' ? v === true : v !== true;
+      });
+    }
   }
 
   return result;
@@ -291,16 +319,21 @@ const transformItem = (item: UserContentCommonSchema): ContentListItem => {
  * to hit the server.
  *
  * @param tableListViewFindItems - The consumer's existing `findItems` function.
- * @param favoritesClient - Optional favorites client for starred filtering.
- * @returns A {@link ClientStrategy} with `findItems`, `invalidate`, and `getItems`.
+ * @param decorate - Optional callback that enriches raw items with external data.
+ * @returns A {@link ClientStrategy} with `findItems`, `onInvalidate`, `onRefresh`, and `getItems`.
  */
 export const createClientStrategy = (
   tableListViewFindItems: TableListViewFindItemsFn,
-  favoritesClient?: FavoritesClientPublic
+  decorate?: ItemDecorator
 ): ClientStrategy => {
-  let cachedItems: UserContentCommonSchema[] = [];
+  let rawItems: UserContentCommonSchema[] = [];
+  let decoratedItems: UserContentCommonSchema[] = [];
   let lastSearchQuery: string | undefined;
   let datasetVersion = 0;
+
+  const applyDecoration = async () => {
+    decoratedItems = decorate ? await decorate(rawItems) : rawItems;
+  };
 
   const findItemsFn: FindItemsFn = async (params: FindItemsParams): Promise<FindItemsResult> => {
     const { searchQuery, filters, sort, page, signal } = params;
@@ -310,18 +343,13 @@ export const createClientStrategy = (
       if (signal?.aborted) {
         throw new DOMException('The operation was aborted.', 'AbortError');
       }
-      cachedItems = result.hits;
+      rawItems = result.hits;
+      await applyDecoration();
       lastSearchQuery = searchQuery;
       datasetVersion += 1;
     }
 
-    let favoriteIds: Set<string> | undefined;
-    if (filters.starredOnly && favoritesClient) {
-      const { favoriteIds: ids } = await favoritesClient.getFavorites();
-      favoriteIds = new Set(ids);
-    }
-
-    let items = filterItems(cachedItems, filters, favoriteIds);
+    let items = filterItems(decoratedItems, filters);
 
     if (sort?.field) {
       items = sortItems(items, sort.field, sort.direction ?? 'asc');
@@ -338,14 +366,20 @@ export const createClientStrategy = (
 
   const onInvalidate = () => {
     lastSearchQuery = undefined;
-    cachedItems = [];
+    rawItems = [];
+    decoratedItems = [];
     datasetVersion += 1;
+  };
+
+  const onRefresh = async () => {
+    await applyDecoration();
   };
 
   return {
     findItems: findItemsFn,
     onInvalidate,
-    getItems: () => cachedItems,
+    onRefresh,
+    getItems: () => decoratedItems,
     getDatasetVersion: () => datasetVersion,
   };
 };

@@ -9,8 +9,8 @@
 
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type { FindItemsParams } from '@kbn/content-list-provider';
-import type { FavoritesClientPublic } from '@kbn/content-management-favorites-public';
 import { createClientStrategy } from './strategy';
+import type { ItemDecorator } from './strategy';
 import type { TableListViewFindItemsFn } from './types';
 
 const createParams = (overrides?: Partial<FindItemsParams>): FindItemsParams => ({
@@ -218,15 +218,16 @@ describe('createClientStrategy', () => {
       expect(result.items[0].id).toBe('1');
     });
 
-    it('applies starred filter with favoritesClient', async () => {
+    it('applies starred filter via decorate + IncludeExcludeFlag', async () => {
       const mockItems = [createMockItem('1'), createMockItem('2'), createMockItem('3')];
       const mockFindItems = createMockFindItems(mockItems);
-      const mockFavoritesClient = {
-        getFavorites: jest.fn().mockResolvedValue({ favoriteIds: ['1', '3'] }),
-      } as unknown as FavoritesClientPublic;
-      const { findItems } = createClientStrategy(mockFindItems, mockFavoritesClient);
+      const decorate: ItemDecorator = async (items) => {
+        const favoriteIds = new Set(['1', '3']);
+        return items.map((item) => ({ ...item, starred: favoriteIds.has(item.id) }));
+      };
+      const { findItems } = createClientStrategy(mockFindItems, decorate);
 
-      const result = await findItems(createParams({ filters: { starredOnly: true } }));
+      const result = await findItems(createParams({ filters: { starred: { state: 'include' } } }));
 
       expect(result.items.map((i) => i.id)).toEqual(['1', '3']);
     });
@@ -359,8 +360,48 @@ describe('createClientStrategy', () => {
     });
   });
 
+  describe('decorate', () => {
+    it('applies decorate callback at cache-fill time', async () => {
+      const mockItems = [createMockItem('1'), createMockItem('2')];
+      const mockFindItems = createMockFindItems(mockItems);
+      const decorate: ItemDecorator = async (items) =>
+        items.map((item) => ({ ...item, starred: item.id === '1' }));
+      const { findItems, getItems } = createClientStrategy(mockFindItems, decorate);
+
+      await findItems(createParams());
+
+      const decorated = getItems() as unknown as Array<{ starred: boolean }>;
+      expect(decorated[0].starred).toBe(true);
+      expect(decorated[1].starred).toBe(false);
+    });
+  });
+
+  describe('onRefresh', () => {
+    it('re-decorates items without a server fetch', async () => {
+      const mockItems = [createMockItem('1'), createMockItem('2')];
+      const mockFindItems = createMockFindItems(mockItems);
+      let favoriteIds = new Set(['1']);
+      const decorate: ItemDecorator = async (items) =>
+        items.map((item) => ({ ...item, starred: favoriteIds.has(item.id) }));
+      const { findItems, onRefresh, getItems } = createClientStrategy(mockFindItems, decorate);
+
+      await findItems(createParams());
+      let decorated = getItems() as unknown as Array<{ starred: boolean }>;
+      expect(decorated[0].starred).toBe(true);
+      expect(decorated[1].starred).toBe(false);
+
+      favoriteIds = new Set(['2']);
+      await onRefresh();
+
+      expect(mockFindItems).toHaveBeenCalledTimes(1);
+      decorated = getItems() as unknown as Array<{ starred: boolean }>;
+      expect(decorated[0].starred).toBe(false);
+      expect(decorated[1].starred).toBe(true);
+    });
+  });
+
   describe('getItems', () => {
-    it('returns raw items from the most recent fetch', async () => {
+    it('returns decorated items from the most recent fetch', async () => {
       const mockItems = [createMockItem('1'), createMockItem('2')];
       const mockFindItems = createMockFindItems(mockItems);
       const { findItems, getItems } = createClientStrategy(mockFindItems);

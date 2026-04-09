@@ -144,6 +144,15 @@ export interface ContentListStateContextValue {
   state: ContentListState;
   /** Dispatch function for client state updates (search, filters, sort). */
   dispatch: Dispatch<ContentListAction>;
-  /** Function to manually refetch items from the data source. */
+  /**
+   * Full refetch: clears the data-source cache (`onInvalidate`) then
+   * re-executes the query. Use after item mutations (edit, delete, create).
+   */
   refetch: () => Promise<void>;
+  /**
+   * Lightweight refresh: re-decorates cached items with external data
+   * (`onRefresh`) then re-executes the query without clearing the cache.
+   * Use after external data mutations (star/unstar).
+   */
+  refresh: () => Promise<void>;
 }

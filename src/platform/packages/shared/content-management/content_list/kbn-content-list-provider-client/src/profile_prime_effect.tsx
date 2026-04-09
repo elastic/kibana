@@ -28,9 +28,9 @@ import { primeRelevantProfiles } from './prime_relevant_profiles';
 const USER_FIELD_NAMES = ['createdBy'];
 
 /**
- * Props for {@link ProfilePrimer}.
+ * Props for {@link ProfilePrimeEffect}.
  */
-interface ProfilePrimerProps {
+interface ProfilePrimeEffectProps {
   getItems: () => UserContentCommonSchema[];
   getDatasetVersion: () => number;
   primingState: PrimingState;
@@ -55,18 +55,18 @@ interface ProfilePrimerProps {
  * Uses {@link ContentListQueryModel.referencedFields} as the trigger rather
  * than raw string matching. `referencedFields` records which fields had a
  * clause with a non-empty value in the parsed AST, regardless of whether
- * the value resolved to an ID. This breaks the bootstrap cycle: the primer
+ * the value resolved to an ID. This breaks the bootstrap cycle: the effect
  * fires when the user types `createdBy:alice`, populates the store, and on
  * the next derivation `resolveDisplayToId` succeeds.
  *
  * Renders nothing — exists only for side-effects.
  */
-export const ProfilePrimer = ({
+export const ProfilePrimeEffect = ({
   getItems,
   getDatasetVersion,
   primingState,
   storeRef,
-}: ProfilePrimerProps): null => {
+}: ProfilePrimeEffectProps): null => {
   const { state } = useContentListState();
   const store = useUserProfileStoreContext();
   const model = useQueryModel(state.queryText);

@@ -29,30 +29,31 @@ describe('toFindItemsFilters', () => {
     expect(result).not.toHaveProperty('search');
   });
 
-  it('maps `flags.starred` to `starredOnly: true`.', () => {
+  it('maps `flags.starred` to `starred: { state: "include" }`.', () => {
     const model: ContentListQueryModel = {
       ...EMPTY_MODEL,
       flags: { starred: true },
     };
-    expect(toFindItemsFilters(model)).toEqual({ starredOnly: true });
+    expect(toFindItemsFilters(model)).toEqual({ starred: { state: 'include' } });
   });
 
-  it('does not set `starredOnly` when `flags.starred` is absent.', () => {
+  it('maps all truthy flags generically.', () => {
     const model: ContentListQueryModel = {
       ...EMPTY_MODEL,
-      flags: { someOtherFlag: true },
+      flags: { starred: true, pinned: true },
     };
     const result = toFindItemsFilters(model);
-    expect(result).not.toHaveProperty('starredOnly');
+    expect(result.starred).toEqual({ state: 'include' });
+    expect(result.pinned).toEqual({ state: 'include' });
   });
 
-  it('does not set `starredOnly` when `flags.starred` is `false`.', () => {
+  it('does not set a flag key when it is `false`.', () => {
     const model: ContentListQueryModel = {
       ...EMPTY_MODEL,
       flags: { starred: false },
     };
     const result = toFindItemsFilters(model);
-    expect(result).not.toHaveProperty('starredOnly');
+    expect(result).not.toHaveProperty('starred');
   });
 
   it('maps field filters with include/exclude arrays.', () => {
@@ -93,7 +94,7 @@ describe('toFindItemsFilters', () => {
     const result = toFindItemsFilters(model);
     expect(result).toEqual({
       search: 'report',
-      starredOnly: true,
+      starred: { state: 'include' },
       tag: { include: ['tag-1'], exclude: [] },
     });
   });

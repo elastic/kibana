@@ -126,7 +126,7 @@ const usePreview = (state: PlaygroundState) => {
 
   // Memoized before `dataSource` so both the provider and findItems share the same
   // in-memory favorites set — starring an item is immediately reflected when the
-  // `starredOnly` filter is toggled.
+  // `starred` filter is toggled.
   const favoritesClient = useMemo(
     () => (hasStarred ? createMockFavoritesClient() : undefined),
     [hasStarred]

@@ -68,7 +68,7 @@ const result = await mockFindDashboards({
   searchQuery: 'revenue',
   filters: {
     tag: { include: ['tag-production'] },
-    starredOnly: false,
+    starred: undefined,
   },
   sort: { field: 'updatedAt', direction: 'desc' },
   page: { index: 0, size: 10 },

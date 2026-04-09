@@ -80,11 +80,13 @@ export type {
 export type {
   ActiveFilters,
   IncludeExcludeFilter,
+  IncludeExcludeFlag,
   FindItemsFn,
   FindItemsParams,
   FindItemsResult,
   DataSourceConfig,
 } from './src/datasource';
+export { getIncludeExcludeFlag } from './src/datasource';
 
 // Query model.
 export type {
