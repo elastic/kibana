@@ -161,16 +161,18 @@ async function archiveInvalidatedByNodeModulesChange(
     const filesToCheck = CACHE_INVALIDATION_FILES.filter(
       (f) => archive.prBuildFileHashes![f] !== undefined
     );
-    if (filesToCheck.length === 0) {
-      // No hashes stored — fall through to git diff.
-      changed = await getChangedInvalidationFiles(archive.sha);
+    if (filesToCheck.length !== CACHE_INVALIDATION_FILES.length) {
+      // Partial or missing hashes — a PR archive with incomplete metadata cannot
+      // be trusted against the current node_modules; treat as invalidated.
+      changed = [...CACHE_INVALIDATION_FILES];
     } else {
       const currentHashes = await calculateFileHashes(filesToCheck);
       changed = filesToCheck.filter((f) => currentHashes[f] !== archive.prBuildFileHashes![f]);
     }
   } else {
     // Commit archives: git diff the archive SHA against HEAD.
-    changed = await getChangedInvalidationFiles(archive.sha);
+    // If git fails (e.g. SHA not in local history), treat as invalidated to be safe.
+    changed = (await getChangedInvalidationFiles(archive.sha)) ?? [...CACHE_INVALIDATION_FILES];
   }
 
   if (changed.length > 0) {

@@ -48,11 +48,7 @@ export async function checkForExistingBuildArtifacts(): Promise<boolean> {
   const raw = await Fs.promises.readFile(configPathsFile, 'utf8');
   const tsconfigPaths: string[] = JSON.parse(raw);
 
-  const SAMPLE_SIZE = 30;
-  const step = Math.max(1, Math.floor(tsconfigPaths.length / SAMPLE_SIZE));
-  const sample = tsconfigPaths.filter((_, i) => i % step === 0).slice(0, SAMPLE_SIZE);
-
-  const checks = sample.map(async (tsconfigRel) => {
+  const checks = tsconfigPaths.map(async (tsconfigRel) => {
     const projectDir = Path.dirname(Path.resolve(REPO_ROOT, tsconfigRel));
     try {
       await Fs.promises.access(Path.join(projectDir, 'target', 'types'));
@@ -62,12 +58,9 @@ export async function checkForExistingBuildArtifacts(): Promise<boolean> {
     }
   });
 
-  // `some(Boolean)` is intentionally conservative: a single sampled project
-  // having a target/types directory is enough to conclude artifacts exist. This
-  // can produce a false positive if the developer previously ran only a partial
-  // type check, but Phase 2's state-SHA comparison corrects for that — if the
-  // sampled project's artifacts are from a different commit, the effective
-  // rebuild count will reflect that and trigger a fresh GCS restore if needed.
+  // Check all projects rather than a sample: a partial `--project` run writes
+  // target/types for only one project, and sampling could miss it, producing a
+  // false negative that triggers an unnecessary GCS restore.
   return (await Promise.all(checks)).some(Boolean);
 }
 
@@ -125,7 +118,9 @@ export async function invalidateTsBuildInfoFiles(
  * were created against different node_modules (e.g. after a yarn.lock update)
  * and therefore can no longer be trusted for incremental tsc correctness.
  */
-export async function getChangedInvalidationFiles(fromSha: string): Promise<string[]> {
+export async function getChangedInvalidationFiles(
+  fromSha: string
+): Promise<string[] | undefined> {
   try {
     const { stdout } = await execa(
       'git',
@@ -137,6 +132,8 @@ export async function getChangedInvalidationFiles(fromSha: string): Promise<stri
       .map((l) => l.trim())
       .filter((l) => l.length > 0);
   } catch {
-    return [];
+    // fromSha may be unreachable (branch switch, shallow clone, GC) — returning
+    // undefined signals "cache safety unknown" so callers can be conservative.
+    return undefined;
   }
 }

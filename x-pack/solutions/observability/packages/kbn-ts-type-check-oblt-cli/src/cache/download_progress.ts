@@ -40,11 +40,11 @@ export const createExtractionProgressBar = (
   total: number,
   logInfo?: (msg: string) => void
 ): { update: (extracted: number) => void; stop: () => void } => {
-  if (isCiEnvironment() || total === 0) {
+  if (total === 0) {
     return { update: () => {}, stop: () => {} };
   }
 
-  if (!isInteractiveTty()) {
+  if (!isInteractiveTty() || isCiEnvironment()) {
     let lastLogTime = Date.now();
 
     return {
@@ -101,11 +101,11 @@ export const createProjectRestoreProgressBar = (
   total: number,
   logInfo?: (msg: string) => void
 ): { increment: () => void; stop: () => void } => {
-  if (isCiEnvironment() || total === 0) {
+  if (total === 0) {
     return { increment: () => {}, stop: () => {} };
   }
 
-  if (!isInteractiveTty()) {
+  if (!isInteractiveTty() || isCiEnvironment()) {
     let count = 0;
     let lastLogTime = Date.now();
 
@@ -159,8 +159,8 @@ export const createDownloadProgressBar = (
 ): { meter: Transform; stop: () => void } => {
   const total = contentLength ?? 0;
 
-  if (!isCiEnvironment() && !isInteractiveTty()) {
-    // Non-TTY (agent, pipe): emit periodic log lines rather than an in-place bar.
+  if (!isInteractiveTty() || isCiEnvironment()) {
+    // Non-TTY or CI: emit periodic log lines rather than an in-place bar.
     let bytesReceived = 0;
     let lastLogTime = Date.now();
     let lastLogBytes = 0;
@@ -198,24 +198,20 @@ export const createDownloadProgressBar = (
     return { meter, stop: () => {} };
   }
 
-  let bar: SingleBar | undefined;
+  // When content-length is known show a proper progress bar with percentage.
+  // When unknown (e.g. selective restore streamed on-the-fly) show only
+  // bytes-received and speed so the display is never falsely at 100%.
+  const format = total
+    ? ' Downloading [{bar}] {percentage}% | {received}/{size} | {speed}/s'
+    : ' Downloading {received} | {speed}/s';
 
-  if (!isCiEnvironment()) {
-    // When content-length is known show a proper progress bar with percentage.
-    // When unknown (e.g. selective restore streamed on-the-fly) show only
-    // bytes-received and speed so the display is never falsely at 100%.
-    const format = total
-      ? ' Downloading [{bar}] {percentage}% | {received}/{size} | {speed}/s'
-      : ' Downloading {received} | {speed}/s';
+  const bar = new SingleBar({ barsize: 30, format, hideCursor: true, clearOnComplete: true });
 
-    bar = new SingleBar({ barsize: 30, format, hideCursor: true, clearOnComplete: true });
-
-    bar.start(total || 1, 0, {
-      received: formatBytes(0),
-      size: total ? formatBytes(total) : '?',
-      speed: '?',
-    });
-  }
+  bar.start(total || 1, 0, {
+    received: formatBytes(0),
+    size: total ? formatBytes(total) : '?',
+    speed: '?',
+  });
 
   let bytesReceived = 0;
   let lastUpdate = Date.now();
@@ -225,30 +221,28 @@ export const createDownloadProgressBar = (
     transform(chunk, _encoding, callback) {
       bytesReceived += chunk.length;
 
-      if (bar) {
-        const now = Date.now();
-        const elapsed = now - lastUpdate;
+      const now = Date.now();
+      const elapsed = now - lastUpdate;
 
-        if (elapsed >= SPEED_WINDOW_MS) {
-          const speed = Math.round(((bytesReceived - lastBytes) / elapsed) * 1000);
-          lastUpdate = now;
-          lastBytes = bytesReceived;
+      if (elapsed >= SPEED_WINDOW_MS) {
+        const speed = Math.round(((bytesReceived - lastBytes) / elapsed) * 1000);
+        lastUpdate = now;
+        lastBytes = bytesReceived;
 
-          // When total is unknown keep position at 0 — only the payload
-          // tokens (received, speed) carry meaningful information.
-          bar.update(total ? bytesReceived : 0, {
-            received: formatBytes(bytesReceived),
-            size: total ? formatBytes(total) : '?',
-            speed: formatBytes(speed),
-          });
-        }
+        // When total is unknown keep position at 0 — only the payload
+        // tokens (received, speed) carry meaningful information.
+        bar.update(total ? bytesReceived : 0, {
+          received: formatBytes(bytesReceived),
+          size: total ? formatBytes(total) : '?',
+          speed: formatBytes(speed),
+        });
       }
 
       callback(null, chunk);
     },
   });
 
-  const stop = () => bar?.stop();
+  const stop = () => bar.stop();
 
   return { meter, stop };
 };

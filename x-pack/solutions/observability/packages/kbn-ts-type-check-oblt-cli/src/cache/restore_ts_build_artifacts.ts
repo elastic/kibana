@@ -282,13 +282,22 @@ export async function resolveRestoreStrategy(
   // has an archive built *after* the invalidating change (which would be safe to
   // restore). If not, tsc rebuilds everything from scratch.
   const changedInvalidationFiles = await getChangedInvalidationFiles(localStateSha);
-  if (changedInvalidationFiles.length > 0) {
-    log.warning(
-      `[Cache check] Cache-invalidation file(s) changed since ${localStateSha.slice(0, 12)}: ` +
-        `${changedInvalidationFiles.join(', ')}. ` +
-        `Local artifacts may be stale — cleaning them.`
-    );
-    if (changedInvalidationFiles.includes('yarn.lock')) {
+  if (changedInvalidationFiles === undefined || changedInvalidationFiles.length > 0) {
+    if (changedInvalidationFiles === undefined) {
+      log.warning(
+        `[Cache check] Could not verify cache-invalidation files since ${localStateSha.slice(
+          0,
+          12
+        )} (git error) — treating as unknown, will restore from cache.`
+      );
+    } else {
+      log.warning(
+        `[Cache check] Cache-invalidation file(s) changed since ${localStateSha.slice(0, 12)}: ` +
+          `${changedInvalidationFiles.join(', ')}. ` +
+          `Local artifacts may be stale — cleaning them.`
+      );
+    }
+    if (changedInvalidationFiles?.includes('yarn.lock')) {
       log.warning(
         '[Bootstrap] yarn.lock changed — if you recently switched branches, ' +
           'run: yarn kbn bootstrap'
@@ -380,7 +389,7 @@ export async function resolveRestoreStrategy(
         effectiveRebuildSet.size === 1
           ? ' — only one project needs rebuilding'
           : effectiveRebuildSet.size > 1
-          ? ' — only ${effectiveRebuildSet.size} projects need rechecking'
+          ? ` — only ${effectiveRebuildSet.size} projects need rechecking`
           : ' — no projects need rechecking'
       }`
     );

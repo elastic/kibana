@@ -75,6 +75,12 @@ run(
       }
     }
     if (brokenRefs.length > 0) {
+      if (process.env.KBN_TS_TYPE_CHECK_BOOTSTRAP_RETRIED === '1') {
+        throw createFailError(
+          'Broken TypeScript project references remain after `yarn kbn bootstrap`. Fix manually: yarn kbn bootstrap'
+        );
+      }
+
       log.warning('[Bootstrap] Broken TypeScript project references detected:');
       for (const msg of brokenRefs.slice(0, 5)) {
         log.warning(`  ${msg}`);
@@ -103,9 +109,9 @@ run(
       const { status } = spawnSync(process.execPath, process.argv.slice(1), {
         cwd: process.cwd(),
         stdio: 'inherit',
-        env: process.env,
+        env: { ...process.env, KBN_TS_TYPE_CHECK_BOOTSTRAP_RETRIED: '1' },
       });
-      process.exit(status ?? 0);
+      process.exit(status ?? 1);
     }
 
     // Decide whether to restore artifacts from GCS before type checking.
