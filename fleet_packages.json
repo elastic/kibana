@@ -30,7 +30,7 @@
   },
   {
     "name": "elastic_agent",
-    "version": "2.7.5"
+    "version": "2.7.6"
   },
   {
     "name": "endpoint",
@@ -38,7 +38,7 @@
   },
   {
     "name": "fleet_server",
-    "version": "1.6.0"
+    "version": "1.6.1"
   },
   {
     "name": "profiler_symbolizer",
