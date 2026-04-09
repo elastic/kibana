@@ -334,6 +334,7 @@ export function UnifiedDocViewerFlyout({
               </>
             )}
             <UnifiedDocViewer
+              key={actualHit.id}
               ref={docViewerRef}
               initialTabId={initialTabId}
               initialState={initialDocViewerState}
