@@ -8,7 +8,6 @@
 import type { AuthMode } from '@kbn/connector-specs';
 import { findConnectorsSo } from '../../../../data/connector';
 import type { GetUserTokenConnectorsSoResult } from '../../../../data/connector/types';
-import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { getAuthMode } from '../../lib/get_auth_mode';
 import { getUserTokenConnectorsForProfile, resolveProfileUidForRequest } from '../../lib';
 import { filterInferenceConnectors } from '../get_all/get_all';
@@ -35,12 +34,6 @@ export async function getAuthStatus({
   try {
     await context.authorization.ensureAuthorized({ operation: 'get' });
   } catch (error) {
-    context.auditLogger?.log(
-      connectorAuditEvent({
-        action: ConnectorAuditAction.FIND,
-        error,
-      })
-    );
     throw error;
   }
 

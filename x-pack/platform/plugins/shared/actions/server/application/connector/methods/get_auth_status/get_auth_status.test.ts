@@ -15,7 +15,6 @@ import { actionsAuthorizationMock } from '../../../../authorization/actions_auth
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { actionExecutorMock } from '../../../../lib/action_executor.mock';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Logger } from '@kbn/logging';
@@ -41,7 +40,6 @@ const actionExecutor = actionExecutorMock.create();
 const authorization = actionsAuthorizationMock.create();
 const bulkExecutionEnqueuer = jest.fn();
 const request = httpServerMock.createKibanaRequest();
-const auditLogger = auditLoggerMock.create();
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
@@ -73,7 +71,6 @@ describe('getAuthStatus()', () => {
       bulkExecutionEnqueuer,
       request,
       authorization: authorization as unknown as ActionsAuthorization,
-      auditLogger,
       usageCounter: mockUsageCounter,
       connectorTokenClient,
       getEventLogClient,
@@ -129,7 +126,6 @@ describe('getAuthStatus()', () => {
       bulkExecutionEnqueuer,
       request,
       authorization: authorization as unknown as ActionsAuthorization,
-      auditLogger,
       inMemoryConnectors,
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,

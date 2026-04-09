@@ -41,4 +41,23 @@ describe('connectorFromSavedObject', () => {
     });
     expect('userAuthStatus' in result).toBe(false);
   });
+
+  it('resolves authMode to shared when authMode is undefined on the saved object', () => {
+    const so = makeSavedObject('conn-2', { authMode: undefined });
+    const result = connectorFromSavedObject(so, false, false);
+    expect(result.authMode).toBe('shared');
+  });
+
+  it('keeps authMode shared when saved object authMode is shared', () => {
+    const so = makeSavedObject('conn-3', { authMode: 'shared' });
+    const result = connectorFromSavedObject(so, false, false);
+    expect(result.authMode).toBe('shared');
+  });
+
+  it('propagates isDeprecated and isConnectorTypeDeprecated from arguments', () => {
+    const so = makeSavedObject('conn-4');
+    const result = connectorFromSavedObject(so, true, true);
+    expect(result.isDeprecated).toBe(true);
+    expect(result.isConnectorTypeDeprecated).toBe(true);
+  });
 });

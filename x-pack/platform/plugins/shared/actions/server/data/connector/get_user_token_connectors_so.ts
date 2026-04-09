@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { nodeBuilder } from '@kbn/es-query';
 import type { UserConnectorToken } from '../../types';
 import { USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE } from '../../constants/saved_objects';
 import type { SavedObjectClientForFind } from './types/params';
@@ -26,7 +27,10 @@ export const getUserTokenConnectorsSo = async ({
   const result = await savedObjectsClient.find<UserConnectorToken>({
     perPage: MAX_ACTIONS_RETURNED,
     type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-    filter: `${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.profileUid: "${profileUid}"`,
+    filter: nodeBuilder.is(
+      `${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.profileUid`,
+      profileUid
+    ),
   });
 
   return {

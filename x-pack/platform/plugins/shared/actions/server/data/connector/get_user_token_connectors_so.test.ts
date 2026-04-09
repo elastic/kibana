@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { nodeBuilder } from '@kbn/es-query';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { getUserTokenConnectorsSo } from './get_user_token_connectors_so';
 import { USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE } from '../../constants/saved_objects';
@@ -16,7 +17,7 @@ beforeEach(() => {
 });
 
 describe('getUserTokenConnectorsSo', () => {
-  it('calls find with a filter scoped to the given profileUid', async () => {
+  it('calls find with a KueryNode filter scoped to the given profileUid', async () => {
     savedObjectsClient.find.mockResolvedValueOnce({
       total: 0,
       per_page: 10000,
@@ -30,7 +31,10 @@ describe('getUserTokenConnectorsSo', () => {
       expect.objectContaining({
         type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
         perPage: 10000,
-        filter: expect.stringContaining('profileUid: "test-profile-uid"'),
+        filter: nodeBuilder.is(
+          `${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.profileUid`,
+          'test-profile-uid'
+        ),
       })
     );
   });
@@ -107,7 +111,17 @@ describe('getUserTokenConnectorsSo', () => {
     await getUserTokenConnectorsSo({ savedObjectsClient, profileUid: 'profile-xyz' });
 
     const callArg = savedObjectsClient.find.mock.calls[0][0];
-    expect(callArg.filter).toContain('profile-xyz');
-    expect(callArg.filter).not.toContain('other-profile');
+    expect(callArg.filter).toEqual(
+      nodeBuilder.is(
+        `${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.profileUid`,
+        'profile-xyz'
+      )
+    );
+    expect(callArg.filter).not.toEqual(
+      nodeBuilder.is(
+        `${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.profileUid`,
+        'other-profile'
+      )
+    );
   });
 });

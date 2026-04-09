@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { extractApiKeyIdFromAuthzHeader } from '@kbn/core-security-server';
 import type { PublicMethodsOf, Writable } from '@kbn/utility-types';
 import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type {
@@ -57,6 +56,7 @@ import { createBulkExecutionEnqueuerFunction } from './create_execute_function';
 import { registerActionsUsageCollector } from './usage';
 import type { ILicenseState } from './lib';
 import { ActionExecutor, TaskRunnerFactory, LicenseState, spaceIdToNamespace } from './lib';
+import { getCurrentUserProfileIdFromAPIKey as getCurrentUserProfileIdFromAPIKeyForRequest } from './lib/get_current_user_profile_id_from_api_key';
 import type {
   Services,
   ActionType,
@@ -668,39 +668,8 @@ export class ActionsPlugin
     const getInternalSavedObjectsRepositoryWithoutAccessToActions = () =>
       core.savedObjects.createInternalRepository();
 
-    const getCurrentUserProfileIdFromAPIKey = async (
-      request: KibanaRequest
-    ): Promise<string | undefined> => {
-      try {
-        const id = extractApiKeyIdFromAuthzHeader(request.headers.authorization);
-        if (!id) {
-          this.logger.debug(`Failed to decode API key ID from Authorization header.`);
-          return undefined;
-        }
-
-        const response = await core.elasticsearch.client
-          .asScoped(request)
-          .asCurrentUser.security.getApiKey({
-            with_profile_uid: true,
-            id,
-          });
-
-        if (response.api_keys && response.api_keys.length > 0) {
-          return response.api_keys[0].profile_uid;
-        }
-
-        logger.debug(
-          `No API keys were returned from query, cannot retrieve associated profile id.`
-        );
-      } catch (error) {
-        logger.debug(
-          `Failed to retrieve API key for user profile retrieval: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
-      }
-      return undefined;
-    };
+    const getCurrentUserProfileIdFromAPIKey = async (request: KibanaRequest) =>
+      getCurrentUserProfileIdFromAPIKeyForRequest(request, core.elasticsearch.client, logger);
 
     actionExecutor!.initialize({
       logger,
@@ -1012,28 +981,12 @@ export class ActionsPlugin
             connectorLifecycleListeners,
             getCurrentUser: async (requestWithAuth: KibanaRequest) =>
               coreStart.security.authc.getCurrentUser(requestWithAuth),
-            getCurrentUserProfileIdFromAPIKey: async (requestWithAuth: KibanaRequest) => {
-              try {
-                const response = await coreStart.elasticsearch.client
-                  .asScoped(requestWithAuth)
-                  .asCurrentUser.security.getApiKey({
-                    with_profile_uid: true,
-                  });
-                if (response.api_keys && response.api_keys.length > 0) {
-                  return response.api_keys[0].profile_uid;
-                }
-                logger.debug(
-                  `No API keys were returned from query, cannot retrieve associated profile id.`
-                );
-              } catch (error) {
-                logger.debug(
-                  `Failed to retrieve API key for user profile retrieval: ${
-                    error instanceof Error ? error.message : String(error)
-                  }`
-                );
-              }
-              return undefined;
-            },
+            getCurrentUserProfileIdFromAPIKey: (requestWithAuth: KibanaRequest) =>
+              getCurrentUserProfileIdFromAPIKeyForRequest(
+                requestWithAuth,
+                coreStart.elasticsearch.client,
+                logger
+              ),
           });
         },
         listTypes: (featureId?: string) => {
