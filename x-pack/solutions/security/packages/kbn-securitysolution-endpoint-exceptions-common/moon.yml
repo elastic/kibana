@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/securitysolution-exceptions-common'
   - '@kbn/openapi-common'
   - '@kbn/zod'
+  - '@kbn/zod-helpers'
 tags:
   - shared-common
   - package
