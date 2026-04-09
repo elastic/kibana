@@ -32,6 +32,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           requiredPrivileges: [FLEET_API_PRIVILEGES.FLEET.ALL],
         },
       },
+      summary: 'Fetch a Fleet index',
+      description: 'Fetch the contents of a Fleet-managed Elasticsearch index by name. For internal debugging use only.',
     })
     .addVersion(
       {
@@ -50,6 +52,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           requiredPrivileges: [FLEET_API_PRIVILEGES.FLEET.ALL],
         },
       },
+      summary: 'Fetch Fleet saved objects',
+      description: 'Fetch Fleet saved objects of a given type, optionally filtered by name. For internal debugging use only.',
     })
     .addVersion(
       {
@@ -68,6 +72,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           requiredPrivileges: [FLEET_API_PRIVILEGES.FLEET.ALL],
         },
       },
+      summary: 'Fetch Fleet saved object names',
+      description: 'Fetch the names of all Fleet saved objects of a given type. For internal debugging use only.',
     })
     .addVersion(
       {
