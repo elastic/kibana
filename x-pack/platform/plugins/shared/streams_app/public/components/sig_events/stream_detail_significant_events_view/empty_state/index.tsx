@@ -85,15 +85,15 @@ export function EmptyState({
             <EuiFlexItem>
               <EuiCallOut
                 announceOnMount
-                title={NO_DEFAULT_CONNECTOR_CALLOUT_TITLE}
+                title={NO_CONNECTOR_CALLOUT_TITLE}
                 color="warning"
                 iconType="warning"
               >
                 <p>
-                  {NO_DEFAULT_CONNECTOR_CALLOUT_DESCRIPTION}{' '}
+                  {NO_CONNECTOR_CALLOUT_DESCRIPTION}{' '}
                   {modelSettingsUrl && (
                     <EuiLink href={modelSettingsUrl} external>
-                      {NO_DEFAULT_CONNECTOR_CALLOUT_LINK_LABEL}
+                      {NO_CONNECTOR_CALLOUT_LINK_LABEL}
                     </EuiLink>
                   )}
                 </p>
@@ -116,7 +116,7 @@ export function EmptyState({
                     size="m"
                     color="primary"
                     isLoading={isGenerating}
-                    isDisabled={isGenerateDisabled || isGenerating}
+                    isDisabled={isGenerateDisabled || isGenerating || isConnectorLoading}
                     onClick={onGenerateSuggestionsClick}
                   >
                     {isGenerating
@@ -170,23 +170,23 @@ const CANCEL_GENERATION_BUTTON_ARIA_LABEL = i18n.translate(
   }
 );
 
-const NO_DEFAULT_CONNECTOR_CALLOUT_TITLE = i18n.translate(
-  'xpack.streams.significantEvents.emptyState.noDefaultConnectorCalloutTitle',
+const NO_CONNECTOR_CALLOUT_TITLE = i18n.translate(
+  'xpack.streams.significantEvents.emptyState.noConnectorCalloutTitle',
   {
     defaultMessage: 'No connector configured',
   }
 );
 
-const NO_DEFAULT_CONNECTOR_CALLOUT_DESCRIPTION = i18n.translate(
-  'xpack.streams.significantEvents.emptyState.noDefaultConnectorCalloutDescription',
+const NO_CONNECTOR_CALLOUT_DESCRIPTION = i18n.translate(
+  'xpack.streams.significantEvents.emptyState.noConnectorCalloutDescription',
   {
     defaultMessage:
       'Generating knowledge indicators requires an AI connector. Open Model Settings to configure one.',
   }
 );
 
-const NO_DEFAULT_CONNECTOR_CALLOUT_LINK_LABEL = i18n.translate(
-  'xpack.streams.significantEvents.emptyState.noDefaultConnectorCalloutLinkLabel',
+const NO_CONNECTOR_CALLOUT_LINK_LABEL = i18n.translate(
+  'xpack.streams.significantEvents.emptyState.noConnectorCalloutLinkLabel',
   {
     defaultMessage: 'Open Model Settings',
   }
