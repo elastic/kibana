@@ -75,7 +75,6 @@ export class DiscoverApp {
     await this.page.testSubj.hover('discoverNewButton');
     await this.page.testSubj.click('discoverNewButton');
     await this.page.testSubj.hover('unifiedFieldListSidebar__toggle-collapse'); // cancel tooltips
-    await this.page.waitForLoadingIndicatorHidden();
   }
 
   async saveSearch(name: string) {
