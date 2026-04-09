@@ -30,6 +30,7 @@ import { type DataTableRecord } from '@kbn/discover-utils/types';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   type EuiDataGridCellValueElementProps,
   type EuiDataGridStyle,
   EuiProgress,
@@ -70,6 +71,7 @@ import type { EntityURLStateResult } from './hooks/use_entity_url_state';
 import {
   ENTITY_ANALYTICS_TABLE_ID,
   ENTITY_FIELDS,
+  ENTITY_GROUPING_OPTIONS,
   DEFAULT_VISIBLE_ROWS_PER_PAGE,
   MAX_ENTITIES_TO_LOAD,
   TEST_SUBJ_DATA_GRID,
@@ -98,6 +100,11 @@ const ROW_TYPE_LABEL = i18n.translate(
 const INSPECT_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.entitiesTable.inspectTitle',
   { defaultMessage: 'Entity analytics table' }
+);
+
+const TARGET_ENTITY_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entitiesTable.targetEntityTooltip',
+  { defaultMessage: 'Primary entity in the resolution group' }
 );
 
 const COLUMN_HEADERS: Record<string, string> = {
@@ -154,12 +161,14 @@ export interface EntitiesDataTableProps {
   state: EntityURLStateResult;
   height?: number;
   groupSelectorComponent?: JSX.Element;
+  selectedGroup?: string;
 }
 
 export const EntitiesDataTable = ({
   state,
   height,
   groupSelectorComponent,
+  selectedGroup,
 }: EntitiesDataTableProps) => {
   const {
     pageSize,
@@ -395,7 +404,45 @@ export const EntitiesDataTable = ({
       ])
     );
 
+    const isResolutionGroup = selectedGroup === ENTITY_GROUPING_OPTIONS.RESOLUTION;
+
     const specificRenderers: CustomCellRenderer = {
+      ...(isResolutionGroup
+        ? {
+            [ENTITY_FIELDS.ENTITY_NAME]: ({
+              row,
+              dataView: dv,
+              fieldFormats: ff,
+            }: DataGridCellValueElementProps) => {
+              const value = row.flattened[ENTITY_FIELDS.ENTITY_NAME];
+              if (value === null || value === undefined) {
+                return getEmptyTagValue();
+              }
+              const resolvedTo = row.flattened[ENTITY_FIELDS.RESOLVED_TO];
+              const isTarget = resolvedTo === null || resolvedTo === undefined;
+              const field = dv.fields.getByName(ENTITY_FIELDS.ENTITY_NAME);
+              const formattedValue = formatFieldValue(value, row.raw, ff, dv, field, 'text');
+
+              if (isTarget) {
+                return (
+                  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                    <EuiFlexItem grow={false}>{formattedValue}</EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiIconTip
+                        content={TARGET_ENTITY_TOOLTIP}
+                        type="aggregate"
+                        size="s"
+                        data-test-subj="target-entity-icon"
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                );
+              }
+
+              return <>{formattedValue}</>;
+            },
+          }
+        : {}),
       [ENTITY_FIELDS.ENTITY_TYPE]: ({ row }: DataGridCellValueElementProps) => {
         const value = row.flattened[ENTITY_FIELDS.ENTITY_TYPE] as string | undefined;
         if (value == null) return getEmptyTagValue();
@@ -425,7 +472,7 @@ export const EntitiesDataTable = ({
       ...nullSafeRenderers,
       ...specificRenderers,
     };
-  }, [rows, currentColumns]);
+  }, [rows, currentColumns, selectedGroup]);
 
   const leadingControlColumns = useLeadingControlColumns({
     canUseTimeline,
