@@ -181,27 +181,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       describe('Pipelines tree', () => {
         it('Displays the structure tree in the details flyout if the pipeline has Pipeline processors', async () => {
-          const baseUrl = await browser.getCurrentUrl();
-          await browser.navigateTo(baseUrl + '?pipeline=' + TREE_PIPELINE_NAME);
+          await pageObjects.ingestPipelines.openPipelineDetailsByName(TREE_PIPELINE_NAME);
 
-          await pageObjects.ingestPipelines.waitForDetailsFlyoutTitle(TREE_PIPELINE_NAME);
-
-          const treeExists = await retry.waitFor('pipeline tree panel to exist', async () => {
+          await retry.waitFor('pipeline tree panel to exist', async () => {
             return await pageObjects.ingestPipelines.pipelineTreeExists();
           });
-          expect(treeExists).to.be(true);
+          expect(await pageObjects.ingestPipelines.pipelineTreeExists()).to.be(true);
         });
 
         it("Doesn't display the structure tree in the details flyout if the pipeline has no Pipeline processors", async () => {
-          const baseUrl = await browser.getCurrentUrl();
-          await browser.navigateTo(baseUrl + '?pipeline=' + TEST_PIPELINE_NAME);
+          await pageObjects.ingestPipelines.openPipelineDetailsByName(TEST_PIPELINE_NAME);
 
-          await pageObjects.ingestPipelines.waitForDetailsFlyoutTitle(TEST_PIPELINE_NAME);
-
-          const treeExists = await retry.waitFor('pipeline tree panel to not exist', async () => {
+          await retry.waitFor('pipeline tree panel to not exist', async () => {
             return !(await pageObjects.ingestPipelines.pipelineTreeExists());
           });
-          expect(treeExists).to.be(true);
+          expect(await pageObjects.ingestPipelines.pipelineTreeExists()).to.be(false);
 
           const pipelineTreeNodesExist = await pageObjects.ingestPipelines.pipelineTreeNodesExist([
             TREE_PIPELINE_NAME,
