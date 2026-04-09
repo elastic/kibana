@@ -28,6 +28,7 @@ import { MAX_NESTING_LEVEL, getSegments } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import { useScrollToActive } from '@kbn/core-chrome-navigation/src/hooks/use_scroll_to_active';
 import type { DraggableProvided } from '@hello-pangea/dnd';
+import { useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { NestedView } from '../../../nested_view';
 import { CurrentStreamEntry } from './current_stream_entry';
@@ -38,7 +39,11 @@ import {
   useStreamRoutingEvents,
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
-import { IdleQueryStreamEntry, CreatingQueryStreamEntry } from './query_stream_entry';
+import {
+  IdleQueryStreamEntry,
+  CreatingQueryStreamEntry,
+  EditingQueryStreamEntry,
+} from './query_stream_entry';
 import { ReviewSuggestionsForm } from './review_suggestions_form/review_suggestions_form';
 import { GenerateSuggestionButton } from './review_suggestions_form/generate_suggestions_button';
 import { AdditionalChargesCallout } from '../shared/additional_charges_callout';
@@ -108,6 +113,17 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
     return snapshot.matches({ ready: 'ingestMode' }) ? 'ingestMode' : 'queryMode';
   });
 
+  const hasActiveQueryModeForm = useStreamsRoutingSelector(
+    (state) =>
+      state.matches({ ready: { queryMode: 'editing' } }) ||
+      state.matches({ ready: { queryMode: 'creating' } })
+  );
+
+  const handleModeChange = useDiscardConfirm(
+    (mode: string) => changeChildStreamsMode(mode as ChildStreamMode),
+    { enabled: hasActiveQueryModeForm }
+  );
+
   return (
     <EuiFlexGroup
       direction="column"
@@ -148,7 +164,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
             },
           ]}
           idSelected={idSelected}
-          onChange={(mode) => changeChildStreamsMode(mode as ChildStreamMode)}
+          onChange={handleModeChange}
           buttonSize="compressed"
           color="primary"
           data-test-subj="streamsAppChildStreamTypeSelector"
@@ -493,7 +509,13 @@ function QueryModeChildrenList() {
   const isCreating = useStreamsRoutingSelector((state) =>
     state.matches({ ready: { queryMode: 'creating' } })
   );
-  const { createQueryStream } = useStreamRoutingEvents();
+  const isEditing = useStreamsRoutingSelector((state) =>
+    state.matches({ ready: { queryMode: 'editing' } })
+  );
+  const editingStreamName = useStreamsRoutingSelector(
+    (snapshot) => snapshot.context.editingQueryStreamName
+  );
+  const { createQueryStream, editQueryStream } = useStreamRoutingEvents();
   const canManage = definition.privileges.manage;
 
   // Get child query stream names from the definition
@@ -539,7 +561,17 @@ function QueryModeChildrenList() {
                 last={pos === childQueryStreamNames.length - 1 && !isCreating}
                 first={pos === 0}
               >
-                <IdleQueryStreamEntry streamName={streamName} />
+                {isEditing && editingStreamName === streamName ? (
+                  <EditingQueryStreamEntry
+                    streamName={streamName}
+                    parentStreamName={definition.stream.name}
+                  />
+                ) : (
+                  <IdleQueryStreamEntry
+                    streamName={streamName}
+                    onEdit={canManage && !isCreating && !isEditing ? editQueryStream : undefined}
+                  />
+                )}
               </NestedView>
             </EuiFlexItem>
           ))}
@@ -554,7 +586,7 @@ function QueryModeChildrenList() {
         </EuiFlexGroup>
       </EuiFlexItem>
       {/* Create button */}
-      {!isCreating && (
+      {!isCreating && !isEditing && (
         <EuiFlexItem grow={false}>
           <EuiFlexGroup
             justifyContent="center"

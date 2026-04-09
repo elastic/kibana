@@ -236,7 +236,44 @@ schema: z.object({
 
 ## OAuth Auth Configuration
 
-When using `oauth_client_credentials`, customize the auth form to minimize user friction. Use `defaults` to pre-populate known values and `overrides.meta` to hide or relabel fields.
+When using `oauth_client_credentials` or `oauth_authorization_code`, customize the auth form to minimize user friction. Use `defaults` with `{ hidden: true }` for values that should be hardcoded, and `overrides.meta` with `placeholder` for values the user must provide.
+
+### Defaults vs Placeholders
+
+**Defaults** set the actual value of a field. On "Edit", defaults re-appear even though the user's original values are encrypted and cannot be read back. This means:
+
+- **If a field has a true default** (a value that is always correct and the user should never change), set it as a `default` AND mark it `{ hidden: true }` so the user never sees it. Good examples: `scope` values, fixed OAuth endpoints (e.g. Google's `https://accounts.google.com/o/oauth2/v2/auth`).
+- **If a field needs an example** (the user must enter their own value, like a tenant-specific URL), use a `placeholder` instead of a `default`. This way, on "Edit", the field appears empty rather than showing a misleading template value.
+
+### Example: Fixed endpoints (Google, Notion, Figma, Zoom)
+
+When the OAuth provider has a single, fixed set of endpoints, use hidden defaults for everything:
+
+```typescript
+auth: {
+  types: [
+    {
+      type: 'oauth_authorization_code',
+      defaults: {
+        authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
+        tokenUrl: 'https://oauth2.googleapis.com/token',
+        scope: 'https://www.googleapis.com/auth/drive.readonly',
+      },
+      overrides: {
+        meta: {
+          authorizationUrl: { hidden: true },
+          tokenUrl: { hidden: true },
+          scope: { hidden: true },
+        },
+      },
+    },
+  ],
+},
+```
+
+### Example: Tenant-specific endpoints (SharePoint, ServiceNow)
+
+When URLs vary per tenant/instance, use placeholders for URLs and hidden defaults for scope:
 
 ```typescript
 auth: {
@@ -244,13 +281,14 @@ auth: {
     {
       type: 'oauth_client_credentials',
       defaults: {
-        tokenUrl: 'https://{instance}.service-now.com/oauth_token.do',
+        scope: 'https://graph.microsoft.com/.default',
       },
       overrides: {
         meta: {
           scope: { hidden: true },
           tokenUrl: {
-            placeholder: 'https://your-instance.service-now.com/oauth_token.do',
+            placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
+            helpText: "Replace '{tenant-id}' with your Azure AD tenant ID.",
           },
         },
       },
@@ -259,7 +297,39 @@ auth: {
 },
 ```
 
-**Goal**: The user should only need to fill in values they actually know (instance URL, client ID, client secret). Everything else should be pre-populated or hidden.
+### Example: Variable endpoints (Salesforce)
+
+When the provider has standard URLs that advanced users may change (e.g. sandbox vs production), use placeholders:
+
+```typescript
+auth: {
+  types: [
+    {
+      type: 'oauth_authorization_code',
+      defaults: {
+        scope: 'api refresh_token',
+      },
+      overrides: {
+        meta: {
+          authorizationUrl: {
+            placeholder: 'https://login.salesforce.com/services/oauth2/authorize',
+          },
+          tokenUrl: {
+            placeholder: 'https://login.salesforce.com/services/oauth2/token',
+          },
+          scope: { hidden: true },
+        },
+      },
+    },
+  ],
+},
+```
+
+**Key rules:**
+- Never use `defaults` for a field the user sees on "Edit" — the default will overwrite their encrypted value.
+- Always pair a `default` with `{ hidden: true }` so the field is invisible in the form.
+- Use `placeholder` to show examples for fields the user must fill in.
+- Use `{ disabled: true }` only when the value should be visible but not editable (rare).
 
 ## Icon Patterns
 

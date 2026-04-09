@@ -19,6 +19,7 @@ import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import { mergeAllMetricsWithChartDimensionSchema } from './shared';
 import { builderEnums } from '../enums';
+import { objectUnion } from './utils/object_union';
 
 const gaugeStateSharedOptionsSchema = {
   shape: schema.maybe(
@@ -183,7 +184,7 @@ export const gaugeStateSchemaESQL = schema.object(
   { meta: { id: 'gaugeESQL', title: 'Gauge Chart (ES|QL)' } }
 );
 
-export const gaugeStateSchema = schema.oneOf([gaugeStateSchemaNoESQL, gaugeStateSchemaESQL], {
+export const gaugeStateSchema = objectUnion([gaugeStateSchemaNoESQL, gaugeStateSchemaESQL], {
   meta: { id: 'gaugeChart', title: 'Gauge Chart' },
 });
 

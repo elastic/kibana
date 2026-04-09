@@ -90,7 +90,7 @@ function reverseBuildVisualizationState(
     adhocReferences
   );
 
-  if (!dataSource || dataSource.type == null) {
+  if (!dataSource || dataSource.type == null || isEsqlTableTypeDataSource(dataSource)) {
     throw new Error('Unsupported DataSource type');
   }
 
