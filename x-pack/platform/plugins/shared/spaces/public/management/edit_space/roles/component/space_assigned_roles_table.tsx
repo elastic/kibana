@@ -369,6 +369,10 @@ export const SpaceAssignedRolesTable = ({
                       isOpen={isBulkActionContextOpen}
                       closePopover={setBulkActionContextOpen.bind(null, false)}
                       anchorPosition="downCenter"
+                      aria-label={i18n.translate(
+                        'xpack.spaces.management.spaceDetails.rolesTable.bulkActionsPopoverAriaLabel',
+                        { defaultMessage: 'Bulk actions' }
+                      )}
                       button={
                         <EuiButtonEmpty
                           size="s"
