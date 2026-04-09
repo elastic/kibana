@@ -45206,7 +45206,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agents-all AND fleet-agent-policies-all AND fleet-settings-all.
+        Rotate the key pair used by Fleet to sign messages sent to Elastic Agents. This operation is irreversible and requires all agents in the Fleet to be re-enrolled after rotation. You must explicitly acknowledge the risk by passing `acknowledge=true` as a query parameter.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all AND fleet-agent-policies-all AND fleet-settings-all.
       operationId: post-fleet-message-signing-service-rotate-key-pair
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -45226,6 +45226,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                rotateKeyPairSuccessExample:
+                  description: The key pair was rotated. All agents must be re-enrolled to receive the new signing key.
+                  value:
+                    message: Key pair rotated successfully.
               schema:
                 additionalProperties: false
                 type: object
@@ -45234,10 +45239,17 @@ paths:
                     type: string
                 required:
                   - message
-          description: 'OK: A successful request.'
+          description: Key pair rotated successfully
         '400':
           content:
             application/json:
+              examples:
+                acknowledgeRequiredExample:
+                  description: Request was rejected because the acknowledge query parameter was not set to true
+                  value:
+                    error: Bad Request
+                    message: 'Warning: this API will cause a key pair to rotate and should not be necessary in normal operation.  If you proceed, you may need to reinstall Agents in your network. You must acknowledge the risks of rotating the key pair with acknowledge=true in the request parameters.  For more information, reach out to your administrator.'
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -45255,10 +45267,17 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
         '500':
           content:
             application/json:
+              examples:
+                serviceUnavailableExample:
+                  description: The message signing service is not available
+                  value:
+                    error: Internal Server Error
+                    message: Failed to rotate key pair. Message signing service is unavailable!
+                    statusCode: 500
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -45276,7 +45295,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: An internal server error.
+          description: Internal Server Error
       summary: Rotate a Fleet message signing key pair
       tags:
         - Message Signing Service
