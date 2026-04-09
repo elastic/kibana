@@ -26,7 +26,7 @@ export const CardLogoIcon: React.FC<{ src: string; alt: string }> = ({ src, alt 
     width: LOGO_SIZE + LOGO_BG_PADDING * 2,
     height: LOGO_SIZE + LOGO_BG_PADDING * 2,
     backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-    borderRadius: 12,
+    borderRadius: 8,
     border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
   };
   if (errored) {
@@ -38,7 +38,7 @@ export const CardLogoIcon: React.FC<{ src: string; alt: string }> = ({ src, alt 
   }
   return (
     <div style={wrapperStyle}>
-      <img
+        <img
         src={src}
         alt={alt}
         style={{ width: LOGO_SIZE, height: LOGO_SIZE, objectFit: 'contain' }}
@@ -55,8 +55,9 @@ export const IntegrationCard: React.FC<{
   logoUrl?: string;
   badge?: string;
   centerAlign?: boolean;
+  layout?: 'vertical' | 'horizontal';
   onClick?: () => void;
-}> = ({ name, description, logoUrl, badge, onClick }) => {
+}> = ({ name, description, logoUrl, badge, layout = 'vertical', onClick }) => {
   const { euiTheme } = useEuiTheme();
   const logoSrc = logoUrl ?? '';
   return (
@@ -80,7 +81,7 @@ export const IntegrationCard: React.FC<{
         titleSize="xs"
         description={description ? undefined : ''}
         icon={<CardLogoIcon src={logoSrc} alt={`${name} logo`} />}
-        layout="vertical"
+        layout={layout}
         hasBorder
         paddingSize="none"
         onClick={onClick}
@@ -100,11 +101,14 @@ export const IntegrationCard: React.FC<{
           .euiCard__top {
             display: flex;
             justify-content: center;
-            margin-bottom: 12px;
+            ${layout === 'horizontal'
+              ? 'margin-bottom: 0; margin-inline-end: 16px; flex-shrink: 0; align-self: flex-start;'
+              : 'margin-bottom: 12px;'}
           }
           .euiCard__content {
-            text-align: center;
+            text-align: ${layout === 'horizontal' ? 'left' : 'center'};
             min-width: 0;
+            justify-content: center;
           }
           .euiCard__content,
           .euiCard__children {
@@ -222,6 +226,7 @@ export const CompactIntegrationCard: React.FC<{
         border-radius: 6px;
         padding: 12px;
         height: 100%;
+        min-height: 74px;
         cursor: pointer;
         .euiCard__top {
           min-width: 0;

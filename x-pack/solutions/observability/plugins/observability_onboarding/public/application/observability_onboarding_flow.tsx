@@ -7,7 +7,7 @@
 
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { useEffect } from 'react';
-import { Route, Routes, Redirect } from '@kbn/shared-ux-router';
+import { Route, Routes } from '@kbn/shared-ux-router';
 import { useLocation } from 'react-router-dom-v5-compat';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -20,9 +20,9 @@ import {
   OtelApmPage,
   CloudForwarderPage,
   IngestHubPage,
+  IntegrationDetailPage,
 } from './pages';
 import type { ObservabilityOnboardingAppServices } from '..';
-import { useFlowBreadcrumb } from './shared/use_flow_breadcrumbs';
 import { useManagedOtlpServiceAvailability } from './shared/use_managed_otlp_service_availability';
 
 const queryClient = new QueryClient();
@@ -34,8 +34,6 @@ export function ObservabilityOnboardingFlow() {
       context: { isDev, isCloud, isServerless },
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
-
-  useFlowBreadcrumb(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -77,7 +75,10 @@ export function ObservabilityOnboardingFlow() {
           <IngestHubPage />
         </Route>
         <Route exact path="/">
-          <Redirect to="/ingest-hub" />
+          <LandingPage />
+        </Route>
+        <Route path="/add-data/:integration">
+          <IntegrationDetailPage />
         </Route>
         <Route>
           <LandingPage />

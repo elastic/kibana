@@ -15,6 +15,7 @@ import type {
   ConfigSchema,
   StreamsApplicationComponentType,
   StreamsApplicationProps,
+  DataSourcesCatalogFlyoutProps,
 } from './types';
 
 export type {
@@ -22,6 +23,7 @@ export type {
   StreamsAppPublicStart,
   StreamsApplicationComponentType,
   StreamsApplicationProps,
+  DataSourcesCatalogFlyoutProps,
 };
 
 export const plugin: PluginInitializer<

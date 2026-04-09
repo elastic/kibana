@@ -26,6 +26,8 @@ function getStoredVersion(): string | null {
 export function useIngestHubVersion(): {
   isSkipVersion: boolean;
   isAgentVersion: boolean;
+  isVersion1: boolean;
+  isVersion2: boolean;
 } {
   const [version, setVersion] = useState<string | null>(() => getStoredVersion());
 
@@ -37,7 +39,9 @@ export function useIngestHubVersion(): {
   }, []);
 
   return {
-    isSkipVersion: version === 'streamsUx' || version === 'agentUx',
-    isAgentVersion: version === 'agentUx',
+    isSkipVersion: version === 'streamsUx' || version === 'agentUx' || version === 'version1' || version === 'version2',
+    isAgentVersion: version === 'agentUx' || version === 'version1' || version === 'version2',
+    isVersion1: version === 'version1',
+    isVersion2: version === 'version2',
   };
 }

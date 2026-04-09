@@ -12,21 +12,23 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import React from 'react';
-import backgroundImageUrl from './background.svg';
+import headerIllustrationUrl from './header_illustration.png';
 
 export function Header() {
+  const { euiTheme } = useEuiTheme();
   return (
     <EuiPageTemplate.Section
       paddingSize="xl"
       css={css`
+        border-bottom: ${euiTheme.border.thin};
+        overflow: hidden;
         & > div {
-          background-image: url(${backgroundImageUrl});
-          background-position: right center;
-          background-repeat: no-repeat;
+          position: relative;
         }
       `}
       grow={false}
@@ -47,12 +49,28 @@ export function Header() {
           <EuiText color="subdued">
             <FormattedMessage
               id="xpack.observability_onboarding.experimentalOnboardingFlow.startIngestingDataIntoTextLabel"
-              defaultMessage="Start ingesting Observability data into Elastic. Return to this page at any time by clicking Add data."
+              defaultMessage="Connect your systems and get full visibility into logs, metrics, and traces."
             />
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem />
       </EuiFlexGroup>
+      {/*
+       * bottom: -32px cancels the section's xl bottom padding so the image
+       * bottom sits exactly at the section's border (= the divider).
+       * overflow: hidden on the section clips everything below that line.
+       */}
+      <img
+        src={headerIllustrationUrl}
+        alt=""
+        aria-hidden="true"
+        css={css`
+          position: absolute;
+          height: 130%;
+          width: auto;
+          right: 140px;
+          bottom: -60px;
+        `}
+      />
     </EuiPageTemplate.Section>
   );
 }

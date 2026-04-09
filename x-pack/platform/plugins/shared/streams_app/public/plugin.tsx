@@ -18,6 +18,7 @@ import {
 import type { Logger } from '@kbn/logging';
 import { DataStreamsStatsService } from '@kbn/dataset-quality-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { DataSourcesCatalogFlyout } from './components/data_sources_view/data_sources_catalog_flyout';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -166,7 +167,7 @@ export class StreamsAppPlugin
         {
           id: 'streams-list',
           title: i18n.translate('xpack.streams.nav.dataStreams', {
-            defaultMessage: 'Data streams',
+            defaultMessage: 'All streams',
           }),
           path: '/',
           visibleIn: [],
@@ -260,6 +261,7 @@ export class StreamsAppPlugin
     });
 
     return {
+      DataSourcesCatalogFlyout,
       renderEmbeddedStreamListView: (container: HTMLElement): (() => void) => {
         const services: StreamsAppServices = {
           dataStreamsClient: new DataStreamsStatsService()

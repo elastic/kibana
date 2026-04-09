@@ -1173,7 +1173,7 @@ export const IngestHubPage: React.FC = () => {
     </div>
   );
 
-  const isSkipLikeVersion = activeVersion === 'streamsUx' || activeVersion === 'agentUx' || activeVersion === 'aiSourceMap';
+  const isSkipLikeVersion = activeVersion === 'streamsUx' || activeVersion === 'agentUx' || activeVersion === 'aiSourceMap' || activeVersion === 'version1' || activeVersion === 'version2';
   const isStopVersion = isSkipLikeVersion;
   const hasAddedData = sessionStorage.getItem('ingestHub:dataAdded') === 'true';
   const isStopFillVersion = activeVersion === 'blockUx' && !hasAddedData;

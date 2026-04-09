@@ -28,14 +28,22 @@ export function ObservabilityOnboardingHeaderActionMenu({ setHeaderActionMenu, t
   const normalizedPathname = location.pathname.replace(/\/$/, '');
   const isFeedbackEnabled = notifications?.feedback?.isEnabled() ?? true;
 
-  const isRootPage = normalizedPathname === '';
-  const isIngestHub = normalizedPathname.startsWith('/ingest-hub');
+  const FEEDBACK_FLOW_PATHS = [
+    '/auto-detect',
+    '/kubernetes',
+    '/otel-kubernetes',
+    '/otel-logs',
+    '/firehose',
+    '/otel-apm',
+    '/cloudforwarder',
+  ];
+  const isFlowPage = FEEDBACK_FLOW_PATHS.some((p) => normalizedPathname.startsWith(p));
 
   const feedbackButtonLabel = i18n.translate('xpack.observability_onboarding.header.feedback', {
     defaultMessage: 'Give feedback',
   });
 
-  if (!context.isServerless && !isRootPage && !isIngestHub && isFeedbackEnabled) {
+  if (!context.isServerless && isFlowPage && isFeedbackEnabled) {
     return (
       <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
         <EuiButtonEmpty

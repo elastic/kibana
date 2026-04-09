@@ -8,8 +8,8 @@
 import type { AvailablePackagesHookType, IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiCallOut, EuiSearchBar, EuiSkeletonText } from '@elastic/eui';
-import React, { useRef, useMemo } from 'react';
+import { EuiButton, EuiCallOut, EuiSearchBar } from '@elastic/eui';
+import React, { useRef, useMemo, useEffect } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
 import { useCardUrlRewrite } from './use_card_url_rewrite';
 import { PackageList } from '../package_list/package_list';
@@ -25,6 +25,7 @@ interface Props {
   packageListRef?: React.Ref<HTMLDivElement>;
   flowCategory?: string | null;
   excludePackageIdList?: string[];
+  onLoadingChange?: (isLoading: boolean) => void;
 }
 
 type WrapperProps = Props & {
@@ -36,8 +37,6 @@ const fetchAvailablePackagesHook = (): Promise<AvailablePackagesHookType> =>
     .then((module) => module.AvailablePackagesHook())
     .then((hook) => hook.useAvailablePackages);
 
-const Loading = () => <EuiSkeletonText isLoading={true} lines={5} />;
-
 const PackageListGridWrapper = ({
   useAvailablePackages,
   packageListRef,
@@ -46,10 +45,15 @@ const PackageListGridWrapper = ({
   customCards,
   flowCategory,
   excludePackageIdList = [],
+  onLoadingChange,
 }: WrapperProps) => {
   const { filteredCards: integrationCards, isLoading } = useAvailablePackages({
     prereleaseIntegrationsEnabled: true,
   });
+
+  useEffect(() => {
+    onLoadingChange?.(isLoading);
+  }, [isLoading, onLoadingChange]);
   const rewriteUrl = useCardUrlRewrite({ category: flowCategory, search: searchQuery });
 
   const list: IntegrationCardItem[] = useMemo(() => {
@@ -62,13 +66,14 @@ const PackageListGridWrapper = ({
       .map(rewriteUrl);
   }, [customCards, excludePackageIdList, integrationCards, rewriteUrl]);
 
-  if (isLoading) return <Loading />;
+  if (isLoading) return null;
 
   return (
     <div ref={packageListRef}>
       <EuiSearchBar
         box={{
           incremental: true,
+          placeholder: 'Search integrations, technologies, data sources...',
         }}
         onChange={({ queryText, error }) => {
           if (error) return;
@@ -86,6 +91,7 @@ const PackageListGridWrapper = ({
 
 export const PackageListSearchForm = React.forwardRef(
   (props: Props, packageListRef?: React.Ref<HTMLDivElement>) => {
+    const { onLoadingChange } = props;
     const ref = useRef<AvailablePackagesHookType | null>(null);
 
     const {
@@ -95,6 +101,12 @@ export const PackageListSearchForm = React.forwardRef(
     } = useAsyncRetry(async () => {
       ref.current = await fetchAvailablePackagesHook();
     });
+
+    const isAsyncLoading = asyncLoading || ref.current === null;
+
+    useEffect(() => {
+      onLoadingChange?.(isAsyncLoading);
+    }, [isAsyncLoading, onLoadingChange]);
 
     if (errorLoading)
       return (
@@ -127,12 +139,12 @@ export const PackageListSearchForm = React.forwardRef(
         </EuiCallOut>
       );
 
-    if (asyncLoading || ref.current === null) return <Loading />;
+    if (isAsyncLoading) return null;
 
     return (
       <PackageListGridWrapper
         {...props}
-        useAvailablePackages={ref.current}
+        useAvailablePackages={ref.current!}
         packageListRef={packageListRef}
       />
     );

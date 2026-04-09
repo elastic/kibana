@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type React from 'react';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { AppMountParameters } from '@kbn/core/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -80,6 +81,11 @@ export interface StreamsAppStartDependencies {
 
 export interface StreamsAppPublicSetup {}
 
+export interface DataSourcesCatalogFlyoutProps {
+  onClose: () => void;
+  onDataConnected: () => void;
+}
+
 export interface StreamsAppPublicStart {
   /**
    * Renders the Streams list view into the given container (e.g. for embedding in another app).
@@ -91,4 +97,9 @@ export interface StreamsAppPublicStart {
    * Returns an unmount function.
    */
   renderEmbeddedStreamsEmptyPrompt: (container: HTMLElement) => () => void;
+  /**
+   * The DataSourcesCatalogFlyout component — renders the "Add data to Elastic Observability"
+   * flyout. Can be mounted directly in any React tree (no streamsApp context required).
+   */
+  DataSourcesCatalogFlyout: React.ComponentType<DataSourcesCatalogFlyoutProps>;
 }

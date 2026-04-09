@@ -8,6 +8,7 @@
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCard,
   EuiCheckbox,
   EuiFieldSearch,
   EuiFlexGroup,
@@ -25,8 +26,13 @@ import {
 } from '@elastic/eui';
 import { css, keyframes } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useKibana } from '../../../../utils/kibana_react';
+import integrationsHeaderImg from './assets/integrations-header.png';
+import apiEndpointHeaderImg from './assets/api-endpoint-header.png';
+import platformMigrationHeaderImg from './assets/platform-migration-header.png';
+
+const LOGO_FALLBACK = 'https://www.vectorlogo.zone/logos';
 
 const OBSERVABILITY_ONBOARDING_APP_ID = 'observabilityOnboarding';
 
@@ -364,7 +370,7 @@ const CARD_STEPS: Record<CardId, CardStep[]> = {
   ],
 };
 
-const CARDS: Array<{ id: CardId; path: string; title: string; description: string }> = [
+const CARDS: Array<{ id: CardId; path: string; title: string; description: string; hidden?: boolean }> = [
   {
     id: 'monitor-cloud',
     path: '/ingest-hub/cloud',
@@ -424,6 +430,7 @@ const CARDS: Array<{ id: CardId; path: string; title: string; description: strin
       'xpack.observability.overview.agentEmptyState.card.platformMigration.description',
       { defaultMessage: 'Move your existing monitoring to Elastic from Datadog, Splunk, or others' }
     ),
+    hidden: true,
   },
 ];
 
@@ -486,11 +493,46 @@ const stepWidgetSlideUp = keyframes`
 /** Same as `conversationElementWidthStyles` max width in `agent_builder/.../conversation.styles.ts`. */
 const AGENT_BUILDER_CONVERSATION_MAX_WIDTH_PX = 800;
 
+const ANIMATED_PLACEHOLDERS = [
+  'How do I monitor my AWS infrastructure?',
+  'How do I set up Kubernetes cluster monitoring?',
+  'How do I collect logs from my Linux servers?',
+  'How can I trace requests across my microservices?',
+  'How do I detect anomalies in my metrics?',
+  'How can I migrate my dashboards to Elastic?',
+  'How do I monitor my Docker containers?',
+  'How can I set up alerting for my services?',
+  'How do I monitor my GCP or Azure resources?',
+  'How do I instrument my Node.js application?',
+];
+
+const placeholderFadeOut = keyframes`
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+`;
+
+const placeholderFadeIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
 export function AgentEmptyState(): React.ReactElement {
-  const { application, agentBuilder, security } = useKibana().services;
+  const { application, agentBuilder, security, streamsApp } = useKibana().services;
   const { euiTheme } = useEuiTheme();
-  const [titleVariantIndex] = useState(() =>
-    Math.floor(Math.random() * AGENT_EMPTY_STATE_TITLE_OPTIONS.length)
+  const titleVariantIndex = AGENT_EMPTY_STATE_TITLE_OPTIONS.findIndex(
+    (o) => o.i18nId === 'xpack.observability.overview.agentEmptyState.title.welcomeObservability'
   );
   const titleOption = AGENT_EMPTY_STATE_TITLE_OPTIONS[titleVariantIndex];
   const titleText = i18n.translate(titleOption.i18nId, {
@@ -587,17 +629,59 @@ export function AgentEmptyState(): React.ReactElement {
     return CARD_PLACEHOLDERS[cardId];
   }, [selectedCardIds, selectedStepId]);
 
+  const [displayedIndex, setDisplayedIndex] = useState(0);
+  const [isExiting, setIsExiting] = useState(false);
+  const stepPanelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (selectedCardIds.length > 0 || !AgentConversationInput) return;
+    const FADE_DURATION = 350;
+    const interval = setInterval(() => {
+      // Phase 1: fade out the current text
+      setIsExiting(true);
+      // Phase 2: swap text and fade in
+      const swapTimer = setTimeout(() => {
+        setDisplayedIndex((i) => (i + 1) % ANIMATED_PLACEHOLDERS.length);
+        setIsExiting(false);
+      }, FADE_DURATION);
+      return () => clearTimeout(swapTimer);
+    }, 3800);
+    return () => clearInterval(interval);
+  }, [selectedCardIds.length, AgentConversationInput]);
+
+  // Unique CSS per (index, phase) forces Emotion to generate a new class name,
+  // which restarts the ::placeholder animation on every transition.
+  const animatedInputCss = useMemo(
+    () => css`
+      /* placeholder-anim: ${displayedIndex}-${isExiting ? 'out' : 'in'} */
+      textarea::placeholder,
+      input::placeholder {
+        animation: ${isExiting ? placeholderFadeOut : placeholderFadeIn} 0.35s ease both;
+      }
+    `,
+    [displayedIndex, isExiting]
+  );
+
+  useEffect(() => {
+    if (selectedCardIds.length === 0 || !stepPanelRef.current) return;
+    stepPanelRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, [selectedCardIds, selectedStepId]);
+
   const navigateToIngest = (path: string) => {
     application?.navigateToApp(OBSERVABILITY_ONBOARDING_APP_ID, { path });
   };
 
+  const [isDataCatalogFlyoutOpen, setIsDataCatalogFlyoutOpen] = useState(false);
+  const DataSourcesCatalogFlyout = streamsApp?.DataSourcesCatalogFlyout;
+
   return (
+    <>
     <EuiFlexGroup
       direction="column"
       alignItems="center"
       justifyContent="center"
       gutterSize="none"
-      css={{ flexGrow: 1, minHeight: 360 }}
+      css={{ width: '100%' }}
       data-test-subj="obltOverviewAgentEmptyState"
     >
       <EuiFlexItem grow={false}>
@@ -661,28 +745,28 @@ export function AgentEmptyState(): React.ReactElement {
       {AgentConversationInput && (
         <EuiFlexItem
           grow={false}
-          css={{ width: '100%', maxWidth: AGENT_BUILDER_CONVERSATION_MAX_WIDTH_PX, position: 'relative' }}
+          css={{ width: '100%', maxWidth: AGENT_BUILDER_CONVERSATION_MAX_WIDTH_PX }}
           data-test-subj="obltOverviewAgentEmptyStatePromptWrapper"
         >
+          <div
+            css={[
+              activePlaceholder === undefined ? animatedInputCss : undefined,
+            ]}
+          >
           <AgentConversationInput
             sessionTag="observability-overview"
             newConversation={true}
             attachments={selectedAttachments as any}
             onAttachmentRemoved={onAttachmentRemoved}
-            placeholder={activePlaceholder}
+            placeholder={activePlaceholder ?? ANIMATED_PLACEHOLDERS[displayedIndex]}
           />
+          </div>
 
           {selectedCardIds.length > 0 && (
             <div
+              ref={stepPanelRef}
               css={css`
-                position: absolute;
-                top: calc(100% + ${euiTheme.size.s});
-                left: 0;
-                right: 0;
-                z-index: 100;
-                ${euiCanAnimate} {
-                  animation: ${stepWidgetSlideUp} ${euiTheme.animation.normal} ease-out both;
-                }
+                margin-top: ${euiTheme.size.s};
               `}
             >
               <EuiPanel
@@ -1262,20 +1346,14 @@ export function AgentEmptyState(): React.ReactElement {
         </EuiFlexItem>
       )}
 
-      <EuiSpacer size="l" />
-
-      <EuiFlexItem
-        grow={false}
-        css={{
-          width: '100%',
-          maxWidth: AGENT_BUILDER_CONVERSATION_MAX_WIDTH_PX,
-          visibility: selectedCardIds.length === 0 ? 'visible' : 'hidden',
-          pointerEvents: selectedCardIds.length === 0 ? 'auto' : 'none',
-        }}
-      >
-          <EuiFlexGroup gutterSize="s" wrap={true} responsive={false} justifyContent="center">
-            {CARDS.map(({ id, title }) => {
-            return (
+      {selectedCardIds.length === 0 && (
+        <EuiFlexItem
+          grow={false}
+          css={{ width: '100%', maxWidth: AGENT_BUILDER_CONVERSATION_MAX_WIDTH_PX }}
+        >
+          <EuiSpacer size="s" />
+          <EuiFlexGroup gutterSize="m" wrap={true} responsive={false} justifyContent="center">
+            {CARDS.filter((c) => !c.hidden).map(({ id, title }) => (
               <EuiFlexItem key={id} grow={false}>
                 <EuiButtonEmpty
                   size="s"
@@ -1304,10 +1382,122 @@ export function AgentEmptyState(): React.ReactElement {
                   {title}
                 </EuiButtonEmpty>
               </EuiFlexItem>
-            );
-          })}
+            ))}
           </EuiFlexGroup>
         </EuiFlexItem>
+      )}
+
+      {selectedCardIds.length === 0 && (
+        <EuiFlexItem
+          grow={false}
+          css={{ width: '100%', maxWidth: AGENT_BUILDER_CONVERSATION_MAX_WIDTH_PX }}
+        >
+          <EuiHorizontalRule margin="xl" />
+        </EuiFlexItem>
+      )}
+
+      {/* Onboarding action cards */}
+      {selectedCardIds.length === 0 && (
+      <EuiFlexItem
+        grow={false}
+        css={{ width: '100%', maxWidth: AGENT_BUILDER_CONVERSATION_MAX_WIDTH_PX }}
+      >
+        <EuiFlexGroup gutterSize="m" responsive={false}>
+          {[
+            {
+              img: integrationsHeaderImg,
+              title: 'Add integrations',
+              description: 'Connect logs, metrics, and traces from any source.',
+              onClick: () => setIsDataCatalogFlyoutOpen(true),
+            },
+            {
+              img: platformMigrationHeaderImg,
+              title: 'Migrate your platform',
+              description: 'Switch from Splunk, Datadog, or others.',
+              onClick: () => navigateToIngest('/platform-migration'),
+            },
+            {
+              img: apiEndpointHeaderImg,
+              title: 'Connect via API',
+              description: 'Send data with REST API or OpenTelemetry.',
+              onClick: () => navigateToIngest('/integrations?category=api-ingestion'),
+            },
+          ].map(({ img, title, description, onClick }) => (
+            <EuiFlexItem key={title}>
+              <EuiCard
+                title={title}
+                titleElement="h4"
+                titleSize="xs"
+                description={description}
+                hasBorder
+                paddingSize="m"
+                onClick={onClick}
+                layout="horizontal"
+                icon={
+                  <div
+                    style={{
+                      flexShrink: 0,
+                      width: 40,
+                      height: 40,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+                      border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+                      borderRadius: 8,
+                    }}
+                  >
+                    <img src={img} alt="" style={{ width: 24, height: 24, objectFit: 'contain' }} />
+                  </div>
+                }
+                css={css`
+                  height: 100%;
+                  cursor: pointer;
+                  .euiCard__top {
+                    align-self: flex-start;
+                    margin-top: 0;
+                  }
+                `}
+              />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+
+        {/* "Not ready" footer */}
+        <div css={css`margin-top: ${euiTheme.size.xl}; text-align: center;`}>
+          <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="center" responsive wrap>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                <strong>Not ready to add your data?</strong>{' '}
+                Explore a fully loaded sample Observability environment before setting up.
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                href="https://www.elastic.co/start"
+                target="_blank"
+                rel="noopener noreferrer"
+                iconType="popout"
+                iconSide="right"
+              >
+                Explore Demo
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+      </EuiFlexItem>
+      )}
+
+      <EuiSpacer size="xl" />
     </EuiFlexGroup>
+
+    {isDataCatalogFlyoutOpen && DataSourcesCatalogFlyout && (
+      <DataSourcesCatalogFlyout
+        onClose={() => setIsDataCatalogFlyoutOpen(false)}
+        onDataConnected={() => setIsDataCatalogFlyoutOpen(false)}
+      />
+    )}
+  </>
   );
 }

@@ -4,147 +4,47 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
-
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useEffect, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import type { FunctionComponent } from 'react';
-import {
-  EuiCheckableCard,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  useGeneratedHtmlId,
-  useEuiTheme,
-  EuiBadge,
-  EuiFlexGrid,
-} from '@elastic/eui';
+import { EuiAccordion, EuiButton, EuiButtonEmpty, EuiCard, EuiCodeBlock, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiFlyout, EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader, EuiFormRow, EuiIcon, EuiLink, EuiLoadingElastic, EuiPanel, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { useSearchParams } from 'react-router-dom-v5-compat';
+import { useSearchParams, useNavigate } from 'react-router-dom-v5-compat';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { ObservabilityOnboardingPricingFeature } from '../../../common/pricing_features';
 import { PackageListSearchForm } from '../package_list_search_form/package_list_search_form';
-import type { Category } from './types';
 import { useCustomCards } from './use_custom_cards';
-import type { SupportedLogo } from '../shared/logo_icon';
-import { LogoIcon } from '../shared/logo_icon';
 import type { ObservabilityOnboardingAppServices } from '../..';
-import { PackageList } from '../package_list/package_list';
-import { usePricingFeature } from '../quickstart_flows/shared/use_pricing_feature';
+import { SECTIONS, POPULAR_INTEGRATION_TILES, API_ENDPOINTS, ELASTIC_LOGOS } from '../pages/ingest_hub/ingest_hub_data';
+import { CardLogoIcon, IntegrationCard } from '../pages/ingest_hub/ingest_hub_components';
 
-interface UseCaseOption {
-  id: Category;
-  label: string;
-  description: React.ReactNode;
-  logos?: SupportedLogo[];
-  showIntegrationsBadge?: boolean;
-}
+const allSections = [...SECTIONS];
 
 export const OnboardingFlowForm: FunctionComponent = () => {
   const {
     services: {
       context: { isCloud },
+      application,
+      docLinks,
+      chrome,
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
 
-  const metricsOnboardingEnabled = usePricingFeature(
-    ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
-  );
+  const supportUrl = useObservable(chrome.getHelpSupportUrl$());
 
-  const applicationUseCaseOption: UseCaseOption = {
-    id: 'application',
-    label: i18n.translate(
-      'xpack.observability_onboarding.experimentalOnboardingFlow.euiCheckableCard.applicationLabel',
-      { defaultMessage: 'Application' }
-    ),
-    description: i18n.translate(
-      'xpack.observability_onboarding.onboardingFlowForm.applicationDescription',
-      {
-        defaultMessage:
-          'Monitor your frontend and backend applications, set up synthetic monitors, and track application performance across your stack',
-      }
-    ),
-    logos: ['opentelemetry', 'java', 'ruby', 'dotnet'],
-  };
-
-  const options: UseCaseOption[] = [
-    {
-      id: 'host',
-      label: i18n.translate(
-        'xpack.observability_onboarding.experimentalOnboardingFlow.euiCheckableCard.hostLabel',
-        { defaultMessage: 'Host' }
-      ),
-      description: metricsOnboardingEnabled
-        ? i18n.translate('xpack.observability_onboarding.onboardingFlowForm.hostDescription', {
-            defaultMessage:
-              'Track your host and its services by setting up SLOs, receiving alerts, and remediating performance issues',
-          })
-        : i18n.translate(
-            'xpack.observability_onboarding.logsEssential.onboardingFlowForm.hostDescription',
-            {
-              defaultMessage:
-                'Ingest and analyze logs on your host such as OS, service, application and other logs',
-            }
-          ),
-      logos: ['opentelemetry', 'apache', 'mysql'],
-    },
-    {
-      id: 'kubernetes',
-      label: i18n.translate(
-        'xpack.observability_onboarding.experimentalOnboardingFlow.euiCheckableCard.kubernetesLabel',
-        { defaultMessage: 'Kubernetes' }
-      ),
-      description: metricsOnboardingEnabled
-        ? i18n.translate(
-            'xpack.observability_onboarding.onboardingFlowForm.kubernetesDescription',
-            {
-              defaultMessage:
-                'Monitor your Kubernetes cluster and container workloads using logs, metrics, traces, and profiling data',
-            }
-          )
-        : i18n.translate(
-            'xpack.observability_onboarding.logsEssential.onboardingFlowForm.kubernetesDescription',
-            {
-              defaultMessage: 'Observe logs from your Kubernetes environments',
-            }
-          ),
-      logos: ['kubernetes', 'opentelemetry'],
-    },
-    ...(metricsOnboardingEnabled ? [applicationUseCaseOption] : []),
-    {
-      id: 'cloud',
-      label: i18n.translate(
-        'xpack.observability_onboarding.experimentalOnboardingFlow.euiCheckableCard.cloudLabel',
-        { defaultMessage: 'Cloud' }
-      ),
-      description: i18n.translate(
-        'xpack.observability_onboarding.onboardingFlowForm.cloudDescription',
-        {
-          defaultMessage:
-            'Ingest telemetry data from your cloud services to better understand application behavior and ensure service availability',
-        }
-      ),
-      logos: ['azure', 'aws', 'gcp'],
-    },
-  ];
-
-  const radioGroupId = useGeneratedHtmlId({ prefix: 'onboardingCategory' });
-  const categorySelectorTitleId = useGeneratedHtmlId();
-  const packageListTitleId = useGeneratedHtmlId();
   const { onPageReady } = usePerformanceContext();
-
   const [searchParams, setSearchParams] = useSearchParams();
-
-  const suggestedPackagesRef = useRef<HTMLDivElement | null>(null);
-  const searchResultsRef = useRef<HTMLDivElement | null>(null);
   const [integrationSearch, setIntegrationSearch] = useState(searchParams.get('search') ?? '');
   const { euiTheme } = useEuiTheme();
+  const navigate = useNavigate();
+
+  const createCollectionCardHandler = useCallback(
+    (query: string) => () => {
+      setIntegrationSearch(query);
+    },
+    [] // eslint-disable-line react-hooks/exhaustive-deps
+  );
 
   useEffect(() => {
     const searchParam = searchParams.get('search') ?? '';
@@ -158,245 +58,551 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     setSearchParams(entries, { replace: true });
   }, [integrationSearch, searchParams, setSearchParams]);
 
-  const createCollectionCardHandler = useCallback(
-    (query: string) => () => {
-      setIntegrationSearch(query);
-      if (searchResultsRef.current) {
-        setTimeout(
-          scrollIntoViewWithOffset,
-          40, // Adding slight delay to ensure DOM is updated before calculating scroll position
-          searchResultsRef.current,
-          parseInt(euiTheme.size.l, 10)
-        );
-      }
-    },
-    [] // eslint-disable-line react-hooks/exhaustive-deps
-  );
-
   useEffect(() => {
     onPageReady({
       meta: { description: '[ttfmp_onboarding] The UI with onboarding categories is rendered' },
     });
   }, [onPageReady]);
 
-  const featuredCardsForCategoryMap: Record<Category, string[]> = {
-    host: ['auto-detect-logs', 'otel-logs'],
-    kubernetes: ['kubernetes-quick-start', 'otel-kubernetes'],
-    application: ['apm-virtual', 'otel-virtual', 'synthetics-virtual'],
-    cloud: ['azure-logs-virtual', 'aws-logs-virtual', 'gcp-logs-virtual'],
-  };
+  const [isPageLoading, setIsPageLoading] = useState(true);
+  const [createdKeys, setCreatedKeys] = useState<Record<string, string>>({});
+  const [createKeyFlyout, setCreateKeyFlyout] = useState<{ endpointId: string; keyName: string } | null>(null);
+
   const customCards = useCustomCards(createCollectionCardHandler);
-  const featuredCardsForCategory: IntegrationCardItem[] = customCards.filter((card) => {
-    const category = searchParams.get('category') as Category;
-
-    if (category === null) {
-      return false;
-    }
-
-    const cardList = featuredCardsForCategoryMap[category] ?? [];
-
-    return cardList.includes(card.id);
-  });
-
-  /**
-   * Cloud deployments have the new Firehose quick start
-   * flow enabled, so the ond card 'epr:awsfirehose' should
-   * not show up in the search results.
-   */
   const searchExcludePackageIdList = isCloud ? ['epr:awsfirehose'] : [];
 
-  let isSelectingCategoryWithKeyboard: boolean = false;
-
   return (
-    <EuiPanel hasBorder paddingSize="xl">
-      <EuiTitle size="s" id={categorySelectorTitleId}>
-        <strong>
-          {i18n.translate(
-            'xpack.observability_onboarding.experimentalOnboardingFlow.strong.startCollectingYourDataLabel',
-            {
-              defaultMessage: 'What do you want to monitor?',
-            }
-          )}
-        </strong>
-      </EuiTitle>
-      <EuiSpacer />
-      <EuiFlexGrid
-        columns={metricsOnboardingEnabled ? 2 : 3}
-        role="group"
-        aria-labelledby={categorySelectorTitleId}
-        data-test-subj="observabilityOnboardingUseCaseGrid"
-      >
-        {options.map((option) => (
-          <EuiFlexItem
-            key={option.id}
-            data-test-subj={`observabilityOnboardingUseCaseCard-${option.id}`} // EuiCheckableCard does not forward `data-test-subj` prop so using parent element instead
-          >
-            <EuiCheckableCard
-              id={`${radioGroupId}_${option.id}`}
-              name={radioGroupId}
-              label={
-                <>
-                  <EuiText>
-                    <strong>{option.label}</strong>
-                  </EuiText>
-                  {/* The description and logo icons are passed into `label` prop instead of `children` to ensure they are clickable */}
-                  <EuiSpacer size="s" />
-                  <EuiText
-                    color="subdued"
-                    size="s"
+    <>
+      {/* Always mounted so onLoadingChange fires once packages load */}
+      <PackageListSearchForm
+        searchQuery={integrationSearch}
+        setSearchQuery={setIntegrationSearch}
+        flowCategory={null}
+        customCards={customCards.filter((card) => !card.isCollectionCard)}
+        excludePackageIdList={searchExcludePackageIdList}
+        onLoadingChange={(loading) => setIsPageLoading(loading)}
+      />
+
+      {isPageLoading && (
+        <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: '60vh' }}>
+          <EuiLoadingElastic size="xl" />
+        </EuiFlexGroup>
+      )}
+
+      {/* Categorized sections — hidden while loading or searching */}
+      {!isPageLoading && !integrationSearch && (
+        <>
+          {/* API ingestion section */}
+          <EuiTitle size="xs" css={css`margin-block-start: 56px;`}>
+            <h3>Send data via API</h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            <p>Direct access to your deployment's endpoints. Create an API key to authenticate.</p>
+          </EuiText>
+          <div style={{ height: 16 }} />
+          <div css={css`display: flex; flex-direction: column; gap: 12px;`}>
+            {API_ENDPOINTS.map((endpoint) => {
+              const existingKey = createdKeys[endpoint.id];
+              const isEnrollment = endpoint.keyType === 'enrollment_token';
+              const isKibanaNoteType = endpoint.keyType === 'kibana_note';
+              const endpointUrl = endpoint.getEndpointUrl(window.location.origin);
+              const flyoutEndpointId = isKibanaNoteType ? 'endpoint-elasticsearch' : endpoint.id;
+
+              return (
+                <EuiPanel
+                  key={endpoint.id}
+                  hasBorder
+                  paddingSize="none"
+                  css={css`
+                    border-radius: 8px;
+                    box-shadow: none;
+                    overflow: hidden;
+                  `}
+                >
+                  <EuiAccordion
+                    id={endpoint.id}
+                    arrowDisplay="right"
+                    paddingSize="m"
                     css={css`
-                      flex-grow: 1; // Allow the description to grow to fill the space
+                      .euiAccordion__triggerWrapper {
+                        padding: 16px;
+                      }
+                      .euiAccordion__childWrapper {
+                        border-top: ${euiTheme.border.thin};
+                        margin-inline: 16px;
+                      }
+                      .euiAccordion__padding--m {
+                        padding-block: 20px;
+                      }
                     `}
-                  >
-                    {option.description}
-                  </EuiText>
-                  {(option.logos || option.showIntegrationsBadge) && (
-                    <>
-                      <EuiSpacer size="m" />
-                      <EuiFlexGroup
-                        gutterSize="m"
-                        responsive={false}
-                        css={css`
-                          flex-grow: 0; // Prevent the logos from growing to align to the bottom
-                        `}
-                        aria-hidden // Hide from screen readers as the logos are mainly decorative
-                      >
-                        {option.logos?.map((logo) => (
-                          <EuiFlexItem key={logo} grow={false}>
-                            <LogoIcon logo={logo} size="l" />
-                          </EuiFlexItem>
-                        ))}
-                        {option.showIntegrationsBadge && (
-                          <EuiBadge color="hollow">
-                            <FormattedMessage
-                              id="xpack.observability_onboarding.experimentalOnboardingFlow.form.addIntegrations"
-                              defaultMessage="+ Integrations"
-                              description="A badge indicating that the user can add additional observability integrations to their deployment via this option"
-                            />
-                          </EuiBadge>
-                        )}
+                    buttonContent={
+                      <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <CardLogoIcon src={endpoint.logoUrl} alt={endpoint.name} />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiText size="s"><strong>{endpoint.name}</strong></EuiText>
+                          <EuiText size="s" color="subdued">{endpoint.description}</EuiText>
+                        </EuiFlexItem>
                       </EuiFlexGroup>
-                    </>
-                  )}
-                </>
-              }
-              checked={option.id === searchParams.get('category')}
-              /**
-               * onKeyDown and onKeyUp handlers disable
-               * scrolling to the category items when user
-               * changes the selected category using keyboard,
-               * which prevents our custom scroll behavior
-               * from conflicting with browser's native one to
-               * put keyboard-focused item into the view.
-               */
-              onKeyDown={() => (isSelectingCategoryWithKeyboard = true)}
-              onKeyUp={() => (isSelectingCategoryWithKeyboard = false)}
-              onChange={() => {
-                setIntegrationSearch('');
-                setSearchParams({ category: option.id }, { replace: true });
-              }}
-              onClick={() => {
-                if (!isSelectingCategoryWithKeyboard && suggestedPackagesRef.current) {
-                  setTimeout(
-                    scrollIntoViewWithOffset,
-                    40, // Adding slight delay to ensure DOM is updated before calculating scroll position
-                    suggestedPackagesRef.current,
-                    parseInt(euiTheme.size.l, 10)
-                  );
-                }
-              }}
-              css={css`
-                flex-grow: 1;
+                    }
+                  >
+                    <EuiFlexGroup gutterSize="m" alignItems="flexEnd" responsive={false}>
+                      {/* Endpoint URL */}
+                      <EuiFlexItem>
+                        <EuiFormRow label={endpoint.keyTypeLabel} fullWidth>
+                          <EuiCodeBlock
+                            language="text"
+                            fontSize="s"
+                            paddingSize="none"
+                            isCopyable
+                            whiteSpace="nowrap"
+                            css={css`
+                              height: 32px;
+                              overflow: hidden;
+                              .euiCodeBlock__pre,
+                              .euiCodeBlock__code {
+                                height: 32px;
+                                padding: 0 8px;
+                                line-height: 32px;
+                                overflow: hidden;
+                              }
+                              .euiCodeBlock__controls {
+                                top: 50%;
+                                transform: translateY(-50%);
+                                height: auto;
+                                display: flex;
+                                align-items: center;
+                              }
+                            `}
+                          >
+                            {endpointUrl}
+                          </EuiCodeBlock>
+                        </EuiFormRow>
+                      </EuiFlexItem>
 
-                & > .euiPanel {
-                  display: flex;
+                      {/* API key / token */}
+                      <EuiFlexItem>
+                        <EuiFormRow
+                          label={isEnrollment ? 'Enrollment token' : 'API Key'}
+                          fullWidth
+                        >
+                          <EuiCodeBlock
+                            language="text"
+                            fontSize="s"
+                            paddingSize="none"
+                            isCopyable={!!existingKey}
+                            whiteSpace="nowrap"
+                            css={css`
+                              height: 32px;
+                              overflow: hidden;
+                              .euiCodeBlock__pre,
+                              .euiCodeBlock__code {
+                                height: 32px;
+                                padding: 0 8px;
+                                line-height: 32px;
+                                overflow: hidden;
+                                color: ${existingKey ? 'inherit' : euiTheme.colors.textSubdued};
+                              }
+                              .euiCodeBlock__controls {
+                                top: 50%;
+                                transform: translateY(-50%);
+                                height: auto;
+                                display: flex;
+                                align-items: center;
+                              }
+                            `}
+                          >
+                            {existingKey ?? 'No key created yet'}
+                          </EuiCodeBlock>
+                        </EuiFormRow>
+                      </EuiFlexItem>
 
-                  & > .euiCheckableCard__label {
-                    display: flex;
-                    flex-direction: column;
+                      {/* Action button */}
+                      <EuiFlexItem grow={false}>
+                        {existingKey ? (
+                          <EuiButton
+                            size="s"
+                            iconType="refresh"
+                            onClick={() => setCreateKeyFlyout({ endpointId: flyoutEndpointId, keyName: '' })}
+                          >
+                            Regenerate
+                          </EuiButton>
+                        ) : (
+                          <EuiButton
+                            size="s"
+                            onClick={() => setCreateKeyFlyout({ endpointId: flyoutEndpointId, keyName: '' })}
+                          >
+                            {isEnrollment ? 'Create enrollment token' : 'Create API key'}
+                          </EuiButton>
+                        )}
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiAccordion>
+                </EuiPanel>
+              );
+            })}
+          </div>{/* end API cards */}
+
+          {/* Integrations section */}
+          <EuiTitle size="xs" css={css`margin-block-start: 56px;`}>
+            <h3>Send data via Integrations</h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            <p>Install pre-built integrations to collect logs, metrics, and traces from your infrastructure and services — and get assets like dashboards and alerts out of the box.</p>
+          </EuiText>
+          <div
+            css={css`
+              background-color: ${euiTheme.colors.backgroundBaseSubdued};
+              border-radius: ${euiTheme.border.radius.medium};
+              padding: 24px;
+              margin-block-start: 12px;
+            `}
+          >
+          {allSections.map((section, index) => (
+            <div key={section.title}>
+              <div style={{ height: index === 0 ? 0 : 24 }} />
+              <EuiText
+                size="xs"
+                color="subdued"
+                css={css`
+                  font-weight: ${euiTheme.font.weight.semiBold};
+                  margin-bottom: 8px;
+                `}
+              >
+                <p>{section.title}</p>
+              </EuiText>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+                {section.tiles.map((tile) => (
+                  <IntegrationCard
+                    key={tile.id}
+                    name={tile.name}
+                    description={tile.description}
+                    logoDomain={tile.logoDomain}
+                    logoUrl={tile.logoUrl}
+                    layout="horizontal"
+                    onClick={() => navigate(`/add-data/${tile.id}`)}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+
+          {/* Popular integrations row */}
+          <div style={{ height: 24 }} />
+          <EuiText
+            size="xs"
+            color="subdued"
+            css={css`
+              font-weight: ${euiTheme.font.weight.semiBold};
+              margin-bottom: 8px;
+            `}
+          >
+            <p>More integrations</p>
+          </EuiText>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr)) minmax(0, 2fr)', gap: 12, alignItems: 'start' }}>
+            {POPULAR_INTEGRATION_TILES.map((tile) => (
+              <EuiCard
+                key={tile.id}
+                title={tile.name}
+                titleElement="h4"
+                titleSize="xs"
+                description=""
+                icon={<CardLogoIcon src={tile.logoUrl ?? ''} alt={`${tile.name} logo`} />}
+                layout="vertical"
+                hasBorder
+                paddingSize="none"
+                onClick={() => navigate(`/add-data/${tile.id.replace('popular-', '')}`)}
+                css={css`
+                  border-radius: 6px;
+                  box-shadow: ${euiTheme.shadows.s};
+                  padding: 16px;
+                  cursor: pointer;
+                  text-align: center;
+                  transition: box-shadow 150ms ease-in;
+                  &:hover,
+                  &:focus {
+                    box-shadow: ${euiTheme.shadows.m};
                   }
+                  .euiCard__top {
+                    display: flex;
+                    justify-content: center;
+                    margin-bottom: 12px;
+                  }
+                  .euiCard__icon {
+                    margin-block-start: 0;
+                  }
+                  .euiCard__title {
+                    font-family: ${euiTheme.font.family};
+                    font-weight: ${euiTheme.font.weight.bold};
+                    color: ${euiTheme.colors.text};
+                  }
+                  .euiCard__description,
+                  .euiCard__children {
+                    display: none;
+                  }
+                  .euiCard__content {
+                    margin-bottom: 0;
+                    padding-bottom: 0;
+                  }
+                `}
+              />
+            ))}
+            <EuiCard
+              title="Browse all"
+              titleElement="h4"
+              titleSize="xs"
+              description=""
+              icon={
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 40, overflow: 'hidden' }}>
+                  {[
+                    { id: 'nginx', name: 'Nginx', url: `${ELASTIC_LOGOS}/nginx/img/logo_nginx.svg` },
+                    { id: 'rabbitmq', name: 'RabbitMQ', url: `${ELASTIC_LOGOS}/rabbitmq/img/logo_rabbitmq.svg` },
+                    { id: 'apache', name: 'Apache', url: `${ELASTIC_LOGOS}/apache/img/logo_apache.svg` },
+                    { id: 'couchbase', name: 'Couchbase', url: `${ELASTIC_LOGOS}/couchbase/img/couchbase-logo.svg` },
+                    { id: 'logstash', name: 'Logstash', url: `${ELASTIC_LOGOS}/logstash/img/logo_logstash.svg` },
+                    { id: 'redis', name: 'Redis', url: `${ELASTIC_LOGOS}/redis/img/logo_redis.svg` },
+                    { id: 'mysql', name: 'MySQL', url: `${ELASTIC_LOGOS}/mysql/img/logo_mysql.svg` },
+                  ].map((logo, i) => (
+                    <div
+                      key={logo.id}
+                      style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: 8,
+                        backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+                        border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginLeft: i === 0 ? 0 : -10,
+                        overflow: 'hidden',
+                        flexShrink: 0,
+                      }}
+                    >
+                      <img
+                        src={logo.url}
+                        alt={logo.name}
+                        style={{ width: 24, height: 24, objectFit: 'contain' }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              }
+              layout="vertical"
+              hasBorder
+              paddingSize="none"
+              onClick={() => application.navigateToApp('integrations', { path: '/browse' })}
+              css={css`
+                border-radius: 6px;
+                box-shadow: ${euiTheme.shadows.s};
+                padding: 16px;
+                cursor: pointer;
+                text-align: center;
+                transition: box-shadow 150ms ease-in;
+                &:hover,
+                &:focus {
+                  box-shadow: ${euiTheme.shadows.m};
+                }
+                .euiCard__top {
+                  display: flex;
+                  justify-content: center;
+                  margin-bottom: 12px;
+                }
+                .euiCard__icon {
+                  margin-block-start: 0;
+                }
+                .euiCard__title {
+                  font-family: ${euiTheme.font.family};
+                  font-weight: ${euiTheme.font.weight.bold};
+                  color: ${euiTheme.colors.text};
+                }
+                .euiCard__description,
+                .euiCard__children {
+                  display: none;
+                }
+                .euiCard__content {
+                  margin-bottom: 0;
+                  padding-bottom: 0;
                 }
               `}
             />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGrid>
-      {/* Hiding element instead of not rending these elements in order to preload available packages on page load */}
-      <div
-        hidden={featuredCardsForCategory.length === 0}
-        role="group"
-        aria-labelledby={packageListTitleId}
-      >
-        <EuiSpacer size="xxl" />
-        <div ref={suggestedPackagesRef}>
-          <EuiTitle size="s" id={packageListTitleId}>
-            <strong>
-              {searchParams.get('category') === 'kubernetes'
-                ? i18n.translate(
-                    'xpack.observability_onboarding.experimentalOnboardingFlow.kubernetesPackagesTitle',
-                    {
-                      defaultMessage: 'Monitor your Kubernetes cluster using:',
-                    }
-                  )
-                : searchParams.get('category') === 'application'
-                ? i18n.translate(
-                    'xpack.observability_onboarding.experimentalOnboardingFlow.applicationPackagesTitle',
-                    {
-                      defaultMessage: 'Monitor your Application using:',
-                    }
-                  )
-                : searchParams.get('category') === 'cloud'
-                ? i18n.translate(
-                    'xpack.observability_onboarding.experimentalOnboardingFlow.cloudPackagesTitle',
-                    {
-                      defaultMessage: 'Select your Cloud provider:',
-                    }
-                  )
-                : i18n.translate(
-                    'xpack.observability_onboarding.experimentalOnboardingFlow.hostPackagesTitle',
-                    {
-                      defaultMessage: 'Monitor your Host using:',
-                    }
-                  )}
-            </strong>
-          </EuiTitle>
-          <EuiSpacer size="m" />
-          <PackageList list={featuredCardsForCategory} showCardLabels={true} />
-        </div>
-      </div>
+          </div>
+          </div>{/* end subdued background */}
+        </>
+      )}
 
-      <div ref={searchResultsRef}>
-        <EuiSpacer size="xxl" />
-        <EuiText size="s" color="subdued">
-          <strong>
-            <FormattedMessage
-              id="xpack.observability_onboarding.experimentalOnboardingFlow.form.searchPromptText"
-              defaultMessage="Search through other ways of ingesting data:"
+      {createKeyFlyout && (() => {
+        const endpoint = API_ENDPOINTS.find((e) => e.id === createKeyFlyout.endpointId);
+        if (!endpoint) return null;
+        const isEnrollment = endpoint.keyType === 'enrollment_token';
+        const keyLabel = isEnrollment ? 'enrollment token' : 'API key';
+        const keyLabelCap = isEnrollment ? 'Enrollment token' : 'API Key';
+
+        return (
+          <EuiFlyout ownFocus onClose={() => setCreateKeyFlyout(null)} size="s" aria-labelledby="createKeyFlyoutTitle">
+            <EuiFlyoutHeader hasBorder>
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <img src={endpoint.logoUrl} alt={endpoint.name} style={{ width: 20, height: 20, objectFit: 'contain' }} />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiTitle size="s">
+                    <h2 id="createKeyFlyoutTitle">Create {keyLabel} for {endpoint.name}</h2>
+                  </EuiTitle>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              {endpoint.keyRole && (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiText size="s" color="subdued">
+                    <p>
+                      This {keyLabel} will have <strong>{endpoint.keyRole}</strong> permissions.{' '}
+                      <EuiLink href={docLinks.links.elasticsearch.apiKeys} target="_blank">Learn more</EuiLink>
+                    </p>
+                  </EuiText>
+                </>
+              )}
+            </EuiFlyoutHeader>
+            <EuiFlyoutBody>
+              <EuiFormRow
+                label={`${keyLabelCap} name`}
+                helpText={`A descriptive name helps identify what this ${keyLabel} is used for.`}
+                fullWidth
+              >
+                <EuiFieldText
+                  value={createKeyFlyout.keyName}
+                  onChange={(e) => setCreateKeyFlyout((prev) => prev ? { ...prev, keyName: e.target.value } : null)}
+                  fullWidth
+                  placeholder={`e.g. ${endpoint.name.toLowerCase().replace(/[\s–-]+/g, '-')}-key`}
+                  autoFocus
+                />
+              </EuiFormRow>
+              {endpoint.keyBehavior && (
+                <>
+                  <EuiSpacer size="m" />
+                  <EuiText size="s" color="subdued">
+                    <p>
+                      {endpoint.keyBehavior === 'reused' && 'This key is typically reused across sessions.'}
+                      {endpoint.keyBehavior === 'always_recreated' && 'A new key should be created each time to maintain security.'}
+                      {endpoint.keyBehavior === 'legacy' && 'Legacy usage — only required for Beats or Logstash configurations.'}
+                    </p>
+                  </EuiText>
+                </>
+              )}
+            </EuiFlyoutBody>
+            <EuiFlyoutFooter>
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty iconType="key" href={`${window.location.origin}/app/management/security/api_keys`} target="_blank">
+                    Manage {isEnrollment ? 'tokens' : 'API keys'}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill
+                    isDisabled={!createKeyFlyout.keyName}
+                    onClick={() => {
+                      const mockKey = `${createKeyFlyout.keyName}:${Date.now().toString(36)}abcdef1234567890`;
+                      setCreatedKeys((prev) => ({ ...prev, [createKeyFlyout!.endpointId]: mockKey }));
+                      setCreateKeyFlyout(null);
+                    }}
+                  >
+                    Create {keyLabelCap}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlyoutFooter>
+          </EuiFlyout>
+        );
+      })()}
+
+      {/* Not ready section — shown once loaded */}
+      {!isPageLoading && <div
+        css={css`
+          padding-block-start: 56px;
+          padding-block-end: 80px;
+        `}
+      >
+        <EuiTitle size="xs">
+          <h3>Not ready to add data?</h3>
+        </EuiTitle>
+        <div style={{ height: 16 }} />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+          {[
+            {
+              id: 'demo',
+              title: 'Demo environment',
+              description: 'See Elastic in action with a live demo.',
+              icon: 'play',
+              href: 'https://www.elastic.co/demo',
+            },
+            {
+              id: 'forum',
+              title: 'Explore forum',
+              description: 'Get help and connect with the Elastic community.',
+              icon: 'discuss',
+              href: 'https://discuss.elastic.co/',
+            },
+            {
+              id: 'docs',
+              title: 'Browse documentation',
+              description: 'In-depth guides for all Observability features.',
+              icon: 'documentation',
+              href: docLinks.links.observability.guide,
+            },
+            {
+              id: 'support',
+              title: 'Support Hub',
+              description: 'Open a case with the Elastic support team.',
+              icon: 'help',
+              href: supportUrl,
+            },
+          ].map((item) => (
+            <EuiCard
+              key={item.id}
+              layout="horizontal"
+              icon={
+                <EuiIcon
+                  type={item.icon}
+                  size="l"
+                  color={euiTheme.colors.primary}
+                />
+              }
+              title={item.title}
+              titleElement="h4"
+              titleSize="xs"
+              description={item.description}
+              href={item.href}
+              target="_blank"
+              hasBorder
+              paddingSize="none"
+              css={css`
+                border-radius: 6px;
+                padding: 16px;
+                cursor: pointer;
+                .euiCard__top {
+                  margin-block-end: 0 !important;
+                  margin-inline-end: 12px !important;
+                  flex-shrink: 0;
+                }
+                .euiCard__title {
+                  font-family: ${euiTheme.font.family};
+                  font-weight: ${euiTheme.font.weight.bold};
+                  color: ${euiTheme.colors.text};
+                }
+                .euiCard__content,
+                .euiCard__children {
+                  margin-bottom: 0;
+                  padding-bottom: 0;
+                }
+              `}
             />
-          </strong>
-        </EuiText>
-        <EuiSpacer size="m" />
-        <PackageListSearchForm
-          searchQuery={integrationSearch}
-          setSearchQuery={setIntegrationSearch}
-          flowCategory={searchParams.get('category')}
-          customCards={customCards.filter((card) => !card.isCollectionCard)}
-          excludePackageIdList={searchExcludePackageIdList}
-        />
-      </div>
-    </EuiPanel>
+          ))}
+        </div>
+      </div>}
+    </>
   );
 };
-
-function scrollIntoViewWithOffset(element: HTMLElement, offset = 0) {
-  // Fixed header in Kibana is different height between serverless and stateful so need to calculate dynamically.
-  const fixedHeaders = document.querySelectorAll('#globalHeaderBars [data-fixed-header=true]');
-  fixedHeaders.forEach((header) => {
-    offset += header.getBoundingClientRect().height;
-  });
-
-  window.scrollTo({
-    behavior: 'smooth',
-    top: element.getBoundingClientRect().top - document.body.getBoundingClientRect().top - offset,
-  });
-}
