@@ -4,6 +4,7 @@ steps:
 
   # Step 1: Run the ES Snapshot Build
   - command: .buildkite/scripts/steps/es_snapshots/build.sh
+    key: build-es-snapshot
     label: Build ES Snapshot
     timeout_in_minutes: 30
     agents:
