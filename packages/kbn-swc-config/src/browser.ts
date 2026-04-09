@@ -32,7 +32,7 @@ export interface SwcLoaderOptions {
       legacyDecorator: boolean;
       decoratorMetadata: boolean;
       react?: {
-        runtime: 'automatic';
+        runtime: 'automatic' | 'classic';
         development?: boolean;
         importSource?: string;
       };

@@ -27,8 +27,6 @@ import {
   type UserProvidedValues,
   DEFAULT_THEME_NAME,
 } from '@kbn/core-ui-settings-common';
-import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
-import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 import { Template } from './views';
 import type {
   IRenderOptions,
@@ -39,12 +37,9 @@ import type {
   RenderingMetadata,
   RenderingStartDeps,
 } from './types';
-import { readFileSync } from 'fs';
-import { fromRoot } from '@kbn/repo-info';
 import { registerBootstrapRoute, bootstrapRendererFactory, isRspackModeEnabled } from './bootstrap';
 import {
   getSettingValue,
-  getBundlesHref,
   getCommonStylesheetPaths,
   getThemeStylesheetPaths,
   getScriptPaths,
@@ -76,33 +71,7 @@ export class RenderingService {
   private readonly themeName$ = new BehaviorSubject<ThemeName>(DEFAULT_THEME_NAME);
   private airgapped: boolean = false;
   private isCoreRenderingInReactConcurrentMode: boolean = true;
-  private chunkManifestCache: string[] | null = null;
-
   constructor(private readonly coreContext: CoreContext) {}
-
-  // Returns the small set of named shared chunks (3-5) for <link rel="preload">
-  // in <head>. These give the browser a download head start during HTML parsing.
-  // All chunks (including these) are also loaded via the bootstrap load() array;
-  // the browser deduplicates automatically.
-  private getPreloadChunkFilenames(): string[] {
-    const isDist = this.coreContext.env.packageInfo.buildNum !== Number.MAX_SAFE_INTEGER;
-    if (isDist && this.chunkManifestCache) {
-      return this.chunkManifestCache;
-    }
-
-    try {
-      const manifestPath = fromRoot('target/public/bundles/chunk-manifest.json');
-      const raw = readFileSync(manifestPath, 'utf-8');
-      const manifest = JSON.parse(raw) as { sharedChunks?: string[]; chunks?: string[] };
-      const result = manifest.sharedChunks ?? manifest.chunks ?? [];
-      if (isDist) {
-        this.chunkManifestCache = result;
-      }
-      return result;
-    } catch {
-      return [];
-    }
-  }
 
   public async preboot({
     http,
@@ -315,7 +284,6 @@ export class RenderingService {
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
 
     const useRspack = isRspackModeEnabled();
-    const bundlesHref = getBundlesHref(staticAssetsHrefBase);
     const uiPublicUrl = `${staticAssetsHrefBase}/ui`;
 
     // Script preloads are intentionally removed for Rspack mode. Under HTTP/1.1
