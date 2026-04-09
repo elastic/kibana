@@ -11,7 +11,11 @@ import { createTracedEsClient } from '@kbn/traced-es-client';
 import type { ComputedFeatureGenerator } from './types';
 
 const LOG_MESSAGE_FIELDS = ['message', 'body.text'];
-const MAX_PATTERNS = 5;
+
+const RARE_PATTERN_COUNT_THRESHOLD = 50;
+const MAX_COMMON_PATTERNS = 3;
+const MAX_RARE_PATTERNS = 2;
+const MAX_PATTERNS = MAX_COMMON_PATTERNS + MAX_RARE_PATTERNS;
 
 export const logPatternsGenerator: ComputedFeatureGenerator = {
   type: LOG_PATTERNS_FEATURE_TYPE,
@@ -38,8 +42,17 @@ This is useful for understanding the types of logs in the stream and identifying
       fields: LOG_MESSAGE_FIELDS,
     });
 
+    const commonPatterns = patterns.filter((p) => p.count >= RARE_PATTERN_COUNT_THRESHOLD);
+    const rarePatterns = patterns.filter((p) => p.count < RARE_PATTERN_COUNT_THRESHOLD);
+
+    const selectedCommon = commonPatterns.slice(0, MAX_COMMON_PATTERNS);
+    const remainingBudget = MAX_PATTERNS - selectedCommon.length;
+    const selectedRare = rarePatterns.slice(0, remainingBudget);
+
+    const selectedPatterns = [...selectedCommon, ...selectedRare];
+
     return {
-      patterns: patterns.slice(0, MAX_PATTERNS).map(({ field, pattern, regex, count, sample }) => ({
+      patterns: selectedPatterns.map(({ field, pattern, regex, count, sample }) => ({
         pattern,
         regex,
         count,
