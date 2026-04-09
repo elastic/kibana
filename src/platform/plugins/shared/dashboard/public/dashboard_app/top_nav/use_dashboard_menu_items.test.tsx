@@ -270,7 +270,7 @@ describe('useDashboardMenuItems', () => {
         );
         expect(switchToViewMode).toBeDefined();
         switchToViewMode!.run?.();
-        waitFor(async () => {
+        await waitFor(async () => {
           expect(openConfirmSpy).toHaveBeenCalled();
           expect(mockSetViewMode).not.toHaveBeenCalled();
           expect(mockAsyncResetToLastSavedState).not.toHaveBeenCalled();
@@ -302,7 +302,7 @@ describe('useDashboardMenuItems', () => {
         );
         expect(switchToViewMode).toBeDefined();
         switchToViewMode!.run?.();
-        waitFor(async () => {
+        await waitFor(async () => {
           expect(openConfirmSpy).toHaveBeenCalled();
           expect(mockAsyncResetToLastSavedState).toHaveBeenCalled();
           expect(mockSetViewMode).toHaveBeenCalledWith('view');
