@@ -14,6 +14,7 @@ import {
   EuiInputPopover,
   EuiLink,
   EuiLoadingSpinner,
+  EuiPanel,
   EuiPopoverFooter,
   EuiSelectable,
   type EuiSelectableOption,
@@ -22,6 +23,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
+import type { ReactElement } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -48,6 +50,10 @@ const defaultConfig: WorkflowSelectorConfig = {
     selectedWorkflowDisabled: i18n.SELECTED_WORKFLOW_DISABLED_ERROR,
     loadFailed: i18n.FAILED_TO_LOAD_WORKFLOWS,
   },
+  listView: false,
+  hideTopRowHeader: false,
+  hideViewWorkflowLink: false,
+  showSelectedInSearch: true,
 };
 
 const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
@@ -56,6 +62,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
   config = {},
   error,
 }) => {
+  const ROW_HEIGHT = 60;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [isSearching, setIsSearching] = useState(true);
@@ -81,6 +88,27 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
     [workflowsData?.results, selectedWorkflowId, finalConfig]
   );
 
+  // Compute list height dynamically for listView: shrink to fit visible options, cap at listViewMaxHeight if set
+  const listViewHeight = useMemo(() => {
+    if (!finalConfig.listView) return undefined;
+    const visibleCount =
+      isSearching && inputValue
+        ? workflowOptions.filter((opt) => opt.name.toLowerCase().includes(inputValue.toLowerCase()))
+            .length
+        : workflowOptions.length;
+    // Ensure at least one row height so the empty state message has space
+    const height = Math.max(visibleCount, 1) * ROW_HEIGHT;
+    return finalConfig.listViewMaxHeight !== undefined
+      ? Math.min(height, finalConfig.listViewMaxHeight)
+      : height;
+  }, [
+    finalConfig.listView,
+    finalConfig.listViewMaxHeight,
+    isSearching,
+    inputValue,
+    workflowOptions,
+  ]);
+
   // Get selected workflow disabled error
   const selectedWorkflowDisabledError = useMemo(
     () =>
@@ -97,73 +125,89 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
   );
 
   // Custom render function for workflow options
-  const renderWorkflowOption = useCallback((option: WorkflowOption, searchValue: string) => {
-    // Prepare the namePrepend content based on the WorkflowOption properties
-    const getPrependContent = (workflowOption: WorkflowOption) => {
-      const isSelected = workflowOption.checked === 'on';
-      const isDisabled = workflowOption.disabled;
-      const wasSelectedButNowDisabled = isSelected && isDisabled;
+  const renderWorkflowOption = useCallback(
+    (option: WorkflowOption, searchValue: string) => {
+      // Prepare the namePrepend content based on the WorkflowOption properties
+      const getPrependContent = (workflowOption: WorkflowOption) => {
+        const isSelected = workflowOption.checked === 'on';
+        const isDisabled = workflowOption.disabled;
+        const wasSelectedButNowDisabled = isSelected && isDisabled;
 
-      if (wasSelectedButNowDisabled) {
-        return (
-          <EuiIcon
-            type="alert"
-            color="warning"
-            style={{ marginRight: '8px' }}
-            aria-label={i18n.WORKFLOW_DISABLED_WARNING}
-          />
+        if (wasSelectedButNowDisabled) {
+          return (
+            <EuiIcon
+              type="alert"
+              color="warning"
+              style={{ marginRight: '8px' }}
+              aria-label={i18n.WORKFLOW_DISABLED_WARNING}
+            />
+          );
+        } else if (isDisabled) {
+          return (
+            <IconDisabledWorkflow
+              size="m"
+              style={{ marginRight: '8px' }}
+              aria-label={i18n.DISABLED_BADGE_LABEL}
+            />
+          );
+        } else if (workflowOption.validationResult) {
+          return (
+            <EuiIcon
+              type="warning"
+              style={{ marginRight: '8px' }}
+              color={workflowOption.validationResult.severity === 'error' ? 'danger' : 'warning'}
+              aria-label={workflowOption.validationResult.message}
+            />
+          );
+        }
+
+        return null;
+      };
+
+      const labelContent =
+        finalConfig.listView && option.checked === 'on' ? (
+          <strong>{option.name}</strong>
+        ) : finalConfig.listView ? (
+          option.name
+        ) : (
+          <EuiHighlight search={searchValue}>{option.name}</EuiHighlight>
         );
-      } else if (isDisabled) {
-        return (
-          <IconDisabledWorkflow
-            size="m"
-            style={{ marginRight: '8px' }}
-            aria-label={i18n.DISABLED_BADGE_LABEL}
-          />
-        );
-      } else if (workflowOption.validationResult) {
-        return (
-          <EuiIcon
-            type="warning"
-            style={{ marginRight: '8px' }}
-            color={workflowOption.validationResult.severity === 'error' ? 'danger' : 'warning'}
-            aria-label={workflowOption.validationResult.message}
-          />
-        );
+
+      const secondaryContent = finalConfig.listView ? (
+        (option.secondaryContent as string)
+      ) : (
+        <EuiHighlight search={searchValue}>{option.secondaryContent as string}</EuiHighlight>
+      );
+
+      const content = (
+        // @ts-expect-error upgrade typescript v5.9.3
+        <>
+          <>
+            {getPrependContent(option)}
+            {labelContent}
+          </>
+          {option.secondaryContent && (
+            <EuiText size="xs" color="subdued" className="eui-displayBlock">
+              <small>{secondaryContent}</small>
+            </EuiText>
+          )}
+        </>
+      );
+
+      const tooltipContent = option.disabled
+        ? i18n.DISABLED_WORKFLOW_TOOLTIP
+        : option.validationResult
+        ? option.validationResult.message
+        : undefined;
+
+      if (tooltipContent) {
+        return <EuiToolTip content={tooltipContent}>{content}</EuiToolTip>;
       }
 
-      return null;
-    };
-
-    const content = (
-      // @ts-expect-error upgrade typescript v5.9.3
-      <>
-        <>
-          {getPrependContent(option)}
-          <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
-        </>
-        {option.secondaryContent && (
-          <EuiText size="xs" color="subdued" className="eui-displayBlock">
-            <small>
-              <EuiHighlight search={searchValue}>{option.secondaryContent as string}</EuiHighlight>
-            </small>
-          </EuiText>
-        )}
-      </>
-    );
-
-    const tooltipContent = option.disabled
-      ? i18n.DISABLED_WORKFLOW_TOOLTIP
-      : option.validationResult
-      ? option.validationResult.message
-      : undefined;
-
-    if (tooltipContent) {
-      return <EuiToolTip content={tooltipContent}>{content}</EuiToolTip>;
-    }
-
-    return content;
-  }, []);
+      return content;
+    },
+    [finalConfig.listView]
+  );
 
   const handleWorkflowChange = useCallback(
     (newOptions: WorkflowOption[], event: unknown, changedOption: WorkflowOption) => {
@@ -171,30 +215,40 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
 
       if (changedOption.checked === 'on') {
         onWorkflowChange(changedOption.id);
-        setInputValue(changedOption.name);
-        setIsSearching(false);
+        if (finalConfig.showSelectedInSearch) {
+          setInputValue(changedOption.name);
+          setIsSearching(false);
+        } else {
+          setInputValue('');
+          setIsSearching(true);
+        }
       } else {
         onWorkflowChange('');
         setInputValue('');
         setIsSearching(true);
       }
     },
-    [onWorkflowChange]
+    [finalConfig.showSelectedInSearch, onWorkflowChange]
   );
 
   const handlePopoverClose = useCallback(() => {
     setIsPopoverOpen(false);
 
     // If the user cleared the input but didn't select anything new,
-    // revert to the currently selected workflow
-    if (selectedWorkflowId && workflowOptions.length > 0 && isSearching) {
+    // revert to the currently selected workflow (only when showSelectedInSearch is enabled)
+    if (
+      finalConfig.showSelectedInSearch &&
+      selectedWorkflowId &&
+      workflowOptions.length > 0 &&
+      isSearching
+    ) {
       const selectedWorkflow = workflowOptions.find((w) => w.id === selectedWorkflowId);
       if (selectedWorkflow) {
         setInputValue(selectedWorkflow.name);
         setIsSearching(false);
       }
     }
-  }, [selectedWorkflowId, workflowOptions, isSearching]);
+  }, [finalConfig.showSelectedInSearch, selectedWorkflowId, workflowOptions, isSearching]);
 
   // Use href+target for regular links
   const workflowManagementLinkProps = useMemo(() => {
@@ -209,14 +263,16 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
     if (selectedWorkflowId && workflowOptions.length > 0) {
       const selectedWorkflow = workflowOptions.find((w) => w.id === selectedWorkflowId);
       if (selectedWorkflow) {
-        setInputValue(selectedWorkflow.name);
-        setIsSearching(false);
+        if (finalConfig.showSelectedInSearch) {
+          setInputValue(selectedWorkflow.name);
+          setIsSearching(false);
+        }
       }
     } else {
       setInputValue('');
       setIsSearching(true);
     }
-  }, [selectedWorkflowId, workflowOptions]);
+  }, [selectedWorkflowId, workflowOptions, finalConfig.showSelectedInSearch]);
 
   // Prioritize selected workflow disabled error over validation errors
   const displayError = selectedWorkflowDisabledError || error;
@@ -226,13 +282,91 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
     ? i18n.LOADING_WORKFLOWS
     : undefined;
 
+  const renderListView = useCallback(
+    (list: ReactElement, search?: ReactElement) => {
+      return (
+        <EuiPanel paddingSize="none">
+          {search}
+          <div>{list}</div>
+          {workflowOptions.length > 0 && !finalConfig.hideViewWorkflowLink && (
+            <EuiPanel
+              paddingSize="s"
+              hasShadow={false}
+              css={{ backgroundColor: euiTheme.colors.backgroundBaseSubdued }}
+            >
+              <EuiText size="s" textAlign="right">
+                <EuiLink {...workflowManagementLinkProps} external={false}>
+                  <FormattedMessage
+                    id="workflows.params.viewAllWorkflowsLinkText"
+                    defaultMessage="View all workflows"
+                  />
+                  <EuiIcon type="external" size="s" aria-hidden={true} />
+                </EuiLink>
+              </EuiText>
+            </EuiPanel>
+          )}
+        </EuiPanel>
+      );
+    },
+    [
+      euiTheme.colors.backgroundBaseSubdued,
+      finalConfig.hideViewWorkflowLink,
+      workflowManagementLinkProps,
+      workflowOptions.length,
+    ]
+  );
+
+  const renderPopoverView = useCallback(
+    (list: ReactElement, search?: ReactElement) => {
+      return (
+        <EuiInputPopover
+          closePopover={handlePopoverClose}
+          disableFocusTrap
+          closeOnScroll
+          isOpen={isPopoverOpen}
+          input={search!} // eslint-disable-line @typescript-eslint/no-non-null-assertion
+          panelPaddingSize="none"
+          fullWidth
+        >
+          {list}
+          {workflowOptions.length > 0 && (
+            <EuiPopoverFooter
+              paddingSize="s"
+              css={{ backgroundColor: euiTheme.colors.backgroundBaseSubdued }}
+            >
+              <EuiText size="s" textAlign="right">
+                <EuiLink {...workflowManagementLinkProps} external={false}>
+                  <FormattedMessage
+                    id="workflows.params.viewAllWorkflowsLinkText"
+                    defaultMessage="View all workflows"
+                  />
+                  <EuiIcon type="external" size="s" aria-hidden={true} />
+                </EuiLink>
+              </EuiText>
+            </EuiPopoverFooter>
+          )}
+        </EuiInputPopover>
+      );
+    },
+    [
+      euiTheme.colors.backgroundBaseSubdued,
+      handlePopoverClose,
+      isPopoverOpen,
+      workflowManagementLinkProps,
+      workflowOptions.length,
+    ]
+  );
+
   return (
     <EuiFormRow
-      label={finalConfig.label}
+      label={finalConfig.hideTopRowHeader ? undefined : finalConfig.label}
       labelAppend={
-        <EuiLink {...workflowManagementLinkProps} external={false}>
-          {finalConfig.createWorkflowLinkText} <EuiIcon type="plusInCircle" size="s" />
-        </EuiLink>
+        finalConfig.hideTopRowHeader ? undefined : (
+          <EuiLink {...workflowManagementLinkProps} external={false}>
+            {finalConfig.createWorkflowLinkText}{' '}
+            <EuiIcon type="plusCircle" size="s" aria-hidden={true} />
+          </EuiLink>
+        )
       }
       helpText={helpText}
       error={displayError}
@@ -248,6 +382,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
           onChange={handleWorkflowChange}
           singleSelection
           searchable
+          height={listViewHeight}
           searchProps={{
             value: inputValue,
             onChange: (value) => {
@@ -269,7 +404,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
             <WorkflowSelectorEmptyState createWorkflowHref={workflowManagementLinkProps.href} />
           }
           listProps={{
-            rowHeight: 60, // Increased height to accommodate secondary content and tags
+            rowHeight: ROW_HEIGHT, // Increased height to accommodate secondary content and tags
             showIcons: false,
             css: {
               // Hide the badge when the option is focused
@@ -281,35 +416,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
           }}
           renderOption={renderWorkflowOption}
         >
-          {(list, search) => (
-            <EuiInputPopover
-              closePopover={handlePopoverClose}
-              disableFocusTrap
-              closeOnScroll
-              isOpen={isPopoverOpen}
-              input={search!} // eslint-disable-line @typescript-eslint/no-non-null-assertion
-              panelPaddingSize="none"
-              fullWidth
-            >
-              {list}
-              {workflowOptions.length > 0 && (
-                <EuiPopoverFooter
-                  paddingSize="s"
-                  css={{ backgroundColor: euiTheme.colors.backgroundBaseSubdued }}
-                >
-                  <EuiText size="s" textAlign="right">
-                    <EuiLink {...workflowManagementLinkProps} external={false}>
-                      <FormattedMessage
-                        id="workflows.params.viewAllWorkflowsLinkText"
-                        defaultMessage="View all workflows"
-                      />
-                      <EuiIcon type="popout" size="s" />
-                    </EuiLink>
-                  </EuiText>
-                </EuiPopoverFooter>
-              )}
-            </EuiInputPopover>
-          )}
+          {finalConfig.listView ? renderListView : renderPopoverView}
         </EuiSelectable>
       )}
     </EuiFormRow>

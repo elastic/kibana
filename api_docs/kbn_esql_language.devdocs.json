@@ -1259,7 +1259,7 @@
           "ISuggestionItem"
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/autocomplete/helpers.ts",
-        "lineNumber": 341,
+        "lineNumber": 323,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1275,7 +1275,7 @@
               "ISuggestionItem"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/autocomplete/helpers.ts",
-            "lineNumber": 348,
+            "lineNumber": 330,
             "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
@@ -2752,7 +2752,7 @@
         "label": "SortingContext",
         "description": [],
         "path": "src/platform/packages/shared/kbn-esql-language/src/language/autocomplete/utils/sorting/types.ts",
-        "lineNumber": 38,
+        "lineNumber": 40,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2765,7 +2765,7 @@
             "label": "command",
             "description": [],
             "path": "src/platform/packages/shared/kbn-esql-language/src/language/autocomplete/utils/sorting/types.ts",
-            "lineNumber": 39,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2783,7 +2783,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/language/autocomplete/utils/sorting/types.ts",
-            "lineNumber": 40,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3637,7 +3637,7 @@
         "label": "EsqlCommandNames",
         "description": [],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/generated/commands/commands.ts",
-        "lineNumber": 121,
+        "lineNumber": 125,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3651,7 +3651,7 @@
         "label": "EsqlFunctionNames",
         "description": [],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/generated/function_names.ts",
-        "lineNumber": 258,
+        "lineNumber": 264,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3942,7 +3942,7 @@
         "label": "InlineCastingType",
         "description": [],
         "signature": [
-          "\"string\" | \"boolean\" | \"bool\" | \"geo_shape\" | \"geotile\" | \"geohash\" | \"geohex\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"date_range\" | \"aggregate_metric_double\" | \"dense_vector\" | \"unsigned_long\" | \"datetime\" | \"int\" | \"cartesian_point\" | \"cartesian_shape\" | \"date_period\" | \"time_duration\""
+          "\"string\" | \"boolean\" | \"bool\" | \"geo_shape\" | \"geotile\" | \"geohash\" | \"geohex\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"date_range\" | \"aggregate_metric_double\" | \"dense_vector\" | \"exponential_histogram\" | \"unsigned_long\" | \"int\" | \"datetime\" | \"tdigest\" | \"cartesian_point\" | \"cartesian_shape\" | \"date_period\" | \"time_duration\""
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
         "lineNumber": 528,

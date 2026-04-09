@@ -5,35 +5,25 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
-import type { DashboardSavedObjectAttributes } from '@kbn/dashboard-plugin/server';
+import type { DashboardPluginStart, DashboardState } from '@kbn/dashboard-plugin/server';
 import type { DashboardAttachmentData } from '@kbn/dashboard-agent-common';
-import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
-import { dashboardSmlType } from './dashboard';
+import {
+  DASHBOARD_ATTACHMENT_TYPE,
+  attachmentDataToDashboardState,
+} from '@kbn/dashboard-agent-common';
+import { createDashboardSmlType } from './dashboard';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
-const references: SavedObjectReference[] = [
-  {
-    id: 'lens-1',
-    name: 'panel-panel-1',
-    type: 'lens',
-  },
-];
-
-const dashboardAttributes: DashboardSavedObjectAttributes = {
+const dashboardAttachmentData: DashboardAttachmentData = {
   title: 'System Overview',
   description: 'Main dashboard for key metrics',
-  kibanaSavedObjectMeta: {
-    searchSourceJSON: '{}',
-  },
-  panelsJSON: JSON.stringify([
+  panels: [
     {
-      type: 'lens',
-      panelIndex: 'panel-1',
-      gridData: { x: 0, y: 0, w: 24, h: 15, i: 'panel-1' },
-      panelRefName: 'panel-panel-1',
-      embeddableConfig: {
+      type: LENS_EMBEDDABLE_TYPE,
+      id: 'panel-1',
+      grid: { x: 0, y: 0, w: 24, h: 15 },
+      config: {
         attributes: {
           title: 'CPU Usage',
           visualizationType: 'lnsXY',
@@ -48,96 +38,98 @@ const dashboardAttributes: DashboardSavedObjectAttributes = {
       },
     },
     {
-      type: 'markdown',
-      panelIndex: 'panel-2',
-      gridData: { x: 24, y: 0, w: 24, h: 10, i: 'panel-2', sectionId: 'section-1' },
-      embeddableConfig: {
-        title: 'Summary',
-        content: 'All systems nominal',
-      },
-    },
-  ]),
-  optionsJSON: '{}',
-  sections: [
-    {
-      gridData: { y: 20, i: 'section-1' },
+      id: 'section-1',
       title: 'Operations',
       collapsed: false,
+      grid: { y: 20 },
+      panels: [
+        {
+          type: 'markdown',
+          id: 'panel-2',
+          grid: { x: 24, y: 0, w: 24, h: 10 },
+          config: {
+            title: 'Summary',
+            content: 'All systems nominal',
+          },
+        },
+      ],
     },
   ],
 };
 
-const dashboardWithLensApiAttributes: DashboardSavedObjectAttributes = {
+const dashboardStateWithLensApi = {
   title: 'API Lens Dashboard',
   description: 'Dashboard with API-format lens panel',
-  kibanaSavedObjectMeta: {
-    searchSourceJSON: '{}',
-  },
-  panelsJSON: JSON.stringify([
+  panels: [
     {
-      type: 'lens',
-      panelIndex: 'panel-3',
-      gridData: { x: 0, y: 0, w: 24, h: 12, i: 'panel-3' },
-      embeddableConfig: {
+      type: LENS_EMBEDDABLE_TYPE,
+      id: 'panel-3',
+      grid: { x: 0, y: 0, w: 24, h: 12 },
+      config: {
         attributes: {
           type: 'lnsXY',
           title: 'Request Rate',
         },
       },
     },
-  ]),
-  optionsJSON: '{}',
-};
+  ],
+} as unknown as DashboardState;
 
-const createSavedObjectsClient = () => {
-  const finder = {
-    find: jest.fn().mockReturnValue(
-      (async function* () {
-        yield {
-          saved_objects: [
-            {
-              id: 'dashboard-1',
-              updated_at: '2025-01-01T00:00:00.000Z',
-              namespaces: ['default'],
-            },
-          ],
-        };
-      })()
-    ),
-    close: jest.fn().mockResolvedValue(undefined),
-  };
-
-  const savedObjectsClient = {
-    createPointInTimeFinder: jest.fn().mockReturnValue(finder),
-    get: jest.fn().mockResolvedValue({
-      id: 'dashboard-1',
-      attributes: dashboardAttributes,
-      references,
-    }),
-    resolve: jest.fn().mockResolvedValue({
-      saved_object: {
-        id: 'dashboard-1',
-        attributes: dashboardAttributes,
-        references,
+const createDashboardClient = ({
+  id = 'dashboard-1',
+  attachmentData = dashboardAttachmentData,
+  data,
+}: {
+  id?: string;
+  attachmentData?: DashboardAttachmentData;
+  data?: DashboardState;
+} = {}): jest.Mocked<DashboardPluginStart['client']> =>
+  ({
+    read: jest.fn().mockResolvedValue({
+      id,
+      data: data ?? attachmentDataToDashboardState(attachmentData),
+      meta: {
+        outcome: 'exactMatch',
+        version: 'v1',
       },
     }),
-  } as unknown as SavedObjectsClientContract;
-
-  return { savedObjectsClient, finder };
-};
+  } as jest.Mocked<DashboardPluginStart['client']>);
 
 const createLogger = (): Logger =>
   ({
     warn: jest.fn(),
   } as unknown as Logger);
 
+const createSavedObjectsClient = () => ({} as never);
+
 describe('dashboardSmlType', () => {
   it('lists dashboards across all spaces', async () => {
-    const { savedObjectsClient, finder } = createSavedObjectsClient();
+    const finder = {
+      find: jest.fn().mockReturnValue(
+        (async function* () {
+          yield {
+            saved_objects: [
+              {
+                id: 'dashboard-1',
+                updated_at: '2025-01-01T00:00:00.000Z',
+                namespaces: ['default'],
+              },
+            ],
+          };
+        })()
+      ),
+      close: jest.fn().mockResolvedValue(undefined),
+    };
+    const savedObjectsClient = {
+      createPointInTimeFinder: jest.fn().mockReturnValue(finder),
+    };
+    const dashboardSmlType = createDashboardSmlType({
+      getDashboardClient: async () => createDashboardClient(),
+    });
 
     const pages = [];
     for await (const page of dashboardSmlType.list({
-      savedObjectsClient,
+      savedObjectsClient: savedObjectsClient as never,
       esClient: {} as never,
       logger: createLogger(),
     })) {
@@ -163,13 +155,17 @@ describe('dashboardSmlType', () => {
   });
 
   it('indexes one chunk per dashboard with deep metadata', async () => {
-    const { savedObjectsClient } = createSavedObjectsClient();
+    const dashboardClient = createDashboardClient();
+    const savedObjectsClient = createSavedObjectsClient();
+    const dashboardSmlType = createDashboardSmlType({
+      getDashboardClient: async () => dashboardClient,
+    });
 
     const result = await dashboardSmlType.getSmlData('dashboard-1', {
-      savedObjectsClient,
       esClient: {} as never,
       logger: createLogger(),
-    });
+      savedObjectsClient,
+    } as never);
 
     expect(result).toEqual({
       chunks: [
@@ -186,10 +182,22 @@ describe('dashboardSmlType', () => {
     expect(result?.chunks[0].content).toContain('Operations');
     expect(result?.chunks[0].content).toContain('2 panels');
     expect(result?.chunks[0].content).toContain('1 sections');
+    const requestHandlerContext = dashboardClient.read.mock.calls[0][0];
+    await expect(requestHandlerContext.resolve(['core'])).resolves.toEqual({
+      core: {
+        savedObjects: {
+          client: savedObjectsClient,
+        },
+      },
+    });
   });
 
   it('converts saved dashboards into dashboard attachments with origin', async () => {
-    const { savedObjectsClient } = createSavedObjectsClient();
+    const dashboardClient = createDashboardClient();
+    const savedObjectsClient = createSavedObjectsClient();
+    const dashboardSmlType = createDashboardSmlType({
+      getDashboardClient: async () => dashboardClient,
+    });
 
     const result = await dashboardSmlType.toAttachment(
       {
@@ -204,10 +212,10 @@ describe('dashboardSmlType', () => {
         permissions: ['saved_object:dashboard/get'],
       },
       {
-        savedObjectsClient,
         request: {} as never,
         spaceId: 'default',
-      }
+        savedObjectsClient,
+      } as never
     );
 
     expect(result).toEqual(
@@ -226,27 +234,34 @@ describe('dashboardSmlType', () => {
     expect(attachmentData?.panels).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          uid: 'panel-1',
-          type: 'lens',
+          id: 'panel-1',
+          type: LENS_EMBEDDABLE_TYPE,
         }),
         expect.objectContaining({
-          uid: 'section-1',
+          id: 'section-1',
           title: 'Operations',
-          panels: [expect.objectContaining({ uid: 'panel-2', type: 'markdown' })],
+          panels: [expect.objectContaining({ id: 'panel-2', type: 'markdown' })],
         }),
       ])
     );
+    const requestHandlerContext = dashboardClient.read.mock.calls[0][0];
+    await expect(requestHandlerContext.resolve(['core'])).resolves.toEqual({
+      core: {
+        savedObjects: {
+          client: savedObjectsClient,
+        },
+      },
+    });
   });
 
   it('falls back to generic panel storage when a lens panel is already in API format', async () => {
-    const { savedObjectsClient } = createSavedObjectsClient();
-
-    (savedObjectsClient.resolve as jest.Mock).mockResolvedValueOnce({
-      saved_object: {
-        id: 'dashboard-2',
-        attributes: dashboardWithLensApiAttributes,
-        references: [],
-      },
+    const savedObjectsClient = createSavedObjectsClient();
+    const dashboardSmlType = createDashboardSmlType({
+      getDashboardClient: async () =>
+        createDashboardClient({
+          id: 'dashboard-2',
+          data: dashboardStateWithLensApi,
+        }),
     });
 
     const result = await dashboardSmlType.toAttachment(
@@ -262,10 +277,10 @@ describe('dashboardSmlType', () => {
         permissions: ['saved_object:dashboard/get'],
       },
       {
-        savedObjectsClient,
         request: {} as never,
         spaceId: 'default',
-      }
+        savedObjectsClient,
+      } as never
     );
 
     expect(result).toEqual(
@@ -278,8 +293,8 @@ describe('dashboardSmlType', () => {
 
     expect(attachmentData?.panels).toEqual([
       expect.objectContaining({
-        uid: 'panel-3',
-        type: 'lens',
+        id: 'panel-3',
+        type: LENS_EMBEDDABLE_TYPE,
         config: expect.objectContaining({
           attributes: expect.objectContaining({
             type: 'lnsXY',
@@ -288,5 +303,33 @@ describe('dashboardSmlType', () => {
         }),
       }),
     ]);
+  });
+
+  it('creates requestHandlerContext from savedObjectsClient for SML reads', async () => {
+    const dashboardClient = createDashboardClient();
+    const savedObjectsClient = createSavedObjectsClient();
+    const dashboardSmlType = createDashboardSmlType({
+      getDashboardClient: async () => dashboardClient,
+    });
+
+    const result = await dashboardSmlType.getSmlData('dashboard-1', {
+      esClient: {} as never,
+      logger: createLogger(),
+      savedObjectsClient,
+    } as never);
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        chunks: [expect.objectContaining({ type: 'dashboard', title: 'System Overview' })],
+      })
+    );
+    const requestHandlerContext = dashboardClient.read.mock.calls[0][0];
+    await expect(requestHandlerContext.resolve(['core'])).resolves.toEqual({
+      core: {
+        savedObjects: {
+          client: savedObjectsClient,
+        },
+      },
+    });
   });
 });

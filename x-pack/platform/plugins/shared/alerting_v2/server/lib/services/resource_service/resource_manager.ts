@@ -8,20 +8,37 @@
 import { inject, injectable } from 'inversify';
 
 import type { IRetryService } from '../retry_service/alerting_retry_service';
-import type { IResourceInitializer } from './resource_initializer';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { LoggerServiceToken } from '../logger_service/logger_service';
 import { RetryServiceToken } from '../retry_service/tokens';
+
+export interface IResourceInitializer {
+  initialize(): Promise<void>;
+}
 
 interface ResourceState {
   initializer?: IResourceInitializer;
   initializationPromise?: Promise<void>;
   error?: Error;
   status: 'not_started' | 'pending' | 'ready' | 'failed';
+  optional: boolean;
+}
+
+export interface RegisterResourceOptions {
+  /**
+   * When `true`, a failure during initialization will NOT cause `waitUntilReady()`
+   * to reject. The resource is still tracked as `'failed'`, but it is treated as
+   * non-blocking for startup readiness.
+   */
+  optional?: boolean;
 }
 
 export interface ResourceManagerContract {
-  registerResource(key: string, initializer: IResourceInitializer): void;
+  registerResource(
+    key: string,
+    initializer: IResourceInitializer,
+    options?: RegisterResourceOptions
+  ): void;
   startInitialization(options?: { resourceKeys?: string[] }): void;
   waitUntilReady(): Promise<void>;
   isReady(key: string): boolean;
@@ -44,7 +61,11 @@ export class ResourceManager implements ResourceManagerContract {
    * A resource can later be initialized either at startup (via `startInitialization()`)
    * or on-demand (via `ensureResourceReady()`).
    */
-  public registerResource(key: string, initializer: IResourceInitializer): void {
+  public registerResource(
+    key: string,
+    initializer: IResourceInitializer,
+    options?: RegisterResourceOptions
+  ): void {
     const existing = this.resources.get(key);
     if (
       existing?.status === 'pending' ||
@@ -59,6 +80,7 @@ export class ResourceManager implements ResourceManagerContract {
     this.resources.set(key, {
       status: 'not_started',
       initializer,
+      optional: options?.optional ?? false,
     });
   }
 
@@ -91,9 +113,23 @@ export class ResourceManager implements ResourceManagerContract {
    * also fail immediately with the stored error.
    */
   public async waitUntilReady(): Promise<void> {
-    await Promise.all(
-      Array.from(this.startupResourceKeys).map((key) => this.ensureResourceReady(key))
-    );
+    await Promise.all(Array.from(this.startupResourceKeys).map((key) => this.waitForResource(key)));
+  }
+
+  private async waitForResource(key: string): Promise<void> {
+    try {
+      await this.ensureResourceReady(key);
+    } catch (err) {
+      const state = this.resources.get(key);
+
+      if (!state?.optional) {
+        throw err;
+      }
+
+      this.logger.debug({
+        message: `ResourceManager: optional resource [${key}] failed to initialize, continuing`,
+      });
+    }
   }
 
   public isReady(key: string): boolean {

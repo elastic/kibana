@@ -69,7 +69,7 @@ export const getRevertChangesAction = ({
       );
       await modal.onClose;
     },
-    icon: 'editorUndo',
+    icon: 'undo',
     isCompatible: true,
     disabled: !annotationLayerHasUnsavedChanges(layer),
     'data-test-subj': 'lnsXY_annotationLayer_revertChanges',
@@ -158,7 +158,7 @@ const RevertChangesConfirmModal = ({
                   data-test-subj="lnsLayerRevertChangesButton"
                   onClick={onConfirm}
                   color="warning"
-                  iconType="returnKey"
+                  iconType="return"
                   fill
                 >
                   {i18n.translate('xpack.lens.layer.unlinkConfirm', {

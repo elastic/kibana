@@ -29,13 +29,15 @@ export class StreamsService {
     esClient,
     esClientAsInternalUser,
     uiSettingsClient,
+    isSecurityEnabled,
   }: {
     attachmentClient: AttachmentClient;
-    queryClient: QueryClient;
-    featureClient: FeatureClient;
+    queryClient?: QueryClient;
+    featureClient?: FeatureClient;
     esClient: ElasticsearchClient;
     esClientAsInternalUser: ElasticsearchClient;
     uiSettingsClient: IUiSettingsClient;
+    isSecurityEnabled: boolean;
   }): Promise<StreamsClient> {
     const [coreStart] = await this.coreSetup.getStartServices();
 
@@ -56,6 +58,7 @@ export class StreamsService {
       lockManager: new LockManagerService(this.coreSetup, logger),
       storageClient: createStreamsStorageClient(esClientAsInternalUser, logger),
       isServerless,
+      isSecurityEnabled,
       isWiredStreamViewsEnabled,
       isDev: this.isDev,
     });

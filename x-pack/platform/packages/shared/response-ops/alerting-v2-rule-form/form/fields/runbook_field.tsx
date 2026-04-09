@@ -21,10 +21,16 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { useController, useFormContext } from 'react-hook-form';
+import {
+  RUNBOOK_ARTIFACT_TYPE,
+  ARTIFACT_VALUE_LIMITS,
+  DEFAULT_ARTIFACT_VALUE_LIMIT,
+} from '@kbn/alerting-v2-constants';
 import type { FormValues } from '../types';
 
 const RUNBOOK_ROW_ID = 'ruleV2FormRunbookField';
-const RUNBOOK_ARTIFACT_TYPE = 'runbook';
+const RUNBOOK_MAX_LENGTH =
+  ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE] ?? DEFAULT_ARTIFACT_VALUE_LIMIT;
 const createRunbookArtifactId = () =>
   `runbook-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
@@ -45,6 +51,8 @@ export const RunbookField: React.FC<RunbookFieldProps> = ({ isOpen, onClose }) =
   const runbookArtifact = artifacts.find((artifact) => artifact.type === RUNBOOK_ARTIFACT_TYPE);
   const runbookValue = runbookArtifact?.value ?? '';
   const [draftRunbook, setDraftRunbook] = useState(runbookValue);
+  const trimmedLength = draftRunbook.trim().length;
+  const isOverLimit = trimmedLength > RUNBOOK_MAX_LENGTH;
 
   useEffect(() => {
     if (isOpen) {
@@ -53,6 +61,9 @@ export const RunbookField: React.FC<RunbookFieldProps> = ({ isOpen, onClose }) =
   }, [isOpen, runbookValue]);
 
   const handleSaveRunbook = () => {
+    if (isOverLimit) {
+      return;
+    }
     const trimmedRunbook = draftRunbook.trim();
     const nonRunbookArtifacts = artifacts.filter(
       (artifact) => artifact.type !== RUNBOOK_ARTIFACT_TYPE
@@ -97,7 +108,19 @@ export const RunbookField: React.FC<RunbookFieldProps> = ({ isOpen, onClose }) =
           })}
         </EuiFormLabel>
         <EuiSpacer size="s" />
-        <EuiFormRow fullWidth>
+        <EuiFormRow
+          fullWidth
+          isInvalid={isOverLimit}
+          error={
+            isOverLimit
+              ? i18n.translate('xpack.alertingV2.ruleForm.runbookMaxLengthError', {
+                  defaultMessage:
+                    'Runbook must be at most {maxLength} characters. Current length: {currentLength}.',
+                  values: { maxLength: RUNBOOK_MAX_LENGTH, currentLength: trimmedLength },
+                })
+              : undefined
+          }
+        >
           <EuiMarkdownEditor
             style={{ width: '100%' }}
             value={draftRunbook}
@@ -117,7 +140,7 @@ export const RunbookField: React.FC<RunbookFieldProps> = ({ isOpen, onClose }) =
             defaultMessage: 'Cancel',
           })}
         </EuiButtonEmpty>
-        <EuiButton onClick={handleSaveRunbook} size="s" color="primary" fill>
+        <EuiButton onClick={handleSaveRunbook} size="s" color="primary" fill disabled={isOverLimit}>
           {i18n.translate('xpack.alertingV2.ruleForm.runbookSaveButton', {
             defaultMessage: 'Add Runbook',
           })}

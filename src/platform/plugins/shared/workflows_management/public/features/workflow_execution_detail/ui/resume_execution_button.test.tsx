@@ -10,8 +10,8 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { ResumeExecutionButton } from './resume_execution_button';
-import { mockWorkflowsManagementCapabilities } from '../../../hooks/__mocks__/use_workflows_capabilities';
 import { TestWrapper } from '../../../shared/test_utils';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 
@@ -91,9 +91,7 @@ describe('ResumeExecutionButton', () => {
         },
       },
     });
-    jest
-      .mocked(useWorkflowsCapabilities)
-      .mockReturnValue({ ...mockWorkflowsManagementCapabilities });
+    jest.mocked(useWorkflowsCapabilities).mockReturnValue(createMockWorkflowsCapabilities());
   });
 
   const renderComponent = (props = {}) =>
@@ -116,7 +114,7 @@ describe('ResumeExecutionButton', () => {
 
     it('disables the button when user lacks executeWorkflow capability', () => {
       jest.mocked(useWorkflowsCapabilities).mockReturnValue({
-        ...mockWorkflowsManagementCapabilities,
+        ...createMockWorkflowsCapabilities(),
         canExecuteWorkflow: false,
       });
       renderComponent();

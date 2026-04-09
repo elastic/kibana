@@ -8,29 +8,35 @@
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import {
-  COMMON_HEADERS,
+  PUBLIC_HEADERS,
+  INTERNAL_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
-  LATEST_INDEX,
+  LATEST_ALIAS,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import { clearEntityStoreIndices, forceLogExtraction } from '../fixtures/helpers';
 
 apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
+  let internalHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver, kbnClient }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
-      ...COMMON_HEADERS,
+      ...PUBLIC_HEADERS,
+    };
+    internalHeaders = {
+      ...credentials.cookieHeader,
+      ...INTERNAL_HEADERS,
     };
 
     await kbnClient.uiSettings.update({
       [FF_ENABLE_ENTITY_STORE_V2]: true,
     });
 
-    const installResponse = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+    const installResponse = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: { historySnapshot: { frequency: '24h' } },
@@ -43,7 +49,7 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
   });
 
   apiTest.afterAll(async ({ apiClient, esClient }) => {
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
@@ -57,17 +63,20 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
     async ({ apiClient, esClient }) => {
       await forceLogExtraction(
         apiClient,
-        defaultHeaders,
+        internalHeaders,
         'host',
         '2026-01-20T11:00:00Z',
         '2026-01-20T13:00:00Z'
       );
 
-      const snapshotResponse = await apiClient.post(ENTITY_STORE_ROUTES.FORCE_HISTORY_SNAPSHOT, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {},
-      });
+      const snapshotResponse = await apiClient.post(
+        ENTITY_STORE_ROUTES.internal.FORCE_HISTORY_SNAPSHOT,
+        {
+          headers: internalHeaders,
+          responseType: 'json',
+          body: {},
+        }
+      );
       expect(snapshotResponse.statusCode).toBe(200);
       const body = snapshotResponse.body as {
         ok: boolean;
@@ -102,7 +111,7 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
       });
 
       const latestSearchResult = await esClient.search({
-        index: LATEST_INDEX,
+        index: LATEST_ALIAS,
         query: { terms: { 'entity.id': [...entityIdsWithBehaviors] } },
         size: entityIdsWithBehaviors.length,
       });

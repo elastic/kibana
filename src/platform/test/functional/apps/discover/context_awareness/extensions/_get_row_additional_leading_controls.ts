@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           hash: `/?_a=${state}`,
         });
         await discover.waitUntilSearchingHasFinished();
-        await testSubjects.existOrFail('exampleLogsControl_visBarVerticalStacked');
+        await testSubjects.existOrFail('exampleLogsControl_chartBarVerticalStack');
         await testSubjects.existOrFail('unifiedDataTable_additionalRowControl_actionsMenu');
       });
 
@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           hash: `/?_a=${state}`,
         });
         await discover.waitUntilSearchingHasFinished();
-        await testSubjects.missingOrFail('exampleLogsControl_visBarVerticalStacked');
+        await testSubjects.missingOrFail('exampleLogsControl_chartBarVerticalStack');
         await testSubjects.missingOrFail('unifiedDataTable_additionalRowControl_actionsMenu');
       });
     });
@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedTabs.closeTabPreviewWithEsc();
         await dataViews.switchTo('my-example-logs');
         await discover.waitUntilSearchingHasFinished();
-        await testSubjects.existOrFail('exampleLogsControl_visBarVerticalStacked');
+        await testSubjects.existOrFail('exampleLogsControl_chartBarVerticalStack');
         await testSubjects.existOrFail('unifiedDataTable_additionalRowControl_actionsMenu');
 
         // check Surrounding docs page
@@ -68,7 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.refresh();
         await header.waitUntilLoadingHasFinished();
 
-        await testSubjects.existOrFail('exampleLogsControl_visBarVerticalStacked');
+        await testSubjects.existOrFail('exampleLogsControl_chartBarVerticalStack');
         await testSubjects.existOrFail('unifiedDataTable_additionalRowControl_actionsMenu');
       });
 
@@ -77,7 +77,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedTabs.closeTabPreviewWithEsc();
         await dataViews.switchTo('my-example-metrics');
         await discover.waitUntilSearchingHasFinished();
-        await testSubjects.missingOrFail('exampleLogsControl_visBarVerticalStacked');
+        await testSubjects.missingOrFail('exampleLogsControl_chartBarVerticalStack');
         await testSubjects.missingOrFail('unifiedDataTable_additionalRowControl_actionsMenu');
 
         // check Surrounding docs page
@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.refresh();
         await header.waitUntilLoadingHasFinished();
 
-        await testSubjects.missingOrFail('exampleLogsControl_visBarVerticalStacked');
+        await testSubjects.missingOrFail('exampleLogsControl_chartBarVerticalStack');
         await testSubjects.missingOrFail('unifiedDataTable_additionalRowControl_actionsMenu');
       });
     });
