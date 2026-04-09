@@ -6,6 +6,7 @@
  */
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
+import { EXTENDED_TIMEOUT } from '..';
 
 export class DifferentialFunctionsPage {
   constructor(public readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
@@ -35,7 +36,9 @@ export class DifferentialFunctionsPage {
     await this.page.goto(
       `${this.kbnUrl.app('profiling')}/functions/differential?${params.toString()}`
     );
-    await this.page.waitForLoadingIndicatorHidden();
+    await this.page.testSubj
+      .locator('overallPerformance_value')
+      .waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 
   getSummaryValue(id: string) {
