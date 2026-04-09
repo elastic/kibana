@@ -171,6 +171,14 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
         model: monaco.editor.ITextModel,
         position: monaco.Position
       ): Promise<monaco.languages.CompletionList> {
+        const editors = monaco.editor.getEditors().filter((editor) => editor.getModel() === model);
+        const modelHasTextFocus =
+          editors.length === 0 || editors.some((editor) => editor.hasTextFocus());
+
+        if (!modelHasTextFocus) {
+          return { suggestions: [] };
+        }
+
         const resolvedCallbacks = deps?.getModelDependencies?.(model) ?? deps;
         const resolvedDeps = resolvedCallbacks
           ? ({ ...deps, ...resolvedCallbacks } as ESQLDependencies)
