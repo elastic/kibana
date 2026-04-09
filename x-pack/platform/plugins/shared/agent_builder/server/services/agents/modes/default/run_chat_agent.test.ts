@@ -13,13 +13,7 @@ import { createAgentHandlerContextMock } from '../../../../test_utils/runner';
 import { createRound } from '../../../../test_utils/conversations';
 
 import { runDefaultAgentMode } from './run_chat_agent';
-import {
-  prepareConversation,
-  selectTools,
-  extractRound,
-  extractAgentResponse,
-  getPendingAgentResponse,
-} from '../utils';
+import { prepareConversation, selectTools, extractRound, getPendingAgentResponse } from '../utils';
 import { createAgentGraph } from './graph';
 
 jest.mock('../utils', () => ({
@@ -52,7 +46,6 @@ jest.mock('./convert_graph_events', () => ({
 const prepareConversationMock = prepareConversation as jest.MockedFn<typeof prepareConversation>;
 const selectToolsMock = selectTools as jest.MockedFn<typeof selectTools>;
 const extractRoundMock = extractRound as jest.MockedFn<typeof extractRound>;
-const extractAgentResponseMock = extractAgentResponse as jest.MockedFn<typeof extractAgentResponse>;
 const getPendingAgentResponseMock = getPendingAgentResponse as jest.MockedFn<
   typeof getPendingAgentResponse
 >;
@@ -97,20 +90,6 @@ describe('runDefaultAgentMode', () => {
         id: 'round-1',
       })
     );
-
-    extractAgentResponseMock.mockResolvedValue({
-      id: 'round-1',
-      timestamp: new Date().toISOString(),
-      type: 'agent_execution',
-      agent_id: 'test-agent',
-      status: 'completed',
-      steps: [],
-      response: { message: 'test' },
-      started_at: new Date().toISOString(),
-      time_to_first_token: 0,
-      time_to_last_token: 0,
-      model_usage: { connector_id: '', llm_calls: 0, input_tokens: 0, output_tokens: 0 },
-    } as any);
 
     createAgentGraphMock.mockReturnValue({
       streamEvents: jest.fn(() => []),

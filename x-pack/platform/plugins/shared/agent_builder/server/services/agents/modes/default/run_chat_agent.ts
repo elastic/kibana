@@ -31,7 +31,6 @@ import { createResultTransformer } from '../utils/create_result_transformer';
 import {
   addRoundCompleteEvent,
   extractRound,
-  extractAgentResponse,
   prepareConversation,
   selectSkills,
   selectTools,
@@ -328,15 +327,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     },
   });
 
-  const [round, agentResponse] = await Promise.all([
-    extractRound(events$),
-    extractAgentResponse(events$),
-  ]);
+  const round = await extractRound(events$);
 
-  return {
-    round,
-    agentResponse,
-  };
+  return { round };
 };
 
 const getConversationState = ({

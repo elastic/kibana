@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { filter, firstValueFrom, map } from 'rxjs';
-import type { ChatAgentEvent, AgentExecutionEvent } from '@kbn/agent-builder-common';
+import type { ChatAgentEvent } from '@kbn/agent-builder-common';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
 
 export const extractRound = async (events$: Observable<ChatAgentEvent>) => {
@@ -15,22 +15,6 @@ export const extractRound = async (events$: Observable<ChatAgentEvent>) => {
     events$.pipe(
       filter(isRoundCompleteEvent),
       map((event) => event.data.round)
-    )
-  );
-};
-
-export const extractAgentResponse = async (
-  events$: Observable<ChatAgentEvent>
-): Promise<AgentExecutionEvent> => {
-  return await firstValueFrom(
-    events$.pipe(
-      filter(isRoundCompleteEvent),
-      map((event) => {
-        if (!event.data.agentResponse) {
-          throw new Error('No agentResponse found in RoundCompleteEvent');
-        }
-        return event.data.agentResponse;
-      })
     )
   );
 };
