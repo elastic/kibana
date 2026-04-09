@@ -12,6 +12,7 @@ import type {
   GetRuleHealthResponse,
   GetSpaceHealthRequestBody,
   GetSpaceHealthResponse,
+  ReadRuleExecutionResultsResponse,
 } from '../../../../../common/api/detection_engine/rule_monitoring';
 import {
   HealthIntervalGranularity,
@@ -24,6 +25,7 @@ import type {
   FetchRuleExecutionEventsArgs,
   FetchRuleExecutionResultsArgs,
   IRuleMonitoringApiClient,
+  ReadRuleExecutionResultsArgs,
 } from '../api_client_interface';
 
 export const api: jest.Mocked<IRuleMonitoringApiClient> = {
@@ -47,6 +49,15 @@ export const api: jest.Mocked<IRuleMonitoringApiClient> = {
         per_page: 20,
         total: 1,
       },
+    }),
+
+  readRuleExecutionResults: jest
+    .fn<Promise<ReadRuleExecutionResultsResponse>, [ReadRuleExecutionResultsArgs]>()
+    .mockResolvedValue({
+      data: [],
+      total: 0,
+      page: 1,
+      per_page: 20,
     }),
 
   fetchRuleExecutionResults: jest

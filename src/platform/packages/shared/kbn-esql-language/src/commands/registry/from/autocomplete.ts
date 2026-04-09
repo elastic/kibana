@@ -22,7 +22,6 @@ import { withinQuotes } from '../../definitions/utils/autocomplete/helpers';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
 import { getOverlapRange, isRestartingExpression } from '../../definitions/utils/shared';
-import { esqlCommandRegistry } from '../../../..';
 import {
   getIndicesBrowserSuggestion,
   shouldSuggestIndicesBrowserAfterComma,
@@ -31,7 +30,6 @@ import {
 const SOURCE_TYPE_INDEX = 'index';
 const METADATA_KEYWORD = 'METADATA';
 const EMPTY_EXTENSIONS = { recommendedFields: [], recommendedQueries: [] };
-const PIPE_SORT_TEXT = '0';
 
 export async function autocomplete(
   query: string,
@@ -148,11 +146,7 @@ async function suggestNextActions(
   context: ICommandContext | undefined,
   callbacks: ICommandCallbacks | undefined
 ): Promise<ISuggestionItem[]> {
-  const suggestions: ISuggestionItem[] = [
-    { ...pipeCompleteItem, sortText: PIPE_SORT_TEXT },
-    commaCompleteItem,
-    metadataSuggestion,
-  ];
+  const suggestions: ISuggestionItem[] = [pipeCompleteItem, commaCompleteItem, metadataSuggestion];
 
   const recommendedQueries = await getRecommendedQueriesSuggestions(
     context?.editorExtensions ?? EMPTY_EXTENSIONS,
@@ -207,10 +201,5 @@ async function suggestAdditionalSources(
 }
 
 function shouldSuggestSubquery(context: ICommandContext | undefined): boolean {
-  if (context?.isCursorInSubquery) {
-    return false;
-  }
-
-  const fromCommand = esqlCommandRegistry.getCommandByName('from');
-  return fromCommand?.metadata?.subquerySupport ?? true;
+  return !context?.isCursorInSubquery;
 }

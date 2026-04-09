@@ -12,7 +12,7 @@ import { DataQualityCard } from './data_quality_card';
 import {
   createMockWiredStreamDefinition,
   createMockQueryStreamDefinition,
-} from '../data_management/shared/mocks';
+} from '../stream_management/data_management/shared/mocks';
 
 const mockUseStreamDetail = jest.fn();
 const mockUseStreamsAppFetch = jest.fn();

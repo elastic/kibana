@@ -1,0 +1,32 @@
+openapi: 3.0.3
+info:
+  title: Shared Primitives Schema
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    NonEmptyString:
+      type: string
+      format: nonempty
+      minLength: 1
+      description: A string that does not contain only whitespace characters
+
+    SafeIdentifier:
+      type: string
+      minLength: 1
+      maxLength: 255
+      pattern: '^[a-zA-Z0-9_]+$'
+      description: An identifier containing only alphanumeric characters and underscores
+
+    SemVer:
+      type: string
+      minLength: 5
+      maxLength: 20
+      pattern: '^\d+\.\d+\.\d+$'
+      description: A semantic version string (e.g. 1.0.0)
+
+    UUID:
+      type: string
+      format: uuid
+      description: A universally unique identifier

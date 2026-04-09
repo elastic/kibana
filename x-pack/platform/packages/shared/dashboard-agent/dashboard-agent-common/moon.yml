@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/dashboard-plugin'
   - '@kbn/lens-embeddable-utils'
+  - '@kbn/lens-common'
 tags:
   - shared-common
   - package

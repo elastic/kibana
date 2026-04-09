@@ -88,7 +88,9 @@
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-browser",
-    "@kbn/share-plugin"
+    "@kbn/share-plugin",
+    "@kbn/core-security-server",
+    "@kbn/management-settings-ids"
   ],
   "exclude": ["target/**/*"]
 }
