@@ -71,6 +71,9 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
+  /**
+   * Create or update the protection updates note for a package policy.
+   */
   createUpdateProtectionUpdatesNote(
     props: CreateUpdateProtectionUpdatesNoteProps,
     kibanaSpace: string = 'default'
@@ -280,6 +283,9 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
+  /**
+   * Get a list of all endpoint host metadata.
+   */
   getEndpointMetadataList(props: GetEndpointMetadataListProps, kibanaSpace: string = 'default') {
     return supertest
       .get(getRouteUrlForSpace('/api/endpoint/metadata', kibanaSpace))
@@ -312,6 +318,9 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },
+  /**
+   * Get the most recent policy response for an endpoint.
+   */
   getPolicyResponse(props: GetPolicyResponseProps, kibanaSpace: string = 'default') {
     return supertest
       .get(getRouteUrlForSpace('/api/endpoint/policy_response', kibanaSpace))
@@ -320,6 +329,9 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },
+  /**
+   * Get the protection updates note for a package policy.
+   */
   getProtectionUpdatesNote(props: GetProtectionUpdatesNoteProps, kibanaSpace: string = 'default') {
     return supertest
       .get(

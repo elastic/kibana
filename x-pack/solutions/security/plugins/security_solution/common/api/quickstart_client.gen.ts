@@ -1008,6 +1008,9 @@ For detailed information on Kibana actions and alerting, and additional API call
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Create or update the protection updates note for a package policy.
+   */
   async createUpdateProtectionUpdatesNote(props: CreateUpdateProtectionUpdatesNoteProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateUpdateProtectionUpdatesNote`);
     return this.kbnClient
@@ -1885,6 +1888,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get a list of all endpoint host metadata.
+   */
   async getEndpointMetadataList(props: GetEndpointMetadataListProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetEndpointMetadataList`);
     return this.kbnClient
@@ -1981,6 +1987,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get the most recent policy response for an endpoint.
+   */
   async getPolicyResponse(props: GetPolicyResponseProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetPolicyResponse`);
     return this.kbnClient
@@ -2009,6 +2018,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get the protection updates note for a package policy.
+   */
   async getProtectionUpdatesNote(props: GetProtectionUpdatesNoteProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetProtectionUpdatesNote`);
     return this.kbnClient
