@@ -308,7 +308,7 @@ export interface ValidationErrors {
     message: string;
     type: { name: string };
   };
-  unknownIndexOrView: {
+  unknownDataSource: {
     message: string;
     type: { name: string };
   };

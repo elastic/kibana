@@ -17,8 +17,8 @@ function hasWildcard(name: string) {
 }
 
 export interface ValidateSourcesOptions {
-  /** When true, use "Unknown index or view" error (e.g. for FROM). When false, use "Unknown index" (e.g. for TS). */
-  useIndexOrViewError?: boolean;
+  /** When true, use "Unknown data source" error (e.g. for FROM). When false, use "Unknown index" (e.g. for TS). */
+  useGenericDataSourceError?: boolean;
 }
 
 export function validateSources(
@@ -31,7 +31,7 @@ export function validateSources(
     ...(context?.sources?.map((source) => source.name) ?? []),
     ...(context?.views?.map((view) => view.name) ?? []),
   ]);
-  const useIndexOrViewError = options?.useIndexOrViewError ?? false;
+  const useGenericDataSourceError = options?.useGenericDataSourceError ?? false;
 
   for (const source of sources) {
     if (source.incomplete) {
@@ -45,7 +45,7 @@ export function validateSources(
 
       if (!sourceExists(sourceName, sourcesMap) && !hasWildcard(sourceName)) {
         messages.push(
-          useIndexOrViewError ? errors.unknownIndexOrView(source) : errors.unknownIndex(source)
+          useGenericDataSourceError ? errors.unknownDataSource(source) : errors.unknownIndex(source)
         );
       }
     }

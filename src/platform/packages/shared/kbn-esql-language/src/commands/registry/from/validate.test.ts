@@ -62,24 +62,24 @@ describe('FROM Validation', () => {
       });
 
       test('errors on trailing comma', () => {
-        fromExpectErrors(`from assignment = 1`, ['Unknown index or view "assignment"']);
+        fromExpectErrors(`from assignment = 1`, ['Unknown data source "assignment"']);
       });
 
       test('errors on invalid syntax', () => {
-        fromExpectErrors('FROM `index`', ['Unknown index or view "`index`"']);
-        fromExpectErrors(`from assignment = 1`, ['Unknown index or view "assignment"']);
+        fromExpectErrors('FROM `index`', ['Unknown data source "`index`"']);
+        fromExpectErrors(`from assignment = 1`, ['Unknown data source "assignment"']);
       });
 
       test('errors on unknown index or view', () => {
-        fromExpectErrors(`FROM index, missingIndex`, ['Unknown index or view "missingIndex"']);
-        fromExpectErrors(`from average()`, ['Unknown index or view "average"']);
-        fromExpectErrors(`fRom custom_function()`, ['Unknown index or view "custom_function"']);
-        fromExpectErrors('from numberField', ['Unknown index or view "numberField"']);
-        fromExpectErrors('FROM policy', ['Unknown index or view "policy"']);
-        fromExpectErrors('FROM index, missingIndex', ['Unknown index or view "missingIndex"']);
-        fromExpectErrors('FROM missingIndex, index', ['Unknown index or view "missingIndex"']);
+        fromExpectErrors(`FROM index, missingIndex`, ['Unknown data source "missingIndex"']);
+        fromExpectErrors(`from average()`, ['Unknown data source "average"']);
+        fromExpectErrors(`fRom custom_function()`, ['Unknown data source "custom_function"']);
+        fromExpectErrors('from numberField', ['Unknown data source "numberField"']);
+        fromExpectErrors('FROM policy', ['Unknown data source "policy"']);
+        fromExpectErrors('FROM index, missingIndex', ['Unknown data source "missingIndex"']);
+        fromExpectErrors('FROM missingIndex, index', ['Unknown data source "missingIndex"']);
         fromExpectErrors('FROM *missingIndex, missingIndex2, index', [
-          'Unknown index or view "missingIndex2"',
+          'Unknown data source "missingIndex2"',
         ]);
       });
       test('no errors on unknown index if using wildcards', () => {
@@ -108,12 +108,12 @@ describe('FROM Validation', () => {
         };
         fromExpectErrors(
           'FROM other_view',
-          ['Unknown index or view "other_view"'],
+          ['Unknown data source "other_view"'],
           contextWithViews
         );
       });
 
-      test('uses "Unknown index" (not "Unknown index or view") for unknown source inside subquery', () => {
+      test('uses "Unknown index" (not "Unknown data source") for unknown source inside subquery', () => {
         const query = 'FROM index, (FROM missingIndex)';
         const { root } = Parser.parse(query);
         const rootFrom = root.commands[0];
@@ -148,9 +148,9 @@ describe('FROM Validation', () => {
   describe('CCS indices', () => {
     describe('... <sources> ...', () => {
       test('display errors on unknown indices', () => {
-        fromExpectErrors('fRoM remote-ccs:indexes', ['Unknown index or view "remote-ccs:indexes"']);
+        fromExpectErrors('fRoM remote-ccs:indexes', ['Unknown data source "remote-ccs:indexes"']);
         fromExpectErrors('fRoM a_index, remote-ccs:indexes', [
-          'Unknown index or view "remote-ccs:indexes"',
+          'Unknown data source "remote-ccs:indexes"',
         ]);
       });
       test('no errors on unknown index if using wildcards', () => {
@@ -162,7 +162,7 @@ describe('FROM Validation', () => {
     describe('... METADATA <indices>', () => {
       test('no errors on correct usage', () => {
         fromExpectErrors(`from remote-ccs:indexes METADATA _id`, [
-          'Unknown index or view "remote-ccs:indexes"',
+          'Unknown data source "remote-ccs:indexes"',
         ]);
         fromExpectErrors(`from *:indexes METADATA _id`, []);
       });
