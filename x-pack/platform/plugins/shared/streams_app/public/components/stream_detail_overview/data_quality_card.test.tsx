@@ -34,7 +34,7 @@ jest.mock('../../hooks/use_streams_app_router', () => ({
 }));
 
 jest.mock('../../hooks/use_time_range', () => ({
-  useTimeRange: () => ({ rangeFrom: 'now-15m', rangeTo: 'now' }),
+  useTimeRange: () => ({ rangeFrom: 'now-24h', rangeTo: 'now' }),
 }));
 
 jest.mock('../../hooks/use_kibana', () => ({

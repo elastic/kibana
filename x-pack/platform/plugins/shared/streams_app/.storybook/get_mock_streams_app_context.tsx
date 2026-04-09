@@ -36,13 +36,13 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
 
   const dataMock = dataPluginMock.createStartContract();
 
-  const start = new Date(new Date().getTime() - 15 * 60 * 1000);
+  const start = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
   const end = new Date();
 
   jest.spyOn(dataMock.query.timefilter.timefilter, 'useTimefilter').mockReturnValue({
     timeState: {
       timeRange: {
-        from: 'now-15m',
+        from: 'now-24h',
         to: 'now',
       },
       asAbsoluteTimeRange: {

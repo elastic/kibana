@@ -34,13 +34,13 @@ let capturedProps: UncontrolledStreamsAppSearchBarProps;
 const mockUpdateTimeRange = jest.fn();
 const mockRefresh = jest.fn();
 
-const dateRange = { from: 'now-15m', to: 'now' };
+const dateRange = { from: 'now-24h', to: 'now' };
 const query = { query: '', language: 'kuery' };
 
 const mockTimeState = {
   start: 1704067200000,
   end: 1704068100000,
-  timeRange: { from: 'now-15m', to: 'now' },
+  timeRange: { from: 'now-24h', to: 'now' },
   asAbsoluteTimeRange: {
     from: '2024-01-01T00:00:00.000Z',
     to: '2024-01-01T00:15:00.000Z',
@@ -52,7 +52,7 @@ beforeEach(() => {
   jest.clearAllMocks();
 
   mockUseTimeRange.mockReturnValue({
-    rangeFrom: 'now-15m',
+    rangeFrom: 'now-24h',
     rangeTo: 'now',
     start: '2024-01-01T00:00:00.000Z',
     end: '2024-01-01T00:15:00.000Z',
@@ -132,7 +132,7 @@ describe('StreamsAppSearchBar', () => {
   it('should pass rangeFrom and rangeTo from useTimeRange to the search bar', () => {
     render(<StreamsAppSearchBar />);
 
-    expect(capturedProps.dateRangeFrom).toBe('now-15m');
+    expect(capturedProps.dateRangeFrom).toBe('now-24h');
     expect(capturedProps.dateRangeTo).toBe('now');
   });
 });

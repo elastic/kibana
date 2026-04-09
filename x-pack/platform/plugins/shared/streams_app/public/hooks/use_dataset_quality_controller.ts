@@ -22,6 +22,7 @@ import { useKbnUrlStateStorageFromRouterContext } from '../util/kbn_url_state_co
 import type { StreamsAppLocatorParams } from '../../common/locators/streams_locator';
 import { useTimeRange } from './use_time_range';
 import { useTimeRangeUpdate } from './use_time_range_update';
+import { STREAMS_APP_DEFAULT_TIME_RANGE } from '../util/constants';
 
 export const useDatasetQualityController = (
   definition: Streams.ingest.all.GetResponse,
@@ -83,8 +84,8 @@ export const useDatasetQualityController = (
 
       // Use time from URL params (rangeFrom/rangeTo) as the source of truth
       // This ensures consistency across tabs within the Streams app.
-      const currentTimeFrom = rangeFrom ?? 'now-15m';
-      const currentTimeTo = rangeTo ?? 'now';
+      const currentTimeFrom = rangeFrom ?? STREAMS_APP_DEFAULT_TIME_RANGE.from;
+      const currentTimeTo = rangeTo ?? STREAMS_APP_DEFAULT_TIME_RANGE.to;
 
       // state initialized but empty
       if (initialState === null) {

@@ -45,7 +45,7 @@ const managementQueryParams = t.partial({
  * creates the routes.
  *
  * Query params (rangeFrom/rangeTo) are optional - navigation calls can omit them
- * and DateRangeRedirect will ensure they're populated from the global timefilter.
+ * and DateRangeRedirect will add the Streams default (Last 24 hours).
  */
 const streamsAppRoutes = {
   '/': {

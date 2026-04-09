@@ -7,13 +7,8 @@
 
 import React, { useLayoutEffect, useEffect, useCallback } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { useKibana } from '../../hooks/use_kibana';
-
-interface TimePickerTimeDefaults {
-  from: string;
-  to: string;
-}
+import { STREAMS_APP_DEFAULT_TIME_RANGE } from '../../util/constants';
 
 /**
  * Hook to check if time range params are set and provide a redirect function.
@@ -22,7 +17,6 @@ function useDateRangeRedirect() {
   const history = useHistory();
   const location = useLocation();
   const {
-    core: { uiSettings },
     dependencies: {
       start: {
         data: { query: queryService },
@@ -37,21 +31,16 @@ function useDateRangeRedirect() {
   const rangeTo = searchParams.get('rangeTo');
 
   const redirect = useCallback(() => {
-    const timePickerTimeDefaults = uiSettings.get<TimePickerTimeDefaults>(
-      UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
-    );
-    const timePickerSharedState = queryService.timefilter.timefilter.getTime();
-
     // Set defaults, preserving any existing params
     const nextParams = new URLSearchParams(location.search);
-    nextParams.set('rangeFrom', timePickerSharedState.from ?? timePickerTimeDefaults.from);
-    nextParams.set('rangeTo', timePickerSharedState.to ?? timePickerTimeDefaults.to);
+    nextParams.set('rangeFrom', STREAMS_APP_DEFAULT_TIME_RANGE.from);
+    nextParams.set('rangeTo', STREAMS_APP_DEFAULT_TIME_RANGE.to);
 
     history.replace({
       ...location,
       search: nextParams.toString(),
     });
-  }, [history, location, queryService, uiSettings]);
+  }, [history, location]);
 
   return { isDateRangeSet, rangeFrom, rangeTo, redirect, queryService };
 }
@@ -60,10 +49,7 @@ function useDateRangeRedirect() {
  * Component that ensures time range params (rangeFrom/rangeTo) are present in the URL.
  * If they are missing, it blocks rendering and redirects to add default values.
  *
- * When adding defaults, it reads from the global timefilter first (which retains the
- * last known time within the session), falling back to Kibana's default time settings.
- * This allows navigation links that don't explicitly pass rangeFrom/rangeTo to still
- * preserve the time range within a session.
+ * When adding defaults, it uses the Streams app default (Last 24 hours: now-24h → now).
  *
  * Also syncs URL time params to the global timefilter on mount and URL changes.
  * This ensures components using useTimefilter() get the correct time from URL.

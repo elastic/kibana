@@ -6,3 +6,9 @@
  */
 
 export const FAILURE_STORE_SELECTOR = '::failures';
+
+/** Default SuperDatePicker range when Streams has no rangeFrom/rangeTo in the URL (Last 24 hours). */
+export const STREAMS_APP_DEFAULT_TIME_RANGE = {
+  from: 'now-24h',
+  to: 'now',
+} as const;

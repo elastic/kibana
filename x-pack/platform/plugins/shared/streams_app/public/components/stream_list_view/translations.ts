@@ -108,6 +108,16 @@ export const SUGGESTIONS_COLUMN_HEADER = i18n.translate(
   { defaultMessage: 'Suggestions' }
 );
 
+export const DATA_QUALITY_FILTER = i18n.translate(
+  'xpack.streams.streamsTreeTable.dataQualityFilter',
+  { defaultMessage: 'Data quality' }
+);
+
+export const GOOD_QUALITY_FILTER = i18n.translate(
+  'xpack.streams.streamsTreeTable.goodQualityFilter',
+  { defaultMessage: 'Good quality' }
+);
+
 export const DEGRADED_QUALITY_FILTER = i18n.translate(
   'xpack.streams.streamsTreeTable.degradedQualityFilter',
   { defaultMessage: 'Degraded quality' }

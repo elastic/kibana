@@ -78,6 +78,8 @@ import {
   FAILURE_STORE_PERMISSIONS_ERROR,
   INGESTION_COLUMN_HEADER,
   STORAGE_COLUMN_HEADER,
+  DATA_QUALITY_FILTER,
+  GOOD_QUALITY_FILTER,
   DEGRADED_QUALITY_FILTER,
   POOR_QUALITY_FILTER,
   TYPE_FILTER,
@@ -137,8 +139,9 @@ export function StreamsTreeTable({
   });
 
   // Filter state
-  const [qualityFilters, setQualityFilters] = useState<Set<'degraded' | 'poor'>>(new Set());
+  const [qualityFilters, setQualityFilters] = useState<Set<QualityIndicators>>(new Set());
   const [typeFilters, setTypeFilters] = useState<Set<StreamType>>(new Set());
+  const [isQualityPopoverOpen, setIsQualityPopoverOpen] = useState(false);
   const [isTypePopoverOpen, setIsTypePopoverOpen] = useState(false);
 
   const { getStreamDocCounts, getStreamHistogram } = useStreamDocCountsFetch({
@@ -190,7 +193,7 @@ export function StreamsTreeTable({
         }
         return acc;
       }, {} as Record<string, number>) ?? {};
-    const merged = { ...fromApi };
+    const merged: Record<string, number | undefined> = { ...fromApi };
     for (const [name, metrics] of Object.entries(STREAMS_LIST_DUMMY_STREAM_METRICS)) {
       merged[name] = metrics.storageBytes;
     }
@@ -291,6 +294,10 @@ export function StreamsTreeTable({
   );
 
   // Compute filter counts from allRows
+  const goodCount = React.useMemo(
+    () => allRows.filter((r) => r.dataQuality === 'good').length,
+    [allRows]
+  );
   const degradedCount = React.useMemo(
     () => allRows.filter((r) => r.dataQuality === 'degraded').length,
     [allRows]
@@ -304,7 +311,7 @@ export function StreamsTreeTable({
   const filteredRows = React.useMemo(() => {
     let rows = allRows;
     if (qualityFilters.size > 0) {
-      rows = rows.filter((row) => qualityFilters.has(row.dataQuality as 'degraded' | 'poor'));
+      rows = rows.filter((row) => qualityFilters.has(row.dataQuality));
     }
     if (typeFilters.size > 0) {
       rows = rows.filter((row) => typeFilters.has(row.type));
@@ -341,18 +348,6 @@ export function StreamsTreeTable({
         next.delete(name);
       } else {
         next.add(name);
-      }
-      return next;
-    });
-  };
-
-  const toggleQualityFilter = (value: 'degraded' | 'poor') => {
-    setQualityFilters((prev) => {
-      const next = new Set(prev);
-      if (next.has(value)) {
-        next.delete(value);
-      } else {
-        next.add(value);
       }
       return next;
     });
@@ -450,6 +445,28 @@ export function StreamsTreeTable({
 
   const isQueryOrDraft = (item: TableRow) => item.type === 'query' || item.isDraft;
 
+  const qualitySelectableOptions: Array<{
+    label: string;
+    key: QualityIndicators;
+    checked?: 'on' | undefined;
+  }> = [
+    {
+      label: `${GOOD_QUALITY_FILTER} (${goodCount})`,
+      key: 'good',
+      checked: qualityFilters.has('good') ? 'on' : undefined,
+    },
+    {
+      label: `${DEGRADED_QUALITY_FILTER} (${degradedCount})`,
+      key: 'degraded',
+      checked: qualityFilters.has('degraded') ? 'on' : undefined,
+    },
+    {
+      label: `${POOR_QUALITY_FILTER} (${poorCount})`,
+      key: 'poor',
+      checked: qualityFilters.has('poor') ? 'on' : undefined,
+    },
+  ];
+
   const typeSelectableOptions: Array<{
     label: string;
     key: StreamType;
@@ -462,30 +479,44 @@ export function StreamsTreeTable({
 
   const filterBar = (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-      {qualityLoaded && canReadFailureStore && (
-        <EuiFlexItem grow={false}>
-          <EuiFilterGroup>
-            <EuiFilterButton
-              hasActiveFilters={qualityFilters.has('degraded')}
-              numFilters={degradedCount}
-              onClick={() => toggleQualityFilter('degraded')}
-              data-test-subj="streamsQualityFilterDegraded"
-            >
-              {DEGRADED_QUALITY_FILTER}
-            </EuiFilterButton>
-            <EuiFilterButton
-              hasActiveFilters={qualityFilters.has('poor')}
-              numFilters={poorCount}
-              onClick={() => toggleQualityFilter('poor')}
-              data-test-subj="streamsQualityFilterPoor"
-            >
-              {POOR_QUALITY_FILTER}
-            </EuiFilterButton>
-          </EuiFilterGroup>
-        </EuiFlexItem>
-      )}
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
+          {qualityLoaded && canReadFailureStore && (
+            <EuiPopover
+              aria-label={DATA_QUALITY_FILTER}
+              button={
+                <EuiFilterButton
+                  iconType="arrowDown"
+                  hasActiveFilters={qualityFilters.size > 0}
+                  numActiveFilters={qualityFilters.size}
+                  onClick={() => setIsQualityPopoverOpen((open) => !open)}
+                  data-test-subj="streamsDataQualityFilter"
+                >
+                  {DATA_QUALITY_FILTER}
+                </EuiFilterButton>
+              }
+              isOpen={isQualityPopoverOpen}
+              closePopover={() => setIsQualityPopoverOpen(false)}
+              panelPaddingSize="none"
+            >
+              <EuiSelectable
+                data-test-subj="streamsDataQualityFilterSelectable"
+                aria-label={DATA_QUALITY_FILTER}
+                options={qualitySelectableOptions}
+                onChange={(newOptions) => {
+                  const selected = new Set<QualityIndicators>();
+                  for (const opt of newOptions) {
+                    if (opt.checked === 'on') {
+                      selected.add(opt.key);
+                    }
+                  }
+                  setQualityFilters(selected);
+                }}
+              >
+                {(list) => <div style={{ width: 240 }}>{list}</div>}
+              </EuiSelectable>
+            </EuiPopover>
+          )}
           <EuiPopover
             aria-label={TYPE_FILTER}
             button={

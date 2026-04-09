@@ -40,7 +40,7 @@ export interface EnrichedStream extends ListStreamDetail {
   documentsCount: number;
   retentionMs: number;
   ingestionRate: number;
-  storageBytes: number;
+  storageBytes: number | undefined;
   suggestionsCount: number;
   type: StreamType;
   isDraft: boolean;
@@ -53,7 +53,7 @@ export type TableRow = EnrichedStream & {
   rootDocumentsCount: number;
   rootRetentionMs: number;
   rootIngestionRate: number;
-  rootStorageBytes: number;
+  rootStorageBytes: number | undefined;
   rootSuggestionsCount: number;
   dataQuality: QualityIndicators;
 };
@@ -135,7 +135,7 @@ export function buildStreamRows(
       case 'ingestionRate':
         return node.ingestionRate;
       case 'storageBytes':
-        return node.storageBytes;
+        return node.storageBytes ?? -1;
       case 'suggestionsCount':
         return node.suggestionsCount;
       default:
@@ -238,23 +238,28 @@ const STREAMS_LIST_DUMMY_SUGGESTIONS_BY_STREAM: Record<string, number> = {
   'logs.otel.child': 1,
 };
 
-/** Demo document count, ingestion (dps), and storage (bytes) for list cells + sorting. */
+/** Demo document count, ingestion (dps), and optional storage (bytes) for list cells + sorting. */
 export interface StreamsListDummyStreamMetrics {
   documents: number;
   ingestionRateDps: number;
-  storageBytes: number;
+  /** Omit to show no storage in the list (em dash), overriding API stats when this stream is in the map. */
+  storageBytes?: number;
 }
 
 export const STREAMS_LIST_DUMMY_STREAM_METRICS: Record<string, StreamsListDummyStreamMetrics> = {
   [LOGS_ECS_STREAM_NAME]: {
     documents: 1_250_000,
     ingestionRateDps: 420.5,
-    storageBytes: 250 * 1024 ** 3,
+  },
+  // Root wired stream: demo volume for list / sorting (overrides API counts when present).
+  'logs.otel': {
+    documents: 190_000,
+    ingestionRateDps: 27.2,
+    storageBytes: 900 * 1024 ** 2,
   },
   'logs.otel.child': {
     documents: 88_200,
     ingestionRateDps: 12.3,
-    storageBytes: 420 * 1024 ** 2,
   },
   'logs-synth-default': {
     documents: 502_000,
@@ -303,7 +308,7 @@ export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStrea
     nameSortKey,
     documentsCount: dummyMetrics?.documents ?? 0,
     ingestionRate: dummyMetrics?.ingestionRateDps ?? 0,
-    storageBytes: dummyMetrics?.storageBytes ?? 0,
+    storageBytes: dummyMetrics === undefined ? 0 : dummyMetrics.storageBytes,
     suggestionsCount: STREAMS_LIST_DUMMY_SUGGESTIONS_BY_STREAM[node.stream.name] ?? 0,
     retentionMs,
     type,

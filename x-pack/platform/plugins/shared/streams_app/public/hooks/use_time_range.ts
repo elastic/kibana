@@ -7,10 +7,10 @@
 
 import { useLocation } from 'react-router-dom';
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
+import { STREAMS_APP_DEFAULT_TIME_RANGE } from '../util/constants';
 
-// Default time range (matches Kibana's default)
-const DEFAULT_FROM = 'now-15m';
-const DEFAULT_TO = 'now';
+const DEFAULT_FROM = STREAMS_APP_DEFAULT_TIME_RANGE.from;
+const DEFAULT_TO = STREAMS_APP_DEFAULT_TIME_RANGE.to;
 
 /**
  * Hook to get the current time range from URL params.
@@ -29,7 +29,7 @@ export function useTimeRange() {
   const rangeFrom = searchParams.get('rangeFrom') ?? DEFAULT_FROM;
   const rangeTo = searchParams.get('rangeTo') ?? DEFAULT_TO;
 
-  // Convert relative times (e.g., "now-15m") to absolute timestamps
+  // Convert relative times (e.g., "now-24h") to absolute timestamps
   const { from: start, to: end } = getAbsoluteTimeRange(
     { from: rangeFrom, to: rangeTo },
     { forceNow: new Date() }
@@ -40,7 +40,7 @@ export function useTimeRange() {
   const endMs = new Date(end).getTime();
 
   return {
-    rangeFrom, // Relative: "now-15m"
+    rangeFrom, // Relative: e.g. "now-24h"
     rangeTo, // Relative: "now"
     start, // Absolute ISO string: "2024-01-13T10:00:00.000Z"
     end, // Absolute ISO string: "2024-01-13T10:15:00.000Z"
