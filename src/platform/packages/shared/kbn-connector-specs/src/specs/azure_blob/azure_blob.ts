@@ -40,6 +40,7 @@ function decodeXmlEntities(str: string): string {
 
 function extractNextMarker(xml: string): string | undefined {
   const match = xml.match(/<NextMarker>([^<]*)<\/NextMarker>/);
+  // An empty <NextMarker/> means no more pages; || undefined coerces '' to undefined intentionally.
   return match?.[1] || undefined;
 }
 
