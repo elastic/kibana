@@ -10,7 +10,7 @@ import type {
   Conversation,
   TimelineConversation,
   ConversationRound,
-  AgentResponseEvent,
+  AgentExecutionEvent,
   ConverseInput,
   AgentConfiguration,
   RuntimeAgentConfigurationOverrides,
@@ -75,7 +75,7 @@ export interface RunAgentParams {
 
 export interface RunAgentResponse {
   round: ConversationRound;
-  agentResponse?: AgentResponseEvent;
+  agentResponse?: AgentExecutionEvent;
 }
 
 export const runAgent = async (

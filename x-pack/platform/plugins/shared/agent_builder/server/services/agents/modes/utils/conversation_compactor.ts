@@ -12,13 +12,13 @@ import type {
   CompactionSummary,
   CompactionStructuredData,
   CompactionToolCallSummary,
-  AgentResponseEvent,
+  AgentExecutionEvent,
 } from '@kbn/agent-builder-common';
 import { ChatEventType, isToolCallStep } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn } from '@kbn/agent-builder-server';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import type { ProcessedConversation, ProcessedTimelineEvent } from './prepare_conversation';
-import { isProcessedAgentResponseEvent } from './prepare_conversation';
+import { isProcessedAgentExecutionEvent } from './prepare_conversation';
 import type { ContextBudget } from './context_budget';
 import {
   estimateTimelineTokens,
@@ -139,7 +139,7 @@ const summarizeParams = (params: Record<string, unknown>): string => {
  * - agent_actions: human-readable description of each tool call
  */
 export const extractProgrammaticSummary = (
-  agentResponses: AgentResponseEvent[]
+  agentResponses: AgentExecutionEvent[]
 ): {
   tool_calls_summary: CompactionToolCallSummary[];
   agent_actions: string[];
@@ -170,15 +170,15 @@ export const extractProgrammaticSummary = (
 // ---------------------------------------------------------------------------
 
 /**
- * Count the number of AgentResponseEvents in an event list.
+ * Count the number of AgentExecutionEvents in an event list.
  */
 const countAgentResponses = (events: ProcessedTimelineEvent[]): number => {
-  return events.filter(isProcessedAgentResponseEvent).length;
+  return events.filter(isProcessedAgentExecutionEvent).length;
 };
 
 /**
  * Split events into "to summarize" and "to preserve" parts.
- * Keeps the last `preserveCount` AgentResponseEvents (and any events after the split point).
+ * Keeps the last `preserveCount` AgentExecutionEvents (and any events after the split point).
  */
 const splitEventsForCompaction = (
   events: ProcessedTimelineEvent[],
@@ -194,7 +194,7 @@ const splitEventsForCompaction = (
   let splitIdx = 0;
 
   for (let i = 0; i < events.length; i++) {
-    if (isProcessedAgentResponseEvent(events[i])) {
+    if (isProcessedAgentExecutionEvent(events[i])) {
       responsesSeen++;
       if (responsesSeen >= responsesToSummarize) {
         splitIdx = i + 1;
@@ -210,10 +210,10 @@ const splitEventsForCompaction = (
 };
 
 /**
- * Extract AgentResponseEvent[] from a mixed event list.
+ * Extract AgentExecutionEvent[] from a mixed event list.
  */
-const extractAgentResponses = (events: ProcessedTimelineEvent[]): AgentResponseEvent[] => {
-  return events.filter(isProcessedAgentResponseEvent) as AgentResponseEvent[];
+const extractAgentResponses = (events: ProcessedTimelineEvent[]): AgentExecutionEvent[] => {
+  return events.filter(isProcessedAgentExecutionEvent) as AgentExecutionEvent[];
 };
 
 // ---------------------------------------------------------------------------
@@ -491,11 +491,11 @@ const applyHardTruncation = (
   let responsesFromEnd = 0;
   let minStartIdx = previousEvents.length;
   for (let i = previousEvents.length - 1; i >= 0; i--) {
-    if (isProcessedAgentResponseEvent(previousEvents[i])) {
+    if (isProcessedAgentExecutionEvent(previousEvents[i])) {
       responsesFromEnd++;
       if (responsesFromEnd >= responsesToPreserve) {
         // Include any preceding user message
-        minStartIdx = i > 0 && !isProcessedAgentResponseEvent(previousEvents[i - 1]) ? i - 1 : i;
+        minStartIdx = i > 0 && !isProcessedAgentExecutionEvent(previousEvents[i - 1]) ? i - 1 : i;
         break;
       }
     }

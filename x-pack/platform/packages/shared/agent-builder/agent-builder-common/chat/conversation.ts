@@ -314,19 +314,11 @@ export type ConversationAction = 'regenerate';
 // ---------------------------------------------------------------------------
 
 /**
- * Defines whether a conversation is scoped to a single user or shared (group).
- */
-export enum ConversationMode {
-  user = 'user',
-  group = 'group',
-}
-
-/**
  * All possible timeline event types.
  */
 export enum TimelineEventType {
   user_message = 'user_message',
-  agent_response = 'agent_response',
+  agentExecution = 'agent_execution',
 }
 
 export type TimelineEventTypeValue = `${TimelineEventType}`;
@@ -360,10 +352,10 @@ export interface UserMessageEvent extends BaseTimelineEvent<'user_message'> {
 }
 
 /**
- * An agent response appended to the timeline.
+ * An agent execution event appended to the timeline.
  * Contains the same data as a ConversationRound except for the `input` field.
  */
-export interface AgentResponseEvent extends BaseTimelineEvent<'agent_response'> {
+export interface AgentExecutionEvent extends BaseTimelineEvent<'agent_execution'> {
   /** Id of the agent that produced this response */
   agent_id: string;
   /** Current status of the response */
@@ -393,7 +385,7 @@ export interface AgentResponseEvent extends BaseTimelineEvent<'agent_response'> 
 /**
  * Union of all timeline event types.
  */
-export type TimelineEvent = UserMessageEvent | AgentResponseEvent;
+export type TimelineEvent = UserMessageEvent | AgentExecutionEvent;
 
 /**
  * Type guard: is this event a UserMessageEvent?
@@ -403,10 +395,10 @@ export const isUserMessageEvent = (event: TimelineEvent): event is UserMessageEv
 };
 
 /**
- * Type guard: is this event an AgentResponseEvent?
+ * Type guard: is this event an AgentExecutionEvent?
  */
-export const isAgentResponseEvent = (event: TimelineEvent): event is AgentResponseEvent => {
-  return event.type === TimelineEventType.agent_response;
+export const isAgentExecutionEvent = (event: TimelineEvent): event is AgentExecutionEvent => {
+  return event.type === TimelineEventType.agentExecution;
 };
 
 /**

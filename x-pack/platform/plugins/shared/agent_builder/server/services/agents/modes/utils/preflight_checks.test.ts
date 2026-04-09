@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ConverseInput, AgentResponseEvent, TimelineEvent } from '@kbn/agent-builder-common';
+import type { ConverseInput, AgentExecutionEvent, TimelineEvent } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus, TimelineEventType } from '@kbn/agent-builder-common';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
@@ -56,9 +56,9 @@ describe('preflight_checks', () => {
       it('should not throw with completed round in conversation', () => {
         const timelineEvents: TimelineEvent[] = [
           {
-            type: TimelineEventType.agent_response,
+            type: TimelineEventType.agentExecution,
             status: ConversationRoundStatus.completed,
-          } as AgentResponseEvent,
+          } as AgentExecutionEvent,
         ];
         const input: ConverseInput = { message: 'next message' };
 
@@ -68,9 +68,9 @@ describe('preflight_checks', () => {
       it('should not throw when action=regenerate (input comes from last round)', () => {
         const timelineEvents: TimelineEvent[] = [
           {
-            type: TimelineEventType.agent_response,
+            type: TimelineEventType.agentExecution,
             status: ConversationRoundStatus.completed,
-          } as AgentResponseEvent,
+          } as AgentExecutionEvent,
         ];
         const input: ConverseInput = {};
 
@@ -83,7 +83,7 @@ describe('preflight_checks', () => {
     describe('when last round is awaiting prompt', () => {
       const createTimelineEventsAwaitingPrompt = (...promptIds: string[]): TimelineEvent[] => [
         {
-          type: TimelineEventType.agent_response,
+          type: TimelineEventType.agentExecution,
           status: ConversationRoundStatus.awaitingPrompt,
           pending_prompts: promptIds.map((id) => ({
             type: AgentPromptType.confirmation,
@@ -93,7 +93,7 @@ describe('preflight_checks', () => {
             confirm_text: 'Yes',
             cancel_text: 'No',
           })),
-        } as AgentResponseEvent,
+        } as AgentExecutionEvent,
       ];
 
       it('should not throw when prompt response matches pending prompt ID', () => {

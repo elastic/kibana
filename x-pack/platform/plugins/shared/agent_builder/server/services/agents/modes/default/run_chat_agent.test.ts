@@ -101,7 +101,7 @@ describe('runDefaultAgentMode', () => {
     extractAgentResponseMock.mockResolvedValue({
       id: 'round-1',
       timestamp: new Date().toISOString(),
-      type: 'agent_response',
+      type: 'agent_execution',
       agent_id: 'test-agent',
       status: 'completed',
       steps: [],

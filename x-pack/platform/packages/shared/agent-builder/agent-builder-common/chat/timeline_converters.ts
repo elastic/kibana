@@ -11,15 +11,15 @@ import type {
   ConversationRound,
   TimelineEvent,
   UserMessageEvent,
-  AgentResponseEvent,
+  AgentExecutionEvent,
   TimelineConversation,
 } from './conversation';
-import { TimelineEventType, isUserMessageEvent, isAgentResponseEvent } from './conversation';
+import { TimelineEventType, isUserMessageEvent, isAgentExecutionEvent } from './conversation';
 
 /**
  * Converts a list of conversation rounds to timeline events.
  * Each round produces a UserMessageEvent (from the round input)
- * followed by an AgentResponseEvent (from the round data).
+ * followed by an AgentExecutionEvent (from the round data).
  */
 export const roundsToTimelineEvents = (
   rounds: ConversationRound[],
@@ -41,11 +41,11 @@ export const roundsToTimelineEvents = (
     };
     events.push(userEvent);
 
-    // Agent response event from the round data
-    const agentEvent: AgentResponseEvent = {
+    // Agent execution event from the round data
+    const agentEvent: AgentExecutionEvent = {
       id: round.id,
       timestamp: round.started_at,
-      type: TimelineEventType.agent_response,
+      type: TimelineEventType.agentExecution,
       agent_id: agentId,
       status: round.status,
       state: round.state,
@@ -67,7 +67,7 @@ export const roundsToTimelineEvents = (
 
 /**
  * Converts timeline events back to conversation rounds.
- * Pairs each UserMessageEvent with the following AgentResponseEvent.
+ * Pairs each UserMessageEvent with the following AgentExecutionEvent.
  * Needed during phase 1 while the ConversationClient still returns rounds.
  */
 export const timelineEventsToRounds = (events: TimelineEvent[]): ConversationRound[] => {
@@ -77,7 +77,7 @@ export const timelineEventsToRounds = (events: TimelineEvent[]): ConversationRou
   for (const event of events) {
     if (isUserMessageEvent(event)) {
       pendingUserMessage = event;
-    } else if (isAgentResponseEvent(event)) {
+    } else if (isAgentExecutionEvent(event)) {
       const round: ConversationRound = {
         id: event.id,
         status: event.status,
@@ -152,30 +152,30 @@ export const timelineConversationToConversation = (
 };
 
 /**
- * Converts an AgentResponseEvent back to a ConversationRound.
+ * Converts an AgentExecutionEvent back to a ConversationRound.
  * Requires the associated UserMessageEvent to reconstruct the input.
  */
-export const agentResponseEventToRound = (
-  agentResponse: AgentResponseEvent,
+export const agentExecutionEventToRound = (
+  agentExecution: AgentExecutionEvent,
   userMessage?: UserMessageEvent
 ): ConversationRound => {
   return {
-    id: agentResponse.id,
-    status: agentResponse.status,
-    state: agentResponse.state,
-    pending_prompts: agentResponse.pending_prompts,
+    id: agentExecution.id,
+    status: agentExecution.status,
+    state: agentExecution.state,
+    pending_prompts: agentExecution.pending_prompts,
     input: {
       message: userMessage?.message ?? '',
       attachments: userMessage?.attachments,
       attachment_refs: userMessage?.attachment_refs,
     },
-    steps: agentResponse.steps,
-    response: agentResponse.response,
-    started_at: agentResponse.started_at,
-    time_to_first_token: agentResponse.time_to_first_token,
-    time_to_last_token: agentResponse.time_to_last_token,
-    model_usage: agentResponse.model_usage,
-    trace_id: agentResponse.trace_id,
-    configuration_overrides: agentResponse.configuration_overrides,
+    steps: agentExecution.steps,
+    response: agentExecution.response,
+    started_at: agentExecution.started_at,
+    time_to_first_token: agentExecution.time_to_first_token,
+    time_to_last_token: agentExecution.time_to_last_token,
+    model_usage: agentExecution.model_usage,
+    trace_id: agentExecution.trace_id,
+    configuration_overrides: agentExecution.configuration_overrides,
   };
 };

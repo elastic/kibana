@@ -8,9 +8,9 @@
 import type { InferenceConnector } from '@kbn/inference-common';
 import { getContextWindowSize } from '@kbn/inference-common';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
-import type { CompactionSummary, AgentResponseEvent } from '@kbn/agent-builder-common';
+import type { CompactionSummary, AgentExecutionEvent } from '@kbn/agent-builder-common';
 import type { ProcessedTimelineEvent, ProcessedUserMessageEvent } from './prepare_conversation';
-import { isProcessedUserMessageEvent, isProcessedAgentResponseEvent } from './prepare_conversation';
+import { isProcessedUserMessageEvent, isProcessedAgentExecutionEvent } from './prepare_conversation';
 
 /**
  * Fraction of the context window reserved for system prompt, output generation,
@@ -67,8 +67,8 @@ export const estimateEventTokens = (event: ProcessedTimelineEvent): number => {
     for (const attachment of userEvent.processedInput.attachments) {
       tokens += estimateTokens(attachment.representation.value);
     }
-  } else if (isProcessedAgentResponseEvent(event)) {
-    const agentEvent = event as AgentResponseEvent;
+  } else if (isProcessedAgentExecutionEvent(event)) {
+    const agentEvent = event as AgentExecutionEvent;
     // Tool call steps
     for (const step of agentEvent.steps) {
       tokens += estimateTokens(step);
@@ -93,7 +93,7 @@ export const estimateTimelineTokens = (events: ProcessedTimelineEvent[]): number
  *
  * When an existing summary is provided, the effective token count is the
  * summary's token cost plus only the events not yet covered by the summary.
- * `summarized_round_count` maps to the count of AgentResponseEvents to skip.
+ * `summarized_round_count` maps to the count of AgentExecutionEvents to skip.
  */
 export const shouldTriggerCompaction = (
   events: ProcessedTimelineEvent[],
@@ -103,7 +103,7 @@ export const shouldTriggerCompaction = (
   if (!existingSummary) {
     return estimateTimelineTokens(events) > budget.triggerThreshold;
   }
-  // Skip events that are already summarized (count by AgentResponseEvents)
+  // Skip events that are already summarized (count by AgentExecutionEvents)
   const eventsAfterSummary = skipSummarizedEvents(events, existingSummary.summarized_round_count);
   const effectiveTokens = existingSummary.token_count + estimateTimelineTokens(eventsAfterSummary);
   return effectiveTokens > budget.triggerThreshold;
@@ -111,7 +111,7 @@ export const shouldTriggerCompaction = (
 
 /**
  * Skips events that have already been summarized.
- * `summarizedCount` is the number of AgentResponseEvents to skip.
+ * `summarizedCount` is the number of AgentExecutionEvents to skip.
  */
 export const skipSummarizedEvents = (
   events: ProcessedTimelineEvent[],
@@ -119,7 +119,7 @@ export const skipSummarizedEvents = (
 ): ProcessedTimelineEvent[] => {
   let agentResponsesSeen = 0;
   for (let i = 0; i < events.length; i++) {
-    if (isProcessedAgentResponseEvent(events[i])) {
+    if (isProcessedAgentExecutionEvent(events[i])) {
       agentResponsesSeen++;
       if (agentResponsesSeen >= summarizedCount) {
         // Return everything after this point (the next event onward)

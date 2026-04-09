@@ -13,7 +13,7 @@ import type {
   ReasoningStep,
   ToolCallStep,
   ToolCallWithResult,
-  AgentResponseEvent,
+  AgentExecutionEvent,
 } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
@@ -33,7 +33,7 @@ import type {
   ProcessedTimelineEvent,
   ProcessedUserMessageEvent,
 } from './prepare_conversation';
-import { isProcessedUserMessageEvent, isProcessedAgentResponseEvent } from './prepare_conversation';
+import { isProcessedUserMessageEvent, isProcessedAgentExecutionEvent } from './prepare_conversation';
 import type { ToolCallResultTransformer } from './create_result_transformer';
 import { serializeCompactionSummary } from './conversation_compactor';
 
@@ -100,7 +100,7 @@ export const convertPreviousEvents = async ({
   for (const event of events) {
     if (isProcessedUserMessageEvent(event)) {
       messages.push(formatProcessedInput({ input: event.processedInput }));
-    } else if (isProcessedAgentResponseEvent(event)) {
+    } else if (isProcessedAgentExecutionEvent(event)) {
       messages.push(...(await agentResponseToLangchain(event, { resultTransformer, ignoreSteps })));
     }
   }
@@ -111,10 +111,10 @@ export const convertPreviousEvents = async ({
 };
 
 /**
- * Converts an AgentResponseEvent to langchain messages (steps + response).
+ * Converts an AgentExecutionEvent to langchain messages (steps + response).
  */
 export const agentResponseToLangchain = async (
-  agentResponse: AgentResponseEvent,
+  agentResponse: AgentExecutionEvent,
   {
     resultTransformer,
     ignoreSteps = false,
@@ -307,10 +307,10 @@ export const createToolCallMessages = async (
 
 const findLastAgentResponse = (
   events: ProcessedTimelineEvent[]
-): AgentResponseEvent | undefined => {
+): AgentExecutionEvent | undefined => {
   for (let i = events.length - 1; i >= 0; i--) {
-    if (isProcessedAgentResponseEvent(events[i])) {
-      return events[i] as AgentResponseEvent;
+    if (isProcessedAgentExecutionEvent(events[i])) {
+      return events[i] as AgentExecutionEvent;
     }
   }
   return undefined;

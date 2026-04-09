@@ -11,13 +11,13 @@ import type {
   ConverseInput,
   TimelineEvent,
   UserMessageEvent,
-  AgentResponseEvent,
+  AgentExecutionEvent,
 } from '@kbn/agent-builder-common';
 import {
   createBadRequestError,
   createInternalError,
   isUserMessageEvent,
-  isAgentResponseEvent,
+  isAgentExecutionEvent,
 } from '@kbn/agent-builder-common';
 import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import {
@@ -55,7 +55,7 @@ export type ProcessedUserMessageEvent = Omit<UserMessageEvent, 'attachments'> & 
 /**
  * Union type for processed timeline events.
  */
-export type ProcessedTimelineEvent = ProcessedUserMessageEvent | AgentResponseEvent;
+export type ProcessedTimelineEvent = ProcessedUserMessageEvent | AgentExecutionEvent;
 
 /**
  * Type guard for ProcessedUserMessageEvent.
@@ -67,12 +67,12 @@ export const isProcessedUserMessageEvent = (
 };
 
 /**
- * Type guard for AgentResponseEvent within ProcessedTimelineEvent.
+ * Type guard for AgentExecutionEvent within ProcessedTimelineEvent.
  */
-export const isProcessedAgentResponseEvent = (
+export const isProcessedAgentExecutionEvent = (
   event: ProcessedTimelineEvent
-): event is AgentResponseEvent => {
-  return event.type === 'agent_response';
+): event is AgentExecutionEvent => {
+  return event.type === 'agent_execution';
 };
 
 export interface ProcessedConversation {
@@ -177,10 +177,10 @@ const prepareForAction = ({
   nextInput: ConverseInput;
 }): { effectiveEvents: TimelineEvent[]; effectiveNextInput: ConverseInput } => {
   if (action === 'regenerate') {
-    // Find the last AgentResponseEvent
+    // Find the last AgentExecutionEvent
     let lastAgentIdx = -1;
     for (let i = previousEvents.length - 1; i >= 0; i--) {
-      if (isAgentResponseEvent(previousEvents[i])) {
+      if (isAgentExecutionEvent(previousEvents[i])) {
         lastAgentIdx = i;
         break;
       }
@@ -265,7 +265,7 @@ export const prepareConversation = async ({
     formatContext,
   });
 
-  // Process each event: UserMessageEvent → ProcessedUserMessageEvent, AgentResponseEvent → pass through
+  // Process each event: UserMessageEvent → ProcessedUserMessageEvent, AgentExecutionEvent → pass through
   const processedEvents: ProcessedTimelineEvent[] = await Promise.all(
     effectiveEvents.map(async (event) => {
       if (isUserMessageEvent(event)) {
@@ -280,8 +280,8 @@ export const prepareConversation = async ({
           processedInput,
         } as ProcessedUserMessageEvent;
       }
-      // AgentResponseEvent passes through as-is
-      return event as AgentResponseEvent;
+      // AgentExecutionEvent passes through as-is
+      return event as AgentExecutionEvent;
     })
   );
 

@@ -10,9 +10,9 @@ import type {
   ConverseInput,
   ConversationAction,
   TimelineEvent,
-  AgentResponseEvent,
+  AgentExecutionEvent,
 } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus, isAgentResponseEvent } from '@kbn/agent-builder-common';
+import { ConversationRoundStatus, isAgentExecutionEvent } from '@kbn/agent-builder-common';
 
 export const ensureValidInput = ({
   input,
@@ -28,11 +28,11 @@ export const ensureValidInput = ({
     return;
   }
 
-  // Find the last AgentResponseEvent
-  let lastAgentResponse: AgentResponseEvent | undefined;
+  // Find the last AgentExecutionEvent
+  let lastAgentResponse: AgentExecutionEvent | undefined;
   for (let i = timelineEvents.length - 1; i >= 0; i--) {
-    if (isAgentResponseEvent(timelineEvents[i])) {
-      lastAgentResponse = timelineEvents[i] as AgentResponseEvent;
+    if (isAgentExecutionEvent(timelineEvents[i])) {
+      lastAgentResponse = timelineEvents[i] as AgentExecutionEvent;
       break;
     }
   }

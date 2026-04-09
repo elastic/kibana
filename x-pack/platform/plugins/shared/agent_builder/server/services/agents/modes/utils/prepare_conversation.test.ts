@@ -9,7 +9,7 @@ import type {
   ConversationRound,
   ConverseInput,
   TimelineEvent,
-  AgentResponseEvent,
+  AgentExecutionEvent,
 } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
@@ -389,8 +389,8 @@ describe('prepareConversation', () => {
       expect((result.previousEvents[0] as any).processedInput.message).toBe('Previous message');
       expect((result.previousEvents[0] as any).processedInput.attachments).toEqual([]);
       // Second event is an agent response
-      expect(result.previousEvents[1].type).toBe(TimelineEventType.agent_response);
-      expect((result.previousEvents[1] as AgentResponseEvent).response.message).toBe('Response');
+      expect(result.previousEvents[1].type).toBe(TimelineEventType.agentExecution);
+      expect((result.previousEvents[1] as AgentExecutionEvent).response.message).toBe('Response');
     });
 
     it('should process previous events with attachments', async () => {
@@ -531,8 +531,8 @@ describe('prepareConversation', () => {
       });
 
       // Agent response event preserves steps, response, trace_id, etc.
-      const agentEvent = result.previousEvents[1] as AgentResponseEvent;
-      expect(agentEvent.type).toBe(TimelineEventType.agent_response);
+      const agentEvent = result.previousEvents[1] as AgentExecutionEvent;
+      expect(agentEvent.type).toBe(TimelineEventType.agentExecution);
       expect(agentEvent.steps).toEqual(rounds[0].steps);
       expect(agentEvent.response).toEqual(rounds[0].response);
       expect(agentEvent.trace_id).toBe('trace-123');

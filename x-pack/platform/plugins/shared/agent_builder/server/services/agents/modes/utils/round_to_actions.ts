@@ -9,7 +9,7 @@ import type { ToolIdMapping } from '@kbn/agent-builder-genai-utils/langchain';
 import type {
   ConversationRound,
   ToolCallStep,
-  AgentResponseEvent,
+  AgentExecutionEvent,
   ReasoningStep,
 } from '@kbn/agent-builder-common';
 import { isReasoningStep } from '@kbn/agent-builder-common';
@@ -25,7 +25,7 @@ export const roundToActions = ({
   round,
   toolIdMapping,
 }: {
-  round: ConversationRound | AgentResponseEvent;
+  round: ConversationRound | AgentExecutionEvent;
   toolIdMapping: ToolIdMapping;
 }): ResearchAgentAction[] => {
   const actions: ResearchAgentAction[] = [];

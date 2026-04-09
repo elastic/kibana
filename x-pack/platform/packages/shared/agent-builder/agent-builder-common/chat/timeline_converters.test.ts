@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { Conversation, ConversationRound, UserMessageEvent, AgentResponseEvent } from '.';
+import type { Conversation, ConversationRound, UserMessageEvent, AgentExecutionEvent } from '.';
 import { ConversationRoundStatus, TimelineEventType } from '.';
 import {
   roundsToTimelineEvents,
   timelineEventsToRounds,
   conversationToTimelineConversation,
   timelineConversationToConversation,
-  agentResponseEventToRound,
+  agentExecutionEventToRound,
 } from './timeline_converters';
 
 const createTestRound = (overrides: Partial<ConversationRound> = {}): ConversationRound => ({
@@ -43,7 +43,7 @@ describe('timeline_converters', () => {
       expect(events).toEqual([]);
     });
 
-    it('converts a single round to user_message + agent_response events', () => {
+    it('converts a single round to user_message + agent_execution events', () => {
       const round = createTestRound();
       const events = roundsToTimelineEvents([round], testUser, testAgentId);
 
@@ -55,8 +55,8 @@ describe('timeline_converters', () => {
       expect(userEvent.message).toBe('hello');
       expect(userEvent.id).toBe('msg-round-1');
 
-      const agentEvent = events[1] as AgentResponseEvent;
-      expect(agentEvent.type).toBe(TimelineEventType.agent_response);
+      const agentEvent = events[1] as AgentExecutionEvent;
+      expect(agentEvent.type).toBe(TimelineEventType.agentExecution);
       expect(agentEvent.agent_id).toBe(testAgentId);
       expect(agentEvent.id).toBe('round-1');
       expect(agentEvent.response.message).toBe('world');
@@ -87,9 +87,9 @@ describe('timeline_converters', () => {
 
       expect(events).toHaveLength(4);
       expect((events[0] as UserMessageEvent).message).toBe('first');
-      expect((events[1] as AgentResponseEvent).id).toBe('r1');
+      expect((events[1] as AgentExecutionEvent).id).toBe('r1');
       expect((events[2] as UserMessageEvent).message).toBe('second');
-      expect((events[3] as AgentResponseEvent).id).toBe('r2');
+      expect((events[3] as AgentExecutionEvent).id).toBe('r2');
     });
   });
 
@@ -99,7 +99,7 @@ describe('timeline_converters', () => {
       expect(rounds).toEqual([]);
     });
 
-    it('pairs user_message with following agent_response into a round', () => {
+    it('pairs user_message with following agent_execution into a round', () => {
       const events = roundsToTimelineEvents([createTestRound()], testUser, testAgentId);
       const rounds = timelineEventsToRounds(events);
 
@@ -110,11 +110,11 @@ describe('timeline_converters', () => {
       expect(rounds[0].model_usage.input_tokens).toBe(10);
     });
 
-    it('handles agent_response without preceding user_message', () => {
-      const agentEvent: AgentResponseEvent = {
+    it('handles agent_execution without preceding user_message', () => {
+      const agentEvent: AgentExecutionEvent = {
         id: 'resp-1',
         timestamp: '2024-01-01T00:00:00.000Z',
-        type: TimelineEventType.agent_response,
+        type: TimelineEventType.agentExecution,
         agent_id: testAgentId,
         status: ConversationRoundStatus.completed,
         steps: [],
@@ -153,7 +153,7 @@ describe('timeline_converters', () => {
       expect(exec.id).toBe('conv-1');
       expect(exec.timeline).toHaveLength(2);
       expect(exec.timeline[0].type).toBe('user_message');
-      expect(exec.timeline[1].type).toBe('agent_response');
+      expect(exec.timeline[1].type).toBe('agent_execution');
     });
   });
 
@@ -179,8 +179,8 @@ describe('timeline_converters', () => {
     });
   });
 
-  describe('agentResponseEventToRound', () => {
-    it('converts agent response event to round with user message', () => {
+  describe('agentExecutionEventToRound', () => {
+    it('converts agent execution event to round with user message', () => {
       const userMsg: UserMessageEvent = {
         id: 'msg-1',
         timestamp: '2024-01-01T00:00:00.000Z',
@@ -188,10 +188,10 @@ describe('timeline_converters', () => {
         user: testUser,
         message: 'hi',
       };
-      const agentResp: AgentResponseEvent = {
+      const agentResp: AgentExecutionEvent = {
         id: 'resp-1',
         timestamp: '2024-01-01T00:00:00.000Z',
-        type: TimelineEventType.agent_response,
+        type: TimelineEventType.agentExecution,
         agent_id: testAgentId,
         status: ConversationRoundStatus.completed,
         steps: [],
@@ -207,7 +207,7 @@ describe('timeline_converters', () => {
         },
       };
 
-      const round = agentResponseEventToRound(agentResp, userMsg);
+      const round = agentExecutionEventToRound(agentResp, userMsg);
       expect(round.id).toBe('resp-1');
       expect(round.input.message).toBe('hi');
       expect(round.response.message).toBe('hey');

@@ -7,7 +7,7 @@
 
 import type { InferenceConnector } from '@kbn/inference-common';
 import { InferenceConnectorType } from '@kbn/inference-common';
-import type { AgentResponseEvent } from '@kbn/agent-builder-common';
+import type { AgentExecutionEvent } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
   ConversationRoundStepType,
@@ -62,10 +62,10 @@ const createMockEvents = (
     },
   };
 
-  const agentEvent: AgentResponseEvent = {
+  const agentEvent: AgentExecutionEvent = {
     id: 'round-1',
     timestamp: new Date().toISOString(),
-    type: TimelineEventType.agent_response,
+    type: TimelineEventType.agentExecution,
     agent_id: 'agent-1',
     status: ConversationRoundStatus.completed,
     steps,

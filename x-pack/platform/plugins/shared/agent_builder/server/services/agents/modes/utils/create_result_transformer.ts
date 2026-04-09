@@ -125,7 +125,7 @@ const estimateConversationTokens = (conversation: ProcessedConversation): number
         if (event.type === 'user_message') {
           return { message: event.processedInput.message };
         }
-        // agent_response
+        // agent_execution
         return { response: event.response, steps: event.steps };
       })
     )

@@ -10,7 +10,7 @@ import {
   ChatEventType,
   ConversationRoundStatus,
   ConversationRoundStepType,
-  type AgentResponseEvent,
+  type AgentExecutionEvent,
 } from '@kbn/agent-builder-common';
 import type { CompactionStructuredData, CompactionSummary } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn } from '@kbn/agent-builder-server';
@@ -43,7 +43,7 @@ const createMockAgentResponse = (
   id: string,
   messageLength: number = 100,
   toolResults: number = 0
-): AgentResponseEvent => {
+): AgentExecutionEvent => {
   const steps = Array.from({ length: toolResults }, (_, i) => ({
     type: ConversationRoundStepType.toolCall as const,
     tool_call_id: `${id}-tc-${i}`,
@@ -62,7 +62,7 @@ const createMockAgentResponse = (
   return {
     id,
     timestamp: new Date().toISOString(),
-    type: 'agent_response',
+    type: 'agent_execution',
     agent_id: 'test-agent',
     status: ConversationRoundStatus.completed,
     steps,
@@ -95,19 +95,19 @@ const createMockUserMessage = (
 });
 
 /**
- * Creates a pair of [ProcessedUserMessageEvent, AgentResponseEvent] for each mock round.
+ * Creates a pair of [ProcessedUserMessageEvent, AgentExecutionEvent] for each mock round.
  */
 const createMockEventPair = (
   id: string,
   messageLength: number = 100,
   toolResults: number = 0
-): [ProcessedUserMessageEvent, AgentResponseEvent] => [
+): [ProcessedUserMessageEvent, AgentExecutionEvent] => [
   createMockUserMessage(id, messageLength),
   createMockAgentResponse(id, messageLength, toolResults),
 ];
 
 const createMockConversation = (
-  eventPairs: [ProcessedUserMessageEvent, AgentResponseEvent][]
+  eventPairs: [ProcessedUserMessageEvent, AgentExecutionEvent][]
 ): ProcessedConversation => ({
   previousEvents: eventPairs.flat() as ProcessedTimelineEvent[],
   nextInput: { message: 'current question', attachments: [] },
@@ -169,7 +169,7 @@ describe('extractProgrammaticSummary', () => {
   });
 
   it('should truncate long params summaries', () => {
-    const agentResponse: AgentResponseEvent = {
+    const agentResponse: AgentExecutionEvent = {
       ...createMockAgentResponse('r1', 50, 0),
       steps: [
         {

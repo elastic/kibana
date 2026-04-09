@@ -20,9 +20,9 @@ import type {
   ToolResultEvent,
   RuntimeAgentConfigurationOverrides,
   CompactionStep,
-  AgentResponseEvent,
+  AgentExecutionEvent,
 } from '@kbn/agent-builder-common';
-import { TimelineEventType, agentResponseEventToRound } from '@kbn/agent-builder-common';
+import { TimelineEventType, agentExecutionEventToRound } from '@kbn/agent-builder-common';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import {
   ChatEventType,
@@ -73,7 +73,7 @@ export const addRoundCompleteEvent = ({
   configurationOverrides,
   compactionResult,
 }: {
-  pendingAgentResponse: AgentResponseEvent | undefined;
+  pendingAgentResponse: AgentExecutionEvent | undefined;
   agentId: string;
   userInput: RoundInput;
   startTime: Date;
@@ -95,7 +95,7 @@ export const addRoundCompleteEvent = ({
         map<SourceEvents[], RoundCompleteEvent>((events) => {
           const attachmentRefs = attachmentStateManager.getAccessedRefs();
 
-          // Build AgentResponseEvent first (the new canonical output)
+          // Build AgentExecutionEvent first (the new canonical output)
           const agentResponse = pendingAgentResponse
             ? resumeAgentResponse({
                 pendingAgentResponse,
@@ -107,7 +107,7 @@ export const addRoundCompleteEvent = ({
                 configurationOverrides,
                 compactionResult,
               })
-            : createAgentResponseEvent({
+            : createAgentExecutionEvent({
                 events,
                 agentId,
                 startTime,
@@ -123,8 +123,8 @@ export const addRoundCompleteEvent = ({
             stateManager,
           });
 
-          // Derive ConversationRound from AgentResponseEvent for backward compatibility
-          const round = agentResponseEventToRound(agentResponse, {
+          // Derive ConversationRound from AgentExecutionEvent for backward compatibility
+          const round = agentExecutionEventToRound(agentResponse, {
             id: `msg-${agentResponse.id}`,
             timestamp: agentResponse.started_at,
             type: TimelineEventType.user_message,
@@ -141,7 +141,6 @@ export const addRoundCompleteEvent = ({
             type: ChatEventType.roundComplete,
             data: {
               round,
-              agentResponse,
               resumed: pendingAgentResponse !== undefined,
               conversation_state: getConversationState(),
               attachments: attachmentStateManager.getAll(),
@@ -165,7 +164,7 @@ const resumeAgentResponse = ({
   configurationOverrides,
   compactionResult,
 }: {
-  pendingAgentResponse: AgentResponseEvent;
+  pendingAgentResponse: AgentExecutionEvent;
   events: SourceEvents[];
   agentId: string;
   startTime: Date;
@@ -173,7 +172,7 @@ const resumeAgentResponse = ({
   modelProvider: ModelProvider;
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
   compactionResult?: CompactedConversation;
-}): AgentResponseEvent => {
+}): AgentExecutionEvent => {
   // Replay tool events for all pending steps (those with empty results)
   const pendingSteps = pendingAgentResponse.steps
     .filter(isToolCallStep)
@@ -192,7 +191,7 @@ const resumeAgentResponse = ({
     step.progression = [...(step.progression ?? []), ...toolProgressions.map(({ data }) => data)];
   }
 
-  const followUp = createAgentResponseEvent({
+  const followUp = createAgentExecutionEvent({
     events,
     agentId,
     startTime,
@@ -206,9 +205,9 @@ const resumeAgentResponse = ({
 };
 
 const mergeAgentResponses = (
-  previous: AgentResponseEvent,
-  next: AgentResponseEvent
-): AgentResponseEvent => {
+  previous: AgentExecutionEvent,
+  next: AgentExecutionEvent
+): AgentExecutionEvent => {
   let traceId: string[] | undefined;
   if (previous.trace_id || next.trace_id) {
     traceId = [
@@ -236,7 +235,7 @@ const mergeAgentResponses = (
   };
 };
 
-const createAgentResponseEvent = ({
+const createAgentExecutionEvent = ({
   events,
   agentId,
   startTime,
@@ -252,7 +251,7 @@ const createAgentResponseEvent = ({
   modelProvider: ModelProvider;
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
   compactionResult?: CompactedConversation;
-}): AgentResponseEvent => {
+}): AgentExecutionEvent => {
   const toolResults = events.filter(isToolResultEvent);
   const toolProgressions = events.filter(isToolProgressEvent);
   const messages = events.filter(isMessageCompleteEvent).map((event) => event.data);
@@ -314,7 +313,7 @@ const createAgentResponseEvent = ({
   return {
     id,
     timestamp: now,
-    type: TimelineEventType.agent_response,
+    type: TimelineEventType.agentExecution,
     agent_id: agentId,
     status: hasPromptRequests
       ? ConversationRoundStatus.awaitingPrompt
@@ -390,7 +389,7 @@ const buildAgentResponseState = ({
   events,
   stateManager,
 }: {
-  agentResponse: AgentResponseEvent;
+  agentResponse: AgentExecutionEvent;
   events: SourceEvents[];
   stateManager: ConversationStateManager;
 }): RoundState | undefined => {

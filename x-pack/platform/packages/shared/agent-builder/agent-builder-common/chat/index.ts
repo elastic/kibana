@@ -94,16 +94,16 @@ export {
   type TimelineEventTypeValue,
   type BaseTimelineEvent,
   type UserMessageEvent,
-  type AgentResponseEvent,
+  type AgentExecutionEvent,
   type TimelineEvent,
   type TimelineConversation,
   isUserMessageEvent,
-  isAgentResponseEvent,
+  isAgentExecutionEvent,
 } from './conversation';
 export {
   roundsToTimelineEvents,
   timelineEventsToRounds,
   conversationToTimelineConversation,
   timelineConversationToConversation,
-  agentResponseEventToRound,
+  agentExecutionEventToRound,
 } from './timeline_converters';

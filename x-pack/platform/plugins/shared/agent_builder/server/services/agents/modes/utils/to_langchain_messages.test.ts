@@ -8,7 +8,7 @@
 import type { AIMessage, ToolMessage } from '@langchain/core/messages';
 import { isAIMessage, isHumanMessage } from '@langchain/core/messages';
 import type {
-  AgentResponseEvent,
+  AgentExecutionEvent,
   ConversationRoundStep,
   ReasoningStep,
   ToolCallStep,
@@ -90,10 +90,10 @@ describe('convertPreviousEvents', () => {
     },
   });
 
-  const makeAgentResponseEvent = (parts: Partial<AgentResponseEvent> = {}): AgentResponseEvent => ({
+  const makeAgentExecutionEvent = (parts: Partial<AgentExecutionEvent> = {}): AgentExecutionEvent => ({
     id: `resp-${++responseCounter}`,
     timestamp: now,
-    type: 'agent_response',
+    type: 'agent_execution',
     agent_id: 'test',
     status: ConversationRoundStatus.completed,
     steps: [],
@@ -112,11 +112,11 @@ describe('convertPreviousEvents', () => {
 
   const makeRoundEvents = (
     message: string,
-    responseParts: Partial<AgentResponseEvent> = {},
+    responseParts: Partial<AgentExecutionEvent> = {},
     attachments: ProcessedAttachment[] = []
   ): ProcessedTimelineEvent[] => [
     makeUserMessageEvent(message, attachments),
-    makeAgentResponseEvent(responseParts),
+    makeAgentExecutionEvent(responseParts),
   ];
 
   const createConversation = (

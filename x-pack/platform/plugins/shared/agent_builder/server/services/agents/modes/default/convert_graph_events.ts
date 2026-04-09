@@ -11,7 +11,7 @@ import type { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracer
 import type { AIMessageChunk } from '@langchain/core/messages';
 import type { OperatorFunction } from 'rxjs';
 import { EMPTY, mergeMap, of } from 'rxjs';
-import type { ChatAgentEvent, AgentResponseEvent } from '@kbn/agent-builder-common/chat';
+import type { ChatAgentEvent, AgentExecutionEvent } from '@kbn/agent-builder-common/chat';
 import { isToolCallStep } from '@kbn/agent-builder-common/chat';
 import {
   createBrowserToolCallEvent,
@@ -58,7 +58,7 @@ export const convertGraphEvents = ({
 }: {
   graphName: string;
   toolManager: ToolManager;
-  pendingAgentResponse: AgentResponseEvent | undefined;
+  pendingAgentResponse: AgentExecutionEvent | undefined;
   logger: Logger;
   startTime: Date;
 }): OperatorFunction<LangchainStreamEvent, ConvertedEvents> => {

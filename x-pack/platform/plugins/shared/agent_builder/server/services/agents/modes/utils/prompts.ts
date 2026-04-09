@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import type { AgentResponseEvent, TimelineEvent } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus, isAgentResponseEvent } from '@kbn/agent-builder-common';
+import type { AgentExecutionEvent, TimelineEvent } from '@kbn/agent-builder-common';
+import { ConversationRoundStatus, isAgentExecutionEvent } from '@kbn/agent-builder-common';
 import type { ProcessedTimelineEvent } from './prepare_conversation';
-import { isProcessedAgentResponseEvent } from './prepare_conversation';
+import { isProcessedAgentExecutionEvent } from './prepare_conversation';
 
 /**
- * Find the last AgentResponseEvent with `awaiting_prompt` status from timeline events.
+ * Find the last AgentExecutionEvent with `awaiting_prompt` status from timeline events.
  */
 export const getPendingAgentResponse = (
   events: TimelineEvent[] | ProcessedTimelineEvent[]
-): AgentResponseEvent | undefined => {
+): AgentExecutionEvent | undefined => {
   for (let i = events.length - 1; i >= 0; i--) {
     const event = events[i];
     if (
-      (isAgentResponseEvent(event as TimelineEvent) ||
-        isProcessedAgentResponseEvent(event as ProcessedTimelineEvent)) &&
-      (event as AgentResponseEvent).status === ConversationRoundStatus.awaitingPrompt
+      (isAgentExecutionEvent(event as TimelineEvent) ||
+        isProcessedAgentExecutionEvent(event as ProcessedTimelineEvent)) &&
+      (event as AgentExecutionEvent).status === ConversationRoundStatus.awaitingPrompt
     ) {
-      return event as AgentResponseEvent;
+      return event as AgentExecutionEvent;
     }
   }
   return undefined;
