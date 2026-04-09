@@ -24,7 +24,7 @@ import type { StreamsRepositoryClient } from '../api';
  */
 export function createStreamsSourceEnricher(
   repositoryClient: StreamsRepositoryClient,
-  application: Promise<ApplicationStart>
+  application: Promise<Pick<ApplicationStart, 'getUrlForApp'>>
 ): (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]> {
   return async (sources: ESQLSourceResult[]): Promise<ESQLSourceResult[]> => {
     try {
