@@ -87,8 +87,13 @@ export async function getHistory(
 const mapHistoryItem =
   (context: RulesClientContext) =>
   (item: ChangeHistoryDocument): RuleChangeHistoryDocument => {
-    const { attributes, references } = (item.object.snapshot ?? {}) as unknown as RuleSnapshot;
+    const { attributes, references } = item.object.snapshot as unknown as RuleSnapshot;
 
+    // Transform to rule domain.
+    // This will be best effort by necessity. Filling gaps as needed.
+    // Bear in mind that change histories are stored indefinitely
+    // so that change in rule schema over time could cause problems
+    // and will need to be tested across versions.
     const ruleDomain = transformRuleAttributesToRuleDomain(
       attributes,
       {
