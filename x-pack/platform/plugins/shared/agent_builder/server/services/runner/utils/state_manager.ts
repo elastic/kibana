@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { Conversation, ExecutionConversation } from '@kbn/agent-builder-common';
+import type { Conversation, TimelineConversation } from '@kbn/agent-builder-common';
 import { timelineEventsToRounds } from '@kbn/agent-builder-common';
 import type { ConversationStateManager, ToolStateManager } from '@kbn/agent-builder-server/runner';
 
 export const createConversationStateManager = (
-  conversation?: Conversation | ExecutionConversation | undefined
+  conversation?: Conversation | TimelineConversation | undefined
 ): ConversationStateManager => {
   const toolCallStateMap = new Map<string, unknown>();
 

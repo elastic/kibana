@@ -12,7 +12,7 @@ import type {
   TimelineEvent,
   UserMessageEvent,
   AgentResponseEvent,
-  ExecutionConversation,
+  TimelineConversation,
 } from './conversation';
 import { TimelineEventType, isUserMessageEvent, isAgentResponseEvent } from './conversation';
 
@@ -106,12 +106,11 @@ export const timelineEventsToRounds = (events: TimelineEvent[]): ConversationRou
 };
 
 /**
- * Converts a Conversation (rounds-based) to an ExecutionConversation (timeline-based).
- * Used as the bridging point in handleAgentExecution during phase 1.
+ * Converts a Conversation (rounds-based) to a TimelineConversation (timeline-based).
  */
-export const conversationToExecutionConversation = (
+export const conversationToTimelineConversation = (
   conversation: Conversation
-): ExecutionConversation => {
+): TimelineConversation => {
   const timeline = roundsToTimelineEvents(
     conversation.rounds,
     conversation.user,
@@ -132,11 +131,10 @@ export const conversationToExecutionConversation = (
 };
 
 /**
- * Converts an ExecutionConversation back to a Conversation (rounds-based).
- * Used during phase 1 to bridge back to the old format for client-facing code.
+ * Converts a TimelineConversation back to a Conversation (rounds-based).
  */
-export const executionConversationToConversation = (
-  executionConversation: ExecutionConversation
+export const timelineConversationToConversation = (
+  executionConversation: TimelineConversation
 ): Conversation => {
   const rounds = timelineEventsToRounds(executionConversation.timeline);
 

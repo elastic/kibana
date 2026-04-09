@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Conversation, ExecutionConversation, ToolResult } from '@kbn/agent-builder-common';
+import type { Conversation, TimelineConversation, ToolResult } from '@kbn/agent-builder-common';
 import { timelineEventsToRounds } from '@kbn/agent-builder-common';
 import type {
   ToolResultStore,
@@ -18,7 +18,7 @@ import { extractConversationToolResults, createToolCallEntry, getToolCallEntryPa
 export const createResultStore = ({
   conversation,
 }: {
-  conversation?: Conversation | ExecutionConversation;
+  conversation?: Conversation | TimelineConversation;
 }) => {
   const rounds =
     conversation && 'timeline' in conversation

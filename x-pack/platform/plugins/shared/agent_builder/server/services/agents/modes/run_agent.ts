@@ -8,7 +8,7 @@
 import type {
   AgentCapabilities,
   Conversation,
-  ExecutionConversation,
+  TimelineConversation,
   ConversationRound,
   AgentResponseEvent,
   ConverseInput,
@@ -28,7 +28,7 @@ export interface RunAgentParams {
   /**
    * Current conversation. Accepts both legacy rounds-based and new timeline-based formats.
    */
-  conversation?: Conversation | ExecutionConversation;
+  conversation?: Conversation | TimelineConversation;
   /**
    * Configuration of the agent to run
    */

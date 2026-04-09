@@ -418,13 +418,6 @@ export type TimelineConversation = Omit<Conversation, 'rounds'> & {
   timeline: TimelineEvent[];
 };
 
-/**
- * The internal format used by the execution pipeline.
- * Currently mirrors TimelineConversation but exists as a separate type
- * to decouple execution from storage.
- */
-export type ExecutionConversation = TimelineConversation;
-
 // Compaction summary types
 
 /** Compact representation of a tool call in a compaction summary */

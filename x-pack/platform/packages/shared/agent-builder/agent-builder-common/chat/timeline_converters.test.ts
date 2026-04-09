@@ -10,8 +10,8 @@ import { ConversationRoundStatus, TimelineEventType } from '.';
 import {
   roundsToTimelineEvents,
   timelineEventsToRounds,
-  conversationToExecutionConversation,
-  executionConversationToConversation,
+  conversationToTimelineConversation,
+  timelineConversationToConversation,
   agentResponseEventToRound,
 } from './timeline_converters';
 
@@ -136,8 +136,8 @@ describe('timeline_converters', () => {
     });
   });
 
-  describe('conversationToExecutionConversation', () => {
-    it('converts a conversation to ExecutionConversation', () => {
+  describe('conversationToTimelineConversation', () => {
+    it('converts a conversation to TimelineConversation', () => {
       const conversation: Conversation = {
         id: 'conv-1',
         agent_id: testAgentId,
@@ -148,18 +148,16 @@ describe('timeline_converters', () => {
         rounds: [createTestRound()],
       };
 
-      const exec = conversationToExecutionConversation(conversation);
+      const exec = conversationToTimelineConversation(conversation);
 
       expect(exec.id).toBe('conv-1');
-      expect(exec.conversation_mode).toBe('user');
-      expect(exec.execution_state).toBe('idle');
       expect(exec.timeline).toHaveLength(2);
       expect(exec.timeline[0].type).toBe('user_message');
       expect(exec.timeline[1].type).toBe('agent_response');
     });
   });
 
-  describe('executionConversationToConversation', () => {
+  describe('timelineConversationToConversation', () => {
     it('round-trips correctly', () => {
       const original: Conversation = {
         id: 'conv-1',
@@ -171,8 +169,8 @@ describe('timeline_converters', () => {
         rounds: [createTestRound()],
       };
 
-      const exec = conversationToExecutionConversation(original);
-      const restored = executionConversationToConversation(exec);
+      const exec = conversationToTimelineConversation(original);
+      const restored = timelineConversationToConversation(exec);
 
       expect(restored.id).toBe(original.id);
       expect(restored.rounds).toHaveLength(1);
