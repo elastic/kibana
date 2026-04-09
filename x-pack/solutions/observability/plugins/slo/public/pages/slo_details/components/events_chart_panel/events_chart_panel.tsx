@@ -44,9 +44,14 @@ export interface Props {
 
 export function EventsChartPanel({ slo, range, dynamicTimeRange = false, onBrushed }: Props) {
   const { discover, uiSettings } = useKibana().services;
+
+  const isApmSlo =
+    apmTransactionDurationIndicatorSchema.is(slo.indicator) ||
+    apmTransactionErrorRateIndicatorSchema.is(slo.indicator);
+
   const {
     data: { transaction: transactionIndex },
-  } = useFetchApmIndices();
+  } = useFetchApmIndices({ enabled: isApmSlo });
 
   const timeRange: TimeRange = dynamicTimeRange
     ? { from: range.from.toISOString(), to: range.to.toISOString() }
@@ -60,10 +65,6 @@ export function EventsChartPanel({ slo, range, dynamicTimeRange = false, onBrush
     objective: slo.objective,
     remoteName: slo.remote?.remoteName,
   });
-
-  const isApmSlo =
-    apmTransactionDurationIndicatorSchema.is(slo.indicator) ||
-    apmTransactionErrorRateIndicatorSchema.is(slo.indicator);
 
   const viewEventsHref = isApmSlo
     ? getApmTracesEsqlLink({ slo, timeRange, discover, transactionIndex })

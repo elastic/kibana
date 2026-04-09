@@ -23,7 +23,9 @@ export interface UseFetchApmIndices {
 
 const INITIAL_DATA: ApmIndicesData = { metric: '', transaction: '' };
 
-export function useFetchApmIndices(): UseFetchApmIndices {
+export function useFetchApmIndices({
+  enabled = true,
+}: { enabled?: boolean } = {}): UseFetchApmIndices {
   const { apmSourcesAccess } = useKibana().services;
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
@@ -38,6 +40,7 @@ export function useFetchApmIndices(): UseFetchApmIndices {
       }
     },
     refetchOnWindowFocus: false,
+    enabled,
   });
   return {
     data: isInitialLoading ? INITIAL_DATA : data ?? INITIAL_DATA,
