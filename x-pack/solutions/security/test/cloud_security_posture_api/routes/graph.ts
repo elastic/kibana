@@ -767,7 +767,7 @@ export default function (providerContext: FtrProviderContext) {
                 entity: expectExpect.objectContaining({
                   availableInEntityStore: false,
                   sourceFields: expectExpect.objectContaining({
-                    'entity.target.id': 'projects/your-project-id/roles/customRole',
+                    'entity.id': 'projects/your-project-id/roles/customRole',
                   }),
                 }),
               })
@@ -1116,7 +1116,7 @@ export default function (providerContext: FtrProviderContext) {
             entity: expectExpect.objectContaining({
               availableInEntityStore: false,
               sourceFields: expectExpect.objectContaining({
-                'entity.target.id': 'target-mv-1',
+                'entity.id': 'target-mv-1',
               }),
             }),
           })
@@ -1128,7 +1128,7 @@ export default function (providerContext: FtrProviderContext) {
             entity: expectExpect.objectContaining({
               availableInEntityStore: false,
               sourceFields: expectExpect.objectContaining({
-                'entity.target.id': 'target-mv-2',
+                'entity.id': 'target-mv-2',
               }),
             }),
           })
@@ -1140,7 +1140,7 @@ export default function (providerContext: FtrProviderContext) {
             entity: expectExpect.objectContaining({
               availableInEntityStore: false,
               sourceFields: expectExpect.objectContaining({
-                'entity.target.id': 'target-mv-3',
+                'entity.id': 'target-mv-3',
               }),
             }),
           })
@@ -1784,7 +1784,7 @@ export default function (providerContext: FtrProviderContext) {
                 entity: expectExpect.objectContaining({
                   availableInEntityStore: false,
                   sourceFields: expectExpect.objectContaining({
-                    'entity.target.id': 'projects/your-project-id/roles/customRole',
+                    'entity.id': 'projects/your-project-id/roles/customRole',
                   }),
                 }),
               })
@@ -1960,7 +1960,7 @@ export default function (providerContext: FtrProviderContext) {
                     sub_type: 'GCP Compute Instance',
                     availableInEntityStore: true,
                     sourceFields: expectExpect.objectContaining({
-                      'host.target.id': 'host-instance-1',
+                      'host.id': 'host-instance-1',
                     }),
                   }),
                 })
@@ -1975,7 +1975,7 @@ export default function (providerContext: FtrProviderContext) {
                     sub_type: 'GCP Compute Instance',
                     availableInEntityStore: true,
                     sourceFields: expectExpect.objectContaining({
-                      'host.target.id': 'host-instance-2',
+                      'host.id': 'host-instance-2',
                     }),
                   }),
                 })
@@ -2047,7 +2047,7 @@ export default function (providerContext: FtrProviderContext) {
                     sub_type: 'GCP Compute Instance',
                     availableInEntityStore: true,
                     sourceFields: expectExpect.objectContaining({
-                      'entity.target.id': 'entity-service-target-1',
+                      'entity.id': 'entity-service-target-1',
                     }),
                   }),
                 })
@@ -2156,8 +2156,7 @@ export default function (providerContext: FtrProviderContext) {
                     sub_type: 'GCP Storage Bucket',
                     availableInEntityStore: true,
                     sourceFields: expectExpect.objectContaining({
-                      'entity.target.id':
-                        'projects/multi-target-project-id/buckets/target-bucket-a',
+                      'entity.id': 'projects/multi-target-project-id/buckets/target-bucket-a',
                     }),
                   }),
                 })
@@ -2172,8 +2171,7 @@ export default function (providerContext: FtrProviderContext) {
                     sub_type: 'GCP Storage Bucket',
                     availableInEntityStore: true,
                     sourceFields: expectExpect.objectContaining({
-                      'entity.target.id':
-                        'projects/multi-target-project-id/buckets/target-bucket-b',
+                      'entity.id': 'projects/multi-target-project-id/buckets/target-bucket-b',
                     }),
                   }),
                 })
@@ -2188,8 +2186,7 @@ export default function (providerContext: FtrProviderContext) {
                     sub_type: 'GCP Storage Bucket',
                     availableInEntityStore: true,
                     sourceFields: expectExpect.objectContaining({
-                      'entity.target.id':
-                        'projects/multi-target-project-id/buckets/target-bucket-c',
+                      'entity.id': 'projects/multi-target-project-id/buckets/target-bucket-c',
                     }),
                   }),
                 })
@@ -2216,7 +2213,7 @@ export default function (providerContext: FtrProviderContext) {
                     sub_type: 'GCP Service Account',
                     availableInEntityStore: true,
                     sourceFields: expectExpect.objectContaining({
-                      'service.target.name': 'TargetServiceDifferent',
+                      'service.name': 'TargetServiceDifferent',
                     }),
                   }),
                 })
@@ -2316,7 +2313,7 @@ export default function (providerContext: FtrProviderContext) {
                     sub_type: 'GCP Compute Instance',
                     availableInEntityStore: true,
                     sourceFields: expectExpect.objectContaining({
-                      'host.target.id': 'partial-host-instance-1',
+                      'host.id': 'partial-host-instance-1',
                     }),
                   }),
                 })
@@ -2474,7 +2471,7 @@ export default function (providerContext: FtrProviderContext) {
                     sub_type: 'AWS Lambda',
                     availableInEntityStore: true,
                     sourceFields: expectExpect.objectContaining({
-                      'service.target.name': 'Relationships Target Service',
+                      'service.name': 'Relationships Target Service',
                     }),
                   }),
                 })
@@ -2802,7 +2799,7 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Service Account',
                     sub_type: 'GCP Service Account',
                     sourceFields: expectExpect.objectContaining({
-                      'user.target.id': 'data-pipeline@my-gcp-project.iam.gserviceaccount.com',
+                      'user.id': 'data-pipeline@my-gcp-project.iam.gserviceaccount.com',
                     }),
                   }),
                 })
@@ -2831,7 +2828,7 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Host',
                     sub_type: 'GCP Compute Instance',
                     sourceFields: expectExpect.objectContaining({
-                      'host.target.id':
+                      'host.id':
                         'projects/my-gcp-project/zones/us-west1-a/instances/database-server-prod-1',
                     }),
                   }),
@@ -3129,7 +3126,7 @@ export default function (providerContext: FtrProviderContext) {
                     sub_type: 'AWS Organizations Admin',
                     availableInEntityStore: true,
                     sourceFields: expectExpect.objectContaining({
-                      'user.target.id': 'rel-hierarchy-delegate-1',
+                      'user.id': 'rel-hierarchy-delegate-1',
                     }),
                   }),
                 })
