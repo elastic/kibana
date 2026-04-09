@@ -11,11 +11,7 @@ import { mockContext } from '../../../__tests__/commands/context_fixtures';
 import { expectErrors } from '../../../__tests__/commands/validation';
 import { validate } from './validate';
 
-const userAgentExpectErrors = (
-  query: string,
-  expectedErrors: string[],
-  context = mockContext
-) => {
+const userAgentExpectErrors = (query: string, expectedErrors: string[], context = mockContext) => {
   return expectErrors(query, expectedErrors, context, 'user_agent', validate);
 };
 
@@ -69,10 +65,9 @@ describe('USER_AGENT Validation', () => {
     });
 
     it('raises error on unknown map key', () => {
-      userAgentExpectErrors(
-        'FROM a | USER_AGENT ua = keywordField WITH { "unknown_key": "val" }',
-        ['Unknown parameter "unknown_key".']
-      );
+      userAgentExpectErrors('FROM a | USER_AGENT ua = keywordField WITH { "unknown_key": "val" }', [
+        'Unknown parameter "unknown_key".',
+      ]);
     });
   });
 
@@ -87,39 +82,27 @@ describe('USER_AGENT Validation', () => {
     });
 
     it('raises error when regex_file is not a string', () => {
-      userAgentExpectErrors(
-        'FROM a | USER_AGENT ua = keywordField WITH { "regex_file": 42 }',
-        [
-          'Invalid type for parameter "regex_file". Expected type: keyword. Received: integer.',
-        ]
-      );
+      userAgentExpectErrors('FROM a | USER_AGENT ua = keywordField WITH { "regex_file": 42 }', [
+        'Invalid type for parameter "regex_file". Expected type: keyword. Received: integer.',
+      ]);
     });
 
     it('raises error when properties is a plain string instead of a list', () => {
-      userAgentExpectErrors(
-        'FROM a | USER_AGENT ua = keywordField WITH { "properties": "name" }',
-        [
-          'Invalid type for parameter "properties". Expected type: list. Received: keyword.',
-        ]
-      );
+      userAgentExpectErrors('FROM a | USER_AGENT ua = keywordField WITH { "properties": "name" }', [
+        'Invalid type for parameter "properties". Expected type: list. Received: keyword.',
+      ]);
     });
 
     it('raises error when properties is a number instead of a list', () => {
-      userAgentExpectErrors(
-        'FROM a | USER_AGENT ua = keywordField WITH { "properties": 10 }',
-        [
-          'Invalid type for parameter "properties". Expected type: list. Received: integer.',
-        ]
-      );
+      userAgentExpectErrors('FROM a | USER_AGENT ua = keywordField WITH { "properties": 10 }', [
+        'Invalid type for parameter "properties". Expected type: list. Received: integer.',
+      ]);
     });
 
     it('raises error when properties is a boolean instead of a list', () => {
-      userAgentExpectErrors(
-        'FROM a | USER_AGENT ua = keywordField WITH { "properties": true }',
-        [
-          'Invalid type for parameter "properties". Expected type: list. Received: boolean.',
-        ]
-      );
+      userAgentExpectErrors('FROM a | USER_AGENT ua = keywordField WITH { "properties": true }', [
+        'Invalid type for parameter "properties". Expected type: list. Received: boolean.',
+      ]);
     });
   });
 });
