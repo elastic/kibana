@@ -7,7 +7,6 @@
 
 import { EuiHorizontalRule } from '@elastic/eui';
 import React from 'react';
-import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import type { ServiceItem } from '../../../../common/search_strategy';
 import type { Entity } from '../../../../common/api/entity_analytics';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
@@ -15,7 +14,6 @@ import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_sum
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { SERVICE_PANEL_RISK_SCORE_QUERY_ID } from '.';
-import { FlyoutBody } from '../../shared/components/flyout_body';
 import { ObservedEntity } from '../shared/components/observed_entity';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import { useObservedServiceItems } from './hooks/use_observed_service_items';
@@ -38,10 +36,6 @@ interface ServicePanelContentProps {
   openDetailsPanel: (path: EntityDetailsPath) => void;
   entityRecord?: Entity;
   entityStoreEntityId?: string;
-  /** When using Entity Store v2: criticality from store. */
-  criticalityFromEntityStore?: CriticalityLevelWithUnassigned;
-  /** When using Entity Store v2: save criticality via entity store API. */
-  onSaveAssetCriticalityViaEntityStore?: (updatedRecord: Entity) => Promise<void>;
 }
 
 export const ServicePanelContent = ({
@@ -56,14 +50,12 @@ export const ServicePanelContent = ({
   openDetailsPanel,
   onAssetCriticalityChange,
   entityStoreEntityId,
-  criticalityFromEntityStore,
-  onSaveAssetCriticalityViaEntityStore,
 }: ServicePanelContentProps) => {
   const observedFields = useObservedServiceItems(observedService);
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
 
   return (
-    <FlyoutBody>
+    <>
       {riskScoreState.hasEngineBeenInstalled && riskScoreState.data?.length !== 0 && (
         <>
           <FlyoutRiskSummary
@@ -84,13 +76,12 @@ export const ServicePanelContent = ({
           <EuiHorizontalRule />
         </>
       )}
-      <AssetCriticalityAccordion
-        entity={{ name: serviceName, type: EntityType.service }}
-        onChange={onAssetCriticalityChange}
-        entityRecord={entityRecord}
-        criticalityFromEntityStore={criticalityFromEntityStore}
-        onSaveViaEntityStore={onSaveAssetCriticalityViaEntityStore}
-      />
+      {!entityRecord && (
+        <AssetCriticalityAccordion
+          entity={{ name: serviceName, type: EntityType.service }}
+          onChange={onAssetCriticalityChange}
+        />
+      )}
       {entityStoreEntityId && (
         <>
           <VisualizationsSection
@@ -109,6 +100,6 @@ export const ServicePanelContent = ({
         observedFields={observedFields}
       />
       <EuiHorizontalRule margin="m" />
-    </FlyoutBody>
+    </>
   );
 };

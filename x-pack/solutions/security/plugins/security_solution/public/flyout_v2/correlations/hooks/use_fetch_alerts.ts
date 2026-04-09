@@ -9,8 +9,8 @@ import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { isNumber } from 'lodash';
-import { useKibana } from '../../../../common/lib/kibana';
-import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { useKibana } from '../../../common/lib/kibana';
+import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { type AlertsQueryParams, createFindAlerts } from '../services/find_alerts';
 
 export type UseAlertsQueryParams = AlertsQueryParams;
@@ -53,6 +53,11 @@ export const useFetchAlerts = ({
 
   const findAlerts = useMemo(() => createFindAlerts(dataService.search), [dataService.search]);
 
+  const isEnabled = useMemo(
+    () => hasAlertsRead && (alertIds?.length ?? 0) > 0,
+    [alertIds, hasAlertsRead]
+  );
+
   const { data, isLoading, isError } = useQuery<
     SearchResponse<Record<string, unknown>, Record<string, AggregationsAggregate>>,
     unknown
@@ -69,7 +74,7 @@ export const useFetchAlerts = ({
       }),
     {
       keepPreviousData: true,
-      enabled: hasAlertsRead && (alertIds?.length ?? 0) > 0,
+      enabled: isEnabled,
     }
   );
 
@@ -77,10 +82,10 @@ export const useFetchAlerts = ({
     const total = data?.hits?.total;
 
     return {
-      loading: isLoading,
+      loading: isEnabled && isLoading,
       error: isError,
       data: data?.hits?.hits || [],
       totalItemCount: isNumber(total) ? total : 0 || 0,
     };
-  }, [data, isError, isLoading]);
+  }, [data, isEnabled, isError, isLoading]);
 };

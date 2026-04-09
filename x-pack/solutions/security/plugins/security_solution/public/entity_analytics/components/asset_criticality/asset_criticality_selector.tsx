@@ -272,13 +272,13 @@ export const AssetCriticalityTitle = () => (
   </EuiToolTip>
 );
 
-interface ModalProps {
-  initialCriticalityLevel: CriticalityLevel | undefined;
+export interface AssetCriticalityModalProps {
+  initialCriticalityLevel: CriticalityLevel | undefined | null;
   toggle: (nextValue: boolean) => void;
   onSave: (value: CriticalityLevelWithUnassigned) => void;
 }
 
-const AssetCriticalityModal: React.FC<ModalProps> = ({
+export const AssetCriticalityModal: React.FC<AssetCriticalityModalProps> = ({
   initialCriticalityLevel,
   toggle,
   onSave,

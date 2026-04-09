@@ -7,11 +7,11 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-import { EuiCallOut } from '@elastic/eui';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { EuiSpacer } from '@elastic/eui';
 import { useUpdateAssetCriticality } from '../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { buildEuidCspPreviewOptions } from '../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
@@ -23,7 +23,7 @@ import { useCalculateEntityRiskScore } from '../../../entity_analytics/api/hooks
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { buildHostNamesFilter } from '../../../../common/search_strategy';
+import { buildHostNamesFilter, type RiskSeverity } from '../../../../common/search_strategy';
 import { useUiSetting, useKibana } from '../../../common/lib/kibana';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { HostPanelFooter } from './footer';
@@ -39,13 +39,18 @@ import {
   getRiskFromEntityRecord,
 } from '../shared/entity_store_risk_utils';
 import { useEntityFromStore, type EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
+import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 import {
   mergeLegacyIdentityWhenStoreEntityMissing,
   type IdentityFields,
 } from '../../document_details/shared/utils';
-import { NO_CORRESPONDING_ENTITY_EXISTS } from '../shared/translations';
 import { HOST_PANEL_RISK_SCORE_QUERY_ID, HOST_PANEL_OBSERVED_HOST_QUERY_ID } from './constants';
+import { FlyoutBody } from '../../shared/components/flyout_body';
+import { useEntityPanelTabs, TABLE_TAB_ID } from '../shared/hooks/use_entity_panel_tabs';
+import { EntityPanelHeaderTabs } from '../shared/components/entity_panel_tabs';
+import { EntityStoreTableTab } from '../shared/components/entity_store_table_tab';
+import { EntitySummaryGrid } from '../shared/components/entity_summary_grid';
 
 export { HOST_PANEL_RISK_SCORE_QUERY_ID, HOST_PANEL_OBSERVED_HOST_QUERY_ID };
 
@@ -215,6 +220,12 @@ export const HostPanel = ({
       ? !!getRiskFromEntityRecord(observedHost.entityRecord)
       : !!hostRiskData?.host?.risk;
 
+  const onCriticalitySave =
+    entityFromStoreResult.entityRecord && observedHost.entityRecord
+      ? (level: CriticalityLevelWithUnassigned) =>
+          updateAssetCriticality(level, observedHost.entityRecord)
+      : undefined;
+
   const entityStoreEntityId = entityStoreV2Enabled
     ? observedHost.entityRecord?.entity?.id
     : undefined;
@@ -254,6 +265,18 @@ export const HostPanel = ({
   const noEntityInStore =
     entityStoreV2Enabled && !entityFromStoreResult.isLoading && !observedHost.entityRecord;
 
+  const { tabs, selectedTabId, setSelectedTabId } = useEntityPanelTabs({
+    entityRecord: observedHost.entityRecord ?? null,
+  });
+
+  const tabsNode = tabs ? (
+    <EntityPanelHeaderTabs
+      tabs={tabs}
+      selectedTabId={selectedTabId}
+      setSelectedTabId={setSelectedTabId}
+    />
+  ) : undefined;
+
   return (
     <>
       <FlyoutNavigation
@@ -273,40 +296,43 @@ export const HostPanel = ({
         lastSeen={observedHost.lastSeen}
         entityId={panelDisplayEntityId}
         identityFields={documentEntityIdentifiers}
-      />
-      {noEntityInStore && (
-        <EuiCallOut
-          title={NO_CORRESPONDING_ENTITY_EXISTS}
-          color="warning"
-          iconType="warning"
-          data-test-subj="entity-flyout-no-entity-warning"
-          announceOnMount
-        />
-      )}
-      <HostPanelContent
-        identityFields={documentEntityIdentifiers}
-        observedHost={observedHost}
-        riskScoreState={effectiveRiskScoreState}
-        contextID={safeContextID}
-        scopeId={scopeId}
-        openDetailsPanel={openDetailsPanel}
-        recalculatingScore={recalculatingScore}
-        onAssetCriticalityChange={calculateEntityRiskScore}
-        isPreviewMode={isPreviewMode}
-        entityRecord={entityStoreV2Enabled ? observedHost.entityRecord ?? undefined : undefined}
-        criticalityFromEntityStore={
-          entityStoreV2Enabled && observedHost.entityRecord
-            ? entityFromStoreResult.entityRecord?.asset?.criticality
+        isEntityInStore={!!observedHost.entityRecord}
+        riskLevel={
+          observedHost.entityRecord
+            ? ((getRiskFromEntityRecord(observedHost.entityRecord)?.calculated_level ??
+                'Unknown') as RiskSeverity)
             : undefined
         }
-        onSaveAssetCriticalityViaEntityStore={
-          entityStoreV2Enabled && entityFromStoreResult.entityRecord
-            ? updateAssetCriticality
-            : undefined
-        }
-        skipRiskAndCriticality={noEntityInStore}
-        entityStoreEntityId={entityStoreEntityId}
       />
+      <FlyoutBody>
+        {observedHost.entityRecord && (
+          <EntitySummaryGrid
+            entityRecord={observedHost.entityRecord}
+            criticalityLevel={entityFromStoreResult.entityRecord?.asset?.criticality}
+            onCriticalitySave={onCriticalitySave}
+          />
+        )}
+        {tabsNode}
+        {tabs && <EuiSpacer size="l" />}
+        {tabs && selectedTabId === TABLE_TAB_ID && observedHost.entityRecord ? (
+          <EntityStoreTableTab entityRecord={observedHost.entityRecord} />
+        ) : (
+          <HostPanelContent
+            identityFields={documentEntityIdentifiers}
+            observedHost={observedHost}
+            riskScoreState={effectiveRiskScoreState}
+            contextID={safeContextID}
+            scopeId={scopeId}
+            openDetailsPanel={openDetailsPanel}
+            recalculatingScore={recalculatingScore}
+            onAssetCriticalityChange={calculateEntityRiskScore}
+            isPreviewMode={isPreviewMode}
+            entityRecord={entityStoreV2Enabled ? observedHost.entityRecord ?? undefined : undefined}
+            skipRiskAndCriticality={noEntityInStore}
+            entityStoreEntityId={entityStoreEntityId}
+          />
+        )}
+      </FlyoutBody>
       {isPreviewMode && (
         <HostPreviewPanelFooter
           hostName={hostName}
