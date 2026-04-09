@@ -792,13 +792,28 @@ export class StreamsClient {
   }
 
   /**
-   * Lists both managed and unmanaged streams
+   * Lists streams. With no filter, returns managed definitions plus unmanaged classic streams
+   * (data streams missing a stored definition). When filtering to `wired` or `query`, only
+   * managed streams are fetched — unmanaged streams are always classic.
    */
-  async listStreams(): Promise<Streams.all.Definition[]> {
-    const streams = await this.listStreamsWithDataStreamExistence();
-    return streams.map(({ stream }) => {
-      return stream;
-    });
+  async listStreams(filter?: {
+    type?: 'classic' | 'wired' | 'query';
+  }): Promise<Streams.all.Definition[]> {
+    const streamType = filter?.type;
+
+    if (streamType === 'wired' || streamType === 'query') {
+      const managed = await this.getManagedStreams();
+      return managed.filter((stream) => stream.type === streamType);
+    }
+
+    const withExistence = await this.listStreamsWithDataStreamExistence();
+    const definitions = withExistence.map(({ stream }) => stream);
+
+    if (streamType === 'classic') {
+      return definitions.filter((stream) => stream.type === 'classic');
+    }
+
+    return definitions;
   }
 
   async listStreamsWithDataStreamExistence(): Promise<

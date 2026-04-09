@@ -85,7 +85,8 @@ export const listStreamsRoute = createServerRoute({
   endpoint: 'GET /api/streams 2023-10-31',
   options: {
     access: 'public',
-    description: 'Fetches list of all streams',
+    description:
+      'Fetches all streams, or only those matching optional query parameter `type` (`classic`, `wired`, or `query`).',
     summary: 'Get stream list',
     availability: {
       since: '9.1.0',
@@ -110,14 +111,24 @@ export const listStreamsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({}),
+  params: z.object({
+    query: z
+      .object({
+        type: z.enum(['classic', 'wired', 'query']).optional(),
+      })
+      .optional(),
+  }),
   handler: async ({
     request,
     getScopedClients,
+    params,
   }): Promise<{ streams: Streams.all.Definition[] }> => {
     const { streamsClient } = await getScopedClients({ request });
+    const filteredType = params?.query?.type;
     return {
-      streams: await streamsClient.listStreams(),
+      streams: await streamsClient.listStreams(
+        filteredType !== undefined ? { type: filteredType } : undefined
+      ),
     };
   },
 });
