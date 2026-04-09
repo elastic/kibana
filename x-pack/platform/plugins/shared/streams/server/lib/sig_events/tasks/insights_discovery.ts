@@ -18,7 +18,6 @@ import type { TaskParams } from '../../tasks/types';
 import { generateInsights } from '../insights/generate_insights';
 import { getErrorMessage, parseError } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
-import { resolveConnectorForSignificantEventsDiscovery } from '../../../routes/utils/resolve_connector_for_feature';
 import type { MemoryGenerationTaskParams } from '../../tasks/task_definitions/memory_generation';
 import { MEMORY_GENERATION_TASK_TYPE } from '../../tasks/task_definitions/memory_generation';
 import { MemoryServiceImpl } from '../../memory';
