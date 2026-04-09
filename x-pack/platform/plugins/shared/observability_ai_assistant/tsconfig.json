@@ -62,6 +62,7 @@
     "@kbn/product-doc-base-plugin",
     "@kbn/spaces-utils",
     "@kbn/usage-collection-plugin",
+    "@kbn/ai-agent-confirmation-modal",
     "@kbn/ai-assistant-management-plugin",
     "@kbn/agent-builder-plugin",
     "@kbn/zod",

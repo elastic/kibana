@@ -7,14 +7,13 @@
 
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
-export const DefaultExperienceCalloutKey =
-  'observabilityAIAssistant.defaultExperienceCalloutDismissed';
+export const AIAgentTourKey = 'observabilityAIAssistant.aiAgentTourDismissed';
 
-export function useDefaultExperienceCalloutDismissed(
+export function useAIAgentTourDismissed(
   defaultValue = false
 ): [boolean, (isDismissed: boolean) => void] {
   const [dismissed = defaultValue, setDismissed] = useLocalStorage<boolean>(
-    DefaultExperienceCalloutKey,
+    AIAgentTourKey,
     defaultValue
   );
 
