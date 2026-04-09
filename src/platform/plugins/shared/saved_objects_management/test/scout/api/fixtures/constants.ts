@@ -43,7 +43,11 @@ export const MANAGEMENT_API = {
 
 export const DEFAULT_TYPES = ['visualization', 'index-pattern', 'search', 'dashboard'];
 
-export function relationshipsUrl(type: string, id: string, types: string[] = DEFAULT_TYPES): string {
+export function relationshipsUrl(
+  type: string,
+  id: string,
+  types: string[] = DEFAULT_TYPES
+): string {
   const typesQuery = types.map((t) => `savedObjectTypes=${t}`).join('&');
   return `${MANAGEMENT_API.RELATIONSHIPS}/${type}/${id}?${typesQuery}`;
 }
