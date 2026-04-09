@@ -146,6 +146,7 @@
     "@kbn/file-upload-common",
     "@kbn/kql",
     "@kbn/as-code-filters-transforms",
+    "@kbn/as-code-filters-schema",
     "@kbn/cps",
     "@kbn/cps-utils",
     "@kbn/lens-common",
