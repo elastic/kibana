@@ -577,7 +577,19 @@ describe('ServiceNowITSMParamsFields renders', () => {
       await userEvent.tripleClick(correlationInput);
       await userEvent.paste('updated correlation id');
 
+      // Verify the correlation_id was updated via editAction
+      expect(editAction.mock.calls.at(-1)![1]).toEqual({
+        incident: { correlation_id: 'updated correlation id' },
+      });
+
+      editAction.mockClear();
       await userEvent.selectOptions(screen.getByTestId('eventActionSelect'), 'resolve');
+
+      // After changing to 'resolve', editAction should be called with 'closeIncident'
+      // which resets the sub-action and clears the form fields
+      await waitFor(() => {
+        expect(editAction).toHaveBeenCalledWith('subAction', 'closeIncident', 0);
+      });
     });
   });
 });
