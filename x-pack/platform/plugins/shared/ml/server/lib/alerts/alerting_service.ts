@@ -452,15 +452,14 @@ export function alertingServiceProvider(
   ) => {
     if (isTimeFunction(source.function) && formatters.dateFormatter) {
       const timezone = 'UTC';
-      const formattedTimeValue = formatTimeValue(value, source.function, source, timezone);
-      const formattedDayOfWeek = formattedTimeValue.moment.format('ddd');
-      const formattedDate = formatters.dateFormatter.convert(
-        formattedTimeValue.moment.valueOf(),
-        'text',
-        {
-          timezone,
-        }
-      );
+      // `formatted` is the compact UI label from `formatTimeValue()`. Alerts need the
+      // fully qualified UTC date/time, so build the notification string from the
+      // resolved moment instead of reusing the shorter display text.
+      const { moment: resolvedMoment } = formatTimeValue(value, source.function, source, timezone);
+      const formattedDayOfWeek = resolvedMoment.format('ddd');
+      const formattedDate = formatters.dateFormatter.convert(resolvedMoment.valueOf(), 'text', {
+        timezone,
+      });
       return `${formattedDayOfWeek} ${formattedDate} UTC`;
     }
 
