@@ -216,6 +216,7 @@ export const deleteIndexedFleetEndpointPolicies = async (
               method: 'POST',
               body: {
                 agentPolicyId: agentPolicy.id,
+                force: true,
               },
             })
             .catch(wrapErrorAndRejectPromise)) as AxiosResponse<DeleteAgentPolicyResponse>
