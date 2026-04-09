@@ -13,7 +13,6 @@ import type {
   ConversationWithoutRounds,
   ToolResult,
   UserIdAndName,
-  ConversationMode,
 } from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
@@ -222,11 +221,7 @@ export const fromEsWithoutRounds = (document: Document): ConversationWithoutRoun
   return convertBaseFromEs(document);
 };
 
-export const toEs = (
-  conversation: Conversation,
-  space: string,
-  conversationMode?: ConversationMode
-): ConversationProperties => {
+export const toEs = (conversation: Conversation, space: string): ConversationProperties => {
   // Write both old and new formats for backward compatibility during transition
   const events = roundsToTimelineEvents(
     conversation.rounds,
@@ -247,8 +242,6 @@ export const toEs = (
     conversation_rounds: serializeStepResults(conversation.rounds),
     // New timeline format
     events,
-    conversation_mode: conversationMode,
-    execution_state: 'idle',
     attachments: conversation.attachments ?? [],
     state: conversation.state,
   };
@@ -299,8 +292,6 @@ export const createRequestToEs = ({
     updated_at: creationDate.toISOString(),
     conversation_rounds: serializeStepResults(conversation.rounds),
     events,
-    conversation_mode: conversation.conversation_mode,
-    execution_state: 'idle',
     attachments: conversation.attachments ?? [],
     state: conversation.state,
   };

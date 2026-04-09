@@ -196,7 +196,6 @@ export {
   type CompactionCompletedEventData,
   isCompactionStartedEvent,
   isCompactionCompletedEvent,
-  ConversationMode,
   TimelineEventType,
   type TimelineEventTypeValue,
   type BaseTimelineEvent,

@@ -90,7 +90,6 @@ export {
 } from './events';
 export type { RoundState } from './round_state';
 export {
-  ConversationMode,
   TimelineEventType,
   type TimelineEventTypeValue,
   type BaseTimelineEvent,

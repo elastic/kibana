@@ -10,12 +10,7 @@ import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import type {
-  ConversationInternalState,
-  ConversationExecutionState,
-  TimelineEvent,
-} from '@kbn/agent-builder-common/chat';
-import type { ConversationMode } from '@kbn/agent-builder-common';
+import type { ConversationInternalState, TimelineEvent } from '@kbn/agent-builder-common/chat';
 import type { PersistentConversationRound } from './types';
 
 export const conversationIndexName = chatSystemIndex('conversations');
@@ -99,8 +94,6 @@ export interface ConversationProperties {
   rounds?: PersistentConversationRound[];
   // New timeline-based fields
   events?: TimelineEvent[];
-  conversation_mode?: ConversationMode;
-  execution_state?: ConversationExecutionState;
 }
 
 export type ConversationStorageSettings = typeof storageSettings;

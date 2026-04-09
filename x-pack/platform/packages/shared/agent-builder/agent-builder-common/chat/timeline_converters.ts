@@ -14,12 +14,7 @@ import type {
   AgentResponseEvent,
   ExecutionConversation,
 } from './conversation';
-import {
-  ConversationMode,
-  TimelineEventType,
-  isUserMessageEvent,
-  isAgentResponseEvent,
-} from './conversation';
+import { TimelineEventType, isUserMessageEvent, isAgentResponseEvent } from './conversation';
 
 /**
  * Converts a list of conversation rounds to timeline events.
@@ -133,8 +128,6 @@ export const conversationToExecutionConversation = (
     attachments: conversation.attachments,
     state: conversation.state,
     timeline,
-    conversation_mode: ConversationMode.user,
-    execution_state: 'idle',
   };
 };
 

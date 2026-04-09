@@ -310,7 +310,7 @@ export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;
 export type ConversationAction = 'regenerate';
 
 // ---------------------------------------------------------------------------
-// Multi-user conversation / timeline data model
+// Timeline data model
 // ---------------------------------------------------------------------------
 
 /**
@@ -410,21 +410,12 @@ export const isAgentResponseEvent = (event: TimelineEvent): event is AgentRespon
 };
 
 /**
- * Execution state of a conversation.
- */
-export type ConversationExecutionState = 'idle' | 'executing' | 'awaiting_hitl';
-
-/**
  * Timeline-based conversation format. Replaces the rounds-based model
  * as the canonical internal representation.
  */
 export type TimelineConversation = Omit<Conversation, 'rounds'> & {
   /** Ordered list of timeline events */
   timeline: TimelineEvent[];
-  /** Whether this is a single-user or group conversation */
-  conversation_mode: ConversationMode;
-  /** Current execution state */
-  execution_state: ConversationExecutionState;
 };
 
 /**
