@@ -23,6 +23,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
+import { useMlKibana } from '../../../../../../contexts/kibana';
 import type {
   CombinedJob,
   Datafeed,
@@ -49,10 +50,15 @@ interface Props {
 }
 
 export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafeedEditorMode }) => {
+  const {
+    services: { cps },
+  } = useMlKibana();
+  const cpsManager = cps?.cpsManager;
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const { displayErrorToast } = useToastNotificationService();
   const [showJsonFlyout, setShowJsonFlyout] = useState(false);
   const [showChangedIndicesWarning, setShowChangedIndicesWarning] = useState(false);
+  const [showProjectRoutingWarning, setShowProjectRoutingWarning] = useState(false);
 
   const [jobConfigString, setJobConfigString] = useState(jobCreator.formattedJobJson);
   const [datafeedConfigString, setDatafeedConfigString] = useState(
@@ -62,6 +68,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
   const [tempCombinedJob, setTempCombinedJob] = useState<CombinedJob | null>(null);
   const [jobSchema, setJobSchema] = useState<object>();
   const [datafeedSchema, setDatafeedSchema] = useState<object>();
+  const [allowedProjects, setAllowedProjects] = useState<string[]>([]);
 
   useEffect(() => {
     setJobConfigString(jobCreator.formattedJobJson);
@@ -80,6 +87,14 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
       });
 
       setShowChangedIndicesWarning(false);
+      setShowProjectRoutingWarning(false);
+      if (cpsManager) {
+        cpsManager.fetchProjects().then((projects) => {
+          if (projects) {
+            setAllowedProjects(Object.keys(projects));
+          }
+        });
+      }
     } else {
       setTempCombinedJob(null);
     }
@@ -136,12 +151,20 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
         originalIndices.every((value, index) => value === datafeed.indices[index]);
       setShowChangedIndicesWarning(valid === false);
 
+      const hasInvalidProjectRouting =
+        !!datafeed.project_routing && !allowedProjects.includes(datafeed.project_routing);
+      setShowProjectRoutingWarning(hasInvalidProjectRouting);
+      if (hasInvalidProjectRouting) {
+        valid = false;
+      }
+
       setTempCombinedJob({
         ...JSON.parse(jobConfigString),
         datafeed_config: datafeed,
       });
     } else {
       setShowChangedIndicesWarning(false);
+      setShowProjectRoutingWarning(false);
       setTempCombinedJob(null);
     }
 
@@ -196,7 +219,10 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
                     defaultMessage: 'Job configuration JSON',
                   })}
                   value={jobConfigString}
-                  heightOffset={showChangedIndicesWarning ? WARNING_CALLOUT_OFFSET : 0}
+                  heightOffset={
+                    (showChangedIndicesWarning ? WARNING_CALLOUT_OFFSET : 0) +
+                    (showProjectRoutingWarning ? WARNING_CALLOUT_OFFSET : 0)
+                  }
                   schema={jobSchema}
                   flyoutTitleId={flyoutTitleId}
                 />
@@ -210,7 +236,10 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
                       defaultMessage: 'Datafeed configuration JSON',
                     })}
                     value={datafeedConfigString}
-                    heightOffset={showChangedIndicesWarning ? WARNING_CALLOUT_OFFSET : 0}
+                    heightOffset={
+                      (showChangedIndicesWarning ? WARNING_CALLOUT_OFFSET : 0) +
+                      (showProjectRoutingWarning ? WARNING_CALLOUT_OFFSET : 0)
+                    }
                     schema={datafeedSchema}
                     flyoutTitleId={flyoutTitleId}
                   />
@@ -218,7 +247,10 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
                     <EuiFlexItem>
                       <DatafeedPreview
                         combinedJob={tempCombinedJob}
-                        heightOffset={showChangedIndicesWarning ? WARNING_CALLOUT_OFFSET : 0}
+                        heightOffset={
+                          (showChangedIndicesWarning ? WARNING_CALLOUT_OFFSET : 0) +
+                          (showProjectRoutingWarning ? WARNING_CALLOUT_OFFSET : 0)
+                        }
                       />
                     </EuiFlexItem>
                   )}
@@ -242,6 +274,27 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
                   <FormattedMessage
                     id="xpack.ml.newJob.wizard.jsonFlyout.indicesChange.calloutText"
                     defaultMessage="You cannot alter the indices being used by the datafeed here. To select a different data view or saved Discover session, go to step 1 of the wizard and select the Change data view option."
+                  />
+                </EuiCallOut>
+              </>
+            )}
+            {showProjectRoutingWarning && (
+              <>
+                <EuiSpacer />
+                <EuiCallOut
+                  announceOnMount
+                  color="warning"
+                  size="s"
+                  title={i18n.translate(
+                    'xpack.ml.newJob.wizard.jsonFlyout.projectRoutingChange.calloutTitle',
+                    {
+                      defaultMessage: 'Invalid project routing',
+                    }
+                  )}
+                >
+                  <FormattedMessage
+                    id="xpack.ml.newJob.wizard.jsonFlyout.projectRoutingChange.calloutText"
+                    defaultMessage="The project routing specified in the datafeed configuration is not a valid project. Please use a project routing value from one of the available projects."
                   />
                 </EuiCallOut>
               </>
