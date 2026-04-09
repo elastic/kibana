@@ -118,11 +118,14 @@ apiTest.describe(
 
     apiTest(
       'should not allow us to update a space with disabled features',
-      async ({ apiClient }) => {
-        const response = await apiClient.put('api/spaces/space/space_to_update', {
+      async ({ apiClient, apiServices }) => {
+        await apiServices.spaces.create({ id: 'space_to_update_disabled' });
+        createdSpaceIds.push('space_to_update_disabled');
+
+        const response = await apiClient.put('api/spaces/space/space_to_update_disabled', {
           headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
           body: {
-            id: 'space_to_update',
+            id: 'space_to_update_disabled',
             name: 'some new name',
             initials: 'SN',
             disabledFeatures: ['discover'],
