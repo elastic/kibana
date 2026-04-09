@@ -168,7 +168,7 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .send(props.body as object);
   },
   /**
-   * Create and run a saved query.
+   * Create and save a query for later use.
    */
   osqueryCreateSavedQuery(props: OsqueryCreateSavedQueryProps, kibanaSpace: string = 'default') {
     return supertest
