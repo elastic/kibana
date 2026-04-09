@@ -187,7 +187,7 @@ describe('useDashboardMenuItems', () => {
 
   describe('switchToViewMode', () => {
     describe('dashboard does not have unsaved changes', () => {
-      test('should switch dashboard to view mode', () => {
+      test('should switch to view mode', () => {
         const { api } = buildMockDashboardApi({ savedObjectId: 'test-id' });
         const mockSetViewMode = jest.fn();
 
@@ -277,7 +277,7 @@ describe('useDashboardMenuItems', () => {
         });
       });
 
-      test('should switch dashboard to view mode and reset changes on accept', async () => {
+      test('should switch to view mode and reset changes on accept', async () => {
         const { result } = renderHook(
           () =>
             useDashboardMenuItems({
