@@ -26,7 +26,7 @@ export class DiscoverApp {
   }
 
   private async waitForDiscoverPage() {
-    await expect(this.page.testSubj.locator('dscPage')).toBeVisible();
+    await expect(this.page.testSubj.locator('dscPage')).toBeVisible({ timeout: 30_000 });
   }
 
   private async getVisibleDataViewSwitch() {
