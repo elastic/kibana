@@ -7,31 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
-import { PROJECT_ROUTING, ProjectRoutingAccess, type ICPSManager } from '@kbn/cps-utils';
-import { of } from 'rxjs';
-
-import { HasData } from './has_data';
 import { HttpFetchError } from '@kbn/core-http-browser-internal/src/http_fetch_error';
-
-const createCpsManager = ({
-  totalProjectCount = 2,
-}: {
-  totalProjectCount?: number;
-} = {}): ICPSManager => {
-  return {
-    whenReady: jest.fn().mockResolvedValue(undefined),
-    fetchProjects: jest.fn().mockResolvedValue(null),
-    getTotalProjectCount: jest.fn().mockReturnValue(totalProjectCount),
-    getProjectRouting$: jest.fn(() => of(undefined)),
-    setProjectRouting: jest.fn(),
-    getProjectRouting: jest.fn(() => undefined),
-    getDefaultProjectRouting: jest.fn(() => PROJECT_ROUTING.ALL),
-    updateDefaultProjectRouting: jest.fn(),
-    getProjectPickerAccess$: jest.fn(() => of(ProjectRoutingAccess.DISABLED)),
-    registerAppAccess: jest.fn(),
-  };
-};
+import { coreMock } from '@kbn/core/public/mocks';
+import { cpsPluginMock } from '@kbn/cps/public/mocks';
+import { HasData } from './has_data';
 
 describe('when calling hasData service', () => {
   describe('hasDataView', () => {
@@ -157,10 +136,11 @@ describe('when calling hasData service', () => {
       it('should return true for hasESData when CPS has linked projects', async () => {
         const coreStart = coreMock.createStart();
         const http = coreStart.http;
-        const cpsManager = createCpsManager();
+        const cpsManager = cpsPluginMock.createStartContract().cpsManager!;
+
+        jest.mocked(cpsManager.getTotalProjectCount).mockReturnValue(2);
 
         const spy = jest.spyOn(http, 'get');
-
         const hasData = new HasData();
         const hasDataService = hasData.start(coreStart, true, cpsManager);
         const response = hasDataService.hasESData();
