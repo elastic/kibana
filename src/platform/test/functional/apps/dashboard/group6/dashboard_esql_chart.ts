@@ -46,6 +46,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should add an ES|QL datatable chart when the ES|QL panel action is clicked', async () => {
+      await dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
       await dashboardAddPanel.openAddPanelFlyout();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
       await dashboardAddPanel.expectAddPanelFlyoutClosed();
