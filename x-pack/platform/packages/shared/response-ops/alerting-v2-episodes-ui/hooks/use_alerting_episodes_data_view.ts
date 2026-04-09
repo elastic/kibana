@@ -12,7 +12,7 @@ import type { DataViewsContract, RuntimeField } from '@kbn/data-views-plugin/pub
 import { useMemo } from 'react';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { buildEpisodesBaseQuery } from '../utils/build_episodes_esql_query';
+import { buildEpisodesBaseQuery } from '../queries/episodes_query';
 
 export interface UseAlertingEpisodesDataViewOptions {
   query?: string;

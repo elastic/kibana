@@ -43,14 +43,14 @@ export function useQueriesApi(): QueriesApi {
         const params = { body: { queryIds } };
         return streamsRepositoryClient.fetch('POST /internal/streams/queries/_promote', {
           params,
-          signal,
+          signal: null,
         });
       },
       demote: async ({ queryIds }: { queryIds: string[] }) => {
         const params = { body: { queryIds } };
         return streamsRepositoryClient.fetch('POST /internal/streams/queries/_demote', {
           params,
-          signal,
+          signal: null,
         });
       },
       upsertQuery: async ({ query, streamName }: { query: StreamQuery; streamName: string }) => {
@@ -106,7 +106,7 @@ export function useQueriesApi(): QueriesApi {
       promoteAll: async () => {
         return streamsRepositoryClient.fetch('POST /internal/streams/queries/_promote', {
           params: { body: {} },
-          signal,
+          signal: null,
         });
       },
       getUnbackedQueriesCount: async (requestSignal?: AbortSignal | null) => {
