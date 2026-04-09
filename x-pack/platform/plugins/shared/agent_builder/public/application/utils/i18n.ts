@@ -490,6 +490,11 @@ export const labels = {
       ),
     },
   },
+  byAuthor: (author: string) =>
+    i18n.translate('xpack.agentBuilder.byAuthor', {
+      defaultMessage: 'By {author}',
+      values: { author },
+    }),
   skills: {
     title: i18n.translate('xpack.agentBuilder.skills.title', { defaultMessage: 'Skills' }),
     newSkillButton: i18n.translate('xpack.agentBuilder.skills.newSkillButton', {
