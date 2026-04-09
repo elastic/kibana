@@ -13,6 +13,7 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiHorizontalRule,
   EuiLink,
   EuiSpacer,
   EuiText,
@@ -33,7 +34,7 @@ export interface LibraryPanelLabels {
   title: string;
   manageLibraryLink: string;
   searchPlaceholder: string;
-  availableSummary: (filtered: number, total: number) => string;
+  availableSummary: (filtered: number, total: number) => React.ReactNode;
   noMatchMessage: string;
   noItemsMessage: string;
   disabledBadgeLabel?: string;
@@ -53,6 +54,7 @@ export interface LibraryPanelProps<T extends LibraryItem> {
   getItemName?: (item: T) => string;
   getSearchableText?: (item: T) => string[];
   disabledItemIdSet?: Set<string>;
+  readOnlyItemIdSet?: Set<string>;
   callout?: React.ReactNode;
 }
 
@@ -70,6 +72,7 @@ export const LibraryPanel = <T extends LibraryItem>({
   getItemName = defaultGetItemName,
   getSearchableText,
   disabledItemIdSet,
+  readOnlyItemIdSet,
   callout,
 }: LibraryPanelProps<T>) => {
   const { createAgentBuilderUrl } = useNavigation();
@@ -130,11 +133,11 @@ export const LibraryPanel = <T extends LibraryItem>({
 
         <EuiSpacer size="m" />
 
-        <EuiText size="xs" color="subdued">
+        <EuiText size="xs">
           {libraryLabels.availableSummary(filteredItems.length, allItems.length)}
         </EuiText>
 
-        <EuiSpacer size="m" />
+        <EuiHorizontalRule margin="s" />
 
         {callout}
 
@@ -143,7 +146,7 @@ export const LibraryPanel = <T extends LibraryItem>({
             {searchQuery.trim() ? libraryLabels.noMatchMessage : libraryLabels.noItemsMessage}
           </EuiText>
         ) : (
-          <EuiFlexGroup direction="column" gutterSize="m">
+          <EuiFlexGroup direction="column" gutterSize="none">
             {filteredItems.map((item) => (
               <EuiFlexItem key={item.id} grow={false}>
                 <LibraryToggleRow
@@ -154,10 +157,12 @@ export const LibraryPanel = <T extends LibraryItem>({
                   onToggle={(checked) => onToggleItem(item, checked)}
                   isMutating={mutatingItemId === item.id}
                   isDisabled={disabledItemIdSet?.has(item.id)}
+                  isReadOnly={readOnlyItemIdSet?.has(item.id)}
                   disabledBadgeLabel={libraryLabels.disabledBadgeLabel}
                   disabledTooltipTitle={libraryLabels.disabledTooltipTitle}
                   disabledTooltipBody={libraryLabels.disabledTooltipBody}
                 />
+                <EuiHorizontalRule margin="m" />
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
