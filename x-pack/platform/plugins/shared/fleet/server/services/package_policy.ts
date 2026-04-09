@@ -3871,7 +3871,9 @@ function enforceFrozenInputs(
   const resultInputs = [...newInputs];
 
   for (const input of resultInputs) {
-    const oldInput = oldInputs.find((i) => getInputEffectiveName(i) === getInputEffectiveName(input));
+    const oldInput = oldInputs.find(
+      (i) => getInputEffectiveName(i) === getInputEffectiveName(input)
+    );
     if (oldInput?.keep_enabled) input.enabled = oldInput.enabled;
     if (input.vars && oldInput?.vars) {
       input.vars = _enforceFrozenVars(oldInput.vars, input.vars, force);
@@ -4029,7 +4031,9 @@ export function updatePackageInputs(
     } else {
       // For inputs that don't specify a policy template, just grab the first input
       // that matches its effective id
-      originalInput = inputs.find((i) => getInputEffectiveName(i) === getInputEffectiveName(update));
+      originalInput = inputs.find(
+        (i) => getInputEffectiveName(i) === getInputEffectiveName(update)
+      );
     }
 
     // If there's no corresponding input on the original package policy, just
