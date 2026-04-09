@@ -31,7 +31,7 @@ export const updateObservableStepCommonDefinition: CommonStepDefinition<
   UpdateObservableStepOutputSchema
 > = {
   id: UpdateObservableStepTypeId,
-  category: StepCategory.Kibana,
+  category: StepCategory.KibanaCases,
   label: i18n.UPDATE_OBSERVABLE_STEP_LABEL,
   description: i18n.UPDATE_OBSERVABLE_STEP_DESCRIPTION,
   documentation: {

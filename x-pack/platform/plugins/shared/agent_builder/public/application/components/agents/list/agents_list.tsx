@@ -22,8 +22,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { UserIdAndName } from '@kbn/agent-builder-common';
-import { hasAgentWriteAccess, type AgentDefinition } from '@kbn/agent-builder-common';
+import { canCurrentUserEditAgent, type AgentDefinition } from '@kbn/agent-builder-common';
 import { countBy } from 'lodash';
 import React, { useMemo } from 'react';
 import { useDeleteAgent } from '../../../context/delete_agent_context';
@@ -66,35 +65,6 @@ const actionLabels = {
   checkingPermissions: i18n.translate('xpack.agentBuilder.agents.actions.checkingPermissions', {
     defaultMessage: 'Checking permissions…',
   }),
-};
-
-const canCurrentUserEditAgent = ({
-  agent,
-  manageAgents,
-  currentUser,
-  isAdmin,
-  isCurrentUserLoading,
-}: {
-  agent: AgentDefinition;
-  manageAgents: boolean;
-  currentUser?: UserIdAndName | null;
-  isAdmin: boolean;
-  isCurrentUserLoading: boolean;
-}) => {
-  if (agent.readonly || !manageAgents) {
-    return false;
-  }
-
-  if (isCurrentUserLoading) {
-    return false;
-  }
-
-  return hasAgentWriteAccess({
-    visibility: agent.visibility,
-    owner: agent.created_by,
-    currentUser,
-    isAdmin,
-  });
 };
 
 export const AgentsList: React.FC = () => {

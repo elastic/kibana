@@ -32,6 +32,7 @@ export interface InsightsDiscoveryTaskResult {
 export interface InsightsDiscoveryTaskParams {
   /** When provided, only generate insights for these stream names. Otherwise all streams are used. */
   streamNames?: string[];
+  connectorId?: string;
 }
 
 export const STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE = 'streams_insights_discovery';
@@ -48,8 +49,11 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
               }
               const { fakeRequest } = runContext;
 
-              const { streamNames, _task } = runContext.taskInstance
-                .params as TaskParams<InsightsDiscoveryTaskParams>;
+              const {
+                streamNames,
+                connectorId: connectorIdOverride,
+                _task,
+              } = runContext.taskInstance.params as TaskParams<InsightsDiscoveryTaskParams>;
 
               const {
                 taskClient,
@@ -64,10 +68,14 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
               });
 
               const taskLogger = taskContext.logger.get('insights_discovery');
-              const connectorId = await resolveConnectorForSignificantEventsDiscovery({
-                searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
-                request: fakeRequest,
-              });
+              const connectorId =
+                connectorIdOverride ??
+                (await resolveConnectorForFeature({
+                  searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
+                  featureId: STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
+                  featureName: 'discovery',
+                  request: fakeRequest,
+                }));
               taskLogger.debug(`Using connector ${connectorId} for discovery`);
               const boundInferenceClient = inferenceClient.bindTo({ connectorId });
 
@@ -135,7 +143,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
 
                 await taskClient.complete<InsightsDiscoveryTaskParams, InsightsDiscoveryTaskResult>(
                   _task,
-                  { streamNames },
+                  { streamNames, connectorId: connectorIdOverride },
                   { insights, tokensUsed: result.tokens_used }
                 );
 
@@ -181,7 +189,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
 
                 await taskClient.fail<InsightsDiscoveryTaskParams>(
                   _task,
-                  { streamNames },
+                  { streamNames, connectorId: connectorIdOverride },
                   errorMessage
                 );
                 return getDeleteTaskRunResult();
