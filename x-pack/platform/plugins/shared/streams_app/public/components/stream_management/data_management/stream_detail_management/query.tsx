@@ -4,25 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import { EuiFlexGroup, EuiPageHeader, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
-import { EuiFlexGroup, EuiFlexItem, EuiPageHeader, EuiToolTip, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
+import React from 'react';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
+import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import type { ManagementTabs } from './wrapper';
-import { StreamsAppPageTemplate } from '../../../streams_app_page_template';
-import { DiscoverBadgeButton, QueryStreamBadge } from '../../../stream_badges';
-import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
-import { StreamDetailAttachments } from '../../../stream_detail_attachments';
-import { RedirectTo } from '../../../redirect_to';
 import { QueryStreamSchemaEditor } from '../../../query_streams/query_stream_schema_editor';
 import { QueryStreamsAdvancedView } from '../../../query_streams/query_streams_advanced_view';
-import { FeedbackButton } from '../../../feedback_button';
+import { RedirectTo } from '../../../redirect_to';
+import { DiscoverBadgeButton, QueryStreamBadge } from '../../../stream_badges';
+import { StreamDetailAttachments } from '../../../stream_detail_attachments';
 import { StreamOverview } from '../../../stream_detail_overview';
+import { StreamsAppPageTemplate } from '../../../streams_app_page_template';
+import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
+import type { ManagementTabs } from './wrapper';
 
 const queryStreamManagementSubTabs = [
   'overview',
@@ -137,14 +136,12 @@ export function QueryStreamDetailManagement({
           background: ${euiTheme.colors.backgroundBasePlain};
         `}
         pageTitle={
-          <EuiFlexGroup gutterSize="s" alignItems="center">
-            {key}
-            <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              {key}
               <QueryStreamBadge />
-              <EuiFlexItem grow />
-              <DiscoverBadgeButton stream={definition.stream} hasDataStream spellOut />
-              <FeedbackButton />
             </EuiFlexGroup>
+            <DiscoverBadgeButton stream={definition.stream} hasDataStream spellOut />
           </EuiFlexGroup>
         }
         tabs={Object.entries(tabs).map(([tabKey, { label }]) => ({
