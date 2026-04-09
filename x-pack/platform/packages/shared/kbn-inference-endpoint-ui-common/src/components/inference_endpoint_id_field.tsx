@@ -18,6 +18,7 @@ import {
   EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import {
