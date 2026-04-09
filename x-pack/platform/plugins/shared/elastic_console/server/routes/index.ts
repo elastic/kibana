@@ -8,6 +8,7 @@
 import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ElasticConsolePluginStart, ElasticConsoleStartDependencies } from '../types';
+import type { LlmGatewayTelemetryWriter } from '../telemetry/llm_gateway_telemetry';
 import { registerChatCompletionsRoute } from './chat_completions';
 import { registerConversationRoutes } from './conversations';
 import { registerModelsRoute } from './models';
@@ -18,13 +19,15 @@ export const registerRoutes = ({
   coreSetup,
   logger,
   cloud,
+  writeLlmGatewayTelemetry,
 }: {
   router: IRouter;
   coreSetup: CoreSetup<ElasticConsoleStartDependencies, ElasticConsolePluginStart>;
   logger: Logger;
   cloud?: CloudSetup;
+  writeLlmGatewayTelemetry: LlmGatewayTelemetryWriter;
 }) => {
-  registerChatCompletionsRoute({ router, coreSetup, logger });
+  registerChatCompletionsRoute({ router, coreSetup, logger, writeLlmGatewayTelemetry });
   registerConversationRoutes({ router, coreSetup, logger });
   registerModelsRoute({ router, coreSetup, logger });
   registerSetupRoute({ router, coreSetup, logger, cloud });

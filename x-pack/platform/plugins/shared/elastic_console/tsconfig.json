@@ -25,6 +25,9 @@
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-server",
     "@kbn/core-feature-flags-server",
+    "@kbn/core-data-streams-server",
+    "@kbn/dashboard-plugin",
+    "@kbn/es-mappings",
     "@kbn/logging"
   ]
 }
