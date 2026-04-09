@@ -164,7 +164,7 @@
           "({ items, anchorElement, tooltipContent, tooltipTitle, isOpen, popoverWidth, primaryActionItem, secondaryActionItem, popoverTestId, onClose, onCloseOverflowButton, }: AppMenuContextMenuProps) => React.JSX.Element | null"
         ],
         "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/components/app_menu_popover.tsx",
-        "lineNumber": 33,
+        "lineNumber": 34,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -180,7 +180,7 @@
               "AppMenuContextMenuProps"
             ],
             "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/components/app_menu_popover.tsx",
-            "lineNumber": 33,
+            "lineNumber": 34,
             "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,

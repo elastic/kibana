@@ -12,6 +12,7 @@ import { getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
+import { defaultToolsFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
 import { EventKind } from '../constants/event_kinds';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { useKibana } from '../../../common/lib/kibana';
@@ -94,12 +95,7 @@ export const InvestigationSection = memo(
           history,
           children: <InvestigationGuideToolsFlyout hit={hit} />,
         }),
-        {
-          ownFocus: false,
-          resizable: true,
-          size: 'm',
-          type: 'overlay',
-        }
+        { ...defaultToolsFlyoutProperties }
       );
     }, [history, hit, overlays, services, store]);
 
