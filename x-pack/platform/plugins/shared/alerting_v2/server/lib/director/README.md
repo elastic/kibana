@@ -1,6 +1,10 @@
 # Director Service
 
-The Director is a state engine responsible for deriving alert state transitions (e.g., pending → active) from the immutable stream of raw alert events.. It processes alert events and determines their episode status using configurable transition strategies. Strategies allows us to support different transition behaviors, based on rule configuration or alert event data, without modifying the core logic of the director. 
+The Director is a state engine that derives episode transitions (for example `pending` → `active`) from the stream of alert events produced by the rule executor. It runs inside the rule pipeline as [`DirectorStep`](../rule_executor/steps/director_step.ts), not as a separate Task Manager job.
+
+Configurable transition strategies encapsulate how rules move between episode statuses (including count/timeframe thresholds) without changing `DirectorService` core logic.
+
+See also: [Rule executor README](../rule_executor/README.md) and [server README](../../README.md).
 
 ## Architecture Overview
 
@@ -100,11 +104,11 @@ These are the possible statuses of an alert episode:
 
 An episode represents a complete alert lifecycle from activation to recovery. The Director manages episode IDs as follows:
 
-1. **New Episode**: A new UUID is generated when:
+1. New Episode: A new UUID is generated when:
    - There is no previous alert state for the group
    - The previous episode was `inactive` and the new status is not `inactive`
 
-2. **Existing Episode**: The current episode ID is preserved when:
+2. Existing Episode: The current episode ID is preserved when:
    - The alert remains in an active lifecycle (pending, active, or recovering)
 
 ```
@@ -185,20 +189,23 @@ export class CustomTransitionStrategy implements ITransitionStrategy {
 
 ### Step 2: Register the Strategy
 
-Register your custom strategy with DI token-based multi-injection:
+Register strategies in `setup/bind_services.ts` with `TransitionStrategyToken` (multi-injection). `TransitionStrategyFactory` is already bound there.
 
 ```typescript
-import { BasicTransitionStrategy } from './basic_strategy';
-import { TransitionStrategyFactory } from './strategy_resolver';
-import { TransitionStrategyToken } from './types';
-import { CustomTransitionStrategy } from './custom_strategy';
+import { CustomTransitionStrategy } from '../lib/director/strategies/custom_strategy';
+import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strategy';
+import { CountTimeframeStrategy } from '../lib/director/strategies/count_timeframe_strategy';
+import { TransitionStrategyToken } from '../lib/director/strategies/types';
 
-bind(TransitionStrategyFactory).toSelf().inSingletonScope();
+// Order matters: specialized strategies first, BasicTransitionStrategy last.
+// Production today registers CountTimeframeStrategy then BasicTransitionStrategy;
+// insert CustomTransitionStrategy before the fallback when you add one.
+bind(TransitionStrategyToken).to(CountTimeframeStrategy).inSingletonScope();
 bind(TransitionStrategyToken).to(CustomTransitionStrategy).inSingletonScope();
 bind(TransitionStrategyToken).to(BasicTransitionStrategy).inSingletonScope();
 ```
 
-**Important:** binding order matters.
+Important: binding order matters.
 
 - Specialized strategies first
 - Fallback strategy (`BasicTransitionStrategy`) last

@@ -1,3 +1,5 @@
-# Kibana Alerting V2
+# Kibana Alerting v2
 
-Plugin for the v2 alerting engine.
+Kibana plugin for Alerting v2: an ES|QL-first, append-only rule engine.
+
+Backend architecture, extension points, and links to component docs are in [`server/README.md`](server/README.md).
