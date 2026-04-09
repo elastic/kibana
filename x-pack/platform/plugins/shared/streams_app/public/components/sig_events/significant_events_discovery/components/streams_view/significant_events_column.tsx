@@ -53,10 +53,7 @@ export function SignificantEventsColumn({ streamName }: SignificantEventsColumnP
       css={{ height: euiTheme.size.xl, whiteSpace: 'nowrap' }}
     >
       <EventsCount count={significantEventsFetchState.data.total_occurrences} />
-      <EuiFlexItem
-        grow={false}
-        css={{ width: CHART_WIDTH, flexShrink: 0 }}
-      >
+      <EuiFlexItem grow={false} css={{ width: CHART_WIDTH, flexShrink: 0 }}>
         <SparkPlot
           id={`significant-events-histogram-${streamName}`}
           name={i18n.translate('xpack.streams.significantEventsTable.histogramSeriesTitle', {
