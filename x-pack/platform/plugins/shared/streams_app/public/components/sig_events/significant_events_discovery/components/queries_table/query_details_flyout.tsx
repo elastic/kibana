@@ -206,8 +206,7 @@ export function QueryDetailsFlyout({
         </FlyoutToolbarHeader>
 
         {/* Second header: title and metadata cards */}
-        <EuiFlyoutHeader hasBorder>
-          <EuiPanel hasShadow={false} color="transparent" paddingSize="none">
+        <EuiFlyoutHeader hasBorder>         
             <EuiTitle size="s">
               <h2 id={flyoutTitleId}>{item.query.title}</h2>
             </EuiTitle>
@@ -230,8 +229,7 @@ export function QueryDetailsFlyout({
                   </EuiBadge>
                 </FlyoutMetadataCard>
               </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
+            </EuiFlexGroup>          
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           {!isEditMode && (

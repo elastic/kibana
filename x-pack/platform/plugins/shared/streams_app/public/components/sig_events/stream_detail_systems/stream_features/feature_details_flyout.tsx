@@ -173,8 +173,7 @@ export function FeatureDetailsFlyout({
       </FlyoutToolbarHeader>
 
       {/* Second header: title and metadata cards */}
-      <EuiFlyoutHeader hasBorder>
-        <EuiPanel hasShadow={false} color="transparent" paddingSize="none">
+      <EuiFlyoutHeader hasBorder>        
           <EuiTitle size="s">
             <h2 id={flyoutTitleId}>{displayTitle}</h2>
           </EuiTitle>
@@ -199,8 +198,7 @@ export function FeatureDetailsFlyout({
                 </EuiBadge>
               </FlyoutMetadataCard>
             </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
+          </EuiFlexGroup>        
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>

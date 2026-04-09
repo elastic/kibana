@@ -74,8 +74,7 @@ export function KnowledgeIndicatorDetailsFlyout({
       </FlyoutToolbarHeader>
 
       {/* Second header: title and metadata cards */}
-      <EuiFlyoutHeader hasBorder>
-        <EuiPanel hasShadow={false} color="transparent" paddingSize="none">
+      <EuiFlyoutHeader hasBorder>        
           <EuiTitle size="s">
             <h2 id={flyoutTitleId}>{title}</h2>
           </EuiTitle>
@@ -120,7 +119,6 @@ export function KnowledgeIndicatorDetailsFlyout({
               </FlyoutMetadataCard>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiPanel>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
