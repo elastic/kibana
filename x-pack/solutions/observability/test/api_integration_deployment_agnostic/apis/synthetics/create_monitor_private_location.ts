@@ -517,7 +517,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(semver.gt(packagePolicyAfterUpgrade.package.version, lowerVersion)).eql(true);
         });
       } finally {
-        await deleteMonitor(monitorId);
+        try {
+          await deleteMonitor(monitorId);
+        } catch (e) {
+          // ignore cleanup errors
+        }
+        // Restore the package to the latest version so subsequent tests aren't affected
+        try {
+          await testPrivateLocations.installSyntheticsPackage();
+        } catch (e) {
+          // ignore cleanup errors
+        }
       }
     });
 
