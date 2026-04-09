@@ -175,9 +175,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiText size="xs">
-                    {GROUP_RISK_SCORE_LABEL}
-                  </EuiText>
+                  <EuiText size="xs">{GROUP_RISK_SCORE_LABEL}</EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <RiskScoreCell riskScore={resolutionRiskScore} />
@@ -203,6 +201,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId
           entityType={entityType}
           excludeEntityIds={excludeEntityIds}
           onAddEntity={handleAddEntity}
+          onEntityNameClick={handleEntityNameClick}
           addingEntityId={addingEntityId}
           disabled={!groupQueryReady}
         />
