@@ -54,6 +54,10 @@ import type {
   ReadRuleExecutionResultsRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/read_rule_execution_results_route.gen';
 import type {
+  RestoreRuleRequestQueryInput,
+  RuleHistoryRequestQueryInput,
+} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/rule_history/rule_history_route.gen';
+import type {
   RulePreviewRequestQueryInput,
   RulePreviewRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_preview/rule_preview.gen';
@@ -473,6 +477,28 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
+  /**
+   * Restores a historical revision of a detection rule.
+   */
+  restoreRule(props: RestoreRuleProps, kibanaSpace: string = 'default') {
+    return supertest
+      .patch(getRouteUrlForSpace('/api/detection_engine/rules/_history', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+   * Retrieve a paginated list of historical rule revisions. By default, the first page is returned, with 20 results per page.
+   */
+  ruleHistory(props: RuleHistoryProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/detection_engine/rules/_history', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
   rulePreview(props: RulePreviewProps, kibanaSpace: string = 'default') {
     return supertest
       .post(getRouteUrlForSpace('/api/detection_engine/rules/preview', kibanaSpace))
@@ -689,6 +715,12 @@ export interface ReadRuleProps {
 export interface ReadRuleExecutionResultsProps {
   params: ReadRuleExecutionResultsRequestParamsInput;
   body: ReadRuleExecutionResultsRequestBodyInput;
+}
+export interface RestoreRuleProps {
+  query: RestoreRuleRequestQueryInput;
+}
+export interface RuleHistoryProps {
+  query: RuleHistoryRequestQueryInput;
 }
 export interface RulePreviewProps {
   query: RulePreviewRequestQueryInput;

@@ -3034,6 +3034,115 @@ paths:
             curl -X GET
             "localhost:5601/api/detection_engine/rules/_find?page=1&per_page=5&sort_field=enabled&sort_order=asc&filter=alert.attributes.name:windows"
             -H 'kbn-xsrf: true'
+  /api/detection_engine/rules/_history:
+    get:
+      description: >-
+        Retrieve a paginated list of historical rule revisions. By default, the
+        first page is returned, with 20 results per page.
+      operationId: RuleHistory
+      parameters:
+        - description: The rule's `id` value.
+          in: query
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/RuleObjectId'
+        - description: Page number
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: integer
+        - description: Rules per page
+          in: query
+          name: per_page
+          required: false
+          schema:
+            default: 20
+            minimum: 0
+            type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                example1:
+                  value:
+                    items:
+                      - changedFields:
+                          - alert.name
+                          - alert.tags
+                        message: Rule installed
+                        revision: 256
+                        timestamp: '2025-07-02T10:05:19.613Z'
+                        username: bobpurton
+                    page: 1
+                    perPage: 5
+                    total: 4
+              schema:
+                type: object
+                properties:
+                  items:
+                    items:
+                      $ref: '#/components/schemas/RuleHistoryResult'
+                    type: array
+                  page:
+                    type: integer
+                  perPage:
+                    type: integer
+                  total:
+                    type: integer
+                required:
+                  - page
+                  - perPage
+                  - total
+                  - items
+          description: |
+            Successful response
+            > info
+      summary: List historical revisions for a detection rule
+      tags:
+        - Security Detections API
+        - Rules API
+      x-codeSamples:
+        - lang: cURL
+          source: >
+            curl -X GET
+            "localhost:5601/api/detection_engine/rules/_history?id=6399a03a-9ec2-4c42-8e2a-9e622683cfcd&per_page=5"
+            -H 'kbn-xsrf: true'
+    patch:
+      description: Restores a historical revision of a detection rule.
+      operationId: RestoreRule
+      parameters:
+        - description: The rule's `id` value.
+          in: query
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/RuleObjectId'
+        - description: The historical change event Id
+          in: query
+          name: changeId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: |
+            Successful response
+            > info
+      summary: Restores a historical revisions of a detection rule
+      tags:
+        - Security Detections API
+        - Rules API
+      x-codeSamples:
+        - lang: cURL
+          source: >
+            curl -X PATCH
+            "localhost:5601/api/detection_engine/rules/_history?id=6399a03a-9ec2-4c42-8e2a-9e622683cfcd&changeId=MmZVCRRrcU8IXhpdBBau"
+            -H 'kbn-xsrf: true'
   /api/detection_engine/rules/_import:
     post:
       description: >
@@ -8232,6 +8341,37 @@ components:
         > This field is not supported for ES|QL rules.
       items: {}
       type: array
+    RuleHistoryResult:
+      type: object
+      properties:
+        action:
+          type: string
+        changes:
+          items:
+            type: string
+          type: array
+        id:
+          type: string
+        metadata: {}
+        oldvalues: {}
+        previousRevision:
+          type: integer
+        revision:
+          type: integer
+        rule: {}
+        snapshot: {}
+        timestamp:
+          type: string
+        username:
+          type: string
+        version:
+          type: integer
+      required:
+        - timestamp
+        - id
+        - ruleId
+        - username
+        - rule
     RuleInterval:
       description: >-
         Frequency of rule execution, using a date math range. For example, "1h"

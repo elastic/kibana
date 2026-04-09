@@ -12,6 +12,7 @@ import type {
   PluginInitializerContext,
   ISavedObjectsRepository,
   UiSettingsServiceStart,
+  AuthenticatedUser,
 } from '@kbn/core/server';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type { ActionsClient, ActionsAuthorization } from '@kbn/actions-plugin/server';
@@ -39,6 +40,7 @@ import type { ConnectorAdapterRegistry } from '../connector_adapters/connector_a
 import type { GetAlertIndicesAlias } from '../lib';
 import type { AlertsService } from '../alerts_service';
 import type { BackfillClient } from '../backfill_client/backfill_client';
+import type { IChangeTrackingService } from './lib/change_tracking';
 
 export type {
   BulkEditOperation,
@@ -60,6 +62,7 @@ export type { GetActionErrorLogByIdParams } from './methods/get_action_error_log
 
 export interface RulesClientContext {
   readonly logger: Logger;
+  readonly getUser: () => AuthenticatedUser | null;
   readonly getUserName: () => Promise<string | null>;
   readonly spaceId: string;
   readonly namespace?: string;
@@ -79,6 +82,7 @@ export interface RulesClientContext {
   readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   readonly auditLogger?: AuditLogger;
   readonly eventLogger?: IEventLogger;
+  readonly changeTrackingService?: IChangeTrackingService;
   readonly fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule>;
   readonly isAuthenticationTypeAPIKey: () => boolean;
   readonly getAuthenticationAPIKey: (name: string) => CreateAPIKeyResult;

@@ -1,0 +1,181 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import crypto from 'node:crypto';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { RuleTypeSolution, SanitizedRule } from '@kbn/alerting-types';
+import type { Logger } from '@kbn/logging';
+import type {
+  ObjectChange,
+  GetHistoryResult,
+  LogChangeHistoryOptions,
+  ChangeHistoryDocument,
+  GetChangeHistoryOptions,
+} from '@kbn/change-history';
+import type { SavedObjectReference } from '@kbn/core/server';
+import { ChangeHistoryClient } from '@kbn/change-history';
+import type { RawRule } from '../../../types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
+
+const ALERTING_RULE_CHANGE_HISTORY_IGNORE_FIELDS = {
+  attributes: {
+    executionStatus: true,
+    monitoring: true,
+    lastRun: true,
+    nextRun: true,
+    scheduledTaskId: true,
+  },
+};
+
+const ALERTING_RULE_CHANGE_HISTORY_SENSITIVE_FIELDS = {
+  attributes: { apiKey: true },
+};
+
+export interface RuleSnapshot {
+  attributes: RawRule;
+  references: SavedObjectReference[];
+}
+
+export interface RuleChange extends ObjectChange {
+  module: RuleTypeSolution;
+  before?: RuleSnapshot;
+  after: RuleSnapshot;
+}
+
+export interface RuleChangeHistoryDocument extends ChangeHistoryDocument {
+  rule: SanitizedRule;
+}
+
+export interface GetRuleHistoryResult extends GetHistoryResult {
+  items: RuleChangeHistoryDocument[];
+}
+
+export interface IChangeTrackingService {
+  register(module: RuleTypeSolution): void;
+  isInitialized(module: RuleTypeSolution): boolean;
+  initialize(elasticsearchClient: ElasticsearchClient): void;
+  log(change: RuleChange, opts: LogChangeHistoryOptions): Promise<void>;
+  logBulk(changes: RuleChange[], opts: LogChangeHistoryOptions): Promise<void>;
+  getHistory(
+    module: RuleTypeSolution,
+    spaceId: string,
+    ruleId: string,
+    opts: GetChangeHistoryOptions
+  ): Promise<GetHistoryResult>;
+}
+
+export class ChangeTrackingService implements IChangeTrackingService {
+  private clients: Record<RuleTypeSolution, ChangeHistoryClient>;
+  private logger: Logger;
+  private kibanaVersion: string;
+  private modules: RuleTypeSolution[];
+  private dataset = 'alerting-rules';
+
+  constructor(logger: Logger, kibanaVersion: string) {
+    this.clients = {} as Record<RuleTypeSolution, ChangeHistoryClient>;
+    this.logger = logger;
+    this.kibanaVersion = kibanaVersion;
+    this.modules = [];
+  }
+
+  register(module: RuleTypeSolution) {
+    if (!this.modules.includes(module)) {
+      this.modules.push(module);
+      const { dataset, logger, kibanaVersion } = this;
+      const client = new ChangeHistoryClient({ module, dataset, logger, kibanaVersion });
+      this.clients[module] = client;
+    }
+  }
+
+  isInitialized(module: RuleTypeSolution) {
+    return !!this.clients[module]?.isInitialized();
+  }
+
+  initialize(elasticsearchClient: ElasticsearchClient) {
+    this.logger.debug(`ChangeTrackingService.initialize(esClient)`);
+    void (async () => {
+      // Initialize each change history client (in sequence, using IIFE)
+      for (const [module, client] of Object.entries(this.clients)) {
+        try {
+          await client.initialize(elasticsearchClient);
+        } catch (cause) {
+          const error = new Error(
+            `Unable to initialize change tracking for [${module}, ${this.dataset}]`,
+            { cause }
+          );
+          this.logger.error(error);
+        }
+      }
+    })();
+  }
+
+  async log(change: RuleChange, opts: LogChangeHistoryOptions) {
+    return this.logBulk([change], opts);
+  }
+
+  async logBulk(changes: RuleChange[], opts: LogChangeHistoryOptions) {
+    // Group rule changes per solution
+    const correlationId = crypto.randomBytes(16).toString('hex');
+    const groups = changes.reduce((result, change) => {
+      const { objectId, objectType, before, after, module } = change;
+      let objects = result.get(module);
+      if (!objects) {
+        result.set(module, (objects = []));
+      }
+      objects.push({ objectType, objectId, before, after });
+      return result;
+    }, new Map<RuleTypeSolution, ObjectChange[]>());
+
+    // One bulk call per solution (security, observability, stack, etc.)
+    // since each is using different data streams.
+    for (const module of groups.keys()) {
+      const client = this.clients[module];
+      const groupedChanges = groups.get(module);
+      if (!client) {
+        const error = new Error(
+          `Unable to log changes. Change history client not initialized for [${module}, ${this.dataset}]`
+        );
+        this.logger.error(error);
+        continue;
+      }
+      if (groupedChanges) {
+        try {
+          await client.logBulk(groupedChanges, {
+            ...opts,
+            correlationId,
+            fieldsToIgnore: ALERTING_RULE_CHANGE_HISTORY_IGNORE_FIELDS,
+            fieldsToHash: ALERTING_RULE_CHANGE_HISTORY_SENSITIVE_FIELDS,
+          });
+        } catch (err) {
+          // Just catch the error.
+          const error = new Error(
+            `Error saving change history for [${module}, ${this.dataset}]: ${err}`,
+            { cause: err }
+          );
+          this.logger.error(error);
+        }
+      }
+    }
+  }
+
+  async getHistory(
+    module: RuleTypeSolution,
+    spaceId: string,
+    ruleId: string,
+    opts: GetChangeHistoryOptions
+  ): Promise<GetHistoryResult> {
+    const client = this.clients[module];
+    if (!client) {
+      const error = new Error(
+        `Unable to get history. Change history client not initialized for [${module}, ${this.dataset}]`
+      );
+      this.logger.error(error);
+      throw error;
+    }
+    return client.getHistory(spaceId, RULE_SAVED_OBJECT_TYPE, ruleId, opts);
+  }
+}

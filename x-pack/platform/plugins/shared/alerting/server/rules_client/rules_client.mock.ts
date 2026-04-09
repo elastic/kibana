@@ -45,6 +45,7 @@ const create = () => {
     actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
     spaceId: 'default',
     namespace: 'default',
+    getUser: jest.fn(),
     getUserName: jest.fn(),
     createAPIKey: jest.fn(),
     logger: loggingSystemMock.create().get(),

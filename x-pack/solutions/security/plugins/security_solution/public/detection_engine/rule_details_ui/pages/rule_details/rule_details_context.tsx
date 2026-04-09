@@ -21,6 +21,13 @@ import { invariant } from '../../../../../common/utils/invariant';
 import { useKibana } from '../../../../common/lib/kibana';
 import { RuleDetailTabs } from './use_rule_details_tabs';
 
+export interface HistoryTableState {
+  pagination: {
+    activePage: number;
+    itemsPerPage: number;
+  };
+}
+
 export interface ExecutionLogTableState {
   /**
    * State of the SuperDatePicker component
@@ -102,6 +109,11 @@ const DEFAULT_STATE: ExecutionLogTableState = {
   },
 };
 
+export interface HistoryTableActions {
+  setActivePage: React.Dispatch<React.SetStateAction<number>>;
+  setItemsPerPage: React.Dispatch<React.SetStateAction<number>>;
+}
+
 export interface ExecutionLogTableActions {
   setRecentlyUsedRanges: React.Dispatch<React.SetStateAction<DurationRange[]>>;
   setRefreshInterval: React.Dispatch<React.SetStateAction<number>>;
@@ -125,6 +137,10 @@ export interface RuleDetailsContextType {
   [RuleDetailTabs.executionResults]: {
     state: ExecutionLogTableState;
     actions: ExecutionLogTableActions;
+  };
+  [RuleDetailTabs.history]: {
+    state: HistoryTableState;
+    actions: HistoryTableActions;
   };
 }
 
@@ -154,15 +170,25 @@ export const RuleDetailsContextProvider = ({ children }: RuleDetailsContextProvi
   const [showSourceEventTimeRange, setShowSourceEventTimeRange] = useState<boolean>(
     storage.get(RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_SOURCE_EVENT_TIME_RANGE_STORAGE_KEY) ?? false
   );
-  // Pagination state
+  // Pagination state (execution results)
   const [pageIndex, setPageIndex] = useState(1);
   const [pageSize, setPageSize] = useState(5);
   const [sortField, setSortField] = useState<keyof RuleExecutionResult>('timestamp');
   const [sortDirection, setSortDirection] = useState<SortOrder>('desc');
+  // Pagination state (history)
+  const [activePage, setActivePage] = useState(0);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
   // // End Execution Log Table tab
 
   const providerValue = useMemo<RuleDetailsContextType>(
     () => ({
+      [RuleDetailTabs.history]: {
+        state: {
+          pagination: { activePage, itemsPerPage },
+        },
+        actions: { setActivePage, setItemsPerPage },
+      },
       [RuleDetailTabs.executionResults]: {
         state: {
           superDatePicker: {
@@ -205,20 +231,22 @@ export const RuleDetailsContextProvider = ({ children }: RuleDetailsContextProvi
       },
     }),
     [
-      end,
-      isPaused,
-      pageIndex,
-      pageSize,
-      queryText,
+      activePage,
+      itemsPerPage,
       recentlyUsedRanges,
       refreshInterval,
-      showMetricColumns,
-      sortDirection,
-      sortField,
+      isPaused,
       start,
+      end,
+      queryText,
       statusFilters,
       runTypeFilters,
+      showMetricColumns,
       showSourceEventTimeRange,
+      pageIndex,
+      pageSize,
+      sortField,
+      sortDirection,
     ]
   );
 

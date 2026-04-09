@@ -28,6 +28,7 @@ import type {
   ImportRuleArgs,
   ImportRulesArgs,
   PatchRuleArgs,
+  RestoreRuleArgs,
   RevertPrebuiltRuleArgs,
   UpdateRuleArgs,
   UpgradePrebuiltRuleArgs,
@@ -41,6 +42,7 @@ import { patchRule } from './methods/patch_rule';
 import { updateRule } from './methods/update_rule';
 import { upgradePrebuiltRule } from './methods/upgrade_prebuilt_rule';
 import { revertPrebuiltRule } from './methods/revert_prebuilt_rule';
+import { restoreRule } from './methods/restore_rule';
 import { MINIMUM_RULE_CUSTOMIZATION_LICENSE } from '../../../../../../common/constants';
 
 interface DetectionRulesClientParams {
@@ -199,6 +201,17 @@ export const createDetectionRulesClient = ({
           ...args,
           detectionRulesClient: this,
           savedObjectsClient,
+        });
+      });
+    },
+
+    async restoreRule(args: RestoreRuleArgs): Promise<RuleResponse> {
+      return withSecuritySpan('DetectionRulesClient.restoreRule', async () => {
+        return restoreRule({
+          actionsClient,
+          rulesClient,
+          args,
+          mlAuthz,
         });
       });
     },
