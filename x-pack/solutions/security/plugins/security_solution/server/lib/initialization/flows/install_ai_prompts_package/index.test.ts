@@ -9,7 +9,6 @@ import { loggerMock } from '@kbn/logging-mocks';
 import {
   INITIALIZATION_FLOW_INSTALL_AI_PROMPTS_PACKAGE,
   INITIALIZATION_FLOW_STATUS_READY,
-  INITIALIZATION_FLOW_STATUS_ERROR,
 } from '../../../../../common/api/initialization';
 import type { InitializationFlowContext } from '../../types';
 import { installAiPromptsPackageFlow } from '.';
@@ -102,7 +101,7 @@ describe('installAiPromptsPackageFlow', () => {
       });
     });
 
-    it('returns an error result when the package is not available', async () => {
+    it('returns ready with skipped status when the package is not available', async () => {
       const logger = loggerMock.create();
       installSecurityAiPromptsPackageMock.mockResolvedValue(null);
 
@@ -112,12 +111,16 @@ describe('installAiPromptsPackageFlow', () => {
       );
 
       expect(result).toEqual({
-        status: INITIALIZATION_FLOW_STATUS_ERROR,
-        error: 'Security AI prompts package is not available',
+        status: INITIALIZATION_FLOW_STATUS_READY,
+        payload: {
+          name: 'security_ai_prompts',
+          version: '',
+          install_status: 'skipped',
+        },
       });
     });
 
-    it('does not log success when the package is not available', async () => {
+    it('logs a debug message when the package is not available', async () => {
       const logger = loggerMock.create();
       installSecurityAiPromptsPackageMock.mockResolvedValue(null);
 
@@ -126,6 +129,9 @@ describe('installAiPromptsPackageFlow', () => {
         logger
       );
 
+      expect(logger.debug).toHaveBeenCalledWith(
+        'AI prompts package installation skipped: package is not available'
+      );
       expect(logger.info).not.toHaveBeenCalled();
     });
 

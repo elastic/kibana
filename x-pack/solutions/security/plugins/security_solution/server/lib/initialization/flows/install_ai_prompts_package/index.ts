@@ -9,7 +9,6 @@ import type { Logger } from '@kbn/logging';
 import {
   INITIALIZATION_FLOW_INSTALL_AI_PROMPTS_PACKAGE,
   INITIALIZATION_FLOW_STATUS_READY,
-  INITIALIZATION_FLOW_STATUS_ERROR,
 } from '../../../../../common/api/initialization';
 import type { InitializationFlowContext, InitializationFlowDefinition } from '../../types';
 import type { InstallAiPromptsPackageProvisionContext } from './types';
@@ -28,9 +27,14 @@ export const installAiPromptsPackageFlow: InitializationFlowDefinition<InstallAi
       const result = await installSecurityAiPromptsPackage(securityContext, logger);
 
       if (result === null) {
+        logger.debug('AI prompts package installation skipped: package is not available');
         return {
-          status: INITIALIZATION_FLOW_STATUS_ERROR,
-          error: 'Security AI prompts package is not available',
+          status: INITIALIZATION_FLOW_STATUS_READY,
+          payload: {
+            name: 'security_ai_prompts',
+            version: '',
+            install_status: 'skipped',
+          },
         };
       }
 
