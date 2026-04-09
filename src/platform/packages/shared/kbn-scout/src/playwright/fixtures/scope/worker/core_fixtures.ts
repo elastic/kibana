@@ -293,8 +293,9 @@ export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
       };
 
       // Hide the announcements (including the sidenav tour) in advance to prevent
-      // it from interfering with test flows. If Kibana was started with
-      // uiSettings.globalOverrides.hideAnnouncements, the API returns 400 — same outcome.
+      // it from interfering with test flows. Default Scout server config_sets do not set
+      // globalOverrides (ECH/MKI parity); a plugin-specific config_set may add
+      // `--uiSettings.globalOverrides.hideAnnouncements`, in which case this POST returns 400.
       try {
         await kbnClient.uiSettings.updateGlobal({ hideAnnouncements: true });
       } catch (err: unknown) {

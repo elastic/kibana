@@ -226,8 +226,6 @@ export const defaultConfig: ScoutServerConfig = {
       `--server.publicBaseUrl=${kbnUrl}`,
       // Allow dynamic config overrides in tests
       `--coreApp.allowDynamicConfigOverrides=true`,
-      // Match FTR: global hideAnnouncements from first paint (Agent Builder announcement modal)
-      '--uiSettings.globalOverrides.hideAnnouncements=true',
     ],
   },
 };
