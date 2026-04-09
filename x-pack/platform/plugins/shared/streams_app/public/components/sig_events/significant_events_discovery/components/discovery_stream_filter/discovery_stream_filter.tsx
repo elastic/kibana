@@ -19,13 +19,14 @@ import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { isComputedFeature } from '@kbn/streams-schema';
 import React, { useMemo, useState } from 'react';
+import { getKnowledgeIndicatorStreamName } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_stream_name';
 
 interface DiscoveryStreamFilterProps {
   knowledgeIndicators: KnowledgeIndicator[];
   searchTerm: string;
   statusFilter: 'active' | 'excluded';
   selectedTypes: string[];
-  showComputed: boolean;
+  hideComputedTypes: boolean;
   selectedStreams: string[];
   onSelectedStreamsChange: (selectedStreams: string[]) => void;
 }
@@ -35,7 +36,7 @@ export function DiscoveryStreamFilter({
   searchTerm,
   statusFilter,
   selectedTypes,
-  showComputed,
+  hideComputedTypes,
   selectedStreams,
   onSelectedStreamsChange,
 }: DiscoveryStreamFilterProps) {
@@ -50,11 +51,7 @@ export function DiscoveryStreamFilter({
     const streams = new Set<string>();
 
     knowledgeIndicators.forEach((ki) => {
-      if (ki.kind === 'feature') {
-        streams.add(ki.feature.stream_name);
-      } else {
-        streams.add(ki.stream_name);
-      }
+      streams.add(getKnowledgeIndicatorStreamName(ki));
     });
 
     return Array.from(streams).sort((left, right) => left.localeCompare(right));
@@ -81,7 +78,7 @@ export function DiscoveryStreamFilter({
         return;
       }
 
-      if (!showComputed && ki.kind === 'feature' && isComputedFeature(ki.feature)) {
+      if (hideComputedTypes && ki.kind === 'feature' && isComputedFeature(ki.feature)) {
         return;
       }
 
@@ -94,12 +91,12 @@ export function DiscoveryStreamFilter({
         return;
       }
 
-      const streamName = ki.kind === 'feature' ? ki.feature.stream_name : ki.stream_name;
+      const streamName = getKnowledgeIndicatorStreamName(ki);
       counts[streamName] = (counts[streamName] ?? 0) + 1;
     });
 
     return counts;
-  }, [knowledgeIndicators, searchTerm, statusFilter, selectedTypes, showComputed]);
+  }, [knowledgeIndicators, searchTerm, statusFilter, selectedTypes, hideComputedTypes]);
 
   const options = useMemo<EuiSelectableOption[]>(
     () => [

@@ -22,6 +22,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -45,15 +46,19 @@ import { DeleteTableItemsModal } from '../../../stream_detail_significant_events
 import { KnowledgeIndicatorsTypeFilter } from '../../../stream_detail_significant_events_view/knowledge_indicators_type_filter';
 import { KnowledgeIndicatorsStatusFilter } from '../../../stream_detail_significant_events_view/knowledge_indicators_status_filter';
 import { getKnowledgeIndicatorItemId } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_item_id';
+import { getKnowledgeIndicatorStreamName } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_stream_name';
 import { DiscoveryStreamFilter } from '../discovery_stream_filter';
 
 const SEARCH_DEBOUNCE_MS = 300;
+const COMPUTED_FEATURE_TYPES_SET = new Set<string>(COMPUTED_FEATURE_TYPES);
+const EMPTY_ANNOTATIONS: never[] = [];
 
 const getKnowledgeIndicatorTitle = (ki: KnowledgeIndicator): string =>
   ki.kind === 'feature' ? ki.feature.title ?? ki.feature.id : ki.query.title ?? ki.query.id;
 
 export function DiscoveryKnowledgeIndicatorsTable() {
   const router = useStreamsAppRouter();
+  const { euiTheme } = useEuiTheme();
   const {
     core: {
       notifications: { toasts },
@@ -69,7 +74,7 @@ export function DiscoveryKnowledgeIndicatorsTable() {
   const [statusFilter, setStatusFilter] = useState<'active' | 'excluded'>('active');
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedStreams, setSelectedStreams] = useState<string[]>([]);
-  const [showComputed, setShowComputed] = useState(false);
+  const [hideComputedTypes, setHideComputedTypes] = useState(true);
 
   const [selectedKnowledgeIndicator, setSelectedKnowledgeIndicator] =
     useState<KnowledgeIndicator | null>(null);
@@ -114,12 +119,14 @@ export function DiscoveryKnowledgeIndicatorsTable() {
         return false;
       }
 
-      const streamName = ki.kind === 'feature' ? ki.feature.stream_name : ki.stream_name;
-      if (selectedStreams.length > 0 && !selectedStreams.includes(streamName)) {
+      if (
+        selectedStreams.length > 0 &&
+        !selectedStreams.includes(getKnowledgeIndicatorStreamName(ki))
+      ) {
         return false;
       }
 
-      if (!showComputed && ki.kind === 'feature' && isComputedFeature(ki.feature)) {
+      if (hideComputedTypes && ki.kind === 'feature' && isComputedFeature(ki.feature)) {
         return false;
       }
 
@@ -146,7 +153,7 @@ export function DiscoveryKnowledgeIndicatorsTable() {
     statusFilter,
     selectedTypes,
     selectedStreams,
-    showComputed,
+    hideComputedTypes,
   ]);
 
   useEffect(() => {
@@ -154,7 +161,18 @@ export function DiscoveryKnowledgeIndicatorsTable() {
       if (current.pageIndex === 0) return current;
       return { ...current, pageIndex: 0 };
     });
-  }, [debouncedSearchTerm, statusFilter, selectedTypes, selectedStreams, showComputed]);
+  }, [debouncedSearchTerm, statusFilter, selectedTypes, selectedStreams, hideComputedTypes]);
+
+  useEffect(() => {
+    setSelectedKnowledgeIndicator((current) => {
+      if (!current) return current;
+      const currentId = getKnowledgeIndicatorItemId(current);
+      const stillExists = knowledgeIndicators.some(
+        (ki) => getKnowledgeIndicatorItemId(ki) === currentId
+      );
+      return stillExists ? current : null;
+    });
+  }, [knowledgeIndicators]);
 
   const toggleSelectedKnowledgeIndicator = useCallback((ki: KnowledgeIndicator) => {
     setSelectedKnowledgeIndicator((current) => {
@@ -289,7 +307,7 @@ export function DiscoveryKnowledgeIndicatorsTable() {
               name={OCCURRENCES_TOOLTIP_NAME}
               type="bar"
               timeseries={occurrences}
-              annotations={[]}
+              annotations={EMPTY_ANNOTATIONS}
               compressed
               hideAxis
               height={32}
@@ -332,8 +350,7 @@ export function DiscoveryKnowledgeIndicatorsTable() {
         name: STREAM_COLUMN_LABEL,
         width: '15%',
         render: (ki: KnowledgeIndicator) => {
-          const streamName = ki.kind === 'feature' ? ki.feature.stream_name : ki.stream_name;
-          return <EuiBadge color="hollow">{streamName}</EuiBadge>;
+          return <EuiBadge color="hollow">{getKnowledgeIndicatorStreamName(ki)}</EuiBadge>;
         },
       },
       {
@@ -399,7 +416,7 @@ export function DiscoveryKnowledgeIndicatorsTable() {
             searchTerm={debouncedSearchTerm}
             selectedTypes={selectedTypes}
             selectedStreams={selectedStreams}
-            showComputed={showComputed}
+            hideComputedTypes={hideComputedTypes}
             statusFilter={statusFilter}
             onStatusFilterChange={setStatusFilter}
           />
@@ -411,7 +428,7 @@ export function DiscoveryKnowledgeIndicatorsTable() {
             statusFilter={statusFilter}
             selectedTypes={selectedTypes}
             onSelectedTypesChange={setSelectedTypes}
-            hideComputedTypes={!showComputed}
+            hideComputedTypes={hideComputedTypes}
             selectedStreams={selectedStreams}
           />
         </EuiFlexItem>
@@ -421,7 +438,7 @@ export function DiscoveryKnowledgeIndicatorsTable() {
             searchTerm={debouncedSearchTerm}
             statusFilter={statusFilter}
             selectedTypes={selectedTypes}
-            showComputed={showComputed}
+            hideComputedTypes={hideComputedTypes}
             selectedStreams={selectedStreams}
             onSelectedStreamsChange={setSelectedStreams}
           />
@@ -429,15 +446,13 @@ export function DiscoveryKnowledgeIndicatorsTable() {
         <EuiFlexItem grow={false}>
           <EuiSwitch
             label={SHOW_COMPUTED_LABEL}
-            checked={showComputed}
+            checked={!hideComputedTypes}
             onChange={(e) => {
-              const checked = e.target.checked;
-              setShowComputed(checked);
-              if (!checked) {
+              const shouldHide = !e.target.checked;
+              setHideComputedTypes(shouldHide);
+              if (shouldHide) {
                 setSelectedTypes((current) =>
-                  current.filter(
-                    (type) => !(COMPUTED_FEATURE_TYPES as readonly string[]).includes(type)
-                  )
+                  current.filter((type) => !COMPUTED_FEATURE_TYPES_SET.has(type))
                 );
               }
             }}
@@ -468,26 +483,12 @@ export function DiscoveryKnowledgeIndicatorsTable() {
         </EuiFlexItem>
         {statusFilter === 'active' ? (
           <EuiFlexItem grow={false}>
-            {(() => {
-              const button = (
-                <EuiButtonEmpty
-                  iconType="eyeClosed"
-                  color="warning"
-                  size="xs"
-                  aria-label={EXCLUDE_SELECTED_LABEL}
-                  isLoading={isBulkOperationInProgress}
-                  isDisabled={isSelectionActionsDisabled || selectionContainsNonExcludable}
-                  onClick={handleBulkExclude}
-                >
-                  {EXCLUDE_SELECTED_LABEL}
-                </EuiButtonEmpty>
-              );
-              return selectionContainsNonExcludable ? (
-                <EuiToolTip content={CANNOT_EXCLUDE_SELECTION_TOOLTIP}>{button}</EuiToolTip>
-              ) : (
-                button
-              );
-            })()}
+            <BulkExcludeButton
+              isLoading={isBulkOperationInProgress}
+              isDisabled={isSelectionActionsDisabled || selectionContainsNonExcludable}
+              showTooltip={selectionContainsNonExcludable}
+              onClick={handleBulkExclude}
+            />
           </EuiFlexItem>
         ) : (
           <EuiFlexItem grow={false}>
@@ -518,8 +519,17 @@ export function DiscoveryKnowledgeIndicatorsTable() {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <EuiHorizontalRule margin="none" style={{ height: 2 }} />
-      <div
+      <EuiHorizontalRule
+        margin="none"
+        css={css`
+          height: ${euiTheme.border.width.thick};
+        `}
+      />
+      <EuiPanel
+        color="transparent"
+        hasShadow={false}
+        hasBorder={false}
+        paddingSize="none"
         css={
           isOperationInProgress
             ? css`
@@ -547,7 +557,7 @@ export function DiscoveryKnowledgeIndicatorsTable() {
           tableCaption={TABLE_CAPTION}
           noItemsMessage={!isLoading ? NO_ITEMS_MESSAGE : ''}
         />
-      </div>
+      </EuiPanel>
       {selectedKnowledgeIndicator ? (
         <KnowledgeIndicatorDetailsFlyout
           knowledgeIndicator={selectedKnowledgeIndicator}
@@ -568,6 +578,38 @@ export function DiscoveryKnowledgeIndicatorsTable() {
       ) : null}
     </EuiPanel>
   );
+}
+
+function BulkExcludeButton({
+  isLoading,
+  isDisabled,
+  showTooltip,
+  onClick,
+}: {
+  isLoading: boolean;
+  isDisabled: boolean;
+  showTooltip: boolean;
+  onClick: () => void;
+}) {
+  const button = (
+    <EuiButtonEmpty
+      iconType="eyeClosed"
+      color="warning"
+      size="xs"
+      aria-label={EXCLUDE_SELECTED_LABEL}
+      isLoading={isLoading}
+      isDisabled={isDisabled}
+      onClick={onClick}
+    >
+      {EXCLUDE_SELECTED_LABEL}
+    </EuiButtonEmpty>
+  );
+
+  if (showTooltip) {
+    return <EuiToolTip content={CANNOT_EXCLUDE_SELECTION_TOOLTIP}>{button}</EuiToolTip>;
+  }
+
+  return button;
 }
 
 const TITLE_COLUMN_LABEL = i18n.translate(

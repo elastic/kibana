@@ -20,6 +20,7 @@ import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { isComputedFeature } from '@kbn/streams-schema';
 import { upperFirst } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
+import { getKnowledgeIndicatorStreamName } from '../utils/get_knowledge_indicator_stream_name';
 
 interface KnowledgeIndicatorTypeFilterProps {
   knowledgeIndicators: KnowledgeIndicator[];
@@ -52,11 +53,7 @@ export function KnowledgeIndicatorsTypeFilter({
       if (selectedStreams.length === 0) {
         return true;
       }
-      const streamName =
-        knowledgeIndicator.kind === 'feature'
-          ? knowledgeIndicator.feature.stream_name
-          : knowledgeIndicator.stream_name;
-      return selectedStreams.includes(streamName);
+      return selectedStreams.includes(getKnowledgeIndicatorStreamName(knowledgeIndicator));
     },
     [selectedStreams]
   );

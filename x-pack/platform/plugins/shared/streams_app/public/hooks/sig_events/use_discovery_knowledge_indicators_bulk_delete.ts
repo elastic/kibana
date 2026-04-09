@@ -8,10 +8,12 @@
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { i18n } from '@kbn/i18n';
 import { groupBy } from 'lodash';
+import { useRef } from 'react';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { DISCOVERY_QUERIES_QUERY_KEY } from './use_fetch_discovery_queries';
 import { useKibana } from '../use_kibana';
 import { useQueriesApi } from './use_queries_api';
+import type { BulkOperationResult } from './use_discovery_features_api';
 import { useDiscoveryFeaturesApi } from './use_discovery_features_api';
 
 interface UseDiscoveryKnowledgeIndicatorsBulkDeleteParams {
@@ -30,15 +32,19 @@ export function useDiscoveryKnowledgeIndicatorsBulkDelete({
   const { deleteFeaturesInBulk } = useDiscoveryFeaturesApi();
   const { deleteQueriesInBulk } = useQueriesApi();
 
+  const hadPartialFailureRef = useRef(false);
+
   const mutation = useMutation<void, Error, KnowledgeIndicator[]>({
     mutationFn: async (knowledgeIndicators) => {
+      hadPartialFailureRef.current = false;
+
       const features = knowledgeIndicators
         .filter((ki) => ki.kind === 'feature')
         .map((ki) => ki.feature);
 
       const queries = knowledgeIndicators.filter((ki) => ki.kind === 'query');
 
-      const requests: Array<Promise<unknown>> = [];
+      const requests: Array<Promise<BulkOperationResult | void>> = [];
 
       if (features.length > 0) {
         requests.push(deleteFeaturesInBulk(features));
@@ -56,11 +62,29 @@ export function useDiscoveryKnowledgeIndicatorsBulkDelete({
         }
       }
 
-      await Promise.all(requests);
+      const results = await Promise.allSettled(requests);
+
+      const hasRejected = results.some((r) => r.status === 'rejected');
+      const featuresResult = features.length > 0 ? results[0] : undefined;
+      const hasPartialFeatureFailure =
+        featuresResult?.status === 'fulfilled' &&
+        featuresResult.value &&
+        'failedCount' in featuresResult.value &&
+        featuresResult.value.failedCount > 0;
+
+      if (hasRejected) {
+        throw new Error(BULK_DELETE_REJECTED_ERROR_MESSAGE);
+      }
+
+      hadPartialFailureRef.current = Boolean(hasPartialFeatureFailure);
     },
-    onSuccess: async () => {
+    onSuccess: () => {
+      if (hadPartialFailureRef.current) {
+        toasts.addWarning({ title: BULK_DELETE_PARTIAL_TOAST_TITLE });
+      } else {
+        toasts.addSuccess({ title: BULK_DELETE_SUCCESS_TOAST_TITLE });
+      }
       onSuccess?.();
-      toasts.addSuccess({ title: BULK_DELETE_SUCCESS_TOAST_TITLE });
     },
     onError: (error) => {
       toasts.addError(error, { title: BULK_DELETE_ERROR_TOAST_TITLE });
@@ -84,10 +108,24 @@ export function useDiscoveryKnowledgeIndicatorsBulkDelete({
   };
 }
 
+const BULK_DELETE_REJECTED_ERROR_MESSAGE = i18n.translate(
+  'xpack.streams.discoveryKnowledgeIndicators.bulkDeleteRejectedErrorMessage',
+  {
+    defaultMessage: 'Some knowledge indicators could not be deleted',
+  }
+);
+
 const BULK_DELETE_ERROR_TOAST_TITLE = i18n.translate(
   'xpack.streams.discoveryKnowledgeIndicators.bulkDeleteErrorToastTitle',
   {
     defaultMessage: 'Failed to delete selected knowledge indicators',
+  }
+);
+
+const BULK_DELETE_PARTIAL_TOAST_TITLE = i18n.translate(
+  'xpack.streams.discoveryKnowledgeIndicators.bulkDeletePartialToastTitle',
+  {
+    defaultMessage: 'Some knowledge indicators could not be deleted',
   }
 );
 

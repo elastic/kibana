@@ -60,10 +60,11 @@ export function useFetchDiscoveryKnowledgeIndicators() {
     [queriesFetchState.data?.queries]
   );
 
+  const refetchQueries = queriesFetchState.refetch;
   const refetch = useCallback(() => {
-    void queriesFetchState.refetch();
+    void refetchQueries();
     void refetchFeatures();
-  }, [queriesFetchState, refetchFeatures]);
+  }, [refetchQueries, refetchFeatures]);
 
   return {
     knowledgeIndicators,

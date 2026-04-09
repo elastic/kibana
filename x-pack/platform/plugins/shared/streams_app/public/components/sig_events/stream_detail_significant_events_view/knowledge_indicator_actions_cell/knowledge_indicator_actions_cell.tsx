@@ -15,11 +15,7 @@ import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../../hooks/sig_events/use_fe
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useQueriesApi } from '../../../../hooks/sig_events/use_queries_api';
 import { useStreamFeaturesApi } from '../../../../hooks/sig_events/use_stream_features_api';
-
-const getStreamName = (knowledgeIndicator: KnowledgeIndicator): string =>
-  knowledgeIndicator.kind === 'feature'
-    ? knowledgeIndicator.feature.stream_name
-    : knowledgeIndicator.stream_name;
+import { getKnowledgeIndicatorStreamName } from '../utils/get_knowledge_indicator_stream_name';
 
 interface Props {
   knowledgeIndicator: KnowledgeIndicator;
@@ -32,7 +28,7 @@ export function KnowledgeIndicatorActionsCell({
   onDeleteRequest,
   onActionStateChange,
 }: Props) {
-  const streamName = getStreamName(knowledgeIndicator);
+  const streamName = getKnowledgeIndicatorStreamName(knowledgeIndicator);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
   const [isActionInProgress, setIsActionInProgress] = useState(false);
 

@@ -196,7 +196,7 @@ export const listAllFeaturesRoute = createServerRoute({
       include_excluded: includeExcluded,
     } = params?.query ?? {};
     const { hits: features } = query
-      ? await featureClient.findFeatures(streamNames, query, { searchMode })
+      ? await featureClient.findFeatures(streamNames, query, { searchMode, includeExcluded })
       : await featureClient.getFeatures(streamNames, { includeExcluded });
 
     return { features };

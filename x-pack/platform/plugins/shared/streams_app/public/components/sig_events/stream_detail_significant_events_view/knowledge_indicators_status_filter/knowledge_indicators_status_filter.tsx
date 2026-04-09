@@ -10,13 +10,14 @@ import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { isComputedFeature } from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
+import { getKnowledgeIndicatorStreamName } from '../utils/get_knowledge_indicator_stream_name';
 
 interface KnowledgeIndicatorStatusFilterProps {
   knowledgeIndicators: KnowledgeIndicator[];
   searchTerm: string;
   selectedTypes: string[];
   selectedStreams?: string[];
-  showComputed?: boolean;
+  hideComputedTypes?: boolean;
   statusFilter: 'active' | 'excluded';
   onStatusFilterChange: (filter: 'active' | 'excluded') => void;
 }
@@ -26,7 +27,7 @@ export function KnowledgeIndicatorsStatusFilter({
   searchTerm,
   selectedTypes,
   selectedStreams = [],
-  showComputed = true,
+  hideComputedTypes = false,
   statusFilter,
   onStatusFilterChange,
 }: KnowledgeIndicatorStatusFilterProps) {
@@ -43,16 +44,15 @@ export function KnowledgeIndicatorsStatusFilter({
           return accumulator;
         }
 
-        const streamName =
-          knowledgeIndicator.kind === 'feature'
-            ? knowledgeIndicator.feature.stream_name
-            : knowledgeIndicator.stream_name;
-        if (selectedStreams.length > 0 && !selectedStreams.includes(streamName)) {
+        if (
+          selectedStreams.length > 0 &&
+          !selectedStreams.includes(getKnowledgeIndicatorStreamName(knowledgeIndicator))
+        ) {
           return accumulator;
         }
 
         if (
-          !showComputed &&
+          hideComputedTypes &&
           knowledgeIndicator.kind === 'feature' &&
           isComputedFeature(knowledgeIndicator.feature)
         ) {
@@ -78,7 +78,7 @@ export function KnowledgeIndicatorsStatusFilter({
       },
       { active: 0, excluded: 0 }
     );
-  }, [knowledgeIndicators, searchTerm, selectedTypes, selectedStreams, showComputed]);
+  }, [knowledgeIndicators, searchTerm, selectedTypes, selectedStreams, hideComputedTypes]);
 
   return (
     <EuiFilterGroup>
