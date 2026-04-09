@@ -43,6 +43,8 @@ import type {
   DataStreamResultsFlyoutComponent,
 } from './manage_integrations_table';
 
+const INVALID_VERSION = '0.0.0';
+
 type ReviewDataStream = DataStreamResponse;
 
 interface ReviewTableRow {
@@ -237,11 +239,17 @@ export const ReviewApproveModal: React.FC<{
   }, [automaticImport, closeModal]);
 
   const normalizedVersion = reviewVersion.trim();
-  const isVersionValid = Boolean(semverValid(normalizedVersion));
+  const isZeroVersion = normalizedVersion.startsWith(INVALID_VERSION);
+  const isVersionValid = Boolean(semverValid(normalizedVersion)) && !isZeroVersion;
   const isVersionInputInvalid = isVersionTouched && !isVersionValid;
   const versionValidationMessage = !normalizedVersion
     ? i18n.translate('xpack.fleet.epmList.manageIntegrations.actions.reviewVersionRequired', {
         defaultMessage: 'Version is required.',
+      })
+    : isZeroVersion
+    ? i18n.translate('xpack.fleet.epmList.manageIntegrations.actions.reviewVersionZeroNotAllowed', {
+        defaultMessage: 'Version {invalidVersion} is not allowed.',
+        values: { invalidVersion: INVALID_VERSION },
       })
     : i18n.translate('xpack.fleet.epmList.manageIntegrations.actions.reviewVersionInvalid', {
         defaultMessage: 'Enter a valid semantic version (for example, 1.0.0).',
@@ -249,15 +257,23 @@ export const ReviewApproveModal: React.FC<{
 
   const handleApproveAndDeploy = useCallback(async () => {
     const version = reviewVersion.trim();
-    if (!semverValid(version)) {
+    if (!semverValid(version) || version.startsWith(INVALID_VERSION)) {
       setIsVersionTouched(true);
       setReviewError(
-        i18n.translate(
-          'xpack.fleet.epmList.manageIntegrations.actions.reviewVersionValidationError',
-          {
-            defaultMessage: 'Provide a valid version before approving and deploying.',
-          }
-        )
+        version.startsWith(INVALID_VERSION)
+          ? i18n.translate(
+              'xpack.fleet.epmList.manageIntegrations.actions.reviewVersionZeroError',
+              {
+                defaultMessage: 'Version {invalidVersion} is not allowed.',
+                values: { invalidVersion: INVALID_VERSION },
+              }
+            )
+          : i18n.translate(
+              'xpack.fleet.epmList.manageIntegrations.actions.reviewVersionValidationError',
+              {
+                defaultMessage: 'Provide a valid version before approving and deploying.',
+              }
+            )
       );
       return;
     }
