@@ -47,7 +47,7 @@ describe('workflow_yaml_attachment', () => {
       const tools = registeredType!.getTools!();
       expect(tools).toContain(workflowTools.getStepDefinitions);
       expect(tools).toContain(workflowTools.validateWorkflow);
-      expect(tools).toContain(workflowTools.replaceYaml);
+      expect(tools).toContain(workflowTools.setYaml);
       expect(tools).toContain(workflowTools.insertStep);
       expect(tools).toContain(workflowTools.modifyStep);
     });

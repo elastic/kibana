@@ -24,7 +24,7 @@ describe('workflowAuthoringSkill', () => {
       expect(tools).toContain(workflowTools.validateWorkflow);
       expect(tools).toContain(workflowTools.getExamples);
       expect(tools).toContain(workflowTools.getConnectors);
-      expect(tools).toContain(workflowTools.replaceYaml);
+      expect(tools).toContain(workflowTools.setYaml);
       expect(tools).toContain(workflowTools.insertStep);
       expect(tools).toContain(workflowTools.modifyStep);
       expect(tools).toContain(workflowTools.modifyStepProperty);
