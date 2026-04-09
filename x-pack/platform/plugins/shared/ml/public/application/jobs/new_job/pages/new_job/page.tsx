@@ -76,7 +76,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   );
 
   if (cps?.cpsManager) {
-    jobCreator.projectRouting = cps.cpsManager.getProjectRouting() ?? null;
+    jobCreator.projectRouting = cps.cpsManager.getDefaultProjectRouting() ?? null;
   }
 
   const jobValidator = useMemo(() => new JobValidator(jobCreator), [jobCreator]);
