@@ -204,33 +204,39 @@ export enum ConversationRoundStatus {
  * Represents a round in a conversation, containing all the information
  * related to this particular round.
  */
-export interface ConversationRound {
-  /** unique id for this round */
-  id: string;
-  /** current status of the round */
+/**
+ * Common fields shared between ConversationRound and AgentExecutionEvent.
+ */
+export interface AgentExecution {
+  /** Current status of the execution */
   status: ConversationRoundStatus;
-  /** persisted state to resume interrupted states */
+  /** Persisted state to resume interrupted states */
   state?: RoundState;
-  /** if status is awaiting_prompt, contains the current prompt requests */
+  /** If status is awaiting_prompt, contains the current prompt requests */
   pending_prompts?: PromptRequest[];
-  /** The user input that initiated the round */
-  input: RoundInput;
-  /** List of intermediate steps before the end result, such as tool calls */
+  /** List of intermediate steps (tool calls, reasoning, compaction) */
   steps: ConversationRoundStep[];
   /** The final response from the assistant */
   response: AssistantResponse;
-  /** when the round was started */
+  /** When the execution was started */
   started_at: string;
-  /** time it took to first token, in ms */
+  /** Time it took to first token, in ms */
   time_to_first_token: number;
-  /** time it took to last token, in ms */
+  /** Time it took to last token, in ms */
   time_to_last_token: number;
-  /** Model Usage statistics for this round */
+  /** Model usage statistics */
   model_usage: RoundModelUsageStats;
-  /** when tracing is enabled, contains the traceId associated with this round */
+  /** When tracing is enabled, contains the traceId */
   trace_id?: string | string[];
-  /** Runtime configuration overrides that were applied to this round */
+  /** Runtime configuration overrides applied to this execution */
   configuration_overrides?: RuntimeAgentConfigurationOverrides;
+}
+
+export interface ConversationRound extends AgentExecution {
+  /** unique id for this round */
+  id: string;
+  /** The user input that initiated the round */
+  input: RoundInput;
 }
 
 export interface RoundModelUsageStats {
@@ -355,31 +361,9 @@ export interface UserMessageEvent extends BaseTimelineEvent<'user_message'> {
  * An agent execution event appended to the timeline.
  * Contains the same data as a ConversationRound except for the `input` field.
  */
-export interface AgentExecutionEvent extends BaseTimelineEvent<'agent_execution'> {
+export interface AgentExecutionEvent extends BaseTimelineEvent<'agent_execution'>, AgentExecution {
   /** Id of the agent that produced this response */
   agent_id: string;
-  /** Current status of the response */
-  status: ConversationRoundStatus;
-  /** Persisted state to resume interrupted states */
-  state?: RoundState;
-  /** if status is awaiting_prompt, contains the current prompt requests */
-  pending_prompts?: PromptRequest[];
-  /** List of intermediate steps (tool calls, reasoning, compaction) */
-  steps: ConversationRoundStep[];
-  /** The final response from the assistant */
-  response: AssistantResponse;
-  /** When the response was started */
-  started_at: string;
-  /** Time it took to first token, in ms */
-  time_to_first_token: number;
-  /** Time it took to last token, in ms */
-  time_to_last_token: number;
-  /** Model usage statistics */
-  model_usage: RoundModelUsageStats;
-  /** When tracing is enabled, contains the traceId */
-  trace_id?: string | string[];
-  /** Runtime configuration overrides applied to this response */
-  configuration_overrides?: RuntimeAgentConfigurationOverrides;
 }
 
 /**
