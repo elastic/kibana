@@ -35,7 +35,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
   const expandedFlyoutGraph = pageObjects.expandedFlyoutGraph;
   const entityFlyout = pageObjects.entityFlyout;
 
-  describe('Security Network Page - Entity Preview flyout', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/261460
+  describe.skip('Security Network Page - Entity Preview flyout', function () {
     this.tags(['cloud_security_posture_graph_viz']);
 
     before(async () => {

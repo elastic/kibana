@@ -169,13 +169,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         it('has correct attributes', () => {
           expect(dataViewResponse.body.attributes.fieldFormatMap).to.be(
             JSON.stringify({
-              'trace.id': {
-                id: 'url',
-                params: {
-                  urlTemplate: 'apm/link-to/trace/{{value}}',
-                  labelTemplate: '{{value}}',
-                },
-              },
               'transaction.id': {
                 id: 'url',
                 params: {
