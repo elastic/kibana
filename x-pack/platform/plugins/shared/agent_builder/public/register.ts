@@ -21,7 +21,9 @@ import {
 import type { AgentBuilderInternalService } from './services';
 import type { AgentBuilderStartDependencies } from './types';
 
-const BASE_DEEP_LINKS: AppDeepLink[] = [
+type AgentBuilderDeepLinkSource = AppDeepLink & { readonly isExperimental?: boolean };
+
+const AGENT_BUILDER_DEEP_LINK_SOURCES: readonly AgentBuilderDeepLinkSource[] = [
   {
     id: 'agents',
     path: '/manage/agents',
@@ -36,14 +38,15 @@ const BASE_DEEP_LINKS: AppDeepLink[] = [
     id: 'plugins',
     path: '/manage/plugins',
     title: i18n.translate('xpack.agentBuilder.plugins.title', { defaultMessage: 'Plugins' }),
+    isExperimental: true,
   },
-
   {
     id: 'connectors',
     path: '/manage/connectors',
     title: i18n.translate('xpack.agentBuilder.connectors.title', {
       defaultMessage: 'Connectors',
     }),
+    isExperimental: true,
   },
   {
     id: 'tools',
@@ -52,6 +55,11 @@ const BASE_DEEP_LINKS: AppDeepLink[] = [
     keywords: ['mcp'],
   },
 ];
+
+export const buildAgentBuilderDeepLinks = (experimentalFeaturesEnabled: boolean): AppDeepLink[] =>
+  AGENT_BUILDER_DEEP_LINK_SOURCES.filter(
+    (link) => !link.isExperimental || experimentalFeaturesEnabled
+  ).map(({ isExperimental: _isExperimental, ...deepLink }) => deepLink);
 
 export const registerApp = ({
   core,
@@ -71,8 +79,8 @@ export const registerApp = ({
     visibleIn: ['sideNav', 'globalSearch'],
     keywords: ['agent builder', 'ai agent', 'chat agent'],
     updater$: appUpdater$,
-    deepLinks: BASE_DEEP_LINKS,
-    defaultPath: '/agents',
+    deepLinks: buildAgentBuilderDeepLinks(false),
+    defaultPath: '/manage/agents',
     async mount({ element, history, onAppLeave }: AppMountParameters) {
       const { mountApp } = await import('./application');
       const [coreStart, startDependencies] = await core.getStartServices();
