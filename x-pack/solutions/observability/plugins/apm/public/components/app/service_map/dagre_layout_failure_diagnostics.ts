@@ -10,9 +10,14 @@ const MAX_STACK_HEAD_LEN = 800;
 
 export interface DagreLayoutFailureDiagnostics {
   error_name: string;
-  /** Truncated Error.message (no service names / topology) */
+  /**
+   * Truncated `Error.message` (length-capped only). Not redacted: we assume Dagre throws
+   * library-internal strings; if another error were wrapped here, content could vary.
+   */
   error_message: string;
-  /** First few stack lines, flattened; helps confirm Dagre internals vs minified chunk */
+  /**
+   * Truncated, flattened stack head. Not redacted; may include chunk URLs/lines for debugging.
+   */
   stack_head: string;
 }
 
@@ -22,8 +27,9 @@ function truncateSingleLine(str: string, max: number): string {
 }
 
 /**
- * Builds privacy-safe fields for telemetry when Dagre.layout throws.
- * Avoids sending the graph; message/stack come from the library only.
+ * Builds telemetry fields when Dagre.layout throws. Does not attach the service map graph.
+ * Message and stack are taken from the caught value as-is (aside from truncation / whitespace
+ * folding); they are not scrubbed for PII—call only with errors originating from Dagre layout.
  */
 export function getDagreLayoutFailureDiagnostics(error: unknown): DagreLayoutFailureDiagnostics {
   if (error instanceof Error) {

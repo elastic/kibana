@@ -43,6 +43,8 @@ const DEFAULT_LAYOUT_OPTIONS: Required<LayoutOptions> = {
 
 /**
  * Places nodes on a square grid when Dagre layout fails (e.g. rare internal dagre bugs).
+ * Positions follow the **input array order** (index 0, 1, …), not graph topology—only
+ * a last-resort layout so the map stays usable.
  */
 export function applyGridFallbackLayout<T extends Record<string, unknown>>(
   nodes: Node<T>[],

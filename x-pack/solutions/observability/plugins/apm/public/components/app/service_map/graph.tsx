@@ -117,6 +117,8 @@ function GraphInner({
     [getAnimationDuration]
   );
 
+  // EBT + console fire once per failed layout computation (each useMemo re-run that throws),
+  // not strictly once per page visit—intentional for measuring failure frequency.
   const onDagreLayoutFailure = useCallback(
     (error: unknown) => {
       telemetry.reportServiceMapDagreLayoutFallback(getDagreLayoutFailureDiagnostics(error));
