@@ -10,6 +10,29 @@ import { createGcsRepository, replaySnapshot, type LoadResult } from '@kbn/es-sn
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { GcsConfig } from '../scenarios/types';
 
+const TEMP_INDEX_PREFIX = 'snapshot-loader-temp-';
+
+async function deleteStaleTemporaryIndices(esClient: Client, log: ToolingLog): Promise<void> {
+  try {
+    const resolved = await esClient.indices.resolveIndex({
+      name: `${TEMP_INDEX_PREFIX}*`,
+    });
+    const staleIndices = resolved.indices.map((entry) => entry.name);
+    if (staleIndices.length > 0) {
+      log.warning(
+        `Found ${staleIndices.length} stale temporary indices from a previous run; deleting`
+      );
+      await esClient.indices.delete({
+        index: staleIndices.join(','),
+        ignore_unavailable: true,
+      });
+      log.info(`Deleted ${staleIndices.length} stale temporary indices`);
+    }
+  } catch {
+    log.debug('No stale temporary indices to clean up');
+  }
+}
+
 export async function replayObservabilityDataStreams(
   esClient: Client,
   log: ToolingLog,
@@ -20,7 +43,9 @@ export async function replayObservabilityDataStreams(
     `Replaying data from snapshot: ${snapshotName} (${gcsConfig.bucket}/${gcsConfig.basePath})`
   );
 
-  return await replaySnapshot({
+  await deleteStaleTemporaryIndices(esClient, log);
+
+  const result = await replaySnapshot({
     esClient,
     log,
     repository: createGcsRepository({
@@ -30,6 +55,12 @@ export async function replayObservabilityDataStreams(
     snapshotName,
     patterns: ['logs-*', 'metrics-*', 'traces-*'],
   });
+
+  if (!result.success) {
+    await deleteStaleTemporaryIndices(esClient, log);
+  }
+
+  return result;
 }
 
 /** deleteByQuery on each distinct destination from snapshot replay (`reindexedIndices` only). */
