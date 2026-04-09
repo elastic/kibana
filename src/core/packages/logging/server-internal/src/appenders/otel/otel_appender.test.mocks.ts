@@ -18,8 +18,22 @@ export const mockBatchLogRecordProcessor = jest.fn();
 export const mockOTLPLogExporter = jest.fn();
 
 export const mockResourceFromAttributes = jest.fn();
-export const mockMergeResource = jest.fn(() => ({ type: 'merged-resource' }));
-export const mockDetectResources = jest.fn(() => ({ merge: mockMergeResource }));
+
+interface MockResource {
+  type: string;
+  merge: jest.Mock<MockResource>;
+}
+
+const makeMockResource = (label: string): MockResource => ({
+  type: label,
+  merge: jest.fn(() => makeMockResource('merged-resource')),
+});
+
+export const mockMergeResource = jest.fn(() => makeMockResource('merged-resource'));
+export const mockDetectResources = jest.fn(() => ({
+  type: 'detected-resource',
+  merge: mockMergeResource,
+}));
 
 jest.mock('@opentelemetry/sdk-logs', () => ({
   LoggerProvider: mockLoggerProvider,
@@ -45,4 +59,9 @@ jest.mock('@opentelemetry/api', () => ({
   trace: {
     setSpanContext: jest.fn((_ctx, spanCtx) => ({ spanContext: spanCtx })),
   },
+}));
+
+export const mockGetConfiguration = jest.fn();
+jest.mock('@kbn/apm-config-loader', () => ({
+  getConfiguration: mockGetConfiguration,
 }));

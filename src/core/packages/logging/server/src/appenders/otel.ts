@@ -36,9 +36,10 @@ export interface OtelAppenderConfig {
   headers: Record<string, string>;
   /**
    * Additional resource attributes merged on top of the auto-detected host,
-   * process and OS attributes. Because Kibana expands dotted YAML keys into
-   * nested objects, wrap dotted attribute names in `[brackets]`:
+   * process, OS and service attributes. Can be used to override defaults such
+   * as `service.name`. Because Kibana expands dotted YAML keys into nested
+   * objects, wrap dotted attribute names in `[brackets]`:
    * `"[service.name]": my-kibana`
    */
-  attributes: Record<string, string>;
+  attributes?: Record<string, string>;
 }

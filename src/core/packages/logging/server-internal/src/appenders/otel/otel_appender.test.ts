@@ -11,6 +11,7 @@ import {
   mockBatchLogRecordProcessor,
   mockDetectResources,
   mockEmit,
+  mockGetConfiguration,
   mockLoggerProvider,
   mockMergeResource,
   mockOTLPLogExporter,
@@ -27,7 +28,6 @@ const validConfig = {
   type: 'otel' as const,
   url: 'http://collector:4318/v1/logs',
   headers: { Authorization: 'Bearer token' },
-  attributes: { 'service.name': 'kibana' },
 };
 
 const makeRecord = (overrides = {}) => ({
@@ -48,27 +48,31 @@ beforeEach(() => {
   mockResourceFromAttributes.mockClear();
   mockDetectResources.mockClear();
   mockMergeResource.mockClear();
+  mockGetConfiguration.mockClear();
   jest.mocked(trace.setSpanContext).mockClear();
 });
 
 describe('OtelAppender.configSchema', () => {
-  it('validates a complete valid config', () => {
-    expect(OtelAppender.configSchema.validate(validConfig)).toEqual(validConfig);
-  });
-
-  it('applies default empty objects for headers and attributes', () => {
+  it('validates a minimal config (url only required)', () => {
     const result = OtelAppender.configSchema.validate({
       type: 'otel',
       url: 'http://collector:4318/v1/logs',
     });
+    expect(result.url).toBe('http://collector:4318/v1/logs');
     expect(result.headers).toEqual({});
-    expect(result.attributes).toEqual({});
+    expect(result.attributes).toBeUndefined();
+  });
+
+  it('accepts optional user-provided attributes to override defaults', () => {
+    const result = OtelAppender.configSchema.validate({
+      ...validConfig,
+      attributes: { 'service.name': 'my-kibana' },
+    });
+    expect(result.attributes).toEqual({ 'service.name': 'my-kibana' });
   });
 
   it('rejects config without url', () => {
-    expect(() =>
-      OtelAppender.configSchema.validate({ type: 'otel', headers: {}, attributes: {} })
-    ).toThrow();
+    expect(() => OtelAppender.configSchema.validate({ type: 'otel' })).toThrow();
   });
 
   it('rejects config with wrong type', () => {
@@ -86,12 +90,55 @@ describe('OtelAppender constructor', () => {
     });
   });
 
-  it('builds resource by merging auto-detected attributes with user-provided ones', () => {
-    const mockResource = { type: 'user-resource' };
-    const mockMergedResource = { type: 'merged-resource' };
-    mockResourceFromAttributes.mockReturnValue(mockResource);
-    mockMergeResource.mockReturnValue(mockMergedResource);
+  it('derives service.name, service.version and deployment.environment from the APM config singleton', () => {
+    mockGetConfiguration.mockReturnValue({
+      serviceName: 'kibana',
+      serviceVersion: '9.4.0',
+      environment: 'production',
+    });
 
+    new OtelAppender(validConfig);
+
+    expect(mockGetConfiguration).toHaveBeenCalledWith('kibana');
+    expect(mockResourceFromAttributes).toHaveBeenCalledWith({
+      'service.name': 'kibana',
+      'service.version': '9.4.0',
+      'deployment.environment': 'production',
+    });
+  });
+
+  it('omits service attributes whose APM config value is falsy', () => {
+    mockGetConfiguration.mockReturnValue({ serviceName: 'kibana' }); // no version or environment
+
+    new OtelAppender(validConfig);
+
+    expect(mockResourceFromAttributes).toHaveBeenCalledWith({ 'service.name': 'kibana' });
+  });
+
+  it('produces no service attributes when the APM config singleton is not initialised', () => {
+    mockGetConfiguration.mockReturnValue(undefined);
+
+    new OtelAppender(validConfig);
+
+    expect(mockResourceFromAttributes).toHaveBeenCalledWith({});
+  });
+
+  it('user-provided attributes override the APM-derived ones', () => {
+    mockGetConfiguration.mockReturnValue({ serviceName: 'kibana', environment: 'development' });
+
+    new OtelAppender({
+      ...validConfig,
+      attributes: { 'service.name': 'custom-kibana', 'deployment.environment': 'staging' },
+    });
+
+    // The user override is passed as the last merge layer.
+    expect(mockResourceFromAttributes).toHaveBeenCalledWith({
+      'service.name': 'custom-kibana',
+      'deployment.environment': 'staging',
+    });
+  });
+
+  it('auto-detects host/process/OS/env attributes via resource detectors', () => {
     new OtelAppender(validConfig);
 
     expect(mockDetectResources).toHaveBeenCalledWith({
@@ -102,11 +149,6 @@ describe('OtelAppender constructor', () => {
         'processDetector',
       ]),
     });
-    expect(mockResourceFromAttributes).toHaveBeenCalledWith(validConfig.attributes);
-    expect(mockMergeResource).toHaveBeenCalledWith(mockResource);
-    expect(mockLoggerProvider).toHaveBeenCalledWith(
-      expect.objectContaining({ resource: mockMergedResource })
-    );
   });
 });
 

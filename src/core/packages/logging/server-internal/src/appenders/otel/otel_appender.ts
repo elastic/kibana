@@ -22,8 +22,35 @@ import {
 } from '@opentelemetry/resources';
 import { BatchLogRecordProcessor, LoggerProvider } from '@opentelemetry/sdk-logs';
 import type { OtelAppenderConfig } from '@kbn/core-logging-server';
+// getConfiguration returns the already-initialised APM config singleton (loaded at bootstrap).
+// Both packages are platform/private so this import is within the allowed visibility boundary.
+import { getConfiguration } from '@kbn/apm-config-loader';
 
 const DISPOSE_TIMEOUT_MS = 5_000;
+
+/**
+ * Derives OTel service resource attributes from the APM configuration that was
+ * already loaded at bootstrap time. This mirrors the approach used by
+ * `initTelemetry` for traces so that all signals share a consistent service
+ * identity without requiring the user to re-declare it in `kibana.yml`.
+ */
+const deriveServiceAttributes = (): Record<string, string> => {
+  const attrs: Record<string, string> = {};
+  const apmConfig = getConfiguration('kibana');
+  if (!apmConfig) {
+    return attrs;
+  }
+  if (apmConfig.serviceName) {
+    attrs['service.name'] = String(apmConfig.serviceName);
+  }
+  if (apmConfig.serviceVersion) {
+    attrs['service.version'] = String(apmConfig.serviceVersion);
+  }
+  if (apmConfig.environment) {
+    attrs['deployment.environment'] = String(apmConfig.environment);
+  }
+  return attrs;
+};
 
 /**
  * Maps a Kibana log level to the corresponding OTel SeverityNumber.
@@ -118,7 +145,8 @@ export class OtelAppender implements DisposableAppender {
     type: schema.literal('otel'),
     url: schema.string(),
     headers: schema.recordOf(schema.string(), schema.string(), { defaultValue: {} }),
-    attributes: schema.recordOf(schema.string(), schema.string(), { defaultValue: {} }),
+    // Optional: user-provided attributes override the service attributes derived from APM config.
+    attributes: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   });
 
   private readonly loggerProvider: LoggerProvider;
@@ -126,11 +154,16 @@ export class OtelAppender implements DisposableAppender {
 
   constructor(config: OtelAppenderConfig) {
     const exporter = new OTLPLogExporter({ url: config.url, headers: config.headers });
-    // Merge auto-detected host/process/OS/env attributes with user-provided ones
-    // so that the resource is consistent with other OTel signals (traces, metrics).
+    // Layer the resource from three sources (each overriding the previous):
+    //   1. Auto-detected: host, OS, process, env-var OTel attributes
+    //   2. Derived: service.name / service.version / deployment.environment from the
+    //      APM config singleton (mirrors how initTelemetry builds trace resources)
+    //   3. User overrides: explicit attributes from kibana.yml (optional)
     const resource = detectResources({
       detectors: [envDetector, hostDetector, osDetector, processDetector],
-    }).merge(resourceFromAttributes(config.attributes));
+    })
+      .merge(resourceFromAttributes(deriveServiceAttributes()))
+      .merge(resourceFromAttributes(config.attributes ?? {}));
     this.loggerProvider = new LoggerProvider({
       processors: [new BatchLogRecordProcessor(exporter)],
       resource,

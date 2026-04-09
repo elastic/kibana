@@ -26,16 +26,25 @@ jest.mock('@opentelemetry/sdk-logs', () => ({
 jest.mock('@opentelemetry/exporter-logs-otlp-http', () => ({
   OTLPLogExporter: jest.fn(),
 }));
-jest.mock('@opentelemetry/resources', () => ({
-  detectResources: jest.fn(() => ({ merge: jest.fn() })),
-  resourceFromAttributes: jest.fn(),
-  envDetector: 'envDetector',
-  hostDetector: 'hostDetector',
-  osDetector: 'osDetector',
-  processDetector: 'processDetector',
-}));
+jest.mock('@opentelemetry/resources', () => {
+  interface MockResource {
+    merge: jest.Mock<MockResource>;
+  }
+  const makeMergeableResource = (): MockResource => ({ merge: jest.fn(makeMergeableResource) });
+  return {
+    detectResources: jest.fn(makeMergeableResource),
+    resourceFromAttributes: jest.fn(makeMergeableResource),
+    envDetector: 'envDetector',
+    hostDetector: 'hostDetector',
+    osDetector: 'osDetector',
+    processDetector: 'processDetector',
+  };
+});
 jest.mock('@opentelemetry/api', () => ({
   ROOT_CONTEXT: 'root-context',
   TraceFlags: { SAMPLED: 1 },
   trace: { setSpanContext: jest.fn() },
+}));
+jest.mock('@kbn/apm-config-loader', () => ({
+  getConfiguration: jest.fn(() => ({ serviceName: 'kibana', serviceVersion: '9.0.0' })),
 }));
