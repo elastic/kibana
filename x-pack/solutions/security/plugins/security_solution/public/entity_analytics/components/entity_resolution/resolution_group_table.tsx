@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiBasicTable,
   EuiButtonIcon,
@@ -18,7 +18,6 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { ResolutionGroup } from './hooks/use_resolution_group';
 import {
   getEntityName,
@@ -213,16 +212,6 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
     currentEntityId,
   ]);
 
-  const getRowProps = useCallback(
-    (_item: TableEntityRow) => ({
-      css: css`
-        & > td {
-          border-bottom: none;
-        }
-      `,
-    }),
-    []
-  );
 
   if (isLoading) {
     return <EuiLoadingSpinner size="m" />;
@@ -249,7 +238,6 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
       data-test-subj={RESOLUTION_GROUP_TABLE_TEST_ID}
       items={items}
       columns={columns}
-      rowProps={getRowProps}
       compressed
     />
   );
