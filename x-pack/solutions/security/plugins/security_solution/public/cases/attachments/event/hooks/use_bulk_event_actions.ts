@@ -8,23 +8,23 @@
 import { useCallback, useMemo } from 'react';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import type { CaseAttachmentWithoutOwner } from '@kbn/cases-plugin/public/types';
-import { AttachmentType } from '@kbn/cases-plugin/common';
-import { APP_ID } from '../../../../common';
-import { useKibana } from '../../../common/lib/kibana';
-import type { CustomBulkAction } from '../../../../common/types';
-import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from './translations';
+import { APP_ID } from '../../../../../common';
+import { useKibana } from '../../../../common/lib/kibana';
+import type { CustomBulkAction } from '../../../../../common/types';
+import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../translations';
+import { generateEventAttachmentWithoutOwner } from '../utils';
 
 /**
  * Utility function converting multiple timeline items into single attachment (when attaching multiple timeline items to a case)
  */
 const timelineItemsToCaseEventAttachment = (
   timelineItems: TimelineItem[]
-): CaseAttachmentWithoutOwner => {
-  return {
-    type: AttachmentType.event,
-    eventId: timelineItems.map((item) => item._id).filter(Boolean),
-    index: timelineItems.map((item) => item._index).filter(Boolean),
-  } as CaseAttachmentWithoutOwner;
+): CaseAttachmentWithoutOwner[] => {
+  const eventAttachment = generateEventAttachmentWithoutOwner({
+    attachmentId: timelineItems.map((item) => item._id),
+    index: timelineItems.map((item) => item._index),
+  });
+  return eventAttachment ? [eventAttachment] : [];
 };
 
 /**
@@ -75,7 +75,7 @@ export const useBulkAddEventsToCaseActions = ({
             disabledLabel: ADD_TO_NEW_CASE,
             onClick: (events: TimelineItem[] = []) =>
               createCaseFlyout.open({
-                attachments: [timelineItemsToCaseEventAttachment(events)],
+                attachments: timelineItemsToCaseEventAttachment(events),
                 observables: getObservables(events),
               }),
           },
@@ -87,9 +87,8 @@ export const useBulkAddEventsToCaseActions = ({
             'data-test-subj': 'attach-existing-case',
             onClick: (events: TimelineItem[] = []) =>
               selectCaseModal.open({
-                getAttachments: (): CaseAttachmentWithoutOwner[] => [
+                getAttachments: (): CaseAttachmentWithoutOwner[] =>
                   timelineItemsToCaseEventAttachment(events),
-                ],
                 getObservables: () => getObservables(events),
               }),
           },
