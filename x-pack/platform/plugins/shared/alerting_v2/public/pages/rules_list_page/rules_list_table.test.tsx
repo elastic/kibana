@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { BULK_FILTER_MAX_RULES } from '@kbn/alerting-v2-schemas';
 import { RulesListTable, type RulesListTableProps } from './rules_list_table';
 
 const mockRules = [
@@ -15,7 +16,7 @@ const mockRules = [
     id: 'rule-1',
     kind: 'alert',
     enabled: true,
-    metadata: { name: 'Rule One', labels: ['prod'] },
+    metadata: { name: 'Rule One', tags: ['prod'] },
     schedule: { every: '1m' },
     evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
   },
@@ -23,34 +24,34 @@ const mockRules = [
     id: 'rule-2',
     kind: 'signal',
     enabled: false,
-    metadata: { name: 'Rule Two', labels: [] },
+    metadata: { name: 'Rule Two', tags: [] },
     schedule: { every: '5m' },
     evaluation: { query: { base: 'FROM metrics-*' } },
   },
 ];
 
-const mockRulesWithManyLabels = [
+const mockRulesWithManyTags = [
   {
-    id: 'rule-many-labels',
+    id: 'rule-many-tags',
     kind: 'alert',
     enabled: true,
     metadata: {
-      name: 'Rule With Many Labels',
-      labels: ['new', 'rna', 'production', 'fix', 'this', 'tags', 'more', 'than', 'enough'],
+      name: 'Rule With Many Tags',
+      tags: ['new', 'rna', 'production', 'fix', 'this', 'tags', 'more', 'than', 'enough'],
     },
     schedule: { every: '1m' },
     evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
   },
 ];
 
-const mockRulesWithLongLabels = [
+const mockRulesWithLongTags = [
   {
-    id: 'rule-long-labels',
+    id: 'rule-long-tags',
     kind: 'alert',
     enabled: true,
     metadata: {
-      name: 'Rule With Long Labels',
-      labels: ['this-is-a-very-long-label-name-that-should-be-truncated'],
+      name: 'Rule With Long Tags',
+      tags: ['this-is-a-very-long-tag-name-that-should-be-truncated'],
     },
     schedule: { every: '1m' },
     evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
@@ -161,37 +162,37 @@ describe('RulesListTable', () => {
       expect(screen.getByText('Detect only')).toBeInTheDocument();
     });
 
-    it('renders label badges for rules with labels', () => {
+    it('renders tag badges for rules with tags', () => {
       renderTable();
 
       expect(screen.getByText('prod')).toBeInTheDocument();
     });
 
-    it('truncates labels to show only the first 1 and a +N badge for overflow', () => {
+    it('truncates tags to show only the first 1 and a +N badge for overflow', () => {
       renderTable({
-        items: mockRulesWithManyLabels as any,
+        items: mockRulesWithManyTags as any,
         totalItemCount: 1,
       });
 
-      // First label should be visible
+      // First tag should be visible
       expect(screen.getByText('new')).toBeInTheDocument();
 
-      // Remaining 8 labels should be hidden behind +8 badge
-      expect(screen.getByTestId('overflowLabelsBadge')).toHaveTextContent('+8');
+      // Remaining 8 tags should be hidden behind +8 badge
+      expect(screen.getByTestId('overflowTagsBadge')).toHaveTextContent('+8');
 
-      // Overflow labels should not be directly visible
+      // Overflow tags should not be directly visible
       expect(screen.queryByText('rna')).not.toBeInTheDocument();
     });
 
-    it('renders long label text with native EuiBadge truncation', () => {
+    it('renders long tag text with native EuiBadge truncation', () => {
       renderTable({
-        items: mockRulesWithLongLabels as any,
+        items: mockRulesWithLongTags as any,
         totalItemCount: 1,
       });
 
-      // The full label text is in the DOM; CSS handles visual truncation
+      // The full tag text is in the DOM; CSS handles visual truncation
       expect(
-        screen.getByText('this-is-a-very-long-label-name-that-should-be-truncated')
+        screen.getByText('this-is-a-very-long-tag-name-that-should-be-truncated')
       ).toBeInTheDocument();
     });
   });
@@ -261,6 +262,36 @@ describe('RulesListTable', () => {
       renderTable({ selectedCount: 1, isAllSelected: false, totalItemCount: 5 });
 
       expect(screen.getByTestId('selectAllRulesButton')).toHaveTextContent('Select all 5 rules');
+    });
+
+    it('shows "Select first {max} rules" without disclosure until select-all is active', () => {
+      renderTable({
+        selectedCount: 1,
+        isAllSelected: false,
+        totalItemCount: BULK_FILTER_MAX_RULES + 2000,
+      });
+
+      const btn = screen.getByTestId('selectAllRulesButton');
+      expect(btn).toHaveTextContent('Select first');
+      expect(btn.textContent?.replace(/\s/g, '')).toMatch(/10,?000/);
+
+      expect(screen.queryByTestId('bulkSelectAllLimitDisclosure')).not.toBeInTheDocument();
+    });
+
+    it('shows disclosure only after select-all when total exceeds bulk cap', () => {
+      renderTable({
+        selectedCount: BULK_FILTER_MAX_RULES,
+        isAllSelected: true,
+        totalItemCount: BULK_FILTER_MAX_RULES + 2000,
+      });
+
+      expect(screen.getByTestId('bulkActionsButton')).toHaveTextContent('Selected');
+      expect(screen.getByTestId('bulkActionsButton').textContent?.replace(/\s/g, '')).toMatch(
+        /10,?000/
+      );
+      const disc = screen.getByTestId('bulkSelectAllLimitDisclosure');
+      expect(disc).toHaveTextContent('Only the first');
+      expect(disc.textContent?.replace(/\s/g, '')).toMatch(/10,?000/);
     });
 
     it('hides "Select all" button when all selected', () => {

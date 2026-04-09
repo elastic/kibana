@@ -355,6 +355,17 @@ interface WorkflowsExecutionEnginePluginStart {
     workflowExecutionId: string,
     spaceId: string
   ): Promise<void>;
+
+  /**
+   * Cancel all non-terminal executions for a workflow in a space by paging the executions
+   * index with search_after (fixed internal batch size). Uses cancelWorkflowExecution per id;
+   * failures are logged and do not stop the rest. Pagination is not point-in-time: under
+   * concurrent index updates, duplicates or gaps across pages are possible.
+   */
+  cancelAllActiveWorkflowExecutions(params: {
+    spaceId: string;
+    workflowId: string;
+  }): Promise<void>;
 }
 
 interface ExecuteWorkflowResponse {
@@ -861,7 +872,16 @@ await workflowsExecutionEngine.cancelWorkflowExecution(
 );
 ```
 
-**Note**: To retrieve workflow execution status and logs, use the workflows_management plugin's API. The execution engine plugin focuses on execution control and does not expose query methods in its public API.
+### Example 4: Bulk cancel non-terminal executions for a workflow
+
+```typescript
+await workflowsExecutionEngine.cancelAllActiveWorkflowExecutions({
+  workflowId: 'my-workflow-id',
+  spaceId: 'default',
+});
+```
+
+**Note**: To retrieve workflow execution status and logs, use the workflows_management plugin's API. The execution engine plugin focuses on execution control; it does not expose ad-hoc query APIs beyond execution helpers such as bulk cancel.
 
 ---
 
