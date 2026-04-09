@@ -362,7 +362,12 @@ export class SearchInterceptor {
           abort: (reason?: AbortReason) => searchAbortController.abort(reason),
           poll: async (abortSignal) => {
             if (id) {
-              await search({ abortSignal, pollLength: '0' });
+              await search({
+                abortSignal,
+                // pollLength should be 0 because this poll is not for results, but just to signal to the server to
+                // record the search in the background search saved object. we want it to finish quickly
+                pollLength: '0',
+              });
             }
           },
         })
