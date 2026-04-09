@@ -61,7 +61,8 @@ export async function resolveConnectors(
 }
 
 function categorizeConnectorType(type: string): StepCategory {
-  if (type.startsWith('kibana.') || type.startsWith('cases.')) return StepCategory.Kibana;
+  if (type.startsWith('kibana.')) return StepCategory.Kibana;
+  if (type.startsWith('cases.')) return StepCategory.KibanaCases;
   if (type.startsWith('elasticsearch.')) return StepCategory.Elasticsearch;
   if (type.startsWith('ai.')) return StepCategory.Ai;
   if (type.startsWith('data.')) return StepCategory.Data;

@@ -18,6 +18,7 @@ import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server/to
 import { relevanceSearch } from '../relevance_search';
 import { naturalLanguageSearch } from '../nl_search';
 import type { MatchResult } from '../steps/perform_match_search';
+import type { TopSnippetsConfig } from '../steps/extract_snippets';
 import { progressMessages } from './i18n';
 
 const convertMatchResult = (result: MatchResult): Resource => {
@@ -28,7 +29,7 @@ const convertMatchResult = (result: MatchResult): Resource => {
     },
     partial: true,
     content: {
-      highlights: result.highlights,
+      snippets: result.snippets,
     },
   };
 };
@@ -40,11 +41,13 @@ export const createRelevanceSearchTool = ({
   esClient,
   events,
   logger,
+  topSnippetsConfig,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
   events?: ToolEventEmitter;
   logger: Logger;
+  topSnippetsConfig?: TopSnippetsConfig;
 }) => {
   return toTool(
     async ({ term, index, size }) => {
@@ -60,6 +63,7 @@ export const createRelevanceSearchTool = ({
             model,
             esClient,
             logger,
+            topSnippetsConfig,
           });
           const resources = rawResults.map(convertMatchResult);
 

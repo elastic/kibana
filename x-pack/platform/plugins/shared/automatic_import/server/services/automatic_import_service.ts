@@ -333,17 +333,7 @@ export class AutomaticImportService {
     }
 
     const title = existing.metadata?.title ?? integrationId;
-    const isInitialRelease = !existing.changelog || existing.changelog.length === 0;
-    const changelogEntry: ChangelogEntry = {
-      version,
-      changes: [
-        {
-          description: isInitialRelease ? `Initial release of ${title}` : `Updated ${title}`,
-          type: 'enhancement',
-          link: '',
-        },
-      ],
-    };
+    const changelogEntry = this.createChangelogEntry(version, title, existing.changelog);
 
     const updateData: IntegrationAttributes = {
       ...existing,
@@ -472,6 +462,8 @@ export class AutomaticImportService {
     }
 
     await this.savedObjectService.deleteDataStream(dataStreamId, integrationId, options);
+
+    await this.resetApprovedStatus(integrationId);
   }
 
   public async reanalyzeDataStream(
@@ -587,15 +579,14 @@ export class AutomaticImportService {
     integrationId: string;
     dataStreamId: string;
     ingestPipeline: string | Record<string, unknown>;
-    internalEsClient: ElasticsearchClient;
+    esClient: ElasticsearchClient;
     fieldsMetadataClient: IFieldsMetadataClient;
   }): Promise<{
     ingest_pipeline: Record<string, unknown>;
     results: Array<Record<string, unknown>>;
   }> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
-    const { integrationId, dataStreamId, ingestPipeline, internalEsClient, fieldsMetadataClient } =
-      params;
+    const { integrationId, dataStreamId, ingestPipeline, esClient, fieldsMetadataClient } = params;
 
     let parsedPipeline: Pipeline;
     try {
@@ -622,7 +613,7 @@ export class AutomaticImportService {
 
     let simulateResponse: estypes.IngestSimulateResponse;
     try {
-      simulateResponse = await internalEsClient.ingest.simulate({
+      simulateResponse = await esClient.ingest.simulate({
         pipeline: parsedPipeline as unknown as estypes.IngestPipeline,
         docs: samples.map((sample) => ({
           _source: { message: sample },
@@ -648,11 +639,7 @@ export class AutomaticImportService {
       fieldsMetadataClient
     );
 
-    const validationResult = await validateFieldMappings(
-      internalEsClient,
-      fieldMapping,
-      this.logger
-    );
+    const validationResult = await validateFieldMappings(esClient, fieldMapping, this.logger);
     if (!validationResult.valid) {
       this.logger.warn(
         `Field mapping validation warnings for ${dataStreamId}: ${validationResult.errors.join(
@@ -670,7 +657,50 @@ export class AutomaticImportService {
       status: TASK_STATUSES.completed,
     });
 
+    await this.resetApprovedStatus(integrationId);
+
     return this.getDataStreamResults(integrationId, dataStreamId);
+  }
+
+  private async resetApprovedStatus(integrationId: string): Promise<void> {
+    assert(this.savedObjectService, 'Saved Objects service not initialized.');
+    const integration = await this.savedObjectService.getIntegration(integrationId);
+    if (integration.status === TASK_STATUSES.approved) {
+      const currentVersion = integration.metadata?.version || '0.1.0';
+      const parts = currentVersion.split('.');
+      const newVersion =
+        parts.length === 3 ? `${parts[0]}.${parseInt(parts[1], 10) + 1}.0` : currentVersion;
+      const title = integration.metadata?.title ?? integrationId;
+      const changelogEntry = this.createChangelogEntry(newVersion, title, integration.changelog);
+      const updateData: IntegrationAttributes = {
+        ...integration,
+        status: TASK_STATUSES.completed,
+        changelog: [changelogEntry, ...(integration.changelog ?? [])],
+      };
+
+      await this.savedObjectService.updateIntegration(updateData, newVersion);
+      this.logger.debug(
+        `Integration ${integrationId} status reset from approved to completed after data stream mutation`
+      );
+    }
+  }
+
+  private createChangelogEntry(
+    version: string,
+    title: string,
+    existingChangelog?: ChangelogEntry[]
+  ): ChangelogEntry {
+    const isInitialRelease = !existingChangelog || existingChangelog.length === 0;
+    return {
+      version,
+      changes: [
+        {
+          description: isInitialRelease ? `Initial release of ${title}` : `Updated ${title}`,
+          type: 'enhancement',
+          link: '',
+        },
+      ],
+    };
   }
 
   public stop() {
