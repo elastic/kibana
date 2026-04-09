@@ -26,6 +26,7 @@ import type { TaskClient } from '../lib/tasks/task_client';
 import type { StreamsTaskType } from '../lib/tasks/task_definitions';
 import type { InsightClient } from '../lib/sig_events/insights/client/insight_client';
 import type { ContinuousKiExtractionWorkflowService } from '../lib/workflows/continuous_extraction_workflow';
+import type { SigEventsTuningConfig } from '../../common/sig_events_tuning_config';
 
 export type GetScopedClients = ({
   request,
@@ -49,6 +50,7 @@ export interface RouteHandlerScopedClients {
   fieldsMetadataClient: IFieldsMetadataClient;
   taskClient: TaskClient<StreamsTaskType>;
   isSecurityEnabled: boolean;
+  tuningConfig: SigEventsTuningConfig;
 }
 
 export interface RouteDependencies {
