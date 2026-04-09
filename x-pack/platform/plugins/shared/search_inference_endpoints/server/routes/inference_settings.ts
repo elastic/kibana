@@ -91,25 +91,7 @@ export const defineInferenceSettingsRoutes = ({
         });
         const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-        const validateEndpoints = async (
-          settingsBody: InferenceSettingsResponse
-        ): Promise<InferenceSettingsResponse> => {
-          try {
-            const { inferenceEndpoints } = await fetchInferenceEndpoints(esClient);
-            const liveIds = new Set(inferenceEndpoints.map((ep) => ep.inference_id));
-            const invalid = findInvalidEndpoints(
-              settingsBody.data,
-              featureRegistry,
-              liveIds,
-              logger
-            );
-            return { ...settingsBody, invalidEndpoints: invalid };
-          } catch (e) {
-            logger.warn(`Failed to validate inference endpoints: ${e.message}`);
-            return settingsBody;
-          }
-        };
-
+        let settingsBody: InferenceSettingsResponse;
         try {
           const so = await soClient.get<InferenceSettingsAttributes>(
             INFERENCE_SETTINGS_SO_TYPE,
@@ -135,11 +117,7 @@ export const defineInferenceSettingsRoutes = ({
             });
           }
 
-          const body = await validateEndpoints(parseInferenceSettingsSO(so));
-          return response.ok({
-            body,
-            headers: { 'content-type': 'application/json' },
-          });
+          settingsBody = parseInferenceSettingsSO(so);
         } catch (e) {
           if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
             return response.ok({
@@ -148,6 +126,22 @@ export const defineInferenceSettingsRoutes = ({
             });
           }
           throw e;
+        }
+
+        try {
+          const { inferenceEndpoints } = await fetchInferenceEndpoints(esClient);
+          const liveIds = new Set(inferenceEndpoints.map((ep) => ep.inference_id));
+          const invalid = findInvalidEndpoints(settingsBody.data, featureRegistry, liveIds, logger);
+          return response.ok({
+            body: { ...settingsBody, invalidEndpoints: invalid },
+            headers: { 'content-type': 'application/json' },
+          });
+        } catch (e) {
+          logger.warn(`Failed to validate inference endpoints: ${e.message}`);
+          return response.ok({
+            body: settingsBody,
+            headers: { 'content-type': 'application/json' },
+          });
         }
       })
     );
