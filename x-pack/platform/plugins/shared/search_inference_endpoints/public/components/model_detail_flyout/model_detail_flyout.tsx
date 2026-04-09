@@ -31,7 +31,7 @@ import {
   isInferenceEndpointWithDisplayNameMetadata,
   isInferenceEndpointWithDisplayCreatorMetadata,
 } from '../../../common/type_guards';
-import { TASK_TYPE_TOOLTIPS } from '../all_inference_endpoints/render_table_columns/render_endpoint/translations';
+import { TASK_TYPE_DESCRIPTIONS } from '@kbn/inference-endpoint-ui-common';
 import { getModelId } from '../../utils/get_model_id';
 import { AddEndpointModal } from './add_endpoint_modal';
 import { ModelEndpointRow } from './model_endpoint_row';
@@ -83,7 +83,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
       taskTypeOptions: taskTypes.map((tt) => ({
         value: tt,
         label: tt,
-        description: TASK_TYPE_TOOLTIPS[tt] ?? '',
+        description: TASK_TYPE_DESCRIPTIONS[tt] ?? '',
       })),
     };
   }, [endpoints]);

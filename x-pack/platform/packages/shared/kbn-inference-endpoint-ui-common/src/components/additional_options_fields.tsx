@@ -175,7 +175,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
             }}
           >
             {(field) => {
-              const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+              const { isInvalid } = getFieldValidityAndErrorMessage(field);
               return (
                 <EuiFormControlLayout
                   fullWidth
