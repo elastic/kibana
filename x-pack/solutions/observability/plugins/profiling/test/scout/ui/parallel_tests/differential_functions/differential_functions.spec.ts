@@ -28,9 +28,6 @@ test.describe('Differential Functions page', { tag: tags.stateful.classic }, () 
       comparisonRangeFrom,
       comparisonRangeTo
     );
-    await page.waitForResponse((response) =>
-      response.url().includes('/internal/profiling/topn/functions')
-    );
 
     await expect(page.getByText('Baseline functions')).toBeVisible();
     await expect(page.getByText('Comparison functions')).toBeVisible();
@@ -74,9 +71,6 @@ test.describe('Differential Functions page', { tag: tags.stateful.classic }, () 
       rangeFrom,
       rangeTo
     );
-    await page.waitForResponse((response) =>
-      response.url().includes('/internal/profiling/topn/functions')
-    );
     const overallPerformanceTitle = page.getByTestId('overallPerformance_summary_title');
 
     await expect(overallPerformanceTitle).toContainText('Lost overall performance by');
@@ -111,9 +105,6 @@ test.describe('Differential Functions page', { tag: tags.stateful.classic }, () 
       comparisonRangeTo,
       rangeFrom,
       rangeTo
-    );
-    await page.waitForResponse((response) =>
-      response.url().includes('/internal/profiling/topn/functions')
     );
 
     await expect(
