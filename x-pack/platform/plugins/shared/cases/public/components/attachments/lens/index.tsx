@@ -78,7 +78,7 @@ const getVisualizationAttachmentViewObject = ({
 export const getVisualizationAttachmentType = (): UnifiedValueAttachmentType => ({
   id: LENS_ATTACHMENT_TYPE,
   icon: 'document',
-  displayName: 'Visualizations',
+  displayName: i18n.VISUALIZATIONS,
   getAttachmentViewObject: getVisualizationAttachmentViewObject,
   getAttachmentRemovalObject: () => ({ event: i18n.REMOVED_VISUALIZATION }),
 });

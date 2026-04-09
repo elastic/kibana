@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isPlainObject } from 'lodash';
 import type { AttachmentRequest, AttachmentRequestV2 } from '../../../common/types/api';
 import type {
   AttachmentAttributesV2,
@@ -22,8 +23,7 @@ import type {
 } from '../types/attachments_v2';
 import type { AttachmentTypeTransformer } from './base';
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null;
+const isRecord = (value: unknown): value is Record<string, unknown> => isPlainObject(value);
 
 const isLegacyPersistableState = (
   value: unknown
