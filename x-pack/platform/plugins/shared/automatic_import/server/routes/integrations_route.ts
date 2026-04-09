@@ -178,6 +178,7 @@ const createIntegrationRoute = (
             title,
             logo,
             description,
+            connectorId,
           };
 
           await automaticImportService.createUpdateIntegration({
