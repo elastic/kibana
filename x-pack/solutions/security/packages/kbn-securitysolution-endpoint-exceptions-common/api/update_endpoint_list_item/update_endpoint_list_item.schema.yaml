@@ -26,7 +26,7 @@ paths:
                   entries:
                     - type: "match"
                       field: "file.hash.sha256"
-                      value: "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3"
+                      value: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
                       operator: "included"
                   os_types:
                     - "windows"
@@ -86,7 +86,7 @@ paths:
                     entries:
                       - type: "match"
                         field: "file.hash.sha256"
-                        value: "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3"
+                        value: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
                         operator: "included"
                     namespace_type: "agnostic"
                     os_types:

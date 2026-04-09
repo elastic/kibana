@@ -112,7 +112,8 @@ paths:
                       - field: file.hash.sha256
                         operator: included
                         type: match
-                        value: a94a8fe5ccb19ba61c4c0873d391e987982fbbd3
+                        value: >-
+                          e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
                     id: d4b0c1e2-3f4a-5b6c-7d8e-9f0a1b2c3d4e
                     item_id: block-malicious-file
                     list_id: endpoint_list
@@ -197,7 +198,8 @@ paths:
                       - field: file.hash.sha256
                         operator: included
                         type: match
-                        value: a94a8fe5ccb19ba61c4c0873d391e987982fbbd3
+                        value: >-
+                          e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
                     id: d4b0c1e2-3f4a-5b6c-7d8e-9f0a1b2c3d4e
                     item_id: block-malicious-file
                     list_id: endpoint_list
@@ -281,7 +283,8 @@ paths:
                     - field: file.hash.sha256
                       operator: included
                       type: match
-                      value: a]94a8fe5ccb19ba61c4c0873d391e987982fbbd3
+                      value: >-
+                        e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
                   name: Block malicious file
                   os_types:
                     - windows
@@ -335,7 +338,8 @@ paths:
                       - field: file.hash.sha256
                         operator: included
                         type: match
-                        value: a94a8fe5ccb19ba61c4c0873d391e987982fbbd3
+                        value: >-
+                          e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
                     id: d4b0c1e2-3f4a-5b6c-7d8e-9f0a1b2c3d4e
                     item_id: block-malicious-file
                     list_id: endpoint_list
@@ -404,7 +408,8 @@ paths:
                     - field: file.hash.sha256
                       operator: included
                       type: match
-                      value: a94a8fe5ccb19ba61c4c0873d391e987982fbbd3
+                      value: >-
+                        e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
                   item_id: block-malicious-file
                   name: Block malicious file (updated)
                   os_types:
@@ -467,7 +472,8 @@ paths:
                       - field: file.hash.sha256
                         operator: included
                         type: match
-                        value: a94a8fe5ccb19ba61c4c0873d391e987982fbbd3
+                        value: >-
+                          e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
                     id: d4b0c1e2-3f4a-5b6c-7d8e-9f0a1b2c3d4e
                     item_id: block-malicious-file
                     list_id: endpoint_list
@@ -581,7 +587,8 @@ paths:
                           - field: file.hash.sha256
                             operator: included
                             type: match
-                            value: a94a8fe5ccb19ba61c4c0873d391e987982fbbd3
+                            value: >-
+                              e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
                         id: d4b0c1e2-3f4a-5b6c-7d8e-9f0a1b2c3d4e
                         item_id: block-malicious-file
                         list_id: endpoint_list
