@@ -8,6 +8,9 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+
+export { X_ELASTIC_INTERNAL_ORIGIN_REQUEST };
 
 /**
  * Context attached to the request when a workflow runs, so that when code
@@ -82,15 +85,27 @@ function parseSourceExecutionIdFromHeaders(headers: KibanaRequest['headers']): s
 }
 
 /**
- * Returns the event-chain context from the request if it was set by a workflow run.
- * Used inside emitEvent to infer depth when the emitter is in a workflow-triggered path.
- * Reads from: (1) the request's symbol (execution-engine fakeRequest path), or
- * (2) the x-kibana-event-chain-depth and x-kibana-event-chain-source-execution-id headers (HTTP path).
+ * Returns the event-chain context for the request.
+ *
+ * Two trusted paths:
+ *  1. In-process (fakeRequest): the execution engine called setWorkflowEventChainContext before
+ *     any step runs, so the Symbol is present and takes precedence.
+ *  2. Inbound HTTP from kibana.request step: no Symbol exists, but the step marks its outbound
+ *     call with x-elastic-internal-origin so request.isInternalApiRequest is true. Only then are
+ *     the event-chain headers parsed.
+ *
+ * Note: isInternalApiRequest is derived from the presence of the x-elastic-internal-origin request
+ * header (see KibanaRequest constructor). It is not enforced at the network layer, so a
+ * sufficiently informed external caller could set it. This gate stops naive spoofing but should
+ * not be treated as a hard trust boundary.
  */
 export function getEventChainContext(request: KibanaRequest): EventChainContext | undefined {
   const stored = getStoredContext(request);
   if (stored !== undefined) {
     return stored;
+  }
+  if (!request.isInternalApiRequest) {
+    return undefined;
   }
   const depth = parseDepthFromHeaders(request.headers);
   if (depth === undefined) {
