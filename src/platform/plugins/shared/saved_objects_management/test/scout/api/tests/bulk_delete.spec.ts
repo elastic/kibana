@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, testData } from '../fixtures';
@@ -18,12 +17,6 @@ const validObject = { type: 'visualization', id: SAVED_OBJECT_IDS.VISUALIZATION 
 const invalidObject = { type: 'wigwags', id: 'foo' };
 
 apiTest.describe('_bulk_delete', { tag: tags.deploymentAgnostic }, () => {
-  let adminCredentials: RoleApiCredentials;
-
-  apiTest.beforeAll(async ({ requestAuth }) => {
-    adminCredentials = await requestAuth.getApiKey('admin');
-  });
-
   apiTest.beforeEach(async ({ kbnClient }) => {
     await kbnClient.importExport.load(KBN_ARCHIVES.BASIC);
   });
@@ -32,10 +25,11 @@ apiTest.describe('_bulk_delete', { tag: tags.deploymentAgnostic }, () => {
     await kbnClient.importExport.unload(KBN_ARCHIVES.BASIC);
   });
 
-  apiTest('should return 200 for an existing object', async ({ apiClient }) => {
+  apiTest('should return 200 for an existing object', async ({ apiClient, samlAuth }) => {
+    const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     const response = await apiClient.post(MANAGEMENT_API.BULK_DELETE, {
       headers: {
-        ...adminCredentials.apiKeyHeader,
+        ...cookieHeader,
         ...testData.COMMON_HEADERS,
       },
       body: [validObject],
@@ -48,10 +42,11 @@ apiTest.describe('_bulk_delete', { tag: tags.deploymentAgnostic }, () => {
     expect(response.body[0].error).toBeUndefined();
   });
 
-  apiTest('should return error for invalid object type', async ({ apiClient }) => {
+  apiTest('should return error for invalid object type', async ({ apiClient, samlAuth }) => {
+    const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     const response = await apiClient.post(MANAGEMENT_API.BULK_DELETE, {
       headers: {
-        ...adminCredentials.apiKeyHeader,
+        ...cookieHeader,
         ...testData.COMMON_HEADERS,
       },
       body: [invalidObject],
@@ -68,10 +63,11 @@ apiTest.describe('_bulk_delete', { tag: tags.deploymentAgnostic }, () => {
     });
   });
 
-  apiTest('should return mix of successes and errors', async ({ apiClient }) => {
+  apiTest('should return mix of successes and errors', async ({ apiClient, samlAuth }) => {
+    const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     const response = await apiClient.post(MANAGEMENT_API.BULK_DELETE, {
       headers: {
-        ...adminCredentials.apiKeyHeader,
+        ...cookieHeader,
         ...testData.COMMON_HEADERS,
       },
       body: [validObject, invalidObject],

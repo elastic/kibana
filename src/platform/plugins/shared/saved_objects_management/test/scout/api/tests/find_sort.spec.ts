@@ -18,7 +18,7 @@ apiTest.describe('find - sortField and sortOrder', { tag: tags.deploymentAgnosti
   let adminCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth, kbnClient }) => {
-    adminCredentials = await requestAuth.getApiKey('admin');
+    adminCredentials = await requestAuth.getApiKey('viewer');
     await kbnClient.importExport.load(KBN_ARCHIVES.BASIC);
     await kbnClient.importExport.load(KBN_ARCHIVES.REFERENCES);
   });

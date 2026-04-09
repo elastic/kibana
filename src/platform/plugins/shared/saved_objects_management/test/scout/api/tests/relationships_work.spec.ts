@@ -33,7 +33,7 @@ apiTest.describe('relationships - should work', { tag: tags.deploymentAgnostic }
   let adminCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth, kbnClient }) => {
-    adminCredentials = await requestAuth.getApiKey('admin');
+    adminCredentials = await requestAuth.getApiKey('viewer');
     await kbnClient.importExport.load(KBN_ARCHIVES.RELATIONSHIPS);
   });
 

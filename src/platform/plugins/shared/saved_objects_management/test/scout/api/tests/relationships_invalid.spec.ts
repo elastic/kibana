@@ -33,7 +33,7 @@ apiTest.describe('relationships - invalid references', { tag: tags.deploymentAgn
   let adminCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth, kbnClient }) => {
-    adminCredentials = await requestAuth.getApiKey('admin');
+    adminCredentials = await requestAuth.getApiKey('viewer');
     await kbnClient.importExport.load(KBN_ARCHIVES.RELATIONSHIPS);
   });
 
