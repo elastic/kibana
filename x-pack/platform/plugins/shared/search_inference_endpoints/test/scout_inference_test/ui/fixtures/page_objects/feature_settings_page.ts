@@ -65,27 +65,45 @@ export class FeatureSettingsPage {
     return this.content.locator('[data-test-subj^="endpoint-row-"]');
   }
 
+  public endpointRowsFor(featureId: string): Locator {
+    return this.subFeatureCard(featureId).locator('[data-test-subj^="endpoint-row-"]');
+  }
+
   public get firstEndpointRow(): Locator {
     // eslint-disable-next-line playwright/no-nth-methods -- selecting the first endpoint row to verify default badge presence
     return this.allEndpointRows.first();
   }
 
+  // --- Sub-Feature Card by ID ---
+
+  public subFeatureCard(featureId: string): Locator {
+    return this.page.testSubj.locator(`subFeatureCard-${featureId}`);
+  }
+
   // --- Add Model Popover ---
 
-  public get firstAddModelButton(): Locator {
-    // eslint-disable-next-line playwright/no-nth-methods -- multiple sub-features have add-model buttons; picking the first to test the popover flow
-    return this.content.locator('[data-test-subj="add-model-button"]').first();
+  public addModelButton(featureId: string): Locator {
+    return this.subFeatureCard(featureId).locator('[data-test-subj="add-model-button"]');
   }
 
   public get addModelSearch(): Locator {
     return this.page.testSubj.locator('add-model-search');
   }
 
+  // --- Add Model Popover Options ---
+
+  public get addModelOptions(): Locator {
+    return this.page.testSubj.locator('add-model-selectable').getByRole('option');
+  }
+
   // --- Copy To Modal ---
 
-  public get firstCopyToButton(): Locator {
-    // eslint-disable-next-line playwright/no-nth-methods -- multiple sub-features have copy-to buttons; picking the first to test the modal flow
-    return this.content.locator('[data-test-subj^="copy-to-"]').first();
+  public copyToButton(featureId: string): Locator {
+    return this.page.testSubj.locator(`copy-to-${featureId}`);
+  }
+
+  public copyToModalCheckbox(featureId: string): Locator {
+    return this.page.locator(`#copy-target-${featureId}`);
   }
 
   public get copyToModalApply(): Locator {
@@ -98,9 +116,8 @@ export class FeatureSettingsPage {
 
   // --- Reset Defaults Modal ---
 
-  public get firstResetLink(): Locator {
-    // eslint-disable-next-line playwright/no-nth-methods -- multiple sub-features have reset links; picking the first to test the modal flow
-    return this.content.locator('[data-test-subj^="reset-"]').first();
+  public resetLink(parentName: string): Locator {
+    return this.page.testSubj.locator(`reset-${parentName}`);
   }
 
   public get resetDefaultsModal(): Locator {
@@ -109,12 +126,6 @@ export class FeatureSettingsPage {
 
   public get resetDefaultsCancelButton(): Locator {
     return this.resetDefaultsModal.locator('[data-test-subj="confirmModalCancelButton"]');
-  }
-
-  // --- Add Model Popover Options ---
-
-  public get addModelOptions(): Locator {
-    return this.page.testSubj.locator('add-model-selectable').getByRole('option');
   }
 
   // --- Route Mocking ---

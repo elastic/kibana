@@ -7,7 +7,7 @@
 
 export const mockInferenceEndpoints = [
   {
-    inference_id: '.anthropic-claude-3.7-sonnet-chat_completion-a3f1',
+    inference_id: '.mock-anthropic-claude-3.7-sonnet-chat_completion-a3f1',
     task_type: 'chat_completion',
     service: 'elastic',
     service_settings: { model_id: 'anthropic-claude-3.7-sonnet' },
@@ -17,7 +17,7 @@ export const mockInferenceEndpoints = [
     },
   },
   {
-    inference_id: '.anthropic-claude-3.7-sonnet-completion-b7d2',
+    inference_id: '.mock-anthropic-claude-3.7-sonnet-completion-b7d2',
     task_type: 'completion',
     service: 'elastic',
     service_settings: { model_id: 'anthropic-claude-3.7-sonnet' },
@@ -27,7 +27,7 @@ export const mockInferenceEndpoints = [
     },
   },
   {
-    inference_id: '.openai-gpt-4.1-chat_completion-c9e4',
+    inference_id: '.mock-openai-gpt-4.1-chat_completion-c9e4',
     task_type: 'chat_completion',
     service: 'elastic',
     service_settings: { model_id: 'openai-gpt-4.1' },
@@ -37,7 +37,7 @@ export const mockInferenceEndpoints = [
     },
   },
   {
-    inference_id: '.openai-gpt-4.1-completion-d5f6',
+    inference_id: '.mock-openai-gpt-4.1-completion-d5f6',
     task_type: 'completion',
     service: 'elastic',
     service_settings: { model_id: 'openai-gpt-4.1' },
@@ -47,7 +47,7 @@ export const mockInferenceEndpoints = [
     },
   },
   {
-    inference_id: '.google-gemini-2.5-pro-chat_completion-e2a8',
+    inference_id: '.mock-google-gemini-2.5-pro-chat_completion-e2a8',
     task_type: 'chat_completion',
     service: 'elastic',
     service_settings: { model_id: 'google-gemini-2.5-pro' },
@@ -57,7 +57,7 @@ export const mockInferenceEndpoints = [
     },
   },
   {
-    inference_id: '.google-gemini-2.5-pro-completion-f1b3',
+    inference_id: '.mock-google-gemini-2.5-pro-completion-f1b3',
     task_type: 'completion',
     service: 'elastic',
     service_settings: { model_id: 'google-gemini-2.5-pro' },

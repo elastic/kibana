@@ -999,6 +999,7 @@
     "@kbn/search-homepage": "link:x-pack/solutions/search/plugins/search_homepage",
     "@kbn/search-index-documents": "link:x-pack/platform/packages/shared/kbn-search-index-documents",
     "@kbn/search-inference-endpoints": "link:x-pack/platform/plugins/shared/search_inference_endpoints",
+    "@kbn/search-inference-endpoints-fixture-plugin": "link:x-pack/platform/test/search_inference_endpoints/plugins/search_inference_endpoints_fixture",
     "@kbn/search-navigation": "link:x-pack/solutions/search/plugins/search_navigation",
     "@kbn/search-notebooks": "link:x-pack/solutions/search/plugins/search_notebooks",
     "@kbn/search-playground": "link:x-pack/solutions/search/plugins/search_playground",
