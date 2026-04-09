@@ -162,12 +162,19 @@ export function findConstantPlaceholderType(
   return undefined;
 }
 
-export function buildMapValueCompleteItem(value: string): ISuggestionItem {
+export function buildMapValueCompleteItem(value: string, label: string = ''): ISuggestionItem {
+  const detail = i18n.translate('kbn-esql-ast.esql.autocomplete.mapValuePlaceholderDetail', {
+    defaultMessage: 'Insert {label} as value for the map key',
+    values: { label },
+  });
+  const asSnippet = value.includes('$0');
+
   return {
-    label: value,
+    label: label || value,
     text: value,
     kind: 'Constant',
-    detail: value,
+    detail,
+    asSnippet,
     category: SuggestionCategory.CONSTANT_VALUE,
   };
 }

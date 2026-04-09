@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isBooleanLiteral, isList, isStringLiteral, LeafPrinter } from '@elastic/esql';
+import { isBooleanLiteral, isStringLiteral, LeafPrinter } from '@elastic/esql';
 import type { ESQLAstUserAgentCommand, ESQLCommand } from '@elastic/esql/types';
 import type { SupportedDataType } from '../../definitions/types';
 import type { ESQLColumnData } from '../types';
@@ -47,7 +47,7 @@ export const columnsAfter = (
   // Determine which property groups are active
   const propertiesList = getPropertiesList(userAgentCommand);
   let activeProperties: PropertyGroup[];
-  if (propertiesList && isList(propertiesList)) {
+  if (propertiesList) {
     activeProperties = propertiesList.values
       .filter(isStringLiteral)
       .map((v) => v.valueUnquoted as PropertyGroup)

@@ -97,7 +97,7 @@ export async function autocomplete(
             'kbn-esql-language.commands.userAgent.autocomplete.propertiesDescription',
             { defaultMessage: 'List of properties to extract' }
           ),
-          suggestions: [buildMapValueCompleteItem('[]')],
+          suggestions: [buildMapValueCompleteItem('[ $0 ]', '[]')],
         },
       };
       return getCommandMapExpressionSuggestions(
