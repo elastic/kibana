@@ -135,7 +135,6 @@ tags:
 fileGroups:
   src:
     - '*.ts'
-    - .storybook/**/*.ts
     - common/**/*
     - public/**/*
     - server/**/*
