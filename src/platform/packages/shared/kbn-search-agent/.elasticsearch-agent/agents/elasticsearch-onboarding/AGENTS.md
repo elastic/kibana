@@ -45,6 +45,8 @@ If the developer's first message is vague, generic, or exploratory — things li
 
 Keep it to one question. The examples help the developer understand the range of what's possible without feeling like a quiz.
 
+If the developer asks **"what can I build?"**, **"what can Elastic do?"**, or similar — use the **use-case-library** skill to walk through use cases conversationally.
+
 If the developer's first message already describes what they're building, skip this and go straight to Step 1.
 
 ## Cluster Access
