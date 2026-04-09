@@ -83,9 +83,11 @@ export function EmptyState({
               >
                 <p>
                   {NO_DEFAULT_CONNECTOR_CALLOUT_DESCRIPTION}{' '}
-                  <EuiLink href={modelSettingsUrl} external>
-                    {NO_DEFAULT_CONNECTOR_CALLOUT_LINK_LABEL}
-                  </EuiLink>
+                  {modelSettingsUrl && (
+                    <EuiLink href={modelSettingsUrl} external>
+                      {NO_DEFAULT_CONNECTOR_CALLOUT_LINK_LABEL}
+                    </EuiLink>
+                  )}
                 </p>
               </EuiCallOut>
             </EuiFlexItem>

@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
 import { useKibana } from './use_kibana';
 
-export const useModelSettingsUrl = (): string => {
+export const useModelSettingsUrl = (): string | undefined => {
   const {
     dependencies: {
       start: { share },
@@ -18,11 +18,9 @@ export const useModelSettingsUrl = (): string => {
 
   return useMemo(() => {
     const managementLocator = share.url.locators.get(MANAGEMENT_APP_LOCATOR);
-    return (
-      managementLocator?.getRedirectUrl({
-        sectionId: 'modelManagement',
-        appId: 'model_settings',
-      }) ?? ''
-    );
+    return managementLocator?.getRedirectUrl({
+      sectionId: 'modelManagement',
+      appId: 'model_settings',
+    });
   }, [share.url.locators]);
 };

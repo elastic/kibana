@@ -12,6 +12,10 @@ import { useModelSettingsUrl } from '../../hooks/use_model_settings_url';
 export function EnableAIFeaturesLink() {
   const modelSettingsUrl = useModelSettingsUrl();
 
+  if (!modelSettingsUrl) {
+    return null;
+  }
+
   return (
     <EuiToolTip
       content={i18n.translate('xpack.streams.enableAIFeaturesLink.tooltipContent', {
