@@ -69,9 +69,8 @@ export class FeatureSettingsPage {
     return this.subFeatureCard(featureId).locator('[data-test-subj^="endpoint-row-"]');
   }
 
-  public get firstEndpointRow(): Locator {
-    // eslint-disable-next-line playwright/no-nth-methods -- selecting the first endpoint row to verify default badge presence
-    return this.allEndpointRows.first();
+  public endpointRow(endpointId: string): Locator {
+    return this.page.testSubj.locator(`endpoint-row-${endpointId}`);
   }
 
   // --- Sub-Feature Card by ID ---
@@ -94,6 +93,10 @@ export class FeatureSettingsPage {
 
   public get addModelOptions(): Locator {
     return this.page.testSubj.locator('add-model-selectable').getByRole('option');
+  }
+
+  public addModelOption(name: string): Locator {
+    return this.page.testSubj.locator('add-model-selectable').getByRole('option', { name });
   }
 
   // --- Copy To Modal ---

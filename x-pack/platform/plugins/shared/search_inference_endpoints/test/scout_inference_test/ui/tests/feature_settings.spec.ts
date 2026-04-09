@@ -75,8 +75,10 @@ test.describe(
         await expect(featureSettings.allEndpointRows).not.toHaveCount(0);
       });
 
-      await test.step('first endpoint row has a default badge', async () => {
-        await expect(featureSettings.firstEndpointRow).toContainText('Default');
+      await test.step('fixture endpoint row has a default badge', async () => {
+        await expect(
+          featureSettings.endpointRow('.anthropic-claude-3.7-sonnet-chat_completion')
+        ).toContainText('Default');
       });
     });
 
@@ -166,11 +168,10 @@ test.describe(
         await expect(alphaRows).not.toHaveCount(0);
         const initialCount = await alphaRows.count();
 
-        await test.step('open popover and select the first model', async () => {
+        await test.step('open popover and select a model', async () => {
           await featureSettings.addModelButton('test_feature_alpha').click();
           await expect(featureSettings.addModelSearch).toBeVisible();
-          // eslint-disable-next-line playwright/no-nth-methods -- selecting the first available model from the popover list
-          await featureSettings.addModelOptions.first().click();
+          await featureSettings.addModelOption('anthropic').click();
         });
 
         await test.step('endpoint row count increases by one', async () => {
