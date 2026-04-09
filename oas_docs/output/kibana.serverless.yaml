@@ -59848,9 +59848,18 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Fetches list of all streams<br/><br/>[Required authorization] Route required privileges: read_stream.
+        Fetches all streams, or only those matching optional query parameter `type` (`classic`, `wired`, or `query`).<br/><br/>[Required authorization] Route required privileges: read_stream.
       operationId: get-streams
-      parameters: []
+      parameters:
+        - in: query
+          name: type
+          required: false
+          schema:
+            enum:
+              - classic
+              - wired
+              - query
+            type: string
       requestBody:
         content:
           application/json:
