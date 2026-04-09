@@ -123,7 +123,6 @@ describe('Inference Settings API', () => {
         body: {
           _meta: { id: INFERENCE_SETTINGS_ID },
           data: { features: [] },
-          invalidEndpoints: [],
         },
         headers: { 'content-type': 'application/json' },
       });
@@ -168,7 +167,6 @@ describe('Inference Settings API', () => {
         body: {
           _meta: { id: INFERENCE_SETTINGS_ID },
           data: { features: [] },
-          invalidEndpoints: [],
         },
         headers: { 'content-type': 'application/json' },
       });

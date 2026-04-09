@@ -118,9 +118,8 @@ export const defineInferenceSettingsRoutes = ({
 
           if (so.error) {
             if (so.error.statusCode === 404) {
-              const body = await validateEndpoints(EMPTY_SETTINGS);
               return response.ok({
-                body,
+                body: EMPTY_SETTINGS,
                 headers: { 'content-type': 'application/json' },
               });
             }
@@ -143,9 +142,8 @@ export const defineInferenceSettingsRoutes = ({
           });
         } catch (e) {
           if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-            const body = await validateEndpoints(EMPTY_SETTINGS);
             return response.ok({
-              body,
+              body: EMPTY_SETTINGS,
               headers: { 'content-type': 'application/json' },
             });
           }
