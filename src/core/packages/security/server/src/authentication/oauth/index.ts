@@ -12,6 +12,7 @@ export type {
   UiamOAuthClientResponse,
   UiamOAuthClientLogo,
   UiamOAuthClientType,
+  UiamOAuthConnectionsSummary,
   UiamOAuthConnectionResponse,
   CreateUiamOAuthClientParams,
   UpdateUiamOAuthClientParams,

@@ -47,7 +47,7 @@ export class UiamOAuth implements UiamOAuthType {
     }
 
     const accessToken = UiamOAuth.getAccessToken(request);
-    this.logger.debug('Trying to create an OAuth client');
+    this.logger.debug('Attempting to create an OAuth client');
 
     try {
       const result = await this.uiam.createOAuthClient(accessToken, params);
@@ -68,7 +68,7 @@ export class UiamOAuth implements UiamOAuthType {
     }
 
     const accessToken = UiamOAuth.getAccessToken(request);
-    this.logger.debug('Trying to list OAuth clients');
+    this.logger.debug('Attempting to list OAuth clients');
 
     try {
       const result = await this.uiam.listOAuthClients(accessToken, clientId);
@@ -90,7 +90,7 @@ export class UiamOAuth implements UiamOAuthType {
     }
 
     const accessToken = UiamOAuth.getAccessToken(request);
-    this.logger.debug(`Trying to update OAuth client ${clientId}`);
+    this.logger.debug(`Attempting to update OAuth client ${clientId}`);
 
     try {
       const result = await this.uiam.updateOAuthClient(accessToken, clientId, params);
@@ -112,7 +112,7 @@ export class UiamOAuth implements UiamOAuthType {
     }
 
     const accessToken = UiamOAuth.getAccessToken(request);
-    this.logger.debug(`Trying to revoke OAuth client ${clientId}`);
+    this.logger.debug(`Attempting to revoke OAuth client ${clientId}`);
 
     try {
       const result = await this.uiam.revokeOAuthClient(accessToken, clientId, reason);
@@ -134,7 +134,7 @@ export class UiamOAuth implements UiamOAuthType {
     }
 
     const accessToken = UiamOAuth.getAccessToken(request);
-    this.logger.debug('Trying to list OAuth connections');
+    this.logger.debug('Attempting to list OAuth connections');
 
     try {
       const result = await this.uiam.listOAuthConnections(accessToken, clientId, connectionId);
@@ -157,7 +157,7 @@ export class UiamOAuth implements UiamOAuthType {
     }
 
     const accessToken = UiamOAuth.getAccessToken(request);
-    this.logger.debug(`Trying to revoke OAuth connection ${connectionId}`);
+    this.logger.debug(`Attempting to revoke OAuth connection ${connectionId}`);
 
     try {
       const result = await this.uiam.revokeOAuthConnection(
