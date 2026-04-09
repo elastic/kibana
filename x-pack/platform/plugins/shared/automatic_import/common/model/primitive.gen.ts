@@ -40,7 +40,7 @@ export type SemVer = z.infer<typeof SemVer>;
 export const SemVer = z
   .string()
   .min(5)
-  .max(50)
+  .max(20)
   .regex(/^\d+\.\d+\.\d+(-[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*)?$/);
 
 /**

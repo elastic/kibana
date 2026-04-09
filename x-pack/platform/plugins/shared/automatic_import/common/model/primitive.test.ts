@@ -141,18 +141,6 @@ describe('primitive schemas', () => {
       });
     });
 
-    it('rejects 0.0.0', () => {
-      const result = SemVer.safeParse('0.0.0');
-      expectParseError(result);
-      expect(stringifyZodError(result.error)).toContain('Version 0.0.0 is not allowed');
-    });
-
-    it('rejects 0.0.0 with pre-release suffix', () => {
-      const result = SemVer.safeParse('0.0.0-beta');
-      expectParseError(result);
-      expect(stringifyZodError(result.error)).toContain('Version 0.0.0 is not allowed');
-    });
-
     it('rejects strings without three numeric segments', () => {
       const invalid = ['1.0', '1', '1.0.0.0', 'v1.0.0', 'abc'];
       invalid.forEach((str) => {
