@@ -6,13 +6,8 @@
  */
 
 import { createBadRequestError } from '@kbn/agent-builder-common/base/errors';
-import type {
-  ConverseInput,
-  ConversationAction,
-  TimelineEvent,
-  AgentExecutionEvent,
-} from '@kbn/agent-builder-common';
-import { ConversationRoundStatus, isAgentExecutionEvent } from '@kbn/agent-builder-common';
+import type { ConverseInput, ConversationAction, TimelineEvent } from '@kbn/agent-builder-common';
+import { ConversationRoundStatus, getLastExecutionEvent } from '@kbn/agent-builder-common';
 
 export const ensureValidInput = ({
   input,
@@ -28,14 +23,7 @@ export const ensureValidInput = ({
     return;
   }
 
-  // Find the last AgentExecutionEvent
-  let lastAgentResponse: AgentExecutionEvent | undefined;
-  for (let i = timelineEvents.length - 1; i >= 0; i--) {
-    if (isAgentExecutionEvent(timelineEvents[i])) {
-      lastAgentResponse = timelineEvents[i] as AgentExecutionEvent;
-      break;
-    }
-  }
+  const lastAgentResponse = getLastExecutionEvent(timelineEvents);
 
   const lastStatus = lastAgentResponse?.status ?? ConversationRoundStatus.completed;
 

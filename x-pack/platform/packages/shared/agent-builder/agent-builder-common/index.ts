@@ -206,6 +206,7 @@ export {
   type TimelineConversation,
   isUserMessageEvent,
   isAgentExecutionEvent,
+  getLastExecutionEvent,
   roundsToTimelineEvents,
   timelineEventsToRounds,
   conversationToTimelineConversation,

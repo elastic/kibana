@@ -21,6 +21,7 @@ import type {
   RuntimeAgentConfigurationOverrides,
   CompactionStep,
   AgentExecutionEvent,
+  ConversationRound,
 } from '@kbn/agent-builder-common';
 import { TimelineEventType, agentExecutionEventToRound } from '@kbn/agent-builder-common';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
@@ -124,18 +125,17 @@ export const addRoundCompleteEvent = ({
           });
 
           // Derive ConversationRound from AgentExecutionEvent for backward compatibility
-          const round = agentExecutionEventToRound(agentResponse, {
-            id: `msg-${agentResponse.id}`,
-            timestamp: agentResponse.started_at,
-            type: TimelineEventType.user_message,
-            user: { id: '', username: '' },
-            message: userInput.message,
-            attachments: userInput.attachments,
-            attachment_refs: [
-              ...(userInput.attachment_refs ?? []),
-              ...(attachmentRefs.length > 0 ? attachmentRefs : []),
-            ],
-          });
+          const round: ConversationRound = {
+            ...agentExecutionEventToRound(agentResponse),
+            input: {
+              message: userInput.message,
+              attachments: userInput.attachments,
+              attachment_refs: [
+                ...(userInput.attachment_refs ?? []),
+                ...(attachmentRefs.length > 0 ? attachmentRefs : []),
+              ],
+            },
+          };
 
           const event: RoundCompleteEvent = {
             type: ChatEventType.roundComplete,

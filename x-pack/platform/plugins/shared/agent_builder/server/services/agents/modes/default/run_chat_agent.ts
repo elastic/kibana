@@ -20,7 +20,11 @@ import type {
   AgentExecutionEvent,
 } from '@kbn/agent-builder-common';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus, roundsToTimelineEvents } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStatus,
+  roundsToTimelineEvents,
+  getLastExecutionEvent,
+} from '@kbn/agent-builder-common';
 import { isTimelineConversation } from '@kbn/agent-builder-common/chat';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
 import { HookLifecycle } from '@kbn/agent-builder-server';
@@ -28,7 +32,6 @@ import type { ConversationInternalState, CompactionSummary } from '@kbn/agent-bu
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType, type PromptManager } from '@kbn/agent-builder-server/runner';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
-import { isProcessedAgentExecutionEvent } from '../utils/prepare_conversation';
 import { createResultTransformer } from '../utils/create_result_transformer';
 import {
   addRoundCompleteEvent,
@@ -361,9 +364,7 @@ const createInitializerCommand = ({
   let startAt = steps.init;
 
   // Find the last AgentExecutionEvent in previousEvents for HITL resumption
-  const lastAgentResponse = [...conversation.previousEvents]
-    .reverse()
-    .find(isProcessedAgentExecutionEvent) as AgentExecutionEvent | undefined;
+  const lastAgentResponse = getLastExecutionEvent(conversation.previousEvents);
 
   if (lastAgentResponse?.status === ConversationRoundStatus.awaitingPrompt) {
     initialState.mainActions = executionToActions({

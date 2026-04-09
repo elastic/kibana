@@ -386,6 +386,18 @@ export const isAgentExecutionEvent = (event: TimelineEvent): event is AgentExecu
 };
 
 /**
+ * Returns the last AgentExecutionEvent from a list of timeline events, or undefined.
+ */
+export const getLastExecutionEvent = (events: TimelineEvent[]): AgentExecutionEvent | undefined => {
+  for (let i = events.length - 1; i >= 0; i--) {
+    if (isAgentExecutionEvent(events[i])) {
+      return events[i] as AgentExecutionEvent;
+    }
+  }
+  return undefined;
+};
+
+/**
  * Timeline-based conversation format. Replaces the rounds-based model
  * as the canonical internal representation.
  */

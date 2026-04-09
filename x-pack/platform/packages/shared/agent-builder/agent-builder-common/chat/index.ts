@@ -100,6 +100,7 @@ export {
   type TimelineConversation,
   isUserMessageEvent,
   isAgentExecutionEvent,
+  getLastExecutionEvent,
   isTimelineConversation,
 } from './conversation';
 export {
