@@ -272,7 +272,7 @@ export class AlertingPlugin {
     this.disabledRuleTypes = new Set(this.config.disabledRuleTypes || []);
     this.enabledRuleTypes =
       this.config.enabledRuleTypes != null ? new Set(this.config.enabledRuleTypes) : null;
-    if (this.config.enableRuleChangeTracking) {
+    if (this.config.ruleChangeTracking.enabled) {
       this.changeTrackingService = new ChangeTrackingService(this.logger, this.kibanaVersion);
     }
   }
@@ -568,11 +568,14 @@ export class AlertingPlugin {
               ruleType.cancelAlertsOnRuleTimeout ?? this.config.cancelAlertsOnRuleTimeout;
           }
 
-          // There are many alert types but they all belong to a specific solution
-          // (security, stack, observability) which in turn determines the business domain.
-          if (this.changeTrackingService && ruleType.trackChanges) {
-            const module = ruleType.solution;
-            this.changeTrackingService.register(module);
+          // Rule Change Tracking
+          // There are many alerting rule types but they all belong to a specific solution
+          // (security, stack, observability).
+          if (this.changeTrackingService) {
+            const { scope } = this.config.ruleChangeTracking;
+            if (scope.includes('all') || scope.includes(ruleType.solution)) {
+              this.changeTrackingService.register(ruleType.solution);
+            }
           }
 
           ruleTypeRegistry.register(ruleType);

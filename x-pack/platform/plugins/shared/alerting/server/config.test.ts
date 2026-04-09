@@ -14,13 +14,18 @@ describe('config validation', () => {
       Object {
         "cancelAlertsOnRuleTimeout": true,
         "enableFrameworkAlerts": true,
-        "enableRuleChangeTracking": false,
         "healthCheck": Object {
           "interval": "60m",
         },
         "invalidateApiKeysTask": Object {
           "interval": "5m",
           "removalDelay": "1h",
+        },
+        "ruleChangeTracking": Object {
+          "enabled": false,
+          "scope": Array [
+            "security",
+          ],
         },
         "rules": Object {
           "apiKeyType": "es",
