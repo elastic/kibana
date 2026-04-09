@@ -7,10 +7,8 @@
 
 import {
   EuiBadge,
+  EuiCallOut,
   EuiContextMenu,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
   EuiSelectable,
   EuiSplitButton,
   useGeneratedHtmlId,
@@ -19,12 +17,10 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import { useBoolean } from '@kbn/react-hooks';
 import type { InferenceConnector } from '@kbn/inference-common';
 import type { OnboardingStep } from '@kbn/streams-schema';
-import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
 import React, { useCallback, useMemo, useState } from 'react';
-import type { UseInferenceFeatureConnectorsResult } from '../../../../../hooks/sig_events/use_inference_feature_connectors';
 import { ConnectorIcon } from '../../../../connector_list_button/connector_icon';
-import { useKibana } from '../../../../../hooks/use_kibana';
 import {
+  CONNECTOR_LOAD_ERROR,
   DEFAULT_MODEL_BADGE_LABEL,
   GENERATE_BUTTON_LABEL,
   GENERATE_FEATURES_BUTTON_LABEL,
@@ -32,9 +28,10 @@ import {
   GENERATE_QUERIES_BUTTON_LABEL,
   GENERATE_QUERIES_TOOLTIP,
   MODEL_SELECTION_PANEL_TITLE,
-  MODEL_SETTINGS_LABEL,
-  ONBOARDING_CONFIG_POPOVER_ARIA_LABEL,
+  GENERATE_CONFIG_ARIA_LABEL,
 } from './translations';
+import { useModelSettingsUrl } from '../../../../../hooks/use_model_settings_url';
+import { buildConnectorMenuItem, buildModelSettingsMenuItems } from './context_menu_helpers';
 
 export interface OnboardingConfig {
   steps: OnboardingStep[];
@@ -44,27 +41,30 @@ export interface OnboardingConfig {
   };
 }
 
-interface OnboardingConfigPopoverProps {
+interface GenerateSplitButtonProps {
   config: OnboardingConfig;
-  featuresConnectors: UseInferenceFeatureConnectorsResult;
-  queriesConnectors: UseInferenceFeatureConnectorsResult;
+  allConnectors: InferenceConnector[];
+  connectorError: Error | undefined;
+  featuresResolvedConnectorId: string | undefined;
+  queriesResolvedConnectorId: string | undefined;
   onConfigChange: (config: OnboardingConfig) => void;
   onRun: () => void;
   onRunFeaturesOnly: () => void;
   onRunQueriesOnly: () => void;
   isRunDisabled: boolean;
+  isConfigDisabled: boolean;
 }
 
 interface ConnectorSubPanelProps {
   connectors: InferenceConnector[];
-  resolvedConnector: InferenceConnector | undefined;
+  resolvedConnectorId: string | undefined;
   selectedConnectorId: string | undefined;
   onSelect: (connectorId: string) => void;
 }
 
 export const ConnectorSubPanel = ({
   connectors,
-  resolvedConnector,
+  resolvedConnectorId,
   selectedConnectorId,
   onSelect,
 }: ConnectorSubPanelProps) => {
@@ -76,11 +76,11 @@ export const ConnectorSubPanel = ({
         checked: connector.connectorId === selectedConnectorId ? ('on' as const) : undefined,
         prepend: <ConnectorIcon connectorName={connector.name} />,
         append:
-          connector.connectorId === resolvedConnector?.connectorId ? (
+          connector.connectorId === resolvedConnectorId ? (
             <EuiBadge color="hollow">{DEFAULT_MODEL_BADGE_LABEL}</EuiBadge>
           ) : undefined,
       })),
-    [connectors, selectedConnectorId, resolvedConnector]
+    [connectors, selectedConnectorId, resolvedConnectorId]
   );
 
   const handleChange = useCallback(
@@ -98,24 +98,23 @@ export const ConnectorSubPanel = ({
   );
 };
 
-export const OnboardingConfigPopover = ({
+export const GenerateSplitButton = ({
   config,
-  featuresConnectors,
-  queriesConnectors,
+  allConnectors,
+  connectorError,
+  featuresResolvedConnectorId,
+  queriesResolvedConnectorId,
   onConfigChange,
   onRun,
   onRunFeaturesOnly,
   onRunQueriesOnly,
   isRunDisabled,
-}: OnboardingConfigPopoverProps) => {
-  const {
-    dependencies: {
-      start: { share },
-    },
-  } = useKibana();
+  isConfigDisabled,
+}: GenerateSplitButtonProps) => {
   const [isOpen, { off: close, toggle }] = useBoolean(false);
   const [menuResetKey, setMenuResetKey] = useState(0);
-  const popoverId = useGeneratedHtmlId({ prefix: 'onboardingConfigPopover' });
+  const popoverId = useGeneratedHtmlId({ prefix: 'generateSplitButton' });
+  const managementUrl = useModelSettingsUrl();
 
   const resetMenu = useCallback(() => setMenuResetKey((k) => k + 1), []);
 
@@ -124,12 +123,8 @@ export const OnboardingConfigPopover = ({
     resetMenu();
   }, [close, resetMenu]);
 
-  const featuresConnector = featuresConnectors.allConnectors.find(
-    (c) => c.connectorId === config.connectors.features
-  );
-  const queriesConnector = queriesConnectors.allConnectors.find(
-    (c) => c.connectorId === config.connectors.queries
-  );
+  const featuresConnector = allConnectors.find((c) => c.connectorId === config.connectors.features);
+  const queriesConnector = allConnectors.find((c) => c.connectorId === config.connectors.queries);
 
   const handleRunFeatures = useCallback(() => {
     close();
@@ -157,16 +152,6 @@ export const OnboardingConfigPopover = ({
     [config, onConfigChange, resetMenu]
   );
 
-  const managementUrl = useMemo(() => {
-    const managementLocator = share.url.locators.get(MANAGEMENT_APP_LOCATOR);
-    return (
-      managementLocator?.getRedirectUrl({
-        sectionId: 'modelManagement',
-        appId: 'model_settings',
-      }) ?? ''
-    );
-  }, [share.url.locators]);
-
   const contextMenuPanels = useMemo(
     () => [
       {
@@ -179,21 +164,7 @@ export const OnboardingConfigPopover = ({
             toolTipContent: GENERATE_FEATURES_TOOLTIP,
             toolTipProps: { position: 'right' as const },
           },
-          {
-            name: (
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <ConnectorIcon connectorName={featuresConnector?.name} />
-                </EuiFlexItem>
-                <EuiFlexItem css={{ minWidth: 0 }}>
-                  <div className="eui-textTruncate">
-                    Model <strong>{featuresConnector?.name ?? '—'}</strong>
-                  </div>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ),
-            panel: 1,
-          },
+          buildConnectorMenuItem(featuresConnector, 1),
           { isSeparator: true as const },
           {
             name: GENERATE_QUERIES_BUTTON_LABEL,
@@ -202,41 +173,8 @@ export const OnboardingConfigPopover = ({
             toolTipContent: GENERATE_QUERIES_TOOLTIP,
             toolTipProps: { position: 'right' as const },
           },
-          {
-            name: (
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <ConnectorIcon connectorName={queriesConnector?.name} />
-                </EuiFlexItem>
-                <EuiFlexItem css={{ minWidth: 0 }}>
-                  <div className="eui-textTruncate">
-                    Model <strong>{queriesConnector?.name ?? '—'}</strong>
-                  </div>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ),
-            panel: 2,
-          },
-          ...(managementUrl
-            ? [
-                { isSeparator: true as const },
-                {
-                  name: (
-                    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                      <EuiFlexItem>{MODEL_SETTINGS_LABEL}</EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon type="popout" size="s" color="subdued" />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  ),
-                  icon: 'gear' as const,
-                  onClick: () => {
-                    window.open(managementUrl, '_blank', 'noreferrer');
-                    handleClose();
-                  },
-                },
-              ]
-            : []),
+          buildConnectorMenuItem(queriesConnector, 2),
+          ...buildModelSettingsMenuItems(managementUrl, handleClose),
         ],
       },
       {
@@ -245,8 +183,8 @@ export const OnboardingConfigPopover = ({
         width: 240,
         content: (
           <ConnectorSubPanel
-            connectors={featuresConnectors.allConnectors}
-            resolvedConnector={featuresConnectors.resolvedConnector}
+            connectors={allConnectors}
+            resolvedConnectorId={featuresResolvedConnectorId}
             selectedConnectorId={config.connectors.features}
             onSelect={handleFeaturesConnectorSelect}
           />
@@ -258,8 +196,8 @@ export const OnboardingConfigPopover = ({
         width: 240,
         content: (
           <ConnectorSubPanel
-            connectors={queriesConnectors.allConnectors}
-            resolvedConnector={queriesConnectors.resolvedConnector}
+            connectors={allConnectors}
+            resolvedConnectorId={queriesResolvedConnectorId}
             selectedConnectorId={config.connectors.queries}
             onSelect={handleQueriesConnectorSelect}
           />
@@ -274,8 +212,9 @@ export const OnboardingConfigPopover = ({
       queriesConnector,
       managementUrl,
       handleClose,
-      featuresConnectors,
-      queriesConnectors,
+      allConnectors,
+      featuresResolvedConnectorId,
+      queriesResolvedConnectorId,
       config.connectors.features,
       config.connectors.queries,
       handleFeaturesConnectorSelect,
@@ -295,9 +234,9 @@ export const OnboardingConfigPopover = ({
       </EuiSplitButton.ActionPrimary>
       <EuiSplitButton.ActionSecondary
         iconType="arrowDown"
-        aria-label={ONBOARDING_CONFIG_POPOVER_ARIA_LABEL}
+        aria-label={GENERATE_CONFIG_ARIA_LABEL}
         data-test-subj="significant_events_onboarding_config_trigger"
-        isDisabled={isRunDisabled}
+        isDisabled={isConfigDisabled}
         onClick={toggle}
         popoverProps={{
           id: popoverId,
@@ -305,7 +244,15 @@ export const OnboardingConfigPopover = ({
           closePopover: handleClose,
           anchorPosition: 'downRight',
           panelPaddingSize: 'none',
-          children: (
+          children: connectorError ? (
+            <EuiCallOut
+              announceOnMount
+              color="danger"
+              size="s"
+              title={CONNECTOR_LOAD_ERROR}
+              css={{ margin: 8 }}
+            />
+          ) : (
             <EuiContextMenu key={menuResetKey} initialPanelId={0} panels={contextMenuPanels} />
           ),
         }}

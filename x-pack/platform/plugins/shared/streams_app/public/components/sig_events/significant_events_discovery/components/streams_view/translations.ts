@@ -65,13 +65,6 @@ export const STREAMS_TABLE_CAPTION_ARIA_LABEL = i18n.translate(
   }
 );
 
-export const RUN_BULK_STREAM_ONBOARDING_BUTTON_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsTree.runBulkStreamOnboardingButtonEmptyLabel',
-  {
-    defaultMessage: 'Onboard Streams',
-  }
-);
-
 export const RUN_STREAM_ONBOARDING_BUTTON_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsTree.runStreamOnboardingButtonEmptyLabel',
   {
@@ -160,38 +153,17 @@ export const GENERATE_QUERIES_BUTTON_LABEL = i18n.translate(
   }
 );
 
-export const ONBOARDING_CONFIG_POPOVER_ARIA_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsView.onboardingConfigPopoverAriaLabel',
+export const CONNECTOR_LOAD_ERROR = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.connectorLoadError',
   {
-    defaultMessage: 'Configure onboarding steps and connectors',
+    defaultMessage: 'Failed to load connectors',
   }
 );
 
-export const ONBOARDING_CONFIG_POPOVER_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsView.onboardingConfigPopoverTitle',
+export const GENERATE_CONFIG_ARIA_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.generateConfigAriaLabel',
   {
-    defaultMessage: 'Onboarding configuration',
-  }
-);
-
-export const FEATURES_STEP_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsView.featuresStepLabel',
-  {
-    defaultMessage: 'KI Features',
-  }
-);
-
-export const QUERIES_STEP_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsView.queriesStepLabel',
-  {
-    defaultMessage: 'KI Queries',
-  }
-);
-
-export const RUN_BUTTON_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsView.runButtonLabel',
-  {
-    defaultMessage: 'Run',
+    defaultMessage: 'Configure generation steps and models',
   }
 );
 
@@ -199,13 +171,6 @@ export const GENERATE_BUTTON_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsView.generateButtonLabel',
   {
     defaultMessage: 'Generate',
-  }
-);
-
-export const MODEL_SELECTOR_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsView.modelSelectorLabel',
-  {
-    defaultMessage: 'Model',
   }
 );
 

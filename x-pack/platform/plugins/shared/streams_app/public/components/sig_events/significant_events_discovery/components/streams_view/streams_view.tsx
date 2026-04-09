@@ -6,38 +6,20 @@
  */
 
 import type { EuiSearchBarProps, Query } from '@elastic/eui';
-import {
-  EuiButton,
-  EuiContextMenu,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiSearchBar,
-  EuiSplitButton,
-  EuiText,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
-import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSearchBar, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
-import {
-  OnboardingStep,
-  STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
-  STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-  STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
-  TaskStatus,
-} from '@kbn/streams-schema';
+import { OnboardingStep, TaskStatus } from '@kbn/streams-schema';
 import pMap from 'p-map';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
-import { useBoolean } from '@kbn/react-hooks';
 import type { TableRow } from './utils';
 import { useIndexPatternsConfig } from '../../../../../hooks/use_index_patterns_config';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useInsightsDiscoveryApi } from '../../../../../hooks/sig_events/use_insights_discovery_api';
-import { useInferenceFeatureConnectors } from '../../../../../hooks/sig_events/use_inference_feature_connectors';
+import { useConnectorConfig } from '../../../../../hooks/sig_events/use_connector_config';
 import type { ScheduleOnboardingOptions } from '../../../../../hooks/use_onboarding_api';
 import { useOnboardingApi } from '../../../../../hooks/use_onboarding_api';
 import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
@@ -45,17 +27,12 @@ import { useTaskPolling } from '../../../../../hooks/use_task_polling';
 import { getFormattedError } from '../../../../../util/errors';
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
 import { useOnboardingStatusUpdateQueue } from '../../hooks/use_onboarding_status_update_queue';
-import { ConnectorIcon } from '../../../../connector_list_button/connector_icon';
-import type { OnboardingConfig } from './onboarding_config_popover';
-import { ConnectorSubPanel, OnboardingConfigPopover } from './onboarding_config_popover';
+import { GenerateSplitButton } from './generate_split_button';
+import { InsightsSplitButton } from './insights_split_button';
 import {
-  DISCOVER_INSIGHTS_BUTTON_LABEL,
-  DISCOVER_INSIGHTS_CONFIG_ARIA_LABEL,
   getInsightsCompleteToastTitle,
   INSIGHTS_COMPLETE_TOAST_VIEW_BUTTON,
   INSIGHTS_SCHEDULING_FAILURE_TITLE,
-  MODEL_SELECTION_PANEL_TITLE,
-  MODEL_SETTINGS_LABEL,
   NO_INSIGHTS_TOAST_TITLE,
   ONBOARDING_FAILURE_TITLE,
   ONBOARDING_SCHEDULING_FAILURE_TITLE,
@@ -82,50 +59,25 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
     core: {
       notifications: { toasts },
     },
-    dependencies: {
-      start: { share },
-    },
   } = useKibana();
   const isInitialStatusUpdateDone = useRef(false);
   const [searchQuery, setSearchQuery] = useState<Query | undefined>();
   const [isWaitingForInsightsTask, setIsWaitingForInsightsTask] = useState(false);
   const { filterStreamsByIndexPatterns } = useIndexPatternsConfig();
 
-  const featuresConnectors = useInferenceFeatureConnectors(
-    STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID
-  );
-  const queriesConnectors = useInferenceFeatureConnectors(
-    STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID
-  );
-  const discoveryConnectors = useInferenceFeatureConnectors(
-    STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID
-  );
-
-  const [discoveryConnectorOverride, setDiscoveryConnectorOverride] = useState<
-    string | undefined
-  >();
-  const displayDiscoveryConnectorId =
-    discoveryConnectorOverride ?? discoveryConnectors.resolvedConnector?.connectorId;
-
-  const [onboardingConfig, setOnboardingConfig] = useState<OnboardingConfig>({
-    steps: [OnboardingStep.FeaturesIdentification, OnboardingStep.QueriesGeneration],
-    connectors: {},
-  });
-
-  useEffect(() => {
-    setOnboardingConfig((prev) => ({
-      ...prev,
-      connectors: {
-        ...prev.connectors,
-        ...(featuresConnectors.resolvedConnector && !prev.connectors.features
-          ? { features: featuresConnectors.resolvedConnector.connectorId }
-          : {}),
-        ...(queriesConnectors.resolvedConnector && !prev.connectors.queries
-          ? { queries: queriesConnectors.resolvedConnector.connectorId }
-          : {}),
-      },
-    }));
-  }, [featuresConnectors.resolvedConnector, queriesConnectors.resolvedConnector]);
+  const {
+    featuresConnectors,
+    queriesConnectors,
+    discoveryConnectors,
+    allConnectors,
+    connectorError,
+    isConnectorCatalogUnavailable,
+    discoveryConnectorOverride,
+    setDiscoveryConnectorOverride,
+    displayDiscoveryConnectorId,
+    onboardingConfig,
+    setOnboardingConfig,
+  } = useConnectorConfig();
 
   const streamsListFetch = useFetchStreams({
     select: (result) => {
@@ -177,7 +129,6 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
     getInsightsTaskStatus,
   ]);
 
-  // When we started the insights task from this view and it completes, show toast
   useEffect(() => {
     if (!isWaitingForInsightsTask || !insightsTask) return;
     if (insightsTask.status !== TaskStatus.Completed && insightsTask.status !== TaskStatus.Failed) {
@@ -276,7 +227,10 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
     selectedStreams
       .filter((item) => {
         const status = streamOnboardingResultMap[item.stream.name]?.status;
-        return ![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(status);
+        return (
+          status === undefined ||
+          ![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(status)
+        );
       })
       .map((item) => item.stream.name);
 
@@ -334,105 +288,6 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
     cancelOnboardingTask(streamName);
   };
 
-  const [isInsightsMenuOpen, { off: closeInsightsMenu, toggle: toggleInsightsMenu }] =
-    useBoolean(false);
-  const [insightsMenuResetKey, setInsightsMenuResetKey] = useState(0);
-  const insightsPopoverId = useGeneratedHtmlId({ prefix: 'insightsConfigPopover' });
-
-  const resetInsightsMenu = useCallback(() => setInsightsMenuResetKey((k) => k + 1), []);
-  const handleCloseInsightsMenu = useCallback(() => {
-    closeInsightsMenu();
-    resetInsightsMenu();
-  }, [closeInsightsMenu, resetInsightsMenu]);
-
-  const handleDiscoveryConnectorSelect = useCallback(
-    (connectorId: string) => {
-      setDiscoveryConnectorOverride(connectorId);
-      resetInsightsMenu();
-    },
-    [resetInsightsMenu]
-  );
-
-  const discoveryConnector = discoveryConnectors.allConnectors.find(
-    (c) => c.connectorId === displayDiscoveryConnectorId
-  );
-
-  const insightsManagementUrl = useMemo(() => {
-    const managementLocator = share.url.locators.get(MANAGEMENT_APP_LOCATOR);
-    return (
-      managementLocator?.getRedirectUrl({
-        sectionId: 'modelManagement',
-        appId: 'model_settings',
-      }) ?? ''
-    );
-  }, [share.url.locators]);
-
-  const insightsContextMenuPanels = useMemo(
-    () => [
-      {
-        id: 0,
-        items: [
-          {
-            name: (
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <ConnectorIcon connectorName={discoveryConnector?.name} />
-                </EuiFlexItem>
-                <EuiFlexItem css={{ minWidth: 0 }}>
-                  <div className="eui-textTruncate">
-                    Model <strong>{discoveryConnector?.name ?? '—'}</strong>
-                  </div>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ),
-            panel: 1,
-          },
-          ...(insightsManagementUrl
-            ? [
-                { isSeparator: true as const },
-                {
-                  name: (
-                    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                      <EuiFlexItem>{MODEL_SETTINGS_LABEL}</EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon type="popout" size="s" color="subdued" />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  ),
-                  icon: 'gear' as const,
-                  onClick: () => {
-                    window.open(insightsManagementUrl, '_blank', 'noreferrer');
-                    handleCloseInsightsMenu();
-                  },
-                },
-              ]
-            : []),
-        ],
-      },
-      {
-        id: 1,
-        title: MODEL_SELECTION_PANEL_TITLE,
-        width: 240,
-        content: (
-          <ConnectorSubPanel
-            connectors={discoveryConnectors.allConnectors}
-            resolvedConnector={discoveryConnectors.resolvedConnector}
-            selectedConnectorId={displayDiscoveryConnectorId}
-            onSelect={handleDiscoveryConnectorSelect}
-          />
-        ),
-      },
-    ],
-    [
-      discoveryConnector,
-      discoveryConnectors,
-      displayDiscoveryConnectorId,
-      insightsManagementUrl,
-      handleCloseInsightsMenu,
-      handleDiscoveryConnectorSelect,
-    ]
-  );
-
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
@@ -451,52 +306,36 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
             <StreamsAppSearchBar showDatePicker />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <OnboardingConfigPopover
+            <GenerateSplitButton
               config={onboardingConfig}
-              featuresConnectors={featuresConnectors}
-              queriesConnectors={queriesConnectors}
+              allConnectors={allConnectors}
+              connectorError={connectorError}
+              featuresResolvedConnectorId={featuresConnectors.resolvedConnectorId}
+              queriesResolvedConnectorId={queriesConnectors.resolvedConnectorId}
               onConfigChange={setOnboardingConfig}
               onRun={onBulkOnboardStreamsClick}
               onRunFeaturesOnly={onBulkOnboardFeaturesOnly}
               onRunQueriesOnly={onBulkOnboardQueriesOnly}
-              isRunDisabled={selectedStreams.length === 0}
+              isRunDisabled={
+                selectedStreams.length === 0 ||
+                isConnectorCatalogUnavailable ||
+                featuresConnectors.loading ||
+                queriesConnectors.loading
+              }
+              isConfigDisabled={selectedStreams.length === 0}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiSplitButton
-              size="m"
-              color="text"
+            <InsightsSplitButton
+              allConnectors={allConnectors}
+              connectorError={connectorError}
+              resolvedConnectorId={discoveryConnectors.resolvedConnectorId}
+              displayConnectorId={displayDiscoveryConnectorId}
+              onConnectorChange={setDiscoveryConnectorOverride}
+              onRun={() => scheduleInsightsTask()}
               isLoading={isSchedulingInsights || isWaitingForInsightsTask}
-              isDisabled={!aiFeatures?.genAiConnectors?.connectors?.length}
-              data-test-subj="significant_events_discover_insights_split_button"
-            >
-              <EuiSplitButton.ActionPrimary
-                onClick={() => scheduleInsightsTask()}
-                data-test-subj="significant_events_discover_insights_button"
-              >
-                {DISCOVER_INSIGHTS_BUTTON_LABEL}
-              </EuiSplitButton.ActionPrimary>
-              <EuiSplitButton.ActionSecondary
-                iconType="arrowDown"
-                aria-label={DISCOVER_INSIGHTS_CONFIG_ARIA_LABEL}
-                data-test-subj="significant_events_insights_connector_trigger"
-                onClick={toggleInsightsMenu}
-                popoverProps={{
-                  id: insightsPopoverId,
-                  isOpen: isInsightsMenuOpen,
-                  closePopover: handleCloseInsightsMenu,
-                  anchorPosition: 'downRight',
-                  panelPaddingSize: 'none',
-                  children: (
-                    <EuiContextMenu
-                      key={insightsMenuResetKey}
-                      initialPanelId={0}
-                      panels={insightsContextMenuPanels}
-                    />
-                  ),
-                }}
-              />
-            </EuiSplitButton>
+              isDisabled={isConnectorCatalogUnavailable || discoveryConnectors.loading}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

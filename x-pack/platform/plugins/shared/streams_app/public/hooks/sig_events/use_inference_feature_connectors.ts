@@ -5,18 +5,11 @@
  * 2.0.
  */
 
-import type { InferenceConnector } from '@kbn/inference-common';
-import {
-  INFERENCE_CONNECTORS_INTERNAL_API_PATH,
-  type InferenceConnectorsApiResponseBody,
-} from '@kbn/inference-common';
-import { useAbortController } from '@kbn/react-hooks';
-import useAsync from 'react-use/lib/useAsync';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import { useKibana } from '../use_kibana';
 
 export interface UseInferenceFeatureConnectorsResult {
-  resolvedConnector: InferenceConnector | undefined;
-  allConnectors: InferenceConnector[];
+  resolvedConnectorId: string | undefined;
   loading: boolean;
   error: Error | undefined;
 }
@@ -25,23 +18,17 @@ export function useInferenceFeatureConnectors(
   featureId: string
 ): UseInferenceFeatureConnectorsResult {
   const { core } = useKibana();
-  const { signal } = useAbortController();
 
-  const state = useAsync(
-    () =>
-      core.http.get<InferenceConnectorsApiResponseBody>(INFERENCE_CONNECTORS_INTERNAL_API_PATH, {
-        query: { featureId },
-        version: '1',
-        signal,
-      }),
-    [core.http, featureId, signal]
-  );
+  const query = useLoadConnectors({
+    http: core.http,
+    toasts: core.notifications.toasts,
+    featureId,
+    settings: core.settings,
+  });
 
   return {
-    // The API returns the feature-matched connector as the first element of `connectors`
-    resolvedConnector: state.value?.connectors[0],
-    allConnectors: state.value?.allConnectors ?? [],
-    loading: state.loading,
-    error: state.error,
+    resolvedConnectorId: query.data?.[0]?.id,
+    loading: query.isLoading,
+    error: query.error ?? undefined,
   };
 }
