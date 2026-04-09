@@ -25,7 +25,7 @@ const dashboardAttachmentData: DashboardAttachmentData = {
   panels: [
     {
       type: 'lens',
-      uid: 'panel-1',
+      id: 'panel-1',
       grid: { x: 0, y: 0, w: 24, h: 15 },
       config: {
         attributes: {

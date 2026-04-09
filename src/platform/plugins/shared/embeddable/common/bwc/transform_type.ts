@@ -8,6 +8,14 @@
  */
 
 export function transformType(type: string) {
+  if (type === 'lens') {
+    return 'vis';
+  }
+
+  if (type === 'visualization') {
+    return 'legacy_vis';
+  }
+
   if (type === 'DASHBOARD_MARKDOWN') {
     return 'markdown';
   }
