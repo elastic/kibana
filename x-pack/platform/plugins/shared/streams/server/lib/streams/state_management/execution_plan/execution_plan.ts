@@ -278,9 +278,12 @@ export class ExecutionPlan {
       return;
     }
 
-    return Promise.all(
-      actions.map((action) => this.dependencies.queryClient.deleteAll(action.request.definition))
-    );
+    const { queryClient } = this.dependencies;
+    if (!queryClient) {
+      throw new Error('queryClient is required for deleteQueries but was not provided');
+    }
+
+    return Promise.all(actions.map((action) => queryClient.deleteAll(action.request.definition)));
   }
 
   private async unlinkAssets(actions: UnlinkAssetsAction[]) {
@@ -306,9 +309,12 @@ export class ExecutionPlan {
       return;
     }
 
-    return Promise.all(
-      actions.map((action) => this.dependencies.featureClient.deleteFeatures(action.request.name))
-    );
+    const { featureClient } = this.dependencies;
+    if (!featureClient) {
+      throw new Error('featureClient is required for unlinkFeatures but was not provided');
+    }
+
+    return Promise.all(actions.map((action) => featureClient.deleteFeatures(action.request.name)));
   }
 
   private async upsertComponentTemplates(actions: UpsertComponentTemplateAction[]) {
