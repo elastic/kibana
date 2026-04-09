@@ -230,14 +230,14 @@ export const getCloudConnectorUsageHandler: FleetRequestHandler<
     await cloudConnectorService.getById(internalSoClient, cloudConnectorId);
 
     // Query package policies that use this cloud connector with pagination
-    logger.debug(
-      `Querying package policies with kuery: ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id:"${cloudConnectorId}"`
-    );
+    const kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id:"${cloudConnectorId}"`;
+
+    logger.debug(`Querying package policies with kuery: ${kuery}`);
 
     const result = await packagePolicyService.list(internalSoClient, {
       page,
       perPage,
-      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id:"${cloudConnectorId}"`,
+      kuery,
     });
 
     logger.debug(`Found ${result?.total || 0} total package policies using cloud connector`);
