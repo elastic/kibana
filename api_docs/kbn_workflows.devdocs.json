@@ -3832,7 +3832,7 @@
           "<InputSchema, OutputSchema, ConfigSchema>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts",
-        "lineNumber": 54,
+        "lineNumber": 55,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3847,7 +3847,7 @@
               "\nUnique identifier for this step type.\nShould follow a namespaced format (e.g., \"ai.prompt\", \"data.set\", \"elasticsearch.search\")."
             ],
             "path": "src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts",
-            "lineNumber": 64,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3862,7 +3862,7 @@
               "\nUser-facing label/title for this step type.\nDisplayed in the UI when selecting or viewing steps."
             ],
             "path": "src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts",
-            "lineNumber": 70,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3877,7 +3877,7 @@
               "\nHuman-readable description of what this step does."
             ],
             "path": "src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts",
-            "lineNumber": 76,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3901,7 +3901,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts",
-            "lineNumber": 81,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3919,7 +3919,7 @@
               "InputSchema"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts",
-            "lineNumber": 86,
+            "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3937,7 +3937,7 @@
               "OutputSchema"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts",
-            "lineNumber": 92,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3955,7 +3955,7 @@
               "ConfigSchema | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts",
-            "lineNumber": 98,
+            "lineNumber": 99,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3980,7 +3980,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts",
-            "lineNumber": 105,
+            "lineNumber": 106,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4005,7 +4005,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts",
-            "lineNumber": 110,
+            "lineNumber": 111,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6507,7 +6507,7 @@
           "\nDocumentation information for a workflow step."
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts",
-        "lineNumber": 24,
+        "lineNumber": 25,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6525,7 +6525,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts",
-            "lineNumber": 28,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6543,7 +6543,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts",
-            "lineNumber": 34,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6561,7 +6561,7 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts",
-            "lineNumber": 40,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10710,7 +10710,7 @@
           "[]"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts",
-        "lineNumber": 22,
+        "lineNumber": 23,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
