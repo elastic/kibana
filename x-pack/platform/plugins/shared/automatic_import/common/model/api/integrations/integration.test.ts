@@ -24,7 +24,7 @@ import {
 describe('integration schemas', () => {
   // Helper to create a valid data stream
   const createValidDataStream = (overrides = {}) => ({
-    dataStreamId: 'ds-123',
+    dataStreamId: 'ds_123',
     title: 'logs',
     description: 'Log data stream',
     inputTypes: [{ name: 'filestream' as const }],
@@ -61,22 +61,20 @@ describe('integration schemas', () => {
       const payload = { integration_id: '   ' };
       const result = ApproveAutoImportIntegrationRequestParams.safeParse(payload);
       expectParseError(result);
-
-      expect(stringifyZodError(result.error)).toContain('integration_id: No empty strings allowed');
     });
 
     it('accepts valid params', () => {
-      const payload = { integration_id: 'integration-123' };
+      const payload = { integration_id: 'integration_123' };
       const result = ApproveAutoImportIntegrationRequestParams.safeParse(payload);
       expectParseSuccess(result);
       expect(result.data).toEqual(payload);
     });
 
     it('strips unknown properties', () => {
-      const payload = { integration_id: 'integration-123', unknown: 'property' };
+      const payload = { integration_id: 'integration_123', unknown: 'property' };
       const result = ApproveAutoImportIntegrationRequestParams.safeParse(payload);
       expectParseSuccess(result);
-      expect(result.data).toEqual({ integration_id: 'integration-123' });
+      expect(result.data).toEqual({ integration_id: 'integration_123' });
     });
   });
 
@@ -104,13 +102,33 @@ describe('integration schemas', () => {
       const payload = { ...validPayload, version: '   ' };
       const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toContain('version: No empty strings allowed');
     });
 
-    it('accepts non-semver version strings', () => {
+    it('rejects non-semver version strings', () => {
       const payload = { ...validPayload, version: 'build-2026-01-29' };
       const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
-      expectParseSuccess(result);
+      expectParseError(result);
+    });
+
+    it('rejects version shorter than 5 characters', () => {
+      const payload = { ...validPayload, version: '1.0' };
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+    });
+
+    it('rejects version longer than 20 characters', () => {
+      const payload = { ...validPayload, version: '1000.1000.10000000000' };
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+    });
+
+    it('accepts valid semver versions', () => {
+      const validVersions = ['1.0.0', '10.20.30', '0.0.1', '99.99.99'];
+      validVersions.forEach((version) => {
+        const payload = { ...validPayload, version };
+        const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+        expectParseSuccess(result);
+      });
     });
 
     it('rejects unknown properties', () => {
@@ -152,7 +170,7 @@ describe('integration schemas', () => {
   describe('CreateAutoImportIntegrationRequestBody', () => {
     const validPayload = {
       connectorId: 'test-connector-id',
-      integrationId: 'test-integration',
+      integrationId: 'test_integration',
       title: 'Test Integration',
       description: 'Integration for testing purposes',
       logo: 'data:image/png;base64,abc123',
@@ -166,7 +184,7 @@ describe('integration schemas', () => {
 
     it('requires connectorId', () => {
       const payload = {
-        integrationId: 'test-integration',
+        integrationId: 'test_integration',
         title: 'Test Integration',
         description: 'Integration for testing purposes',
         dataStreams: [createValidDataStream()],
@@ -200,8 +218,6 @@ describe('integration schemas', () => {
 
       const result = CreateAutoImportIntegrationRequestBody.safeParse(payload);
       expectParseError(result);
-
-      expect(stringifyZodError(result.error)).toContain('integrationId: No empty strings allowed');
     });
 
     it('accepts a payload with multiple data streams', () => {
@@ -225,7 +241,7 @@ describe('integration schemas', () => {
         ...validPayload,
         dataStreams: Array.from({ length: 51 }, (_, i) =>
           createValidDataStream({
-            dataStreamId: `ds-${i}`,
+            dataStreamId: `ds_${i}`,
             title: `stream-${i}`,
           })
         ),
@@ -238,7 +254,7 @@ describe('integration schemas', () => {
     it('accepts integration without logo', () => {
       const payload = {
         connectorId: 'test-connector-id',
-        integrationId: 'test-integration',
+        integrationId: 'test_integration',
         title: 'Test Integration',
         description: 'Integration for testing purposes',
         dataStreams: [createValidDataStream()],
@@ -251,7 +267,7 @@ describe('integration schemas', () => {
     it('accepts integration without dataStreams (optional)', () => {
       const payload = {
         connectorId: 'test-connector-id',
-        integrationId: 'test-integration',
+        integrationId: 'test_integration',
         title: 'Test Integration',
         description: 'Integration for testing purposes',
       };
@@ -273,7 +289,7 @@ describe('integration schemas', () => {
     it('requires title', () => {
       const payload = {
         connectorId: 'test-connector-id',
-        integrationId: 'test-integration',
+        integrationId: 'test_integration',
         description: 'Integration for testing purposes',
         dataStreams: [createValidDataStream()],
       };
@@ -287,7 +303,7 @@ describe('integration schemas', () => {
     it('requires description', () => {
       const payload = {
         connectorId: 'test-connector-id',
-        integrationId: 'test-integration',
+        integrationId: 'test_integration',
         title: 'Test Integration',
         dataStreams: [createValidDataStream()],
       };
@@ -301,12 +317,12 @@ describe('integration schemas', () => {
     it('requires data stream title', () => {
       const payload = {
         connectorId: 'test-connector-id',
-        integrationId: 'test-integration',
+        integrationId: 'test_integration',
         title: 'Test Integration',
         description: 'Integration for testing purposes',
         dataStreams: [
           {
-            dataStreamId: 'ds-123',
+            dataStreamId: 'ds_123',
             description: 'Log data stream',
             inputTypes: [{ name: 'filestream' as const }],
           },
@@ -322,7 +338,7 @@ describe('integration schemas', () => {
     it('requires data stream dataStreamId', () => {
       const payload = {
         connectorId: 'test-connector-id',
-        integrationId: 'test-integration',
+        integrationId: 'test_integration',
         title: 'Test Integration',
         description: 'Integration for testing purposes',
         dataStreams: [
@@ -343,7 +359,7 @@ describe('integration schemas', () => {
     it('rejects invalid input type', () => {
       const payload = {
         connectorId: 'test-connector-id',
-        integrationId: 'test-integration',
+        integrationId: 'test_integration',
         title: 'Test Integration',
         description: 'Integration for testing purposes',
         dataStreams: [
@@ -378,7 +394,7 @@ describe('integration schemas', () => {
       inputTypes.forEach((inputType) => {
         const payload = {
           connectorId: 'test-connector-id',
-          integrationId: 'test-integration',
+          integrationId: 'test_integration',
           title: 'Test Integration',
           description: 'Integration for testing purposes',
           dataStreams: [
@@ -397,7 +413,7 @@ describe('integration schemas', () => {
     it('rejects empty string for title', () => {
       const payload = {
         connectorId: 'test-connector-id',
-        integrationId: 'test-integration',
+        integrationId: 'test_integration',
         title: '   ',
         description: 'Integration for testing purposes',
         dataStreams: [createValidDataStream()],
@@ -412,7 +428,7 @@ describe('integration schemas', () => {
     it('rejects empty string for description', () => {
       const payload = {
         connectorId: 'test-connector-id',
-        integrationId: 'test-integration',
+        integrationId: 'test_integration',
         title: 'Test Integration',
         description: '   ',
         dataStreams: [createValidDataStream()],
@@ -483,13 +499,11 @@ describe('integration schemas', () => {
 
       const result = GetAutoImportIntegrationRequestParams.safeParse(payload);
       expectParseError(result);
-
-      expect(stringifyZodError(result.error)).toContain('integration_id: No empty strings allowed');
     });
 
     it('accepts valid params', () => {
       const payload = {
-        integration_id: 'integration-123',
+        integration_id: 'integration_123',
       };
 
       const result = GetAutoImportIntegrationRequestParams.safeParse(payload);
@@ -500,7 +514,7 @@ describe('integration schemas', () => {
 
     it('strips unknown properties', () => {
       const payload = {
-        integration_id: 'integration-123',
+        integration_id: 'integration_123',
         unknown: 'property',
       };
 
@@ -508,7 +522,7 @@ describe('integration schemas', () => {
       expectParseSuccess(result);
 
       expect(result.data).toEqual({
-        integration_id: 'integration-123',
+        integration_id: 'integration_123',
       });
     });
   });
@@ -895,13 +909,11 @@ describe('integration schemas', () => {
 
       const result = UpdateAutoImportIntegrationRequestParams.safeParse(payload);
       expectParseError(result);
-
-      expect(stringifyZodError(result.error)).toContain('integration_id: No empty strings allowed');
     });
 
     it('accepts valid params', () => {
       const payload = {
-        integration_id: 'integration-123',
+        integration_id: 'integration_123',
       };
 
       const result = UpdateAutoImportIntegrationRequestParams.safeParse(payload);
@@ -1062,13 +1074,11 @@ describe('integration schemas', () => {
 
       const result = DeleteAutoImportIntegrationRequestParams.safeParse(payload);
       expectParseError(result);
-
-      expect(stringifyZodError(result.error)).toContain('integration_id: No empty strings allowed');
     });
 
     it('accepts valid params', () => {
       const payload = {
-        integration_id: 'integration-123',
+        integration_id: 'integration_123',
       };
 
       const result = DeleteAutoImportIntegrationRequestParams.safeParse(payload);
@@ -1079,7 +1089,7 @@ describe('integration schemas', () => {
 
     it('strips unknown properties', () => {
       const payload = {
-        integration_id: 'integration-123',
+        integration_id: 'integration_123',
         unknown: 'property',
       };
 
@@ -1087,7 +1097,7 @@ describe('integration schemas', () => {
       expectParseSuccess(result);
 
       expect(result.data).toEqual({
-        integration_id: 'integration-123',
+        integration_id: 'integration_123',
       });
     });
   });
@@ -1128,7 +1138,7 @@ describe('integration schemas', () => {
 
         // Step 2: GET - Retrieve the created integration
         const getParams = {
-          integration_id: 'nginx-integration-001',
+          integration_id: 'nginx_integration_001',
         };
         const getParamsResult = GetAutoImportIntegrationRequestParams.safeParse(getParams);
         expectParseSuccess(getParamsResult);
@@ -1162,7 +1172,7 @@ describe('integration schemas', () => {
 
         // Step 3: PATCH - Update the integration
         const updateParams = {
-          integration_id: 'nginx-integration-001',
+          integration_id: 'nginx_integration_001',
         };
         const updateParamsResult = UpdateAutoImportIntegrationRequestParams.safeParse(updateParams);
         expectParseSuccess(updateParamsResult);
@@ -1184,7 +1194,7 @@ describe('integration schemas', () => {
 
         // Step 4: DELETE - Delete the integration
         const deleteParams = {
-          integration_id: 'nginx-integration-001',
+          integration_id: 'nginx_integration_001',
         };
         const deleteParamsResult = DeleteAutoImportIntegrationRequestParams.safeParse(deleteParams);
         expectParseSuccess(deleteParamsResult);
@@ -1259,7 +1269,7 @@ describe('integration schemas', () => {
         expectParseSuccess(getAllResponseResult);
 
         // Step 4: DELETE - Delete MySQL integration
-        const deleteMySQLParams = { integration_id: 'mysql-001' };
+        const deleteMySQLParams = { integration_id: 'mysql_001' };
         const deleteMySQLParamsResult =
           DeleteAutoImportIntegrationRequestParams.safeParse(deleteMySQLParams);
         expectParseSuccess(deleteMySQLParamsResult);
@@ -1311,7 +1321,7 @@ describe('integration schemas', () => {
       });
 
       it('handles updating only specific data stream properties', () => {
-        const updateParams = { integration_id: 'test-001' };
+        const updateParams = { integration_id: 'test_001' };
         const updateParamsResult = UpdateAutoImportIntegrationRequestParams.safeParse(updateParams);
         expectParseSuccess(updateParamsResult);
 
@@ -1423,7 +1433,7 @@ describe('integration schemas', () => {
       });
 
       it('validates integrationId consistency across workflow', () => {
-        const integrationId = 'consistent-integration-001';
+        const integrationId = 'consistent_integration_001';
 
         // Create
         const createResponse = { integration_id: integrationId };

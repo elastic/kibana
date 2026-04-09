@@ -44,7 +44,6 @@ spaceTest.describe('Panel titles (dashboard)', { tag: tags.deploymentAgnostic },
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsPrivilegedUser();
-    await pageObjects.dashboard.goto();
     await pageObjects.dashboard.openNewDashboard();
     await pageObjects.dashboard.waitForRenderComplete();
   });
