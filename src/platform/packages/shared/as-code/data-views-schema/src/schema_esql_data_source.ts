@@ -27,8 +27,8 @@ export const esqlDataSourceSchema = schema.object(
   },
   {
     meta: {
-      id: 'esqlDataset',
-      title: 'ES|QL Dataset',
+      id: 'esqlDataSource',
+      title: 'ES|QL Data Source',
       description:
         'Uses an ES|QL query as the data source. The query is executed at render time; resulting columns are available as fields.',
     },
