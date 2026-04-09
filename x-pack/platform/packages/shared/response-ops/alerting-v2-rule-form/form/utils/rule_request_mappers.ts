@@ -115,7 +115,7 @@ const mapStateTransition = (formValues: FormValues) => {
   }
 
   if (recoveryMode !== 'immediate') {
-    if (recoveryMode === 'recoveries' && stateTransition.recoveringCount != null) {
+    if (recoveryMode !== 'duration' && stateTransition.recoveringCount != null) {
       out.recovering_count = stateTransition.recoveringCount;
     }
     if (recoveryMode === 'duration') {
