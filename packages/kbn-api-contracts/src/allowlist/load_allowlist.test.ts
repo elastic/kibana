@@ -168,10 +168,22 @@ describe('isAllowlisted', () => {
     };
 
     expect(
-      isAllowlisted(allowlist, '/api/fleet/outputs', 'post', 'request-property-removed', '/components/schemas/Output/properties/name')
+      isAllowlisted(
+        allowlist,
+        '/api/fleet/outputs',
+        'post',
+        'request-property-removed',
+        '/components/schemas/Output/properties/name'
+      )
     ).toBe(true);
     expect(
-      isAllowlisted(allowlist, '/api/fleet/outputs', 'post', 'response-optional-property-removed', '/components/schemas/Output/properties/type')
+      isAllowlisted(
+        allowlist,
+        '/api/fleet/outputs',
+        'post',
+        'response-optional-property-removed',
+        '/components/schemas/Output/properties/type'
+      )
     ).toBe(true);
   });
 
@@ -189,10 +201,22 @@ describe('isAllowlisted', () => {
     };
 
     expect(
-      isAllowlisted(allowlist, '/api/fleet/outputs', 'post', 'request-property-removed', '/some/source')
+      isAllowlisted(
+        allowlist,
+        '/api/fleet/outputs',
+        'post',
+        'request-property-removed',
+        '/some/source'
+      )
     ).toBe(true);
     expect(
-      isAllowlisted(allowlist, '/api/fleet/outputs', 'post', 'response-optional-property-removed', '/some/source')
+      isAllowlisted(
+        allowlist,
+        '/api/fleet/outputs',
+        'post',
+        'response-optional-property-removed',
+        '/some/source'
+      )
     ).toBe(false);
   });
 
@@ -210,10 +234,22 @@ describe('isAllowlisted', () => {
     };
 
     expect(
-      isAllowlisted(allowlist, '/api/fleet/outputs', 'post', 'request-property-removed', '/components/schemas/Output/properties/name')
+      isAllowlisted(
+        allowlist,
+        '/api/fleet/outputs',
+        'post',
+        'request-property-removed',
+        '/components/schemas/Output/properties/name'
+      )
     ).toBe(true);
     expect(
-      isAllowlisted(allowlist, '/api/fleet/outputs', 'post', 'request-property-removed', '/components/schemas/Output/properties/type')
+      isAllowlisted(
+        allowlist,
+        '/api/fleet/outputs',
+        'post',
+        'request-property-removed',
+        '/components/schemas/Output/properties/type'
+      )
     ).toBe(false);
   });
 
@@ -232,13 +268,31 @@ describe('isAllowlisted', () => {
     };
 
     expect(
-      isAllowlisted(allowlist, '/api/fleet/outputs', 'post', 'request-property-removed', '/components/schemas/Output/properties/name')
+      isAllowlisted(
+        allowlist,
+        '/api/fleet/outputs',
+        'post',
+        'request-property-removed',
+        '/components/schemas/Output/properties/name'
+      )
     ).toBe(true);
     expect(
-      isAllowlisted(allowlist, '/api/fleet/outputs', 'post', 'request-property-removed', '/components/schemas/Output/properties/type')
+      isAllowlisted(
+        allowlist,
+        '/api/fleet/outputs',
+        'post',
+        'request-property-removed',
+        '/components/schemas/Output/properties/type'
+      )
     ).toBe(false);
     expect(
-      isAllowlisted(allowlist, '/api/fleet/outputs', 'post', 'response-optional-property-removed', '/components/schemas/Output/properties/name')
+      isAllowlisted(
+        allowlist,
+        '/api/fleet/outputs',
+        'post',
+        'response-optional-property-removed',
+        '/components/schemas/Output/properties/name'
+      )
     ).toBe(false);
   });
 });

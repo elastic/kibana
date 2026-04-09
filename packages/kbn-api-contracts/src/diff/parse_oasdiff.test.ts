@@ -35,7 +35,14 @@ describe('parseOasdiff', () => {
       }),
     ]);
     expect(result).toEqual([
-      { type: 'method_removed', path: '/api/test', method: 'GET', reason: 'GET /api/test removed', oasdiffId: 'api-removed-without-deprecation', source: 'test' },
+      {
+        type: 'method_removed',
+        path: '/api/test',
+        method: 'GET',
+        reason: 'GET /api/test removed',
+        oasdiffId: 'api-removed-without-deprecation',
+        source: 'test',
+      },
     ]);
   });
 
@@ -133,7 +140,14 @@ describe('parseOasdiff', () => {
       }),
     ]);
     expect(result).toEqual([
-      { type: 'parameter_removed', path: '/api/test', method: 'GET', reason: 'parameter removed', oasdiffId: 'request-parameter-removed', source: 'test' },
+      {
+        type: 'parameter_removed',
+        path: '/api/test',
+        method: 'GET',
+        reason: 'parameter removed',
+        oasdiffId: 'request-parameter-removed',
+        source: 'test',
+      },
     ]);
   });
 
