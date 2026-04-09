@@ -217,6 +217,17 @@ export function getActionOptions(
         iconType: 'clock',
         iconColor: euiTheme.colors.vis.euiColorVis0,
       },
+      {
+        id: 'waitForInput',
+        label: i18n.translate('workflows.actionsMenu.waitForInput', {
+          defaultMessage: 'Wait For Input',
+        }),
+        description: i18n.translate('workflows.actionsMenu.waitForInputDescription', {
+          defaultMessage: 'Pause execution until external input is provided (human-in-the-loop)',
+        }),
+        iconType: 'user',
+        iconColor: euiTheme.colors.vis.euiColorVis0,
+      },
       ...(['workflow.execute', 'workflow.executeAsync'] as const)
         .map((stepId) => getBuiltInStepDefinition(stepId))
         .filter((def): def is NonNullable<typeof def> => def !== undefined)
