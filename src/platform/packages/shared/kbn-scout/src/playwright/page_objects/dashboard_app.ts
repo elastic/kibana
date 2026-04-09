@@ -522,6 +522,10 @@ export class DashboardApp {
     return this.panelSelectionList.locator('li').count();
   }
 
+  async getAddPanelItemText(): Promise<string[]> {
+    return this.panelSelectionList.locator('li').allTextContents();
+  }
+
   /**
    * Waits for all dashboard panels to finish rendering.
    * Uses the data-render-complete attribute to determine completion.
