@@ -78,7 +78,7 @@ describe(
       it('shows all default column headers', () => {
         const expectedHeaders = [
           'Entity name',
-          'Entity id',
+          'Entity ID',
           'Data source',
           'Resolved to',
           'Entity type',
