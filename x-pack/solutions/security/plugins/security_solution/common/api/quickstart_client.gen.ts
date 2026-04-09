@@ -855,7 +855,7 @@ To retrieve machine learning job IDs, which are required to create machine learn
 ...
 ```
 
-Additionally, you can set up notifications for when rules create alerts. The notifications use the [Alerting and Actions framework](https://www.elastic.co/guide/en/kibana/current/alerting-getting-started.html). Each action type requires a connector. Connectors store the information required to send notifications via external systems. The following connector types are supported for rule notifications:
+Additionally, you can set up notifications for when rules create alerts. The notifications use the [Alerting and Actions framework](https://www.elastic.co/docs/explore-analyze/alerting). Each action type requires a connector. Connectors store the information required to send notifications via external systems. The following connector types are supported for rule notifications:
 
 * Slack
 * Email
@@ -868,12 +868,12 @@ Additionally, you can set up notifications for when rules create alerts. The not
 > info
 > For more information on PagerDuty fields, see [Send a v2 Event](https://developer.pagerduty.com/docs/events-api-v2/trigger-events/).
 
-To retrieve connector IDs, which are required to configure rule notifications, call the [Find objects API](https://www.elastic.co/guide/en/kibana/current/saved-objects-api-find.html) with `"type": "action"` in the request payload.
+To retrieve connector IDs, which are required to configure rule notifications, call the [Find objects API](https://www.elastic.co/docs/api/doc/kibana/operation/operation-findsavedobjects) with `"type": "action"` in the request payload.
 
 For detailed information on Kibana actions and alerting, and additional API calls, see:
 
 * [Alerting API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-alerting)
-* [Alerting and Actions framework](https://www.elastic.co/guide/en/kibana/current/alerting-getting-started.html)
+* [Alerting and Actions framework](https://www.elastic.co/docs/explore-analyze/alerting)
 * [Connectors API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-connectors)
 
     */
@@ -1466,9 +1466,9 @@ The entity will be immediately deleted from the latest index.  It will remain av
 > info
 > Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
 
-> You can use Kibana’s [Saved Objects](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
+> You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
 
-> Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
+> Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
 
     */
   async exportRules(props: ExportRulesProps) {
@@ -2141,14 +2141,14 @@ finalize it.
 
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 > info
-> To import rules with actions, you need at least Read privileges for the Action and Connectors feature. To overwrite or add new connectors, you need All privileges for the Actions and Connectors feature. To import rules without actions, you don’t need Actions and Connectors privileges. Refer to [Enable and access detections](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html#enable-detections-ui) for more information.
+> To import rules with actions, you need at least Read privileges for the Action and Connectors feature. To overwrite or add new connectors, you need All privileges for the Actions and Connectors feature. To import rules without actions, you don’t need Actions and Connectors privileges. Refer to [Enable and access detections](https://www.elastic.co/docs/solutions/security/detect-and-alert/detections-privileges) for more information.
 
 > info
 > Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
 
-> You can use Kibana’s [Saved Objects](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
+> You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
 
-> Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
+> Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
 
     */
   async importRules(props: ImportRulesProps) {

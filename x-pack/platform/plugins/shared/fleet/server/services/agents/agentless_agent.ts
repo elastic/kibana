@@ -191,6 +191,7 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     const cloudSetup = appContextService.getCloud();
     if (!cloudSetup?.isServerlessEnabled) {
       requestConfig.data.stack_version = appContextService.getKibanaVersion();
+      requestConfig.data.is_elastic_staff_owned = cloudSetup?.isElasticStaffOwned ?? false;
     }
 
     const requestConfigDebugStatus = this.createRequestConfigDebug(requestConfig);
@@ -527,7 +528,8 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
           'fleet_url',
           'labels',
           'resources',
-          'cloud_connectors'
+          'cloud_connectors',
+          'is_elastic_staff_owned'
         ),
         agent_policy: '[REDACTED]',
         fleet_token: '[REDACTED]',

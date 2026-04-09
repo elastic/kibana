@@ -97,6 +97,23 @@ export default function ({ getService }: FtrProviderContext) {
         expect(savedObjects[1].attributes.title).to.be('logstash');
         expect(savedObjects[1].attributes.author).to.be('Mr Nobody');
       });
+
+      it('finds the right document, deeply nested search field under nested ancestor', async () => {
+        const query = queryString.stringify({
+          type: 'nestedtype',
+          search_fields: ['comments.metadata.author'],
+          search: 'graceinternal',
+        });
+        const response = await supertest.get(
+          `${getUrlPrefix(defaultNamespace)}/api/saved_objects/_find?${query}`
+        );
+        expect(response.status).to.eql(200, JSON.stringify(response.body));
+        const savedObjects = JSON.parse(response.text).saved_objects;
+        expect(savedObjects.length).to.be(1);
+        expect(savedObjects[0].attributes.title).to.be('beats');
+        expect(savedObjects[0].attributes.author).to.be('Deep Author');
+        expect(savedObjects[0].attributes.comments[0].metadata.author).to.be('graceinternal');
+      });
     });
   });
 }

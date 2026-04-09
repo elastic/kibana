@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/ci-stats-reporter'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-operations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/ci-stats-reporter'
+  title: '@kbn/ci-stats-reporter'
   description: Moon project for @kbn/ci-stats-reporter
   channel: ''
   owner: '@elastic/kibana-operations'
-  metadata:
-    sourceRoot: src/platform/packages/private/kbn-ci-stats-reporter
+  sourceRoot: src/platform/packages/private/kbn-ci-stats-reporter
 dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/ci-stats-core'

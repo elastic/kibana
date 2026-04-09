@@ -72,4 +72,25 @@ shared@~1.2.0:
       },
     });
   });
+
+  it('indexes each package alias in a compound yarn.lock header', () => {
+    const lockfile = `
+"@scope/alias@npm:@scope/alias@2.0.1", "plain-name@1 - 2", "plain-name@npm:@scope/alias@2.0.1":
+  version "2.0.1"
+  resolved "https://example.invalid/pkg.tgz"
+`;
+
+    const parsed = parseYarnLock(lockfile);
+
+    expect(parsed['plain-name@2.0.1']).toMatchObject({
+      name: 'plain-name',
+      requestedVersions: ['1 - 2', 'npm:@scope/alias@2.0.1'],
+      resolvedVersion: '2.0.1',
+    });
+    expect(parsed['@scope/alias@2.0.1']).toMatchObject({
+      name: '@scope/alias',
+      requestedVersions: ['npm:@scope/alias@2.0.1'],
+      resolvedVersion: '2.0.1',
+    });
+  });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
+import { type IRouter, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
@@ -52,10 +52,21 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
         const space = await osqueryContext.service.getActiveSpace(request);
         const spaceId = space?.id ?? DEFAULT_SPACE_ID;
 
-        const savedQuery = await spaceScopedClient.get<SavedQuerySavedObject>(
-          savedQuerySavedObjectType,
-          request.params.id
-        );
+        let savedQuery;
+        try {
+          savedQuery = await spaceScopedClient.get<SavedQuerySavedObject>(
+            savedQuerySavedObjectType,
+            request.params.id
+          );
+        } catch (err) {
+          if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+            return response.notFound({
+              body: { message: `Saved query ${request.params.id} not found` },
+            });
+          }
+
+          throw err;
+        }
 
         if (savedQuery.attributes.ecs_mapping) {
           // @ts-expect-error update types

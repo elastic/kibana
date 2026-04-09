@@ -104,7 +104,7 @@ pageLoadAssetSize:
   links: 8620
   lists: 5093
   logsDataAccess: 7900
-  logsShared: 101273
+  logsShared: 102400
   logstash: 15882
   maintenanceWindows: 3905
   management: 12951

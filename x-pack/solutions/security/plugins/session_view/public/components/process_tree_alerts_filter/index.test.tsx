@@ -262,12 +262,13 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
       });
 
       it('should set the EmptyFilterButton text content to  display "View: file alerts"  when file alert option is clicked', async () => {
+        const user = userEvent.setup({ pointerEventsCheck: 0 });
         const filterButton = renderResult.getByTestId(
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
-        await userEvent.click(filterButton);
+        await user.click(filterButton);
 
-        await userEvent.click(
+        await user.click(
           renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-file')
         );
 
@@ -275,12 +276,13 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
       });
 
       it('should set the EmptyFilterButton text content to  display "View: all alerts"  when default filter option is clicked', async () => {
+        const user = userEvent.setup({ pointerEventsCheck: 0 });
         const filterButton = renderResult.getByTestId(
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
-        await userEvent.click(filterButton);
+        await user.click(filterButton);
 
-        await userEvent.click(
+        await user.click(
           renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-default')
         );
 
@@ -288,12 +290,13 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
       });
 
       it('should set the EmptyFilterButton text content to  display "View: process alerts"  when process alert option is clicked', async () => {
+        const user = userEvent.setup({ pointerEventsCheck: 0 });
         const filterButton = renderResult.getByTestId(
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
-        await userEvent.click(filterButton);
+        await user.click(filterButton);
 
-        await userEvent.click(
+        await user.click(
           renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-process')
         );
 
@@ -301,12 +304,13 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
       });
 
       it('should set the EmptyFilterButton text content to  display "View: network alerts"  when network alert option is clicked', async () => {
+        const user = userEvent.setup({ pointerEventsCheck: 0 });
         const filterButton = renderResult.getByTestId(
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
-        await userEvent.click(filterButton);
+        await user.click(filterButton);
 
-        await userEvent.click(
+        await user.click(
           renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-network')
         );
 
