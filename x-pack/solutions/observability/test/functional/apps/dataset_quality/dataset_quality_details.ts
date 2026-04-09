@@ -267,6 +267,13 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         await PageObjects.datasetQuality.selectQualityIssueChart('failed');
 
+        // Wait for the URL to reflect the chart selection before clicking the link,
+        // otherwise the Discover link may still hold the degraded-docs query.
+        await retry.tryForTime(5000, async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          expect(decodeURIComponent(currentUrl)).to.contain('qualityIssuesChart:failed');
+        });
+
         // This line is required to solve problems where rendered lens visualisation below gets the hover bringing additional action icons
         // which over lap with the button on top of the visualisation causing ElementClickInterceptedError to happen
         await testSubjects.moveMouseTo(

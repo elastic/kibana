@@ -14,7 +14,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
-import { DEFAULT_TIME_RANGE, attachmentToDashboardState } from '@kbn/dashboard-agent-common';
+import { DEFAULT_TIME_RANGE, attachmentDataToDashboardState } from '@kbn/dashboard-agent-common';
 import type { SavedObjectStatus } from './use_register_canvas_action_buttons';
 import { useRegisterCanvasActionButtons } from './use_register_canvas_action_buttons';
 
@@ -112,7 +112,10 @@ export const DashboardCanvasContent = ({
     [attachmentOrigin, checkSavedDashboardExist]
   );
 
-  const dashboardState = useMemo(() => attachmentToDashboardState(attachment), [attachment]);
+  const dashboardState = useMemo(
+    () => attachmentDataToDashboardState(attachment.data),
+    [attachment.data]
+  );
 
   const [timeRange, setTimeRange] = useState<{ from: string; to: string }>(
     dashboardState.time_range ?? DEFAULT_TIME_RANGE
@@ -135,7 +138,7 @@ export const DashboardCanvasContent = ({
     timeRange,
     dashboardState,
     attachmentOrigin,
-    checkSavedDashboardExist,
+    savedObjectStatus,
     isSidebar,
   });
 
@@ -151,6 +154,7 @@ export const DashboardCanvasContent = ({
           showQueryMenu={false}
           query={undefined}
           displayStyle="inPage"
+          useDefaultBehaviors={true}
           disableQueryLanguageSwitcher
           isDisabled={!dashboardApi}
           dateRangeFrom={timeRange.from}
