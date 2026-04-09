@@ -32,27 +32,19 @@ const EMPTY_SETTINGS: InferenceSettingsResponse = {
 const findInvalidEndpoints = (
   settings: InferenceSettingsAttributes,
   featureRegistry: InferenceFeatureRegistry,
-  liveEndpointIds: Set<string>,
+  existingEndpointIds: Set<string>,
   logger: Logger
 ): string[] => {
   const soFeaturesMap = new Map(settings.features.map((f) => [f.feature_id, f]));
-  const features = featureRegistry.getAll();
-  const childFeatures = features.filter((f) => f.parentFeatureId !== undefined);
-  const allEffectiveIds = new Set<string>();
 
-  for (const feature of childFeatures) {
-    const { ids } = resolveFeatureEndpointIds(
-      featureRegistry,
-      soFeaturesMap,
-      feature.featureId,
-      logger
+  const resolvedEndpointIds = featureRegistry
+    .getAll()
+    .filter((f) => f.parentFeatureId !== undefined)
+    .flatMap(
+      (f) => resolveFeatureEndpointIds(featureRegistry, soFeaturesMap, f.featureId, logger).ids
     );
-    for (const id of ids) {
-      allEffectiveIds.add(id);
-    }
-  }
 
-  return [...allEffectiveIds].filter((id) => !liveEndpointIds.has(id));
+  return [...new Set(resolvedEndpointIds)].filter((id) => !existingEndpointIds.has(id));
 };
 
 export const defineInferenceSettingsRoutes = ({
@@ -128,15 +120,22 @@ export const defineInferenceSettingsRoutes = ({
           throw e;
         }
 
-        const invalidEndpoints = await fetchInferenceEndpoints(esClient)
-          .then(({ inferenceEndpoints }) => {
-            const liveIds = new Set(inferenceEndpoints.map((ep) => ep.inference_id));
-            return findInvalidEndpoints(settingsBody.data, featureRegistry, liveIds, logger);
-          })
-          .catch((e) => {
+        let invalidEndpoints: string[] = [];
+
+        if (settingsBody.data.features.length > 0) {
+          try {
+            const { inferenceEndpoints } = await fetchInferenceEndpoints(esClient);
+            const existingIds = new Set(inferenceEndpoints.map((ep) => ep.inference_id));
+            invalidEndpoints = findInvalidEndpoints(
+              settingsBody.data,
+              featureRegistry,
+              existingIds,
+              logger
+            );
+          } catch (e) {
             logger.warn(`Failed to validate inference endpoints: ${e.message}`);
-            return [];
-          });
+          }
+        }
 
         return response.ok({
           body: { ...settingsBody, invalidEndpoints },
