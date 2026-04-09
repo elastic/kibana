@@ -22,6 +22,7 @@ import {
   RuntimeStateManagerProvider,
   fromTabStateToSavedObjectTab,
   internalStateActions,
+  useInternalStateSelector,
 } from '../../../state_management/redux';
 import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
@@ -39,6 +40,11 @@ jest.mock('./discover_session_save_dashboard_modal', () => ({
 }));
 
 const MockModal = jest.mocked(DiscoverSessionSaveDashboardModal);
+
+const CurrentTabProviderFromStore = ({ children }: { children: React.ReactNode }) => {
+  const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
+  return <CurrentTabProvider currentTabId={currentTabId}>{children}</CurrentTabProvider>;
+};
 
 const defaultServices = createDiscoverServicesMock();
 
@@ -159,14 +165,14 @@ const setup = async ({
   render(
     <InternalStateProvider store={toolkit.internalState}>
       <RuntimeStateManagerProvider value={toolkit.runtimeStateManager}>
-        <CurrentTabProvider currentTabId={toolkit.getCurrentTab().id}>
+        <CurrentTabProviderFromStore>
           <DiscoverSessionSaveModalContainer
             initialCopyOnSave={initialCopyOnSave}
             onClose={onClose}
             onSaveCb={onSaveCb}
             services={services}
           />
-        </CurrentTabProvider>
+        </CurrentTabProviderFromStore>
       </RuntimeStateManagerProvider>
     </InternalStateProvider>
   );
