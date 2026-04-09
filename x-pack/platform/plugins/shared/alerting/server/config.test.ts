@@ -14,7 +14,6 @@ describe('config validation', () => {
       Object {
         "cancelAlertsOnRuleTimeout": true,
         "enableFrameworkAlerts": true,
-        "enableRuleChangeTracking": false,
         "healthCheck": Object {
           "interval": "60m",
         },
