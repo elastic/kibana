@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/monaco'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/monaco'
+  title: '@kbn/monaco'
   description: Moon project for @kbn/monaco
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-monaco
+  sourceRoot: src/platform/packages/shared/kbn-monaco
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/repo-info'
@@ -24,37 +23,57 @@ dependsOn:
   - '@kbn/esql-validation-autocomplete'
   - '@kbn/esql-types'
 tags:
-  - is-webpack-built
+  - shared-common
   - package
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - is-webpack-built
 fileGroups:
   src:
     - src/**/*
     - '**/*.ts'
     - src/languages/painless/autocomplete_definitions/*.json
     - '!target/**/*'
+    - version_dependencies.txt
+  jest-config:
+    - jest.config.js
 tasks:
-  jest:
+  extract-version-dependencies:
+    command: node
     args:
-      - '--config'
-      - $projectRoot/jest.config.js
+      - scripts/extract_version_dependencies.js
+      - src/platform/packages/shared/kbn-monaco/version_dependencies.txt
+      - '--collect'
+      - babel-loader
+      - '--collect'
+      - monaco-editor
+      - '--collect'
+      - monaco-yaml
+      - '--collect'
+      - terser-webpack-plugin
+      - '--collect'
+      - webpack
+      - '--transitive'
+    env:
+      CI_STATS_DISABLED: 'true'
     inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+      - /package.json
+      - /yarn.lock
+    outputs:
+      - version_dependencies.txt
+    options:
+      runFromWorkspaceRoot: true
   build-webpack:
     command: yarn
     args:
       - build
+    deps:
+      - ~:extract-version-dependencies
     inputs:
       - '@group(src)'
+      - package.json
       - webpack.config.js
       - /src/platform/packages/shared/kbn-esql-ast/**/*.{js,ts,tsx}
       - /src/platform/packages/shared/kbn-esql-types/**/*.{js,ts,tsx}
@@ -71,5 +90,11 @@ tasks:
     args:
       - build
       - '--watch'
+    deps:
+      - extract-version-dependencies
+    inputs:
+      - '@group(src)'
+      - package.json
+      - webpack.config.js
     outputs:
       - /target/build/src/platform/packages/shared/kbn-monaco

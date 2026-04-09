@@ -4,27 +4,28 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/ui-shared-deps-src'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-operations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/ui-shared-deps-src'
+  title: '@kbn/ui-shared-deps-src'
   description: Moon project for @kbn/ui-shared-deps-src
   channel: ''
   owner: '@elastic/kibana-operations'
-  metadata:
-    sourceRoot: src/platform/packages/private/kbn-ui-shared-deps-src
+  sourceRoot: src/platform/packages/private/kbn-ui-shared-deps-src
 dependsOn:
+  - '@kbn/repo-info'
   - '@kbn/ui-shared-deps-npm'
 tags:
-  - is-webpack-built
+  - shared-common
   - package
   - prod
   - group-platform
   - private
+  - is-webpack-built
 fileGroups:
   src:
     - '**/*.ts'
@@ -32,15 +33,53 @@ fileGroups:
     - '!src/entry.js'
     - '!**/*.config.js'
     - '!target/**/*'
+    - version_dependencies.txt
 tasks:
+  extract-version-dependencies:
+    command: node
+    args:
+      - scripts/extract_version_dependencies.js
+      - src/platform/packages/private/kbn-ui-shared-deps-src/version_dependencies.txt
+      - '--collect'
+      - '@babel/plugin-transform-numeric-separator'
+      - '--collect'
+      - babel-loader
+      - '--collect'
+      - chroma-js
+      - '--collect'
+      - css-loader
+      - '--collect'
+      - dompurify
+      - '--collect'
+      - mini-css-extract-plugin
+      - '--collect'
+      - monaco-editor
+      - '--collect'
+      - monaco-yaml
+      - '--collect'
+      - react-use
+      - '--collect'
+      - webpack
+      - '--transitive'
+    env:
+      CI_STATS_DISABLED: 'true'
+    inputs:
+      - /package.json
+      - /yarn.lock
+    outputs:
+      - version_dependencies.txt
+    options:
+      runFromWorkspaceRoot: true
   build-webpack:
     command: yarn
     args:
       - build
     deps:
+      - ~:extract-version-dependencies
       - ^:build-webpack
     inputs:
       - '@group(src)'
+      - package.json
       - webpack.config.js
       - /src/platform/packages/shared/kbn-repo-info/**/*.{js,ts,tsx}
       - /src/platform/packages/shared/kbn-ui-theme/**/*.{js,ts,tsx}
@@ -78,9 +117,11 @@ tasks:
       - build
       - '--watch'
     deps:
+      - extract-version-dependencies
       - ^:build-webpack
     inputs:
       - '@group(src)'
+      - package.json
       - webpack.config.js
     outputs:
       - /target/build/src/platform/packages/private/kbn-ui-shared-deps-src

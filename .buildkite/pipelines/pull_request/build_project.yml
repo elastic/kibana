@@ -1,6 +1,7 @@
 steps:
   - command: .buildkite/scripts/steps/artifacts/docker_image.sh
     label: 'Build Project Image'
+    key: build_project_image
     agents:
       machineType: n2-standard-16
       preemptible: true

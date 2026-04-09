@@ -1,5 +1,5 @@
 {
-  "sha1": "53615177400b4a78f90820b9879f684b85e26944",
+  "sha1": "55c47e3df596550fc8ba71a6f382bd02739611f9",
   "tests": [
     {
       "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
@@ -8,8 +8,8 @@
       "tags": [],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 16,
-        "column": 16
+        "line": 19,
+        "column": 1
       }
     },
     {

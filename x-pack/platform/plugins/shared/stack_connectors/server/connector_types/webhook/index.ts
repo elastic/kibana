@@ -10,10 +10,7 @@ import type { AxiosError, AxiosResponse } from 'axios';
 import type { Logger } from '@kbn/core/server';
 import { pipe } from 'fp-ts/pipeable';
 import { getOrElse, map } from 'fp-ts/Option';
-import type {
-  ActionTypeExecutorResult as ConnectorTypeExecutorResult,
-  ValidatorServices,
-} from '@kbn/actions-plugin/server/types';
+import type { ActionTypeExecutorResult as ConnectorTypeExecutorResult } from '@kbn/actions-plugin/server/types';
 
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import {
@@ -23,11 +20,8 @@ import {
 } from '@kbn/actions-plugin/common';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
-import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { SSLCertType } from '../../../common/auth/constants';
 import type {
   ActionParamsType,
-  ConnectorTypeConfigType,
   WebhookConnectorType,
   WebhookConnectorTypeExecutorOptions,
 } from './types';
@@ -37,9 +31,8 @@ import type { Result } from '../lib/result_type';
 import { isOk, promiseResult } from '../lib/result_type';
 import { ConfigSchema, ParamsSchema } from './schema';
 import { SecretConfigurationSchema } from '../../../common/auth/schema';
-import { AuthType } from '../../../common/auth/constants';
 import { getAxiosConfig } from './get_axios_config';
-import { ADDITIONAL_FIELD_CONFIG_ERROR } from './translations';
+import { validateConnectorTypeConfig } from './validations';
 
 export const ConnectorTypeId = '.webhook';
 const userErrorCodes = [400, 404, 405, 406, 410, 411, 414, 428, 431];
@@ -83,127 +76,6 @@ function renderParameterTemplates(
   return {
     body: renderMustacheString(logger, params.body, variables, 'json'),
   };
-}
-
-function validateUrl(configuredUrl: string) {
-  try {
-    new URL(configuredUrl);
-  } catch (err) {
-    throw new Error(
-      i18n.translate('xpack.stackConnectors.webhook.configurationErrorNoHostname', {
-        defaultMessage: 'error validation webhook action config: unable to parse url: {err}',
-        values: {
-          err: err.toString(),
-        },
-      })
-    );
-  }
-}
-
-function ensureUriAllowed(
-  configuredUrl: string,
-  configurationUtilities: ActionsConfigurationUtilities
-) {
-  try {
-    configurationUtilities.ensureUriAllowed(configuredUrl);
-  } catch (allowListError) {
-    throw new Error(
-      i18n.translate('xpack.stackConnectors.webhook.configurationError', {
-        defaultMessage: 'error validation webhook action config: {message}',
-        values: {
-          message: allowListError.message,
-        },
-      })
-    );
-  }
-}
-
-function validateAuthType(configObject: ConnectorTypeConfigType) {
-  if (Boolean(configObject.authType) && !configObject.hasAuth) {
-    throw new Error(
-      i18n.translate('xpack.stackConnectors.webhook.authConfigurationError', {
-        defaultMessage:
-          'error validation webhook action config: authType must be null or undefined if hasAuth is false',
-      })
-    );
-  }
-}
-
-function validateCertType(
-  configObject: ConnectorTypeConfigType,
-  configurationUtilities: ActionsConfigurationUtilities
-) {
-  if (configObject.certType === SSLCertType.PFX) {
-    const webhookSettings = configurationUtilities.getWebhookSettings();
-    if (!webhookSettings.ssl.pfx.enabled) {
-      throw new Error(
-        i18n.translate('xpack.stackConnectors.webhook.pfxConfigurationError', {
-          defaultMessage:
-            'error validation webhook action config: certType "{certType}" is disabled',
-          values: {
-            certType: SSLCertType.PFX,
-          },
-        })
-      );
-    }
-  }
-}
-
-function validateAdditionalFields(configObject: ConnectorTypeConfigType) {
-  if (configObject.additionalFields) {
-    try {
-      const parsedAdditionalFields = JSON.parse(configObject.additionalFields);
-
-      if (
-        typeof parsedAdditionalFields !== 'object' ||
-        Array.isArray(parsedAdditionalFields) ||
-        Object.keys(parsedAdditionalFields).length === 0
-      ) {
-        throw new Error(ADDITIONAL_FIELD_CONFIG_ERROR);
-      }
-    } catch (e) {
-      throw new Error(ADDITIONAL_FIELD_CONFIG_ERROR);
-    }
-  }
-}
-
-function validateOAuth2(configObject: ConnectorTypeConfigType) {
-  if (
-    configObject.authType === AuthType.OAuth2ClientCredentials &&
-    (!configObject.accessTokenUrl || !configObject.clientId)
-  ) {
-    const missingFields = [];
-    if (!configObject.accessTokenUrl) {
-      missingFields.push('Access Token URL (accessTokenUrl)');
-    }
-    if (!configObject.clientId) {
-      missingFields.push('Client ID (clientId)');
-    }
-
-    throw new Error(
-      i18n.translate('xpack.stackConnectors.webhook.oauth2ConfigurationError', {
-        defaultMessage: `error validation webhook action config: missing {missingItems} fields`,
-        values: {
-          missingItems: missingFields.join(', '),
-        },
-      })
-    );
-  }
-}
-
-function validateConnectorTypeConfig(
-  configObject: ConnectorTypeConfigType,
-  validatorServices: ValidatorServices
-) {
-  const { configurationUtilities } = validatorServices;
-  const configuredUrl = configObject.url;
-
-  validateUrl(configuredUrl);
-  ensureUriAllowed(configuredUrl, configurationUtilities);
-  validateAuthType(configObject);
-  validateCertType(configObject, configurationUtilities);
-  validateAdditionalFields(configObject);
-  validateOAuth2(configObject);
 }
 
 // action executor

@@ -50,7 +50,7 @@ const scenario: Scenario<InfraDocument | ApmFields> = async ({
       const instances = times(numInstances).map((index) => {
         return apm
           .service({
-            name: `synth-node-${index % 3}`,
+            name: `synth-node-${index}`,
             environment: ENVIRONMENT,
             agentName: 'node-js',
           })

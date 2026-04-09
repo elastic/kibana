@@ -104,6 +104,7 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
+          diskSizeGb: 110
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60
@@ -121,6 +122,7 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
+          diskSizeGb: 120
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60
@@ -258,6 +260,7 @@ steps:
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-standard-4
+          diskSizeGb: 120
         depends_on: build
         timeout_in_minutes: 75
         parallelism: 12
@@ -274,6 +277,7 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
+          diskSizeGb: 120
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60

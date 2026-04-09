@@ -8,6 +8,7 @@
     "@kbn/scout-oblt",
     "@kbn/apm-synthtrace-client",
     "@kbn/rison",
+    "@kbn/scout-synthtrace",
   ],
   "exclude": ["target/**/*"]
 }

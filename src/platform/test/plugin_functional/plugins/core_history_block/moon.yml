@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/core-history-block-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/core-history-block-plugin'
+  title: '@kbn/core-history-block-plugin'
   description: Moon project for @kbn/core-history-block-plugin
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: src/platform/test/plugin_functional/plugins/core_history_block
+  sourceRoot: src/platform/test/plugin_functional/plugins/core_history_block
 dependsOn:
   - '@kbn/core'
   - '@kbn/shared-ux-router'

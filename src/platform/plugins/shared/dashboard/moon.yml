@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/dashboard-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-presentation'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/dashboard-plugin'
+  title: '@kbn/dashboard-plugin'
   description: Moon project for @kbn/dashboard-plugin
   channel: ''
   owner: '@elastic/kibana-presentation'
-  metadata:
-    sourceRoot: src/platform/plugins/shared/dashboard
+  sourceRoot: src/platform/plugins/shared/dashboard
 dependsOn:
   - '@kbn/core'
   - '@kbn/inspector-plugin'
@@ -125,16 +124,6 @@ fileGroups:
     - test/scout_oas_schema/**/*
     - test/scout_oas_schema/**/*.json
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

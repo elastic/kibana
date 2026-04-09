@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/resolver-test-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/security-solution'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/resolver-test-plugin'
+  title: '@kbn/resolver-test-plugin'
   description: Moon project for @kbn/resolver-test-plugin
   channel: ''
   owner: '@elastic/security-solution'
-  metadata:
-    sourceRoot: x-pack/solutions/security/test/plugin_functional/plugins/resolver_test
+  sourceRoot: x-pack/solutions/security/test/plugin_functional/plugins/resolver_test
 dependsOn:
   - '@kbn/core'
   - '@kbn/kibana-react-plugin'

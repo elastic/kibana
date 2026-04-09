@@ -1,6 +1,7 @@
 steps:
   - command: .buildkite/scripts/steps/entity_store_performance/trigger_performance_tests.sh
     label: 'Entity Store Performance Tests'
+    key: entity_store_performance
     agents:
       provider: gcp
       image: family/kibana-ubuntu-2404
@@ -12,4 +13,3 @@ steps:
       automatic:
         - exit_status: '-1'
           limit: 1
-

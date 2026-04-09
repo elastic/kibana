@@ -7,7 +7,7 @@
 
 import { filter, some } from 'lodash';
 
-import type { IRouter } from '@kbn/core/server';
+import { type IRouter, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
@@ -107,27 +107,38 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           return response.conflict({ body: `Saved query with id "${id}" already exists.` });
         }
 
-        const updatedSavedQuerySO = await spaceScopedClient.update(
-          savedQuerySavedObjectType,
-          request.params.id,
-          {
-            id,
-            description: description || '',
-            platform,
-            query,
-            version,
-            interval,
-            timeout,
-            snapshot,
-            removed,
-            ecs_mapping: convertECSMappingToArray(ecs_mapping),
-            updated_by: currentUser,
-            updated_at: new Date().toISOString(),
-          },
-          {
-            refresh: 'wait_for',
+        let updatedSavedQuerySO;
+        try {
+          updatedSavedQuerySO = await spaceScopedClient.update(
+            savedQuerySavedObjectType,
+            request.params.id,
+            {
+              id,
+              description: description || '',
+              platform,
+              query,
+              version,
+              interval,
+              timeout,
+              snapshot,
+              removed,
+              ecs_mapping: convertECSMappingToArray(ecs_mapping),
+              updated_by: currentUser,
+              updated_at: new Date().toISOString(),
+            },
+            {
+              refresh: 'wait_for',
+            }
+          );
+        } catch (err) {
+          if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+            return response.notFound({
+              body: { message: `Saved query ${request.params.id} not found` },
+            });
           }
-        );
+
+          throw err;
+        }
 
         if (ecs_mapping || updatedSavedQuerySO.attributes.ecs_mapping) {
           // @ts-expect-error update types

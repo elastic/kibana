@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/exploratory-view-example-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-presentation-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/exploratory-view-example-plugin'
+  title: '@kbn/exploratory-view-example-plugin'
   description: Moon project for @kbn/exploratory-view-example-plugin
   channel: ''
   owner: '@elastic/obs-presentation-team'
-  metadata:
-    sourceRoot: x-pack/examples/exploratory_view_example
+  sourceRoot: x-pack/examples/exploratory_view_example
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'

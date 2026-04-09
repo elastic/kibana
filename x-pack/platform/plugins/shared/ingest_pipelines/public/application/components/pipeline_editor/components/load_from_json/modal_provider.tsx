@@ -8,11 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FunctionComponent } from 'react';
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { EuiConfirmModal, EuiSpacer, EuiText, EuiCallOut, useGeneratedHtmlId } from '@elastic/eui';
 
 import type { OnJsonEditorUpdateHandler } from '../../../../../shared_imports';
-import { JsonEditor } from '../../../../../shared_imports';
+import { JsonEditor, XJson } from '../../../../../shared_imports';
 
 import type { Processor } from '../../../../../../common/types';
 
@@ -55,25 +55,39 @@ const i18nTexts = {
   },
 };
 
+const { collapseLiteralStrings } = XJson;
+
 const defaultValue = {};
 const defaultValueRaw = JSON.stringify(defaultValue, null, 2);
+
+const isValidXJson = (content: string): boolean => {
+  if (content.trim() === '') return false;
+  try {
+    JSON.parse(collapseLiteralStrings(content));
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
 
 export const ModalProvider: FunctionComponent<Props> = ({ onDone, children }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isValidJson, setIsValidJson] = useState(true);
   const [error, setError] = useState<Error | undefined>();
-  const jsonContent = useRef<Parameters<OnJsonEditorUpdateHandler>['0']>({
-    isValid: true,
-    validate: () => true,
-    data: {
-      format: () => defaultValue,
-      raw: defaultValueRaw,
-    },
-  });
+  const [editorContent, setEditorContent] = useState(defaultValueRaw);
+
+  useEffect(() => {
+    if (!isModalVisible) return;
+
+    setEditorContent(defaultValueRaw);
+    setIsValidJson(isValidXJson(defaultValueRaw));
+    setError(undefined);
+  }, [isModalVisible]);
 
   const onJsonUpdate: OnJsonEditorUpdateHandler = useCallback((jsonUpdateData) => {
-    setIsValidJson(jsonUpdateData.validate());
-    jsonContent.current = jsonUpdateData;
+    setEditorContent(jsonUpdateData.data.raw);
+    setIsValidJson(isValidXJson(jsonUpdateData.data.raw));
+    setError(undefined);
   }, []);
 
   const modalTitleId = useGeneratedHtmlId();
@@ -92,7 +106,7 @@ export const ModalProvider: FunctionComponent<Props> = ({ onDone, children }) =>
           titleProps={{ id: modalTitleId }}
           onConfirm={async () => {
             try {
-              const json = jsonContent.current.data.format();
+              const json = JSON.parse(collapseLiteralStrings(editorContent));
               const { processors, on_failure: onFailure } = json;
               // This function will throw if it cannot parse the pipeline object
               deserialize({ processors, onFailure });
@@ -103,7 +117,7 @@ export const ModalProvider: FunctionComponent<Props> = ({ onDone, children }) =>
             }
           }}
           cancelButtonText={i18nTexts.buttons.cancel}
-          confirmButtonDisabled={!isValidJson}
+          confirmButtonDisabled={!isValidJson || Boolean(error)}
           confirmButtonText={i18nTexts.buttons.confirm}
           maxWidth={600}
         >
@@ -133,9 +147,12 @@ export const ModalProvider: FunctionComponent<Props> = ({ onDone, children }) =>
 
             <JsonEditor
               label={i18nTexts.editor.label}
+              value={editorContent}
               onUpdate={onJsonUpdate}
+              error={!isValidJson || error ? i18nTexts.error.body : null}
               codeEditorProps={{
                 height: '300px',
+                languageId: 'xjson',
               }}
             />
           </div>

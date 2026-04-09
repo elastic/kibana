@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/test-suites-xpack-chat'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/workchat-eng'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/test-suites-xpack-chat'
+  title: '@kbn/test-suites-xpack-chat'
   description: Moon project for @kbn/test-suites-xpack-chat
   channel: ''
   owner: '@elastic/workchat-eng'
-  metadata:
-    sourceRoot: x-pack/solutions/chat/test
+  sourceRoot: x-pack/solutions/chat/test
 dependsOn:
   - '@kbn/test'
   - '@kbn/test-suites-xpack-platform'

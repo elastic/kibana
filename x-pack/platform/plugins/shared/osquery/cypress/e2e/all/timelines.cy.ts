@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { recurse } from 'cypress-recurse';
 import { initializeDataViews } from '../../tasks/login';
 import { takeOsqueryActionWithParams } from '../../tasks/live_query';
 import { ServerlessRoleName } from '../../support/roles';
@@ -27,9 +28,22 @@ describe('ALL - Timelines', { tags: ['@ess'] }, () => {
     cy.getBySel('timeline-bottom-bar').within(() => {
       cy.getBySel('timeline-bottom-bar-title-button').click();
     });
-    cy.getBySel('timelineQueryInput').type(
-      'NOT host.name: "dev-fleet-server*" and component.type: "osquery" AND (_index: "logs-*" OR _index: "filebeat-*"){enter}'
+    const timelineQuery =
+      'NOT host.name: "dev-fleet-server*" and component.type: "osquery" AND (_index: "logs-*" OR _index: "filebeat-*")';
+    recurse(
+      () => {
+        cy.getBySel('timelineQueryInput').focus();
+        cy.getBySel('timelineQueryInput').clear();
+        cy.getBySel('timelineQueryInput').type(timelineQuery, {
+          parseSpecialCharSequences: false,
+        });
+
+        return cy.getBySel('timelineQueryInput').invoke('val');
+      },
+      (val) => `${val ?? ''}` === timelineQuery,
+      { limit: 5, delay: 100 }
     );
+    cy.getBySel('timelineQueryInput').type('{enter}');
 
     // Force true due to pointer-events: none on parent prevents user mouse interaction.
     cy.getBySel('docTableExpandToggleColumn').first().click({ force: true });

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/elastic-assistant-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/security-generative-ai'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/elastic-assistant-plugin'
+  title: '@kbn/elastic-assistant-plugin'
   description: Moon project for @kbn/elastic-assistant-plugin
   channel: ''
   owner: '@elastic/security-generative-ai'
-  metadata:
-    sourceRoot: x-pack/solutions/security/plugins/elastic_assistant
+  sourceRoot: x-pack/solutions/security/plugins/elastic_assistant
 dependsOn:
   - '@kbn/core'
   - '@kbn/core-http-server'
@@ -117,16 +116,6 @@ fileGroups:
     - server/**/*.json
     - public/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/gen-ai-settings-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-ai-infra'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/gen-ai-settings-plugin'
+  title: '@kbn/gen-ai-settings-plugin'
   description: Moon project for @kbn/gen-ai-settings-plugin
   channel: ''
   owner: '@elastic/appex-ai-infra'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/private/gen_ai_settings
+  sourceRoot: x-pack/platform/plugins/private/gen_ai_settings
 dependsOn:
   - '@kbn/core'
   - '@kbn/management-plugin'
@@ -55,16 +54,6 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}
