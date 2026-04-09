@@ -58,7 +58,7 @@ const LOCAL_STORAGE_PINNED_METADATA_ROWS = 'hostsView:pinnedMetadataRows';
 
 export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn }: Props) => {
   const [searchError, setSearchError] = useState<SearchErrorType | null>(null);
-  const [metadataSearch, setMetadataSearch] = useState(search);
+  const [metadataSearch, setMetadataSearch] = useState(search ?? '');
   const [fieldsWithPins, setFieldsWithPins] = useState(rows);
 
   const [pinnedItems, setPinnedItems] = useLocalStorage<Array<Field['name']>>(
@@ -145,7 +145,6 @@ export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn
     box: {
       'data-test-subj': 'infraAssetDetailsMetadataSearchBarInput',
       incremental: true,
-      schema: true,
       placeholder: SEARCH_PLACEHOLDER,
     },
     query: metadataSearch,
