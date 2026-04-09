@@ -96,6 +96,15 @@ describe('EventsChartPanel', () => {
       expect(getApmTracesEsqlLinkMock).not.toHaveBeenCalled();
       expect(screen.getByTestId('sloDetailDiscoverLink')).toHaveAttribute('href', 'discover-link');
     });
+
+    it('hides the link when the href cannot be resolved', () => {
+      getApmTracesEsqlLinkMock.mockReturnValue(undefined);
+      const slo = buildSlo({ indicator: buildApmLatencyIndicator() });
+
+      render(<EventsChartPanel slo={slo} range={RANGE} />);
+
+      expect(screen.queryByTestId('sloDetailDiscoverLink')).not.toBeInTheDocument();
+    });
   });
 
   describe('time range passed to link builders', () => {
