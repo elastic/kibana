@@ -37,6 +37,11 @@ export const GCP_CREDENTIALS_CLOUD_CONNECTOR_ID = 'gcp_credentials_cloud_connect
 // Cloud connector support flag
 export const SUPPORTS_CLOUD_CONNECTORS_VAR_NAME = 'supports_cloud_connectors';
 
+// Packages that should be hidden from the Identity Federation Flyout usage list.
+// These are internal integrations (e.g. the permission verifier) that attach a
+// cloud_connector_id but should not be surfaced to users.
+export const CLOUD_CONNECTOR_HIDDEN_PACKAGES: readonly string[] = ['verifier_otel'];
+
 // OTel Verifier package constants
 export const VERIFIER_PKG_NAME = 'verifier_otel';
 export const VERIFIER_POLICY_TEMPLATE = 'verifierreceiver';

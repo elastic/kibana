@@ -7,7 +7,10 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import {
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  CLOUD_CONNECTOR_HIDDEN_PACKAGES,
+} from '../../../common/constants';
 import { cloudConnectorService, packagePolicyService } from '../../services';
 import type { FleetRequestHandler } from '../../types';
 import { appContextService } from '../../services/app_context';
@@ -239,7 +242,16 @@ export const getCloudConnectorUsageHandler: FleetRequestHandler<
 
     logger.debug(`Found ${result?.total || 0} total package policies using cloud connector`);
 
-    const usageItems: CloudConnectorUsageItem[] = (result?.items || []).map((policy) => ({
+    // Filter out internal/hidden packages (e.g. verifier_otel) that should
+    // not appear in the Identity Federation Flyout usage list.
+    const visiblePolicies = (result?.items || []).filter(
+      (policy) =>
+        !policy.package?.name || !CLOUD_CONNECTOR_HIDDEN_PACKAGES.includes(policy.package.name)
+    );
+
+    const hiddenCount = (result?.items || []).length - visiblePolicies.length;
+
+    const usageItems: CloudConnectorUsageItem[] = visiblePolicies.map((policy) => ({
       id: policy.id,
       name: policy.name,
       package: policy.package
@@ -254,14 +266,14 @@ export const getCloudConnectorUsageHandler: FleetRequestHandler<
       updated_at: policy.updated_at,
     }));
 
+    const adjustedTotal = (result?.total || 0) - hiddenCount;
+
     logger.info(
-      `Successfully retrieved usage for cloud connector ${cloudConnectorId}: ${
-        usageItems.length
-      } of ${result?.total || 0} policies`
+      `Successfully retrieved usage for cloud connector ${cloudConnectorId}: ${usageItems.length} of ${adjustedTotal} policies (${hiddenCount} hidden)`
     );
     const body: GetCloudConnectorUsageResponse = {
       items: usageItems,
-      total: result?.total || 0,
+      total: adjustedTotal,
       page,
       perPage,
     };

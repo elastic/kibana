@@ -1732,6 +1732,107 @@ describe('Cloud Connector API', () => {
       });
     });
 
+    it('should exclude hidden packages (verifier_otel) from usage results and totals', async () => {
+      const mockCloudConnector: CloudConnector = {
+        id: 'connector-123',
+        name: 'test-connector',
+        cloudProvider: 'aws' as CloudProvider,
+        vars: {
+          role_arn: { value: 'arn:aws:iam::123456789012:role/TestRole', type: 'text' },
+          external_id: { value: { id: 'secret-id', isSecretRef: true }, type: 'password' },
+        },
+        packagePolicyCount: 3,
+        created_at: '2023-01-01T00:00:00.000Z',
+        updated_at: '2023-01-01T00:00:00.000Z',
+      };
+
+      mockCloudConnectorService.getById.mockResolvedValue(mockCloudConnector);
+      mockPackagePolicyService.list.mockResolvedValue({
+        items: [
+          {
+            id: 'policy-1',
+            name: 'CSPM Policy',
+            package: {
+              name: 'cloud_security_posture',
+              title: 'Cloud Security Posture',
+              version: '1.0.0',
+            },
+            policy_ids: ['agent-policy-1'],
+            created_at: '2023-01-01T00:00:00.000Z',
+            updated_at: '2023-01-02T00:00:00.000Z',
+          },
+          {
+            id: 'policy-2',
+            name: 'Verifier Policy',
+            package: {
+              name: 'verifier_otel',
+              title: 'Permission Verifier',
+              version: '1.0.0',
+            },
+            policy_ids: ['agent-policy-2'],
+            created_at: '2023-01-01T00:00:00.000Z',
+            updated_at: '2023-01-02T00:00:00.000Z',
+          },
+          {
+            id: 'policy-3',
+            name: 'Asset Inventory Policy',
+            package: {
+              name: 'cloud_asset_inventory',
+              title: 'Cloud Asset Inventory',
+              version: '2.0.0',
+            },
+            policy_ids: ['agent-policy-3'],
+            created_at: '2023-01-01T00:00:00.000Z',
+            updated_at: '2023-01-02T00:00:00.000Z',
+          },
+        ],
+        total: 3,
+        page: 1,
+        perPage: 10,
+      } as any);
+
+      const request = httpServerMock.createKibanaRequest({
+        params: { cloudConnectorId: 'connector-123' },
+        query: {},
+      });
+
+      await getCloudConnectorUsageHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          items: [
+            {
+              id: 'policy-1',
+              name: 'CSPM Policy',
+              package: {
+                name: 'cloud_security_posture',
+                title: 'Cloud Security Posture',
+                version: '1.0.0',
+              },
+              policy_ids: ['agent-policy-1'],
+              created_at: '2023-01-01T00:00:00.000Z',
+              updated_at: '2023-01-02T00:00:00.000Z',
+            },
+            {
+              id: 'policy-3',
+              name: 'Asset Inventory Policy',
+              package: {
+                name: 'cloud_asset_inventory',
+                title: 'Cloud Asset Inventory',
+                version: '2.0.0',
+              },
+              policy_ids: ['agent-policy-3'],
+              created_at: '2023-01-01T00:00:00.000Z',
+              updated_at: '2023-01-02T00:00:00.000Z',
+            },
+          ],
+          total: 2,
+          page: 1,
+          perPage: 10,
+        },
+      });
+    });
+
     it('should handle policies without package information', async () => {
       const mockCloudConnector: CloudConnector = {
         id: 'connector-123',

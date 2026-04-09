@@ -115,7 +115,7 @@ describe('verify_permissions_task', () => {
         expect.objectContaining({
           'fleet:verify_permissions': expect.objectContaining({
             title: 'OTel Verify Permission Task',
-            timeout: '5m',
+            timeout: '1d',
           }),
         })
       );
@@ -129,7 +129,7 @@ describe('verify_permissions_task', () => {
       expect(taskManager.ensureScheduled).toHaveBeenCalledWith({
         id: 'fleet:verify_permissions:1.0.0',
         taskType: 'fleet:verify_permissions',
-        schedule: { interval: '5m' },
+        schedule: { interval: '12h' },
         state: {},
         params: {},
       });
@@ -205,14 +205,18 @@ describe('verify_permissions_task', () => {
     });
 
     it('should proceed past gate check when verifier policy has expired', async () => {
-      const sixMinutesAgo = minutesAgo(6);
+      const thirteenHoursAgo = hoursAgo(13);
 
       mockedAgentPolicyService.list
         .mockResolvedValueOnce({
-          items: [{ id: 'expired-verifier', created_at: sixMinutesAgo, updated_at: sixMinutesAgo }],
+          items: [
+            { id: 'expired-verifier', created_at: thirteenHoursAgo, updated_at: thirteenHoursAgo },
+          ],
         } as any)
         .mockResolvedValueOnce({
-          items: [{ id: 'expired-verifier', created_at: sixMinutesAgo, updated_at: sixMinutesAgo }],
+          items: [
+            { id: 'expired-verifier', created_at: thirteenHoursAgo, updated_at: thirteenHoursAgo },
+          ],
         } as any);
 
       mockedAgentPolicyService.deleteVerifierPolicy.mockResolvedValue();
@@ -478,11 +482,13 @@ describe('verify_permissions_task', () => {
     });
 
     it('should cleanup expired verifier policies', async () => {
-      const sixMinutesAgo = minutesAgo(6);
+      const thirteenHoursAgo = hoursAgo(13);
 
       mockedAgentPolicyService.list
         .mockResolvedValueOnce({
-          items: [{ id: 'expired-verifier', created_at: sixMinutesAgo, updated_at: sixMinutesAgo }],
+          items: [
+            { id: 'expired-verifier', created_at: thirteenHoursAgo, updated_at: thirteenHoursAgo },
+          ],
         } as any)
         .mockResolvedValueOnce({ items: [] } as any);
 
@@ -500,14 +506,14 @@ describe('verify_permissions_task', () => {
     });
 
     it('should not cleanup verifier policies within TTL', async () => {
-      const twoMinutesAgo = minutesAgo(2);
+      const twoHoursAgo = hoursAgo(2);
 
       mockedAgentPolicyService.list
         .mockResolvedValueOnce({
-          items: [{ id: 'fresh-verifier', created_at: twoMinutesAgo, updated_at: twoMinutesAgo }],
+          items: [{ id: 'fresh-verifier', created_at: twoHoursAgo, updated_at: twoHoursAgo }],
         } as any)
         .mockResolvedValueOnce({
-          items: [{ id: 'fresh-verifier', created_at: twoMinutesAgo, updated_at: twoMinutesAgo }],
+          items: [{ id: 'fresh-verifier', created_at: twoHoursAgo, updated_at: twoHoursAgo }],
         } as any);
 
       await taskRunner.run();
@@ -516,11 +522,13 @@ describe('verify_permissions_task', () => {
     });
 
     it('should continue to Phase 2 even when cleanup deletion fails', async () => {
-      const sixMinutesAgo = minutesAgo(6);
+      const thirteenHoursAgo = hoursAgo(13);
 
       mockedAgentPolicyService.list
         .mockResolvedValueOnce({
-          items: [{ id: 'bad-verifier', created_at: sixMinutesAgo, updated_at: sixMinutesAgo }],
+          items: [
+            { id: 'bad-verifier', created_at: thirteenHoursAgo, updated_at: thirteenHoursAgo },
+          ],
         } as any)
         .mockResolvedValueOnce({ items: [] } as any);
 
@@ -586,7 +594,7 @@ describe('verify_permissions_task', () => {
     });
 
     it('should skip all verifications when a non-expired verifier deployment is in flight', async () => {
-      const twoMinutesAgo = minutesAgo(2);
+      const twoHoursAgo = hoursAgo(2);
 
       mockedAgentPolicyService.list
         .mockResolvedValueOnce({ items: [] } as any)
@@ -594,8 +602,8 @@ describe('verify_permissions_task', () => {
           items: [
             {
               id: 'in-flight-verifier',
-              created_at: twoMinutesAgo,
-              updated_at: twoMinutesAgo,
+              created_at: twoHoursAgo,
+              updated_at: twoHoursAgo,
             },
           ],
         } as any);
@@ -613,7 +621,7 @@ describe('verify_permissions_task', () => {
         .mockResolvedValueOnce({ items: [] } as any)
         .mockResolvedValueOnce({ items: [] } as any);
 
-      const twoMinutesAgo = minutesAgo(2);
+      const twoHoursAgo = hoursAgo(2);
 
       mockSoClient.find
         .mockResolvedValueOnce({
@@ -625,8 +633,8 @@ describe('verify_permissions_task', () => {
               created_at: '2025-01-01T00:00:00Z',
               updated_at: '2025-01-01T00:00:00Z',
               verification_status: 'failed',
-              verification_started_at: twoMinutesAgo,
-              verification_failed_at: twoMinutesAgo,
+              verification_started_at: twoHoursAgo,
+              verification_failed_at: twoHoursAgo,
             }),
           ],
         });
@@ -646,7 +654,7 @@ describe('verify_permissions_task', () => {
         policyId: 'verifier-policy-retry',
       });
 
-      const sixMinutesAgo = minutesAgo(6);
+      const thirteenHoursAgo = hoursAgo(13);
 
       mockSoClient.find
         .mockResolvedValueOnce({
@@ -658,8 +666,8 @@ describe('verify_permissions_task', () => {
               created_at: '2025-01-01T00:00:00Z',
               updated_at: '2025-01-01T00:00:00Z',
               verification_status: 'failed',
-              verification_started_at: sixMinutesAgo,
-              verification_failed_at: sixMinutesAgo,
+              verification_started_at: thirteenHoursAgo,
+              verification_failed_at: thirteenHoursAgo,
             }),
           ],
         });
@@ -735,8 +743,8 @@ describe('verify_permissions_task', () => {
 
       it('should verify recently created connector', async () => {
         setupEligibilityTest({
-          created_at: minutesAgo(2),
-          verification_started_at: minutesAgo(10),
+          created_at: hoursAgo(2),
+          verification_started_at: hoursAgo(13),
           verification_status: 'success',
         });
 
@@ -747,9 +755,9 @@ describe('verify_permissions_task', () => {
 
       it('should verify recently updated connector', async () => {
         setupEligibilityTest({
-          created_at: hoursAgo(1),
-          updated_at: minutesAgo(2),
-          verification_started_at: minutesAgo(10),
+          created_at: hoursAgo(24),
+          updated_at: hoursAgo(2),
+          verification_started_at: hoursAgo(13),
           verification_status: 'success',
         });
 
@@ -760,9 +768,9 @@ describe('verify_permissions_task', () => {
 
       it('should re-verify connector whose verification_started_at expired and status is not failed', async () => {
         setupEligibilityTest({
-          created_at: hoursAgo(1),
-          updated_at: hoursAgo(1),
-          verification_started_at: minutesAgo(6),
+          created_at: hoursAgo(24),
+          updated_at: hoursAgo(24),
+          verification_started_at: hoursAgo(13),
           verification_status: 'pending',
         });
 
@@ -773,9 +781,9 @@ describe('verify_permissions_task', () => {
 
       it('should not re-verify connector whose verification_started_at is recent and status is success', async () => {
         setupEligibilityTest({
-          created_at: hoursAgo(1),
-          updated_at: hoursAgo(1),
-          verification_started_at: minutesAgo(2),
+          created_at: hoursAgo(24),
+          updated_at: hoursAgo(24),
+          verification_started_at: hoursAgo(2),
           verification_status: 'success',
         });
 
@@ -786,9 +794,9 @@ describe('verify_permissions_task', () => {
 
       it('should verify connector with no verification_status set (backwards compat)', async () => {
         setupEligibilityTest({
-          created_at: hoursAgo(1),
-          updated_at: hoursAgo(1),
-          verification_started_at: minutesAgo(10),
+          created_at: hoursAgo(24),
+          updated_at: hoursAgo(24),
+          verification_started_at: hoursAgo(13),
         });
 
         await taskRunner.run();
