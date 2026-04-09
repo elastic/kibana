@@ -2787,10 +2787,10 @@ x-pack/solutions/security/test/serverless/functional/configs/config.context_awar
 /x-pack/solutions/security/plugins/security_solution/public/flyout/attack_details @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/flyout/shared @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/flyout/rule_details @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/investigation_guide @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/shared @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/flyout_v2 @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/notes @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/onboarding @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/one_discover @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/overview @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/resolver @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/sourcerer @elastic/security-threat-hunting-investigations
