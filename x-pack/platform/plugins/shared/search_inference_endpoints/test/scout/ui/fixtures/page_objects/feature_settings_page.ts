@@ -110,4 +110,22 @@ export class FeatureSettingsPage {
   public get resetDefaultsCancelButton(): Locator {
     return this.resetDefaultsModal.locator('[data-test-subj="confirmModalCancelButton"]');
   }
+
+  // --- Add Model Popover Options ---
+
+  public get addModelOptions(): Locator {
+    return this.page.locator('li[role="option"]');
+  }
+
+  // --- Route Mocking ---
+
+  public async mockInferenceEndpoints(endpoints: unknown[]) {
+    await this.page.route('**/internal/inference_endpoints/endpoints', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ inference_endpoints: endpoints }),
+      });
+    });
+  }
 }

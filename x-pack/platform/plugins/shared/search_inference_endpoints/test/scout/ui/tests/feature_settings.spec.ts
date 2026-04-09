@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
+import { mockInferenceEndpoints } from '../fixtures/mock_data/inference_endpoints';
 
 test.describe(
   'Feature Settings',
@@ -111,6 +112,59 @@ test.describe(
       await test.step('cancel closes the modal', async () => {
         await featureSettings.copyToModalCancel.click();
         await expect(featureSettings.copyToModalApply).toBeHidden();
+      });
+    });
+
+    test('add model popover search filters results', async ({ page, pageObjects }) => {
+      const { featureSettings } = pageObjects;
+
+      await test.step('mock inference endpoints with chat_completion models', async () => {
+        await featureSettings.mockInferenceEndpoints(mockInferenceEndpoints);
+        await page.reload();
+        await featureSettings.goto();
+      });
+
+      await test.step('open popover and verify models are listed', async () => {
+        await featureSettings.firstAddModelButton.click();
+        await expect(featureSettings.addModelSearch).toBeVisible();
+        await expect(featureSettings.addModelOptions).not.toHaveCount(0);
+      });
+
+      await test.step('search filters the model list', async () => {
+        await featureSettings.addModelSearch.fill('anthropic');
+        await expect(featureSettings.addModelOptions).toHaveCount(1);
+        await expect(featureSettings.addModelOptions).toContainText('anthropic');
+      });
+    });
+
+    test('selecting a model adds it to the assigned models list', async ({ page, pageObjects }) => {
+      const { featureSettings } = pageObjects;
+
+      await test.step('mock inference endpoints', async () => {
+        await featureSettings.mockInferenceEndpoints(mockInferenceEndpoints);
+        await page.reload();
+        await featureSettings.goto();
+      });
+
+      await test.step('count existing endpoint rows', async () => {
+        await expect(featureSettings.allEndpointRows).not.toHaveCount(0);
+      });
+
+      const initialCount = await featureSettings.allEndpointRows.count();
+
+      await test.step('select a model from the popover', async () => {
+        await featureSettings.firstAddModelButton.click();
+        await expect(featureSettings.addModelSearch).toBeVisible();
+        // eslint-disable-next-line playwright/no-nth-methods -- selecting the first available model from the popover list
+        await featureSettings.addModelOptions.first().click();
+      });
+
+      await test.step('endpoint row count increases', async () => {
+        await expect(featureSettings.allEndpointRows).toHaveCount(initialCount + 1);
+      });
+
+      await test.step('save button becomes enabled', async () => {
+        await expect(featureSettings.saveButton).toBeEnabled();
       });
     });
   }
