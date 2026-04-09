@@ -37,8 +37,9 @@ export function transformPinnedPanelsIn(pinnedPanels?: PinnedPanelsState): {
       let transformedControlState = { ...controlState } as Partial<
         Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'][number]
       >;
-      try {
-        if (transforms?.transformIn) {
+
+      if (transforms?.transformIn) {
+        try {
           const transformed = transforms.transformIn(controlState.config);
           // prefix all the reference names with their IDs so that they are unique
           references = [
@@ -56,16 +57,16 @@ export function transformPinnedPanelsIn(pinnedPanels?: PinnedPanelsState): {
               },
             };
           }
-        } else {
-          transformedControlState = {
-            ...transformedControlState,
-            config: controlState.config,
-          };
+        } catch (e) {
+          panelErrors.push(
+            new TransformPanelInError(e.message, controlState.type, controlState.config)
+          );
         }
-      } catch (e) {
-        panelErrors.push(
-          new TransformPanelInError(e.message, controlState.type, controlState.config)
-        );
+      } else {
+        transformedControlState = {
+          ...transformedControlState,
+          config: controlState.config,
+        };
       }
 
       const { width, grow, config } = transformedControlState;
