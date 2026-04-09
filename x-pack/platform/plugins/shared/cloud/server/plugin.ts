@@ -122,6 +122,11 @@ export interface CloudSetup {
     defaultSolution?: SolutionId;
   };
   /**
+   * `true` when running on ECE (Elastic Cloud Enterprise).
+   * `false` or `undefined` on ESS or self-managed.
+   */
+  isEce?: boolean;
+  /**
    * `true` when running on Serverless Elastic Cloud
    * Note that `isCloudEnabled` will always be true when `isServerlessEnabled` is.
    */
@@ -376,6 +381,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       cloudHost: decodedId?.host,
       cloudDefaultPort: decodedId?.defaultPort,
       isCloudEnabled,
+      isEce: this.config.is_ece,
       trialEndDate: this.trialEndDate,
       isElasticStaffOwned: this.config.is_elastic_staff_owned,
       apm: {

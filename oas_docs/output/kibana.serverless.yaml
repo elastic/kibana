@@ -64610,6 +64610,51 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/workflows/workflow/{workflowId}/executions/cancel:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/workflow/{workflowId}/executions/cancel</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Request cancellation for all non-terminal executions of the given workflow in the current space.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:cancelExecution.
+      operationId: post-workflows-workflow-workflowid-executions-cancel
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: Workflow ID
+          in: path
+          name: workflowId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Indicates a successful response
+      summary: Cancel all active workflow executions
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/workflows/workflow/{workflowId}/executions/cancel" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - lang: Console
+          source: |
+            POST kbn://api/workflows/workflow/{workflowId}/executions/cancel
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/workflows/workflow/{workflowId}/executions/steps:
     get:
       description: |-
