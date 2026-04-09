@@ -323,10 +323,8 @@ export interface ChartSectionProps {
    */
   isComponentVisible: boolean;
   /**
-   * Callback invoked when a Lens embeddable finishes loading, providing its inspector adapters
+   * Optional request adapter for recording metrics-specific requests (e.g. METRICS_INFO)
+   * in the Inspector. When provided, the metrics experience will log its requests on this adapter.
    */
-  onLensLoad?: (
-    isLoading: boolean,
-    adapters: Partial<DefaultInspectorAdapters> | undefined
-  ) => void;
+  metricsRequestAdapter?: RequestAdapter;
 }

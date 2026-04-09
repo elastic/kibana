@@ -27,12 +27,12 @@ export const MetricsExperienceGrid = ({
   histogramCss,
   onBrushEnd,
   onFilter,
-  onLensLoad,
   actions,
   services,
   fetch$: discoverFetch$,
   fetchParams,
   isComponentVisible,
+  metricsRequestAdapter,
   breakdownField,
   onBreakdownFieldChange,
 }: UnifiedMetricsGridProps) => {
@@ -54,6 +54,7 @@ export const MetricsExperienceGrid = ({
     services,
     isComponentVisible,
     selectedDimensionNames: selectedDimensions,
+    metricsRequestAdapter,
   });
 
   const { filteredMetricItems } = useMetricFieldsFilter({
@@ -151,7 +152,6 @@ export const MetricsExperienceGrid = ({
         fetchParams={fetchParams}
         onBrushEnd={onBrushEnd}
         onFilter={onFilter}
-        onLensLoad={onLensLoad}
         actions={actions}
         histogramCss={histogramCss}
         isDiscoverLoading={isDiscoverLoading}

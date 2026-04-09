@@ -122,7 +122,6 @@ export function LensWrapper({
           withDefaultActions
           onBrushEnd={onBrushEnd}
           onFilter={onFilter}
-          onLoad={lensProps.onLoad}
           syncTooltips={syncTooltips}
           syncCursor={syncCursor}
         />

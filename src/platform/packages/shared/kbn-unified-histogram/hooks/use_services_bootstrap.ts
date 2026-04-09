@@ -143,14 +143,7 @@ export const useServicesBootstrap = (
         lensVisServiceState: updatedLensVisServiceState,
       });
     },
-    ...pick(
-      stateService,
-      'state$',
-      'setChartHidden',
-      'setTopPanelHeight',
-      'setTotalHits',
-      'setLensRequestAdapter'
-    ),
+    ...pick(stateService, 'state$', 'setChartHidden', 'setTopPanelHeight', 'setTotalHits'),
   }));
 
   const stateProps = useStateProps({

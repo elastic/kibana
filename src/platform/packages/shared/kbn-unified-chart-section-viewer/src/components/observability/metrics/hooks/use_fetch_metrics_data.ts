@@ -9,6 +9,7 @@
 
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useEffect, useMemo } from 'react';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { buildMetricsInfoQuery, hasTransformationalCommand } from '@kbn/esql-utils';
 import { getFieldIconType } from '@kbn/field-utils';
@@ -29,11 +30,13 @@ export function useFetchMetricsData({
   services,
   isComponentVisible,
   selectedDimensionNames,
+  metricsRequestAdapter,
 }: {
   fetchParams: ChartSectionProps['fetchParams'];
   services: ChartSectionProps['services'];
   isComponentVisible: boolean;
   selectedDimensionNames?: Dimension[];
+  metricsRequestAdapter?: RequestAdapter;
 }): MetricsInfo {
   const { trackMetricsInfo } = useTelemetry();
   const esql = getEsqlQuery(fetchParams.query);
@@ -52,39 +55,53 @@ export function useFetchMetricsData({
 
   const [{ value, error, loading }, executeFetch] = useAsyncFn(
     async (signal: AbortSignal): Promise<ParsedMetrics | null> => {
-      const result = await executeEsqlQuery<MetricsESQLResponse>({
-        esqlQuery: metricsInfoQuery,
-        search: services.data.search.search,
-        signal,
-        dataView: fetchParams.dataView,
-        timeRange: fetchParams.timeRange,
-        filters: fetchParams.filters ?? [],
-        variables: fetchParams.esqlVariables,
-        uiSettings: services.uiSettings,
+      metricsRequestAdapter?.reset();
+      const requestResponder = metricsRequestAdapter?.start('Grid of metrics', {
+        description: 'This request queries Elasticsearch to fetch metrics info for the grid.',
       });
+      try {
+        const { documents, rawResponse, requestParams } =
+          await executeEsqlQuery<MetricsESQLResponse>({
+            esqlQuery: metricsInfoQuery,
+            search: services.data.search.search,
+            signal,
+            dataView: fetchParams.dataView,
+            timeRange: fetchParams.timeRange,
+            filters: fetchParams.filters ?? [],
+            variables: fetchParams.esqlVariables,
+            uiSettings: services.uiSettings,
+          });
 
-      const getFieldType = (name: string) => {
-        const field = fetchParams.dataView?.getFieldByName(name);
-        return field ? getFieldIconType(field) : undefined;
-      };
+        requestResponder?.json(requestParams);
+        requestResponder?.ok({ json: rawResponse });
 
-      const parsed = parseMetricsWithTelemetry(result, getFieldType);
+        const getFieldType = (name: string) => {
+          const field = fetchParams.dataView?.getFieldByName(name);
+          return field ? getFieldIconType(field) : undefined;
+        };
 
-      const sortedMetrics: ParsedMetrics = {
-        metricItems: [...parsed.metricItems].sort((a, b) =>
-          a.metricName.localeCompare(b.metricName)
-        ),
-        allDimensions: [...parsed.allDimensions].sort((a, b) => a.name.localeCompare(b.name)),
-      };
+        const parsed = parseMetricsWithTelemetry(documents, getFieldType);
 
-      if (!signal.aborted) {
-        trackMetricsInfo(parsed.telemetry);
+        const sortedMetrics: ParsedMetrics = {
+          metricItems: [...parsed.metricItems].sort((a, b) =>
+            a.metricName.localeCompare(b.metricName)
+          ),
+          allDimensions: [...parsed.allDimensions].sort((a, b) => a.name.localeCompare(b.name)),
+        };
+
+        if (!signal.aborted) {
+          trackMetricsInfo(parsed.telemetry);
+        }
+
+        return sortedMetrics;
+      } catch (e) {
+        requestResponder?.error({ json: e });
+        throw e;
       }
-
-      return sortedMetrics;
     },
     [
       metricsInfoQuery,
+      metricsRequestAdapter,
       fetchParams.dataView,
       fetchParams.timeRange,
       fetchParams.filters,
