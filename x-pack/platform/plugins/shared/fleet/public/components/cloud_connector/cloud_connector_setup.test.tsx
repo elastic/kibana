@@ -249,7 +249,7 @@ describe('CloudConnectorSetup', () => {
 
       // Simulate clicking existing connection tab
       act(() => {
-        onTabClick({ id: 'existing-connection', name: 'Existing Connection', content: null });
+        onTabClick({ id: 'existing-connection', name: 'Existing Identity', content: null });
       });
 
       // Verify component re-renders with new selectedTabId
@@ -281,7 +281,7 @@ describe('CloudConnectorSetup', () => {
       const onTabClick = mockCloudConnectorTabs.mock.calls[0][0].onTabClick;
 
       act(() => {
-        onTabClick({ id: 'new-connection', name: 'New Connection', content: null });
+        onTabClick({ id: 'new-connection', name: 'New Identity', content: null });
       });
 
       expect(mockUpdatePolicyWithNewCredentials).toHaveBeenCalledWith(mockCredentials);
@@ -308,7 +308,7 @@ describe('CloudConnectorSetup', () => {
       const onTabClick = mockCloudConnectorTabs.mock.calls[0][0].onTabClick;
 
       act(() => {
-        onTabClick({ id: 'existing-connection', name: 'Existing Connection', content: null });
+        onTabClick({ id: 'existing-connection', name: 'Existing Identity', content: null });
       });
 
       expect(mockUpdatePolicyWithExistingCredentials).toHaveBeenCalledWith(mockCredentials);
@@ -323,7 +323,7 @@ describe('CloudConnectorSetup', () => {
 
       // Switch to existing connection tab
       act(() => {
-        onTabClick({ id: 'existing-connection', name: 'Existing Connection', content: null });
+        onTabClick({ id: 'existing-connection', name: 'Existing Identity', content: null });
       });
 
       // Should be called even with empty credentials to reset validation
@@ -331,7 +331,7 @@ describe('CloudConnectorSetup', () => {
 
       // Switch back to new connection tab
       act(() => {
-        onTabClick({ id: 'new-connection', name: 'New Connection', content: null });
+        onTabClick({ id: 'new-connection', name: 'New Identity', content: null });
       });
 
       // Should be called to ensure validation state is correct for the active tab

@@ -7,12 +7,50 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TermsIndexPatternColumn } from '@kbn/lens-common';
-import type { LensApiTermsOperation } from '../../schema/bucket_ops';
+import type {
+  FieldBasedIndexPatternColumn,
+  PercentileIndexPatternColumn,
+  PercentileRanksIndexPatternColumn,
+  TermsIndexPatternColumn,
+} from '@kbn/lens-common';
+import type {
+  LensApiTermsOperation,
+  TermOperationRankByCustomBaseType,
+  TermOperationRankByCustomPercentileRankType,
+  TermOperationRankByCustomPercentileType,
+} from '../../schema/bucket_ops';
 import { fromFormatAPIToLensState } from './format';
-import { isColumnOfReferableType } from './utils';
 import { getLensAPIBucketSharedProps, getLensStateBucketSharedProps } from './utils';
 import type { AnyLensStateColumn } from './types';
+
+function isPercentileOrderAgg(
+  orderAgg: FieldBasedIndexPatternColumn
+): orderAgg is PercentileIndexPatternColumn {
+  return orderAgg.operationType === 'percentile';
+}
+
+function isPercentileRanksOrderAgg(
+  orderAgg: FieldBasedIndexPatternColumn
+): orderAgg is PercentileRanksIndexPatternColumn {
+  return orderAgg.operationType === 'percentile_rank';
+}
+
+function isBaseCustomOperation(
+  operation: string
+): operation is TermOperationRankByCustomBaseType['operation'] {
+  const ops: string[] = [
+    'min',
+    'max',
+    'average',
+    'median',
+    'standard_deviation',
+    'unique_count',
+    'count',
+    'sum',
+    'last_value',
+  ];
+  return ops.includes(operation);
+}
 
 function getOrderByValue(
   rankBy: LensApiTermsOperation['rank_by'],
@@ -31,7 +69,7 @@ function getOrderByValue(
     return { type: 'custom' };
   }
 
-  const refId = getMetricColumnIdByIndex(rankBy?.type === 'column' ? rankBy.metric ?? 0 : 0);
+  const refId = getMetricColumnIdByIndex(rankBy?.type === 'metric' ? rankBy.metric_index ?? 0 : 0);
   if (!refId) {
     return { type: 'alphabetical', fallback: true };
   }
@@ -45,7 +83,7 @@ function getOrderDirection(
   if (rankBy && 'direction' in rankBy && rankBy.direction) {
     return rankBy.direction;
   }
-  const refId = getMetricColumnIdByIndex(rankBy?.type === 'column' ? rankBy.metric ?? 0 : 0);
+  const refId = getMetricColumnIdByIndex(rankBy?.type === 'metric' ? rankBy.metric_index ?? 0 : 0);
   return refId ? 'desc' : 'asc';
 }
 
@@ -84,21 +122,86 @@ export function fromTermsLensApiToLensState(
         : {}),
       orderBy: orderByConfig,
       orderDirection,
-      ...(rank_by?.type === 'custom'
-        ? {
-            orderAgg: {
-              operationType: rank_by.operation,
-              sourceField: rank_by.field ?? '',
-              dataType: 'number',
-              isBucketed: false,
-              label: '',
-            },
-          }
-        : {}),
+      ...(rank_by?.type === 'custom' ? { orderAgg: getCustomOrderAgg(rank_by) } : {}),
       ...(format ? { format } : {}),
       parentFormat: { id: 'terms' },
     },
   };
+}
+
+function getCustomOrderAgg(
+  rankBy:
+    | TermOperationRankByCustomBaseType
+    | TermOperationRankByCustomPercentileType
+    | TermOperationRankByCustomPercentileRankType
+): TermsIndexPatternColumn['params']['orderAgg'] {
+  if (rankBy.operation === 'percentile') {
+    const orderAgg: PercentileIndexPatternColumn = {
+      operationType: rankBy.operation,
+      sourceField: rankBy.field,
+      dataType: 'number',
+      isBucketed: false,
+      label: '',
+      params: { percentile: rankBy.percentile },
+    };
+    return orderAgg;
+  }
+  if (rankBy.operation === 'percentile_rank') {
+    const orderAgg: PercentileRanksIndexPatternColumn = {
+      operationType: rankBy.operation,
+      sourceField: rankBy.field,
+      dataType: 'number',
+      isBucketed: false,
+      label: '',
+      params: { value: rankBy.rank },
+    };
+    return orderAgg;
+  }
+  return {
+    operationType: rankBy.operation,
+    sourceField: rankBy.field,
+    dataType: 'number',
+    isBucketed: false,
+    label: '',
+  };
+}
+
+function getCustomRankByFromOrderAgg(
+  orderAgg: NonNullable<TermsIndexPatternColumn['params']['orderAgg']>,
+  orderDirection: TermsIndexPatternColumn['params']['orderDirection']
+): LensApiTermsOperation['rank_by'] {
+  const { sourceField } = orderAgg;
+
+  if (isPercentileOrderAgg(orderAgg)) {
+    const rankBy: TermOperationRankByCustomPercentileType = {
+      type: 'custom',
+      operation: 'percentile',
+      field: sourceField,
+      direction: orderDirection,
+      percentile: orderAgg.params.percentile,
+    };
+    return rankBy;
+  }
+  if (isPercentileRanksOrderAgg(orderAgg)) {
+    const rankBy: TermOperationRankByCustomPercentileRankType = {
+      type: 'custom',
+      operation: 'percentile_rank',
+      field: sourceField,
+      direction: orderDirection,
+      rank: orderAgg.params.value,
+    };
+    return rankBy;
+  }
+  if (isBaseCustomOperation(orderAgg.operationType)) {
+    const rankBy: TermOperationRankByCustomBaseType = {
+      type: 'custom',
+      operation: orderAgg.operationType,
+      field: sourceField,
+      direction: orderDirection,
+    };
+    return rankBy;
+  }
+  return undefined;
 }
 
 function getRankByConfig(
@@ -114,18 +217,8 @@ function getRankByConfig(
   if (params.orderBy.type === 'significant') {
     return { type: 'significant' };
   }
-  if (
-    params.orderBy.type === 'custom' &&
-    params.orderAgg &&
-    // @ts-expect-error
-    isColumnOfReferableType(params.orderAgg)
-  ) {
-    return {
-      type: 'custom',
-      operation: params.orderAgg.operationType,
-      field: params.orderAgg.sourceField,
-      direction: params.orderDirection,
-    };
+  if (params.orderBy.type === 'custom' && params.orderAgg) {
+    return getCustomRankByFromOrderAgg(params.orderAgg, params.orderDirection);
   }
   if (params.orderBy.type === 'column') {
     const index = columns
@@ -135,8 +228,8 @@ function getRankByConfig(
       );
     if (index > -1) {
       return {
-        type: 'column',
-        metric: index,
+        type: 'metric',
+        metric_index: index,
         direction: params.orderDirection,
       };
     }

@@ -64,7 +64,9 @@
     "@kbn/usage-collection-plugin",
     "@kbn/ai-assistant-management-plugin",
     "@kbn/agent-builder-plugin",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/search-inference-endpoints",
+    "@kbn/shared-ux-ai-components",
   ],
   "exclude": ["target/**/*"]
 }
