@@ -37,7 +37,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       expect(connectorsExcludingPreconfiguredInference.length).to.be(0);
     });
 
-    it("returns the gen ai connector if it's been created", async () => {
+    it('does not return a connector that is not configured for the feature', async () => {
       const connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
         port: 1234,
       });
@@ -47,7 +47,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       const connectorsExcludingPreconfiguredInference = res.body.filter((c) => !c.isPreconfigured);
-      expect(connectorsExcludingPreconfiguredInference.length).to.be(1);
+      expect(connectorsExcludingPreconfiguredInference.length).to.be(0);
 
       await observabilityAIAssistantAPIClient.deleteActionConnector({ actionId: connectorId });
     });

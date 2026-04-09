@@ -169,11 +169,16 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
           });
 
           it('creates a connector', async () => {
-            const response = await observabilityAIAssistantAPIClient.editor({
-              endpoint: 'GET /internal/observability_ai_assistant/connectors',
-            });
+            const response = await supertest
+              .get('/api/actions/connectors')
+              .set('kbn-xsrf', 'foo')
+              .expect(200);
 
-            expect(response.body.length).to.eql(1);
+            const genAiConnectors = response.body.filter(
+              (c: { connector_type_id: string; is_preconfigured: boolean }) =>
+                c.connector_type_id === '.gen-ai' && !c.is_preconfigured
+            );
+            expect(genAiConnectors.length).to.eql(1);
           });
 
           describe('after refreshing the page', () => {
