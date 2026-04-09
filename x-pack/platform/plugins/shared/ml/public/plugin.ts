@@ -277,7 +277,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             }
 
             if (fullLicense && mlCapabilities.canGetMlInfo && this.enabledFeatures.ad) {
-              registerEmbeddables(pluginsSetup.embeddable, core);
+              registerEmbeddables(pluginsSetup.embeddable, core, pluginsSetup.usageCollection);
               registerMlUiActions(pluginsSetup.uiActions, core);
             }
 
@@ -313,7 +313,12 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             if (fullLicense && mlCapabilities.canGetMlInfo) {
               if (this.enabledFeatures.ad) {
                 if (pluginsSetup.cases) {
-                  registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart);
+                  registerCasesAttachments(
+                    pluginsSetup.cases,
+                    coreStart,
+                    pluginStart,
+                    pluginsSetup.usageCollection
+                  );
                 }
 
                 pluginStart.cps?.cpsManager?.registerAppAccess('ml', (location: string) =>
