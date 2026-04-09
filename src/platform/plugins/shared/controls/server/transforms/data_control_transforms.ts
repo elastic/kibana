@@ -11,6 +11,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { DataControlState, LegacyStoredDataControlState } from '@kbn/controls-schemas';
 import { DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 
 export function transformDataControlIn(
@@ -67,6 +68,14 @@ export function transformDataControlOut<
       state as LegacyStoredDataControlState
     );
 
+  const dataViewId = dataViewRef?.id ?? state.dataViewId ?? '';
+  if (!dataViewId.length) {
+    throw new Error(
+      i18n.translate('controls.server.transformIn.referenceError', {
+        defaultMessage: 'Invalid data view ID',
+      })
+    );
+  }
   return {
     ...DEFAULT_DATA_CONTROL_STATE,
     title,
