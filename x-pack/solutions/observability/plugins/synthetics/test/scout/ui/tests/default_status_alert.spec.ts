@@ -99,6 +99,7 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('verify alert is generated', async () => {
+      await syntheticsServices.cleanUpAlerts();
       await pageObjects.syntheticsApp.navigateToAlertsPage();
 
       await expect(async () => {
