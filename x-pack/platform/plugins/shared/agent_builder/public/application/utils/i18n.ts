@@ -525,7 +525,7 @@ export const labels = {
     }),
     toolsLabel: i18n.translate('xpack.agentBuilder.skills.toolsLabel', { defaultMessage: 'Tools' }),
     referencedContentLabel: i18n.translate('xpack.agentBuilder.skills.referencedContentLabel', {
-      defaultMessage: 'Additional files',
+      defaultMessage: 'Files',
     }),
     referencedFileCard: {
       skillNamePathPlaceholder: i18n.translate(

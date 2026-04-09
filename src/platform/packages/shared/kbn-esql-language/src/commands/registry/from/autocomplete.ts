@@ -9,7 +9,7 @@
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import { isSubQuery, isSource } from '@elastic/esql';
-import { pipeCompleteItem, commaCompleteItem, subqueryCompleteItem } from '../complete_items';
+import { pipeCompleteItem, commaCompleteItem, buildSubqueryCompleteItem } from '../complete_items';
 import {
   getSourcesFromCommands,
   getSourceSuggestions,
@@ -69,6 +69,12 @@ async function handleFromAutocomplete(
   // Use commandText for pattern matching (e.g., /METADATA\s+$/, /\s$/) because these
   // checks need to operate on the current command only, not the entire query
   const commandText = query.substring(command.location.min, cursorPos);
+
+  const subqueryItem = buildSubqueryCompleteItem(commandText);
+  const subquerySuggestion = {
+    ...subqueryItem,
+    text: `${commandText}${subqueryItem.text}`,
+  };
   const indicesBrowserSuggestion = await getIndicesBrowserSuggestion({
     callbacks,
     context,
@@ -91,7 +97,7 @@ async function handleFromAutocomplete(
   // Case 1: FROM | (no sources yet)
   if (!hasAnySources) {
     // Use innerText for absolute positions in rangeToReplace
-    const suggestions = suggestInitialSources(context, innerText);
+    const suggestions = suggestInitialSources(context, innerText, subquerySuggestion);
     if (indicesBrowserSuggestion) {
       suggestions.unshift(indicesBrowserSuggestion);
     }
@@ -108,7 +114,13 @@ async function handleFromAutocomplete(
   const shouldSuggestIndicesBrowserInAdditionalSlot =
     Boolean(indicesBrowserSuggestion) && shouldSuggestIndicesBrowserAfterComma(commandText);
 
-  const suggestions = await suggestAdditionalSources(innerText, context, callbacks, indexes);
+  const suggestions = await suggestAdditionalSources(
+    innerText,
+    context,
+    callbacks,
+    indexes,
+    subquerySuggestion
+  );
   if (shouldSuggestIndicesBrowserInAdditionalSlot && indicesBrowserSuggestion) {
     suggestions.unshift(indicesBrowserSuggestion);
   }
@@ -120,7 +132,8 @@ async function handleFromAutocomplete(
  */
 function suggestInitialSources(
   context: ICommandContext | undefined,
-  innerText: string
+  innerText: string,
+  subquerySuggestion: ISuggestionItem
 ): ISuggestionItem[] {
   let sources = context?.sources ?? [];
 
@@ -133,7 +146,7 @@ function suggestInitialSources(
   const suggestions = [...sourceSuggestions, ...viewSuggestions];
 
   if (shouldSuggestSubquery(context)) {
-    suggestions.push(subqueryCompleteItem);
+    suggestions.push(subquerySuggestion);
   }
 
   return suggestions;
@@ -163,7 +176,8 @@ async function suggestAdditionalSources(
   innerText: string,
   context: ICommandContext | undefined,
   callbacks: ICommandCallbacks | undefined,
-  indexes: ReturnType<typeof getSourcesFromCommands>
+  indexes: ReturnType<typeof getSourcesFromCommands>,
+  subquerySuggestion: ISuggestionItem
 ): Promise<ISuggestionItem[]> {
   const lastIndex = indexes[indexes.length - 1];
   const isTypingIndexName = lastIndex?.name && innerText.endsWith(lastIndex.name);
@@ -194,7 +208,7 @@ async function suggestAdditionalSources(
   );
 
   if (isRestartingExpression(innerText) && shouldSuggestSubquery(context)) {
-    suggestions.push(subqueryCompleteItem);
+    suggestions.push(subquerySuggestion);
   }
 
   return suggestions;
