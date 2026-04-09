@@ -203,6 +203,25 @@ async function attemptToCreateCommand(
   const { headlessBrowser, throttleOption, noCache } = getConfiguration();
 
   const buildDriverInstance = async () => {
+    // Strip FIPS-related env vars so browser subprocesses (chromedriver, geckodriver) don't
+    // inherit NODE_OPTIONS="--enable-fips" or OpenSSL FIPS config, which causes SIGTRAP crashes
+    // in browsers that weren't compiled with FIPS support.
+    const driverEnv = Object.entries(process.env).reduce<Record<string, string>>(
+      (env, [key, value]) => {
+        if (
+          value !== undefined &&
+          key !== 'NODE_OPTIONS' &&
+          key !== 'OPENSSL_CONF' &&
+          key !== 'OPENSSL_MODULES'
+        ) {
+          env[key] = value;
+        }
+
+        return env;
+      },
+      {}
+    );
+
     switch (browserType) {
       case 'chrome': {
         const chromeOptions = initChromiumOptions(
@@ -220,7 +239,11 @@ async function attemptToCreateCommand(
           session = await new Builder()
             .forBrowser(browserType)
             .setChromeOptions(chromeOptions)
-            .setChromeService(new chrome.ServiceBuilder(chromeDriver.path).enableVerboseLogging())
+            .setChromeService(
+              new chrome.ServiceBuilder(process.env.TEST_CHROMEDRIVER_PATH || chromeDriver.path)
+                .enableVerboseLogging()
+                .setEnvironment(driverEnv)
+            )
             .build();
         }
 
@@ -239,7 +262,7 @@ async function attemptToCreateCommand(
           const session = await new Builder()
             .forBrowser('MicrosoftEdge')
             .setEdgeOptions(edgeOptions)
-            .setEdgeService(new edge.ServiceBuilder(edgePaths.driverPath))
+            .setEdgeService(new edge.ServiceBuilder(edgePaths.driverPath).setEnvironment(driverEnv))
             .build();
           return {
             session,
@@ -279,7 +302,7 @@ async function attemptToCreateCommand(
           const session = await new Builder()
             .forBrowser(browserType)
             .setFirefoxOptions(firefoxOptions)
-            .setFirefoxService(new firefox.ServiceBuilder())
+            .setFirefoxService(new firefox.ServiceBuilder().setEnvironment(driverEnv))
             .build();
           return {
             session,
@@ -293,7 +316,11 @@ async function attemptToCreateCommand(
         const session = await new Builder()
           .forBrowser(browserType)
           .setFirefoxOptions(firefoxOptions)
-          .setFirefoxService(new firefox.ServiceBuilder().setStdio(['ignore', input, 'ignore']))
+          .setFirefoxService(
+            new firefox.ServiceBuilder()
+              .setEnvironment(driverEnv)
+              .setStdio(['ignore', input, 'ignore'])
+          )
           .build();
 
         const CONSOLE_LINE_RE = /^console\.([a-z]+): ([\s\S]+)/;
