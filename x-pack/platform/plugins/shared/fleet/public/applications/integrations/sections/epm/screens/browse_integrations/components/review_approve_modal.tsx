@@ -248,7 +248,8 @@ export const ReviewApproveModal: React.FC<{
       })
     : isZeroVersion
     ? i18n.translate('xpack.fleet.epmList.manageIntegrations.actions.reviewVersionZeroNotAllowed', {
-        defaultMessage: `Version ${INVALID_VERSION} is not allowed.`,
+        defaultMessage: 'Version {invalidVersion} is not allowed.',
+        values: { invalidVersion: INVALID_VERSION },
       })
     : i18n.translate('xpack.fleet.epmList.manageIntegrations.actions.reviewVersionInvalid', {
         defaultMessage: 'Enter a valid semantic version (for example, 1.0.0).',
@@ -263,7 +264,8 @@ export const ReviewApproveModal: React.FC<{
           ? i18n.translate(
               'xpack.fleet.epmList.manageIntegrations.actions.reviewVersionZeroError',
               {
-                defaultMessage: `Version ${INVALID_VERSION} is not allowed.`,
+                defaultMessage: 'Version {invalidVersion} is not allowed.',
+                values: { invalidVersion: INVALID_VERSION },
               }
             )
           : i18n.translate(
