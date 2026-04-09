@@ -12,7 +12,6 @@ import { test } from '../fixtures';
 test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => {
   const NEW_LOCATION_LABEL = 'Updated Test Location';
   const FLEET_POLICY_NAME = 'Test fleet policy';
-  let locationId: string;
 
   test.beforeAll(async ({ syntheticsServices }) => {
     await syntheticsServices.deletePrivateLocations();
@@ -66,7 +65,6 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
       await pageObjects.syntheticsApp.navigateToSettingsTab('Private Locations');
       const privateLocations = await syntheticsServices.getPrivateLocations();
       expect(privateLocations).toHaveLength(1);
-      locationId = privateLocations[0].id;
       await syntheticsServices.addMonitorSimple('test-monitor', {
         locations: [privateLocations[0]],
         type: 'browser',
@@ -103,7 +101,7 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
       await page.testSubj.click('settings-page-link');
       await pageObjects.syntheticsApp.navigateToSettingsTab('Private Locations');
       await expect(page.locator(`td:has-text("${NEW_LOCATION_LABEL}")`)).toBeVisible();
-      const deleteLocationButton = page.locator(`[data-test-subj="deleteLocation-${locationId}"]`);
+      const deleteLocationButton = page.testSubj.locator('action-delete');
       await expect(deleteLocationButton).toBeDisabled();
     });
 
