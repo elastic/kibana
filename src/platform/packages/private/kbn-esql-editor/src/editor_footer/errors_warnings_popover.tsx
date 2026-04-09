@@ -102,7 +102,7 @@ function ErrorsWarningsContent({
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="s" alignItems="center">
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type={type} color={color} size="s" />
+                      <EuiIcon type={type} color={color} size="s" aria-hidden="true" />
                     </EuiFlexItem>
                     <EuiFlexItem css={{ whiteSpace: 'nowrap' }}>
                       {i18n.translate('esqlEditor.query.lineNumber', {
@@ -183,6 +183,9 @@ export function ErrorsWarningsFooterPopover({
           ownFocus={false}
           isOpen={isPopoverOpen}
           closePopover={closePopover}
+          aria-label={i18n.translate('esqlEditor.errorsWarningsPopover.ariaLabel', {
+            defaultMessage: 'Errors and warnings popover',
+          })}
         >
           {visibleItems.length > 0 && (
             <ErrorsWarningsContent items={visibleItems} type={type} onErrorClick={onErrorClick} />
