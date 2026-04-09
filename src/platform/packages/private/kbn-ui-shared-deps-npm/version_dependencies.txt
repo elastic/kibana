@@ -367,7 +367,7 @@ postcss-modules-scope@3.2.0
 postcss-modules-values@4.0.0
 postcss-selector-parser@6.1.2
 postcss-value-parser@4.2.0
-postcss@8.5.6
+postcss@8.5.8
 prismjs@1.27.0
 process-nextick-args@2.0.1
 process@0.11.10

@@ -108,6 +108,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
+      diskSizeGb: 120
       preemptible: true
     timeout_in_minutes: 60
     parallelism: 8
@@ -124,6 +125,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
+      diskSizeGb: 120
       preemptible: true
     timeout_in_minutes: 60
     parallelism: 8
