@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import type { Writable } from '@kbn/utility-types';
-import type { storedFilterSchema } from '@kbn/es-query-server';
+import type { Filter } from '@kbn/es-query';
 
 /**
  * Local type definition for stored filters
- * Inferred from the storedFilterSchema in @kbn/es-query-server
  */
-export type StoredFilter = Writable<TypeOf<typeof storedFilterSchema>>;
+export type StoredFilter = Omit<Filter, 'meta'> & {
+  meta: Omit<Filter['meta'], 'params' | 'value'> & {
+    field?: string;
+    relation?: string;
+    indexRefName?: string;
+    params?: any;
+    value?: any;
+  };
+};
