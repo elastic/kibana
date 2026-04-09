@@ -9,7 +9,6 @@
 
 import path from 'path';
 import { test as base } from '@playwright/test';
-import { REPO_ROOT } from '@kbn/repo-info';
 import type { ScoutLogger } from '../../worker';
 
 let lastLoggedFile = '';
@@ -25,8 +24,7 @@ export const logTestFileFixture = base.extend<{ logTestFile: void }, { log: Scou
     async ({ log }, use, testInfo) => {
       if (testInfo.file !== lastLoggedFile) {
         lastLoggedFile = testInfo.file;
-        const relativePath = path.relative(REPO_ROOT, testInfo.file);
-        log.debug(`[testFile] Running tests: ${relativePath}`);
+        log.debug(`[testFile] ${path.basename(testInfo.file)}`);
       }
       await use();
     },
