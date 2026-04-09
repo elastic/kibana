@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ConnectorUserAuthStatus } from '@kbn/actions-types';
 import type { SavedObjectClientForFind } from '../../../data/connector/types/params';
 import type { Connector } from '../types';
 import { getUserTokenConnectorsForProfile } from './get_user_token_connectors_for_profile';
@@ -19,7 +20,7 @@ export async function resolveUserAuthStatusForConnector({
   connectorId: string;
   profileUid: string | undefined;
   savedObjectsClient: SavedObjectClientForFind;
-}): Promise<'connected' | 'not_connected' | 'not_applicable'> {
+}): Promise<ConnectorUserAuthStatus> {
   if (authMode !== 'per-user') {
     return 'not_applicable';
   }
