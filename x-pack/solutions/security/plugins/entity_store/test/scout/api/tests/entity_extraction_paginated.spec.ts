@@ -12,7 +12,7 @@ import {
   INTERNAL_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
-  LATEST_INDEX,
+  LATEST_ALIAS,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import { expectedHostEntities } from '../fixtures/entity_extraction_expected';
@@ -91,7 +91,7 @@ apiTest.describe(
         expect(extractionResponse.body.pages).toBe(expectedPageCount);
 
         const entities = await esClient.search({
-          index: LATEST_INDEX,
+          index: LATEST_ALIAS,
           query: {
             bool: {
               filter: {
@@ -126,7 +126,7 @@ apiTest.describe(
         expect(update.statusCode).toBe(200);
 
         await esClient.deleteByQuery({
-          index: LATEST_INDEX,
+          index: LATEST_ALIAS,
           refresh: true,
           query: {
             bool: {
@@ -154,7 +154,7 @@ apiTest.describe(
         expect(extractionResponse.body.pages).toBeGreaterThan(minimumPagesWithEntityPaginationOnly);
 
         const entities = await esClient.search({
-          index: LATEST_INDEX,
+          index: LATEST_ALIAS,
           query: {
             bool: {
               filter: {
