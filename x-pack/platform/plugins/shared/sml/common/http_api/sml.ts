@@ -6,16 +6,16 @@
  */
 
 /**
- * Max length of `query` for POST `/internal/agent_builder/sml/_search` (route validation + UI).
+ * Max length of `query` for POST `/internal/sml/_search` (route validation + UI).
  * The agent `sml_search` tool uses its own separate limit in its Zod schema.
  */
 export const SML_HTTP_SEARCH_QUERY_MAX_LENGTH = 512;
 
-/** Max items per `POST /internal/agent_builder/sml/_attach` (matches `sml_attach` tool). */
+/** Max items per `POST /internal/sml/_attach` (matches `sml_attach` tool). */
 export const SML_HTTP_ATTACH_ITEMS_MAX = 50;
 
 /**
- * Response body for `POST /internal/agent_builder/sml/_search` (internal only).
+ * Response body for `POST /internal/sml/_search` (internal only).
  */
 export interface SmlSearchHttpResponse {
   total: number;
@@ -40,7 +40,7 @@ export interface SmlSearchHttpResultItem {
 }
 
 /**
- * Response body for `POST /internal/agent_builder/sml/_attach` (internal only).
+ * Response body for `POST /internal/sml/_attach` (internal only).
  */
 export interface SmlAttachHttpResponse {
   results: SmlAttachHttpResultItem[];
