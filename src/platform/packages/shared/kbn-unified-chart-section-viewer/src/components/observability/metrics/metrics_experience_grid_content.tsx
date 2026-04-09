@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import {
@@ -61,6 +61,28 @@ export const MetricsExperienceGridContent = ({
   const whereStatements = useMemo(() => extractWhereCommand(esqlQuery), [esqlQuery]);
 
   const { searchTerm, currentPage, selectedDimensions, onPageChange } = useMetricsExperienceState();
+
+  // Buffer selectedDimensions so the grid only receives updated dimensions after
+  // the METRICS_INFO query completes. This prevents a race condition where new
+  // dimensions flow to the grid before metricItems have been refreshed.
+  const [bufferedDimensions, setBufferedDimensions] = useState(selectedDimensions);
+  const wasLoadingRef = useRef(isDiscoverLoading);
+
+  useEffect(() => {
+    if (wasLoadingRef.current && !isDiscoverLoading) {
+      // Loading just finished — sync buffered dimensions with the current selection
+      setBufferedDimensions(selectedDimensions);
+    }
+    wasLoadingRef.current = isDiscoverLoading;
+  }, [isDiscoverLoading, selectedDimensions]);
+
+  // Immediately clear buffered dimensions when the user deselects all,
+  // since no METRICS_INFO query fires for an empty selection
+  useEffect(() => {
+    if (selectedDimensions.length === 0) {
+      setBufferedDimensions(selectedDimensions);
+    }
+  }, [selectedDimensions]);
 
   const {
     currentPageItems: currentPageFields = [],
@@ -117,7 +139,7 @@ export const MetricsExperienceGridContent = ({
         {isDiscoverLoading && <MetricsGridLoadingProgress />}
         <MetricsGrid
           columns={columns}
-          dimensions={selectedDimensions}
+          dimensions={bufferedDimensions}
           services={services}
           metricItems={currentPageFields}
           onBrushEnd={onBrushEnd}

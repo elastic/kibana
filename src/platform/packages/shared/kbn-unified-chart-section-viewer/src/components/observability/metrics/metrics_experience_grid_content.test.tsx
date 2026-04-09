@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, act } from '@testing-library/react';
 import type { MetricsExperienceGridContentProps } from './metrics_experience_grid_content';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
 import * as hooks from './hooks';
@@ -27,6 +27,17 @@ jest.mock('./context/metrics_experience_state_provider');
 jest.mock('./hooks');
 jest.mock('../../chart', () => ({
   Chart: jest.fn(() => <div data-test-subj="metric-chart" />),
+}));
+
+const mockMetricsGrid = jest.fn((props: { metricItems: any[] }) =>
+  props.metricItems.length === 0 ? (
+    <div data-test-subj="metricsExperienceNoData" />
+  ) : (
+    <div data-test-subj="unifiedMetricsExperienceGrid" />
+  )
+);
+jest.mock('./metrics_grid', () => ({
+  MetricsGrid: (props: any) => mockMetricsGrid(props),
 }));
 
 /**
@@ -206,5 +217,141 @@ describe('MetricsExperienceGridContent', () => {
     );
 
     expect(getByTestId('metricsExperienceProgressBar')).toBeInTheDocument();
+  });
+
+  describe('dimension buffering', () => {
+    it('does not forward new dimensions to MetricsGrid while loading', () => {
+      // Start with no dimensions, not loading
+      useMetricsExperienceStateMock.mockReturnValue({
+        currentPage: 0,
+        selectedDimensions: [],
+        onDimensionsChange: jest.fn(),
+        onPageChange: jest.fn(),
+        isFullscreen: false,
+        searchTerm: '',
+        onSearchTermChange: jest.fn(),
+        onToggleFullscreen: jest.fn(),
+      });
+
+      const Wrapper = ({ children }: { children: React.ReactNode }) => (
+        <IntlProvider>{children}</IntlProvider>
+      );
+
+      const { rerender } = render(
+        <MetricsExperienceGridContent {...defaultProps} isDiscoverLoading={false} />,
+        { wrapper: Wrapper }
+      );
+
+      // User selects a dimension — state updates immediately but loading starts
+      useMetricsExperienceStateMock.mockReturnValue({
+        currentPage: 0,
+        selectedDimensions: [dimensions[0]],
+        onDimensionsChange: jest.fn(),
+        onPageChange: jest.fn(),
+        isFullscreen: false,
+        searchTerm: '',
+        onSearchTermChange: jest.fn(),
+        onToggleFullscreen: jest.fn(),
+      });
+
+      act(() => {
+        rerender(<MetricsExperienceGridContent {...defaultProps} isDiscoverLoading />);
+      });
+
+      // MetricsGrid should still receive empty dimensions (the buffered value)
+      const lastCall = mockMetricsGrid.mock.calls[mockMetricsGrid.mock.calls.length - 1][0];
+      expect(lastCall.dimensions).toEqual([]);
+    });
+
+    it('forwards dimensions to MetricsGrid after loading completes', () => {
+      // Start with no dimensions, not loading
+      useMetricsExperienceStateMock.mockReturnValue({
+        currentPage: 0,
+        selectedDimensions: [],
+        onDimensionsChange: jest.fn(),
+        onPageChange: jest.fn(),
+        isFullscreen: false,
+        searchTerm: '',
+        onSearchTermChange: jest.fn(),
+        onToggleFullscreen: jest.fn(),
+      });
+
+      const Wrapper = ({ children }: { children: React.ReactNode }) => (
+        <IntlProvider>{children}</IntlProvider>
+      );
+
+      const { rerender } = render(
+        <MetricsExperienceGridContent {...defaultProps} isDiscoverLoading={false} />,
+        { wrapper: Wrapper }
+      );
+
+      // Simulate: dimension selected, loading starts
+      useMetricsExperienceStateMock.mockReturnValue({
+        currentPage: 0,
+        selectedDimensions: [dimensions[0]],
+        onDimensionsChange: jest.fn(),
+        onPageChange: jest.fn(),
+        isFullscreen: false,
+        searchTerm: '',
+        onSearchTermChange: jest.fn(),
+        onToggleFullscreen: jest.fn(),
+      });
+
+      act(() => {
+        rerender(<MetricsExperienceGridContent {...defaultProps} isDiscoverLoading />);
+      });
+
+      // Loading completes — dimensions should now flow through
+      act(() => {
+        rerender(<MetricsExperienceGridContent {...defaultProps} isDiscoverLoading={false} />);
+      });
+
+      const lastCall = mockMetricsGrid.mock.calls[mockMetricsGrid.mock.calls.length - 1][0];
+      expect(lastCall.dimensions).toEqual([dimensions[0]]);
+    });
+
+    it('immediately clears buffered dimensions when all dimensions are deselected', () => {
+      // Start with a dimension selected, not loading
+      useMetricsExperienceStateMock.mockReturnValue({
+        currentPage: 0,
+        selectedDimensions: [dimensions[0]],
+        onDimensionsChange: jest.fn(),
+        onPageChange: jest.fn(),
+        isFullscreen: false,
+        searchTerm: '',
+        onSearchTermChange: jest.fn(),
+        onToggleFullscreen: jest.fn(),
+      });
+
+      const Wrapper = ({ children }: { children: React.ReactNode }) => (
+        <IntlProvider>{children}</IntlProvider>
+      );
+
+      const { rerender } = render(
+        <MetricsExperienceGridContent {...defaultProps} isDiscoverLoading={false} />,
+        { wrapper: Wrapper }
+      );
+
+      // User deselects all dimensions
+      useMetricsExperienceStateMock.mockReturnValue({
+        currentPage: 0,
+        selectedDimensions: [],
+        onDimensionsChange: jest.fn(),
+        onPageChange: jest.fn(),
+        isFullscreen: false,
+        searchTerm: '',
+        onSearchTermChange: jest.fn(),
+        onToggleFullscreen: jest.fn(),
+      });
+
+      act(() => {
+        rerender(
+          <MetricsExperienceGridContent {...defaultProps} isDiscoverLoading={false} />
+        );
+      });
+
+      const lastCall = mockMetricsGrid.mock.calls[mockMetricsGrid.mock.calls.length - 1][0];
+      expect(lastCall.dimensions).toEqual([]);
+    });
   });
 });
