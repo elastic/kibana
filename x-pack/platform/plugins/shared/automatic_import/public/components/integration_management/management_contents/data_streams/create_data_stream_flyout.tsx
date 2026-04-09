@@ -217,37 +217,36 @@ interface AnalyzeFormValidityParams {
   isUploadingSamples: boolean;
 }
 
+const isValidTitle = (title: string): boolean =>
+  !!title && isValidNameFormat(title) && startsWithLetter(title);
+
+const checkIntegrationFieldsValid = (params: AnalyzeFormValidityParams): boolean =>
+  isValidTitle(params.integrationTitle) &&
+  !!params.description?.trim() &&
+  !!params.connectorId?.trim();
+
+const checkDataStreamFieldsValid = (params: AnalyzeFormValidityParams): boolean =>
+  isValidTitle(params.dataStreamTitle) &&
+  !!params.dataStreamDescription?.trim() &&
+  !params.hasDuplicateDataStreamName &&
+  params.dataCollectionMethod != null &&
+  params.dataCollectionMethod.length > 0;
+
+const checkLogSourceValid = (params: AnalyzeFormValidityParams): boolean =>
+  (params.logsSourceOption === 'file' && !!params.logSample) ||
+  (params.logsSourceOption === 'index' && !!params.selectedIndex && !params.indexValidationError);
+
 const useAnalyzeFormValidity = (params: AnalyzeFormValidityParams) => {
-  const isIntegrationFieldsValid =
-    !!params.integrationTitle &&
-    !!params.description?.trim() &&
-    !!params.connectorId?.trim() &&
-    isValidNameFormat(params.integrationTitle) &&
-    startsWithLetter(params.integrationTitle);
-
-  const isDataStreamFieldsValid =
-    !!params.dataStreamTitle &&
-    !!params.dataStreamDescription?.trim() &&
-    !params.hasDuplicateDataStreamName &&
-    isValidNameFormat(params.dataStreamTitle) &&
-    startsWithLetter(params.dataStreamTitle) &&
-    params.dataCollectionMethod != null &&
-    params.dataCollectionMethod.length > 0;
-
-  const isLogSourceValid =
-    (params.logsSourceOption === 'file' && !!params.logSample) ||
-    (params.logsSourceOption === 'index' && !!params.selectedIndex && !params.indexValidationError);
-
   const isAnalyzeDisabled =
-    !isIntegrationFieldsValid ||
-    !isDataStreamFieldsValid ||
-    !isLogSourceValid ||
+    !checkIntegrationFieldsValid(params) ||
+    !checkDataStreamFieldsValid(params) ||
+    !checkLogSourceValid(params) ||
     params.isParsing ||
     params.isValidatingIndex ||
     params.isLoading ||
     params.isUploadingSamples;
 
-  return { isAnalyzeDisabled, isIntegrationFieldsValid, isDataStreamFieldsValid };
+  return { isAnalyzeDisabled };
 };
 
 export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ onClose }) => {
