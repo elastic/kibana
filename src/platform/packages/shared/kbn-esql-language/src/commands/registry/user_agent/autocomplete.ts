@@ -9,6 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ESQLAstAllCommands, ESQLAstUserAgentCommand } from '@elastic/esql/types';
+import { isStringLiteral } from '@elastic/esql';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
 import {
@@ -113,9 +114,11 @@ export async function autocomplete(
 
     case UserAgentPosition.WITHIN_PROPERTIES_ARRAY: {
       const propertiesList = getPropertiesList(userAgentCommand);
-      const usedValues = new Set(propertiesList?.values.map((v) => v.name) ?? []);
+      const usedValues = new Set(
+        propertiesList?.values.filter(isStringLiteral).map((v) => v.valueUnquoted) ?? []
+      );
       return ['name', 'version', 'os', 'device']
-        .filter((v) => !usedValues.has(`"${v}"`))
+        .filter((v) => !usedValues.has(v))
         .map((v) => buildMapValueCompleteItem(`"${v}"`));
     }
 
