@@ -175,7 +175,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
+                  <EuiText size="xs">
                     {GROUP_RISK_SCORE_LABEL}
                   </EuiText>
                 </EuiFlexItem>
