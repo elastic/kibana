@@ -63,10 +63,6 @@ export const CopySavedQueryResponse = z.object({
        */
       platform: z.string().optional(),
       /**
-       * The minimum osquery version.
-       */
-      version: z.string().optional(),
-      /**
        * The ECS mapping configuration.
        */
       ecs_mapping: z.object({}).optional(),

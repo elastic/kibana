@@ -92,7 +92,5 @@ components:
             policy_ids:
               - "my_policy_id"
             shards:
-              - key: 47638692-7c4c-4053-aa3e-7186f28df349
-                value: 35
-              - key: 5e267651-fe50-443e-8d3f-3bbc9171b618
-                value: 58
+              "47638692-7c4c-4053-aa3e-7186f28df349": 35
+              "5e267651-fe50-443e-8d3f-3bbc9171b618": 58

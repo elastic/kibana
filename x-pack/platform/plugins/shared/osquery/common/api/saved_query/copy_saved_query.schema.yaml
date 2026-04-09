@@ -40,9 +40,6 @@ components:
             platform:
               description: 'The target platform(s).'
               type: string
-            version:
-              description: 'The minimum osquery version.'
-              type: string
             ecs_mapping:
               description: 'The ECS mapping configuration.'
               type: object
@@ -65,7 +62,6 @@ components:
           query: "select * from uptime;"
           description: "Saved query description"
           platform: "linux,darwin"
-          version: "2.8.0"
           interval: "60"
           timeout: 120
           snapshot: true
