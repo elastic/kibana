@@ -58,10 +58,12 @@ const MAX_EXCLUDED_FEATURES_FOR_PROMPT = 10;
 class FeatureAccumulator {
   private readonly byUuid = new Map<string, Feature>();
   private readonly byLowerId = new Map<string, Feature>();
+  private readonly fromStorage = new Set<string>();
 
   constructor(initialFeatures: Feature[] = []) {
     for (const f of initialFeatures) {
       this.add(f);
+      this.fromStorage.add(f.uuid);
     }
   }
 
@@ -85,13 +87,30 @@ class FeatureAccumulator {
     );
   }
 
+  isStoredFeature(feature: Feature): boolean {
+    return this.fromStorage.has(feature.uuid);
+  }
+
+  promoteFromStorage(featureUuid: string) {
+    this.fromStorage.delete(featureUuid);
+  }
+
   getAll(): Feature[] {
     return Array.from(this.byUuid.values());
   }
 
-  getTopByConfidence(limit: number): Feature[] {
+  getDiscovered(): Feature[] {
+    return this.getAll().filter((f) => !this.fromStorage.has(f.uuid));
+  }
+
+  getTopRanked(limit: number): Feature[] {
     return this.getAll()
-      .sort((a, b) => b.confidence - a.confidence)
+      .sort((a, b) => {
+        const aEntity = a.type === 'entity' ? 0 : 1;
+        const bEntity = b.type === 'entity' ? 0 : 1;
+        if (aEntity !== bEntity) return aEntity - bEntity;
+        return b.confidence - a.confidence;
+      })
       .slice(0, limit);
   }
 
@@ -161,8 +180,7 @@ export async function identifyStreamFeatures({
       properties,
     }));
 
-  const known = new FeatureAccumulator();
-  const existing = new FeatureAccumulator(existingFeatures);
+  const known = new FeatureAccumulator(existingFeatures);
 
   let totalTokensUsed: ChatCompletionTokenCount = { ...EMPTY_TOKENS };
 
@@ -180,7 +198,7 @@ export async function identifyStreamFeatures({
       index: streamName,
       start,
       end,
-      features: known.getAll().filter(isFeatureWithFilter),
+      features: known.getDiscovered().filter(isFeatureWithFilter),
       logger,
       size: DOCUMENTS_BATCH_SIZE,
     });
@@ -190,7 +208,7 @@ export async function identifyStreamFeatures({
       break;
     }
 
-    const previousFeatures = known.getTopByConfidence(MAX_PREVIOUSLY_IDENTIFIED_FEATURES);
+    const previousFeatures = known.getTopRanked(MAX_PREVIOUSLY_IDENTIFIED_FEATURES);
 
     logger.debug(
       () =>
@@ -261,7 +279,6 @@ export async function identifyStreamFeatures({
     const { newFeatures, updatedFeatures, codeIgnoredCount } = reconcileFeatures({
       rawFeatures,
       known,
-      existing,
       ignoredFeatures,
       logger,
       excludedFeatures,
@@ -272,6 +289,9 @@ export async function identifyStreamFeatures({
     }
     for (const feature of updatedFeatures) {
       known.update(feature);
+      if (known.isStoredFeature(feature)) {
+        known.promoteFromStorage(feature.uuid);
+      }
     }
 
     const iterationEntry: IterationTelemetry = {
@@ -288,6 +308,7 @@ export async function identifyStreamFeatures({
       filtersCapped: batchResult.filtersCapped,
       hasFilteredDocuments: batchResult.hasFilteredDocuments,
     };
+
     await onIterationComplete?.(iterationEntry, { newFeatures, updatedFeatures });
 
     logger.debug(
@@ -305,7 +326,7 @@ export async function identifyStreamFeatures({
   }
 
   return {
-    features: known.getAll(),
+    features: known.getDiscovered(),
     tokensUsed: totalTokensUsed,
   };
 }
@@ -314,6 +335,7 @@ export interface FeaturesIdentificationTaskParams {
   start: number;
   end: number;
   streamName: string;
+  connectorId?: string;
 }
 
 export const FEATURES_IDENTIFICATION_TASK_TYPE = 'streams_features_identification';
@@ -334,8 +356,13 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
               }
               const { fakeRequest } = runContext;
 
-              const { start, end, streamName, _task } = runContext.taskInstance
-                .params as TaskParams<FeaturesIdentificationTaskParams>;
+              const {
+                start,
+                end,
+                streamName,
+                connectorId: connectorIdOverride,
+                _task,
+              } = runContext.taskInstance.params as TaskParams<FeaturesIdentificationTaskParams>;
 
               const runId = uuid();
               const trackEmptyTelemetry = (state: 'canceled' | 'failure') => {
@@ -374,12 +401,14 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
               });
 
               const taskLogger = taskContext.logger.get('features_identification', streamName);
-              const connectorId = await resolveConnectorForFeature({
-                searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
-                featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-                featureName: 'knowledge indicator extraction',
-                request: fakeRequest,
-              });
+              const connectorId =
+                connectorIdOverride ??
+                (await resolveConnectorForFeature({
+                  searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
+                  featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+                  featureName: 'knowledge indicator extraction',
+                  request: fakeRequest,
+                }));
               taskLogger.debug(`Using connector ${connectorId} for knowledge indicator extraction`);
 
               let hasTrackedIteration = false;
@@ -488,7 +517,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
 
                 await taskClient.complete<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
                   _task,
-                  { start, end, streamName },
+                  { start, end, streamName, connectorId: connectorIdOverride },
                   {
                     features: allFeatures,
                     durationMs,
@@ -545,7 +574,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
 
                 await taskClient.fail<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
                   _task,
-                  { start, end, streamName },
+                  { start, end, streamName, connectorId: connectorIdOverride },
                   errorMessage,
                   {
                     features: [],
@@ -587,14 +616,12 @@ const hasChanged = (updated: BaseFeature, current: Feature): boolean =>
 function reconcileFeatures({
   rawFeatures,
   known,
-  existing,
   ignoredFeatures,
   excludedFeatures,
   logger,
 }: {
   rawFeatures: BaseFeature[];
   known: FeatureAccumulator;
-  existing: FeatureAccumulator;
   ignoredFeatures: IgnoredFeature[];
   excludedFeatures: Feature[];
   logger: Logger;
@@ -628,23 +655,21 @@ function reconcileFeatures({
   });
 
   for (const raw of nonExcludedInferredFeatures) {
-    const thisRunMatch = known.findDuplicate(raw);
+    const match = known.findDuplicate(raw);
 
-    if (thisRunMatch) {
-      // Intra-run: merge evidence/tags accumulated across iterations of this run
-      const merged = mergeFeature(thisRunMatch, raw);
-      if (hasChanged(merged, thisRunMatch)) {
-        updatedFeatures.push({ ...merged, ...metadata, uuid: thisRunMatch.uuid });
+    if (match) {
+      if (known.isStoredFeature(match)) {
+        // Stored-origin: always update to refresh last_seen / expires_at
+        updatedFeatures.push({ ...raw, ...metadata, uuid: match.uuid });
+      } else {
+        // Intra-run: merge properties accumulated across iterations of this run
+        const merged = mergeFeature(match, raw);
+        if (hasChanged(merged, match)) {
+          updatedFeatures.push({ ...merged, ...metadata, uuid: match.uuid });
+        }
       }
     } else {
-      // Cross-run: reuse UUID for UI continuity but don't merge — prior data may be stale
-      const existingMatch = existing.findDuplicate(raw);
-
-      if (existingMatch) {
-        newFeatures.push({ ...raw, ...metadata, uuid: existingMatch.uuid });
-      } else {
-        newFeatures.push({ ...raw, ...metadata, uuid: uuid() });
-      }
+      newFeatures.push({ ...raw, ...metadata, uuid: uuid() });
     }
   }
 

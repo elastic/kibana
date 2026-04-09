@@ -34,6 +34,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.observability}.get_traces`,
   `${internalNamespaces.observability}.get_runtime_metrics`,
   `${internalNamespaces.observability}.get_logs`,
+  `${internalNamespaces.observability}.get_apm_correlations`,
 
   // Security Solution
   `${internalNamespaces.security}.entity_risk_score`,
@@ -129,6 +130,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   `${internalNamespaces.search}.semantic-search`,
   `${internalNamespaces.search}.hybrid-search`,
   `${internalNamespaces.search}.rag-chatbot`,
+  `${internalNamespaces.search}.use-case-library`,
 ] as const;
 
 export type AgentBuilderBuiltinSkill = (typeof AGENT_BUILDER_BUILTIN_SKILLS)[number];

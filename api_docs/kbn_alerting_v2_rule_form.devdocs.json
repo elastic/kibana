@@ -355,7 +355,7 @@
             "section": "def-public.FormValues",
             "text": "FormValues"
           },
-          ") => { kind: any; metadata: { name: string; description?: string | undefined; owner?: string | undefined; labels?: string[] | undefined; }; time_field: string; schedule: { every: string; lookback?: string | undefined; }; evaluation: { query: { base: string; }; }; recovery_policy?: { type: any; query?: { base?: string | undefined; } | undefined; } | undefined; state_transition?: any; grouping?: { fields: string[]; } | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | undefined; artifacts?: { id: string; type: string; value: string; }[] | undefined; }"
+          ") => { kind: any; metadata: { name: string; description?: string | undefined; owner?: string | undefined; tags?: string[] | undefined; }; time_field: string; schedule: { every: string; lookback?: string | undefined; }; evaluation: { query: { base: string; }; }; recovery_policy?: { type: any; query?: { base?: string | undefined; } | undefined; } | undefined; state_transition?: any; grouping?: { fields: string[]; } | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | undefined; artifacts?: { id: string; type: string; value: string; }[] | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
         "lineNumber": 210,
@@ -468,7 +468,7 @@
             "section": "def-public.FormValues",
             "text": "FormValues"
           },
-          ") => { metadata?: { name?: string | undefined; description?: string | undefined; owner?: string | undefined; labels?: string[] | undefined; } | undefined; time_field?: string | undefined; schedule?: any; evaluation?: { query?: { base?: string | undefined; } | undefined; } | undefined; recovery_policy?: any; state_transition?: any; grouping?: any; no_data?: any; artifacts?: any; enabled?: boolean | undefined; }"
+          ") => { metadata?: { name?: string | undefined; description?: string | undefined; owner?: string | undefined; tags?: string[] | undefined; } | undefined; time_field?: string | undefined; schedule?: any; evaluation?: { query?: { base?: string | undefined; } | undefined; } | undefined; recovery_policy?: any; state_transition?: any; grouping?: any; no_data?: any; artifacts?: any; enabled?: boolean | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
         "lineNumber": 220,
@@ -1631,7 +1631,7 @@
             "label": "metadata",
             "description": [],
             "signature": [
-              "{ name: string; description?: string | undefined; owner?: string | undefined; labels?: string[] | undefined; }"
+              "{ name: string; description?: string | undefined; owner?: string | undefined; tags?: string[] | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
             "lineNumber": 140,

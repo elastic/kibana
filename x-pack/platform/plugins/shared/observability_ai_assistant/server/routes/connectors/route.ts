@@ -6,6 +6,7 @@
  */
 import * as t from 'io-ts';
 import type { InferenceConnector } from '@kbn/inference-common';
+import { OBSERVABILITY_AI_ASSISTANT_SUBFEATURE_ID } from '../../../common/feature';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 
 const listConnectorsRoute = createObservabilityAIAssistantServerRoute({
@@ -16,7 +17,21 @@ const listConnectorsRoute = createObservabilityAIAssistantServerRoute({
     },
   },
   handler: async (resources): Promise<InferenceConnector[]> => {
-    const { request, plugins } = resources;
+    const { request, plugins, logger } = resources;
+
+    const searchInferenceEndpoints = await plugins.searchInferenceEndpoints?.start();
+    if (searchInferenceEndpoints) {
+      const resolved = await searchInferenceEndpoints.endpoints.getForFeature(
+        OBSERVABILITY_AI_ASSISTANT_SUBFEATURE_ID,
+        request
+      );
+      resolved.warnings.forEach((w) => logger.warn(w));
+
+      if (resolved.endpoints.length > 0) {
+        return resolved.endpoints;
+      }
+    }
+
     const inferenceStart = await plugins.inference.start();
     return inferenceStart.getConnectorList(request);
   },

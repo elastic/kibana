@@ -9,7 +9,8 @@ import {
   evaluate as base,
   createQuantitativeCorrectnessEvaluators,
   createSpanLatencyEvaluator,
-  getCurrentTraceId,
+  createToolCallsEvaluator,
+  createTrajectoryEvaluator,
   type EvaluationDataset,
   type Example,
 } from '@kbn/evals';
@@ -27,6 +28,7 @@ interface ObservabilityAgentExample extends Example {
   output: {
     criteria?: string[];
     expected?: string;
+    expectedTools?: string[];
   };
 }
 
@@ -59,6 +61,10 @@ export const evaluate = base.extend<
           Boolean(example.output.expected)
         );
 
+        const includeToolCoverage = examples.some((example) =>
+          Boolean(example.output.expectedTools?.length)
+        );
+
         await executorClient.runExperiment(
           {
             dataset: { name, description, examples } satisfies EvaluationDataset,
@@ -82,20 +88,37 @@ export const evaluate = base.extend<
                     metadata,
                   })
                 : undefined;
-              const traceId = getCurrentTraceId();
 
               return {
                 errors: response.errors,
                 messages: response.messages,
                 steps: response.steps,
                 correctnessAnalysis: correctnessResult?.metadata,
-                traceId,
+                traceId: response.traceId,
               };
             },
           },
           [
             createCriteriaEvaluator({ evaluators }),
             ...(includeQuantitativeCorrectness ? createQuantitativeCorrectnessEvaluators() : []),
+            ...(includeToolCoverage
+              ? [
+                  createTrajectoryEvaluator({
+                    extractToolCalls: (output: unknown) => {
+                      const steps = (output as any)?.steps ?? [];
+                      return steps
+                        .filter((s: any) => s.type === 'tool_call')
+                        .map((s: any) => s.tool_id as string);
+                    },
+                    goldenPathExtractor: (expected: unknown) => {
+                      return (expected as any)?.expectedTools ?? [];
+                    },
+                    orderWeight: 0,
+                    coverageWeight: 1,
+                  }),
+                ]
+              : []),
+            createToolCallsEvaluator({ traceEsClient, log }),
             evaluators.traceBasedEvaluators.inputTokens,
             evaluators.traceBasedEvaluators.outputTokens,
             evaluators.traceBasedEvaluators.cachedTokens,

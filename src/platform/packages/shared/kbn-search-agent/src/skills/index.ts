@@ -14,6 +14,7 @@ import { hybridSearchSkill } from './hybrid_search';
 import { keywordSearchSkill } from './keyword_search';
 import { ragChatbotSkill } from './rag_chatbot';
 import { semanticSearchSkill } from './semantic_search';
+import { useCaseLibrarySkill } from './use_case_library';
 import { vectorDatabaseSkill } from './vector_database';
 export {
   catalogEcommerceSkill,
@@ -21,6 +22,7 @@ export {
   keywordSearchSkill,
   ragChatbotSkill,
   semanticSearchSkill,
+  useCaseLibrarySkill,
   vectorDatabaseSkill,
 };
 
@@ -30,5 +32,6 @@ export const skills = [
   keywordSearchSkill,
   ragChatbotSkill,
   semanticSearchSkill,
+  useCaseLibrarySkill,
   vectorDatabaseSkill,
 ];
