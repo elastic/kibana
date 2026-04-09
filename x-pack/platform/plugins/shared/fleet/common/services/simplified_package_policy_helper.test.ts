@@ -53,7 +53,7 @@ describe('generateInputId', () => {
     ).toBe('nginx-logfile');
   });
 
-  it('should use name without policy_template prefix when policy_template is absent', () => {
+  it('should use name without policy_template prefix when policy_template is not stored on the input (single-template packages)', () => {
     expect(
       generateInputId({
         type: 'otelcol',
