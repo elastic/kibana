@@ -20,8 +20,6 @@ import {
   ConversationRoundStatus,
   ConversationRoundStepType,
   ToolResultType,
-  roundsToTimelineEvents,
-  timelineEventsToRounds,
 } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type {
@@ -158,21 +156,7 @@ function migrateRoundState(state: RoundState & { agent: LegacyAgentStateFields }
 export const fromEs = (document: Document): Conversation => {
   const base = convertBaseFromEs(document);
 
-  // New format: if `events` field is present, convert timeline events to rounds
-  if (document._source!.events && document._source!.events.length > 0) {
-    const rounds = timelineEventsToRounds(document._source!.events);
-    return {
-      ...base,
-      rounds,
-      ...(document._source!.attachments &&
-        document._source!.attachments.length > 0 && {
-          attachments: document._source!.attachments,
-        }),
-      ...(document._source!.state && { state: document._source!.state }),
-    };
-  }
-
-  // Legacy format: prefer 'rounds' field, fallback to 'conversation_rounds' field
+  // Migration: prefer legacy 'rounds' field, fallback to new 'conversation_rounds' field
   const rawRounds = document._source!.rounds ?? document._source!.conversation_rounds;
   const deserializedRounds = deserializeStepResults(rawRounds);
 
@@ -222,13 +206,6 @@ export const fromEsWithoutRounds = (document: Document): ConversationWithoutRoun
 };
 
 export const toEs = (conversation: Conversation, space: string): ConversationProperties => {
-  // Write both old and new formats for backward compatibility during transition
-  const events = roundsToTimelineEvents(
-    conversation.rounds,
-    conversation.user,
-    conversation.agent_id
-  );
-
   return {
     agent_id: conversation.agent_id,
     user_id: conversation.user.id,
@@ -237,11 +214,9 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     title: conversation.title,
     created_at: conversation.created_at,
     updated_at: conversation.updated_at,
-    // Legacy format (kept for rollback safety)
+    // Explicitly omit rounds to ensure migration
     rounds: undefined,
     conversation_rounds: serializeStepResults(conversation.rounds),
-    // New timeline format
-    events,
     attachments: conversation.attachments ?? [],
     state: conversation.state,
   };
@@ -279,9 +254,6 @@ export const createRequestToEs = ({
   creationDate: Date;
   space: string;
 }): ConversationProperties => {
-  // Write both old and new formats
-  const events = roundsToTimelineEvents(conversation.rounds, currentUser, conversation.agent_id);
-
   return {
     agent_id: conversation.agent_id,
     user_id: currentUser.id,
@@ -291,7 +263,6 @@ export const createRequestToEs = ({
     created_at: creationDate.toISOString(),
     updated_at: creationDate.toISOString(),
     conversation_rounds: serializeStepResults(conversation.rounds),
-    events,
     attachments: conversation.attachments ?? [],
     state: conversation.state,
   };

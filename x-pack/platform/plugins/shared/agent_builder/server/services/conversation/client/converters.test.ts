@@ -450,18 +450,10 @@ describe('conversation model converters', () => {
             },
           },
         ],
-        // New timeline format (dual-written)
-        events: expect.arrayContaining([
-          expect.objectContaining({ type: 'user_message', message: 'some message' }),
-          expect.objectContaining({ type: 'agent_response', agent_id: 'agent_id' }),
-        ]),
-        conversation_mode: undefined,
-        execution_state: 'idle',
         created_at: creationDate,
         updated_at: updateDate,
         // NEW: attachments defaults to empty array
         attachments: [],
-        state: undefined,
         // Legacy field explicitly set to undefined
         rounds: undefined,
       });
