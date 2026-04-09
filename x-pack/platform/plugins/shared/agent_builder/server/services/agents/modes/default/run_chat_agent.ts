@@ -19,6 +19,7 @@ import type {
   RoundInput,
   AgentExecutionEvent,
 } from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus, roundsToTimelineEvents } from '@kbn/agent-builder-common';
 import { isTimelineConversation } from '@kbn/agent-builder-common/chat';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
@@ -41,7 +42,7 @@ import {
 import { resolveCapabilities } from '../utils/capabilities';
 import { resolveConfiguration } from '../utils/configuration';
 import { ensureValidInput } from '../utils/preflight_checks';
-import { roundToActions } from '../utils/round_to_actions';
+import { executionToActions } from '../utils/execution_to_actions';
 import { computeContextBudget } from '../utils/context_budget';
 import { compactConversation } from '../utils/conversation_compactor';
 import { createAgentGraph } from './graph';
@@ -295,7 +296,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   // Use provided overrides, or fall back to pending agent response's overrides (for HITL resume)
   const effectiveOverrides = configurationOverrides ?? pendingExecution?.configuration_overrides;
-  const effectiveAgentId = agentId ?? conversation?.agent_id ?? 'default';
+  const effectiveAgentId = agentId ?? conversation?.agent_id ?? agentBuilderDefaultAgentId;
 
   const events$ = merge(graphEvents$, manualEvents$).pipe(
     addRoundCompleteEvent({
@@ -365,8 +366,8 @@ const createInitializerCommand = ({
     .find(isProcessedAgentExecutionEvent) as AgentExecutionEvent | undefined;
 
   if (lastAgentResponse?.status === ConversationRoundStatus.awaitingPrompt) {
-    initialState.mainActions = roundToActions({
-      round: lastAgentResponse,
+    initialState.mainActions = executionToActions({
+      execution: lastAgentResponse,
       toolIdMapping: agentBuilderToLangchainIdMap,
     });
 

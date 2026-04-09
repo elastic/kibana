@@ -6,31 +6,25 @@
  */
 
 import type { ToolIdMapping } from '@kbn/agent-builder-genai-utils/langchain';
-import type {
-  ConversationRound,
-  ToolCallStep,
-  AgentExecutionEvent,
-  ReasoningStep,
-} from '@kbn/agent-builder-common';
+import type { ToolCallStep, ReasoningStep, AgentExecution } from '@kbn/agent-builder-common';
 import { isReasoningStep } from '@kbn/agent-builder-common';
 import type { ResearchAgentAction } from '../default/actions';
 import { toolCallAction, executeToolAction } from '../default/actions';
 import { groupToolCallSteps } from './to_langchain_messages';
 
 /**
- * Converts a round or agent response event's steps into graph actions.
- * Both types share the same `steps` field shape.
+ * Converts an agent execution's steps into graph actions.
  */
-export const roundToActions = ({
-  round,
+export const executionToActions = ({
+  execution,
   toolIdMapping,
 }: {
-  round: ConversationRound | AgentExecutionEvent;
+  execution: AgentExecution;
   toolIdMapping: ToolIdMapping;
 }): ResearchAgentAction[] => {
   const actions: ResearchAgentAction[] = [];
-  const groups = groupToolCallSteps(round.steps);
-  const reasoningSteps = round.steps.filter(isReasoningStep);
+  const groups = groupToolCallSteps(execution.steps);
+  const reasoningSteps = execution.steps.filter(isReasoningStep);
 
   for (const group of groups) {
     const { completed, pending } = partitionGroupByCompletion(group);

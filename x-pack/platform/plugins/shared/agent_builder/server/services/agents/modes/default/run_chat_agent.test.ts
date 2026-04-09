@@ -22,7 +22,7 @@ jest.mock('../utils', () => ({
   selectTools: jest.fn(),
   extractRound: jest.fn(),
   extractAgentResponse: jest.fn(),
-  getPendingAgentResponse: jest.fn().mockReturnValue(undefined),
+  getPendingExecution: jest.fn().mockReturnValue(undefined),
   addRoundCompleteEvent: jest.fn(() => (source$: any) => source$),
   evictInternalEvents: jest.fn(() => (source$: any) => source$),
 }));
@@ -46,7 +46,7 @@ jest.mock('./convert_graph_events', () => ({
 const prepareConversationMock = prepareConversation as jest.MockedFn<typeof prepareConversation>;
 const selectToolsMock = selectTools as jest.MockedFn<typeof selectTools>;
 const extractRoundMock = extractRound as jest.MockedFn<typeof extractRound>;
-const getPendingAgentResponseMock = getPendingExecution as jest.MockedFn<
+const getPendingExecutionMock = getPendingExecution as jest.MockedFn<
   typeof getPendingExecution
 >;
 const createAgentGraphMock = createAgentGraph as jest.MockedFn<typeof createAgentGraph>;
@@ -67,7 +67,7 @@ describe('runDefaultAgentMode', () => {
     context.toolManager.getToolIdMapping.mockReturnValue(new Map());
     context.toolManager.getDynamicToolIds.mockReturnValue([]);
 
-    getPendingAgentResponseMock.mockReturnValue(undefined);
+    getPendingExecutionMock.mockReturnValue(undefined);
 
     const staticTools = [{ id: 'static-tool-1' } as ExecutableTool];
     const dynamicTools = [{ id: 'dynamic-tool-1' } as ExecutableTool];
