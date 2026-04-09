@@ -68,6 +68,9 @@ jest.mock('../../hooks/use_permissions');
 jest.mock('../../hooks/use_create_data_view');
 jest.mock('../../hooks/use_space');
 jest.mock('./components/slo_list_search_bar');
+jest.mock('./components/slo_sparkline', () => ({
+  SloSparkline: () => <div data-test-subj="mockedSparkline" />,
+}));
 jest.mock('@kbn/ebt-tools');
 
 const useGetSettingsMock = useGetSettings as jest.Mock;

@@ -9,6 +9,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { HostPanelHeader } from './header';
+import { RiskSeverity } from '../../../../common/search_strategy';
 
 const defaultLastSeen = {
   date: '2023-02-23T20:03:17.489Z',
@@ -77,23 +78,43 @@ describe('HostPanelHeader', () => {
     expect(queryByTestId('host-panel-header-observed-badge')).not.toBeInTheDocument();
   });
 
-  it('renders entity id when provided', () => {
+  it('renders entity store badge when isEntityInStore is true', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <HostPanelHeader {...mockProps} entityId="host-entity-uuid-123" />
+        <HostPanelHeader {...mockProps} isEntityInStore />
       </TestProviders>
     );
 
-    expect(getByTestId('host-panel-header-entity-id')).toHaveTextContent('host-entity-uuid-123');
+    expect(getByTestId('host-panel-header-observed-badge')).toHaveTextContent('Entity Store');
   });
 
-  it('does not render entity id when omitted', () => {
-    const { queryByTestId } = render(
+  it('renders observed badge text when isEntityInStore is false', () => {
+    const { getByTestId } = render(
       <TestProviders>
         <HostPanelHeader {...mockProps} />
       </TestProviders>
     );
 
-    expect(queryByTestId('host-panel-header-entity-id')).not.toBeInTheDocument();
+    expect(getByTestId('host-panel-header-observed-badge')).toHaveTextContent('Observed');
+  });
+
+  it('renders risk level badge when isEntityInStore and riskLevel are provided', () => {
+    const { getByText } = render(
+      <TestProviders>
+        <HostPanelHeader {...mockProps} isEntityInStore riskLevel={RiskSeverity.High} />
+      </TestProviders>
+    );
+
+    expect(getByText('Risk: High')).toBeInTheDocument();
+  });
+
+  it('does not render risk level badge when isEntityInStore is false', () => {
+    const { queryByText } = render(
+      <TestProviders>
+        <HostPanelHeader {...mockProps} riskLevel={RiskSeverity.High} />
+      </TestProviders>
+    );
+
+    expect(queryByText('Risk: High')).not.toBeInTheDocument();
   });
 });

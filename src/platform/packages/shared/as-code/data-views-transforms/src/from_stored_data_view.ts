@@ -27,7 +27,7 @@ export function fromStoredDataView(
 ): AsCodeDataView {
   if (!index) throw new Error('Cannot derive data view from empty index');
   if (typeof index === 'string') {
-    return { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: index };
+    return { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: index };
   }
   if (!index.title) throw new Error('Cannot derive data view without `title` or `id`');
   return {
