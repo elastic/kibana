@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { EuiButtonIcon } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PageScope } from '../../../data_view_manager/constants';
@@ -17,8 +16,6 @@ import {
   CorrelationsDetailsAlertsTable,
 } from './correlations_details_alerts_table';
 import { CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TEST_ID } from './test_ids';
-import { AttackDetailsPreviewPanelKey } from '../../../flyout/attack_details/constants/panel_keys';
-import { ATTACK_PREVIEW_BANNER } from '../../../flyout/attack_details/context';
 
 export interface RelatedAttacksProps {
   /**
@@ -33,47 +30,48 @@ export interface RelatedAttacksProps {
    * Id of the document
    */
   eventId: string;
+  /**
+   * Callback to open an attack preview when clicking the expand button.
+   * When not provided, the expand button column is hidden.
+   * // TODO make required once we have an attack flyout in the new flyout system
+   */
+  onShowAttack?: (id: string, indexName: string) => void;
 }
 
 /**
  * Show related attacks in an expandable panel with a table.
  */
-export const RelatedAttacks: React.FC<RelatedAttacksProps> = ({ attackIds, scopeId, eventId }) => {
+export const RelatedAttacks: React.FC<RelatedAttacksProps> = ({
+  attackIds,
+  scopeId,
+  eventId,
+  onShowAttack,
+}) => {
   const { dataView } = useDataView(PageScope.attacks);
-  const { openPreviewPanel } = useExpandableFlyoutApi();
   const attackIndexName = useMemo(() => dataView.getIndexPattern(), [dataView]);
-  const openAttackPreview = useCallback(
-    (attackId: string, indexName: string) => {
-      openPreviewPanel({
-        id: AttackDetailsPreviewPanelKey,
-        params: {
-          attackId,
-          indexName,
-          banner: ATTACK_PREVIEW_BANNER,
-        },
-      });
-    },
-    [openPreviewPanel]
-  );
   const columns = useMemo<Array<CorrelationsCustomTableColumn>>(
     () => [
-      {
-        render: (row: Record<string, unknown>) => (
-          <EuiButtonIcon
-            iconType="expand"
-            data-test-subj={`${CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TEST_ID}AlertPreviewButton`}
-            onClick={() => openAttackPreview(row.id as string, row.index as string)}
-            aria-label={i18n.translate(
-              'xpack.securitySolution.flyout.correlations.relatedAttacksPreviewButtonLabel',
-              {
-                defaultMessage: 'Preview attack with id {id}',
-                values: { id: row.id as string },
-              }
-            )}
-          />
-        ),
-        width: '5%',
-      },
+      ...(onShowAttack
+        ? [
+            {
+              render: (row: Record<string, unknown>) => (
+                <EuiButtonIcon
+                  iconType="expand"
+                  data-test-subj={`${CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TEST_ID}AlertPreviewButton`}
+                  onClick={() => onShowAttack(row.id as string, row.index as string)}
+                  aria-label={i18n.translate(
+                    'xpack.securitySolution.flyout.correlations.relatedAttacksPreviewButtonLabel',
+                    {
+                      defaultMessage: 'Preview attack with id {id}',
+                      values: { id: row.id as string },
+                    }
+                  )}
+                />
+              ),
+              width: '5%',
+            } as CorrelationsCustomTableColumn,
+          ]
+        : []),
       {
         field: 'kibana.alert.attack_discovery.title',
         name: (
@@ -111,7 +109,7 @@ export const RelatedAttacks: React.FC<RelatedAttacksProps> = ({ attackIds, scope
         render: (value: unknown) => (Array.isArray(value) ? value.length : ''),
       },
     ],
-    [openAttackPreview]
+    [onShowAttack]
   );
 
   return (

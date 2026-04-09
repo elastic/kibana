@@ -48,6 +48,7 @@ export class CPSServerPlugin implements Plugin<CPSServerSetup, CPSServerStart | 
 
   public start(core: CoreStart): CPSServerStart | undefined {
     const { cpsEnabled } = this.config$;
+    this.log.info(`Cross-project search (CPS) is ${cpsEnabled ? 'enabled' : 'disabled'}`);
 
     if (!cpsEnabled) {
       return undefined;
