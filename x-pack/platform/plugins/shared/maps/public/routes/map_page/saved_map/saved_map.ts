@@ -15,6 +15,7 @@ import type {
 import type { ScopedHistory } from '@kbn/core/public';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { Writable } from '@kbn/utility-types';
+import { fromStoredFilters } from '@kbn/as-code-filters-transforms';
 import type { AdhocDataView, MapAttributes } from '../../../../server';
 import {
   APP_ID,
@@ -544,7 +545,7 @@ export class SavedMap {
     return {
       adHocDataViews: await this._getAdHocDataViews(),
       center: getMapCenter(state),
-      filters: getFilters(state),
+      filters: fromStoredFilters(getFilters(state)) ?? [],
       isLayerTOCOpen: getIsLayerTOCOpen(state),
       layers: copyPersistentState(getLayerListRaw(state)),
       openTOCDetails: getOpenTOCDetails(state),

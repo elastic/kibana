@@ -6,7 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { storedFilterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
+import { querySchema, timeRangeSchema } from '@kbn/es-query-server';
+import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { layersSchema } from '../layer_schemas';
 import { settingsSchema } from './settings_schema';
@@ -41,7 +42,7 @@ export const mapAttributesSchema = schema.object(
     adHocDataViews: schema.maybe(schema.arrayOf(adhocDataViewSchema)),
     center: schema.maybe(mapCenterSchema),
     description: schema.maybe(schema.string()),
-    filters: schema.maybe(schema.arrayOf(storedFilterSchema)),
+    filters: schema.maybe(schema.arrayOf(asCodeFilterSchema)),
     isLayerTOCOpen: schema.maybe(
       schema.boolean({
         defaultValue: true,

@@ -7,6 +7,7 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { TimeRange } from '@kbn/es-query';
+import { fromStoredFilters } from '@kbn/as-code-filters-transforms';
 import type { MapAttributes, StoredMapAttributes } from '../../server';
 import { injectReferences } from '../migrations/references';
 import type { LayerDescriptor } from '../descriptor_types';
@@ -44,8 +45,15 @@ function parseMapStateJSON(mapStateJSON?: string) {
     parsedMapState,
     mapStateKeys
   ) as Partial<MapAttributes> & { refreshConfig: StoredRefreshInterval };
+
+  const convertedFilters =
+    'filters' in rest && Array.isArray((rest as Record<string, unknown>).filters)
+      ? fromStoredFilters((rest as Record<string, unknown>).filters as unknown[]) ?? []
+      : undefined;
+
   return {
     ...rest,
+    ...(convertedFilters !== undefined ? { filters: convertedFilters } : {}),
     ...(refreshConfig
       ? { refreshInterval: { pause: refreshConfig.isPaused, value: refreshConfig.interval } }
       : {}),
