@@ -6895,6 +6895,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/evals-suite-workflows@link:src/platform/packages/shared/kbn-evals-suite-workflows":
+  version "0.0.0"
+  uid ""
+
 "@kbn/evals@link:x-pack/platform/packages/shared/kbn-evals":
   version "0.0.0"
   uid ""
