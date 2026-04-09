@@ -12,10 +12,7 @@ import type { ESQLAstAllCommands, ESQLAstUserAgentCommand } from '@elastic/esql/
 import { isStringLiteral } from '@elastic/esql';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
-import {
-  getFieldsSuggestions,
-  getFunctionsSuggestions,
-} from '../../definitions/utils/autocomplete/helpers';
+import { suggestForExpression } from '../../definitions/utils/autocomplete/expressions';
 import { ESQL_STRING_TYPES } from '../../definitions/types';
 import {
   assignCompletionItem,
@@ -58,19 +55,24 @@ export async function autocomplete(
       return [assignCompletionItem];
 
     case UserAgentPosition.AFTER_ASSIGN: {
-      const fieldSuggestions = await getFieldsSuggestions(
-        [...ESQL_STRING_TYPES],
-        callbacks.getByType,
-        { addSpaceAfterField: true }
-      );
-      const functionSuggestions = getFunctionsSuggestions({
+      // Only pass expressionRoot when the cursor is inside an incomplete sub-expression.
+      // For empty / EDITOR_MARKER / cursor-at-end-of-complete cases, treat as empty.
+      const expressionRoot = userAgentCommand.expression?.incomplete
+        ? userAgentCommand.expression
+        : undefined;
+      const { suggestions } = await suggestForExpression({
+        query,
+        expressionRoot,
+        command,
+        cursorPosition,
         location: Location.EVAL,
-        types: [...ESQL_STRING_TYPES],
-        options: {},
         context,
         callbacks,
+        options: {
+          preferredExpressionType: [...ESQL_STRING_TYPES],
+        },
       });
-      return [...fieldSuggestions, ...functionSuggestions];
+      return suggestions;
     }
 
     case UserAgentPosition.AFTER_EXPRESSION:

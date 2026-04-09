@@ -93,7 +93,7 @@ describe('USER_AGENT Autocomplete', () => {
     // CONCAT() has no arguments — the expression is not meaningfully complete;
     // autocomplete should behave like AFTER_ASSIGN, not AFTER_EXPRESSION.
     await expectUserAgentSuggestionsContains(
-      'FROM a | USER_AGENT ua = CONCAT()',
+      'FROM a | USER_AGENT ua = CONCAT(',
       [
         'uaString ',
         ...getFunctionSignaturesByReturnType(Location.EVAL, ['keyword', 'text'], { scalar: true }),
@@ -102,7 +102,7 @@ describe('USER_AGENT Autocomplete', () => {
     );
     // WITH / pipe must NOT be offered here
     const results = await suggest(
-      'FROM a | USER_AGENT ua = CONCAT()',
+      'FROM a | USER_AGENT ua = CONCAT(',
       mockContext,
       'user_agent',
       mockCallbacks,
