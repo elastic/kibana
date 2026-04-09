@@ -66,7 +66,10 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
             filters.push(`(${userFilters.join(' OR ')})`);
           }
 
-          if (request.query.search) {
+          if (request.query.id) {
+            const idTerm = request.query.id.trim();
+            filters.push(`${savedQuerySavedObjectType}.attributes.id: "${escapeQuotes(idTerm)}"`);
+          } else if (request.query.search) {
             const searchTerm = escapeKuery(request.query.search.trim());
             if (searchTerm) {
               const searchFilter = [

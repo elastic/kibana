@@ -63,6 +63,9 @@ export class ServiceDetailsPage {
     await this.page
       .getByTestId('superDatePickerToggleQuickMenuButton')
       .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await this.page
+      .getByTestId('apmMainTemplateServiceAgentLoader')
+      .waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });
   }
 
   // #region Mobile Services

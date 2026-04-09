@@ -15,6 +15,11 @@ test.describe(
   'Advanced tab permissions - Wired streams',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
+    test.beforeAll(async ({ apiServices }) => {
+      // Ensure logs.otel has a backing data stream (deferred by default) so stream tabs render
+      await apiServices.streams.restoreDataStream('logs.otel');
+    });
+
     test.beforeEach(async ({ pageObjects }) => {
       // Navigate to the wired stream's retention tab (a tab that's always visible)
       await pageObjects.streams.gotoDataRetentionTab(WIRED_STREAM);

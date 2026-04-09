@@ -58,7 +58,7 @@ export const LicensePaywallCard = React.memo(() => {
                 href={getUrlForApp('management', { path: 'stack/license_management' })}
                 fill
               >
-                {i18n.ENTERPRISE_LICENSE_UPGRADE_BUTTON}
+                {i18n.ENTERPRISE_LICENSE_MANAGE_BUTTON}
               </EuiButton>
             </div>
           </EuiFlexItem>
