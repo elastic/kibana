@@ -516,7 +516,7 @@ GET /api/workflows/stats
 #### Get Workflow Aggregations
 
 ```http
-GET /api/workflows/aggs?fields=field1&fields=field2
+GET /api/workflows/aggs?fields=[field1,field2]
 ```
 
 **Query Parameters:**
