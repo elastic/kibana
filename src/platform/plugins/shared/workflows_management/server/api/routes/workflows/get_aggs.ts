@@ -16,6 +16,7 @@ import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
 import { withLicenseCheck } from '../utils/with_license_check';
 
 const MAX_AGG_FIELDS = 25;
+const FIELDS_DENY_LIST = new Set(['_id', '_index', '_score', '_source']);
 
 export function registerGetAggsRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
@@ -41,7 +42,13 @@ export function registerGetAggsRoute({ router, api, spaces }: RouteDependencies)
           request: {
             query: schema.object({
               fields: schema.arrayOf(
-                schema.string({ meta: { description: 'Field name to aggregate.' } }),
+                schema.string({
+                  meta: { description: 'Field name to aggregate.' },
+                  validate: (field) =>
+                    !FIELDS_DENY_LIST.has(field)
+                      ? undefined
+                      : 'Field is not allowed for aggregation.',
+                }),
                 {
                   maxSize: MAX_AGG_FIELDS,
                   meta: { description: 'Fields to aggregate on.' },
