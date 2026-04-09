@@ -10,7 +10,8 @@
 import type { ObjectType, Props, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { DataGridDensity } from '@kbn/discover-utils';
-import { aggregateQuerySchema, querySchema } from '@kbn/es-query-server';
+import { asCodeQuerySchema } from '@kbn/as-code-shared-schemas';
+import { aggregateQuerySchema } from '@kbn/es-query-server';
 import {
   BY_REF_SCHEMA_META,
   BY_VALUE_SCHEMA_META,
@@ -300,7 +301,7 @@ const classicTabSchema = schema.allOf([
   dataTableSchema,
   dataTableLimitsSchema,
   schema.object({
-    query: schema.maybe(querySchema),
+    query: schema.maybe(asCodeQuerySchema),
     filters: schema.arrayOf(asCodeFilterSchema, {
       maxSize: 100,
       defaultValue: [],
