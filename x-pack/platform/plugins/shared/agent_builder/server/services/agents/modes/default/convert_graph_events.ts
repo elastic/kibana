@@ -52,21 +52,21 @@ export type ConvertedEvents = ChatAgentEvent | InternalEvent;
 export const convertGraphEvents = ({
   graphName,
   toolManager,
-  pendingAgentResponse,
+  pendingExecution,
   logger,
   startTime,
 }: {
   graphName: string;
   toolManager: ToolManager;
-  pendingAgentResponse: AgentExecutionEvent | undefined;
+  pendingExecution: AgentExecutionEvent | undefined;
   logger: Logger;
   startTime: Date;
 }): OperatorFunction<LangchainStreamEvent, ConvertedEvents> => {
   return (streamEvents$) => {
     const toolCallIdToIdMap = new Map<string, string>();
 
-    if (pendingAgentResponse) {
-      const toolCalls = pendingAgentResponse.steps.filter(isToolCallStep);
+    if (pendingExecution) {
+      const toolCalls = pendingExecution.steps.filter(isToolCallStep);
       toolCalls.forEach((toolCall) => {
         toolCallIdToIdMap.set(toolCall.tool_call_id, toolCall.tool_id);
       });

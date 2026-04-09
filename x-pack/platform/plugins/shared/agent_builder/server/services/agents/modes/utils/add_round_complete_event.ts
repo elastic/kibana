@@ -61,7 +61,7 @@ const isStepEvent = (event: SourceEvents): event is StepEvents => {
 };
 
 export const addRoundCompleteEvent = ({
-  pendingAgentResponse,
+  pendingExecution,
   agentId,
   userInput,
   startTime,
@@ -73,7 +73,7 @@ export const addRoundCompleteEvent = ({
   configurationOverrides,
   compactionResult,
 }: {
-  pendingAgentResponse: AgentExecutionEvent | undefined;
+  pendingExecution: AgentExecutionEvent | undefined;
   agentId: string;
   userInput: RoundInput;
   startTime: Date;
@@ -96,9 +96,9 @@ export const addRoundCompleteEvent = ({
           const attachmentRefs = attachmentStateManager.getAccessedRefs();
 
           // Build AgentExecutionEvent first (the new canonical output)
-          const agentResponse = pendingAgentResponse
+          const agentResponse = pendingExecution
             ? resumeAgentResponse({
-                pendingAgentResponse,
+                pendingExecution,
                 events,
                 agentId,
                 startTime,
@@ -141,7 +141,7 @@ export const addRoundCompleteEvent = ({
             type: ChatEventType.roundComplete,
             data: {
               round,
-              resumed: pendingAgentResponse !== undefined,
+              resumed: pendingExecution !== undefined,
               conversation_state: getConversationState(),
               attachments: attachmentStateManager.getAll(),
             },
@@ -155,7 +155,7 @@ export const addRoundCompleteEvent = ({
 };
 
 const resumeAgentResponse = ({
-  pendingAgentResponse,
+  pendingExecution,
   events,
   agentId,
   startTime,
@@ -164,7 +164,7 @@ const resumeAgentResponse = ({
   configurationOverrides,
   compactionResult,
 }: {
-  pendingAgentResponse: AgentExecutionEvent;
+  pendingExecution: AgentExecutionEvent;
   events: SourceEvents[];
   agentId: string;
   startTime: Date;
@@ -174,7 +174,7 @@ const resumeAgentResponse = ({
   compactionResult?: CompactedConversation;
 }): AgentExecutionEvent => {
   // Replay tool events for all pending steps (those with empty results)
-  const pendingSteps = pendingAgentResponse.steps
+  const pendingSteps = pendingExecution.steps
     .filter(isToolCallStep)
     .filter((step) => step.results.length === 0);
 
@@ -201,7 +201,7 @@ const resumeAgentResponse = ({
     compactionResult,
   });
 
-  return mergeAgentResponses(pendingAgentResponse, followUp);
+  return mergeAgentResponses(pendingExecution, followUp);
 };
 
 const mergeAgentResponses = (

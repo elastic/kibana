@@ -115,11 +115,11 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   ensureValidInput({ input: nextInput, timelineEvents, action });
 
-  const pendingAgentResponse = getPendingAgentResponse(timelineEvents);
-  const conversationTimestamp = pendingAgentResponse?.started_at ?? startTime.toISOString();
+  const pendingExecution = getPendingAgentResponse(timelineEvents);
+  const conversationTimestamp = pendingExecution?.started_at ?? startTime.toISOString();
 
   // Only clear access tracking for a brand new round; keep it when resuming (HITL).
-  if (!pendingAgentResponse) {
+  if (!pendingExecution) {
     context.attachmentStateManager.clearAccessTracking();
   }
 
@@ -283,7 +283,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       toolManager,
       logger,
       startTime,
-      pendingAgentResponse,
+      pendingExecution,
     }),
     finalize(() => manualEvents$.complete())
   );
@@ -295,7 +295,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   // Use provided overrides, or fall back to pending agent response's overrides (for HITL resume)
   const effectiveOverrides =
-    configurationOverrides ?? pendingAgentResponse?.configuration_overrides;
+    configurationOverrides ?? pendingExecution?.configuration_overrides;
   const effectiveAgentId = agentId ?? conversation?.agent_id ?? 'default';
 
   const events$ = merge(graphEvents$, manualEvents$).pipe(
@@ -308,7 +308,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
           toolManager,
           compactionSummary: compactionResult.summary,
         }),
-      pendingAgentResponse,
+      pendingExecution,
       startTime,
       modelProvider,
       stateManager,
