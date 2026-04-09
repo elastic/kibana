@@ -30,6 +30,7 @@ import { AllRules } from '../../components/rules_table';
 import { RulesTableContextProvider } from '../../components/rules_table/rules_table/rules_table_context';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { RuleUpdateCallouts } from '../../components/rule_update_callouts/rule_update_callouts';
+import { useDeprecatedRulesTableCallout } from '../../../rule_management/components/rule_deprecation';
 import { RuleImportModal } from '../../components/rule_import_modal/rule_import_modal';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { CreateRuleMenu } from '../../components/create_rule_menu';
@@ -65,6 +66,7 @@ const RulesPageContent = () => {
   const aiRuleCreationEnabled = useIsExperimentalFeatureEnabled('aiRuleCreationEnabled');
   const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
   const isAiRuleCreationAvailable = aiRuleCreationEnabled && isAgentBuilderEnabled;
+  const deprecatedRulesCallout = useDeprecatedRulesTableCallout();
 
   if (
     redirectToDetections(
@@ -118,6 +120,7 @@ const RulesPageContent = () => {
                     iconType="download"
                     isDisabled={isImportValueListDisabled}
                     onClick={showValueListFlyout}
+                    aria-label={`${i18n.IMPORT_VALUE_LISTS}: ${i18n.UPLOAD_VALUE_LISTS_TOOLTIP}`}
                   >
                     {i18n.IMPORT_VALUE_LISTS}
                   </EuiButtonEmpty>
@@ -155,6 +158,7 @@ const RulesPageContent = () => {
           )}
           <RuleUpdateCallouts shouldShowUpdateRulesCallout={canEditRules} />
           <EuiSpacer size="s" />
+          {deprecatedRulesCallout}
           <MaintenanceWindowCallout
             kibanaServices={kibanaServices}
             categories={[DEFAULT_APP_CATEGORIES.security.id]}

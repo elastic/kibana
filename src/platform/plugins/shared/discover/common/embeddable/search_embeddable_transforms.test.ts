@@ -60,7 +60,7 @@ describe('searchEmbeddableTransforms', () => {
         title: 'Test Title',
         description: 'Test Description',
         time_range: { from: 'now-15m', to: 'now' },
-        discover_session_id: 'session-123',
+        ref_id: 'session-123',
         selected_tab_id: undefined,
         overrides: {},
       });
@@ -139,7 +139,7 @@ describe('searchEmbeddableTransforms', () => {
       expect(density).toBe(DataGridDensity.COMPACT);
       expect(dataSource).toEqual({
         type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-        id: 'data-view-1',
+        ref_id: 'data-view-1',
       });
       expect(mockDrilldownTransforms.transformOut).toHaveBeenCalledWith(state, references);
     });
@@ -161,8 +161,26 @@ describe('searchEmbeddableTransforms', () => {
       expect(result).toMatchObject({
         title: 'Test Title',
         description: 'Test Description',
-        discover_session_id: 'session-xyz',
+        ref_id: 'session-xyz',
       });
+    });
+
+    it('transforms by-reference state', () => {
+      const state: StoredSearchEmbeddableState = {
+        title: 'Test Title',
+        description: 'Test Description',
+      };
+      const result = getSearchEmbeddableTransforms(
+        mockDrilldownTransforms,
+        whenDisabled
+      ).transformOut?.(state, [
+        {
+          id: '2f360f30-ea74-11eb-b4c6-3d2afc1cb389',
+          name: 'savedObjectRef',
+          type: 'search',
+        },
+      ]);
+      expect(result).toEqual({ ...state, savedObjectId: '2f360f30-ea74-11eb-b4c6-3d2afc1cb389' });
     });
   });
 
@@ -173,7 +191,7 @@ describe('searchEmbeddableTransforms', () => {
           title: 'Test Search',
           description: 'Test Description',
           time_range: { from: 'now-15m', to: 'now' },
-          discover_session_id: 'test-saved-object-id',
+          ref_id: 'test-saved-object-id',
           selected_tab_id: undefined,
           overrides: {},
         };
@@ -201,7 +219,7 @@ describe('searchEmbeddableTransforms', () => {
           title: 'My Search',
           description: 'My description',
           time_range: { from: 'now-1h', to: 'now' },
-          discover_session_id: 'session-456',
+          ref_id: 'session-456',
           selected_tab_id: 'tab-1',
           overrides: {},
         };
@@ -243,7 +261,7 @@ describe('searchEmbeddableTransforms', () => {
               filters: [],
               rows_per_page: 100,
               sample_size: 1000,
-              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'data-view-1' },
+              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'data-view-1' },
             },
           ],
         };
@@ -281,7 +299,7 @@ describe('searchEmbeddableTransforms', () => {
               row_height: 3,
               query: { language: 'kuery', query: '' },
               filters: [],
-              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'data-view-id-123' },
+              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'data-view-id-123' },
             },
           ],
         };

@@ -30,7 +30,6 @@ import {
 const SOURCE_TYPE_INDEX = 'index';
 const METADATA_KEYWORD = 'METADATA';
 const EMPTY_EXTENSIONS = { recommendedFields: [], recommendedQueries: [] };
-const PIPE_SORT_TEXT = '0';
 
 export async function autocomplete(
   query: string,
@@ -147,11 +146,7 @@ async function suggestNextActions(
   context: ICommandContext | undefined,
   callbacks: ICommandCallbacks | undefined
 ): Promise<ISuggestionItem[]> {
-  const suggestions: ISuggestionItem[] = [
-    { ...pipeCompleteItem, sortText: PIPE_SORT_TEXT },
-    commaCompleteItem,
-    metadataSuggestion,
-  ];
+  const suggestions: ISuggestionItem[] = [pipeCompleteItem, commaCompleteItem, metadataSuggestion];
 
   const recommendedQueries = await getRecommendedQueriesSuggestions(
     context?.editorExtensions ?? EMPTY_EXTENSIONS,

@@ -370,13 +370,8 @@
       "groupingMode": {
         "type": "keyword"
       },
-      "throttle": {
-        "type": "object",
-        "properties": {
-          "strategy": {
-            "type": "keyword"
-          }
-        }
+      "tags": {
+        "type": "keyword"
       },
       "name": {
         "fields": {
@@ -389,6 +384,14 @@
       },
       "snoozedUntil": {
         "type": "date"
+      },
+      "throttle": {
+        "properties": {
+          "strategy": {
+            "type": "keyword"
+          }
+        },
+        "type": "object"
       },
       "updatedAt": {
         "type": "date"
@@ -442,13 +445,18 @@
           "description": {
             "type": "text"
           },
-          "labels": {
-            "type": "keyword"
-          },
           "name": {
+            "fields": {
+              "keyword": {
+                "type": "keyword"
+              }
+            },
             "type": "text"
           },
           "owner": {
+            "type": "keyword"
+          },
+          "tags": {
             "type": "keyword"
           }
         }
@@ -1334,31 +1342,6 @@
       }
     }
   },
-  "data_connector": {
-    "dynamic": false,
-    "properties": {
-      "kscIds": {
-        "type": "keyword"
-      },
-      "name": {
-        "fields": {
-          "keyword": {
-            "type": "keyword"
-          }
-        },
-        "type": "text"
-      },
-      "toolIds": {
-        "type": "keyword"
-      },
-      "type": {
-        "type": "keyword"
-      },
-      "workflowIds": {
-        "type": "keyword"
-      }
-    }
-  },
   "data_stream-config": {
     "dynamic": false,
     "properties": {
@@ -1370,6 +1353,9 @@
       },
       "integration_id": {
         "type": "keyword"
+      },
+      "title": {
+        "type": "text"
       },
       "job_info": {
         "properties": {
@@ -2229,6 +2215,9 @@
       "is_protected": {
         "type": "boolean"
       },
+      "is_verifier": {
+        "type": "boolean"
+      },
       "keep_monitoring_alive": {
         "type": "boolean"
       },
@@ -2309,6 +2298,15 @@
       },
       "vars": {
         "type": "flattened"
+      },
+      "verification_failed_at": {
+        "type": "date"
+      },
+      "verification_started_at": {
+        "type": "date"
+      },
+      "verification_status": {
+        "type": "keyword"
       }
     }
   },
@@ -2669,6 +2667,9 @@
       "is_protected": {
         "type": "boolean"
       },
+      "is_verifier": {
+        "type": "boolean"
+      },
       "keep_monitoring_alive": {
         "type": "boolean"
       },
@@ -2847,6 +2848,9 @@
       },
       "name": {
         "type": "keyword"
+      },
+      "otel_exporter_config_yaml": {
+        "type": "text"
       },
       "output_id": {
         "index": false,

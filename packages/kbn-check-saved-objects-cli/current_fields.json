@@ -112,6 +112,7 @@
     "groupingMode",
     "name",
     "snoozedUntil",
+    "tags",
     "throttle",
     "throttle.strategy",
     "updatedAt",
@@ -131,9 +132,9 @@
     "kind",
     "metadata",
     "metadata.description",
-    "metadata.labels",
     "metadata.name",
     "metadata.owner",
+    "metadata.tags",
     "no_data",
     "no_data.behavior",
     "no_data.timeframe",
@@ -388,13 +389,6 @@
     "title",
     "version"
   ],
-  "data_connector": [
-    "kscIds",
-    "name",
-    "toolIds",
-    "type",
-    "workflowIds"
-  ],
   "data_stream-config": [
     "created_by",
     "data_stream_id",
@@ -404,7 +398,8 @@
     "job_info.job_type",
     "job_info.status",
     "metadata",
-    "result"
+    "result",
+    "title"
   ],
   "dynamic-config-overrides": [],
   "endpoint:unified-user-artifact-manifest": [
@@ -662,6 +657,7 @@
     "is_managed",
     "is_preconfigured",
     "is_protected",
+    "is_verifier",
     "keep_monitoring_alive",
     "min_agent_version",
     "monitoring_enabled",
@@ -687,7 +683,10 @@
     "namespace",
     "packagePolicyCount",
     "updated_at",
-    "vars"
+    "vars",
+    "verification_failed_at",
+    "verification_started_at",
+    "verification_status"
   ],
   "fleet-fleet-server-host": [
     "host_urls",
@@ -804,6 +803,7 @@
     "is_managed",
     "is_preconfigured",
     "is_protected",
+    "is_verifier",
     "keep_monitoring_alive",
     "min_agent_version",
     "monitoring_diagnostics",
@@ -859,6 +859,7 @@
     "is_preconfigured",
     "key",
     "name",
+    "otel_exporter_config_yaml",
     "output_id",
     "partition",
     "password",
