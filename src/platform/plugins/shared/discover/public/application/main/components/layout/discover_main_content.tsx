@@ -27,7 +27,6 @@ import { PatternAnalysisTab } from '../pattern_analysis/pattern_analysis_tab';
 import { PATTERN_ANALYSIS_VIEW_CLICK } from '../pattern_analysis/constants';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import type { SidebarToggleState } from '../../../types';
-import { DataInsightsButton } from './data_insights_button';
 import {
   internalStateActions,
   useCurrentTabAction,
@@ -123,7 +122,7 @@ export const DiscoverMainContent = ({
 
   const renderViewModeToggle = useCallback(
     (patternCount?: number) => {
-      const toggle = (
+      return (
         <DocumentViewModeToggle
           viewMode={viewMode}
           isEsqlMode={isEsqlMode}
@@ -141,19 +140,6 @@ export const DiscoverMainContent = ({
             ) : undefined
           }
         />
-      );
-
-      if (!isEsqlMode) {
-        return toggle;
-      }
-
-      return (
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>{toggle}</EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <DataInsightsButton />
-          </EuiFlexItem>
-        </EuiFlexGroup>
       );
     },
     [

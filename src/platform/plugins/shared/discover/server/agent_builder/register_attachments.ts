@@ -63,34 +63,7 @@ const createEsqlQueryResultsAttachmentType = (): AttachmentTypeDefinition => {
     },
     getTools: () => [platformCoreTools.generateEsql, platformCoreTools.executeEsql],
     getAgentDescription: () => {
-      return `You have access to ES|QL query results from Kibana Discover. The attachment includes the query, column metadata, a small sample of rows, the total result count, and the time range.
-
-IMPORTANT: The sample rows are only provided to help you understand the data schema and value formats. They are NOT sufficient for statistical analysis. To identify real patterns, trends, and anomalies, you MUST run aggregation queries against the full dataset using the executeEsql tool.
-
-Structure your response as follows:
-
-## Overview
-Summarize what the data represents based on the query, columns, and sample values. Mention the total result count and time range if available.
-
-## Deep Analysis
-Proactively run 2-3 aggregation queries using the executeEsql tool to analyze the full dataset. Choose queries based on what would be most insightful for this data — for example:
-- Distribution of values across key categorical fields (STATS COUNT(*) BY field)
-- Time-based trends if a timestamp field exists (STATS ... BY BUCKET(@timestamp, ...))
-- Min/max/avg of numeric fields
-- Error rates, status distributions, or top-N rankings
-
-Present the results of each query with your interpretation of what they reveal: patterns, trends, anomalies, or notable findings.
-
-## Suggested Queries
-After your analysis, suggest exactly 3 additional ES|QL queries using the generateEsql tool for the user to explore further. Each should have a different analytical focus:
-1. An aggregation query (using STATS with COUNT, AVG, SUM, etc.)
-2. A filtering/drill-down query (using WHERE to explore interesting subsets)
-3. A time-based analysis query (using STATS ... BY BUCKET(@timestamp, ...) to show trends over time). If no timestamp field is present, replace this with a top-N ranking or cross-field comparison.
-
-For each suggested query, call the generateEsql tool with a natural language description of what the query should do. Include the source index from the original query in your description.
-
-## Opening Queries in Discover
-If the user asks to open a query in Discover (e.g. "open query 2 in Discover"), use the discover_open_esql_query_in_new_tab tool to open it in a new Discover tab. After listing your suggested queries, let the user know they can ask you to open any of them in Discover.`;
+      return `This attachment contains ES|QL query results from Kibana Discover: the query text, column metadata, a small sample of rows for schema understanding, the total result count, and the time range. Use the sample rows only to understand the data schema — run executeEsql for actual analysis.`;
     },
   };
 };
@@ -98,6 +71,8 @@ If the user asks to open a query in Discover (e.g. "open query 2 in Discover"), 
 const formatQueryResultsData = (data: EsqlQueryResultsData): string => {
   const lines: string[] = [];
 
+  lines.push('=== ES|QL QUERY RESULTS FROM DISCOVER ===');
+  lines.push('');
   lines.push(`ES|QL Query: ${data.query}`);
   lines.push(`Total Results: ${data.totalHits}`);
   if (data.timeRange) {
@@ -123,7 +98,33 @@ const formatQueryResultsData = (data: EsqlQueryResultsData): string => {
     lines.push(`  { ${entries} }`);
   }
 
+  lines.push('');
+  lines.push('=== ANALYSIS INSTRUCTIONS ===');
+  lines.push(
+    'When asked to analyze this data, you MUST first run 2-3 aggregation queries using the executeEsql tool against the full dataset BEFORE writing your response.'
+  );
+  lines.push(
+    'The sample rows above are only for understanding the schema. Base your analysis on actual aggregation results, not the sample.'
+  );
+  lines.push('Examples of useful aggregations:');
+  lines.push(
+    `  - FROM ${getSourceIndex(data.query)} | STATS count = COUNT(*) BY <categorical_field>`
+  );
+  lines.push(
+    `  - FROM ${getSourceIndex(data.query)} | STATS count = COUNT(*) BY BUCKET(@timestamp, 1h)`
+  );
+  lines.push(
+    `  - FROM ${getSourceIndex(
+      data.query
+    )} | STATS avg_val = AVG(<numeric_field>), max_val = MAX(<numeric_field>)`
+  );
+
   return lines.join('\n');
+};
+
+const getSourceIndex = (query: string): string => {
+  const match = query.match(/FROM\s+(\S+)/i);
+  return match ? match[1] : 'index';
 };
 
 export const registerAttachments = (agentBuilder: AgentBuilderPluginSetup) => {
