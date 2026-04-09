@@ -211,6 +211,100 @@ describe('createSkillRegistry', () => {
     });
   });
 
+  describe('list with includePlugins filter', () => {
+    const pluginSkill = createMockInternalSkillDefinition({
+      id: 'plugin-skill-1',
+      name: 'plugin-skill-1-name',
+      readonly: false,
+      plugin_id: 'my-plugin',
+    });
+
+    it('excludes plugin skills by default (no options)', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([builtinSkill1]),
+        persistedProvider: createMockPersistedProvider([persistedSkill1, pluginSkill]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+      });
+
+      const result = await registry.list();
+      expect(result.find((s) => s.id === 'plugin-skill-1')).toBeUndefined();
+      expect(result).toHaveLength(2);
+    });
+
+    it('excludes plugin skills when includePlugins is false', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([builtinSkill1]),
+        persistedProvider: createMockPersistedProvider([persistedSkill1, pluginSkill]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+      });
+
+      const result = await registry.list({ includePlugins: false });
+      expect(result.find((s) => s.id === 'plugin-skill-1')).toBeUndefined();
+      expect(result).toHaveLength(2);
+    });
+
+    it('includes plugin skills when includePlugins is true', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([builtinSkill1]),
+        persistedProvider: createMockPersistedProvider([persistedSkill1, pluginSkill]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+      });
+
+      const result = await registry.list({ includePlugins: true });
+      expect(result.find((s) => s.id === 'plugin-skill-1')).toBeDefined();
+      expect(result).toHaveLength(3);
+    });
+
+    it('always returns non-plugin skills regardless of the flag', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([builtinSkill1]),
+        persistedProvider: createMockPersistedProvider([persistedSkill1]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+      });
+
+      const withFlag = await registry.list({ includePlugins: true });
+      const withoutFlag = await registry.list({ includePlugins: false });
+
+      expect(withFlag).toHaveLength(2);
+      expect(withoutFlag).toHaveLength(2);
+    });
+
+    it('excludes plugin skills from built-in type filter', async () => {
+      const builtinPluginSkill = createMockInternalSkillDefinition({
+        id: 'builtin-plugin-skill',
+        readonly: true,
+        plugin_id: 'my-plugin',
+      });
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([builtinSkill1, builtinPluginSkill]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+      });
+
+      const result = await registry.list({ type: 'built-in' });
+      expect(result.find((s) => s.id === 'builtin-plugin-skill')).toBeUndefined();
+      expect(result).toHaveLength(1);
+    });
+
+    it('excludes plugin skills from persisted type filter', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([]),
+        persistedProvider: createMockPersistedProvider([persistedSkill1, pluginSkill]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+      });
+
+      const result = await registry.list({ type: 'persisted' });
+      expect(result.find((s) => s.id === 'plugin-skill-1')).toBeUndefined();
+      expect(result).toHaveLength(1);
+    });
+  });
+
   describe('list with summaryOnly', () => {
     it('forwards options to both providers', async () => {
       const builtinProvider = createMockBuiltinProvider([builtinSkill1]);

@@ -7,34 +7,51 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { SavedObjectReference } from '@kbn/core/server';
+import { isQueryAnnotationConfig, isRangeAnnotationConfig } from '@kbn/event-annotation-common';
+import type { AvailableReferenceLineIcon } from '@kbn/expression-xy-plugin/common';
 import type {
   FormBasedLayer,
   SeriesType,
   TextBasedLayer,
   XYAnnotationLayerConfig,
+  XYByValueAnnotationLayerConfig,
   XYDataLayerConfig,
+  XYPersistedAnnotationLayerConfig,
   XYReferenceLineLayerConfig,
   YConfig,
 } from '@kbn/lens-common';
-import { AvailableReferenceLineIcons } from '@kbn/lens-common';
-import type { SavedObjectReference } from '@kbn/core/server';
-import type { AvailableReferenceLineIcon } from '@kbn/expression-xy-plugin/common';
-import { isRangeAnnotationConfig, isQueryAnnotationConfig } from '@kbn/event-annotation-common';
-import { isEsqlTableTypeDataset } from '../../../utils';
-import type { DatasetType } from '../../../schema/dataset';
-import { LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE } from '../../../schema/constants';
-import type { LensApiStaticValueOperation } from '../../../schema/metric_ops';
+import {
+  AvailableReferenceLineIcons,
+  isPersistedByReferenceAnnotationsLayer,
+  isPersistedLinkedByValueAnnotationsLayer,
+} from '@kbn/lens-common';
+import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type {
-  DataLayerType,
-  ReferenceLineLayerType,
+  AnnotationLayerByValueType,
   AnnotationLayerType,
+  DataLayerType,
   DataLayerTypeESQL,
   DataLayerTypeNoESQL,
+  ReferenceLineLayerType,
   ReferenceLineLayerTypeESQL,
   ReferenceLineLayerTypeNoESQL,
 } from '../../../schema/charts/xy';
+import { LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE } from '../../../schema/constants';
+import type { DataSourceType } from '../../../schema/data_source';
+import type { LensApiStaticValueOperation } from '../../../schema/metric_ops';
+import { isEsqlTableTypeDataSource } from '../../../utils';
+import { fromColorMappingLensStateToAPI, fromStaticColorLensStateToAPI } from '../../coloring';
+import { getValueApiColumn } from '../../columns/esql_column';
+import { toApiFilterLanguage } from '../../columns/filter';
 import {
-  buildDatasetState,
+  isAPIColumnOfBucketType,
+  isAPIColumnOfReferenceType,
+  isAPIColumnOfType,
+} from '../../columns/utils';
+import {
+  buildDataSourceState,
   generateApiLayer,
   isDataViewSpec,
   isFormBasedLayer,
@@ -43,27 +60,29 @@ import {
   operationFromColumn,
 } from '../../utils';
 import { stripUndefined } from '../utils';
-import { getValueApiColumn } from '../../columns/esql_column';
-import { fromColorMappingLensStateToAPI, fromStaticColorLensStateToAPI } from '../../coloring';
-import {
-  isAPIColumnOfBucketType,
-  isAPIColumnOfReferenceType,
-  isAPIColumnOfType,
-} from '../../columns/utils';
+import { getYAccessorAxisModeMap, type ResolveAxisId } from './chart';
+import { xyIconCompat } from './helpers';
 
 function convertDataLayerToAPI(
   visualization: XYDataLayerConfig,
-  layer: Omit<FormBasedLayer, 'indexPatternId'>
-): Omit<DataLayerTypeNoESQL, 'type' | 'dataset'>;
+  layer: Omit<FormBasedLayer, 'indexPatternId'>,
+  resolveAxisId: ResolveAxisId
+): Omit<DataLayerTypeNoESQL, 'type' | 'data_source'>;
 function convertDataLayerToAPI(
   visualization: XYDataLayerConfig,
-  layer: TextBasedLayer
-): Omit<DataLayerTypeESQL, 'type' | 'dataset'>;
+  layer: TextBasedLayer,
+  resolveAxisId: ResolveAxisId
+): Omit<DataLayerTypeESQL, 'type' | 'data_source'>;
 function convertDataLayerToAPI(
   visualization: XYDataLayerConfig,
-  layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer
-): Omit<DataLayerTypeNoESQL, 'type' | 'dataset'> | Omit<DataLayerTypeESQL, 'type' | 'dataset'> {
+  layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
+  resolveAxisId: ResolveAxisId
+):
+  | Omit<DataLayerTypeNoESQL, 'type' | 'data_source'>
+  | Omit<DataLayerTypeESQL, 'type' | 'data_source'> {
   const yConfigMap = new Map(visualization.yConfig?.map((y) => [y.forAccessor, y]));
+  const yAccessorModesMap = getYAccessorAxisModeMap(visualization, (accessor) => accessor);
+
   if (isFormBasedLayer(layer)) {
     const x = visualization.xAccessor
       ? operationFromColumn(visualization.xAccessor, layer)
@@ -95,6 +114,7 @@ function convertDataLayerToAPI(
             return undefined;
           }
           const yConfig = yConfigMap.get(accessor);
+
           return {
             ...apiOperation,
             ...(visualization.colorMapping
@@ -104,6 +124,7 @@ function convertDataLayerToAPI(
                   color: fromStaticColorLensStateToAPI(yConfig.color),
                 }
               : {}),
+            axis_id: resolveAxisId(yAccessorModesMap.get(accessor) ?? 'left'),
           };
         })
         .filter(nonNullable) ?? [];
@@ -143,6 +164,7 @@ function convertDataLayerToAPI(
     return {
       ...getValueApiColumn(accessor, layer),
       ...(color ? { color: fromStaticColorLensStateToAPI(color) } : {}),
+      axis_id: resolveAxisId(yAccessorModesMap.get(accessor) ?? 'left'),
     };
   });
 
@@ -185,29 +207,30 @@ export function buildAPIDataLayer(
   layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   adHocDataViews: Record<string, unknown>,
   references: SavedObjectReference[],
-  adhocReferences?: SavedObjectReference[]
+  adhocReferences: SavedObjectReference[] | undefined,
+  resolveAxisId: ResolveAxisId
 ): DataLayerType {
   const type = convertSeriesTypeToAPIFormat(visualization.seriesType);
   if (isTextBasedLayer(layer)) {
-    const dataset = buildDatasetState(
+    const dataSource = buildDataSourceState(
       layer,
       visualization.layerId,
       adHocDataViews,
       references,
       adhocReferences
     );
-    const baseLayer = convertDataLayerToAPI(visualization, layer);
-    if (isEsqlTableTypeDataset(dataset)) {
+    const baseLayer = convertDataLayerToAPI(visualization, layer, resolveAxisId);
+    if (isEsqlTableTypeDataSource(dataSource)) {
       return {
         type,
-        dataset,
+        data_source: dataSource,
         ...baseLayer,
       };
     }
     // this should be a never as schema should ensure this scenario never happens
     throw new Error('Text based layers can only be used with ESQL or Table datasets');
   }
-  const dataset = buildDatasetState(
+  const dataSource = buildDataSourceState(
     layer,
     visualization.layerId,
     adHocDataViews,
@@ -215,15 +238,15 @@ export function buildAPIDataLayer(
     adhocReferences
   );
 
-  if (isEsqlTableTypeDataset(dataset)) {
+  if (isEsqlTableTypeDataSource(dataSource)) {
     // this should be a never as schema should ensure this scenario never happens
     throw new Error('Form based layers cannot be used with ESQL or Table datasets');
   }
-  const baseLayer = convertDataLayerToAPI(visualization, layer);
+  const baseLayer = convertDataLayerToAPI(visualization, layer, resolveAxisId);
 
   return {
     type,
-    dataset,
+    data_source: dataSource,
     ...baseLayer,
   };
 }
@@ -237,27 +260,29 @@ function isReferenceLineValidIcon(icon: string | undefined): icon is AvailableRe
 }
 
 function convertReferenceLinesDecorationsToAPIFormat(
-  yConfig: Omit<YConfig, 'forAccessor'>
+  yConfig: Omit<YConfig, 'forAccessor'>,
+  resolveAxisId: ResolveAxisId
 ): Pick<
   ReferenceLineDef,
-  | 'color'
-  | 'stroke_dash'
-  | 'stroke_width'
-  | 'icon'
-  | 'decoration_position'
-  | 'fill'
-  | 'axis'
-  | 'text'
+  'color' | 'stroke_dash' | 'stroke_width' | 'icon' | 'position' | 'fill' | 'axis_id' | 'text'
 > {
+  const resolvedAxisId = (): ReferenceLineDef['axis_id'] | undefined => {
+    if (!yConfig.axisMode || yConfig.axisMode === 'auto') return undefined;
+    if (yConfig.axisMode === 'bottom') return 'x';
+    return resolveAxisId(yConfig.axisMode);
+  };
   return stripUndefined({
     color: yConfig.color ? fromStaticColorLensStateToAPI(yConfig.color) : undefined,
     stroke_dash: yConfig.lineStyle,
     stroke_width: yConfig.lineWidth,
-    icon: isReferenceLineValidIcon(yConfig.icon) ? yConfig.icon : undefined,
-    decoration_position: yConfig.iconPosition,
+    icon:
+      isReferenceLineValidIcon(yConfig.icon) && yConfig.icon !== 'empty'
+        ? xyIconCompat.toAPI(yConfig.icon)
+        : undefined,
+    position: yConfig.iconPosition,
     fill: yConfig.fill && yConfig.fill !== 'none' ? yConfig.fill : undefined,
-    axis: yConfig.axisMode && yConfig.axisMode !== 'auto' ? yConfig.axisMode : undefined,
-    text: yConfig.textVisibility != null ? (yConfig.textVisibility ? 'label' : 'none') : undefined,
+    axis_id: resolvedAxisId(),
+    text: yConfig.textVisibility != null ? { visible: yConfig.textVisibility } : undefined,
   });
 }
 
@@ -273,22 +298,28 @@ function getLabelFromLayer(
 
 function convertReferenceLineLayerToAPI(
   visualization: XYReferenceLineLayerConfig,
-  layer: Omit<FormBasedLayer, 'indexPatternId'>
-): Omit<ReferenceLineLayerTypeNoESQL, 'type' | 'dataset'>;
+  layer: Omit<FormBasedLayer, 'indexPatternId'>,
+  resolveAxisId: ResolveAxisId
+): Omit<ReferenceLineLayerTypeNoESQL, 'type' | 'data_source'>;
 function convertReferenceLineLayerToAPI(
   visualization: XYReferenceLineLayerConfig,
-  layer: TextBasedLayer
-): Omit<ReferenceLineLayerTypeESQL, 'type' | 'dataset'>;
+  layer: TextBasedLayer,
+  resolveAxisId: ResolveAxisId
+): Omit<ReferenceLineLayerTypeESQL, 'type' | 'data_source'>;
 function convertReferenceLineLayerToAPI(
   visualization: XYReferenceLineLayerConfig,
-  layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer
-): Omit<ReferenceLineLayerType, 'type' | 'dataset'> {
+  layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
+  resolveAxisId: ResolveAxisId
+): Omit<ReferenceLineLayerType, 'type' | 'data_source'> {
   const yConfigMap = new Map(visualization.yConfig?.map((y) => [y.forAccessor, y]));
   const thresholds = (visualization.accessors
     ?.map((accessor): ReferenceLineDef | undefined => {
       const label = getLabelFromLayer(accessor, layer);
       const { forAccessor, ...yConfigRest } = yConfigMap.get(accessor) || {};
-      const decorationConfig = convertReferenceLinesDecorationsToAPIFormat(yConfigRest);
+      const decorationConfig = convertReferenceLinesDecorationsToAPIFormat(
+        yConfigRest,
+        resolveAxisId
+      );
 
       // this is very annoying as TS cannot seem to narrow the type correctly here
       // if we move this check outside the loop
@@ -324,12 +355,32 @@ function convertReferenceLineLayerToAPI(
 
 export function buildAPIReferenceLinesLayer(
   visualization: XYReferenceLineLayerConfig,
+  layer: Omit<FormBasedLayer, 'indexPatternId'>,
+  adHocDataViews: Record<string, unknown>,
+  resolveAxisId: ResolveAxisId,
+  references: SavedObjectReference[],
+  adhocReferences?: SavedObjectReference[]
+): ReferenceLineLayerTypeNoESQL;
+/**
+ * @deprecated ES|QL reference lines are not yet supported
+ */
+export function buildAPIReferenceLinesLayer(
+  visualization: XYReferenceLineLayerConfig,
+  layer: TextBasedLayer,
+  adHocDataViews: Record<string, unknown>,
+  resolveAxisId: ResolveAxisId,
+  references: SavedObjectReference[],
+  adhocReferences?: SavedObjectReference[]
+): ReferenceLineLayerTypeESQL;
+export function buildAPIReferenceLinesLayer(
+  visualization: XYReferenceLineLayerConfig,
   layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   adHocDataViews: Record<string, unknown>,
+  resolveAxisId: ResolveAxisId,
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
 ): ReferenceLineLayerType {
-  const dataset = buildDatasetState(
+  const dataSource = buildDataSourceState(
     layer,
     visualization.layerId,
     adHocDataViews,
@@ -337,22 +388,22 @@ export function buildAPIReferenceLinesLayer(
     adhocReferences
   );
   if (isTextBasedLayer(layer)) {
-    if (isEsqlTableTypeDataset(dataset)) {
+    if (isEsqlTableTypeDataSource(dataSource)) {
       return {
-        type: 'referenceLines',
-        dataset,
-        ...convertReferenceLineLayerToAPI(visualization, layer),
+        type: 'reference_lines',
+        data_source: dataSource,
+        ...convertReferenceLineLayerToAPI(visualization, layer, resolveAxisId),
       };
     }
     throw new Error('Text based layers can only be used with ESQL or Table datasets');
   }
-  if (isEsqlTableTypeDataset(dataset)) {
+  if (isEsqlTableTypeDataSource(dataSource)) {
     throw new Error('Form based layers cannot be used with ESQL or Table datasets');
   }
   return {
-    type: 'referenceLines',
-    dataset,
-    ...convertReferenceLineLayerToAPI(visualization, layer),
+    type: 'reference_lines',
+    data_source: dataSource,
+    ...convertReferenceLineLayerToAPI(visualization, layer, resolveAxisId),
   };
 }
 
@@ -362,8 +413,11 @@ function findAnnotationDataView(layerId: string, references: SavedObjectReferenc
 }
 
 function getTextConfigurationForQueryAnnotation(
-  annotation: XYAnnotationLayerConfig['annotations'][number]
-): Pick<Extract<AnnotationLayerType['events'][number], { type: 'query' }>, 'text' | 'label'> {
+  annotation: XYByValueAnnotationLayerConfig['annotations'][number]
+): Pick<
+  Extract<AnnotationLayerByValueType['events'][number], { type: 'query' }>,
+  'text' | 'label'
+> {
   const textConfig = {
     ...('label' in annotation && annotation.label ? { label: annotation.label } : {}),
   };
@@ -371,63 +425,95 @@ function getTextConfigurationForQueryAnnotation(
     if ('textField' in annotation && annotation.textField) {
       return {
         ...textConfig,
-        text: { type: 'field', field: annotation.textField },
+        text: {
+          visible: annotation.textVisibility,
+          field: annotation.textField,
+        },
       };
     }
     return {
       ...textConfig,
-      text: annotation.textVisibility ? 'label' : 'none',
+      text: { visible: annotation.textVisibility },
     };
   }
   return textConfig;
 }
 
 export function buildAPIAnnotationsLayer(
-  visualization: XYAnnotationLayerConfig,
+  layer: XYPersistedAnnotationLayerConfig | XYAnnotationLayerConfig,
   adHocDataViews: Record<string, unknown>,
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
 ): AnnotationLayerType {
+  if (
+    isPersistedByReferenceAnnotationsLayer(layer) ||
+    isPersistedLinkedByValueAnnotationsLayer(layer)
+  ) {
+    const annotationGroupId = references?.find(({ name }) => name === layer.annotationGroupRef)?.id;
+    if (!annotationGroupId) {
+      throw new Error('XY visualization: library annotation group ID reference is missing');
+    }
+
+    return {
+      type: 'annotation_group',
+      group_id: annotationGroupId,
+    };
+  }
+
+  const indexPatternId =
+    'indexPatternId' in layer
+      ? layer.indexPatternId
+      : findAnnotationDataView(layer.layerId, references);
+
+  if (!indexPatternId) {
+    // shouldn't happen unless data is corrupt
+    throw new Error('XY visualization: cannot find data view ID for annotation layer.');
+  }
+
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const ignore_global_filters =
-    visualization.ignoreGlobalFilters ?? LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE;
-  const adHocDataView = adHocDataViews[visualization.layerId];
-  const referencedDataView = findAnnotationDataView(visualization.layerId, references);
-  const dataset = (
-    isDataViewSpec(adHocDataView) && adHocDataView?.id === visualization.indexPatternId
+    layer.ignoreGlobalFilters ?? LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE;
+  const adHocDataView = adHocDataViews[layer.layerId];
+  const referencedDataView = findAnnotationDataView(layer.layerId, references);
+  const dataSource = (
+    isDataViewSpec(adHocDataView) && adHocDataView?.id === indexPatternId
       ? {
-          type: 'index',
-          index: visualization.indexPatternId,
-          time_field: adHocDataView.timeFieldName!,
+          type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+          index_pattern: indexPatternId,
+          time_field: adHocDataView.timeFieldName,
         }
       : {
-          type: 'dataView',
-          id: referencedDataView ?? visualization.indexPatternId,
+          type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+          ref_id: referencedDataView ?? indexPatternId,
         }
-  ) satisfies Extract<DatasetType, { type: 'index' | 'dataView' }>;
+  ) satisfies Extract<
+    DataSourceType,
+    { type: typeof AS_CODE_DATA_VIEW_REFERENCE_TYPE | typeof AS_CODE_DATA_VIEW_SPEC_TYPE }
+  >;
   return {
     type: 'annotations',
-    dataset,
+    data_source: dataSource,
     ignore_global_filters,
-    events: visualization.annotations.map((annotation) => {
+    events: layer.annotations.map((annotation) => {
       if (isQueryAnnotationConfig(annotation)) {
         return {
           type: 'query',
           label: annotation.label,
           query: annotation.filter
             ? {
-                language: annotation.filter.language as 'kuery' | 'lucene',
+                language: toApiFilterLanguage(annotation.filter.language),
                 // it should never be a non-string here as schema ensures that
-                query: typeof annotation.filter.query === 'string' ? annotation.filter.query : '',
+                expression:
+                  typeof annotation.filter.query === 'string' ? annotation.filter.query : '',
               }
-            : { language: 'kuery', query: '' },
+            : { language: 'kql', expression: '' },
 
           time_field: annotation.timeField!,
           ...(annotation.extraFields ? { extra_fields: annotation.extraFields } : {}),
           color: annotation.color ? fromStaticColorLensStateToAPI(annotation.color) : undefined,
-          ...(annotation.isHidden != null ? { hidden: annotation.isHidden } : {}),
+          ...(annotation.isHidden != null ? { visible: !annotation.isHidden } : {}),
           ...getTextConfigurationForQueryAnnotation(annotation),
-          ...(annotation.icon ? { icon: annotation.icon } : {}),
+          ...(annotation.icon ? { icon: xyIconCompat.toAPI(annotation.icon) } : {}),
           // lineWidth isn't allowed to be zero, so the truthy check is valid here
           ...(annotation.lineWidth || annotation.lineStyle
             ? {
@@ -448,7 +534,7 @@ export function buildAPIAnnotationsLayer(
           },
           color: annotation.color ? fromStaticColorLensStateToAPI(annotation.color) : undefined,
           fill: annotation.outside ? 'outside' : 'inside',
-          ...(annotation.isHidden != null ? { hidden: annotation.isHidden } : {}),
+          ...(annotation.isHidden != null ? { visible: !annotation.isHidden } : {}),
           ...(annotation.label ? { label: annotation.label } : {}),
         };
       }
@@ -457,14 +543,14 @@ export function buildAPIAnnotationsLayer(
         type: 'point',
         timestamp: annotation.key.timestamp,
         color: annotation.color ? fromStaticColorLensStateToAPI(annotation.color) : undefined,
-        ...(annotation.isHidden != null ? { hidden: annotation.isHidden } : {}),
+        ...(annotation.isHidden != null ? { visible: !annotation.isHidden } : {}),
         ...(annotation.textVisibility != null
           ? {
-              text: annotation.textVisibility ? 'label' : 'none',
+              text: { visible: annotation.textVisibility },
             }
           : {}),
         ...(annotation.label ? { label: annotation.label } : {}),
-        ...(annotation.icon ? { icon: annotation.icon } : {}),
+        ...(annotation.icon ? { icon: xyIconCompat.toAPI(annotation.icon) } : {}),
         ...(annotation.lineWidth || annotation.lineStyle
           ? {
               line: {

@@ -17,7 +17,7 @@ import type {
   AggregationsStringTermsBucket,
   AggregationsTopHitsAggregate,
 } from '@elastic/elasticsearch/lib/api/types';
-import { getLatestEntitiesIndexName } from '../../../common';
+import { getEntitiesAlias, ENTITY_LATEST } from '../../../common';
 import type { ResolutionClient } from '../../domain/resolution';
 import { getFieldValue } from '../../../common/domain/euid/commons';
 import { ENTITY_ID_FIELD } from '../../../common/domain/definitions/common_fields';
@@ -43,7 +43,7 @@ export interface RunDeps {
 
 export async function runAutomatedResolution(deps: RunDeps): Promise<AutomatedResolutionState> {
   const { state, namespace, esClient, logger, resolutionClient, abortController } = deps;
-  const index = getLatestEntitiesIndexName(namespace);
+  const index = getEntitiesAlias(ENTITY_LATEST, namespace);
 
   // Step 1: Collect new email values
   const { values, maxTimestamp } = await collectNewEmailValues(esClient, index, state);
@@ -118,7 +118,9 @@ async function collectNewEmailValues(
   ];
 
   if (state.lastProcessedTimestamp) {
-    filters.push({ range: { '@timestamp': { gt: state.lastProcessedTimestamp } } });
+    filters.push({
+      range: { 'entity.lifecycle.first_seen': { gt: state.lastProcessedTimestamp } },
+    });
   }
 
   do {
@@ -137,7 +139,7 @@ async function collectNewEmailValues(
             ...(afterKey ? { after: afterKey } : {}),
           },
         },
-        max_timestamp: { max: { field: '@timestamp' } },
+        max_timestamp: { max: { field: 'entity.lifecycle.first_seen' } },
       },
     });
 

@@ -541,13 +541,13 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.values', {
         defaultMessage: 'VALUES',
       }),
-      preview: true,
+      preview: false,
       license: undefined,
       description: {
         markdownContent: i18n.translate('languageDocumentation.documentationESQL.values.markdown', {
           defaultMessage: `
   ### VALUES
-  Returns unique values as a multivalued field. The order of the returned values isn’t guaranteed.
+  Returns unique (deduplicated) values as a multivalued field. The order of the returned values isn’t guaranteed.
   If you need the values returned in order use
   [\`MV_SORT\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/mv-functions/mv_sort).
 

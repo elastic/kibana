@@ -23,7 +23,7 @@ import { DEFAULT_LAYER_ID } from '../../constants';
 import type { DeepMutable, DeepPartial } from '../utils';
 import {
   addLayerColumn,
-  buildDatasetState,
+  buildDataSourceState,
   buildDatasourceStates,
   buildReferences,
   generateApiLayer,
@@ -42,7 +42,7 @@ import type { GaugeStateESQL, GaugeStateNoESQL } from '../../schema/charts/gauge
 import { fromMetricAPItoLensState } from '../columns/metric';
 import type { LensApiAllMetricOperations } from '../../schema/metric_ops';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
-import { isEsqlTableTypeDataset } from '../../utils';
+import { isEsqlTableTypeDataSource } from '../../utils';
 
 const ACCESSOR = 'gauge_accessor';
 
@@ -62,7 +62,7 @@ function buildVisualizationState(config: GaugeState): GaugeVisualizationState {
     goalAccessor: layer.metric.goal ? getAccessorName('goal') : undefined,
     shape: layer.shape
       ? layer.shape.type === 'bullet'
-        ? layer.shape.direction === 'horizontal'
+        ? layer.shape.orientation === 'horizontal'
           ? 'horizontalBullet'
           : 'verticalBullet'
         : layer.shape.type === 'semi_circle'
@@ -72,13 +72,14 @@ function buildVisualizationState(config: GaugeState): GaugeVisualizationState {
     ...(layer.metric.color
       ? { colorMode: 'palette', palette: fromColorByValueAPIToLensState(layer.metric.color) }
       : {}),
-    ticksPosition: layer.metric.ticks ?? 'auto',
-    ...(layer.metric.hide_title
+    ticksPosition:
+      layer.metric.ticks?.visible === false ? 'hidden' : layer.metric.ticks?.mode ?? 'auto',
+    ...(layer.metric.title?.visible === false
       ? { labelMajorMode: 'none' }
-      : layer.metric.title
-      ? { labelMajorMode: 'custom', labelMajor: layer.metric.title }
+      : layer.metric.title?.text
+      ? { labelMajorMode: 'custom', labelMajor: layer.metric.title.text }
       : { labelMajorMode: 'auto' }),
-    labelMinor: layer.metric.sub_title,
+    labelMinor: layer.metric.subtitle,
   };
 }
 
@@ -95,23 +96,29 @@ function reverseBuildVisualizationState(
     throw new Error('Metric accessor is missing in the visualization state');
   }
 
-  const dataset = buildDatasetState(layer, layerId, adHocDataViews, references, adhocReferences);
+  const dataSource = buildDataSourceState(
+    layer,
+    layerId,
+    adHocDataViews,
+    references,
+    adhocReferences
+  );
 
-  if (!dataset || dataset.type == null) {
-    throw new Error('Unsupported dataset type');
+  if (!dataSource || dataSource.type == null) {
+    throw new Error('Unsupported DataSource type');
   }
 
   const props: DeepPartial<DeepMutable<GaugeState>> = {
     ...generateApiLayer(layer),
     shape:
       visualization.shape === 'horizontalBullet'
-        ? { type: 'bullet', direction: 'horizontal' }
+        ? { type: 'bullet', orientation: 'horizontal' }
         : visualization.shape === 'verticalBullet'
-        ? { type: 'bullet', direction: 'vertical' }
+        ? { type: 'bullet', orientation: 'vertical' }
         : {
             type: visualization.shape === 'semiCircle' ? 'semi_circle' : visualization.shape,
           },
-    metric: isEsqlTableTypeDataset(dataset)
+    metric: isEsqlTableTypeDataSource(dataSource)
       ? {
           ...getValueApiColumn(metricAccessor, layer as TextBasedLayer),
           ...(visualization.minAccessor
@@ -154,18 +161,26 @@ function reverseBuildVisualizationState(
   } as GaugeState;
 
   if (props.metric) {
-    props.metric.hide_title = visualization.labelMajorMode === 'none';
+    props.metric.title = {
+      visible: visualization.labelMajorMode !== 'none',
+    };
+    const titleValue = visualization.labelMajor;
 
-    if (visualization.labelMajor) {
-      props.metric.title = visualization.labelMajor;
+    if (titleValue) {
+      props.metric.title.text = titleValue;
     }
 
     if (visualization.labelMinor) {
-      props.metric.sub_title = visualization.labelMinor;
+      props.metric.subtitle = visualization.labelMinor;
     }
 
     if (visualization.ticksPosition) {
-      props.metric.ticks = visualization.ticksPosition;
+      props.metric.ticks =
+        visualization.ticksPosition === 'hidden'
+          ? { visible: false }
+          : visualization.ticksPosition === 'bands'
+          ? { visible: true, mode: 'bands' }
+          : { visible: true, mode: 'auto' };
     }
 
     if (visualization.colorMode === 'palette' && visualization.palette) {
@@ -175,7 +190,7 @@ function reverseBuildVisualizationState(
 
   return {
     type: 'gauge',
-    dataset: dataset satisfies GaugeState['dataset'],
+    data_source: dataSource satisfies GaugeState['data_source'],
     ...props,
   } as GaugeState;
 }

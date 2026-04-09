@@ -18,7 +18,12 @@ export function mockHandlerArguments(
   {
     actionsClient = actionsClientMock.create(),
     listTypes: listTypesRes = [],
-  }: { actionsClient?: ActionsClientMock; listTypes?: ConnectorType[] },
+    getSkippedPreconfiguredConnectorIds = () => new Set<string>(),
+  }: {
+    actionsClient?: ActionsClientMock;
+    listTypes?: ConnectorType[];
+    getSkippedPreconfiguredConnectorIds?: () => Set<string>;
+  },
   request: unknown,
   response?: Array<MethodKeysOf<KibanaResponseFactory>>
 ): [ActionsRequestHandlerContext, KibanaRequest<unknown, unknown, unknown>, KibanaResponseFactory] {
@@ -38,6 +43,7 @@ export function mockHandlerArguments(
             }
           );
         },
+        getSkippedPreconfiguredConnectorIds,
       },
     } as unknown as ActionsRequestHandlerContext,
     request as KibanaRequest<unknown, unknown, unknown>,

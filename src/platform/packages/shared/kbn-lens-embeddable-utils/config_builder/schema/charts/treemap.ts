@@ -11,7 +11,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema, staticColorSchema } from '../color';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 
 import {
   collapseBySchema,
@@ -23,15 +23,16 @@ import {
 import type { PartitionMetric } from './partition_shared';
 import {
   legendNestedSchema,
-  legendVisibleSchema,
   validateColoringAssignments,
   valueDisplaySchema,
 } from './partition_shared';
 import {
   legendSizeSchema,
+  legendVisibilitySchemaWithAuto,
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
+import { objectUnion } from './utils/object_union';
 import { groupIsNotCollapsed } from '../../utils';
 
 const treemapSharedStateSchema = {
@@ -40,7 +41,7 @@ const treemapSharedStateSchema = {
       {
         nested: legendNestedSchema,
         truncate_after_lines: legendTruncateAfterLinesSchema,
-        visible: legendVisibleSchema,
+        visibility: legendVisibilitySchemaWithAuto,
         size: legendSizeSchema,
       },
       {
@@ -52,17 +53,18 @@ const treemapSharedStateSchema = {
       }
     )
   ),
-  value_display: valueDisplaySchema,
+  values: valueDisplaySchema,
 
   /**
-   * Position of the labels: hidden or visible
+   * Labels configuration
    */
-  label_position: schema.maybe(
-    schema.oneOf([schema.literal('hidden'), schema.literal('visible')], {
-      meta: {
-        description: 'Position of the labels: hidden or visible',
+  labels: schema.maybe(
+    schema.object(
+      {
+        visible: schema.maybe(schema.boolean({ meta: { description: 'Show category labels' } })),
       },
-    })
+      { meta: { description: 'Labels configuration' } }
+    )
   ),
 };
 
@@ -117,7 +119,7 @@ export const treemapStateSchemaNoESQL = schema.object(
     type: schema.literal('treemap'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetSchema,
+    ...dataSourceSchema,
     ...dslOnlyPanelInfoSchema,
     ...treemapSharedStateSchema,
     ...dslOnlyPanelInfoSchema,
@@ -164,7 +166,7 @@ export const treemapStateSchemaESQL = schema.object(
     type: schema.literal('treemap'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
+    ...dataSourceEsqlTableSchema,
     ...treemapSharedStateSchema,
     /**
      * Primary value configuration, must define operation. In ES|QL mode, uses column-based configuration.
@@ -199,7 +201,7 @@ export const treemapStateSchemaESQL = schema.object(
   }
 );
 
-export const treemapStateSchema = schema.oneOf([treemapStateSchemaNoESQL, treemapStateSchemaESQL], {
+export const treemapStateSchema = objectUnion([treemapStateSchemaNoESQL, treemapStateSchemaESQL], {
   meta: {
     id: 'treemapChart',
     title: 'Treemap Chart',

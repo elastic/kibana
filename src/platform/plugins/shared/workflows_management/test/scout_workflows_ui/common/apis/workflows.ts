@@ -38,68 +38,68 @@ interface GetWorkflowExecutionOptions {
 export class WorkflowsApiService {
   constructor(private readonly spaceId: string, private readonly kbnClient: KbnClient) {}
 
-  /** POST /api/workflows — create a single workflow from YAML. */
+  /** POST /api/workflows/workflow — create a single workflow from YAML. */
   async create(yaml: string): Promise<WorkflowDetailDto> {
     const response = await this.kbnClient.request<WorkflowDetailDto>({
       method: 'POST',
-      path: `/s/${this.spaceId}/api/workflows`,
+      path: `/s/${this.spaceId}/api/workflows/workflow`,
       body: { yaml },
     });
     return response.data;
   }
 
-  /** POST /api/workflows/_bulk_create — create multiple workflows at once. */
+  /** POST /api/workflows — create multiple workflows at once (bulk). */
   async bulkCreate(yamls: string[]): Promise<BulkCreateResult> {
     const response = await this.kbnClient.request<BulkCreateResult>({
       method: 'POST',
-      path: `/s/${this.spaceId}/api/workflows/_bulk_create`,
+      path: `/s/${this.spaceId}/api/workflows`,
       body: { workflows: yamls.map((y) => ({ yaml: y })) },
     });
     return response.data;
   }
 
-  /** GET /api/workflows/{id} — fetch a workflow by ID. */
+  /** GET /api/workflows/workflow/{id} — fetch a workflow by ID. */
   async getWorkflow(workflowId: string): Promise<WorkflowDetailDto> {
     const response = await this.kbnClient.request<WorkflowDetailDto>({
       method: 'GET',
-      path: `/s/${this.spaceId}/api/workflows/${workflowId}`,
+      path: `/s/${this.spaceId}/api/workflows/workflow/${workflowId}`,
     });
     return response.data;
   }
 
-  /** GET /api/workflows/{id} — fetch a workflow by ID, with response status. */
+  /** GET /api/workflows/workflow/{id} — fetch a workflow by ID, with response status. */
   async rawGetWorkflow(workflowId: string): Promise<{
     data: WorkflowDetailDto;
     status: number;
   }> {
     const response = await this.kbnClient.request<WorkflowDetailDto>({
       method: 'GET',
-      path: `/s/${this.spaceId}/api/workflows/${workflowId}`,
+      path: `/s/${this.spaceId}/api/workflows/workflow/${workflowId}`,
     });
     return response;
   }
 
-  /** PUT /api/workflows/{id} — partially update a workflow (e.g. toggle enabled). */
+  /** PUT /api/workflows/workflow/{id} — partially update a workflow (e.g. toggle enabled). */
   async update(
     id: string,
     body: Partial<Pick<WorkflowDetailDto, 'name' | 'description' | 'enabled' | 'yaml'>>
   ): Promise<WorkflowDetailDto> {
     const response = await this.kbnClient.request<WorkflowDetailDto>({
       method: 'PUT',
-      path: `/s/${this.spaceId}/api/workflows/${id}`,
+      path: `/s/${this.spaceId}/api/workflows/workflow/${id}`,
       body,
     });
     return response.data;
   }
 
-  /** PUT /api/workflows/{id} — update a workflow, with response status. */
+  /** PUT /api/workflows/workflow/{id} — update a workflow, with response status. */
   async rawUpdate(
     id: string,
     body: Partial<Pick<WorkflowDetailDto, 'name' | 'description' | 'enabled' | 'yaml'>>
   ): Promise<{ data: WorkflowDetailDto; status: number }> {
     const response = await this.kbnClient.request<WorkflowDetailDto>({
       method: 'PUT',
-      path: `/s/${this.spaceId}/api/workflows/${id}`,
+      path: `/s/${this.spaceId}/api/workflows/workflow/${id}`,
       body,
     });
     return response;
@@ -116,12 +116,11 @@ export class WorkflowsApiService {
     }
   }
 
-  /** POST /api/workflows/search + DELETE — delete all workflows in a space. */
+  /** GET /api/workflows + DELETE — delete all workflows in a space. */
   async deleteAll(): Promise<void> {
     const response = await this.kbnClient.request<{ results?: Array<{ id: string }> }>({
-      method: 'POST',
-      path: `/s/${this.spaceId}/api/workflows/search`,
-      body: { size: 10000, page: 1 },
+      method: 'GET',
+      path: `/s/${this.spaceId}/api/workflows?size=10000&page=1`,
     });
 
     const workflowIds = response.data.results?.map((w) => w.id) || [];
@@ -137,7 +136,7 @@ export class WorkflowsApiService {
   async run(id: string, inputs: Record<string, unknown>): Promise<{ workflowExecutionId: string }> {
     const response = await this.kbnClient.request<{ workflowExecutionId: string }>({
       method: 'POST',
-      path: `/s/${this.spaceId}/api/workflows/${id}/run`,
+      path: `/s/${this.spaceId}/api/workflows/workflow/${id}/run`,
       body: { inputs },
     });
     return response.data;
@@ -150,7 +149,7 @@ export class WorkflowsApiService {
     const { includeInput = false, includeOutput = false } = options;
     const response = await this.kbnClient.request<WorkflowExecutionDto>({
       method: 'GET',
-      path: `/s/${this.spaceId}/api/workflowExecutions/${workflowExecutionId}?includeInput=${includeInput}&includeOutput=${includeOutput}`,
+      path: `/s/${this.spaceId}/api/workflows/executions/${workflowExecutionId}?includeInput=${includeInput}&includeOutput=${includeOutput}`,
     });
     return response.data;
   }
@@ -166,7 +165,7 @@ export class WorkflowsApiService {
       page: number;
     }>({
       method: 'GET',
-      path: `/s/${this.spaceId}/api/workflowExecutions?workflowId=${workflowId}&size=${size}&page=${page}`,
+      path: `/s/${this.spaceId}/api/workflows/workflow/${workflowId}/executions?size=${size}&page=${page}`,
     });
     return response.data;
   }

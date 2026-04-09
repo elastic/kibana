@@ -48,6 +48,7 @@ export type ActionsComponentProps = Pick<
   | 'disablePinAction'
   | 'disableTimelineAction'
   | 'ecsData'
+  | 'eventData'
   | 'eventId'
   | 'eventIdToNoteIds'
   | 'hit'
@@ -67,6 +68,7 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
   disablePinAction = true,
   disableTimelineAction = false,
   ecsData,
+  eventData,
   eventId,
   eventIdToNoteIds,
   hit,
@@ -182,7 +184,7 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
                 <EuiButtonIcon
                   aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
                   data-test-subj="expand-event"
-                  iconType="expand"
+                  iconType="maximize"
                   onClick={onExpandEvent}
                   size="s"
                   color="text"
@@ -204,6 +206,7 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
             key="add-event-note"
             timelineType={timelineType}
             notesCount={documentBasedNotes.length}
+            eventData={eventData}
             eventId={eventId}
             toggleShowNotes={toggleShowNotes}
           />

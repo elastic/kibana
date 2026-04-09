@@ -12525,6 +12525,10 @@
               "path": "x-pack/platform/plugins/shared/osquery/public/results/unified_results_table.tsx"
             },
             {
+              "plugin": "osquery",
+              "path": "x-pack/platform/plugins/shared/osquery/public/action_results/unified_action_results_summary.tsx"
+            },
+            {
               "plugin": "expressionPartitionVis",
               "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
@@ -25291,7 +25295,7 @@
           "\"index-pattern\""
         ],
         "path": "src/platform/plugins/shared/data_views/common/constants.ts",
-        "lineNumber": 53,
+        "lineNumber": 57,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -25974,7 +25978,7 @@
           "\"metaFields\""
         ],
         "path": "src/platform/plugins/shared/data_views/common/constants.ts",
-        "lineNumber": 47,
+        "lineNumber": 51,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -26180,7 +26184,7 @@
           "\nUsed to optimize on-boarding experience to determine if the instance has some user created data views or data indices/streams by filtering data sources\nthat are created by default by elastic in ese.\nWe should somehow prevent creating initial data for the users without their explicit action\ninstead of relying on these hardcoded assets"
         ],
         "path": "src/platform/plugins/shared/data_views/common/constants.ts",
-        "lineNumber": 36,
+        "lineNumber": 40,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -26196,7 +26200,7 @@
               "string[]"
             ],
             "path": "src/platform/plugins/shared/data_views/common/constants.ts",
-            "lineNumber": 37,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -26215,7 +26219,7 @@
           "readonly [\"keyword\", \"long\", \"double\", \"date\", \"ip\", \"boolean\", \"geo_point\", \"composite\"]"
         ],
         "path": "src/platform/plugins/shared/data_views/common/constants.ts",
-        "lineNumber": 26,
+        "lineNumber": 30,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

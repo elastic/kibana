@@ -213,20 +213,48 @@ describe('DateRangePickerControl', () => {
   });
 
   describe('collapsed prop', () => {
-    it('shows the label and omits aria-label when not collapsed (default)', () => {
-      renderWithEuiTheme(<DateRangePicker {...defaultProps} />);
+    describe('collapsed=false (default)', () => {
+      it('shows the text label', () => {
+        renderWithEuiTheme(<DateRangePicker {...defaultProps} />);
 
-      const button = screen.getByTestId('dateRangePickerControlButton');
-      expect(button).not.toHaveAttribute('aria-label');
-      expect(button).toHaveTextContent('Last 20 minutes');
+        const button = screen.getByTestId('dateRangePickerControlButton');
+        expect(button).not.toHaveAttribute('aria-label');
+        expect(button).toHaveTextContent('Last 20 minutes');
+      });
+
+      it('hides the duration badge for relative-to-now ranges', () => {
+        renderWithEuiTheme(<DateRangePicker {...defaultProps} defaultValue="last 20 minutes" />);
+        expect(screen.queryByTestId('dateRangePickerDurationBadge')).not.toBeInTheDocument();
+      });
+
+      it('shows the duration badge for non-relative-to-now ranges', () => {
+        renderWithEuiTheme(
+          <DateRangePicker {...defaultProps} defaultValue="2024-01-01 to 2024-02-01" />
+        );
+        expect(screen.getByTestId('dateRangePickerDurationBadge')).toBeInTheDocument();
+      });
     });
 
-    it('hides the label and sets aria-label when collapsed', () => {
-      renderWithEuiTheme(<DateRangePicker {...defaultProps} collapsed />);
+    describe('collapsed=true', () => {
+      it('hides the text label and sets aria-label', () => {
+        renderWithEuiTheme(<DateRangePicker {...defaultProps} collapsed />);
 
-      const button = screen.getByTestId('dateRangePickerControlButton');
-      expect(button).toHaveAttribute('aria-label');
-      expect(button).not.toHaveTextContent('Last 20 minutes');
+        const button = screen.getByTestId('dateRangePickerControlButton');
+        expect(button).toHaveAttribute('aria-label');
+        expect(button).not.toHaveTextContent('Last 20 minutes');
+      });
+
+      it('shows the duration badge for non-relative-to-now ranges', () => {
+        renderWithEuiTheme(
+          <DateRangePicker {...defaultProps} collapsed defaultValue="2024-01-01 to 2024-02-01" />
+        );
+        expect(screen.getByTestId('dateRangePickerDurationBadge')).toBeInTheDocument();
+      });
+
+      it('shows the duration badge for relative-to-now ranges', () => {
+        renderWithEuiTheme(<DateRangePicker {...defaultProps} collapsed />);
+        expect(screen.getByTestId('dateRangePickerDurationBadge')).toBeInTheDocument();
+      });
     });
   });
 
@@ -367,14 +395,14 @@ describe('DateRangePickerControl', () => {
       renderWithEuiTheme(<DateRangePicker {...defaultProps} width="restricted" />);
       const wrapper = screen.getByTestId('dateRangePickerControlWrapper');
       expect(wrapper).toHaveStyle({
-        'inline-size': 'var(--kbnDateRangePickerWidth, 21.25rem)',
+        'inline-size': 'var(--kbnDateRangePickerWidthRestricted, 21.25rem)',
       });
     });
 
     it('full', () => {
       const { container } = renderWithEuiTheme(<DateRangePicker {...defaultProps} width="full" />);
       expect(container.firstElementChild).toHaveStyle({ display: 'flex', 'inline-size': '100%' });
-      const popover = screen.getByTestId('dateRangePickerDialogTriggerWrapper');
+      const popover = screen.getByTestId('dateRangePickerPopoverTriggerWrapper');
       expect(popover).toHaveStyle({ 'inline-size': '100%' });
     });
   });
@@ -413,11 +441,252 @@ describe('DateRangePickerControl', () => {
       expect(badge).toBeInTheDocument();
     });
 
-    it('renders a duration label when the range is valid', () => {
-      renderWithEuiTheme(<DateRangePicker {...defaultProps} defaultValue="last 20 minutes" />);
+    it('renders a duration label when the range is valid and not relative-to-now', () => {
+      renderWithEuiTheme(
+        <DateRangePicker {...defaultProps} defaultValue="2024-01-01 to 2024-02-01" />
+      );
       const button = screen.getByTestId('dateRangePickerControlButton');
-      const badge = within(button).getByText('20min');
+      const badge = within(button).getByTestId('dateRangePickerDurationBadge');
       expect(badge).toBeInTheDocument();
+    });
+  });
+
+  describe('roundRelativeTime', () => {
+    it('applies rounding to the start date when selecting a preset', async () => {
+      const onChange = jest.fn();
+      renderWithEuiTheme(
+        <DateRangePicker
+          defaultValue="last 20 minutes"
+          onChange={onChange}
+          settings={{ roundRelativeTime: true }}
+          onSettingsChange={() => {}}
+          presets={[{ start: 'now-15m', end: 'now', label: 'Last 15 minutes' }]}
+        />
+      );
+
+      const input = openEditing();
+      fireEvent.keyDown(input, { key: 'ArrowDown' });
+
+      const preset = screen.getByTestId('dateRangePickerPresetItem-Last_15_minutes');
+      fireEvent.click(within(preset).getByRole('button'));
+
+      expect(onChange).toHaveBeenCalledTimes(1);
+      expect(onChange).toHaveBeenCalledWith(
+        expect.objectContaining({ start: 'now-15m/m', end: 'now' })
+      );
+      await waitForPopoverClose();
+    });
+  });
+
+  describe('auto-refresh', () => {
+    const onRefresh = jest.fn();
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+      onRefresh.mockClear();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    const autoRefreshSettings = {
+      roundRelativeTime: true,
+      autoRefresh: { isEnabled: true, isPaused: false, intervalMs: 4000, intervalDisplayUnit: 's' },
+    } as const;
+
+    it('does not render the auto-refresh append control when `settings.autoRefresh` is absent', () => {
+      renderWithEuiTheme(
+        <DateRangePicker {...defaultProps} settings={{ roundRelativeTime: true }} />
+      );
+
+      expect(screen.queryByTestId('dateRangePickerAutoRefreshButton')).not.toBeInTheDocument();
+    });
+
+    it('does not render the auto-refresh append control when `onRefresh` is absent', () => {
+      renderWithEuiTheme(
+        <DateRangePicker {...defaultProps} settings={{ ...autoRefreshSettings }} />
+      );
+
+      expect(screen.queryByTestId('dateRangePickerAutoRefreshButton')).not.toBeInTheDocument();
+    });
+
+    it('does not render the auto-refresh append control when `settings.autoRefresh.isEnabled` is false', () => {
+      renderWithEuiTheme(
+        <DateRangePicker
+          {...defaultProps}
+          onRefresh={onRefresh}
+          settings={{
+            roundRelativeTime: true,
+            autoRefresh: {
+              isEnabled: false,
+              isPaused: false,
+              intervalMs: 4000,
+              intervalDisplayUnit: 's',
+            },
+          }}
+        />
+      );
+
+      expect(screen.queryByTestId('dateRangePickerAutoRefreshButton')).not.toBeInTheDocument();
+    });
+
+    it('shows the auto-refresh append control when `settings.autoRefresh.isPaused` is true (play to resume)', () => {
+      renderWithEuiTheme(
+        <DateRangePicker
+          {...defaultProps}
+          onRefresh={onRefresh}
+          settings={{
+            roundRelativeTime: true,
+            autoRefresh: {
+              isEnabled: true,
+              isPaused: true,
+              intervalMs: 4000,
+              intervalDisplayUnit: 's',
+            },
+          }}
+        />
+      );
+
+      expect(screen.getByTestId('dateRangePickerAutoRefreshButton')).toBeInTheDocument();
+    });
+
+    it('shows mm:ss countdown on the auto-refresh append control while idle when `settings.autoRefresh` is set', () => {
+      renderWithEuiTheme(
+        <DateRangePicker
+          {...defaultProps}
+          onRefresh={onRefresh}
+          settings={{ ...autoRefreshSettings }}
+        />
+      );
+
+      const refreshBtn = screen.getByTestId('dateRangePickerAutoRefreshButton');
+
+      expect(refreshBtn).toBeInTheDocument();
+      expect(refreshBtn).toHaveTextContent('00:04');
+    });
+
+    it('shows the auto-refresh append control while editing when `settings.autoRefresh` is set', async () => {
+      renderWithEuiTheme(
+        <DateRangePicker
+          {...defaultProps}
+          onRefresh={onRefresh}
+          settings={{ ...autoRefreshSettings }}
+        />
+      );
+
+      openEditing();
+
+      expect(screen.getByTestId('dateRangePickerAutoRefreshButton')).toBeInTheDocument();
+
+      fireEvent.keyDown(screen.getByTestId('dateRangePickerInput'), { key: 'Escape' });
+
+      await waitForPopoverClose();
+    });
+
+    it('calls `onSettingsChange` when the auto-refresh append control is clicked', async () => {
+      const onSettingsChange = jest.fn();
+
+      renderWithEuiTheme(
+        <DateRangePicker
+          {...defaultProps}
+          onRefresh={onRefresh}
+          settings={{ ...autoRefreshSettings }}
+          onSettingsChange={onSettingsChange}
+        />
+      );
+
+      openEditing();
+
+      fireEvent.click(screen.getByTestId('dateRangePickerAutoRefreshButton'));
+
+      expect(onSettingsChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          autoRefresh: expect.objectContaining({ isPaused: true }),
+        })
+      );
+
+      fireEvent.keyDown(screen.getByTestId('dateRangePickerInput'), { key: 'Escape' });
+
+      await waitForPopoverClose();
+    });
+
+    it('calls `onRefresh` on each interval while `settings.autoRefresh` is active', () => {
+      const tickOnRefresh = jest.fn();
+
+      renderWithEuiTheme(
+        <DateRangePicker
+          {...defaultProps}
+          settings={{ ...autoRefreshSettings }}
+          onRefresh={tickOnRefresh}
+        />
+      );
+
+      act(() => {
+        jest.advanceTimersByTime(4000);
+      });
+
+      expect(tickOnRefresh).toHaveBeenCalledTimes(1);
+      expect(tickOnRefresh).toHaveBeenLastCalledWith();
+
+      act(() => {
+        jest.advanceTimersByTime(4000);
+      });
+
+      expect(tickOnRefresh).toHaveBeenCalledTimes(2);
+      expect(tickOnRefresh).toHaveBeenLastCalledWith();
+    });
+
+    it('does not call `onRefresh` while `settings.autoRefresh.isPaused` is true', () => {
+      const pausedOnRefresh = jest.fn();
+
+      renderWithEuiTheme(
+        <DateRangePicker
+          {...defaultProps}
+          settings={{
+            roundRelativeTime: true,
+            autoRefresh: {
+              isEnabled: true,
+              isPaused: true,
+              intervalMs: 1000,
+              intervalDisplayUnit: 's',
+            },
+          }}
+          onRefresh={pausedOnRefresh}
+        />
+      );
+
+      act(() => {
+        jest.advanceTimersByTime(10_000);
+      });
+
+      expect(pausedOnRefresh).not.toHaveBeenCalled();
+    });
+
+    it('does not call `onRefresh` while `settings.autoRefresh.isEnabled` is false', () => {
+      const disabledOnRefresh = jest.fn();
+
+      renderWithEuiTheme(
+        <DateRangePicker
+          {...defaultProps}
+          settings={{
+            roundRelativeTime: true,
+            autoRefresh: {
+              isEnabled: false,
+              isPaused: false,
+              intervalMs: 1000,
+              intervalDisplayUnit: 's',
+            },
+          }}
+          onRefresh={disabledOnRefresh}
+        />
+      );
+
+      act(() => {
+        jest.advanceTimersByTime(10_000);
+      });
+
+      expect(disabledOnRefresh).not.toHaveBeenCalled();
     });
   });
 });

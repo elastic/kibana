@@ -67,6 +67,8 @@ describe('useUnifiedWaterfallFetcher', () => {
       errors: [],
       agentMarks: { domComplete: 100 },
       entryTransaction: { id: 'tx-1' } as any,
+      traceDocsTotal: 1000,
+      maxTraceItems: 5000,
     };
 
     mockUseFetcher.mockReturnValue({
@@ -89,7 +91,58 @@ describe('useUnifiedWaterfallFetcher', () => {
     expect(result.current.errors).toEqual(mockData.errors);
     expect(result.current.agentMarks).toEqual(mockData.agentMarks);
     expect(result.current.entryTransaction).toEqual(mockData.entryTransaction);
+    expect(result.current.traceDocsTotal).toBe(1000);
+    expect(result.current.maxTraceItems).toBe(5000);
     expect(result.current.status).toBe(useFetcherModule.FETCH_STATUS.SUCCESS);
+  });
+
+  it('returns traceDocsTotal and maxTraceItems from API response', () => {
+    mockUseFetcher.mockReturnValue({
+      data: {
+        traceItems: [],
+        errors: [],
+        agentMarks: {},
+        entryTransaction: undefined,
+        traceDocsTotal: 20000,
+        maxTraceItems: 5000,
+      },
+      status: useFetcherModule.FETCH_STATUS.SUCCESS,
+      error: undefined,
+      refetch: jest.fn(),
+    });
+
+    const { result } = renderHook(() =>
+      useUnifiedWaterfallFetcher({
+        start: '2025-01-15T00:00:00.000Z',
+        end: '2025-01-15T01:00:00.000Z',
+        traceId: 'trace-123',
+      })
+    );
+
+    expect(result.current.traceDocsTotal).toBe(20000);
+    expect(result.current.maxTraceItems).toBe(5000);
+    // exceedMax is computed at the call site: traceDocsTotal > maxTraceItems
+    expect(result.current.traceDocsTotal > result.current.maxTraceItems).toBe(true);
+  });
+
+  it('returns zero traceDocsTotal and maxTraceItems as initial values', () => {
+    mockUseFetcher.mockReturnValue({
+      data: undefined,
+      status: useFetcherModule.FETCH_STATUS.NOT_INITIATED,
+      error: undefined,
+      refetch: jest.fn(),
+    });
+
+    const { result } = renderHook(() =>
+      useUnifiedWaterfallFetcher({
+        start: '2025-01-15T00:00:00.000Z',
+        end: '2025-01-15T01:00:00.000Z',
+        traceId: 'trace-123',
+      })
+    );
+
+    expect(result.current.traceDocsTotal).toBe(0);
+    expect(result.current.maxTraceItems).toBe(0);
   });
 
   it('does not call API when traceId is undefined', () => {
@@ -185,6 +238,7 @@ describe('useUnifiedWaterfallFetcher', () => {
           end: '2025-01-15T01:00:00.000Z',
           entryTransactionId: 'tx-1',
           serviceName: 'test-service',
+          ecsOnly: true,
         },
       },
     });

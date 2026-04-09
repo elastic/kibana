@@ -251,7 +251,7 @@
                 "OsqueryResponseActionsParamsFormProps"
               ],
               "path": "x-pack/platform/plugins/shared/osquery/public/shared_components/lazy_osquery_action_params_form.tsx",
-              "lineNumber": 16,
+              "lineNumber": 18,
               "columnNumber": 10,
               "deprecated": false,
               "trackAdoption": false
@@ -322,7 +322,7 @@
       "label": "OsqueryPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/osquery/server/types.ts",
-      "lineNumber": 29,
+      "lineNumber": 35,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -348,10 +348,70 @@
             "; }"
           ],
           "path": "x-pack/platform/plugins/shared/osquery/server/types.ts",
-          "lineNumber": 30,
+          "lineNumber": 36,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "osquery",
+          "id": "def-server.OsqueryPluginSetup.checkResponseActionAuthz",
+          "type": "Function",
+          "tags": [],
+          "label": "checkResponseActionAuthz",
+          "description": [
+            "\nValidates that the requesting user has the required osquery privileges\nfor the given response action configuration.\nThrows a 403 CustomHttpRequestError if the user lacks authorization.\n\nUsed by security_solution when creating/updating detection rules\nthat include osquery response actions."
+          ],
+          "signature": [
+            "(request: ",
+            "KibanaRequest",
+            "<unknown, unknown, unknown, any>, actionParams: ",
+            "CheckResponseActionAuthzParams",
+            ") => Promise<void>"
+          ],
+          "path": "x-pack/platform/plugins/shared/osquery/server/types.ts",
+          "lineNumber": 37,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "osquery",
+              "id": "def-server.OsqueryPluginSetup.checkResponseActionAuthz.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [],
+              "signature": [
+                "KibanaRequest",
+                "<unknown, unknown, unknown, any>"
+              ],
+              "path": "x-pack/platform/plugins/shared/osquery/server/types.ts",
+              "lineNumber": 46,
+              "columnNumber": 5,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "osquery",
+              "id": "def-server.OsqueryPluginSetup.checkResponseActionAuthz.$2",
+              "type": "Object",
+              "tags": [],
+              "label": "actionParams",
+              "description": [],
+              "signature": [
+                "CheckResponseActionAuthzParams"
+              ],
+              "path": "x-pack/platform/plugins/shared/osquery/server/types.ts",
+              "lineNumber": 47,
+              "columnNumber": 5,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",
@@ -365,7 +425,7 @@
       "label": "OsqueryPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/osquery/server/types.ts",
-      "lineNumber": 34,
+      "lineNumber": 52,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,

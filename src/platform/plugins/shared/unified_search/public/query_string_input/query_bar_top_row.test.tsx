@@ -26,6 +26,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
+import type { Filter } from '@kbn/es-query';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { unifiedSearchPluginMock } from '../mocks';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -593,6 +594,30 @@ describe('QueryBarTopRowTopRow', () => {
     });
   });
 
+  it('Should hide ES|QL UI when query input is disabled', async () => {
+    render(
+      wrapQueryBarTopRowInContext({
+        query: esqlQuery,
+        isDirty: false,
+        screenTitle: 'SQL Screen',
+        timeHistory: mockTimeHistory,
+        indexPatterns: [stubIndexPattern],
+        showQueryInput: false,
+        showDatePicker: true,
+        showQueryMenu: false,
+        dateRangeFrom: 'now-7d',
+        dateRangeTo: 'now',
+      })
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('esql-menu-button')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedTextLangEditor')).not.toBeInTheDocument();
+      expect(screen.getByTestId('superDatePickerShowDatesButton')).toBeInTheDocument();
+      expect(within(screen.getByTestId('querySubmitButton')).getByText('Refresh')).toBeVisible();
+    });
+  });
+
   it('Should render custom data view picker', async () => {
     const dataViewPickerOverride = <div data-test-subj="dataViewPickerOverride" />;
     const { getByTestId } = render(
@@ -650,6 +675,42 @@ describe('QueryBarTopRowTopRow', () => {
     await waitFor(() => {
       expect(screen.getByTestId('dataSharedTimefilterDuration')).toBeInTheDocument();
       expect(screen.queryByTestId('queryCancelButton')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('filter bar toggle button', () => {
+    const filtersMock = [{ meta: {} }] as Filter[];
+
+    it('should render when showAddFilter is true and filters has at least one entry', async () => {
+      render(
+        wrapQueryBarTopRowInContext({
+          isDirty: false,
+          showAddFilter: true,
+          filters: filtersMock,
+          indexPatterns: [stubIndexPattern],
+          timeHistory: mockTimeHistory,
+        })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('filterBarToggleButton')).toBeInTheDocument();
+      });
+    });
+
+    it('should not render when filters is empty', async () => {
+      render(
+        wrapQueryBarTopRowInContext({
+          isDirty: false,
+          showAddFilter: true,
+          filters: [],
+          indexPatterns: [stubIndexPattern],
+          timeHistory: mockTimeHistory,
+        })
+      );
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('filterBarToggleButton')).not.toBeInTheDocument();
+      });
     });
   });
 

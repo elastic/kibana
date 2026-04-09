@@ -129,11 +129,22 @@ dependsOn:
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/esql'
   - '@kbn/controls-schemas'
+  - '@kbn/as-code-data-views-schema'
+  - '@kbn/as-code-data-views-transforms'
   - '@kbn/as-code-filters-schema'
+  - '@kbn/as-code-filters-transforms'
+  - '@kbn/as-code-shared-schemas'
+  - '@kbn/as-code-shared-transforms'
   - '@kbn/scout'
+  - '@kbn/scout-synthtrace'
   - '@kbn/synthtrace-client'
+  - '@kbn/alerting-v2-plugin'
   - '@kbn/cps-utils'
   - '@kbn/as-code-data-views-schema'
+  - '@kbn/aiops-log-rate-analysis'
+  - '@kbn/presentation-util-plugin'
+  - '@kbn/core-saved-objects-common'
+  - '@kbn/as-code-filters-constants'
 tags:
   - plugin
   - prod
@@ -148,26 +159,6 @@ fileGroups:
     - test/**/*
     - .storybook/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

@@ -22,7 +22,7 @@ describe('config_schema', () => {
       ...getConfigMock(),
     };
     expect(() => ConfigSchema.validate(mock)).toThrow(
-      '[madeUpValue]: definition for this key is missing'
+      "[madeUpValue]: Additional properties are not allowed ('madeUpValue' was unexpected)"
     );
   });
 

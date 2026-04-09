@@ -122,7 +122,7 @@ export const getMissingAssistantKibanaPrivilegesError = ({
 }) => {
   return {
     error: 'Forbidden',
-    message: `API [${routeDetails}] is unauthorized for user, this action is granted by the Kibana privileges [securitySolution-attackDiscoveryAll]`,
+    message: `API [${routeDetails}] is unauthorized for user, this action is granted by the Kibana privileges [securitySolution-attackDiscoveryAll,alerts-read]`,
     statusCode: 403,
   };
 };
@@ -147,8 +147,8 @@ export const getMissingAssistantAndScheduleKibanaPrivilegesError = ({
   // The PUT UPDATE route has privileges listed in reverse order compared to the CREATE/ENABLE/DISABLE routes
   const isUpdateRoute = routeDetails.startsWith('PUT ');
   const privileges = isUpdateRoute
-    ? '[securitySolution-updateAttackDiscoverySchedule,securitySolution-attackDiscoveryAll]' // PUT
-    : '[securitySolution-attackDiscoveryAll,securitySolution-updateAttackDiscoverySchedule]'; // CREATE/ENABLE/DISABLE
+    ? '[securitySolution-updateAttackDiscoverySchedule,securitySolution-attackDiscoveryAll,alerts-read]' // PUT
+    : '[securitySolution-attackDiscoveryAll,securitySolution-updateAttackDiscoverySchedule,alerts-read]'; // CREATE/ENABLE/DISABLE
 
   return {
     error: 'Forbidden',

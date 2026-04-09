@@ -178,7 +178,7 @@ export const LogEntryExampleMessageRow: React.FC<Props> = ({
             <EuiButtonIcon
               data-test-subj="infraLogEntryExampleMessageRowButton"
               aria-label={MENU_LABEL}
-              iconType="boxesHorizontal"
+              iconType="boxesVertical"
               size="s"
               onClick={toggleMenu}
             />

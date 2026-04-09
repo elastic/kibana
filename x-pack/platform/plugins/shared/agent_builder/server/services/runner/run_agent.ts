@@ -11,7 +11,6 @@ import type {
   RunAgentReturn,
   ExperimentalFeatures,
 } from '@kbn/agent-builder-server';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { withAgentSpan } from '../../tracing';
 import { createAgentHandler } from '../agents/modes/create_handler';
@@ -22,6 +21,7 @@ import {
   createToolProvider,
   createSkillsService,
 } from './utils';
+import { createPluginsService } from './utils/plugins';
 import type { RunnerManager } from './runner';
 
 export const createAgentHandlerContext = async <TParams = Record<string, unknown>>({
@@ -37,7 +37,6 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     spaces,
     elasticsearch,
     savedObjects,
-    uiSettings,
     modelProvider,
     toolsService,
     attachmentsService,
@@ -49,21 +48,16 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     stateManager,
     filestore,
     skillServiceStart,
+    pluginsServiceStart,
     toolManager,
   } = manager.deps;
 
   const spaceId = getCurrentSpaceId({ request, spaces });
   const toolRegistry = await toolsService.getRegistry({ request });
 
-  // fetch experimental features setting to build experimental feature list
-  const soClient = savedObjects.getScopedClient(request);
-  const uiSettingsClient = uiSettings.asScopedToClient(soClient);
-  const experimentalFeaturesEnabled = await uiSettingsClient.get<boolean>(
-    AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
-  );
   const experimentalFeatures: ExperimentalFeatures = {
-    filestore: experimentalFeaturesEnabled,
-    skills: experimentalFeaturesEnabled,
+    filestore: true,
+    skills: true,
   };
 
   return {
@@ -100,6 +94,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
       spaceId,
       runner: manager.getRunner(),
     }),
+    plugins: createPluginsService({ pluginsServiceStart, request }),
     toolManager,
     events: createAgentEventEmitter({ eventHandler: onEvent, context: manager.context }),
     hooks: manager.deps.hooks,

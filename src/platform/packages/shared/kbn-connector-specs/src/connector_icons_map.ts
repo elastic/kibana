@@ -35,12 +35,10 @@ export const ConnectorIconsMap: Map<
   ],
   ['.notion', lazy(() => import(/* webpackChunkName: "connectorNotion" */ './specs/notion/icon'))],
   [
-    '.pagerduty-v2',
-    lazy(() => import(/* webpackChunkName: "connectorIconPagerduty" */ './specs/pagerduty/icon')),
-  ],
-  [
-    '.pagerduty',
-    lazy(() => import(/* webpackChunkName: "connectorIconPagerduty" */ './specs/pagerduty/icon')),
+    '.pagerduty_mcp',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconPagerdutyMcp" */ './specs/pagerduty/icon')
+    ),
   ],
   [
     '.brave-search',
@@ -94,6 +92,15 @@ export const ConnectorIconsMap: Map<
   ],
   ['.figma', lazy(() => import(/* webpackChunkName: "connectorIconFigma" */ './specs/figma/icon'))],
   [
+    '.confluence-cloud',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconConfluenceCloud" */ './specs/atlassian/confluence_cloud/icon'
+        )
+    ),
+  ],
+  [
     '.google_drive',
     lazy(
       () => import(/* webpackChunkName: "connectorIconGoogleDrive" */ './specs/google_drive/icon')
@@ -129,8 +136,8 @@ export const ConnectorIconsMap: Map<
     ),
   ],
   [
-    '.tavily',
-    lazy(() => import(/* webpackChunkName: "connectorIconTavily" */ './specs/tavily/icon')),
+    '.tavily_mcp',
+    lazy(() => import(/* webpackChunkName: "connectorIconTavilyMcp" */ './specs/tavily/icon')),
   ],
   [
     '.google_calendar',
@@ -146,5 +153,31 @@ export const ConnectorIconsMap: Map<
   [
     '.amazon_s3',
     lazy(() => import(/* webpackChunkName: "connectorIconAmazons3" */ './specs/amazon_s3/icon')),
+  ],
+
+  [
+    '.sharepoint-server',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconsharepointserver" */ './specs/sharepoint_server/icon'
+        )
+    ),
+  ],
+  [
+    '.microsoft-teams',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconMicrosoftTeams" */ './specs/microsoft_teams/icon')
+    ),
+  ],
+  [
+    '.google_cloud_storage',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconGoogleCloudStorage" */ './specs/google_cloud_storage/icon'
+        )
+    ),
   ],
 ]);

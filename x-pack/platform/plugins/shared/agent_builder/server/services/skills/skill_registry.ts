@@ -109,20 +109,23 @@ export const createSkillRegistry = ({
     },
 
     async list(options) {
-      const { type, ...listOptions } = options ?? {};
+      const { type, includePlugins, ...listOptions } = options ?? {};
+      let results: InternalSkillDefinition[];
       if (type === 'built-in') {
-        const skills = await builtinProvider.list(listOptions);
-        return skills.filter(isVisible);
+        results = await builtinProvider.list(listOptions);
+      } else if (type === 'persisted') {
+        results = await persistedProvider.list(listOptions);
+      } else {
+        const [builtinSkills, persistedSkills] = await Promise.all([
+          builtinProvider.list(listOptions),
+          persistedProvider.list(listOptions),
+        ]);
+        results = [...builtinSkills, ...persistedSkills];
       }
-      if (type === 'persisted') {
-        const skills = await persistedProvider.list(listOptions);
-        return skills.filter(isVisible);
+      if (!includePlugins) {
+        results = results.filter((skill) => !skill.plugin_id);
       }
-      const [builtinSkills, persistedSkills] = await Promise.all([
-        builtinProvider.list(listOptions),
-        persistedProvider.list(listOptions),
-      ]);
-      return [...builtinSkills, ...persistedSkills].filter(isVisible);
+      return results.filter(isVisible);
     },
 
     async create(params) {

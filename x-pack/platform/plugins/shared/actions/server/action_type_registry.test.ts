@@ -354,45 +354,15 @@ describe('actionTypeRegistry', () => {
         expect(err.message).toMatchInlineSnapshot(`
           "[
             {
-              \\"code\\": \\"invalid_union\\",
-              \\"errors\\": [
-                [
-                  {
-                    \\"origin\\": \\"number\\",
-                    \\"code\\": \\"too_small\\",
-                    \\"minimum\\": 5,
-                    \\"inclusive\\": true,
-                    \\"path\\": [
-                      \\"subActionParams\\",
-                      \\"value\\"
-                    ],
-                    \\"message\\": \\"Too small: expected number to be >=5\\"
-                  }
-                ],
-                [
-                  {
-                    \\"code\\": \\"invalid_value\\",
-                    \\"values\\": [
-                      \\"subaction2\\"
-                    ],
-                    \\"path\\": [
-                      \\"subAction\\"
-                    ],
-                    \\"message\\": \\"Invalid input: expected \\\\\\"subaction2\\\\\\"\\"
-                  },
-                  {
-                    \\"expected\\": \\"string\\",
-                    \\"code\\": \\"invalid_type\\",
-                    \\"path\\": [
-                      \\"subActionParams\\",
-                      \\"message\\"
-                    ],
-                    \\"message\\": \\"Invalid input: expected string, received undefined\\"
-                  }
-                ]
+              \\"origin\\": \\"number\\",
+              \\"code\\": \\"too_small\\",
+              \\"minimum\\": 5,
+              \\"inclusive\\": true,
+              \\"path\\": [
+                \\"subActionParams\\",
+                \\"value\\"
               ],
-              \\"path\\": [],
-              \\"message\\": \\"Invalid input\\"
+              \\"message\\": \\"Too small: expected number to be >=5\\"
             }
           ]"
         `);

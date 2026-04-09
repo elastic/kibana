@@ -28,8 +28,8 @@ const FIELD: FieldSpec = {
 
 const getCompatibleActions = () =>
   Promise.resolve([
-    makeAction('Filter in', 'plusInCircle', 2),
-    makeAction('Filter out', 'minusInCircle', 3),
+    makeAction('Filter in', 'plusCircle', 2),
+    makeAction('Filter out', 'minusCircle', 3),
     makeAction('Minimize', 'minimize', 1),
     makeAction('Send email', 'email', 4),
     makeAction('Pin field', 'pin', 5),

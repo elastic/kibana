@@ -8,5 +8,7 @@
 export const FLYOUT_STORAGE_KEYS = {
   OVERVIEW_TAB_EXPANDED_SECTIONS:
     'securitySolution.documentDetailsFlyout.overviewSectionExpanded.v8.14',
+  THREAT_INTELLIGENCE_TIME_RANGE:
+    'securitySolution.documentDetailsFlyout.threatIntelligenceTimeRange',
   PREVALENCE_TIME_RANGE: 'securitySolution.documentDetailsFlyout.prevalenceTimeRange',
 };

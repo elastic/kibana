@@ -12,6 +12,7 @@ describe('ClassicStream', () => {
   describe('Definition', () => {
     it.each([
       {
+        type: 'classic' as const,
         name: 'classic-stream',
         description: '',
         updated_at: new Date().toISOString(),
@@ -24,6 +25,7 @@ describe('ClassicStream', () => {
         },
       },
       {
+        type: 'classic' as const,
         name: 'classic-stream-with-fields',
         description: '',
         updated_at: new Date().toISOString(),
@@ -101,6 +103,7 @@ describe('ClassicStream', () => {
     it.each([
       {
         stream: {
+          type: 'classic' as const,
           name: 'classic-stream',
           description: '',
           updated_at: new Date().toISOString(),
@@ -182,6 +185,7 @@ describe('ClassicStream', () => {
     it.each([
       {
         stream: {
+          type: 'classic' as const,
           description: '',
           ingest: {
             lifecycle: { inherit: {} },

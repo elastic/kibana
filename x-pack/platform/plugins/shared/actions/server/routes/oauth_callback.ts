@@ -7,8 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, KibanaResponseFactory, Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { capitalize, escape } from 'lodash';
+import Boom from '@hapi/boom';
+import { escape } from 'lodash';
+import { OAuthAuthorizationService } from '../lib';
 import type { ActionsPluginsStart } from '../plugin';
 import type { ILicenseState } from '../lib';
 import {
@@ -21,9 +24,10 @@ import type { ActionsRequestHandlerContext } from '../types';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from './constants';
 import { verifyAccessAndContext } from './verify_access_and_context';
+import { OAUTH_API_TAG } from '../feature';
 import { OAuthStateClient } from '../lib/oauth_state_client';
-import { OAuthAuthorizationService } from '../lib/oauth_authorization_service';
 import { requestOAuthAuthorizationCodeToken } from '../lib/request_oauth_authorization_code_token';
+import { requestEarsToken } from '../lib/ears/request_ears_token';
 import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
 import { UserConnectorTokenClient } from '../lib/user_connector_token_client';
 
@@ -83,6 +87,8 @@ const querySchema = schema.object(
 );
 
 interface OAuthConnectorSecrets {
+  authType?: string;
+  provider?: string;
   clientId?: string;
   clientSecret?: string;
   tokenUrl?: string;
@@ -90,6 +96,7 @@ interface OAuthConnectorSecrets {
 }
 
 interface OAuthConnectorConfig {
+  authType?: string;
   clientId?: string;
   tokenUrl?: string;
   useBasicAuth?: boolean;
@@ -97,6 +104,7 @@ interface OAuthConnectorConfig {
 
 type RespondWithErrorOptions = {
   details: string;
+  statusCode: number;
 } & (
   | { connectorId: string; returnUrl?: string }
   | { connectorId?: undefined; returnUrl?: undefined }
@@ -110,6 +118,7 @@ interface RespondWithSuccessOptions {
 interface OAuthCallbackBroadcast {
   connectorId: string;
   status: OAuthAuthorizationStatus;
+  statusCode: number;
   error?: string;
 }
 
@@ -251,15 +260,23 @@ const GENERIC_OAUTH_ERROR = i18n.translate('xpack.actions.oauthCallback.error.ge
   defaultMessage: 'OAuth authorization failed',
 });
 
-const buildOAuthReturnUrl = (
-  kibanaReturnUrl: string,
-  connectorId: string,
-  status: OAuthAuthorizationStatus,
-  errorMessage?: string
-): string => {
+const buildOAuthReturnUrl = ({
+  kibanaReturnUrl,
+  connectorId,
+  status,
+  statusCode,
+  errorMessage,
+}: {
+  kibanaReturnUrl: string;
+  connectorId: string;
+  status: OAuthAuthorizationStatus;
+  statusCode: number;
+  errorMessage?: string;
+}): string => {
   const returnUrl = new URL(kibanaReturnUrl);
   returnUrl.searchParams.set(OAUTH_CALLBACK_QUERY_PARAMS.AUTHORIZATION_STATUS, status);
   returnUrl.searchParams.set(OAUTH_CALLBACK_QUERY_PARAMS.CONNECTOR_ID, connectorId);
+  returnUrl.searchParams.set(OAUTH_CALLBACK_QUERY_PARAMS.STATUS_CODE, String(statusCode));
   if (errorMessage) {
     returnUrl.searchParams.set(OAUTH_CALLBACK_QUERY_PARAMS.ERROR, errorMessage);
   }
@@ -277,17 +294,18 @@ const buildOAuthReturnUrl = (
  */
 const respondWithError = (
   res: KibanaResponseFactory,
-  { details, connectorId, returnUrl }: RespondWithErrorOptions
+  { details, statusCode, connectorId, returnUrl }: RespondWithErrorOptions
 ) => {
   if (returnUrl) {
     return res.redirected({
       headers: {
-        location: buildOAuthReturnUrl(
-          returnUrl,
+        location: buildOAuthReturnUrl({
+          kibanaReturnUrl: returnUrl,
           connectorId,
-          OAuthAuthorizationStatus.Error,
-          details
-        ),
+          status: OAuthAuthorizationStatus.Error,
+          statusCode,
+          errorMessage: details,
+        }),
       },
     });
   }
@@ -309,6 +327,7 @@ const respondWithError = (
         ? {
             connectorId,
             status: OAuthAuthorizationStatus.Error,
+            statusCode,
             error: details,
           }
         : undefined,
@@ -331,7 +350,12 @@ const respondWithSuccess = (
   if (returnUrl) {
     return res.redirected({
       headers: {
-        location: buildOAuthReturnUrl(returnUrl, connectorId, OAuthAuthorizationStatus.Success),
+        location: buildOAuthReturnUrl({
+          kibanaReturnUrl: returnUrl,
+          connectorId,
+          status: OAuthAuthorizationStatus.Success,
+          statusCode: 200,
+        }),
       },
     });
   }
@@ -354,6 +378,7 @@ const respondWithSuccess = (
       broadcast: {
         connectorId,
         status: OAuthAuthorizationStatus.Success,
+        statusCode: 200,
       },
     }),
   });
@@ -373,7 +398,11 @@ export const oauthCallbackRoute = (
   router.get(
     {
       path: `${BASE_ACTION_API_PATH}/connector/_oauth_callback`,
-      security: DEFAULT_ACTION_ROUTE_SECURITY,
+      security: {
+        authz: {
+          requiredPrivileges: [OAUTH_API_TAG],
+        },
+      },
       options: {
         access: 'public',
         summary: i18n.translate('xpack.actions.oauthCallback.routeSummary', {
@@ -384,7 +413,7 @@ export const oauthCallbackRoute = (
             'Handles the OAuth 2.0 authorization code callback from external providers. Exchanges the authorization code for access and refresh tokens.',
         }),
         tags: ['oas-tag:connectors'],
-        // authRequired: true is the default - user must have valid session
+        // authRequired: true is the default - user must have a valid session
         // The OAuth redirect happens in their browser, so they will have their session cookie
       },
       validate: {
@@ -442,6 +471,7 @@ export const oauthCallbackRoute = (
 
         if (!profileUid) {
           return respondWithError(res, {
+            statusCode: 500,
             details: i18n.translate('xpack.actions.oauthCallback.error.missingProfileUid', {
               defaultMessage: 'Unable to retrieve Kibana user profile ID.',
             }),
@@ -452,6 +482,7 @@ export const oauthCallbackRoute = (
         if (oauthRateLimiter.isRateLimited(profileUid, 'callback')) {
           routeLogger.warn(`OAuth callback rate limit exceeded for user: ${profileUid}`);
           return respondWithError(res, {
+            statusCode: 429,
             details: i18n.translate('xpack.actions.oauthCallback.error.rateLimited', {
               defaultMessage: 'Too many authorization attempts. Please wait before trying again.',
             }),
@@ -462,6 +493,7 @@ export const oauthCallbackRoute = (
 
         if (!stateParam) {
           return respondWithError(res, {
+            statusCode: 400,
             details: i18n.translate('xpack.actions.oauthCallback.error.missingState', {
               defaultMessage: 'Missing required OAuth state parameter.',
             }),
@@ -482,6 +514,7 @@ export const oauthCallbackRoute = (
         const oauthState = await oauthStateClient.get(stateParam);
         if (!oauthState) {
           return respondWithError(res, {
+            statusCode: 400,
             details: i18n.translate('xpack.actions.oauthCallback.error.invalidState', {
               defaultMessage:
                 'Invalid or expired state parameter. The authorization session may have timed out.',
@@ -498,6 +531,7 @@ export const oauthCallbackRoute = (
             }, got ${profileUid}`
           );
           return respondWithError(res, {
+            statusCode: 403,
             details: i18n.translate('xpack.actions.oauthCallback.error.userMismatch', {
               defaultMessage:
                 'This authorization session was not initiated by you. Please start a new authorization flow.',
@@ -518,6 +552,7 @@ export const oauthCallbackRoute = (
             : providerError;
           routeLogger.error(`OAuth provider error for connector ${stateConnectorId}: ${details}`);
           return respondWithError(res, {
+            statusCode: 400,
             details,
             connectorId: stateConnectorId,
             returnUrl: kibanaReturnUrl,
@@ -541,34 +576,54 @@ export const oauthCallbackRoute = (
 
           const config = rawAction.attributes.config;
           const secrets = rawAction.attributes.secrets;
-          const clientId = secrets.clientId || config?.clientId;
-          const clientSecret = secrets.clientSecret;
-          const tokenUrl = secrets.tokenUrl || config?.tokenUrl;
-          const useBasicAuth = secrets.useBasicAuth ?? config?.useBasicAuth ?? true;
+          const authType = secrets.authType || config?.authType;
 
-          if (!clientId || !clientSecret || !tokenUrl) {
-            throw new Error(
-              'Connector missing required OAuth configuration (clientId, clientSecret, tokenUrl)'
+          let tokenResult;
+          if (authType === 'ears') {
+            const provider = secrets.provider;
+            if (!provider) {
+              throw new Error('Connector missing required OAuth configuration (provider)');
+            }
+
+            tokenResult = await requestEarsToken(
+              provider,
+              logger,
+              {
+                code,
+                pkceVerifier: oauthState.codeVerifier,
+              },
+              configurationUtilities
+            );
+          } else {
+            const clientId = secrets.clientId || config?.clientId;
+            const clientSecret = secrets.clientSecret;
+            const useBasicAuth = secrets.useBasicAuth ?? config?.useBasicAuth ?? true;
+            const tokenUrl = secrets.tokenUrl || config?.tokenUrl;
+            if (!clientId || !clientSecret || !tokenUrl) {
+              throw new Error(
+                'Connector missing required OAuth configuration (clientId, clientSecret, tokenUrl)'
+              );
+            }
+
+            // Build the redirect URI (must match the one sent to the authorization endpoint)
+            const redirectUri = OAuthAuthorizationService.getRedirectUri(
+              coreStart.http.basePath.publicBaseUrl
+            );
+
+            tokenResult = await requestOAuthAuthorizationCodeToken(
+              tokenUrl,
+              logger,
+              {
+                code,
+                redirectUri,
+                codeVerifier: oauthState.codeVerifier,
+                clientId,
+                clientSecret,
+              },
+              configurationUtilities,
+              useBasicAuth
             );
           }
-
-          const redirectUri = OAuthAuthorizationService.getRedirectUri(
-            coreStart.http.basePath.publicBaseUrl
-          );
-
-          const tokenResult = await requestOAuthAuthorizationCodeToken(
-            tokenUrl,
-            logger,
-            {
-              code,
-              redirectUri,
-              codeVerifier: oauthState.codeVerifier,
-              clientId,
-              clientSecret,
-            },
-            configurationUtilities,
-            useBasicAuth
-          );
           routeLogger.debug(
             `Successfully exchanged authorization code for access token for connectorId: ${stateConnectorId}`
           );
@@ -588,7 +643,7 @@ export const oauthCallbackRoute = (
             tokenType: 'access_token',
             profileUid,
           });
-          const formattedToken = `${capitalize(tokenResult.tokenType)} ${tokenResult.accessToken}`;
+          const formattedToken = `${tokenResult.tokenType} ${tokenResult.accessToken}`;
           await userConnectorTokenClient.createWithRefreshToken({
             connectorId: stateConnectorId,
             accessToken: formattedToken,
@@ -606,13 +661,14 @@ export const oauthCallbackRoute = (
             returnUrl: kibanaReturnUrl,
           });
         } catch (err) {
-          const errorMessage = err instanceof Error ? err.message : String(err);
-          routeLogger.error(`OAuth callback failed: ${errorMessage}`);
+          routeLogger.error(`OAuth callback failed: ${getErrorMessage(err)}`);
           if (err instanceof Error && err.stack) {
             routeLogger.debug(`OAuth callback error stack: ${err.stack}`);
           }
+
           return respondWithError(res, {
             details: GENERIC_OAUTH_ERROR,
+            statusCode: getErrorStatusCode(err),
             connectorId: stateConnectorId,
             returnUrl: kibanaReturnUrl,
           });
@@ -692,4 +748,20 @@ export const oauthCallbackScriptRoute = (router: IRouter<ActionsRequestHandlerCo
       });
     }
   );
+};
+
+const getErrorMessage = (err: unknown): string => {
+  if (SavedObjectsErrorHelpers.isSavedObjectsClientError(err) || Boom.isBoom(err)) {
+    return err.output.payload.message;
+  }
+
+  return err instanceof Error ? err.message : 'Unknown error';
+};
+
+const getErrorStatusCode = (err: unknown): number => {
+  if (SavedObjectsErrorHelpers.isSavedObjectsClientError(err) || Boom.isBoom(err)) {
+    return err.output.statusCode;
+  }
+
+  return 500;
 };

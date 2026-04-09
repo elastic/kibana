@@ -20,7 +20,7 @@ const SHOW_TOP = (fieldName: string) =>
     defaultMessage: `Show top {fieldName}`,
   });
 
-const ICON = 'visBarVertical';
+const ICON = 'chartBarVertical';
 
 export const createShowTopNCellActionFactory = createCellActionFactory(
   ({ services }: { services: StartServices }): CellActionTemplate<SecurityCellAction> => ({

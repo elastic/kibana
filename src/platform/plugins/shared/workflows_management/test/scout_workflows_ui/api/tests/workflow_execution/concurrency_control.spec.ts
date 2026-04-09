@@ -50,8 +50,7 @@ steps:
     with:
       message: "Hello from Scout API test 2"
 `;
-// Failing: See https://github.com/elastic/kibana/issues/257103
-spaceTest.describe.skip(
+spaceTest.describe(
   'Workflow execution concurrency control',
   { tag: tags.deploymentAgnostic },
   () => {

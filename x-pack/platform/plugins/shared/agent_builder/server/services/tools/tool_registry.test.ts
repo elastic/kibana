@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -94,6 +95,7 @@ describe('ToolRegistryImpl', () => {
     const healthClient = createMockHealthClient();
 
     const registry = createToolRegistry({
+      logger: loggerMock.create(),
       getRunner: jest.fn() as any,
       builtinProvider,
       persistedProvider,

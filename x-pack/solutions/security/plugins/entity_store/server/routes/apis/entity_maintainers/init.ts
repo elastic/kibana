@@ -7,8 +7,8 @@
 
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
-import { ENTITY_STORE_ROUTES } from '../../../../common';
-import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
+import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
+import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import { ENTITY_STORE_STATUS } from '../../../domain/constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
@@ -18,7 +18,7 @@ import type { AssetManagerClient } from '../../../domain/asset_manager';
 export function registerInitMaintainers(router: EntityStorePluginRouter) {
   router.versioned
     .post({
-      path: ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT,
+      path: ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT,
       access: 'internal',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

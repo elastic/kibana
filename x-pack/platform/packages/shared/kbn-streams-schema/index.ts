@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { Streams } from './src/models/streams';
+export { Streams, streamDefinitionSchema } from './src/models/streams';
 export { IngestBase, type IngestStreamIndexMode } from './src/models/ingest/base';
 export { Ingest, IngestStream, IngestUpsertRequest } from './src/models/ingest';
 export { WiredIngest, WiredStream, WiredIngestUpsertRequest } from './src/models/ingest/wired';
@@ -33,7 +33,13 @@ export {
 export { getStreamTypeFromDefinition } from './src/helpers/get_stream_type_from_definition';
 export type { StreamType } from './src/helpers/get_stream_type_from_definition';
 export { isRootStreamDefinition } from './src/helpers/is_root_stream_definition';
-export { isOtelStream } from './src/helpers/is_otel_stream';
+export {
+  isOtelStream,
+  OTEL_CONTENT_FIELD,
+  ECS_CONTENT_FIELD,
+  OTEL_SEVERITY_FIELD,
+  ECS_SEVERITY_FIELD,
+} from './src/helpers/is_otel_stream';
 export { getIndexPatternsForStream, getSourcesForStream } from './src/helpers/hierarchy_helpers';
 export { getDiscoverEsqlQuery } from './src/helpers/get_discover_esql_query';
 export {
@@ -189,7 +195,10 @@ export {
 
 export {
   type Feature,
+  type FeatureWithFilter,
   type BaseFeature,
+  type IdentifiedFeature,
+  type IgnoredFeature,
   type FeatureStatus,
   DATASET_ANALYSIS_FEATURE_TYPE,
   LOG_SAMPLES_FEATURE_TYPE,
@@ -197,11 +206,16 @@ export {
   ERROR_LOGS_FEATURE_TYPE,
   COMPUTED_FEATURE_TYPES,
   isFeature,
+  isFeatureWithFilter,
   isComputedFeature,
   isDuplicateFeature,
   hasSameFingerprint,
+  mergeFeature,
+  toBaseFeature,
   featureSchema,
   baseFeatureSchema,
+  identifiedFeatureSchema,
+  ignoredFeatureSchema,
   featureStatusSchema,
 } from './src/feature';
 
@@ -222,7 +236,7 @@ export { type IngestStreamProcessing } from './src/models/ingest/processing';
 export { TaskStatus, type TaskResult } from './src/tasks/types';
 
 export type { GenerateDescriptionResult } from './src/api/description_generation';
-export type { IdentifyFeaturesResult } from './src/api/features';
+export type { IdentifyFeaturesResult, IterationResult } from './src/api/features';
 
 export {
   type GenerateInsightsResult,
@@ -251,3 +265,13 @@ export type { StreamsOasDefinitions } from './src/oas_definitions';
 
 export { streamMatchesIndexPatterns } from './src/helpers/stream_matches_index_patterns';
 export { DEFAULT_INDEX_PATTERNS } from './src/helpers/default_index_patterns';
+
+export {
+  STREAMS_SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+  STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+  STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+  STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
+  STREAMS_INFERENCE_PARENT_FEATURE_ID,
+  STREAMS_PARTITIONING_SUGGESTIONS_INFERENCE_FEATURE_ID,
+  STREAMS_PROCESSING_SUGGESTIONS_INFERENCE_FEATURE_ID,
+} from './src/inference_feature_ids';

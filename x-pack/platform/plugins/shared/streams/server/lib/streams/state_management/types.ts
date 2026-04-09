@@ -33,9 +33,11 @@ export interface StateDependencies {
   storageClient: StreamsStorageClient;
   esClient: ElasticsearchClient;
   attachmentClient: AttachmentClient;
-  queryClient: QueryClient;
-  featureClient: FeatureClient;
+  queryClient?: QueryClient;
+  featureClient?: FeatureClient;
   isServerless: boolean;
+  isSecurityEnabled: boolean;
   isWiredStreamViewsEnabled: boolean;
   isDev: boolean;
+  deferRootDataStreamMaterialization?: boolean;
 }

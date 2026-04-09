@@ -10,15 +10,9 @@ import { useQuery } from '@kbn/react-query';
 import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
+import { sanitizeSearch } from '../common/sanitize_search';
 import { SAVED_QUERIES_ID } from './constants';
 import type { SavedQuerySO } from '../routes/saved_queries/list';
-
-const sanitizeSearch = (value: string | undefined): string | undefined => {
-  if (!value) return undefined;
-  const sanitized = value.replace(/[*?\\{}()|"<>]/g, '').trim();
-
-  return sanitized || undefined;
-};
 
 export const useSavedQueries = ({
   isLive = false,

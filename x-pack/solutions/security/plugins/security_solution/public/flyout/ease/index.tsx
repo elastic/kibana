@@ -12,7 +12,8 @@ import { getRawData } from '../../assistant/helpers';
 import { AIAssistantSection } from './components/ai_assistant_section';
 import { AttackDiscoverySection } from './components/attack_discovery_section';
 import { AlertSummarySection } from './components/alert_summary_section';
-import { HighlightedFields } from '../document_details/right/components/highlighted_fields';
+import { HighlightedFields } from '../../flyout_v2/document/components/highlighted_fields';
+import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 import { useEaseDetailsContext } from './context';
 import { FlyoutBody } from '../shared/components/flyout_body';
 import { FlyoutNavigation } from '../shared/components/flyout_navigation';
@@ -49,9 +50,10 @@ export const EasePanel: React.FC<Partial<EaseDetailsProps>> = memo(() => {
           </EuiFlexItem>
           <EuiFlexItem>
             <HighlightedFields
+              hideEditButton={true}
               hit={hit}
               investigationFields={investigationFields}
-              showCellActions={false}
+              renderCellActions={noopCellActionRenderer}
             />
           </EuiFlexItem>
           <EuiFlexItem>

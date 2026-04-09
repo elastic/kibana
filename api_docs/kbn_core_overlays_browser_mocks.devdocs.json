@@ -15,7 +15,7 @@
         "label": "overlayServiceMock",
         "description": [],
         "path": "src/core/packages/overlays/browser-mocks/src/overlay_service.mock.ts",
-        "lineNumber": 39,
+        "lineNumber": 40,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -41,7 +41,7 @@
               ">>"
             ],
             "path": "src/core/packages/overlays/browser-mocks/src/overlay_service.mock.ts",
-            "lineNumber": 40,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -69,7 +69,7 @@
               ">"
             ],
             "path": "src/core/packages/overlays/browser-mocks/src/overlay_service.mock.ts",
-            "lineNumber": 41,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

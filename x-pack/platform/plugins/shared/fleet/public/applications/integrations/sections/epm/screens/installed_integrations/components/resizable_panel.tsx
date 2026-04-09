@@ -179,8 +179,8 @@ export const ResizablePanel: React.FunctionComponent<{
           <EuiFlexItem grow={false}>
             {isCollapsed ? (
               <EuiButtonIcon
-                key="arrowUp"
-                iconType="arrowUp"
+                key="chevronSingleUp"
+                iconType="chevronSingleUp"
                 aria-label={i18n.translate(
                   'xpack.fleet.integrationsResizablePanel.collapseButton',
                   { defaultMessage: 'Collapse panel' }
@@ -190,8 +190,8 @@ export const ResizablePanel: React.FunctionComponent<{
               />
             ) : (
               <EuiButtonIcon
-                key="arrowDown"
-                iconType="arrowDown"
+                key="chevronSingleDown"
+                iconType="chevronSingleDown"
                 aria-label={i18n.translate(
                   'xpack.fleet.integrationsResizablePanel.collapseButton',
                   { defaultMessage: 'Collapse panel' }
