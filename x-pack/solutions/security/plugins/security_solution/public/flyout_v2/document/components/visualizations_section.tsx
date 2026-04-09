@@ -123,7 +123,7 @@ export const VisualizationsSection = memo(
       <ExpandableSection
         data-test-subj={VISUALIZATION_SECTION_TEST_ID}
         expanded={expanded}
-        gutterSize="s"
+        gutterSize="m"
         localStorageKey={FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS}
         sectionId={LOCAL_STORAGE_SECTION_KEY}
         title={VISUALIZATION_SECTION_TITLE}

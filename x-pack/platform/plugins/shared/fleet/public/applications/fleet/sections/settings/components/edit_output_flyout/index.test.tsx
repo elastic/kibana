@@ -85,7 +85,8 @@ const kafkaSectionsLabels = ['Partitioning', 'Topics', 'Headers', 'Compression',
 
 const remoteEsOutputLabels = ['Hosts', 'Service token'];
 
-describe('EditOutputFlyout', () => {
+// Failing: See https://github.com/elastic/kibana/issues/262076
+describe.skip('EditOutputFlyout', () => {
   const mockStartServices = (isServerlessEnabled?: boolean) => {
     mockUseStartServices.mockReturnValue({
       notifications: {

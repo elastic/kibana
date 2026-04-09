@@ -41,7 +41,7 @@ export const addAlertsStepCommonDefinition: CommonStepDefinition<
   AddAlertsStepOutputSchema
 > = {
   id: AddAlertsStepTypeId,
-  category: StepCategory.Kibana,
+  category: StepCategory.KibanaCases,
   label: i18n.ADD_ALERTS_STEP_LABEL,
   description: i18n.ADD_ALERTS_STEP_DESCRIPTION,
   documentation: {

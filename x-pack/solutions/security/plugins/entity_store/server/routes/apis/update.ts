@@ -8,6 +8,7 @@
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
@@ -41,7 +42,15 @@ export function registerUpdate(router: EntityStorePluginRouter) {
         const { logsExtractionClient, logger } = await ctx.entityStore;
         logger.debug('Update api called');
 
-        await logsExtractionClient.updateConfig(req.body.logExtraction);
+        try {
+          await logsExtractionClient.updateConfig(req.body.logExtraction);
+        } catch (error) {
+          if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+            return res.notFound({ body: { message: 'Entity store is not installed' } });
+          }
+          logger.error(error);
+          throw error;
+        }
 
         return res.ok({
           body: {
