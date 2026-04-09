@@ -58,7 +58,7 @@ spaceTest.describe(
       });
 
       await spaceTest.step('verify total panel count', async () => {
-        expect(await pageObjects.dashboard.getAddPanelItemText()).toEqual([]);
+        expect(await pageObjects.dashboard.getAddPanelItemText()).toStrictEqual([]);
         expect(await pageObjects.dashboard.getPanelTypeCount()).toBe(3);
       });
     });
