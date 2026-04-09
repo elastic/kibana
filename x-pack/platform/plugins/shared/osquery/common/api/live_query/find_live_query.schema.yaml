@@ -103,6 +103,12 @@ components:
             expiration:
               description: 'The expiration date and time of the live query.'
               type: string
+            '@timestamp':
+              description: 'The timestamp when the live query was created.'
+              type: string
+            agent_selection:
+              description: 'The original agent selection criteria.'
+              type: object
             agents:
               description: 'A list of agent IDs targeted by the live query.'
               type: array
@@ -111,12 +117,18 @@ components:
             user_id:
               description: 'The ID of the user who ran the live query.'
               type: string
+            pack_id:
+              description: 'The pack ID, if the live query was run from a pack.'
+              type: string
+            pack_name:
+              description: 'The pack name, if the live query was run from a pack.'
+              type: string
             queries:
-              description: 'The list of queries in the live query action.'
+              description: 'The list of queries in the live query action, each with aggregated result counts.'
               type: array
               items:
                 type: object
             status:
               description: 'The overall status of the live query.'
               type: string
-              enum: [completed, pending]
+              enum: [completed, running]

@@ -604,6 +604,8 @@ components:
           description: My pack
           enabled: true
           name: my_pack
+          policy_ids:
+            - my_policy_id
           queries:
             ports:
               ecs_mapping:
@@ -622,6 +624,7 @@ components:
               value: 58
           updated_at: '2025-02-26T13:37:30.452Z'
           updated_by: elastic
+          version: 1
       type: object
       properties:
         data:
@@ -643,18 +646,29 @@ components:
             name:
               description: The pack name.
               type: string
+            policy_ids:
+              description: A list of agent policy IDs associated with the pack.
+              items:
+                type: string
+              type: array
             queries:
               description: The queries in the pack.
               type: object
             saved_object_id:
               description: The saved object ID of the pack.
               type: string
+            shards:
+              description: Shard configuration for the pack.
+              type: object
             updated_at:
               description: The last update timestamp.
               type: string
             updated_by:
               description: The user who last updated the pack.
               type: string
+            version:
+              description: The pack version.
+              type: integer
     CreateSavedQueryRequestBody:
       example:
         description: Saved query description
@@ -701,7 +715,10 @@ components:
           interval: '60'
           platform: linux,darwin
           query: select * from uptime;
+          removed: false
           saved_object_id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
+          snapshot: true
+          timeout: 120
           updated_at: '2022-07-26T09:28:08.597Z'
           updated_by: elastic
           version: 2.8.0
@@ -735,9 +752,18 @@ components:
             query:
               description: The SQL query.
               type: string
+            removed:
+              description: Whether to include results for removed processes.
+              type: boolean
             saved_object_id:
               description: The saved object ID of the saved query.
               type: string
+            snapshot:
+              description: Whether the query is a snapshot query.
+              type: boolean
+            timeout:
+              description: The query timeout in seconds.
+              type: integer
             updated_at:
               description: The last update timestamp.
               type: string
@@ -819,9 +845,15 @@ components:
           description: The live query details.
           type: object
           properties:
+            '@timestamp':
+              description: The timestamp when the live query was created.
+              type: string
             action_id:
               description: The ID of the live query action.
               type: string
+            agent_selection:
+              description: The original agent selection criteria.
+              type: object
             agents:
               description: A list of agent IDs targeted by the live query.
               items:
@@ -830,8 +862,16 @@ components:
             expiration:
               description: The expiration date and time of the live query.
               type: string
+            pack_id:
+              description: The pack ID, if the live query was run from a pack.
+              type: string
+            pack_name:
+              description: The pack name, if the live query was run from a pack.
+              type: string
             queries:
-              description: The list of queries in the live query action.
+              description: >-
+                The list of queries in the live query action, each with
+                aggregated result counts.
               items:
                 type: object
               type: array
@@ -839,7 +879,7 @@ components:
               description: The overall status of the live query.
               enum:
                 - completed
-                - pending
+                - running
               type: string
             user_id:
               description: The ID of the user who ran the live query.
@@ -890,10 +930,7 @@ components:
           created_by: elastic
           description: ''
           enabled: true
-          id: 3c42c847-eb30-4452-80e0-728584042334
           name: test_pack
-          namespaces:
-            - default
           policy_ids: []
           queries:
             uptime:
@@ -903,24 +940,29 @@ components:
               interval: 3600
               query: select * from uptime
           read_only: false
-          type: osquery-pack
+          saved_object_id: 3c42c847-eb30-4452-80e0-728584042334
+          shards: {}
           updated_at: '2022-07-25T20:12:01.455Z'
           updated_by: elastic
+          version: 1
       type: object
       properties:
         data:
           description: The pack details.
           type: object
           properties:
+            created_at:
+              description: The creation timestamp.
+              type: string
+            created_by:
+              description: The user who created the pack.
+              type: string
             description:
               description: The pack description.
               type: string
             enabled:
               description: Whether the pack is enabled.
               type: boolean
-            id:
-              description: The pack ID.
-              type: string
             name:
               description: The pack name.
               type: string
@@ -930,42 +972,53 @@ components:
                 type: string
               type: array
             queries:
-              description: The queries in the pack.
+              description: The queries in the pack, keyed by query name.
               type: object
             read_only:
               description: Whether the pack is read-only (true for prebuilt packs).
               type: boolean
-            type:
-              description: The saved object type.
+            saved_object_id:
+              description: The saved object ID of the pack.
               type: string
+            shards:
+              description: >-
+                Shard configuration for policies, as a map of policy ID to
+                percentage.
+              type: object
+            updated_at:
+              description: The last update timestamp.
+              type: string
+            updated_by:
+              description: The user who last updated the pack.
+              type: string
+            version:
+              description: The pack version.
+              type: integer
     FindPacksResponse:
       description: A paginated list of query packs.
       example:
         data:
-          - attributes:
-              created_at: '2023-10-31T00:00:00Z'
-              created_by: elastic
-              created_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
-              description: My pack description
-              enabled: true
-              name: My Pack
-              queries:
-                - ecs_mapping:
-                    - host.uptime:
-                        field: total_seconds
-                  id: uptime
-                  interval: '3600'
-                  query: select * from uptime;
-              updated_at: '2023-10-31T00:00:00Z'
-              updated_by: elastic
-              updated_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
-            id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
-            namespaces:
-              - default
-            type: osquery-pack
+          - created_at: '2023-10-31T00:00:00Z'
+            created_by: elastic
+            description: My pack description
+            enabled: true
+            name: My Pack
+            policy_ids:
+              - policy-id-1
+            queries:
+              - ecs_mapping:
+                  host.uptime:
+                    field: total_seconds
+                id: uptime
+                interval: 3600
+                query: select * from uptime;
+            read_only: false
+            saved_object_id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
+            updated_at: '2023-10-31T00:00:00Z'
+            updated_by: elastic
+            version: 1
         page: 1
-        pageSize: 10
-        policy_ids: []
+        per_page: 10
         total: 1
       type: object
       properties:
@@ -977,7 +1030,7 @@ components:
         page:
           description: The current page number.
           type: integer
-        pageSize:
+        per_page:
           description: The number of results per page.
           type: integer
         total:
@@ -987,8 +1040,83 @@ components:
       description: The details of a single saved query.
       example:
         data:
-          attributes:
-            created_at: '2022-07-26T09:28:08.597Z'
+          created_at: '2022-07-26T09:28:08.597Z'
+          created_by: elastic
+          description: Saved query description
+          ecs_mapping:
+            host.uptime:
+              field: total_seconds
+          id: saved_query_id
+          interval: '60'
+          platform: linux,darwin
+          prebuilt: false
+          query: select * from uptime;
+          removed: false
+          saved_object_id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
+          snapshot: true
+          timeout: 120
+          updated_at: '2022-07-26T09:28:08.597Z'
+          updated_by: elastic
+          version: 2.8.0
+      type: object
+      properties:
+        data:
+          description: The saved query details.
+          type: object
+          properties:
+            created_at:
+              description: The creation timestamp.
+              type: string
+            created_by:
+              description: The user who created the saved query.
+              type: string
+            description:
+              description: The saved query description.
+              type: string
+            ecs_mapping:
+              description: The ECS mapping configuration.
+              type: object
+            id:
+              description: The saved query ID.
+              type: string
+            interval:
+              description: The query interval in seconds.
+              type: string
+            platform:
+              description: The target platform(s).
+              type: string
+            prebuilt:
+              description: Whether this is a prebuilt saved query.
+              type: boolean
+            query:
+              description: The SQL query.
+              type: string
+            removed:
+              description: Whether to include results for removed processes.
+              type: boolean
+            saved_object_id:
+              description: The saved object ID.
+              type: string
+            snapshot:
+              description: Whether the query is a snapshot query.
+              type: boolean
+            timeout:
+              description: The query timeout in seconds.
+              type: integer
+            updated_at:
+              description: The last update timestamp.
+              type: string
+            updated_by:
+              description: The user who last updated the saved query.
+              type: string
+            version:
+              description: The minimum osquery version.
+              type: string
+    FindSavedQueryResponse:
+      description: A paginated list of saved queries.
+      example:
+        data:
+          - created_at: '2022-07-26T09:28:08.597Z'
             created_by: elastic
             description: Saved query description
             ecs_mapping:
@@ -999,82 +1127,13 @@ components:
             platform: linux,darwin
             prebuilt: false
             query: select * from uptime;
+            removed: false
+            saved_object_id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
+            snapshot: true
+            timeout: 120
             updated_at: '2022-07-26T09:28:08.597Z'
             updated_by: elastic
             version: 2.8.0
-          coreMigrationVersion: 8.4.0
-          id: 3c42c847-eb30-4452-80e0-728584042334
-          namespaces:
-            - default
-          references: []
-          type: osquery-saved-query
-          updated_at: '2022-07-26T09:28:08.600Z'
-          version: WzQzMTcsMV0=
-      type: object
-      properties:
-        data:
-          description: The saved query details.
-          type: object
-          properties:
-            attributes:
-              description: The saved query attributes.
-              type: object
-              properties:
-                description:
-                  description: The saved query description.
-                  type: string
-                ecs_mapping:
-                  description: The ECS mapping configuration.
-                  type: object
-                id:
-                  description: The saved query ID.
-                  type: string
-                interval:
-                  description: The query interval in seconds.
-                  type: string
-                platform:
-                  description: The target platform(s).
-                  type: string
-                prebuilt:
-                  description: Whether this is a prebuilt saved query.
-                  type: boolean
-                query:
-                  description: The SQL query.
-                  type: string
-                version:
-                  description: The minimum osquery version.
-                  type: string
-            id:
-              description: The saved query saved object ID.
-              type: string
-            type:
-              description: The saved object type.
-              type: string
-    FindSavedQueryResponse:
-      description: A paginated list of saved queries.
-      example:
-        data:
-          - attributes:
-              created_at: '2022-07-26T09:28:08.597Z'
-              created_by: elastic
-              created_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
-              description: Saved query description
-              ecs_mapping:
-                host.uptime:
-                  field: total_seconds
-              id: saved_query_id
-              interval: '60'
-              platform: linux,darwin
-              prebuilt: false
-              query: select * from uptime;
-              updated_at: '2022-07-26T09:28:08.597Z'
-              updated_by: elastic
-              updated_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
-              version: 2.8.0
-            id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
-            namespaces:
-              - default
-            type: osquery-saved-query
         page: 1
         per_page: 100
         total: 11
@@ -1295,6 +1354,8 @@ components:
           description: My pack
           enabled: true
           name: updated_my_pack_name
+          policy_ids:
+            - my_policy_id
           queries:
             ports:
               ecs_mapping:
@@ -1313,6 +1374,7 @@ components:
               value: 58
           updated_at: '2025-02-26T13:40:16.297Z'
           updated_by: elastic
+          version: 1
       type: object
       properties:
         data:
@@ -1334,18 +1396,29 @@ components:
             name:
               description: The pack name.
               type: string
+            policy_ids:
+              description: A list of agent policy IDs associated with the pack.
+              items:
+                type: string
+              type: array
             queries:
               description: The queries in the pack.
               type: object
             saved_object_id:
               description: The saved object ID of the pack.
               type: string
+            shards:
+              description: Shard configuration for the pack.
+              type: object
             updated_at:
               description: The last update timestamp.
               type: string
             updated_by:
               description: The user who last updated the pack.
               type: string
+            version:
+              description: The pack version.
+              type: integer
     UpdateSavedQueryRequestBody:
       example:
         id: updated_my_saved_query_name
@@ -1373,8 +1446,6 @@ components:
       description: The response for updating a saved query.
       example:
         data:
-          created_at: '2022-07-26T09:28:08.597Z'
-          created_by: elastic
           description: Saved query description
           ecs_mapping:
             host.uptime:
@@ -1383,7 +1454,10 @@ components:
           interval: '60'
           platform: linux,darwin
           query: select * from uptime;
+          removed: false
           saved_object_id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
+          snapshot: true
+          timeout: 120
           updated_at: '2022-07-26T10:15:00.000Z'
           updated_by: elastic
           version: 2.8.0
@@ -1393,12 +1467,6 @@ components:
           description: The updated saved query.
           type: object
           properties:
-            created_at:
-              description: The creation timestamp.
-              type: string
-            created_by:
-              description: The user who created the saved query.
-              type: string
             description:
               description: The saved query description.
               type: string
@@ -1417,9 +1485,18 @@ components:
             query:
               description: The SQL query.
               type: string
+            removed:
+              description: Whether to include results for removed processes.
+              type: boolean
             saved_object_id:
               description: The saved object ID of the saved query.
               type: string
+            snapshot:
+              description: Whether the query is a snapshot query.
+              type: boolean
+            timeout:
+              description: The query timeout in seconds.
+              type: integer
             updated_at:
               description: The last update timestamp.
               type: string

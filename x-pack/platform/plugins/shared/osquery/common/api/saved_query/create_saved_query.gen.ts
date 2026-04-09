@@ -72,6 +72,18 @@ export const CreateSavedQueryResponse = z.object({
        */
       interval: z.string().optional(),
       /**
+       * The query timeout in seconds.
+       */
+      timeout: z.number().int().optional(),
+      /**
+       * Whether the query is a snapshot query.
+       */
+      snapshot: z.boolean().optional(),
+      /**
+       * Whether to include results for removed processes.
+       */
+      removed: z.boolean().optional(),
+      /**
        * The target platform(s).
        */
       platform: z.string().optional(),

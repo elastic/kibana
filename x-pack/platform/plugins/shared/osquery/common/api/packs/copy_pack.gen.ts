@@ -43,6 +43,10 @@ export const CopyPacksResponse = z.object({
        */
       queries: z.object({}).optional(),
       /**
+       * The pack version.
+       */
+      version: z.number().int().optional(),
+      /**
        * Whether the pack is enabled. Always false for copies.
        */
       enabled: z.boolean().optional(),
@@ -62,6 +66,14 @@ export const CopyPacksResponse = z.object({
        * The user who last updated the pack.
        */
       updated_by: z.string().optional(),
+      /**
+       * A list of agent policy IDs associated with the pack. Always empty for copies.
+       */
+      policy_ids: z.array(z.string()).optional(),
+      /**
+       * Shard configuration for the pack.
+       */
+      shards: z.object({}).optional(),
     })
     .optional(),
 });

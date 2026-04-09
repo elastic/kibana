@@ -72,6 +72,18 @@ export const UpdateSavedQueryResponse = z.object({
        */
       interval: z.string().optional(),
       /**
+       * The query timeout in seconds.
+       */
+      timeout: z.number().int().optional(),
+      /**
+       * Whether the query is a snapshot query.
+       */
+      snapshot: z.boolean().optional(),
+      /**
+       * Whether to include results for removed processes.
+       */
+      removed: z.boolean().optional(),
+      /**
        * The target platform(s).
        */
       platform: z.string().optional(),
@@ -83,14 +95,6 @@ export const UpdateSavedQueryResponse = z.object({
        * The ECS mapping configuration.
        */
       ecs_mapping: z.object({}).optional(),
-      /**
-       * The creation timestamp.
-       */
-      created_at: z.string().optional(),
-      /**
-       * The user who created the saved query.
-       */
-      created_by: z.string().optional(),
       /**
        * The last update timestamp.
        */

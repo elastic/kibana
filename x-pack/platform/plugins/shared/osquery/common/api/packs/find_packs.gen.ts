@@ -28,7 +28,7 @@ export const FindPacksResponse = z.object({
   /**
    * The number of results per page.
    */
-  pageSize: z.number().int().optional(),
+  per_page: z.number().int().optional(),
   /**
    * The total number of packs.
    */
@@ -50,33 +50,53 @@ export const FindPackResponse = z.object({
   data: z
     .object({
       /**
-       * The pack ID.
+       * The saved object ID of the pack.
        */
-      id: z.string().optional(),
-      /**
-       * The saved object type.
-       */
-      type: z.string().optional(),
+      saved_object_id: z.string().optional(),
       /**
        * The pack name.
        */
       name: z.string().optional(),
       /**
-       * The queries in the pack.
+       * The pack description.
+       */
+      description: z.string().optional(),
+      /**
+       * The queries in the pack, keyed by query name.
        */
       queries: z.object({}).optional(),
+      /**
+       * The pack version.
+       */
+      version: z.number().int().optional(),
       /**
        * Whether the pack is enabled.
        */
       enabled: z.boolean().optional(),
       /**
-       * The pack description.
+       * The creation timestamp.
        */
-      description: z.string().optional(),
+      created_at: z.string().optional(),
+      /**
+       * The user who created the pack.
+       */
+      created_by: z.string().optional(),
+      /**
+       * The last update timestamp.
+       */
+      updated_at: z.string().optional(),
+      /**
+       * The user who last updated the pack.
+       */
+      updated_by: z.string().optional(),
       /**
        * A list of agent policy IDs associated with the pack.
        */
       policy_ids: z.array(z.string()).optional(),
+      /**
+       * Shard configuration for policies, as a map of policy ID to percentage.
+       */
+      shards: z.object({}).optional(),
       /**
        * Whether the pack is read-only (true for prebuilt packs).
        */

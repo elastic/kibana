@@ -46,6 +46,10 @@ export const UpdatePacksResponse = z.object({
   data: z
     .object({
       /**
+       * The saved object ID of the pack.
+       */
+      saved_object_id: z.string().optional(),
+      /**
        * The pack name.
        */
       name: z.string().optional(),
@@ -57,6 +61,10 @@ export const UpdatePacksResponse = z.object({
        * The queries in the pack.
        */
       queries: z.object({}).optional(),
+      /**
+       * The pack version.
+       */
+      version: z.number().int().optional(),
       /**
        * Whether the pack is enabled.
        */
@@ -78,9 +86,13 @@ export const UpdatePacksResponse = z.object({
        */
       updated_by: z.string().optional(),
       /**
-       * The saved object ID of the pack.
+       * A list of agent policy IDs associated with the pack.
        */
-      saved_object_id: z.string().optional(),
+      policy_ids: z.array(z.string()).optional(),
+      /**
+       * Shard configuration for the pack.
+       */
+      shards: z.object({}).optional(),
     })
     .optional(),
 });

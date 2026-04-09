@@ -82,6 +82,14 @@ export const FindLiveQueryDetailsResponse = z.object({
        */
       expiration: z.string().optional(),
       /**
+       * The timestamp when the live query was created.
+       */
+      '@timestamp': z.string().optional(),
+      /**
+       * The original agent selection criteria.
+       */
+      agent_selection: z.object({}).optional(),
+      /**
        * A list of agent IDs targeted by the live query.
        */
       agents: z.array(z.string()).optional(),
@@ -90,13 +98,21 @@ export const FindLiveQueryDetailsResponse = z.object({
        */
       user_id: z.string().optional(),
       /**
-       * The list of queries in the live query action.
+       * The pack ID, if the live query was run from a pack.
+       */
+      pack_id: z.string().optional(),
+      /**
+       * The pack name, if the live query was run from a pack.
+       */
+      pack_name: z.string().optional(),
+      /**
+       * The list of queries in the live query action, each with aggregated result counts.
        */
       queries: z.array(z.object({})).optional(),
       /**
        * The overall status of the live query.
        */
-      status: z.enum(['completed', 'pending']).optional(),
+      status: z.enum(['completed', 'running']).optional(),
     })
     .optional(),
 });
