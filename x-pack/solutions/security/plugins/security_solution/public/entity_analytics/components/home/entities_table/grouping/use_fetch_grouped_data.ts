@@ -36,6 +36,8 @@ export interface TargetEntityMetadata {
 
 export type TargetMetadataMap = Map<string, TargetEntityMetadata>;
 
+const EMPTY_TARGET_METADATA: TargetMetadataMap = new Map();
+
 interface TargetEntitySource {
   entity?: {
     id?: string;
@@ -163,5 +165,5 @@ export const useFetchTargetMetadata = (entityIds: string[]): TargetMetadataMap =
     }
   );
 
-  return metadataMap ?? new Map();
+  return metadataMap ?? EMPTY_TARGET_METADATA;
 };
