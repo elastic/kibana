@@ -102,12 +102,19 @@ export async function enrollAgent(
     }
   );
 
-  fleetProcess.on('error', (err) => {
-    throw new Error(`Fleet Server process failed: ${err.message}`);
+  // Race: either Fleet Server becomes healthy or the process fails
+  const fleetProcessError = new Promise<never>((_, rej) => {
+    fleetProcess.on('error', (err) =>
+      rej(new Error(`Fleet Server process failed: ${err.message}`))
+    );
+    fleetProcess.on('close', (code) => {
+      if (code !== null && code !== 0) {
+        rej(new Error(`Fleet Server exited with code ${code}`));
+      }
+    });
   });
 
-  // Wait for Fleet Server to be healthy before enrolling the agent
-  await waitForFleetServer();
+  await Promise.race([waitForFleetServer(), fleetProcessError]);
 
   spawnSync(
     'docker',
