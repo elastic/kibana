@@ -78,6 +78,40 @@ describe('groupPanelRenderer', () => {
       expect(getByText('bernicehuel')).toBeInTheDocument();
     });
 
+    it('renders entity id subtitle when entity name is available', () => {
+      const bucket = createMockBucket({
+        key: 'user:james@example.com',
+        key_as_string: 'user:james@example.com',
+        resolutionEntityName: {
+          doc_count: 1,
+          name: { buckets: [{ key: 'james-hue', doc_count: 1 }] },
+        },
+      });
+      const element = groupPanelRenderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
+
+      const { getByText } = render(<>{element}</>);
+
+      expect(getByText('james-hue')).toBeInTheDocument();
+      expect(getByText('Entity id: user:james@example.com')).toBeInTheDocument();
+    });
+
+    it('does not render entity id subtitle when falling back to entity id as name', () => {
+      const bucket = createMockBucket({
+        key: 'fallback-entity-id',
+        key_as_string: 'fallback-entity-id',
+        resolutionEntityName: {
+          doc_count: 0,
+          name: { buckets: [] },
+        },
+      });
+      const element = groupPanelRenderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
+
+      const { getByText, queryByText } = render(<>{element}</>);
+
+      expect(getByText('fallback-entity-id')).toBeInTheDocument();
+      expect(queryByText(/Entity id:/)).not.toBeInTheDocument();
+    });
+
     it('falls back to bucket key when resolutionEntityName has no buckets', () => {
       const bucket = createMockBucket({
         key: 'fallback-entity-id',

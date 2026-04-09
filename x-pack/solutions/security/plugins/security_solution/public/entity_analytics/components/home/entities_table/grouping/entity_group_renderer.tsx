@@ -97,6 +97,14 @@ const ResolutionGroupPanel = ({ bucket }: { bucket: RawBucket<EntitiesGroupingAg
       )}
       <EuiFlexItem grow={false}>
         <EuiText size="s">{displayName}</EuiText>
+        {targetEntityName && (
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('xpack.securitySolution.entityAnalytics.entitiesTable.group.entityId', {
+              defaultMessage: 'Entity id: {entityId}',
+              values: { entityId },
+            })}
+          </EuiText>
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
