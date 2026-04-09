@@ -7,8 +7,13 @@
 
 import type { ComposerQuery } from '@elastic/esql';
 import { esql } from '@elastic/esql';
+import { escapeStringValue } from '@kbn/esql-utils/src/utils/append_to_query/utils';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
-import { ALERT_EVENTS_DATA_STREAM, PAGE_SIZE_ESQL_VARIABLE } from '../constants';
+import {
+  ALERT_ACTIONS_DATA_STREAM,
+  ALERT_EVENTS_DATA_STREAM,
+  PAGE_SIZE_ESQL_VARIABLE,
+} from '../constants';
 
 export interface AlertEpisode {
   '@timestamp': string;
@@ -39,6 +44,8 @@ export interface EpisodesFilterState {
   ruleId?: string | null;
   /** Query string for full-text search */
   queryString?: string | null;
+  /** Tag values — episodes matching any selected tag (OR) */
+  tags?: string[] | null;
 }
 
 export interface EpisodesSortState {
@@ -67,23 +74,48 @@ export const addEpisodeAggregation = (query: ComposerQuery) => {
     .pipe`WHERE @timestamp == last_timestamp`;
 };
 
-const addQueryStringFilter = (query: ComposerQuery, search: string) => {
-  query.where`QSTR(${search})`;
+const addGroupHashActionStats = (query: ComposerQuery) => {
+  // prettier-ignore
+  query
+    .pipe`INLINE STATS last_deactivate_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate") BY group_hash`
+    .pipe`INLINE STATS last_tags = LAST(tags, @timestamp) WHERE action_type IN ("tag") BY group_hash`;
+};
+
+const addTagsFilter = (query: ComposerQuery, tags: string[]) => {
+  const trimmed = tags.map((t) => t.trim()).filter(Boolean);
+  if (trimmed.length === 0) {
+    return;
+  }
+  if (trimmed.length === 1) {
+    query.where`MV_CONTAINS(last_tags, ${trimmed[0]})`;
+    return;
+  }
+  const clause = trimmed.map((t) => `MV_CONTAINS(last_tags, ${escapeStringValue(t)})`).join(' OR ');
+  query.pipe(`WHERE (${clause})`);
 };
 
 /**
- * Builds an ES|QL query that aggregates episode data starting from
- * the alerting-events data stream.
+ * Builds an ES|QL query that aggregates episode data from `.rule-events` and
+ * `.alert-actions` (last tags / deactivate state per group_hash), then episode rows.
  */
 export const buildEpisodesBaseQuery = (search?: string): ComposerQuery => {
-  const query = esql.from(ALERT_EVENTS_DATA_STREAM).where`type == "alert"`;
+  const query = esql.from([ALERT_EVENTS_DATA_STREAM, ALERT_ACTIONS_DATA_STREAM]);
 
-  if (search) {
-    // The query string must be applied before EVALs and aggregations
-    addQueryStringFilter(query, search);
+  const trimmedSearch = search?.trim();
+  if (trimmedSearch) {
+    query.pipe(
+      `WHERE ((type == "alert" AND QSTR(${escapeStringValue(
+        trimmedSearch
+      )})) OR (action_type IN ("deactivate", "activate", "tag")))`
+    );
+  } else {
+    query.where`type == "alert" OR action_type IN ("deactivate", "activate", "tag")`;
   }
 
+  addGroupHashActionStats(query);
+  query.where`type == "alert"`;
   addEpisodeAggregation(query);
+  query.pipe`EVAL effective_status = CASE(last_deactivate_action == "deactivate", "inactive", \`episode.status\`)`;
 
   return query;
 };
@@ -102,11 +134,15 @@ export const buildEpisodesQuery = (
   const query = buildEpisodesBaseQuery(filterState?.queryString?.trim());
 
   if (filterState?.status) {
-    query.where`episode.status == ${filterState.status}`;
+    query.where`effective_status == ${filterState.status}`;
   }
 
   if (filterState?.ruleId) {
     query.where`rule.id == ${filterState.ruleId}`;
+  }
+
+  if (filterState?.tags?.length) {
+    addTagsFilter(query, filterState.tags);
   }
 
   return query.sort([sortField, sortDir]).pipe`LIMIT ${pageSizeParam}`.keep(
