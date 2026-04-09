@@ -8,6 +8,7 @@
 import type { Conversation, TimelineConversation } from '@kbn/agent-builder-common';
 import { timelineEventsToRounds } from '@kbn/agent-builder-common';
 import type { ConversationStateManager, ToolStateManager } from '@kbn/agent-builder-server/runner';
+import { isTimelineConversation } from '@kbn/agent-builder-common/chat';
 
 export const createConversationStateManager = (
   conversation?: Conversation | TimelineConversation | undefined
@@ -16,7 +17,7 @@ export const createConversationStateManager = (
 
   // prefill tool state map with last round's tool state
   const rounds = conversation
-    ? 'timeline' in conversation
+    ? isTimelineConversation(conversation)
       ? timelineEventsToRounds(conversation.timeline)
       : conversation.rounds
     : [];
