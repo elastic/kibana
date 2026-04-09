@@ -26,10 +26,20 @@ import {
   UseField,
   useFormContext,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import * as LABELS from '../translations';
 import type { Config } from '../types/types';
+
+const inferenceIdConfig = {
+  validations: [
+    {
+      validator: fieldValidators.emptyField(LABELS.getRequiredMessage('Inference endpoint ID')),
+      isBlocking: true,
+    },
+  ],
+};
 
 interface InferenceEndpointIdFieldProps {
   config: Config;
@@ -48,7 +58,7 @@ export const InferenceEndpointIdField: React.FC<InferenceEndpointIdFieldProps> =
   return (
     <>
       <EuiHorizontalRule margin="m" />
-      <UseField path="config.inferenceId">
+      <UseField path="config.inferenceId" config={inferenceIdConfig}>
         {(field) => {
           const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
           return (

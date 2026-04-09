@@ -26,8 +26,8 @@ export const mockProviders: InferenceProvider[] = [
       },
       model_id: {
         default_value: null,
-        description: 'The name of the model to use for the inference task.',
-        label: 'Model ID',
+        description: '23The name of the model to use for the inference task.',
+        label: 'Model ID23',
         required: true,
         sensitive: false,
         updatable: true,

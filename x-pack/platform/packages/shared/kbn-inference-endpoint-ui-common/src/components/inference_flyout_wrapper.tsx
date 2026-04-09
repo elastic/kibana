@@ -210,10 +210,10 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
-                color="success"
+                color="primary"
                 size="m"
                 isLoading={form.isSubmitting || isLoading}
-                disabled={!form.isValid || isLoading}
+                disabled={form.isValid === false || isLoading}
                 data-test-subj="inference-endpoint-submit-button"
                 onClick={handleSubmit}
               >

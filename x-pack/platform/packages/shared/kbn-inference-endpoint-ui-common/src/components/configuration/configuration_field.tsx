@@ -422,11 +422,15 @@ export const ConfigurationField: React.FC<ConfigurationFieldProps> = ({
   isPreconfigured,
 }) => {
   const validateAndSetConfigValue = (value: number | string | boolean | Map) => {
-    setConfigValue(
-      configEntry.type === FieldType.STRING && value === ''
-        ? null
-        : ensureCorrectTyping(configEntry.type, value)
-    );
+    const isEmpty = configEntry.type === FieldType.STRING && value === '';
+    if (configEntry.required && isEmpty) {
+      configEntry.isValid = false;
+      configEntry.validationErrors = [`${configEntry.label} is required.`];
+    } else {
+      configEntry.isValid = true;
+      configEntry.validationErrors = [];
+    }
+    setConfigValue(isEmpty ? null : ensureCorrectTyping(configEntry.type, value));
   };
 
   const { key, type, sensitive } = configEntry;
