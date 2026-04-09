@@ -30,7 +30,7 @@ import type { LensAttributes } from '../../types';
 import { DEFAULT_LAYER_ID } from '../../constants';
 import {
   addLayerColumn,
-  buildDatasetState,
+  buildDataSourceState,
   buildDatasourceStates,
   buildReferences,
   generateApiLayer,
@@ -82,14 +82,20 @@ function getTagcloudDataset(
   references: SavedObjectReference[],
   adhocReferences: SavedObjectReference[] = [],
   layerId: string
-): TagcloudState['dataset'] {
-  const dataset = buildDatasetState(layer, layerId, adHocDataViews, references, adhocReferences);
+): TagcloudState['data_source'] {
+  const dataSource = buildDataSourceState(
+    layer,
+    layerId,
+    adHocDataViews,
+    references,
+    adhocReferences
+  );
 
-  if (!dataset || dataset.type == null) {
-    throw new Error('Unsupported dataset type');
+  if (!dataSource || dataSource.type == null) {
+    throw new Error('Unsupported DataSource type');
   }
 
-  return dataset;
+  return dataSource;
 }
 
 function getTagcloudMetric(
@@ -136,13 +142,19 @@ function reverseBuildVisualizationState(
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
 ): TagcloudState {
-  const dataset = getTagcloudDataset(layer, adHocDataViews, references, adhocReferences, layerId);
+  const dataSource = getTagcloudDataset(
+    layer,
+    adHocDataViews,
+    references,
+    adhocReferences,
+    layerId
+  );
   const metric = getTagcloudMetric(layer, visualization);
   const tagBy = getTagcloudTagBy(layer, visualization);
 
   return {
     type: 'tag_cloud',
-    dataset,
+    data_source: dataSource,
     ...generateApiLayer(layer),
     metric,
     tag_by: tagBy,

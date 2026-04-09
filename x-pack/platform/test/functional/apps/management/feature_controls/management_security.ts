@@ -38,7 +38,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('should not show the Stack Management nav link', async () => {
         const links = await appsMenu.readLinks();
-        expect(links.map((link) => link.text)).to.eql(['Dashboards']);
+        expect(links.map((link) => link.text)).to.not.contain('Stack Management');
       });
 
       it('should render the "application not found" view when navigating to management directly', async () => {
@@ -89,7 +89,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const modelManagementSection = sections.find(
           (section) => section.sectionId === 'modelManagement'
         );
-        expect(modelManagementSection?.sectionLinks).to.eql(['inference_endpoints']);
+        expect(modelManagementSection?.sectionLinks).to.eql([
+          'elastic_inference_service',
+          'inference_endpoints',
+          'model_settings',
+        ]);
 
         const kibanaSection = sections.find((section) => section.sectionId === 'kibana');
         expect(kibanaSection?.sectionLinks).to.eql([

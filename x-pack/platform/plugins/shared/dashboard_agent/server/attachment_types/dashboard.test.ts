@@ -12,7 +12,7 @@ import {
 } from '@kbn/agent-builder-common/attachments';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
-  attachmentToDashboardState,
+  attachmentDataToDashboardState,
   type DashboardAttachmentData,
 } from '@kbn/dashboard-agent-common';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
@@ -25,7 +25,7 @@ const dashboardAttachmentData: DashboardAttachmentData = {
   panels: [
     {
       type: 'lens',
-      uid: 'panel-1',
+      id: 'panel-1',
       grid: { x: 0, y: 0, w: 24, h: 15 },
       config: {
         attributes: {
@@ -52,11 +52,7 @@ const createDashboardClient = ({
   ({
     read: jest.fn().mockResolvedValue({
       id: 'dashboard-1',
-      data: attachmentToDashboardState({
-        id: 'dashboard-1',
-        type: DASHBOARD_ATTACHMENT_TYPE,
-        data: dashboardAttachmentData,
-      }),
+      data: attachmentDataToDashboardState(dashboardAttachmentData),
       meta: {
         outcome: 'exactMatch',
         updated_at: updatedAt,
