@@ -30,7 +30,7 @@ apiTest.describe('automatic_import Data Stream API (reader)', { tag: tags.statef
   });
 
   apiTest('POST /upload: returns 403 for reader user', async ({ apiClient, apiServices }) => {
-    const dsId = 'scout-upload-reader-ds';
+    const dsId = 'scout_upload_reader_ds';
     await apiServices.autoImport.createIntegrationWithDataStream(
       DATA_STREAMS_INTEGRATION_ID,
       'Scout DS Test Integration',
@@ -52,7 +52,7 @@ apiTest.describe('automatic_import Data Stream API (reader)', { tag: tags.statef
   apiTest(
     'DELETE /data_streams/{id}: returns 403 for reader user',
     async ({ apiClient, apiServices }) => {
-      const dsId = 'scout-delete-reader-ds';
+      const dsId = 'scout_delete_reader_ds';
       await apiServices.autoImport.createIntegrationWithDataStream(
         DATA_STREAMS_INTEGRATION_ID,
         'Scout DS Test Integration',
@@ -75,7 +75,7 @@ apiTest.describe('automatic_import Data Stream API (reader)', { tag: tags.statef
   apiTest(
     'PATCH /data_streams/{id}: returns 403 for reader user',
     async ({ apiClient, apiServices }) => {
-      const dsId = 'scout-pipeline-reader-ds';
+      const dsId = 'scout_pipeline_reader_ds';
       await apiServices.autoImport.createIntegrationWithDataStream(
         DATA_STREAMS_INTEGRATION_ID,
         'Scout DS Test Integration',
@@ -95,7 +95,7 @@ apiTest.describe('automatic_import Data Stream API (reader)', { tag: tags.statef
   apiTest(
     'PUT /data_streams/{id}/reanalyze: returns 403 for reader user',
     async ({ apiClient, apiServices }) => {
-      const dsId = 'scout-reanalyze-reader-ds';
+      const dsId = 'scout_reanalyze_reader_ds';
       await apiServices.autoImport.createIntegrationWithDataStream(
         DATA_STREAMS_INTEGRATION_ID,
         'Scout DS Test Integration',
