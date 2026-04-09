@@ -73,17 +73,17 @@ export function useGenAIConnectorsWithoutContext(_assistant?: unknown): UseGenAI
     ''
   );
 
-  const loadConnectorsResult = useLoadConnectors({
+  const {
+    data: aiConnectors,
+    isLoading: loading,
+    error,
+    refetch,
+  } = useLoadConnectors({
     http: http!,
     toasts: notifications?.toasts,
     featureId: OBSERVABILITY_AI_ASSISTANT_SUBFEATURE_ID,
     settings: settings!,
   });
-
-  // eslint-disable-next-line no-console
-  console.log('[useGenAIConnectors] useLoadConnectors result:', loadConnectorsResult);
-
-  const { data: aiConnectors, isLoading: loading, error, refetch } = loadConnectorsResult;
 
   const connectors = useMemo(() => aiConnectors?.map(toInferenceConnector), [aiConnectors]);
 
