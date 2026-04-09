@@ -8,10 +8,10 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
+import type { ConnectorAuthStatusMap } from '@kbn/actions-types';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../constants';
 import type { ConnectorAuthStatusApiResponse } from './transform_connector_auth_status_response';
 import { transformConnectorAuthStatusResponse } from './transform_connector_auth_status_response';
-import type { ConnectorAuthStatusMap } from '../../types';
 
 export async function fetchConnectorAuthStatus({
   http,

@@ -35,3 +35,7 @@ export interface ActionType {
   isDeprecated: boolean;
   allowMultipleSystemActions?: boolean;
 }
+
+export type ConnectorUserAuthStatus = 'connected' | 'not_connected' | 'not_applicable';
+
+export type ConnectorAuthStatusMap = Record<string, { userAuthStatus: ConnectorUserAuthStatus }>;

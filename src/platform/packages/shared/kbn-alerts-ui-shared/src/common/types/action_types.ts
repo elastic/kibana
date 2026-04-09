@@ -11,15 +11,18 @@ import type { ComponentType, ReactNode } from 'react';
 import type { RuleActionParam, ActionVariable } from '@kbn/alerting-types';
 import type { IconType, RecursivePartial } from '@elastic/eui';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { ActionType, SubFeature } from '@kbn/actions-types';
+import type {
+  ActionType,
+  ActionTypeSource,
+  ConnectorAuthStatusMap,
+  ConnectorUserAuthStatus,
+  SubFeature,
+} from '@kbn/actions-types';
 import type { SerializerFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { ActionTypeSource } from '@kbn/actions-types';
 import type { RuleFormParamsErrors } from './rule_types';
 import type { TypeRegistry } from '../type_registry';
 
-export type ConnectorUserAuthStatus = 'connected' | 'not_connected' | 'not_applicable';
-
-export type ConnectorAuthStatusMap = Record<string, { userAuthStatus: ConnectorUserAuthStatus }>;
+export type { ConnectorAuthStatusMap, ConnectorUserAuthStatus };
 
 export interface GenericValidationResult<T> {
   errors: Record<Extract<keyof T, string>, string[] | unknown>;

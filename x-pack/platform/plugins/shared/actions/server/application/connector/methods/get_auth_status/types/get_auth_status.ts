@@ -5,13 +5,12 @@
  * 2.0.
  */
 
+import type { ConnectorAuthStatusMap } from '@kbn/actions-types';
+
 import type { ActionsClientContext } from '../../../../../actions_client';
 
 export interface GetAuthStatusParams {
   context: ActionsClientContext;
 }
 
-export type GetAuthStatusResult = Record<
-  string,
-  { userAuthStatus: 'connected' | 'not_connected' | 'not_applicable' }
->;
+export type GetAuthStatusResult = ConnectorAuthStatusMap;
