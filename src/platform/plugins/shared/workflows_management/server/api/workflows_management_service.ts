@@ -25,6 +25,7 @@ import {
   ExecutionType,
   NonTerminalExecutionStatuses,
   transformWorkflowYamlJsontoEsWorkflow,
+  WORKFLOW_ID_PATTERN,
 } from '@kbn/workflows';
 import type {
   ConnectorTypeInfo,
@@ -1805,8 +1806,7 @@ export class WorkflowsService {
   }
 
   private validateWorkflowId(id: string): void {
-    const uuidRegex = /^workflow-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(id)) {
+    if (!WORKFLOW_ID_PATTERN.test(id)) {
       throw new WorkflowValidationError(
         `Invalid workflow ID format. Expected format: workflow-{uuid}, received: ${id}`
       );
