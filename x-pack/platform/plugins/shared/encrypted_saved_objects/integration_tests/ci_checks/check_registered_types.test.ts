@@ -64,7 +64,7 @@ describe('checking changes on all registered encrypted SO types', () => {
 
     expect(hashMap).toMatchInlineSnapshot(`
       Object {
-        "action": "4e9f7946dfcbee267e685618638f76f3d55e65c949bd259487dc4bf004018478",
+        "action": "1246557bd7101a6f8f732c6fe2fcebb582b2dfb6154816c43cce224ceaee4239",
         "action_task_params": "06aa563283bdcd5c07ec433a7d0b8425019ad11d75595ee1431691667ecd2cec",
         "ad_hoc_run_params": "6539367aa4ae8340c62f123c3457c6b8d7873c92de68651c70d41028dfe7ed32",
         "alert": "878a3b83179bbf2ad9d3862fcba539b7066429869b14c120a1dc7a8d39f4a7fa",
@@ -140,6 +140,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "fleet-fleet-server-host|1",
         "fleet-uninstall-tokens|1",
         "ingest-download-sources|1",
+        "ingest-outputs|9",
         "ingest-outputs|8",
         "ingest-outputs|7",
         "ingest-outputs|6",

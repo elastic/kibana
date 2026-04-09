@@ -5,15 +5,31 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
 import { Header } from '../../flyout_v2/document/header';
+import { NotesDetails } from '../../flyout_v2/notes';
 import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 
-export interface AlertFlyoutHeaderProps extends Pick<DocViewRenderProps, 'hit'> {
+export const MISSING_METADATA_CALLOUT = i18n.translate(
+  'xpack.securitySolution.flyout.document.header.missingMetadataCallout',
+  {
+    defaultMessage:
+      'Some of the content below might not be loading correctly. To ensure the best experience, please add `METADATA _id,_index` to your query.',
+  }
+);
+
+export interface AlertFlyoutHeaderProps {
+  /**
+   * The document record used to render the flyout header.
+   */
+  hit: DataTableRecord;
   /**
    * The document record used to render the flyout header.
    */
@@ -34,8 +50,29 @@ export const AlertFlyoutHeader = ({
   storePromise,
   onAlertUpdated,
 }: AlertFlyoutHeaderProps) => {
+  const history = useHistory();
   const [services, setServices] = useState<StartServices | null>(null);
   const [store, setStore] = useState<SecurityAppStore | null>(null);
+  const openNotesFlyout = useCallback(() => {
+    if (!services || !store) {
+      return;
+    }
+
+    services.overlays?.openSystemFlyout(
+      flyoutProviders({
+        services,
+        store,
+        history,
+        children: <NotesDetails hit={hit} />,
+      }),
+      {
+        ownFocus: false,
+        resizable: true,
+        size: 'm',
+        type: 'overlay',
+      }
+    );
+  }, [history, hit, services, store]);
 
   useEffect(() => {
     let isCanceled = false;
@@ -61,19 +98,33 @@ export const AlertFlyoutHeader = ({
     };
   }, [servicesPromise, storePromise]);
 
+  const isMissingMetadata = !hit.raw._id || !hit.raw._index;
+  const metadataCallout = isMissingMetadata ? (
+    <>
+      <EuiCallOut announceOnMount size="s" title={MISSING_METADATA_CALLOUT} />
+      <EuiSpacer size="s" />
+    </>
+  ) : null;
+
   if (!services || !store) {
-    return null;
+    return metadataCallout;
   }
 
-  return flyoutProviders({
-    services,
-    store,
-    children: (
-      <Header
-        hit={hit}
-        renderCellActions={noopCellActionRenderer}
-        onAlertUpdated={onAlertUpdated}
-      />
-    ),
-  });
+  return (
+    <>
+      {metadataCallout}
+      {flyoutProviders({
+        services,
+        store,
+        children: (
+          <Header
+            hit={hit}
+            renderCellActions={noopCellActionRenderer}
+            onAlertUpdated={onAlertUpdated}
+            onShowNotes={openNotesFlyout}
+          />
+        ),
+      })}
+    </>
+  );
 };

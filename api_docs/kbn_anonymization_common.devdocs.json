@@ -349,6 +349,25 @@
     "misc": [
       {
         "parentPluginId": "@kbn/anonymization-common",
+        "id": "def-common.ANONYMIZATION_FEATURE_ACTIVE",
+        "type": "boolean",
+        "tags": [],
+        "label": "ANONYMIZATION_FEATURE_ACTIVE",
+        "description": [
+          "\nThe anonymization feature (Phase 1 — profile-based policy service, persistent replacements,\nper-space salt) is intentionally disabled pending full removal of the implementation.\nThis constant is the single place to change; all runtime checks across both server and browser\ncode derive their state from it."
+        ],
+        "signature": [
+          "false"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/anonymization-common/index.ts",
+        "lineNumber": 67,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/anonymization-common",
         "id": "def-common.AnonymizationEntityClass",
         "type": "Type",
         "tags": [],

@@ -172,15 +172,15 @@ export const VisibilitySectionBoxes: React.FC<VisibilitySectionBoxesProps> = ({
         statusDescriptions: {
           healthy: i18n.translate(
             'xpack.securitySolution.siemReadiness.visibility.retention.healthy.description',
-            { defaultMessage: 'All ILM policies meet requirements.' }
+            { defaultMessage: 'All Lifecycle Policies meet requirements.' }
           ),
           actionsRequired: i18n.translate(
             'xpack.securitySolution.siemReadiness.visibility.retention.actionsRequired.description',
-            { defaultMessage: 'Some ILM policies needs increasing.' }
+            { defaultMessage: 'Some Lifecycle Policies need increasing.' }
           ),
           noData: i18n.translate(
             'xpack.securitySolution.siemReadiness.visibility.retention.noData.description',
-            { defaultMessage: 'No data in ILM management.' }
+            { defaultMessage: 'No data in Lifecycle management.' }
           ),
         },
       },
