@@ -52,6 +52,11 @@ export const ACTIONS_COLUMN = i18n.translate(
   { defaultMessage: 'Actions' }
 );
 
+export const EXPAND_ENTITY_BUTTON = i18n.translate(
+  'xpack.securitySolution.entityResolution.expandEntity',
+  { defaultMessage: 'Open entity details' }
+);
+
 export const REMOVE_ENTITY_BUTTON = i18n.translate(
   'xpack.securitySolution.entityResolution.removeEntity',
   { defaultMessage: 'Remove from resolution group' }

@@ -34,6 +34,7 @@ import {
   SOURCE_COLUMN,
   RISK_SCORE_COLUMN,
   ACTIONS_COLUMN,
+  EXPAND_ENTITY_BUTTON,
   REMOVE_ENTITY_BUTTON,
   TARGET_ENTITY_TOOLTIP,
   CANNOT_REMOVE_TARGET_TOOLTIP,
@@ -78,17 +79,66 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
   }, [group, hasGroup]);
 
   const columns: Array<EuiBasicTableColumn<TableEntityRow>> = useMemo(() => {
-    const cols: Array<EuiBasicTableColumn<TableEntityRow>> = [
+    const cols: Array<EuiBasicTableColumn<TableEntityRow>> = [];
+
+    if (showActions) {
+      cols.push({
+        name: ACTIONS_COLUMN,
+        width: '80px',
+        render: ({ entity }: TableEntityRow) => {
+          const entityId = getEntityId(entity);
+          const isTarget = entityId === targetEntityId;
+          const isCurrentEntity = currentEntityId === entityId;
+          const isThisEntityRemoving = removingEntityId === entityId;
+
+          const expandButton = (
+            <EuiButtonIcon
+              iconType="expand"
+              color={isCurrentEntity ? 'text' : 'primary'}
+              aria-label={EXPAND_ENTITY_BUTTON}
+              disabled={isCurrentEntity}
+              onClick={() => onEntityNameClick?.(entity)}
+            />
+          );
+
+          const removeButton = (
+            <EuiButtonIcon
+              iconType="cross"
+              color="primary"
+              aria-label={REMOVE_ENTITY_BUTTON}
+              disabled={isTarget || !!removingEntityId}
+              onClick={() => onRemoveEntity?.(entityId)}
+              isLoading={isThisEntityRemoving}
+            />
+          );
+
+          return (
+            <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>{expandButton}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {isTarget ? (
+                  <EuiToolTip content={CANNOT_REMOVE_TARGET_TOOLTIP}>{removeButton}</EuiToolTip>
+                ) : (
+                  removeButton
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        },
+      });
+    }
+
+    cols.push(
       {
         name: ENTITY_NAME_COLUMN,
         render: ({ entity }: TableEntityRow) => {
           const name = getEntityName(entity);
           const entityId = getEntityId(entity);
           const isTarget = entityId === targetEntityId;
-
           const isCurrentEntity = currentEntityId === entityId;
+
           const nameContent =
-            onEntityNameClick && !isCurrentEntity ? (
+            onEntityNameClick && !isCurrentEntity && !showActions ? (
               <EuiText size="xs" css={truncatedCellCss}>
                 <EuiLink onClick={() => onEntityNameClick(entity)} title={name}>
                   {name}
@@ -150,34 +200,8 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
           const score = getEntityRiskScore(entity);
           return <RiskScoreCell riskScore={score} />;
         },
-      },
-    ];
-
-    if (showActions) {
-      cols.push({
-        name: ACTIONS_COLUMN,
-        width: '60px',
-        render: ({ entity }: TableEntityRow) => {
-          const entityId = getEntityId(entity);
-          const isTarget = entityId === targetEntityId;
-          const isThisEntityRemoving = removingEntityId === entityId;
-          const button = (
-            <EuiButtonIcon
-              iconType="cross"
-              color="danger"
-              aria-label={REMOVE_ENTITY_BUTTON}
-              disabled={isTarget || !!removingEntityId}
-              onClick={() => onRemoveEntity?.(entityId)}
-              isLoading={isThisEntityRemoving}
-            />
-          );
-          if (isTarget) {
-            return <EuiToolTip content={CANNOT_REMOVE_TARGET_TOOLTIP}>{button}</EuiToolTip>;
-          }
-          return button;
-        },
-      });
-    }
+      }
+    );
 
     return cols;
   }, [
