@@ -32,6 +32,7 @@ import {
 import pMap from 'p-map';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
+import { useBoolean } from '@kbn/react-hooks';
 import type { TableRow } from './utils';
 import { useIndexPatternsConfig } from '../../../../../hooks/use_index_patterns_config';
 import { useKibana } from '../../../../../hooks/use_kibana';
@@ -43,7 +44,6 @@ import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router
 import { useTaskPolling } from '../../../../../hooks/use_task_polling';
 import { getFormattedError } from '../../../../../util/errors';
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
-import { useBoolean } from '@kbn/react-hooks';
 import { useOnboardingStatusUpdateQueue } from '../../hooks/use_onboarding_status_update_queue';
 import { ConnectorIcon } from '../../../../connector_list_button/connector_icon';
 import type { OnboardingConfig } from './onboarding_config_popover';
@@ -169,7 +169,13 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
       });
       throw error;
     }
-  }, [scheduleInsightsDiscoveryTask, selectedStreams, discoveryConnectorOverride, toasts, getInsightsTaskStatus]);
+  }, [
+    scheduleInsightsDiscoveryTask,
+    selectedStreams,
+    discoveryConnectorOverride,
+    toasts,
+    getInsightsTaskStatus,
+  ]);
 
   // When we started the insights task from this view and it completes, show toast
   useEffect(() => {

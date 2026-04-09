@@ -241,8 +241,7 @@ export const GENERATE_FEATURES_TOOLTIP = i18n.translate(
 export const GENERATE_QUERIES_TOOLTIP = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsView.generateQueriesTooltip',
   {
-    defaultMessage:
-      'Runs only query generation on selected streams using the configured model.',
+    defaultMessage: 'Runs only query generation on selected streams using the configured model.',
   }
 );
 
