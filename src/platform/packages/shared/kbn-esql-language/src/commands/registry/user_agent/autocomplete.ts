@@ -20,7 +20,6 @@ import {
   assignCompletionItem,
   buildAddValuePlaceholder,
   buildMapValueCompleteItem,
-  getNewUserDefinedColumnSuggestion,
   pipeCompleteItem,
   withCompleteItem,
 } from '../complete_items';
@@ -45,7 +44,13 @@ export async function autocomplete(
   switch (position) {
     case UserAgentPosition.AFTER_USER_AGENT_KEYWORD:
       return [
-        getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() ?? ''),
+        {
+          label: 'Columns prefix',
+          text: '${1:user_agent} = ',
+          asSnippet: true,
+          kind: 'Reference',
+          detail: 'The prefix for the columns being created.',
+        },
       ];
 
     case UserAgentPosition.AFTER_TARGET_FIELD:

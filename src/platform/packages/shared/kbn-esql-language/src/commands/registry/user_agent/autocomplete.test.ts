@@ -13,11 +13,7 @@ import {
   getFunctionSignaturesByReturnType,
   suggest,
 } from '../../../__tests__/commands/autocomplete';
-import {
-  assignCompletionItem,
-  pipeCompleteItem,
-  withCompleteItem,
-} from '../complete_items';
+import { assignCompletionItem, pipeCompleteItem, withCompleteItem } from '../complete_items';
 import type { ICommandCallbacks } from '../types';
 import { Location } from '../types';
 import { autocomplete } from './autocomplete';
@@ -65,7 +61,7 @@ describe('USER_AGENT Autocomplete', () => {
     const mockCallbacks = getMockCallbacks();
     (mockCallbacks.getSuggestedUserDefinedColumnName as jest.Mock).mockReturnValue('ua');
 
-    await expectUserAgentSuggestions('FROM a | USER_AGENT ', ['ua = '], mockCallbacks);
+    await expectUserAgentSuggestions('FROM a | USER_AGENT ', ['${1:user_agent} = '], mockCallbacks);
   });
 
   it('suggests = after the target field name', async () => {
@@ -109,7 +105,11 @@ describe('USER_AGENT Autocomplete', () => {
     );
     const texts = results.map((r) => r.text);
     expect(texts).toEqual(
-      expect.arrayContaining(['"regex_file": "$0"', '"extract_device_type": ', '"properties": [ $0 ]'])
+      expect.arrayContaining([
+        '"regex_file": "$0"',
+        '"extract_device_type": ',
+        '"properties": [ $0 ]',
+      ])
     );
   });
 
