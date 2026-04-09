@@ -141,7 +141,6 @@ export function QueryDetailsFlyout({
     },
   ];
 
-
   return (
     <>
       <EuiFlyout
