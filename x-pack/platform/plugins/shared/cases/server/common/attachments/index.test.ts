@@ -10,6 +10,8 @@ import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { getAttachmentTypeFromAttributes, getAttachmentTypeTransformers } from '.';
 import { commentAttachmentTransformer } from './comment';
 
+const owner = 'cases';
+
 describe('common/attachments', () => {
   describe('getAttachmentTypeFromAttributes', () => {
     it('throws for null', () => {
@@ -61,21 +63,21 @@ describe('common/attachments', () => {
 
   describe('getAttachmentTypeTransformers', () => {
     it('returns comment transformer correctly', () => {
-      const transformer1 = getAttachmentTypeTransformers(COMMENT_ATTACHMENT_TYPE);
+      const transformer1 = getAttachmentTypeTransformers(COMMENT_ATTACHMENT_TYPE, owner);
       expect(transformer1).toBe(commentAttachmentTransformer);
 
-      const transformer2 = getAttachmentTypeTransformers('comment');
+      const transformer2 = getAttachmentTypeTransformers('comment', owner);
       expect(transformer2).toBe(commentAttachmentTransformer);
 
-      const transformer3 = getAttachmentTypeTransformers(AttachmentType.user);
+      const transformer3 = getAttachmentTypeTransformers(AttachmentType.user, owner);
       expect(transformer3).toBe(commentAttachmentTransformer);
 
-      const transformer4 = getAttachmentTypeTransformers('user');
+      const transformer4 = getAttachmentTypeTransformers('user', owner);
       expect(transformer4).toBe(commentAttachmentTransformer);
     });
 
     it('returns pass-through transformer for other types', () => {
-      const transformer = getAttachmentTypeTransformers(AttachmentType.alert);
+      const transformer = getAttachmentTypeTransformers(AttachmentType.alert, owner);
       expect(transformer).not.toBe(commentAttachmentTransformer);
       expect(transformer.isType({ type: AttachmentType.alert } as never)).toBe(false);
     });

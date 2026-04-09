@@ -26,6 +26,7 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiPopover,
+  EuiSpacer,
   EuiText,
   EuiTextArea,
   EuiTitle,
@@ -35,6 +36,8 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
+import { FlyoutMetadataCard } from '../../../../flyout_components/flyout_metadata_card';
+import { FlyoutToolbarHeader } from '../../../../flyout_components/flyout_toolbar_header';
 import type { SignificantEventItem } from '../../../../../hooks/sig_events/use_fetch_significant_events';
 import { StreamsESQLEditor } from '../../../../esql_query_editor';
 import { InfoPanel } from '../../../../info_panel';
@@ -140,77 +143,90 @@ export function QueryDetailsFlyout({
         size="40%"
         hideCloseButton
       >
-        <EuiFlyoutHeader hasBorder>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-            <EuiFlexItem>
-              <EuiTitle size="m">
-                <h2 id={flyoutTitleId}>{item.query.title}</h2>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="xs" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiPopover
-                    aria-label={ACTIONS_BUTTON_ARIA_LABEL}
-                    button={
-                      <EuiButtonIcon
-                        data-test-subj="queriesTableQueryDetailsFlyoutActionsButton"
-                        iconType="boxesVertical"
-                        aria-label={ACTIONS_BUTTON_ARIA_LABEL}
-                        onClick={() => {
-                          setIsActionsPopoverOpen((value) => !value);
-                        }}
-                      />
-                    }
-                    isOpen={isActionsPopoverOpen}
-                    closePopover={() => {
+        {/* First header: minimal toolbar with actions and close */}
+        <FlyoutToolbarHeader>
+          <EuiFlexItem grow={false}>
+            <EuiPopover
+              aria-label={ACTIONS_BUTTON_ARIA_LABEL}
+              button={
+                <EuiButtonIcon
+                  data-test-subj="queriesTableQueryDetailsFlyoutActionsButton"
+                  iconType="boxesVertical"
+                  aria-label={ACTIONS_BUTTON_ARIA_LABEL}
+                  onClick={() => setIsActionsPopoverOpen((value) => !value)}
+                />
+              }
+              isOpen={isActionsPopoverOpen}
+              closePopover={() => setIsActionsPopoverOpen(false)}
+              panelPaddingSize="none"
+              anchorPosition="downRight"
+            >
+              <EuiContextMenuPanel
+                size="s"
+                items={[
+                  <EuiContextMenuItem
+                    key="edit"
+                    icon="pencil"
+                    disabled={isEditMode}
+                    onClick={() => {
                       setIsActionsPopoverOpen(false);
+                      setIsEditMode(true);
                     }}
-                    panelPaddingSize="none"
-                    anchorPosition="downRight"
+                    data-test-subj="queriesTableQueryDetailsFlyoutEditAction"
                   >
-                    <EuiContextMenuPanel
-                      size="s"
-                      items={[
-                        <EuiContextMenuItem
-                          key="edit"
-                          icon="pencil"
-                          disabled={isEditMode}
-                          onClick={() => {
-                            setIsActionsPopoverOpen(false);
-                            setIsEditMode(true);
-                          }}
-                          data-test-subj="queriesTableQueryDetailsFlyoutEditAction"
-                        >
-                          {EDIT_ACTION_LABEL}
-                        </EuiContextMenuItem>,
-                        <EuiContextMenuItem
-                          key="delete"
-                          icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
-                          css={css`
-                            color: ${euiTheme.colors.danger};
-                          `}
-                          onClick={() => {
-                            setIsActionsPopoverOpen(false);
-                            setIsDeleteModalVisible(true);
-                          }}
-                          data-test-subj="queriesTableQueryDetailsFlyoutDeleteAction"
-                        >
-                          {DELETE_ACTION_LABEL}
-                        </EuiContextMenuItem>,
-                      ]}
-                    />
-                  </EuiPopover>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    data-test-subj="queriesTableQueryDetailsFlyoutCloseButton"
-                    iconType="cross"
-                    aria-label={CLOSE_BUTTON_ARIA_LABEL}
-                    onClick={onClose}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                    {EDIT_ACTION_LABEL}
+                  </EuiContextMenuItem>,
+                  <EuiContextMenuItem
+                    key="delete"
+                    icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
+                    css={css`
+                      color: ${euiTheme.colors.danger};
+                    `}
+                    onClick={() => {
+                      setIsActionsPopoverOpen(false);
+                      setIsDeleteModalVisible(true);
+                    }}
+                    data-test-subj="queriesTableQueryDetailsFlyoutDeleteAction"
+                  >
+                    {DELETE_ACTION_LABEL}
+                  </EuiContextMenuItem>,
+                ]}
+              />
+            </EuiPopover>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              data-test-subj="queriesTableQueryDetailsFlyoutCloseButton"
+              iconType="cross"
+              aria-label={CLOSE_BUTTON_ARIA_LABEL}
+              onClick={onClose}
+            />
+          </EuiFlexItem>
+        </FlyoutToolbarHeader>
+
+        {/* Second header: title and metadata cards */}
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="s">
+            <h2 id={flyoutTitleId}>{item.query.title}</h2>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+            <EuiFlexItem>
+              <FlyoutMetadataCard title={SEVERITY_DETAILS_LABEL}>
+                <SeverityBadge score={item.query.severity_score} />
+              </FlyoutMetadataCard>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <FlyoutMetadataCard title={TYPE_LABEL}>
+                <EuiBadge color="hollow">{QUERY_TYPE_BADGE_LABEL}</EuiBadge>
+              </FlyoutMetadataCard>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <FlyoutMetadataCard title={STREAM_LABEL}>
+                <EuiBadge color="hollow" iconType="productStreamsClassic" iconSide="left">
+                  {item.stream_name}
+                </EuiBadge>
+              </FlyoutMetadataCard>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
@@ -340,6 +356,11 @@ export function QueryDetailsFlyout({
 function getQueryInputValue(item: SignificantEventItem) {
   return item.query.esql?.query ?? '';
 }
+
+const STREAM_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.streamLabel',
+  { defaultMessage: 'Stream' }
+);
 
 const QUERY_INFORMATION_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.queryInformationTitle',
