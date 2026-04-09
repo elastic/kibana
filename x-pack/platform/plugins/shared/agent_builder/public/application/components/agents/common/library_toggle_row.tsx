@@ -81,7 +81,7 @@ export const LibraryToggleRow: React.FC<LibraryToggleRowProps> = ({
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
-        <EuiText size="xs" color="subdued" css={EUI_TEXT_STYLES}>
+        <EuiText size="s" color="subdued" css={EUI_TEXT_STYLES}>
           {description}
         </EuiText>
       </EuiFlexItem>
@@ -113,7 +113,6 @@ export const LibraryToggleRow: React.FC<LibraryToggleRowProps> = ({
             checked={isActive}
             onChange={(e) => onToggle(e.target.checked)}
             disabled={isMutating}
-            compressed
           />
         )}
       </EuiFlexItem>
