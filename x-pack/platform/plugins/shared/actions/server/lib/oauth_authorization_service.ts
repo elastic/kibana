@@ -21,6 +21,7 @@ interface OAuthConnectorSecrets {
   clientSecret?: string;
   tokenUrl?: string;
   scope?: string;
+  authorizationParams?: Record<string, string>;
 }
 
 /**
@@ -32,6 +33,7 @@ interface OAuthConnectorConfig {
   clientId?: string;
   tokenUrl?: string;
   scope?: string;
+  authorizationParams?: Record<string, string>;
 }
 
 /**
@@ -43,6 +45,7 @@ export interface OAuthFlowConfig {
   tokenUrl: string;
   clientId: string;
   scope?: string;
+  authorizationParams?: Record<string, string>;
 }
 
 /**
@@ -66,6 +69,7 @@ interface BuildAuthorizationUrlParams {
   redirectUri: string;
   state: string;
   codeChallenge: string;
+  authorizationParams?: Record<string, string>;
 }
 
 /**
@@ -182,12 +186,15 @@ export class OAuthAuthorizationService {
       );
     }
 
+    const authorizationParams = secrets.authorizationParams || config?.authorizationParams;
+
     return {
       authTypeId: 'oauth_authorization_code',
       authorizationUrl,
       tokenUrl,
       clientId,
       scope,
+      ...(authorizationParams ? { authorizationParams } : {}),
     };
   }
 
@@ -216,7 +223,15 @@ export class OAuthAuthorizationService {
    * @returns The complete authorization URL as a string
    */
   buildAuthorizationUrl(params: BuildAuthorizationUrlParams): string {
-    const { baseAuthorizationUrl, clientId, scope, redirectUri, state, codeChallenge } = params;
+    const {
+      baseAuthorizationUrl,
+      clientId,
+      scope,
+      redirectUri,
+      state,
+      codeChallenge,
+      authorizationParams,
+    } = params;
 
     const authUrl = new URL(baseAuthorizationUrl);
     authUrl.searchParams.set('client_id', clientId);
@@ -228,6 +243,12 @@ export class OAuthAuthorizationService {
 
     if (scope) {
       authUrl.searchParams.set('scope', scope);
+    }
+
+    if (authorizationParams) {
+      for (const [key, value] of Object.entries(authorizationParams)) {
+        authUrl.searchParams.set(key, value);
+      }
     }
 
     return authUrl.toString();

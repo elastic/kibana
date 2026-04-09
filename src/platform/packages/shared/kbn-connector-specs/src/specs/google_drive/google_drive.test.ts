@@ -40,8 +40,13 @@ describe('GoogleDriveConnector', () => {
         defaults: {
           authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
           tokenUrl: 'https://oauth2.googleapis.com/token',
-          scope:
-            'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.metadata.readonly',
+          scope: 'https://www.googleapis.com/auth/drive.file',
+          authorizationParams: {
+            trigger_onepick: 'true',
+            prompt: 'consent',
+            allow_multiple: 'true',
+            allow_folder_selection: 'true',
+          },
         },
       });
     });

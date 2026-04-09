@@ -31,6 +31,9 @@ const authSchema = z
     useBasicAuth: z.boolean().default(true).optional().meta({
       hidden: true, // Hidden from UI - uses connector spec defaults
     }),
+    authorizationParams: z.record(z.string(), z.string()).optional().meta({
+      hidden: true, // Hidden from UI - extra query params appended to the authorization URL
+    }),
   })
   .meta({ label: i18n.OAUTH_AUTHORIZATION_CODE_LABEL });
 

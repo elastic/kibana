@@ -33,13 +33,51 @@ function escapeQueryValue(value: string): string {
  * Extracts and throws a meaningful error from Google Drive API responses.
  * Returns void if the error doesn't have Google API error details.
  */
-function throwGoogleDriveError(error: unknown): void {
+function parseGoogleDriveError(
+  error: unknown
+): { message?: string; code?: number; errors?: unknown[] } | undefined {
   const axiosError = error as {
-    response?: { data?: { error?: { message?: string; code?: number } } };
+    response?: { data?: unknown };
   };
-  const googleError = axiosError.response?.data?.error;
+  const responseData = axiosError.response?.data;
+  if (!responseData) {
+    return undefined;
+  }
+
+  // When responseType is 'arraybuffer', error response body is a Buffer/ArrayBuffer
+  // instead of parsed JSON, so we need to decode and parse it manually
+  let parsed: { error?: { message?: string; code?: number; errors?: unknown[] } } | undefined;
+  if (responseData instanceof ArrayBuffer || Buffer.isBuffer(responseData)) {
+    try {
+      const buf = Buffer.isBuffer(responseData)
+        ? responseData
+        : Buffer.from(new Uint8Array(responseData));
+      const text = buf.toString('utf-8');
+      parsed = JSON.parse(text);
+    } catch {
+      return undefined;
+    }
+  } else {
+    parsed = responseData as typeof parsed;
+  }
+
+  return parsed?.error;
+}
+
+/**
+ * Extracts and throws a meaningful error from Google Drive API responses.
+ * Returns void if the error doesn't have Google API error details.
+ */
+function throwGoogleDriveError(
+  error: unknown,
+  ctx?: { log: { debug: (msg: string) => void } }
+): void {
+  const googleError = parseGoogleDriveError(error);
   if (googleError) {
-    throw new Error(`Google Drive API error (${googleError.code})`);
+    ctx?.log.debug(`Google Drive API error details: ${JSON.stringify(googleError)}`);
+    throw new Error(
+      `Google Drive API error (${googleError.code}): ${googleError.message ?? 'Unknown error'}`
+    );
   }
 }
 
@@ -70,7 +108,13 @@ export const GoogleDriveConnector: ConnectorSpec = {
           authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
           tokenUrl: 'https://oauth2.googleapis.com/token',
           scope:
-            'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.metadata.readonly',
+            'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.metadata.readonly',
+          authorizationParams: {
+            trigger_onepick: 'true',
+            prompt: 'consent',
+            allow_multiple: 'true',
+            allow_folder_selection: 'true',
+          },
         },
       },
     ],
@@ -164,7 +208,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
             nextPageToken: response.data.nextPageToken,
           };
         } catch (error: unknown) {
-          throwGoogleDriveError(error);
+          throwGoogleDriveError(error, ctx);
           throw error;
         }
       },
@@ -240,7 +284,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
             nextPageToken: response.data.nextPageToken,
           };
         } catch (error: unknown) {
-          throwGoogleDriveError(error);
+          throwGoogleDriveError(error, ctx);
           throw error;
         }
       },
@@ -322,7 +366,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
             encoding: 'base64',
           };
         } catch (error: unknown) {
-          throwGoogleDriveError(error);
+          throwGoogleDriveError(error, ctx);
           throw error;
         }
       },
@@ -374,7 +418,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
                 });
                 return response.data;
               } catch (error: unknown) {
-                throwGoogleDriveError(error);
+                throwGoogleDriveError(error, ctx);
                 throw error;
               }
             })
@@ -382,7 +426,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
 
           return { files: results };
         } catch (error: unknown) {
-          throwGoogleDriveError(error);
+          throwGoogleDriveError(error, ctx);
           throw error;
         }
       },

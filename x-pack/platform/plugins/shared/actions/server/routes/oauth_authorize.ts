@@ -218,6 +218,7 @@ export const oauthAuthorizeRoute = (
               redirectUri,
               state: state.state,
               codeChallenge,
+              authorizationParams: oauthConfig.authorizationParams,
             });
           }
 
