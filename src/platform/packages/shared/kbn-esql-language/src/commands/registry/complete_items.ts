@@ -160,7 +160,7 @@ export function findConstantPlaceholderType(
 export function buildMapValueCompleteItem(value: string, label: string = ''): ISuggestionItem {
   const detail = i18n.translate('kbn-esql-ast.esql.autocomplete.mapValuePlaceholderDetail', {
     defaultMessage: 'Insert {label} as value for the map key',
-    values: { label },
+    values: { label: label || value },
   });
   const asSnippet = value.includes('$0');
 
