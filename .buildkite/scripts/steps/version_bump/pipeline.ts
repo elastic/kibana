@@ -11,6 +11,13 @@ import { emitPipeline, getPipeline } from '#pipeline-utils';
 
 const BUMP_TYPE = process.env.WORKFLOW;
 
+if (!BUMP_TYPE) {
+  console.error(
+    'BUMP_TYPE environment variable is not set. Please set it to either "patch" or "minor".'
+  );
+  process.exit(1);
+}
+
 (async () => {
   const pipeline: string[] = [];
 
