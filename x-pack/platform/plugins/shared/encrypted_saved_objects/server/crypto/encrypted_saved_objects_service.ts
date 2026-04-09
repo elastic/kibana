@@ -186,6 +186,16 @@ export class EncryptedSavedObjectsService {
   }
 
   /**
+   * Returns the set of attribute names that are encrypted for the given type.
+   * Returns undefined if the type is not registered.
+   * @param type Saved object type.
+   */
+  public getEncryptedAttributes(type: string): ReadonlySet<string> | undefined {
+    const attributes = this.typeDefinitions.get(type)?.attributesToEncrypt;
+    return attributes ? new Set(attributes) : undefined;
+  }
+
+  /**
    * Takes saved object attributes for the specified type and, depending on the type definition,
    * either decrypts or strips encrypted attributes (e.g. in case AAD or encryption key has changed
    * and decryption is no longer possible).
