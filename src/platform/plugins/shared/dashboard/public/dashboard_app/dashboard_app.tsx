@@ -149,7 +149,7 @@ export function DashboardApp({
     const unlisten = history.listen((location) => {
       const dashboardPath = `${VIEW_DASHBOARD_URL}/${savedDashboardId}`;
       const isNavigatingToSameDashboard =
-        savedDashboardId && location.pathname.match(`^${dashboardPath}\/?`);
+        savedDashboardId && location.pathname.match(`^${dashboardPath}/?$`);
       // Bail out if the history update is navigating to a different dashboard. Otherwise the following code
       // will eat the state transfer intended for the next dashboard
       if (!isNavigatingToSameDashboard) return;
