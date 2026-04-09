@@ -8,7 +8,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "test/scout/**/*"
+    "test/scout_inference_test/**/*"
   ],
   "kbn_references": [
     "@kbn/config-schema",
