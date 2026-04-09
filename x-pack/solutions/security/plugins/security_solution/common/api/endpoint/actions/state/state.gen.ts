@@ -20,6 +20,9 @@ export type ActionStateSuccessResponse = z.infer<typeof ActionStateSuccessRespon
 export const ActionStateSuccessResponse = z.object({
   body: z.object({
     data: z.object({
+      /**
+       * Whether the Kibana instance has encryption enabled for response actions.
+       */
       canEncrypt: z.boolean().optional(),
     }),
   }),

@@ -7,12 +7,14 @@ paths:
     get:
       summary: Get a policy response
       operationId: GetPolicyResponse
+      description: Get the most recent policy response for an endpoint.
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       parameters:
         - name: query
           in: query
           required: true
+          description: The query parameters for retrieving the policy response.
           schema:
             type: object
             properties:
@@ -20,7 +22,7 @@ paths:
                 $ref: '../model/schema/common.schema.yaml#/components/schemas/AgentId'
       responses:
         '200':
-          description: OK
+          description: Indicates a successful call.
           content:
             application/json:
               schema:

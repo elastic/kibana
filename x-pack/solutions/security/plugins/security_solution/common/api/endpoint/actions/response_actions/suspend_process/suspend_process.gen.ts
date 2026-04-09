@@ -16,7 +16,10 @@
 
 import { z } from '@kbn/zod/v4';
 
-import { BaseActionSchema } from '../../../model/schema/common.gen';
+import {
+  ResponseActionCreateSuccessResponse,
+  BaseActionSchema,
+} from '../../../model/schema/common.gen';
 
 export type SuspendProcessRouteRequestBody = z.infer<typeof SuspendProcessRouteRequestBody>;
 export const SuspendProcessRouteRequestBody = BaseActionSchema.merge(
@@ -38,9 +41,6 @@ export const SuspendProcessRouteRequestBody = BaseActionSchema.merge(
   })
 );
 
-export type SuspendProcessRouteResponse = z.infer<typeof SuspendProcessRouteResponse>;
-export const SuspendProcessRouteResponse = z.object({});
-
 export type EndpointSuspendProcessActionRequestBody = z.infer<
   typeof EndpointSuspendProcessActionRequestBody
 >;
@@ -52,4 +52,4 @@ export type EndpointSuspendProcessActionRequestBodyInput = z.input<
 export type EndpointSuspendProcessActionResponse = z.infer<
   typeof EndpointSuspendProcessActionResponse
 >;
-export const EndpointSuspendProcessActionResponse = SuspendProcessRouteResponse;
+export const EndpointSuspendProcessActionResponse = ResponseActionCreateSuccessResponse;

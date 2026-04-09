@@ -15,6 +15,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import {
+  isValidDateMath,
+  isNonEmptyString,
+  ArrayFromString,
+  BooleanFromString,
+} from '@kbn/zod-helpers/v4';
 
 import { AgentIds, AgentId } from '../../model/schema/common.gen';
 
@@ -51,6 +57,9 @@ export type EndpointGetActionsStatusRequestQuery = z.infer<
   typeof EndpointGetActionsStatusRequestQuery
 >;
 export const EndpointGetActionsStatusRequestQuery = z.object({
+  /**
+   * The query parameters for filtering action status.
+   */
   query: z.object({
     agent_ids: AgentIds.optional(),
   }),
