@@ -52,6 +52,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--server.restrictInternalApis=false',
         // disable fleet task that writes to metrics.fleet_server.* data streams, impacting functional tests
         `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
+        // Enforced at process start so Cypress/FTR see it before lifecycle.beforeTests applies globalDefaults
+        // (Agent Builder announcement modal reads global hideAnnouncements).
+        '--uiSettings.globalOverrides.hideAnnouncements=true',
       ],
     },
     uiSettings: {

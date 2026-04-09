@@ -193,6 +193,8 @@ export default async () => {
         `--xpack.security.uiam.ssl.certificate=${KBN_CERT_PATH}`,
         `--xpack.security.uiam.ssl.key=${KBN_KEY_PATH}`,
         '--xpack.security.uiam.ssl.verificationMode=none',
+        // Enforced at process start so UI loads without announcement overlays before FTR lifecycle hooks
+        '--uiSettings.globalOverrides.hideAnnouncements=true',
       ],
     },
 
