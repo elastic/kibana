@@ -13,6 +13,7 @@ import type { RuleSignatureId } from '../../../../../../common/api/detection_eng
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { useFetchPrebuiltRulesStatusQuery } from '../../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query';
+import { useInvalidatePrebuiltRulesStatusOnInit } from '../../../../rule_management/logic/prebuilt_rules/use_invalidate_prebuilt_rules_status_on_init';
 import { PERFORM_ALL_RULES_INSTALLATION_KEY } from '../../../../rule_management/api/hooks/prebuilt_rules/use_perform_all_rules_install_mutation';
 import {
   usePerformInstallAllRules,
@@ -159,6 +160,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
 
   const [sortingOptions, setSortingOptions] = useState<PrebuiltRuleAssetsSortItem | undefined>();
 
+  useInvalidatePrebuiltRulesStatusOnInit();
   const { data: prebuiltRulesStatus } = useFetchPrebuiltRulesStatusQuery();
 
   const initState = useSecuritySolutionInitialization([
