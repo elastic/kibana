@@ -10,6 +10,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { EMPTY } from 'rxjs';
 import type { AnalyticsServiceStart, ApplicationStart, IUiSettingsClient } from '@kbn/core/public';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
+import { canUserChangeSpaceChatExperience } from '@kbn/ai-assistant-common';
 import { useGlobalUiSetting, useKibana } from '@kbn/kibana-react-plugin/public';
 import { HIDE_ANNOUNCEMENTS_ID } from '@kbn/management-settings-ids';
 import { AgentBuilderAnnouncementModal } from '@kbn/agent-builder-browser';
@@ -25,6 +26,10 @@ export function AgentBuilderAnnouncementModalController() {
     userProfile: UserProfileServiceStart;
     settings: { client: IUiSettingsClient; globalClient: IUiSettingsClient };
   }>();
+  const canRevertToAssistant = useMemo(
+    () => canUserChangeSpaceChatExperience(services.application.capabilities),
+    [services.application.capabilities]
+  );
   const hideAnnouncements = useGlobalUiSetting<boolean>(HIDE_ANNOUNCEMENTS_ID);
   const spacesService = services.spaces;
   const activeSpace$ = useMemo(() => spacesService?.getActiveSpace$() ?? EMPTY, [spacesService]);
@@ -42,6 +47,7 @@ export function AgentBuilderAnnouncementModalController() {
 
   return (
     <AgentBuilderAnnouncementModal
+      canRevertToAssistant={canRevertToAssistant}
       onContinue={() => {
         void markSeen().catch(() => {});
         services.analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInAction, {

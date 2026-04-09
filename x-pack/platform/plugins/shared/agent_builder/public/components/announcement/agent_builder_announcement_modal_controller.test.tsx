@@ -15,8 +15,16 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { HIDE_ANNOUNCEMENTS_ID } from '@kbn/management-settings-ids';
 import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common/telemetry';
 import { AgentBuilderAnnouncementModalController } from './agent_builder_announcement_modal_controller';
+import type { ChatExperienceCapabilitiesInput } from '@kbn/ai-assistant-common';
 
 const SPACE_ID = 'test-space';
+
+const capabilitiesAllowRevert: ChatExperienceCapabilitiesInput = {
+  advancedSettings: { save: true },
+  observabilityAIAssistant: { show: true },
+  securitySolutionAssistant: { 'ai-assistant': false },
+  agentBuilder: { manageAgents: true },
+};
 
 function buildServices({
   hideAnnouncements = false,
@@ -24,6 +32,7 @@ function buildServices({
   spaceId = SPACE_ID,
   userProfileEnabled = true,
   agentBuilderSeenJson,
+  chatExperienceCapabilities = capabilitiesAllowRevert,
 }: {
   hideAnnouncements?: boolean;
   announcementSeenInProfile?: boolean;
@@ -31,6 +40,7 @@ function buildServices({
   userProfileEnabled?: boolean;
   /** Overrides the JSON stored in user profile for per-space dismissal (default derives from announcementSeenInProfile). */
   agentBuilderSeenJson?: string;
+  chatExperienceCapabilities?: ChatExperienceCapabilitiesInput;
 } = {}) {
   const space$ = new BehaviorSubject({ id: spaceId, name: spaceId });
   const reportEvent = jest.fn();
@@ -68,7 +78,7 @@ function buildServices({
       getActiveSpace$: () => space$.asObservable(),
     },
     analytics: { reportEvent },
-    application: { navigateToApp },
+    application: { navigateToApp, capabilities: chatExperienceCapabilities },
     userProfile,
   };
 
@@ -202,5 +212,25 @@ describe('AgentBuilderAnnouncementModalController', () => {
     });
     expect(navigateToApp).toHaveBeenCalledWith('management', { path: '/ai/genAiSettings' });
     expect(screen.queryByTestId('agentBuilderAnnouncementRevertButton')).not.toBeInTheDocument();
+  });
+
+  it('does not show revert when the user cannot change space-level chat experience', async () => {
+    const { services } = buildServices({
+      chatExperienceCapabilities: {
+        advancedSettings: { save: false },
+        observabilityAIAssistant: { show: true },
+        securitySolutionAssistant: { 'ai-assistant': false },
+        agentBuilder: { manageAgents: true },
+      },
+    });
+    renderController(services);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('agentBuilderAnnouncementContinueButton')).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('agentBuilderAnnouncementRevertButton')).not.toBeInTheDocument();
+    expect(
+      screen.getByText(/Only a user with permission to change space-level Gen AI settings/i)
+    ).toBeInTheDocument();
   });
 });

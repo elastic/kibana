@@ -56,4 +56,16 @@ describe('AgentBuilderAnnouncementModal', () => {
 
     expect(defaultProps.onContinue).toHaveBeenCalled();
   });
+
+  it('hides revert and shows read-only copy when canRevertToAssistant is false', () => {
+    renderWithEui(<AgentBuilderAnnouncementModal {...defaultProps} canRevertToAssistant={false} />);
+
+    expect(screen.queryByTestId('agentBuilderAnnouncementRevertButton')).not.toBeInTheDocument();
+    expect(
+      screen.getByText(/Only a user with permission to change space-level Gen AI settings/i)
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('agentBuilderAnnouncementContinueButton')).toHaveTextContent(
+      'Got it'
+    );
+  });
 });

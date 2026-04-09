@@ -29,11 +29,17 @@ import * as i18n from './translations';
 export interface AgentBuilderAnnouncementModalProps {
   onRevert: () => void;
   onContinue: () => void;
+  /**
+   * When false, the revert action is hidden and copy explains that only admins with
+   * Gen AI / space settings access can switch the space back to the legacy Assistant.
+   */
+  canRevertToAssistant?: boolean;
 }
 
 export const AgentBuilderAnnouncementModal: React.FC<AgentBuilderAnnouncementModalProps> = ({
   onRevert,
   onContinue,
+  canRevertToAssistant = true,
 }) => {
   const { euiTheme } = useEuiTheme();
   const modalTitleId = useGeneratedHtmlId({ prefix: 'agentBuilderAnnouncementModalTitle' });
@@ -90,21 +96,23 @@ export const AgentBuilderAnnouncementModal: React.FC<AgentBuilderAnnouncementMod
 
         <EuiCallOut title={i18n.NEED_HISTORY_TITLE} iconType="hourglass" color="primary" size="s">
           <EuiText size="s">
-            <p>{i18n.NEED_HISTORY_BODY}</p>
+            <p>{canRevertToAssistant ? i18n.NEED_HISTORY_BODY : i18n.NEED_HISTORY_BODY_READONLY}</p>
           </EuiText>
         </EuiCallOut>
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onRevert} data-test-subj="agentBuilderAnnouncementRevertButton">
-          {i18n.REVERT_BUTTON}
-        </EuiButtonEmpty>
+        {canRevertToAssistant ? (
+          <EuiButtonEmpty onClick={onRevert} data-test-subj="agentBuilderAnnouncementRevertButton">
+            {i18n.REVERT_BUTTON}
+          </EuiButtonEmpty>
+        ) : null}
         <EuiButton
           fill
           onClick={onContinue}
           data-test-subj="agentBuilderAnnouncementContinueButton"
         >
-          {i18n.CONTINUE_BUTTON}
+          {canRevertToAssistant ? i18n.CONTINUE_BUTTON : i18n.CONTINUE_BUTTON_READONLY}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>

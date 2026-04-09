@@ -71,6 +71,14 @@ export const NEED_HISTORY_BODY = i18n.translate(
   }
 );
 
+export const NEED_HISTORY_BODY_READONLY = i18n.translate(
+  'xpack.agentBuilder.announcementModal.needHistoryBodyReadonly',
+  {
+    defaultMessage:
+      'Your AI Assistant history and data remain available where your access allows. Only a user with permission to change space-level Gen AI settings can switch this space back to the legacy Assistant. Contact your Kibana administrator if you need that change.',
+  }
+);
+
 export const REVERT_BUTTON = i18n.translate('xpack.agentBuilder.announcementModal.revertButton', {
   defaultMessage: 'Revert to AI Assistant',
 });
@@ -78,4 +86,9 @@ export const REVERT_BUTTON = i18n.translate('xpack.agentBuilder.announcementModa
 export const CONTINUE_BUTTON = i18n.translate(
   'xpack.agentBuilder.announcementModal.continueButton',
   { defaultMessage: 'Continue with AI Agent' }
+);
+
+export const CONTINUE_BUTTON_READONLY = i18n.translate(
+  'xpack.agentBuilder.announcementModal.continueButtonReadonly',
+  { defaultMessage: 'Got it' }
 );
