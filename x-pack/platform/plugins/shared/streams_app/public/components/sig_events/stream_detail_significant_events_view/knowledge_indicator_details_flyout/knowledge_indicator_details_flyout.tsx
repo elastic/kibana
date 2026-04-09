@@ -17,15 +17,15 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
-  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { upperFirst } from 'lodash';
 import React from 'react';
 import { getConfidenceColor } from '../../stream_detail_systems/stream_features/use_stream_features_table';
+import { FlyoutMetadataCard } from '../../../flyout_components/flyout_metadata_card';
+import { FlyoutToolbarHeader } from '../../../flyout_components/flyout_toolbar_header';
 import { SeverityBadge } from '../severity_badge/severity_badge';
 import { KnowledgeIndicatorFeatureDetailsContent } from './knowledge_indicator_feature_details_content';
 import { KnowledgeIndicatorQueryDetailsContent } from './knowledge_indicator_query_details_content';
@@ -41,7 +41,6 @@ export function KnowledgeIndicatorDetailsFlyout({
   occurrencesByQueryId,
   onClose,
 }: Props) {
-  const { euiTheme } = useEuiTheme();
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'knowledgeIndicatorDetailsFlyoutTitle' });
 
   const title =
@@ -64,32 +63,15 @@ export function KnowledgeIndicatorDetailsFlyout({
       hideCloseButton
     >
       {/* First header: minimal toolbar with close button */}
-      <EuiFlyoutHeader
-        hasBorder
-        css={css`
-          && {
-            padding: 0 calc(${euiTheme.size.xs} + ${euiTheme.size.s}) 0 0;
-          }
-        `}
-      >
-        <EuiFlexGroup
-          justifyContent="flexEnd"
-          alignItems="center"
-          responsive={false}
-          gutterSize="none"
-          css={css`
-            height: ${euiTheme.size.xxl};
-          `}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="cross"
-              aria-label={CLOSE_BUTTON_ARIA_LABEL}
-              onClick={onClose}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutHeader>
+      <FlyoutToolbarHeader>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="cross"
+            aria-label={CLOSE_BUTTON_ARIA_LABEL}
+            onClick={onClose}
+          />
+        </EuiFlexItem>
+      </FlyoutToolbarHeader>
 
       {/* Second header: title and metadata cards */}
       <EuiFlyoutHeader hasBorder>
@@ -102,40 +84,40 @@ export function KnowledgeIndicatorDetailsFlyout({
             {knowledgeIndicator.kind === 'feature' ? (
               <>
                 <EuiFlexItem>
-                  <KiMetadataCard title={CONFIDENCE_LABEL}>
+                  <FlyoutMetadataCard title={CONFIDENCE_LABEL}>
                     <EuiHealth color={getConfidenceColor(knowledgeIndicator.feature.confidence)}>
                       {knowledgeIndicator.feature.confidence}
                     </EuiHealth>
-                  </KiMetadataCard>
+                  </FlyoutMetadataCard>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <KiMetadataCard title={TYPE_LABEL}>
+                  <FlyoutMetadataCard title={TYPE_LABEL}>
                     <EuiBadge color="hollow">
                       {upperFirst(knowledgeIndicator.feature.type)}
                     </EuiBadge>
-                  </KiMetadataCard>
+                  </FlyoutMetadataCard>
                 </EuiFlexItem>
               </>
             ) : (
               <>
                 <EuiFlexItem>
-                  <KiMetadataCard title={SEVERITY_LABEL}>
+                  <FlyoutMetadataCard title={SEVERITY_LABEL}>
                     <SeverityBadge score={knowledgeIndicator.query.severity_score} />
-                  </KiMetadataCard>
+                  </FlyoutMetadataCard>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <KiMetadataCard title={TYPE_LABEL}>
+                  <FlyoutMetadataCard title={TYPE_LABEL}>
                     <EuiBadge color="hollow">{QUERY_TYPE_LABEL}</EuiBadge>
-                  </KiMetadataCard>
+                  </FlyoutMetadataCard>
                 </EuiFlexItem>
               </>
             )}
             <EuiFlexItem>
-              <KiMetadataCard title={STREAM_LABEL}>
+              <FlyoutMetadataCard title={STREAM_LABEL}>
                 <EuiBadge color="hollow" iconType="productStreamsClassic" iconSide="left">
                   {streamName}
                 </EuiBadge>
-              </KiMetadataCard>
+              </FlyoutMetadataCard>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
@@ -152,21 +134,6 @@ export function KnowledgeIndicatorDetailsFlyout({
         )}
       </EuiFlyoutBody>
     </EuiFlyout>
-  );
-}
-
-function KiMetadataCard({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <EuiPanel hasShadow={false} hasBorder paddingSize="s">
-      <EuiFlexGroup direction="column" gutterSize="xs" responsive={false} alignItems="flexStart">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xxs">
-            <h3>{title}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>{children}</EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
   );
 }
 
