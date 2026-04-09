@@ -3234,6 +3234,136 @@ steps:
     });
   });
 
+  describe('validateWorkflowId', () => {
+    const mockRequest = {
+      auth: { credentials: { username: 'test-user' } },
+    } as any;
+
+    const makeCommand = (id: string) => ({
+      yaml: 'name: Test Workflow\nenabled: true\ndefinition:\n  triggers: []',
+      id,
+    });
+
+    const expectValid = async (id: string) => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } } as any);
+      mockEsClient.index.mockResolvedValue({ _id: id } as any);
+      await expect(
+        service.createWorkflow(makeCommand(id), 'default', mockRequest)
+      ).resolves.toBeDefined();
+    };
+
+    const expectInvalid = async (id: string) => {
+      await expect(
+        service.createWorkflow(makeCommand(id), 'default', mockRequest)
+      ).rejects.toMatchObject({
+        name: 'WorkflowValidationError',
+        message: `Invalid workflow ID format. Expected format: workflow-{uuid}, received: ${id}`,
+        statusCode: 400,
+      });
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    };
+
+    describe('valid IDs', () => {
+      it('should accept hyphenated semantic IDs', async () => {
+        await expectValid('security-alert-enrichment');
+      });
+
+      it('should accept short hyphenated IDs', async () => {
+        await expectValid('daily-log-cleanup');
+      });
+
+      it('should accept simple semantic IDs', async () => {
+        await expectValid('user-onboarding');
+      });
+
+      it('should accept IDs with numeric suffixes', async () => {
+        await expectValid('incident-response-2024');
+      });
+
+      it('should accept mixed-case IDs', async () => {
+        await expectValid('Security-Alert-Enrichment');
+      });
+
+      it('should accept snake_case IDs', async () => {
+        await expectValid('process_security_alerts');
+      });
+
+      it('should accept snake_case IDs with multiple segments', async () => {
+        await expectValid('analyze_user_behavior');
+      });
+
+      it('should accept short 3-character IDs', async () => {
+        await expectValid('dev');
+      });
+
+      it('should accept short 4-character IDs', async () => {
+        await expectValid('test');
+      });
+
+      it('should accept short environment-style IDs', async () => {
+        await expectValid('prod');
+      });
+
+      it('should accept UUIDs (plain, without prefix)', async () => {
+        await expectValid('550e8400-e29b-41d4-a716-446655440000');
+      });
+
+      it('should accept legacy workflow-{uuid} format', async () => {
+        await expectValid('workflow-550e8400-e29b-41d4-a716-446655440000');
+      });
+
+      it('should accept IDs with version suffix', async () => {
+        await expectValid('backup-v2');
+      });
+
+      it('should accept IDs with year suffix', async () => {
+        await expectValid('migration-2024');
+      });
+    });
+
+    describe('invalid IDs', () => {
+      it('should throw WorkflowValidationError for IDs containing @', async () => {
+        await expectInvalid('alert@notification');
+      });
+
+      it('should throw WorkflowValidationError for IDs containing spaces', async () => {
+        await expectInvalid('alert notification');
+      });
+
+      it('should throw WorkflowValidationError for IDs containing dots', async () => {
+        await expectInvalid('alert.process');
+      });
+
+      it('should throw WorkflowValidationError for IDs starting with a hyphen', async () => {
+        await expectInvalid('-alert');
+      });
+
+      it('should throw WorkflowValidationError for IDs ending with a hyphen', async () => {
+        await expectInvalid('alert-');
+      });
+
+      it('should throw WorkflowValidationError for IDs starting with an underscore', async () => {
+        await expectInvalid('_alert');
+      });
+
+      it('should throw WorkflowValidationError for IDs ending with an underscore', async () => {
+        await expectInvalid('alert_');
+      });
+
+      it('should skip validation and auto-generate an ID when empty string is provided', async () => {
+        // An empty string is falsy, so the `if (workflow.id)` guard in createWorkflow
+        // skips validateWorkflowId entirely and a new ID is auto-generated.
+        mockEsClient.search.mockResolvedValue({ hits: { hits: [] } } as any);
+        mockEsClient.index.mockResolvedValue({ _id: 'workflow-auto' } as any);
+
+        const result = await service.createWorkflow(makeCommand(''), 'default', mockRequest);
+
+        expect(result.id).toMatch(/^workflow-/);
+        expect(mockEsClient.index).toHaveBeenCalled();
+      });
+    });
+  });
+
   describe('validateWorkflow', () => {
     const mockRequest = {} as any;
 
