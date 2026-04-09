@@ -12,12 +12,8 @@
 import { catalogEcommerceSkill } from './catalog_ecommerce';
 import { keywordSearchSkill } from './keyword_search';
 import { ragChatbotSkill } from './rag_chatbot';
+import { useCaseLibrarySkill } from './use_case_library';
 import { vectorHybridSearchSkill } from './vector_hybrid_search';
-export { catalogEcommerceSkill, keywordSearchSkill, ragChatbotSkill, vectorHybridSearchSkill };
+export { catalogEcommerceSkill, keywordSearchSkill, ragChatbotSkill, useCaseLibrarySkill, vectorHybridSearchSkill };
 
-export const skills = [
-  catalogEcommerceSkill,
-  keywordSearchSkill,
-  ragChatbotSkill,
-  vectorHybridSearchSkill,
-];
+export const skills = [catalogEcommerceSkill, keywordSearchSkill, ragChatbotSkill, useCaseLibrarySkill, vectorHybridSearchSkill];

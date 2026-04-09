@@ -12,8 +12,7 @@
 export const vectorHybridSearchSkill = {
   id: 'vector-hybrid-search',
   name: 'vector-hybrid-search',
-  description:
-    'Guide for building vector search, hybrid search, and using Elasticsearch as a vector database. Covers semantic_text, dense_vector, embedding strategies, hybrid BM25+kNN via RRF, reranking, and production optimization. Use when a developer wants semantic search, hybrid search, kNN, embeddings, or Elasticsearch as a vector store.',
+  description: 'Guide for building vector search, hybrid search, and using Elasticsearch as a vector database. Covers semantic_text, dense_vector, embedding strategies, hybrid BM25+kNN via RRF, reranking, and production optimization. Use when a developer wants semantic search, hybrid search, kNN, embeddings, or Elasticsearch as a vector store.',
   content: `# Vector & Hybrid Search Guide
 
 Covers the full lifecycle of vector or hybrid search with Elasticsearch — planning, data modeling, search implementation, and optimization. All API examples use SENSE syntax for Kibana Dev Tools.
