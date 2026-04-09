@@ -40,6 +40,18 @@ type PackagePolicyStream = RegistryStream & {
 export const getInputEffectiveName = (input: { name?: string; type: string }): string =>
   input.name ?? input.type;
 
+/**
+ * Builds the composite key used to index input validation results and var definitions.
+ * For packages with integrations (multiple policy templates), the key is prefixed with
+ * the policy template name to avoid collisions across templates.
+ */
+export const buildInputKey = (
+  effectiveName: string,
+  policyTemplateName: string | undefined,
+  hasIntegrations: boolean
+): string =>
+  hasIntegrations && policyTemplateName ? `${policyTemplateName}-${effectiveName}` : effectiveName;
+
 export const getStreamsForInputType = (
   inputType: string,
   packageInfo: PackageInfo,

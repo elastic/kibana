@@ -30,6 +30,7 @@ import {
   getNormalizedInputs,
   getNormalizedDataStreams,
   getInputEffectiveName,
+  buildInputKey,
 } from '.';
 import { packageHasNoPolicyTemplates } from './policy_template';
 import { isValidDataset } from './is_valid_namespace';
@@ -370,8 +371,11 @@ export const validatePackagePolicy = (
   >((varDefs, policyTemplate) => {
     const inputs = getNormalizedInputs(policyTemplate);
     inputs.forEach((input) => {
-      const effectiveName = getInputEffectiveName(input);
-      const varDefKey = hasIntegrations ? `${policyTemplate.name}-${effectiveName}` : effectiveName;
+      const varDefKey = buildInputKey(
+        getInputEffectiveName(input),
+        policyTemplate.name,
+        hasIntegrations
+      );
 
       if ((input.vars || []).length) {
         varDefs[varDefKey] = keyBy(input.vars || [], 'name');
@@ -384,10 +388,11 @@ export const validatePackagePolicy = (
   >((reqVarDefs, policyTemplate) => {
     const inputs = getNormalizedInputs(policyTemplate);
     inputs.forEach((input) => {
-      const effectiveName = getInputEffectiveName(input);
-      const requiredVarDefKey = hasIntegrations
-        ? `${policyTemplate.name}-${effectiveName}`
-        : effectiveName;
+      const requiredVarDefKey = buildInputKey(
+        getInputEffectiveName(input),
+        policyTemplate.name,
+        hasIntegrations
+      );
 
       if ((input.vars || []).length) {
         reqVarDefs[requiredVarDefKey] = input.required_vars;
@@ -433,8 +438,11 @@ export const validatePackagePolicy = (
     if (!input.vars && !input.streams) {
       return;
     }
-    const effectiveName = getInputEffectiveName(input);
-    const inputKey = hasIntegrations ? `${input.policy_template}-${effectiveName}` : effectiveName;
+    const inputKey = buildInputKey(
+      getInputEffectiveName(input),
+      input.policy_template,
+      hasIntegrations
+    );
     const inputValidationResults: PackagePolicyInputValidationResults = {
       vars: undefined,
       required_vars: undefined,

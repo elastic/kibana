@@ -23,6 +23,7 @@ import {
   isIntegrationPolicyTemplate,
   getRegistryStreamWithDataStreamForInputType,
   getInputEffectiveName,
+  buildInputKey,
 } from '../../../../../../../../common/services';
 import { isInputAllowedForDeploymentMode } from '../../../../../../../../common/services/agentless_policy_helper';
 
@@ -197,9 +198,11 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                         updatePackagePolicyInput={updatePackagePolicyInput}
                         inputValidationResults={
                           validationResults?.inputs?.[
-                            hasIntegrations
-                              ? `${policyTemplate.name}-${policyInputEffectiveName}`
-                              : policyInputEffectiveName
+                            buildInputKey(
+                              policyInputEffectiveName,
+                              policyTemplate.name,
+                              hasIntegrations
+                            )
                           ] ?? {}
                         }
                         forceShowErrors={submitAttempted}
