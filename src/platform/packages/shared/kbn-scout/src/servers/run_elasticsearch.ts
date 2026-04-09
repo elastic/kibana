@@ -10,7 +10,7 @@
 import type { ArtifactLicense, ServerlessProjectType } from '@kbn/es';
 import { isServerlessProjectType } from '@kbn/es/src/utils';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { cleanupElasticsearch, createTestEsCluster, esTestConfig } from '@kbn/test';
+import { cleanupElasticsearch, createTestEsCluster, esTestConfig } from '@kbn/test-es-server';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { resolve } from 'path';
 import Url from 'url';

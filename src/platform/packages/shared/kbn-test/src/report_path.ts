@@ -10,7 +10,7 @@
 import Fs from 'fs';
 import Path from 'path';
 
-import { CI_PARALLEL_PROCESS_PREFIX } from './ci_parallel_process_prefix';
+import { CI_PARALLEL_PROCESS_PREFIX } from '@kbn/test-es-server';
 
 export function getUniqueJunitReportPath(
   rootDirectory: string,

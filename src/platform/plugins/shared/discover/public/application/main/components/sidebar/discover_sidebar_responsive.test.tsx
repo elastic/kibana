@@ -8,7 +8,7 @@
  */
 
 import { render, screen, act as rtlAct } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
 import { BehaviorSubject } from 'rxjs';
 import type { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -277,8 +277,7 @@ async function mountComponent<WithReactTestingLibrary extends boolean = false>(
   return comp! as unknown as MountReturn<WithReactTestingLibrary>;
 }
 
-// FLAKY: https://github.com/elastic/kibana/issues/225125
-describe.skip('discover responsive sidebar', function () {
+describe('discover responsive sidebar', function () {
   let props: TestWrapperProps;
 
   beforeEach(async () => {
@@ -406,7 +405,10 @@ describe.skip('discover responsive sidebar', function () {
   describe('when the input is focused', () => {
     it('should set a11y attributes for the search input in the field list', async function () {
       // Given
-      const user = userEvent.setup();
+      const user = userEvent.setup({
+        pointerEventsCheck: PointerEventsCheckLevel.Never,
+        skipHover: true,
+      });
 
       // When
       await mountComponent(props, undefined, undefined, true);

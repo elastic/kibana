@@ -12,7 +12,7 @@ import { createTestServerlessInstances } from '@kbn/core-test-helpers-kbn-server
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { getCapabilitiesFromClient } from '@kbn/core-elasticsearch-server-internal';
 
-// FLAKY: https://github.com/elastic/kibana/issues/167248
+// Serverless tests only supported on main
 describe.skip('ES capabilities for serverless ES', () => {
   let serverlessES: TestServerlessESUtils;
   let client: ElasticsearchClient;

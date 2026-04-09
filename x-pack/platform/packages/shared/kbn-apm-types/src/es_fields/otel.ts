@@ -15,3 +15,4 @@ export const RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE =
   'resource.attributes.telemetry.sdk.language';
 export const LINKS_TRACE_ID = 'links.trace_id';
 export const LINKS_SPAN_ID = 'links.span_id';
+export const PROCESS_RUNTIME_VERSION = 'process.runtime.version';

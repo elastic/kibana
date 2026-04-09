@@ -46,18 +46,20 @@ const useSlotContainerInnerStyles = (
         transparent 100%
       )`;
     }
-    return { 'mask-image': maskStyle };
+    return { maskImage: maskStyle };
   }, [scrollState, euiTheme.size.m]);
 
-  return css`
-    overflow-x: auto;
-    scrollbar-width: none;
-    scroll-behavior: smooth;
-    &::-webkit-scrollbar {
-      display: none;
-    }
-    ${maskImage};
-  `;
+  return css([
+    css`
+      overflow-x: auto;
+      scrollbar-width: none;
+      scroll-behavior: smooth;
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    `,
+    maskImage,
+  ]);
 };
 
 export const useStyles = (scrollState: ScrollState) => {

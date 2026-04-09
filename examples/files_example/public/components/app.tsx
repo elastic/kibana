@@ -89,7 +89,7 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
         ) : status === 'AWAITING_UPLOAD' ? (
           <EuiIcon type="clock" aria-label={status} />
         ) : (
-          <EuiIcon color="danger" type="warning" arial-label={status} />
+          <EuiIcon color="danger" type="warning" aria-label={status} />
         ),
     },
     {
@@ -138,6 +138,7 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
         <EuiPageTemplate.Header pageTitle="Files example" />
         <EuiPageTemplate.Section>
           <EuiInMemoryTable
+            tableCaption="Files example"
             columns={columns}
             items={items}
             itemId="id"
