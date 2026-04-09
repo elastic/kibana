@@ -121,7 +121,7 @@ browserify-des@1.0.0
 browserify-rsa@4.1.0
 browserify-sign@4.2.3
 browserify-zlib@0.2.0
-browserslist@4.28.0
+browserslist@4.28.1
 buffer-from@1.1.1
 buffer-xor@1.0.3
 buffer@5.7.1
@@ -131,7 +131,7 @@ call-bind@1.0.8
 call-bound@1.0.3
 callsites@3.1.0
 camelize@1.0.0
-caniuse-lite@1.0.30001754
+caniuse-lite@1.0.30001781
 ccount@1.0.5
 character-entities-html4@1.1.4
 character-entities-legacy@1.1.1
@@ -190,7 +190,7 @@ detect-node-es@1.1.0
 diffie-hellman@5.0.3
 domain-browser@4.22.0
 dunder-proto@1.0.1
-electron-to-chromium@1.5.250
+electron-to-chromium@1.5.321
 elliptic@6.6.1
 emoticon@3.2.0
 enhanced-resolve@5.20.0
@@ -497,7 +497,7 @@ unist-util-visit-parents@2.1.2
 unist-util-visit-parents@3.1.0
 unist-util-visit@1.4.1
 unist-util-visit@2.0.3
-update-browserslist-db@1.1.4
+update-browserslist-db@1.2.3
 uri-js@4.2.2
 url-parse@1.5.10
 url@0.11.4
