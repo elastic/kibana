@@ -160,7 +160,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
                   validator: ({ value, path }) => {
                     if (value !== undefined && value !== null && value !== '') {
                       const numValue = Number(value);
-                      if (isNaN(numValue) || numValue < 0) {
+                      if (isNaN(numValue) || numValue < 0 || numValue > 1) {
                         return {
                           code: 'ERR_FIELD_INVALID',
                           path,
