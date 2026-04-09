@@ -29,7 +29,7 @@ jest.mock('../../chart', () => ({
   Chart: jest.fn(() => <div data-test-subj="metric-chart" />),
 }));
 
-const mockMetricsGrid = jest.fn((props: { metricItems: any[] }) =>
+const mockMetricsGrid = jest.fn((props: { metricItems: any[]; dimensions: Dimension[] }) =>
   props.metricItems.length === 0 ? (
     <div data-test-subj="metricsExperienceNoData" />
   ) : (
