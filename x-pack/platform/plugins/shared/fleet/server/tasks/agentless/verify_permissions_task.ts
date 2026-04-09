@@ -30,8 +30,8 @@ const TASK_TIMEOUT = '1d';
 const TASK_ID = `${TASK_TYPE}:1.0.0`;
 const TASK_INTERVAL = '12h';
 export const VERIFY_PERMISSIONS_TASK = '[OTel Verify Permissions Task]';
-const VERIFICATION_TTL_MS = 12 * 60 * 60 * 1000;
-const ELIGIBILITY_WINDOW_MS = 12 * 60 * 60 * 1000;
+const VERIFICATION_TTL_MS = 5 * 60 * 1000;
+const ELIGIBILITY_WINDOW_MS = 5 * 60 * 1000;
 
 export function registerVerifyPermissionsTask(taskManager: TaskManagerSetupContract) {
   taskManager.registerTaskDefinitions({
@@ -329,23 +329,23 @@ async function getPackagePolicyMap(
 /**
  * Check if a connector is eligible for verification based on 6 criteria:
  *   1. Never verified (verification_started_at is null)
- *   2. Recently created (created_at within last 12 hours)
- *   3. Recently updated (updated_at within last 12 hours)
- *   4. Due for re-verification (started_at > 12 hours ago AND status != failed)
- *   5. Failed with cooldown expired (status = failed AND failed_at > 12 hours ago)
+ *   2. Recently created (created_at within last 5 min)
+ *   3. Recently updated (updated_at within last 5 min)
+ *   4. Due for re-verification (started_at > 5 min ago AND status != failed)
+ *   5. Failed with cooldown expired (status = failed AND failed_at > 5 min ago)
  *   6. Backwards compat (verification_status not set)
  */
 function isConnectorEligible(attrs: CloudConnectorSOAttributes): boolean {
-  const eligibilityCutoff = Date.now() - ELIGIBILITY_WINDOW_MS;
+  const fiveMinutesAgo = Date.now() - ELIGIBILITY_WINDOW_MS;
 
   if (!attrs.verification_started_at) return true;
 
-  if (attrs.created_at && new Date(attrs.created_at).getTime() >= eligibilityCutoff) return true;
+  if (attrs.created_at && new Date(attrs.created_at).getTime() >= fiveMinutesAgo) return true;
 
-  if (attrs.updated_at && new Date(attrs.updated_at).getTime() >= eligibilityCutoff) return true;
+  if (attrs.updated_at && new Date(attrs.updated_at).getTime() >= fiveMinutesAgo) return true;
 
   if (
-    new Date(attrs.verification_started_at).getTime() <= eligibilityCutoff &&
+    new Date(attrs.verification_started_at).getTime() <= fiveMinutesAgo &&
     attrs.verification_status !== 'failed'
   ) {
     return true;
@@ -354,7 +354,7 @@ function isConnectorEligible(attrs: CloudConnectorSOAttributes): boolean {
   if (
     attrs.verification_status === 'failed' &&
     attrs.verification_failed_at &&
-    new Date(attrs.verification_failed_at).getTime() <= eligibilityCutoff
+    new Date(attrs.verification_failed_at).getTime() <= fiveMinutesAgo
   ) {
     return true;
   }
