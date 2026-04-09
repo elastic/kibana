@@ -46,9 +46,7 @@ jest.mock('./convert_graph_events', () => ({
 const prepareConversationMock = prepareConversation as jest.MockedFn<typeof prepareConversation>;
 const selectToolsMock = selectTools as jest.MockedFn<typeof selectTools>;
 const extractRoundMock = extractRound as jest.MockedFn<typeof extractRound>;
-const getPendingExecutionMock = getPendingExecution as jest.MockedFn<
-  typeof getPendingExecution
->;
+const getPendingExecutionMock = getPendingExecution as jest.MockedFn<typeof getPendingExecution>;
 const createAgentGraphMock = createAgentGraph as jest.MockedFn<typeof createAgentGraph>;
 
 describe('runDefaultAgentMode', () => {

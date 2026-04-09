@@ -10,7 +10,10 @@ import { getContextWindowSize } from '@kbn/inference-common';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import type { CompactionSummary, AgentExecutionEvent } from '@kbn/agent-builder-common';
 import type { ProcessedTimelineEvent, ProcessedUserMessageEvent } from './prepare_conversation';
-import { isProcessedUserMessageEvent, isProcessedAgentExecutionEvent } from './prepare_conversation';
+import {
+  isProcessedUserMessageEvent,
+  isProcessedAgentExecutionEvent,
+} from './prepare_conversation';
 
 /**
  * Fraction of the context window reserved for system prompt, output generation,

@@ -90,7 +90,9 @@ describe('convertPreviousEvents', () => {
     },
   });
 
-  const makeAgentExecutionEvent = (parts: Partial<AgentExecutionEvent> = {}): AgentExecutionEvent => ({
+  const makeAgentExecutionEvent = (
+    parts: Partial<AgentExecutionEvent> = {}
+  ): AgentExecutionEvent => ({
     id: `resp-${++responseCounter}`,
     timestamp: now,
     type: 'agent_execution',

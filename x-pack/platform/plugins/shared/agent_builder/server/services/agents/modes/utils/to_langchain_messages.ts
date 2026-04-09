@@ -33,7 +33,10 @@ import type {
   ProcessedTimelineEvent,
   ProcessedUserMessageEvent,
 } from './prepare_conversation';
-import { isProcessedUserMessageEvent, isProcessedAgentExecutionEvent } from './prepare_conversation';
+import {
+  isProcessedUserMessageEvent,
+  isProcessedAgentExecutionEvent,
+} from './prepare_conversation';
 import type { ToolCallResultTransformer } from './create_result_transformer';
 import { serializeCompactionSummary } from './conversation_compactor';
 
