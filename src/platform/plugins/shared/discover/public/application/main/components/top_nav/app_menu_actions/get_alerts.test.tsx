@@ -57,6 +57,7 @@ const getAlertsMenuItem = async ({
     services,
     tabId: currentTab.id,
     getState: toolkit.internalState.getState,
+    subscribe: (listener: () => void) => toolkit.internalState.subscribe(listener),
     showCreateRuleV2,
   });
 };
