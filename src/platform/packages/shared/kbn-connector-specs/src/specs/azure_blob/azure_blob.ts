@@ -43,6 +43,24 @@ function extractNextMarker(xml: string): string | undefined {
   return match?.[1] || undefined;
 }
 
+/**
+ * Extracts and throws a meaningful error from Azure Blob Storage API responses.
+ * Uses the x-ms-error-code response header when available for a human-readable code.
+ */
+function createAzureBlobError(error: unknown): Error {
+  const axiosError = error as {
+    response?: { status?: number; headers?: Record<string, string> };
+    message?: string;
+  };
+  const status = axiosError.response?.status;
+  const errorCode = axiosError.response?.headers?.['x-ms-error-code'];
+  if (status != null) {
+    const detail = errorCode ? ` ${errorCode}` : '';
+    return new Error(`Azure Blob Storage error (${status}${detail})`);
+  }
+  return new Error(axiosError.message ?? 'Unknown Azure Blob Storage error');
+}
+
 function getBaseUrl(ctx: ActionContext): string {
   const url = (ctx.config?.accountUrl as string)?.trim() ?? '';
   return url.replace(/\/+$/, '');
@@ -154,18 +172,22 @@ export const AzureBlob: ConnectorSpec = {
           ),
       }),
       handler: async (ctx, input) => {
-        const baseUrl = getBaseUrl(ctx);
-        const response = await ctx.client.get(`${baseUrl}/`, {
-          params: {
-            comp: 'list',
-            ...(input.prefix && { prefix: input.prefix }),
-            ...(input.maxresults != null && { maxresults: input.maxresults }),
-            ...(input.marker && { marker: input.marker }),
-          },
-          responseType: 'text',
-        });
-        const xml = response.data as string;
-        return parseListContainersXml(xml);
+        try {
+          const baseUrl = getBaseUrl(ctx);
+          const response = await ctx.client.get(`${baseUrl}/`, {
+            params: {
+              comp: 'list',
+              ...(input.prefix && { prefix: input.prefix }),
+              ...(input.maxresults != null && { maxresults: input.maxresults }),
+              ...(input.marker && { marker: input.marker }),
+            },
+            responseType: 'text',
+          });
+          const xml = response.data as string;
+          return parseListContainersXml(xml);
+        } catch (err) {
+          throw createAzureBlobError(err);
+        }
       },
     },
 
@@ -195,20 +217,24 @@ export const AzureBlob: ConnectorSpec = {
           ),
       }),
       handler: async (ctx, input) => {
-        const baseUrl = getBaseUrl(ctx);
-        const container = encodePathSegment(input.container);
-        const response = await ctx.client.get(`${baseUrl}/${container}`, {
-          params: {
-            restype: 'container',
-            comp: 'list',
-            ...(input.prefix && { prefix: input.prefix }),
-            ...(input.maxresults != null && { maxresults: input.maxresults }),
-            ...(input.marker && { marker: input.marker }),
-          },
-          responseType: 'text',
-        });
-        const xml = response.data as string;
-        return parseListBlobsXml(xml);
+        try {
+          const baseUrl = getBaseUrl(ctx);
+          const container = encodePathSegment(input.container);
+          const response = await ctx.client.get(`${baseUrl}/${container}`, {
+            params: {
+              restype: 'container',
+              comp: 'list',
+              ...(input.prefix && { prefix: input.prefix }),
+              ...(input.maxresults != null && { maxresults: input.maxresults }),
+              ...(input.marker && { marker: input.marker }),
+            },
+            responseType: 'text',
+          });
+          const xml = response.data as string;
+          return parseListBlobsXml(xml);
+        } catch (err) {
+          throw createAzureBlobError(err);
+        }
       },
     },
 
@@ -227,18 +253,22 @@ export const AzureBlob: ConnectorSpec = {
           ),
       }),
       handler: async (ctx, input) => {
-        const baseUrl = getBaseUrl(ctx);
-        const container = encodePathSegment(input.container);
-        const response = await ctx.client.get(
-          `${baseUrl}/${container}/${encodePathSegment(input.blobName)}`,
-          { responseType: 'arraybuffer' }
-        );
-        const buffer = Buffer.from(response.data as ArrayBuffer);
-        return {
-          contentBase64: buffer.toString('base64'),
-          contentType: response.headers['content-type'] as string | undefined,
-          contentLength: buffer.length,
-        };
+        try {
+          const baseUrl = getBaseUrl(ctx);
+          const container = encodePathSegment(input.container);
+          const response = await ctx.client.get(
+            `${baseUrl}/${container}/${encodePathSegment(input.blobName)}`,
+            { responseType: 'arraybuffer' }
+          );
+          const buffer = Buffer.from(response.data as ArrayBuffer);
+          return {
+            contentBase64: buffer.toString('base64'),
+            contentType: response.headers['content-type'] as string | undefined,
+            contentLength: buffer.length,
+          };
+        } catch (err) {
+          throw createAzureBlobError(err);
+        }
       },
     },
 
@@ -257,29 +287,23 @@ export const AzureBlob: ConnectorSpec = {
           ),
       }),
       handler: async (ctx, input) => {
-        const baseUrl = getBaseUrl(ctx);
-        const container = encodePathSegment(input.container);
-
-        let response;
         try {
-          response = await ctx.client.head(
+          const baseUrl = getBaseUrl(ctx);
+          const container = encodePathSegment(input.container);
+          const response = await ctx.client.head(
             `${baseUrl}/${container}/${encodePathSegment(input.blobName)}`
           );
+          return {
+            contentType: response.headers['content-type'],
+            contentLength: response.headers['content-length']
+              ? parseInt(String(response.headers['content-length']), 10)
+              : undefined,
+            lastModified: response.headers['last-modified'],
+            etag: response.headers.etag,
+          };
         } catch (err) {
-          const status = (err as { response?: { status?: number } })?.response?.status;
-          if (status === 404) {
-            throw new Error(`Blob not found: ${input.container}/${input.blobName}`);
-          }
-          throw err;
+          throw createAzureBlobError(err);
         }
-        return {
-          contentType: response.headers['content-type'],
-          contentLength: response.headers['content-length']
-            ? parseInt(String(response.headers['content-length']), 10)
-            : undefined,
-          lastModified: response.headers['last-modified'],
-          etag: response.headers.etag,
-        };
       },
     },
   },

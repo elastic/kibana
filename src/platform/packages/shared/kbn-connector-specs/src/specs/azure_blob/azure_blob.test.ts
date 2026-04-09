@@ -142,6 +142,41 @@ describe('AzureBlob', () => {
     });
   });
 
+  describe('error handling', () => {
+    it('wraps API errors with status and x-ms-error-code', async () => {
+      const azureError = Object.assign(new Error('Request failed'), {
+        response: { status: 404, headers: { 'x-ms-error-code': 'BlobNotFound' } },
+      });
+      mockClient.get.mockRejectedValue(azureError);
+
+      await expect(
+        AzureBlob.actions.listBlobs.handler(mockContext, { container: 'mycontainer' })
+      ).rejects.toThrow('Azure Blob Storage error (404 BlobNotFound)');
+    });
+
+    it('wraps API errors with status only when x-ms-error-code is absent', async () => {
+      const azureError = Object.assign(new Error('Request failed'), {
+        response: { status: 403, headers: {} },
+      });
+      mockClient.head.mockRejectedValue(azureError);
+
+      await expect(
+        AzureBlob.actions.getBlobProperties.handler(mockContext, {
+          container: 'mycontainer',
+          blobName: 'file.txt',
+        })
+      ).rejects.toThrow('Azure Blob Storage error (403)');
+    });
+
+    it('falls back to the original message for non-HTTP errors', async () => {
+      mockClient.get.mockRejectedValue(new Error('Network Error'));
+
+      await expect(AzureBlob.actions.listContainers.handler(mockContext, {})).rejects.toThrow(
+        'Network Error'
+      );
+    });
+  });
+
   describe('test handler', () => {
     const runTestHandler = async (ctx: ActionContext) => {
       const testDef = AzureBlob.test;
