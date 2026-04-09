@@ -90,13 +90,19 @@ describe('USER_AGENT Autocomplete', () => {
       { label: 'uaString', text: 'uaString ' },
     ]);
 
-    // CONCAT() has no arguments — the expression is not meaningfully complete;
-    // autocomplete should behave like AFTER_ASSIGN, not AFTER_EXPRESSION.
+    // e.g. CONCAT()
+    // CONCAT( — cursor inside an incomplete call. Functions have trailing commas because
+    // CONCAT requires more mandatory args (in_function position).
     await expectUserAgentSuggestionsContains(
       'FROM a | USER_AGENT ua = CONCAT(',
       [
         'uaString ',
-        ...getFunctionSignaturesByReturnType(Location.EVAL, ['keyword', 'text'], { scalar: true }),
+        // CONCAT is excluded because it's the parent function we're inside
+        ...getFunctionSignaturesByReturnType(Location.EVAL, ['keyword', 'text'], {
+          scalar: true,
+        })
+          .filter((s) => !s.startsWith('CONCAT('))
+          .map((s) => `${s},`),
       ],
       mockCallbacks
     );
