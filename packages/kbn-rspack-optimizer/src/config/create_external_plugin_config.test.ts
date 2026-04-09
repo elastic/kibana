@@ -9,6 +9,7 @@
 
 import Path from 'path';
 import Fs from 'fs';
+import Os from 'os';
 import { createCrossPluginExternals, createPluginWrapper } from './create_external_plugin_config';
 
 // ──────────────────────────────────────────────
@@ -114,7 +115,7 @@ describe('createCrossPluginExternals', () => {
 // ──────────────────────────────────────────────
 
 describe('createPluginWrapper', () => {
-  const tmpDir = Path.resolve(__dirname, '__fixtures__', 'wrapper_test');
+  const tmpDir = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'kbn-wrapper-test-'));
   const wrapperDir = Path.join(tmpDir, 'wrappers');
   const pluginDir = Path.join(tmpDir, 'my-plugin');
 

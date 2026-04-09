@@ -9,10 +9,11 @@
 
 import Path from 'path';
 import Fs from 'fs';
+import Os from 'os';
 import { findTargetEntry } from './create_single_compile_config';
 import { filterStatsByFocus, type FocusPluginInfo } from '../plugins/emit_stats_plugin';
 
-const tmpDir = Path.resolve(__dirname, '__fixtures__', 'find_target_entry_test');
+const tmpDir = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'kbn-find-target-entry-'));
 
 function createFile(relativePath: string) {
   const fullPath = Path.join(tmpDir, relativePath);
@@ -21,7 +22,6 @@ function createFile(relativePath: string) {
 }
 
 beforeAll(() => {
-  Fs.mkdirSync(tmpDir, { recursive: true });
   createFile('plugin-a/public/index.ts');
   createFile('plugin-a/common/index.ts');
   createFile('plugin-b/public/index.tsx');

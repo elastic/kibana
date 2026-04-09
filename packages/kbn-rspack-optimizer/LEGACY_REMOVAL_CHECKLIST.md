@@ -46,9 +46,24 @@ with `[rspack-transition]` comments for easy discovery via `grep -r 'rspack-tran
 - [ ] `packages/kbn-perf-page-load/src/cli/compare_optimizers_cmd.ts`: Delete the entire file (compare-optimizers command). Remove `compareOptimizersCmd` import and registration from `cli/index.ts`.
 - [ ] `packages/kbn-perf-page-load/src/cli/run_cmd.ts`: Remove the `[rspack-transition]` legacy build branch (the `build_kibana_platform_plugins.js --dist` code path).
 
+## Tests
+
+These test files contain `KBN_USE_RSPACK` or `isRspackMode`-gated branches that should be
+simplified once the legacy optimizer is removed. Each item is a **pure simplification** --
+delete the legacy branch/assertions and keep only the rspack assertions.
+
+- [ ] `src/dev/build/build_distributables.test.ts`: Delete the "runs BuildKibanaPlatformPlugins when KBN_USE_RSPACK is not set" test case and the "any value other than true" case. The "runs BuildRspackBundles" case becomes the only test (and no longer needs the env var setup).
+- [ ] `src/dev/build/tasks/create_cdn_assets_task.test.ts`: Delete the legacy bundle path test cases. The rspack "copies unified rspack bundles" case becomes the only test.
+- [ ] `packages/kbn-cli-dev-mode/src/optimizer.test.ts`: Delete the `describe('rspack path', ...)` wrapper -- promote its tests to top level. Delete the "falls back to webpack" test. Remove the `@kbn/optimizer` mock and the legacy optimizer tests ("uses options to create valid OptimizerConfig", etc.).
+- [ ] `src/core/packages/apps/server-internal/src/bundle_routes/register_bundle_routes.test.ts`: Delete the `describe('rspack mode', ...)` wrapper and the "when KBN_USE_RSPACK is unset" regression guard. Promote the rspack route tests to top level.
+- [ ] `src/core/packages/rendering/server-internal/src/rendering_service.test.ts`: Remove the `isRspackModeEnabledMock` toggle. The `describe('rspack mode metadata', ...)` assertions (preload fonts, font-display:swap) should apply unconditionally.
+- [ ] `src/core/packages/rendering/server-internal/src/rendering_service.test.mocks.ts`: Remove the `isRspackModeEnabled` mock export.
+- [ ] `packages/kbn-ci-stats-shipper-cli/ship_ci_stats_cli.test.ts`: Delete the "does not include kbn-rspack-optimizer" test case that asserts the legacy update command. The rspack update command test becomes the only case.
+- [ ] `packages/kbn-plugin-helpers/src/integration_tests/build.test.ts`: Delete the original "builds a generated plugin into a viable archive" test (legacy webpack path). The "[rspack-transition]" rspack build test becomes the sole build test. Remove `KBN_USE_RSPACK` env override (it will be the default).
+
 ## Package rename
 
 - [ ] `packages/kbn-rspack-optimizer/`: Rename to `packages/kbn-optimizer/` (reclaiming the name from the deleted legacy package). Update all imports and `kibana.jsonc` references.
 - [ ] Delete this `LEGACY_REMOVAL_CHECKLIST.md` file (no longer needed).
 
-## Total: ~14 files with deletions, 0 files with structural changes.
+## Total: ~22 files with deletions/simplifications, 0 files with structural changes.

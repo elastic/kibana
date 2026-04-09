@@ -9,6 +9,7 @@
 
 import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
+import type { ThemeTag } from '../types';
 import {
   getSharedResolveConfig,
   getSharedResolveFallback,
@@ -59,15 +60,63 @@ describe('shared_config', () => {
       );
     });
 
+    it('should alias buffer to node-stdlib-browser and package resolve paths', () => {
+      const alias = resolveConfig.alias as Record<string, string[]>;
+      expect(alias.buffer).toEqual([
+        Path.resolve(REPO_ROOT, 'node_modules/node-stdlib-browser/node_modules/buffer'),
+        require.resolve('buffer'),
+      ]);
+    });
+
+    it('should alias punycode to node-stdlib-browser and package resolve paths', () => {
+      const alias = resolveConfig.alias as Record<string, string[]>;
+      expect(alias.punycode).toEqual([
+        Path.resolve(REPO_ROOT, 'node_modules/node-stdlib-browser/node_modules/punycode'),
+        require.resolve('punycode'),
+      ]);
+    });
+
     it('should reference tsconfig.base.json', () => {
       expect(resolveConfig.tsConfig).toBe(Path.resolve(REPO_ROOT, 'tsconfig.base.json'));
     });
   });
 
   describe('getSharedResolveFallback', () => {
-    const fallback = getSharedResolveFallback();
+    /** Must stay in sync with `getSharedResolveFallback` in shared_config.ts */
+    const EXPECTED_NODE_FALLBACK_KEYS = [
+      'node:fs',
+      'node:path',
+      'node:os',
+      'node:crypto',
+      'node:stream',
+      'node:buffer',
+      'node:util',
+      'node:url',
+      'node:http',
+      'node:https',
+      'node:events',
+      'node:process',
+      'node:querystring',
+      'node:assert',
+      'node:zlib',
+      'node:vm',
+      'node:tty',
+      'node:child_process',
+      'node:net',
+      'node:tls',
+      'node:dns',
+    ] as const;
+
+    it('should cover the full set of node:* stubs with false fallbacks', () => {
+      const fallback = getSharedResolveFallback();
+      for (const key of EXPECTED_NODE_FALLBACK_KEYS) {
+        expect(fallback[key]).toBe(false);
+      }
+      expect(Object.keys(fallback).sort()).toEqual([...EXPECTED_NODE_FALLBACK_KEYS].sort());
+    });
 
     it('should disable node:-prefixed modules for browser', () => {
+      const fallback = getSharedResolveFallback();
       expect(fallback['node:child_process']).toBe(false);
       expect(fallback['node:net']).toBe(false);
       expect(fallback['node:tls']).toBe(false);
@@ -227,6 +276,35 @@ describe('shared_config', () => {
       const jsRule = rulesWithBabel.find((r) => r.test?.toString().includes('jt'));
       const use = jsRule?.use as any;
       expect(use?.loader).toContain('babel-loader');
+    });
+
+    it('should pass non-default themeTags and bundleId to theme_loader options', () => {
+      const themeTags: ThemeTag[] = ['borealisdark', 'borealislight'];
+      const bundleId = 'custom-bundle';
+      const rules = getSharedModuleRules(REPO_ROOT, false, themeTags, bundleId);
+      const scssRule = rules.find((r) => r.test?.toString() === '/\\.scss$/');
+      expect(scssRule?.oneOf).toBeDefined();
+
+      const themeLoaderEntry = (scssRule!.oneOf as any[]).find((entry) => {
+        const use = entry.use as { loader?: string }[] | undefined;
+        return use?.[0]?.loader?.includes('theme_loader');
+      });
+      expect(themeLoaderEntry).toBeDefined();
+      const themeLoaderOptions = (themeLoaderEntry!.use as { options?: unknown }[])[0].options;
+      expect(themeLoaderOptions).toEqual({ bundleId, themeTags });
+    });
+
+    it('should build per-theme resourceQuery rules for non-default themeTags order', () => {
+      const themeTags: ThemeTag[] = ['borealisdark', 'borealislight'];
+      const rules = getSharedModuleRules(REPO_ROOT, false, themeTags, 'custom-bundle');
+      const scssRule = rules.find((r) => r.test?.toString() === '/\\.scss$/');
+      const oneOf = scssRule?.oneOf as any[];
+
+      const themeQueryRules = oneOf!.filter((entry) => entry.resourceQuery !== undefined);
+      expect(themeQueryRules).toHaveLength(themeTags.length);
+      themeTags.forEach((theme, i) => {
+        expect(themeQueryRules[i].resourceQuery).toEqual(new RegExp(`\\?${theme}$`));
+      });
     });
   });
 
