@@ -199,6 +199,57 @@ const getAnalyzeLogsValidationReasons = (params: AnalyzeLogsValidationParams): s
   return reasons;
 };
 
+interface AnalyzeFormValidityParams {
+  integrationTitle: string;
+  description?: string;
+  connectorId?: string;
+  dataStreamTitle: string;
+  dataStreamDescription?: string;
+  dataCollectionMethod?: string[];
+  hasDuplicateDataStreamName: boolean;
+  logsSourceOption: string;
+  logSample?: string;
+  selectedIndex: string;
+  indexValidationError?: string | null;
+  isParsing: boolean;
+  isValidatingIndex: boolean;
+  isLoading: boolean;
+  isUploadingSamples: boolean;
+}
+
+const useAnalyzeFormValidity = (params: AnalyzeFormValidityParams) => {
+  const isIntegrationFieldsValid =
+    !!params.integrationTitle &&
+    !!params.description?.trim() &&
+    !!params.connectorId?.trim() &&
+    isValidNameFormat(params.integrationTitle) &&
+    startsWithLetter(params.integrationTitle);
+
+  const isDataStreamFieldsValid =
+    !!params.dataStreamTitle &&
+    !!params.dataStreamDescription?.trim() &&
+    !params.hasDuplicateDataStreamName &&
+    isValidNameFormat(params.dataStreamTitle) &&
+    startsWithLetter(params.dataStreamTitle) &&
+    params.dataCollectionMethod != null &&
+    params.dataCollectionMethod.length > 0;
+
+  const isLogSourceValid =
+    (params.logsSourceOption === 'file' && !!params.logSample) ||
+    (params.logsSourceOption === 'index' && !!params.selectedIndex && !params.indexValidationError);
+
+  const isAnalyzeDisabled =
+    !isIntegrationFieldsValid ||
+    !isDataStreamFieldsValid ||
+    !isLogSourceValid ||
+    params.isParsing ||
+    params.isValidatingIndex ||
+    params.isLoading ||
+    params.isUploadingSamples;
+
+  return { isAnalyzeDisabled, isIntegrationFieldsValid, isDataStreamFieldsValid };
+};
+
 export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ onClose }) => {
   const { euiTheme } = useEuiTheme();
   const styles = useLayoutStyles();
@@ -295,12 +346,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
   );
 
   const integrationTitle = formData?.title?.trim() ?? '';
-  const isIntegrationFieldsValid =
-    !!integrationTitle &&
-    !!formData?.description?.trim() &&
-    !!formData?.connectorId?.trim() &&
-    isValidNameFormat(integrationTitle) &&
-    startsWithLetter(integrationTitle);
+  const dataStreamTitle = formData?.dataStreamTitle?.trim() ?? '';
 
   const existingDataStreamNames = useMemo(
     () => new Set((integration?.dataStreams ?? []).map((ds) => ds.title.toLowerCase())),
@@ -308,31 +354,25 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
   );
 
   const hasDuplicateDataStreamName =
-    !!formData?.dataStreamTitle?.trim() &&
-    existingDataStreamNames.has(formData.dataStreamTitle.trim().toLowerCase());
+    !!dataStreamTitle && existingDataStreamNames.has(dataStreamTitle.toLowerCase());
 
-  const dataStreamTitle = formData?.dataStreamTitle?.trim() ?? '';
-  const isDataStreamFieldsValid =
-    !!dataStreamTitle &&
-    !!formData?.dataStreamDescription?.trim() &&
-    !hasDuplicateDataStreamName &&
-    isValidNameFormat(dataStreamTitle) &&
-    startsWithLetter(dataStreamTitle) &&
-    formData?.dataCollectionMethod != null &&
-    formData.dataCollectionMethod.length > 0;
-
-  const isLogSourceValid =
-    (logsSourceOption === 'file' && !!logSample) ||
-    (logsSourceOption === 'index' && !!selectedIndex && !indexValidationError);
-
-  const isAnalyzeDisabled =
-    !isIntegrationFieldsValid ||
-    !isDataStreamFieldsValid ||
-    !isLogSourceValid ||
-    isParsing ||
-    isValidatingIndex ||
-    isLoading ||
-    isUploadingSamples;
+  const { isAnalyzeDisabled } = useAnalyzeFormValidity({
+    integrationTitle,
+    description: formData?.description,
+    connectorId: formData?.connectorId,
+    dataStreamTitle,
+    dataStreamDescription: formData?.dataStreamDescription,
+    dataCollectionMethod: formData?.dataCollectionMethod,
+    hasDuplicateDataStreamName,
+    logsSourceOption,
+    logSample,
+    selectedIndex,
+    indexValidationError,
+    isParsing,
+    isValidatingIndex,
+    isLoading,
+    isUploadingSamples,
+  });
 
   const analyzeLogsValidationReasons = useMemo(
     () =>
