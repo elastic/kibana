@@ -40,6 +40,7 @@ export type {
   UiamOAuthType,
   UiamOAuthClientResponse,
   UiamOAuthClientLogo,
+  UiamOAuthClientType,
   UiamOAuthConnectionResponse,
   CreateUiamOAuthClientParams,
   UpdateUiamOAuthClientParams,

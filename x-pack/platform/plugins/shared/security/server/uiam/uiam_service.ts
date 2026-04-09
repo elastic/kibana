@@ -15,6 +15,7 @@ import type {
   CreateUiamOAuthClientParams,
   UiamOAuthClientLogo,
   UiamOAuthClientResponse,
+  UiamOAuthClientType,
   UiamOAuthConnectionResponse,
   UpdateUiamOAuthClientParams,
 } from '@kbn/core-security-server';
@@ -98,6 +99,7 @@ export interface ConvertUiamApiKeysResponse {
 }
 
 export type OAuthClientLogo = UiamOAuthClientLogo;
+export type OAuthClientType = UiamOAuthClientType;
 export type OAuthClientResponse = UiamOAuthClientResponse;
 export type OAuthConnectionResponse = UiamOAuthConnectionResponse;
 export type CreateOAuthClientRequestBody = CreateUiamOAuthClientParams;

@@ -9,31 +9,20 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 
-/**
- * Represents a client logo provided as a URL.
- */
-export interface UiamOAuthClientLogoUrl {
-  type: 'url';
-  url: string;
-}
-
-/**
- * Represents a client logo provided as base64-encoded image data.
- */
-export interface UiamOAuthClientLogoBase64 {
-  type: 'base64';
+export interface UiamOAuthClientLogo {
   media_type: string;
   data: string;
 }
 
-export type UiamOAuthClientLogo = UiamOAuthClientLogoUrl | UiamOAuthClientLogoBase64;
+export interface UiamOAuthConnectionsSummary {
+  active?: string[];
+  revoked?: string[];
+}
 
-/**
- * Represents a single OAuth client returned by the UIAM service.
- */
 export interface UiamOAuthClientResponse {
   id: string;
   client_name?: string;
+  client_secret?: string;
   resource: string;
   type?: string;
   creation?: string;
@@ -42,15 +31,13 @@ export interface UiamOAuthClientResponse {
   revocation_reason?: string;
   client_metadata?: Record<string, string>;
   client_logo?: UiamOAuthClientLogo;
-  connections?: { active?: string[]; revoked?: string[] };
+  connections?: UiamOAuthConnectionsSummary;
 }
 
-/**
- * Represents a single OAuth connection returned by the UIAM service.
- */
 export interface UiamOAuthConnectionResponse {
   id: string;
   client_id: string;
+  name?: string;
   resource: string;
   creation?: string;
   revoked?: boolean;
@@ -59,22 +46,19 @@ export interface UiamOAuthConnectionResponse {
   scopes?: string[];
 }
 
-/**
- * Parameters for creating an OAuth client.
- */
+export type UiamOAuthClientType = 'public' | 'confidential';
+
 export interface CreateUiamOAuthClientParams {
   resource: string;
   client_name?: string;
+  client_type?: UiamOAuthClientType;
   client_metadata?: Record<string, string>;
   client_logo?: UiamOAuthClientLogo;
 }
 
-/**
- * Parameters for updating an OAuth client.
- */
 export interface UpdateUiamOAuthClientParams {
   client_name?: string | null;
-  client_metadata?: Record<string, string>;
+  client_metadata: Record<string, string | null>;
   client_logo?: UiamOAuthClientLogo | null;
 }
 

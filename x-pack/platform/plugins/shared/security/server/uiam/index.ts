@@ -17,4 +17,5 @@ export {
   type OAuthClientsResponse,
   type OAuthConnectionsResponse,
   type OAuthClientLogo,
+  type OAuthClientType,
 } from './uiam_service';
