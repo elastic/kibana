@@ -53,6 +53,23 @@ interface TargetEntitySource {
   };
 }
 
+export const parseTargetMetadataHits = (
+  hits: Array<{ _source?: unknown }>
+): TargetMetadataMap => {
+  const result: TargetMetadataMap = new Map();
+  for (const hit of hits) {
+    const { id, name, EngineMetadata, relationships } =
+      (hit._source as TargetEntitySource)?.entity ?? {};
+    const type = EngineMetadata?.Type;
+    const riskScore = relationships?.resolution?.risk?.calculated_score_norm ?? null;
+
+    if (id && name && type) {
+      result.set(id, { name, type, riskScore });
+    }
+  }
+  return result;
+};
+
 export type EntitiesRootGroupingAggregation = RootAggregation<EntitiesGroupingAggregation>;
 
 export const getGroupedEntitiesQuery = (query: EntitiesGroupingQuery, indexPattern: string) => {
@@ -144,19 +161,7 @@ export const useFetchTargetMetadata = (entityIds: string[]): TargetMetadataMap =
         })
       );
 
-      const result: TargetMetadataMap = new Map();
-      for (const hit of hits.hits) {
-        const { id, name, EngineMetadata, relationships } =
-          (hit._source as TargetEntitySource)?.entity ?? {};
-        const type = EngineMetadata?.Type;
-        const riskScore = relationships?.resolution?.risk?.calculated_score_norm ?? null;
-
-        if (id && name && type) {
-          result.set(id, { name, type, riskScore });
-        }
-      }
-
-      return result;
+      return parseTargetMetadataHits(hits.hits);
     },
     {
       onError: (err: Error) => showErrorToast(toasts, err),
