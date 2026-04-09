@@ -263,7 +263,7 @@ describe('useDashboardMenuItems', () => {
         );
 
         const openConfirmSpy = jest.spyOn(coreServices.overlays, 'openConfirm');
-        openConfirmSpy.mockResolvedValue(false);
+        openConfirmSpy.mockResolvedValueOnce(false);
 
         const switchToViewMode = result.current.editModeTopNavConfig.items?.find(
           ({ id }) => id === 'cancel'
@@ -295,7 +295,7 @@ describe('useDashboardMenuItems', () => {
         );
 
         const openConfirmSpy = jest.spyOn(coreServices.overlays, 'openConfirm');
-        openConfirmSpy.mockResolvedValue(true);
+        openConfirmSpy.mockResolvedValueOnce(true);
 
         const switchToViewMode = result.current.editModeTopNavConfig.items?.find(
           ({ id }) => id === 'cancel'
