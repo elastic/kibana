@@ -525,7 +525,7 @@ TS metrics-*
       );
     });
 
-    it('should return graceful no-op for incompatible histogram types', () => {
+    it('should pass incompatible histogram types through for Lens to handle', () => {
       const mockMetricWithConflictingHistogram: ParsedMetricItem = {
         metricName: 'request.duration',
         fieldTypes: [ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM, ES_FIELD_TYPES.TDIGEST],
@@ -538,9 +538,14 @@ TS metrics-*
       const query = createESQLQuery({
         metricItem: mockMetricWithConflictingHistogram,
       });
-      // Incompatible types produce an empty aggregation, so the query
-      // short-circuits to an empty string (graceful no-op)
-      expect(query).toBe('');
+      // Incompatible types are passed through uncast so Lens can
+      // surface its own error message
+      expect(query).toBe(
+        `
+TS metrics-*
+  | STATS PERCENTILE(request.duration, 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+`.trim()
+      );
     });
   });
 });
