@@ -25,7 +25,6 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiIcon,
-  EuiPanel,
   EuiPopover,
   EuiSpacer,
   EuiText,
@@ -206,30 +205,30 @@ export function QueryDetailsFlyout({
         </FlyoutToolbarHeader>
 
         {/* Second header: title and metadata cards */}
-        <EuiFlyoutHeader hasBorder>         
-            <EuiTitle size="s">
-              <h2 id={flyoutTitleId}>{item.query.title}</h2>
-            </EuiTitle>
-            <EuiSpacer size="m" />
-            <EuiFlexGroup gutterSize="s" responsive={false} wrap>
-              <EuiFlexItem>
-                <FlyoutMetadataCard title={SEVERITY_DETAILS_LABEL}>
-                  <SeverityBadge score={item.query.severity_score} />
-                </FlyoutMetadataCard>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <FlyoutMetadataCard title={TYPE_LABEL}>
-                  <EuiBadge color="hollow">{QUERY_TYPE_BADGE_LABEL}</EuiBadge>
-                </FlyoutMetadataCard>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <FlyoutMetadataCard title={STREAM_LABEL}>
-                  <EuiBadge color="hollow" iconType="productStreamsClassic" iconSide="left">
-                    {item.stream_name}
-                  </EuiBadge>
-                </FlyoutMetadataCard>
-              </EuiFlexItem>
-            </EuiFlexGroup>          
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="s">
+            <h2 id={flyoutTitleId}>{item.query.title}</h2>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+            <EuiFlexItem>
+              <FlyoutMetadataCard title={SEVERITY_DETAILS_LABEL}>
+                <SeverityBadge score={item.query.severity_score} />
+              </FlyoutMetadataCard>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <FlyoutMetadataCard title={TYPE_LABEL}>
+                <EuiBadge color="hollow">{QUERY_TYPE_BADGE_LABEL}</EuiBadge>
+              </FlyoutMetadataCard>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <FlyoutMetadataCard title={STREAM_LABEL}>
+                <EuiBadge color="hollow" iconType="productStreamsClassic" iconSide="left">
+                  {item.stream_name}
+                </EuiBadge>
+              </FlyoutMetadataCard>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           {!isEditMode && (

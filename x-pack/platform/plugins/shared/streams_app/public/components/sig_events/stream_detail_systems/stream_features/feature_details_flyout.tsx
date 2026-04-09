@@ -16,7 +16,6 @@ import {
   EuiFlyoutHeader,
   EuiHealth,
   EuiIcon,
-  EuiPanel,
   EuiPopover,
   EuiSpacer,
   EuiTitle,
@@ -173,32 +172,32 @@ export function FeatureDetailsFlyout({
       </FlyoutToolbarHeader>
 
       {/* Second header: title and metadata cards */}
-      <EuiFlyoutHeader hasBorder>        
-          <EuiTitle size="s">
-            <h2 id={flyoutTitleId}>{displayTitle}</h2>
-          </EuiTitle>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup gutterSize="s" responsive={false} wrap>
-            <EuiFlexItem>
-              <FlyoutMetadataCard title={CONFIDENCE_LABEL}>
-                <EuiHealth color={getConfidenceColor(feature.confidence)}>
-                  {feature.confidence}
-                </EuiHealth>
-              </FlyoutMetadataCard>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <FlyoutMetadataCard title={TYPE_LABEL}>
-                <EuiBadge color="hollow">{upperFirst(feature.type)}</EuiBadge>
-              </FlyoutMetadataCard>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <FlyoutMetadataCard title={STREAM_LABEL}>
-                <EuiBadge color="hollow" iconType="productStreamsClassic" iconSide="left">
-                  {feature.stream_name}
-                </EuiBadge>
-              </FlyoutMetadataCard>
-            </EuiFlexItem>
-          </EuiFlexGroup>        
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="s">
+          <h2 id={flyoutTitleId}>{displayTitle}</h2>
+        </EuiTitle>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+          <EuiFlexItem>
+            <FlyoutMetadataCard title={CONFIDENCE_LABEL}>
+              <EuiHealth color={getConfidenceColor(feature.confidence)}>
+                {feature.confidence}
+              </EuiHealth>
+            </FlyoutMetadataCard>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <FlyoutMetadataCard title={TYPE_LABEL}>
+              <EuiBadge color="hollow">{upperFirst(feature.type)}</EuiBadge>
+            </FlyoutMetadataCard>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <FlyoutMetadataCard title={STREAM_LABEL}>
+              <EuiBadge color="hollow" iconType="productStreamsClassic" iconSide="left">
+                {feature.stream_name}
+              </EuiBadge>
+            </FlyoutMetadataCard>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>

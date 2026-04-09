@@ -14,7 +14,6 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiHealth,
-  EuiPanel,
   EuiSpacer,
   EuiTitle,
   useGeneratedHtmlId,
@@ -70,51 +69,49 @@ export function KnowledgeIndicatorDetailsFlyout({
       </FlyoutToolbarHeader>
 
       {/* Second header: title and metadata cards */}
-      <EuiFlyoutHeader hasBorder>        
-          <EuiTitle size="s">
-            <h2 id={flyoutTitleId}>{title}</h2>
-          </EuiTitle>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup gutterSize="s" responsive={false} wrap>
-            {knowledgeIndicator.kind === 'feature' ? (
-              <>
-                <EuiFlexItem>
-                  <FlyoutMetadataCard title={CONFIDENCE_LABEL}>
-                    <EuiHealth color={getConfidenceColor(knowledgeIndicator.feature.confidence)}>
-                      {knowledgeIndicator.feature.confidence}
-                    </EuiHealth>
-                  </FlyoutMetadataCard>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <FlyoutMetadataCard title={TYPE_LABEL}>
-                    <EuiBadge color="hollow">
-                      {upperFirst(knowledgeIndicator.feature.type)}
-                    </EuiBadge>
-                  </FlyoutMetadataCard>
-                </EuiFlexItem>
-              </>
-            ) : (
-              <>
-                <EuiFlexItem>
-                  <FlyoutMetadataCard title={SEVERITY_LABEL}>
-                    <SeverityBadge score={knowledgeIndicator.query.severity_score} />
-                  </FlyoutMetadataCard>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <FlyoutMetadataCard title={TYPE_LABEL}>
-                    <EuiBadge color="hollow">{QUERY_TYPE_LABEL}</EuiBadge>
-                  </FlyoutMetadataCard>
-                </EuiFlexItem>
-              </>
-            )}
-            <EuiFlexItem>
-              <FlyoutMetadataCard title={STREAM_LABEL}>
-                <EuiBadge color="hollow" iconType="productStreamsClassic" iconSide="left">
-                  {streamName}
-                </EuiBadge>
-              </FlyoutMetadataCard>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="s">
+          <h2 id={flyoutTitleId}>{title}</h2>
+        </EuiTitle>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+          {knowledgeIndicator.kind === 'feature' ? (
+            <>
+              <EuiFlexItem>
+                <FlyoutMetadataCard title={CONFIDENCE_LABEL}>
+                  <EuiHealth color={getConfidenceColor(knowledgeIndicator.feature.confidence)}>
+                    {knowledgeIndicator.feature.confidence}
+                  </EuiHealth>
+                </FlyoutMetadataCard>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <FlyoutMetadataCard title={TYPE_LABEL}>
+                  <EuiBadge color="hollow">{upperFirst(knowledgeIndicator.feature.type)}</EuiBadge>
+                </FlyoutMetadataCard>
+              </EuiFlexItem>
+            </>
+          ) : (
+            <>
+              <EuiFlexItem>
+                <FlyoutMetadataCard title={SEVERITY_LABEL}>
+                  <SeverityBadge score={knowledgeIndicator.query.severity_score} />
+                </FlyoutMetadataCard>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <FlyoutMetadataCard title={TYPE_LABEL}>
+                  <EuiBadge color="hollow">{QUERY_TYPE_LABEL}</EuiBadge>
+                </FlyoutMetadataCard>
+              </EuiFlexItem>
+            </>
+          )}
+          <EuiFlexItem>
+            <FlyoutMetadataCard title={STREAM_LABEL}>
+              <EuiBadge color="hollow" iconType="productStreamsClassic" iconSide="left">
+                {streamName}
+              </EuiBadge>
+            </FlyoutMetadataCard>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
