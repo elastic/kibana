@@ -147,7 +147,7 @@ export default function (providerContext: FtrProviderContext) {
               'otlpreceiver-otelcol': {
                 enabled: true,
                 streams: {
-                  generic: { enabled: true, vars: {} },
+                  'generic.otel': { enabled: true, vars: {} },
                 },
               },
             },
