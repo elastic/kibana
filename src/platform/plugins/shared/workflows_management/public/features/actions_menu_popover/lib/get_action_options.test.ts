@@ -166,6 +166,126 @@ describe('getActionOptions', () => {
     }
   });
 
+  it('should not show Cases nested group when no cases steps are registered', () => {
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+    const kibanaGroup = result.find((group) => group.id === 'kibana');
+
+    expect(kibanaGroup).toBeDefined();
+    if (kibanaGroup && isActionGroup(kibanaGroup)) {
+      expect(kibanaGroup.options).toHaveLength(0);
+      expect(kibanaGroup.options.find((opt) => opt.id === 'kibana.cases')).toBeUndefined();
+    }
+  });
+
+  it('should place KibanaCases steps in nested Cases group under Kibana', () => {
+    const mockConnector = {
+      type: 'cases.createCase',
+      description: 'Create case',
+    };
+
+    const mockStepDefinition = {
+      id: 'cases.createCase',
+      label: 'Create case',
+      description: 'Create a case',
+      icon: 'casesApp',
+      category: StepCategory.KibanaCases,
+      inputSchema: z.object({}),
+      outputSchema: z.object({}),
+    };
+
+    (getAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+    mockWorkflowsExtensions.getStepDefinition.mockReturnValue(mockStepDefinition as any);
+
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+    const kibanaGroup = result.find((group) => group.id === 'kibana');
+
+    expect(kibanaGroup).toBeDefined();
+    if (kibanaGroup && isActionGroup(kibanaGroup)) {
+      expect(kibanaGroup.options).toHaveLength(1);
+      const casesNested = kibanaGroup.options[0];
+      expect(casesNested.id).toBe('kibana.cases');
+      if (isActionGroup(casesNested)) {
+        expect(casesNested.options).toHaveLength(1);
+        expect(casesNested.options[0].id).toBe('cases.createCase');
+      }
+    }
+  });
+
+  it('should set pathIds on groups for navigation from search', () => {
+    const mockConnector = {
+      type: 'cases.createCase',
+      description: 'Create case',
+    };
+
+    const mockStepDefinition = {
+      id: 'cases.createCase',
+      label: 'Create case',
+      description: 'Create a case',
+      icon: 'casesApp',
+      category: StepCategory.KibanaCases,
+      inputSchema: z.object({}),
+      outputSchema: z.object({}),
+    };
+
+    (getAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+    mockWorkflowsExtensions.getStepDefinition.mockReturnValue(mockStepDefinition as any);
+
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+    const kibanaGroup = result.find((group) => group.id === 'kibana');
+
+    expect(kibanaGroup).toBeDefined();
+    if (kibanaGroup && isActionGroup(kibanaGroup)) {
+      expect(kibanaGroup.pathIds).toEqual(['kibana']);
+      const casesNested = kibanaGroup.options.find((opt) => opt.id === 'kibana.cases');
+      expect(casesNested).toBeDefined();
+      if (casesNested && isActionGroup(casesNested)) {
+        expect(casesNested.pathIds).toEqual(['kibana', 'kibana.cases']);
+      }
+    }
+  });
+
+  it('should list nested Cases group before other Kibana options when both are present', () => {
+    const mockConnectors = [
+      {
+        type: 'kibana.saved_object',
+        description: 'Saved Object',
+        summary: 'Kibana Summary',
+      },
+      {
+        type: 'cases.createCase',
+        description: 'Create case',
+      },
+    ];
+
+    const mockCasesStepDefinition = {
+      id: 'cases.createCase',
+      label: 'Create case',
+      description: 'Create a case',
+      icon: 'casesApp',
+      category: StepCategory.KibanaCases,
+      inputSchema: z.object({}),
+      outputSchema: z.object({}),
+    };
+
+    (getAllConnectors as jest.Mock).mockReturnValue(mockConnectors);
+    mockWorkflowsExtensions.getStepDefinition.mockImplementation((type: string) => {
+      if (type === 'cases.createCase') {
+        return mockCasesStepDefinition as any;
+      }
+      return undefined;
+    });
+
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+    const kibanaGroup = result.find((group) => group.id === 'kibana');
+
+    expect(kibanaGroup).toBeDefined();
+    if (kibanaGroup && isActionGroup(kibanaGroup)) {
+      expect(kibanaGroup.options).toHaveLength(2);
+      expect(kibanaGroup.options[0].id).toBe('kibana.cases');
+      expect(kibanaGroup.options[1].id).toBe('kibana.saved_object');
+    }
+  });
+
   it('should add elasticsearch connectors to elasticsearch group', () => {
     const mockConnector = {
       type: 'elasticsearch.search',
