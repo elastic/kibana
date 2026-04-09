@@ -76,6 +76,25 @@ apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_
     });
   });
 
+  apiTest('Update on uninstalled store should return 404', async ({ apiClient, kbnClient }) => {
+    await kbnClient.uiSettings.update({
+      [FF_ENABLE_ENTITY_STORE_V2]: true,
+    });
+
+    await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {},
+    });
+
+    const update = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: { logExtraction: { frequency: '1m' } },
+    });
+    expect(update.statusCode).toBe(404);
+  });
+
   apiTest('logExtraction is mandatory on update', async ({ apiClient, kbnClient }) => {
     await kbnClient.uiSettings.update({
       [FF_ENABLE_ENTITY_STORE_V2]: true,
