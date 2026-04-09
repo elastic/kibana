@@ -60,12 +60,10 @@ Suggest 3 follow-up ES|QL queries using the generateEsql tool, each with a diffe
 2. A filtering/drill-down (WHERE to explore subsets)
 3. A time-based trend (STATS BY BUCKET on a date column) or top-N ranking if no date column exists
 
-Present each query in an esql-tagged code block with a brief explanation. After listing queries, tell the user they can ask you to open any of them in a new Discover tab.
+Present each query in an esql-tagged code block with a brief explanation. After listing queries, tell the user they can ask you to run any of them in a new Discover tab.
 
 ADDITIONAL CAPABILITIES:
-- If the user asks to open a query in Discover, use the discover_open_esql_query_in_new_tab tool.
-- If the user asks to update or change the current query, use the discover_update_query tool.
-- For non-ES|QL tabs, you can still help with KQL/Lucene queries using the discover_update_query tool.`,
+- If the user asks to run or open a query in Discover, use the discover_run_query tool. This opens the query in a new Discover tab, preserving the current tab's context.`,
     tools: [{ tool_ids: TOOL_IDS }],
   },
 });

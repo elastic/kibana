@@ -71,8 +71,6 @@ const createEsqlQueryResultsAttachmentType = (): AttachmentTypeDefinition => {
 const formatQueryResultsData = (data: EsqlQueryResultsData): string => {
   const lines: string[] = [];
 
-  lines.push('=== ES|QL QUERY RESULTS FROM DISCOVER ===');
-  lines.push('');
   lines.push(`ES|QL Query: ${data.query}`);
   lines.push(`Total Results: ${data.totalHits}`);
   if (data.timeRange) {
@@ -98,33 +96,7 @@ const formatQueryResultsData = (data: EsqlQueryResultsData): string => {
     lines.push(`  { ${entries} }`);
   }
 
-  lines.push('');
-  lines.push('=== ANALYSIS INSTRUCTIONS ===');
-  lines.push(
-    'When asked to analyze this data, you MUST first run 2-3 aggregation queries using the executeEsql tool against the full dataset BEFORE writing your response.'
-  );
-  lines.push(
-    'The sample rows above are only for understanding the schema. Base your analysis on actual aggregation results, not the sample.'
-  );
-  lines.push('Examples of useful aggregations:');
-  lines.push(
-    `  - FROM ${getSourceIndex(data.query)} | STATS count = COUNT(*) BY <categorical_field>`
-  );
-  lines.push(
-    `  - FROM ${getSourceIndex(data.query)} | STATS count = COUNT(*) BY BUCKET(@timestamp, 1h)`
-  );
-  lines.push(
-    `  - FROM ${getSourceIndex(
-      data.query
-    )} | STATS avg_val = AVG(<numeric_field>), max_val = MAX(<numeric_field>)`
-  );
-
   return lines.join('\n');
-};
-
-const getSourceIndex = (query: string): string => {
-  const match = query.match(/FROM\s+(\S+)/i);
-  return match ? match[1] : 'index';
 };
 
 export const registerAttachments = (agentBuilder: AgentBuilderPluginSetup) => {
