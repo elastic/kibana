@@ -62,6 +62,11 @@ export interface DeleteWorkflowsResponse {
     id: string;
     error: string;
   }>;
+  /**
+   * Workflow ids successfully soft-deleted in Elasticsearch. Used server-side for audit logging;
+   * bulk delete route omits this field from the HTTP JSON body so the public API shape is unchanged.
+   */
+  successfulIds?: string[];
 }
 
 export interface GetWorkflowExecutionLogsParams {
@@ -125,8 +130,12 @@ export class WorkflowsManagementApi {
     private readonly getWorkflowsExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>
   ) {}
 
-  public async getWorkflows(params: GetWorkflowsParams, spaceId: string): Promise<WorkflowListDto> {
-    return this.workflowsService.getWorkflows(params, spaceId);
+  public async getWorkflows(
+    params: GetWorkflowsParams,
+    spaceId: string,
+    options?: { includeExecutionHistory?: boolean }
+  ): Promise<WorkflowListDto> {
+    return this.workflowsService.getWorkflows(params, spaceId, options);
   }
 
   /**
@@ -220,9 +229,18 @@ export class WorkflowsManagementApi {
   public async deleteWorkflows(
     workflowIds: string[],
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: { force?: boolean }
   ): Promise<DeleteWorkflowsResponse> {
-    return this.workflowsService.deleteWorkflows(workflowIds, spaceId);
+    return this.workflowsService.deleteWorkflows(workflowIds, spaceId, options);
+  }
+
+  public async disableAllWorkflows(): Promise<{
+    total: number;
+    disabled: number;
+    failures: Array<{ id: string; error: string }>;
+  }> {
+    return this.workflowsService.disableAllWorkflows();
   }
 
   public async runWorkflow(
@@ -468,6 +486,18 @@ export class WorkflowsManagementApi {
     return workflowsExecutionEngine.cancelWorkflowExecution(workflowExecutionId, spaceId);
   }
 
+  public async cancelAllActiveWorkflowExecutions(
+    workflowId: string,
+    spaceId: string
+  ): Promise<void> {
+    const workflow = await this.getWorkflow(workflowId, spaceId);
+    if (!workflow) {
+      throw new WorkflowNotFoundError(workflowId);
+    }
+    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    return workflowsExecutionEngine.cancelAllActiveWorkflowExecutions({ spaceId, workflowId });
+  }
+
   public async resumeWorkflowExecution(
     executionId: string,
     spaceId: string,
@@ -478,8 +508,8 @@ export class WorkflowsManagementApi {
     return workflowsExecutionEngine.resumeWorkflowExecution(executionId, spaceId, input, request);
   }
 
-  public async getWorkflowStats(spaceId: string) {
-    return this.workflowsService.getWorkflowStats(spaceId);
+  public async getWorkflowStats(spaceId: string, options?: { includeExecutionStats?: boolean }) {
+    return this.workflowsService.getWorkflowStats(spaceId, options);
   }
 
   public async getWorkflowAggs(fields: string[] = [], spaceId: string) {

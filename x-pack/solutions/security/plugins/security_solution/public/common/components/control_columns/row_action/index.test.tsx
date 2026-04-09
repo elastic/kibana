@@ -35,12 +35,18 @@ jest.mock('react-redux', () => {
 });
 
 jest.mock('../../../utils/route/use_route_spy');
+jest.mock('../../../../flyout_v2/shared/components/flyout_provider', () => ({
+  flyoutProviders: ({ children }: { children: React.ReactNode }) => children,
+}));
 
 const mockOpenFlyout = jest.fn();
 jest.mock('@kbn/expandable-flyout');
 
 const mockedTelemetry = createTelemetryServiceMock();
 const mockOpenSystemFlyout = jest.fn();
+const mockDocumentFlyoutWrapper = jest.fn((_props?: unknown) => (
+  <div>{'MockDocumentFlyoutWrapper'}</div>
+));
 jest.mock('../../../lib/kibana', () => {
   const original = jest.requireActual('../../../lib/kibana');
   return {
@@ -58,6 +64,12 @@ jest.mock('../../../lib/kibana', () => {
     }),
   };
 });
+jest.mock('../../../../flyout_v2/shared/components/flyout_provider', () => ({
+  flyoutProviders: ({ children }: { children: React.ReactNode }) => children,
+}));
+jest.mock('../../../../flyout_v2/document/document_flyout_wrapper', () => ({
+  DocumentFlyoutWrapper: (props: unknown) => mockDocumentFlyoutWrapper(props),
+}));
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const original = jest.requireActual('@kbn/kibana-react-plugin/public');
   return {
@@ -98,6 +110,7 @@ describe('RowAction', () => {
     loadingEventIds: [],
     onRowSelected: jest.fn(),
     onRuleChange: jest.fn(),
+    refetch: jest.fn(),
     selectedEventIds: {},
     tableId: TableId.test,
     width: 100,
@@ -173,10 +186,11 @@ describe('RowAction', () => {
 
   test('should open system flyout when newFlyoutSystemEnabled is enabled', () => {
     jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
+    const refetch = jest.fn();
 
     const wrapper = render(
       <TestProviders>
-        <RowAction {...defaultProps} />
+        <RowAction {...defaultProps} refetch={refetch} />
       </TestProviders>
     );
 
@@ -184,6 +198,13 @@ describe('RowAction', () => {
 
     expect(mockOpenFlyout).not.toHaveBeenCalled();
     expect(mockOpenSystemFlyout).toHaveBeenCalled();
+    const flyoutElement = mockOpenSystemFlyout.mock.calls[0][0];
+    expect(flyoutElement.props.documentId).toBe('1');
+    expect(flyoutElement.props.indexName).toBeUndefined();
+    expect(flyoutElement.props.renderCellActions).toBeDefined();
+    expect(flyoutElement.props.onAlertUpdated).toEqual(expect.any(Function));
+    flyoutElement.props.onAlertUpdated();
+    expect(refetch).toHaveBeenCalledTimes(1);
   });
 
   describe('privileges', () => {

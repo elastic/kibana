@@ -52,7 +52,7 @@ export function ChatItemActions({
           color="text"
           data-test-subj="observabilityAiAssistantChatItemActionsEditPromptButton"
           display={editing ? 'fill' : 'empty'}
-          iconType="documentEdit"
+          iconType="pencil"
           onClick={onToggleEdit}
         />
       ) : null}
@@ -79,7 +79,7 @@ export function ChatItemActions({
               })}
               color="text"
               data-test-subj="observabilityAiAssistantChatItemActionsCopyMessageButton"
-              iconType="copyClipboard"
+              iconType="copy"
               display={isPopoverOpen === 'copy' ? 'fill' : 'empty'}
               onClick={() => {
                 setIsPopoverOpen('copy');

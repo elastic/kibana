@@ -7,9 +7,24 @@
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
 
-import { generateSecretsSchemaFromSpec } from '@kbn/connector-specs/src/lib';
+import { generateSecretsSchemaFromSpec, getSchemaForAuthType } from '@kbn/connector-specs/src/lib';
 import type { ActionTypeSecrets, ValidatorType, ValidatorServices } from '../../types';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
+import { getAllowedHostsKeysFromShape, validateAllowedHostsKeys } from './allowed_hosts_validation';
+
+const buildAllowedHostsFieldsByAuthType = (authSpec: ConnectorSpec['auth']) => {
+  const allowedHostsFieldsByAuthType = new Map<string, string[]>();
+
+  for (const authTypeDef of authSpec?.types ?? []) {
+    const { schema: authTypeSchema, id: authTypeId } = getSchemaForAuthType(authTypeDef);
+    const keys = getAllowedHostsKeysFromShape(authTypeSchema.shape);
+    if (keys.length) {
+      allowedHostsFieldsByAuthType.set(authTypeId, keys);
+    }
+  }
+
+  return allowedHostsFieldsByAuthType;
+};
 
 export const generateSecretsSchema = (
   authSpec: ConnectorSpec['auth'],
@@ -17,6 +32,9 @@ export const generateSecretsSchema = (
 ): ValidatorType<ActionTypeSecrets> => {
   const settings = configUtils.getWebhookSettings();
   const isPfxEnabled = settings.ssl.pfx.enabled;
+
+  const allowedHostsFieldsByAuthType = buildAllowedHostsFieldsByAuthType(authSpec);
+
   return {
     // Always include EARS in the static schema so it parses correctly.
     // The actual gating happens in the customValidator at request time.
@@ -39,6 +57,19 @@ export const generateSecretsSchema = (
           );
         }
       }
+
+      const secretsRecord = value as Record<string, unknown>;
+      const authType = secretsRecord.authType;
+      if (typeof authType !== 'string') return;
+
+      const allowedHostsFields = allowedHostsFieldsByAuthType.get(authType);
+      if (!allowedHostsFields) return;
+
+      validateAllowedHostsKeys(
+        secretsRecord,
+        allowedHostsFields,
+        validatorServices.configurationUtilities
+      );
     },
   };
 };

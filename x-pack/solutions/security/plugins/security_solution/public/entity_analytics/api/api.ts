@@ -54,6 +54,15 @@ import type {
   UpdateWatchlistRequestBodyInput,
   UpdateWatchlistResponse,
 } from '../../../common/api/entity_analytics/watchlists/management/update.gen';
+import type { ListWatchlistEntitySourcesResponse } from '../../../common/api/entity_analytics/watchlists/data_source/list.gen';
+import type {
+  UpdateWatchlistEntitySourceRequestBodyInput,
+  UpdateWatchlistEntitySourceResponse,
+} from '../../../common/api/entity_analytics/watchlists/data_source/update.gen';
+import type {
+  CreateWatchlistEntitySourceRequestBodyInput,
+  CreateWatchlistEntitySourceResponse,
+} from '../../../common/api/entity_analytics/watchlists/data_source/create.gen';
 import {
   API_VERSIONS,
   ASSET_CRITICALITY_CSV_UPLOAD_V2_URL,
@@ -83,7 +92,29 @@ import {
   RISK_SCORE_ENTITY_CALCULATION_URL,
   RISK_SCORE_PREVIEW_URL,
 } from '../../../common/constants';
-import { WATCHLISTS_URL } from '../../../common/entity_analytics/watchlists/constants';
+import {
+  WATCHLISTS_URL,
+  WATCHLISTS_INDICES_URL,
+  WATCHLISTS_CSV_UPLOAD_URL,
+} from '../../../common/entity_analytics/watchlists/constants';
+import type { UploadWatchlistCsvResponse } from '../../../common/api/entity_analytics/watchlists/csv_upload/csv_upload.gen';
+import {
+  GENERATE_LEADS_URL,
+  GET_LEADS_URL,
+  GET_LEAD_BY_ID_URL,
+  LEAD_GENERATION_STATUS_URL,
+  DISMISS_LEAD_URL,
+  BULK_UPDATE_LEADS_URL,
+  ENABLE_LEAD_GENERATION_URL,
+  DISABLE_LEAD_GENERATION_URL,
+} from '../../../common/entity_analytics/lead_generation/constants';
+import type {
+  FindLeadsResponse,
+  GenerateLeadsResponse,
+  Lead,
+  LeadGenerationStatus,
+  BulkUpdateLeadsResponse,
+} from '../../../common/entity_analytics/lead_generation/types';
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
@@ -115,13 +146,16 @@ export const useEntityAnalyticsRoutes = () => {
 
   return useMemo(() => {
     const fetchEntityMaintainers = (ids?: string[]) =>
-      http.fetch<GetEntityMaintainersResponse>(ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_GET, {
-        method: 'GET',
-        query: {
-          ...ENTITY_STORE_V2_QUERY,
-          ...(ids && ids.length > 0 ? { ids } : {}),
-        },
-      });
+      http.fetch<GetEntityMaintainersResponse>(
+        ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_GET,
+        {
+          method: 'GET',
+          query: {
+            ...ENTITY_STORE_V2_QUERY,
+            ...(ids && ids.length > 0 ? { ids } : {}),
+          },
+        }
+      );
 
     const fetchRiskScoreMaintainer = async (): Promise<
       EntityMaintainerResponseItem | undefined
@@ -172,7 +206,7 @@ export const useEntityAnalyticsRoutes = () => {
       });
 
     /**
-     * Fetches entities from the Entity Store v2 unified latest index (internal entity_store plugin route).
+     * Fetches entities from the Entity Store v2 unified latest index (`entity_store` plugin CRUD GET; public API version).
      */
     const fetchEntitiesListV2 = ({
       signal,
@@ -181,8 +215,8 @@ export const useEntityAnalyticsRoutes = () => {
       signal?: AbortSignal;
       params: FetchEntitiesListParams;
     }) =>
-      http.fetch<ListEntitiesResponse>(ENTITY_STORE_ROUTES.CRUD_GET, {
-        version: ENTITY_STORE_API_VERSIONS.internal.v2,
+      http.fetch<ListEntitiesResponse>(ENTITY_STORE_ROUTES.public.CRUD_GET, {
+        version: ENTITY_STORE_API_VERSIONS.public.v1,
         method: 'GET',
         query: {
           entity_types: params.entityTypes,
@@ -239,7 +273,7 @@ export const useEntityAnalyticsRoutes = () => {
      */
     const initRiskEngine = async () => {
       if (isMaintainerRiskScoreV2Enabled) {
-        await http.fetch<{ ok: true }>(ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT, {
+        await http.fetch<{ ok: true }>(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT, {
           method: 'POST',
           query: ENTITY_STORE_V2_QUERY,
           body: JSON.stringify({}),
@@ -268,7 +302,7 @@ export const useEntityAnalyticsRoutes = () => {
       if (isMaintainerRiskScoreV2Enabled) {
         await http.fetch<{ ok: true }>(
           getMaintainerRouteWithId(
-            ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_START,
+            ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_START,
             RISK_SCORE_MAINTAINER_ID
           ),
           {
@@ -293,7 +327,7 @@ export const useEntityAnalyticsRoutes = () => {
       if (isMaintainerRiskScoreV2Enabled) {
         await http.fetch<{ ok: true }>(
           getMaintainerRouteWithId(
-            ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_STOP,
+            ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_STOP,
             RISK_SCORE_MAINTAINER_ID
           ),
           {
@@ -318,7 +352,7 @@ export const useEntityAnalyticsRoutes = () => {
       if (isMaintainerRiskScoreV2Enabled) {
         await http.fetch<{ ok: true }>(
           getMaintainerRouteWithId(
-            ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_RUN,
+            ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_RUN,
             RISK_SCORE_MAINTAINER_ID
           ),
           {
@@ -378,8 +412,8 @@ export const useEntityAnalyticsRoutes = () => {
      * Get Entity Store v2 privileges
      */
     const fetchEntityStoreV2Privileges = () =>
-      http.fetch<EntityAnalyticsPrivileges>(ENTITY_STORE_ROUTES.CHECK_PRIVILEGES, {
-        version: ENTITY_STORE_API_VERSIONS.internal.v2,
+      http.fetch<EntityAnalyticsPrivileges>(ENTITY_STORE_ROUTES.public.CHECK_PRIVILEGES, {
+        version: ENTITY_STORE_API_VERSIONS.public.v1,
         method: 'GET',
       });
 
@@ -714,10 +748,164 @@ export const useEntityAnalyticsRoutes = () => {
         method: 'PUT',
         body: JSON.stringify(params.body),
       });
+
     const deleteWatchlist = async (params: { id: string }) =>
       http.fetch<{ deleted: true }>(`${WATCHLISTS_URL}/${params.id}`, {
         version: API_VERSIONS.public.v1,
         method: 'DELETE',
+      });
+
+    const listWatchlistEntitySources = async (params: {
+      watchlistId: string;
+      signal?: AbortSignal;
+    }) =>
+      http.fetch<ListWatchlistEntitySourcesResponse>(
+        `${WATCHLISTS_URL}/${params.watchlistId}/entity_source/list`,
+        {
+          version: API_VERSIONS.public.v1,
+          method: 'GET',
+          signal: params.signal,
+        }
+      );
+
+    const updateWatchlistEntitySource = async (params: {
+      watchlistId: string;
+      entitySourceId: string;
+      body: UpdateWatchlistEntitySourceRequestBodyInput;
+    }) =>
+      http.fetch<UpdateWatchlistEntitySourceResponse>(
+        `${WATCHLISTS_URL}/${params.watchlistId}/entity_source/${params.entitySourceId}`,
+        {
+          version: API_VERSIONS.public.v1,
+          method: 'PUT',
+          body: JSON.stringify(params.body),
+        }
+      );
+
+    const createWatchlistEntitySource = async (params: {
+      watchlistId: string;
+      body: CreateWatchlistEntitySourceRequestBodyInput;
+    }) =>
+      http.fetch<CreateWatchlistEntitySourceResponse>(
+        `${WATCHLISTS_URL}/${params.watchlistId}/entity_source`,
+        {
+          version: API_VERSIONS.public.v1,
+          method: 'POST',
+          body: JSON.stringify(params.body),
+        }
+      );
+
+    const searchWatchlistIndices = async (params: {
+      query: string | undefined;
+      signal?: AbortSignal;
+    }) =>
+      http.fetch<string[]>(WATCHLISTS_INDICES_URL, {
+        version: API_VERSIONS.public.v1,
+        method: 'GET',
+        query: {
+          searchQuery: params.query,
+        },
+        signal: params.signal,
+      });
+
+    const uploadWatchlistCsv = async (
+      watchlistId: string,
+      file: File
+    ): Promise<UploadWatchlistCsvResponse> => {
+      const body = new FormData();
+      body.append('file', file);
+      return http.fetch<UploadWatchlistCsvResponse>(
+        WATCHLISTS_CSV_UPLOAD_URL.replace('{watchlist_id}', encodeURIComponent(watchlistId)),
+        {
+          version: API_VERSIONS.public.v1,
+          method: 'POST',
+          headers: {
+            'Content-Type': undefined, // Lets the browser set the appropriate content type
+          },
+          body,
+        }
+      );
+    };
+
+    const fetchLeads = ({
+      signal,
+      params,
+    }: {
+      signal?: AbortSignal;
+      params?: {
+        page?: number;
+        perPage?: number;
+        sortField?: 'priority' | 'timestamp';
+        sortOrder?: 'asc' | 'desc';
+        status?: 'active' | 'dismissed' | 'expired';
+      };
+    }) =>
+      http.fetch<FindLeadsResponse>(GET_LEADS_URL, {
+        version: API_VERSIONS.internal.v1,
+        method: 'GET',
+        query: params,
+        signal,
+      });
+
+    const fetchLeadById = ({ signal, id }: { signal?: AbortSignal; id: string }) =>
+      http.fetch<Lead>(GET_LEAD_BY_ID_URL.replace('{id}', id), {
+        version: API_VERSIONS.internal.v1,
+        method: 'GET',
+        signal,
+      });
+
+    const fetchLeadGenerationStatus = ({ signal }: { signal?: AbortSignal }) =>
+      http.fetch<LeadGenerationStatus>(LEAD_GENERATION_STATUS_URL, {
+        version: API_VERSIONS.internal.v1,
+        method: 'GET',
+        signal,
+      });
+
+    const generateLeads = ({
+      signal,
+      params,
+    }: {
+      signal?: AbortSignal;
+      params?: { maxLeads?: number };
+    }) =>
+      http.fetch<GenerateLeadsResponse>(GENERATE_LEADS_URL, {
+        version: API_VERSIONS.internal.v1,
+        method: 'POST',
+        body: JSON.stringify(params ?? {}),
+        signal,
+      });
+
+    const dismissLead = ({ signal, id }: { signal?: AbortSignal; id: string }) =>
+      http.fetch<void>(DISMISS_LEAD_URL.replace('{id}', id), {
+        version: API_VERSIONS.internal.v1,
+        method: 'POST',
+        signal,
+      });
+
+    const bulkUpdateLeads = ({
+      signal,
+      params,
+    }: {
+      signal?: AbortSignal;
+      params: { ids: string[]; status: 'active' | 'dismissed' | 'expired' };
+    }) =>
+      http.fetch<BulkUpdateLeadsResponse>(BULK_UPDATE_LEADS_URL, {
+        version: API_VERSIONS.internal.v1,
+        method: 'POST',
+        body: JSON.stringify(params),
+        signal,
+      });
+
+    const enableLeadGeneration = () =>
+      http.fetch<{ success: boolean }>(ENABLE_LEAD_GENERATION_URL, {
+        version: API_VERSIONS.internal.v1,
+        method: 'POST',
+      });
+
+    const disableLeadGeneration = () =>
+      http.fetch<{ success: boolean }>(DISABLE_LEAD_GENERATION_URL, {
+        version: API_VERSIONS.internal.v1,
+        method: 'POST',
       });
 
     return {
@@ -749,6 +937,11 @@ export const useEntityAnalyticsRoutes = () => {
       getWatchlist,
       updateWatchlist,
       deleteWatchlist,
+      listWatchlistEntitySources,
+      updateWatchlistEntitySource,
+      createWatchlistEntitySource,
+      searchWatchlistIndices,
+      uploadWatchlistCsv,
       fetchRiskEngineSettings,
       calculateEntityRiskScore,
       cleanUpRiskEngine,
@@ -758,6 +951,14 @@ export const useEntityAnalyticsRoutes = () => {
       listPrivMonMonitoredIndices,
       fetchEntityDetailsHighlights,
       fetchWatchlists,
+      fetchLeads,
+      fetchLeadById,
+      fetchLeadGenerationStatus,
+      generateLeads,
+      dismissLead,
+      bulkUpdateLeads,
+      enableLeadGeneration,
+      disableLeadGeneration,
     };
   }, [
     http,

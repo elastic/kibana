@@ -7,12 +7,28 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Conversation } from './conversation';
 import { ConversationHeader } from './conversation_header/conversation_header';
 import { RoutedConversationsProvider } from '../../context/conversation/routed_conversations_provider';
-import { SendMessageProvider } from '../../context/send_message/send_message_context';
+import {
+  SendMessageProvider,
+  useSendMessage,
+} from '../../context/send_message/send_message_context';
 import { conversationBackgroundStyles, headerHeight } from './conversation.styles';
+
+// Clears error state on every navigation. Rendered inside SendMessageProvider (for context access)
+// and inside the Router (for useLocation access), so it's intentionally placed in the routed view
+// only — the embeddable/sidebar context has no navigation and doesn't need this behavior.
+const LocationErrorClearer: React.FC<{}> = () => {
+  const { key: locationKey } = useLocation();
+  const { removeError } = useSendMessage();
+  useEffect(() => {
+    removeError();
+  }, [locationKey, removeError]);
+  return null;
+};
 
 export const AgentBuilderConversationsView: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
@@ -45,6 +61,7 @@ export const AgentBuilderConversationsView: React.FC<{}> = () => {
   return (
     <RoutedConversationsProvider>
       <SendMessageProvider>
+        <LocationErrorClearer />
         <div css={containerStyles} data-test-subj="agentBuilderPageConversations">
           <div css={headerStyles}>
             <ConversationHeader />

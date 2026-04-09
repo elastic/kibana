@@ -43,6 +43,7 @@ describe('Watchlist entities service', () => {
       })
     ).resolves.toEqual({
       correlationMap: expect.any(Map),
+      watchlistsByEuid: expect.any(Map),
       entityIdsByType: {
         user: ['user:jdoe'],
         host: ['host:server-1'],
@@ -83,7 +84,7 @@ describe('Watchlist entities service', () => {
       namespace: 'default',
     });
 
-    const result = await service.listEntityStoreEntities({
+    const result = await service.listEntityStoreEntities<'index'>({
       type: 'index',
       field: 'user.name',
     });
