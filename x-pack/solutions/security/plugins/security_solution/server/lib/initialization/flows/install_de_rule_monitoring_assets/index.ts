@@ -11,14 +11,14 @@ import {
   INITIALIZATION_FLOW_STATUS_READY,
 } from '../../../../../common/api/initialization';
 import type { InitializationFlowContext, InitializationFlowDefinition } from '../../types';
-import type { SetupHealthAssetsProvisionContext } from './types';
+import type { InstallDeRuleMonitoringAssetsProvisionContext } from './types';
 
-export const setupHealthAssetsFlow: InitializationFlowDefinition<SetupHealthAssetsProvisionContext> =
+export const installDeRuleMonitoringAssetsFlow: InitializationFlowDefinition<InstallDeRuleMonitoringAssetsProvisionContext> =
   {
     id: INITIALIZATION_FLOW_INSTALL_DE_RULE_MONITORING_ASSETS,
     resolveProvisionContext: async (
       context: InitializationFlowContext
-    ): Promise<SetupHealthAssetsProvisionContext> => {
+    ): Promise<InstallDeRuleMonitoringAssetsProvisionContext> => {
       const securityContext = await context.requestHandlerContext.securitySolution;
 
       // The health client internally creates an importer backed by
@@ -31,6 +31,8 @@ export const setupHealthAssetsFlow: InitializationFlowDefinition<SetupHealthAsse
     },
     provision: async ({ healthClient }, logger: Logger) => {
       await healthClient.installAssetsForMonitoringHealth();
+
+      logger.info('Detection engine rule monitoring assets initialized');
 
       return { status: INITIALIZATION_FLOW_STATUS_READY };
     },

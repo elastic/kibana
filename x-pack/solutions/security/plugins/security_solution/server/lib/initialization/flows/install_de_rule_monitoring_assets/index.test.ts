@@ -11,7 +11,7 @@ import {
   INITIALIZATION_FLOW_STATUS_READY,
 } from '../../../../../common/api/initialization';
 import type { InitializationFlowContext } from '../../types';
-import { setupHealthAssetsFlow } from '.';
+import { installDeRuleMonitoringAssetsFlow } from '.';
 
 const createMockHealthClient = () => ({
   installAssetsForMonitoringHealth: jest.fn().mockResolvedValue(undefined),
@@ -31,17 +31,17 @@ const createMockInitializationFlowContext = (
     },
   } as unknown as InitializationFlowContext);
 
-describe('setupHealthAssetsFlow', () => {
+describe('installDeRuleMonitoringAssetsFlow', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('has the correct id', () => {
-    expect(setupHealthAssetsFlow.id).toBe(INITIALIZATION_FLOW_INSTALL_DE_RULE_MONITORING_ASSETS);
+    expect(installDeRuleMonitoringAssetsFlow.id).toBe(INITIALIZATION_FLOW_INSTALL_DE_RULE_MONITORING_ASSETS);
   });
 
   it('does not have runFirst set', () => {
-    expect(setupHealthAssetsFlow.runFirst).toBeUndefined();
+    expect(installDeRuleMonitoringAssetsFlow.runFirst).toBeUndefined();
   });
 
   describe('resolveProvisionContext', () => {
@@ -50,7 +50,7 @@ describe('setupHealthAssetsFlow', () => {
       const healthClient = createMockHealthClient();
       const context = createMockInitializationFlowContext(healthClient);
 
-      const provisionContext = await setupHealthAssetsFlow.resolveProvisionContext(context, logger);
+      const provisionContext = await installDeRuleMonitoringAssetsFlow.resolveProvisionContext(context, logger);
 
       expect(provisionContext.healthClient).toBe(healthClient);
     });
@@ -61,7 +61,7 @@ describe('setupHealthAssetsFlow', () => {
       const logger = loggerMock.create();
       const healthClient = createMockHealthClient();
 
-      const result = await setupHealthAssetsFlow.provision({ healthClient }, logger);
+      const result = await installDeRuleMonitoringAssetsFlow.provision({ healthClient }, logger);
 
       expect(result).toEqual({ status: INITIALIZATION_FLOW_STATUS_READY });
     });
@@ -70,7 +70,7 @@ describe('setupHealthAssetsFlow', () => {
       const logger = loggerMock.create();
       const healthClient = createMockHealthClient();
 
-      await setupHealthAssetsFlow.provision({ healthClient }, logger);
+      await installDeRuleMonitoringAssetsFlow.provision({ healthClient }, logger);
 
       expect(healthClient.installAssetsForMonitoringHealth).toHaveBeenCalledTimes(1);
     });
@@ -82,7 +82,7 @@ describe('setupHealthAssetsFlow', () => {
         new Error('Failed to import saved objects')
       );
 
-      await expect(setupHealthAssetsFlow.provision({ healthClient }, logger)).rejects.toThrow(
+      await expect(installDeRuleMonitoringAssetsFlow.provision({ healthClient }, logger)).rejects.toThrow(
         'Failed to import saved objects'
       );
     });

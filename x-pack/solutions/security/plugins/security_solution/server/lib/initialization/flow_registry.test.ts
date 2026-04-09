@@ -62,7 +62,7 @@ jest.mock('./flows/install_ai_prompts_package', () => ({
 }));
 
 jest.mock('./flows/install_de_rule_monitoring_assets', () => ({
-  setupHealthAssetsFlow: {
+  installDeRuleMonitoringAssetsFlow: {
     id: 'install-detection-engine-rule-monitoring-assets' as const,
     resolveProvisionContext: jest.fn().mockResolvedValue({}),
     provision: jest.fn().mockResolvedValue({ status: 'ready' as const }),
