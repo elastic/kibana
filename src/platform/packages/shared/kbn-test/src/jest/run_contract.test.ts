@@ -21,7 +21,7 @@ jest.mock('@kbn/dev-validation-runner', () => ({
   formatReproductionCommand: jest.fn(),
   readValidationRunFlags: jest.fn(),
   resolveValidationBaseContext: jest.fn(),
-  VALIDATION_RUN_HELP: '',
+  VALIDATION_RUN_HELP: [],
   VALIDATION_RUN_STRING_FLAGS: [],
 }));
 
