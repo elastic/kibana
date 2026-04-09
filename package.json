@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "9.3.3",
+  "version": "9.3.4",
   "branch": "9.3",
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -74,7 +74,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "22.22.0",
+    "node": "22.22.2",
     "yarn": "^1.22.19"
   },
   "resolutions": {
@@ -1453,7 +1453,7 @@
     "type-fest": "4.41.0",
     "typescript-fsa": "3.0.0",
     "typescript-fsa-reducers": "1.2.2",
-    "undici": "6.23.0",
+    "undici": "6.24.1",
     "unidiff": "1.0.4",
     "unified": "9.2.2",
     "use-resize-observer": "9.1.0",
@@ -1941,8 +1941,8 @@
     "content-security-policy-parser": "0.6.0",
     "cpy": "8.1.2",
     "css-loader": "7.1.2",
-    "cssnano": "7.1.2",
-    "cssnano-preset-default": "7.0.10",
+    "cssnano": "7.1.3",
+    "cssnano-preset-default": "7.0.11",
     "cssstyle": "5.3.7",
     "csstype": "3.0.7",
     "cypress": "15.12.0",
@@ -2014,7 +2014,7 @@
     "keyv": "5.3.4",
     "license-checker": "25.0.1",
     "lighthouse": "12.8.2",
-    "lightningcss": "1.31.1",
+    "lightningcss": "1.32.0",
     "listr2": "8.2.5",
     "lmdb": "3.4.4",
     "marge": "1.0.1",
@@ -2041,8 +2041,8 @@
     "pixelmatch": "5.3.0",
     "playwright": "1.59.1",
     "pngjs": "7.0.0",
-    "postcss": "8.5.6",
-    "postcss-loader": "8.2.0",
+    "postcss": "8.5.8",
+    "postcss-loader": "8.2.1",
     "postcss-scss": "4.0.9",
     "prettier": "2.8.8",
     "proxy": "2.1.1",
