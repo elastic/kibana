@@ -18,9 +18,8 @@ responses:
             value:
               status: ONLINE
               name: fleet-server-1
-              host_id: fleet-server-host-id-1
           postHealthCheckUnreachableExample:
-            description: 'Fleet Server host ID exists but the server is not reachable'
+            description: 'Fleet Server host is not reachable (request timed out or aborted)'
             value:
               status: OFFLINE
               host_id: fleet-server-host-id-1
@@ -30,11 +29,11 @@ responses:
       application/json:
         examples:
           badRequestExample:
-            description: 'The request body is invalid or missing required fields'
+            description: 'The host ID exists but has no associated host URLs configured'
             value:
               statusCode: 400
               error: 'Bad Request'
-              message: '[request body.id]: expected value of type [string] but got [undefined]'
+              message: 'The requested host id fleet-server-host-id-1 does not have associated host urls.'
   404:
     description: 'Not Found'
     content:
@@ -45,4 +44,4 @@ responses:
             value:
               statusCode: 404
               error: 'Not Found'
-              message: 'Fleet Server host fleet-server-host-id-1 not found'
+              message: 'The requested host id fleet-server-host-id-1 does not exist.'
