@@ -11,7 +11,8 @@ import { test } from '../fixtures';
 
 const SAMPLE_DATA_SET = 'ecommerce';
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/261380
+test.describe.skip(
   'Discover Alerts menu with alerting v2',
   {
     tag: [

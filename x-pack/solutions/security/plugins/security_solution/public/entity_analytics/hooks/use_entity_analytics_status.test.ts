@@ -16,6 +16,7 @@ import {
 describe('deriveEntityAnalyticsStatus', () => {
   const base = {
     isEntityStoreFeatureFlagDisabled: false,
+    isEntityStoreV2Enabled: false,
     isMutationLoading: false,
   };
 
@@ -183,6 +184,70 @@ describe('deriveEntityAnalyticsStatus', () => {
           entityStoreStatus: 'not_installed',
         })
       ).toBe('partially_enabled');
+    });
+  });
+
+  describe('entity store v2 (entity store is sole status driver)', () => {
+    const v2Base = { ...base, isEntityStoreV2Enabled: true };
+
+    it('returns enabled when store=running regardless of risk engine status', () => {
+      expect(
+        deriveEntityAnalyticsStatus({
+          ...v2Base,
+          riskEngineStatus: RiskEngineStatusEnum.DISABLED,
+          entityStoreStatus: 'running',
+        })
+      ).toBe('enabled');
+    });
+
+    it('returns disabled when store=stopped regardless of risk engine status', () => {
+      expect(
+        deriveEntityAnalyticsStatus({
+          ...v2Base,
+          riskEngineStatus: RiskEngineStatusEnum.ENABLED,
+          entityStoreStatus: 'stopped',
+        })
+      ).toBe('disabled');
+    });
+
+    it('returns not_installed when store=not_installed regardless of risk engine status', () => {
+      expect(
+        deriveEntityAnalyticsStatus({
+          ...v2Base,
+          riskEngineStatus: RiskEngineStatusEnum.ENABLED,
+          entityStoreStatus: 'not_installed',
+        })
+      ).toBe('not_installed');
+    });
+
+    it('returns not_installed when store status is undefined', () => {
+      expect(
+        deriveEntityAnalyticsStatus({
+          ...v2Base,
+          riskEngineStatus: RiskEngineStatusEnum.ENABLED,
+          entityStoreStatus: undefined,
+        })
+      ).toBe('not_installed');
+    });
+
+    it('returns enabling when store=installing', () => {
+      expect(
+        deriveEntityAnalyticsStatus({
+          ...v2Base,
+          riskEngineStatus: RiskEngineStatusEnum.DISABLED,
+          entityStoreStatus: 'installing',
+        })
+      ).toBe('enabling');
+    });
+
+    it('returns error when store=error', () => {
+      expect(
+        deriveEntityAnalyticsStatus({
+          ...v2Base,
+          riskEngineStatus: RiskEngineStatusEnum.ENABLED,
+          entityStoreStatus: 'error',
+        })
+      ).toBe('error');
     });
   });
 });
