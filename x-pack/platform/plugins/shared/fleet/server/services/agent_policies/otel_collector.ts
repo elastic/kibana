@@ -201,10 +201,27 @@ function generateOtelTypeTransforms(
     case 'traces':
       return {
         trace_statements: [
+          // Spans are routed to traces-* per the OTel Elastic mapping spec:
+          // https://github.com/elastic/opentelemetry-dev/blob/f01e7a6ec1c133367eadccb01ddd54426d69e486/docs/ingest/mapping/traces-mapping.md
+          // The dataset defaults to 'generic.otel' but can be overridden via the
+          // data_stream.dataset policy variable when the package declares it.
           { context: 'span', statements: buildDataStreamStatements('traces', dataset, namespace) },
           {
+            // Span events are routed to logs-* even though they originate from a traces signal type.
+            // In the OTel data model, span events are log records enriched with span context
+            // (attributes and timestamp, but no start/end time or duration). Storing them in
+            // traces-* would cause index mapping conflicts with the span document schema.
+            //
+            // Per the OTel Elastic mapping spec, span events belong in logs-generic.otel-* by
+            // default, but the dataset can be overridden via the data_stream.dataset policy
+            // variable — the same override that applies to spans above.
+            // https://github.com/elastic/opentelemetry-dev/blob/main/docs/ingest/mapping/traces-mapping.md#span-events
+            //
+            // The APM UI queries span events via logs-*.otel-* (not logs-generic.otel-*
+            // specifically), so any dataset value is compatible with APM visibility.
+            // See: x-pack/platform/plugins/shared/apm_sources_access/common/config_schema.ts
             context: 'spanevent',
-            statements: buildDataStreamStatements('logs', null, namespace),
+            statements: buildDataStreamStatements('logs', dataset, namespace),
           },
         ],
       };

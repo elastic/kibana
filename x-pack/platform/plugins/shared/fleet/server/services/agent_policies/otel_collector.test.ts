@@ -623,6 +623,7 @@ describe('generateOtelcolConfig', () => {
               context: 'spanevent',
               statements: [
                 'set(attributes["data_stream.type"], "logs")',
+                'set(attributes["data_stream.dataset"], "zipkinreceiver")',
                 'set(attributes["data_stream.namespace"], "apmtest")',
               ],
             },
@@ -698,6 +699,7 @@ describe('generateOtelcolConfig', () => {
         context: 'spanevent',
         statements: [
           'set(attributes["data_stream.type"], "logs")',
+          'set(attributes["data_stream.dataset"], "zipkinreceiver")',
           'set(attributes["data_stream.namespace"], "apmtest")',
         ],
       },
@@ -1034,6 +1036,7 @@ describe('generateOtelcolConfig', () => {
             context: 'spanevent',
             statements: [
               'set(attributes["data_stream.type"], "logs")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },
@@ -1089,6 +1092,7 @@ describe('generateOtelcolConfig', () => {
             context: 'spanevent',
             statements: [
               'set(attributes["data_stream.type"], "logs")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },
