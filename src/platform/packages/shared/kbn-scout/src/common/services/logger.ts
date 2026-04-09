@@ -62,5 +62,4 @@ export class ScoutLogger extends ToolingLog {
   public serviceMessage(name: string, message: string) {
     this.debug(`[${name}] ${message}`);
   }
-
 }
