@@ -26,7 +26,6 @@ import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { useTimefilter } from '../../hooks/use_timefilter';
-import { FeedbackButton } from '../feedback_button';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
 import { WelcomeTourCallout } from '../streams_tour';
 import { ClassicStreamCreationFlyout } from './classic_stream_creation_flyout';
@@ -168,7 +167,6 @@ export function StreamListView() {
                 })}
               </EuiFlexGroup>
             </EuiFlexItem>
-            <FeedbackButton />
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 iconType="gear"
