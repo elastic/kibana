@@ -35,4 +35,12 @@ describe('prettifyQuery', () => {
     const result = prettifyQuery(query);
     expect(result).toBe('FROM logs\n  | WHERE status = "error"\n  | STATS count = COUNT(*)');
   });
+
+  it('should handle header commands correctly', () => {
+    const query = 'SET option = value; SET option2 = value2; FROM logs | WHERE status = "error"';
+    const result = prettifyQuery(query);
+    expect(result).toBe(
+      'SET option = value;\nSET option2 = value2;\nFROM logs\n  | WHERE status = "error"'
+    );
+  });
 });
