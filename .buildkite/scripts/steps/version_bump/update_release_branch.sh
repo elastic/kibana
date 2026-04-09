@@ -9,9 +9,6 @@ git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
 
 git checkout "$BRANCH"
 
-echo "Removing .github/CODEOWNERS"
-git rm -f .github/CODEOWNERS
-
 echo "Updating branch property in package.json to '$BRANCH'"
 jq --arg branch "$BRANCH" '.branch = $branch' package.json > package.json.tmp && mv package.json.tmp package.json
 
