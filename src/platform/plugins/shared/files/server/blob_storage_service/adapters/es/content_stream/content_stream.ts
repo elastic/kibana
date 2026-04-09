@@ -135,6 +135,7 @@ export class ContentStream extends Duplex {
         {
           asStream: true, // This tells the ES client to not process the response body in any way.
           headers: { accept: 'application/cbor' },
+          compression: false, // Disable compression: asStream bypasses decompression, so gzipped bytes would break CBOR decoding
         }
       );
 
