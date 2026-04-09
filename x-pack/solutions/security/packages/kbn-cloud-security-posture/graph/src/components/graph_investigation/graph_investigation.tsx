@@ -17,11 +17,6 @@ import { Panel } from '@xyflow/react';
 import { getEsQueryConfig } from '@kbn/data-service';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
-import {
-  getGraphActorEuidSourceFields,
-  getGraphTargetEuidSourceFields,
-} from '@kbn/cloud-security-posture-common';
-import { type EntityStoreEuid, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { Graph, isEntityNode } from '../../..';
 import { Callout } from '../callout/callout';
 import { type UseFetchGraphDataParams, useFetchGraphData } from '../../hooks/use_fetch_graph_data';
@@ -45,12 +40,10 @@ import { useGraphFilters } from '../filters/use_graph_filters';
 
 const useGraphPopovers = ({
   scopeId,
-  euid,
   onOpenEventPreview,
   onOpenNetworkPreview,
 }: {
   scopeId: string;
-  euid?: EntityStoreEuid;
   onOpenEventPreview?: (node: NodeViewModel) => void;
   onOpenNetworkPreview?: (ip: string, scopeId: string) => void;
 }) => {
@@ -253,18 +246,8 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     onOpenNetworkPreview,
   }: GraphInvestigationProps) => {
     const emptyEntityIds = useMemo(() => [], []);
-    const euidApi = useEntityStoreEuidApi();
-    const euid = euidApi?.euid;
-    const GRAPH_ACTOR_EUID_SOURCE_FIELDS = useMemo(
-      () => (euid ? getGraphActorEuidSourceFields(euid) : []),
-      [euid]
-    );
-    const GRAPH_TARGET_EUID_SOURCE_FIELDS = useMemo(
-      () => (euid ? getGraphTargetEuidSourceFields(euid) : []),
-      [euid]
-    );
 
-    const { searchFilters, setSearchFilters, entityIdsForApi } = useGraphFilters(
+    const { searchFilters, setSearchFilters, entityIdsForApi, pinnedEuids } = useGraphFilters(
       scopeId,
       entityIds ?? emptyEntityIds,
       dataView?.id ?? ''
@@ -324,10 +307,6 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       return lastValidEsQuery.current;
     }, [dataView, kquery, notifications, searchFilters, uiSettings]);
 
-    const pinnedIds = useMemo(() => {
-      return []; // TODO implement pinning functionality and pass pinned IDs here - should keep its own state
-    }, []);
-
     const { data, refresh, isFetching, isError, error } = useFetchGraphData({
       req: {
         query: {
@@ -337,7 +316,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           start: timeRange.from,
           end: timeRange.to,
           entityIds: entityIdsForApi,
-          pinnedIds,
+          pinnedIds: pinnedEuids,
         },
         nodesLimit: GRAPH_NODES_LIMIT,
       },
@@ -366,7 +345,6 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       createEventClickHandler,
     } = useGraphPopovers({
       scopeId,
-      euid,
       onOpenEventPreview,
       onOpenNetworkPreview,
     });
