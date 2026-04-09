@@ -11,7 +11,6 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { DataControlState, LegacyStoredDataControlState } from '@kbn/controls-schemas';
 import { DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
-import { i18n } from '@kbn/i18n';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 
 export function transformDataControlIn(
@@ -22,6 +21,9 @@ export function transformDataControlIn(
   references?: Reference[];
 } {
   const { data_view_id, ...rest } = state;
+  if (!data_view_id.length) {
+    throw new Error('Must include a non-empty data view ID');
+  }
   return {
     state: {
       ...rest,
@@ -71,11 +73,7 @@ export function transformDataControlOut<
   // get the data view ID from the reference, or fall back to an explicitly stored dataViewId
   const dataViewId = dataViewRef?.id ?? state.dataViewId ?? '';
   if (!dataViewId.length) {
-    throw new Error(
-      i18n.translate('controls.server.transformIn.referenceError', {
-        defaultMessage: 'Invalid data view ID',
-      })
-    );
+    throw new Error('Must include a non-empty data view ID');
   }
   return {
     ...DEFAULT_DATA_CONTROL_STATE,

@@ -20,6 +20,7 @@ export const dataControlSchema = schema.object({
   ...controlTitleSchema.getPropSchemas(),
   data_view_id: schema.string({
     meta: { description: 'The ID of the data view that the control is tied to' }, // this will generate a reference
+    minLength: 1,
   }),
   field_name: schema.string({
     meta: { description: 'The name of the field in the data view that the control is tied to' },
