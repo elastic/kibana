@@ -201,6 +201,14 @@ export interface AnomalyDetectionRuleState {
   contextFieldFormatters?: AnomalyDetectionAlertFieldFormatters;
 }
 
+const hasCurrentContextFieldFormatters = (
+  formatters?: AnomalyDetectionAlertFieldFormatters
+): formatters is AnomalyDetectionAlertFieldFormatters & { dateFormatter: IFieldFormat } => {
+  // Rule state can rehydrate formatter caches created before `dateFormatter` was added.
+  // Rebuild those stale caches so time-based alert values can be formatted consistently.
+  return formatters?.dateFormatter !== undefined;
+};
+
 /**
  * Alerting related server-side methods
  * @param mlClient
@@ -781,10 +789,9 @@ export function alertingServiceProvider(
 
     const resultsLabel = getAggResultsLabel(params.resultType);
 
-    const fieldsFormatters =
-      contextFieldFormatters?.dateFormatter !== undefined
-        ? contextFieldFormatters
-        : await getFormatters(datafeeds![0]!.indices[0]);
+    const fieldsFormatters = hasCurrentContextFieldFormatters(contextFieldFormatters)
+      ? contextFieldFormatters
+      : await getFormatters(datafeeds![0]!.indices[0]);
 
     const formatter = getResultsToContextFormatter(
       params.resultType,
@@ -1001,10 +1008,9 @@ export function alertingServiceProvider(
     | { payload: AnomalyDetectionAlertPayload; context: AnomalyDetectionAlertContext; name: string }
     | undefined
   > => {
-    const formatters =
-      contextFieldFormatters?.dateFormatter !== undefined
-        ? contextFieldFormatters
-        : await getFormatters(indexPattern);
+    const formatters = hasCurrentContextFieldFormatters(contextFieldFormatters)
+      ? contextFieldFormatters
+      : await getFormatters(indexPattern);
 
     const context = getResultsToContextFormatter(resultType, false, formatters)(value);
     const payload = getResultsToPayloadFormatter(resultType, false)(value);
