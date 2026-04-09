@@ -89,5 +89,7 @@ export const taskSchemaV8 = taskSchemaV7.extends({
 });
 
 export const taskSchemaV9 = taskSchemaV8.extends({
+  // Make cost more lenient to allow for future cost values without breaking forward compatibility.
+  // Coerced to 'normal' in forward compatibility function if value is not recognized.
   cost: schema.maybe(schema.string()),
 });
