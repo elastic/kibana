@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { Plugin } from '@kbn/core/public';
 import { type CoreSetup, type CoreStart, type PluginInitializerContext } from '@kbn/core/public';
@@ -13,7 +14,6 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
-import { firstValueFrom } from 'rxjs';
 import type { GenAiSettingsConfigType } from '../common/config';
 
 export interface GenAiSettingsStartDeps {
@@ -42,45 +42,48 @@ export class GenAiSettingsPlugin
       GenAiSettingsStartDeps
     >
 {
+  private licensingSubscription?: Subscription;
+
   constructor(private initializerContext: PluginInitializerContext<GenAiSettingsConfigType>) {}
 
-  public async setup(
+  public setup(
     core: CoreSetup<GenAiSettingsStartDeps, GenAiSettingsPluginStart>,
     { management }: GenAiSettingsSetupDeps
-  ): Promise<GenAiSettingsPluginSetup> {
-    const [coreStart, { licensing }] = await core.getStartServices();
-    const capabilities = coreStart.application.capabilities;
+  ): GenAiSettingsPluginSetup {
+    core.getStartServices().then(([coreStart, { licensing }]) => {
+      const capabilities = coreStart.application.capabilities;
 
-    const hasEnterpriseLicense = licensing
-      ? (await firstValueFrom(licensing.license$)).hasAtLeast('enterprise')
-      : false;
+      const hasConnectorsReadPrivilege =
+        capabilities.actions?.show === true && capabilities.actions?.execute === true;
+      const hasAnonymizationPrivilege =
+        capabilities.anonymization?.show === true || capabilities.anonymization?.manage === true;
 
-    const hasConnectorsReadPrivilege =
-      capabilities.actions?.show === true && capabilities.actions?.execute === true;
-    const hasAnonymizationPrivilege =
-      capabilities.anonymization?.show === true || capabilities.anonymization?.manage === true;
+      this.licensingSubscription = licensing.license$.subscribe((license) => {
+        const hasEnterpriseLicense = license?.hasAtLeast('enterprise') ?? false;
 
-    // This section depends mainly on Connectors feature, but should have its own Kibana feature setting in the future.
-    if (hasEnterpriseLicense && (hasConnectorsReadPrivilege || hasAnonymizationPrivilege)) {
-      management.sections.section.ai.registerApp({
-        id: 'genAiSettings',
-        title: i18n.translate('genAiSettings.managementSectionLabel', {
-          defaultMessage: 'GenAI Settings',
-        }),
-        order: 1,
-        keywords: ['ai', 'generative', 'settings', 'configuration'],
+        if (hasEnterpriseLicense && (hasConnectorsReadPrivilege || hasAnonymizationPrivilege)) {
+          // This section depends mainly on Connectors feature, but should have its own Kibana feature setting in the future.
+          management.sections.section.ai.registerApp({
+            id: 'genAiSettings',
+            title: i18n.translate('genAiSettings.managementSectionLabel', {
+              defaultMessage: 'GenAI Settings',
+            }),
+            order: 1,
+            keywords: ['ai', 'generative', 'settings', 'configuration'],
 
-        mount: async (mountParams) => {
-          const { mountManagementSection } = await import('./management_section/mount_section');
+            mount: async (mountParams) => {
+              const { mountManagementSection } = await import('./management_section/mount_section');
 
-          return mountManagementSection({
-            core,
-            mountParams,
-            config: this.initializerContext.config.get(),
+              return mountManagementSection({
+                core,
+                mountParams,
+                config: this.initializerContext.config.get(),
+              });
+            },
           });
-        },
+        }
       });
-    }
+    });
 
     return {};
   }
@@ -89,5 +92,7 @@ export class GenAiSettingsPlugin
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    this.licensingSubscription?.unsubscribe();
+  }
 }
