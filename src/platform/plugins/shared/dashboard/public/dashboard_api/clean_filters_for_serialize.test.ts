@@ -78,9 +78,7 @@ describe('cleanFiltersForSerialize', () => {
   test('should not fail if meta is missing from filters', () => {
     const filters: Filter[] = [{ query: { a: 'a' } }, { query: { b: 'b' } }] as unknown as Filter[];
 
-    const cleanedFilters = cleanFiltersForSerialize(
-      filters as unknown as Filter[]
-    );
+    const cleanedFilters = cleanFiltersForSerialize(filters as unknown as Filter[]);
 
     expect(cleanedFilters?.[0]).toEqual({ query: { a: 'a' } });
     expect(cleanedFilters?.[1]).toEqual({ query: { b: 'b' } });
