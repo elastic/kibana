@@ -146,7 +146,7 @@ interface AnalyzeLogsValidationParams {
   logsSourceOption: string;
   logSample?: string;
   selectedIndex: string;
-  indexValidationError?: string;
+  indexValidationError?: string | null;
 }
 
 const getAnalyzeLogsValidationReasons = (params: AnalyzeLogsValidationParams): string[] => {
