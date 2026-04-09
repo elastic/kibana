@@ -67,7 +67,7 @@ export const QueryModeEmptyPrompt = () => {
         >
           <EuiButton
             size="s"
-            data-test-subj="streamsAppQueryModeEmptyPromptCreateButton"
+            data-test-subj="streamsAppQueryModeCreateButton"
             onClick={createQueryStream}
             disabled={!canManage}
           >
