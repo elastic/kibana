@@ -172,6 +172,9 @@ export class ContentStream extends Duplex {
           this.logger.error(`File not found (id: ${this.getHeadChunkId()}).`);
         }
       }
+      this.logger.error(
+        `Error reading chunk #${this.chunksRead} with id [${id}] from index [${chunkIndex}]: ${e.message}`
+      );
       throw e;
     }
   }
