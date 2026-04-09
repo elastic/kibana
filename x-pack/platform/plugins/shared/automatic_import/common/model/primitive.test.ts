@@ -7,7 +7,7 @@
 
 import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers/v4';
 
-import { NonEmptyString, UUID } from './primitive.gen';
+import { NonEmptyString, SafeIdentifier, UUID } from './primitive.gen';
 
 describe('primitive schemas', () => {
   describe('NonEmptyString', () => {
@@ -75,6 +75,50 @@ describe('primitive schemas', () => {
       const result = NonEmptyString.safeParse(complexString);
       expectParseSuccess(result);
       expect(result.data).toBe(complexString);
+    });
+  });
+
+  describe('SafeIdentifier', () => {
+    it('accepts valid identifiers', () => {
+      const valid = ['abc', 'ABC', '123', 'abc_123', 'My_Integration_01', '_leading', 'trailing_'];
+      valid.forEach((str) => {
+        const result = SafeIdentifier.safeParse(str);
+        expectParseSuccess(result);
+        expect(result.data).toBe(str);
+      });
+    });
+
+    it('rejects identifiers with hyphens', () => {
+      const result = SafeIdentifier.safeParse('my-integration');
+      expectParseError(result);
+    });
+
+    it('rejects identifiers with spaces', () => {
+      const result = SafeIdentifier.safeParse('my integration');
+      expectParseError(result);
+    });
+
+    it('rejects identifiers with special characters', () => {
+      const invalid = ['foo!bar', 'a/b', 'x.y', 'a@b', '../etc', 'a%00b', 'foo\nbar'];
+      invalid.forEach((str) => {
+        const result = SafeIdentifier.safeParse(str);
+        expectParseError(result);
+      });
+    });
+
+    it('rejects empty string', () => {
+      const result = SafeIdentifier.safeParse('');
+      expectParseError(result);
+    });
+
+    it('rejects strings exceeding 255 characters', () => {
+      const result = SafeIdentifier.safeParse('a'.repeat(256));
+      expectParseError(result);
+    });
+
+    it('accepts strings at the 255 character limit', () => {
+      const result = SafeIdentifier.safeParse('a'.repeat(255));
+      expectParseSuccess(result);
     });
   });
 
