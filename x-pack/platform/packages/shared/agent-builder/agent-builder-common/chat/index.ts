@@ -94,6 +94,7 @@ export {
   type TimelineEventTypeValue,
   type BaseTimelineEvent,
   type UserMessageEvent,
+  type AgentExecution,
   type AgentExecutionEvent,
   type TimelineEvent,
   type TimelineConversation,
