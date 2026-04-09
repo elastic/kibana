@@ -50,6 +50,8 @@ import {
   useGetIntegrationById,
   useUploadSamples,
   normalizeTitleName,
+  isValidNameFormat,
+  startsWithLetter,
   useKibana,
 } from '../../../../common';
 import { useTelemetry } from '../../../telemetry_context';
@@ -228,8 +230,13 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
     [validateIndex, clearIndexValidationError]
   );
 
+  const integrationTitle = formData?.title?.trim() ?? '';
   const isIntegrationFieldsValid =
-    !!formData?.title?.trim() && !!formData?.description?.trim() && !!formData?.connectorId?.trim();
+    !!integrationTitle &&
+    !!formData?.description?.trim() &&
+    !!formData?.connectorId?.trim() &&
+    isValidNameFormat(integrationTitle) &&
+    startsWithLetter(integrationTitle);
 
   const existingDataStreamNames = useMemo(
     () => new Set((integration?.dataStreams ?? []).map((ds) => ds.title.toLowerCase())),
@@ -240,10 +247,13 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
     !!formData?.dataStreamTitle?.trim() &&
     existingDataStreamNames.has(formData.dataStreamTitle.trim().toLowerCase());
 
+  const dataStreamTitle = formData?.dataStreamTitle?.trim() ?? '';
   const isDataStreamFieldsValid =
-    !!formData?.dataStreamTitle?.trim() &&
+    !!dataStreamTitle &&
     !!formData?.dataStreamDescription?.trim() &&
     !hasDuplicateDataStreamName &&
+    isValidNameFormat(dataStreamTitle) &&
+    startsWithLetter(dataStreamTitle) &&
     formData?.dataCollectionMethod != null &&
     formData.dataCollectionMethod.length > 0;
 
@@ -262,8 +272,15 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
 
   const analyzeLogsValidationReasons = useMemo(() => {
     const reasons: string[] = [];
-    if (!formData?.title?.trim()) {
+    if (!integrationTitle) {
       reasons.push(formI18n.TITLE_REQUIRED);
+    } else {
+      if (!isValidNameFormat(integrationTitle)) {
+        reasons.push(formI18n.NAME_INVALID_FORMAT);
+      }
+      if (!startsWithLetter(integrationTitle)) {
+        reasons.push(formI18n.NAME_MUST_START_WITH_LETTER);
+      }
     }
     if (!formData?.description?.trim()) {
       reasons.push(formI18n.DESCRIPTION_REQUIRED);
@@ -271,10 +288,18 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
     if (!formData?.connectorId?.trim()) {
       reasons.push(formI18n.CONNECTOR_REQUIRED);
     }
-    if (!formData?.dataStreamTitle?.trim()) {
+    if (!dataStreamTitle) {
       reasons.push(formI18n.DATA_STREAM_TITLE_REQUIRED);
-    } else if (hasDuplicateDataStreamName) {
-      reasons.push(formI18n.DATA_STREAM_TITLE_ALREADY_EXISTS);
+    } else {
+      if (hasDuplicateDataStreamName) {
+        reasons.push(formI18n.DATA_STREAM_TITLE_ALREADY_EXISTS);
+      }
+      if (!isValidNameFormat(dataStreamTitle)) {
+        reasons.push(formI18n.NAME_INVALID_FORMAT);
+      }
+      if (!startsWithLetter(dataStreamTitle)) {
+        reasons.push(formI18n.NAME_MUST_START_WITH_LETTER);
+      }
     }
     if (!formData?.dataStreamDescription?.trim()) {
       reasons.push(formI18n.DATA_STREAM_DESCRIPTION_REQUIRED);
@@ -294,10 +319,10 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
     }
     return reasons;
   }, [
-    formData?.title,
+    integrationTitle,
+    dataStreamTitle,
     formData?.description,
     formData?.connectorId,
-    formData?.dataStreamTitle,
     formData?.dataStreamDescription,
     formData?.dataCollectionMethod,
     hasDuplicateDataStreamName,
