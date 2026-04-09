@@ -130,10 +130,16 @@ export interface SecuritySolutionAlertFlyoutHeaderTitleFeature {
   renderHeader: (props: SecuritySolutionAlertFlyoutRenderProps) => JSX.Element;
 }
 
+export interface SecuritySolutionAlertFlyoutFooterFeature {
+  id: 'security-solution-alert-flyout-footer';
+  renderFooter: (props: SecuritySolutionAlertFlyoutRenderProps) => JSX.Element;
+}
+
 export type SecuritySolutionFeature =
   | SecuritySolutionCellRendererFeature
   | SecuritySolutionAlertFlyoutOverviewTabFeature
-  | SecuritySolutionAlertFlyoutHeaderTitleFeature;
+  | SecuritySolutionAlertFlyoutHeaderTitleFeature
+  | SecuritySolutionAlertFlyoutFooterFeature;
 
 /** ****************************************************************************************/
 

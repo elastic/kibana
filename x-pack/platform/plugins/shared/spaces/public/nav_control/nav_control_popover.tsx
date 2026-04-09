@@ -170,6 +170,9 @@ const NavControlPopoverUI = ({
       panelProps={{
         'data-test-subj': 'spaceMenuPopoverPanel',
       }}
+      aria-label={i18n.translate('xpack.spaces.navControl.popover.ariaLabel', {
+        defaultMessage: 'Spaces navigation',
+      })}
     >
       {shouldRenderTour && tourProps && <SolutionViewSwitchTour {...tourProps} />}
       <SpacesMenu

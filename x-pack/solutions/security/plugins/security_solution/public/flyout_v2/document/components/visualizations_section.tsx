@@ -22,6 +22,7 @@ import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { AnalyzerGraph } from '../../analyzer';
 import { useSessionViewConfig } from '../../session_view/hooks/use_session_view_config';
 import { SessionView } from '../../session_view';
+import { defaultToolsFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
 
 export const VISUALIZATION_SECTION_TEST_ID = `${PREFIX}Visualizations` as const;
 
@@ -82,12 +83,7 @@ export const VisualizationsSection = memo(
               />
             ),
           }),
-          {
-            ownFocus: false,
-            resizable: true,
-            size: 'm',
-            type: 'overlay',
-          }
+          { ...defaultToolsFlyoutProperties }
         ),
       [history, hit, onAlertUpdated, overlays, renderCellActions, services, store]
     );
@@ -108,12 +104,7 @@ export const VisualizationsSection = memo(
               />
             ),
           }),
-          {
-            ownFocus: false,
-            resizable: true,
-            size: 'm',
-            type: 'overlay',
-          }
+          { ...defaultToolsFlyoutProperties }
         ),
       [
         history,
@@ -132,7 +123,7 @@ export const VisualizationsSection = memo(
       <ExpandableSection
         data-test-subj={VISUALIZATION_SECTION_TEST_ID}
         expanded={expanded}
-        gutterSize="s"
+        gutterSize="m"
         localStorageKey={FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS}
         sectionId={LOCAL_STORAGE_SECTION_KEY}
         title={VISUALIZATION_SECTION_TITLE}
