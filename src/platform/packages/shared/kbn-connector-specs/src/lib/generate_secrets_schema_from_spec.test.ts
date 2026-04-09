@@ -48,4 +48,42 @@ describe('generateSecretsSchemaFromSpec', () => {
     const schema = generateSecretsSchemaFromSpec({ types: [] });
     expect(z.toJSONSchema(schema)).toMatchSnapshot();
   });
+
+  describe('runtime parse behavior', () => {
+    test('parses valid secrets for none auth type', () => {
+      const schema = generateSecretsSchemaFromSpec({ types: ['none'] });
+      expect(schema.parse({ authType: 'none' })).toEqual({ authType: 'none' });
+    });
+
+    test('parses valid secrets for basic auth type', () => {
+      const schema = generateSecretsSchemaFromSpec({ types: ['basic'] });
+      const secrets = { authType: 'basic', username: 'user', password: 'pass' };
+      expect(schema.parse(secrets)).toEqual(secrets);
+    });
+
+    test('parses valid secrets for bearer auth type', () => {
+      const schema = generateSecretsSchemaFromSpec({ types: ['bearer'] });
+      const secrets = { authType: 'bearer', token: 'my-token' };
+      expect(schema.parse(secrets)).toEqual(secrets);
+    });
+
+    test('throws for invalid authType', () => {
+      const schema = generateSecretsSchemaFromSpec({ types: ['basic'] });
+      expect(() =>
+        schema.parse({ authType: 'invalid_type', username: 'u', password: 'p' })
+      ).toThrow();
+    });
+
+    test('throws for missing required fields in basic auth', () => {
+      const schema = generateSecretsSchemaFromSpec({ types: ['basic'] });
+      expect(() => schema.parse({ authType: 'basic', username: 'user' })).toThrow(
+        /password|Required/
+      );
+    });
+
+    test('parses empty object when no auth types', () => {
+      const schema = generateSecretsSchemaFromSpec({ types: [] });
+      expect(schema.parse({})).toEqual({});
+    });
+  });
 });

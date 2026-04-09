@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/securitysolution-es-utils'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/security-detection-engine'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/securitysolution-es-utils'
+  title: '@kbn/securitysolution-es-utils'
   description: Moon project for @kbn/securitysolution-es-utils
   channel: ''
   owner: '@elastic/security-detection-engine'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-securitysolution-es-utils
+  sourceRoot: src/platform/packages/shared/kbn-securitysolution-es-utils
 dependsOn:
   - '@kbn/zod-helpers'
   - '@kbn/zod'
@@ -31,16 +30,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/custom-icons'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-exploration-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/custom-icons'
+  title: '@kbn/custom-icons'
   description: Moon project for @kbn/custom-icons
   channel: ''
   owner: '@elastic/obs-exploration-team'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-custom-icons
+  sourceRoot: src/platform/packages/shared/kbn-custom-icons
 dependsOn:
   - '@kbn/elastic-agent-utils'
   - '@kbn/kibana-react-plugin'
@@ -32,16 +31,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

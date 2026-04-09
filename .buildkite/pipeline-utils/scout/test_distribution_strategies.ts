@@ -12,7 +12,7 @@ import fs from 'node:fs';
 import { SCOUT_TEST_LANE_LOADS_PATH, SCOUT_TEST_TRACKS_ROOT } from './paths';
 import { scoutTestTrack, type ScoutTestTrack } from './test_tracks';
 import { pickScoutTestGroupRunOrder } from './pick_scout_test_group_run_order';
-import { BuildkiteClient, type BuildkiteStep } from '../buildkite';
+import { BuildkiteClient, type BuildkiteCommandStep } from '../buildkite';
 import { getKibanaDir } from '../utils';
 import { expandAgentQueue } from '../agent_images';
 import { collectEnvFromLabels } from '../pr_labels';
@@ -57,7 +57,7 @@ async function distributeScoutTestsOnLanes() {
     throw new Error(`No Scout test tracks definition files found under ${SCOUT_TEST_TRACKS_ROOT}`);
   }
 
-  const steps: BuildkiteStep[] = [];
+  const steps: BuildkiteCommandStep[] = [];
   const loadIDsByStepKey: Record<string, string[]> = {};
   const testLaneLoadsFilePath = path.relative(getKibanaDir(), SCOUT_TEST_LANE_LOADS_PATH);
 
@@ -111,11 +111,7 @@ async function distributeScoutTestsOnLanes() {
       loadIDsByStepKey[stepKey] = lane.loads;
     });
 
-  // Write the test lane load IDs to disk in preparation of uploading as an artifact
-  fs.writeFileSync(testLaneLoadsFilePath, JSON.stringify(loadIDsByStepKey));
-
   const bk = new BuildkiteClient();
-  bk.uploadArtifacts(testLaneLoadsFilePath);
 
   const lanesGroupStepDependencies: string[] = [];
 
@@ -130,6 +126,14 @@ async function distributeScoutTestsOnLanes() {
     // Default dependencies
     lanesGroupStepDependencies.push('build_scout_tests');
   }
+
+  for (const { key } of steps) {
+    bk.setMetadata(`cancel_on_gate_failure:${key}`, 'true');
+  }
+
+  // Write the test lane load IDs to disk in preparation of uploading as an artifact
+  fs.writeFileSync(testLaneLoadsFilePath, JSON.stringify(loadIDsByStepKey));
+  bk.uploadArtifacts(testLaneLoadsFilePath);
 
   // Send it 🚀
   bk.uploadSteps([

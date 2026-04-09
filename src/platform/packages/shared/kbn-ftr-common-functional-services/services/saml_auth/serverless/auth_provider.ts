@@ -13,7 +13,7 @@ import { SERVERLESS_ROLES_ROOT_PATH } from '@kbn/es';
 import { type Config } from '@kbn/test';
 import { isServerlessProjectType, readRolesDescriptorsFromResource } from '@kbn/es/src/utils';
 import { resolve } from 'path';
-import type { Role } from '@kbn/test/src/auth/types';
+import type { Role } from '@kbn/test-saml-auth';
 import {
   getServerlessInternalRequestHeaders,
   COMMON_REQUEST_HEADERS,
