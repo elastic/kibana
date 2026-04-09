@@ -19,6 +19,9 @@ export function resolveEsqlVariables(
   }
 
   let resolved = query.esql;
+  // Sort by descending key length so that longer variable names are replaced first.
+  // This prevents a shorter variable (e.g. ?ban) from matching inside a longer one
+  // (e.g. ?banana), which would leave the query in an invalid state (e.g. "someValueana").
   const sortedVariables = [...variables].sort((a, b) => b.key.length - a.key.length);
   for (const { key, value } of sortedVariables) {
     const literal = typeof value === 'string' ? `"${value.replaceAll('"', '""')}"` : String(value);
