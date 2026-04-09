@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable import/no-nodejs-modules -- HMAC-SHA256 for Azure Shared Key signing runs server-side only */
-import { createHmac } from 'crypto';
 import { z } from '@kbn/zod/v4';
 import type { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
+import { computeSignature } from './azure_shared_key_crypto';
 
 const authSchema = z
   .object({
@@ -105,16 +104,6 @@ export function buildStringToSign(
   return lines.join('\n') + '\n' + canonicalizedHeaders + canonicalizedResource;
 }
 
-/**
- * Compute the Shared Key signature: HMAC-SHA256 over UTF-8 string-to-sign with Base64-decoded key, result Base64-encoded.
- */
-export function computeSignature(stringToSign: string, base64AccountKey: string): string {
-  const keyBuffer = Buffer.from(base64AccountKey, 'base64');
-  const hmac = createHmac('sha256', keyBuffer);
-  hmac.update(stringToSign, 'utf8');
-  return hmac.digest('base64');
-}
-
 function getRequestUrl(config: InternalAxiosRequestConfig): {
   pathname: string;
   searchParams: Record<string, string>;
@@ -165,7 +154,7 @@ export const AzureSharedKeyAuth: AuthTypeSpec<AuthSchemaType> = {
   ): Promise<AxiosInstance> => {
     const { accountName, accountKey } = secret;
 
-    axiosInstance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+    axiosInstance.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
       const msDate = formatMsDate();
       const existingHeaders: Record<string, string> = {};
       if (config.headers) {
@@ -187,7 +176,7 @@ export const AzureSharedKeyAuth: AuthTypeSpec<AuthSchemaType> = {
         canonicalizedHeaders,
         canonicalizedResource
       );
-      const signature = computeSignature(stringToSign, accountKey);
+      const signature = await computeSignature(stringToSign, accountKey);
       const authHeader = `SharedKey ${accountName}:${signature}`;
 
       config.headers.set('x-ms-date', msDate);

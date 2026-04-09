@@ -13,11 +13,22 @@ import {
   buildCanonicalizedHeaders,
   buildCanonicalizedResource,
   buildStringToSign,
-  computeSignature,
   AzureSharedKeyAuth,
 } from './azure_shared_key';
+import { computeSignature } from './azure_shared_key_crypto';
+
+jest.mock('./azure_shared_key_crypto', () => ({
+  computeSignature: jest.fn().mockResolvedValue('mock-signature'),
+}));
+
+const mockComputeSignature = jest.mocked(computeSignature);
 
 describe('Azure Shared Key auth', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockComputeSignature.mockResolvedValue('mock-signature');
+  });
+
   describe('AzureSharedKeyAuth', () => {
     it('has id azure_shared_key and schema with accountName and accountKey', () => {
       expect(AzureSharedKeyAuth.id).toBe('azure_shared_key');
@@ -25,9 +36,9 @@ describe('Azure Shared Key auth', () => {
       expect(AzureSharedKeyAuth.schema.shape.accountKey).toBeDefined();
     });
 
-    it('signs GET request using encoded URI path in canonical resource for blob names with spaces', async () => {
+    it('sets x-ms-date and Authorization headers on each request', async () => {
       const accountName = 'myaccount';
-      const accountKey = Buffer.from('test-key-32-bytes-long!!!!!!!!').toString('base64');
+      const accountKey = 'dGVzdGtleQ==';
 
       const axiosInstance = axios.create();
       axiosInstance.defaults.headers.common['x-ms-version'] = '2021-06-08';
@@ -54,33 +65,52 @@ describe('Azure Shared Key auth', () => {
       // Signing interceptor added LAST so it runs FIRST (LIFO)
       await AzureSharedKeyAuth.configure(mockCtx, axiosInstance, { accountName, accountKey });
 
-      const blobUrl =
-        'https://myaccount.blob.core.windows.net/taracontainer2/Screen%20Recording%202026-03-12%20at%202.13.27%20PM.mov';
       await axiosInstance
-        .get(blobUrl, { responseType: 'arraybuffer' })
+        .get('https://myaccount.blob.core.windows.net/mycontainer/blob.txt')
         .catch((e: Error & { isTestStop?: boolean }) => {
           if (!e.isTestStop) throw e;
         });
 
       expect(capturedXMsDate).toBeDefined();
-      expect(capturedAuthorization).toBeDefined();
+      expect(capturedAuthorization).toBe('SharedKey myaccount:mock-signature');
+    });
 
-      // Azure Shared Key canonical resource uses the encoded URI path (spaces stay as %20).
-      // Azure docs: "Append the resource's encoded URI path, without any query parameters."
-      // Only query parameters are URL-decoded, not the path itself.
-      const canonicalHeaders = `x-ms-date:${capturedXMsDate}\nx-ms-version:2021-06-08\n`;
-      const encodedCanonicalResource =
-        '/myaccount/taracontainer2/Screen%20Recording%202026-03-12%20at%202.13.27%20PM.mov';
-      const sts = `GET\n\n\n\n\n\n\n\n\n\n\n\n${canonicalHeaders}${encodedCanonicalResource}`;
-      const expectedSig = computeSignature(sts, accountKey);
-      expect(capturedAuthorization).toBe(`SharedKey myaccount:${expectedSig}`);
+    it('passes the correct string-to-sign to computeSignature', async () => {
+      const accountName = 'myaccount';
+      const accountKey = 'dGVzdGtleQ==';
 
-      // And confirm it does NOT use the decoded form
-      const decodedCanonicalResource =
-        '/myaccount/taracontainer2/Screen Recording 2026-03-12 at 2.13.27 PM.mov';
-      const stsDecoded = `GET\n\n\n\n\n\n\n\n\n\n\n\n${canonicalHeaders}${decodedCanonicalResource}`;
-      const decodedSig = computeSignature(stsDecoded, accountKey);
-      expect(capturedAuthorization).not.toBe(`SharedKey myaccount:${decodedSig}`);
+      const axiosInstance = axios.create();
+      axiosInstance.defaults.headers.common['x-ms-version'] = '2021-06-08';
+
+      const mockCtx = {
+        logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+        getCustomHostSettings: () => undefined,
+        getToken: async () => null,
+        proxySettings: undefined,
+        sslSettings: { verificationMode: 'full' as const },
+      } as unknown as AuthContext;
+
+      // Short-circuit the request before it hits the network (LIFO: runs after the signing interceptor)
+      axiosInstance.interceptors.request.use(() => {
+        const testErr = Object.assign(new Error('test_stop'), { isTestStop: true });
+        return Promise.reject(testErr);
+      });
+
+      await AzureSharedKeyAuth.configure(mockCtx, axiosInstance, { accountName, accountKey });
+
+      await axiosInstance
+        .get('https://myaccount.blob.core.windows.net/mycontainer/blob%20with%20spaces.txt')
+        .catch((e: Error & { isTestStop?: boolean }) => {
+          if (!e.isTestStop) throw e;
+        });
+
+      expect(mockComputeSignature).toHaveBeenCalledTimes(1);
+      const [stringToSign, keyArg] = mockComputeSignature.mock.calls[0];
+      expect(keyArg).toBe(accountKey);
+      // Canonical resource must use the encoded URI path (spaces stay as %20)
+      expect(stringToSign).toContain('/myaccount/mycontainer/blob%20with%20spaces.txt');
+      // String-to-sign must start with the verb
+      expect(stringToSign).toMatch(/^GET\n/);
     });
   });
 
@@ -152,25 +182,6 @@ describe('Azure Shared Key auth', () => {
       const result = buildStringToSign('GET', requestHeaders, '', '/myaccount/');
       const lines = result.split('\n');
       expect(lines[3]).toBe(''); // content-length
-    });
-  });
-
-  describe('computeSignature', () => {
-    it('returns deterministic base64 signature for given string and key', () => {
-      const key = Buffer.from('test-key-32-bytes-long!!!!!!!!').toString('base64');
-      const stringToSign =
-        'GET\n\n\n\n\n\n\n\n\n\n\n\nx-ms-date:Sat, 21 Feb 2015 00:48:38 GMT\nx-ms-version:2021-06-08\n/myaccount/mycontainer\ncomp:list';
-      const sig1 = computeSignature(stringToSign, key);
-      const sig2 = computeSignature(stringToSign, key);
-      expect(sig1).toBe(sig2);
-      expect(sig1).toMatch(/^[A-Za-z0-9+/]+=*$/);
-    });
-
-    it('produces different signature for different key', () => {
-      const key1 = Buffer.from('key1----------------------------').toString('base64');
-      const key2 = Buffer.from('key2----------------------------').toString('base64');
-      const stringToSign = 'GET\n\n\n\n\n\n\n\n\n\n\n\n/myaccount/';
-      expect(computeSignature(stringToSign, key1)).not.toBe(computeSignature(stringToSign, key2));
     });
   });
 });
