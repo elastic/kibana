@@ -57,6 +57,7 @@ const defaultFormState = {
       children: [childFeature],
     },
   ],
+  invalidEndpointIds: new Set<string>(),
   updateEndpoints: jest.fn(),
   save: jest.fn(),
   resetSection: jest.fn(),

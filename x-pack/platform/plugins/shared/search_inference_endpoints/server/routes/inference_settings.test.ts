@@ -17,6 +17,12 @@ import { APIRoutes } from '../../common/types';
 import { MockRouter } from '../../__mocks__/router.mock';
 import { defineInferenceSettingsRoutes } from './inference_settings';
 
+const mockFeatureRegistry = {
+  getAll: jest.fn().mockReturnValue([]),
+  get: jest.fn(),
+  register: jest.fn(),
+};
+
 describe('Inference Settings API', () => {
   const mockLogger = loggingSystemMock.createLogger().get();
   let mockRouter: MockRouter;
@@ -24,9 +30,19 @@ describe('Inference Settings API', () => {
     create: jest.fn(),
     get: jest.fn(),
   };
+  const mockESClient = {
+    inference: {
+      get: jest.fn().mockResolvedValue({ endpoints: [] }),
+    },
+  };
   const mockCore = {
     savedObjects: {
       getClient: jest.fn().mockReturnValue(mockSOClient),
+    },
+    elasticsearch: {
+      client: {
+        asCurrentUser: mockESClient,
+      },
     },
   };
 
@@ -51,6 +67,7 @@ describe('Inference Settings API', () => {
       defineInferenceSettingsRoutes({
         logger: mockLogger,
         router: mockRouter.router,
+        featureRegistry: mockFeatureRegistry as any,
       });
     });
 
@@ -86,6 +103,7 @@ describe('Inference Settings API', () => {
               { feature_id: 'agent_builder', endpoints: [{ id: '.anthropic-claude-3.7-sonnet' }] },
             ],
           },
+          invalidEndpoints: [],
         },
         headers: { 'content-type': 'application/json' },
       });
@@ -105,6 +123,7 @@ describe('Inference Settings API', () => {
         body: {
           _meta: { id: INFERENCE_SETTINGS_ID },
           data: { features: [] },
+          invalidEndpoints: [],
         },
         headers: { 'content-type': 'application/json' },
       });
@@ -149,6 +168,7 @@ describe('Inference Settings API', () => {
         body: {
           _meta: { id: INFERENCE_SETTINGS_ID },
           data: { features: [] },
+          invalidEndpoints: [],
         },
         headers: { 'content-type': 'application/json' },
       });
@@ -235,6 +255,7 @@ describe('Inference Settings API', () => {
       defineInferenceSettingsRoutes({
         logger: mockLogger,
         router: mockRouter.router,
+        featureRegistry: mockFeatureRegistry as any,
       });
     });
 

@@ -9,14 +9,16 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiEmptyPrompt,
   EuiLoadingSpinner,
   EuiPageTemplate,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { Location } from 'history';
 import { useHistory } from 'react-router-dom';
-import * as i18n from '../../../common/translations';
+import * as translations from '../../../common/translations';
 import { docLinks } from '../../../common/doc_links';
 import { FeatureSection } from './feature_section';
 import { DefaultModelSection } from './default_model_section';
@@ -32,6 +34,7 @@ export const ModelSettings: React.FC = () => {
     isDirty: isFeatureDirty,
     assignments,
     sections,
+    invalidEndpointIds,
     updateEndpoints,
     save: saveFeatures,
     resetSection,
@@ -96,7 +99,7 @@ export const ModelSettings: React.FC = () => {
     <>
       <EuiPageTemplate.Header
         data-test-subj="modelSettingsPageHeader"
-        pageTitle={i18n.SETTINGS_TITLE}
+        pageTitle={translations.SETTINGS_TITLE}
         bottomBorder
         paddingSize="none"
         restrictWidth={true}
@@ -108,7 +111,7 @@ export const ModelSettings: React.FC = () => {
             isDisabled={!isDirty}
             data-test-subj="save-settings-button"
           >
-            {i18n.SETTINGS_SAVE_BUTTON}
+            {translations.SETTINGS_SAVE_BUTTON}
           </EuiButton>,
           <EuiButtonEmpty
             iconType="popout"
@@ -119,7 +122,7 @@ export const ModelSettings: React.FC = () => {
             data-test-subj="settings-api-documentation"
             href={docLinks.createInferenceEndpoint}
           >
-            {i18n.API_DOCUMENTATION_LINK}
+            {translations.API_DOCUMENTATION_LINK}
           </EuiButtonEmpty>,
         ]}
       />
@@ -132,6 +135,37 @@ export const ModelSettings: React.FC = () => {
         <DefaultModelSection defaultModelSettings={defaultModelSettings} />
         {disallowOtherModels ? null : (
           <>
+            {invalidEndpointIds.size > 0 && (
+              <>
+                <EuiSpacer size="l" />
+                <EuiCallOut
+                  title={i18n.translate(
+                    'xpack.searchInferenceEndpoints.settings.invalidEndpoints.title',
+                    {
+                      defaultMessage: 'Some assigned inference endpoints are no longer available',
+                    }
+                  )}
+                  color="warning"
+                  iconType="warning"
+                  data-test-subj="invalidEndpointsCallout"
+                  announceOnMount={false}
+                >
+                  <p>
+                    {i18n.translate(
+                      'xpack.searchInferenceEndpoints.settings.invalidEndpoints.description',
+                      {
+                        defaultMessage:
+                          'The following endpoints could not be found: {endpointList}. Features using these endpoints may not work as expected.',
+                        values: {
+                          endpointList: [...invalidEndpointIds].join(', '),
+                        },
+                      }
+                    )}
+                  </p>
+                </EuiCallOut>
+              </>
+            )}
+
             <EuiSpacer size="xl" />
 
             {isLoading ? (
@@ -139,8 +173,8 @@ export const ModelSettings: React.FC = () => {
             ) : sections.length === 0 ? (
               <EuiEmptyPrompt
                 iconType="gear"
-                title={<h2>{i18n.SETTINGS_NO_FEATURES_TITLE}</h2>}
-                body={<p>{i18n.SETTINGS_NO_FEATURES_DESCRIPTION}</p>}
+                title={<h2>{translations.SETTINGS_NO_FEATURES_TITLE}</h2>}
+                body={<p>{translations.SETTINGS_NO_FEATURES_DESCRIPTION}</p>}
                 data-test-subj="settings-no-features"
               />
             ) : (
@@ -155,6 +189,7 @@ export const ModelSettings: React.FC = () => {
                     }))}
                     onReset={() => setResetParentKey(section.featureId)}
                     onEndpointsChange={updateEndpoints}
+                    invalidEndpointIds={invalidEndpointIds}
                     isBeta={section.isBeta}
                     isTechPreview={section.isTechPreview}
                   />
