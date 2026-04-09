@@ -72,6 +72,7 @@ export class AutomaticImportSavedObjectService {
         integration_id: integrationId,
         created_by: authenticatedUser.username,
         created_by_profile_uid: authenticatedUser.profile_uid,
+        connector_id: integrationParams.connectorId,
         metadata: {
           title: integrationParams.title,
           description: integrationParams.description,
@@ -134,6 +135,7 @@ export class AutomaticImportSavedObjectService {
         last_updated_by: data.last_updated_by ?? existingIntegration.last_updated_by,
         last_updated_at: new Date().toISOString(),
         status: data.status ?? existingIntegration.status,
+        connector_id: data.connector_id ?? existingIntegration.connector_id,
         metadata: {
           ...existingIntegration.metadata,
           ...data.metadata,

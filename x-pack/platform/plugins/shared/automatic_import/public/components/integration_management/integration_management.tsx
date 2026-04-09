@@ -167,6 +167,7 @@ export const IntegrationManagement = React.memo(() => {
       title: integration.title,
       description: integration.description,
       logo: integration.logo,
+      connectorId: integration.connectorId ?? '',
     };
   }, [integration]);
 
