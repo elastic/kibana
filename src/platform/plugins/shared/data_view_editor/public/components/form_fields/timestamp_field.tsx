@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
@@ -94,6 +94,8 @@ export const TimestampField = ({
   const timestampNoFieldsHelp =
     options.length === 0 && !isLoadingOptions && hasMatchedIndices ? noTimestampOptionText : '';
 
+  const wasValueInTheListRef = useRef(false);
+
   return (
     <UseField<EuiComboBoxOptionOption<string>> config={timestampConfig} path="timestampField">
       {(field) => {
@@ -110,12 +112,24 @@ export const TimestampField = ({
           (option) => option.value === value.value
         );
 
+        if (valueInList) {
+          wasValueInTheListRef.current = true;
+        }
+
         if ((!value || !valueInList) && !isDisabled) {
           const val = optionsAsComboBoxOptions.filter((el) => el.value === '@timestamp');
           if (val.length) {
+            wasValueInTheListRef.current = true;
             setValue(val[0]);
           }
-        } else if (!isLoadingOptions && typeof value === 'object' && value?.value && !valueInList) {
+        } else if (
+          !isLoadingOptions &&
+          typeof value === 'object' &&
+          value?.value &&
+          !valueInList &&
+          wasValueInTheListRef.current
+        ) {
+          wasValueInTheListRef.current = false;
           reset();
         }
 
