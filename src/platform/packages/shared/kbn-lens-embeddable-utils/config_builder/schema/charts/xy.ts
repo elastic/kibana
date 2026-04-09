@@ -41,6 +41,7 @@ import {
   DEFAULT_PARTIAL_BUCKETS_VISIBLE,
   DEFAULT_POINTS_VISIBILITY,
 } from '../../transforms/charts/xy/defaults';
+import { objectUnion } from './utils/object_union';
 
 /**
  * Statistical functions that can be displayed in chart legend for data series
@@ -966,7 +967,7 @@ const annotationByRefLayerSchema = schema.object(
   }
 );
 
-const annotationLayerSchema = schema.oneOf(
+const annotationLayerSchema = objectUnion(
   [annotationLayerByValueSchema, annotationByRefLayerSchema],
   {
     meta: {
@@ -976,8 +977,12 @@ const annotationLayerSchema = schema.oneOf(
   }
 );
 
-const xyLayerUnionNoESQL = schema.oneOf(
-  [xyDataLayerSchemaNoESQL, referenceLineLayerSchemaNoESQL, annotationLayerSchema],
+const xyLayerUnionNoESQL = objectUnion(
+  [
+    xyDataLayerSchemaNoESQL,
+    referenceLineLayerSchemaNoESQL,
+    ...annotationLayerSchema.getUnionTypes(),
+  ],
   {
     meta: {
       id: 'xyLayersNoESQL',
@@ -986,7 +991,7 @@ const xyLayerUnionNoESQL = schema.oneOf(
   }
 );
 
-const xyLayerUnionESQL = schema.oneOf([xyDataLayerSchemaESQL], {
+const xyLayerUnionESQL = objectUnion([xyDataLayerSchemaESQL], {
   meta: {
     id: 'xyLayersESQL',
     description: 'XY chart layer types for ES|QL queries',
@@ -1043,7 +1048,7 @@ export const xyStateSchemaESQL = schema.object(
 /**
  * XY chart state
  */
-export const xyStateSchema = schema.oneOf([xyStateSchemaNoESQL, xyStateSchemaESQL], {
+export const xyStateSchema = objectUnion([xyStateSchemaNoESQL, xyStateSchemaESQL], {
   meta: {
     id: 'xyChart',
     title: 'XY Chart',
