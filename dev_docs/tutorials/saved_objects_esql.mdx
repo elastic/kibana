@@ -139,7 +139,7 @@ If you provide a `filter` in the options, it is merged with the security filter 
 
 Encrypted saved object attributes are handled differently depending on whether `_source` is present in the response:
 
-- **With `_source` (via `metadata: ['_id', '_source']`):** The full document in `_source` contains all attributes needed for AAD (Additional Authenticated Data) reconstruction. Encrypted attributes are **decrypted** in `_source` using the same path as `find` and `search`. If decryption fails (e.g., key rotation), encrypted attributes are stripped from `_source` instead.
+- **With `_source` (via `metadata: ['_id', '_source']`):** The full document in `_source` contains all attributes needed for AAD (Additional Authenticated Data) reconstruction. Encrypted attributes are by default stripped from `_source`, or are **decrypted** in `_source`, using the same path as `find` and `search`, if registered with the `dangerouslyExposeValue` option. If decryption fails (e.g., key rotation), all encrypted attributes are stripped from `_source`.
 - **Standalone scalar columns (e.g., `connector.secrets`):** Always replaced with `null`, regardless of `_source` decryption. These columns contain raw ciphertext that cannot be used outside the document context.
 
 For example, if a `connector` type has an encrypted `secrets` attribute:
