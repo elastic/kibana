@@ -42,6 +42,7 @@ export interface TracesFlyout {
   readonly logs: {
     readonly section: Locator;
     readonly openInDiscoverButton: Locator;
+    readonly totalDocuments: Locator;
   };
 
   readonly spanLinks: {
@@ -131,6 +132,10 @@ export function createTracesFlyout(page: ScoutPage): TracesFlyout {
     logs: {
       section: page.testSubj.locator('unifiedDocViewerLogsSection'),
       openInDiscoverButton: page.testSubj.locator('unifiedDocViewerLogsOpenInDiscoverButton'),
+      totalDocuments: page.testSubj
+        .locator('unifiedDocViewerLogsSection')
+        .locator('[data-test-subj="savedSearchTotalDocuments"]')
+        .locator('strong'),
     },
 
     spanLinks: {
