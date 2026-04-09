@@ -323,6 +323,15 @@ export const streamRoutingMachine = setup({
             'childStreams.mode.changeToQueryMode': {
               target: '#queryMode',
             },
+            'stream.received': {
+              target: '#ingestMode',
+              actions: [
+                { type: 'storeDefinition', params: ({ event }) => event },
+                { type: 'setupRouting', params: ({ event }) => ({ definition: event.definition }) },
+                { type: 'clearRefreshing' },
+              ],
+              reenter: true,
+            },
             'routingSamples.setDocumentMatchFilter': {
               actions: sendTo('routingSamplesMachine', ({ event }) => ({
                 type: 'routingSamples.setDocumentMatchFilter',
@@ -818,6 +827,14 @@ export const streamRoutingMachine = setup({
               guard: not('isClassicStream'),
               target: '#ingestMode',
               actions: assign({ editingQueryStreamName: null }),
+            },
+            'stream.received': {
+              target: '#queryMode',
+              actions: [
+                { type: 'storeDefinition', params: ({ event }) => event },
+                { type: 'clearRefreshing' },
+              ],
+              reenter: true,
             },
           },
           states: {
