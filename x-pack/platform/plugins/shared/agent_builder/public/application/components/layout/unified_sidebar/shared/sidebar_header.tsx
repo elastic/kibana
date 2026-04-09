@@ -20,7 +20,6 @@ import { css } from '@emotion/react';
 
 import { useAgentBuilderAgents } from '../../../../hooks/agents/use_agents';
 import { useNavigation } from '../../../../hooks/use_navigation';
-import { useUiPrivileges } from '../../../../hooks/use_ui_privileges';
 import { appPaths } from '../../../../utils/app_paths';
 import { AgentAvatar } from '../../../common/agent_avatar';
 import { AgentSelector } from './agent_selector';
