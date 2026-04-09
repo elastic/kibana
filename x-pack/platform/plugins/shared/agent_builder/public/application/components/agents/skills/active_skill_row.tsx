@@ -17,7 +17,8 @@ export interface ActiveSkillRowProps {
   onSelect: (skill: PublicSkillSummary) => void;
   onRemove: (skill: PublicSkillSummary) => void;
   isRemoving?: boolean;
-  readOnly?: boolean;
+  isAutoIncluded: boolean;
+  canEditAgent: boolean;
 }
 
 export const ActiveSkillRow: React.FC<ActiveSkillRowProps> = ({
@@ -26,7 +27,8 @@ export const ActiveSkillRow: React.FC<ActiveSkillRowProps> = ({
   onSelect,
   onRemove,
   isRemoving = false,
-  readOnly = false,
+  isAutoIncluded,
+  canEditAgent,
 }) => {
   return (
     <ActiveItemRow
@@ -37,8 +39,9 @@ export const ActiveSkillRow: React.FC<ActiveSkillRowProps> = ({
       onRemove={() => onRemove(skill)}
       isRemoving={isRemoving}
       removeAriaLabel={labels.agentSkills.removeSkillAriaLabel}
+      canEditAgent={canEditAgent}
       readOnlyContent={
-        readOnly ? (
+        isAutoIncluded ? (
           <EuiBadge color="hollow">{labels.agentSkills.elasticCapabilitiesReadOnlyBadge}</EuiBadge>
         ) : undefined
       }
