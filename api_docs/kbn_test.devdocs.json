@@ -3556,7 +3556,7 @@
           "() => RegExpMatchArray | null | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/fips.ts",
-        "lineNumber": 50,
+        "lineNumber": 56,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4573,7 +4573,7 @@
           "() => void"
         ],
         "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/cli/ftr.ts",
-        "lineNumber": 22,
+        "lineNumber": 23,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
