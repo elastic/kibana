@@ -28,6 +28,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { defer } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
 import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useEsqlEditorParams } from '../../hooks/use_esql_editor_params';
 import { useEsqlParamsValidation } from '../../hooks/use_esql_params_validation';
@@ -82,11 +83,10 @@ const EsqlParamActions: React.FC<EsqlParamActionsProps> = ({ onAppend, onReplace
   return (
     <>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          aria-label={i18nMessages.inferParamsButtonLabel}
+        <AiButton
           iconType="sparkles"
-          color="primary"
           size="s"
+          variant="empty"
           onClick={() => {
             inferParamsFromEsql();
             trigger('esql');
@@ -94,7 +94,7 @@ const EsqlParamActions: React.FC<EsqlParamActionsProps> = ({ onAppend, onReplace
           }}
         >
           {i18nMessages.inferParamsButtonLabel}
-        </EuiButtonEmpty>
+        </AiButton>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
