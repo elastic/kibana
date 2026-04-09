@@ -153,6 +153,13 @@ export interface DateRangePickerProps {
    * When omitted, paths are used as-is.
    */
   prependBasePath?: (path: string) => string;
+  /**
+   * Whether the current user can access the Advanced Settings management page.
+   * When `false`, links to Advanced Settings are hidden in the settings panel.
+   * Typically derived from `capabilities.advancedSettings.save`.
+   * @default false
+   */
+  canAccessAdvancedSettings?: boolean;
 }
 
 export interface DateRangePickerOnChangeProps extends TimeRangeBounds {

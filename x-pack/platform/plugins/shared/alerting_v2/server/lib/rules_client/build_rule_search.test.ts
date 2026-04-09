@@ -14,13 +14,13 @@ describe('buildFindRulesSearch', () => {
 
   it('returns the search-only query when no explicit filter is provided', () => {
     expect(buildFindRulesSearch({ search: 'lim' })).toBe(
-      '(alerting_rule.attributes.metadata.name: lim* OR alerting_rule.attributes.metadata.tags: lim*)'
+      '(alerting_rule.attributes.metadata.name: lim* OR alerting_rule.attributes.metadata.description: lim* OR alerting_rule.attributes.metadata.tags: lim* OR alerting_rule.attributes.grouping.fields: lim*)'
     );
   });
 
   it('combines an existing filter with the search query', () => {
     expect(buildFindRulesSearch({ filter: 'enabled: true', search: 'prod' })).toBe(
-      '(alerting_rule.attributes.enabled: true AND (alerting_rule.attributes.metadata.name: prod* OR alerting_rule.attributes.metadata.tags: prod*))'
+      '(alerting_rule.attributes.enabled: true AND (alerting_rule.attributes.metadata.name: prod* OR alerting_rule.attributes.metadata.description: prod* OR alerting_rule.attributes.metadata.tags: prod* OR alerting_rule.attributes.grouping.fields: prod*))'
     );
   });
 });
