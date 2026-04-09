@@ -257,16 +257,11 @@ describe('<PipelinesList />', () => {
         // racing the flyout rendering against useRequest's async state updates.
         const pipelinePath = `${API_BASE_PATH}/${encodeURIComponent(pipelineName)}`;
         await waitFor(() =>
-          expect(httpSetup.get.mock.calls.some((call) => call[0].path === pipelinePath)).toBe(true)
+          expect(httpSetup.get.mock.calls.length).toBeGreaterThan(getCallsBeforeOpenFlyout)
         );
-        const pipelineRequestCallIndex = httpSetup.get.mock.calls.findIndex(
-          (call, idx) => idx >= getCallsBeforeOpenFlyout && call[0].path === pipelinePath
+        await waitFor(() =>
+          expect(httpSetup.get).toHaveBeenCalledWith(pipelinePath, expect.any(Object))
         );
-        const pipelineRequest = httpSetup.get.mock.results[pipelineRequestCallIndex]?.value as
-          | Promise<unknown>
-          | undefined;
-        expect(pipelineRequest).toBeDefined();
-        await pipelineRequest;
 
         expect(screen.getByTestId('pipelinesTable')).toBeInTheDocument();
         await screen.findByTestId('pipelineDetails');
