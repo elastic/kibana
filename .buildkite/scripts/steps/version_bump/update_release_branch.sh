@@ -13,7 +13,7 @@ echo "Updating branch property in package.json to '$BRANCH'"
 jq --arg branch "$BRANCH" '.branch = $branch' package.json > package.json.tmp && mv package.json.tmp package.json
 
 git add package.json
-git commit -m "[release branch setup] Remove CODEOWNERS and set branch to ${BRANCH}"
+git commit -m "[release branch setup] Set branch to ${BRANCH}"
 
 git push origin "$BRANCH"
 
