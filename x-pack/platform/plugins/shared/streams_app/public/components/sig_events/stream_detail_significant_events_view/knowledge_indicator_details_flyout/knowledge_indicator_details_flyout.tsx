@@ -65,11 +65,7 @@ export function KnowledgeIndicatorDetailsFlyout({
       {/* First header: minimal toolbar with close button */}
       <FlyoutToolbarHeader>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="cross"
-            aria-label={CLOSE_BUTTON_ARIA_LABEL}
-            onClick={onClose}
-          />
+          <EuiButtonIcon iconType="cross" aria-label={CLOSE_BUTTON_ARIA_LABEL} onClick={onClose} />
         </EuiFlexItem>
       </FlyoutToolbarHeader>
 
