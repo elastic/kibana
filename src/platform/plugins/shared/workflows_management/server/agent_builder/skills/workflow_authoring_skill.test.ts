@@ -7,29 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_definition';
 import { workflowAuthoringSkill } from './workflow_authoring_skill';
-import { workflowTools } from '../../../common/agent_builder/constants';
+import {
+  WORKFLOW_YAML_ATTACHMENT_TYPE,
+  workflowTools,
+} from '../../../common/agent_builder/constants';
 
 describe('workflowAuthoringSkill', () => {
+  it('passes agent-builder validation', async () => {
+    await expect(validateSkillDefinition(workflowAuthoringSkill)).resolves.toBeDefined();
+  });
+
+  it('is marked as experimental', () => {
+    expect(workflowAuthoringSkill.experimental).toBe(true);
+  });
+
   describe('getRegistryTools', () => {
     it('includes all workflow tools', () => {
       const tools = workflowAuthoringSkill.getRegistryTools!();
       expect(tools).toEqual(Object.values(workflowTools));
-    });
-
-    it('includes key workflow tools', () => {
-      const tools = workflowAuthoringSkill.getRegistryTools!();
-      expect(tools).toContain(workflowTools.getStepDefinitions);
-      expect(tools).toContain(workflowTools.getTriggerDefinitions);
-      expect(tools).toContain(workflowTools.validateWorkflow);
-      expect(tools).toContain(workflowTools.getExamples);
-      expect(tools).toContain(workflowTools.getConnectors);
-      expect(tools).toContain(workflowTools.setYaml);
-      expect(tools).toContain(workflowTools.insertStep);
-      expect(tools).toContain(workflowTools.modifyStep);
-      expect(tools).toContain(workflowTools.modifyStepProperty);
-      expect(tools).toContain(workflowTools.modifyProperty);
-      expect(tools).toContain(workflowTools.deleteStep);
     });
   });
 
@@ -42,6 +39,19 @@ describe('workflowAuthoringSkill', () => {
     it('does not reference list_workflows or get_workflow tools', () => {
       expect(workflowAuthoringSkill.content).not.toContain('list_workflows');
       expect(workflowAuthoringSkill.content).not.toContain('get_workflow');
+    });
+
+    it('references the workflow attachment type', () => {
+      expect(workflowAuthoringSkill.content).toContain(WORKFLOW_YAML_ATTACHMENT_TYPE);
+    });
+
+    it('documents all edit tools', () => {
+      expect(workflowAuthoringSkill.content).toContain(workflowTools.setYaml);
+      expect(workflowAuthoringSkill.content).toContain(workflowTools.insertStep);
+      expect(workflowAuthoringSkill.content).toContain(workflowTools.modifyStep);
+      expect(workflowAuthoringSkill.content).toContain(workflowTools.modifyStepProperty);
+      expect(workflowAuthoringSkill.content).toContain(workflowTools.modifyProperty);
+      expect(workflowAuthoringSkill.content).toContain(workflowTools.deleteStep);
     });
   });
 });
