@@ -26,7 +26,7 @@ export const logTestFileFixture = base.extend<{ logTestFile: void }, { log: Scou
       if (testInfo.file !== lastLoggedFile) {
         lastLoggedFile = testInfo.file;
         const relativePath = path.relative(REPO_ROOT, testInfo.file);
-        log.testFileStarted(relativePath);
+        log.debug(`[testFile] Running tests: ${relativePath}`);
       }
       await use();
     },
