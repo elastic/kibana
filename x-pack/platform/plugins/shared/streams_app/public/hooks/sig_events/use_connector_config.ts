@@ -61,7 +61,11 @@ export function useConnectorConfig() {
           : {}),
       },
     }));
-  }, [featuresConnectors.resolvedConnectorId, queriesConnectors.resolvedConnectorId]);
+  }, [
+    featuresConnectors.resolvedConnectorId,
+    queriesConnectors.resolvedConnectorId,
+    setOnboardingConfig,
+  ]);
 
   return {
     featuresConnectors,

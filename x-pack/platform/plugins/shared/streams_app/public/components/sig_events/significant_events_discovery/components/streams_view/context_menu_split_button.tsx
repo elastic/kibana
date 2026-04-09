@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiContextMenu, EuiSplitButton, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiContextMenu,
+  EuiSplitButton,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { useBoolean } from '@kbn/react-hooks';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -53,6 +59,7 @@ export const ContextMenuSplitButton = ({
   isLoading,
   'data-test-subj': dataTestSubj,
 }: ContextMenuSplitButtonProps) => {
+  const { euiTheme } = useEuiTheme();
   const [isOpen, { off: close, toggle }] = useBoolean(false);
   const [menuResetKey, setMenuResetKey] = useState(0);
   const popoverId = useGeneratedHtmlId({ prefix: 'contextMenuSplitButton' });
@@ -97,7 +104,7 @@ export const ContextMenuSplitButton = ({
               color="danger"
               size="s"
               title={errorTitle}
-              css={{ margin: 8 }}
+              css={{ margin: euiTheme.size.s }}
             />
           ) : (
             <EuiContextMenu key={menuResetKey} initialPanelId={0} panels={panels} />
