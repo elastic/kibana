@@ -205,7 +205,10 @@ describe('useLensProps', () => {
       expect(result.current).toStrictEqual(
         expect.objectContaining({
           attributes: { attributes: {}, state: {}, visualizationType: 'lnsXY' },
-          executionContext: { description: 'metrics experience chart data' },
+          executionContext: {
+            page: 'metrics_fetch_chart_data',
+            description: 'metrics experience chart data',
+          },
           id: 'metricsExperienceLensComponent',
           noPadding: true,
           searchSessionId: fetchParams.searchSessionId,

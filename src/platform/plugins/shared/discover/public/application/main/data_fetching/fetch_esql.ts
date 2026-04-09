@@ -18,6 +18,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { RecordsFetchResponse } from '../../types';
@@ -48,6 +49,7 @@ export interface FetchEsqlParams {
     title: string;
     description: string;
   };
+  executionContext?: KibanaExecutionContext;
 }
 
 export function fetchEsql({
@@ -65,6 +67,7 @@ export function fetchEsql({
   searchSessionId,
   projectRouting,
   inspectorConfig,
+  executionContext,
 }: FetchEsqlParams): Promise<RecordsFetchResponse> {
   const props = getTextBasedQueryStateToAstProps({
     query,
@@ -86,6 +89,7 @@ export function fetchEsql({
             projectRouting,
           },
           searchSessionId,
+          executionContext,
         });
         abortSignal?.addEventListener('abort', (e) => {
           contract.cancel((e.target as AbortSignal)?.reason);

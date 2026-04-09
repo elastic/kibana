@@ -86,4 +86,51 @@ describe('fetchEsql', () => {
 
     expect(result.time).toEqual(absoluteTimeRange);
   });
+
+  it('passes execution context to expression execution when provided', async () => {
+    const executionContext = { page: 'metrics_fetch_documents' };
+    const expressionsExecuteSpy = jest.spyOn(discoverServiceMock.expressions, 'execute');
+    expressionsExecuteSpy.mockReturnValueOnce({
+      cancel: jest.fn(),
+      getData: jest.fn(() =>
+        of({
+          result: {
+            columns: [],
+            rows: [],
+          },
+        })
+      ),
+    } as unknown as ExecutionContract);
+
+    await fetchEsql({ ...fetchEsqlMockProps, executionContext });
+
+    expect(expressionsExecuteSpy).toHaveBeenCalledWith(
+      expect.anything(),
+      null,
+      expect.objectContaining({ executionContext })
+    );
+  });
+
+  it('does not pass execution context when not provided', async () => {
+    const expressionsExecuteSpy = jest.spyOn(discoverServiceMock.expressions, 'execute');
+    expressionsExecuteSpy.mockReturnValueOnce({
+      cancel: jest.fn(),
+      getData: jest.fn(() =>
+        of({
+          result: {
+            columns: [],
+            rows: [],
+          },
+        })
+      ),
+    } as unknown as ExecutionContract);
+
+    await fetchEsql(fetchEsqlMockProps);
+
+    expect(expressionsExecuteSpy).toHaveBeenCalledWith(
+      expect.anything(),
+      null,
+      expect.objectContaining({ executionContext: undefined })
+    );
+  });
 });

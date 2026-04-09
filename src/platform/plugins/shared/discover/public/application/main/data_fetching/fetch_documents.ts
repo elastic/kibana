@@ -18,6 +18,7 @@ import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { RecordsFetchResponse } from '../../types';
 import { getAllowedSampleSize } from '../../../utils/get_allowed_sample_size';
 import type { CommonFetchParams } from './fetch_all';
+import { DataSourceCategory } from '../../../context_awareness/profiles/data_source_profile';
 
 /**
  * Requests the documents for Discover. This will return a promise that will resolve
@@ -49,7 +50,9 @@ export const fetchDocuments = (
   const dataView = searchSource.getField('index')!;
   const isFetchingMore = Boolean(searchSource.getField('searchAfter'));
 
+  const { dataSourceContext } = scopedProfilesManager.getContexts();
   const executionContext = {
+    ...PROFILE_DOCUMENT_FETCH_CONTEXT[dataSourceContext.category],
     description: isFetchingMore ? 'fetch more documents' : 'fetch documents',
   };
 
@@ -99,4 +102,9 @@ export const fetchDocuments = (
       interceptedWarnings,
     };
   });
+};
+
+const PROFILE_DOCUMENT_FETCH_CONTEXT: Partial<Record<DataSourceCategory, { page: string }>> = {
+  [DataSourceCategory.Metrics]: { page: 'metrics_fetch_documents' },
+  [DataSourceCategory.Traces]: { page: 'traces_fetch_documents' },
 };

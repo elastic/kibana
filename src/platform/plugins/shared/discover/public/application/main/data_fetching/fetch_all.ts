@@ -10,6 +10,7 @@
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import type { ISearchSource } from '@kbn/data-plugin/common';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { BehaviorSubject } from 'rxjs';
 import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
@@ -36,6 +37,7 @@ import type { DiscoverServices } from '../../../build_services';
 import { fetchEsql } from './fetch_esql';
 import type { InternalStateStore, TabState } from '../state_management/redux';
 import type { ScopedProfilesManager } from '../../../context_awareness';
+import { DataSourceCategory } from '../../../context_awareness/profiles/data_source_profile';
 import type { ScopedDiscoverEBTManager } from '../../../ebt_manager';
 
 export interface CommonFetchParams {
@@ -109,6 +111,7 @@ export function fetchAll(
     });
 
     // Start fetching all required requests
+    const executionContext = getProfileExecutionContext(scopedProfilesManager);
     const response = isEsqlQuery
       ? fetchEsql({
           query,
@@ -121,6 +124,7 @@ export function fetchAll(
           timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
           esqlVariables: currentTab.esqlVariables,
           searchSessionId: params.searchSessionId,
+          executionContext,
         })
       : fetchDocuments(searchSource, params);
     const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';
@@ -303,4 +307,16 @@ const noResultsFound = (subject: DataMain$) => {
       (a, b) => a.fetchStatus === b.fetchStatus && a.foundDocuments === b.foundDocuments
     )
   );
+};
+
+const PROFILE_EXECUTION_CONTEXT: Partial<Record<DataSourceCategory, KibanaExecutionContext>> = {
+  [DataSourceCategory.Metrics]: { page: 'metrics_fetch_documents' },
+  [DataSourceCategory.Traces]: { page: 'traces_fetch_documents' },
+};
+
+const getProfileExecutionContext = (
+  scopedProfilesManager: ScopedProfilesManager
+): KibanaExecutionContext | undefined => {
+  const { dataSourceContext } = scopedProfilesManager.getContexts();
+  return PROFILE_EXECUTION_CONTEXT[dataSourceContext.category];
 };

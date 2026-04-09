@@ -33,6 +33,11 @@ import type {
   LensESQLDataset,
 } from '@kbn/lens-embeddable-utils/config_builder/types';
 import type { UnifiedMetricsGridProps } from '../../../types';
+import { getMetricsExecutionContext } from '../../observability/metrics/utils/execution_context';
+import {
+  MetricsExecutionContextAction,
+  MetricsExecutionContextName,
+} from '../../observability/metrics/utils/execution_context_enums';
 
 export type LensProps = Pick<
   EmbeddableComponentProps,
@@ -226,6 +231,10 @@ const getLensProps = ({
   esqlVariables,
   searchSessionId,
   executionContext: {
+    ...getMetricsExecutionContext(
+      MetricsExecutionContextAction.FETCH,
+      MetricsExecutionContextName.CHART_DATA
+    ).executionContext,
     description: 'metrics experience chart data',
   },
   lastReloadRequestTime,

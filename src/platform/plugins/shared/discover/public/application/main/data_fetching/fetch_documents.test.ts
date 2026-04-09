@@ -21,6 +21,7 @@ import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_so
 import { getDiscoverInternalStateMock } from '../../../__mocks__/discover_state.mock';
 import { selectTabRuntimeState } from '../state_management/redux';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
+import { DataSourceCategory } from '../../../context_awareness/profiles/data_source_profile';
 
 const getDeps = async (): Promise<CommonFetchParams> => {
   const services = createDiscoverServicesMock();
@@ -128,6 +129,52 @@ describe('test fetchDocuments', () => {
 
     expect(searchSourceForLoadMore.fetch$ as jest.Mock).toHaveBeenCalledWith(
       expect.objectContaining({ sessionId: undefined })
+    );
+  });
+
+  test('passes metrics execution context page label when in metrics profile', async () => {
+    const deps = await getDeps();
+    const hits = [{ _id: '1', foo: 'bar' }] as unknown as EsHitRecord[];
+
+    const searchSource = createSearchSourceMock({ index: dataViewMock });
+    searchSource.fetch$ = <T>() =>
+      of({ rawResponse: { hits: { hits } } } as IKibanaSearchResponse<SearchResponse<T>>);
+    jest.spyOn(searchSource, 'fetch$');
+
+    jest.spyOn(deps.scopedProfilesManager, 'getContexts').mockReturnValue({
+      rootContext: { profileId: 'root' },
+      dataSourceContext: { profileId: 'metrics', category: DataSourceCategory.Metrics },
+    });
+
+    await fetchDocuments(searchSource, deps);
+
+    expect(searchSource.fetch$ as jest.Mock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionContext: expect.objectContaining({ page: 'metrics_fetch_documents' }),
+      })
+    );
+  });
+
+  test('does not pass profile-specific page label when in default profile', async () => {
+    const deps = await getDeps();
+    const hits = [{ _id: '1', foo: 'bar' }] as unknown as EsHitRecord[];
+
+    const searchSource = createSearchSourceMock({ index: dataViewMock });
+    searchSource.fetch$ = <T>() =>
+      of({ rawResponse: { hits: { hits } } } as IKibanaSearchResponse<SearchResponse<T>>);
+    jest.spyOn(searchSource, 'fetch$');
+
+    jest.spyOn(deps.scopedProfilesManager, 'getContexts').mockReturnValue({
+      rootContext: { profileId: 'root' },
+      dataSourceContext: { profileId: 'default', category: DataSourceCategory.Default },
+    });
+
+    await fetchDocuments(searchSource, deps);
+
+    expect(searchSource.fetch$ as jest.Mock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionContext: { description: 'fetch documents' },
+      })
     );
   });
 });
