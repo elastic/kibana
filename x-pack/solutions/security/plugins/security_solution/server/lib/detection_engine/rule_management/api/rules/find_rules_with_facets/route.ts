@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
+import { MAX_RESULTS_WINDOW } from '../../../../../../usage/constants';
 import { DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS } from '../../../../../../../common/constants';
 import type {
   FacetCounts,
@@ -22,9 +24,7 @@ import {
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { findRules } from '../../../logic/search/find_rules';
 import { buildGranularRulesKql } from '../../../logic/search/build_granular_rules_kql';
-import { parseGranularSort } from '../../../logic/search/parse_granular_sort';
 import { computeGranularFacetCounts } from '../../../logic/search/compute_granular_facet_counts';
-import { resolveGranularFindCursor } from '../../../logic/search/resolve_granular_find_cursor';
 import { buildSiemResponse } from '../../../../routes/utils';
 import { transformFindAlerts } from '../../../utils/utils';
 
@@ -60,61 +60,77 @@ export const findRulesWithFacetsRoute = (router: SecuritySolutionPluginRouter, l
         }
 
         try {
-          const reqBody = request.body;
+          const {
+            filter,
+            search,
+            sort_field: sortField,
+            sort_order: sortOrder,
+            search_after: searchAfterInput,
+            page = 1,
+            per_page,
+            fields,
+            aggregations,
+          } = request.body;
 
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
           const rulesClient = await ctx.alerting.getRulesClient();
 
           const combinedKql = buildGranularRulesKql({
-            filter: reqBody.filter,
-            search: reqBody.search,
+            filter,
+            search,
           });
 
-          const parsedSort = parseGranularSort(reqBody.sort);
-          const sortField = parsedSort?.sortField;
-          const sortOrder = parsedSort?.sortOrder;
-
-          const cursorResult = resolveGranularFindCursor(reqBody.cursor, sortField, sortOrder);
-
-          if (!cursorResult.ok) {
-            return siemResponse.error({ statusCode: 400, body: cursorResult.error });
-          }
-
-          const { searchAfter, pit } = cursorResult;
+          const searchAfter: SortResults | undefined =
+            searchAfterInput != null && searchAfterInput.length > 0
+              ? ([...searchAfterInput] as SortResults)
+              : undefined;
 
           let ruleIds: string[] | undefined;
           let warnings: WarningSchema[] | undefined;
 
-          const includeCounts = reqBody.aggregations?.counts ?? [];
+          const categoryCounts = aggregations?.counts ?? [];
 
           let counts: FacetCounts | undefined;
 
           const rules = await findRules({
             rulesClient,
-            perPage: reqBody.per_page,
-            page: searchAfter != null ? 1 : reqBody.page,
+            perPage: per_page,
+            page: searchAfter ? undefined : page,
             sortField,
             sortOrder,
             filter: combinedKql,
-            fields: reqBody.fields,
+            fields,
             ruleIds,
             searchAfter,
-            pit,
           });
 
-          if (includeCounts.length > 0) {
+          if (categoryCounts.length > 0) {
             counts = await computeGranularFacetCounts({
               rulesClient,
               filter: combinedKql,
               ruleIds,
-              categories: includeCounts,
+              categories: categoryCounts,
             });
           }
 
           const base = transformFindAlerts(rules, warnings);
+
+          const shouldReturnSearchAfter =
+            sortField != null &&
+            sortOrder != null &&
+            rules.searchAfter != null &&
+            rules.searchAfter.length > 0 &&
+            (page * per_page >= MAX_RESULTS_WINDOW || searchAfter != null);
+
+          const responseSearchAfter =
+            shouldReturnSearchAfter && rules.searchAfter != null
+              ? ([...rules.searchAfter] as FindRulesWithFacetsResponse['search_after'])
+              : undefined;
+
           const responseBody: FindRulesWithFacetsResponse = {
             ...base,
             ...(counts !== undefined ? { counts } : {}),
+            ...(responseSearchAfter !== undefined ? { search_after: responseSearchAfter } : {}),
           };
 
           return response.ok({ body: responseBody });

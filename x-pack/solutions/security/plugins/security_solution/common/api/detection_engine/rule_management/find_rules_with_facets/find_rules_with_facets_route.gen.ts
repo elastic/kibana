@@ -16,13 +16,31 @@
 
 import { z } from '@kbn/zod/v4';
 
-import {
-  GranularRulesSearch,
-  FindRulesWithFacetsAggregations,
-  FacetCounts,
-} from '../granular_rules_contract.gen';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 import { WarningSchema } from '../../model/warning_schema.gen';
+import {
+  FacetCounts,
+  FindRulesWithFacetsAggregations,
+  GranularRulesSearch,
+} from '../granular_rules_contract.gen';
+import { FindRulesSortField } from '../find_rules/find_rules_route.gen';
+import { SortOrder } from '../../model/sorting.gen';
+
+/**
+  * One value in a `search_after` array (string, number, boolean).
+
+  */
+export const FindRulesWithFacetsSearchAfterItemInternal = z.union([
+  z.string(),
+  z.number(),
+  z.boolean(),
+]);
+
+export type FindRulesWithFacetsSearchAfterItem = z.infer<
+  typeof FindRulesWithFacetsSearchAfterItemInternal
+>;
+export const FindRulesWithFacetsSearchAfterItem =
+  FindRulesWithFacetsSearchAfterItemInternal as z.ZodType<FindRulesWithFacetsSearchAfterItem>;
 
 export type FindRulesWithFacetsRequestBody = z.infer<typeof FindRulesWithFacetsRequestBody>;
 export const FindRulesWithFacetsRequestBody = z
@@ -32,25 +50,16 @@ export const FindRulesWithFacetsRequestBody = z
      */
     fields: z.array(z.string()).optional(),
     /**
-     * KQL filter using saved-object field paths, typically prefixed with `alert.attributes.`
-     * See `FindRulesWithFacetsKqlFilterField`.
-     */
+      * KQL filter string.
+
+      */
     filter: z.string().optional(),
-    /**
-     * Aggregation-related options. See `FindRulesWithFacetsAggregations`.
-     */
     aggregations: FindRulesWithFacetsAggregations.optional(),
-    /**
-     * Optional free-text search combined with the KQL `filter`.
-     * See `GranularRulesSearch`.
-     */
     search: GranularRulesSearch.optional(),
+    sort_field: FindRulesSortField.optional(),
+    sort_order: SortOrder.optional(),
     /**
-     * Sort criteria as `field:order` tokens (e.g. `name:asc`). Comma-separated or repeated per element.
-     */
-    sort: z.array(z.string()).optional(),
-    /**
-     * Page number (1-based). Ignored when `cursor` is provided.
+     * Page number (1-based). Ignored when `search_after` is provided.
      */
     page: z.number().int().min(1).optional().default(1),
     /**
@@ -58,11 +67,16 @@ export const FindRulesWithFacetsRequestBody = z
      */
     per_page: z.number().int().min(0).max(10000).optional().default(20),
     /**
-     * Opaque cursor from a previous response's `next_cursor`.
-     */
-    cursor: z.string().optional(),
+      * Elasticsearch-style `search_after` tiebreaker values. Requires `sort_field` and
+`sort_order`. When set, `page` is ignored.
+
+      */
+    search_after: z.array(FindRulesWithFacetsSearchAfterItem).min(1).optional(),
   })
   .strict();
+
+export type FindRulesWithFacetsRequestBody = z.infer<typeof FindRulesWithFacetsRequestBody>;
+export const FindRulesWithFacetsRequestBody = FindRulesWithFacetsRequestBody;
 export type FindRulesWithFacetsRequestBodyInput = z.input<typeof FindRulesWithFacetsRequestBody>;
 
 export type FindRulesWithFacetsResponse = z.infer<typeof FindRulesWithFacetsResponse>;
@@ -74,9 +88,12 @@ export const FindRulesWithFacetsResponse = z
     data: z.array(RuleResponse),
     warnings: z.array(WarningSchema).optional(),
     /**
-     * Present when more results exist; pass as `cursor` on the next request.
-     */
-    next_cursor: z.string().optional(),
+      * Sort values of the last hit on this page, for use as `search_after` on the next
+request. Only included when deep pagination applies (offset
+at or past the default 10,000-result window) or the request used `search_after`.
+
+      */
+    search_after: z.array(FindRulesWithFacetsSearchAfterItem).optional(),
     counts: FacetCounts.optional(),
   })
   .strict();

@@ -26,8 +26,9 @@ export const GranularRulesSearchMode = z.literal('legacy').default('legacy');
 
 /**
   * Optional free-text search combined with the KQL `filter` on `_find_with_facets`.
-When `mode` is `legacy` and `term` is set, the server ANDs the filter KQL with a KQL
-fragment derived from `term` (same semantics as legacy rule management search).
+When `mode` is `legacy`, the server ANDs the filter KQL with a KQL fragment derived from
+`term` (same semantics as legacy rule management search). An empty string means no
+free-text constraint.
 
   */
 export type GranularRulesSearch = z.infer<typeof GranularRulesSearch>;
@@ -47,46 +48,36 @@ The server maps friendly names to underlying rule fields.
 export type GranularRulesFacetCategory = z.infer<typeof GranularRulesFacetCategory>;
 export const GranularRulesFacetCategory = z.enum([
   'tags',
-  'severity',
-  'risk_score',
   'type',
   'enabled',
-  'customization_status',
-  'execution_status',
+  'gapFillStatuses',
+  'updatedAt',
+  'updatedBy',
+  'createdAt',
+  'createdBy',
+  'lastRunOutcome',
+  'lastRunDuration',
+  'lastRunError',
+  'lastRunWarning',
+  'lastRunStatus',
+  'lastRunStatusReason',
+  'lastRunStatusReasonType',
+  'lastRunStatusReasonMessage',
+  'lastRunStatusReasonCode',
   'name',
 ]);
 export type GranularRulesFacetCategoryEnum = typeof GranularRulesFacetCategory.enum;
 export const GranularRulesFacetCategoryEnum = GranularRulesFacetCategory.enum;
 
 /**
-  * Common **first path segment** after `alert.attributes.` when writing KQL for the
-`_find_with_facets` request `filter` field (same underlying rule document as classic `_find`).
-Filters use full paths such as `alert.attributes.enabled: true` or
-`alert.attributes.name: "My rule"`.
-
-Nested fields append further segments (not listed exhaustively here), for example
-`alert.attributes.schedule.interval`, `alert.attributes.mapped_params.severity`,
-`alert.attributes.params.ruleId`, `alert.attributes.lastRun.outcome`.
-
-This enumeration documents typical vocabulary for clients and codegen; the `filter`
-parameter remains a free-form KQL string and may reference other indexed paths when valid.
+  * Common first path segment when writing KQL for the `_find_with_facets` request `filter` field.
+Filters use full paths such as `enabled: true` or `name: "My rule"`.
 
   */
 export type FindRulesWithFacetsKqlFilterField = z.infer<typeof FindRulesWithFacetsKqlFilterField>;
 export const FindRulesWithFacetsKqlFilterField = z.enum([
-  'alertTypeId',
-  'consumer',
-  'createdAt',
-  'createdBy',
   'enabled',
-  'executionStatus',
-  'lastRun',
-  'mapped_params',
-  'monitoring',
   'name',
-  'params',
-  'revision',
-  'schedule',
   'tags',
   'updatedAt',
   'updatedBy',
@@ -95,8 +86,7 @@ export type FindRulesWithFacetsKqlFilterFieldEnum = typeof FindRulesWithFacetsKq
 export const FindRulesWithFacetsKqlFilterFieldEnum = FindRulesWithFacetsKqlFilterField.enum;
 
 /**
-  * Aggregation-related options on `_find_with_facets` (JSON request body). Additional
-aggregation kinds may be added later alongside `counts`.
+  * Aggregation-related options on `_find_with_facets`.
 
   */
 export type FindRulesWithFacetsAggregations = z.infer<typeof FindRulesWithFacetsAggregations>;
@@ -110,8 +100,7 @@ export const FindRulesWithFacetsAggregations = z
   .strict();
 
 /**
-  * Per-category facet counts. Each key is a facet category from `aggregations.counts`;
-each value maps a displayed bucket value (string) to a non-negative count.
+  * Per-category facet counts. Each key is a facet category from `aggregations.counts`, each value is an object that maps a filter value to its count.
 
   */
 export type FacetCounts = z.infer<typeof FacetCounts>;

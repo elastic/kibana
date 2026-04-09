@@ -27,6 +27,7 @@ import type {
   CoverageOverviewFilter,
   FindRulesWithFacetsAggregations,
   FindRulesWithFacetsResponse,
+  FindRulesWithFacetsSearchAfterItem,
   GranularRulesSearch,
   PatchRuleRequestBody,
 } from '../../../../common/api/detection_engine/rule_management';
@@ -118,20 +119,15 @@ export interface FetchRulesResponse {
   warnings?: WarningSchema[];
 }
 
-/**
- * Props for internal `_find_with_facets`. Intentionally separate from {@link FetchRulesProps} so the
- * facets endpoint is not tied to classic `_find`'s request shape as it evolves.
- *
- * `filter` is structured KQL. `search` is optional `{ term, mode }` in the JSON request body.
- * `sort` is a single token, e.g. `enabled:desc`.
- */
 export interface FetchRulesWithFacetsProps {
   pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
   filter?: string;
   search?: GranularRulesSearch;
-  sort?: string;
+  sort_field?: z.infer<typeof FindRulesSortField>;
+  sort_order?: z.infer<typeof SortOrder>;
   aggregations?: FindRulesWithFacetsAggregations;
-  cursor?: string;
+  /** Elasticsearch-style `search_after` (same `sort_field` / `sort_order` on each request). */
+  search_after?: FindRulesWithFacetsSearchAfterItem[];
   signal?: AbortSignal;
 }
 

@@ -232,29 +232,42 @@ export const fetchRules = async ({
 };
 
 /**
- * Fetches rules via internal `_find_with_facets` (POST JSON body: KQL `filter`, optional `search`, `sort`, …).
- * Not a public HTTP contract yet. Use {@link fetchRules} for classic `_find`.
+ * Fetches all rules from the Detection Engine API with the option to include aggregations
+ * and deep pagination via `search_after`.
+ *
+ * @param filter structured KQL filter
+ * @param search free-text search (e.g. `{ term, mode }`)
+ * @param sort_field field to sort by
+ * @param sort_order sort order (e.g. `asc` or `desc`)
+ * @param aggregations aggregations to include (e.g. `{ counts: ['tags', 'enabled'] }`)
+ * @param pagination pagination options (e.g. `{ page, perPage }`)
+ * @param search_after tiebreaker values for the next page (requires sort_field + sort_order)
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
  */
 export const fetchRulesWithFacets = async ({
   filter = '',
   search,
-  sort = 'enabled:desc',
+  sort_field = 'enabled',
+  sort_order = 'desc',
   pagination = {
     page: 1,
     perPage: 20,
   },
   signal,
   aggregations,
-  cursor,
+  search_after,
 }: FetchRulesWithFacetsProps): Promise<FetchRulesWithFacetsResponse> => {
   const body = {
     page: pagination.page,
     per_page: pagination.perPage,
-    sort: [sort],
+    sort_field,
+    sort_order,
     ...(filter.trim() !== '' ? { filter: filter.trim() } : {}),
     ...(search != null ? { search } : {}),
     ...(aggregations != null ? { aggregations } : {}),
-    ...(cursor ? { cursor } : {}),
+    ...(search_after?.length ? { search_after } : {}),
   };
 
   return KibanaServices.get().http.fetch<FetchRulesWithFacetsResponse>(

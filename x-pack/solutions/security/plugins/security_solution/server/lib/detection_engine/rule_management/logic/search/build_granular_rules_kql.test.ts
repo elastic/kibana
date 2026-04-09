@@ -12,7 +12,7 @@ describe('buildGranularRulesKql', () => {
   it('returns undefined when filter and search are empty', () => {
     expect(buildGranularRulesKql({ filter: undefined, search: undefined })).toBeUndefined();
     expect(buildGranularRulesKql({ filter: '  ', search: undefined })).toBeUndefined();
-    expect(buildGranularRulesKql({ filter: undefined, search: {} })).toBeUndefined();
+    expect(buildGranularRulesKql({ filter: undefined, search: { term: '' } })).toBeUndefined();
     expect(buildGranularRulesKql({ filter: '  ', search: { term: '  ' } })).toBeUndefined();
   });
 

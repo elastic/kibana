@@ -267,18 +267,9 @@ finalize it.
       .query(props.query);
   },
   /**
-      * **Internal Kibana API** — not part of the public REST surface yet; called only from
-first-party Security Solution UI with an internal-origin request. Subject to change
-before promotion to `access: public`.
-
-Paginated listing of installed detection rules using a KQL `filter` string (field paths
-under `alert.attributes.*`, see `FindRulesWithFacetsKqlFilterField` for common first
-segments), optional legacy search, facet counts, multi-sort, and opaque cursor pagination.
-
-When `search.mode` is `legacy` and `search.term` is set, the server ANDs the filter KQL
-with a KQL fragment derived from `term` (same semantics as legacy rule management search).
-
-Sorting is expressed as a `sort` array of `field:order` tokens (comma-separated tokens allowed per element).
+      * Paginated listing of installed detection rules using a JSON body: KQL `filter`, optional `search` (`term` + `mode`), 
+`aggregations.counts` for facet buckets, and optional `search_after` for deep pagination (same `sort_field` /
+`sort_order` on each request. `Page` is ignored when `search_after` is set).
 
       */
   findRulesWithFacets(props: FindRulesWithFacetsProps, kibanaSpace: string = 'default') {
@@ -287,7 +278,7 @@ Sorting is expressed as a `sort` array of `field:order` tokens (comma-separated 
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .send(props.body);
+      .send(props.body as object);
   },
   getRuleExecutionEvents(props: GetRuleExecutionEventsProps, kibanaSpace: string = 'default') {
     return supertest

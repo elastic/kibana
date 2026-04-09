@@ -19,7 +19,7 @@ import { useFetchRulesSnoozeSettingsQuery } from '../../../../rule_management/ap
 import { useGetGapsSummaryByRuleIds } from '../../../../rule_gaps/api/hooks/use_get_gaps_summary_by_rule_id';
 import { useGapAutoFillSchedulerContext } from '../../../../rule_gaps/context/gap_auto_fill_scheduler_context';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
-import { splitRuleFilterSearchFromStructuredKql } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
+import { convertRulesFilterToKQL } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
 import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
@@ -248,11 +248,14 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
   const pagination = useMemo(() => ({ page, perPage }), [page, perPage]);
 
   const findRulesQueryArgs = useMemo(() => {
-    const { structuredKql, searchTerm } = splitRuleFilterSearchFromStructuredKql(filterOptions);
+    const searchTerm = filterOptions.filter?.trim();
+    const structuredKql = convertRulesFilterToKQL({ ...filterOptions, filter: '' });
     return {
       filter: structuredKql,
-      sort: `${sortingOptions.field}:${sortingOptions.order}`,
+      sort_field: sortingOptions.field,
+      sort_order: sortingOptions.order,
       pagination,
+      aggregations: undefined,
       ...(searchTerm !== '' ? { search: { term: searchTerm, mode: 'legacy' as const } } : {}),
     };
   }, [filterOptions, sortingOptions, pagination]);

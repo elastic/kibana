@@ -9,8 +9,11 @@ import type { UseQueryOptions } from '@kbn/react-query';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
 import type { RuleResponse, WarningSchema } from '../../../../../common/api/detection_engine';
+import type { SortOrder } from '../../../../../common/api/detection_engine/model/sorting.gen';
 import type {
+  FindRulesSortField,
   FindRulesWithFacetsAggregations,
+  FindRulesWithFacetsSearchAfterItem,
   GranularRulesSearch,
 } from '../../../../../common/api/detection_engine/rule_management';
 import { DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS } from '../../../../../common/constants';
@@ -21,9 +24,11 @@ import { DEFAULT_QUERY_OPTIONS } from './constants';
 export interface FindRulesQueryArgs {
   filter?: string;
   search?: GranularRulesSearch;
-  sort?: string;
+  sort_field?: FindRulesSortField;
+  sort_order?: SortOrder;
   pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
   aggregations?: FindRulesWithFacetsAggregations;
+  search_after?: FindRulesWithFacetsSearchAfterItem[];
 }
 
 const FIND_RULES_QUERY_KEY = ['POST', DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS];
@@ -59,10 +64,12 @@ export const useFindRulesQuery = (
       const response = await fetchRulesWithFacets({
         signal,
         filter: queryArgs.filter,
-        sort: queryArgs.sort,
+        sort_field: queryArgs.sort_field,
+        sort_order: queryArgs.sort_order,
         pagination: queryArgs.pagination,
         search: queryArgs.search,
         aggregations: queryArgs.aggregations,
+        search_after: queryArgs.search_after,
       });
 
       return { rules: response.data, total: response.total, warnings: response.warnings };

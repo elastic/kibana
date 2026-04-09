@@ -12,7 +12,6 @@ import { RuleCustomizationStatus, RuleExecutionStatusEnum } from '../../api/dete
 import { fullyEscapeKQLStringParam, prepareKQLStringParam } from '../../utils/kql';
 import {
   ENABLED_FIELD,
-  HIGHEST_PRIORITY_GAP_FILL_STATUS_FIELD,
   IS_CUSTOMIZED_FIELD,
   LAST_RUN_OUTCOME_FIELD,
   PARAMS_IMMUTABLE_FIELD,
@@ -41,20 +40,6 @@ interface RulesFilterOptions {
   ruleIds: string[];
   includeRuleTypes?: Type[];
   gapFillStatuses?: GapFillStatus[];
-}
-
-/**
- * Splits free-text rules search bar (`filter`) from structured facet filters for `_find_with_facets`.
- */
-export function splitRuleFilterSearchFromStructuredKql(
-  filterOptions: Partial<RulesFilterOptions>
-): { structuredKql: string; searchTerm: string } {
-  const searchTerm = (filterOptions.filter ?? '').trim();
-  const structuredKql = convertRulesFilterToKQL({
-    ...filterOptions,
-    filter: '',
-  });
-  return { structuredKql, searchTerm };
 }
 
 /**
@@ -122,9 +107,7 @@ export function convertRulesFilterToKQL({
 
   if (gapFillStatuses?.length) {
     kql.push(
-      `(${gapFillStatuses
-        .map((s) => `${HIGHEST_PRIORITY_GAP_FILL_STATUS_FIELD}: ${prepareKQLStringParam(s)}`)
-        .join(' OR ')})`
+      `(${gapFillStatuses.map((status) => `kibana.alert.rule.gap.status: ${status}`).join(' OR ')})`
     );
   }
 

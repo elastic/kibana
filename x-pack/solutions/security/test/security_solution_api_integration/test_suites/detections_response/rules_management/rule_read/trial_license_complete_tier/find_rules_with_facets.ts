@@ -12,11 +12,7 @@ import {
 } from '@kbn/core-http-common';
 import { createRule, deleteAllRules } from '@kbn/detections-response-ftr-services';
 import { DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS } from '@kbn/security-solution-plugin/common/constants';
-import {
-  encodeFindRulesWithFacetsCursor,
-  FIND_RULES_WITH_FACETS_CURSOR_SCHEMA_VERSION,
-  MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH,
-} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
+import { MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
 import {
   getSimpleRule,
   getSimpleRuleOutput,
@@ -86,10 +82,11 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(Object.keys(enabledBuckets).length).to.be.greaterThan(0);
     });
 
-    it('accepts sort tokens', async () => {
+    it('accepts sort_field and sort_order', async () => {
       await createRule(supertest, log, getSimpleRule());
       const { body } = await findRulesWithFacets({
-        sort: ['name:desc'],
+        sort_field: 'name',
+        sort_order: 'desc',
       }).expect(200);
       expect(body.total).to.be(1);
     });
@@ -103,35 +100,55 @@ export default ({ getService }: FtrProviderContext): void => {
       expect((body.message as string[]).some((m) => m.includes('invalid KQL filter'))).to.be(true);
     });
 
-    it('returns 400 for unsupported sort field in facet sort syntax', async () => {
+    it('returns 400 for unsupported sort_field', async () => {
       const { body } = await findRulesWithFacets({
-        sort: ['not_a_supported_field:asc'],
+        sort_field: 'not_a_supported_field',
+        sort_order: 'asc',
       }).expect(400);
       expect(body.status_code).to.be(400);
-      expect(body.message).to.be.an('array');
-      expect((body.message as string[]).some((m) => m.includes('unsupported sort field'))).to.be(
-        true
-      );
     });
 
-    it('returns 400 when cursor cannot be decoded', async () => {
+    it('returns 400 when search_after is provided without sort_field and sort_order', async () => {
       const { body } = await findRulesWithFacets({
-        cursor: 'not-valid-cursor-payload',
+        search_after: ['nonsense-sort-token'],
       }).expect(400);
       expect(body.status_code).to.be(400);
-      expect(String(body.message).toLowerCase()).to.contain('cursor');
+      expect(String(body.message)).to.contain('sort_field and sort_order');
     });
 
-    it('returns 400 when cursor is provided without sort', async () => {
-      const cursor = encodeFindRulesWithFacetsCursor({
-        v: FIND_RULES_WITH_FACETS_CURSOR_SCHEMA_VERSION,
-        searchAfter: ['nonsense-sort-token'],
+    it('paginates with page under the max result window without response search_after', async () => {
+      await createRule(supertest, log, {
+        ...getSimpleRule('cursor-rule-a'),
+        name: 'Aaa facets cursor rule',
       });
-      const { body } = await findRulesWithFacets({
-        cursor,
-      }).expect(400);
-      expect(body.status_code).to.be(400);
-      expect(String(body.message)).to.contain('cursor requires sort');
+      await createRule(supertest, log, {
+        ...getSimpleRule('cursor-rule-b'),
+        name: 'Zzz facets cursor rule',
+      });
+
+      const first = await findRulesWithFacets({
+        per_page: 1,
+        page: 1,
+        sort_field: 'name',
+        sort_order: 'asc',
+      }).expect(200);
+
+      expect(first.body.data).to.have.length(1);
+      expect(first.body.total).to.be(2);
+      expect(first.body.data[0].name).to.be('Aaa facets cursor rule');
+      expect(first.body.search_after).to.be(undefined);
+
+      const second = await findRulesWithFacets({
+        per_page: 1,
+        page: 2,
+        sort_field: 'name',
+        sort_order: 'asc',
+      }).expect(200);
+
+      expect(second.body.data).to.have.length(1);
+      expect(second.body.total).to.be(2);
+      expect(second.body.data[0].name).to.be('Zzz facets cursor rule');
+      expect(second.body.search_after).to.be(undefined);
     });
 
     it('returns 400 when search.term exceeds max length', async () => {

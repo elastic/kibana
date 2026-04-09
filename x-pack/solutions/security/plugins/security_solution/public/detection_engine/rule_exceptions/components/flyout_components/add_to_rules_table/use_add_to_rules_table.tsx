@@ -30,7 +30,8 @@ export const useAddToRulesTable = ({
 }: ExceptionsAddToRulesComponentProps) => {
   const { data: { rules } = { rules: [], total: 0 }, isFetched } = useFindRules({
     filter: '',
-    sort: 'enabled:desc',
+    sort_field: 'enabled',
+    sort_order: 'desc',
     pagination: {
       page: 1,
       perPage: 10000,

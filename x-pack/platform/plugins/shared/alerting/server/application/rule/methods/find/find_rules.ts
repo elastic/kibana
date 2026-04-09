@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import { pick } from 'lodash';
 import type { KueryNode } from '@kbn/es-query';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import {
   buildConsumersFilter,
   buildRuleTypeIdsFilter,
@@ -43,6 +44,7 @@ export interface FindResult<Params extends RuleParams> {
   page: number;
   perPage: number;
   total: number;
+  searchAfter?: SortResults;
   data: Array<SanitizedRule<Params>>;
 }
 
@@ -144,6 +146,8 @@ export async function findRules<Params extends RuleParams = never>(
     },
   });
 
+  const searchAfter = data.length > 0 ? data[data.length - 1]?.sort : undefined;
+
   const siemRules: Rule[] = [];
 
   const authorizedData = data.map(({ id, attributes, references }) => {
@@ -210,6 +214,7 @@ export async function findRules<Params extends RuleParams = never>(
       page,
       perPage,
       total,
+      searchAfter,
       // replace siem formatted rules
       data: authorizedData.map((rule) => formattedRulesMap[rule.id] ?? rule),
     };
@@ -219,6 +224,7 @@ export async function findRules<Params extends RuleParams = never>(
     page,
     perPage,
     total,
+    searchAfter,
     data: authorizedData as Array<SanitizedRule<Params>>,
   };
 }

@@ -6,14 +6,13 @@
  */
 
 import { fromKueryExpression } from '@kbn/es-query';
-import { FindRulesSortField } from '../find_rules/find_rules_route.gen';
 import type { FindRulesRequestQueryInput } from '../find_rules/find_rules_route.gen';
 import { validateFindRulesRequestQuery } from '../find_rules/request_schema_validation';
 import type { FindRulesWithFacetsRequestBodyInput } from './find_rules_with_facets_route.gen';
-import {
-  MAX_FIND_RULES_WITH_FACETS_FILTER_KQL_LENGTH,
-  MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH,
-} from './find_rules_with_facets_limits';
+
+export const MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH = 1000;
+
+export const MAX_FIND_RULES_WITH_FACETS_FILTER_KQL_LENGTH = 10_000;
 
 /**
  * Validates KQL syntax only (not field allow-lists). Empty or whitespace-only strings are accepted.
@@ -34,32 +33,15 @@ export const validateFindRulesWithFacetsKqlFilter = (filter: string | undefined)
   }
 };
 
-const validateSortTokens = (sort: string[] | undefined): string[] => {
-  if (sort == null || sort.length === 0) {
+const validateSearchAfterRequiresSort = (body: FindRulesWithFacetsRequestBodyInput): string[] => {
+  const sa = body.search_after;
+  if (sa == null || sa.length === 0) {
     return [];
   }
-  const errors: string[] = [];
-  for (const rawToken of sort) {
-    const tokens = rawToken
-      .split(',')
-      .map((t) => t.trim())
-      .filter(Boolean);
-    for (const token of tokens) {
-      const lastColon = token.lastIndexOf(':');
-      if (lastColon <= 0 || lastColon === token.length - 1) {
-        errors.push(`invalid sort token "${token}"; expected "<field>:<order>"`);
-      } else {
-        const field = token.slice(0, lastColon);
-        const order = token.slice(lastColon + 1).trim();
-        if (order !== 'asc' && order !== 'desc') {
-          errors.push(`invalid sort token "${token}"; order must be asc or desc`);
-        } else if (!FindRulesSortField.safeParse(field).success) {
-          errors.push(`unsupported sort field "${field}"`);
-        }
-      }
-    }
+  if (body.sort_field == null || body.sort_order == null) {
+    return ['when search_after is provided, sort_field and sort_order must be set'];
   }
-  return errors;
+  return [];
 };
 
 const validateAggregationsCountsUnique = (
@@ -80,15 +62,17 @@ export const validateFindRulesWithFacetsRequestBody = (
 ): string[] => {
   const errors = [...validateFindRulesRequestQuery(body as FindRulesRequestQueryInput)];
 
-  const searchTerm = body.search?.term;
-  if (searchTerm != null && searchTerm.length > MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH) {
+  if (
+    body.search != null &&
+    body.search.term.length > MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH
+  ) {
     errors.push(
       `search.term exceeds maximum length of ${MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH}`
     );
   }
 
   errors.push(...validateFindRulesWithFacetsKqlFilter(body.filter));
-  errors.push(...validateSortTokens(body.sort as string[] | undefined));
+  errors.push(...validateSearchAfterRequiresSort(body));
   errors.push(...validateAggregationsCountsUnique(body.aggregations));
 
   const searchMode = body.search?.mode;

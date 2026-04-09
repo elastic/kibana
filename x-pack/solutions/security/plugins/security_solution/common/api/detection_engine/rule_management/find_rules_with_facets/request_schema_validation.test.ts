@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { FindRulesWithFacetsRequestBodyInput } from './find_rules_with_facets_route.gen';
+import {
+  FindRulesWithFacetsRequestBody,
+  type FindRulesWithFacetsRequestBodyInput,
+} from './find_rules_with_facets_route.gen';
 import {
   MAX_FIND_RULES_WITH_FACETS_FILTER_KQL_LENGTH,
   MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH,
@@ -77,6 +80,14 @@ describe('validateFindRulesWithFacetsRequestBody', () => {
     ).toEqual([]);
   });
 
+  it('rejects request body when search is present without term (Zod)', () => {
+    const result = FindRulesWithFacetsRequestBody.safeParse({
+      ...emptyBody,
+      search: { mode: 'legacy' },
+    } as FindRulesWithFacetsRequestBodyInput);
+    expect(result.success).toBe(false);
+  });
+
   it('accepts search.term at max length', () => {
     const term = 'x'.repeat(MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH);
     expect(
@@ -107,20 +118,23 @@ describe('validateFindRulesWithFacetsRequestBody', () => {
     expect(errors.some((e) => e.startsWith('invalid KQL filter'))).toBe(true);
   });
 
-  it('rejects unsupported sort field token', () => {
+  it('rejects sort_field without sort_order', () => {
     const errors = validateFindRulesWithFacetsRequestBody({
       ...emptyBody,
-      sort: ['not_a_real_field:asc'],
+      sort_field: 'name',
     });
-    expect(errors.some((e) => e.includes('unsupported sort field'))).toBe(true);
+    expect(errors).toContain(
+      'when "sort_order" and "sort_field" must exist together or not at all'
+    );
   });
 
-  it('rejects malformed sort token', () => {
-    const errors = validateFindRulesWithFacetsRequestBody({
-      ...emptyBody,
-      sort: ['nameasc'],
-    });
-    expect(errors.some((e) => e.includes('invalid sort token'))).toBe(true);
+  it('rejects search_after without sort_field and sort_order', () => {
+    expect(
+      validateFindRulesWithFacetsRequestBody({
+        ...emptyBody,
+        search_after: ['opaque-token'],
+      })
+    ).toContain('when search_after is provided, sort_field and sort_order must be set');
   });
 
   it('rejects unsupported search.mode', () => {

@@ -8,20 +8,11 @@ paths:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: FindRulesWithFacets
-      summary: List detection rules with KQL filter, facet counts, and cursor pagination (internal)
+      summary: List detection rules with KQL filter, facet counts, and search_after pagination (internal)
       description: |
-        **Internal Kibana API** — not part of the public REST surface yet; called only from
-        first-party Security Solution UI with an internal-origin request. Subject to change
-        before promotion to `access: public`.
-
-        Paginated listing of installed detection rules using a JSON body: KQL `filter` (field paths
-        under `alert.attributes.*`, see `FindRulesWithFacetsKqlFilterField` for common first
-        segments), optional `search` (`term` + `mode`), `aggregations.counts` for facet buckets,
-        multi-sort, and opaque cursor pagination.
-
-        Sorting is expressed as a `sort` array of `field:order` tokens (or comma-separated strings
-        in an element); each token must be `<field>:<order>` where `<order>` is `asc` or `desc` and
-        `<field>` is a supported rule sort field (see `FindRulesSortField` on the classic `_find` endpoint).
+        Paginated listing of installed detection rules using a JSON body: KQL `filter`, optional `search` (`term` + `mode`), 
+        `aggregations.counts` for facet buckets, and optional `search_after` for deep pagination (same `sort_field` /
+        `sort_order` on each request. `Page` is ignored when `search_after` is set).
       tags:
         - Rules API
       requestBody:
@@ -53,9 +44,14 @@ paths:
                     type: array
                     items:
                       $ref: '../../model/warning_schema.schema.yaml#/components/schemas/WarningSchema'
-                  next_cursor:
-                    type: string
-                    description: Present when more results exist; pass as `cursor` on the next request.
+                  search_after:
+                    type: array
+                    description: |
+                      Sort values of the last hit on this page, for use as `search_after` on the next
+                      request. Only included when deep pagination applies (offset
+                      at or past the default 10,000-result window) or the request used `search_after`.
+                    items:
+                      $ref: '#/components/schemas/FindRulesWithFacetsSearchAfterItem'
                   counts:
                     $ref: '../granular_rules_contract.schema.yaml#/components/schemas/FacetCounts'
                 required:
@@ -65,42 +61,51 @@ paths:
                   - data
 components:
   schemas:
+    FindRulesWithFacetsSearchAfterItem:
+      description: |
+        One value in a `search_after` array (string, number, boolean).
+      oneOf:
+        - type: string
+        - type: number
+        - type: boolean
+
     FindRulesWithFacetsRequestBody:
       type: object
       additionalProperties: false
       properties:
         fields:
           type: array
-          description: Subset of rule fields to return (same semantics as classic `_find`).
+          description: Subset of rule fields to return.
           items:
             type: string
         filter:
           type: string
           description: |
-            KQL filter using saved-object field paths, typically prefixed with `alert.attributes.`
-            (same semantics as classic `_find`). The `FindRulesWithFacetsKqlFilterField` schema
-            lists common **first segments** after `alert.attributes.`; use dotted paths for nested
-            fields (e.g. `alert.attributes.schedule.interval`, `alert.attributes.mapped_params.severity`).
+            KQL filter string.
         aggregations:
           $ref: '../granular_rules_contract.schema.yaml#/components/schemas/FindRulesWithFacetsAggregations'
         search:
           $ref: '../granular_rules_contract.schema.yaml#/components/schemas/GranularRulesSearch'
-        sort:
-          type: array
-          description: Sort criteria as `field:order` tokens (e.g. `name:asc`). Comma-separated or repeated per element.
-          items:
-            type: string
+        sort_field:
+          $ref: '../find_rules/find_rules_route.schema.yaml#/components/schemas/FindRulesSortField'
+        sort_order:
+          $ref: '../../model/sorting.schema.yaml#/components/schemas/SortOrder'
         page:
           type: integer
           minimum: 1
           default: 1
-          description: Page number (1-based). Ignored when `cursor` is provided.
+          description: Page number (1-based). Ignored when `search_after` is provided.
         per_page:
           type: integer
           minimum: 0
           maximum: 10000
           default: 20
           description: Page size.
-        cursor:
-          type: string
-          description: Opaque cursor from a previous response's `next_cursor`.
+        search_after:
+          type: array
+          minItems: 1
+          description: |
+            Elasticsearch-style `search_after` tiebreaker values. Requires `sort_field` and
+            `sort_order`. When set, `page` is ignored.
+          items:
+            $ref: '#/components/schemas/FindRulesWithFacetsSearchAfterItem'

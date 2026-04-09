@@ -511,7 +511,7 @@ describe('Detections Rules API', () => {
       fetchMock.mockResolvedValue(rulesMock);
     });
 
-    test('uses _find_with_facets with sort tokens and API version', async () => {
+    test('uses _find_with_facets with default sort and API version', async () => {
       await fetchRulesWithFacets({});
       expect(fetchMock).toHaveBeenCalledWith(
         '/api/detection_engine/rules/_find_with_facets',
@@ -521,17 +521,19 @@ describe('Detections Rules API', () => {
           body: JSON.stringify({
             page: 1,
             per_page: 20,
-            sort: ['enabled:desc'],
+            sort_field: 'enabled',
+            sort_order: 'desc',
           }),
         })
       );
     });
 
-    test('sends structured filter, legacy search, and sort token', async () => {
+    test('sends structured filter, legacy search, and sort_field / sort_order', async () => {
       await fetchRulesWithFacets({
         filter: 'alert.attributes.params.immutable: false',
         search: { term: 'hello', mode: 'legacy' },
-        sort: 'name:asc',
+        sort_field: 'name',
+        sort_order: 'asc',
       });
       expect(fetchMock).toHaveBeenCalledWith(
         '/api/detection_engine/rules/_find_with_facets',
@@ -541,7 +543,8 @@ describe('Detections Rules API', () => {
           body: JSON.stringify({
             page: 1,
             per_page: 20,
-            sort: ['name:asc'],
+            sort_field: 'name',
+            sort_order: 'asc',
             filter: 'alert.attributes.params.immutable: false',
             search: { term: 'hello', mode: 'legacy' },
           }),
@@ -561,11 +564,11 @@ describe('Detections Rules API', () => {
       );
     });
 
-    test('passes cursor in the body when provided', async () => {
-      await fetchRulesWithFacets({ cursor: 'opaque-cursor' });
+    test('passes search_after in the body when provided', async () => {
+      await fetchRulesWithFacets({ search_after: [42, 'rule-id'] });
       const [, options] = fetchMock.mock.calls[0];
       expect(JSON.parse(options.body as string)).toEqual(
-        expect.objectContaining({ cursor: 'opaque-cursor' })
+        expect.objectContaining({ search_after: [42, 'rule-id'] })
       );
     });
   });
