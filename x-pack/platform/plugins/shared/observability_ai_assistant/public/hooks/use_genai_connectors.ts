@@ -47,7 +47,7 @@ export function useGenAIConnectors(): UseGenAIConnectorsResult {
   return useGenAIConnectorsWithoutContext();
 }
 
-export function useGenAIConnectorsWithoutContext(_assistant?: unknown): UseGenAIConnectorsResult {
+export function useGenAIConnectorsWithoutContext(): UseGenAIConnectorsResult {
   const {
     services: { http, settings, notifications },
   } = useKibana();
