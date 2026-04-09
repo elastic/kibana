@@ -94,14 +94,6 @@ import {
 import { DeprecatedLogsBadge, DiscoverBadgeButton, QueryStreamBadge } from '../stream_badges';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 
-const datePickerStyle = css`
-  .euiFormControlLayout,
-  .euiSuperDatePicker button,
-  .euiButton {
-    height: 40px;
-  }
-`;
-
 const nameTextTruncationStyle = css`
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -483,9 +475,9 @@ export function StreamsTreeTable({
   ];
 
   const filterBar = (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
       <EuiFlexItem grow={false}>
-        <EuiFilterGroup>
+        <EuiFilterGroup compressed>
           {qualityLoaded && canReadFailureStore && (
             <EuiPopover
               aria-label={DATA_QUALITY_FILTER}
@@ -875,6 +867,7 @@ export function StreamsTreeTable({
               <RetentionColumn
                 lifecycle={item.effective_lifecycle!}
                 streamName={item.stream.name}
+                dataStream={item.data_stream}
                 dataTestSubj={`retentionColumn-${item.stream.name}`}
               />
             );
@@ -920,15 +913,14 @@ export function StreamsTreeTable({
         onChange: handleQueryChange,
         box: {
           incremental: true,
+          compressed: true,
           'aria-label': STREAMS_TABLE_SEARCH_ARIA_LABEL,
         },
         toolsRight: (
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive wrap>
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive wrap>
             <EuiFlexItem grow={false}>{filterBar}</EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <div className={datePickerStyle}>
-                <StreamsAppSearchBar showDatePicker />
-              </div>
+              <StreamsAppSearchBar showDatePicker />
             </EuiFlexItem>
           </EuiFlexGroup>
         ),

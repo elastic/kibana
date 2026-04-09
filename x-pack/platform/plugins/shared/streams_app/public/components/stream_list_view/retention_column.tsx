@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { EuiText, EuiLink, EuiBadge, EuiFlexGroup } from '@elastic/eui';
+import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
+import { EuiText, EuiLink, EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
@@ -20,6 +22,7 @@ import {
 } from '@kbn/streams-schema';
 import { useKibana } from '../../hooks/use_kibana';
 import {
+  ILM_POLICY_TOOLTIP_TITLE,
   INDEFINITE_RETENTION_ARIA_LABEL,
   INDEFINITE_RETENTION_LABEL,
   NO_DATA_SHORT_LABEL,
@@ -30,10 +33,13 @@ import { getTimeSizeAndUnitLabel } from '../stream_management/data_management/st
 export function RetentionColumn({
   lifecycle,
   streamName,
+  dataStream,
   dataTestSubj,
 }: {
   lifecycle: IngestStreamEffectiveLifecycle;
   streamName?: string;
+  /** Data stream stats from the list API; used to show DSL retention hint alongside ILM. */
+  dataStream?: IndicesDataStream;
   dataTestSubj?: string;
 }) {
   const {
@@ -64,35 +70,105 @@ export function RetentionColumn({
   }
 
   if (isIlmLifecycle(lifecycle)) {
+    const rawDslRetention = dataStream?.lifecycle?.data_retention;
+    const retentionSummary =
+      rawDslRetention != null && String(rawDslRetention).trim() !== ''
+        ? getTimeSizeAndUnitLabel(String(rawDslRetention)) ?? String(rawDslRetention)
+        : INDEFINITE_RETENTION_LABEL;
+
+    const policyHref = ilmLocator?.getRedirectUrl({
+      page: 'policy_edit',
+      policyName: lifecycle.ilm.policy,
+    });
+    const policyLinkLabel = i18n.translate(
+      'xpack.streams.streamsRetentionColumn.ilmLinkAriaLabel',
+      {
+        defaultMessage: 'ILM policy "{name}", opens in Index Lifecycle Management in a new tab',
+        values: { name: lifecycle.ilm.policy },
+      }
+    );
+    const ilmUnavailableLabel = i18n.translate(
+      'xpack.streams.streamsRetentionColumn.ilmUnavailableAriaLabel',
+      {
+        defaultMessage: 'ILM policy "{name}"',
+        values: { name: lifecycle.ilm.policy },
+      }
+    );
+    const ilmBadgeLabel = i18n.translate('xpack.streams.streamsRetentionColumn.ilmBadgeLabel', {
+      defaultMessage: 'ILM',
+    });
+
+    const badge = (
+      <EuiBadge color="hollow" iconType="external" iconSide="right">
+        {ilmBadgeLabel}
+      </EuiBadge>
+    );
+
+    const retentionText = (
+      <EuiText
+        size="s"
+        css={{ whiteSpace: 'nowrap' as const }}
+        data-test-subj={dataTestSubj ? `${dataTestSubj}-retentionSummary` : undefined}
+      >
+        {retentionSummary}
+      </EuiText>
+    );
+
+    const policyAnchor = !policyHref ? (
+      <span
+        data-test-subj={dataTestSubj ? `${dataTestSubj}-ilmPolicy` : undefined}
+        aria-label={ilmUnavailableLabel}
+      >
+        {badge}
+      </span>
+    ) : (
+      <EuiLink
+        href={policyHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        external={false}
+        aria-label={policyLinkLabel}
+        data-test-subj={dataTestSubj ? `${dataTestSubj}-ilmPolicy` : undefined}
+        css={{
+          display: 'inline-flex',
+          maxWidth: '150px',
+          '&:hover, &:focus': { textDecoration: 'none' },
+        }}
+      >
+        {badge}
+      </EuiLink>
+    );
+
+    const policyControl = (
+      <EuiToolTip
+        position="top"
+        title={ILM_POLICY_TOOLTIP_TITLE}
+        content={lifecycle.ilm.policy}
+        css={css`
+          && {
+            max-width: 256px !important;
+          }
+        `}
+        anchorProps={{
+          css: css`
+            display: inline-flex;
+          `,
+        }}
+      >
+        {policyAnchor}
+      </EuiToolTip>
+    );
+
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiLink
-          href={ilmLocator?.getRedirectUrl({
-            page: 'policy_edit',
-            policyName: lifecycle.ilm.policy,
-          })}
-          target="_blank"
-          aria-label={i18n.translate('xpack.streams.streamsRetentionColumn.ilmLinkAriaLabel', {
-            defaultMessage: 'ILM policy: {name}, click to edit the policy in a new tab',
-            values: { name: lifecycle.ilm.policy },
-          })}
-          css={{
-            whiteSpace: 'nowrap' as const,
-            textOverflow: 'ellipsis',
-            overflow: 'hidden',
-            maxWidth: '150px',
-          }}
-          data-test-subj={dataTestSubj}
-        >
-          {lifecycle.ilm.policy}
-        </EuiLink>
-        <EuiBadge color="hollow">
-          <EuiText size="s">
-            {i18n.translate('xpack.streams.streamsRetentionColumn.ilmBadgeLabel', {
-              defaultMessage: 'ILM',
-            })}
-          </EuiText>
-        </EuiBadge>
+      <EuiFlexGroup
+        gutterSize="xs"
+        alignItems="center"
+        responsive={false}
+        wrap
+        data-test-subj={dataTestSubj}
+      >
+        <EuiFlexItem grow={false}>{retentionText}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{policyControl}</EuiFlexItem>
       </EuiFlexGroup>
     );
   }

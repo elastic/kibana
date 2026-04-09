@@ -93,6 +93,11 @@ export const NO_RETENTION_LABEL = i18n.translate(
   { defaultMessage: 'No retention policy configured' }
 );
 
+export const ILM_POLICY_TOOLTIP_TITLE = i18n.translate(
+  'xpack.streams.streamsRetentionColumn.ilmPolicyTooltipTitle',
+  { defaultMessage: 'Policy' }
+);
+
 export const INGESTION_COLUMN_HEADER = i18n.translate(
   'xpack.streams.streamsTreeTable.ingestionColumnHeader',
   { defaultMessage: 'Ingestion' }
