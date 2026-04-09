@@ -14,6 +14,11 @@ import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 
+export type SmlCheckPermissionsFn = (
+  originId: string,
+  esClient: ElasticsearchClient
+) => Promise<boolean>;
+
 /**
  * A single SML chunk to be indexed.
  */
@@ -96,6 +101,17 @@ export interface SmlTypeDefinition {
     item: SmlDocument,
     context: SmlToAttachmentContext
   ) => Promise<AttachmentInput<string, unknown> | undefined>;
+
+  /**
+   * Optional: cystom check permissions for an origin resource.
+   * Called at query time (search and attach) after Kibana privilege checks pass.
+   * Return `false` to deny access to the item.
+   *
+   * Types that only need Kibana saved-object permissions can omit this hook.
+   * Useful for types whose origin resources live in Elasticsearch directly
+   * (indices, data streams, etc.) where index-level privileges apply.
+   */
+  checkPermissions?: SmlCheckPermissionsFn;
 
   /**
    * Optional: custom crawl interval for the crawler.

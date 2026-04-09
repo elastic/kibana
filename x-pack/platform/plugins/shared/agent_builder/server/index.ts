@@ -29,6 +29,7 @@ export type { ConversationListOptions } from './services/conversation/client/typ
 
 export type {
   SmlTypeDefinition,
+  SmlCheckPermissionsFn,
   SmlChunk,
   SmlData,
   SmlContext,
