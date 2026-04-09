@@ -1,7 +1,4 @@
 steps:
-  # run the bash files directly and only run the build and promote, because verify will fail.
-  # TODO: Ask @alex if this would work, especially because the meta data get happens in two separate bash files.
-
   # Step 1: Run the ES Snapshot Build
   - command: .buildkite/scripts/steps/es_snapshots/build.sh
     key: build-es-snapshot

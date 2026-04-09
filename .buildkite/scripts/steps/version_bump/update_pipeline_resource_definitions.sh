@@ -7,7 +7,7 @@ source "$(dirname "$0")/wait_for_pr_merge.sh"
 echo --- Update pipeline resource definitions
 
 git fetch origin main
-git checkout main
+git checkout -B main origin/main
 
 FILES=(
   ".buildkite/pipeline-resource-definitions/kibana-console-definitions-sync.yml"
@@ -18,7 +18,7 @@ FILES=(
 
 for file in "${FILES[@]}"; do
   echo "Updating branch_configuration in $file"
-  sed -i "s/branch_configuration: main /branch_configuration: main ${BRANCH} /" "$file"
+  sed -i "s/branch_configuration: main/branch_configuration: main ${BRANCH}/" "$file"
 done
 
 echo --- Committing pipeline resource definition changes

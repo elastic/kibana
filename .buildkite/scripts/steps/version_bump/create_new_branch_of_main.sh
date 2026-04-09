@@ -10,8 +10,7 @@ git config --global user.name kibanamachine
 git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
 
 git fetch origin main
-git checkout main
-git checkout -b "$BRANCH"
+git checkout -b "$BRANCH" origin/main
 git push origin "$BRANCH"
 
 echo "Branch '$BRANCH' created and pushed to origin"

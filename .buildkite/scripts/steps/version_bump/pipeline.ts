@@ -13,7 +13,7 @@ const BUMP_TYPE = process.env.WORKFLOW;
 
 if (!BUMP_TYPE) {
   console.error(
-    'BUMP_TYPE environment variable is not set. Please set it to either "patch" or "minor".'
+    'WORKFLOW environment variable is not set. Please set it to either "patch" or "minor".'
   );
   process.exit(1);
 }
@@ -47,7 +47,6 @@ if (!BUMP_TYPE) {
       // Step 4: Update the labels for PRs and the color of the label itself
       pipeline.push('  - wait');
 
-      // TODO: Ask Tiago if we can guarantee that the next label exists.
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/update_label_color.yml'));
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/reconcile_pr_labels.yml'));
     }
@@ -77,8 +76,6 @@ if (!BUMP_TYPE) {
       pipeline.push('  - wait');
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/update_release_branch.yml'));
 
-      // This job only works on the main branch.
-      // TODO: Ask Tiago about the ordering of this.
       pipeline.push(
         getPipeline('.buildkite/pipelines/version_bump/update_pipeline_resource_definitions.yml')
       );

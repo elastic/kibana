@@ -6,7 +6,7 @@ source "$(dirname "$0")/wait_for_pr_merge.sh"
 
 # Always target main, even when the pipeline runs on another branch
 git fetch origin main
-git checkout main
+git checkout -B main origin/main
 
 # --- Functions ---
 
@@ -24,7 +24,8 @@ update_minor_versions_json() {
   major=$(echo "$NEW_VERSION" | cut -d. -f1)
   minor=$(echo "$NEW_VERSION" | cut -d. -f2)
   next_minor=$((minor + 1))
-  NEXT_DEV_VERSION="${major}.${next_minor}.0"
+  # Exported so update_backportrc_json can use it
+  export NEXT_DEV_VERSION="${major}.${next_minor}.0"
 
   echo "Minor bump: adding branch '$BRANCH' with version '$NEW_VERSION'"
   echo "Next dev version for main: $NEXT_DEV_VERSION"
@@ -108,7 +109,7 @@ echo --- Committing version bump changes
 git config --global user.name kibanamachine
 git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
 
-branch="bump-versions-json$(date +%F_%H-%M-%S)"
+branch="bump-versions-json-$(date +%F_%H-%M-%S)"
 git checkout -b "$branch"
 git add $FILES_TO_COMMIT
 git commit -m "[versions.json bump] Bump versions.json to ${NEW_VERSION}"
