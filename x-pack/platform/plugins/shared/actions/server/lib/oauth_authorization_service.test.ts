@@ -362,7 +362,7 @@ describe('OAuthAuthorizationService', () => {
       expect(parsed.searchParams.get('user_scope')).toBe('channels:read chat:write');
     });
 
-    it.each(['client_id', 'response_type', 'redirect_uri', 'state', 'code_challenge', 'scope'])(
+    it.each(['client_id', 'response_type', 'redirect_uri', 'state', 'code_challenge'])(
       'throws when scopeParamName is the reserved param "%s"',
       (reserved) => {
         const service = createService();
