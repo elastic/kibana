@@ -101,7 +101,6 @@ const RESERVED_AUTH_URL_PARAMS = new Set([
   'state',
   'code_challenge',
   'code_challenge_method',
-  'scope',
 ]);
 
 /**
