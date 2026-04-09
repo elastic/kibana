@@ -10,6 +10,7 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_co
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('Streams Endpoints', () => {
     loadTestFile(require.resolve('./basic'));
+    loadTestFile(require.resolve('./list_streams_type_filter'));
     loadTestFile(require.resolve('./enrichment'));
     loadTestFile(require.resolve('./classic'));
     loadTestFile(require.resolve('./flush_config'));
