@@ -637,18 +637,13 @@ describe('convertPreviousEvents', () => {
         tool_call_group_id: groupId,
       };
 
-      const previousRounds = [
-        createRound({
-          id: 'round-1',
-          input: makeRoundInput('find foo'),
-          steps: [reasoningStep, step1],
-          response: makeAssistantResponse('done!'),
-          started_at: now,
-        }),
-      ];
+      const previousEvents = makeRoundEvents('find foo', {
+        steps: [reasoningStep, step1],
+        response: makeAssistantResponse('done!'),
+      });
       const nextInput = makeRoundInput('next');
-      const result = await convertPreviousRounds({
-        conversation: createConversation({ previousRounds, nextInput }),
+      const result = await convertPreviousEvents({
+        conversation: createConversation({ previousEvents, nextInput }),
       });
 
       const aiMsg = result[1] as AIMessage;
@@ -670,18 +665,13 @@ describe('convertPreviousEvents', () => {
         tool_call_group_id: groupId,
       };
 
-      const previousRounds = [
-        createRound({
-          id: 'round-1',
-          input: makeRoundInput('find foo'),
-          steps: [reasoningStep, step1],
-          response: makeAssistantResponse('done!'),
-          started_at: now,
-        }),
-      ];
+      const previousEvents = makeRoundEvents('find foo', {
+        steps: [reasoningStep, step1],
+        response: makeAssistantResponse('done!'),
+      });
       const nextInput = makeRoundInput('next');
-      const result = await convertPreviousRounds({
-        conversation: createConversation({ previousRounds, nextInput }),
+      const result = await convertPreviousEvents({
+        conversation: createConversation({ previousEvents, nextInput }),
       });
 
       const aiMsg = result[1] as AIMessage;
@@ -703,38 +693,33 @@ describe('convertPreviousEvents', () => {
       const step1: ToolCallStep = { ...makeToolCallStep(toolCall1), tool_call_group_id: groupId };
       const step2: ToolCallStep = { ...makeToolCallStep(toolCall2), tool_call_group_id: groupId };
 
-      const previousRounds = [
-        createRound({
-          id: 'round-1',
-          input: makeRoundInput('find things'),
-          steps: [
-            {
-              type: ConversationRoundStepType.reasoning,
-              reasoning: 'group level thought',
-              tool_call_group_id: groupId,
-            } as ReasoningStep,
-            {
-              type: ConversationRoundStepType.reasoning,
-              reasoning: 'reason for call-1',
-              tool_call_id: 'call-1',
-              tool_call_group_id: groupId,
-            } as ReasoningStep,
-            step1,
-            {
-              type: ConversationRoundStepType.reasoning,
-              reasoning: 'reason for call-2',
-              tool_call_id: 'call-2',
-              tool_call_group_id: groupId,
-            } as ReasoningStep,
-            step2,
-          ],
-          response: makeAssistantResponse('done!'),
-          started_at: now,
-        }),
-      ];
+      const previousEvents = makeRoundEvents('find things', {
+        steps: [
+          {
+            type: ConversationRoundStepType.reasoning,
+            reasoning: 'group level thought',
+            tool_call_group_id: groupId,
+          } as ReasoningStep,
+          {
+            type: ConversationRoundStepType.reasoning,
+            reasoning: 'reason for call-1',
+            tool_call_id: 'call-1',
+            tool_call_group_id: groupId,
+          } as ReasoningStep,
+          step1,
+          {
+            type: ConversationRoundStepType.reasoning,
+            reasoning: 'reason for call-2',
+            tool_call_id: 'call-2',
+            tool_call_group_id: groupId,
+          } as ReasoningStep,
+          step2,
+        ],
+        response: makeAssistantResponse('done!'),
+      });
       const nextInput = makeRoundInput('next');
-      const result = await convertPreviousRounds({
-        conversation: createConversation({ previousRounds, nextInput }),
+      const result = await convertPreviousEvents({
+        conversation: createConversation({ previousEvents, nextInput }),
       });
 
       const aiMsg = result[1] as AIMessage;
