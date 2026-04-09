@@ -10,6 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import type { DisposableAppender, LogLevel, LogRecord } from '@kbn/logging';
 import { ROOT_CONTEXT, TraceFlags, trace, type Context } from '@opentelemetry/api';
+import type { AnyValueMap } from '@opentelemetry/api-logs';
 import { SeverityNumber, type Logger } from '@opentelemetry/api-logs';
 import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
 import {
@@ -185,7 +186,7 @@ export class OtelAppender implements DisposableAppender {
       severityText: record.level.id.toUpperCase(),
       // body = the human-readable message, as per the OTel Logs spec.
       // Structured context lives in attributes; meta is JSON-encoded there.
-      body: record.message,
+      body: record as unknown as AnyValueMap,
       context: toTraceContext(record),
       attributes: toAttributes(record),
     });
