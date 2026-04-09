@@ -343,7 +343,7 @@ export const QueryBarTopRow = React.memo(
     } = kibana.services;
 
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
-    const shouldRenderTextBasedQueryUi = Boolean(showQueryInput && isQueryLangSelected);
+    const shouldRenderESQLUi = Boolean(showQueryInput && isQueryLangSelected);
 
     const backgroundSearchState = useObservable(
       data.search.session.state$.pipe(
@@ -602,7 +602,7 @@ export const QueryBarTopRow = React.memo(
     function shouldShowDatePickerAsBadge(): boolean {
       return (
         (Boolean(props.showDatePickerAsBadge) && !shouldRenderQueryInput()) ||
-        Boolean(shouldRenderTextBasedQueryUi && props.query && isOfAggregateQueryType(props.query))
+        Boolean(shouldRenderESQLUi && props.query && isOfAggregateQueryType(props.query))
       );
     }
 
@@ -745,7 +745,7 @@ export const QueryBarTopRow = React.memo(
     }
 
     const getSubmitButtonProps = () => {
-      if (shouldRenderTextBasedQueryUi) {
+      if (shouldRenderESQLUi) {
         const label = strings.getSearchButtonLabel();
         return { icon: undefined, text: label, ariaLabel: label, color: 'primary' as const };
       }
@@ -840,7 +840,7 @@ export const QueryBarTopRow = React.memo(
         <EuiFlexItem grow={false}>
           <NoDataPopover storage={storage} showNoDataPopover={props.indicateNoData}>
             <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
-              {shouldRenderTextBasedQueryUi ? (
+              {shouldRenderESQLUi ? (
                 <>
                   {shouldRenderUpdateButton() ? button : null}
                   {shouldRenderDatePicker() ? renderDatePicker() : null}
@@ -1002,9 +1002,9 @@ export const QueryBarTopRow = React.memo(
       );
     }
 
-    function renderTextLangEditor() {
+    function renderESQLEditor() {
       return (
-        shouldRenderTextBasedQueryUi &&
+        shouldRenderESQLUi &&
         props.query &&
         isOfAggregateQueryType(props.query) && (
           <ESQLLangEditor
@@ -1070,7 +1070,7 @@ export const QueryBarTopRow = React.memo(
           dateFormat={uiSettings.get('dateFormat')}
         />
         {!isScreenshotMode &&
-          (shouldRenderTextBasedQueryUi ? (
+          (shouldRenderESQLUi ? (
             <EsqlEditorActionsProvider>
               <EuiFlexGroup {...queryBarFlexGroupProps}>
                 {props.dataViewPickerOverride || renderDataViewsPicker()}
@@ -1091,7 +1091,7 @@ export const QueryBarTopRow = React.memo(
                 {renderEsqlMenuPopover()}
               </EuiFlexGroup>
               {!shouldShowDatePickerAsBadge() && props.filterBar}
-              {renderTextLangEditor()}
+              {renderESQLEditor()}
             </EsqlEditorActionsProvider>
           ) : (
             <>
@@ -1103,7 +1103,7 @@ export const QueryBarTopRow = React.memo(
                 {renderDatePickerWithUpdateBtn()}
               </EuiFlexGroup>
               {!shouldShowDatePickerAsBadge() && props.filterBar}
-              {renderTextLangEditor()}
+              {renderESQLEditor()}
             </>
           ))}
       </FilterBarContextProvider>
