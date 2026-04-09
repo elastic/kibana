@@ -53,9 +53,7 @@ interface TargetEntitySource {
   };
 }
 
-export const parseTargetMetadataHits = (
-  hits: Array<{ _source?: unknown }>
-): TargetMetadataMap => {
+export const parseTargetMetadataHits = (hits: Array<{ _source?: unknown }>): TargetMetadataMap => {
   const result: TargetMetadataMap = new Map();
   for (const hit of hits) {
     const { id, name, EngineMetadata, relationships } =
