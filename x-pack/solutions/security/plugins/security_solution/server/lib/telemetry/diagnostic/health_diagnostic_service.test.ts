@@ -60,8 +60,11 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
   };
 
   const setupDefaultArtifact = (overrides = {}) => {
-    (artifactService.getArtifact as jest.Mock).mockResolvedValue({
-      data: createMockArtifactData(overrides),
+    (artifactService.getArtifact as jest.Mock).mockImplementation((artifactId: string) => {
+      if (artifactId === 'health-diagnostic-queries-v2') {
+        return Promise.resolve({ data: createMockArtifactData(overrides) });
+      }
+      return Promise.resolve({ data: '' }); // v1: empty by default
     });
   };
 
@@ -359,15 +362,53 @@ enabled: true`,
         expect(mockLogger.warn).not.toHaveBeenCalled();
       });
 
-      test('should handle artifact service errors gracefully', async () => {
+      test('should continue with v2 queries when v1 artifact fails', async () => {
         await startService();
+        (artifactService.getArtifact as jest.Mock).mockImplementation((artifactId: string) => {
+          if (artifactId === 'health-diagnostic-queries-v1') {
+            return Promise.reject(new Error('v1 not found'));
+          }
+          return Promise.resolve({ data: createMockArtifactData() });
+        });
+        mockQueryExecutor.search.mockReturnValue(of(mockDocument));
 
+        const result = await service.runHealthDiagnosticQueries({});
+
+        expect(result).toHaveLength(1);
+        expect(result[0].name).toBe('test-query');
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          'Error getting health diagnostic queries',
+          expect.any(Object)
+        );
+      });
+
+      test('should continue with v1 queries when v2 artifact fails', async () => {
+        await startService();
+        (artifactService.getArtifact as jest.Mock).mockImplementation((artifactId: string) => {
+          if (artifactId === 'health-diagnostic-queries-v2') {
+            return Promise.reject(new Error('v2 not found'));
+          }
+          return Promise.resolve({ data: createMockArtifactData() });
+        });
+        mockQueryExecutor.search.mockReturnValue(of(mockDocument));
+
+        const result = await service.runHealthDiagnosticQueries({});
+
+        expect(result).toHaveLength(1);
+        expect(result[0].name).toBe('test-query');
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          'Error getting health diagnostic queries',
+          expect.any(Object)
+        );
+      });
+
+      test('should return empty array when both artifacts fail', async () => {
+        await startService();
         (artifactService.getArtifact as jest.Mock).mockRejectedValue(
           new Error('Artifact not found')
         );
-        const lastExecutionByQuery = {};
 
-        const result = await service.runHealthDiagnosticQueries(lastExecutionByQuery);
+        const result = await service.runHealthDiagnosticQueries({});
 
         expect(result).toEqual([]);
         expect(mockLogger.warn).toHaveBeenCalledWith(
