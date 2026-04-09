@@ -23,7 +23,7 @@
       "workflowsManagement",
       "share"
     ],
-    "optionalPlugins": ["management"],
+    "optionalPlugins": ["management", "usageCollection"],
     "requiredBundles": ["alerting"],
     "extraPublicDirs": []
   }

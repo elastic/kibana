@@ -73,7 +73,7 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
-  metadata: { name: 'Test Signal Rule', labels: ['prod', 'infra'] },
+  metadata: { name: 'Test Signal Rule', tags: ['prod', 'infra'] },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
   evaluation: { query: { base: 'FROM logs-* | STATS count() BY host.name' } },
@@ -83,9 +83,10 @@ const baseRule: RuleApiResponse = {
   updatedAt: '2026-03-04T12:00:00.000Z',
 };
 
-const mockUseNavigateToRuleEventsInDiscover = useNavigateToRuleEventsInDiscover as jest.MockedFunction<
-  typeof useNavigateToRuleEventsInDiscover
->;
+const mockUseNavigateToRuleEventsInDiscover =
+  useNavigateToRuleEventsInDiscover as jest.MockedFunction<
+    typeof useNavigateToRuleEventsInDiscover
+  >;
 
 const renderPage = (rule: RuleApiResponse) =>
   render(
