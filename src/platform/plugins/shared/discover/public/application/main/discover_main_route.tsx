@@ -46,6 +46,7 @@ import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { setBreadcrumbs } from '../../utils/breadcrumbs';
 import { useUnsavedChanges } from './state_management/hooks/use_unsaved_changes';
 import { DiscoverTopNavMenuProvider } from './components/top_nav/discover_topnav_menu';
+import { useAgentBuilderEsqlAttachment } from './hooks/use_agent_builder_esql_attachment';
 
 export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
@@ -101,6 +102,31 @@ export const DiscoverMainRoute = ({
       </RuntimeStateManagerProvider>
     </DiscoverCustomizationContextProvider>
   );
+};
+
+const DiscoverMainView = ({
+  tabsEnabled,
+  ...props
+}: SingleTabViewProps & { tabsEnabled: boolean }) => {
+  useAgentBuilderEsqlAttachment();
+
+  const { customizationContext } = props;
+
+  /**
+   * We need to account for three different display modes:
+   * - If tabs are enabled, show the tabs bar and the app menu.
+   * - If tabs are disabled and Discover is embedded, hide both the tabs bar and the app menu.
+   * - If tabs are disabled and Discover is standalone, hide the tabs bar but show the app menu.
+   */
+  if (tabsEnabled) {
+    return <TabsView {...props} />;
+  }
+
+  if (customizationContext.displayMode === 'embedded') {
+    return <SingleTabView {...props} />;
+  }
+
+  return <SingleTabViewWithAppMenu {...props} />;
 };
 
 const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
@@ -276,21 +302,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
                   defaultMessage: 'Discover - Session not yet saved',
                 })}
           </h1>
-          {
-            /**
-             * We need to account for three different display modes:
-             * - If tabs are enabled, show the tabs bar and the app menu.
-             * - If tabs are disabled and Discover is embedded, hide both the tabs bar and the app menu.
-             * - If tabs are disabled and Discover is standalone, hide the tabs bar but show the app menu.
-             */
-            tabsEnabled ? (
-              <TabsView {...props} />
-            ) : customizationContext.displayMode === 'embedded' ? (
-              <SingleTabView {...props} />
-            ) : (
-              <SingleTabViewWithAppMenu {...props} />
-            )
-          }
+          <DiscoverMainView {...props} tabsEnabled={tabsEnabled} />
         </>
       </DiscoverTopNavMenuProvider>
     </ChartPortalsRenderer>

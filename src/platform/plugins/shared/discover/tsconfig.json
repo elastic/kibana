@@ -86,6 +86,8 @@
     "@kbn/elastic-agent-utils",
     "@kbn/custom-icons",
     "@kbn/observability-ai-assistant-plugin",
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-plugin",
     "@kbn/aiops-plugin",
     "@kbn/data-visualizer-plugin",
     "@kbn/search-types",

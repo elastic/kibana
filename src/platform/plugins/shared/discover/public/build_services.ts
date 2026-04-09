@@ -64,6 +64,7 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
 import type { DiscoverStartPlugins } from './types';
 import type { DiscoverContextAppLocator } from './application/context/services/locator';
@@ -98,6 +99,7 @@ export interface DiscoverFeatureFlags {
 }
 
 export interface DiscoverServices {
+  agentBuilder?: AgentBuilderPluginStart;
   aiops?: AiopsPluginStart;
   alertingVTwo?: AlertingV2PublicStart;
   application: ApplicationStart;
@@ -193,6 +195,7 @@ export const buildServices = ({
   const storage = new Storage(localStorage);
 
   return {
+    agentBuilder: plugins.agentBuilder,
     aiops: plugins.aiops,
     alertingVTwo: plugins.alertingVTwo,
     application: core.application,
