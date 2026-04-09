@@ -75,6 +75,7 @@ import { defaultDeepLinks } from './app/links/default_deep_links';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import { registerAttachmentUiDefinitions } from './agent_builder/attachment_types';
 import { registerRuleAttachment } from './agent_builder/attachment_types/rule_attachment';
+import { registerWatchlistAttachment } from './agent_builder/attachment_types/watchlist_attachment';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -289,6 +290,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         attachments: plugins.agentBuilder.attachments,
         application: core.application,
         aiRuleCreation: this.services.aiRuleCreation,
+      });
+      registerWatchlistAttachment({
+        attachments: plugins.agentBuilder.attachments,
+        application: core.application,
+        aiWatchlist: this.services.aiWatchlist,
       });
     }
 

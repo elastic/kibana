@@ -105,6 +105,7 @@ import type { OnboardingService } from './onboarding/service';
 import type { TelemetryServiceStart } from './common/lib/telemetry';
 import type { SiemMigrationsService } from './siem_migrations/service';
 import type { AiRuleCreationService } from './detection_engine/common/ai_rule_creation_store';
+import type { AiWatchlistService } from './detection_engine/common/ai_watchlist_service';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -217,6 +218,7 @@ export type StartServices = CoreStart &
     productDocBase: ProductDocBasePluginStart;
     logger: Logger;
     aiRuleCreation: AiRuleCreationService;
+    aiWatchlist: AiWatchlistService;
   };
 
 export type StartRenderServices = Pick<

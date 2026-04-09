@@ -720,8 +720,10 @@ export enum SecurityAgentBuilderAttachments {
   alert = 'security.alert',
   entity = 'security.entity',
   rule = 'security.rule',
+  watchlist = 'security.watchlist',
 }
 
 export const SECURITY_RULE_ATTACHMENT_ID = 'ai-rule-creation';
+export const SECURITY_WATCHLIST_ATTACHMENT_ID = 'ai-watchlist-creation';
 
 export const THREAT_HUNTING_AGENT_ID = `${internalNamespaces.security}.agent`;
