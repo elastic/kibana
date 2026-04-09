@@ -12,15 +12,9 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, testData } from '../fixtures';
 
-const { KBN_ARCHIVES, MANAGEMENT_API } = testData;
+const { KBN_ARCHIVES, relationshipsUrl } = testData;
 
-const DEFAULT_TYPES = ['visualization', 'index-pattern', 'search', 'dashboard'];
 const NON_EXISTENT_ID = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';
-
-function relationshipsUrl(type: string, id: string): string {
-  const typesQuery = DEFAULT_TYPES.map((t) => `savedObjectTypes=${t}`).join('&');
-  return `${MANAGEMENT_API.RELATIONSHIPS}/${type}/${id}?${typesQuery}`;
-}
 
 apiTest.describe('relationships - should return 404', { tag: tags.deploymentAgnostic }, () => {
   let adminCredentials: RoleApiCredentials;

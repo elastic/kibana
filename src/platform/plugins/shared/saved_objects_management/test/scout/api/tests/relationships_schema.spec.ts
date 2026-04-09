@@ -13,9 +13,7 @@ import { expect } from '@kbn/scout/api';
 import { schema } from '@kbn/config-schema';
 import { apiTest, testData } from '../fixtures';
 
-const { KBN_ARCHIVES, MANAGEMENT_API, SAVED_OBJECT_IDS } = testData;
-
-const DEFAULT_TYPES = ['visualization', 'index-pattern', 'search', 'dashboard'];
+const { KBN_ARCHIVES, SAVED_OBJECT_IDS, relationshipsUrl } = testData;
 
 const relationSchema = schema.object({
   id: schema.string(),
@@ -48,11 +46,6 @@ const responseSchema = schema.object({
   relations: schema.arrayOf(relationSchema),
   invalidRelations: schema.arrayOf(invalidRelationSchema),
 });
-
-function relationshipsUrl(type: string, id: string, types: string[] = DEFAULT_TYPES): string {
-  const typesQuery = types.map((t) => `savedObjectTypes=${t}`).join('&');
-  return `${MANAGEMENT_API.RELATIONSHIPS}/${type}/${id}?${typesQuery}`;
-}
 
 apiTest.describe(
   'relationships - validate response schema',

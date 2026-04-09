@@ -12,8 +12,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, testData } from '../fixtures';
 
-const { KBN_ARCHIVES, MANAGEMENT_API } = testData;
-const DEFAULT_TYPES = ['visualization', 'index-pattern', 'search', 'dashboard'];
+const { KBN_ARCHIVES, MANAGEMENT_API, DEFAULT_TYPES } = testData;
 
 apiTest.describe('scroll_count - less than 10k objects', { tag: tags.deploymentAgnostic }, () => {
   let adminCredentials: RoleApiCredentials;

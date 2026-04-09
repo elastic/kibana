@@ -12,22 +12,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, testData } from '../fixtures';
 
-const { KBN_ARCHIVES, MANAGEMENT_API, SAVED_OBJECT_IDS } = testData;
-
-const DEFAULT_TYPES = ['visualization', 'index-pattern', 'search', 'dashboard'];
-
-function relationshipsUrl(type: string, id: string, types: string[] = DEFAULT_TYPES): string {
-  const typesQuery = types.map((t) => `savedObjectTypes=${t}`).join('&');
-  return `${MANAGEMENT_API.RELATIONSHIPS}/${type}/${id}?${typesQuery}`;
-}
-
-function sortRelations<T extends { relationship: string; type: string; id: string }>(
-  relations: T[]
-): T[] {
-  return [...relations].sort((a, b) =>
-    `${a.relationship}:${a.type}:${a.id}`.localeCompare(`${b.relationship}:${b.type}:${b.id}`)
-  );
-}
+const { KBN_ARCHIVES, SAVED_OBJECT_IDS, relationshipsUrl, sortRelations } = testData;
 
 apiTest.describe('relationships - should work', { tag: tags.deploymentAgnostic }, () => {
   let adminCredentials: RoleApiCredentials;

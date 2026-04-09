@@ -40,3 +40,18 @@ export const MANAGEMENT_API = {
   BULK_DELETE: '/internal/kibana/management/saved_objects/_bulk_delete',
   IMPORT: '/api/saved_objects/_import',
 };
+
+export const DEFAULT_TYPES = ['visualization', 'index-pattern', 'search', 'dashboard'];
+
+export function relationshipsUrl(type: string, id: string, types: string[] = DEFAULT_TYPES): string {
+  const typesQuery = types.map((t) => `savedObjectTypes=${t}`).join('&');
+  return `${MANAGEMENT_API.RELATIONSHIPS}/${type}/${id}?${typesQuery}`;
+}
+
+export function sortRelations<T extends { relationship: string; type: string; id: string }>(
+  relations: T[]
+): T[] {
+  return [...relations].sort((a, b) =>
+    `${a.relationship}:${a.type}:${a.id}`.localeCompare(`${b.relationship}:${b.type}:${b.id}`)
+  );
+}
