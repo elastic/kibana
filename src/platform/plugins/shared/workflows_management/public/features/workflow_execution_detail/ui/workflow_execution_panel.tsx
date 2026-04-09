@@ -203,7 +203,13 @@ const ReplayExecutionButton = React.memo<{
   const dispatch = useDispatch();
   const isStepRun = stepExecutionId != null && stepId != null;
 
+  const isSyntaxValid = useSelector(selectIsYamlSyntaxValid);
+  const { canExecuteWorkflow } = useWorkflowsCapabilities();
+
   const replayExecution = useCallback(() => {
+    if (!canExecuteWorkflow) {
+      return;
+    }
     if (isStepRun && stepId && stepExecutionId) {
       dispatch(setTestStepModalOpenStepId(stepId));
       dispatch(setReplayStepExecutionId(stepExecutionId));
@@ -211,10 +217,7 @@ const ReplayExecutionButton = React.memo<{
       dispatch(setReplayExecutionId(executionId));
       dispatch(setIsTestModalOpen(true));
     }
-  }, [executionId, stepExecutionId, stepId, isStepRun, dispatch]);
-
-  const isSyntaxValid = useSelector(selectIsYamlSyntaxValid);
-  const { canExecuteWorkflow } = useWorkflowsCapabilities();
+  }, [canExecuteWorkflow, executionId, stepExecutionId, stepId, isStepRun, dispatch]);
   const { isRunDisabled, runDisabledTooltipContent } = useMemo<{
     isRunDisabled: boolean;
     runDisabledTooltipContent: string | null;
@@ -231,7 +234,7 @@ const ReplayExecutionButton = React.memo<{
 
   return (
     <EuiToolTip
-      content={runDisabledTooltipContent ?? isStepRun ? i18nTexts.replayStep : i18nTexts.replay}
+      content={runDisabledTooltipContent ?? (isStepRun ? i18nTexts.replayStep : i18nTexts.replay)}
       disableScreenReaderOutput
     >
       <EuiButtonIcon

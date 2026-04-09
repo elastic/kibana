@@ -47,7 +47,7 @@ Use this skill when the user wants to:
 - **${workflowTools.getWorkflow}**: Retrieve a specific workflow by ID
 
 ### Edit Tools
-- **${workflowTools.replaceYaml}**: Replace the entire workflow YAML, or **create a new workflow from scratch** when no ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment exists. Use this to create new workflows.
+- **${workflowTools.setYaml}**: Set the complete workflow YAML. Creates a new workflow when no ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment exists, or replaces the entire YAML of an existing one.
 - **${workflowTools.insertStep}**: Insert a new step at the end of the steps list (requires existing attachment)
 - **${workflowTools.modifyStep}**: Replace an entire step by name (requires existing attachment)
 - **${workflowTools.modifyStepProperty}**: Modify a single property of a step (requires existing attachment)
@@ -55,6 +55,10 @@ Use this skill when the user wants to:
 - **${workflowTools.deleteStep}**: Delete a step by name (requires existing attachment)
 
 ## Core Instructions
+
+### Creating New Workflows
+
+To create a new workflow, call \`${workflowTools.setYaml}\` with the complete YAML. This tool creates the ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment automatically when none exists. Do NOT use attachments.add or attachment_add — that will fail.
 
 ### Search Examples Before Writing Step YAML
 

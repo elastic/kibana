@@ -13,12 +13,13 @@ import type { FormValues } from '../types';
 import { deriveRecoveryDelayModeFromStateTransition } from '../utils/rule_request_mappers';
 import { StateTransitionCountField } from './state_transition_count_field';
 import { StateTransitionTimeframeField } from './state_transition_timeframe_field';
+import { useRuleFormMeta } from '../contexts';
 
-type DelayMode = 'immediate' | 'breaches' | 'duration';
+type DelayMode = 'immediate' | 'recoveries' | 'duration';
 
 const MODE_OPTION_IDS = {
   immediate: 'recovery_delay_mode_immediate',
-  breaches: 'recovery_delay_mode_breaches',
+  recoveries: 'recovery_delay_mode_recoveries',
   duration: 'recovery_delay_mode_duration',
 } as const;
 
@@ -30,9 +31,9 @@ const MODE_OPTIONS = [
     }),
   },
   {
-    id: MODE_OPTION_IDS.breaches,
-    label: i18n.translate('xpack.alertingV2.ruleForm.recoveryDelay.delayModeBreaches', {
-      defaultMessage: 'Breaches',
+    id: MODE_OPTION_IDS.recoveries,
+    label: i18n.translate('xpack.alertingV2.ruleForm.recoveryDelay.delayModeRecoveries', {
+      defaultMessage: 'Recoveries',
     }),
   },
   {
@@ -46,13 +47,13 @@ const MODE_OPTIONS = [
 const modeFromOptionId = (id: string): DelayMode => {
   if (id === MODE_OPTION_IDS.immediate) return 'immediate';
   if (id === MODE_OPTION_IDS.duration) return 'duration';
-  return 'breaches';
+  return 'recoveries';
 };
 
 const optionIdForMode = (mode: DelayMode): string => {
   if (mode === 'immediate') return MODE_OPTION_IDS.immediate;
   if (mode === 'duration') return MODE_OPTION_IDS.duration;
-  return MODE_OPTION_IDS.breaches;
+  return MODE_OPTION_IDS.recoveries;
 };
 
 const DEFAULT_RECOVERING_COUNT = 2;
@@ -60,10 +61,12 @@ const DEFAULT_RECOVERING_TIMEFRAME = '2m';
 
 export const RecoveryDelayField = () => {
   const { control, getValues, setValue } = useFormContext<FormValues>();
+  const { layout } = useRuleFormMeta();
   const stateTransition = useWatch({ control, name: 'stateTransition' });
   const selectedMode = useWatch({ control, name: 'stateTransitionRecoveryDelayMode' });
+  const derived = selectedMode ?? deriveRecoveryDelayModeFromStateTransition(stateTransition);
   const displayMode: DelayMode =
-    selectedMode ?? deriveRecoveryDelayModeFromStateTransition(stateTransition);
+    derived === 'immediate' || derived === 'duration' ? derived : 'recoveries';
 
   const onModeChange = useCallback(
     (optionId: string) => {
@@ -82,8 +85,8 @@ export const RecoveryDelayField = () => {
             { shouldDirty: true, shouldTouch: true }
           );
           break;
-        case 'breaches':
-          setValue('stateTransitionRecoveryDelayMode', 'breaches', { shouldDirty: true });
+        case 'recoveries':
+          setValue('stateTransitionRecoveryDelayMode', 'recoveries', { shouldDirty: true });
           setValue(
             'stateTransition',
             {
@@ -121,7 +124,7 @@ export const RecoveryDelayField = () => {
     >
       <>
         <EuiButtonGroup
-          buttonSize="s"
+          buttonSize={layout === 'flyout' ? 'compressed' : 's'}
           legend={i18n.translate('xpack.alertingV2.ruleForm.recoveryDelay.delayModeLegend', {
             defaultMessage: 'Recovery delay mode',
           })}
@@ -139,11 +142,11 @@ export const RecoveryDelayField = () => {
             })}
           </EuiText>
         )}
-        {displayMode === 'breaches' && (
+        {displayMode === 'recoveries' && (
           <StateTransitionCountField
             variant="recovering"
             prependLabel={i18n.translate(
-              'xpack.alertingV2.ruleForm.recoveryDelay.inlineBreachesPrepend',
+              'xpack.alertingV2.ruleForm.recoveryDelay.inlineRecoveriesPrepend',
               { defaultMessage: 'Consecutive recoveries' }
             )}
           />

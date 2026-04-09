@@ -11,11 +11,30 @@ import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflow
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
+/**
+ * Step types whose outputs must never be evicted from in-memory state,
+ * even for non-latest iterations in a loop.
+ *
+ * - data.set: getVariables reads all executions, not just the latest
+ * - waitForInput: user-provided answers must be preserved for auditability
+ *   and downstream access across all loop iterations
+ */
+const EVICTION_EXEMPT_STEP_TYPES = new Set(['data.set', 'waitForInput']);
+
+/** Context for the step that failed during this run; used to build workflow_execution_failed event. */
+export interface FailedStepContext {
+  stepId: string;
+  stepName: string;
+  stepExecutionId: string;
+}
+
 export class WorkflowExecutionState {
   private stepExecutions: Map<string, EsWorkflowStepExecution> = new Map();
   private workflowExecution: EsWorkflowExecution;
   private workflowDocumentChanges: Partial<EsWorkflowExecution> | undefined = undefined;
   private stepDocumentsChanges: Map<string, Partial<EsWorkflowStepExecution>> = new Map();
+
+  private lastFailedStepContext: FailedStepContext | undefined = undefined;
 
   /**
    * Maps step IDs to their execution IDs in chronological order.
@@ -49,6 +68,14 @@ export class WorkflowExecutionState {
 
   public getWorkflowExecution(): EsWorkflowExecution {
     return this.workflowExecution;
+  }
+
+  public setLastFailedStepContext(ctx: FailedStepContext): void {
+    this.lastFailedStepContext = ctx;
+  }
+
+  public getLastFailedStepContext(): FailedStepContext | undefined {
+    return this.lastFailedStepContext;
   }
 
   public updateWorkflowExecution(workflowExecution: Partial<EsWorkflowExecution>): void {
@@ -182,6 +209,47 @@ export class WorkflowExecutionState {
       ...(this.stepDocumentsChanges.get(stepId) || {}),
       ...step,
     });
+  }
+
+  /**
+   * Nullifies `output` and `input` on non-latest in-memory step executions
+   * for the given step IDs, reducing memory pressure after a loop completes.
+   *
+   * Preserves:
+   * - The latest execution per stepId (needed by getContext → getLatestStepExecution)
+   * - All data.set step outputs (needed by getVariables which reads all executions)
+   * - All waitForInput step outputs (user-provided values that must be preserved for
+   *   auditability and downstream access across all iterations)
+   * - All metadata fields (needed by telemetry at terminal state)
+   *
+   * Note: eviction uses global-latest-wins semantics — it keeps the absolute latest
+   * execution per stepId across all loop iterations, not scoped to a specific loop scope.
+   * This means that after outer-loop eviction, only the latest execution from the last
+   * outer iteration retains its output. This is correct because getLatestStepExecution
+   * always returns the absolute latest execution.
+   *
+   * Does NOT touch ES-persisted documents — this is in-memory only.
+   * On resume, ES documents still hold the original outputs.
+   */
+  public evictStaleLoopOutputs(innerStepIds: Iterable<string>): void {
+    for (const stepId of innerStepIds) {
+      const executionIds = this.stepIdExecutionIdIndex.get(stepId);
+      if (executionIds && executionIds.length > 1) {
+        const staleIds = executionIds.slice(0, -1);
+        for (const execId of staleIds) {
+          const stepExec = this.stepExecutions.get(execId);
+          if (
+            stepExec &&
+            (stepExec.stepType == null || !EVICTION_EXEMPT_STEP_TYPES.has(stepExec.stepType))
+          ) {
+            // Replace with a shallow copy so any pending stepDocumentsChanges entry
+            // for this execution is not mutated (it shares the same object reference
+            // when the step was first created via createStep).
+            this.stepExecutions.set(execId, { ...stepExec, output: undefined, input: undefined });
+          }
+        }
+      }
+    }
   }
 
   private buildStepIdExecutionIdIndex(): void {

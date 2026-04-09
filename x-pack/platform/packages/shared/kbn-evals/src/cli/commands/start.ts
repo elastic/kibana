@@ -117,6 +117,45 @@ const waitForScoutReady = async (repoRoot: string, log: ToolingLog): Promise<voi
   throw new Error(`Scout did not become ready within ${SCOUT_READY_TIMEOUT_MS / 1000}s`);
 };
 
+/**
+ * Verify the Scout-managed ES and Kibana are actually reachable, not just that
+ * the parent PID is alive. Covers the common case where ES crashes while the
+ * Scout orchestrator (and Kibana) keep running.
+ */
+const probeScoutHealth = async (repoRoot: string): Promise<{ ok: boolean; reason?: string }> => {
+  const configPath = Path.join(repoRoot, SCOUT_LOCAL_CONFIG);
+  if (!Fs.existsSync(configPath)) {
+    return { ok: false, reason: 'local config missing (.scout/servers/local.json)' };
+  }
+
+  try {
+    const raw = Fs.readFileSync(configPath, 'utf-8');
+    const parsed = JSON.parse(raw) as { hosts?: { kibana?: string; elasticsearch?: string } };
+    const esUrl = parsed.hosts?.elasticsearch;
+    const kbnUrl = parsed.hosts?.kibana;
+
+    if (!esUrl || !kbnUrl) {
+      return { ok: false, reason: 'hosts missing from local config' };
+    }
+
+    const [esOk, kbnOk] = await Promise.all([probeHttp(esUrl), probeHttp(`${kbnUrl}/api/status`)]);
+
+    if (!esOk && !kbnOk) {
+      return { ok: false, reason: `ES (${esUrl}) and Kibana (${kbnUrl}) are unreachable` };
+    }
+    if (!esOk) {
+      return { ok: false, reason: `ES is unreachable (${esUrl})` };
+    }
+    if (!kbnOk) {
+      return { ok: false, reason: `Kibana is unreachable (${kbnUrl})` };
+    }
+
+    return { ok: true };
+  } catch {
+    return { ok: false, reason: 'failed to read local config' };
+  }
+};
+
 const isEisConnectorId = (id: string): boolean => id.startsWith('eis-');
 
 const shellQuote = (value: string): string => {
@@ -387,7 +426,18 @@ export const startCmd: Command<void> = {
         await stopService(repoRoot, 'scout', log);
       }
 
-      if (scoutAlive && !staleCheck.stale) {
+      let scoutReusable = scoutAlive && !staleCheck.stale;
+
+      if (scoutReusable) {
+        const health = await probeScoutHealth(repoRoot);
+        if (!health.ok) {
+          log.warning(`[2/4] Scout PID alive but ${health.reason}. Restarting...`);
+          await stopService(repoRoot, 'scout', log);
+          scoutReusable = false;
+        }
+      }
+
+      if (scoutReusable) {
         log.info('[2/4] Scout server already running -- reusing');
       } else {
         const scoutConfigPath = Path.join(repoRoot, SCOUT_LOCAL_CONFIG);
