@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export * from './event_message_filter';
+/**
+ * minWidth for each block rendered in the flyout header.
+ * Allows to switch for a 1 row 4 blocks to 2 rows with 2 block each
+ */
+export const flyoutHeaderBlockStyles = {
+  minWidth: 280,
+};
