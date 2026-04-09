@@ -45,6 +45,8 @@ describe('writeImpactReport', () => {
       path: '/api/spaces/space',
       method: undefined,
       reason: 'Endpoint removed',
+      oasdiffId: undefined,
+      source: undefined,
       terraformResource: 'elasticstack_kibana_space',
       owners: ['@elastic/kibana-security'],
     });
