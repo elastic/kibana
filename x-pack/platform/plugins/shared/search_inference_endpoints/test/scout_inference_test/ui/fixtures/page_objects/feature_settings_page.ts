@@ -127,4 +127,20 @@ export class FeatureSettingsPage {
   public get resetDefaultsCancelButton(): Locator {
     return this.resetDefaultsModal.locator('[data-test-subj="confirmModalCancelButton"]');
   }
+
+  // --- Route Mocking ---
+
+  public async mockInferenceEndpoints(endpoints: unknown[]) {
+    await this.page.route('**/internal/inference_endpoints/endpoints', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ inference_endpoints: endpoints }),
+      });
+    });
+  }
+
+  public async unmockInferenceEndpoints() {
+    await this.page.unroute('**/internal/inference_endpoints/endpoints');
+  }
 }

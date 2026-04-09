@@ -10,18 +10,6 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import { mockInferenceEndpoints } from '../fixtures/mock_data/inference_endpoints';
 
-const MOCK_ROUTE = '**/internal/inference_endpoints/endpoints';
-
-async function setupMockEndpoints(page: Parameters<Parameters<typeof test>[2]>[0]['page']) {
-  await page.route(MOCK_ROUTE, async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({ inference_endpoints: mockInferenceEndpoints }),
-    });
-  });
-}
-
 test.describe(
   'Feature Settings',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
@@ -143,9 +131,9 @@ test.describe(
       });
     });
 
-    test('searching in add model popover filters the results', async ({ page, pageObjects }) => {
+    test('searching in add model popover filters the results', async ({ pageObjects }) => {
       const { featureSettings } = pageObjects;
-      await setupMockEndpoints(page);
+      await featureSettings.mockInferenceEndpoints(mockInferenceEndpoints);
       await featureSettings.goto();
 
       try {
@@ -166,16 +154,15 @@ test.describe(
           await expect(featureSettings.addModelOptions).not.toHaveCount(0);
         });
       } finally {
-        await page.unroute(MOCK_ROUTE);
+        await featureSettings.unmockInferenceEndpoints();
       }
     });
 
     test('selecting a model from the popover adds it to the endpoint list', async ({
-      page,
       pageObjects,
     }) => {
       const { featureSettings } = pageObjects;
-      await setupMockEndpoints(page);
+      await featureSettings.mockInferenceEndpoints(mockInferenceEndpoints);
       await featureSettings.goto();
 
       try {
@@ -198,16 +185,15 @@ test.describe(
           await expect(featureSettings.saveButton).toBeEnabled();
         });
       } finally {
-        await page.unroute(MOCK_ROUTE);
+        await featureSettings.unmockInferenceEndpoints();
       }
     });
 
     test('copy to applies source endpoint list to the target sub-feature', async ({
-      page,
       pageObjects,
     }) => {
       const { featureSettings } = pageObjects;
-      await setupMockEndpoints(page);
+      await featureSettings.mockInferenceEndpoints(mockInferenceEndpoints);
       await featureSettings.goto();
 
       try {
@@ -242,7 +228,7 @@ test.describe(
           await expect(featureSettings.saveButton).toBeEnabled();
         });
       } finally {
-        await page.unroute(MOCK_ROUTE);
+        await featureSettings.unmockInferenceEndpoints();
       }
     });
   }
