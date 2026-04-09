@@ -56,9 +56,11 @@ export enum QUERY_TIMEOUT {
 /**
  * How long Fleet Server holds an undelivered action for offline agents.
  * Agents that check in within this window will receive the query; after that, the action expires.
- * Matches endpoint response actions which also use 2 weeks (see getActionRequestExpiration in security_solution).
+ * Set to 24h to cover intermittent connectivity and overnight offline agents,
+ * but not so long that stale queries pile up on agents gone for weeks (e.g. vacations).
+ * For comparison, endpoint response actions use 2 weeks — but those are "must execute" operations (isolate/release).
  */
-export const ACTION_EXPIRATION_WEEKS = 2;
+export const ACTION_EXPIRATION_HOURS = 24;
 
 export const MAX_TAGS_PER_ACTION = 20;
 export const MAX_TAG_LENGTH = 256;
