@@ -97,6 +97,30 @@ describe('FullTraceWaterfallRenderer', () => {
     expect(screen.getByTestId('traceWaterfall')).toBeInTheDocument();
   });
 
+  describe('service badge navigation', () => {
+    it('passes getServiceBadgeHref to TraceWaterfall', () => {
+      mockUseFetcher.mockReturnValue({
+        data: {
+          traceItems: [],
+          errors: [],
+          agentMarks: {},
+          traceDocsTotal: 2,
+          maxTraceItems: 5000,
+        },
+        status: useFetcherModule.FETCH_STATUS.SUCCESS,
+        error: undefined,
+        refetch: jest.fn(),
+      });
+
+      renderComponent();
+
+      expect(mockTraceWaterfall).toHaveBeenCalledWith(
+        expect.objectContaining({ getServiceBadgeHref: expect.any(Function) }),
+        expect.anything()
+      );
+    });
+  });
+
   describe('WaterfallSizeWarning props', () => {
     it('passes traceDocsTotal and maxTraceItems to TraceWaterfall', () => {
       mockUseFetcher.mockReturnValue({

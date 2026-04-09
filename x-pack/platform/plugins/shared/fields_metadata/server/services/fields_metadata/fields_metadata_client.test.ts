@@ -17,6 +17,7 @@ import { MetadataFieldsRepository } from './repositories/metadata_fields_reposit
 import { OtelFieldsRepository } from './repositories/otel_fields_repository';
 import { FieldMetadata } from '../../../common/fields_metadata/models/field_metadata';
 import { FieldsMetadataDictionary } from '../../../common/fields_metadata/models/fields_metadata_dictionary';
+import { StreamsFieldsRepository } from './repositories/streams_fields_repository';
 
 const ecsFields = {
   '@timestamp': {
@@ -221,6 +222,9 @@ describe('FieldsMetadataClient class', () => {
   const otelFieldsRepository = OtelFieldsRepository.create({
     otelFields: otelFields as TOtelFields,
   });
+  const streamsFieldsRepository = StreamsFieldsRepository.create({
+    streamsFieldsExtractor: jest.fn(),
+  });
   const integrationFieldsExtractor = jest.fn();
   const integrationListExtractor = jest.fn();
   integrationFieldsExtractor.mockImplementation(
@@ -272,6 +276,7 @@ describe('FieldsMetadataClient class', () => {
       integrationFieldsRepository,
       metadataFieldsRepository,
       otelFieldsRepository,
+      streamsFieldsRepository,
     });
   });
 
@@ -370,6 +375,7 @@ describe('FieldsMetadataClient class', () => {
         integrationFieldsRepository,
         metadataFieldsRepository,
         otelFieldsRepository,
+        streamsFieldsRepository,
       });
 
       const fieldInstance = await clientWithouthPrivileges.getByName('mysql.slowlog.filesort');
@@ -559,6 +565,7 @@ describe('FieldsMetadataClient class', () => {
         integrationFieldsRepository,
         metadataFieldsRepository,
         otelFieldsRepository,
+        streamsFieldsRepository,
       });
 
       await expect(client.matchesAnyTypeForEventCategory(['process'], ['start'])).resolves.toBe(
@@ -579,6 +586,7 @@ describe('FieldsMetadataClient class', () => {
         integrationFieldsRepository,
         metadataFieldsRepository,
         otelFieldsRepository,
+        streamsFieldsRepository,
       });
 
       await expect(client.matchesAnyTypeForEventCategory(['process'], ['start'])).resolves.toBe(

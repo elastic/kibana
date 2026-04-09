@@ -20,7 +20,3 @@ const result = idSchema.validate('dashboard_abc123'); // throws if invalid
 ## Exported Schemas
 
 - `asCodeIdSchema` — Validates As Code identifiers according to platform requirements.
-
-## Exported Types
-
-- `AsCodeId` - ID type

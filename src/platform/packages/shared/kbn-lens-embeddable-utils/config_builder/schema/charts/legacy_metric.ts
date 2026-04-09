@@ -10,7 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { layerSettingsSchema, sharedPanelInfoSchema, dslOnlyPanelInfoSchema } from '../shared';
 import {
   applyColorToSchema,
@@ -19,16 +19,11 @@ import {
 } from '../color';
 import { horizontalAlignmentSchema, verticalAlignmentSchema } from '../alignments';
 import { mergeAllMetricsWithChartDimensionSchema } from './shared';
+import { objectUnion } from './utils/object_union';
 
 const legacyMetricStateMetricOptionsSchema = {
   /**
-   * Size of the legacy metric label and value. Possible values:
-   * - 'xs': Extra small
-   * - 's': Small
-   * - 'm': Medium (default)
-   * - 'l': Large
-   * - 'xl': Extra large
-   * - 'xxl': Double extra large
+   * Font scale for the legacy metric label and value.
    */
   size: schema.maybe(
     schema.oneOf(
@@ -92,7 +87,7 @@ export const legacyMetricStateSchemaNoESQL = schema.object(
     ...sharedPanelInfoSchema,
     ...dslOnlyPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetSchema,
+    ...dataSourceSchema,
     /**
      * Metric configuration, must define operation.
      */
@@ -106,7 +101,7 @@ const esqlLegacyMetricState = schema.object(
     type: schema.literal('legacy_metric'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
+    ...dataSourceEsqlTableSchema,
     /**
      * Metric configuration, must define operation.
      */
@@ -115,12 +110,10 @@ const esqlLegacyMetricState = schema.object(
   { meta: { id: 'legacyMetricESQL', title: 'Legacy Metric Chart (ES|QL)' } }
 );
 
-export const legacyMetricStateSchema = schema.oneOf(
-  [legacyMetricStateSchemaNoESQL, esqlLegacyMetricState],
-  {
-    meta: { id: 'legacyMetricChart', title: 'Legacy Metric Chart' },
-  }
-);
+// Legacy metric is not currently supported for ES|QL datasets
+export const legacyMetricStateSchema = objectUnion([legacyMetricStateSchemaNoESQL], {
+  meta: { id: 'legacyMetricChart', title: 'Legacy Metric Chart' },
+});
 
 export type LegacyMetricState = TypeOf<typeof legacyMetricStateSchema>;
 export type LegacyMetricStateNoESQL = TypeOf<typeof legacyMetricStateSchemaNoESQL>;
