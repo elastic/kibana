@@ -254,6 +254,14 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                                               'This inference endpoint is no longer available',
                                           }
                                         )}
+                                        aria-label={i18n.translate(
+                                          'xpack.searchInferenceEndpoints.settings.endpointUnavailable',
+                                          {
+                                            defaultMessage:
+                                              'Inference endpoint {label} is no longer available',
+                                            values: { label },
+                                          }
+                                        )}
                                       />
                                     ) : (
                                       <EuiIcon type={icon} size="m" aria-hidden />

@@ -148,7 +148,7 @@ export const ModelSettings: React.FC = () => {
                   color="warning"
                   iconType="warning"
                   data-test-subj="invalidEndpointsCallout"
-                  announceOnMount={false}
+                  announceOnMount
                 >
                   <p>
                     {i18n.translate(
