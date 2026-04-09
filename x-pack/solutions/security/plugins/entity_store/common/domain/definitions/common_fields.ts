@@ -9,7 +9,6 @@ import type { Condition } from '@kbn/streamlang';
 import type { EntityType, EntityField, FieldEvaluation } from './entity_schema';
 import { collectValues, newestValue, oldestValue } from './field_retention_operations';
 
-/** Keyword subfields under each `entity.relationships.<leaf>` (ECS RFC bag-of-identifiers). */
 export const ENTITY_RELATIONSHIP_IDENTIFIER_FIELDS = [
   'entity_id',
   'host_id',
@@ -141,14 +140,13 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
     }),
 
     // RELATIONSHIPS ------------------------------------------------------------
-    // Each leaf is an object of keyword arrays (bag of identifiers); see ECS RFC entity.relationships.*.
+    // Each leaf is an object of keyword arrays (a collection of identifiers); see ECS RFC entity.relationships.*.
     ...ENTITY_RELATIONSHIP_COLLECT_LEAVES.flatMap((leaf) =>
       ENTITY_RELATIONSHIP_IDENTIFIER_FIELDS.map((idField) =>
         collectValues({
           source: `${prefix}.relationships.${leaf}.${idField}`,
           destination: `entity.relationships.${leaf}.${idField}`,
           mapping: { type: 'keyword' },
-          ...(leaf === 'communicates_with' ? { fieldHistoryLength: 50 as const } : {}),
           allowAPIUpdate: true,
         })
       )

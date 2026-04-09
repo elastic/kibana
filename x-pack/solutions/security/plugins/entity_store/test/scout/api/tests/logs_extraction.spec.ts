@@ -1086,7 +1086,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
   );
 
   apiTest(
-    'Should merge entity.relationships.* identifier bags from host.entity on source documents',
+    'Should merge entity.relationships.* identifier from host.entity on source documents',
     async ({ apiClient, esClient }) => {
       const fromIso = '2026-04-10T09:00:00Z';
       const toIso = '2026-04-10T11:00:00Z';
