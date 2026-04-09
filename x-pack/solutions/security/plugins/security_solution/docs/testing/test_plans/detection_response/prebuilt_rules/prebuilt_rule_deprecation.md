@@ -257,7 +257,7 @@ Then the response contains an empty rules array
 
 ```Gherkin
 Given the package contains more than 200 deprecated rule assets
-When deprecated rules are fetched
+When the user requests the deprecation review
 Then at most 200 deprecated rules are returned
 ```
 
