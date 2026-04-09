@@ -15,10 +15,12 @@ import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/
 import { AttachmentType, type AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import {
+  internalStateActions,
   useAppStateSelector,
   useCurrentDataView,
   useCurrentTabDataStateContainer,
   useCurrentTabSelector,
+  useInternalStateDispatch,
 } from '../../state_management/redux';
 import { useDataState } from '../../hooks/use_data_state';
 import { FetchStatus } from '../../../types';
@@ -135,7 +137,8 @@ const buildEsqlResultsAttachment = (
 };
 
 export const DiscoverAgentBuilderConfig = () => {
-  const { agentBuilder, locator } = useDiscoverServices();
+  const { agentBuilder } = useDiscoverServices();
+  const dispatch = useInternalStateDispatch();
   const dataView = useCurrentDataView();
   const [columns, dataSource, query] = useAppStateSelector((state) => [
     state.columns,
@@ -169,10 +172,10 @@ export const DiscoverAgentBuilderConfig = () => {
       schema: updateQuerySchema,
       handler: async ({ language, query: nextQuery }: z.infer<typeof updateQuerySchema>) => {
         const newQuery = toDiscoverQuery(queryRef.current, nextQuery, language);
-        await locator.navigate({ query: newQuery });
+        dispatch(internalStateActions.openInNewTab({ appState: { query: newQuery } }));
       },
     }),
-    [locator]
+    [dispatch]
   );
 
   const browserApiTools = useMemo(() => [runQueryTool], [runQueryTool]);
