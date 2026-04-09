@@ -6,9 +6,16 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React from 'react';
 import { ConversationActionButton } from './conversation_action_button';
 import { ConnectorSelector } from './connector_selector';
+
+const connectorFlexItemStyles = css`
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+`;
 
 interface InputActionsProps {
   onSubmit: () => void;
@@ -30,7 +37,7 @@ export const InputActions: React.FC<InputActionsProps> = ({
       alignItems="center"
       justifyContent="spaceBetween"
     >
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} css={connectorFlexItemStyles}>
         <ConnectorSelector />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
