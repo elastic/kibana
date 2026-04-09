@@ -139,6 +139,7 @@ export class AutomaticImportSavedObjectService {
           ...data.metadata,
           version: newVersion,
         },
+        changelog: data.changelog ?? existingIntegration.changelog,
       };
 
       return await this.savedObjectsClient.update<IntegrationAttributes>(

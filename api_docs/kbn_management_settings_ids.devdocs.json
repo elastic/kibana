@@ -778,7 +778,7 @@
         "label": "ELASTIC_CONSOLE_ENABLED_SETTING_ID",
         "description": [],
         "signature": [
-          "\"elasticConsole:enabled\""
+          "\"elasticRamen:enabled\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
         "lineNumber": 12,
