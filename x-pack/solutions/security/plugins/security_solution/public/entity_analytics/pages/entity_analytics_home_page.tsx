@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import {
   EuiFlexGroup,
@@ -45,6 +45,12 @@ import {
   type URLQuery,
 } from '../components/home/entities_table';
 import { DynamicRiskLevelPanel } from '../components/home/dynamic_risk_level_panel';
+import { TopThreatHuntingLeads } from '../components/threat_hunting/top_threat_hunting_leads';
+import { ThreatHuntingLeadsFlyout } from '../components/threat_hunting/top_threat_hunting_leads/threat_hunting_leads_flyout';
+import { LeadProvenanceFlyout } from '../components/threat_hunting/top_threat_hunting_leads/lead_provenance_flyout';
+import { useHuntingLeads } from '../components/threat_hunting/top_threat_hunting_leads/use_hunting_leads';
+import { useLeadAttachment } from '../components/threat_hunting/top_threat_hunting_leads/use_lead_attachment';
+import type { HuntingLead } from '../components/threat_hunting/top_threat_hunting_leads/types';
 
 const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => ({
   query,
@@ -60,7 +66,24 @@ export const EntityAnalyticsHomePage = () => {
     sourcererDataView: oldSourcererDataViewSpec,
   } = useSourcererDataView();
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const leadGenerationEnabled = useIsExperimentalFeatureEnabled('leadGenerationEnabled');
+  const leadDetailsEnabled = useIsExperimentalFeatureEnabled('leadGenerationDetailsEnabled');
   const { dataView, status } = useDataView(PageScope.explore);
+
+  const {
+    leads,
+    totalCount,
+    isLoading: isLeadsLoading,
+    isGenerating,
+    hasGenerated,
+    generate,
+    isScheduled,
+    toggleSchedule,
+  } = useHuntingLeads(leadGenerationEnabled);
+  const openAgentBuilderWithLead = useLeadAttachment();
+
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const [provenanceLead, setProvenanceLead] = useState<HuntingLead | null>(null);
 
   const isSourcererLoading = useMemo(
     () => (newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading),
@@ -106,6 +129,25 @@ export const EntityAnalyticsHomePage = () => {
   const isXlScreen = useIsWithinBreakpoints(['l', 'xl']);
   const showEmptyPrompt = !indicesExist;
 
+  const handleOpenFlyout = useCallback(() => setIsFlyoutOpen(true), []);
+  const handleCloseFlyout = useCallback(() => setIsFlyoutOpen(false), []);
+
+  const handleOpenLeadInChat = useCallback(
+    (lead: HuntingLead) => openAgentBuilderWithLead(lead),
+    [openAgentBuilderWithLead]
+  );
+
+  const handleLeadInfoClick = useCallback((lead: HuntingLead) => setProvenanceLead(lead), []);
+
+  const handleCloseProvenance = useCallback(() => setProvenanceLead(null), []);
+
+  const handleHuntInChat = useCallback(() => {
+    const firstLead = leads[0];
+    if (firstLead) {
+      openAgentBuilderWithLead(firstLead);
+    }
+  }, [leads, openAgentBuilderWithLead]);
+
   if (newDataViewPickerEnabled && status === 'pristine') {
     return <PageLoader />;
   }
@@ -144,6 +186,25 @@ export const EntityAnalyticsHomePage = () => {
           <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsHomePageLoader" />
         ) : (
           <EuiFlexGroup direction="column" gutterSize="l">
+            {leadGenerationEnabled && (
+              <EuiFlexItem>
+                <TopThreatHuntingLeads
+                  leads={leads}
+                  totalCount={totalCount}
+                  isLoading={isLeadsLoading}
+                  isGenerating={isGenerating}
+                  hasGenerated={hasGenerated}
+                  onSeeAll={handleOpenFlyout}
+                  onLeadClick={handleOpenLeadInChat}
+                  onHuntInChat={handleHuntInChat}
+                  onLeadInfoClick={leadDetailsEnabled ? handleLeadInfoClick : undefined}
+                  onGenerate={generate}
+                  isScheduled={isScheduled}
+                  onToggleSchedule={toggleSchedule}
+                />
+              </EuiFlexItem>
+            )}
+
             <EuiFlexItem>
               <EuiFlexGroup
                 direction={isXlScreen ? 'row' : 'column'}
@@ -175,6 +236,22 @@ export const EntityAnalyticsHomePage = () => {
           </EuiFlexGroup>
         )}
       </SecuritySolutionPageWrapper>
+
+      {leadGenerationEnabled && isFlyoutOpen && (
+        <ThreatHuntingLeadsFlyout
+          onClose={handleCloseFlyout}
+          onSelectLead={handleOpenLeadInChat}
+          onInfoClick={leadDetailsEnabled ? handleLeadInfoClick : undefined}
+        />
+      )}
+
+      {leadGenerationEnabled && provenanceLead && (
+        <LeadProvenanceFlyout
+          lead={provenanceLead}
+          onClose={handleCloseProvenance}
+          onInvestigateInChat={handleOpenLeadInChat}
+        />
+      )}
 
       <SpyRoute pageName={SecurityPageName.entityAnalyticsHomePage} />
     </>

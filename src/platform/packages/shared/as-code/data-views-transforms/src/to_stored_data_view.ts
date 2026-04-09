@@ -26,7 +26,7 @@ import {
  * @returns Value suitable for `SerializedSearchSourceFields.index`
  */
 export function toStoredDataView(dataView: AsCodeDataView): string | DataViewSpec {
-  if (dataView.type === AS_CODE_DATA_VIEW_REFERENCE_TYPE) return dataView.id;
+  if (dataView.type === AS_CODE_DATA_VIEW_REFERENCE_TYPE) return dataView.ref_id;
   const runtimeFieldMap = toStoredRuntimeFields(dataView.runtime_fields);
   const fieldFormats = toStoredFieldFormats(dataView.runtime_fields);
   const fieldAttrs = toStoredFieldAttributes(dataView.runtime_fields);
