@@ -10,18 +10,12 @@ import type { InferenceConnector as CommonInferenceConnector } from '@kbn/infere
 import { InferenceConnectorType } from '@kbn/inference-common';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useLoadConnectors, type AIConnector } from '@kbn/inference-connectors';
-import {
-  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
-  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
-} from '@kbn/management-settings-ids';
 import { OBSERVABILITY_AI_ASSISTANT_SUBFEATURE_ID } from '../../common/feature';
 import { useKibana } from './use_kibana';
 import {
   type InferenceConnector,
   getInferenceConnectorInfo,
 } from '../../common/utils/get_inference_connector';
-
-const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
 
 export interface UseGenAIConnectorsResult {
   connectors?: CommonInferenceConnector[];
@@ -55,18 +49,8 @@ export function useGenAIConnectors(): UseGenAIConnectorsResult {
 
 export function useGenAIConnectorsWithoutContext(_assistant?: unknown): UseGenAIConnectorsResult {
   const {
-    services: { http, settings, notifications, uiSettings },
+    services: { http, settings, notifications },
   } = useKibana();
-
-  const defaultConnector = uiSettings!.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
-
-  const genAISettingsDefaultOnly = uiSettings!.get<boolean>(
-    GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
-    false
-  );
-
-  const isConnectorSelectionRestricted =
-    genAISettingsDefaultOnly && defaultConnector !== NO_DEFAULT_CONNECTOR;
 
   const [lastUsedConnector, setLastUsedConnector] = useLocalStorage(
     `xpack.observabilityAiAssistant.lastUsedConnector`,
@@ -125,7 +109,7 @@ export function useGenAIConnectorsWithoutContext(_assistant?: unknown): UseGenAI
       refetch();
     },
     getConnector,
-    isConnectorSelectionRestricted,
-    defaultConnector: defaultConnector === NO_DEFAULT_CONNECTOR ? undefined : defaultConnector,
+    isConnectorSelectionRestricted: false,
+    defaultConnector: undefined,
   };
 }
