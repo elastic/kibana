@@ -29,6 +29,7 @@ export {
   DeleteAutoImportIntegrationRequestParams,
   DownloadAutoImportIntegrationRequestParams,
   DownloadAutoImportIntegrationRequestQuery,
+  DownloadIntentEnum,
   GetAutoImportIntegrationRequestParams,
 } from './model/api/integrations/integration.gen';
 

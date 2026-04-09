@@ -141,11 +141,16 @@ export type DownloadAutoImportIntegrationRequestParamsInput = z.input<
   typeof DownloadAutoImportIntegrationRequestParams
 >;
 
+export enum DownloadIntentEnum {
+  download = 'download',
+  install = 'install',
+}
+
 export type DownloadAutoImportIntegrationRequestQuery = z.infer<
   typeof DownloadAutoImportIntegrationRequestQuery
 >;
 export const DownloadAutoImportIntegrationRequestQuery = z.object({
-  intent: z.enum(['download', 'install']).optional(),
+  intent: z.enum([DownloadIntentEnum.download, DownloadIntentEnum.install]).optional(),
 });
 
 export type GetAllAutoImportIntegrationsResponse = z.infer<

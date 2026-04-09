@@ -24,6 +24,7 @@ import {
   DeleteAutoImportIntegrationRequestParams,
   DownloadAutoImportIntegrationRequestParams,
   DownloadAutoImportIntegrationRequestQuery,
+  DownloadIntentEnum,
   GetAutoImportIntegrationRequestParams,
 } from '../../common';
 import { buildAutomaticImportResponse } from './utils';
@@ -373,7 +374,7 @@ const downloadIntegrationRoute = (
             fieldsMetadataClient
           );
 
-          if (request.query.intent === 'install') {
+          if (request.query.intent === DownloadIntentEnum.install) {
             try {
               const integration = await automaticImportService.getIntegrationById(integrationId);
               const dataStreams = await automaticImportService.getAllDataStreams(integrationId);

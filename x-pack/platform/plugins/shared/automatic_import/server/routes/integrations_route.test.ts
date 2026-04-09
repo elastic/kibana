@@ -9,7 +9,7 @@ import type { IRouter } from '@kbn/core/server';
 import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AutomaticImportPluginRequestHandlerContext } from '../types';
-import { AutomaticImportTelemetryEventType } from '../../common';
+import { AutomaticImportTelemetryEventType, DownloadIntentEnum } from '../../common';
 import { registerIntegrationRoutes } from './integrations_route';
 
 // Extract the handler from the versioned router mock
@@ -151,7 +151,7 @@ describe('downloadIntegrationRoute telemetry', () => {
       }),
     } as unknown as AutomaticImportPluginRequestHandlerContext);
 
-  const makeRequest = (intent?: 'download' | 'install') =>
+  const makeRequest = (intent?: DownloadIntentEnum) =>
     httpServerMock.createKibanaRequest({
       method: 'get',
       path: DOWNLOAD_PATH,
@@ -165,7 +165,7 @@ describe('downloadIntegrationRoute telemetry', () => {
   it('fires IntegrationInstalled telemetry once per data stream when intent=install', async () => {
     const handler = getVersionedRouteHandler(router, 'get', DOWNLOAD_PATH);
     const response = makeResponse();
-    await handler(makeContext(), makeRequest('install'), response);
+    await handler(makeContext(), makeRequest(DownloadIntentEnum.install), response);
 
     expect(response.ok).toHaveBeenCalled();
     expect(reportTelemetryEvent).toHaveBeenCalledTimes(2);
@@ -190,7 +190,7 @@ describe('downloadIntegrationRoute telemetry', () => {
   it('does not fire telemetry when intent=download', async () => {
     const handler = getVersionedRouteHandler(router, 'get', DOWNLOAD_PATH);
     const response = makeResponse();
-    await handler(makeContext(), makeRequest('download'), response);
+    await handler(makeContext(), makeRequest(DownloadIntentEnum.download), response);
 
     expect(response.ok).toHaveBeenCalled();
     expect(reportTelemetryEvent).not.toHaveBeenCalled();
@@ -210,7 +210,7 @@ describe('downloadIntegrationRoute telemetry', () => {
 
     const handler = getVersionedRouteHandler(router, 'get', DOWNLOAD_PATH);
     const response = makeResponse();
-    await handler(makeContext(), makeRequest('install'), response);
+    await handler(makeContext(), makeRequest(DownloadIntentEnum.install), response);
 
     expect(response.ok).toHaveBeenCalled();
     expect(reportTelemetryEvent).not.toHaveBeenCalled();
