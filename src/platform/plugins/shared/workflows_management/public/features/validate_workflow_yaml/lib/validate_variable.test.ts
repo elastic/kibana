@@ -364,10 +364,11 @@ describe('validateVariable', () => {
       hasDynamicBracketAccess: true,
       dynamicAccess: {
         prefixPath: 'steps.load.output._source',
-        dynamicKeys: ['steps.comment.output'],
+        dynamicKeys: ['steps.note', 'steps.comment.output'],
       },
     });
     mockGetSchemaAtPath
+      .mockReturnValueOnce({ schema: z.record(z.string(), z.unknown()), scopedToPath: null })
       .mockReturnValueOnce({ schema: z.record(z.string(), z.unknown()), scopedToPath: null })
       .mockReturnValueOnce({ schema: z.string(), scopedToPath: null });
 
@@ -379,8 +380,9 @@ describe('validateVariable', () => {
       owner: 'variable-validation',
     });
     expect(result.hoverMessage).toContain('Dynamic bracket access');
-    expect(mockGetSchemaAtPath).toHaveBeenCalledTimes(2);
+    expect(mockGetSchemaAtPath).toHaveBeenCalledTimes(3);
     expect(mockGetSchemaAtPath).toHaveBeenCalledWith(mockContext, 'steps.load.output._source');
+    expect(mockGetSchemaAtPath).toHaveBeenCalledWith(mockContext, 'steps.note');
     expect(mockGetSchemaAtPath).toHaveBeenCalledWith(mockContext, 'steps.comment.output');
   });
 
@@ -394,12 +396,13 @@ describe('validateVariable', () => {
       hasDynamicBracketAccess: true,
       dynamicAccess: {
         prefixPath: 'a',
-        dynamicKeys: ['b', 'd'],
+        dynamicKeys: ['b', 'c', 'd'],
       },
     });
     mockGetSchemaAtPath
       .mockReturnValueOnce({ schema: z.record(z.string(), z.unknown()), scopedToPath: null })
       .mockReturnValueOnce({ schema: z.string(), scopedToPath: null })
+      .mockReturnValueOnce({ schema: z.record(z.string(), z.unknown()), scopedToPath: null })
       .mockReturnValueOnce({ schema: z.string(), scopedToPath: null });
 
     const result = validateVariable(variableItem, mockContext);
@@ -410,9 +413,10 @@ describe('validateVariable', () => {
       owner: 'variable-validation',
     });
     expect(result.hoverMessage).toContain('Dynamic bracket access');
-    expect(mockGetSchemaAtPath).toHaveBeenCalledTimes(3);
+    expect(mockGetSchemaAtPath).toHaveBeenCalledTimes(4);
     expect(mockGetSchemaAtPath).toHaveBeenCalledWith(mockContext, 'a');
     expect(mockGetSchemaAtPath).toHaveBeenCalledWith(mockContext, 'b');
+    expect(mockGetSchemaAtPath).toHaveBeenCalledWith(mockContext, 'c');
     expect(mockGetSchemaAtPath).toHaveBeenCalledWith(mockContext, 'd');
   });
 
@@ -426,12 +430,13 @@ describe('validateVariable', () => {
       hasDynamicBracketAccess: true,
       dynamicAccess: {
         prefixPath: 'a',
-        dynamicKeys: ['b', 'd'],
+        dynamicKeys: ['b', 'c', 'd'],
       },
     });
     mockGetSchemaAtPath
       .mockReturnValueOnce({ schema: z.record(z.string(), z.unknown()), scopedToPath: null })
       .mockReturnValueOnce({ schema: z.string(), scopedToPath: null })
+      .mockReturnValueOnce({ schema: z.record(z.string(), z.unknown()), scopedToPath: null })
       .mockReturnValueOnce({ schema: null, scopedToPath: null });
 
     const result = validateVariable(variableItem, mockContext);

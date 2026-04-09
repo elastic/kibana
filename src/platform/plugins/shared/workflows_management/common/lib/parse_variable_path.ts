@@ -97,6 +97,18 @@ export function parseVariablePath(path: string): ParsedVariablePath | null {
   }
 }
 
+/**
+ * Extracts the single PropertyAccessToken from a parsed Liquid filtered-value,
+ * applying guards against inputs that LiquidJS would partially accept but are
+ * not valid single variable paths.
+ *
+ * Returns null when:
+ * - The expression contains multiple space-separated identifiers (e.g. `a b`)
+ * - The root token is not a PropertyAccess (e.g. a bare number or quoted string)
+ * - The path has no property segments (e.g. empty brackets `[]`)
+ * - The first segment is not a word identifier (e.g. `["foo"]` or `[0]`)
+ * - Any word segment resolved to an empty string (malformed input)
+ */
 function getPropertyAccessToken(
   filtered: ReturnType<Tokenizer['readFilteredValue']>
 ): PropertyAccessToken | null {
@@ -127,13 +139,30 @@ function extractDynamicAccess(props: Token[]): DynamicBracketAccessInfo | undefi
   };
 }
 
+/**
+ * Recursively collects every statically-resolvable path inside dynamic bracket
+ * accesses so that each one can be validated against the context schema.
+ *
+ * For a nested expression like `inputs.index[index.x]` the function emits
+ * both the intermediate prefix (`inputs.index`) and the leaf key (`index.x`).
+ *
+ * Example — `context.items[inputs.index[index.x]]`:
+ *   → `['inputs.index', 'index.x']`
+ *
+ * Example — `a[b].x[c[d]].y`:
+ *   → `['b', 'c', 'd']`
+ */
 function collectDynamicKeys(props: Token[]): string[] {
   const keys: string[] = [];
   for (const prop of props) {
     if (prop.kind === TokenKind.PropertyAccess) {
       const nested = prop as PropertyAccessToken;
-      const hasNestedDynamic = nested.props.some((p) => p.kind === TokenKind.PropertyAccess);
-      if (hasNestedDynamic) {
+      const nestedFirstDynIdx = nested.props.findIndex((p) => p.kind === TokenKind.PropertyAccess);
+      if (nestedFirstDynIdx !== -1) {
+        const nestedPrefix = propsToPathString(nested.props.slice(0, nestedFirstDynIdx));
+        if (nestedPrefix) {
+          keys.push(nestedPrefix);
+        }
         keys.push(...collectDynamicKeys(nested.props));
       } else {
         keys.push(propsToPathString(nested.props));

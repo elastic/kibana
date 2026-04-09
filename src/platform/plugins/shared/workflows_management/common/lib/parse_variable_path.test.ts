@@ -275,7 +275,7 @@ describe('parseVariablePath', () => {
       hasDynamicBracketAccess: true,
       dynamicAccess: {
         prefixPath: 'steps.load.output._source',
-        dynamicKeys: ['steps.note_sync_space_comment'],
+        dynamicKeys: ['steps.note', 'steps.note_sync_space_comment'],
       },
     });
   });
@@ -288,7 +288,7 @@ describe('parseVariablePath', () => {
       hasDynamicBracketAccess: true,
       dynamicAccess: {
         prefixPath: 'a',
-        dynamicKeys: ['d'],
+        dynamicKeys: ['b', 'c', 'd'],
       },
     });
   });
@@ -301,7 +301,7 @@ describe('parseVariablePath', () => {
       hasDynamicBracketAccess: true,
       dynamicAccess: {
         prefixPath: 'a',
-        dynamicKeys: ['b', 'd'],
+        dynamicKeys: ['b', 'c', 'd'],
       },
     });
   });
