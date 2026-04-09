@@ -154,8 +154,8 @@ describe('primitive schemas', () => {
       expectParseError(result);
     });
 
-    it('rejects strings exceeding 50 characters', () => {
-      const result = SemVer.safeParse(`1.0.0-${'a'.repeat(50)}`);
+    it('rejects strings exceeding 20 characters', () => {
+      const result = SemVer.safeParse(`1.0.0-${'a'.repeat(20)}`);
       expectParseError(result);
     });
   });
