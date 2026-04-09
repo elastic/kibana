@@ -8,25 +8,31 @@
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import type { Streams } from '@kbn/streams-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
+import { isComputedFeature } from '@kbn/streams-schema';
 import React, { useCallback, useMemo, useState } from 'react';
 import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../../hooks/sig_events/use_fetch_discovery_queries';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useQueriesApi } from '../../../../hooks/sig_events/use_queries_api';
 import { useStreamFeaturesApi } from '../../../../hooks/sig_events/use_stream_features_api';
 
+const getStreamName = (knowledgeIndicator: KnowledgeIndicator): string =>
+  knowledgeIndicator.kind === 'feature'
+    ? knowledgeIndicator.feature.stream_name
+    : knowledgeIndicator.stream_name;
+
 interface Props {
-  definition: Streams.all.Definition;
   knowledgeIndicator: KnowledgeIndicator;
   onDeleteRequest: (knowledgeIndicator: KnowledgeIndicator) => void;
+  onActionStateChange?: (inProgress: boolean) => void;
 }
 
 export function KnowledgeIndicatorActionsCell({
-  definition,
   knowledgeIndicator,
   onDeleteRequest,
+  onActionStateChange,
 }: Props) {
+  const streamName = getStreamName(knowledgeIndicator);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
   const [isActionInProgress, setIsActionInProgress] = useState(false);
 
@@ -36,15 +42,16 @@ export function KnowledgeIndicatorActionsCell({
     },
   } = useKibana();
   const queryClient = useQueryClient();
-  const { excludeFeaturesInBulk, restoreFeaturesInBulk } = useStreamFeaturesApi(definition);
+  const { excludeFeaturesInBulk, restoreFeaturesInBulk } = useStreamFeaturesApi(streamName);
   const { promote } = useQueriesApi();
 
   const invalidateKnowledgeIndicatorsData = useCallback(async () => {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
-      queryClient.invalidateQueries({ queryKey: ['features', definition.name] }),
+      queryClient.invalidateQueries({ queryKey: ['features', streamName] }),
+      queryClient.invalidateQueries({ queryKey: ['features', 'all'] }),
     ]);
-  }, [definition.name, queryClient]);
+  }, [streamName, queryClient]);
 
   const excludeAction = useMutation<void, Error, string>({
     mutationFn: async (featureUuid) => {
@@ -85,74 +92,92 @@ export function KnowledgeIndicatorActionsCell({
     },
   });
 
-  const withActionLoading = useCallback((run: () => void) => {
-    setIsActionInProgress(true);
-    setIsActionsMenuOpen(false);
-    run();
-  }, []);
-
-  const featureActionItems = useMemo(
-    () =>
-      knowledgeIndicator.kind === 'feature'
-        ? [
-            knowledgeIndicator.feature.excluded_at ? (
-              <EuiContextMenuItem
-                key="feature-restore"
-                icon="eye"
-                disabled={isActionInProgress}
-                onClick={() =>
-                  withActionLoading(() =>
-                    restoreAction.mutate(knowledgeIndicator.feature.uuid, {
-                      onSettled: () => {
-                        setIsActionInProgress(false);
-                      },
-                    })
-                  )
-                }
-              >
-                {KI_ACTION_RESTORE_LABEL}
-              </EuiContextMenuItem>
-            ) : (
-              <EuiContextMenuItem
-                key="feature-exclude"
-                icon="eyeClosed"
-                disabled={isActionInProgress}
-                onClick={() =>
-                  withActionLoading(() =>
-                    excludeAction.mutate(knowledgeIndicator.feature.uuid, {
-                      onSettled: () => {
-                        setIsActionInProgress(false);
-                      },
-                    })
-                  )
-                }
-              >
-                {KI_ACTION_EXCLUDE_LABEL}
-              </EuiContextMenuItem>
-            ),
-            <EuiContextMenuItem
-              key="feature-delete"
-              icon="trash"
-              color="danger"
-              disabled={isActionInProgress}
-              onClick={() => {
-                setIsActionsMenuOpen(false);
-                onDeleteRequest(knowledgeIndicator);
-              }}
-            >
-              {KI_ACTION_DELETE_LABEL}
-            </EuiContextMenuItem>,
-          ]
-        : [],
-    [
-      excludeAction,
-      isActionInProgress,
-      knowledgeIndicator,
-      onDeleteRequest,
-      restoreAction,
-      withActionLoading,
-    ]
+  const withActionLoading = useCallback(
+    (run: () => void) => {
+      setIsActionInProgress(true);
+      onActionStateChange?.(true);
+      setIsActionsMenuOpen(false);
+      run();
+    },
+    [onActionStateChange]
   );
+
+  const clearActionLoading = useCallback(() => {
+    setIsActionInProgress(false);
+    onActionStateChange?.(false);
+  }, [onActionStateChange]);
+
+  const featureActionItems = useMemo(() => {
+    if (knowledgeIndicator.kind !== 'feature') {
+      return [];
+    }
+
+    const items: React.ReactElement[] = [];
+    const computed = isComputedFeature(knowledgeIndicator.feature);
+
+    if (!computed) {
+      if (knowledgeIndicator.feature.excluded_at) {
+        items.push(
+          <EuiContextMenuItem
+            key="feature-restore"
+            icon="eye"
+            disabled={isActionInProgress}
+            onClick={() =>
+              withActionLoading(() =>
+                restoreAction.mutate(knowledgeIndicator.feature.uuid, {
+                  onSettled: clearActionLoading,
+                })
+              )
+            }
+          >
+            {KI_ACTION_RESTORE_LABEL}
+          </EuiContextMenuItem>
+        );
+      } else {
+        items.push(
+          <EuiContextMenuItem
+            key="feature-exclude"
+            icon="eyeClosed"
+            disabled={isActionInProgress}
+            onClick={() =>
+              withActionLoading(() =>
+                excludeAction.mutate(knowledgeIndicator.feature.uuid, {
+                  onSettled: clearActionLoading,
+                })
+              )
+            }
+          >
+            {KI_ACTION_EXCLUDE_LABEL}
+          </EuiContextMenuItem>
+        );
+      }
+    }
+
+    items.push(
+      <EuiContextMenuItem
+        key="feature-delete"
+        icon="trash"
+        color="danger"
+        disabled={isActionInProgress}
+        onClick={() => {
+          setIsActionsMenuOpen(false);
+          onDeleteRequest(knowledgeIndicator);
+        }}
+      >
+        {KI_ACTION_DELETE_LABEL}
+      </EuiContextMenuItem>
+    );
+
+    return items;
+  }, [
+    clearActionLoading,
+    excludeAction,
+    isActionInProgress,
+    knowledgeIndicator,
+    onDeleteRequest,
+    restoreAction,
+    withActionLoading,
+  ]);
 
   const queryActionItems = useMemo(
     () =>
@@ -165,9 +190,7 @@ export function KnowledgeIndicatorActionsCell({
               onClick={() =>
                 withActionLoading(() =>
                   promoteAction.mutate(knowledgeIndicator.query.id, {
-                    onSettled: () => {
-                      setIsActionInProgress(false);
-                    },
+                    onSettled: clearActionLoading,
                   })
                 )
               }
@@ -188,7 +211,14 @@ export function KnowledgeIndicatorActionsCell({
             </EuiContextMenuItem>,
           ]
         : [],
-    [isActionInProgress, knowledgeIndicator, onDeleteRequest, promoteAction, withActionLoading]
+    [
+      clearActionLoading,
+      isActionInProgress,
+      knowledgeIndicator,
+      onDeleteRequest,
+      promoteAction,
+      withActionLoading,
+    ]
   );
 
   return (

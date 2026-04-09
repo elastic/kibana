@@ -7,68 +7,67 @@
 
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { i18n } from '@kbn/i18n';
+import { groupBy } from 'lodash';
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../../hooks/sig_events/use_fetch_discovery_queries';
-import { useKibana } from '../../../../hooks/use_kibana';
-import { useQueriesApi } from '../../../../hooks/sig_events/use_queries_api';
-import { useStreamFeaturesApi } from '../../../../hooks/sig_events/use_stream_features_api';
+import { DISCOVERY_QUERIES_QUERY_KEY } from './use_fetch_discovery_queries';
+import { useKibana } from '../use_kibana';
+import { useQueriesApi } from './use_queries_api';
+import { useDiscoveryFeaturesApi } from './use_discovery_features_api';
 
-interface UseKnowledgeIndicatorsBulkDeleteParams {
-  streamName: string;
+interface UseDiscoveryKnowledgeIndicatorsBulkDeleteParams {
   onSuccess?: () => void;
 }
 
-export function useKnowledgeIndicatorsBulkDelete({
-  streamName,
+export function useDiscoveryKnowledgeIndicatorsBulkDelete({
   onSuccess,
-}: UseKnowledgeIndicatorsBulkDeleteParams) {
+}: UseDiscoveryKnowledgeIndicatorsBulkDeleteParams = {}) {
   const {
     core: {
       notifications: { toasts },
     },
   } = useKibana();
   const queryClient = useQueryClient();
-  const { deleteFeaturesInBulk } = useStreamFeaturesApi(streamName);
+  const { deleteFeaturesInBulk } = useDiscoveryFeaturesApi();
   const { deleteQueriesInBulk } = useQueriesApi();
 
   const mutation = useMutation<void, Error, KnowledgeIndicator[]>({
     mutationFn: async (knowledgeIndicators) => {
-      const featureUuids = knowledgeIndicators
-        .filter((knowledgeIndicator) => knowledgeIndicator.kind === 'feature')
-        .map((knowledgeIndicator) => knowledgeIndicator.feature.uuid);
+      const features = knowledgeIndicators
+        .filter((ki) => ki.kind === 'feature')
+        .map((ki) => ki.feature);
 
-      const queryIds = knowledgeIndicators
-        .filter((knowledgeIndicator) => knowledgeIndicator.kind === 'query')
-        .map((knowledgeIndicator) => knowledgeIndicator.query.id);
+      const queries = knowledgeIndicators.filter((ki) => ki.kind === 'query');
 
-      const requests: Array<Promise<void>> = [];
+      const requests: Array<Promise<unknown>> = [];
 
-      if (featureUuids.length > 0) {
-        requests.push(deleteFeaturesInBulk(featureUuids));
+      if (features.length > 0) {
+        requests.push(deleteFeaturesInBulk(features));
       }
 
-      if (queryIds.length > 0) {
-        requests.push(deleteQueriesInBulk({ queryIds, streamName }));
+      if (queries.length > 0) {
+        const queriesByStream = groupBy(queries, 'stream_name');
+        for (const [streamName, streamQueries] of Object.entries(queriesByStream)) {
+          requests.push(
+            deleteQueriesInBulk({
+              queryIds: streamQueries.map((q) => q.query.id),
+              streamName,
+            })
+          );
+        }
       }
 
       await Promise.all(requests);
     },
     onSuccess: async () => {
       onSuccess?.();
-
-      toasts.addSuccess({
-        title: BULK_DELETE_SUCCESS_TOAST_TITLE,
-      });
+      toasts.addSuccess({ title: BULK_DELETE_SUCCESS_TOAST_TITLE });
     },
     onError: (error) => {
-      toasts.addError(error, {
-        title: BULK_DELETE_ERROR_TOAST_TITLE,
-      });
+      toasts.addError(error, { title: BULK_DELETE_ERROR_TOAST_TITLE });
     },
     onSettled: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
-        queryClient.invalidateQueries({ queryKey: ['features', streamName] }),
         queryClient.invalidateQueries({ queryKey: ['features', 'all'] }),
       ]);
     },
@@ -79,7 +78,6 @@ export function useKnowledgeIndicatorsBulkDelete({
       if (knowledgeIndicators.length === 0) {
         return;
       }
-
       await mutation.mutateAsync(knowledgeIndicators);
     },
     isDeleting: mutation.isLoading,
@@ -87,14 +85,14 @@ export function useKnowledgeIndicatorsBulkDelete({
 }
 
 const BULK_DELETE_ERROR_TOAST_TITLE = i18n.translate(
-  'xpack.streams.significantEventsTable.bulkDeleteErrorToastTitle',
+  'xpack.streams.discoveryKnowledgeIndicators.bulkDeleteErrorToastTitle',
   {
     defaultMessage: 'Failed to delete selected knowledge indicators',
   }
 );
 
 const BULK_DELETE_SUCCESS_TOAST_TITLE = i18n.translate(
-  'xpack.streams.significantEventsTable.bulkDeleteSuccessToastTitle',
+  'xpack.streams.discoveryKnowledgeIndicators.bulkDeleteSuccessToastTitle',
   {
     defaultMessage: 'Knowledge indicators deleted',
   }

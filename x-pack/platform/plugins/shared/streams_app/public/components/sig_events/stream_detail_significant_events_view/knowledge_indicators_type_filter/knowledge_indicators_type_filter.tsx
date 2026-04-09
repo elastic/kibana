@@ -17,8 +17,9 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
+import { isComputedFeature } from '@kbn/streams-schema';
 import { upperFirst } from 'lodash';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 interface KnowledgeIndicatorTypeFilterProps {
   knowledgeIndicators: KnowledgeIndicator[];
@@ -26,6 +27,8 @@ interface KnowledgeIndicatorTypeFilterProps {
   statusFilter: 'active' | 'excluded';
   selectedTypes: string[];
   onSelectedTypesChange: (selectedTypes: string[]) => void;
+  hideComputedTypes?: boolean;
+  selectedStreams?: string[];
 }
 
 export function KnowledgeIndicatorsTypeFilter({
@@ -34,6 +37,8 @@ export function KnowledgeIndicatorsTypeFilter({
   statusFilter,
   selectedTypes,
   onSelectedTypesChange,
+  hideComputedTypes = false,
+  selectedStreams = [],
 }: KnowledgeIndicatorTypeFilterProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const popoverId = useGeneratedHtmlId({
@@ -42,10 +47,34 @@ export function KnowledgeIndicatorsTypeFilter({
 
   const hasActiveFilters = selectedTypes.length > 0;
 
+  const matchesStreamFilter = useCallback(
+    (knowledgeIndicator: KnowledgeIndicator) => {
+      if (selectedStreams.length === 0) {
+        return true;
+      }
+      const streamName =
+        knowledgeIndicator.kind === 'feature'
+          ? knowledgeIndicator.feature.stream_name
+          : knowledgeIndicator.stream_name;
+      return selectedStreams.includes(streamName);
+    },
+    [selectedStreams]
+  );
+
   const availableTypes = useMemo(() => {
     const types = new Set<string>();
 
     knowledgeIndicators.forEach((knowledgeIndicator) => {
+      if (
+        hideComputedTypes &&
+        knowledgeIndicator.kind === 'feature' &&
+        isComputedFeature(knowledgeIndicator.feature)
+      ) {
+        return;
+      }
+      if (!matchesStreamFilter(knowledgeIndicator)) {
+        return;
+      }
       if (knowledgeIndicator.kind === 'feature') {
         types.add(knowledgeIndicator.feature.type);
       } else {
@@ -54,13 +83,25 @@ export function KnowledgeIndicatorsTypeFilter({
     });
 
     return Array.from(types).sort((left, right) => left.localeCompare(right));
-  }, [knowledgeIndicators]);
+  }, [knowledgeIndicators, hideComputedTypes, matchesStreamFilter]);
 
   const typeCounts = useMemo(() => {
     const normalizedSearchTerm = searchTerm.trim().toLowerCase();
     const counts: Record<string, number> = {};
 
     knowledgeIndicators.forEach((knowledgeIndicator) => {
+      if (
+        hideComputedTypes &&
+        knowledgeIndicator.kind === 'feature' &&
+        isComputedFeature(knowledgeIndicator.feature)
+      ) {
+        return;
+      }
+
+      if (!matchesStreamFilter(knowledgeIndicator)) {
+        return;
+      }
+
       const matchesStatusFilter =
         statusFilter === 'active'
           ? knowledgeIndicator.kind === 'query' || !knowledgeIndicator.feature.excluded_at
@@ -85,7 +126,7 @@ export function KnowledgeIndicatorsTypeFilter({
     });
 
     return counts;
-  }, [knowledgeIndicators, searchTerm, statusFilter]);
+  }, [knowledgeIndicators, searchTerm, statusFilter, hideComputedTypes, matchesStreamFilter]);
 
   const options = useMemo<EuiSelectableOption[]>(
     () => [

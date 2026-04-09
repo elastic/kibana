@@ -59,7 +59,7 @@ export function KnowledgeIndicatorsTable({
     KnowledgeIndicator[]
   >([]);
   const { deleteKnowledgeIndicatorsInBulk, isDeleting } = useKnowledgeIndicatorsBulkDelete({
-    definition,
+    streamName: definition.name,
     onSuccess: () => {
       setSelectedKnowledgeIndicators([]);
       setKnowledgeIndicatorsToDelete([]);
@@ -211,14 +211,13 @@ export function KnowledgeIndicatorsTable({
         align: 'right',
         render: (knowledgeIndicator: KnowledgeIndicator) => (
           <KnowledgeIndicatorActionsCell
-            definition={definition}
             knowledgeIndicator={knowledgeIndicator}
             onDeleteRequest={(item) => setKnowledgeIndicatorsToDelete([item])}
           />
         ),
       },
     ],
-    [definition, occurrencesByQueryId, onViewDetails, selectedKnowledgeIndicatorId]
+    [occurrencesByQueryId, onViewDetails, selectedKnowledgeIndicatorId]
   );
 
   return (

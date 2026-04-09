@@ -171,6 +171,7 @@ export const listAllFeaturesRoute = createServerRoute({
       .object({
         query: z.string().optional().describe('Free-text query for semantic/keyword search'),
         search_mode: searchModeSchema.optional(),
+        include_excluded: BooleanFromString.optional(),
       })
       .optional(),
   }),
@@ -189,10 +190,14 @@ export const listAllFeaturesRoute = createServerRoute({
     const streams = await streamsClient.listStreams();
     const streamNames = streams.map((stream) => stream.name);
 
-    const { query, search_mode: searchMode } = params?.query ?? {};
+    const {
+      query,
+      search_mode: searchMode,
+      include_excluded: includeExcluded,
+    } = params?.query ?? {};
     const { hits: features } = query
       ? await featureClient.findFeatures(streamNames, query, { searchMode })
-      : await featureClient.getFeatures(streamNames);
+      : await featureClient.getFeatures(streamNames, { includeExcluded });
 
     return { features };
   },

@@ -19,7 +19,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import type { Feature, Streams } from '@kbn/streams-schema';
+import type { Feature } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { upperFirst } from 'lodash';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -47,7 +47,7 @@ export function getStatusColor(status: Feature['status']): 'success' | 'danger' 
 }
 
 interface UseStreamFeaturesTableProps {
-  definition: Streams.all.Definition;
+  streamName: string;
   features: Feature[];
   refreshFeatures: () => void;
   isIdentifyingFeatures: boolean;
@@ -57,7 +57,7 @@ interface UseStreamFeaturesTableProps {
 }
 
 export function useStreamFeaturesTable({
-  definition,
+  streamName,
   features,
   refreshFeatures,
   isIdentifyingFeatures,
@@ -69,7 +69,7 @@ export function useStreamFeaturesTable({
     core: { notifications },
   } = useKibana();
   const { deleteFeature, deleteFeaturesInBulk, excludeFeaturesInBulk, restoreFeaturesInBulk } =
-    useStreamFeaturesApi(definition);
+    useStreamFeaturesApi(streamName);
 
   const sortedFeatures = useMemo(
     () => sortBy(features, (f) => (f.title ?? f.id).toLowerCase()),
