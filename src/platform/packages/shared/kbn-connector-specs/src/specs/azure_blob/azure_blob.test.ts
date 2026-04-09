@@ -75,7 +75,7 @@ describe('AzureBlob', () => {
   describe('listBlobs action', () => {
     it('should list blobs and parse XML response', async () => {
       const xml =
-        '<?xml version="1.0"?><EnumerationResults><Blobs><Blob><Name>file1.txt</Name><Content-Length>100</Content-Length><Last-Modified>Mon, 01 Jan 2024 00:00:00 GMT</Last-Modified></Blob></Blobs><NextMarker></NextMarker></EnumerationResults>';
+        '<?xml version="1.0"?><EnumerationResults><Blobs><Blob><Name>file1.txt</Name><Properties><Content-Length>100</Content-Length><Last-Modified>Mon, 01 Jan 2024 00:00:00 GMT</Last-Modified></Properties></Blob></Blobs><NextMarker></NextMarker></EnumerationResults>';
       mockClient.get.mockResolvedValue({ data: xml });
 
       const result = await AzureBlob.actions.listBlobs.handler(mockContext, {

@@ -92,8 +92,10 @@ function parseListBlobsXml(xml: string): {
   const blobBlocks = xml.match(blobBlockRegex) ?? [];
   for (const block of blobBlocks) {
     const nameMatch = block.match(/<Name>([^<]*)<\/Name>/);
-    const lengthMatch = block.match(/<Content-Length>([^<]*)<\/Content-Length>/);
-    const lastModMatch = block.match(/<Last-Modified>([^<]*)<\/Last-Modified>/);
+    const propertiesMatch = block.match(/<Properties>(.*?)<\/Properties>/s);
+    const properties = propertiesMatch?.[1] ?? '';
+    const lengthMatch = properties.match(/<Content-Length>([^<]*)<\/Content-Length>/);
+    const lastModMatch = properties.match(/<Last-Modified>([^<]*)<\/Last-Modified>/);
     blobs.push({
       name: decodeXmlEntities(nameMatch?.[1] ?? ''),
       contentLength: lengthMatch?.[1] ? parseInt(lengthMatch[1], 10) : undefined,
