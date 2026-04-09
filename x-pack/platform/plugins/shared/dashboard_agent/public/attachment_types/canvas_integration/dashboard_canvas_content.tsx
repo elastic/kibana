@@ -154,6 +154,7 @@ export const DashboardCanvasContent = ({
           showQueryMenu={false}
           query={undefined}
           displayStyle="inPage"
+          useDefaultBehaviors={true}
           disableQueryLanguageSwitcher
           isDisabled={!dashboardApi}
           dateRangeFrom={timeRange.from}
