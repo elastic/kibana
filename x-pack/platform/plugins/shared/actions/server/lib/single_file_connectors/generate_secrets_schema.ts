@@ -37,7 +37,8 @@ export const generateSecretsSchema = (
 
   return {
     // Always include EARS in the static schema so it parses correctly.
-    // The actual gating happens in the customValidator at request time.
+    // The actual gating happens in the customValidator at request time,
+    // which rejects EARS auth when the feature is not enabled.
     schema: generateSecretsSchemaFromSpec(authSpec, {
       isPfxEnabled,
       isEarsEnabled: false,
@@ -46,21 +47,18 @@ export const generateSecretsSchema = (
       value: ActionTypeSecrets,
       validatorServices: ValidatorServices
     ): Promise<void> => {
-      if (
-        (value as { authType?: string })?.authType === 'ears' &&
-        validatorServices.getIsEarsEnabled
-      ) {
-        const isEarsEnabled = await validatorServices.getIsEarsEnabled();
-        if (!isEarsEnabled) {
-          throw new Error(
-            'EARS OAuth authentication is not enabled. Enable it via the actions:earsOAuthEnabled setting.'
-          );
-        }
-      }
-
       const secretsRecord = value as Record<string, unknown>;
       const authType = secretsRecord.authType;
       if (typeof authType !== 'string') return;
+
+      if (
+        authType === 'ears' &&
+        (!validatorServices.getIsEarsEnabled || !(await validatorServices.getIsEarsEnabled()))
+      ) {
+        throw new Error(
+          'EARS OAuth authentication is not enabled. Enable it via the actions:earsOAuthEnabled setting.'
+        );
+      }
 
       const allowedHostsFields = allowedHostsFieldsByAuthType.get(authType);
       if (!allowedHostsFields) return;

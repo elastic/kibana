@@ -104,6 +104,66 @@ describe('generateSecretsSchema', () => {
     expect(result.schema.parse({})).toEqual({});
   });
 
+  describe('customValidator - EARS auth gating', () => {
+    const earsAuthSpec: ConnectorSpec['auth'] = {
+      types: ['none', 'ears'],
+    };
+
+    it('throws when authType is ears and getIsEarsEnabled is not provided', async () => {
+      const validator = generateSecretsSchema(earsAuthSpec, mockConfigUtils);
+
+      await expect(
+        validator.customValidator!(
+          { authType: 'ears', provider: 'google' },
+          { configurationUtilities: mockConfigUtils }
+        )
+      ).rejects.toThrow(
+        'EARS OAuth authentication is not enabled. Enable it via the actions:earsOAuthEnabled setting.'
+      );
+    });
+
+    it('throws when authType is ears and getIsEarsEnabled returns false', async () => {
+      const validator = generateSecretsSchema(earsAuthSpec, mockConfigUtils);
+
+      await expect(
+        validator.customValidator!(
+          { authType: 'ears', provider: 'google' },
+          {
+            configurationUtilities: mockConfigUtils,
+            getIsEarsEnabled: async () => false,
+          }
+        )
+      ).rejects.toThrow(
+        'EARS OAuth authentication is not enabled. Enable it via the actions:earsOAuthEnabled setting.'
+      );
+    });
+
+    it('does not throw when authType is ears and getIsEarsEnabled returns true', async () => {
+      const validator = generateSecretsSchema(earsAuthSpec, mockConfigUtils);
+
+      await expect(
+        validator.customValidator!(
+          { authType: 'ears', provider: 'google' },
+          {
+            configurationUtilities: mockConfigUtils,
+            getIsEarsEnabled: async () => true,
+          }
+        )
+      ).resolves.toBeUndefined();
+    });
+
+    it('does not check EARS when authType is not ears', async () => {
+      const validator = generateSecretsSchema(earsAuthSpec, mockConfigUtils);
+
+      await expect(
+        validator.customValidator!(
+          { authType: 'none' },
+          { configurationUtilities: mockConfigUtils }
+        )
+      ).resolves.toBeUndefined();
+    });
+  });
+
   describe('customValidator - allowedHosts validation for URL fields', () => {
     const oauthAuthSpec = {
       types: [
@@ -117,10 +177,10 @@ describe('generateSecretsSchema', () => {
       ],
     };
 
-    it('calls ensureUriAllowed for authorizationUrl', () => {
+    it('calls ensureUriAllowed for authorizationUrl', async () => {
       const validator = generateSecretsSchema(oauthAuthSpec, mockConfigUtils);
 
-      validator.customValidator!(
+      await validator.customValidator!(
         {
           authType: 'oauth_authorization_code',
           authorizationUrl: 'https://provider.example.com/authorize',
@@ -139,7 +199,7 @@ describe('generateSecretsSchema', () => {
       );
     });
 
-    it('validates URL defaults for the selected authType', () => {
+    it('validates URL defaults for the selected authType', async () => {
       const validator = generateSecretsSchema(
         {
           types: [
@@ -161,7 +221,7 @@ describe('generateSecretsSchema', () => {
         clientSecret: 'client-secret',
       });
 
-      validator.customValidator!(parsedSecrets as Record<string, unknown>, validatorServices);
+      await validator.customValidator!(parsedSecrets as Record<string, unknown>, validatorServices);
 
       expect(mockConfigUtils.ensureUriAllowed).toHaveBeenCalledWith(
         'https://provider.example.com/authorize'
@@ -171,7 +231,7 @@ describe('generateSecretsSchema', () => {
       );
     });
 
-    it('throws when authorizationUrl is not in allowedHosts', () => {
+    it('throws when authorizationUrl is not in allowedHosts', async () => {
       mockConfigUtils.ensureUriAllowed.mockImplementation(() => {
         throw new Error(
           'target url "https://not-allowed.example.com/authorize" is not added to the Kibana config xpack.actions.allowedHosts'
@@ -180,7 +240,7 @@ describe('generateSecretsSchema', () => {
 
       const validator = generateSecretsSchema(oauthAuthSpec, mockConfigUtils);
 
-      expect(() =>
+      await expect(
         validator.customValidator!(
           {
             authType: 'oauth_authorization_code',
@@ -191,12 +251,12 @@ describe('generateSecretsSchema', () => {
           },
           validatorServices
         )
-      ).toThrow(
+      ).rejects.toThrow(
         'target url "https://not-allowed.example.com/authorize" is not added to the Kibana config xpack.actions.allowedHosts'
       );
     });
 
-    it('throws when tokenUrl is not in allowedHosts', () => {
+    it('throws when tokenUrl is not in allowedHosts', async () => {
       mockConfigUtils.ensureUriAllowed
         .mockImplementationOnce(() => {})
         .mockImplementationOnce(() => {
@@ -207,7 +267,7 @@ describe('generateSecretsSchema', () => {
 
       const validator = generateSecretsSchema(oauthAuthSpec, mockConfigUtils);
 
-      expect(() =>
+      await expect(
         validator.customValidator!(
           {
             authType: 'oauth_authorization_code',
@@ -218,15 +278,15 @@ describe('generateSecretsSchema', () => {
           },
           validatorServices
         )
-      ).toThrow(
+      ).rejects.toThrow(
         'target url "https://not-allowed.example.com/token" is not added to the Kibana config xpack.actions.allowedHosts'
       );
     });
 
-    it('does not validate when validate configuration is missing', () => {
+    it('does not validate when validate configuration is missing', async () => {
       const validator = generateSecretsSchema({ types: ['basic'] }, mockConfigUtils);
 
-      validator.customValidator!(
+      await validator.customValidator!(
         {
           authType: 'basic',
           username: 'user',
@@ -238,7 +298,7 @@ describe('generateSecretsSchema', () => {
       expect(mockConfigUtils.ensureUriAllowed).not.toHaveBeenCalled();
     });
 
-    it('does not validate URL fields from non-selected auth types', () => {
+    it('does not validate URL fields from non-selected auth types', async () => {
       const validator = generateSecretsSchema(
         {
           types: [
@@ -261,12 +321,12 @@ describe('generateSecretsSchema', () => {
         password: 'pass',
       });
 
-      validator.customValidator!(parsedSecrets as Record<string, unknown>, validatorServices);
+      await validator.customValidator!(parsedSecrets as Record<string, unknown>, validatorServices);
 
       expect(mockConfigUtils.ensureUriAllowed).not.toHaveBeenCalled();
     });
 
-    it('supports opting out via meta.validate.allowedHosts=false', () => {
+    it('supports opting out via meta.validate.allowedHosts=false', async () => {
       mockConfigUtils.ensureUriAllowed.mockImplementation((uri: string) => {
         if (uri === 'https://not-allowed.example.com/token') {
           throw new Error(
@@ -295,7 +355,7 @@ describe('generateSecretsSchema', () => {
         mockConfigUtils
       );
 
-      expect(() =>
+      await expect(
         validator.customValidator!(
           {
             authType: 'oauth_authorization_code',
@@ -306,7 +366,7 @@ describe('generateSecretsSchema', () => {
           },
           validatorServices
         )
-      ).not.toThrow();
+      ).resolves.toBeUndefined();
 
       expect(mockConfigUtils.ensureUriAllowed).toHaveBeenCalledWith(
         'https://provider.example.com/authorize'
