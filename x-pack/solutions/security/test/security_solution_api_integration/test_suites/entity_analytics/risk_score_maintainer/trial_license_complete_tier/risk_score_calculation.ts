@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 import { deleteAllAlerts, deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { WatchlistObject } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/management/common.gen';
+import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
 import {
   createAndSyncRuleAndAlertsFactory,
   readRiskScores,
@@ -170,7 +171,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const risk = ecsDoc!.host!.risk!;
 
-          expect(risk.id_field).to.eql('entity_id');
+          expect(risk.id_field).to.eql('entity.id');
           expect(risk.id_value).to.eql(host.expectedEuid);
           expect(risk.score_type).to.eql('base');
           expect(risk.calculation_run_id).to.be.a('string');
@@ -551,7 +552,7 @@ export default ({ getService }: FtrProviderContext): void => {
             requiredWatchlistId: watchlistId,
           });
           const entityResponse = await es.search({
-            index: '.entities.v2.latest.security_default',
+            index: getEntitiesAlias(ENTITY_LATEST, 'default'),
             size: 1,
             query: { term: { 'entity.id': idpUser.expectedEuid } },
           });

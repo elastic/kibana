@@ -13,8 +13,9 @@ import { useCommandMenuAnchor } from './use_command_menu_anchor';
 
 const containerStyles = css`
   position: relative;
+  display: flex;
+  flex-direction: column;
   flex-grow: 1;
-  height: 100%;
 `;
 
 interface CommandMenuContainerProps {
