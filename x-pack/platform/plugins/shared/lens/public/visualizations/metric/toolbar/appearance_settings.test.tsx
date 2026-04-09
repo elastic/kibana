@@ -270,7 +270,11 @@ describe('appearance settings', () => {
 
   it.each<[PrimaryMetricPosition, string, PrimaryMetricPosition, string]>([
     ['top', 'Top', 'bottom', 'Bottom'],
+    ['middle', 'Middle', 'bottom', 'Bottom'],
     ['bottom', 'Bottom', 'top', 'Top'],
+    ['bottom', 'Bottom', 'middle', 'Middle'],
+    ['middle', 'Middle', 'top', 'Top'],
+    ['top', 'Top', 'middle', 'Middle'],
   ])(
     'should set default config when changing from %j (%s) to %j (%s)',
     (newPosition, newLabel, prevPosition, prevLabel) => {

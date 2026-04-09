@@ -352,6 +352,12 @@ const primaryMetricPositionOptions: Array<
     }),
   },
   {
+    id: 'middle',
+    label: i18n.translate('xpack.lens.metric.appearancePopover.middle', {
+      defaultMessage: 'Middle',
+    }),
+  },
+  {
     id: 'bottom',
     label: i18n.translate('xpack.lens.metric.appearancePopover.bottom', {
       defaultMessage: 'Bottom',
