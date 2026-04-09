@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/saved-object-export-transforms-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/saved-object-export-transforms-plugin'
+  title: '@kbn/saved-object-export-transforms-plugin'
   description: Moon project for @kbn/saved-object-export-transforms-plugin
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: src/platform/test/plugin_functional/plugins/saved_object_export_transforms
+  sourceRoot: src/platform/test/plugin_functional/plugins/saved_object_export_transforms
 dependsOn:
   - '@kbn/core'
 tags:

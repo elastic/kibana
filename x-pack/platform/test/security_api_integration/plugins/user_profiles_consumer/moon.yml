@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/user-profiles-consumer-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-security'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/user-profiles-consumer-plugin'
+  title: '@kbn/user-profiles-consumer-plugin'
   description: Moon project for @kbn/user-profiles-consumer-plugin
   channel: ''
   owner: '@elastic/kibana-security'
-  metadata:
-    sourceRoot: x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer
+  sourceRoot: x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer
 dependsOn:
   - '@kbn/core'
   - '@kbn/features-plugin'

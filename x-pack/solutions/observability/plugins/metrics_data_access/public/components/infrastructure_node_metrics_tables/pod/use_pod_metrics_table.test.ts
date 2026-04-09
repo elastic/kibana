@@ -8,7 +8,10 @@
 import {
   ECS_POD_CPU_USAGE_LIMIT_PCT,
   MEMORY_LIMIT_UTILIZATION,
-  SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION,
+  otelDatasetFilterDsl,
+  SEMCONV_K8S_POD_CPU_NODE_UTILIZATION,
+  SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION,
+  SEMCONV_K8S_POD_MEMORY_WORKING_SET,
 } from '../shared/constants';
 import { usePodMetricsTable } from './use_pod_metrics_table';
 import { useInfrastructureNodeMetrics } from '../shared';
@@ -71,10 +74,7 @@ describe('usePodMetricsTable hook', () => {
 
     const filterClauseWithEventModuleFilter = {
       bool: {
-        filter: [
-          { term: { 'event.dataset': 'kubeletstatsreceiver.otel' } },
-          { ...filterClauseDsl },
-        ],
+        filter: [otelDatasetFilterDsl('kubeletstatsreceiver.otel'), { ...filterClauseDsl }],
       },
     };
 
@@ -99,12 +99,104 @@ describe('usePodMetricsTable hook', () => {
         metricsExplorerOptions: expect.objectContaining({
           filterQuery: JSON.stringify(filterClauseWithEventModuleFilter),
           metrics: expect.arrayContaining([
-            expect.objectContaining({ field: SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION }),
-            expect.objectContaining({ field: MEMORY_LIMIT_UTILIZATION }),
+            expect.objectContaining({ field: SEMCONV_K8S_POD_CPU_NODE_UTILIZATION }),
+            expect.objectContaining({ field: SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION }),
+            expect.objectContaining({ field: SEMCONV_K8S_POD_MEMORY_WORKING_SET }),
           ]),
         }),
       })
     );
+  });
+
+  it('should use memory_limit_utilization as % when available', () => {
+    useInfrastructureNodeMetricsMock.mockClear();
+    useInfrastructureNodeMetricsMock.mockReturnValue({
+      isLoading: true,
+      data: { state: 'empty-indices' },
+      metricIndices: 'test-index',
+    });
+
+    renderHook(() =>
+      usePodMetricsTable({
+        timerange: { from: 'now-30d', to: 'now' },
+        metricsClient: createMetricsClientMock({}),
+        isOtel: true,
+      })
+    );
+
+    const lastCallArgs = useInfrastructureNodeMetricsMock.mock.calls.at(-1);
+    const { transform, metricsExplorerOptions } = lastCallArgs?.[0] ?? {};
+    expect(transform).toBeDefined();
+
+    const metrics = metricsExplorerOptions?.metrics ?? [];
+    const metricIndexByField = new Map(metrics.map((metric, index) => [metric.field, index]));
+
+    const row = transform!({
+      id: 'test-pod-uid',
+      columns: [],
+      keys: ['test-pod-uid', 'test-pod-name'],
+      rows: [
+        {
+          timestamp: Date.now(),
+          [`metric_${metricIndexByField.get(SEMCONV_K8S_POD_CPU_NODE_UTILIZATION)}`]: 0.05,
+          [`metric_${metricIndexByField.get(SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION)}`]: 0.3,
+          [`metric_${metricIndexByField.get(SEMCONV_K8S_POD_MEMORY_WORKING_SET)}`]: 512_000_000,
+        },
+      ],
+    });
+
+    expect(row).toEqual({
+      id: 'test-pod-uid',
+      name: 'test-pod-name',
+      averageCpuUsagePercent: 5,
+      averageMemoryUsagePercent: 30,
+      memoryUnit: '%',
+    });
+  });
+
+  it('should fall back to memory.working_set as MB when limit_utilization is absent', () => {
+    useInfrastructureNodeMetricsMock.mockClear();
+    useInfrastructureNodeMetricsMock.mockReturnValue({
+      isLoading: true,
+      data: { state: 'empty-indices' },
+      metricIndices: 'test-index',
+    });
+
+    renderHook(() =>
+      usePodMetricsTable({
+        timerange: { from: 'now-30d', to: 'now' },
+        metricsClient: createMetricsClientMock({}),
+        isOtel: true,
+      })
+    );
+
+    const lastCallArgs = useInfrastructureNodeMetricsMock.mock.calls.at(-1);
+    const { transform, metricsExplorerOptions } = lastCallArgs?.[0] ?? {};
+    expect(transform).toBeDefined();
+
+    const metrics = metricsExplorerOptions?.metrics ?? [];
+    const metricIndexByField = new Map(metrics.map((metric, index) => [metric.field, index]));
+
+    const row = transform!({
+      id: 'test-pod-uid',
+      columns: [],
+      keys: ['test-pod-uid', 'test-pod-name'],
+      rows: [
+        {
+          timestamp: Date.now(),
+          [`metric_${metricIndexByField.get(SEMCONV_K8S_POD_CPU_NODE_UTILIZATION)}`]: 0.05,
+          [`metric_${metricIndexByField.get(SEMCONV_K8S_POD_MEMORY_WORKING_SET)}`]: 512_000_000,
+        },
+      ],
+    });
+
+    expect(row).toEqual({
+      id: 'test-pod-uid',
+      name: 'test-pod-name',
+      averageCpuUsagePercent: 5,
+      averageMemoryUsagePercent: 512,
+      memoryUnit: ' MB',
+    });
   });
 
   it('should call useInfrastructureNodeMetrics with ECS metrics when isOtel is false', () => {
@@ -120,6 +212,7 @@ describe('usePodMetricsTable hook', () => {
       },
     };
 
+    useInfrastructureNodeMetricsMock.mockClear();
     // include this to prevent rendering error in test
     useInfrastructureNodeMetricsMock.mockReturnValue({
       isLoading: true,

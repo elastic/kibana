@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/apm-ui-shared'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-presentation-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/apm-ui-shared'
+  title: '@kbn/apm-ui-shared'
   description: Moon project for @kbn/apm-ui-shared
   channel: ''
   owner: '@elastic/obs-presentation-team'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-apm-ui-shared
+  sourceRoot: src/platform/packages/shared/kbn-apm-ui-shared
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/charts-theme'
@@ -33,16 +32,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

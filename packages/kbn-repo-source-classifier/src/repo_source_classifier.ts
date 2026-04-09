@@ -166,7 +166,14 @@ export class RepoSourceClassifier {
 
     const { pkgId, rel } = pkgInfo;
 
-    if (pkgId === '@kbn/test' || pkgId === '@kbn/test-subj-selector') {
+    if (
+      pkgId === '@kbn/test' ||
+      pkgId === '@kbn/test-docker-servers' ||
+      pkgId === '@kbn/test-es-server' ||
+      pkgId === '@kbn/test-kibana-server' ||
+      pkgId === '@kbn/test-saml-auth' ||
+      pkgId === '@kbn/test-subj-selector'
+    ) {
       return 'common package';
     }
 

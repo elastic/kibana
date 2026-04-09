@@ -104,7 +104,7 @@ describe('pull_request pipeline generation', () => {
 
     expect(mockRunPreBuild).not.toHaveBeenCalled();
     expect(warnSpy).toHaveBeenCalledWith(
-      'Isolated changes to renovate.json. Skipping main PR pipeline.'
+      'Isolated changes to renovate.json or .buildkite/pipelines/pull_request/renovate.yml. Skipping main PR pipeline.'
     );
 
     const parsed = yamlLoad(output) as Record<string, unknown>;

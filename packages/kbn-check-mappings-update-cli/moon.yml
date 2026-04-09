@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/check-mappings-update-cli'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/check-mappings-update-cli'
+  title: '@kbn/check-mappings-update-cli'
   description: Moon project for @kbn/check-mappings-update-cli
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: packages/kbn-check-mappings-update-cli
+  sourceRoot: packages/kbn-check-mappings-update-cli
 dependsOn:
   - '@kbn/some-dev-log'
   - '@kbn/dev-cli-errors'
@@ -42,16 +41,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

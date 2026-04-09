@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/encrypted-saved-objects-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-security'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/encrypted-saved-objects-plugin'
+  title: '@kbn/encrypted-saved-objects-plugin'
   description: Moon project for @kbn/encrypted-saved-objects-plugin
   channel: ''
   owner: '@elastic/kibana-security'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/encrypted_saved_objects
+  sourceRoot: x-pack/platform/plugins/shared/encrypted_saved_objects
 dependsOn:
   - '@kbn/security-plugin'
   - '@kbn/config-schema'
@@ -40,16 +39,6 @@ fileGroups:
   src:
     - server/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

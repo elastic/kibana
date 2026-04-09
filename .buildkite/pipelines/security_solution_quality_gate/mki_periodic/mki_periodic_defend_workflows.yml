@@ -11,6 +11,7 @@ steps:
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-standard-4
+          diskSizeGb: 120
           preemptible: true
         timeout_in_minutes: 300
         parallelism: 5
@@ -142,6 +143,7 @@ steps:
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-standard-4
+          diskSizeGb: 115
           preemptible: true
         timeout_in_minutes: 300
         parallelism: 3

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/security-plugin-types-common'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-security'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/security-plugin-types-common'
+  title: '@kbn/security-plugin-types-common'
   description: Moon project for @kbn/security-plugin-types-common
   channel: ''
   owner: '@elastic/kibana-security'
-  metadata:
-    sourceRoot: x-pack/platform/packages/shared/security/plugin_types_common
+  sourceRoot: x-pack/platform/packages/shared/security/plugin_types_common
 dependsOn:
   - '@kbn/licensing-plugin'
   - '@kbn/core-security-common'

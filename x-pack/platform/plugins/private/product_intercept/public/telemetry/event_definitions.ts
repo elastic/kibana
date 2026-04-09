@@ -14,6 +14,7 @@ export enum EventMetric {
 }
 
 export enum EventFieldType {
+  INTERCEPT_ID = 'intercept_id',
   INTERACTION_TYPE = 'interaction_type',
   INTERCEPT_RUN_ID = 'interaction_run_id',
   INTERACTION_METRIC = 'interaction_metric',
@@ -27,6 +28,15 @@ const fields: Record<EventFieldType, RootSchema<unknown>> = {
       type: 'keyword',
       _meta: {
         description: 'The id of the product intercept run',
+        optional: false,
+      },
+    },
+  },
+  [EventFieldType.INTERCEPT_ID]: {
+    [EventFieldType.INTERCEPT_ID]: {
+      type: 'keyword',
+      _meta: {
+        description: 'The id of the product intercept that triggered the run',
         optional: false,
       },
     },
@@ -79,6 +89,7 @@ export const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
     schema: {
       ...fields[EventFieldType.INTERACTION_TYPE],
       ...fields[EventFieldType.INTERCEPT_RUN_ID],
+      ...fields[EventFieldType.INTERCEPT_ID],
     },
   },
   {
@@ -87,12 +98,14 @@ export const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
       ...fields[EventFieldType.INTERACTION_METRIC],
       ...fields[EventFieldType.INTERACTION_METRIC_VALUE],
       ...fields[EventFieldType.INTERCEPT_RUN_ID],
+      ...fields[EventFieldType.INTERCEPT_ID],
     },
   },
   {
     eventType: EventMetric.PRODUCT_INTERCEPT_TRIGGER_FETCH_ERROR,
     schema: {
       ...fields[EventFieldType.TRIGGER_FETCH_ERROR_MESSAGE],
+      ...fields[EventFieldType.INTERCEPT_ID],
     },
   },
 ];

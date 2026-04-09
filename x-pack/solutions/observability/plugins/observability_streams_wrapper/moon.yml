@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/streams-app-wrapper-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/streams-program-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/streams-app-wrapper-plugin'
+  title: '@kbn/streams-app-wrapper-plugin'
   description: Moon project for @kbn/streams-app-wrapper-plugin
   channel: ''
   owner: '@elastic/streams-program-team'
-  metadata:
-    sourceRoot: x-pack/solutions/observability/plugins/observability_streams_wrapper
+  sourceRoot: x-pack/solutions/observability/plugins/observability_streams_wrapper
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/streams-plugin'
@@ -51,16 +50,6 @@ fileGroups:
     - .storybook/**/*
     - '!target/**/*'
     - '!.storybook/**/*.js'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

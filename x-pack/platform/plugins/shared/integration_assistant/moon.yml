@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/integration-assistant-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/security-scalability'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/integration-assistant-plugin'
+  title: '@kbn/integration-assistant-plugin'
   description: Moon project for @kbn/integration-assistant-plugin
   channel: ''
   owner: '@elastic/security-scalability'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/integration_assistant
+  sourceRoot: x-pack/platform/plugins/shared/integration_assistant
 dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'
@@ -62,16 +61,6 @@ fileGroups:
     - scripts/**/*.ts
     - __jest__/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

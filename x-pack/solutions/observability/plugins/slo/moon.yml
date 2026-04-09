@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/slo-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-ux-management-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/slo-plugin'
+  title: '@kbn/slo-plugin'
   description: Moon project for @kbn/slo-plugin
   channel: ''
   owner: '@elastic/obs-ux-management-team'
-  metadata:
-    sourceRoot: x-pack/solutions/observability/plugins/slo
+  sourceRoot: x-pack/solutions/observability/plugins/slo
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'
@@ -127,16 +126,6 @@ fileGroups:
     - server/**/*
     - ./emotion.d.ts
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

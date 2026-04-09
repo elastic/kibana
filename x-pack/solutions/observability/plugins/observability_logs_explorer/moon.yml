@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/observability-logs-explorer-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-exploration-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/observability-logs-explorer-plugin'
+  title: '@kbn/observability-logs-explorer-plugin'
   description: Moon project for @kbn/observability-logs-explorer-plugin
   channel: ''
   owner: '@elastic/obs-exploration-team'
-  metadata:
-    sourceRoot: x-pack/solutions/observability/plugins/observability_logs_explorer
+  sourceRoot: x-pack/solutions/observability/plugins/observability_logs_explorer
 dependsOn:
   - '@kbn/config-schema'
   - '@kbn/core'
@@ -72,16 +71,6 @@ fileGroups:
     - server/**/*
     - .storybook/**/*.tsx
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

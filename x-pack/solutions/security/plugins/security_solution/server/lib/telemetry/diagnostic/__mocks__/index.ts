@@ -8,11 +8,19 @@
 import type { AnalyticsServiceStart, Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { CircuitBreakingQueryExecutorImpl } from '../health_diagnostic_receiver';
-import { QueryType, Action } from '../health_diagnostic_service.types';
+import {
+  QueryType,
+  Action,
+  type HealthDiagnosticQueryV1,
+  type HealthDiagnosticQueryV2,
+} from '../health_diagnostic_service.types';
+
+export type { HealthDiagnosticQueryV1, HealthDiagnosticQueryV2 };
 import type { TelemetryConfigProvider } from '../../../../../common/telemetry_config/telemetry_config_provider';
 
 export const createMockLogger = (): jest.Mocked<Logger> =>
   ({
+    trace: jest.fn(),
     debug: jest.fn(),
     info: jest.fn(),
     warn: jest.fn(),
@@ -69,6 +77,9 @@ export const createMockEsClient = () => {
     ilm: {
       explainLifecycle: jest.fn(),
     },
+    security: {
+      hasPrivileges: jest.fn(),
+    },
     helpers: mockHelpers,
     cluster: { health: jest.fn() },
     nodes: { stats: jest.fn() },
@@ -96,6 +107,53 @@ export const createMockQuery = (type: QueryType, overrides = {}) => ({
   enabled: true,
   size: 100,
   ...overrides,
+});
+
+export const createMockQueryV1 = (
+  type: QueryType,
+  overrides: Partial<HealthDiagnosticQueryV1> = {}
+): HealthDiagnosticQueryV1 => ({
+  version: 1,
+  id: 'test-query-v1',
+  name: 'test-query-v1',
+  index: 'test-index',
+  type,
+  query: type === QueryType.DSL ? '{"query": {"match_all": {}}}' : 'test query',
+  scheduleCron: '5m',
+  filterlist: { 'user.name': Action.KEEP },
+  enabled: true,
+  size: 100,
+  ...overrides,
+});
+
+export const createMockQueryV2 = (
+  type: QueryType,
+  overrides: Partial<HealthDiagnosticQueryV2> = {}
+): HealthDiagnosticQueryV2 => ({
+  version: 2,
+  id: 'test-query-v2',
+  name: 'test-query-v2',
+  integrations: ['endpoint.*'], // already an array — parser split happens at parse time
+  type,
+  query: type === QueryType.DSL ? '{"query": {"match_all": {}}}' : 'test query',
+  scheduleCron: '5m',
+  filterlist: { 'user.name': Action.KEEP },
+  enabled: true,
+  size: 100,
+  ...overrides,
+});
+
+export const createMockPackageService = (
+  packages: Array<{
+    name: string;
+    version: string;
+    status: string;
+    data_streams?: Array<{ dataset: string; type: string }>;
+  }> = []
+) => ({
+  asInternalUser: {
+    getPackages: jest.fn().mockResolvedValue(packages),
+  },
 });
 
 export const createMockArtifactData = (
@@ -161,6 +219,7 @@ export const setupPointInTime = (
 ) => {
   mockEsClient.openPointInTime.mockResolvedValue({ id: pitId });
   mockEsClient.closePointInTime.mockResolvedValue({});
+  mockEsClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: true });
 };
 
 export const createTestObserver = () => {

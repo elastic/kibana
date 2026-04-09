@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/flot-charts'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-operations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/flot-charts'
+  title: '@kbn/flot-charts'
   description: Moon project for @kbn/flot-charts
   channel: ''
   owner: '@elastic/kibana-operations'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-flot-charts
+  sourceRoot: src/platform/packages/shared/kbn-flot-charts
 dependsOn:
   - '@kbn/i18n'
 tags:

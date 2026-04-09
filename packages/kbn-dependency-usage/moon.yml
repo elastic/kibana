@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/dependency-usage'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-security'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/dependency-usage'
+  title: '@kbn/dependency-usage'
   description: Moon project for @kbn/dependency-usage
   channel: ''
   owner: '@elastic/kibana-security'
-  metadata:
-    sourceRoot: packages/kbn-dependency-usage
+  sourceRoot: packages/kbn-dependency-usage
 dependsOn:
   - '@kbn/repo-info'
 tags:
@@ -29,16 +28,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}
