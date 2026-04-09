@@ -128,21 +128,20 @@ export const defineInferenceSettingsRoutes = ({
           throw e;
         }
 
-        try {
-          const { inferenceEndpoints } = await fetchInferenceEndpoints(esClient);
-          const liveIds = new Set(inferenceEndpoints.map((ep) => ep.inference_id));
-          const invalid = findInvalidEndpoints(settingsBody.data, featureRegistry, liveIds, logger);
-          return response.ok({
-            body: { ...settingsBody, invalidEndpoints: invalid },
-            headers: { 'content-type': 'application/json' },
+        const invalidEndpoints = await fetchInferenceEndpoints(esClient)
+          .then(({ inferenceEndpoints }) => {
+            const liveIds = new Set(inferenceEndpoints.map((ep) => ep.inference_id));
+            return findInvalidEndpoints(settingsBody.data, featureRegistry, liveIds, logger);
+          })
+          .catch((e) => {
+            logger.warn(`Failed to validate inference endpoints: ${e.message}`);
+            return [];
           });
-        } catch (e) {
-          logger.warn(`Failed to validate inference endpoints: ${e.message}`);
-          return response.ok({
-            body: settingsBody,
-            headers: { 'content-type': 'application/json' },
-          });
-        }
+
+        return response.ok({
+          body: { ...settingsBody, invalidEndpoints },
+          headers: { 'content-type': 'application/json' },
+        });
       })
     );
 
