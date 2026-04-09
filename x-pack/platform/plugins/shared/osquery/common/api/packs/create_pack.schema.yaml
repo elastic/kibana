@@ -44,8 +44,40 @@ components:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ObjectQueries'
 
     CreatePacksResponse:
+      description: 'The response for creating a pack.'
       type: object
-      properties: { }
+      properties:
+        data:
+          description: 'The created pack.'
+          type: object
+          properties:
+            name:
+              description: 'The pack name.'
+              type: string
+            description:
+              description: 'The pack description.'
+              type: string
+            queries:
+              description: 'The queries in the pack.'
+              type: object
+            enabled:
+              description: 'Whether the pack is enabled.'
+              type: boolean
+            created_at:
+              description: 'The creation timestamp.'
+              type: string
+            created_by:
+              description: 'The user who created the pack.'
+              type: string
+            updated_at:
+              description: 'The last update timestamp.'
+              type: string
+            updated_by:
+              description: 'The user who last updated the pack.'
+              type: string
+            saved_object_id:
+              description: 'The saved object ID of the pack.'
+              type: string
       example:
         data:
           name: my_pack

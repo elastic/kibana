@@ -15,6 +15,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import {
+  isValidDateMath,
+  isNonEmptyString,
+  ArrayFromString,
+  BooleanFromString,
+} from '@kbn/zod-helpers/v4';
 
 export type GetAgentDetailsRequestParams = z.infer<typeof GetAgentDetailsRequestParams>;
 export const GetAgentDetailsRequestParams = z.object({

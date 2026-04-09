@@ -1,13 +1,28 @@
 openapi: 3.0.0
 info:
-  title: Find Saved Queries Schema
+  title: Find Packs Schema
   version: '2023-10-31'
 paths: { }
 components:
   schemas:
     FindPacksResponse:
+      description: 'A paginated list of query packs.'
       type: object
-      properties: { }
+      properties:
+        page:
+          description: 'The current page number.'
+          type: integer
+        pageSize:
+          description: 'The number of results per page.'
+          type: integer
+        total:
+          description: 'The total number of packs.'
+          type: integer
+        data:
+          description: 'The list of packs.'
+          type: array
+          items:
+            type: object
       example:
         page: 1
         pageSize: 10
@@ -36,8 +51,39 @@ components:
               description: 'My pack description'
         policy_ids: []
     FindPackResponse:
+      description: 'The details of a single query pack.'
       type: object
-      properties: { }
+      properties:
+        data:
+          description: 'The pack details.'
+          type: object
+          properties:
+            id:
+              description: 'The pack ID.'
+              type: string
+            type:
+              description: 'The saved object type.'
+              type: string
+            name:
+              description: 'The pack name.'
+              type: string
+            queries:
+              description: 'The queries in the pack.'
+              type: object
+            enabled:
+              description: 'Whether the pack is enabled.'
+              type: boolean
+            description:
+              description: 'The pack description.'
+              type: string
+            policy_ids:
+              description: 'A list of agent policy IDs associated with the pack.'
+              type: array
+              items:
+                type: string
+            read_only:
+              description: 'Whether the pack is read-only (true for prebuilt packs).'
+              type: boolean
       example:
         data:
           id: "3c42c847-eb30-4452-80e0-728584042334"
@@ -59,5 +105,4 @@ components:
           updated_by: "elastic"
           description: ""
           policy_ids: [ ]
-          read_only: false  # true for prebuilt packs
-
+          read_only: false

@@ -8,8 +8,26 @@ components:
     GetLiveQueryResultsResponse:
       type: object
       description: 'The response for getting live query results.'
-      properties: { }
+      properties:
+        data:
+          description: 'The query results data wrapper.'
+          type: object
+          properties:
+            edges:
+              description: 'The paginated list of query result rows.'
+              type: array
+              items:
+                type: object
+            total:
+              description: 'The total number of result rows.'
+              type: integer
       example:
         data:
           total: 2
-          edges: [{}, {}]
+          edges:
+            - _id: 'result-1'
+              fields:
+                host.uptime: ['12345']
+            - _id: 'result-2'
+              fields:
+                host.uptime: ['67890']

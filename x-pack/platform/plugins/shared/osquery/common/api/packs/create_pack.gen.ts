@@ -35,5 +35,52 @@ export const CreatePacksRequestBody = z.object({
   queries: ObjectQueries.optional(),
 });
 
+/**
+ * The response for creating a pack.
+ */
 export type CreatePacksResponse = z.infer<typeof CreatePacksResponse>;
-export const CreatePacksResponse = z.object({});
+export const CreatePacksResponse = z.object({
+  /**
+   * The created pack.
+   */
+  data: z
+    .object({
+      /**
+       * The pack name.
+       */
+      name: z.string().optional(),
+      /**
+       * The pack description.
+       */
+      description: z.string().optional(),
+      /**
+       * The queries in the pack.
+       */
+      queries: z.object({}).optional(),
+      /**
+       * Whether the pack is enabled.
+       */
+      enabled: z.boolean().optional(),
+      /**
+       * The creation timestamp.
+       */
+      created_at: z.string().optional(),
+      /**
+       * The user who created the pack.
+       */
+      created_by: z.string().optional(),
+      /**
+       * The last update timestamp.
+       */
+      updated_at: z.string().optional(),
+      /**
+       * The user who last updated the pack.
+       */
+      updated_by: z.string().optional(),
+      /**
+       * The saved object ID of the pack.
+       */
+      saved_object_id: z.string().optional(),
+    })
+    .optional(),
+});

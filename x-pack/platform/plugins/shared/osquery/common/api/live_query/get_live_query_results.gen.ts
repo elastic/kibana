@@ -20,4 +20,20 @@ import { z } from '@kbn/zod/v4';
  * The response for getting live query results.
  */
 export type GetLiveQueryResultsResponse = z.infer<typeof GetLiveQueryResultsResponse>;
-export const GetLiveQueryResultsResponse = z.object({});
+export const GetLiveQueryResultsResponse = z.object({
+  /**
+   * The query results data wrapper.
+   */
+  data: z
+    .object({
+      /**
+       * The paginated list of query result rows.
+       */
+      edges: z.array(z.object({})).optional(),
+      /**
+       * The total number of result rows.
+       */
+      total: z.number().int().optional(),
+    })
+    .optional(),
+});

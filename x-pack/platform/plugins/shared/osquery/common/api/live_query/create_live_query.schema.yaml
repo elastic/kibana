@@ -63,8 +63,38 @@ components:
           nullable: true
 
     CreateLiveQueryResponse:
+      description: 'The response for creating a live query.'
       type: object
-      properties: { }
+      properties:
+        data:
+          description: 'The live query action data.'
+          type: object
+          properties:
+            action_id:
+              description: 'The ID of the live query action.'
+              type: string
+            expiration:
+              description: 'The expiration date and time of the live query.'
+              type: string
+            type:
+              description: 'The action type.'
+              type: string
+            input_type:
+              description: 'The input type for the action.'
+              type: string
+            agents:
+              description: 'A list of agent IDs targeted by the live query.'
+              type: array
+              items:
+                type: string
+            user_id:
+              description: 'The ID of the user who created the live query.'
+              type: string
+            queries:
+              description: 'The list of queries in the live query action.'
+              type: array
+              items:
+                type: object
       example:
         data:
            action_id: '3c42c847-eb30-4452-80e0-728584042334'

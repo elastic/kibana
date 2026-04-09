@@ -6,8 +6,23 @@ paths: { }
 components:
   schemas:
     FindSavedQueryResponse:
+        description: 'A paginated list of saved queries.'
         type: object
-        properties: { }
+        properties:
+          page:
+            description: 'The current page number.'
+            type: integer
+          per_page:
+            description: 'The number of results per page.'
+            type: integer
+          total:
+            description: 'The total number of saved queries.'
+            type: integer
+          data:
+            description: 'The list of saved queries.'
+            type: array
+            items:
+              type: object
         example:
           page: 1
           per_page: 100
@@ -36,8 +51,47 @@ components:
                 prebuilt: false
 
     FindSavedQueryDetailResponse:
+      description: 'The details of a single saved query.'
       type: object
-      properties: { }
+      properties:
+        data:
+          description: 'The saved query details.'
+          type: object
+          properties:
+            id:
+              description: 'The saved query saved object ID.'
+              type: string
+            type:
+              description: 'The saved object type.'
+              type: string
+            attributes:
+              description: 'The saved query attributes.'
+              type: object
+              properties:
+                id:
+                  description: 'The saved query ID.'
+                  type: string
+                description:
+                  description: 'The saved query description.'
+                  type: string
+                query:
+                  description: 'The SQL query.'
+                  type: string
+                platform:
+                  description: 'The target platform(s).'
+                  type: string
+                version:
+                  description: 'The minimum osquery version.'
+                  type: string
+                interval:
+                  description: 'The query interval in seconds.'
+                  type: string
+                ecs_mapping:
+                  description: 'The ECS mapping configuration.'
+                  type: object
+                prebuilt:
+                  description: 'Whether this is a prebuilt saved query.'
+                  type: boolean
       example:
         data:
           id: "3c42c847-eb30-4452-80e0-728584042334"
