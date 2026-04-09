@@ -6,7 +6,7 @@
  */
 
 import type { InferenceConnector } from '@kbn/inference-common';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { ConnectorSubPanel } from './connector_sub_panel';
 import {
   CONNECTOR_LOAD_ERROR,
@@ -42,7 +42,10 @@ export const InsightsSplitButton = ({
 }: InsightsSplitButtonProps) => {
   const managementUrl = useModelSettingsUrl();
 
-  const discoveryConnector = allConnectors.find((c) => c.connectorId === displayConnectorId);
+  const discoveryConnector = useMemo(
+    () => allConnectors.find((c) => c.connectorId === displayConnectorId),
+    [allConnectors, displayConnectorId]
+  );
 
   const buildPanels = useCallback(
     ({ resetMenu, closeMenu }: MenuHelpers) => [

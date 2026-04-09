@@ -223,62 +223,72 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
     });
   }, [onboardingStatusUpdateQueue, processStatusUpdateQueue, streamsListFetch.data]);
 
-  const isStreamActionable = (streamName: string) => {
-    const result = streamOnboardingResultMap[streamName];
-    if (!result) return false;
-    return ![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(result.status);
-  };
+  const isStreamActionable = useCallback(
+    (streamName: string) => {
+      const result = streamOnboardingResultMap[streamName];
+      if (!result) return false;
+      return ![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(result.status);
+    },
+    [streamOnboardingResultMap]
+  );
 
-  const getActionableStreamNames = () =>
-    selectedStreams
-      .filter((item) => isStreamActionable(item.stream.name))
-      .map((item) => item.stream.name);
+  const getActionableStreamNames = useCallback(
+    () =>
+      selectedStreams
+        .filter((item) => isStreamActionable(item.stream.name))
+        .map((item) => item.stream.name),
+    [selectedStreams, isStreamActionable]
+  );
 
-  const bulkScheduleOnboardingTask = async (
-    streamList: string[],
-    options?: ScheduleOnboardingOptions
-  ) => {
-    try {
-      await pMap(
-        streamList,
-        async (streamName) => {
-          await scheduleOnboardingTask(streamName, options);
-        },
-        { concurrency: 10 }
-      );
-    } catch (error) {
-      toasts.addError(getFormattedError(error), { title: ONBOARDING_SCHEDULING_FAILURE_TITLE });
-    }
+  const bulkScheduleOnboardingTask = useCallback(
+    async (streamList: string[], options?: ScheduleOnboardingOptions) => {
+      try {
+        await pMap(
+          streamList,
+          async (streamName) => {
+            await scheduleOnboardingTask(streamName, options);
+          },
+          { concurrency: 10 }
+        );
+      } catch (error) {
+        toasts.addError(getFormattedError(error), { title: ONBOARDING_SCHEDULING_FAILURE_TITLE });
+      }
 
-    streamList.forEach((streamName) => {
-      onboardingStatusUpdateQueue.add(streamName);
-    });
-    processStatusUpdateQueue();
-  };
+      streamList.forEach((streamName) => {
+        onboardingStatusUpdateQueue.add(streamName);
+      });
+      processStatusUpdateQueue();
+    },
+    [scheduleOnboardingTask, toasts, onboardingStatusUpdateQueue, processStatusUpdateQueue]
+  );
 
-  const onBulkOnboardStreamsClick = async () => {
+  const onBulkOnboardStreamsClick = useCallback(async () => {
     const streamList = getActionableStreamNames();
     setSelectedStreams([]);
     await bulkScheduleOnboardingTask(streamList, onboardingConfig);
-  };
+  }, [getActionableStreamNames, bulkScheduleOnboardingTask, onboardingConfig]);
 
-  const onBulkOnboardFeaturesOnly = async () => {
-    const streamList = getActionableStreamNames();
-    setSelectedStreams([]);
-    await bulkScheduleOnboardingTask(streamList, {
-      steps: [OnboardingStep.FeaturesIdentification],
-      connectors: onboardingConfig.connectors,
-    });
-  };
+  const onBulkOnboardStep = useCallback(
+    async (step: OnboardingStep) => {
+      const streamList = getActionableStreamNames();
+      setSelectedStreams([]);
+      await bulkScheduleOnboardingTask(streamList, {
+        steps: [step],
+        connectors: onboardingConfig.connectors,
+      });
+    },
+    [getActionableStreamNames, bulkScheduleOnboardingTask, onboardingConfig.connectors]
+  );
 
-  const onBulkOnboardQueriesOnly = async () => {
-    const streamList = getActionableStreamNames();
-    setSelectedStreams([]);
-    await bulkScheduleOnboardingTask(streamList, {
-      steps: [OnboardingStep.QueriesGeneration],
-      connectors: onboardingConfig.connectors,
-    });
-  };
+  const onBulkOnboardFeaturesOnly = useCallback(
+    () => onBulkOnboardStep(OnboardingStep.FeaturesIdentification),
+    [onBulkOnboardStep]
+  );
+
+  const onBulkOnboardQueriesOnly = useCallback(
+    () => onBulkOnboardStep(OnboardingStep.QueriesGeneration),
+    [onBulkOnboardStep]
+  );
 
   const onOnboardStreamActionClick = async (streamName: string) => {
     await bulkScheduleOnboardingTask([streamName]);
@@ -332,7 +342,7 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
               resolvedConnectorId={discoveryConnectors.resolvedConnectorId}
               displayConnectorId={displayDiscoveryConnectorId}
               onConnectorChange={setDiscoveryConnectorOverride}
-              onRun={() => scheduleInsightsTask()}
+              onRun={scheduleInsightsTask}
               isLoading={isSchedulingInsights || isWaitingForInsightsTask}
               isDisabled={isConnectorCatalogUnavailable || discoveryConnectors.loading}
             />

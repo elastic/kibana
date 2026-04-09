@@ -6,7 +6,7 @@
  */
 
 import type { InferenceConnector } from '@kbn/inference-common';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   CONNECTOR_LOAD_ERROR,
   GENERATE_BUTTON_LABEL,
@@ -53,8 +53,47 @@ export const GenerateSplitButton = ({
 }: GenerateSplitButtonProps) => {
   const managementUrl = useModelSettingsUrl();
 
-  const featuresConnector = allConnectors.find((c) => c.connectorId === config.connectors.features);
-  const queriesConnector = allConnectors.find((c) => c.connectorId === config.connectors.queries);
+  const featuresConnector = useMemo(
+    () => allConnectors.find((c) => c.connectorId === config.connectors.features),
+    [allConnectors, config.connectors.features]
+  );
+  const queriesConnector = useMemo(
+    () => allConnectors.find((c) => c.connectorId === config.connectors.queries),
+    [allConnectors, config.connectors.queries]
+  );
+
+  const buildConnectorSubPanel = useCallback(
+    ({
+      panelId,
+      connectorKey,
+      resolvedId,
+      resetMenu,
+    }: {
+      panelId: number;
+      connectorKey: keyof OnboardingConfig['connectors'];
+      resolvedId: string | undefined;
+      resetMenu: () => void;
+    }) => ({
+      id: panelId,
+      title: MODEL_SELECTION_PANEL_TITLE,
+      width: 240,
+      content: (
+        <ConnectorSubPanel
+          connectors={allConnectors}
+          resolvedConnectorId={resolvedId}
+          selectedConnectorId={config.connectors[connectorKey]}
+          onSelect={(connectorId: string) => {
+            onConfigChange({
+              ...config,
+              connectors: { ...config.connectors, [connectorKey]: connectorId },
+            });
+            resetMenu();
+          }}
+        />
+      ),
+    }),
+    [allConnectors, config, onConfigChange]
+  );
 
   const buildPanels = useCallback(
     ({ resetMenu, closeMenu }: MenuHelpers) => [
@@ -87,55 +126,27 @@ export const GenerateSplitButton = ({
           ...buildModelSettingsMenuItems(managementUrl, closeMenu),
         ],
       },
-      {
-        id: 1,
-        title: MODEL_SELECTION_PANEL_TITLE,
-        width: 240,
-        content: (
-          <ConnectorSubPanel
-            connectors={allConnectors}
-            resolvedConnectorId={featuresResolvedConnectorId}
-            selectedConnectorId={config.connectors.features}
-            onSelect={(connectorId: string) => {
-              onConfigChange({
-                ...config,
-                connectors: { ...config.connectors, features: connectorId },
-              });
-              resetMenu();
-            }}
-          />
-        ),
-      },
-      {
-        id: 2,
-        title: MODEL_SELECTION_PANEL_TITLE,
-        width: 240,
-        content: (
-          <ConnectorSubPanel
-            connectors={allConnectors}
-            resolvedConnectorId={queriesResolvedConnectorId}
-            selectedConnectorId={config.connectors.queries}
-            onSelect={(connectorId: string) => {
-              onConfigChange({
-                ...config,
-                connectors: { ...config.connectors, queries: connectorId },
-              });
-              resetMenu();
-            }}
-          />
-        ),
-      },
+      buildConnectorSubPanel({
+        panelId: 1,
+        connectorKey: 'features',
+        resolvedId: featuresResolvedConnectorId,
+        resetMenu,
+      }),
+      buildConnectorSubPanel({
+        panelId: 2,
+        connectorKey: 'queries',
+        resolvedId: queriesResolvedConnectorId,
+        resetMenu,
+      }),
     ],
     [
       isRunDisabled,
       featuresConnector,
       queriesConnector,
       managementUrl,
-      allConnectors,
       featuresResolvedConnectorId,
       queriesResolvedConnectorId,
-      config,
-      onConfigChange,
+      buildConnectorSubPanel,
       onRunFeaturesOnly,
       onRunQueriesOnly,
     ]

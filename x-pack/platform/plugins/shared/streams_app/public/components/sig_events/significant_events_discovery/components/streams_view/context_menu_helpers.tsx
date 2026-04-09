@@ -37,7 +37,10 @@ export function buildModelSettingsMenuItems(
   ];
 }
 
-export function buildConnectorMenuItem(connector: InferenceConnector | undefined, panelId: number) {
+export function buildConnectorMenuItem(
+  connector: InferenceConnector | undefined,
+  panelId: number
+): { name: React.ReactNode; panel: number } {
   return {
     name: (
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>

@@ -49,23 +49,15 @@ export function useConnectorConfig() {
   });
 
   useEffect(() => {
-    setOnboardingConfig((prev) => ({
-      ...prev,
-      connectors: {
-        ...prev.connectors,
-        ...(featuresConnectors.resolvedConnectorId && !prev.connectors.features
-          ? { features: featuresConnectors.resolvedConnectorId }
-          : {}),
-        ...(queriesConnectors.resolvedConnectorId && !prev.connectors.queries
-          ? { queries: queriesConnectors.resolvedConnectorId }
-          : {}),
-      },
-    }));
-  }, [
-    featuresConnectors.resolvedConnectorId,
-    queriesConnectors.resolvedConnectorId,
-    setOnboardingConfig,
-  ]);
+    setOnboardingConfig((prev) => {
+      const features = prev.connectors.features ?? featuresConnectors.resolvedConnectorId;
+      const queries = prev.connectors.queries ?? queriesConnectors.resolvedConnectorId;
+      if (features === prev.connectors.features && queries === prev.connectors.queries) {
+        return prev;
+      }
+      return { ...prev, connectors: { features, queries } };
+    });
+  }, [featuresConnectors.resolvedConnectorId, queriesConnectors.resolvedConnectorId]);
 
   return {
     featuresConnectors,
