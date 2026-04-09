@@ -25,8 +25,6 @@ export default createTestConfig({
   kbnServerArgs: [
     '--xpack.infra.enabled=true',
     '--xpack.infra.featureFlags.customThresholdAlertsEnabled=true',
-    // Suppress Agent Builder announcement modal so it doesn't block tests running in Observability context.
-    '--uiSettings.overrides.agentBuilder:announcementModalSeen=true',
   ],
   // load tests in the index file
   testFiles: [require.resolve('./index.feature_flags.ts')],

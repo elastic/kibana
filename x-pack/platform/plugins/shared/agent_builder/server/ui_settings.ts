@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import {
   AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-  AGENT_BUILDER_ANNOUNCEMENT_MODAL_SEEN_ID,
 } from '@kbn/management-settings-ids';
 
 export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServiceSetup }) => {
@@ -45,21 +44,6 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       technicalPreview: true,
       requiresPageReload: false,
       readonly: false,
-    },
-    [AGENT_BUILDER_ANNOUNCEMENT_MODAL_SEEN_ID]: {
-      description: i18n.translate(
-        'xpack.agentBuilder.uiSettings.announcementModalSeen.description',
-        {
-          defaultMessage: 'Tracks whether the Agent Builder announcement modal has been dismissed.',
-        }
-      ),
-      name: i18n.translate('xpack.agentBuilder.uiSettings.announcementModalSeen.name', {
-        defaultMessage: 'Agent Builder announcement seen',
-      }),
-      schema: schema.boolean(),
-      value: false,
-      readonly: true,
-      readonlyMode: 'ui',
     },
   });
 };

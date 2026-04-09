@@ -6,16 +6,13 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { EuiProvider } from '@elastic/eui';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import {
-  HIDE_ANNOUNCEMENTS_ID,
-  AGENT_BUILDER_ANNOUNCEMENT_MODAL_SEEN_ID,
-} from '@kbn/management-settings-ids';
+import { HIDE_ANNOUNCEMENTS_ID } from '@kbn/management-settings-ids';
 import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common/telemetry';
 import { AgentBuilderAnnouncementModalController } from './agent_builder_announcement_modal_controller';
 
@@ -23,26 +20,44 @@ const SPACE_ID = 'test-space';
 
 function buildServices({
   hideAnnouncements = false,
-  announcementModalSeen = false,
+  announcementSeenInProfile = false,
   spaceId = SPACE_ID,
+  userProfileEnabled = true,
+  agentBuilderSeenJson,
 }: {
   hideAnnouncements?: boolean;
-  announcementModalSeen?: boolean;
+  announcementSeenInProfile?: boolean;
   spaceId?: string;
+  userProfileEnabled?: boolean;
+  /** Overrides the JSON stored in user profile for per-space dismissal (default derives from announcementSeenInProfile). */
+  agentBuilderSeenJson?: string;
 } = {}) {
   const space$ = new BehaviorSubject({ id: spaceId, name: spaceId });
   const reportEvent = jest.fn();
   const navigateToApp = jest.fn();
-  const settingsSet = jest.fn().mockResolvedValue(undefined);
+  const partialUpdate = jest.fn().mockResolvedValue(undefined);
+  const seenJson =
+    agentBuilderSeenJson ??
+    (announcementSeenInProfile ? JSON.stringify({ [spaceId]: true }) : JSON.stringify({}));
+
+  const userProfile = {
+    getEnabled$: () => of(userProfileEnabled),
+    getCurrent: jest.fn().mockResolvedValue({
+      data: {
+        userSettings: {
+          agentBuilderAnnouncementModalSeenBySpaceJson: seenJson,
+        },
+      },
+    }),
+    partialUpdate,
+  };
 
   const services = {
     settings: {
       client: {
-        get: jest.fn((key: string) =>
-          key === AGENT_BUILDER_ANNOUNCEMENT_MODAL_SEEN_ID ? announcementModalSeen : undefined
-        ),
+        get: jest.fn(),
         get$: jest.fn(),
-        set: settingsSet,
+        set: jest.fn(),
       },
       globalClient: {
         get: (key: string) => (key === HIDE_ANNOUNCEMENTS_ID ? hideAnnouncements : undefined),
@@ -54,9 +69,10 @@ function buildServices({
     },
     analytics: { reportEvent },
     application: { navigateToApp },
+    userProfile,
   };
 
-  return { services, reportEvent, navigateToApp, settingsSet };
+  return { services, reportEvent, navigateToApp, partialUpdate, userProfile, space$ };
 }
 
 function renderController(services: ReturnType<typeof buildServices>['services']) {
@@ -87,8 +103,19 @@ describe('AgentBuilderAnnouncementModalController', () => {
     });
   });
 
-  it('does not render the modal when the user has already seen it', async () => {
-    const { services } = buildServices({ announcementModalSeen: true });
+  it('does not render the modal when the user has already seen it in their profile', async () => {
+    const { services } = buildServices({ announcementSeenInProfile: true });
+    renderController(services);
+
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId('agentBuilderAnnouncementContinueButton')
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it('does not render the modal when user profiles are disabled', async () => {
+    const { services } = buildServices({ userProfileEnabled: false });
     renderController(services);
 
     await waitFor(() => {
@@ -107,9 +134,33 @@ describe('AgentBuilderAnnouncementModalController', () => {
     });
   });
 
-  it('calls settings.client.set, reports OptInAction telemetry, and hides the modal on continue', async () => {
+  it('shows the modal after switching to a space where the announcement was not dismissed', async () => {
+    const spaceA = 'space-a';
+    const spaceB = 'space-b';
+    const { services, space$ } = buildServices({
+      spaceId: spaceA,
+      agentBuilderSeenJson: JSON.stringify({ [spaceA]: true }),
+    });
+    renderController(services);
+
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId('agentBuilderAnnouncementContinueButton')
+      ).not.toBeInTheDocument();
+    });
+
+    await act(async () => {
+      space$.next({ id: spaceB, name: spaceB });
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('agentBuilderAnnouncementContinueButton')).toBeInTheDocument();
+    });
+  });
+
+  it('calls partialUpdate, reports OptInAction telemetry, and hides the modal on continue', async () => {
     const user = userEvent.setup();
-    const { services, reportEvent, settingsSet } = buildServices();
+    const { services, reportEvent, partialUpdate } = buildServices();
     renderController(services);
 
     await waitFor(() =>
@@ -118,7 +169,13 @@ describe('AgentBuilderAnnouncementModalController', () => {
 
     await user.click(screen.getByTestId('agentBuilderAnnouncementContinueButton'));
 
-    expect(settingsSet).toHaveBeenCalledWith(AGENT_BUILDER_ANNOUNCEMENT_MODAL_SEEN_ID, true);
+    await waitFor(() => {
+      expect(partialUpdate).toHaveBeenCalledWith({
+        userSettings: {
+          agentBuilderAnnouncementModalSeenBySpaceJson: JSON.stringify({ [SPACE_ID]: true }),
+        },
+      });
+    });
     expect(reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
       action: 'confirmed',
       source: 'agent_builder_nav_control',
@@ -126,9 +183,9 @@ describe('AgentBuilderAnnouncementModalController', () => {
     expect(screen.queryByTestId('agentBuilderAnnouncementContinueButton')).not.toBeInTheDocument();
   });
 
-  it('calls settings.client.set, reports OptOut telemetry, navigates to management, and hides the modal on revert', async () => {
+  it('calls partialUpdate, reports OptOut telemetry, navigates to GenAI settings, and hides the modal on revert', async () => {
     const user = userEvent.setup();
-    const { services, reportEvent, navigateToApp, settingsSet } = buildServices();
+    const { services, reportEvent, navigateToApp, partialUpdate } = buildServices();
     renderController(services);
 
     await waitFor(() =>
@@ -137,7 +194,9 @@ describe('AgentBuilderAnnouncementModalController', () => {
 
     await user.click(screen.getByTestId('agentBuilderAnnouncementRevertButton'));
 
-    expect(settingsSet).toHaveBeenCalledWith(AGENT_BUILDER_ANNOUNCEMENT_MODAL_SEEN_ID, true);
+    await waitFor(() => {
+      expect(partialUpdate).toHaveBeenCalled();
+    });
     expect(reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.OptOut, {
       source: 'agent_builder_nav_control',
     });

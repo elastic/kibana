@@ -36,20 +36,7 @@ import { globalSetupHook } from '../fixtures';
 globalSetupHook(
   'Ingest data to Elasticsearch',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
-  async ({
-    infraSynthtraceEsClient,
-    logsSynthtraceEsClient,
-    apmSynthtraceEsClient,
-    log,
-    kbnClient,
-  }) => {
-    await kbnClient.uiSettings.update({
-      'agentBuilder:announcementModalSeen': true,
-    });
-    log.info(
-      'Set agentBuilder:announcementModalSeen so UI tests are not blocked by the Agent Builder announcement modal'
-    );
-
+  async ({ infraSynthtraceEsClient, logsSynthtraceEsClient, apmSynthtraceEsClient, log }) => {
     await infraSynthtraceEsClient.index(
       generateHostData({
         from: DATE_WITH_HOSTS_DATA_FROM,
