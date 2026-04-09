@@ -22,6 +22,8 @@ import {
 } from '@elastic/eui';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
+import { GLOBAL_ARTIFACT_TAG } from '../../../../../../common/endpoint/service/artifacts';
 import { prepareToCloseAlerts } from '../../../../../detection_engine/rule_exceptions/components/add_exception_flyout/helpers';
 import { useCloseAlertsFromExceptions } from '../../../../../detection_engine/rule_exceptions/logic/use_close_alerts';
 import { ExceptionItemsFlyoutAlertsActions } from '../../../../../detection_engine/rule_exceptions/components/flyout_components/alerts_actions';
@@ -83,6 +85,7 @@ export const EndpointExceptionsFlyout: React.FC<EndpointExceptionsFlyoutProps> =
   const [disableBulkClose, setDisableBulkCloseAlerts] = useState(false);
   const [bulkCloseIndex, setBulkCloseIndex] = useState<string[] | undefined>();
   const { hasAlertsUpdate } = useAlertsPrivileges();
+  const { canManageGlobalArtifacts } = useUserPrivileges().endpointPrivileges;
 
   useEffect(() => {
     if (!isAlertDataLoading && alertData) {
@@ -94,11 +97,12 @@ export const EndpointExceptionsFlyout: React.FC<EndpointExceptionsFlyoutProps> =
         )[0] as CreateExceptionListItemSchema),
 
         os_types: retrieveAlertOsTypes(alertData),
+        tags: canManageGlobalArtifacts ? [GLOBAL_ARTIFACT_TAG] : [],
       };
 
       setException(initialException);
     }
-  }, [alertData, isAlertDataLoading]);
+  }, [alertData, canManageGlobalArtifacts, isAlertDataLoading]);
 
   const handleCloseFlyout = useCallback((): void => {
     onCancel(false);
