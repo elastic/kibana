@@ -41,6 +41,7 @@ import {
   DEFAULT_PARTIAL_BUCKETS_VISIBLE,
   DEFAULT_POINTS_VISIBILITY,
 } from '../../transforms/charts/xy/defaults';
+import { objectUnion } from './utils/object_union';
 
 /**
  * Statistical functions that can be displayed in chart legend for data series
@@ -277,17 +278,6 @@ const sharedLegendSchema = {
 /**
  * Layout Schemas
  */
-const legendTruncateMaxPixelsSchema = schema.maybe(
-  schema.number({
-    defaultValue: 250,
-    min: 10,
-    max: 1000,
-    meta: {
-      description: 'Maximum pixels before truncating legend items in list layout',
-      id: 'legendTruncateMaxPixels',
-    },
-  })
-);
 const legendTruncateEnabledSchema = schema.maybe(
   schema.boolean({
     meta: {
@@ -306,12 +296,6 @@ const gridLayout = schema.object({
 });
 const listLayout = schema.object({
   type: schema.literal('list'),
-  truncate: schema.maybe(
-    schema.object({
-      max_pixels: legendTruncateMaxPixelsSchema,
-      enabled: legendTruncateEnabledSchema,
-    })
-  ),
 });
 
 const XY_API_LINE_INTERPOLATION = {
@@ -754,7 +738,7 @@ const referenceLineLayerSchemaNoESQL = schema.object(
   {
     ...layerSettingsSchema,
     ...dataSourceSchema,
-    type: schema.literal('referenceLines'),
+    type: schema.literal('reference_lines'),
     thresholds: schema.arrayOf(
       mergeAllMetricsWithChartDimensionSchemaWithStaticOps(referenceLineLayerShared),
       { meta: { description: 'Array of reference line thresholds' }, minSize: 1, maxSize: 100 }
@@ -776,7 +760,7 @@ const referenceLineLayerSchemaESQL = schema.object(
   {
     ...layerSettingsSchema,
     ...dataSourceEsqlTableSchema,
-    type: schema.literal('referenceLines'),
+    type: schema.literal('reference_lines'),
     thresholds: schema.arrayOf(esqlColumnWithFormatSchema.extends(referenceLineLayerShared), {
       meta: { description: 'Array of ES|QL-based reference line thresholds' },
       minSize: 1,
@@ -966,7 +950,7 @@ const annotationByRefLayerSchema = schema.object(
   }
 );
 
-const annotationLayerSchema = schema.oneOf(
+const annotationLayerSchema = objectUnion(
   [annotationLayerByValueSchema, annotationByRefLayerSchema],
   {
     meta: {
@@ -976,8 +960,12 @@ const annotationLayerSchema = schema.oneOf(
   }
 );
 
-const xyLayerUnionNoESQL = schema.oneOf(
-  [xyDataLayerSchemaNoESQL, referenceLineLayerSchemaNoESQL, annotationLayerSchema],
+const xyLayerUnionNoESQL = objectUnion(
+  [
+    xyDataLayerSchemaNoESQL,
+    referenceLineLayerSchemaNoESQL,
+    ...annotationLayerSchema.getUnionTypes(),
+  ],
   {
     meta: {
       id: 'xyLayersNoESQL',
@@ -986,7 +974,7 @@ const xyLayerUnionNoESQL = schema.oneOf(
   }
 );
 
-const xyLayerUnionESQL = schema.oneOf([xyDataLayerSchemaESQL, referenceLineLayerSchemaESQL], {
+const xyLayerUnionESQL = objectUnion([xyDataLayerSchemaESQL], {
   meta: {
     id: 'xyLayersESQL',
     description: 'XY chart layer types for ES|QL queries',
@@ -1018,7 +1006,7 @@ export const xyStateSchemaNoESQL = schema.object(
 );
 
 /**
- * XY chart state for ES|QL layers only (data and reference lines)
+ * XY chart state for ES|QL layers only (reference lines are not supported)
  */
 export const xyStateSchemaESQL = schema.object(
   {
@@ -1043,7 +1031,7 @@ export const xyStateSchemaESQL = schema.object(
 /**
  * XY chart state
  */
-export const xyStateSchema = schema.oneOf([xyStateSchemaNoESQL, xyStateSchemaESQL], {
+export const xyStateSchema = objectUnion([xyStateSchemaNoESQL, xyStateSchemaESQL], {
   meta: {
     id: 'xyChart',
     title: 'XY Chart',
@@ -1057,13 +1045,19 @@ export type XYState = TypeOf<typeof xyStateSchema>;
 export type DataLayerTypeESQL = TypeOf<typeof xyDataLayerSchemaESQL>;
 export type DataLayerTypeNoESQL = TypeOf<typeof xyDataLayerSchemaNoESQL>;
 export type DataLayerType = DataLayerTypeNoESQL | DataLayerTypeESQL;
+/**
+ * @deprecated ES|QL reference lines are not yet supported
+ */
 export type ReferenceLineLayerTypeESQL = TypeOf<typeof referenceLineLayerSchemaESQL>;
 export type ReferenceLineLayerTypeNoESQL = TypeOf<typeof referenceLineLayerSchemaNoESQL>;
 export type ReferenceLineLayerType = ReferenceLineLayerTypeNoESQL | ReferenceLineLayerTypeESQL;
 export type AnnotationLayerType = TypeOf<typeof annotationLayerSchema>;
 export type AnnotationLayerByRefType = TypeOf<typeof annotationByRefLayerSchema>;
 export type AnnotationLayerByValueType = TypeOf<typeof annotationLayerByValueSchema>;
-export type LayerTypeESQL = DataLayerTypeESQL | ReferenceLineLayerTypeESQL;
+/**
+ * Reference line layers are not support but included to keep existing logic
+ */
+export type LayerTypeESQL = TypeOf<typeof xyLayerUnionESQL> | ReferenceLineLayerTypeESQL;
 export type LayerTypeNoESQL =
   | DataLayerTypeNoESQL
   | ReferenceLineLayerTypeNoESQL

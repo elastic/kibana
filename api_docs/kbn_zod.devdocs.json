@@ -30730,6 +30730,10 @@
           },
           {
             "plugin": "agentBuilder",
+            "path": "x-pack/platform/plugins/shared/agent_builder/public/application/components/skills/skill_form_validation.ts"
+          },
+          {
+            "plugin": "agentBuilder",
             "path": "x-pack/platform/plugins/shared/agent_builder/public/application/components/tools/form/validation/esql_tool_form_validation.ts"
           },
           {
@@ -30787,6 +30791,10 @@
           {
             "plugin": "cases",
             "path": "x-pack/platform/plugins/shared/cases/server/connectors/cases/schema.ts"
+          },
+          {
+            "plugin": "@kbn/agent-builder-common",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/validation.ts"
           },
           {
             "plugin": "@kbn/alerting-v2-schemas",
