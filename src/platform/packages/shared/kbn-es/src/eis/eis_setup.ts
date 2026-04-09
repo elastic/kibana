@@ -7,6 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Shared utilities for the Elastic Inference Service (EIS) development setup.
+ *
+ * Provides:
+ *  - CCM (Cloud Connected Mode) API key resolution with a three-tier fallback:
+ *    env var → local file cache → Vault (with automatic OIDC login).
+ *  - `setCcmApiKey` to push the resolved key into a running Elasticsearch via
+ *    `PUT _inference/_ccm`.
+ *  - `eisHttpRequest`, a minimal HTTP helper used by both this module and the
+ *    connector discovery orchestrator in kbn-cli-dev-mode.
+ *
+ * Used by `yarn es snapshot --eis` (sets the key) and `yarn start --eis`
+ * (discovers connectors).
+ */
+
 import http from 'http';
 import https from 'https';
 import { spawn } from 'child_process';
@@ -16,7 +31,10 @@ import type { ToolingLog } from '@kbn/tooling-log';
 
 import { readCachedKey, readStaleKey, writeCachedKey } from './ccm_key_cache';
 
+/** QA environment URL for the Elastic Inference Service. */
 export const EIS_QA_URL = 'https://inference.eu-west-1.aws.svc.qa.elastic.cloud';
+
+/** Elasticsearch `-E` argument that points the inference plugin at the QA EIS. */
 export const EIS_ES_ARG = `xpack.inference.elastic.url=${EIS_QA_URL}`;
 
 const VAULT_SECRET_PATH = 'secret/kibana-issues/dev/inference/kibana-eis-ccm';
@@ -27,6 +45,11 @@ export interface EisElasticsearchConnection {
   ssl: boolean;
 }
 
+/**
+ * Minimal HTTP/HTTPS request helper. Returns the status code and raw body.
+ * Shared between EIS setup (PUT _inference/_ccm) and connector discovery
+ * (GET _inference/chat_completion/_all).
+ */
 export const eisHttpRequest = (
   requestUrl: string,
   options: http.RequestOptions | https.RequestOptions,
@@ -54,6 +77,7 @@ export const eisHttpRequest = (
 const createBasicAuth = (username: string, password: string): string =>
   Buffer.from(`${username}:${password}`).toString('base64');
 
+/** Returns true when the local Vault token is still valid. */
 const isVaultAuthenticated = async (vaultAddr: string): Promise<boolean> => {
   try {
     await execa('vault', ['token', 'lookup', '-format=json'], {
@@ -65,6 +89,7 @@ const isVaultAuthenticated = async (vaultAddr: string): Promise<boolean> => {
   }
 };
 
+/** Spawns `vault login --method oidc` with inherited stdio so the user can complete the OAuth flow in the terminal. */
 const vaultLogin = async (vaultAddr: string, log: ToolingLog): Promise<void> => {
   log.info('Opening browser for Vault OIDC login...');
   const child = spawn('vault', ['login', '--method', 'oidc'], {
@@ -99,6 +124,10 @@ const readVaultSecret = async (vaultAddr: string): Promise<string> => {
   return apiKey;
 };
 
+/**
+ * Fetches the CCM API key from Vault. Automatically triggers OIDC login when
+ * the session is expired or missing, and retries once if the first read fails.
+ */
 const getEisApiKeyFromVault = async (vaultAddr: string, log: ToolingLog): Promise<string> => {
   const authenticated = await isVaultAuthenticated(vaultAddr);
 

@@ -80,6 +80,7 @@ export const snapshot: Command = {
       default: defaults,
     });
 
+    // --eis implies trial license and the EIS inference URL ES argument.
     if (options.eis) {
       options.license = 'trial';
       const userEsArgs = options.esArgs
@@ -135,6 +136,10 @@ export const snapshot: Command = {
       });
 
       if (options.eis) {
+        // EIS mode: start ES, resolve the CCM API key, set it, then wait for
+        // shutdown. We use cluster.start() (returns when ES is ready) instead of
+        // cluster.run() (blocks until exit) so we can perform the CCM setup
+        // in between.
         await cluster.start(installPath, {
           reportTime,
           startTime: runStartTime,
@@ -147,17 +152,24 @@ export const snapshot: Command = {
           },
         });
 
-        const protocol = options.ssl ? 'https' : 'http';
-        const es = {
-          baseUrl: `${protocol}://localhost:${options.port || 9200}`,
-          credentials: { username: 'elastic', password: options.password || 'changeme' },
-          ssl: !!options.ssl,
-        };
+        try {
+          const protocol = options.ssl ? 'https' : 'http';
+          const es = {
+            baseUrl: `${protocol}://localhost:${options.port || 9200}`,
+            credentials: { username: 'elastic', password: options.password || 'changeme' },
+            ssl: !!options.ssl,
+          };
 
-        const apiKey = await resolveCcmApiKey(log);
-        await setCcmApiKey(apiKey, es, log);
-        log.success('EIS: CCM API key set in Elasticsearch');
+          const apiKey = await resolveCcmApiKey(log);
+          await setCcmApiKey(apiKey, es, log);
+          log.success('EIS: CCM API key set in Elasticsearch');
+        } catch (error) {
+          log.error('EIS setup failed, stopping Elasticsearch...');
+          await cluster.stop();
+          throw error;
+        }
 
+        // Keep the process alive until the user sends SIGINT/SIGTERM (Ctrl+C).
         await new Promise<void>((resolve) => {
           const shutdown = () => {
             cluster.stop().finally(resolve);

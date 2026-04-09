@@ -204,6 +204,8 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions, keystoreC
 
   set('plugins.paths', _.compact([].concat(get('plugins.paths'), opts.pluginPath)));
 
+  // Inject EIS connectors discovered by bootstrap.ts (--eis flag) into the
+  // Kibana config as preconfigured action connectors.
   const eisConnectorsJson = process.env.__KIBANA_EIS_CONNECTORS;
   if (eisConnectorsJson) {
     try {

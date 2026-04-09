@@ -7,6 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * EIS connector discovery for `yarn start --eis`.
+ *
+ * Queries a running Elasticsearch instance for inference endpoints provided by
+ * the Elastic Inference Service (GET _inference/chat_completion/_all), converts
+ * them into Kibana preconfigured connector definitions, and returns the result
+ * so bootstrap.ts can inject them into the Kibana config via an env var.
+ *
+ * This module does NOT start or stop Elasticsearch — that is handled separately
+ * by `yarn es snapshot --eis`.
+ */
+
 import chalk from 'chalk';
 import { eisHttpRequest } from '@kbn/es';
 import type { EisElasticsearchConnection } from '@kbn/es';
@@ -52,6 +64,11 @@ interface EisInferenceEndpoint {
 const createBasicAuth = (username: string, password: string): string =>
   Buffer.from(`${username}:${password}`).toString('base64');
 
+/**
+ * Polls ES for EIS inference endpoints with retries (endpoints may take a few
+ * seconds to register after the CCM key is set). Converts each endpoint into a
+ * Kibana preconfigured connector definition keyed by a sanitised model ID.
+ */
 const discoverConnectors = async (
   es: EisElasticsearchConnection,
   log: Log
@@ -174,6 +191,7 @@ const discoverConnectors = async (
   return {};
 };
 
+/** Entry point called from bootstrap.ts when `--eis` is passed to `yarn start`. */
 export const discoverEisConnectors = async (log: Log): Promise<EisConnectorResult> => {
   log.good('eis', 'Discovering EIS connectors from Elasticsearch...');
 

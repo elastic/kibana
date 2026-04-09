@@ -7,6 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * TTL-based file cache for the EIS CCM API key.
+ *
+ * Stores the key at ~/.elastic/eis-ccm-key.json so that repeated `yarn es
+ * snapshot --eis` runs don't require a Vault round-trip every time. The TTL
+ * defaults to 7 days and is configurable via the EIS_CCM_KEY_TTL_HOURS env var.
+ *
+ * Three read modes:
+ *  - `readCachedKey` — returns the key only if within TTL.
+ *  - `readStaleKey`  — returns the key regardless of age (fallback when Vault
+ *    is unreachable).
+ *  - `writeCachedKey` — persists a freshly-fetched key with a timestamp.
+ */
+
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
@@ -19,7 +33,7 @@ interface CachedKey {
 
 const CACHE_DIR = path.join(os.homedir(), '.elastic');
 const CACHE_PATH = path.join(CACHE_DIR, 'eis-ccm-key.json');
-const DEFAULT_TTL_HOURS = 168; // 7 days
+const DEFAULT_TTL_HOURS = 168;
 
 const getTtlMs = (): number => {
   const envHours = process.env.EIS_CCM_KEY_TTL_HOURS;
