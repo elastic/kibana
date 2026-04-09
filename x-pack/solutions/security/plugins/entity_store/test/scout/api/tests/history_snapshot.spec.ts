@@ -12,7 +12,7 @@ import {
   INTERNAL_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
-  LATEST_INDEX,
+  LATEST_ALIAS,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import { clearEntityStoreIndices, forceLogExtraction } from '../fixtures/helpers';
@@ -111,7 +111,7 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
       });
 
       const latestSearchResult = await esClient.search({
-        index: LATEST_INDEX,
+        index: LATEST_ALIAS,
         query: { terms: { 'entity.id': [...entityIdsWithBehaviors] } },
         size: entityIdsWithBehaviors.length,
       });

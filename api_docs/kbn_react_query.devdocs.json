@@ -14168,6 +14168,10 @@
                 "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_load_connectors.ts"
               },
               {
+                "plugin": "@kbn/inference-connectors",
+                "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_connector_by_id.ts"
+              },
+              {
                 "plugin": "@kbn/elastic-assistant",
                 "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/capabilities/use_capabilities.tsx"
               },
