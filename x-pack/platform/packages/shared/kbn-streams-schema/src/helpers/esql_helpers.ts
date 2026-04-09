@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import { BasicPrettyPrinter, Builder, Parser } from '@elastic/esql';
-import type { ESQLCommand, ESQLSingleAstItem, ESQLSource } from '@elastic/esql/types';
+import { BasicPrettyPrinter, Builder, Parser, walk, type WalkerAstNode } from '@elastic/esql';
+import type {
+  ESQLAstItem,
+  ESQLCommand,
+  ESQLFunction,
+  ESQLSingleAstItem,
+  ESQLSource,
+} from '@elastic/esql/types';
 import type { QueryType } from '../queries';
 
 // ---------------------------------------------------------------------------
@@ -41,18 +47,55 @@ function printWithUpdatedFrom(
   return BasicPrettyPrinter.print(Builder.expression.query(updatedCommands as ESQLCommand[]));
 }
 
-/**
- * Matches `BUCKET(@timestamp, N unit)` or `TBUCKET(@timestamp, N unit)` in
- * the raw query string. The AST does not expose BUCKET as a named node in a
- * way that's easy to match, so regex is the pragmatic approach.
- *
- * When the match succeeds, group 1 is the numeric value and group 2 is the
- * time unit (e.g. "5", "minutes"). Returns `null` when no bucket call is found.
- */
-function matchTimeBucket(esql: string): RegExpMatchArray | null {
-  return esql.match(
-    /(?:BUCKET|TBUCKET)\s*\(\s*@?\w+(?:\.\w+)*\s*,\s*(\d+)\s*(seconds?|minutes?|hours?|days?|[smhd])\s*\)/i
-  );
+interface TimeBucketInfo {
+  value: number;
+  unit: string;
+  targetField: string;
+}
+
+function findBucketFunction(commands: WalkerAstNode): ESQLFunction | null {
+  let found: ESQLFunction | null = null;
+  walk(commands, {
+    visitFunction: (node) => {
+      if (!found && (node.name === 'bucket' || node.name === 'tbucket')) {
+        found = node;
+      }
+    },
+  });
+  return found;
+}
+
+function isTimeSpanLiteral(node: ESQLAstItem): node is ESQLSingleAstItem & {
+  literalType: 'time_duration' | 'date_period';
+  quantity: number;
+  unit: string;
+} {
+  if (Array.isArray(node) || !('type' in node) || node.type !== 'literal') return false;
+  const { literalType } = node as { literalType: string };
+  return literalType === 'time_duration' || literalType === 'date_period';
+}
+
+function extractTimeBucketInfo(commands: WalkerAstNode): TimeBucketInfo | null {
+  const bucketFn = findBucketFunction(commands);
+  if (!bucketFn) return null;
+
+  const targetArg = bucketFn.args[0];
+  const targetField =
+    targetArg && !Array.isArray(targetArg) && 'type' in targetArg && targetArg.type === 'column'
+      ? (targetArg as { name: string }).name
+      : null;
+
+  const intervalArg = bucketFn.args[1];
+  if (!intervalArg || Array.isArray(intervalArg)) return null;
+
+  if (isTimeSpanLiteral(intervalArg)) {
+    const { quantity, unit } = intervalArg;
+    if (quantity > 0 && targetField) {
+      return { value: quantity, unit, targetField };
+    }
+  }
+
+  return null;
 }
 
 const STATS_REGEX = /\|\s*STATS\b/i;
@@ -185,59 +228,102 @@ export function deriveQueryType(esql: string): QueryType {
   return hasStatsCommand(esql) ? 'stats' : 'match';
 }
 
-// Detects `<var> * <number> / <var>` — a rate computation — regardless of variable names.
-const RATE_PATTERN = /\b\w+\s*\*\s*[\d.]+\s*\/\s*\w+\b/i;
+const SAMPLE_FLOOR_AGG_NAMES = new Set([
+  'percentile',
+  'percentile_disc',
+  'percentile_cont',
+  'avg',
+  'median',
+]);
 
-// Rate computations and statistical aggregations that require a minimum
-// sample size to produce meaningful results. Simple COUNT thresholds are
-// excluded because the count itself acts as the sample size.
-const STAT_AGG_PATTERN =
-  /\bPERCENTILE\b|\bPERCENTILE_DISC\b|\bPERCENTILE_CONT\b|\bAVG\b|\bMEDIAN\b/i;
-const NEEDS_SAMPLE_FLOOR_PATTERN = new RegExp(
-  `${RATE_PATTERN.source}|${STAT_AGG_PATTERN.source}`,
-  'i'
-);
+const COMPARISON_OPERATORS = new Set(['>', '<', '>=', '<=']);
 
-const COMPARISON_PATTERN = /\b\w+\s*[<>]=?\s*\d+(?:\.\d+)?/gi;
+function collectFunctionNames(nodes: WalkerAstNode): Set<string> {
+  const names = new Set<string>();
+  walk(nodes, {
+    visitFunction: (node) => {
+      names.add(node.name);
+    },
+  });
+  return names;
+}
 
-function checkSampleSizeFloor(esql: string, hints: string[]): void {
-  if (!NEEDS_SAMPLE_FLOOR_PATTERN.test(esql)) return;
+function hasRateComputation(nodes: WalkerAstNode): boolean {
+  const fns = collectFunctionNames(nodes);
+  return fns.has('*') && fns.has('/');
+}
 
-  // Find all pipe-delimited WHERE commands (the post-STATS thresholds),
-  // not inner WHERE clauses inside a STATS aggregation like `COUNT(*) WHERE …`.
-  // The threshold may be split across multiple WHERE clauses
-  // (e.g. `| WHERE total > 20 | WHERE rate > 5`), so we aggregate
-  // comparisons across all of them.
-  const pipeWhereMatch = esql.match(/\|\s*WHERE\b((?:(?!\|).)*)/gis);
-  if (!pipeWhereMatch) return;
+function needsSampleFloor(commandsFromStats: ESQLCommand[]): boolean {
+  const fns = collectFunctionNames(commandsFromStats);
+  const hasStatAgg = [...SAMPLE_FLOOR_AGG_NAMES].some((name) => fns.has(name));
+  return hasStatAgg || hasRateComputation(commandsFromStats);
+}
 
-  const allWhereBodies = pipeWhereMatch.map((m) => m.replace(/^\|\s*WHERE\b/i, '')).join(' ');
+function countComparisons(whereCommands: ESQLCommand[]): number {
+  let count = 0;
+  walk(
+    whereCommands.flatMap((cmd) => cmd.args),
+    {
+      visitFunction: (node) => {
+        if (COMPARISON_OPERATORS.has(node.name)) {
+          count++;
+        }
+      },
+    }
+  );
+  return count;
+}
 
-  // A threshold clause needs at least two comparisons: one for the volume
-  // floor (e.g. total > 20) and one for the metric threshold (e.g.
-  // error_rate > 10). A single comparison is likely just the threshold
-  // without a floor.
-  const matches = allWhereBodies.match(COMPARISON_PATTERN);
-  if (!matches || matches.length < 2) {
+function checkSampleSizeFloor(
+  commandsFromStats: ESQLCommand[],
+  whereCommandsAfterStats: ESQLCommand[],
+  hints: string[]
+): void {
+  if (!needsSampleFloor(commandsFromStats)) return;
+  if (whereCommandsAfterStats.length === 0) return;
+
+  if (countComparisons(whereCommandsAfterStats) < 2) {
     hints.push(
       'Heuristic warning: This STATS query may lack a sample-size floor (e.g. total > 20). Low-traffic buckets can produce high-variance results that trigger false alerts. This check is approximate — compound predicates may not be detected.'
     );
   }
 }
 
-function checkIsNotNullDenominator(esql: string, hints: string[]): void {
-  if (!RATE_PATTERN.test(esql)) return;
+function containsFunction(node: WalkerAstNode, fnName: string): boolean {
+  let found = false;
+  walk(node, {
+    visitFunction: (fn) => {
+      if (fn.name === fnName) found = true;
+    },
+  });
+  return found;
+}
 
-  // Extract the STATS command body (from `| STATS` to the next `|`).
-  const statsMatch = esql.match(/\|\s*STATS\b([\s\S]*?)(?:\|(?!\s*STATS\b)|$)/i);
-  const statsBody = statsMatch?.[1] ?? '';
+function checkIsNotNullDenominator(
+  statsCmd: ESQLCommand,
+  commandsFromStats: ESQLCommand[],
+  hints: string[]
+): void {
+  if (!hasRateComputation(commandsFromStats)) return;
 
-  // A well-formed rate denominator uses `COUNT(*) WHERE <field> IS NOT NULL`
-  // to exclude rows missing the target field in mixed streams. If no arm
-  // in the STATS body contains this pattern, warn.
-  const hasFilteredDenominator = /COUNT\s*\(\s*\*\s*\)\s*WHERE\b[^,]*\bIS\s+NOT\s+NULL\b/i.test(
-    statsBody
-  );
+  let hasFilteredDenominator = false;
+  walk(statsCmd.args, {
+    visitFunction: (node) => {
+      if (node.name !== 'where' || node.subtype !== 'binary-expression') return;
+      const [aggSide, conditionSide] = node.args;
+      if (!aggSide) return;
+      if (!containsFunction(aggSide, 'count')) return;
+
+      if (!conditionSide || Array.isArray(conditionSide)) return;
+      if (
+        'type' in conditionSide &&
+        conditionSide.type === 'function' &&
+        (conditionSide as ESQLFunction).name === 'is not null'
+      ) {
+        hasFilteredDenominator = true;
+      }
+    },
+  });
 
   if (hasFilteredDenominator) return;
 
@@ -282,8 +368,10 @@ export function getStatsQueryHints(esql: string): string[] {
 
   const hints: string[] = [];
   const statsIdx = commands.findIndex((cmd) => cmd.name === 'stats');
+  const statsCmd = commands[statsIdx];
+  const commandsFromStats = commands.slice(statsIdx);
 
-  if (!matchTimeBucket(esql)) {
+  if (!extractTimeBucketInfo(commands)) {
     hints.push(
       'Note: This STATS query has no temporal bucketing. Each execution produces one value per group. Consider adding BY bucket = BUCKET(@timestamp, N minutes) for time-series granularity.'
     );
@@ -298,10 +386,11 @@ export function getStatsQueryHints(esql: string): string[] {
   }
 
   if (hasWhereAfterStats) {
-    checkSampleSizeFloor(esql, hints);
+    const whereCommandsAfterStats = commandsAfterStats.filter((cmd) => cmd.name === 'where');
+    checkSampleSizeFloor(commandsFromStats, whereCommandsAfterStats, hints);
   }
 
-  checkIsNotNullDenominator(esql, hints);
+  checkIsNotNullDenominator(statsCmd, commandsFromStats, hints);
 
   const disallowed = ['sort', 'limit', 'keep'];
   const found = commandsAfterStats
@@ -357,7 +446,8 @@ function getAssignmentLhsName(arg: ByArg): string | null {
 function getAssignmentRhsFnName(arg: ByArg): string | null {
   if (Array.isArray(arg) || !('type' in arg)) return null;
   if (arg.type !== 'function' || !('name' in arg) || arg.name !== '=') return null;
-  const rhs = (arg as { args: ESQLCommand['args'] }).args[1];
+  const rawRhs = (arg as { args: ESQLCommand['args'] }).args[1];
+  const rhs = Array.isArray(rawRhs) ? rawRhs[0] : rawRhs;
   if (rhs && !Array.isArray(rhs) && 'type' in rhs && rhs.type === 'function' && 'name' in rhs) {
     return (rhs.name as string).toLowerCase();
   }
@@ -386,27 +476,21 @@ export function extractStatsGroupColumns(esql: string): string[] {
 
 /**
  * Extracts the output column name for the temporal BUCKET/TBUCKET call
- * in the STATS command's BY clause. Falls back to regex when the AST
- * doesn't expose the alias (known parser limitation with some BUCKET forms).
+ * in the STATS command's BY clause.
  *
- * Returns `null` when no bucket call is found.
+ * Returns `null` when no bucket call is found or the query fails to parse.
  */
 export function extractBucketColumnName(esql: string): string | null {
   const byArgs = findStatsByArgs(esql);
-  if (byArgs) {
-    for (const arg of byArgs) {
-      const fnName = getAssignmentRhsFnName(arg);
-      if (fnName === 'bucket' || fnName === 'tbucket') {
-        const name = getAssignmentLhsName(arg);
-        if (name) return name;
-      }
+  if (!byArgs) return null;
+
+  for (const arg of byArgs) {
+    const fnName = getAssignmentRhsFnName(arg);
+    if (fnName === 'bucket' || fnName === 'tbucket') {
+      return getAssignmentLhsName(arg);
     }
   }
-
-  // Regex fallback for cases where the AST doesn't expose the alias.
-  // Supports dotted identifiers (e.g. `foo.bar = BUCKET(...)`).
-  const match = esql.match(/(\w+(?:\.\w+)*)\s*=\s*(?:BUCKET|TBUCKET)\s*\(/i);
-  return match?.[1] ?? null;
+  return null;
 }
 
 const ONE_SECOND_IN_MS = 1_000;
@@ -433,11 +517,22 @@ export const MS_PER_UNIT: Record<string, number> = {
  * Extracts the source field passed as the first argument to BUCKET/TBUCKET
  * (e.g. `@timestamp` in `BUCKET(@timestamp, 5 minutes)`).
  *
- * Returns `null` when no temporal bucketing is found.
+ * Returns `null` when no temporal bucketing is found or the query fails to parse.
  */
 export function extractBucketTargetField(esql: string): string | null {
-  const match = esql.match(/(?:BUCKET|TBUCKET)\s*\(\s*(@?\w+(?:\.\w+)*)\s*,/i);
-  return match?.[1] ?? null;
+  const { root, parsed } = tryParseEsql(esql);
+  if (!parsed) return null;
+
+  const bucketFn = findBucketFunction(root.commands);
+  if (!bucketFn) return null;
+
+  const targetArg = bucketFn.args[0];
+  if (!targetArg || Array.isArray(targetArg)) return null;
+
+  if ('type' in targetArg && targetArg.type === 'column' && 'name' in targetArg) {
+    return (targetArg as { name: string }).name;
+  }
+  return null;
 }
 
 /**
@@ -448,16 +543,16 @@ export function extractBucketTargetField(esql: string): string | null {
  * Returns `null` when no temporal bucketing is found.
  */
 export function extractBucketIntervalMs(esql: string): number | null {
-  const match = matchTimeBucket(esql);
-  if (!match) return null;
+  const { root, parsed } = tryParseEsql(esql);
+  if (!parsed) return null;
 
-  const value = parseInt(match[1], 10);
-  const unit = match[2].toLowerCase();
-  const msPerUnit = MS_PER_UNIT[unit];
+  const info = extractTimeBucketInfo(root.commands);
+  if (!info) return null;
 
-  if (!msPerUnit || isNaN(value) || value <= 0) return null;
+  const msPerUnit = MS_PER_UNIT[info.unit];
+  if (!msPerUnit) return null;
 
-  return value * msPerUnit;
+  return info.value * msPerUnit;
 }
 
 /**

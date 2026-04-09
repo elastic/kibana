@@ -10,7 +10,7 @@ import type { StreamQuery } from '@kbn/streams-schema';
 import { useMemo } from 'react';
 import { useKibana } from '../use_kibana';
 
-interface PromoteResult {
+export interface PromoteResult {
   promoted: number;
   skipped_stats: number;
 }

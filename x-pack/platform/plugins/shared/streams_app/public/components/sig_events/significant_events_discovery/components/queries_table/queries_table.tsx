@@ -41,7 +41,7 @@ import {
   useFetchDiscoveryQueriesOccurrences,
 } from '../../../../../hooks/sig_events/use_fetch_discovery_queries_occurrences';
 import { useKibana } from '../../../../../hooks/use_kibana';
-import { useQueriesApi } from '../../../../../hooks/sig_events/use_queries_api';
+import { useQueriesApi, type PromoteResult } from '../../../../../hooks/sig_events/use_queries_api';
 import {
   UNBACKED_QUERIES_COUNT_QUERY_KEY,
   useUnbackedQueriesCount,
@@ -160,7 +160,7 @@ export function QueriesTable() {
     [queryClient]
   );
 
-  const promoteAllMutation = useMutation<{ promoted: number; skipped_stats: number }, Error>({
+  const promoteAllMutation = useMutation<PromoteResult, Error>({
     mutationFn: promoteAll,
     mutationKey: ['promoteAll'],
     onSuccess: async ({ promoted, skipped_stats: skippedStats }) => {

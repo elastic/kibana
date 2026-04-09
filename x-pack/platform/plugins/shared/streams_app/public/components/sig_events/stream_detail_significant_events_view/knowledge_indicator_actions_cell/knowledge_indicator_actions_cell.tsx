@@ -16,7 +16,7 @@ import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../../hooks/sig_events/use_fe
 import { DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY } from '../../../../hooks/sig_events/use_fetch_discovery_queries_occurrences';
 import { UNBACKED_QUERIES_COUNT_QUERY_KEY } from '../../../../hooks/sig_events/use_unbacked_queries_count';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { useQueriesApi } from '../../../../hooks/sig_events/use_queries_api';
+import { useQueriesApi, type PromoteResult } from '../../../../hooks/sig_events/use_queries_api';
 import { useStreamFeaturesApi } from '../../../../hooks/sig_events/use_stream_features_api';
 import {
   PROMOTE_QUERY_ALREADY_PROMOTED,
@@ -81,7 +81,7 @@ export function KnowledgeIndicatorActionsCell({
     },
   });
 
-  const promoteAction = useMutation<{ promoted: number; skipped_stats: number }, Error, string>({
+  const promoteAction = useMutation<PromoteResult, Error, string>({
     mutationFn: async (queryId) => {
       return promote({ queryIds: [queryId] });
     },

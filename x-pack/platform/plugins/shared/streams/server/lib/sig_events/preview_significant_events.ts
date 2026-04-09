@@ -41,10 +41,10 @@ function parseBucketSize(raw: string): { value: number; unit: string } {
 }
 
 function msToEsqlBucketSize(ms: number): string {
-  if (ms >= 86_400_000 && ms % 86_400_000 === 0) return `${ms / 86_400_000}d`;
-  if (ms >= 3_600_000 && ms % 3_600_000 === 0) return `${ms / 3_600_000}h`;
-  if (ms >= 60_000 && ms % 60_000 === 0) return `${ms / 60_000}m`;
-  return `${Math.round(ms / 1000)}s`;
+  if (ms >= MS_PER_UNIT.d && ms % MS_PER_UNIT.d === 0) return `${ms / MS_PER_UNIT.d}d`;
+  if (ms >= MS_PER_UNIT.h && ms % MS_PER_UNIT.h === 0) return `${ms / MS_PER_UNIT.h}h`;
+  if (ms >= MS_PER_UNIT.m && ms % MS_PER_UNIT.m === 0) return `${ms / MS_PER_UNIT.m}m`;
+  return `${Math.round(ms / MS_PER_UNIT.s)}s`;
 }
 
 function stripLimitCommand(esql: string): string {
