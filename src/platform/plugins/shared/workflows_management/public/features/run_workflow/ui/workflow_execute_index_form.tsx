@@ -47,7 +47,7 @@ interface Document {
   [key: string]: unknown;
 }
 
-interface WorkflowExecuteEventFormProps {
+interface WorkflowExecuteIndexFormProps {
   setValue: (data: string) => void;
   errors: string | null;
   setErrors: (errors: string | null) => void;
@@ -74,7 +74,7 @@ export const WorkflowExecuteIndexForm = ({
   setValue,
   errors,
   setErrors,
-}: WorkflowExecuteEventFormProps): React.JSX.Element => {
+}: WorkflowExecuteIndexFormProps): React.JSX.Element => {
   const { euiTheme } = useEuiTheme();
   const { services } = useKibana();
   const { unifiedSearch, notifications } = services;

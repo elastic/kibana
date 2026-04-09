@@ -21,7 +21,10 @@ interface ExtraActionsBarProps {
   isReadOnly: boolean;
 }
 
-export const ExtraActionsBar = ({ actions, isReadOnly }: ExtraActionsBarProps) => {
+export const ExtraActionsBar = React.memo(function ExtraActionsBar({
+  actions,
+  isReadOnly,
+}: ExtraActionsBarProps) {
   const visibleActions = actions.filter((action) => !isReadOnly || action.showInReadOnly !== false);
 
   if (visibleActions.length === 0) {
@@ -37,4 +40,4 @@ export const ExtraActionsBar = ({ actions, isReadOnly }: ExtraActionsBarProps) =
       ))}
     </EuiFlexGroup>
   );
-};
+});

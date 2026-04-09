@@ -9,7 +9,7 @@
 
 // General settings
 export const DISABLE_REQUEST_BATCHING_ID = 'bfetch:disable';
-export const ELASTIC_CONSOLE_ENABLED_SETTING_ID = 'elasticConsole:enabled';
+export const ELASTIC_CONSOLE_ENABLED_SETTING_ID = 'elasticRamen:enabled';
 export const DISABLE_BATCH_COMPRESSION_ID = 'bfetch:disableCompression';
 export const CSV_QUOTE_VALUES_ID = 'csv:quoteValues';
 export const CSV_SEPARATOR_ID = 'csv:separator';
@@ -75,9 +75,6 @@ export const BANNERS_TEXT_CONTENT_ID = 'banners:textContent';
 export const BANNERS_TEXT_COLOR_ID = 'banners:textColor';
 export const BANNERS_LINK_COLOR_ID = 'banners:linkColor';
 export const BANNERS_BACKGROUND_COLOR_ID = 'banners:backgroundColor';
-
-// Data sources settings
-export const DATA_SOURCES_ENABLED_SETTING_ID = 'dataSources:enabled';
 
 // Discover settings
 export const CONTEXT_DEFAULT_SIZE_ID = 'context:defaultSize';
