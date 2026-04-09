@@ -85,9 +85,29 @@ components:
         endDate:
           type: string
           description: The end date filter applied to the query.
+        agentTypes:
+          type: array
+          description: The list of agent types the query was filtered by.
+          items:
+            type: string
         elasticAgentIds:
           type: array
           description: The list of elastic agent IDs the query was filtered by.
+          items:
+            type: string
+        userIds:
+          type: array
+          description: The list of user IDs the query was filtered by.
+          items:
+            type: string
+        commands:
+          type: array
+          description: The list of commands the query was filtered by.
+          items:
+            type: string
+        statuses:
+          type: array
+          description: The list of statuses the query was filtered by.
           items:
             type: string
         total:

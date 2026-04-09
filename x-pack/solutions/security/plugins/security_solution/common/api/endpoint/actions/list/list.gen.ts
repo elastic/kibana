@@ -55,9 +55,25 @@ export const GetEndpointActionListResponse = z.object({
    */
   endDate: z.string().optional(),
   /**
+   * The list of agent types the query was filtered by.
+   */
+  agentTypes: z.array(z.string()).optional(),
+  /**
    * The list of elastic agent IDs the query was filtered by.
    */
   elasticAgentIds: z.array(z.string()).optional(),
+  /**
+   * The list of user IDs the query was filtered by.
+   */
+  userIds: z.array(z.string()).optional(),
+  /**
+   * The list of commands the query was filtered by.
+   */
+  commands: z.array(z.string()).optional(),
+  /**
+   * The list of statuses the query was filtered by.
+   */
+  statuses: z.array(z.string()).optional(),
   /**
    * The total number of response actions matching the query.
    */

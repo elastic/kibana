@@ -1693,6 +1693,16 @@ components:
         total: 4
       type: object
       properties:
+        agentTypes:
+          description: The list of agent types the query was filtered by.
+          items:
+            type: string
+          type: array
+        commands:
+          description: The list of commands the query was filtered by.
+          items:
+            type: string
+          type: array
         data:
           description: The list of response actions.
           items:
@@ -1715,9 +1725,19 @@ components:
         startDate:
           description: The start date filter applied to the query.
           type: string
+        statuses:
+          description: The list of statuses the query was filtered by.
+          items:
+            type: string
+          type: array
         total:
           description: The total number of response actions matching the query.
           type: integer
+        userIds:
+          description: The list of user IDs the query was filtered by.
+          items:
+            type: string
+          type: array
     GetFile:
       allOf:
         - $ref: '#/components/schemas/ResponseActionDetails'
