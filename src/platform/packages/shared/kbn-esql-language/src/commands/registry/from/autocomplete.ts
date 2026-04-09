@@ -70,10 +70,7 @@ async function handleFromAutocomplete(
   // checks need to operate on the current command only, not the entire query
   const commandText = query.substring(command.location.min, cursorPos);
 
-  const subqueryItem = buildSubqueryCompleteItem(commandText, {
-    start: 0,
-    end: commandText.length + 1,
-  });
+  const subqueryItem = buildSubqueryCompleteItem(commandText);
   const subquerySuggestion = {
     ...subqueryItem,
     text: `${commandText}${subqueryItem.text}`,

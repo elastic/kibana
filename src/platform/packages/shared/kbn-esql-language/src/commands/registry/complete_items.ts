@@ -348,10 +348,7 @@ export interface MapKeySuggestionOptions {
   rangeToReplace?: { start: number; end: number };
 }
 
-export function buildSubqueryCompleteItem(
-  filterText?: string,
-  rangeToReplace?: { start: number; end: number }
-): ISuggestionItem {
+export function buildSubqueryCompleteItem(filterText?: string): ISuggestionItem {
   return withAutoSuggest({
     label: '(FROM ...)',
     text: '(FROM $0)',
@@ -361,7 +358,6 @@ export function buildSubqueryCompleteItem(
       defaultMessage: 'Adds a nested ES|QL query to your current query',
     }),
     ...(filterText && { filterText }),
-    ...(rangeToReplace && { rangeToReplace }),
     category: SuggestionCategory.SUBQUERY,
   });
 }
