@@ -17,6 +17,9 @@ export async function resolveProfileUidForRequest({
   getCurrentUserProfileIdFromAPIKey?: (request: KibanaRequest) => Promise<string | undefined>;
 }): Promise<string | undefined> {
   const profileUidFromAPIKey = await getCurrentUserProfileIdFromAPIKey?.(request);
+  if (profileUidFromAPIKey) {
+    return profileUidFromAPIKey;
+  }
   const currentUser = await getCurrentUser?.(request);
-  return profileUidFromAPIKey ?? currentUser?.profile_uid;
+  return currentUser?.profile_uid;
 }

@@ -80,7 +80,17 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
     try {
       const [actionsResponse, authStatusMap] = await Promise.all([
         loadAllActions({ http }),
-        loadConnectorAuthStatus({ http }).catch(() => null),
+        loadConnectorAuthStatus({ http }).catch(() => {
+          toasts.addDanger({
+            title: i18n.translate(
+              'xpack.triggersActionsUI.sections.connector.home.unableToLoadAuthStatusMessage',
+              {
+                defaultMessage: 'Unable to load connector authentication status',
+              }
+            ),
+          });
+          return null;
+        }),
       ]);
 
       const actionsWithAuth = actionsResponse.map((connector) => {

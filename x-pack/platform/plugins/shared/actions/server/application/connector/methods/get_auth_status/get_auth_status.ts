@@ -31,11 +31,7 @@ function deriveUserAuthStatus(
 export async function getAuthStatus({
   context,
 }: GetAuthStatusParams): Promise<GetAuthStatusResult> {
-  try {
-    await context.authorization.ensureAuthorized({ operation: 'get' });
-  } catch (error) {
-    throw error;
-  }
+  await context.authorization.ensureAuthorized({ operation: 'get' });
 
   const profileUid = await resolveProfileUidForRequest({
     request: context.request,
@@ -48,8 +44,9 @@ export async function getAuthStatus({
     profileUid,
   });
 
-  const isUnsetOrDefaultSpace = !context.spaceId || context.spaceId === 'default';
-  const namespace = isUnsetOrDefaultSpace ? undefined : context.spaceId;
+  const namespace = context.spaceId
+    ? context.spaces?.spaceIdToNamespace(context.spaceId)
+    : undefined;
 
   const { saved_objects: savedObjects } = await findConnectorsSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,

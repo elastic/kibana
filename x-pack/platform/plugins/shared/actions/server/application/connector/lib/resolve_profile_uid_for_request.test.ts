@@ -12,47 +12,57 @@ describe('resolveProfileUidForRequest', () => {
   const request = httpServerMock.createKibanaRequest();
 
   it('prefers API key profile UID over currentUser profile_uid to match with how task execution gets the profileUid', async () => {
+    const getCurrentUser = jest.fn().mockResolvedValue({ profile_uid: 'from-user' });
     const uid = await resolveProfileUidForRequest({
       request,
-      getCurrentUser: async () => ({ profile_uid: 'from-user' }),
+      getCurrentUser,
       getCurrentUserProfileIdFromAPIKey: async () => 'from-api-key',
     });
     expect(uid).toBe('from-api-key');
+    expect(getCurrentUser).not.toHaveBeenCalled();
   });
 
   it('falls back to currentUser profile_uid when API key returns undefined', async () => {
+    const getCurrentUser = jest.fn().mockResolvedValue({ profile_uid: 'from-user' });
     const uid = await resolveProfileUidForRequest({
       request,
-      getCurrentUser: async () => ({ profile_uid: 'from-user' }),
+      getCurrentUser,
       getCurrentUserProfileIdFromAPIKey: async () => undefined,
     });
     expect(uid).toBe('from-user');
+    expect(getCurrentUser).toHaveBeenCalledWith(request);
   });
 
   it('falls back to getCurrentUserProfileIdFromAPIKey when getCurrentUser returns null', async () => {
+    const getCurrentUser = jest.fn().mockResolvedValue(null);
     const uid = await resolveProfileUidForRequest({
       request,
-      getCurrentUser: async () => null,
+      getCurrentUser,
       getCurrentUserProfileIdFromAPIKey: async () => 'from-api-key',
     });
     expect(uid).toBe('from-api-key');
+    expect(getCurrentUser).not.toHaveBeenCalled();
   });
 
   it('falls back to getCurrentUserProfileIdFromAPIKey when user has no profile_uid', async () => {
+    const getCurrentUser = jest.fn().mockResolvedValue({});
     const uid = await resolveProfileUidForRequest({
       request,
-      getCurrentUser: async () => ({}),
+      getCurrentUser,
       getCurrentUserProfileIdFromAPIKey: async () => 'from-api-key',
     });
     expect(uid).toBe('from-api-key');
+    expect(getCurrentUser).not.toHaveBeenCalled();
   });
 
   it('returns undefined when both sources yield nothing', async () => {
+    const getCurrentUser = jest.fn().mockResolvedValue(null);
     const uid = await resolveProfileUidForRequest({
       request,
-      getCurrentUser: async () => null,
+      getCurrentUser,
       getCurrentUserProfileIdFromAPIKey: async () => undefined,
     });
     expect(uid).toBeUndefined();
+    expect(getCurrentUser).toHaveBeenCalledWith(request);
   });
 });
