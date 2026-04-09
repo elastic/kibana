@@ -47,6 +47,7 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
         timestamp: firstCheckTime,
         configId,
       });
+      await syntheticsServices.deleteTlsRules();
     });
 
     await test.step('login and navigate to overview', async () => {
@@ -99,7 +100,6 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('verify alert is generated', async () => {
-      await syntheticsServices.cleanUpAlerts();
       await pageObjects.syntheticsApp.navigateToAlertsPage();
 
       await expect(async () => {
