@@ -51,10 +51,12 @@ export function formatTimeValue(
     case 'time_of_week': {
       /**
        * `time_of_week` values are modeled as seconds within a week in UTC.
-       * Find the current record's position within its display week, subtract it,
-       * then add the modeled offset back to land on the matching day/time.
+       * Find the current record's position within the UTC epoch week, subtract it,
+       * then add the modeled offset back to land on the matching UTC day/time.
+       * `unix()` truncates to whole seconds, so normalize to midnight afterwards to
+       * clear any sub-second remainder from the original record timestamp.
        */
-      const remainder = getDisplayMoment(date, timezone).unix() % WEEK_DURATION_IN_SECONDS;
+      const remainder = moment.utc(date).unix() % WEEK_DURATION_IN_SECONDS;
       const utcMoment = moment
         .utc(date)
         .subtract(remainder, 'seconds')

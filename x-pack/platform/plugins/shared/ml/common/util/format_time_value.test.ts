@@ -48,6 +48,18 @@ describe('formatTimeValue', () => {
     expect(result.moment.format('Z')).toBe('-04:00');
   });
 
+  test('formats time_of_week independently from the record time within the same week', () => {
+    const result = formatTimeValue(
+      359739,
+      'time_of_week',
+      { ...timeOfWeekRecord, timestamp: 1530198896789 },
+      'US/Eastern'
+    );
+
+    expect(result.formatted).toBe('Sun 23:55');
+    expect(result.moment.format('Z')).toBe('-04:00');
+  });
+
   test('calculates time_of_day day offsets in UTC', () => {
     const result = formatTimeValue(90000, 'time_of_day', timeOfDayRecord, 'UTC');
 
