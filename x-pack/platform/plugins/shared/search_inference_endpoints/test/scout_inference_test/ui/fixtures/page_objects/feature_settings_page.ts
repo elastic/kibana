@@ -6,13 +6,14 @@
  */
 
 import type { ScoutPage, Locator } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 export class FeatureSettingsPage {
   constructor(private readonly page: ScoutPage) {}
 
   public async goto() {
     await this.page.gotoApp('management/modelManagement/model_settings');
-    await this.page.testSubj.waitForSelector('modelSettingsPage');
+    await expect(this.page.testSubj.locator('modelSettingsPage')).toBeVisible();
   }
 
   // --- Header ---
