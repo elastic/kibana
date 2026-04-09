@@ -52,6 +52,11 @@ export const ACTIONS_COLUMN = i18n.translate(
   { defaultMessage: 'Actions' }
 );
 
+export const GROUP_RISK_SCORE_LABEL = i18n.translate(
+  'xpack.securitySolution.entityResolution.groupRiskScore',
+  { defaultMessage: 'Group risk score:' }
+);
+
 export const EXPAND_ENTITY_BUTTON = i18n.translate(
   'xpack.securitySolution.entityResolution.expandEntity',
   { defaultMessage: 'Open entity details' }

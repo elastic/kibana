@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { EntityType } from '@kbn/entity-store/public';
 import { API_VERSIONS } from '../../../../common/entity_analytics/constants';
@@ -24,13 +24,15 @@ import { useUnlinkEntities } from './hooks/use_unlink_entities';
 import { ResolutionGroupTable } from './resolution_group_table';
 import { AddEntitiesSection } from './add_entities_section';
 import { ConfirmResolutionModal } from './confirm_resolution_modal';
-import { getEntityId, getEntityName } from './helpers';
+import { getEntityId, getEntityName, getResolutionRiskScore } from './helpers';
 import {
   RESOLUTION_GROUP_LINK_TITLE,
   RESOLUTION_ERROR_TITLE,
   ENTITY_HAS_ALIASES_ERROR,
+  GROUP_RISK_SCORE_LABEL,
 } from './translations';
 import { RESOLUTION_GROUP_TAB_CONTENT_TEST_ID } from './test_ids';
+import { RiskScoreCell } from '../home/entities_table/risk_score_cell';
 
 interface ResolutionGroupTabProps {
   entityId: string;
@@ -54,6 +56,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId
 
   const targetEntityId = group?.target ? getEntityId(group.target) : undefined;
   const hasGroup = group && group.group_size > 1;
+  const resolutionRiskScore = hasGroup ? getResolutionRiskScore(group.target) : undefined;
 
   const excludeEntityIds = useMemo(() => {
     if (!group) return [entityId];
@@ -162,9 +165,27 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId
   return (
     <>
       <div data-test-subj={RESOLUTION_GROUP_TAB_CONTENT_TEST_ID}>
-        <EuiTitle size="xs">
-          <h3>{RESOLUTION_GROUP_LINK_TITLE}</h3>
-        </EuiTitle>
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h3>{RESOLUTION_GROUP_LINK_TITLE}</h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          {hasGroup && resolutionRiskScore != null && (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    {GROUP_RISK_SCORE_LABEL}
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <RiskScoreCell riskScore={resolutionRiskScore} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
         <EuiSpacer size="m" />
         <ResolutionGroupTable
           group={group ?? null}
