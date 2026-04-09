@@ -284,3 +284,26 @@
   "version": "WzQ4OCwxXQ=="
 }
 
+{
+  "attributes": {
+    "title": "beats",
+    "author": "Deep Author",
+    "comments": [
+      {
+        "user": "grace",
+        "message": "deeply insightful",
+        "date": "2024-04-01",
+        "rating": 5,
+        "metadata": {
+          "author": "graceinternal",
+          "tag": "review"
+        }
+      }
+    ]
+  },
+  "id": "4",
+  "type": "nestedtype",
+  "updated_at": "2024-04-05T10:30:00.000Z",
+  "version": "WzQ4OCwxXQ=="
+}
+

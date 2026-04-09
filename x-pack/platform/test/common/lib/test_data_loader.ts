@@ -95,6 +95,7 @@ const OBJECTS_TO_SHARE: Array<{
       { type: 'nestedtype', id: '1' },
       { type: 'nestedtype', id: '2' },
       { type: 'nestedtype', id: '3' },
+      { type: 'nestedtype', id: '4' },
     ],
   },
 ];
