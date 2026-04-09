@@ -348,16 +348,19 @@ export interface MapKeySuggestionOptions {
   rangeToReplace?: { start: number; end: number };
 }
 
-export const subqueryCompleteItem: ISuggestionItem = withAutoSuggest({
-  label: '(FROM ...)',
-  text: '(FROM $0)',
-  asSnippet: true,
-  kind: 'Method',
-  detail: i18n.translate('kbn-esql-language.esql.autocomplete.subqueryFromDoc', {
-    defaultMessage: 'Adds a nested ES|QL query to your current query',
-  }),
-  category: SuggestionCategory.CUSTOM_ACTION,
-});
+export function buildSubqueryCompleteItem(filterText?: string): ISuggestionItem {
+  return withAutoSuggest({
+    label: '(FROM ...)',
+    text: '(FROM $0)',
+    asSnippet: true,
+    kind: 'Method',
+    detail: i18n.translate('kbn-esql-language.esql.autocomplete.subqueryFromDoc', {
+      defaultMessage: 'Adds a nested ES|QL query to your current query',
+    }),
+    ...(filterText && { filterText }),
+    category: SuggestionCategory.SUBQUERY,
+  });
+}
 
 export const minMaxValueCompleteItem: ISuggestionItem = {
   label: 'minmax',
