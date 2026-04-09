@@ -110,13 +110,13 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
     }),
     collectValues({
       source: `${prefix}.attributes.permissions`,
-      destination: 'entity.attributes.granted_permissions',
+      destination: 'entity.attributes.permissions',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
     collectValues({
       source: `${prefix}.attributes.known_redirects`,
-      destination: 'entity.attributes.known_redirect',
+      destination: 'entity.attributes.known_redirects',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),

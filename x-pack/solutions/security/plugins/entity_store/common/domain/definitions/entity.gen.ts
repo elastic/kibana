@@ -70,11 +70,11 @@ export const EntityField = z
         /**
          * Action-level permissions granted to this entity (not roles or groups).
          */
-        granted_permissions: z.array(z.string()).optional(),
+        permissions: z.array(z.string()).optional(),
         /**
          * Known redirect URIs or URLs (e.g. OAuth application callbacks).
          */
-        known_redirect: z.array(z.string()).optional(),
+        known_redirects: z.array(z.string()).optional(),
         /**
          * OAuth consent restriction (e.g. admin_only, verified_only, unrestricted).
          */
@@ -105,7 +105,7 @@ export const EntityField = z
       .optional(),
     relationships: z
       .object({
-        administrators: EntityRelationshipIdentifiers.optional(),
+        administers: EntityRelationshipIdentifiers.optional(),
         communicates_with: EntityRelationshipIdentifiers.optional(),
         depends_on: EntityRelationshipIdentifiers.optional(),
         owns_inferred: EntityRelationshipIdentifiers.optional(),

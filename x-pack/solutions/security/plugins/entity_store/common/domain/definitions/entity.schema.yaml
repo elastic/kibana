@@ -91,7 +91,7 @@ components:
               items:
                 type: string
               description: Action-level permissions granted to this entity (not roles or groups).
-            known_redirect:
+            known_redirects:
               type: array
               items:
                 type: string
