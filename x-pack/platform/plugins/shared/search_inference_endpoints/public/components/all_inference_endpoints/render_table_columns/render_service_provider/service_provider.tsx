@@ -30,15 +30,10 @@ export const ServiceProvider: React.FC<ServiceProviderProps> = ({ service, endpo
           css={ServiceIcon}
           title={
             provider
-              ? i18n.translate(
-                  'xpack.searchInferenceEndpoints.allInferenceEndpoints.table.serviceColumn.serviceIcon.title',
-                  {
-                    defaultMessage: '{serviceName} service logo',
-                    values: {
-                      serviceName: provider.name,
-                    },
-                  }
-                )
+              ? i18n.translate('xpack.searchInferenceEndpoints.serviceProvider.iconTitle', {
+                  defaultMessage: '{providerName} service logo',
+                  values: { providerName: provider.name },
+                })
               : undefined
           }
         />

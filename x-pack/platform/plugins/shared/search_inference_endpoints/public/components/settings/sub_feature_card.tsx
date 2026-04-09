@@ -26,11 +26,10 @@ import {
   EuiToolTip,
   euiDragDropReorder,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { css } from '@emotion/react';
-import * as translations from '../../../common/translations';
+import { i18n } from '@kbn/i18n';
 import { useQueryInferenceEndpoints } from '../../hooks/use_inference_endpoints';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
 import { getModelId } from '../../utils/get_model_id';
@@ -161,16 +160,22 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                 <EuiBadgeGroup>
                   {isTechPreview && (
                     <EuiBadge>
-                      {i18n.translate('xpack.searchInferenceEndpoints.settings.techPreview', {
-                        defaultMessage: 'Technical Preview',
-                      })}
+                      {i18n.translate(
+                        'xpack.searchInferenceEndpoints.settings.subFeatureCard.technicalPreviewBadge',
+                        {
+                          defaultMessage: 'Technical Preview',
+                        }
+                      )}
                     </EuiBadge>
                   )}
                   {isBeta && (
                     <EuiBadge>
-                      {i18n.translate('xpack.searchInferenceEndpoints.settings.betaBadge', {
-                        defaultMessage: 'Beta',
-                      })}
+                      {i18n.translate(
+                        'xpack.searchInferenceEndpoints.settings.subFeatureCard.betaBadge',
+                        {
+                          defaultMessage: 'Beta',
+                        }
+                      )}
                     </EuiBadge>
                   )}
                 </EuiBadgeGroup>
@@ -198,7 +203,14 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
         >
           <EuiPanel color="subdued" paddingSize="s" hasBorder={false}>
             <EuiText size="xs" color="subdued">
-              <strong>{translations.SETTINGS_ASSIGNED_MODELS}</strong>
+              <strong>
+                {i18n.translate(
+                  'xpack.searchInferenceEndpoints.settings.subFeatureCard.assignedModelsLabel',
+                  {
+                    defaultMessage: 'Assigned models',
+                  }
+                )}
+              </strong>
             </EuiText>
             <EuiSpacer size="s" />
 
@@ -230,8 +242,10 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                                       paddingSize="none"
                                       {...provided.dragHandleProps}
                                       aria-label={i18n.translate(
-                                        'xpack.searchInferenceEndpoints.settings.dragHandle',
-                                        { defaultMessage: 'Drag to reorder' }
+                                        'xpack.searchInferenceEndpoints.settings.subFeatureCard.dragToReorderAriaLabel',
+                                        {
+                                          defaultMessage: 'Drag to reorder',
+                                        }
                                       )}
                                     >
                                       <EuiIcon type="grab" size="s" color="subdued" aria-hidden />
@@ -263,7 +277,12 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                                   {index === 0 && (
                                     <EuiFlexItem grow={false}>
                                       <EuiBadge color="hollow">
-                                        {translations.SETTINGS_DEFAULT_BADGE}
+                                        {i18n.translate(
+                                          'xpack.searchInferenceEndpoints.settings.subFeatureCard.defaultBadge',
+                                          {
+                                            defaultMessage: 'Default',
+                                          }
+                                        )}
                                       </EuiBadge>
                                     </EuiFlexItem>
                                   )}
@@ -271,7 +290,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                                     <EuiButtonIcon
                                       iconType="cross"
                                       aria-label={i18n.translate(
-                                        'xpack.searchInferenceEndpoints.settings.removeModel',
+                                        'xpack.searchInferenceEndpoints.settings.subFeatureCard.removeModelAriaLabel',
                                         {
                                           defaultMessage: 'Remove model',
                                         }
@@ -309,10 +328,13 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                     data-test-subj={`show-more-${featureId}`}
                     color="text"
                   >
-                    {i18n.translate('xpack.searchInferenceEndpoints.settings.showMore', {
-                      defaultMessage: 'Show {count} more',
-                      values: { count: hiddenCount },
-                    })}
+                    {i18n.translate(
+                      'xpack.searchInferenceEndpoints.settings.subFeatureCard.showMore',
+                      {
+                        defaultMessage: 'Show {count} more',
+                        values: { count: hiddenCount },
+                      }
+                    )}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
               )}
@@ -335,9 +357,12 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                     onClick={() => setIsCopyModalOpen(true)}
                     data-test-subj={`copy-to-${featureId}`}
                   >
-                    {i18n.translate('xpack.searchInferenceEndpoints.settings.copyTo.button', {
-                      defaultMessage: 'Copy to',
-                    })}
+                    {i18n.translate(
+                      'xpack.searchInferenceEndpoints.settings.subFeatureCard.copyToButton',
+                      {
+                        defaultMessage: 'Copy to',
+                      }
+                    )}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
               )}

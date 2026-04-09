@@ -7,8 +7,8 @@
 
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { i18n } from '@kbn/i18n';
 import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import { i18n } from '@kbn/i18n';
 import {
   isInferenceEndpointWithDisplayNameMetadata,
   isInferenceEndpointWithDisplayCreatorMetadata,
@@ -34,21 +34,19 @@ export const TASK_TYPE_CATEGORY: Partial<Record<InferenceTaskType, TaskTypeCateg
 };
 
 export const TASK_TYPE_DISPLAY_NAME: Record<InferenceTaskType, string> = {
-  chat_completion: i18n.translate(
-    'xpack.searchInferenceEndpoints.eisUtils.taskType.chatCompletion',
-    { defaultMessage: 'chat completion' }
-  ),
-  completion: i18n.translate('xpack.searchInferenceEndpoints.eisUtils.taskType.completion', {
+  chat_completion: i18n.translate('xpack.searchInferenceEndpoints.eis.taskType.chatCompletion', {
+    defaultMessage: 'chat completion',
+  }),
+  completion: i18n.translate('xpack.searchInferenceEndpoints.eis.taskType.completion', {
     defaultMessage: 'completion',
   }),
-  text_embedding: i18n.translate('xpack.searchInferenceEndpoints.eisUtils.taskType.textEmbedding', {
+  text_embedding: i18n.translate('xpack.searchInferenceEndpoints.eis.taskType.textEmbedding', {
     defaultMessage: 'text embedding',
   }),
-  sparse_embedding: i18n.translate(
-    'xpack.searchInferenceEndpoints.eisUtils.taskType.sparseEmbedding',
-    { defaultMessage: 'sparse embedding' }
-  ),
-  rerank: i18n.translate('xpack.searchInferenceEndpoints.eisUtils.taskType.rerank', {
+  sparse_embedding: i18n.translate('xpack.searchInferenceEndpoints.eis.taskType.sparseEmbedding', {
+    defaultMessage: 'sparse embedding',
+  }),
+  rerank: i18n.translate('xpack.searchInferenceEndpoints.eis.taskType.rerank', {
     defaultMessage: 'rerank',
   }),
 };
@@ -125,19 +123,19 @@ export const groupEndpointsByModel = (endpoints: EisInferenceEndpoint[]): Groupe
 export const TASK_TYPE_FILTERS: Array<{ category: TaskTypeCategory; label: string }> = [
   {
     category: 'LLM',
-    label: i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.filter.llm', {
+    label: i18n.translate('xpack.searchInferenceEndpoints.eis.filter.llm', {
       defaultMessage: 'LLM',
     }),
   },
   {
     category: 'Embedding',
-    label: i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.filter.embedding', {
+    label: i18n.translate('xpack.searchInferenceEndpoints.eis.filter.embedding', {
       defaultMessage: 'Embedding',
     }),
   },
   {
     category: 'Rerank',
-    label: i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.filter.rerank', {
+    label: i18n.translate('xpack.searchInferenceEndpoints.eis.filter.rerank', {
       defaultMessage: 'Rerank',
     }),
   },

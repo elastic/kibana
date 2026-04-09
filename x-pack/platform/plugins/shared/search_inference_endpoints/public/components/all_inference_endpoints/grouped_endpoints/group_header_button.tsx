@@ -30,16 +30,10 @@ export const GroupByHeaderButton = ({ data, groupBy }: GroupByHeaderButtonProps)
       </EuiText>
       <EuiSpacer />
       <EuiBadge>
-        {i18n.translate(
-          'xpack.searchInferenceEndpoints.groupedEndpoints.headers.endpointsCountBadge',
-          {
-            defaultMessage:
-              '{endpointCount} {endpointCount, plural, one {endpoint} other {endpoints}}',
-            values: {
-              endpointCount: data.endpoints.length,
-            },
-          }
-        )}
+        {i18n.translate('xpack.searchInferenceEndpoints.groupedEndpoints.endpointCount', {
+          defaultMessage: '{count, plural, one {# endpoint} other {# endpoints}}',
+          values: { count: data.endpoints.length },
+        })}
       </EuiBadge>
     </EuiFlexGroup>
   );

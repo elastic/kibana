@@ -19,8 +19,8 @@ import {
   type EuiTableComputedColumnType,
 } from '@elastic/eui';
 
-import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { i18n } from '@kbn/i18n';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import {
   isGroupOpen,
   useGroupsAccordionToggleState,
@@ -83,7 +83,7 @@ export const GroupedEndpointsTables = ({
       <EuiEmptyPrompt
         title={
           <h2>
-            {i18n.translate('xpack.searchInferenceEndpoints.table.noItemsMessage', {
+            {i18n.translate('xpack.searchInferenceEndpoints.groupedEndpoints.noItemsFound', {
               defaultMessage: 'No items found',
             })}
           </h2>
@@ -162,10 +162,7 @@ export const GroupedEndpointsTables = ({
                   'xpack.searchInferenceEndpoints.groupedEndpoints.tableCaption',
                   {
                     defaultMessage: 'Inference endpoints list grouped by {groupBy}: {groupId}',
-                    values: {
-                      groupBy,
-                      groupId: groupedData.groupId,
-                    },
+                    values: { groupBy, groupId: groupedData.groupId },
                   }
                 )}
               />

@@ -18,7 +18,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import * as translations from '../../../common/translations';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 import { SubFeatureCard } from './sub_feature_card';
 
@@ -65,16 +64,22 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
                 <EuiBadgeGroup>
                   {isTechPreview && (
                     <EuiBadge>
-                      {i18n.translate('xpack.searchInferenceEndpoints.settings.techPreview', {
-                        defaultMessage: 'Technical Preview',
-                      })}
+                      {i18n.translate(
+                        'xpack.searchInferenceEndpoints.settings.featureSection.technicalPreviewBadge',
+                        {
+                          defaultMessage: 'Technical Preview',
+                        }
+                      )}
                     </EuiBadge>
                   )}
                   {isBeta && (
                     <EuiBadge>
-                      {i18n.translate('xpack.searchInferenceEndpoints.settings.betaBadge', {
-                        defaultMessage: 'Beta',
-                      })}
+                      {i18n.translate(
+                        'xpack.searchInferenceEndpoints.settings.featureSection.betaBadge',
+                        {
+                          defaultMessage: 'Beta',
+                        }
+                      )}
                     </EuiBadge>
                   )}
                 </EuiBadgeGroup>
@@ -89,7 +94,12 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
         {features.length > 0 && (
           <EuiFlexItem grow={false}>
             <EuiLink onClick={onReset} data-test-subj={`reset-${parentName}`}>
-              {translations.SETTINGS_RESET_DEFAULTS}
+              {i18n.translate(
+                'xpack.searchInferenceEndpoints.settings.featureSection.resetAllToDefaultsButton',
+                {
+                  defaultMessage: 'Reset all to defaults',
+                }
+              )}
             </EuiLink>
           </EuiFlexItem>
         )}
@@ -99,8 +109,10 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
           <EuiText size="s" color="subdued">
             <p>
               {i18n.translate(
-                'xpack.searchInferenceEndpoints.settings.featureSection.noSubFeatures',
-                { defaultMessage: 'No registered sub-features.' }
+                'xpack.searchInferenceEndpoints.settings.featureSection.noRegisteredSubFeatures',
+                {
+                  defaultMessage: 'No registered sub-features.',
+                }
               )}
             </p>
           </EuiText>

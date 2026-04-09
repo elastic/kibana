@@ -6,8 +6,8 @@
  */
 
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { i18n } from '@kbn/i18n';
 import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import { i18n } from '@kbn/i18n';
 
 import { isInferenceEndpointWithDisplayCreatorMetadata } from '../../common/type_guards';
 import {
@@ -21,7 +21,7 @@ import { KNOWN_MODEL_GROUPS, ELASTIC_GROUP_ID } from './known_models';
 
 export const UNKNOWN_MODEL_ID_FALLBACK = 'unknown_model';
 const UNKNOWN_MODEL_LABEL_FALLBACK = i18n.translate(
-  'xpack.searchInferenceEndpoints.groupedEndpoints.unknownModelLabel',
+  'xpack.searchInferenceEndpoints.groupBy.unknownModel',
   {
     defaultMessage: 'Unknown Model',
   }

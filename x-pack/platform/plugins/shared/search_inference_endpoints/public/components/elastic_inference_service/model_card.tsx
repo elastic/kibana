@@ -57,7 +57,7 @@ export const ModelCard: React.FC<ModelCardProps> = ({ model, onClick }) => {
             <h4>{modelName}</h4>
           </EuiTitle>
           <EuiText size="xs" color="subdued">
-            {i18n.translate('xpack.searchInferenceEndpoints.eisModelCard.supports', {
+            {i18n.translate('xpack.searchInferenceEndpoints.eisModelCard.supportsTaskTypes', {
               defaultMessage: 'Supports {taskTypes}',
               values: { taskTypes: taskTypeLabels },
             })}

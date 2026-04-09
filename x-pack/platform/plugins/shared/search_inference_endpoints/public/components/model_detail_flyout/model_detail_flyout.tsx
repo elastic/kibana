@@ -25,14 +25,35 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 
 import { docLinks } from '../../../common/doc_links';
 import {
   isInferenceEndpointWithDisplayNameMetadata,
   isInferenceEndpointWithDisplayCreatorMetadata,
 } from '../../../common/type_guards';
-import { TASK_TYPE_TOOLTIPS } from '../all_inference_endpoints/render_table_columns/render_endpoint/translations';
 import { getModelId } from '../../utils/get_model_id';
+
+const TASK_TYPE_TOOLTIPS: Partial<Record<InferenceTaskType, string>> = {
+  text_embedding: i18n.translate('xpack.searchInferenceEndpoints.taskTypeTooltip.textEmbedding', {
+    defaultMessage: 'Converts text into dense vector representations for semantic search',
+  }),
+  sparse_embedding: i18n.translate(
+    'xpack.searchInferenceEndpoints.taskTypeTooltip.sparseEmbedding',
+    {
+      defaultMessage: 'Converts text into sparse vector representations for semantic search',
+    }
+  ),
+  rerank: i18n.translate('xpack.searchInferenceEndpoints.taskTypeTooltip.rerank', {
+    defaultMessage: 'Re-ranks search results by relevance',
+  }),
+  completion: i18n.translate('xpack.searchInferenceEndpoints.taskTypeTooltip.completion', {
+    defaultMessage: 'Generates text completions from a given input',
+  }),
+  chat_completion: i18n.translate('xpack.searchInferenceEndpoints.taskTypeTooltip.chatCompletion', {
+    defaultMessage: 'Generates conversational responses from a chat input',
+  }),
+};
 import { AddEndpointModal } from './add_endpoint_modal';
 import { ModelEndpointRow } from './model_endpoint_row';
 
@@ -70,9 +91,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
       displayName: endpointWithName ? endpointWithName.metadata.display.name : modelId,
       modelAuthor: endpointWithCreator
         ? endpointWithCreator.metadata.display.model_creator
-        : i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.unknownAuthor', {
-            defaultMessage: 'Unknown',
-          }),
+        : 'Unknown',
     };
   }, [allEndpoints, modelId]);
 
@@ -105,21 +124,20 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
 
   const descriptionListItems = [
     {
-      title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.modelAuthorLabel', {
+      title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.modelAuthorTitle', {
         defaultMessage: 'Model author',
       }),
       description: modelAuthor,
     },
     {
-      title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.documentationLabel', {
+      title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.documentationTitle', {
         defaultMessage: 'Documentation',
       }),
       description: (
         <EuiLink href={docLinks.elasticInferenceService} target="_blank" external>
-          {i18n.translate(
-            'xpack.searchInferenceEndpoints.modelDetailFlyout.viewDocumentationLink',
-            { defaultMessage: 'View documentation' }
-          )}
+          {i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.viewDocumentation', {
+            defaultMessage: 'View documentation',
+          })}
         </EuiLink>
       ),
     },
@@ -159,8 +177,10 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
                 <EuiTitle size="xxs">
                   <h3>
                     {i18n.translate(
-                      'xpack.searchInferenceEndpoints.modelDetailFlyout.modelEndpointsTitle',
-                      { defaultMessage: 'Model endpoints' }
+                      'xpack.searchInferenceEndpoints.modelDetailFlyout.modelEndpointsHeading',
+                      {
+                        defaultMessage: 'Model endpoints',
+                      }
                     )}
                   </h3>
                 </EuiTitle>
@@ -173,10 +193,9 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
                   onClick={handleOpenAddModal}
                   data-test-subj="modelDetailFlyoutAddEndpointButton"
                 >
-                  {i18n.translate(
-                    'xpack.searchInferenceEndpoints.modelDetailFlyout.addEndpointButton',
-                    { defaultMessage: 'Add endpoint' }
-                  )}
+                  {i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.addEndpoint', {
+                    defaultMessage: 'Add endpoint',
+                  })}
                 </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>

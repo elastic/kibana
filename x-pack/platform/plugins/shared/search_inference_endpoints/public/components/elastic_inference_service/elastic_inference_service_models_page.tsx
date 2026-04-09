@@ -90,12 +90,12 @@ export const ElasticInferenceServiceModelsPage = () => {
         iconType="warning"
         title={
           <h2>
-            {i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.error.title', {
+            {i18n.translate('xpack.searchInferenceEndpoints.eisModels.unableToLoadModels', {
               defaultMessage: 'Unable to load models',
             })}
           </h2>
         }
-        body={i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.error.body', {
+        body={i18n.translate('xpack.searchInferenceEndpoints.eisModels.fetchError', {
           defaultMessage: 'An error occurred while fetching model data.',
         })}
       />
@@ -111,14 +111,16 @@ export const ElasticInferenceServiceModelsPage = () => {
             <EuiFlexItem grow={true}>
               <EuiFieldSearch
                 placeholder={i18n.translate(
-                  'xpack.searchInferenceEndpoints.eisModelspage.searchPlaceholder',
-                  { defaultMessage: 'Search models...' }
+                  'xpack.searchInferenceEndpoints.eisModels.searchPlaceholder',
+                  {
+                    defaultMessage: 'Search models...',
+                  }
                 )}
                 value={searchQuery}
                 fullWidth={true}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 aria-label={i18n.translate(
-                  'xpack.searchInferenceEndpoints.eisModelspage.searchbar',
+                  'xpack.searchInferenceEndpoints.eisModels.searchAriaLabel',
                   {
                     defaultMessage: 'Find Elastic Inference Service models',
                   }
@@ -158,7 +160,7 @@ export const ElasticInferenceServiceModelsPage = () => {
             <EuiEmptyPrompt
               title={
                 <h3>
-                  {i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.noResults', {
+                  {i18n.translate('xpack.searchInferenceEndpoints.eisModels.noModelsFound', {
                     defaultMessage: 'No models found',
                   })}
                 </h3>

@@ -28,7 +28,7 @@ export const EXTERNAL_INFERENCE_TITLE = i18n.translate(
 );
 
 export const MODEL_SETTINGS_SECTION_TITLE = i18n.translate(
-  'xpack.searchInferenceEndpoints.modelSettingsTitle',
+  'xpack.searchInferenceEndpoints.modelSettingsSectionTitle',
   {
     defaultMessage: 'Feature Settings',
   }

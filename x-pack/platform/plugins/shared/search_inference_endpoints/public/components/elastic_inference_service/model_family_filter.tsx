@@ -23,15 +23,12 @@ export const ModelFamilyFilter: React.FC<ModelFamilyFilterProps> = ({
 }) => {
   return (
     <MultiSelectFilter
-      buttonLabel={i18n.translate('xpack.searchInferenceEndpoints.modelFamilyFilter.buttonLabel', {
+      buttonLabel={i18n.translate('xpack.searchInferenceEndpoints.eisFilter.modelFamilyLabel', {
         defaultMessage: 'Model family',
       })}
-      ariaLabel={i18n.translate(
-        'xpack.searchInferenceEndpoints.modelFamilyFilter.button.ariaLabel',
-        {
-          defaultMessage: 'Select a model family to filter',
-        }
-      )}
+      ariaLabel={i18n.translate('xpack.searchInferenceEndpoints.eisFilter.modelFamilyAriaLabel', {
+        defaultMessage: 'Select a model family to filter',
+      })}
       onChange={onChange}
       options={options}
       renderOption={(option) => option.label}

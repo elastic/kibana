@@ -43,8 +43,10 @@ export const ModelEndpointRow: React.FC<ModelEndpointRowProps> = ({
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={i18n.translate(
-                  'xpack.searchInferenceEndpoints.modelDetailFlyout.viewEndpointTooltip',
-                  { defaultMessage: 'View endpoint' }
+                  'xpack.searchInferenceEndpoints.modelEndpointRow.viewEndpointTooltip',
+                  {
+                    defaultMessage: 'View endpoint',
+                  }
                 )}
               >
                 <EuiButtonIcon
@@ -52,8 +54,10 @@ export const ModelEndpointRow: React.FC<ModelEndpointRowProps> = ({
                   size="xs"
                   color="primary"
                   aria-label={i18n.translate(
-                    'xpack.searchInferenceEndpoints.modelDetailFlyout.viewEndpointAriaLabel',
-                    { defaultMessage: 'View endpoint' }
+                    'xpack.searchInferenceEndpoints.modelEndpointRow.viewEndpointAriaLabel',
+                    {
+                      defaultMessage: 'View endpoint',
+                    }
                   )}
                   onClick={() => onView(endpoint)}
                 />
@@ -65,8 +69,10 @@ export const ModelEndpointRow: React.FC<ModelEndpointRowProps> = ({
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={i18n.translate(
-                  'xpack.searchInferenceEndpoints.modelDetailFlyout.copyEndpointIdTooltip',
-                  { defaultMessage: 'Copy endpoint ID' }
+                  'xpack.searchInferenceEndpoints.modelEndpointRow.copyEndpointIdTooltip',
+                  {
+                    defaultMessage: 'Copy endpoint ID',
+                  }
                 )}
               >
                 <EuiButtonIcon
@@ -74,8 +80,10 @@ export const ModelEndpointRow: React.FC<ModelEndpointRowProps> = ({
                   size="xs"
                   color="text"
                   aria-label={i18n.translate(
-                    'xpack.searchInferenceEndpoints.modelDetailFlyout.copyEndpointIdAriaLabel',
-                    { defaultMessage: 'Copy endpoint ID' }
+                    'xpack.searchInferenceEndpoints.modelEndpointRow.copyEndpointIdAriaLabel',
+                    {
+                      defaultMessage: 'Copy endpoint ID',
+                    }
                   )}
                   onClick={() => onCopy(endpoint.inference_id)}
                 />
@@ -90,7 +98,7 @@ export const ModelEndpointRow: React.FC<ModelEndpointRowProps> = ({
           {preconfigured ? (
             <EuiToolTip
               content={i18n.translate(
-                'xpack.searchInferenceEndpoints.modelDetailFlyout.preconfiguredTooltip',
+                'xpack.searchInferenceEndpoints.modelEndpointRow.preconfiguredTooltip',
                 {
                   defaultMessage:
                     'Preconfigured endpoints are system generated and can not be edited',
@@ -103,8 +111,10 @@ export const ModelEndpointRow: React.FC<ModelEndpointRowProps> = ({
                   size="xs"
                   isDisabled
                   aria-label={i18n.translate(
-                    'xpack.searchInferenceEndpoints.modelDetailFlyout.preconfiguredAriaLabel',
-                    { defaultMessage: 'Preconfigured endpoint' }
+                    'xpack.searchInferenceEndpoints.modelEndpointRow.preconfiguredEndpointAriaLabel',
+                    {
+                      defaultMessage: 'Preconfigured endpoint',
+                    }
                   )}
                 />
               </span>
@@ -112,8 +122,10 @@ export const ModelEndpointRow: React.FC<ModelEndpointRowProps> = ({
           ) : onDelete ? (
             <EuiToolTip
               content={i18n.translate(
-                'xpack.searchInferenceEndpoints.modelDetailFlyout.deleteEndpointTooltip',
-                { defaultMessage: 'Delete endpoint' }
+                'xpack.searchInferenceEndpoints.modelEndpointRow.deleteEndpointTooltip',
+                {
+                  defaultMessage: 'Delete endpoint',
+                }
               )}
             >
               <EuiButtonIcon
@@ -121,8 +133,10 @@ export const ModelEndpointRow: React.FC<ModelEndpointRowProps> = ({
                 size="xs"
                 color="danger"
                 aria-label={i18n.translate(
-                  'xpack.searchInferenceEndpoints.modelDetailFlyout.deleteEndpointAriaLabel',
-                  { defaultMessage: 'Delete endpoint' }
+                  'xpack.searchInferenceEndpoints.modelEndpointRow.deleteEndpointAriaLabel',
+                  {
+                    defaultMessage: 'Delete endpoint',
+                  }
                 )}
                 onClick={() => onDelete(endpoint)}
                 data-test-subj={`deleteEndpointButton-${endpoint.inference_id}`}

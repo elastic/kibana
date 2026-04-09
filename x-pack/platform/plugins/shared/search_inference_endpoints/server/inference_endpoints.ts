@@ -7,7 +7,6 @@
 
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
 import { type InferenceConnector, defaultInferenceEndpoints } from '@kbn/inference-common';
 import { INFERENCE_SETTINGS_SO_TYPE, INFERENCE_SETTINGS_ID } from '../common/constants';
 import type { InferenceSettingsAttributes } from '../common/types';
@@ -64,12 +63,7 @@ const fetchConnectorsByIds = async (
       const connector = await getConnectorById(id);
       endpoints.push(connector);
     } catch (e) {
-      warnings.push(
-        i18n.translate('xpack.searchInferenceEndpoints.endpoints.endpointNotFound', {
-          defaultMessage: 'Inference endpoint "{endpointId}" was not found in Elasticsearch.',
-          values: { endpointId: id },
-        })
-      );
+      warnings.push(`Inference endpoint "${id}" was not found in Elasticsearch.`);
     }
   }
 
@@ -91,12 +85,7 @@ const resolveEndpointIds = async (
 ): Promise<ResolvedEndpointIds> => {
   let current = registry.get(featureId);
   if (!current) {
-    logger.warn(
-      i18n.translate('xpack.searchInferenceEndpoints.endpoints.featureNotFound', {
-        defaultMessage: 'Feature with id "{featureId}" is not registered.',
-        values: { featureId },
-      })
-    );
+    logger.warn(`Feature with id "${featureId}" is not registered.`);
     return { ids: [], warnings: [], soEntryFound: false };
   }
   let recEntry = current.recommendedEndpoints?.length
@@ -134,11 +123,7 @@ const resolveEndpointIds = async (
         return {
           ids: [],
           warnings: [
-            i18n.translate('xpack.searchInferenceEndpoints.endpoints.cyclicDependency', {
-              defaultMessage:
-                'Cyclic dependency detected in feature fallback chain: "{featureId}" references back to "{currentId}".',
-              values: { featureId, currentId },
-            }),
+            `Cyclic dependency detected in feature fallback chain: "${featureId}" references back to "${currentId}".`,
           ],
           soEntryFound: false,
         };
@@ -200,10 +185,7 @@ const readSettingsFeatures = async (
       return [];
     }
     logger.error(
-      i18n.translate('xpack.searchInferenceEndpoints.endpoints.soReadError', {
-        defaultMessage: 'Failed to read inference settings: {message}',
-        values: { message: e instanceof Error ? e.message : String(e) },
-      })
+      `Failed to read inference settings: ${e instanceof Error ? e.message : String(e)}`
     );
     return [];
   }
