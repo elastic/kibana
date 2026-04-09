@@ -62,4 +62,12 @@ export class ScoutLogger extends ToolingLog {
   public serviceMessage(name: string, message: string) {
     this.debug(`[${name}] ${message}`);
   }
+
+  /**
+   * Used to log the test file a worker is currently running
+   * @param filePath relative path to the test file
+   */
+  public testFileStarted(filePath: string) {
+    this.info(`[testFile] Running tests: ${filePath}`);
+  }
 }
