@@ -16,6 +16,10 @@
 
 import type { z } from '@kbn/zod/v4';
 
+import {
+  PlatformErrorResponse,
+  SiemErrorResponse,
+} from '@kbn/openapi-common/schemas/error_responses.gen';
 import { EndpointList } from '../model/endpoint_list_common.gen';
 
 export type CreateEndpointListResponse = z.infer<typeof CreateEndpointListResponse>;

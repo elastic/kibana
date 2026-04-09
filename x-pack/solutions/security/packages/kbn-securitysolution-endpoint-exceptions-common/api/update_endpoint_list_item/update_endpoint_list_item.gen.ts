@@ -28,6 +28,10 @@ import {
   ExceptionListItemCommentArray,
 } from '@kbn/securitysolution-exceptions-common/api/model/exception_list_common.gen';
 import { ExceptionListItemEntryArray } from '@kbn/securitysolution-exceptions-common/api/model/exception_list_item_entry.gen';
+import {
+  PlatformErrorResponse,
+  SiemErrorResponse,
+} from '@kbn/openapi-common/schemas/error_responses.gen';
 import { EndpointListItem } from '../model/endpoint_list_common.gen';
 
 export type UpdateEndpointListItemRequestBody = z.infer<typeof UpdateEndpointListItemRequestBody>;
@@ -48,6 +52,9 @@ export const UpdateEndpointListItemRequestBody = z.object({
   tags: ExceptionListItemTags.optional(),
   meta: ExceptionListItemMeta.optional(),
   comments: ExceptionListItemCommentArray.optional().default([]),
+  /**
+   * The version id, normally returned by the API when the item is retrieved. Use it ensure updates are made against the latest version.
+   */
   _version: z.string().optional(),
 });
 export type UpdateEndpointListItemRequestBodyInput = z.input<

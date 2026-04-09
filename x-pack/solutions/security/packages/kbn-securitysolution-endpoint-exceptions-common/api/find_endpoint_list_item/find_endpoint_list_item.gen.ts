@@ -15,8 +15,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import {
+  isValidDateMath,
+  isNonEmptyString,
+  ArrayFromString,
+  BooleanFromString,
+} from '@kbn/zod-helpers/v4';
 
 import { NonEmptyString } from '@kbn/openapi-common/schemas/primitives.gen';
+import {
+  PlatformErrorResponse,
+  SiemErrorResponse,
+} from '@kbn/openapi-common/schemas/error_responses.gen';
 import { EndpointListItem } from '../model/endpoint_list_common.gen';
 
 export type FindEndpointListItemsFilter = z.infer<typeof FindEndpointListItemsFilter>;
@@ -53,9 +63,24 @@ export type FindEndpointListItemsRequestQueryInput = z.input<
 
 export type FindEndpointListItemsResponse = z.infer<typeof FindEndpointListItemsResponse>;
 export const FindEndpointListItemsResponse = z.object({
+  /**
+   * The list of endpoint exception list items.
+   */
   data: z.array(EndpointListItem),
+  /**
+   * The current page number.
+   */
   page: z.number().int().min(0),
+  /**
+   * The number of items per page.
+   */
   per_page: z.number().int().min(0),
+  /**
+   * The total number of endpoint exception list items.
+   */
   total: z.number().int().min(0),
+  /**
+   * The point-in-time ID for pagination.
+   */
   pit: z.string().optional(),
 });

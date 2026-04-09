@@ -27,6 +27,10 @@ import {
   ExceptionListItemCommentArray,
 } from '@kbn/securitysolution-exceptions-common/api/model/exception_list_common.gen';
 import { ExceptionListItemEntryArray } from '@kbn/securitysolution-exceptions-common/api/model/exception_list_item_entry.gen';
+import {
+  PlatformErrorResponse,
+  SiemErrorResponse,
+} from '@kbn/openapi-common/schemas/error_responses.gen';
 import { EndpointListItem } from '../model/endpoint_list_common.gen';
 
 export type CreateEndpointListItemRequestBody = z.infer<typeof CreateEndpointListItemRequestBody>;
