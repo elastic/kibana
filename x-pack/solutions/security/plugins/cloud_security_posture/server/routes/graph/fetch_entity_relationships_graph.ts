@@ -141,8 +141,7 @@ ${forkBranches}
       )}), ""),
     ${JSON_OBJECT_SEPARATOR}, _target_source_fields,
     ${JSON_OBJECT_END},
-  ${JSON_OBJECT_END},
-${JSON_OBJECT_END})
+  ${JSON_OBJECT_END})
 // Group by actor entity, relationship, and target type/subtype (for target grouping)
 // This ensures targets with the same type are grouped together
 | STATS badge = COUNT(*),
