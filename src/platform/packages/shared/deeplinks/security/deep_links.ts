@@ -59,6 +59,7 @@ export enum SecurityPageName {
   hostsUncommonProcesses = 'hosts-uncommon_processes',
   kubernetes = 'kubernetes',
   landing = 'get_started',
+  launchpad = 'launchpad',
   network = 'network',
   networkAnomalies = 'network-anomalies',
   networkDns = 'network-dns',
