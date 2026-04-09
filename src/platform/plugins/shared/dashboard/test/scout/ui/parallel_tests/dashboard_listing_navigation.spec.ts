@@ -9,17 +9,9 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import type { ScoutPage } from '@kbn/scout';
 import { DASHBOARD_DEFAULT_INDEX_TITLE, DASHBOARD_SAVED_SEARCH_ARCHIVE } from '../constants';
 
 const DASHBOARD_NAME = 'Navigation Test Dashboard';
-
-const navigateToNewDashboard = async (page: ScoutPage) => {
-  await page.gotoApp('dashboards', { hash: '/create' });
-  await expect(page.testSubj.locator('dashboardAddTopNavButton')).toBeVisible({
-    timeout: 20_000,
-  });
-};
 
 spaceTest.describe('Dashboard listing navigation', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
@@ -52,7 +44,7 @@ spaceTest.describe('Dashboard listing navigation', { tag: tags.deploymentAgnosti
       );
 
       await spaceTest.step('navigating back to listing page from a new dashboard', async () => {
-        await pageObjects.dashboard.goto();
+        await page.goBack();
         await expect(page.testSubj.locator('newItemButton')).toBeVisible();
       });
     }
@@ -61,9 +53,13 @@ spaceTest.describe('Dashboard listing navigation', { tag: tags.deploymentAgnosti
   spaceTest(
     'saving a dashboard and returning to the listing page shows it',
     async ({ page, pageObjects }) => {
-      await navigateToNewDashboard(page);
-      await pageObjects.dashboard.saveDashboard(DASHBOARD_NAME);
       await pageObjects.dashboard.goto();
+      await page.testSubj.click('newItemButton');
+      await expect(page.testSubj.locator('dashboardAddTopNavButton')).toBeVisible({
+        timeout: 20_000,
+      });
+      await pageObjects.dashboard.saveDashboard(DASHBOARD_NAME);
+      await page.goBack();
       await expect(
         page.testSubj.locator(`dashboardListingTitleLink-${DASHBOARD_NAME.split(' ').join('-')}`)
       ).toBeVisible();
