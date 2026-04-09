@@ -93,7 +93,9 @@ export function packagePolicyToSimplifiedPackagePolicy(packagePolicy: PackagePol
 }
 
 export function generateInputId(input: NewPackagePolicyInput) {
-  return `${input.policy_template ? `${input.policy_template}-` : ''}${getInputEffectiveName(input)}`;
+  return `${input.policy_template ? `${input.policy_template}-` : ''}${getInputEffectiveName(
+    input
+  )}`;
 }
 
 export function formatInputs(
