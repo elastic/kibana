@@ -274,6 +274,9 @@ export const createFinalChunk = (
       prompt_tokens: tokenCount.prompt,
       completion_tokens: tokenCount.completion,
       total_tokens: tokenCount.total,
+      ...(tokenCount.cached !== undefined
+        ? { prompt_tokens_details: { cached_tokens: tokenCount.cached } }
+        : {}),
     };
   }
 
@@ -322,6 +325,9 @@ export const inferenceResponseToOpenAi = (
           prompt_tokens: response.tokens.prompt,
           completion_tokens: response.tokens.completion,
           total_tokens: response.tokens.total,
+          ...(response.tokens.cached !== undefined
+            ? { prompt_tokens_details: { cached_tokens: response.tokens.cached } }
+            : {}),
         }
       : undefined,
   };

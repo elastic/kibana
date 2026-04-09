@@ -16,10 +16,7 @@ import type {
 import { registerUiSettings } from './ui_settings';
 import { registerRoutes } from './routes';
 import { installLlmGatewayDashboardIfMissing } from './dashboard/install_llm_gateway_dashboard';
-import {
-  createLlmGatewayTelemetryWriter,
-  registerLlmGatewayTelemetryDataStream,
-} from './telemetry/llm_gateway_telemetry';
+import { createLlmGatewayTelemetryWriter } from './telemetry/llm_gateway_telemetry';
 
 export class ElasticConsolePlugin
   implements
@@ -43,12 +40,10 @@ export class ElasticConsolePlugin
     setupDeps: ElasticConsoleSetupDependencies
   ): ElasticConsolePluginSetup {
     registerUiSettings(coreSetup);
-    registerLlmGatewayTelemetryDataStream(coreSetup.dataStreams);
 
     const pluginThis = this;
     const writeLlmGatewayTelemetry = createLlmGatewayTelemetryWriter({
       logger: this.logger,
-      coreSetup,
       onFirstGatewayUse: () => {
         pluginThis.onFirstLlmGatewayTelemetryObservation(coreSetup);
       },

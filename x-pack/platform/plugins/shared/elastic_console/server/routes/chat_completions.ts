@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { PassThrough } from 'stream';
-import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
+import type { CoreSetup, ElasticsearchClient, IRouter, Logger } from '@kbn/core/server';
 import {
   ChatCompletionEventType,
   type ChatCompletionChunkEvent,
@@ -125,6 +125,8 @@ export const registerChatCompletionsRoute = ({
     },
     async (ctx, request, response) => {
       const gatewayLogger = logger.get('llm_gateway');
+      const coreContext = await ctx.core;
+      const esClient = coreContext.elasticsearch.client.asCurrentUser;
       try {
         const [coreStart, { inference }] = await coreSetup.getStartServices();
 
@@ -172,6 +174,7 @@ export const registerChatCompletionsRoute = ({
             response,
             logger: gatewayLogger,
             writeLlmGatewayTelemetry,
+            esClient,
           });
         }
 
@@ -188,22 +191,26 @@ export const registerChatCompletionsRoute = ({
           response,
           logger: gatewayLogger,
           writeLlmGatewayTelemetry,
+          esClient,
         });
       } catch (error) {
         logger.error(`Chat completions error: ${error.message}`);
         // Return an OpenAI-compatible error response so AI SDKs can parse it
         const errorBody = createErrorResponse(error.message, request.body.model || 'default');
-        writeLlmGatewayTelemetry({
-          streaming: Boolean(request.body.stream),
-          connectorId:
-            typeof request.headers['x-connector-id'] === 'string'
-              ? request.headers['x-connector-id']
-              : request.body.model || 'default',
-          model: request.body.model || 'default',
-          toolCallCount: 0,
-          outcome: 'error',
-          errorMessage: error.message,
-        });
+        writeLlmGatewayTelemetry(
+          {
+            streaming: Boolean(request.body.stream),
+            connectorId:
+              typeof request.headers['x-connector-id'] === 'string'
+                ? request.headers['x-connector-id']
+                : request.body.model || 'default',
+            model: request.body.model || 'default',
+            toolCallCount: 0,
+            outcome: 'error',
+            errorMessage: error.message,
+          },
+          esClient
+        );
         return response.ok({
           headers: { 'Content-Type': 'application/json' },
           body: errorBody,
@@ -244,6 +251,7 @@ const handleStreamingRequest = async ({
   response,
   logger: routeLogger,
   writeLlmGatewayTelemetry,
+  esClient,
 }: {
   client: any;
   connectorId: string;
@@ -257,6 +265,7 @@ const handleStreamingRequest = async ({
   response: any;
   logger: Logger;
   writeLlmGatewayTelemetry: LlmGatewayTelemetryWriter;
+  esClient: ElasticsearchClient;
 }) => {
   const completionId = `chatcmpl-${uuidv4()}`;
   const passThrough = new PassThrough();
@@ -297,15 +306,18 @@ const handleStreamingRequest = async ({
     },
     error: (error: Error) => {
       routeLogger.error(`Streaming error: ${error.message}`);
-      writeLlmGatewayTelemetry({
-        streaming: true,
-        connectorId,
-        model,
-        toolCallCount: completionMessage?.toolCalls?.length ?? 0,
-        tokens: tokenCount,
-        outcome: 'error',
-        errorMessage: error.message,
-      });
+      writeLlmGatewayTelemetry(
+        {
+          streaming: true,
+          connectorId,
+          model,
+          toolCallCount: completionMessage?.toolCalls?.length ?? 0,
+          tokens: tokenCount,
+          outcome: 'error',
+          errorMessage: error.message,
+        },
+        esClient
+      );
       // Emit a valid OpenAI delta chunk with error content so AI SDKs can parse it
       const errorContentChunk = {
         id: completionId,
@@ -327,14 +339,17 @@ const handleStreamingRequest = async ({
       passThrough.end();
     },
     complete: () => {
-      writeLlmGatewayTelemetry({
-        streaming: true,
-        connectorId,
-        model,
-        toolCallCount: completionMessage?.toolCalls?.length ?? 0,
-        tokens: tokenCount,
-        outcome: 'success',
-      });
+      writeLlmGatewayTelemetry(
+        {
+          streaming: true,
+          connectorId,
+          model,
+          toolCallCount: completionMessage?.toolCalls?.length ?? 0,
+          tokens: tokenCount,
+          outcome: 'success',
+        },
+        esClient
+      );
       const finalChunk = createFinalChunk(model, completionId, hasToolCalls, tokenCount);
       passThrough.write(`data: ${JSON.stringify(finalChunk)}\n\n`);
       passThrough.write('data: [DONE]\n\n');
@@ -367,6 +382,7 @@ const handleNonStreamingRequest = async ({
   response,
   logger: routeLogger,
   writeLlmGatewayTelemetry,
+  esClient,
 }: {
   client: any;
   connectorId: string;
@@ -380,6 +396,7 @@ const handleNonStreamingRequest = async ({
   response: any;
   logger: Logger;
   writeLlmGatewayTelemetry: LlmGatewayTelemetryWriter;
+  esClient: ElasticsearchClient;
 }) => {
   try {
     const result = await client.chatComplete({
@@ -393,14 +410,17 @@ const handleNonStreamingRequest = async ({
     });
 
     const openAiResponse = inferenceResponseToOpenAi(result, model);
-    writeLlmGatewayTelemetry({
-      streaming: false,
-      connectorId,
-      model,
-      toolCallCount: result.toolCalls.length,
-      tokens: result.tokens,
-      outcome: 'success',
-    });
+    writeLlmGatewayTelemetry(
+      {
+        streaming: false,
+        connectorId,
+        model,
+        toolCallCount: result.toolCalls.length,
+        tokens: result.tokens,
+        outcome: 'success',
+      },
+      esClient
+    );
 
     return response.ok({
       headers: {
@@ -410,14 +430,17 @@ const handleNonStreamingRequest = async ({
     });
   } catch (error) {
     routeLogger.error(`Non-streaming completion error: ${error.message}`);
-    writeLlmGatewayTelemetry({
-      streaming: false,
-      connectorId,
-      model,
-      toolCallCount: 0,
-      outcome: 'error',
-      errorMessage: error.message,
-    });
+    writeLlmGatewayTelemetry(
+      {
+        streaming: false,
+        connectorId,
+        model,
+        toolCallCount: 0,
+        outcome: 'error',
+        errorMessage: error.message,
+      },
+      esClient
+    );
     return response.ok({
       headers: { 'Content-Type': 'application/json' },
       body: createErrorResponse(error.message, model),

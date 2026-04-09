@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import type { CoreStart, Logger } from '@kbn/core/server';
 import { SavedObjectsClient, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '@kbn/dashboard-plugin/common/constants';
@@ -14,27 +13,22 @@ import {
   ELASTIC_RAMEN_LLM_GATEWAY_DASHBOARD_ID,
   ELASTIC_RAMEN_LLM_GATEWAY_DATA_VIEW_ID,
 } from './llm_gateway_dashboard_constants';
+import { buildLlmGatewayDashboardPanelsJson } from './llm_gateway_dashboard_panels';
 
 const DATA_VIEW_SAVED_OBJECT_TYPE = 'index-pattern';
 
-const markdownPanel = (content: string, grid: { x: number; y: number; w: number; h: number }) => {
-  const panelId = uuidv4();
-  return {
-    type: 'DASHBOARD_MARKDOWN' as const,
-    embeddableConfig: { content },
-    panelIndex: panelId,
-    gridData: {
-      i: panelId,
-      x: grid.x,
-      y: grid.y,
-      w: grid.w,
-      h: grid.h,
-    },
-  };
-};
+function llmGatewayDashboardOptions(): string {
+  return JSON.stringify({
+    useMargins: true,
+    syncColors: false,
+    syncCursor: true,
+    syncTooltips: false,
+  });
+}
 
 /**
- * Installs a default-space data view + dashboard for LLM gateway telemetry (idempotent).
+ * Installs a default-space data view + Lens dashboard for LLM gateway telemetry (idempotent).
+ * If the dashboard saved object id already exists, does nothing.
  */
 export async function installLlmGatewayDashboardIfMissing(
   coreStart: CoreStart,
@@ -44,17 +38,7 @@ export async function installLlmGatewayDashboardIfMissing(
   const internalRepo = coreStart.savedObjects.createInternalRepository();
   const soClient = new SavedObjectsClient(internalRepo);
 
-  try {
-    try {
-      await soClient.get(DASHBOARD_SAVED_OBJECT_TYPE, ELASTIC_RAMEN_LLM_GATEWAY_DASHBOARD_ID);
-      log.debug('LLM gateway telemetry dashboard already present; skipping install.');
-      return;
-    } catch (err) {
-      if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
-        throw err;
-      }
-    }
-
+  const ensureDataView = async () => {
     try {
       await soClient.get(DATA_VIEW_SAVED_OBJECT_TYPE, ELASTIC_RAMEN_LLM_GATEWAY_DATA_VIEW_ID);
     } catch (err) {
@@ -72,42 +56,31 @@ export async function installLlmGatewayDashboardIfMissing(
         { id: ELASTIC_RAMEN_LLM_GATEWAY_DATA_VIEW_ID }
       );
     }
+  };
 
-    const panelsJSON = JSON.stringify([
-      markdownPanel(
-        `## Elastic Ramen — LLM gateway telemetry
+  const lensPanelsJson = buildLlmGatewayDashboardPanelsJson(ELASTIC_RAMEN_LLM_GATEWAY_DATA_VIEW_ID);
 
-Telemetry documents are indexed into data stream \`${ELASTIC_RAMEN_LLM_GATEWAY_TELEMETRY_DATA_STREAM}\`.
+  try {
+    await soClient.get(DASHBOARD_SAVED_OBJECT_TYPE, ELASTIC_RAMEN_LLM_GATEWAY_DASHBOARD_ID);
+    log.debug('LLM gateway telemetry dashboard already present; skipping install.');
+    return;
+  } catch (err) {
+    if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
+      throw err;
+    }
+  }
 
-**Fields (examples)**  
-- \`gen_ai.usage.*\` — input, output, total, cache vs non-cached prompt tokens  
-- \`elastic_ramen.*\` — connector, model, tool calls, outcome  
-- \`event.outcome\` — success / failure
-
-**Discover** (default space): open Discover, pick data view *Elastic Ramen LLM gateway telemetry*, or filter:
-
-\`\`\`
-data_stream.dataset:"elastic_ramen.llm_gateway"
-\`\`\`
-
-Add **Lens** panels from this data view for charts (requests over time, token sums, cache ratio, etc.).`,
-        { x: 0, y: 0, w: 48, h: 18 }
-      ),
-    ]);
+  try {
+    await ensureDataView();
 
     await soClient.create(
       DASHBOARD_SAVED_OBJECT_TYPE,
       {
         title: 'Elastic Ramen — LLM gateway telemetry',
         description:
-          'Pre-installed dashboard scaffold for Elastic Ramen OpenAI-compatible gateway usage.',
-        panelsJSON,
-        optionsJSON: JSON.stringify({
-          useMargins: true,
-          syncColors: false,
-          syncCursor: true,
-          syncTooltips: false,
-        }),
+          'Elastic Ramen OpenAI-compatible gateway: completions, tokens, cache split, models, outcomes, tool calls.',
+        panelsJSON: lensPanelsJson,
+        optionsJSON: llmGatewayDashboardOptions(),
         timeRestore: true,
         timeFrom: 'now-7d',
         timeTo: 'now',
@@ -121,8 +94,8 @@ Add **Lens** panels from this data view for charts (requests over time, token su
     log.info(
       `Installed LLM gateway telemetry dashboard (id: ${ELASTIC_RAMEN_LLM_GATEWAY_DASHBOARD_ID}).`
     );
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
+  } catch (installErr) {
+    const message = installErr instanceof Error ? installErr.message : String(installErr);
     log.error(`Could not install LLM gateway telemetry dashboard: ${message}`);
   }
 }

@@ -447,6 +447,23 @@ describe('openAIAdapter', () => {
       expect(getRequest().body.stream).toBe(true);
     });
 
+    it('sets stream_options.include_usage so usage (incl. cached prompt tokens) is sent on chunks', () => {
+      openAIAdapter
+        .chatComplete({
+          ...defaultArgs,
+          stream: true,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'question',
+            },
+          ],
+        })
+        .subscribe(noop);
+
+      expect(getRequest().body.stream_options).toEqual({ include_usage: true });
+    });
+
     describe('when handling the response', () => {
       it('throws an error if the connector response is in error', async () => {
         executorMock.invoke.mockImplementation(async () => {

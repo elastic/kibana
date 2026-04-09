@@ -48,6 +48,15 @@ export const openAIAdapter: InferenceConnectorAdapter = {
         ? !isNativeFunctionCallingSupported(connector)
         : functionCalling === 'simulated';
 
+    /** OpenAI Chat Completions only emits `usage` on stream chunks when this is set (incl. cached prompt tokens). */
+    const streamOptions =
+      stream === true
+        ? ({ stream_options: { include_usage: true } } satisfies Pick<
+            OpenAIRequest,
+            'stream_options'
+          >)
+        : {};
+
     let request: OpenAIRequest;
 
     if (useSimulatedFunctionCalling) {
@@ -59,6 +68,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
       });
       request = {
         stream,
+        ...streamOptions,
         ...getTemperatureIfValid(temperature, { connector, modelName }),
         model: modelName,
         messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
@@ -69,6 +79,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
 
       request = {
         stream,
+        ...streamOptions,
         ...getTemperatureIfValid(temperature, { connector, modelName }),
         model: modelName,
         messages: messagesToOpenAI({ system, messages }),
