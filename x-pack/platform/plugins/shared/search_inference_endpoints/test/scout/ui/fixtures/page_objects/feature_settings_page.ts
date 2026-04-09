@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable playwright/no-nth-methods */
 import type { ScoutPage, Locator } from '@kbn/scout';
 
 export class FeatureSettingsPage {
@@ -67,12 +66,14 @@ export class FeatureSettingsPage {
   }
 
   public get firstEndpointRow(): Locator {
+    // eslint-disable-next-line playwright/no-nth-methods -- selecting the first endpoint row to verify default badge presence
     return this.allEndpointRows.first();
   }
 
   // --- Add Model Popover ---
 
   public get firstAddModelButton(): Locator {
+    // eslint-disable-next-line playwright/no-nth-methods -- multiple sub-features have add-model buttons; picking the first to test the popover flow
     return this.content.locator('[data-test-subj="add-model-button"]').first();
   }
 
@@ -83,6 +84,7 @@ export class FeatureSettingsPage {
   // --- Copy To Modal ---
 
   public get firstCopyToButton(): Locator {
+    // eslint-disable-next-line playwright/no-nth-methods -- multiple sub-features have copy-to buttons; picking the first to test the modal flow
     return this.content.locator('[data-test-subj^="copy-to-"]').first();
   }
 
@@ -97,6 +99,7 @@ export class FeatureSettingsPage {
   // --- Reset Defaults Modal ---
 
   public get firstResetLink(): Locator {
+    // eslint-disable-next-line playwright/no-nth-methods -- multiple sub-features have reset links; picking the first to test the modal flow
     return this.content.locator('[data-test-subj^="reset-"]').first();
   }
 
