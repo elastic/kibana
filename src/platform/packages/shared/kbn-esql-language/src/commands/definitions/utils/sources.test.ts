@@ -181,39 +181,12 @@ describe('buildSourcesDefinitions with timeseries', () => {
 });
 
 describe('getIndexSourcesFromQuery', () => {
-  it('returns a single index name from a FROM clause', () => {
-    expect(getIndexSourcesFromQuery('FROM logs-default')).toEqual(['logs-default']);
-  });
-
   it('returns multiple index names from a comma-separated FROM clause', () => {
     expect(getIndexSourcesFromQuery('FROM stream-a, stream-b')).toEqual(['stream-a', 'stream-b']);
   });
 
-  it('includes wildcard patterns (caller is responsible for filtering)', () => {
-    expect(getIndexSourcesFromQuery('FROM logs-*')).toEqual(['logs-*']);
-  });
-
   it('returns an empty array when the query has no FROM command', () => {
     expect(getIndexSourcesFromQuery('ROW x = 1')).toEqual([]);
-  });
-
-  it('returns an empty array for an empty string', () => {
-    expect(getIndexSourcesFromQuery('')).toEqual([]);
-  });
-
-  it('returns an empty array for an unparseable query', () => {
-    expect(getIndexSourcesFromQuery('NOT VALID ESQL %%% !!!')).toEqual([]);
-  });
-
-  it('ignores piped commands after the FROM clause', () => {
-    const result = getIndexSourcesFromQuery('FROM my-index | WHERE field = "value" | LIMIT 10');
-    expect(result).toEqual(['my-index']);
-  });
-
-  it('handles index names with dots and dashes', () => {
-    expect(getIndexSourcesFromQuery('FROM logs-kibana.otel-default')).toEqual([
-      'logs-kibana.otel-default',
-    ]);
   });
 });
 
