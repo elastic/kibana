@@ -16,7 +16,6 @@
  *
  * 1a – Valid known fields return non-empty buckets (sanity / regression guard).
  * 1b – An unmapped field name returns 200 with an absent or empty bucket list
- *      (documents current permissive behaviour; desired behaviour after a fix is 400).
  * 1c – An ES metadata field (_id) is rejected with 400 or returns an empty bucket
  *      (regression guard: once an allowlist is added, metadata fields must be blocked).
  * 1d – Sending more than MAX_AGG_FIELDS (25) fields is rejected with 400
