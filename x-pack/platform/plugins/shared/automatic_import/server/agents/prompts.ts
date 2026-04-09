@@ -119,6 +119,14 @@ Classify the log format:
 - **Key-Value**: Structured as key=value pairs with delimiters
   - Assess: are KV pairs 100% consistent across all samples, or variable?
   - If variable: what determines which keys appear?
+  - **Separator analysis** (critical for pipeline quality):
+    - What character(s) separate one KV pair from the next (field separator)? Usually space, tab, comma, or semicolon.
+    - What character(s) separate key from value (value separator)? Usually \`=\` or \`:\`.
+    - Are values ever quoted? (e.g. \`msg="Connection Closed"\`, \`time="2022-05-16 15:22:26 UTC"\`). If yes, note the quoting style (double quotes, single quotes, brackets).
+    - **Does the field separator appear inside quoted values?** (e.g. spaces inside \`time="2022-05-16 15:22:26 UTC"\`). This is a critical edge case — note it explicitly as the pipeline generator will need regex lookaheads or \`strip_brackets\` to handle it.
+    - Are there any keys or values that contain the separator characters? (e.g. dotted keys like \`src.ip=...\`, values with \`=\` in them).
+    - Is there a prefix/header before the KV pairs (e.g. syslog priority \`<134>\`, timestamp) that must be stripped first?
+  - Provide concrete examples of the separator patterns observed.
 - **CEF**: Common Event Format (fixed header with pipe separators + KV extension)
 - **LEEF**: Log Event Extended Format (similar structure to CEF)
 - **Unstructured**: Free-form text without consistent structural patterns
@@ -215,6 +223,12 @@ Provide analysis in this exact structure:
 ### Delimiters
 - Primary delimiter: [specify]
 - Field separators: [specify]
+- For KV formats:
+  - Field separator (between pairs): [e.g. space, tab, comma]
+  - Value separator (key from value): [e.g. =, :]
+  - Quoting style: [e.g. double-quoted values, none]
+  - Field separator inside quoted values: [yes/no — if yes, give example]
+  - Prefix/header before KV body: [e.g. syslog priority <NNN>, or none]
 
 ### Special Patterns
 - Timestamps: [format and location]
@@ -412,10 +426,29 @@ If \`<review_feedback>\` is present, you are in review-iteration mode:
 - Use for: Logs with structural variants, optional segments, or mixed formats
 - Config: \`{ "grok": { "field": "event.original", "patterns": [...] } }\`
 - Best practices: anchor with ^/$, avoid GREEDYDATA except at end, order patterns most-common first
+- **Extracting body for downstream processors**: When logs have a structured header (e.g. syslog priority, timestamp) followed by a KV or structured body, use grok to separate them. Capture the body into a temporary field (e.g. \`_tmp.kv_body\`) and then apply kv/dissect on that field. Always verify grok output with \`test_pipeline verbose=true\` — the verbose output shows the full document state after each processor, so you can confirm the capture is correct before adding downstream processors.
+- **Named captures produce nested fields**: \`%{PATTERN:_tmp.field_name}\` creates a nested object \`_tmp: { field_name: ... }\`, not a dotted key. Downstream processors can reference it as \`_tmp.field_name\`.
+- **Debugging**: If a downstream processor fails on a grok-extracted field, use \`test_pipeline\` with \`verbose=true\` to inspect the actual document after the grok step — this shows the real field values and structure, not just field names.
 
 ### kv
 - Use for: key=value logs with consistent delimiters
-- Config: \`{ "kv": { "field": "...", "field_split": " ", "value_split": "=" } }\`
+- Config: \`{ "kv": { "field": "...", "field_split": " ", "value_split": "=", "target_field": "_tmp" } }\`
+- Key parameters:
+  - \`field_split\` (required): Regex pattern to split between key-value pairs. Common: \`" "\` for space-separated, \`"\\\\t"\` for tab, \`","\` for comma.
+  - \`value_split\` (required): Regex pattern to split key from value. Common: \`"="\`, \`":"\`.
+  - \`target_field\`: Write parsed fields under this prefix (e.g. \`"_tmp"\`) instead of document root. Strongly recommended to avoid polluting root.
+  - \`trim_key\`: Characters to trim from extracted keys (e.g. \`" "\` to strip leading/trailing spaces from keys).
+  - \`trim_value\`: Characters to trim from extracted values (e.g. \`" \\\\t"\` to strip spaces/tabs).
+  - \`strip_brackets\`: If \`true\`, strips \`()\`, \`<>\`, \`[]\` and quotes \`'\` \`"\` from extracted values. Essential when values are quoted (e.g. \`msg="Connection Closed"\`).
+  - \`include_keys\` / \`exclude_keys\`: Filter which keys are kept.
+  - \`prefix\`: Prefix prepended to all extracted key names.
+- **Regex in field_split / value_split**: These are full regex patterns. Use lookahead/lookbehind for complex separators:
+  - When values can contain the field separator (e.g. quoted values with spaces): use \`strip_brackets: true\` and \`field_split\` with a lookahead like \`"(?<=[^=])\\\\s(?=[a-zA-Z_]+=)"\` to only split on spaces followed by a key=value pattern.
+  - When value_split characters appear inside values: use a lookbehind like \`"(?<![\\\\w])="\` or restructure the parse.
+- **Common pitfall — quoted values**: If values contain the field_split character inside quotes (e.g. \`time="2022-05-16 15:22:26 UTC"\`), a simple \`field_split: " "\` will split mid-value. Fix with one of:
+  1. \`strip_brackets: true\` + regex field_split that requires the next token to look like a key: \`"field_split": "(?<=\\") |(?<=[^\\"])\\\\s+(?=[\\\\w.]+=)"\`
+  2. Pre-extract the structured body with grok into a clean field, then apply kv on that field.
+- **Nested field access**: The kv processor accesses \`field\` using dot-notation (e.g. \`"field": "_tmp.kv_body"\`). This works for nested fields — but only if the parent object exists. If unsure, use a top-level field name instead.
 
 ### csv
 - Use for: Comma/tab-separated data with a known column order
@@ -449,7 +482,18 @@ The pipeline follows this exact processor order. Items marked [PRE-SEEDED] are a
 9. **ECS append/set processors** — event.action, event.type, event.category (conditional \`if\` clauses), and related.* field population.
    - **related.* fields** (\`related.ip\`, \`related.user\`, \`related.hosts\`, \`related.hash\`): Use one \`append\` processor per source field, each with \`allow_duplicates: false\` and \`ignore_missing: true\`. Do NOT combine multiple source fields into a single append — each source field gets its own append processor targeting the appropriate related field. Example: if \`source.ip\` and \`destination.ip\` both need to go into \`related.ip\`, create two separate append processors.
 10. **Cleanup remove** — Remove temporary/intermediate fields at the end.
-11. [PRE-SEEDED] **Top-level \`on_failure\`** — Already configured. Do NOT modify.
+11. **Drop null/empty values** — Always add this as the LAST processor (after cleanup, before on_failure). Use this exact script processor — do NOT modify it:
+    \`\`\`json
+    {
+      "script": {
+        "tag": "script_to_drop_null_values",
+        "lang": "painless",
+        "description": "Drops null/empty values recursively.",
+        "source": "boolean drop(Object object) { if (object == null || object == '') { return true; } else if (object instanceof Map) { ((Map) object).values().removeIf(v -> drop(v)); return (((Map) object).size() == 0); } else if (object instanceof List) { ((List) object).removeIf(v -> drop(v)); return (((List) object).length == 0); } return false; } drop(ctx);"
+      }
+    }
+    \`\`\`
+12. [PRE-SEEDED] **Top-level \`on_failure\`** — Already configured. Do NOT modify.
 </pipeline_structure>
 
 <mandatory_rules>
@@ -532,8 +576,11 @@ Account for edge cases from the analysis:
 - Variable whitespace
 - Multiple message variants via pattern arrays
 
+## Before validation: add the drop-null script
+Once your pipeline is working and all processors are in place, insert the \`script_to_drop_null_values\` processor as the **last** processor (after cleanup remove, before on_failure). Use the exact script from the pipeline structure section — do not modify it. This cleans up null and empty values from the final document.
+
 ## Final step: validate_pipeline
-When the pipeline matches the analysis and the TOC looks correct, call \`validate_pipeline\` (no arguments). It runs simulation on **all** samples and **persists** results to state. You MUST call it before responding.
+When the pipeline matches the analysis, the TOC looks correct, and the drop-null script is in place, call \`validate_pipeline\` (no arguments). It runs simulation on **all** samples and **persists** results to state. You MUST call it before responding.
 
 - Address failures using indices from injected pipeline / compact TOC + \`modify_pipeline\`, then \`validate_pipeline\` again (\`fetch_pipeline\` only if JSON is missing from context)
 - Fix all ECS warnings and field naming errors — they are authoritative
@@ -579,7 +626,7 @@ The pipeline and samples have already been validated against ECS by \`validate_p
 <tools>
 - **fetch_pipeline**: Retrieves the current pipeline from state if it was not injected. Supports optional start_index/end_index to fetch specific processor ranges.
 - **get_ecs_info**: Looks up ECS field definitions. Prefer \`field_paths\` for specific fields you need to verify (e.g. \`["source.ip", "event.action"]\`). Only use \`root_fields\` when you genuinely do not know which children exist under a root group — each root field returns all direct children, which can be very token-heavy. Batch all lookups into a single call.
-- **submit_review**: MUST be called as your final action. Pass your full review (all issues, details, and recommendations) as \`full_review\` and a concise summary (PASSED/FAILED, issue count, severity, which agent should fix) as \`summary\`. The full review is stored in shared state; the summary is returned to the orchestrator.
+- **submit_review**: MUST be called as your final action. Pass your full review (all issues, details, and recommendations) as \`content\` and a concise summary (PASSED/FAILED, issue count, severity, which agent should fix) as \`summary\`. When the review PASSES, you MUST also provide \`field_mappings\` — see the field mappings section below. The full review is stored in shared state; the summary is returned to the orchestrator.
 </tools>
 
 <review_checklist>
@@ -590,7 +637,8 @@ The pipeline and samples have already been validated against ECS by \`validate_p
 - Parsing processors operate on \`event.original\`, NOT \`message\`
 - Has the mandatory top-level \`on_failure\` handler (sets event.kind to pipeline_error, appends to error.message with processor type/tag/pipeline/message, appends preserve_original_event to tags)
 - No duplicate processors doing the same work
-- Processors in logical order (ecs.version → message rename/remove → parse event.original → convert → rename → event.kind → append → cleanup → on_failure)
+- Processors in logical order (ecs.version → message rename/remove → parse event.original → convert → rename → event.kind → append → cleanup → drop-null script → on_failure)
+- The \`script_to_drop_null_values\` processor is present as the last processor before on_failure
 - Every processor has a unique \`tag\` field
 
 ### 2. Parsing Quality
@@ -639,10 +687,51 @@ The pipeline and samples have already been validated against ECS by \`validate_p
 - \`ctx['dotted.key']\` bracket notation in Painless creates literal dotted keys instead of nested structures — this is a critical bug that causes pipeline failures
 </review_checklist>
 
+<field_mappings>
+When your review PASSES, you MUST provide \`field_mappings\` in your \`submit_review\` call. This maps the custom-namespaced fields to their Elasticsearch field types for index template generation.
+
+### What to include
+- ONLY fields under the custom namespace \`<integration>.<datastream>.*\` (e.g. \`sonicwall.firewall.pri\`, \`sonicwall.firewall.sess\`)
+- Base your mappings on the **post-processed document output** (the successful simulation results in your context), NOT the raw log samples
+
+### What to exclude
+- ALL ECS fields (\`source.ip\`, \`event.action\`, \`user.name\`, etc.)
+- \`@timestamp\` (ECS field, always mapped automatically)
+- \`event.original\`, \`ecs.version\`, \`tags\`, \`error.*\` (pipeline infrastructure fields)
+- Any \`related.*\` fields (\`related.ip\`, \`related.user\`, etc.)
+- Fields outside the \`<integration>.<datastream>.*\` namespace
+
+### Type rules
+Only these four types are allowed:
+- \`"keyword"\` — for string values (actions, names, identifiers, status codes, etc.)
+- \`"long"\` — for numeric values (counts, ports, sizes, IDs that are numbers)
+- \`"ip"\` — for IP address values (IPv4 or IPv6)
+- \`"date"\` — for date/time values that are stored as date strings (only if a date processor targets this field)
+
+### Example
+If the post-processed document contains:
+\`\`\`json
+{
+  "sonicwall": {
+    "firewall": {
+      "pri": 6,
+      "sess": "Web",
+      "m": 537,
+      "fw": "10.0.0.96",
+      "sn": "0040103CE114"
+    }
+  }
+}
+\`\`\`
+Then field_mappings would be:
+\`[{"name": "sonicwall.firewall.pri", "type": "long"}, {"name": "sonicwall.firewall.sess", "type": "keyword"}, {"name": "sonicwall.firewall.m", "type": "long"}, {"name": "sonicwall.firewall.fw", "type": "ip"}, {"name": "sonicwall.firewall.sn", "type": "keyword"}]\`
+</field_mappings>
+
 <output_format>
 After completing your review, call \`submit_review\` with:
-- \`full_review\`: Your complete review including all issues, details, specific processor references, and recommendations
+- \`content\`: Your complete review including all issues, details, specific processor references, and recommendations
 - \`summary\`: A concise summary following the format below
+- \`field_mappings\`: (PASS only) Array of custom field mappings — see the field mappings section above
 
 ### Summary format on Success
 "REVIEW PASSED. Pipeline is valid and ECS-compliant. [brief summary: format parsed, success rate, key ECS fields mapped]"

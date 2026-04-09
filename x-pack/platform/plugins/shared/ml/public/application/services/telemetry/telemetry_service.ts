@@ -16,6 +16,7 @@ interface TelemetryServiceSetupParams {
 
 export class TelemetryService {
   private analytics?: AnalyticsServiceSetup;
+  private initialized = false;
 
   constructor() {}
 
@@ -26,9 +27,14 @@ export class TelemetryService {
     analytics.registerEventType(trainedModelsEbtEvents.trainedModelsModelDownloadEventType);
     analytics.registerEventType(trainedModelsEbtEvents.trainedModelsDeploymentUpdatedEventType);
     analytics.registerEventType(trainedModelsEbtEvents.trainedModelsModelTestedEventType);
+
+    this.initialized = true;
   }
 
   public start(): ITelemetryClient {
+    if (!this.initialized) {
+      throw new Error('TelemetryService has not been initialized. Call setup() first.');
+    }
     if (!this.analytics) {
       throw new Error(
         'The TelemetryService.setup() method has not been invoked, be sure to call it during the plugin setup.'
