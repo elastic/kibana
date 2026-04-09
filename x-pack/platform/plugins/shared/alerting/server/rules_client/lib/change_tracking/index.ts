@@ -97,24 +97,20 @@ export class ChangeTrackingService implements IChangeTrackingService {
 
   initialize(elasticsearchClient: ElasticsearchClient) {
     this.logger.debug(`ChangeTrackingService.initialize(esClient)`);
-    for (const module of this.modules) {
-      // Initialize the change history client
-      const client = this.clients[module];
-      void client
-        .initialize(elasticsearchClient)
-        .catch()
-        .then(() => {
-          if (!client.isInitialized()) {
-            const error = new Error(
-              `Unable to initialize change tracking for [${module}, ${this.dataset}]`
-            );
-            this.logger.error(error);
-          }
-        });
-
-      // Stash the client for later use
-      this.clients[module] = client;
-    }
+    (async () => {
+      // Initialize each change history client (in sequence, using IIFE)
+      for (const [module, client] of Object.entries(this.clients)) {
+        try {
+          await client.initialize(elasticsearchClient);
+        } catch (cause) {
+          const error = new Error(
+            `Unable to initialize change tracking for [${module}, ${this.dataset}]`,
+            { cause }
+          );
+          this.logger.error(error);
+        }
+      }
+    })();
   }
 
   async log(change: RuleChange, opts: LogChangeHistoryOptions) {

@@ -107,11 +107,11 @@ describe('ChangeTrackingService', () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       service.initialize(esClient);
 
+      await new Promise(process.nextTick);
+
       expect(stackClient.initialize).toHaveBeenCalledWith(esClient);
       expect(securityClient.initialize).toHaveBeenCalledWith(esClient);
 
-      await Promise.resolve();
-      await Promise.resolve();
       expect(logger.error).not.toHaveBeenCalled();
     });
   });
