@@ -177,8 +177,8 @@ export interface AgentEventEmitter {
 
 export interface AgentParams {
   /**
-   * Current conversation. Accepts both the legacy rounds-based format
-   * and the new timeline-based TimelineConversation format.
+   * Current conversation.
+   * Accepts both the legacy rounds-based format and the new timeline-based TimelineConversation format.
    */
   conversation?: Conversation | TimelineConversation;
   /**
