@@ -9,6 +9,7 @@ import React, { memo, useMemo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
+import { EuiSpacer } from '@elastic/eui';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { TIMESTAMP_TEST_ID } from './test_ids';
 
@@ -27,7 +28,12 @@ export const Timestamp = memo(({ hit }: DocumentTimestampProps) => {
 
   if (!timestamp) return null;
 
-  return <PreferenceFormattedDate value={new Date(timestamp)} data-test-subj={TIMESTAMP_TEST_ID} />;
+  return (
+    <>
+      <PreferenceFormattedDate value={new Date(timestamp)} data-test-subj={TIMESTAMP_TEST_ID} />
+      <EuiSpacer size="xs" />
+    </>
+  );
 });
 
 Timestamp.displayName = 'Timestamp';
