@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PackageInfo } from '../types';
+import type { NewPackagePolicyInput, PackageInfo } from '../types';
 
 import {
   packageToPackagePolicy,
@@ -31,7 +31,7 @@ describe('getInputEffectiveName', () => {
         type: 'otelcol',
         enabled: true,
         streams: [],
-      })
+      } as NewPackagePolicyInput)
     ).toBe('filelog_otel');
   });
 
@@ -42,7 +42,7 @@ describe('getInputEffectiveName', () => {
         type: 'logfile',
         enabled: true,
         streams: [],
-      })
+      } as NewPackagePolicyInput)
     ).toBe('logfile');
   });
 });

@@ -4014,7 +4014,7 @@ export function updatePackageInputs(
       // If the updated value defines a policy template, try to find an original input
       // with the same policy template value. Match by name ?? type on both sides
       // so that inputs with explicit ids are correctly matched during upgrade.
-      const updateEffectiveId = getInputEffectiveName(update);
+      const updateEffectiveId = getInputEffectiveName(update as NewPackagePolicyInput);
       const matchingInput = inputs.find(
         (i) =>
           getInputEffectiveName(i) === updateEffectiveId &&
@@ -4032,7 +4032,7 @@ export function updatePackageInputs(
       // For inputs that don't specify a policy template, just grab the first input
       // that matches its effective id
       originalInput = inputs.find(
-        (i) => getInputEffectiveName(i) === getInputEffectiveName(update)
+        (i) => getInputEffectiveName(i) === getInputEffectiveName(update as NewPackagePolicyInput)
       );
     }
 
