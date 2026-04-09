@@ -13,7 +13,7 @@ import type { ScoutPage } from '.';
 import type { PathOptions } from '../../../../../common/services/kibana_url';
 import type { KibanaUrl, ScoutLogger } from '../../worker';
 import type { ScoutSpaceParallelFixture } from '../../worker/scout_space';
-import { extendPlaywrightPage } from './single_thread';
+import { extendPlaywrightPage, forwardBrowserConsoleLogs } from './single_thread';
 
 export const scoutPageParallelFixture = base.extend<
   { page: ScoutPage },
@@ -29,8 +29,8 @@ export const scoutPageParallelFixture = base.extend<
     use: (extendedPage: ScoutPage) => Promise<void>
   ) => {
     const extendedPage = extendPlaywrightPage({ page, kbnUrl });
+    forwardBrowserConsoleLogs(page, log);
 
-    // Overriding navigation to specific Kibana apps: url should respect the Kibana Space id
     extendedPage.gotoApp = (appName: string, pathOptions?: PathOptions) =>
       page.goto(kbnUrl.app(appName, { space: scoutSpace.id, pathOptions }));
 

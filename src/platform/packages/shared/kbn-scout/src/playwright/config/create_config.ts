@@ -87,6 +87,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
     workers: options.workers ?? 1,
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
     reporter: [
+      ['list'],
       ['html', { outputFolder: './.scout/reports', open: 'never' }], // HTML report configuration
       ['json', { outputFile: './.scout/reports/test-results.json' }], // JSON report
       scoutPlaywrightReporter({ name: 'scout-playwright', runId }), // Scout events report
