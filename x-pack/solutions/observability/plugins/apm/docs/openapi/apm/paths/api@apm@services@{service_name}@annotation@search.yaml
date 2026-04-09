@@ -24,12 +24,16 @@ get:
       description: The start date for the search
       schema:
         type: string
+        format: date-time
+      example: '2024-01-01T00:00:00.000Z'
     - name: end
       in: query
       required: false
       description: The end date for the search
       schema:
         type: string
+        format: date-time
+      example: '2024-01-31T23:59:59.999Z'
   responses:
     "200":
       description: Successful response

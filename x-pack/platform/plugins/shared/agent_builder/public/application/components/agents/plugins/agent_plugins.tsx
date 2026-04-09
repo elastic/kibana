@@ -43,6 +43,7 @@ import { InstallPluginFlyout } from './install_plugin_flyout';
 import { PageWrapper } from '../common/page_wrapper';
 import { ICON_DIMENSIONS } from '../common/constants';
 import { useListDetailPageStyles } from '../common/styles';
+import { useCanEditAgent } from '../../../hooks/agents/use_can_edit_agent';
 
 export const AgentPlugins: React.FC = () => {
   const { agentId } = useParams<{ agentId: string }>();
@@ -54,6 +55,7 @@ export const AgentPlugins: React.FC = () => {
 
   const { agent, isLoading: agentLoading } = useAgentBuilderAgentById(agentId);
   const { plugins: allPlugins, isLoading: pluginsLoading } = usePluginsService();
+  const canEditAgent = useCanEditAgent({ agent });
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPluginId, setSelectedPluginId] = useQueryState<string>(searchParamNames.pluginId);
@@ -337,6 +339,7 @@ export const AgentPlugins: React.FC = () => {
                       <EuiBadge color="hollow">{labels.agentPlugins.autoBadge}</EuiBadge>
                     ) : undefined
                   }
+                  canEditAgent={canEditAgent}
                 />
               ))
             )}

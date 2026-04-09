@@ -25,7 +25,6 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
 import {
   OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS,
   OBSERVABILITY_STREAMS_SIG_EVENTS_TUNING_CONFIG,
@@ -38,6 +37,7 @@ import {
   type SigEventsTuningConfig,
 } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../../../hooks/use_kibana';
+import { useModelSettingsUrl } from '../../../../../hooks/use_model_settings_url';
 import { getFormattedError } from '../../../../../util/errors';
 import { useContinuousExtractionSettings } from './use_continuous_extraction_settings';
 import {
@@ -46,22 +46,8 @@ import {
 } from './sig_events_tuning_config_editor';
 
 export function SettingsTab() {
-  const {
-    dependencies: {
-      start: { share },
-    },
-    core,
-  } = useKibana();
-
-  const modelSettingsUrl = useMemo(() => {
-    const managementLocator = share.url.locators.get(MANAGEMENT_APP_LOCATOR);
-    return (
-      managementLocator?.getRedirectUrl({
-        sectionId: 'modelManagement',
-        appId: 'model_settings',
-      }) ?? ''
-    );
-  }, [share.url.locators]);
+  const { core } = useKibana();
+  const modelSettingsUrl = useModelSettingsUrl();
 
   const [savedIndexPatterns, setSavedIndexPatterns] = useState<string>(() =>
     core.settings.client.get<string>(
