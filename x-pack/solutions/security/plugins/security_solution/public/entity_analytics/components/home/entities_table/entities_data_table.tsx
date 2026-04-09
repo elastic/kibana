@@ -107,7 +107,7 @@ const COLUMN_HEADERS: Record<string, string> = {
   ),
   [ENTITY_FIELDS.ENTITY_ID]: i18n.translate(
     'xpack.securitySolution.entityAnalytics.entitiesTable.columnEntityId',
-    { defaultMessage: 'Entity id' }
+    { defaultMessage: 'Entity ID' }
   ),
   [ENTITY_FIELDS.ENTITY_SOURCE]: i18n.translate(
     'xpack.securitySolution.entityAnalytics.entitiesTable.columnDataSource',
