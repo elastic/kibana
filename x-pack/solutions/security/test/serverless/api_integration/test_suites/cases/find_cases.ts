@@ -6,15 +6,18 @@
  */
 
 import expect from '@kbn/expect';
+import type { CasePostRequest, CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
 import type { RoleCredentials } from '../../services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const svlCases = getService('svlCases');
   const svlUserManager = getService('svlUserManager');
+  const normalizeFindCasesResponse = (response: CasesFindResponse) =>
+    svlCases.omit.removeServerGeneratedPropertiesFromFindCasesResponse(response);
 
-  let findCasesResp: any;
-  let postCaseReq: any;
+  let findCasesResp: CasesFindResponse;
+  let postCaseReq: CasePostRequest;
 
   describe('find_cases', () => {
     let roleAuthc: RoleCredentials;
@@ -31,7 +34,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should return empty response', async () => {
         const cases = await svlCases.api.findCases({}, roleAuthc);
-        expect(cases).to.eql(findCasesResp);
+        expect(normalizeFindCasesResponse(cases)).to.eql(normalizeFindCasesResponse(findCasesResp));
       });
 
       it('should return cases', async () => {
@@ -41,17 +44,19 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const cases = await svlCases.api.findCases({}, roleAuthc);
 
-        expect(cases).to.eql({
-          ...findCasesResp,
-          total: 3,
-          cases: [a, b, c],
-          count_open_cases: 3,
-        });
+        expect(normalizeFindCasesResponse(cases)).to.eql(
+          normalizeFindCasesResponse({
+            ...findCasesResp,
+            total: 3,
+            cases: [a, b, c],
+            count_open_cases: 3,
+          })
+        );
       });
 
       it('returns empty response when trying to find cases with owner as cases', async () => {
         const cases = await svlCases.api.findCases({ query: { owner: 'cases' } }, roleAuthc);
-        expect(cases).to.eql(findCasesResp);
+        expect(normalizeFindCasesResponse(cases)).to.eql(normalizeFindCasesResponse(findCasesResp));
       });
 
       it('returns empty response when trying to find cases with owner as observability', async () => {
@@ -61,7 +66,7 @@ export default ({ getService }: FtrProviderContext): void => {
           },
           roleAuthc
         );
-        expect(cases).to.eql(findCasesResp);
+        expect(normalizeFindCasesResponse(cases)).to.eql(normalizeFindCasesResponse(findCasesResp));
       });
     });
   });

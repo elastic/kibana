@@ -49,7 +49,8 @@ const WORKFLOW_ENABLED_ROLE: KibanaRole = {
   ],
 };
 
-spaceTest.describe('Run workflow alert action', { tag: [...tags.stateful.classic] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/261392
+spaceTest.describe.skip('Run workflow alert action', { tag: [...tags.stateful.classic] }, () => {
   let ruleName: string;
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {
