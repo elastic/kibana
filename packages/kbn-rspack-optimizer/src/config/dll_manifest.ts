@@ -32,7 +32,7 @@ import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
  *    property access (e.g. `mod.format`) for each named import.
  *  - Everything else → strip buildMeta entirely (default-only CJS or modules
  *    without export metadata; no named imports expected).
- * 
+ *
  * NOTE: This can be removed once we delete the legacy optimizer and promote this one to be the optimizer.
  */
 export const DLL_MANIFEST = (() => {

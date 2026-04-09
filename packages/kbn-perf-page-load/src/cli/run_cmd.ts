@@ -85,7 +85,7 @@ export const runCmd: Command<{}> = {
     const resultFile = resolve(scoutDir, `_latest_${process.pid}.json`);
 
     const env: Record<string, string> = {
-      ...process.env as Record<string, string>,
+      ...(process.env as Record<string, string>),
       PERF_LH_RESULT_FILE: resultFile,
       LIGHTHOUSE_THROTTLE: throttle,
     };
@@ -95,20 +95,29 @@ export const runCmd: Command<{}> = {
     }
 
     // Spawn Scout to run the spec
-    log.info(`Running Lighthouse benchmark (throttle=${throttle}, dist=${dist}, rspack=${useRspack})...`);
+    log.info(
+      `Running Lighthouse benchmark (throttle=${throttle}, dist=${dist}, rspack=${useRspack})...`
+    );
 
     try {
-      execFileSync(process.execPath, [
-        resolve(REPO_ROOT, 'scripts/scout.js'),
-        'run-tests',
-        '--arch', 'stateful',
-        '--domain', 'classic',
-        '--testFiles', SPEC_PATH,
-      ], {
-        cwd: REPO_ROOT,
-        stdio: 'inherit',
-        env,
-      });
+      execFileSync(
+        process.execPath,
+        [
+          resolve(REPO_ROOT, 'scripts/scout.js'),
+          'run-tests',
+          '--arch',
+          'stateful',
+          '--domain',
+          'classic',
+          '--testFiles',
+          SPEC_PATH,
+        ],
+        {
+          cwd: REPO_ROOT,
+          stdio: 'inherit',
+          env,
+        }
+      );
     } catch (e) {
       // Scout exits non-zero on test failure; check if results were written
       if (!Fs.existsSync(resultFile)) {

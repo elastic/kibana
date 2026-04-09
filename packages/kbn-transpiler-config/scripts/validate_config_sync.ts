@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable no-console */
+
 /**
  * CI check script to validate that transpiler configurations are in sync.
  *
@@ -109,7 +111,9 @@ function validateAll(): boolean {
   console.log('📋 Checking styled-components list sync...');
   const styledResult = validateStyledComponentsSync();
   if (styledResult.passed) {
-    console.log(`   ✅ styled-components list is in sync (${USES_STYLED_COMPONENTS.length} patterns)\n`);
+    console.log(
+      `   ✅ styled-components list is in sync (${USES_STYLED_COMPONENTS.length} patterns)\n`
+    );
   } else {
     console.log('   ❌ styled-components list is NOT in sync');
     styledResult.errors.forEach((e) => console.log(`      ERROR: ${e}`));

@@ -46,7 +46,7 @@ export interface Options {
 /**
  * Check if RSPack optimizer should be used instead of Webpack optimizer
  */
-function useRspackOptimizer(): boolean {
+function isRspackOptimizerEnabled(): boolean {
   return process.env.KBN_USE_RSPACK === 'true';
 }
 
@@ -66,7 +66,7 @@ export class Optimizer {
     }
 
     // Check if we should use RSPack optimizer
-    if (useRspackOptimizer()) {
+    if (isRspackOptimizerEnabled()) {
       this.run$ = this.createRspackRun$(options);
     } else {
       this.run$ = this.createWebpackRun$(options);

@@ -27,8 +27,7 @@
 
 // Regex to match: const/let/var name = require('module')
 // Captures: 1=const/let/var, 2=variable name, 3=module name
-const REQUIRE_PATTERN =
-  /\b(const|let|var)\s+(\w+)\s*=\s*require\s*\(\s*(['"`])([^'"`]+)\3\s*\)/g;
+const REQUIRE_PATTERN = /\b(const|let|var)\s+(\w+)\s*=\s*require\s*\(\s*(['"`])([^'"`]+)\3\s*\)/g;
 
 // Helper function to inject - extracts .default from ES modules
 const INTEROP_HELPER = `
@@ -45,6 +44,7 @@ function needsTransform(source: string): boolean {
 /**
  * Transform require() calls to use interop helper
  */
+// eslint-disable-next-line import/no-default-export
 export default function requireInteropLoader(this: any, source: string): string {
   // Skip if no require() calls
   if (!needsTransform(source)) {

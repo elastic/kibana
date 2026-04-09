@@ -66,7 +66,7 @@ export class HmrServer {
     });
   }
 
-  get port(): number {
+  public get port(): number {
     return this.assignedPort;
   }
 

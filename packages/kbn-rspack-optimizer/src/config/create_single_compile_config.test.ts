@@ -9,11 +9,8 @@
 
 import Path from 'path';
 import Fs from 'fs';
-import {
-  findTargetEntry,
-  filterStatsByFocus,
-  type FocusPluginInfo,
-} from './create_single_compile_config';
+import { findTargetEntry } from './create_single_compile_config';
+import { filterStatsByFocus, type FocusPluginInfo } from '../plugins/emit_stats_plugin';
 
 const tmpDir = Path.resolve(__dirname, '__fixtures__', 'find_target_entry_test');
 
@@ -82,9 +79,15 @@ describe('findTargetEntry', () => {
 });
 
 describe('filterStatsByFocus', () => {
-  const dashboardFocus: FocusPluginInfo = { id: 'dashboard', contextDir: '/repo/plugins/dashboard' };
+  const dashboardFocus: FocusPluginInfo = {
+    id: 'dashboard',
+    contextDir: '/repo/plugins/dashboard',
+  };
   const securityFocus: FocusPluginInfo = { id: 'security', contextDir: '/repo/plugins/security' };
-  const nonExistentFocus: FocusPluginInfo = { id: 'nonExistent', contextDir: '/repo/plugins/nonExistent' };
+  const nonExistentFocus: FocusPluginInfo = {
+    id: 'nonExistent',
+    contextDir: '/repo/plugins/nonExistent',
+  };
 
   // RSPack-style stats: modules nested inside chunk.modules, no chunk.id.
   // Simulates splitChunks moving dashboard modules into a shared chunk.
@@ -97,44 +100,68 @@ describe('filterStatsByFocus', () => {
         names: ['plugin-dashboard'],
         files: ['chunks/plugin-dashboard.abc.js'],
         modules: [
-          { identifier: '/repo/plugins/dashboard/public/index.ts', name: './plugins/dashboard/public/index.ts' },
+          {
+            identifier: '/repo/plugins/dashboard/public/index.ts',
+            name: './plugins/dashboard/public/index.ts',
+          },
         ],
       },
       {
         names: ['plugin-dashboardEnhanced'],
         files: ['chunks/plugin-dashboardEnhanced.def.js'],
         modules: [
-          { identifier: '/repo/plugins/dashboardEnhanced/public/index.ts', name: './plugins/dashboardEnhanced/public/index.ts' },
+          {
+            identifier: '/repo/plugins/dashboardEnhanced/public/index.ts',
+            name: './plugins/dashboardEnhanced/public/index.ts',
+          },
         ],
       },
       {
         names: ['shared-plugins'],
         files: ['chunks/shared-plugins.xyz.js'],
         modules: [
-          { identifier: '/repo/plugins/dashboard/public/app.tsx', name: './plugins/dashboard/public/app.tsx' },
-          { identifier: '/repo/plugins/security/public/nav.tsx', name: './plugins/security/public/nav.tsx' },
-          { identifier: '/repo/node_modules/lodash/index.js', name: './node_modules/lodash/index.js' },
+          {
+            identifier: '/repo/plugins/dashboard/public/app.tsx',
+            name: './plugins/dashboard/public/app.tsx',
+          },
+          {
+            identifier: '/repo/plugins/security/public/nav.tsx',
+            name: './plugins/security/public/nav.tsx',
+          },
+          {
+            identifier: '/repo/node_modules/lodash/index.js',
+            name: './node_modules/lodash/index.js',
+          },
         ],
       },
       {
         names: ['plugin-data'],
         files: ['chunks/plugin-data.ghi.js'],
         modules: [
-          { identifier: '/repo/plugins/data/public/index.ts', name: './plugins/data/public/index.ts' },
+          {
+            identifier: '/repo/plugins/data/public/index.ts',
+            name: './plugins/data/public/index.ts',
+          },
         ],
       },
       {
         names: ['plugin-security'],
         files: ['chunks/plugin-security.jkl.js'],
         modules: [
-          { identifier: '/repo/plugins/security/public/index.ts', name: './plugins/security/public/index.ts' },
+          {
+            identifier: '/repo/plugins/security/public/index.ts',
+            name: './plugins/security/public/index.ts',
+          },
         ],
       },
       {
         names: ['vendors-heavy'],
         files: ['chunks/vendors-heavy.xyz.js'],
         modules: [
-          { identifier: '/repo/node_modules/react/index.js', name: './node_modules/react/index.js' },
+          {
+            identifier: '/repo/node_modules/react/index.js',
+            name: './node_modules/react/index.js',
+          },
         ],
       },
     ],

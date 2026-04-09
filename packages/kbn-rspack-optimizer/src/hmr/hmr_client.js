@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable no-console */
+/* eslint-disable no-console, no-var */
 /* global __KBN_HMR_PORT__, __webpack_hash__ */
 
 var LOG_PREFIX = '[@kbn/rspack-optimizer][hmr]';
@@ -17,6 +17,7 @@ var lastErrors = null;
 
 function upToDate(hash) {
   if (hash) lastHash = hash;
+  // eslint-disable-next-line camelcase
   return lastHash === __webpack_hash__;
 }
 
@@ -32,11 +33,15 @@ var updateFlashTimeout = null;
 var indicatorObserver = null;
 
 var STATE_CONFIG = {
-  idle:         { color: '#4caf50', text: 'HMR: Connected',    animation: 'none' },
-  building:     { color: '#ff9800', text: 'HMR: Building...',  animation: 'kbnHmrPulse 1.2s ease-in-out infinite' },
-  updated:      { color: '#4caf50', text: 'HMR: Updated',      animation: 'kbnHmrFlash 0.6s ease-out' },
-  error:        { color: '#f44336', text: 'HMR: Error',        animation: 'kbnHmrBounce 0.4s ease-out' },
-  disconnected: { color: '#888',    text: 'HMR: Disconnected', animation: 'none' },
+  idle: { color: '#4caf50', text: 'HMR: Connected', animation: 'none' },
+  building: {
+    color: '#ff9800',
+    text: 'HMR: Building...',
+    animation: 'kbnHmrPulse 1.2s ease-in-out infinite',
+  },
+  updated: { color: '#4caf50', text: 'HMR: Updated', animation: 'kbnHmrFlash 0.6s ease-out' },
+  error: { color: '#f44336', text: 'HMR: Error', animation: 'kbnHmrBounce 0.4s ease-out' },
+  disconnected: { color: '#888', text: 'HMR: Disconnected', animation: 'none' },
 };
 
 function injectIndicatorStyles() {
@@ -86,44 +91,53 @@ function createIndicator() {
 
   var container = document.createElement('div');
   container.id = INDICATOR_ID;
-  container.setAttribute('style', [
-    'position:fixed',
-    'bottom:16px',
-    'right:16px',
-    'height:28px',
-    'border-radius:14px',
-    'background:rgba(30,30,30,0.85)',
-    'z-index:2147483647',
-    'display:flex',
-    'align-items:center',
-    'gap:6px',
-    'cursor:default',
-    'pointer-events:auto',
-    'overflow:hidden',
-    'transition:width 0.25s ease, padding 0.25s ease',
-    'box-sizing:border-box',
-  ].join(';'));
+  container.setAttribute(
+    'style',
+    [
+      'position:fixed',
+      'bottom:16px',
+      'right:16px',
+      'height:28px',
+      'border-radius:14px',
+      'background:rgba(30,30,30,0.85)',
+      'z-index:2147483647',
+      'display:flex',
+      'align-items:center',
+      'gap:6px',
+      'cursor:default',
+      'pointer-events:auto',
+      'overflow:hidden',
+      'transition:width 0.25s ease, padding 0.25s ease',
+      'box-sizing:border-box',
+    ].join(';')
+  );
 
   var dot = document.createElement('span');
-  dot.setAttribute('style', [
-    'width:10px',
-    'height:10px',
-    'border-radius:50%',
-    'flex-shrink:0',
-    'transition:background 0.3s ease',
-    'background:#4caf50',
-  ].join(';'));
+  dot.setAttribute(
+    'style',
+    [
+      'width:10px',
+      'height:10px',
+      'border-radius:50%',
+      'flex-shrink:0',
+      'transition:background 0.3s ease',
+      'background:#4caf50',
+    ].join(';')
+  );
 
   var label = document.createElement('span');
   label.className = INDICATOR_ID + '_label';
-  label.setAttribute('style', [
-    'font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif',
-    'font-size:11px',
-    'color:#ccc',
-    'white-space:nowrap',
-    'line-height:1',
-    'user-select:none',
-  ].join(';'));
+  label.setAttribute(
+    'style',
+    [
+      'font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif',
+      'font-size:11px',
+      'color:#ccc',
+      'white-space:nowrap',
+      'line-height:1',
+      'user-select:none',
+    ].join(';')
+  );
   label.textContent = 'HMR: Connected';
 
   container.onclick = function () {
@@ -176,7 +190,7 @@ function applyIndicatorState() {
   indicatorDot.style.animation = cfg.animation;
   indicatorLabel.textContent = cfg.text;
   indicatorElement.title = cfg.text;
-  indicatorElement.style.cursor = (lastErrors && lastErrors.length > 0) ? 'pointer' : 'default';
+  indicatorElement.style.cursor = lastErrors && lastErrors.length > 0 ? 'pointer' : 'default';
 }
 
 function setIndicatorState(state) {
@@ -210,46 +224,55 @@ function showOverlay(errors) {
 
   var backdrop = document.createElement('div');
   backdrop.id = OVERLAY_ID;
-  backdrop.setAttribute('style', [
-    'position:fixed',
-    'inset:0',
-    'z-index:2147483647',
-    'background:rgba(0,0,0,0.85)',
-    'overflow:hidden',
-    'padding:50px 150px 150px',
-    'box-sizing:border-box',
-    'font-family:monospace',
-    'font-size:13px',
-    'color:#e8e8e8',
-    'line-height:1.5',
-    'display:flex',
-    'flex-direction:column',
-  ].join(';'));
+  backdrop.setAttribute(
+    'style',
+    [
+      'position:fixed',
+      'inset:0',
+      'z-index:2147483647',
+      'background:rgba(0,0,0,0.85)',
+      'overflow:hidden',
+      'padding:50px 150px 150px',
+      'box-sizing:border-box',
+      'font-family:monospace',
+      'font-size:13px',
+      'color:#e8e8e8',
+      'line-height:1.5',
+      'display:flex',
+      'flex-direction:column',
+    ].join(';')
+  );
 
   var header = document.createElement('div');
-  header.setAttribute('style', [
-    'display:flex',
-    'align-items:center',
-    'justify-content:space-between',
-    'margin-bottom:16px',
-    'flex-shrink:0',
-  ].join(';'));
+  header.setAttribute(
+    'style',
+    [
+      'display:flex',
+      'align-items:center',
+      'justify-content:space-between',
+      'margin-bottom:16px',
+      'flex-shrink:0',
+    ].join(';')
+  );
 
   var title = document.createElement('span');
   title.setAttribute('style', 'font-size:18px;font-weight:bold;color:#ff6b6b');
   title.textContent = 'Build Error';
 
   var closeBtn = document.createElement('button');
-  closeBtn.setAttribute('style', [
-    'background:none',
-    'border:1px solid #666',
-    'border-radius:4px',
-    'color:#ccc',
-    'cursor:pointer',
-    'font-size:14px',
-    'padding:4px 12px',
-    'font-family:inherit',
-  ].join(';'));
+  closeBtn.setAttribute(
+    'style',
+    [
+      'background:none',
+      'border:1px solid #666',
+      'border-radius:4px',
+      'color:#ccc',
+      'cursor:pointer',
+      'font-size:14px',
+      'padding:4px 12px',
+      'font-family:inherit',
+    ].join(';')
+  );
   closeBtn.textContent = 'Dismiss (Esc)';
   closeBtn.onclick = hideOverlay;
 
@@ -257,19 +280,22 @@ function showOverlay(errors) {
   header.appendChild(closeBtn);
 
   var body = document.createElement('pre');
-  body.setAttribute('style', [
-    'margin:0',
-    'padding:16px',
-    'background:#1e1e1e',
-    'border-radius:6px',
-    'border:1px solid #444',
-    'overflow:auto',
-    'white-space:pre',
-    'word-break:normal',
-    'box-sizing:border-box',
-    'flex:1',
-    'min-height:0',
-  ].join(';'));
+  body.setAttribute(
+    'style',
+    [
+      'margin:0',
+      'padding:16px',
+      'background:#1e1e1e',
+      'border-radius:6px',
+      'border:1px solid #444',
+      'overflow:auto',
+      'white-space:pre',
+      'word-break:normal',
+      'box-sizing:border-box',
+      'flex:1',
+      'min-height:0',
+    ].join(';')
+  );
   body.textContent = errors.join('\n\n');
 
   backdrop.appendChild(header);
@@ -313,8 +339,12 @@ if (module.hot) {
         var rest = window.location.pathname.slice(currentBasePath.length);
         var newUrl = serverBasePath + rest + window.location.search + window.location.hash;
         console.log(
-          LOG_PREFIX + ' Base path changed from ' + currentBasePath +
-          ' to ' + serverBasePath + ', redirecting...'
+          LOG_PREFIX +
+            ' Base path changed from ' +
+            currentBasePath +
+            ' to ' +
+            serverBasePath +
+            ', redirecting...'
         );
         window.location.href = newUrl;
         return;
@@ -375,14 +405,20 @@ if (module.hot) {
               window.location.reload();
               return;
             }
-            var fileLabel = lastFiles && lastFiles.length > 0
-              ? lastFiles.map(function (f) { return f.split('/').pop(); }).join(', ')
-              : '';
+            var fileLabel =
+              lastFiles && lastFiles.length > 0
+                ? lastFiles
+                    .map(function (f) {
+                      return f.split('/').pop();
+                    })
+                    .join(', ')
+                : '';
             var timeLabel = lastTime ? ' in ' + lastTime + 's' : '';
             var prefix = fileLabel ? fileLabel + ' \u2192 ' : '';
-            var moduleCount = updatedModules.length > 1
-              ? ' (' + updatedModules.length + ' modules re-evaluated)'
-              : '';
+            var moduleCount =
+              updatedModules.length > 1
+                ? ' (' + updatedModules.length + ' modules re-evaluated)'
+                : '';
             console.log(LOG_PREFIX + ' ' + prefix + 'Updated' + timeLabel + moduleCount);
             if (!upToDate()) {
               module.hot.check({ ignoreDeclined: true, ignoreUnaccepted: true });

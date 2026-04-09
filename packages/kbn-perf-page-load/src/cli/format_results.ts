@@ -42,8 +42,12 @@ export const formatSingleResults = (results: Results): string => {
   const colWidth = 18;
   const metricWidth = 20;
 
-  const header = `| ${'Metric'.padEnd(metricWidth)} | ${pages.map((p) => pad(p, colWidth)).join(' | ')} |`;
-  const separator = `|${'-'.repeat(metricWidth + 2)}|${pages.map(() => '-'.repeat(colWidth + 2)).join('|')}|`;
+  const header = `| ${'Metric'.padEnd(metricWidth)} | ${pages
+    .map((p) => pad(p, colWidth))
+    .join(' | ')} |`;
+  const separator = `|${'-'.repeat(metricWidth + 2)}|${pages
+    .map(() => '-'.repeat(colWidth + 2))
+    .join('|')}|`;
 
   const rows = METRIC_LABELS.map(({ key, label, unit }) => {
     const values = pages.map((p) => {
@@ -76,14 +80,22 @@ export const formatComparisonResults = (
     const colWidth = 14;
     const metricWidth = 20;
 
-    const header = `| ${'Metric'.padEnd(metricWidth)} | ${pad(label1, colWidth)} | ${pad(label2, colWidth)} | ${pad('Delta', colWidth)} |`;
-    const sep = `|${'-'.repeat(metricWidth + 2)}|${'-'.repeat(colWidth + 2)}|${'-'.repeat(colWidth + 2)}|${'-'.repeat(colWidth + 2)}|`;
+    const header = `| ${'Metric'.padEnd(metricWidth)} | ${pad(label1, colWidth)} | ${pad(
+      label2,
+      colWidth
+    )} | ${pad('Delta', colWidth)} |`;
+    const sep = `|${'-'.repeat(metricWidth + 2)}|${'-'.repeat(colWidth + 2)}|${'-'.repeat(
+      colWidth + 2
+    )}|${'-'.repeat(colWidth + 2)}|`;
 
     const rows = METRIC_LABELS.map(({ key, label, unit }) => {
       const v1 = m1[key];
       const v2 = m2[key];
       if (v1 === undefined || v1 === null || v2 === undefined || v2 === null) {
-        return `| ${label.padEnd(metricWidth)} | ${pad('—', colWidth)} | ${pad('—', colWidth)} | ${pad('—', colWidth)} |`;
+        return `| ${label.padEnd(metricWidth)} | ${pad('—', colWidth)} | ${pad(
+          '—',
+          colWidth
+        )} | ${pad('—', colWidth)} |`;
       }
 
       const n1 = key === 'performanceScore' ? Math.round((v1 as number) * 100) : (v1 as number);
@@ -93,15 +105,16 @@ export const formatComparisonResults = (
 
       // For scores, higher is better (regression = decrease). For timings, lower is better (regression = increase).
       const isScoreMetric = key === 'performanceScore';
-      const isRegression = isScoreMetric
-        ? delta < -threshold
-        : delta > threshold;
+      const isRegression = isScoreMetric ? delta < -threshold : delta > threshold;
 
       if (isRegression) {
         regressions.push(`${page}/${label}: ${deltaStr}`);
       }
 
-      return `| ${label.padEnd(metricWidth)} | ${pad(`${n1}${unit}`, colWidth)} | ${pad(`${n2}${unit}`, colWidth)} | ${pad(deltaStr, colWidth)} |`;
+      return `| ${label.padEnd(metricWidth)} | ${pad(`${n1}${unit}`, colWidth)} | ${pad(
+        `${n2}${unit}`,
+        colWidth
+      )} | ${pad(deltaStr, colWidth)} |`;
     });
 
     return `\n  ${page}:\n${[sep, header, sep, ...rows, sep].join('\n')}`;

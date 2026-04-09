@@ -48,11 +48,15 @@ describe('shared_config', () => {
     });
 
     it('should have react-dom profiling alias', () => {
-      expect((resolveConfig.alias as Record<string, unknown>)?.['react-dom$']).toBe('react-dom/profiling');
+      expect((resolveConfig.alias as Record<string, unknown>)?.['react-dom$']).toBe(
+        'react-dom/profiling'
+      );
     });
 
     it('should have scheduler/tracing alias', () => {
-      expect((resolveConfig.alias as Record<string, unknown>)?.['scheduler/tracing']).toBe('scheduler/tracing-profiling');
+      expect((resolveConfig.alias as Record<string, unknown>)?.['scheduler/tracing']).toBe(
+        'scheduler/tracing-profiling'
+      );
     });
 
     it('should reference tsconfig.base.json', () => {
@@ -187,15 +191,15 @@ describe('shared_config', () => {
     });
 
     it('should include image loader rule', () => {
-      const imageRule = rules.find((r) =>
-        r.test?.toString().includes('png') || r.test?.toString().includes('svg')
+      const imageRule = rules.find(
+        (r) => r.test?.toString().includes('png') || r.test?.toString().includes('svg')
       );
       expect(imageRule).toBeDefined();
     });
 
     it('should include font loader rule', () => {
-      const fontRule = rules.find((r) =>
-        r.test?.toString().includes('woff') || r.test?.toString().includes('ttf')
+      const fontRule = rules.find(
+        (r) => r.test?.toString().includes('woff') || r.test?.toString().includes('ttf')
       );
       expect(fontRule).toBeDefined();
     });

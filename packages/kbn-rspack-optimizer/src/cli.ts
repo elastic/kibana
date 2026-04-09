@@ -15,11 +15,7 @@ import { createFlagError } from '@kbn/dev-cli-errors';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { runBuild } from './run_build';
 import type { ThemeTag } from './types';
-import {
-  validateLimitsForAllBundles,
-  updateBundleLimits,
-  DEFAULT_LIMITS_PATH,
-} from './limits';
+import { validateLimitsForAllBundles, updateBundleLimits, DEFAULT_LIMITS_PATH } from './limits';
 import { discoverPlugins } from './utils/plugin_discovery';
 import { getInspectExecArgv } from './utils/inspect';
 
@@ -109,10 +105,7 @@ export function runRspackCli(options: CliOptions = {}): void {
           examples: false,
           testPlugins: false,
         });
-        const pluginIds = [
-          'core',
-          ...allPlugins.filter((p) => !p.ignoreMetrics).map((p) => p.id),
-        ];
+        const pluginIds = ['core', ...allPlugins.filter((p) => !p.ignoreMetrics).map((p) => p.id)];
         validateLimitsForAllBundles(log, pluginIds, limitsPath);
         return;
       }
@@ -308,10 +301,7 @@ function runProfileWorker(
 
     child = fork(workerPath, workerArgs, {
       stdio: 'inherit',
-      execArgv: [
-        '--max-old-space-size=8192',
-        ...getInspectExecArgv(inspectWorkers),
-      ],
+      execArgv: ['--max-old-space-size=8192', ...getInspectExecArgv(inspectWorkers)],
       env: {
         ...process.env,
         ELASTIC_APM_ACTIVE: 'false',

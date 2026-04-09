@@ -98,9 +98,7 @@ const parseTraceDetail = (raw: string): string => {
  * including `args.data.detail`.
  */
 const extractKbnLoadMarks = (result: RunnerResult): KbnLoadMark[] => {
-  const traceEvents = result.artifacts?.Trace?.traceEvents as
-    | KbnLoadTraceEvent[]
-    | undefined;
+  const traceEvents = result.artifacts?.Trace?.traceEvents as KbnLoadTraceEvent[] | undefined;
   if (!traceEvents?.length) return [];
 
   const navigationStart = traceEvents.find(
@@ -164,25 +162,22 @@ perfLighthouseTest.describe(
   () => {
     const auditOptions = getAuditOptions();
 
-    perfLighthouseTest(
-      'Home page audit',
-      async ({ browserAuth, lighthouse, page, kbnUrl }) => {
-        await browserAuth.loginAsAdmin();
+    perfLighthouseTest('Home page audit', async ({ browserAuth, lighthouse, page, kbnUrl }) => {
+      await browserAuth.loginAsAdmin();
 
-        // Warm-up: navigate to the page to populate server-side caches
-        try {
-          await page.goto(kbnUrl.get('/app/home'));
-          await page.waitForLoadState('networkidle', { timeout: 15000 });
-        } catch {
-          // Warm-up may timeout with dev bundles; that is acceptable
-        }
-
-        const url = kbnUrl.get('/app/home');
-        const result = await lighthouse.runAudit(url, auditOptions);
-        const kbnMarks = extractKbnLoadMarks(result);
-        results['home'] = extractMetrics(result, kbnMarks);
+      // Warm-up: navigate to the page to populate server-side caches
+      try {
+        await page.goto(kbnUrl.get('/app/home'));
+        await page.waitForLoadState('networkidle', { timeout: 15000 });
+      } catch {
+        // Warm-up may timeout with dev bundles; that is acceptable
       }
-    );
+
+      const url = kbnUrl.get('/app/home');
+      const result = await lighthouse.runAudit(url, auditOptions);
+      const kbnMarks = extractKbnLoadMarks(result);
+      results.home = extractMetrics(result, kbnMarks);
+    });
 
     perfLighthouseTest(
       'eCommerce Dashboard audit',
@@ -205,7 +200,7 @@ perfLighthouseTest.describe(
         );
         const result = await lighthouse.runAudit(url, auditOptions);
         const kbnMarks = extractKbnLoadMarks(result);
-        results['dashboard'] = extractMetrics(result, kbnMarks);
+        results.dashboard = extractMetrics(result, kbnMarks);
       }
     );
 

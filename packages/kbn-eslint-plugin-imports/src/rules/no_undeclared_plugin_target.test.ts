@@ -33,7 +33,12 @@ const MOCK_MANIFESTS: Record<string, any> = {
   },
   '@kbn/ui-actions-plugin': {
     type: 'plugin',
-    plugin: { id: 'uiActions', browser: true, server: true, extraPublicDirs: ['common/trigger_ids'] },
+    plugin: {
+      id: 'uiActions',
+      browser: true,
+      server: true,
+      extraPublicDirs: ['common/trigger_ids'],
+    },
   },
   '@kbn/some-package': {
     type: 'shared-common',

@@ -35,7 +35,7 @@ const runBenchmark = (
   const resultFile = resolve(scoutDir, `${label}.json`);
 
   const env: Record<string, string> = {
-    ...process.env as Record<string, string>,
+    ...(process.env as Record<string, string>),
     PERF_LH_RESULT_FILE: resultFile,
     LIGHTHOUSE_THROTTLE: throttle,
   };
@@ -70,17 +70,24 @@ const runBenchmark = (
   log.info(`[${label}] Running Lighthouse benchmark...`);
 
   try {
-    execFileSync(process.execPath, [
-      resolve(REPO_ROOT, 'scripts/scout.js'),
-      'run-tests',
-      '--arch', 'stateful',
-      '--domain', 'classic',
-      '--testFiles', SPEC_PATH,
-    ], {
-      cwd: REPO_ROOT,
-      stdio: 'inherit',
-      env,
-    });
+    execFileSync(
+      process.execPath,
+      [
+        resolve(REPO_ROOT, 'scripts/scout.js'),
+        'run-tests',
+        '--arch',
+        'stateful',
+        '--domain',
+        'classic',
+        '--testFiles',
+        SPEC_PATH,
+      ],
+      {
+        cwd: REPO_ROOT,
+        stdio: 'inherit',
+        env,
+      }
+    );
   } catch {
     if (!Fs.existsSync(resultFile)) {
       throw createFailError(`[${label}] Benchmark failed and no results were written.`);
@@ -124,9 +131,7 @@ export const compareOptimizersCmd: Command<{}> = {
     const threshold = Number(flagsReader.string('threshold') ?? '5');
 
     if (throttle === 'devtools' && !dist) {
-      throw createFailError(
-        'DevTools throttling requires dist bundles (--dist).'
-      );
+      throw createFailError('DevTools throttling requires dist bundles (--dist).');
     }
 
     // Run legacy FIRST, then rspack (see JSDoc above for rationale)

@@ -230,11 +230,7 @@ export function getCssLoaderRule(dist: boolean): RuleSetRule {
  * Get the sass-loader chain for a specific theme.
  * Each theme uses different globals (light vs dark colors/shadows).
  */
-function getSassLoaderChain(
-  repoRoot: string,
-  theme: ThemeTag,
-  dist: boolean
-): RuleSetRule['use'] {
+function getSassLoaderChain(repoRoot: string, theme: ThemeTag, dist: boolean): RuleSetRule['use'] {
   const nodeModulesPath = Path.resolve(repoRoot, 'node_modules');
   const globalsPath = Path.resolve(
     repoRoot,
@@ -259,10 +255,7 @@ function getSassLoaderChain(
             Path.resolve(repoRoot, 'src/core/public/styles'),
             Path.resolve(repoRoot, 'packages'),
           ],
-          loadPaths: [
-            nodeModulesPath,
-            Path.resolve(repoRoot, 'src/core/public/styles'),
-          ],
+          loadPaths: [nodeModulesPath, Path.resolve(repoRoot, 'src/core/public/styles')],
           quietDeps: true,
           silenceDeprecations: ['color-functions', 'import', 'global-builtin', 'legacy-js-api'],
         },
@@ -344,10 +337,7 @@ export function getNodeModulesScssLoaderRule(repoRoot: string, dist: boolean): R
               Path.resolve(repoRoot, 'src/core/public/styles'),
               Path.resolve(repoRoot, 'packages'),
             ],
-            loadPaths: [
-              nodeModulesPath,
-              Path.resolve(repoRoot, 'src/core/public/styles'),
-            ],
+            loadPaths: [nodeModulesPath, Path.resolve(repoRoot, 'src/core/public/styles')],
             quietDeps: true,
             silenceDeprecations: ['color-functions', 'import', 'global-builtin', 'legacy-js-api'],
           },

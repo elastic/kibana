@@ -72,7 +72,7 @@ const runInWorktree = async (
   const resultFile = resolve(scoutDir, `${label}.json`);
 
   const env: Record<string, string> = {
-    ...process.env as Record<string, string>,
+    ...(process.env as Record<string, string>),
     PERF_LH_RESULT_FILE: resultFile,
     LIGHTHOUSE_THROTTLE: throttle,
   };
@@ -84,17 +84,24 @@ const runInWorktree = async (
   log.info(`[${label}] Running Lighthouse benchmark...`);
 
   try {
-    execFileSync(process.execPath, [
-      resolve(wsRoot, 'scripts/scout.js'),
-      'run-tests',
-      '--arch', 'stateful',
-      '--domain', 'classic',
-      '--testFiles', specPath,
-    ], {
-      cwd: wsRoot,
-      stdio: 'inherit',
-      env,
-    });
+    execFileSync(
+      process.execPath,
+      [
+        resolve(wsRoot, 'scripts/scout.js'),
+        'run-tests',
+        '--arch',
+        'stateful',
+        '--domain',
+        'classic',
+        '--testFiles',
+        specPath,
+      ],
+      {
+        cwd: wsRoot,
+        stdio: 'inherit',
+        env,
+      }
+    );
   } catch {
     if (!Fs.existsSync(resultFile)) {
       throw createFailError(`[${label}] Benchmark failed and no results were written.`);

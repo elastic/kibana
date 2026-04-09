@@ -151,7 +151,9 @@ export class CliDevMode {
           .join(`${this.basePathProxy.host}:${this.basePathProxy.port}`);
       },
       proxyUrl: this.basePathProxy
-        ? `http://${this.basePathProxy.host}:${this.basePathProxy.port}${this.basePathProxy.basePath ?? ''}`
+        ? `http://${this.basePathProxy.host}:${this.basePathProxy.port}${
+            this.basePathProxy.basePath ?? ''
+          }`
         : undefined,
     });
 

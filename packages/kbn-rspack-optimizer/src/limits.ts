@@ -49,9 +49,7 @@ export function validateLimitsForAllBundles(
 
   const sharedChunkNames = getSharedChunkNames();
   const missingBundleIds = diff(pluginIds, limitBundleIds);
-  const extraBundleIds = diff(limitBundleIds, pluginIds).filter(
-    (id) => !sharedChunkNames.has(id)
-  );
+  const extraBundleIds = diff(limitBundleIds, pluginIds).filter((id) => !sharedChunkNames.has(id));
 
   const issues = [];
   if (missingBundleIds.length) {

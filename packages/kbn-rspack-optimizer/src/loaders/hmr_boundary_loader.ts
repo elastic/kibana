@@ -206,6 +206,7 @@ if (module.hot) {
  * The loader entry point. Receives SWC-compiled JavaScript.
  * Appends HMR accept boundary for files containing React components.
  */
+// eslint-disable-next-line import/no-default-export
 export default function hmrBoundaryLoader(this: any, source: string): string {
   if (!source.includes(REFRESH_REG_MARKER)) {
     return source;

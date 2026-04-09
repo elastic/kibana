@@ -9,8 +9,4 @@
 
 export { perfLighthouseTest } from './fixture';
 export { DEVTOOLS_DESKTOP_THROTTLING } from './types';
-export type {
-  PerfLighthouseFixture,
-  PerfLighthouseAuditOptions,
-  ThrottlingConfig,
-} from './types';
+export type { PerfLighthouseFixture, PerfLighthouseAuditOptions, ThrottlingConfig } from './types';

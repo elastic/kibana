@@ -22,6 +22,8 @@
  * - @kbn/security-hardening
  */
 
+/* eslint-disable no-var */
+
 // Minimal setup - just what we need for TypeScript support
 require('source-map-support').install();
 require('@kbn/babel-register').install();
@@ -106,15 +108,21 @@ function getBundleSummary(bundlesDir) {
     var chunksDir = Path.join(bundlesDir, 'chunks');
     if (Fs.existsSync(chunksDir)) {
       var chunkFiles = Fs.readdirSync(chunksDir)
-        .filter(function (f) { return f.endsWith('.js'); })
+        .filter(function (f) {
+          return f.endsWith('.js');
+        })
         .map(function (f) {
           var size = Fs.statSync(Path.join(chunksDir, f)).size;
           return { name: f, size: size };
         })
-        .sort(function (a, b) { return b.size - a.size; });
+        .sort(function (a, b) {
+          return b.size - a.size;
+        });
 
       summary.chunkCount = chunkFiles.length;
-      summary.chunks = chunkFiles.reduce(function (sum, c) { return sum + c.size; }, 0);
+      summary.chunks = chunkFiles.reduce(function (sum, c) {
+        return sum + c.size;
+      }, 0);
       summary.total += summary.chunks;
       summary.largestChunks = chunkFiles.slice(0, 5);
     }
@@ -129,7 +137,9 @@ async function main() {
   var dist = args.dist;
   var outputRoot = args['output-root'] ? Path.resolve(args['output-root']) : repoRoot;
   var profileFocus = args['profile-focus']
-    ? args['profile-focus'].split(',').map(function (s) { return s.trim(); })
+    ? args['profile-focus'].split(',').map(function (s) {
+        return s.trim();
+      })
     : undefined;
   var limitsPath = args.limits ? Path.resolve(args.limits) : undefined;
   var themes = parseThemes(args.themes);
@@ -180,7 +190,9 @@ async function main() {
         log.info('');
         log.info('Total size:      ' + formatBytes(summary.total));
         log.info('Main bundle:     ' + formatBytes(summary.mainBundle) + ' (kibana.bundle.js)');
-        log.info('Chunks:          ' + formatBytes(summary.chunks) + ' (' + summary.chunkCount + ' files)');
+        log.info(
+          'Chunks:          ' + formatBytes(summary.chunks) + ' (' + summary.chunkCount + ' files)'
+        );
         if (summary.largestChunks.length > 0) {
           log.info('');
           log.info('Largest chunks:');
@@ -203,7 +215,9 @@ async function main() {
       // RsDoctor (if not stats-only and manifest exists)
       if (!statsOnly && Fs.existsSync(rsdoctorManifest)) {
         log.info('RsDoctor (interactive):');
-        log.info('  → npx @rsdoctor/cli analyze --profile target/public/bundles/.rsdoctor/manifest.json');
+        log.info(
+          '  → npx @rsdoctor/cli analyze --profile target/public/bundles/.rsdoctor/manifest.json'
+        );
         log.info('');
       }
 

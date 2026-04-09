@@ -31,10 +31,7 @@ describe('readLimits', () => {
   it('reads valid YAML and returns parsed limits object', () => {
     const tmpDir = createTmpDir();
     const limitsPath = Path.join(tmpDir, 'limits.yml');
-    Fs.writeFileSync(
-      limitsPath,
-      'pageLoadAssetSize:\n  core: 500000\n  discover: 200000\n'
-    );
+    Fs.writeFileSync(limitsPath, 'pageLoadAssetSize:\n  core: 500000\n  discover: 200000\n');
 
     const limits = readLimits(limitsPath);
     expect(limits).toEqual({
@@ -111,10 +108,7 @@ describe('validateLimitsForAllBundles', () => {
   it('errors when entries are not sorted alphabetically', () => {
     const tmpDir = createTmpDir();
     const limitsPath = Path.join(tmpDir, 'limits.yml');
-    Fs.writeFileSync(
-      limitsPath,
-      'pageLoadAssetSize:\n  discover: 150000\n  core: 500000\n'
-    );
+    Fs.writeFileSync(limitsPath, 'pageLoadAssetSize:\n  discover: 150000\n  core: 500000\n');
 
     const log = createMockLog();
     expect(() => {
@@ -270,10 +264,7 @@ describe('updateBundleLimits', () => {
       metricsPath,
       JSON.stringify([{ group: 'page load bundle size', id: 'core', value: 100000 }])
     );
-    Fs.writeFileSync(
-      limitsPath,
-      'pageLoadAssetSize:\n  core: 150000\n  removed_plugin: 200000\n'
-    );
+    Fs.writeFileSync(limitsPath, 'pageLoadAssetSize:\n  core: 150000\n  removed_plugin: 200000\n');
 
     const log = createMockLog();
     updateBundleLimits(log as any, metricsPath, limitsPath);
