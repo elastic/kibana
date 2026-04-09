@@ -96,7 +96,6 @@ export async function enrollAgent(
       `docker.elastic.co/elastic-agent/elastic-agent:${version}`,
     ],
     {
-      shell: true,
       cwd: path.join(__dirname, '../'),
       timeout: 120000,
     }
