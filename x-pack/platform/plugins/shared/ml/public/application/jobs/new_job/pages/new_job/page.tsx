@@ -75,10 +75,6 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     [jobType]
   );
 
-  if (cps?.cpsManager) {
-    jobCreator.projectRouting = cps.cpsManager.getDefaultProjectRouting() ?? null;
-  }
-
   const jobValidator = useMemo(() => new JobValidator(jobCreator), [jobCreator]);
 
   const { displayErrorToast } = useToastNotificationService();
@@ -154,6 +150,10 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
         jobCreator.categorizationFieldName = catFields[0].name;
       }
     }
+  }
+
+  if (cps?.cpsManager && jobCreator.projectRouting === null) {
+    jobCreator.projectRouting = cps.cpsManager.getDefaultProjectRouting() ?? null;
   }
 
   if (autoSetTimeRange) {
