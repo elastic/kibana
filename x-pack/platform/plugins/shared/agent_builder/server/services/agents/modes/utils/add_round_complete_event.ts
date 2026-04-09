@@ -358,6 +358,8 @@ const createReasoningStep = (event: ReasoningEvent): ReasoningStep => {
   return {
     type: ConversationRoundStepType.reasoning,
     reasoning: event.data.reasoning,
+    tool_call_id: event.data.tool_call_id,
+    tool_call_group_id: event.data.tool_call_group_id,
   };
 };
 

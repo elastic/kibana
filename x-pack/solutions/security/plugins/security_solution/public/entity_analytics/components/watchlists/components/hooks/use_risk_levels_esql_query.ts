@@ -17,7 +17,7 @@ import { esqlResponseToRecords } from '../../../../../common/utils/esql';
 import { useRiskEngineStatus } from '../../../../api/hooks/use_risk_engine_status';
 import { getWatchlistRiskLevelsQueryBodyV2 } from '../queries/watchlist_risk_level_query';
 import type { WatchlistRiskLevelsQueryResult } from './types';
-import { getLatestEntitiesIndexName } from '../../../home/constants';
+import { getEntitiesAlias, ENTITY_LATEST } from '../../../home/constants';
 
 export const useRiskLevelsEsqlQuery = ({
   watchlistId,
@@ -30,7 +30,7 @@ export const useRiskLevelsEsqlQuery = ({
 }) => {
   const { data } = useKibana().services;
 
-  const index = getLatestEntitiesIndexName(spaceId);
+  const index = getEntitiesAlias(ENTITY_LATEST, spaceId);
 
   const filterQuery = useEsqlGlobalFilterQuery();
 
