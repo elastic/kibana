@@ -390,6 +390,21 @@ describe('getStoredTokenWithRefresh', () => {
       }
     );
 
+    it('removes the lock entry even when the callback throws', async () => {
+      const deleteSpy = jest.spyOn(Map.prototype, 'delete');
+      const connectorId = 'connector-cleanup-on-throw';
+
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: null,
+      });
+
+      await getStoredTokenWithRefresh({ ...baseOpts, connectorId }).catch(() => {});
+
+      expect(deleteSpy).toHaveBeenCalledWith(connectorId);
+      deleteSpy.mockRestore();
+    });
+
     it('allows concurrent per-user calls for different users on the same connector to refresh independently', async () => {
       const lockedConnectorId = 'connector-lock-per-user-diff';
       // Different profileUids => different lock keys => independent execution.

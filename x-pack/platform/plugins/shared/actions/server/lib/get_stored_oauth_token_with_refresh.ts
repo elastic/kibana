@@ -112,129 +112,131 @@ export const getStoredTokenWithRefresh = async ({
   const lockKey = isPerUser ? `${connectorId}:${profileUid}` : connectorId;
   const lock = getOrCreateLock(lockKey);
 
-  const result = await lock(async () => {
-    // Re-fetch token inside lock - another request may have already refreshed it
-    const { connectorToken, hasErrors } = isPerUser
-      ? await connectorTokenClient.get({
-          profileUid: profileUid!,
-          connectorId,
-          tokenType: 'access_token',
-        })
-      : await connectorTokenClient.get({
-          connectorId,
+  try {
+    const result = await lock(async () => {
+      // Re-fetch token inside lock - another request may have already refreshed it
+      const { connectorToken, hasErrors } = isPerUser
+        ? await connectorTokenClient.get({
+            profileUid: profileUid!,
+            connectorId,
+            tokenType: 'access_token',
+          })
+        : await connectorTokenClient.get({
+            connectorId,
+            tokenType: 'access_token',
+          });
+
+      if (hasErrors) {
+        logger.warn(`Errors fetching connector token for connectorId: ${connectorId}`);
+        return null;
+      }
+
+      // No token found - user must authorize first
+      if (!connectorToken) {
+        throw new ConnectorAuthorizationError({
+          authMethod: 'oauth_authorization_code',
+          reason: 'no_token',
+          message: `No access token found for connectorId: ${connectorId}. User must complete OAuth authorization flow.`,
+        });
+      }
+
+      // Check if access token is still valid (may have been refreshed by another request)
+      const now = Date.now();
+      const expiresAt = connectorToken.expiresAt ? Date.parse(connectorToken.expiresAt) : Infinity;
+
+      const extractedTokens = extractStoredOAuthTokens({
+        connectorToken: connectorToken as ConnectorToken | UserConnectorToken,
+        isPerUser,
+      });
+
+      const { accessToken: storedAccessToken, refreshToken: storedRefreshToken } = extractedTokens;
+
+      if (!forceRefresh && expiresAt > now) {
+        // Token still valid
+        logger.debug(`Using stored access token for connectorId: ${connectorId}`);
+        if (storedAccessToken === null) {
+          logger.warn(
+            `Stored token has unexpected shape for connectorId: ${connectorId} (authMode: ${
+              authMode ?? 'shared'
+            }). User must re-authorize.`
+          );
+        }
+        return storedAccessToken;
+      }
+
+      if (!storedRefreshToken) {
+        throw new ConnectorAuthorizationError({
+          authMethod: 'oauth_authorization_code',
+          reason: 'token_expired',
+          message: `Access token expired and no refresh token available for connectorId: ${connectorId}. User must re-authorize.`,
+        });
+      }
+
+      // Check if the refresh token is expired
+      if (
+        connectorToken.refreshTokenExpiresAt &&
+        Date.parse(connectorToken.refreshTokenExpiresAt) <= now
+      ) {
+        throw new ConnectorAuthorizationError({
+          authMethod: 'oauth_authorization_code',
+          reason: 'refresh_token_expired',
+          message: `Refresh token expired for connectorId: ${connectorId}. User must re-authorize.`,
+        });
+      }
+
+      // Refresh the token
+      logger.debug(`Refreshing access token for connectorId: ${connectorId}`);
+      try {
+        const tokenResult = await refreshFn(storedRefreshToken);
+
+        const newAccessToken = `${tokenResult.tokenType} ${tokenResult.accessToken}`;
+
+        const updatedRefreshToken: string | undefined =
+          tokenResult.refreshToken ?? storedRefreshToken;
+
+        // Update stored token
+        await connectorTokenClient.updateWithRefreshToken({
+          id: connectorToken.id!,
+          token: newAccessToken,
+          refreshToken: updatedRefreshToken,
+          expiresIn: tokenResult.expiresIn,
+          refreshTokenExpiresIn: tokenResult.refreshTokenExpiresIn,
           tokenType: 'access_token',
         });
 
-    if (hasErrors) {
-      logger.warn(`Errors fetching connector token for connectorId: ${connectorId}`);
-      return null;
-    }
+        return newAccessToken;
+      } catch (err) {
+        logger.error(
+          `Failed to refresh access token for connectorId: ${connectorId}. Error: ${err.message}`
+        );
 
-    // No token found - user must authorize first
-    if (!connectorToken) {
-      throw new ConnectorAuthorizationError({
-        authMethod: 'oauth_authorization_code',
-        reason: 'no_token',
-        message: `No access token found for connectorId: ${connectorId}. User must complete OAuth authorization flow.`,
-      });
-    }
+        const isTokenRevoked =
+          typeof err.message === 'string' && err.message.includes('invalid_grant');
 
-    // Check if access token is still valid (may have been refreshed by another request)
-    const now = Date.now();
-    const expiresAt = connectorToken.expiresAt ? Date.parse(connectorToken.expiresAt) : Infinity;
+        if (isTokenRevoked) {
+          throw new ConnectorAuthorizationError({
+            authMethod: 'oauth_authorization_code',
+            reason: 'token_revoked',
+            message: `Failed to refresh access token for connectorId: ${connectorId}. User must re-authorize.`,
+          });
+        }
 
-    const extractedTokens = extractStoredOAuthTokens({
-      connectorToken: connectorToken as ConnectorToken | UserConnectorToken,
-      isPerUser,
+        if (treatRefreshFailureAsAuthError) {
+          throw new ConnectorAuthorizationError({
+            authMethod: 'oauth_authorization_code',
+            reason: 'refresh_failed',
+            message: `Failed to refresh access token for connectorId: ${connectorId}. User must re-authorize.`,
+          });
+        }
+
+        return null;
+      }
     });
 
-    const { accessToken: storedAccessToken, refreshToken: storedRefreshToken } = extractedTokens;
-
-    if (!forceRefresh && expiresAt > now) {
-      // Token still valid
-      logger.debug(`Using stored access token for connectorId: ${connectorId}`);
-      if (storedAccessToken === null) {
-        logger.warn(
-          `Stored token has unexpected shape for connectorId: ${connectorId} (authMode: ${
-            authMode ?? 'shared'
-          }). User must re-authorize.`
-        );
-      }
-      return storedAccessToken;
+    return result;
+  } finally {
+    if (lock.pendingCount === 0 && lock.activeCount === 0) {
+      tokenRefreshLocks.delete(lockKey);
     }
-
-    if (!storedRefreshToken) {
-      throw new ConnectorAuthorizationError({
-        authMethod: 'oauth_authorization_code',
-        reason: 'token_expired',
-        message: `Access token expired and no refresh token available for connectorId: ${connectorId}. User must re-authorize.`,
-      });
-    }
-
-    // Check if the refresh token is expired
-    if (
-      connectorToken.refreshTokenExpiresAt &&
-      Date.parse(connectorToken.refreshTokenExpiresAt) <= now
-    ) {
-      throw new ConnectorAuthorizationError({
-        authMethod: 'oauth_authorization_code',
-        reason: 'refresh_token_expired',
-        message: `Refresh token expired for connectorId: ${connectorId}. User must re-authorize.`,
-      });
-    }
-
-    // Refresh the token
-    logger.debug(`Refreshing access token for connectorId: ${connectorId}`);
-    try {
-      const tokenResult = await refreshFn(storedRefreshToken);
-
-      const newAccessToken = `${tokenResult.tokenType} ${tokenResult.accessToken}`;
-
-      const updatedRefreshToken: string | undefined =
-        tokenResult.refreshToken ?? storedRefreshToken;
-
-      // Update stored token
-      await connectorTokenClient.updateWithRefreshToken({
-        id: connectorToken.id!,
-        token: newAccessToken,
-        refreshToken: updatedRefreshToken,
-        expiresIn: tokenResult.expiresIn,
-        refreshTokenExpiresIn: tokenResult.refreshTokenExpiresIn,
-        tokenType: 'access_token',
-      });
-
-      return newAccessToken;
-    } catch (err) {
-      logger.error(
-        `Failed to refresh access token for connectorId: ${connectorId}. Error: ${err.message}`
-      );
-
-      const isTokenRevoked =
-        typeof err.message === 'string' && err.message.includes('invalid_grant');
-
-      if (isTokenRevoked) {
-        throw new ConnectorAuthorizationError({
-          authMethod: 'oauth_authorization_code',
-          reason: 'token_revoked',
-          message: `Failed to refresh access token for connectorId: ${connectorId}. User must re-authorize.`,
-        });
-      }
-
-      if (treatRefreshFailureAsAuthError) {
-        throw new ConnectorAuthorizationError({
-          authMethod: 'oauth_authorization_code',
-          reason: 'refresh_failed',
-          message: `Failed to refresh access token for connectorId: ${connectorId}. User must re-authorize.`,
-        });
-      }
-
-      return null;
-    }
-  });
-
-  if (lock.pendingCount === 0 && lock.activeCount === 0) {
-    tokenRefreshLocks.delete(lockKey);
   }
-
-  return result;
 };
