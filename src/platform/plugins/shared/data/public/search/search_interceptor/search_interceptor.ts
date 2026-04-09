@@ -174,12 +174,11 @@ export class SearchInterceptor {
     try {
       this.performanceObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries() as PerformanceResourceTiming[];
-        entries.forEach((entry) => {
-          if (entry.name.includes('/internal/search/')) {
-            this.protocolSupportsMultiplexing = ['h2', 'h3'].includes(entry.nextHopProtocol);
-            this.performanceObserver?.disconnect(); // We only need to detect this once, so we can disconnect the observer after the first match
-          }
-        });
+        const entry = entries.find(({ name }) => name.includes('/internal/search/'));
+        if (entry) {
+          this.protocolSupportsMultiplexing = ['h2', 'h3'].includes(entry.nextHopProtocol);
+          this.performanceObserver?.disconnect(); // We only need to detect this once, so we can disconnect the observer after the first match
+        }
       });
       this.performanceObserver.observe({ entryTypes: ['resource'] });
     } catch (e) {
