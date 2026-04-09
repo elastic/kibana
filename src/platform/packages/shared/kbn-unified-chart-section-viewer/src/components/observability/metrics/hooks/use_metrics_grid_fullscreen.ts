@@ -98,6 +98,7 @@ export const useMetricsGridFullScreen = ({ prefix }: { prefix: string }) => {
       `,
       [METRICS_GRID_RESTRICT_BODY_CLASS]: css`
         overflow: hidden;
+        --euiFixedHeadersOffset: 0px !important;
 
         .euiHeader[data-fixed-header] {
           z-index: ${fullScreenZIndex - 1} !important;
@@ -109,7 +110,9 @@ export const useMetricsGridFullScreen = ({ prefix }: { prefix: string }) => {
 
         .euiFlyout {
           ${logicalCSS('top', '0 !important')}
-          ${logicalCSS('height', '100%')}
+          ${logicalCSS('bottom', '0 !important')}
+          ${logicalCSS('height', '100% !important')}
+          ${logicalCSS('max-height', '100vh !important')}
           z-index: ${menuZIndex + 1} !important;
         }
 
