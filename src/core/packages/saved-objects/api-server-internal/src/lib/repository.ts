@@ -54,6 +54,8 @@ import type {
   SavedObjectsRawDocSource,
   SavedObjectsSearchOptions,
   SavedObjectsSearchResponse,
+  SavedObjectsEsqlOptions,
+  SavedObjectsEsqlResponse,
   ISavedObjectsRepository,
   SavedObjectsChangeAccessControlResponse,
   SavedObjectsChangeAccessControlObject,
@@ -95,6 +97,7 @@ import {
   performUpdateObjectsSpaces,
   performCollectMultiNamespaceReferences,
   performSearch,
+  performEsql,
 } from './apis';
 import { createRepositoryHelpers } from './utils';
 import { performChangeOwnership } from './apis/change_ownership';
@@ -348,6 +351,13 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     options: SavedObjectsSearchOptions
   ): Promise<SavedObjectsSearchResponse<T, A>> {
     return performSearch({ options }, this.apiExecutionContext);
+  }
+
+  /**
+   * {@inheritDoc ISavedObjectsRepository.esql}
+   */
+  async esql(options: SavedObjectsEsqlOptions): Promise<SavedObjectsEsqlResponse> {
+    return performEsql({ options, rawClient: this.options.client }, this.apiExecutionContext);
   }
 
   /**
