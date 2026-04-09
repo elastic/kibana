@@ -52,16 +52,30 @@ import {
 import { versionStore } from './application/version_switcher_store';
 import type { IngestHubVersion } from './application/version_switcher_store';
 import { DiscoverTour } from './application/discover_tour';
-
 const VERSION_OPTIONS = [
   {
-    value: 'blockUx' as IngestHubVersion,
-    inputDisplay: 'Block',
+    value: 'version1' as IngestHubVersion,
+    inputDisplay: 'Version 1',
     dropdownDisplay: (
       <>
-        <strong>Block</strong>
+        <strong>Version 1</strong>
         <EuiText size="s" color="subdued">
-          <p>User lands in Kibana and is blocked and pushed to add data.</p>
+          <p>Near-term fixes (Add Data, AWS, Kubernetes).</p>
+        </EuiText>
+      </>
+    ),
+  },
+  {
+    value: 'version2' as IngestHubVersion,
+    inputDisplay: 'Version 2',
+    dropdownDisplay: (
+      <>
+        <strong>Version 2</strong>
+        <EuiText size="s" color="subdued">
+          <p>
+            &ldquo;Everything is a stream&rdquo; canvas vision + AI-assisted onboarding +
+            AI-generated integrations + progressive disclosure principles.
+          </p>
         </EuiText>
       </>
     ),
@@ -135,7 +149,7 @@ const VersionSwitcherNavControl: React.FC<{ navigateToApp?: (appId: string, opti
         title={<span style={{ fontSize: 13 }}>Onboarding Experience</span>}
         description=""
         paddingSize="s"
-        style={{ textAlign: 'center', width: 200 }}
+        style={{ textAlign: 'center', width: 280 }}
       >
         <EuiSuperSelect
           options={VERSION_OPTIONS}
@@ -144,8 +158,12 @@ const VersionSwitcherNavControl: React.FC<{ navigateToApp?: (appId: string, opti
             versionStore.setVersion(value);
             sessionStorage.removeItem('ingestHub:showDiscoverTour');
             sessionStorage.removeItem('ingestHub:dataAdded');
-            const path = value === 'blockUx' ? '/ingest-hub/integrations' : '/ingest-hub';
-            navigateToApp?.(PLUGIN_ID, { path });
+            if (value === 'agentUx' || value === 'version1' || value === 'version2') {
+              navigateToApp?.('observability-overview');
+            } else {
+              const path = value === 'blockUx' ? '/ingest-hub/integrations' : '/ingest-hub';
+              navigateToApp?.(PLUGIN_ID, { path });
+            }
           }}
           compressed
           hasDividers
@@ -218,10 +236,10 @@ export class ObservabilityOnboardingPlugin
           visibleIn: [],
         },
         {
-          id: 'ingest-hub-integrations',
-          title: 'Add data',
-          path: '/ingest-hub/integrations',
-          visibleIn: [],
+              id: 'ingest-hub-integrations',
+              title: 'Add data',
+              path: '/ingest-hub/integrations',
+              visibleIn: [],
         },
         {
           id: 'ingest-hub-platform-migration',
@@ -311,3 +329,4 @@ export class ObservabilityOnboardingPlugin
     };
   }
 }
+

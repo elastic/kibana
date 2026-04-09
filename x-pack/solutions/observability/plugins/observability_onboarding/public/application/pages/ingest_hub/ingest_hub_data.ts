@@ -140,6 +140,44 @@ export const SECTIONS: IntegrationSection[] = [
   },
 ];
 
+export const POPULAR_INTEGRATION_TILES: IntegrationTile[] = [
+  {
+    id: 'popular-confluence',
+    name: 'Confluence',
+    description: '',
+    logoDomain: 'atlassian.com',
+    logoUrl: `${ELASTIC_LOGOS}/atlassian_confluence/img/confluence-logo.svg`,
+  },
+  {
+    id: 'popular-salesforce',
+    name: 'Salesforce',
+    description: '',
+    logoDomain: 'salesforce.com',
+    logoUrl: `${ELASTIC_LOGOS}/salesforce/img/salesforce.svg`,
+  },
+  {
+    id: 'popular-slack',
+    name: 'Slack',
+    description: '',
+    logoDomain: 'slack.com',
+    logoUrl: `${ELASTIC_LOGOS}/slack/img/slack.svg`,
+  },
+  {
+    id: 'popular-splunk',
+    name: 'Splunk',
+    description: '',
+    logoDomain: 'splunk.com',
+    logoUrl: `${ELASTIC_LOGOS}/splunk/img/splunk-logo.svg`,
+  },
+  {
+    id: 'popular-jira',
+    name: 'Jira',
+    description: '',
+    logoDomain: 'atlassian.com',
+    logoUrl: `${ELASTIC_LOGOS}/atlassian_jira/img/jira-software-logo.svg`,
+  },
+];
+
 export const SAAS_TILES: IntegrationTile[] = [
   {
     id: 'confluence',
@@ -335,12 +373,105 @@ export interface ApiIngestionTile extends IntegrationTile {
   endpointLabel: string;
 }
 
+export interface ApiEndpoint {
+  id: string;
+  name: string;
+  description: string;
+  logoUrl: string;
+  getEndpointUrl: (origin: string) => string;
+  keyType: 'api_key' | 'enrollment_token' | 'kibana_note';
+  keyRole?: string;
+  keyBehavior?: 'reused' | 'always_recreated' | 'legacy';
+  openUrl?: (origin: string) => string;
+  openLabel?: string;
+  badge: 'recommended' | 'legacy';
+  keyTypeLabel: string;
+  keyTypeDescription: string;
+}
+
+export const API_ENDPOINTS: ApiEndpoint[] = [
+  {
+    id: 'endpoint-elasticsearch',
+    name: 'Elasticsearch',
+    description: 'Primary datastore: index data, search, and generate analytics.',
+    logoUrl: `${ELASTIC_LOGOS}/elasticsearch/img/logo_elasticsearch.svg`,
+    getEndpointUrl: (origin) => `${origin}/elasticsearch`,
+    keyType: 'api_key',
+    keyRole: 'superuser',
+    keyBehavior: 'reused',
+    badge: 'recommended',
+    keyTypeLabel: 'Endpoint',
+    keyTypeDescription: 'The primary method for authenticating API requests',
+  },
+  {
+    id: 'endpoint-otlp',
+    name: 'OpenTelemetry',
+    description: 'Send OpenTelemetry traces, metrics, and logs.',
+    logoUrl: 'https://opentelemetry.io/img/logos/opentelemetry-logo-nav.png',
+    getEndpointUrl: (origin) => `${origin}/otlp`,
+    keyType: 'api_key',
+    keyRole: 'write',
+    keyBehavior: 'always_recreated',
+    badge: 'recommended',
+    keyTypeLabel: 'Endpoint',
+    keyTypeDescription: 'The recommended path for observability ingestion',
+  },
+  {
+    id: 'endpoint-apm',
+    name: 'Elastic APM',
+    description: 'Legacy API for datastore: index data, search, and generate analytics.',
+    logoUrl: `${ELASTIC_LOGOS}/apm/img/logo_apm.svg`,
+    getEndpointUrl: (origin) => `${origin}/apm`,
+    keyType: 'api_key',
+    keyBehavior: 'reused',
+    badge: 'legacy',
+    keyTypeLabel: 'Endpoint',
+    keyTypeDescription: 'This path is being replaced by OTLP →',
+  },
+  {
+    id: 'endpoint-fleet',
+    name: 'Fleet',
+    description: 'Fleet server endpoint: directly ingest endpoint, metric, or log data.',
+    logoUrl: `${ELASTIC_LOGOS}/fleet_server/img/logo_fleet_server.svg`,
+    getEndpointUrl: (origin) => `${origin}/fleet`,
+    keyType: 'enrollment_token',
+    keyBehavior: 'reused',
+    openUrl: (origin) => `${origin}/app/fleet`,
+    openLabel: 'Open Fleet',
+    badge: 'legacy',
+    keyTypeLabel: 'Endpoint',
+    keyTypeDescription: 'Primary path for managing agents and directly ingesting data',
+  },
+  {
+    id: 'endpoint-cloud-id',
+    name: 'Cloud ID',
+    description: "Used for auth with Elastic's CloudID mechanism.",
+    logoUrl: `${ELASTIC_LOGOS}/elasticsearch/img/logo_elasticsearch.svg`,
+    getEndpointUrl: () => 'My_deployment:dXMtd2VzdDIuZ2NwLmVsYXN0aWMuY29tJGM...',
+    keyType: 'api_key',
+    keyBehavior: 'legacy',
+    badge: 'legacy',
+    keyTypeLabel: 'Endpoint',
+    keyTypeDescription: 'A secondary auth method',
+  },
+  {
+    id: 'endpoint-kibana',
+    name: 'Kibana',
+    description: 'Legacy path for ingesting and managing data directly.',
+    logoUrl: `${ELASTIC_LOGOS}/kibana/img/logo_kibana.svg`,
+    getEndpointUrl: (origin) => origin,
+    keyType: 'kibana_note',
+    badge: 'legacy',
+    keyTypeLabel: 'Endpoint',
+    keyTypeDescription: 'Use an Elasticsearch API key to authenticate',
+  },
+];
+
 export const API_INGESTION_TILES: ApiIngestionTile[] = [
   {
     id: 'api-apm',
     name: 'APM',
-    description:
-      'Send application performance data, traces, and errors using APM agents or OpenTelemetry.',
+    description: 'Instrument apps with APM agents or OpenTelemetry.',
     logoDomain: 'elastic.co',
     logoUrl: `${ELASTIC_LOGOS}/apm/img/logo_apm.svg`,
     endpointLabel: 'endpoint_access',
@@ -348,8 +479,7 @@ export const API_INGESTION_TILES: ApiIngestionTile[] = [
   {
     id: 'api-elasticsearch',
     name: 'Elasticsearch',
-    description:
-      'Index and query observability data directly using the Elasticsearch API or bulk ingestion.',
+    description: 'Index data directly via the Elasticsearch API.',
     logoDomain: 'elastic.co',
     logoUrl: `${ELASTIC_LOGOS}/elasticsearch/img/logo_elasticsearch.svg`,
     endpointLabel: 'elasticsearch_access',
@@ -357,18 +487,17 @@ export const API_INGESTION_TILES: ApiIngestionTile[] = [
   {
     id: 'api-kibana',
     name: 'Kibana',
-    description: 'Access Kibana programmatically or embed dashboards using the Kibana API.',
+    description: 'Query and embed dashboards via the Kibana API.',
     logoDomain: 'elastic.co',
     logoUrl: `${ELASTIC_LOGOS}/kibana/img/logo_kibana.svg`,
     endpointLabel: 'endpoint_access',
   },
   {
-    id: 'api-ingest',
-    name: 'Ingest',
-    description:
-      'Send data from Beats, Logstash, or Fleet-managed agents to your Elastic deployment.',
+    id: 'api-fleet',
+    name: 'Fleet',
+    description: 'Send data from Beats, Logstash, or Fleet agents.',
     logoDomain: 'elastic.co',
-    logoUrl: `${ELASTIC_LOGOS}/elastic/img/logo_elastic.svg`,
+    logoUrl: `${ELASTIC_LOGOS}/fleet_server/img/logo_fleet_server.svg`,
     endpointLabel: 'endpoint_access',
   },
 ];

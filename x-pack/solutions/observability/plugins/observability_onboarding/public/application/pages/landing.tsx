@@ -8,9 +8,13 @@
 import React from 'react';
 import { PageTemplate } from './template';
 import { OnboardingFlowForm } from '../onboarding_flow_form/onboarding_flow_form';
+import { useFlowBreadcrumb } from '../shared/use_flow_breadcrumbs';
 
-export const LandingPage = () => (
-  <PageTemplate>
-    <OnboardingFlowForm />
-  </PageTemplate>
-);
+export const LandingPage = () => {
+  useFlowBreadcrumb(null);
+  return (
+    <PageTemplate>
+      <OnboardingFlowForm />
+    </PageTemplate>
+  );
+};

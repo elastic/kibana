@@ -43,7 +43,7 @@ const CardLogoIcon: React.FC<{ src: string; alt: string }> = ({ src, alt }) => {
     width: CARD_LOGO_SIZE + CARD_LOGO_BG_PADDING * 2,
     height: CARD_LOGO_SIZE + CARD_LOGO_BG_PADDING * 2,
     backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-    borderRadius: 12,
+    borderRadius: 8,
     border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
   };
   return (
@@ -66,6 +66,7 @@ interface KubernetesFlyoutProps {
   logoUrl: string;
   onClose: () => void;
   isChild?: boolean;
+  historyKey?: symbol;
   hideCloseButton?: boolean;
   ownFocus?: boolean;
 }
@@ -117,7 +118,7 @@ const K8S_DASHBOARDS = [
   '[Kubernetes] Volumes',
 ];
 
-export const KubernetesFlyout: React.FC<KubernetesFlyoutProps> = ({ logoUrl, onClose, isChild, hideCloseButton, ownFocus: ownFocusProp }) => {
+export const KubernetesFlyout: React.FC<KubernetesFlyoutProps> = ({ logoUrl, onClose, isChild, historyKey, hideCloseButton, ownFocus: ownFocusProp }) => {
   const { euiTheme } = useEuiTheme();
   const [selectedCollector, setSelectedCollector] = useState('new-collector');
   const [instrumentApp, setInstrumentApp] = useState(false);
@@ -312,9 +313,13 @@ export const KubernetesFlyout: React.FC<KubernetesFlyoutProps> = ({ logoUrl, onC
             session: 'inherit' as const,
             flyoutMenuProps: { title: 'Add Kubernetes', hideCloseButton },
           }
-        : {})}
+        : {
+            session: 'start' as const,
+            historyKey,
+            flyoutMenuProps: { title: 'Add Kubernetes' },
+          })}
       css={css`
-        inline-size: 36vw !important;
+        inline-size: ${isChild ? '36vw' : '72vw'} !important;
         ${
           isChild
             ? `
@@ -327,16 +332,13 @@ export const KubernetesFlyout: React.FC<KubernetesFlyoutProps> = ({ logoUrl, onC
             : ''
         }
         & .euiFlyoutHeader {
-          padding-block: 32px !important;
-          padding-inline: 32px !important;
+          padding: 40px !important;
         }
         & .euiFlyoutBody__overflowContent {
-          padding-block: 32px !important;
-          padding-inline: 32px !important;
+          padding: 40px !important;
         }
         & .euiFlyoutFooter {
-          padding-block: 24px !important;
-          padding-inline: 32px !important;
+          padding: 40px !important;
         }
       `}
     >
@@ -346,7 +348,7 @@ export const KubernetesFlyout: React.FC<KubernetesFlyoutProps> = ({ logoUrl, onC
             <CardLogoIcon src={logoUrl} alt="Kubernetes logo" />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiTitle size="m">
+            <EuiTitle size="s">
               <h2 id="kubernetesFlyoutTitle">Add Kubernetes</h2>
             </EuiTitle>
             <EuiText size="s" color="subdued">

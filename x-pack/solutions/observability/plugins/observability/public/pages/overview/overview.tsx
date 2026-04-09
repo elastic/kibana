@@ -165,18 +165,20 @@ export function OverviewPage() {
   return (
     <ObservabilityPageTemplate
       isPageDataLoaded={isAllRequestsComplete}
-      pageHeader={{
-        ...(isSkipVersion ? {} : {
-          pageTitle: i18n.translate('xpack.observability.overview.pageTitle', {
-            defaultMessage: 'Overview',
+      {...(!isAgentVersion && {
+        pageHeader: {
+          ...(isSkipVersion ? {} : {
+            pageTitle: i18n.translate('xpack.observability.overview.pageTitle', {
+              defaultMessage: 'Overview',
+            }),
           }),
-        }),
-        rightSideItems: hasAnyData ? [<HeaderActions />] : [],
-        rightSideGroupProps: {
-          responsive: true,
+          rightSideItems: hasAnyData ? [<HeaderActions />] : [],
+          rightSideGroupProps: {
+            responsive: true,
+          },
+          'data-test-subj': 'obltOverviewPageHeader',
         },
-        'data-test-subj': 'obltOverviewPageHeader',
-      }}
+      })}
       pageSectionProps={{
         contentProps: {
           style: {
@@ -189,7 +191,22 @@ export function OverviewPage() {
     >
       <HeaderMenu />
 
-      {hasAnyData ? (
+      {isAgentVersion ? (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'center',
+            minHeight: 'calc(100vh - 96px)',
+            paddingTop: 'max(40px, calc((100vh - 96px) * 0.18))',
+            paddingBottom: '40px',
+            width: '100%',
+            boxSizing: 'border-box',
+          }}
+        >
+          <AgentEmptyState />
+        </div>
+      ) : hasAnyData ? (
         <>
           {!isSkipVersion && <ObservabilityOnboardingCallout />}
 
@@ -200,8 +217,6 @@ export function OverviewPage() {
             <EuiSpacer size="s" />
           </EuiFlexGroup>
         </>
-      ) : isAgentVersion ? (
-        <AgentEmptyState />
       ) : (
         <EuiEmptyPrompt
           iconType="logoObservability"

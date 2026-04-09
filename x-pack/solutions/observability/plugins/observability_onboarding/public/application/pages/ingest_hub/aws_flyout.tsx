@@ -48,6 +48,7 @@ interface AwsFlyoutProps {
   onClose: () => void;
   onSeeMyData?: () => void;
   isChild?: boolean;
+  historyKey?: symbol;
   hideCloseButton?: boolean;
   ownFocus?: boolean;
 }
@@ -247,6 +248,7 @@ export const AwsFlyout: React.FC<AwsFlyoutProps> = ({
   onClose,
   onSeeMyData,
   isChild,
+  historyKey,
   hideCloseButton,
   ownFocus: ownFocusProp,
 }) => {
@@ -822,66 +824,76 @@ export const AwsFlyout: React.FC<AwsFlyoutProps> = ({
       aria-labelledby="awsFlyoutTitle"
       {...(isChild
         ? {
-            session: 'start' as const,
+            session: 'inherit' as const,
             flyoutMenuProps: { title: 'Add Amazon Web Services', hideCloseButton },
           }
-        : {})}
+        : {
+            session: 'start' as const,
+            historyKey,
+            flyoutMenuProps: { title: 'Add Amazon Web Services' },
+          })}
       css={css`
-        inline-size: ${isChild ? '74vw' : '50vw'} !important;
-        ${
-          isChild
-            ? `
-          animation-duration: 0s !important;
-          transition-duration: 0s !important;
-          [class*="euiFlyoutMenu__container"] {
-            border-block-end: none !important;
-          }
-        `
-            : ''
+        inline-size: ${isChild ? '36vw' : '72vw'} !important;
+        animation-duration: 0s !important;
+        transition-duration: 0s !important;
+        [class*="euiFlyoutMenu__container"] {
+          border-block-end: none !important;
         }
         & .euiFlyoutHeader {
-          padding-top: 32px !important;
-          padding-bottom: 0 !important;
-          padding-inline: 32px !important;
+          padding: 40px !important;
         }
         & .euiFlyoutBody__overflowContent {
-          padding-top: 24px !important;
-          padding-bottom: 32px !important;
-          padding-inline: 32px !important;
+          padding: 40px !important;
         }
         & .euiFlyoutFooter {
-          padding-block: 24px !important;
-          padding-inline: 32px !important;
+          padding: 40px !important;
         }
       `}
     >
-      <EuiFlyoutHeader>
+      <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
           <EuiFlexItem grow={false}>
-            <CardLogoIcon src={logoUrl} alt="AWS logo" />
+            <div css={css`position: relative; display: inline-flex;`}>
+              <CardLogoIcon src={logoUrl} alt="AWS logo" />
+              <div
+                css={css`
+                  position: absolute;
+                  bottom: -5px;
+                  right: -5px;
+                  width: 28px;
+                  height: 28px;
+                  background: ${euiTheme.colors.backgroundBasePlain};
+                  border-radius: 50%;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                `}
+              >
+                <EuiIcon type="plusCircle" size="l" color="primary" />
+              </div>
+            </div>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiTitle size="m">
-              <h2 id="awsFlyoutTitle">Add Amazon Web Services</h2>
+          <EuiFlexItem style={{ minWidth: 0 }}>
+            <EuiTitle size="s">
+              <h2 id="awsFlyoutTitle" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Add Amazon Web Services</h2>
             </EuiTitle>
-            <EuiText size="s" color="subdued">
+            <EuiText size="s" color="subdued" style={{ marginTop: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               Collect logs and metrics from your AWS services.
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer size="m" />
+      </EuiFlyoutHeader>
+
+      <EuiFlyoutBody>
+        {/* Tabs sit at the top of the body, flush with the edges */}
         <div
           css={css`
-            margin-inline: -32px;
-            inline-size: calc(100% + 64px);
-            max-inline-size: none;
+            margin-inline: -40px;
+            padding-inline: 40px;
+            margin-block-end: 24px;
           `}
         >
-          <EuiTabs
-            css={css`
-              padding-inline: 32px;
-            `}
-          >
+          <EuiTabs size="m">
             <EuiTab
               isSelected={selectedTab === 'metrics'}
               onClick={() => setSelectedTab('metrics')}
@@ -896,9 +908,6 @@ export const AwsFlyout: React.FC<AwsFlyoutProps> = ({
             </EuiTab>
           </EuiTabs>
         </div>
-      </EuiFlyoutHeader>
-
-      <EuiFlyoutBody>
         {selectedTab === 'metrics' ? (
           <>
             <EuiTitle size="xs">

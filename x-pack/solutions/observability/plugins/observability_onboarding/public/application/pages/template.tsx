@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { EuiPageTemplate, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiPageTemplate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
-import { Footer } from '../footer/footer';
 import { Header } from '../header';
 
 interface TemplateProps {
@@ -19,8 +18,6 @@ export const PageTemplate: React.FC<React.PropsWithChildren<TemplateProps>> = ({
   children,
   customHeader,
 }) => {
-  const { euiTheme } = useEuiTheme();
-
   return (
     <EuiPageTemplate
       css={css`
@@ -28,17 +25,15 @@ export const PageTemplate: React.FC<React.PropsWithChildren<TemplateProps>> = ({
       `}
     >
       {!!customHeader ? customHeader : <Header />}
-      <EuiPageTemplate.Section paddingSize="xl" restrictWidth>
-        {children}
-      </EuiPageTemplate.Section>
-      <EuiSpacer size="xl" />
       <EuiPageTemplate.Section
+        paddingSize="none"
+        restrictWidth
         css={css`
-          padding-inline: 0px;
-          border-top: ${euiTheme.border.thin};
+          padding-block-start: 32px;
+          padding-block-end: 96px;
         `}
       >
-        <Footer />
+        {children}
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );

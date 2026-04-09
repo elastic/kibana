@@ -30,6 +30,7 @@ import {
   EuiSplitButton,
   EuiSplitPanel,
   EuiText,
+  EuiTitle,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
@@ -37,6 +38,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
 import { CompactLogoIcon, DataSourcesCatalogFlyout } from './data_sources_catalog_flyout';
+import { AssetImage } from '../asset_image';
 
 const ELASTIC_LOGOS = 'https://raw.githubusercontent.com/elastic/integrations/main/packages';
 
@@ -293,28 +295,35 @@ export function DataSourcesView() {
             : []
         }
       />
-      <StreamsAppPageTemplate.Body grow={false}>
+      <StreamsAppPageTemplate.Body grow={!hasIngestedMockAwsData}>
         {!hasIngestedMockAwsData ? (
           <EuiEmptyPrompt
-            css={{ maxInlineSize: '100% !important' }}
-            iconType="database"
+            css={{
+              maxInlineSize: '100% !important',
+              '.euiEmptyPrompt__content': { flexBasis: '35%' },
+              '.euiEmptyPrompt__icon': { maxInlineSize: 'unset !important' },
+              '.euiEmptyPrompt__icon .euiImageWrapper': { maxInlineSize: 'unset !important' },
+            }}
+            icon={<AssetImage type="addStreams" size="fullWidth" />}
+            layout="horizontal"
+            color="plain"
             title={
-              <h3>
+              <h2>
                 {i18n.translate('xpack.streams.dataSourcesView.emptyTitle', {
-                  defaultMessage: 'No data sources connected yet',
+                  defaultMessage: 'Your live data registry',
                 })}
-              </h3>
+              </h2>
             }
             body={
               <p>
                 {i18n.translate('xpack.streams.dataSourcesView.emptyBody', {
                   defaultMessage:
-                    'Connect a data source through an ingestion flow to start seeing it here.',
+                    'Connect integrations, packages, connectors, or APIs and get an instant view of what\'s flowing — volume, schema, and health for every source in one place. Once connected, manage retention, routing, and policies without leaving Streams.',
                 })}
               </p>
             }
             actions={
-              <EuiButton fill iconType="plusInCircle" onClick={openCatalog}>
+              <EuiButton color="primary" fill onClick={openCatalog}>
                 {i18n.translate('xpack.streams.dataSourcesView.emptyAddDataButton', {
                   defaultMessage: 'Add data',
                 })}

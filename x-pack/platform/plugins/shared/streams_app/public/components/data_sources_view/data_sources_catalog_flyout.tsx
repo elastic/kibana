@@ -7,7 +7,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { css } from '@emotion/react';
-import { IntegrationDetailsFlyout } from './integration_details_flyout';
+import { IntegrationDetailsFlyout, ingestHubHistoryKey } from './integration_details_flyout';
 import { AWS_SERVICES } from './aws_services_data';
 import integrationsHeaderImg from './assets/integrations-header.png';
 import {
@@ -146,6 +146,7 @@ const CompactIntegrationCard: React.FC<{
         border-radius: 6px;
         padding: 12px;
         height: 100%;
+        min-height: 74px;
         cursor: pointer;
         .euiCard__top { min-width:0; flex-shrink:0; margin-block-end:0 !important; margin-inline-end:12px !important; }
         .euiCard__content { min-width:0; overflow:hidden; }
@@ -268,9 +269,9 @@ const SECTIONS: IntegrationSection[] = [
     title: 'Cloud',
     description: 'Monitor your cloud infrastructure',
     tiles: [
-      { id: 'aws', name: 'Amazon Web Services', description: 'Collect logs and metrics from AWS services.', logoDomain: 'aws.amazon.com', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_aws.svg`, catalogue: true },
-      { id: 'gcp', name: 'Google Cloud Platform', description: 'Monitor Google Cloud operations and resources.', logoDomain: 'cloud.google.com', logoUrl: `${ELASTIC_LOGOS}/gcp/img/logo_gcp.svg`, catalogue: true },
-      { id: 'azure', name: 'Azure', description: 'Centralize Azure monitoring and alerting.', logoDomain: 'azure.microsoft.com', logoUrl: `${ELASTIC_LOGOS}/azure/img/logo_azure.svg` },
+      { id: 'aws', name: 'Amazon Web Services Collection', description: 'Collect logs and metrics from AWS services.', logoDomain: 'aws.amazon.com', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_aws.svg`, catalogue: true },
+      { id: 'gcp', name: 'Google Cloud Platform Collection', description: 'Monitor Google Cloud operations and resources.', logoDomain: 'cloud.google.com', logoUrl: `${ELASTIC_LOGOS}/gcp/img/logo_gcp.svg`, catalogue: true },
+      { id: 'azure', name: 'Azure Collection', description: 'Centralize Azure monitoring and alerting.', logoDomain: 'azure.microsoft.com', logoUrl: `${ELASTIC_LOGOS}/azure/img/logo_azure.svg` },
     ],
   },
   {
@@ -765,9 +766,12 @@ export function DataSourcesCatalogFlyout({
       ownFocus
       type="overlay"
       session="start"
+      historyKey={ingestHubHistoryKey}
       flyoutMenuProps={{ title: 'Add data to Elastic Observability' }}
+      style={{ inlineSize: '72vw', maxInlineSize: '72vw' }}
       css={css`
-        inline-size: 60vw !important;
+        inline-size: 72vw !important;
+        max-inline-size: 72vw !important;
         animation-duration: 0s !important;
         transition-duration: 0s !important;
         .euiFlyout__closeButton { z-index: 10; }
@@ -779,16 +783,13 @@ export function DataSourcesCatalogFlyout({
           overflow: hidden !important;
         }
         & .euiFlyoutHeader {
-          padding-block: 32px !important;
-          padding-inline: 32px !important;
+          padding: 40px !important;
         }
         & .euiFlyoutBody__overflowContent {
-          padding-block: 32px !important;
-          padding-inline: 32px !important;
+          padding: 40px !important;
         }
         & .euiFlyoutFooter {
-          padding-block: 16px !important;
-          padding-inline: 32px !important;
+          padding: 40px !important;
         }
       `}
     >
@@ -797,21 +798,26 @@ export function DataSourcesCatalogFlyout({
           <EuiFlexItem grow={false}>
             <div
               style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 40,
+                height: 40,
                 backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-                borderRadius: 10,
-                padding: 4,
+                borderRadius: 8,
+                border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
                 flexShrink: 0,
               }}
             >
               <img
                 src={integrationsHeaderImg}
                 alt="Add data"
-                style={{ width: 48, height: 48, objectFit: 'contain', display: 'block' }}
+                style={{ width: 24, height: 24, objectFit: 'contain', display: 'block' }}
               />
             </div>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiTitle size="m">
+            <EuiTitle size="s">
               <h2>Add data to Elastic Observability</h2>
             </EuiTitle>
             <EuiText size="s" color="subdued" style={{ marginTop: 4 }}>

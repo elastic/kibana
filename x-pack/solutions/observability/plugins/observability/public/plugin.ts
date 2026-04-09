@@ -73,6 +73,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { StreamsPluginStart, StreamsPluginSetup } from '@kbn/streams-plugin/public';
+import type { StreamsAppPublicStart } from '@kbn/streams-app-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
@@ -181,6 +182,7 @@ export interface ObservabilityPublicPluginsStart {
   dataViewFieldEditor: DataViewFieldEditorStart;
   toastNotifications: ToastsStart;
   streams: StreamsPluginStart;
+  streamsApp?: StreamsAppPublicStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   inspector: InspectorPluginStart;
   savedObjectsTagging: SavedObjectTaggingPluginStart;

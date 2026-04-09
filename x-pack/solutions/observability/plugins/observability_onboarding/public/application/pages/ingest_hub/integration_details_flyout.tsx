@@ -38,7 +38,7 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { type IntegrationTile } from './data_sources_catalog_flyout';
+import { type IntegrationTile } from './ingest_hub_data';
 import { AwsFlyout } from './aws_flyout';
 import { KubernetesFlyout } from './kubernetes_flyout';
 import {
@@ -879,8 +879,6 @@ const KubernetesDetailsBody: React.FC<KubernetesDetailsBodyProps> = ({
         OpenTelemetry Operator or Elastic Agent — no custom instrumentation required.
       </p>
     </EuiText>
-
-    <EuiSpacer size="m" />
 
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>

@@ -204,7 +204,7 @@ export function StreamListView() {
               <EuiFlexItem>
                 <EuiFlexGroup alignItems="center" gutterSize="m">
                   {i18n.translate('xpack.streams.streamsListView.pageHeaderTitle', {
-                    defaultMessage: 'Data streams',
+                    defaultMessage: 'All streams',
                   })}
                 </EuiFlexGroup>
               </EuiFlexItem>
