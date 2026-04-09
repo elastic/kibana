@@ -19,9 +19,14 @@ interface InvalidateApiKeysAndDeleteSO {
   invalidateApiKeyFn?: ApiKeyInvalidationFn;
   invalidateUiamApiKeyFn?: UiamApiKeyInvalidationFn;
   logger: Logger;
-  missingApiKeyRetries?: Record<string, number>;
+  missingApiKeyRetries: Record<string, number>;
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectType: string;
+}
+
+export interface InvalidateApiKeysResult {
+  totalInvalidated: number;
+  missingApiKeyRetries: Record<string, number>;
 }
 
 export async function invalidateApiKeysAndDeletePendingApiKeySavedObject({
@@ -30,11 +35,12 @@ export async function invalidateApiKeysAndDeletePendingApiKeySavedObject({
   invalidateApiKeyFn,
   invalidateUiamApiKeyFn,
   logger,
-  missingApiKeyRetries,
+  missingApiKeyRetries: inputRetries,
   savedObjectsClient,
   savedObjectType,
-}: InvalidateApiKeysAndDeleteSO) {
+}: InvalidateApiKeysAndDeleteSO): Promise<InvalidateApiKeysResult> {
   let totalInvalidated = 0;
+  const missingApiKeyRetries = { ...inputRetries };
 
   // ES APIKey invalidation
   if (apiKeyIdsToInvalidate.length > 0) {
@@ -71,10 +77,8 @@ export async function invalidateApiKeysAndDeletePendingApiKeySavedObject({
               `Error: ${response.result.error_details?.map((d) => d.reason).join('; ')}`
           );
         } else if (isMissingApiKey(response.result)) {
-          const retryCount = (missingApiKeyRetries?.[id] ?? 0) + 1;
-          if (missingApiKeyRetries) {
-            missingApiKeyRetries[id] = retryCount;
-          }
+          const retryCount = (missingApiKeyRetries[id] ?? 0) + 1;
+          missingApiKeyRetries[id] = retryCount;
           if (retryCount < MAX_MISSING_KEY_RETRIES) {
             logger.warn(
               `UIAM APIKey not found, will retry (${retryCount}/${MAX_MISSING_KEY_RETRIES}). ` +
@@ -98,9 +102,7 @@ export async function invalidateApiKeysAndDeletePendingApiKeySavedObject({
 
       try {
         await savedObjectsClient.delete(savedObjectType, id);
-        if (missingApiKeyRetries) {
-          delete missingApiKeyRetries[id];
-        }
+        delete missingApiKeyRetries[id];
         totalInvalidated++;
       } catch (err) {
         logger.error(`Failed to delete invalidated UIAM API key. Error: ${err.message}`);
@@ -109,5 +111,5 @@ export async function invalidateApiKeysAndDeletePendingApiKeySavedObject({
   }
 
   logger.debug(`Total invalidated API keys "${totalInvalidated}"`);
-  return totalInvalidated;
+  return { totalInvalidated, missingApiKeyRetries };
 }

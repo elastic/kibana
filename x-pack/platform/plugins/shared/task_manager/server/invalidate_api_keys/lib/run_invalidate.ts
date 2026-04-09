@@ -46,10 +46,11 @@ export async function runInvalidate(opts: RunInvalidateOpts): Promise<RunInvalid
     savedObjectsClient,
     savedObjectType,
   } = opts;
-  const missingApiKeyRetries = { ...(opts.missingApiKeyRetries ?? {}) };
 
   let hasMoreApiKeysPendingInvalidation = true;
+  let missingApiKeyRetries = opts.missingApiKeyRetries ?? {};
   let totalInvalidated = 0;
+
   const excludedSOIds = new Set<string>();
 
   do {
@@ -78,7 +79,7 @@ export async function runInvalidate(opts: RunInvalidateOpts): Promise<RunInvalid
         });
       apiKeyIdsToExclude.forEach(({ id }) => excludedSOIds.add(id));
 
-      totalInvalidated += await invalidateApiKeysAndDeletePendingApiKeySavedObject({
+      const result = await invalidateApiKeysAndDeletePendingApiKeySavedObject({
         apiKeyIdsToInvalidate,
         uiamApiKeysToInvalidate,
         invalidateApiKeyFn,
@@ -88,6 +89,8 @@ export async function runInvalidate(opts: RunInvalidateOpts): Promise<RunInvalid
         savedObjectsClient,
         savedObjectType,
       });
+      totalInvalidated += result.totalInvalidated;
+      missingApiKeyRetries = result.missingApiKeyRetries;
     }
 
     hasMoreApiKeysPendingInvalidation = apiKeysToInvalidate.total > PAGE_SIZE;
