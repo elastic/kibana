@@ -32,7 +32,6 @@ export enum RuleAuditAction {
   MUTE_ALERT = 'rule_alert_mute',
   UNMUTE_ALERT = 'rule_alert_unmute',
   AGGREGATE = 'rule_aggregate',
-  GET_HISTORY = 'rule_get_history',
   BULK_EDIT = 'rule_bulk_edit',
   BULK_EDIT_PARAMS = 'rule_bulk_edit_params',
   GET_EXECUTION_LOG = 'rule_get_execution_log',
@@ -103,7 +102,6 @@ const ruleEventVerbs: Record<RuleAuditAction, VerbsTuple> = {
     'accessing execution log for',
     'accessed execution log for',
   ],
-  rule_get_history: ['access history for', 'accessing history for', 'accessed history for'],
   rule_get_global_execution_log: [
     'access execution log',
     'accessing execution log',
@@ -190,7 +188,6 @@ const ruleEventTypes: Record<RuleAuditAction, ArrayElement<EcsEvent['type']>> = 
   rule_alert_unmute: 'change',
   rule_aggregate: 'access',
   rule_get_execution_log: 'access',
-  rule_get_history: 'access',
   rule_get_global_execution_log: 'access',
   rule_get_action_error_log: 'access',
   rule_snooze: 'change',

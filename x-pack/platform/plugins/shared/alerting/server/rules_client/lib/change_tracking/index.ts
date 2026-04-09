@@ -97,7 +97,7 @@ export class ChangeTrackingService implements IChangeTrackingService {
 
   initialize(elasticsearchClient: ElasticsearchClient) {
     this.logger.debug(`ChangeTrackingService.initialize(esClient)`);
-    (async () => {
+    void (async () => {
       // Initialize each change history client (in sequence, using IIFE)
       for (const [module, client] of Object.entries(this.clients)) {
         try {
