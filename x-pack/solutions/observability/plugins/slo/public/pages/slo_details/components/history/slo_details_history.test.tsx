@@ -106,7 +106,7 @@ describe('SloDetailsHistory', () => {
       isLoading: false,
       data: mockHistoricalSummaryData,
     });
-    useFetchApmIndexMock.mockReturnValue({ data: { metric: '', traces: '' } });
+    useFetchApmIndexMock.mockReturnValue({ data: { metric: '', transaction: '', span: '' } });
   });
 
   it('renders the history view with error rate panel', () => {

@@ -28,6 +28,10 @@ const tracesInDiscoverLabel = i18n.translate(
   { defaultMessage: 'Traces in Discover' }
 );
 
+function splitCommaSeparatedIndexPatterns(pattern: string | undefined): string[] {
+  return pattern ? pattern.split(',') : [];
+}
+
 interface SliChartPanelActionsProps {
   slo: SLOWithSummaryResponse;
   timeRange?: { from: string; to: string };
@@ -48,17 +52,24 @@ export function SliChartPanelActions({ slo, timeRange }: SliChartPanelActionsPro
   const apmLink = apmUrl ? basePath.prepend(apmUrl) : undefined;
 
   const {
-    data: { traces: tracesIndex },
+    data: { transaction, span },
   } = useFetchApmIndex({ enabled: true });
 
+  const tracesIndices = [
+    ...new Set([
+      ...splitCommaSeparatedIndexPatterns(transaction),
+      ...splitCommaSeparatedIndexPatterns(span),
+    ]),
+  ].join(', ');
+
   const discoverLink = (() => {
-    if (!tracesIndex) return undefined;
+    if (!tracesIndices) return undefined;
 
     const resolved = getResolvedApmParams(slo);
 
     return getApmTracesDiscoverUrl({
       params: {
-        index: tracesIndex,
+        index: tracesIndices,
         serviceName: resolved.serviceName,
         environment: resolved.environment,
         transactionType: resolved.transactionType,

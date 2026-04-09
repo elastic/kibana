@@ -46,7 +46,7 @@ describe('SliChartPanel', () => {
         application: { capabilities: { apm: { show: false } } },
       },
     });
-    useFetchApmIndexMock.mockReturnValue({ data: { metric: '', traces: '' } });
+    useFetchApmIndexMock.mockReturnValue({ data: { metric: '', transaction: '', span: '' } });
   });
 
   it('renders the SLI chart panel', () => {

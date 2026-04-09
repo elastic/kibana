@@ -6,12 +6,12 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-
 import { useKibana } from './use_kibana';
 
 interface ApmIndices {
   metric: string;
-  traces: string;
+  transaction: string;
+  span: string;
 }
 
 export interface UseFetchApmIndex {
@@ -21,11 +21,7 @@ export interface UseFetchApmIndex {
   isError: boolean;
 }
 
-function splitCommaSeparatedIndexPatterns(pattern: string | undefined): string[] {
-  return pattern ? pattern.split(',') : [];
-}
-
-const EMPTY_INDICES: ApmIndices = { metric: '', traces: '' };
+const EMPTY_INDICES: ApmIndices = { metric: '', transaction: '', span: '' };
 
 export function useFetchApmIndex({ enabled = true }: { enabled?: boolean } = {}): UseFetchApmIndex {
   const { apmSourcesAccess } = useKibana().services;
@@ -34,19 +30,7 @@ export function useFetchApmIndex({ enabled = true }: { enabled?: boolean } = {})
     queryKey: ['fetchApmIndices'],
     queryFn: async ({ signal }) => {
       const { metric, transaction, span } = await apmSourcesAccess.getApmIndices({ signal });
-
-      // deduplicate and join the transaction and span index patterns
-      const tracesIndices = [
-        ...new Set([
-          ...splitCommaSeparatedIndexPatterns(transaction),
-          ...splitCommaSeparatedIndexPatterns(span),
-        ]),
-      ].join(',');
-
-      return {
-        metric,
-        traces: tracesIndices,
-      };
+      return { metric, transaction, span };
     },
     refetchOnWindowFocus: false,
     enabled,

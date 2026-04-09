@@ -95,7 +95,7 @@ describe('HistoricalDataCharts', () => {
       isLoading: false,
       data: mockHistoricalSummaryData,
     });
-    useFetchApmIndexMock.mockReturnValue({ data: { metric: '', traces: '' } });
+    useFetchApmIndexMock.mockReturnValue({ data: { metric: '', transaction: '', span: '' } });
   });
 
   it('renders both SLI and error budget chart panels', () => {
