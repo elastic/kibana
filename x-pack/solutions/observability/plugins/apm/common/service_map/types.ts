@@ -12,6 +12,7 @@ import type { SPAN_DESTINATION_SERVICE_RESOURCE, SPAN_SUBTYPE, SPAN_TYPE } from 
 import type { ServiceAnomaliesResponse } from '../../server/routes/service_map/get_service_anomalies';
 import type { Coordinate } from '../../typings/timeseries';
 import type { ServiceAnomalyStats } from '../anomaly_detection';
+import type { SloStatus } from '../service_inventory';
 
 export interface ServiceMapTelemetry {
   tracesCount: number;
@@ -56,6 +57,9 @@ export interface ServiceMapRawResponse {
   spans: ServiceMapSpan[];
   servicesData: ServicesResponse[];
   anomalies: ServiceAnomaliesResponse;
+  /** Optional: alert and SLO counts per service (same source as service inventory table). */
+  serviceAlertsCounts?: Record<string, number>;
+  serviceSloStats?: Record<string, { sloStatus: SloStatus; sloCount: number }>;
 }
 
 export type ServiceMapResponse = Pick<ServiceMapTelemetry, 'tracesCount'> & ServiceMapRawResponse;
@@ -179,6 +183,11 @@ export interface ServiceNodeData extends BaseNodeData {
   isService: true;
   agentName?: AgentName;
   serviceAnomalyStats?: ServiceAnomalyStats;
+  /** Active alerts count (from service inventory source). Shown as badge on node. */
+  alertsCount?: number;
+  /** SLO count and worst status (from service inventory source). Shown as badge on node. */
+  sloCount?: number;
+  sloStatus?: SloStatus;
 }
 
 export interface DependencyNodeData extends BaseNodeData {

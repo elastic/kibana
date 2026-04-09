@@ -4,15 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import type { ApmPluginContextValue } from '../context/apm_plugin/apm_plugin_context';
 import { ApmPluginContext } from '../context/apm_plugin/apm_plugin_context';
+import { getDateRange } from '../context/url_params_context/helpers';
 import { createCallApmApi } from '../services/rest/create_call_apm_api';
 import { ChartPointerEventContextProvider } from '../context/chart_pointer_event/chart_pointer_event_context';
 import type { EmbeddableDeps } from './types';
+import { LicenseProvider } from '../context/license/license_context';
 import { TimeRangeMetadataContextProvider } from '../context/time_range_metadata/time_range_metadata_context';
+import { ApmIndexSettingsContextProvider } from '../context/apm_index_settings/apm_index_settings_context';
 
 export interface ApmEmbeddableContextProps {
   deps: EmbeddableDeps;
@@ -29,6 +32,10 @@ export function ApmEmbeddableContext({
   deps,
   children,
 }: ApmEmbeddableContextProps) {
+  const { start: resolvedStart, end: resolvedEnd } = useMemo(() => {
+    return getDateRange({ rangeFrom, rangeTo });
+  }, [rangeFrom, rangeTo]);
+
   const services = {
     config: deps.config,
     core: deps.coreStart,
@@ -46,6 +53,7 @@ export function ApmEmbeddableContext({
     share: deps.pluginsSetup.share,
     kibanaEnvironment: deps.kibanaEnvironment,
     observabilityRuleTypeRegistry: deps.observabilityRuleTypeRegistry,
+    licensing: deps.pluginsStart.licensing,
   } as ApmPluginContextValue;
 
   createCallApmApi(deps.coreStart);
@@ -58,12 +66,18 @@ export function ApmEmbeddableContext({
           <KibanaContextProvider services={deps.coreStart}>
             <TimeRangeMetadataContextProvider
               uiSettings={deps.coreStart.uiSettings}
-              start={rangeFrom}
-              end={rangeTo}
+              start={resolvedStart ?? rangeFrom}
+              end={resolvedEnd ?? rangeTo}
               kuery={kuery}
               useSpanName={false}
             >
-              <ChartPointerEventContextProvider>{children}</ChartPointerEventContextProvider>
+              <ApmIndexSettingsContextProvider
+                apmSourcesAccess={deps.pluginsStart.apmSourcesAccess}
+              >
+                <LicenseProvider>
+                  <ChartPointerEventContextProvider>{children}</ChartPointerEventContextProvider>
+                </LicenseProvider>
+              </ApmIndexSettingsContextProvider>
             </TimeRangeMetadataContextProvider>
           </KibanaContextProvider>
         </KibanaThemeProvider>

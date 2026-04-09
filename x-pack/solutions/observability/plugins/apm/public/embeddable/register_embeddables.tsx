@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { CoreSetup } from '@kbn/core/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 import type { ApmPluginStartDeps, ApmPluginStart } from '../plugin';
 import type { EmbeddableDeps } from './types';
@@ -13,6 +14,10 @@ import {
   APM_ALERTING_LATENCY_CHART_EMBEDDABLE,
   APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE,
 } from './alerting/constants';
+import {
+  ADD_APM_SERVICE_MAP_PANEL_ACTION_ID,
+  APM_SERVICE_MAP_EMBEDDABLE,
+} from './service_map/constants';
 
 export async function registerEmbeddables(
   deps: Omit<EmbeddableDeps, 'coreStart' | 'pluginsStart'>
@@ -49,4 +54,23 @@ export async function registerEmbeddables(
       pluginsStart,
     });
   });
+
+  registerReactEmbeddableFactory(APM_SERVICE_MAP_EMBEDDABLE, async () => {
+    const { getServiceMapEmbeddableFactory } = await import(
+      './service_map/react_embeddable_factory'
+    );
+
+    return getServiceMapEmbeddableFactory({ ...deps, coreStart, pluginsStart });
+  });
+
+  pluginsSetup.uiActions.addTriggerActionAsync(
+    ADD_PANEL_TRIGGER,
+    ADD_APM_SERVICE_MAP_PANEL_ACTION_ID,
+    async () => {
+      const { createAddServiceMapPanelAction } = await import(
+        './service_map/create_add_service_map_panel_action'
+      );
+      return createAddServiceMapPanelAction();
+    }
+  );
 }

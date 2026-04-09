@@ -14,6 +14,8 @@ export interface AlertDetailsSource {
 
 export interface AlertDetailsAppSectionProps {
   setSources: React.Dispatch<React.SetStateAction<AlertDetailsSource[] | undefined>>;
+  /** Optional deps for rule types that embed content (e.g. APM service map). Passed when present. */
+  embeddableDeps?: unknown;
 }
 
 export const TAB_IDS = [

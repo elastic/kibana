@@ -141,7 +141,25 @@ export function transformToReactFlow(
     }),
   ];
 
-  const reactFlowNodes = [...uniqueNodes.values()].map((node) => toReactFlowNode(node));
+  const baseNodes = [...uniqueNodes.values()].map((node) => toReactFlowNode(node));
+  const hasBadgeData = Boolean(data.serviceAlertsCounts || data.serviceSloStats);
+  const reactFlowNodes = hasBadgeData
+    ? baseNodes.map((node) => {
+        if (node.type === 'service' && node.data.isService) {
+          const serviceData = node.data as ServiceNodeData;
+          return {
+            ...node,
+            data: {
+              ...serviceData,
+              alertsCount: data.serviceAlertsCounts?.[node.id],
+              sloCount: data.serviceSloStats?.[node.id]?.sloCount,
+              sloStatus: data.serviceSloStats?.[node.id]?.sloStatus,
+            },
+          };
+        }
+        return node;
+      })
+    : baseNodes;
 
   const reactFlowEdges: ServiceMapEdge[] = [];
   for (const edge of markedEdges) {

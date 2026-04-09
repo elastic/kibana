@@ -23,6 +23,7 @@ import {
   SERVICE_NODE_CIRCLE_SIZE,
 } from '../../../../common/service_map/constants';
 import { NodeLabel } from './node_label';
+import { ServiceNodeBadges } from './service_node_badges';
 
 type ServiceNodeType = Node<ServiceNodeData, 'service'>;
 
@@ -91,13 +92,50 @@ export const ServiceNode = memo(
         );
       }
 
-      return parts.join('. ');
-    }, [data.label, data.agentName, data.serviceAnomalyStats?.healthStatus]);
+      if ((data.alertsCount ?? 0) > 0) {
+        parts.push(
+          i18n.translate('xpack.apm.serviceMap.serviceNode.alertsInfo', {
+            defaultMessage: '{count} active alert(s)',
+            values: { count: data.alertsCount },
+          })
+        );
+      }
 
-    const containerStyles = css`
+      if (data.sloStatus !== undefined) {
+        parts.push(
+          i18n.translate('xpack.apm.serviceMap.serviceNode.sloInfo', {
+            defaultMessage: 'SLO status: {status}',
+            values: { status: data.sloStatus },
+          })
+        );
+      }
+
+      return parts.join('. ');
+    }, [
+      data.label,
+      data.agentName,
+      data.serviceAnomalyStats?.healthStatus,
+      data.alertsCount,
+      data.sloStatus,
+    ]);
+
+    const nodeHeadWrapperStyles = css`
       position: relative;
       width: ${SERVICE_NODE_CIRCLE_SIZE}px;
       height: ${SERVICE_NODE_CIRCLE_SIZE}px;
+    `;
+
+    const badgesOverlayStyles = css`
+      position: absolute;
+      top: -${euiTheme.size.xs};
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: ${euiTheme.levels?.header ?? 2000};
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: ${euiTheme.size.xs};
     `;
 
     const handleStyles = css`
@@ -136,15 +174,27 @@ export const ServiceNode = memo(
       pointer-events: none;
     `;
 
+    const hasBadges = (data.alertsCount ?? 0) > 0 || (data.sloCount ?? 0) > 0;
+
     return (
       <EuiFlexGroup
         direction="column"
         alignItems="center"
-        gutterSize="s"
+        gutterSize="xs"
         responsive={false}
         data-test-subj={`serviceMapNode-service-${data.id}`}
       >
-        <EuiFlexItem grow={false} css={containerStyles}>
+        <EuiFlexItem grow={false} css={nodeHeadWrapperStyles}>
+          {hasBadges && (
+            <div css={badgesOverlayStyles} aria-hidden="true">
+              <ServiceNodeBadges
+                serviceName={data.id}
+                alertsCount={data.alertsCount}
+                sloCount={data.sloCount}
+                sloStatus={data.sloStatus}
+              />
+            </div>
+          )}
           <Handle type="target" position={targetPosition ?? Position.Left} css={handleStyles} />
           <div
             css={circleStyles}

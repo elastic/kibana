@@ -6,7 +6,13 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { kqlQuery, termQuery, rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
+import {
+  kqlQuery,
+  termQuery,
+  termsQuery,
+  rangeQuery,
+  wildcardQuery,
+} from '@kbn/observability-plugin/server';
 import {
   ALERT_RULE_TYPE_ID,
   ALERT_STATUS,
@@ -34,6 +40,7 @@ export async function getServicesAlerts({
   maxNumServices = MAX_NUMBER_OF_SERVICES,
   serviceGroup,
   serviceName,
+  serviceNames,
   start,
   end,
   environment,
@@ -44,11 +51,22 @@ export async function getServicesAlerts({
   maxNumServices?: number;
   serviceGroup?: ServiceGroup | null;
   serviceName?: string;
+  /** When set, only aggregate alerts for these services (faster when map has few services). */
+  serviceNames?: string[];
   start: number;
   end: number;
   environment?: string;
   searchQuery?: string;
 }): Promise<ServiceAlertsResponse> {
+  const serviceFilter =
+    serviceNames && serviceNames.length > 0
+      ? termsQuery(SERVICE_NAME, ...serviceNames)
+      : termQuery(SERVICE_NAME, serviceName);
+  const aggSize =
+    serviceNames && serviceNames.length > 0
+      ? Math.min(serviceNames.length, maxNumServices)
+      : maxNumServices;
+
   const params = {
     size: 0,
     track_total_hits: false,
@@ -59,7 +77,7 @@ export async function getServicesAlerts({
           ...rangeQuery(start, end),
           ...kqlQuery(kuery),
           ...serviceGroupWithOverflowQuery(serviceGroup),
-          ...termQuery(SERVICE_NAME, serviceName),
+          ...serviceFilter,
           ...wildcardQuery(SERVICE_NAME, searchQuery),
           ...alertsEnvironmentQuery(environment),
         ],
@@ -69,7 +87,7 @@ export async function getServicesAlerts({
       services: {
         terms: {
           field: SERVICE_NAME,
-          size: maxNumServices,
+          size: aggSize,
         },
         aggs: {
           alerts_count: {
