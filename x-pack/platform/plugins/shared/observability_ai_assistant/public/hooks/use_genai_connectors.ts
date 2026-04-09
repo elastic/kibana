@@ -10,6 +10,10 @@ import type { InferenceConnector as CommonInferenceConnector } from '@kbn/infere
 import { InferenceConnectorType } from '@kbn/inference-common';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useLoadConnectors, type AIConnector } from '@kbn/inference-connectors';
+import {
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+} from '@kbn/management-settings-ids';
 import { OBSERVABILITY_AI_ASSISTANT_SUBFEATURE_ID } from '../../common/feature';
 import { useKibana } from './use_kibana';
 import {
@@ -57,6 +61,14 @@ export function useGenAIConnectorsWithoutContext(): UseGenAIConnectorsResult {
     ''
   );
 
+  const defaultConnectorId = settings!.client.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
+  const defaultConnectorOnly = settings!.client.get<boolean>(
+    GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+    false
+  );
+
+  const isConnectorSelectionRestricted = defaultConnectorOnly && !!defaultConnectorId;
+
   const {
     data: aiConnectors,
     isLoading: loading,
@@ -83,14 +95,23 @@ export function useGenAIConnectorsWithoutContext(): UseGenAIConnectorsResult {
   }, [connectors, setLastUsedConnector]);
 
   const selectedConnector = useMemo(() => {
+    if (isConnectorSelectionRestricted) {
+      return defaultConnectorId;
+    }
+
     const hasConnector = (id: string | undefined) =>
       id && connectors?.some((c) => c.connectorId === id);
 
     if (hasConnector(lastUsedConnector)) {
       return lastUsedConnector;
     }
+
+    if (hasConnector(defaultConnectorId)) {
+      return defaultConnectorId;
+    }
+
     return connectors?.[0]?.connectorId;
-  }, [lastUsedConnector, connectors]);
+  }, [isConnectorSelectionRestricted, defaultConnectorId, lastUsedConnector, connectors]);
 
   const getConnector = (id: string) => {
     const connector = connectors?.find((_connector) => _connector.connectorId === id);
@@ -109,7 +130,7 @@ export function useGenAIConnectorsWithoutContext(): UseGenAIConnectorsResult {
       refetch();
     },
     getConnector,
-    isConnectorSelectionRestricted: false,
-    defaultConnector: undefined,
+    isConnectorSelectionRestricted,
+    defaultConnector: defaultConnectorId || undefined,
   };
 }
