@@ -12,6 +12,7 @@ import React from 'react';
 import type { EsqlResults } from '@kbn/agent-builder-common/tools/tool_result';
 import type { TimeRange } from '@kbn/agent-builder-common';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { useLensInput } from './use_lens_input';
 import { BaseVisualization } from '../shared/base_visualization';
 
@@ -23,6 +24,7 @@ export function VisualizeESQL({
   esqlQuery,
   preferredChartType,
   timeRange,
+  embeddable,
 }: {
   lens: LensPublicStart;
   dataViews: DataViewsServicePublic;
@@ -32,6 +34,7 @@ export function VisualizeESQL({
   preferredChartType?: ChartType;
   errorMessages?: string[];
   timeRange?: TimeRange;
+  embeddable?: EmbeddableStart;
 }) {
   const { lensInput, setLensInput, isLoading } = useLensInput({
     lens,
@@ -49,6 +52,7 @@ export function VisualizeESQL({
       lensInput={lensInput}
       setLensInput={setLensInput}
       isLoading={isLoading}
+      embeddable={embeddable}
     />
   );
 }

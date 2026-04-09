@@ -50,6 +50,7 @@ import { createPublicAgentsContract } from './services/agents';
 import { createPublicEventsContract } from './services/events';
 import { registerWorkflowSteps } from './step_types';
 import type {
+  ActiveDashboardApi,
   ConfigSchema,
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
@@ -76,6 +77,7 @@ export class AgentBuilderPlugin
     >
 {
   logger: Logger;
+  private activeDashboardApi$ = new BehaviorSubject<ActiveDashboardApi | undefined>(undefined);
   private conversationActiveConfig: EmbeddableConversationProps = {};
   private internalServices?: AgentBuilderInternalService;
   private setupServices?: {
@@ -205,6 +207,7 @@ export class AgentBuilderPlugin
     };
 
     const internalServices: AgentBuilderInternalService = {
+      activeDashboardApi$: this.activeDashboardApi$,
       agentService,
       attachmentsService,
       chatService,
@@ -281,6 +284,9 @@ export class AgentBuilderPlugin
       },
       updateAttachmentOrigin: (conversationId: string, attachmentId: string, origin: string) => {
         return attachmentsService.updateOrigin(conversationId, attachmentId, origin);
+      },
+      setActiveDashboardApi: (api: ActiveDashboardApi | undefined) => {
+        this.activeDashboardApi$.next(api);
       },
     };
 

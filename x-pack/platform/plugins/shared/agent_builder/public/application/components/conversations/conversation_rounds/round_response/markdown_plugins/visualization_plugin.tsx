@@ -98,6 +98,7 @@ export function createVisualizationRenderer({
           lens={startDependencies.lens}
           uiActions={startDependencies.uiActions}
           timeRange={visTimeRange}
+          embeddable={startDependencies.embeddable}
         />
       );
     }
@@ -117,6 +118,7 @@ export function createVisualizationRenderer({
         esqlColumns={columns}
         preferredChartType={chartType}
         timeRange={resultTimeRange}
+        embeddable={startDependencies.embeddable}
       />
     );
   };
