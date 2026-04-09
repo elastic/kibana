@@ -39,7 +39,7 @@ export function registerSuggestionsInferenceFeatures(
         defaultMessage: 'AI models used for Streams suggestions.',
       }
     ),
-    taskType: 'completion',
+    taskType: 'chat_completion',
     recommendedEndpoints: [],
   });
   if (parentResult.ok) {
@@ -90,7 +90,7 @@ export function registerSuggestionsInferenceFeatures(
       parentFeatureId: STREAMS_INFERENCE_PARENT_FEATURE_ID,
       featureName: child.featureName,
       featureDescription: child.featureDescription,
-      taskType: 'completion',
+      taskType: 'chat_completion',
       recommendedEndpoints: child.recommendedEndpoints,
     });
     if (childResult.ok) {
