@@ -68,6 +68,6 @@ export class ScoutLogger extends ToolingLog {
    * @param filePath relative path to the test file
    */
   public testFileStarted(filePath: string) {
-    this.info(`[testFile] Running tests: ${filePath}`);
+    this.debug(`[testFile] Running tests: ${filePath}`);
   }
 }
