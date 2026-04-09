@@ -10,7 +10,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiCodeBlock,
   EuiConfirmModal,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -27,36 +26,25 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiPopover,
+  EuiSpacer,
   EuiText,
   EuiTextArea,
   EuiTitle,
-  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useMemo, useState } from 'react';
-import { StreamsESQLEditor } from '../../../../esql_query_editor';
+import React, { useEffect, useState } from 'react';
+import { FlyoutMetadataCard } from '../../../../flyout_components/flyout_metadata_card';
+import { FlyoutToolbarHeader } from '../../../../flyout_components/flyout_toolbar_header';
 import type { SignificantEventItem } from '../../../../../hooks/sig_events/use_fetch_significant_events';
+import { StreamsESQLEditor } from '../../../../esql_query_editor';
 import { InfoPanel } from '../../../../info_panel';
 import { SparkPlot } from '../../../../spark_plot';
-import { SeveritySelector } from '../../../stream_detail_significant_events_view/add_significant_event_flyout/common/severity_selector';
+import { SeveritySelector } from '../severity_selector';
 import { SeverityBadge } from '../severity_badge/severity_badge';
-import {
-  BACKED_STATUS_COLUMN,
-  IMPACT_COLUMN,
-  LAST_OCCURRED_COLUMN,
-  NOT_PROMOTED_BADGE_LABEL,
-  NOT_PROMOTED_TOOLTIP_CONTENT,
-  OCCURRENCES_COLUMN,
-  OCCURRENCES_TOOLTIP_NAME,
-  PROMOTED_BADGE_LABEL,
-  PROMOTED_TOOLTIP_CONTENT,
-  STREAM_COLUMN,
-} from './translations';
-import { formatLastOccurredAt } from './utils';
-import { AssetImage } from '../../../../asset_image';
+import { OCCURRENCES_COLUMN, OCCURRENCES_TOOLTIP_NAME } from './translations';
 
 interface QueryDetailsFlyoutProps {
   item: SignificantEventItem;
@@ -99,14 +87,6 @@ export function QueryDetailsFlyout({
     setSeverityScore(item.query.severity_score);
   }, [item]);
 
-  const lastOccurredAt = useMemo(
-    () => formatLastOccurredAt(item.occurrences, DEFAULT_QUERY_PLACEHOLDER),
-    [item.occurrences]
-  );
-  const hasDetectedOccurrences = useMemo(
-    () => item.occurrences.some((occurrence) => occurrence.y > 0),
-    [item.occurrences]
-  );
   const isSaveDisabled = !title.trim() || !query.trim() || isSaving;
 
   const handleCancelEdit = () => {
@@ -132,11 +112,13 @@ export function QueryDetailsFlyout({
 
   const infoListItems = [
     {
+      title: TYPE_LABEL,
+      description: <EuiBadge color="hollow">{QUERY_TYPE_BADGE_LABEL}</EuiBadge>,
+    },
+    {
       title: QUERY_LABEL,
       description: (
-        <EuiCodeBlock language="esql" paddingSize="none" transparentBackground>
-          {getDisplayQueryValue(item)}
-        </EuiCodeBlock>
+        <EuiText size="s">{getQueryInputValue(item) || DEFAULT_QUERY_PLACEHOLDER}</EuiText>
       ),
     },
     {
@@ -146,29 +128,8 @@ export function QueryDetailsFlyout({
       ),
     },
     {
-      title: IMPACT_COLUMN,
+      title: SEVERITY_DETAILS_LABEL,
       description: <SeverityBadge score={item.query.severity_score} />,
-    },
-    {
-      title: LAST_OCCURRED_COLUMN,
-      description: <EuiText size="s">{lastOccurredAt}</EuiText>,
-    },
-    {
-      title: STREAM_COLUMN,
-      description: <EuiBadge color="hollow">{item.stream_name}</EuiBadge>,
-    },
-    {
-      title: BACKED_STATUS_COLUMN,
-      description: (
-        <EuiToolTip
-          content={item.rule_backed ? PROMOTED_TOOLTIP_CONTENT : NOT_PROMOTED_TOOLTIP_CONTENT}
-        >
-          <span tabIndex={0}>
-            {item.rule_backed && <EuiBadge color="hollow">{PROMOTED_BADGE_LABEL}</EuiBadge>}
-            {!item.rule_backed && <EuiBadge color="warning">{NOT_PROMOTED_BADGE_LABEL}</EuiBadge>}
-          </span>
-        </EuiToolTip>
-      ),
     },
   ];
 
@@ -182,76 +143,90 @@ export function QueryDetailsFlyout({
         size="40%"
         hideCloseButton
       >
-        <EuiFlyoutHeader hasBorder>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-            <EuiFlexItem>
-              <EuiTitle size="m">
-                <h2 id={flyoutTitleId}>{item.query.title}</h2>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="xs" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiPopover
-                    button={
-                      <EuiButtonIcon
-                        data-test-subj="queriesTableQueryDetailsFlyoutActionsButton"
-                        iconType="boxesVertical"
-                        aria-label={ACTIONS_BUTTON_ARIA_LABEL}
-                        onClick={() => {
-                          setIsActionsPopoverOpen((value) => !value);
-                        }}
-                      />
-                    }
-                    isOpen={isActionsPopoverOpen}
-                    closePopover={() => {
+        {/* First header: minimal toolbar with actions and close */}
+        <FlyoutToolbarHeader>
+          <EuiFlexItem grow={false}>
+            <EuiPopover
+              aria-label={ACTIONS_BUTTON_ARIA_LABEL}
+              button={
+                <EuiButtonIcon
+                  data-test-subj="queriesTableQueryDetailsFlyoutActionsButton"
+                  iconType="boxesVertical"
+                  aria-label={ACTIONS_BUTTON_ARIA_LABEL}
+                  onClick={() => setIsActionsPopoverOpen((value) => !value)}
+                />
+              }
+              isOpen={isActionsPopoverOpen}
+              closePopover={() => setIsActionsPopoverOpen(false)}
+              panelPaddingSize="none"
+              anchorPosition="downRight"
+            >
+              <EuiContextMenuPanel
+                size="s"
+                items={[
+                  <EuiContextMenuItem
+                    key="edit"
+                    icon="pencil"
+                    disabled={isEditMode}
+                    onClick={() => {
                       setIsActionsPopoverOpen(false);
+                      setIsEditMode(true);
                     }}
-                    panelPaddingSize="none"
-                    anchorPosition="downRight"
+                    data-test-subj="queriesTableQueryDetailsFlyoutEditAction"
                   >
-                    <EuiContextMenuPanel
-                      size="s"
-                      items={[
-                        <EuiContextMenuItem
-                          key="edit"
-                          icon="pencil"
-                          disabled={isEditMode}
-                          onClick={() => {
-                            setIsActionsPopoverOpen(false);
-                            setIsEditMode(true);
-                          }}
-                          data-test-subj="queriesTableQueryDetailsFlyoutEditAction"
-                        >
-                          {EDIT_ACTION_LABEL}
-                        </EuiContextMenuItem>,
-                        <EuiContextMenuItem
-                          key="delete"
-                          icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
-                          css={css`
-                            color: ${euiTheme.colors.danger};
-                          `}
-                          onClick={() => {
-                            setIsActionsPopoverOpen(false);
-                            setIsDeleteModalVisible(true);
-                          }}
-                          data-test-subj="queriesTableQueryDetailsFlyoutDeleteAction"
-                        >
-                          {DELETE_ACTION_LABEL}
-                        </EuiContextMenuItem>,
-                      ]}
-                    />
-                  </EuiPopover>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    data-test-subj="queriesTableQueryDetailsFlyoutCloseButton"
-                    iconType="cross"
-                    aria-label={CLOSE_BUTTON_ARIA_LABEL}
-                    onClick={onClose}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                    {EDIT_ACTION_LABEL}
+                  </EuiContextMenuItem>,
+                  <EuiContextMenuItem
+                    key="delete"
+                    icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
+                    css={css`
+                      color: ${euiTheme.colors.danger};
+                    `}
+                    onClick={() => {
+                      setIsActionsPopoverOpen(false);
+                      setIsDeleteModalVisible(true);
+                    }}
+                    data-test-subj="queriesTableQueryDetailsFlyoutDeleteAction"
+                  >
+                    {DELETE_ACTION_LABEL}
+                  </EuiContextMenuItem>,
+                ]}
+              />
+            </EuiPopover>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              data-test-subj="queriesTableQueryDetailsFlyoutCloseButton"
+              iconType="cross"
+              aria-label={CLOSE_BUTTON_ARIA_LABEL}
+              onClick={onClose}
+            />
+          </EuiFlexItem>
+        </FlyoutToolbarHeader>
+
+        {/* Second header: title and metadata cards */}
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="s">
+            <h2 id={flyoutTitleId}>{item.query.title}</h2>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+            <EuiFlexItem>
+              <FlyoutMetadataCard title={SEVERITY_DETAILS_LABEL}>
+                <SeverityBadge score={item.query.severity_score} />
+              </FlyoutMetadataCard>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <FlyoutMetadataCard title={TYPE_LABEL}>
+                <EuiBadge color="hollow">{QUERY_TYPE_BADGE_LABEL}</EuiBadge>
+              </FlyoutMetadataCard>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <FlyoutMetadataCard title={STREAM_LABEL}>
+                <EuiBadge color="hollow" iconType="productStreamsClassic" iconSide="left">
+                  {item.stream_name}
+                </EuiBadge>
+              </FlyoutMetadataCard>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
@@ -275,29 +250,14 @@ export function QueryDetailsFlyout({
               </EuiFlexItem>
               <EuiFlexItem>
                 <InfoPanel title={OCCURRENCES_COLUMN}>
-                  {hasDetectedOccurrences ? (
-                    <SparkPlot
-                      id={`query-details-occurrences-${item.query.id}`}
-                      name={OCCURRENCES_TOOLTIP_NAME}
-                      type="bar"
-                      timeseries={item.occurrences}
-                      annotations={[]}
-                      height={160}
-                    />
-                  ) : (
-                    <EuiFlexGroup
-                      direction="column"
-                      gutterSize="s"
-                      alignItems="center"
-                      justifyContent="center"
-                      css={{ height: '100%', minHeight: '200px', padding: '30px' }}
-                    >
-                      <AssetImage type="barChart" size="xs" />
-                      <EuiText color="subdued" size="s" textAlign="center">
-                        {NO_OCCURRENCES_DESCRIPTION}
-                      </EuiText>
-                    </EuiFlexGroup>
-                  )}
+                  <SparkPlot
+                    id={`query-details-occurrences-${item.query.id}`}
+                    name={OCCURRENCES_TOOLTIP_NAME}
+                    type="bar"
+                    timeseries={item.occurrences}
+                    annotations={[]}
+                    height={160}
+                  />
                 </InfoPanel>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -397,14 +357,24 @@ function getQueryInputValue(item: SignificantEventItem) {
   return item.query.esql?.query ?? '';
 }
 
-function getDisplayQueryValue(item: SignificantEventItem) {
-  const queryText = getQueryInputValue(item);
-  return queryText || DEFAULT_QUERY_PLACEHOLDER;
-}
+const STREAM_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.streamLabel',
+  { defaultMessage: 'Stream' }
+);
 
 const QUERY_INFORMATION_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.queryInformationTitle',
   { defaultMessage: 'Query information' }
+);
+
+const TYPE_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.typeLabel',
+  { defaultMessage: 'Type' }
+);
+
+const QUERY_TYPE_BADGE_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.queryTypeBadgeLabel',
+  { defaultMessage: 'Query' }
 );
 
 const EDIT_QUERY_TITLE = i18n.translate(
@@ -434,6 +404,11 @@ const DESCRIPTION_PLACEHOLDER = i18n.translate(
 
 const SEVERITY_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.severityLabel',
+  { defaultMessage: 'Severity' }
+);
+
+const SEVERITY_DETAILS_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.severityDetailsLabel',
   { defaultMessage: 'Severity' }
 );
 
@@ -482,12 +457,4 @@ const DELETE_MODAL_BODY = i18n.translate(
 const DELETE_CONFIRM_BUTTON_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.deleteConfirmButtonLabel',
   { defaultMessage: 'Delete query' }
-);
-
-const NO_OCCURRENCES_DESCRIPTION = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.noOccurrencesDescription',
-  {
-    defaultMessage:
-      "We currently don't detect any events. You can leave it, as it might happen later or modify the query.",
-  }
 );

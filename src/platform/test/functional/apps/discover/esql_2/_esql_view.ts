@@ -30,16 +30,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const filterBar = getService('filterBar');
 
-  const { common, discover, dashboard, header, timePicker, unifiedFieldList, unifiedSearch } =
-    getPageObjects([
-      'common',
-      'discover',
-      'dashboard',
-      'header',
-      'timePicker',
-      'unifiedFieldList',
-      'unifiedSearch',
-    ]);
+  const {
+    appMenu,
+    common,
+    discover,
+    dashboard,
+    header,
+    timePicker,
+    unifiedFieldList,
+    unifiedSearch,
+  } = getPageObjects([
+    'appMenu',
+    'common',
+    'discover',
+    'dashboard',
+    'header',
+    'timePicker',
+    'unifiedFieldList',
+    'unifiedSearch',
+  ]);
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -98,7 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('app-menu-overflow-button');
         expect(await testSubjects.exists('discoverAlertsButton')).to.be(true);
         await testSubjects.click('app-menu-overflow-button');
-        expect(await testSubjects.exists('shareTopNavButton')).to.be(true);
+        expect(await appMenu.menuItemExists('shareTopNavButton')).to.be(true);
         expect(await testSubjects.exists('docTableExpandToggleColumn')).to.be(true);
         expect(await testSubjects.exists('dataGridColumnSortingButton')).to.be(true);
         expect(await testSubjects.exists('fieldListFiltersFieldSearch')).to.be(true);
@@ -123,7 +132,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('app-menu-overflow-button');
         expect(await testSubjects.exists('discoverAlertsButton')).to.be(true);
         await testSubjects.click('app-menu-overflow-button');
-        expect(await testSubjects.exists('shareTopNavButton')).to.be(true);
+        expect(await appMenu.menuItemExists('shareTopNavButton')).to.be(true);
         // we don't sort for the Document view
         expect(await testSubjects.exists('dataGridColumnSortingButton')).to.be(false);
         expect(await testSubjects.exists('docTableExpandToggleColumn')).to.be(true);
@@ -401,7 +410,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await testSubjects.click('querySubmitButton');
             await discover.waitUntilTabIsLoaded();
           }
-          await inspector.open();
+          await discover.openInspectorFromTabMenu();
           retries = retries + 1;
           const requestNames = await inspector.getRequestNames();
           expect(requestNames).to.contain('Table');
@@ -437,7 +446,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             window.ELASTIC_ESQL_DELAY_SECONDS = undefined;
           });
 
-          await inspector.open();
+          await discover.openInspectorFromTabMenu();
           const requestNames = (await inspector.getRequestNames()).split(',');
           const requestTotalTime = await inspector.getRequestTotalTime();
           expect(requestTotalTime).to.be.greaterThan(5000);

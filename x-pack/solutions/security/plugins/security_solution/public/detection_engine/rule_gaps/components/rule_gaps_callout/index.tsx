@@ -18,9 +18,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { useGetRuleIdsWithGaps } from '../../api/hooks/use_get_rule_ids_with_gaps';
+import { useGapAutoFillSchedulerContext } from '../../context/gap_auto_fill_scheduler_context';
 import { GapRangeValue } from '../../constants';
 import { useKibana } from '../../../../common/lib/kibana';
-import { SecurityPageName } from '../../../../../common/constants';
+import { SecurityPageName, EXCLUDED_GAP_REASONS_KEY } from '../../../../../common/constants';
 import { useGetSecuritySolutionUrl } from '../../../../common/components/link_to';
 import { AllRulesTabs } from '../../../rule_management_ui/components/rules_table/rules_table_toolbar';
 import {
@@ -28,12 +29,17 @@ import {
   RULE_GAPS_CALLOUT_MONITORING_TAB,
   RULE_GAPS_CALLOUT_TITLE,
 } from './translations';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const DISMISSAL_STORAGE_KEY = 'rule-gaps-callout-dismissed';
 
 export const RuleGapsCallout = () => {
-  const { docLinks, spaces } = useKibana().services;
+  const { read: canReadSecurity } = useUserPrivileges().siemPrivileges;
+  const { docLinks, spaces, uiSettings } = useKibana().services;
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
+  const excludedReasons = uiSettings?.get<string[]>(EXCLUDED_GAP_REASONS_KEY);
+  const { scheduler } = useGapAutoFillSchedulerContext();
+  const activeSchedulerId = scheduler?.enabled ? scheduler.id : undefined;
 
   const [spaceId, setSpaceId] = useState('');
   useEffect(() => {
@@ -46,6 +52,8 @@ export const RuleGapsCallout = () => {
   const { data } = useGetRuleIdsWithGaps({
     gapRange: GapRangeValue.LAST_24_H,
     gapFillStatuses: [gapFillStatus.UNFILLED],
+    excludedReasons,
+    schedulerId: activeSchedulerId,
   });
 
   useEffect(() => {
@@ -128,16 +136,18 @@ export const RuleGapsCallout = () => {
                 {RULE_GAPS_CALLOUT_MONITORING_TAB}
               </EuiButton>
             )}
-            <EuiButtonEmpty
-              href={getSecuritySolutionUrl({
-                deepLinkId: SecurityPageName.dashboards,
-                path: `security-detection-rule-monitoring-${spaceId}`,
-              })}
-              color="warning"
-              size="s"
-            >
-              {RULE_GAPS_CALLOUT_DASHBOARD}
-            </EuiButtonEmpty>
+            {canReadSecurity && spaceId && (
+              <EuiButtonEmpty
+                href={getSecuritySolutionUrl({
+                  deepLinkId: SecurityPageName.dashboards,
+                  path: `security-detection-rule-monitoring-${spaceId}`,
+                })}
+                color="warning"
+                size="s"
+              >
+                {RULE_GAPS_CALLOUT_DASHBOARD}
+              </EuiButtonEmpty>
+            )}
           </EuiFlexGroup>
         </>
       </EuiCallOut>

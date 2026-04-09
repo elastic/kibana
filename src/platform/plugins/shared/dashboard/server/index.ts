@@ -50,11 +50,13 @@ export type {
   DashboardFilter,
   DashboardOptions,
   DashboardQuery,
+  DashboardSanitizeResponseBody,
   DashboardCreateRequestBody,
   DashboardCreateResponseBody,
   DashboardReadResponseBody,
   DashboardSearchRequestParams,
   DashboardSearchResponseBody,
+  DashboardUpdateRequestBody,
   DashboardUpdateResponseBody,
   GridData,
 } from './api';

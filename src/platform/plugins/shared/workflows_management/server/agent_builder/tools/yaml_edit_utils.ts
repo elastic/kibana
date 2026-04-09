@@ -13,6 +13,9 @@ import type { Node, YAMLMap, YAMLSeq } from 'yaml';
 import { getStepNode } from '../../../common/lib/yaml/get_step_node';
 import { WORKFLOW_DEFINITION_KEYS_ORDER } from '../../../common/lib/yaml/stringify_workflow_definition';
 
+const FIX_SPLICE_INDENTATION = true;
+const ENABLE_DOT_NOTATION_PATHS = true;
+
 interface StepDefinition {
   name: string;
   type: string;
@@ -405,6 +408,67 @@ export const modifyStep = (
   });
 };
 
+const resolveDotNotationProperty = (
+  yaml: string,
+  stepNode: YAMLMap,
+  property: string,
+  value: unknown,
+  indentUnit: number,
+  scope: EditScope
+): EditResult | null => {
+  const dotIdx = property.indexOf('.');
+  const parentKey = property.slice(0, dotIdx);
+  const childKey = property.slice(dotIdx + 1);
+  const parentPair = findPairInMap(stepNode, parentKey);
+  if (!parentPair || !isMap(parentPair.value)) {
+    return null;
+  }
+
+  const childPair = findPairInMap(parentPair.value as YAMLMap, childKey);
+  if (childPair && childPair.value && (childPair.value as { range?: unknown }).range) {
+    const valRange = nodeRange(childPair.value as { range?: [number, number, number] | null });
+    if (valRange) {
+      const precedingNewline = yaml.lastIndexOf('\n', valRange[0] - 1);
+      const valueIndent = precedingNewline >= 0 ? valRange[0] - precedingNewline - 1 : valRange[0];
+      const depth = Math.floor(valueIndent / indentUnit);
+      const valStr = stringifyValuePreservingFormat(
+        value,
+        indentUnit,
+        depth,
+        childPair.value as Node
+      ).trimEnd();
+      return checkedResult(yaml, spliceYaml(yaml, valRange[0], valRange[1], `${valStr}\n`), scope);
+    }
+  }
+
+  if (!childPair) {
+    const parentRange = nodeRange(
+      parentPair.value as unknown as { range?: [number, number, number] | null }
+    );
+    if (parentRange) {
+      const raw = stringify({ [childKey]: value }, { indent: indentUnit, lineWidth: 0 }).trimEnd();
+      const precedingNewline = yaml.lastIndexOf('\n', parentRange[0] - 1);
+      const parentIndent =
+        precedingNewline >= 0 ? parentRange[0] - precedingNewline - 1 : parentRange[0];
+      const childIndent = parentIndent + indentUnit;
+      const pad = ' '.repeat(childIndent);
+      const valStr = raw
+        .split('\n')
+        .map((line) => (line.length > 0 ? `${pad}${line}` : line))
+        .join('\n');
+      const needsNewline = parentRange[1] > 0 && yaml[parentRange[1] - 1] !== '\n';
+      const insertion = `${needsNewline ? '\n' : ''}${valStr}\n`;
+      return checkedResult(
+        yaml,
+        spliceYaml(yaml, parentRange[1], parentRange[1], insertion),
+        scope
+      );
+    }
+  }
+
+  return null;
+};
+
 export const modifyStepProperty = (
   yaml: string,
   stepName: string,
@@ -417,10 +481,24 @@ export const modifyStepProperty = (
   const stepNode = getStepNode(doc, stepName);
   if (!stepNode) return { success: false, yaml, error: `Step "${stepName}" not found` };
 
-  const pair = findPairInMap(stepNode, property);
   const indentUnit = detectIndent(yaml);
-
   const scope: EditScope = { type: 'step', stepName };
+
+  if (ENABLE_DOT_NOTATION_PATHS && property.includes('.')) {
+    const dotResult = resolveDotNotationProperty(
+      yaml,
+      stepNode,
+      property,
+      value,
+      indentUnit,
+      scope
+    );
+    if (dotResult) {
+      return dotResult;
+    }
+  }
+
+  const pair = findPairInMap(stepNode, property);
 
   if (pair && pair.value && (pair.value as { range?: unknown }).range) {
     const valRange = nodeRange(pair.value as { range?: [number, number, number] | null });
@@ -460,11 +538,22 @@ export const modifyStepProperty = (
   const leadingWs = yaml.slice(Math.max(0, stepRange[0] - 40), stepRange[0]);
   const nl = leadingWs.lastIndexOf('\n');
   const stepIndent = nl >= 0 ? leadingWs.length - nl - 1 : 0;
-  const propIndent = stepIndent + indentUnit;
-  const pad = ' '.repeat(propIndent);
-  const valStr = stringifyValue({ [property]: value }, indentUnit, 0).trimEnd();
+
+  let valStr: string;
+  if (FIX_SPLICE_INDENTATION) {
+    const raw = stringify({ [property]: value }, { indent: indentUnit, lineWidth: 0 }).trimEnd();
+    const pad = ' '.repeat(stepIndent);
+    valStr = raw
+      .split('\n')
+      .map((line) => (line.length > 0 ? `${pad}${line}` : line))
+      .join('\n');
+  } else {
+    const propIndent = stepIndent + indentUnit;
+    const pad = ' '.repeat(propIndent);
+    valStr = `${pad}${stringifyValue({ [property]: value }, indentUnit, 0).trimEnd()}`;
+  }
   const needsNewline = stepRange[1] > 0 && yaml[stepRange[1] - 1] !== '\n';
-  const insertion = `${needsNewline ? '\n' : ''}${pad}${valStr}\n`;
+  const insertion = `${needsNewline ? '\n' : ''}${valStr}\n`;
   return checkedResult(yaml, spliceYaml(yaml, stepRange[1], stepRange[1], insertion), scope);
 };
 

@@ -25,6 +25,7 @@ function createMockType(name: string, schemaFields: string[]): SavedObjectsType 
     name,
     namespaceType: 'agnostic',
     hidden: false,
+    management: { importableAndExportable: true },
     mappings: { dynamic: false, properties: {} },
     modelVersions: {
       1: {
@@ -246,6 +247,37 @@ describe('validateChangesNewType', () => {
     });
 
     expect(() => callValidate(to, createMockType('my-type', ['name']))).not.toThrow();
+  });
+
+  it('should not throw for types not searchable via the management page, even if name field has non-text type', () => {
+    const to = buildNewType('my-internal-type', {
+      mappings: { 'properties.name.type': 'keyword' },
+    });
+    // importableAndExportable: false is the exemption criterion — the management find route
+    // only searches types with importableAndExportable: true
+    const internalType = {
+      ...createMockType('my-internal-type', ['name']),
+      management: { importableAndExportable: false },
+    } as unknown as SavedObjectsType;
+
+    expect(() => callValidate(to, internalType)).not.toThrow();
+  });
+
+  it('should throw for hidden types that are also importable/exportable, if name field has non-text type', () => {
+    // Hidden types that are also importableAndExportable: true DO appear in the management
+    // find route (via includedHiddenTypes), so they are subject to the same validation.
+    const to = buildNewType('my-hidden-exportable-type', {
+      mappings: { 'properties.name.type': 'keyword' },
+    });
+    const hiddenExportableType = {
+      ...createMockType('my-hidden-exportable-type', ['name']),
+      hidden: true,
+      management: { importableAndExportable: true },
+    } as unknown as SavedObjectsType;
+
+    expect(() => callValidate(to, hiddenExportableType)).toThrow(
+      /The SO type 'my-hidden-exportable-type' has 'name' or 'title' fields with incorrect types/
+    );
   });
 
   it('should not throw when mapping has nested fields that match schema (path format normalization)', () => {

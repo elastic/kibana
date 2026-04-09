@@ -174,6 +174,18 @@ export const SET_TEMPLATE_FIELD_LABEL = (fieldName: string, value: string) =>
     values: { fieldName, value },
   });
 
+export const SET_TEMPLATE_FIELD_LABEL_PREFIX = (fieldName: string) =>
+  i18n.translate('xpack.cases.caseView.userActions.setTemplateFieldLabelPrefix', {
+    defaultMessage: 'set {fieldName} to',
+    values: { fieldName },
+  });
+
 export const EXTENDED_FIELDS = i18n.translate('xpack.cases.caseView.userActions.extendedFields', {
   defaultMessage: 'Template Fields',
 });
+
+export const SYNCED_ALERTS_WITH_CLOSE_REASON = (count: number) =>
+  i18n.translate('xpack.cases.caseView.userActions.status.syncedAlertsWithCloseReason', {
+    values: { count },
+    defaultMessage: 'and synced {count, plural, =1 {# alert} other {# alerts}} with close reason',
+  });

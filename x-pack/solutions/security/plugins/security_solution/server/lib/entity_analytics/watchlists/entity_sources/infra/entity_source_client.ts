@@ -133,7 +133,7 @@ export class WatchlistEntitySourceClient {
   private getQueryFilters(query?: ListWatchlistEntitySourcesRequestQuery, ids?: string[]): string {
     const queryParts = _.pick(query ?? {}, ['type', 'managed', 'name']);
     const filters = Object.entries(queryParts).map(
-      ([key, value]) => `${watchlistEntitySourceTypeName}.attributes.${key}: ${value}`
+      ([key, value]) => `${watchlistEntitySourceTypeName}.attributes.${key}: "${value}"`
     );
 
     if (ids?.length) {

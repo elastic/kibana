@@ -128,13 +128,13 @@ steps:
             - exit_status: '-1'
               limit: 3
 
-      - label: 'Evals: Streams Significant Events'
-        key: kbn-evals-weekly-streams-significant-events
+      - label: 'Evals: Significant Events'
+        key: kbn-evals-weekly-significant-events
         command: bash .buildkite/scripts/steps/evals/run_suite.sh
         env:
           KBN_EVALS: '1'
           FTR_EIS_CCM: '1'
-          EVAL_SUITE_ID: 'streams/significant-events'
+          EVAL_SUITE_ID: 'significant-events'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
           EVAL_MODEL_GROUPS: *weekly_eis_model_groups
@@ -249,6 +249,29 @@ steps:
           EVAL_INCLUDE_EIS_MODELS: '1'
           EVAL_MODEL_GROUPS: *weekly_eis_model_groups
           EVAL_SERVER_CONFIG_SET: 'evals_entity_analytics'
+        timeout_in_minutes: 60
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-8
+          preemptible: true
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
+      - label: 'Evals: Workflows Authoring'
+        key: kbn-evals-weekly-workflows
+        command: bash .buildkite/scripts/steps/evals/run_suite.sh
+        env:
+          KBN_EVALS: '1'
+          FTR_EIS_CCM: '1'
+          EVAL_SUITE_ID: 'workflows'
+          EVAL_FANOUT: '1'
+          EVAL_INCLUDE_EIS_MODELS: '1'
+          EVAL_MODEL_GROUPS: *weekly_eis_model_groups
+          EVAL_SERVER_CONFIG_SET: 'evals_workflows'
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404

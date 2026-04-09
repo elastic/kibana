@@ -89,8 +89,8 @@
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-browser",
     "@kbn/share-plugin",
-    "@kbn/test",
-    "@kbn/tooling-log"
+    "@kbn/core-security-server",
+    "@kbn/management-settings-ids"
   ],
   "exclude": ["target/**/*"]
 }

@@ -40,16 +40,16 @@
       ]
     },
     {
-      "id": "streams/significant-events",
-      "name": "Streams Significant Events",
+      "id": "significant-events",
+      "name": "Significant Events",
       "slackChannel": "#significant-events-alerts",
-      "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-streams/evals/significant_events/playwright.config.ts",
+      "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-significant-events/playwright.config.ts",
       "tags": [
         "platform",
-        "streams"
+        "significant-events"
       ],
       "ciLabels": [
-        "evals:streams-sigevents"
+        "evals:significant-events"
       ]
     },
     {
@@ -150,6 +150,14 @@
       "ciLabels": [
         "evals:attack-discovery"
       ]
+    },
+    {
+      "id": "workflows",
+      "name": "Workflows Authoring",
+      "configPath": "src/platform/packages/shared/kbn-evals-suite-workflows/playwright.config.ts",
+      "tags": ["platform", "workflows"],
+      "ciLabels": ["evals:workflows"],
+      "serverConfigSet": "evals_workflows"
     }
   ]
 }

@@ -33,7 +33,7 @@ export const histogramVisTypeDefinition = {
   title: i18n.translate('visTypeXy.histogram.histogramTitle', {
     defaultMessage: 'Vertical bar',
   }),
-  icon: 'visBarVertical',
+  icon: 'chartBarVertical',
   description: i18n.translate('visTypeXy.histogram.histogramDescription', {
     defaultMessage: 'Present data in vertical bars on an axis.',
   }),
