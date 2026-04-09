@@ -27,6 +27,10 @@ export const openAppearanceModal = ({
   security,
   isServerless,
 }: OpenAppearanceModalParams) => {
+  if (appearanceModalRef) {
+    return;
+  }
+
   const closeModal = () => {
     appearanceModalRef?.close();
     appearanceModalRef = null;
