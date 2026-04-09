@@ -43,6 +43,8 @@ import type {
   DataStreamResultsFlyoutComponent,
 } from './manage_integrations_table';
 
+const INVALID_VERSION = '0.0.0';
+
 type ReviewDataStream = DataStreamResponse;
 
 interface ReviewTableRow {
@@ -237,7 +239,7 @@ export const ReviewApproveModal: React.FC<{
   }, [automaticImport, closeModal]);
 
   const normalizedVersion = reviewVersion.trim();
-  const isZeroVersion = normalizedVersion.startsWith('0.0.0');
+  const isZeroVersion = normalizedVersion.startsWith(INVALID_VERSION);
   const isVersionValid = Boolean(semverValid(normalizedVersion)) && !isZeroVersion;
   const isVersionInputInvalid = isVersionTouched && !isVersionValid;
   const versionValidationMessage = !normalizedVersion
@@ -246,7 +248,7 @@ export const ReviewApproveModal: React.FC<{
       })
     : isZeroVersion
     ? i18n.translate('xpack.fleet.epmList.manageIntegrations.actions.reviewVersionZeroNotAllowed', {
-        defaultMessage: 'Version 0.0.0 is not allowed.',
+        defaultMessage: `Version ${INVALID_VERSION} is not allowed.`,
       })
     : i18n.translate('xpack.fleet.epmList.manageIntegrations.actions.reviewVersionInvalid', {
         defaultMessage: 'Enter a valid semantic version (for example, 1.0.0).',
@@ -254,14 +256,14 @@ export const ReviewApproveModal: React.FC<{
 
   const handleApproveAndDeploy = useCallback(async () => {
     const version = reviewVersion.trim();
-    if (!semverValid(version) || version.startsWith('0.0.0')) {
+    if (!semverValid(version) || version.startsWith(INVALID_VERSION)) {
       setIsVersionTouched(true);
       setReviewError(
-        version.startsWith('0.0.0')
+        version.startsWith(INVALID_VERSION)
           ? i18n.translate(
               'xpack.fleet.epmList.manageIntegrations.actions.reviewVersionZeroError',
               {
-                defaultMessage: 'Version 0.0.0 is not allowed.',
+                defaultMessage: `Version ${INVALID_VERSION} is not allowed.`,
               }
             )
           : i18n.translate(
