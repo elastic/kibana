@@ -18,6 +18,7 @@ export interface FieldMapping {
   scripted?: boolean;
   rowCount?: number;
   type: string;
+  esTypes?: string[];
   name: string;
   displayName?: string;
 }
