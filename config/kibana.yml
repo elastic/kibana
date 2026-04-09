@@ -1,3 +1,10 @@
+uiSettings:
+  overrides:
+    'workflows:ui:enabled': true
+    'agentBuilder:connectorsEnabled': true
+    'agentBuilder:experimentalFeatures': true
+xpack.stack_connectors.enableExperimental:
+  - connectorsFromSpecs
 # For more configuration options see the configuration guide for Kibana in
 # https://www.elastic.co/guide/index.html
 
