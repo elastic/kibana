@@ -255,7 +255,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                                           }
                                         )}
                                         aria-label={i18n.translate(
-                                          'xpack.searchInferenceEndpoints.settings.endpointUnavailable',
+                                          'xpack.searchInferenceEndpoints.settings.endpointUnavailable.ariaLabel',
                                           {
                                             defaultMessage:
                                               'Inference endpoint {label} is no longer available',
