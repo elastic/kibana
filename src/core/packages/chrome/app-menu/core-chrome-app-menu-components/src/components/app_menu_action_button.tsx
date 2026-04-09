@@ -72,11 +72,6 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
   const handleClick = (event: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
     if (isDisabled(disableButton)) return;
 
-    if (hasItems) {
-      onPopoverToggle();
-      return;
-    }
-
     const triggerElement = event.currentTarget;
     run?.({
       triggerElement,
