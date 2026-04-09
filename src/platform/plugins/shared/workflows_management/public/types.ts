@@ -29,6 +29,7 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
+import type { AvailabilityService } from './common/lib/availability/availability_service';
 import type { TelemetryServiceClient } from './common/lib/telemetry/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -70,8 +71,13 @@ export interface AgentBuilderPluginStartContract {
   clearChatConfig: () => void;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WorkflowsPublicPluginStart {}
+export interface WorkflowsPublicPluginStart {
+  /**
+   * Sets Workflows availability status to unavailable.
+   * Should only be called in serverless.
+   * */
+  setUnavailableInServerlessTier: () => void;
+}
 
 export interface WorkflowsPublicPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
@@ -92,6 +98,7 @@ export interface WorkflowsPublicPluginStartAdditionalServices {
   workflowsManagement: {
     telemetry: TelemetryServiceClient;
     agentBuilder?: AgentBuilderPluginStartContract;
+    availability: AvailabilityService;
   };
 }
 

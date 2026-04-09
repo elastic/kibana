@@ -12,31 +12,74 @@ import React, { type PropsWithChildren, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useObservable } from '@kbn/use-observable';
+import type { UnavailabilityReason } from '../../common/lib/availability/availability_service';
 import { useKibana } from '../../hooks/use_kibana';
 import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { AccessDenied } from '../access_denied/access_denied';
 
+/**
+ * Wrapper component to render the workflows app with the availability check
+ */
 export const WorkflowsAvailabilityWrapper = React.memo<PropsWithChildren>(({ children }) => {
-  const { services } = useKibana();
-  const license = useObservable(services.licensing.license$);
+  const { availability } = useKibana().services.workflowsManagement;
 
-  if (!license?.hasAtLeast('enterprise')) {
-    return <AvailabilityAccessDenied />;
+  const availability$ = useMemo(() => availability.getAvailabilityStatus$(), [availability]);
+  const availabilityStatus = useObservable(availability$, availability.getAvailabilityStatus());
+
+  if (!availabilityStatus.isAvailable) {
+    return <AvailabilityAccessDenied reason={availabilityStatus.unavailabilityReason} />;
   }
 
   return <>{children}</>;
 });
 WorkflowsAvailabilityWrapper.displayName = 'WorkflowsAvailabilityWrapper';
 
-const SUBSCRIPTIONS_LINK = 'https://www.elastic.co/subscriptions';
-
-const AvailabilityAccessDenied: React.FC = () => {
+/**
+ * Component to render the access denied screen when the workflows app is not available
+ * @param reason - The reason for the unavailability
+ * @returns The access denied component
+ */
+const AvailabilityAccessDenied = React.memo<{ reason: UnavailabilityReason }>(({ reason }) => {
   useWorkflowsBreadcrumbs();
-  const { application } = useKibana().services;
+  const actions = useUnavailabilityActions(reason);
+  return (
+    <AccessDenied
+      title={
+        reason === 'license'
+          ? i18n.translate('platform.plugins.shared.workflows_management.ui.upgradeLicense.title', {
+              defaultMessage: 'Upgrade your license',
+            })
+          : i18n.translate(
+              'platform.plugins.shared.workflows_management.ui.unavailableInServerlessTier.title',
+              { defaultMessage: 'Upgrade your subscription' }
+            )
+      }
+      description={
+        reason === 'license' ? (
+          <FormattedMessage
+            id="platform.plugins.shared.workflows_management.ui.upgradeLicense.description"
+            defaultMessage="You need an Enterprise license to use Workflows."
+          />
+        ) : (
+          <FormattedMessage
+            id="platform.plugins.shared.workflows_management.ui.unavailableInServerlessTier.description"
+            defaultMessage="You need to upgrade the subscription of your serverless project to use Workflows."
+          />
+        )
+      }
+      actions={actions}
+    />
+  );
+});
+AvailabilityAccessDenied.displayName = 'AvailabilityAccessDenied';
 
-  const actions = useMemo(
-    () => [
-      <EuiButton fill href={SUBSCRIPTIONS_LINK} target="_blank">
+const LICENSE_DOCS_LINK = 'https://www.elastic.co/subscriptions';
+
+const useUnavailabilityActions = (reason: UnavailabilityReason): React.ReactNode[] => {
+  const { application } = useKibana().services;
+  if (reason === 'license') {
+    return [
+      <EuiButton fill href={LICENSE_DOCS_LINK} target="_blank">
         <FormattedMessage
           id="platform.plugins.shared.workflows_management.ui.upgradeLicense.subscriptionPlansButton"
           defaultMessage="Subscription plans"
@@ -56,23 +99,9 @@ const AvailabilityAccessDenied: React.FC = () => {
           defaultMessage="Manage your license"
         />
       </EuiButtonEmpty>,
-    ],
-    [application]
-  );
-
-  return (
-    <AccessDenied
-      title={i18n.translate(
-        'platform.plugins.shared.workflows_management.ui.upgradeLicense.title',
-        { defaultMessage: 'Upgrade your license' }
-      )}
-      description={
-        <FormattedMessage
-          id="platform.plugins.shared.workflows_management.ui.upgradeLicense.description"
-          defaultMessage="You need an Enterprise license to use Workflows."
-        />
-      }
-      actions={actions}
-    />
-  );
+    ];
+  }
+  return [
+    // TODO: Add actions for unavailable in serverless tier
+  ];
 };

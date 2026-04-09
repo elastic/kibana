@@ -15,8 +15,8 @@ import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/us
 import { AccessDenied } from '../access_denied/access_denied';
 
 export const WorkflowsPrivilegesWrapper: React.FC<React.PropsWithChildren> = ({ children }) => {
-  const capabilities = useWorkflowsCapabilities();
-  if (!capabilities.canReadWorkflow) {
+  const { canReadWorkflow } = useWorkflowsCapabilities();
+  if (!canReadWorkflow) {
     return <PrivilegesAccessDenied />;
   }
   return children;
