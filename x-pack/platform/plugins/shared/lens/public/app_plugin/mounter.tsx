@@ -38,13 +38,13 @@ import type {
   LensTopNavMenuEntryGenerator,
   LensAttributesService,
 } from '@kbn/lens-common';
-import { LENS_SHARE_STATE_ACTION } from '@kbn/lens-common';
+import { LENS_EMBEDDABLE_TYPE, LENS_SHARE_STATE_ACTION } from '@kbn/lens-common';
 import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { App } from './app';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import type { LensPluginStartDependencies } from '../plugin';
-import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE, APP_ID } from '../../common/constants';
+import { LENS_EDIT_BY_VALUE, APP_ID } from '../../common/constants';
 import type { RedirectToOriginProps, HistoryLocationState } from './types';
 import type { LensRootStore } from '../state_management';
 import { makeConfigureStore, navigateAway, loadInitial, setState } from '../state_management';

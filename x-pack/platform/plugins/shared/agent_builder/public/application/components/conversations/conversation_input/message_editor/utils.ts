@@ -9,6 +9,24 @@ import { charOffsetToDomPosition } from './command_badge';
 import type { ActiveCommand } from './command_menu';
 
 /**
+ * Converts a plain text string into a DocumentFragment, preserving line breaks
+ * as <br> elements. Text nodes alone cannot render \n in a contenteditable div.
+ */
+export const createTextFragment = (text: string): DocumentFragment => {
+  const fragment = document.createDocumentFragment();
+  const parts = text.split('\n');
+  parts.forEach((part, i) => {
+    if (part) {
+      fragment.appendChild(document.createTextNode(part));
+    }
+    if (i < parts.length - 1) {
+      fragment.appendChild(document.createElement('br'));
+    }
+  });
+  return fragment;
+};
+
+/**
  * Creates a DOM Range spanning the full command text (sequence + query)
  * within the editor, e.g. the range covering "/summ" in "hello /summ".
  */
