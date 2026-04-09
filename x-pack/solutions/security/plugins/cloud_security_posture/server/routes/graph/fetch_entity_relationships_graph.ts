@@ -286,6 +286,10 @@ export const fetchEntities = async ({
   entityIds: EntityId[];
   spaceId: string;
 }): Promise<EsqlToRecords<EntityRecord>> => {
+  if (entityIds.length === 0) {
+    return { columns: [], records: [] };
+  }
+
   const indexName = getEntitiesLatestIndexName(spaceId);
 
   logger.trace(`Fetching entities from index [${indexName}] for ${entityIds.length} entities`);
