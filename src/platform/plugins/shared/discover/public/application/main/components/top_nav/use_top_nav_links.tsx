@@ -21,7 +21,6 @@ import type { RuleTypeWithDescription } from '@kbn/alerts-ui-shared';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import useObservable from 'react-use/lib/useObservable';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
-import { toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { useI18n } from '@kbn/i18n-react';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
@@ -39,7 +38,7 @@ import {
 import { useProfileAccessor } from '../../../../context_awareness';
 import {
   internalStateActions,
-  selectTabSavedSearch,
+  selectTabSavedSearchByValueAttributes,
   useCurrentDataView,
   useCurrentTabAction,
   useCurrentTabSelector,
@@ -104,26 +103,17 @@ export const useTopNavLinks = ({
       .map((ruleType) => ruleType.id);
 
   const transferBackToEditor = useCallback(async () => {
-    const internalState = getState();
-    const tabId = internalState.tabs.unsafeCurrentId;
-
-    const savedSearch = await selectTabSavedSearch({
-      tabId,
+    const byValueState = await selectTabSavedSearchByValueAttributes({
+      tabId: currentTab.id,
       getState,
       runtimeStateManager,
       services,
     });
 
-    const { searchSourceJSON, references } = savedSearch.searchSource.serialize();
-    const attributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
-
     services.embeddableEditor.transferBackToEditor(TransferAction.SaveByValue, {
-      state: {
-        ...attributes,
-        references,
-      },
+      state: byValueState,
     });
-  }, [getState, runtimeStateManager, services]);
+  }, [getState, currentTab.id, runtimeStateManager, services]);
 
   const discoverParams: AppMenuDiscoverParams = useMemo(
     () => ({

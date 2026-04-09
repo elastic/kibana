@@ -74,6 +74,7 @@ export {
   selectHasUnsavedChanges,
   searchSourceComparator,
   selectTabSavedSearch,
+  selectTabSavedSearchByValueAttributes,
 } from './selectors';
 
 export {

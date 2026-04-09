@@ -40,7 +40,6 @@ import {
   useInternalStateDispatch,
   useInternalStateGetState,
   useInternalStateSelector,
-  useRuntimeStateManager,
 } from '../../state_management/redux';
 import { DiscoverTopNavMenu } from './discover_topnav_menu';
 import { ESQLToDataViewTransitionModal } from './esql_dataview_transition';
@@ -138,7 +137,6 @@ export const DiscoverTopNav = ({
 }: DiscoverTopNavProps) => {
   const dispatch = useInternalStateDispatch();
   const getState = useInternalStateGetState();
-  const runtimeStateManager = useRuntimeStateManager();
   const currentTabId = useCurrentTabSelector((tab) => tab.id);
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data } = services;
@@ -291,10 +289,9 @@ export const DiscoverTopNav = ({
       if (needsSave) {
         setInitialCopyOnSave(false);
         onSaveCbRef.current = () => {
-          const tabId = getState().tabs.unsafeCurrentId;
           dispatch(
             internalStateActions.transitionFromESQLToDataView({
-              tabId,
+              tabId: currentTabId,
               dataViewId: dataView.id ?? '',
             })
           );
@@ -304,7 +301,7 @@ export const DiscoverTopNav = ({
       }
       dispatch(transitionFromESQLToDataView({ dataViewId: dataView.id ?? '' }));
     },
-    [dataView.id, dispatch, getState, services, transitionFromESQLToDataView]
+    [dataView.id, currentTabId, dispatch, services, transitionFromESQLToDataView]
   );
 
   const onOpenSaveModal = useCallback(() => {
@@ -509,12 +506,9 @@ export const DiscoverTopNav = ({
       )}
       {isSaveModalVisible && (
         <DiscoverSessionSaveModalContainer
-          dispatch={dispatch}
-          getState={getState}
           initialCopyOnSave={initialCopyOnSave}
           onClose={onCloseSaveModal}
           onSaveCb={onSaveCbRef.current}
-          runtimeStateManager={runtimeStateManager}
           services={services}
         />
       )}

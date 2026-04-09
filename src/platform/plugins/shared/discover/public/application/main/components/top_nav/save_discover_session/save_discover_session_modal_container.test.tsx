@@ -17,6 +17,9 @@ import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { DiscoverServices } from '../../../../../build_services';
 import {
+  CurrentTabProvider,
+  InternalStateProvider,
+  RuntimeStateManagerProvider,
   fromTabStateToSavedObjectTab,
   internalStateActions,
 } from '../../../state_management/redux';
@@ -154,15 +157,18 @@ const setup = async ({
   const onClose = jest.fn();
 
   render(
-    <DiscoverSessionSaveModalContainer
-      dispatch={toolkit.internalState.dispatch}
-      getState={toolkit.internalState.getState}
-      initialCopyOnSave={initialCopyOnSave}
-      onClose={onClose}
-      onSaveCb={onSaveCb}
-      runtimeStateManager={toolkit.runtimeStateManager}
-      services={services}
-    />
+    <InternalStateProvider store={toolkit.internalState}>
+      <RuntimeStateManagerProvider value={toolkit.runtimeStateManager}>
+        <CurrentTabProvider currentTabId={toolkit.getCurrentTab().id}>
+          <DiscoverSessionSaveModalContainer
+            initialCopyOnSave={initialCopyOnSave}
+            onClose={onClose}
+            onSaveCb={onSaveCb}
+            services={services}
+          />
+        </CurrentTabProvider>
+      </RuntimeStateManagerProvider>
+    </InternalStateProvider>
   );
 
   const modalProps: DiscoverSessionSaveDashboardModalProps | undefined = MockModal.mock.calls.length
