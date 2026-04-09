@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 
 import { EuiButton, EuiFlexGroup, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
-import { useRunWorkflow, WorkflowSelector } from '@kbn/workflows-ui';
+import { useRunWorkflow, useWorkflows, WorkflowSelector } from '@kbn/workflows-ui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { RunWorkflowResponseDto } from '@kbn/workflows';
@@ -28,6 +28,8 @@ export interface RunWorkflowPanelProps {
   onClose: () => void;
   /** Optional callback invoked when workflow execution is triggered. */
   onExecute?: () => void;
+  /** Optional callback invoked after a workflow execution is triggered successfully. */
+  onSuccess?: (executionId: string, workflowId: string, workflowName?: string) => void;
 }
 
 /** A shared panel that lets users select and execute a workflow with arbitrary inputs. */
@@ -37,6 +39,7 @@ export const RunWorkflowPanel = ({
   executeButtonTestSubj,
   onClose,
   onExecute,
+  onSuccess,
 }: RunWorkflowPanelProps) => {
   const {
     services: { application, rendering },
@@ -47,6 +50,8 @@ export const RunWorkflowPanel = ({
   const runWorkflow = useRunWorkflow();
   const [selectedId, setSelectedId] = React.useState<string>('');
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
+
+  const { data: workflowsData } = useWorkflows({ size: 1000, page: 1 });
 
   const handleExecuteClick = useCallback(() => {
     if (!selectedId) return;
@@ -60,6 +65,8 @@ export const RunWorkflowPanel = ({
       },
       {
         onSuccess: (data: RunWorkflowResponseDto) => {
+          const workflowName = workflowsData?.results.find((w) => w.id === selectedId)?.name;
+          onSuccess?.(data.workflowExecutionId, selectedId, workflowName);
           workflowTriggerSuccess({
             title: i18n.WORKFLOW_START_SUCCESS_TOAST,
             ...(rendering && {
@@ -94,15 +101,17 @@ export const RunWorkflowPanel = ({
       }
     );
   }, [
-    application,
     selectedId,
+    onExecute,
     runWorkflow,
     inputs,
+    workflowsData?.results,
+    onSuccess,
     workflowTriggerSuccess,
-    workflowTriggerFailed,
     rendering,
+    application,
+    workflowTriggerFailed,
     onClose,
-    onExecute,
   ]);
 
   const workflowSelector = useMemo(
