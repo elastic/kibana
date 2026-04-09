@@ -40,7 +40,7 @@ const BUMP_TYPE = process.env.WORKFLOW;
       // Step 4: Update the labels for PRs and the color of the label itself
       pipeline.push('  - wait');
 
-      // TODO: Ask Tiago if we can guarentee that the next label exists.
+      // TODO: Ask Tiago if we can guarantee that the next label exists.
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/update_label_color.yml'));
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/reconcile_pr_labels.yml'));
     }
