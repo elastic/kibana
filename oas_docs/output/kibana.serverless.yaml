@@ -141,7 +141,6 @@ tags:
     description: |
       Fleet Server hosts APIs enable you to manage Fleet Server hosts, including creating, updating, and deleting Fleet Server host configurations.
     x-displayName: Fleet Server hosts
-  - name: Fleet service tokens
   - name: Fleet uninstall tokens
     description: |
       Fleet uninstall tokens APIs enable you to manage Fleet uninstall tokens, including retrieving metadata and decrypted tokens for agent uninstallation.
@@ -10589,6 +10588,15 @@ paths:
           name: product_name
   /api/apm/fleet/apm_server_schema:
     post:
+      deprecated: true
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/fleet/apm_server_schema</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        DEPRECATED: This endpoint is intended for internal use by Fleet integrations to push the APM Server configuration schema. Do not use for new integrations. It stores the provided schema object as a Kibana saved object. If Fleet migration is not available on the current deployment, the API returns a 404.
       operationId: saveApmServerSchema
       parameters:
         - $ref: '#/components/parameters/APM_UI_elastic_api_version'
@@ -10610,8 +10618,12 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                saveApmServerSchemaResponseExample1:
+                  $ref: '#/components/examples/APM_UI_fleet_apm_server_schema_200_response1'
               schema:
                 additionalProperties: false
+                description: The response body is intentionally empty for this endpoint.
                 type: object
           description: Successful response
         '400':
@@ -10644,12 +10656,6 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/fleet/apm_server_schema</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/apm/services/{serviceName}/annotation:
     post:
       description: |-
@@ -10673,6 +10679,9 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              createAnnotationRequest1:
+                $ref: '#/components/examples/APM_UI_annotation_object_post_request1'
             schema:
               $ref: '#/components/schemas/APM_UI_create_annotation_object'
         required: true
@@ -10757,16 +10766,20 @@ paths:
           schema:
             type: string
         - description: The start date for the search
+          example: '2024-01-01T00:00:00.000Z'
           in: query
           name: start
           required: false
           schema:
+            format: date-time
             type: string
         - description: The end date for the search
+          example: '2024-01-31T23:59:59.999Z'
           in: query
           name: end
           required: false
           schema:
+            format: date-time
             type: string
       responses:
         '200':
@@ -10801,6 +10814,14 @@ paths:
           name: product_name
   /api/apm/settings/agent-configuration:
     delete:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/settings/agent-configuration</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Delete an existing agent configuration. You must have `all` privileges for the APM and User Experience feature in Kibana. When successful, the configuration is removed and, if Fleet is enabled, APM package policies are synchronized accordingly.
       operationId: deleteAgentConfiguration
       parameters:
         - $ref: '#/components/parameters/APM_UI_elastic_api_version'
@@ -10818,6 +10839,9 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                deleteAgentConfigurationResponseExample1:
+                  $ref: '#/components/examples/APM_UI_agent_configuration_intake_object_delete_200_response1'
               schema:
                 $ref: '#/components/schemas/APM_UI_delete_agent_configurations_response'
           description: Successful response
@@ -10851,13 +10875,15 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-      description: |-
+    get:
+      description: |
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/settings/agent-configuration</span></div>
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/settings/agent-configuration</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-    get:
+
+        Retrieve all agent configurations. You must have `read` privileges for the APM and User Experience feature in Kibana. If agent configuration is not available on the current deployment, the API returns a 404.
       operationId: getAgentConfigurations
       parameters:
         - $ref: '#/components/parameters/APM_UI_elastic_api_version'
@@ -10895,13 +10921,15 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-      description: |-
+    put:
+      description: |
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/settings/agent-configuration</span></div>
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/settings/agent-configuration</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-    put:
+
+        Create or update an agent configuration. You must have `all` privileges for the APM and User Experience feature in Kibana. When updating an existing configuration, the `?overwrite=true` query parameter is required. If the configuration already exists and `overwrite` is not set to `true`, the API returns a 400 error. When successful and Fleet is enabled, APM package policies are synchronized accordingly.
       operationId: createUpdateAgentConfiguration
       parameters:
         - $ref: '#/components/parameters/APM_UI_elastic_api_version'
@@ -10924,8 +10952,12 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                createUpdateAgentConfigurationResponseExample1:
+                  $ref: '#/components/examples/APM_UI_agent_configuration_intake_object_put_200_response1'
               schema:
                 additionalProperties: false
+                description: The response body is intentionally empty for this endpoint.
                 type: object
           description: Successful response
         '400':
@@ -10958,12 +10990,6 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/settings/agent-configuration</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/apm/settings/agent-configuration/agent_name:
     get:
       description: |-
@@ -11017,10 +11043,19 @@ paths:
           name: product_name
   /api/apm/settings/agent-configuration/environments:
     get:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/settings/agent-configuration/environments</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Retrieve the available environments for a given service, to be used in agent configuration. You must have `read` privileges for the APM and User Experience feature in Kibana. If `serviceName` is omitted, environments across all services are returned.
       operationId: getEnvironmentsForService
       parameters:
         - $ref: '#/components/parameters/APM_UI_elastic_api_version'
-        - description: The name of the service
+        - description: The name of the service. If omitted, environments across all services are returned.
+          example: opbeans-node
           in: query
           name: serviceName
           schema:
@@ -11029,6 +11064,9 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getEnvironmentsForServiceResponseExample1:
+                  $ref: '#/components/examples/APM_UI_agent_configuration_environments_200_response1'
               schema:
                 $ref: '#/components/schemas/APM_UI_service_environments_response'
           description: Successful response
@@ -11056,14 +11094,9 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/settings/agent-configuration/environments</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/apm/settings/agent-configuration/search:
     post:
+      deprecated: true
       description: |
         **Spaces method and path for this operation:**
 
@@ -11071,7 +11104,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        This endpoint enables you to search for a single agent configuration and update the 'applied_by_agent' field.
+        DEPRECATED: This endpoint is intended for internal use by APM agents to fetch their configuration and mark it as applied. Do not use for new integrations. It searches for a single agent configuration matching the given service, and optionally updates the `applied_by_agent` field when the provided `etag` matches the current configuration.
       operationId: searchSingleConfiguration
       parameters:
         - $ref: '#/components/parameters/APM_UI_elastic_api_version'
@@ -11121,6 +11154,14 @@ paths:
           name: product_name
   /api/apm/settings/agent-configuration/view:
     get:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/settings/agent-configuration/view</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Retrieve a single agent configuration matching the given service name and environment. You must have `read` privileges for the APM and User Experience feature in Kibana. If no matching configuration is found, the API returns a 404.
       operationId: getSingleAgentConfiguration
       parameters:
         - $ref: '#/components/parameters/APM_UI_elastic_api_version'
@@ -11140,6 +11181,9 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getSingleAgentConfigurationResponseExample1:
+                  $ref: '#/components/examples/APM_UI_agent_configuration_intake_object_view_200_response1'
               schema:
                 $ref: '#/components/schemas/APM_UI_single_agent_configuration_response'
           description: Successful response
@@ -11167,12 +11211,6 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/settings/agent-configuration/view</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/apm/sourcemaps:
     get:
       description: |
@@ -11344,8 +11382,12 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                deleteSourceMapResponseExample1:
+                  $ref: '#/components/examples/APM_UI_source_maps_delete_200_response1'
               schema:
                 additionalProperties: false
+                description: The response body is intentionally empty for this endpoint.
                 type: object
           description: Successful response
         '400':
@@ -51613,79 +51655,6 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-  /api/fleet/service_tokens:
-    post:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/service_tokens</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        [Required authorization] Route required privileges: fleet-agents-all.
-      operationId: post-fleet-service-tokens
-      parameters:
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              additionalProperties: false
-              nullable: true
-              type: object
-              properties:
-                remote:
-                  default: false
-                  type: boolean
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  name:
-                    type: string
-                  value:
-                    type: string
-                required:
-                  - name
-                  - value
-          description: 'OK: A successful request.'
-        '400':
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                description: Generic Error
-                type: object
-                properties:
-                  attributes: {}
-                  error:
-                    type: string
-                  errorType:
-                    type: string
-                  message:
-                    type: string
-                  statusCode:
-                    type: number
-                required:
-                  - message
-                  - attributes
-          description: A bad request.
-      summary: Create a service token
-      tags:
-        - Fleet service tokens
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
   /api/fleet/settings:
     get:
       description: |-
@@ -66079,196 +66048,197 @@ paths:
           name: product_name
 components:
   examples:
+    APM_UI_agent_configuration_environments_200_response1:
+      description: An example of a successful response from `GET /api/apm/settings/agent-configuration/environments`.
+      value:
+        environments:
+          - alreadyConfigured: true
+            name: production
+          - alreadyConfigured: false
+            name: development
+          - alreadyConfigured: false
+            name: ALL_OPTION_VALUE
+    APM_UI_agent_configuration_intake_object_delete_200_response1:
+      description: An example of a successful response from `DELETE /api/apm/settings/agent-configuration`.
+      value:
+        result: deleted
     APM_UI_agent_configuration_intake_object_delete_request1:
       description: Run `DELETE /api/apm/settings/agent-configuration` to delete a configuration.
-      value: |
-        {
-            "service" : {
-                "name": "frontend",
-                "environment": "production"
-            }
-        }
+      value:
+        service:
+          environment: production
+          name: frontend
     APM_UI_agent_configuration_intake_object_get_200_response1:
       description: An example of a successful response from `GET /api/apm/settings/agent-configuration`.
-      value: |
-        [
-          {
-              "agent_name": "go",
-              "service": {
-              "name": "opbeans-go",
-              "environment": "production"
-              },
-              "settings": {
-              "transaction_sample_rate": "1",
-              "capture_body": "off",
-              "transaction_max_spans": "200"
-              },
-              "@timestamp": 1581934104843,
-              "applied_by_agent": false,
-              "etag": "1e58c178efeebae15c25c539da740d21dee422fc"
-          },
-          {
-              "agent_name": "go",
-              "service": {
-              "name": "opbeans-go"
-              },
-              "settings": {
-              "transaction_sample_rate": "1",
-              "capture_body": "off",
-              "transaction_max_spans": "300"
-              },
-              "@timestamp": 1581934111727,
-              "applied_by_agent": false,
-              "etag": "3eed916d3db434d9fb7f039daa681c7a04539a64"
-          },
-          {
-              "agent_name": "nodejs",
-              "service": {
-              "name": "frontend"
-              },
-              "settings": {
-              "transaction_sample_rate": "1",
-              },
-              "@timestamp": 1582031336265,
-              "applied_by_agent": false,
-              "etag": "5080ed25785b7b19f32713681e79f46996801a5b"
-          }
-        ]
+      value:
+        - '@timestamp': 1581934104843
+          agent_name: go
+          applied_by_agent: false
+          etag: 1e58c178efeebae15c25c539da740d21dee422fc
+          service:
+            environment: production
+            name: opbeans-go
+          settings:
+            capture_body: 'off'
+            transaction_max_spans: '200'
+            transaction_sample_rate: '1'
+        - '@timestamp': 1581934111727
+          agent_name: go
+          applied_by_agent: false
+          etag: 3eed916d3db434d9fb7f039daa681c7a04539a64
+          service:
+            name: opbeans-go
+          settings:
+            capture_body: 'off'
+            transaction_max_spans: '300'
+            transaction_sample_rate: '1'
+        - '@timestamp': 1582031336265
+          agent_name: nodejs
+          applied_by_agent: false
+          etag: 5080ed25785b7b19f32713681e79f46996801a5b
+          service:
+            name: frontend
+          settings:
+            transaction_sample_rate: '1'
+    APM_UI_agent_configuration_intake_object_put_200_response1:
+      description: An example of a successful response from `PUT /api/apm/settings/agent-configuration`. The response body is intentionally empty.
+      value: {}
     APM_UI_agent_configuration_intake_object_put_request1:
       description: Run `PUT /api/apm/settings/agent-configuration` to create or update configuration details.
-      value: |
-        {
-            "service": {
-                "name": "frontend",
-                "environment": "production"
-            },
-            "settings": {
-                "transaction_sample_rate": "0.4",
-                "capture_body": "off",
-                "transaction_max_spans": "500"
-            },
-            "agent_name": "nodejs"
-        }
+      value:
+        agent_name: nodejs
+        service:
+          environment: production
+          name: frontend
+        settings:
+          capture_body: 'off'
+          transaction_max_spans: '500'
+          transaction_sample_rate: '0.4'
     APM_UI_agent_configuration_intake_object_search_200_response1:
       description: An example of a successful response from `POST /api/apm/settings/agent-configuration/search`.
-      value: |
-        {
-          "_index": ".apm-agent-configuration",
-          "_id": "CIaqXXABmQCdPphWj8EJ",
-          "_score": 2,
-          "_source": {
-            "agent_name": "nodejs",
-            "service": {
-              "name": "frontend"
-            },
-            "settings": {
-              "transaction_sample_rate": "1",
-            },
-            "@timestamp": 1582031336265,
-            "applied_by_agent": false,
-            "etag": "5080ed25785b7b19f32713681e79f46996801a5b"
-          }
-        }
+      value:
+        _id: CIaqXXABmQCdPphWj8EJ
+        _index: .apm-agent-configuration
+        _score: 2
+        _source:
+          '@timestamp': 1582031336265
+          agent_name: nodejs
+          applied_by_agent: false
+          etag: 5080ed25785b7b19f32713681e79f46996801a5b
+          service:
+            name: frontend
+          settings:
+            transaction_sample_rate: '1'
     APM_UI_agent_configuration_intake_object_search_request1:
       description: Run `POST /api/apm/settings/agent-configuration/search` to search configuration details.
-      value: |
-        {
-            "etag": "1e58c178efeebae15c25c539da740d21dee422fc",
-            "service" : {
-                "name": "frontend",
-                "environment": "production"
-            }
-        }
+      value:
+        etag: 1e58c178efeebae15c25c539da740d21dee422fc
+        service:
+          environment: production
+          name: frontend
+    APM_UI_agent_configuration_intake_object_view_200_response1:
+      description: An example of a successful response from `GET /api/apm/settings/agent-configuration/view`.
+      value:
+        '@timestamp': 1582031336265
+        agent_name: nodejs
+        applied_by_agent: true
+        etag: 5080ed25785b7b19f32713681e79f46996801a5b
+        id: CIaqXXABmQCdPphWj8EJ
+        service:
+          environment: production
+          name: frontend
+        settings:
+          capture_body: 'off'
+          transaction_max_spans: '500'
+          transaction_sample_rate: '0.4'
     APM_UI_agent_keys_object_post_200_response1:
       description: An example of a successful response from `POST /api/apm/agent_keys`, which creates an APM agent API key.
-      value: |
-        {
-          "agentKey": {
-            "id": "3DCLmn0B3ZMhLUa7WBG9",
-            "name": "apm-key",
-            "api_key": "PjGloCGOTzaZr8ilUPvkjA",
-            "encoded": "M0RDTG1uMEIzWk1oTFVhN1dCRzk6UGpHbG9DR09UemFacjhpbFVQdmtqQQ=="
-          }
-        }
+      value:
+        agentKey:
+          api_key: PjGloCGOTzaZr8ilUPvkjA
+          encoded: M0RDTG1uMEIzWk1oTFVhN1dCRzk6UGpHbG9DR09UemFacjhpbFVQdmtqQQ==
+          id: 3DCLmn0B3ZMhLUa7WBG9
+          name: apm-key
     APM_UI_agent_keys_object_post_request1:
       description: Run `POST /api/apm/agent_keys` to create an APM agent API key with the specified privileges.
-      value: |
-        {
-            "name": "apm-key",
-            "privileges": ["event:write", "config_agent:read"]
-        }
+      value:
+        name: apm-key
+        privileges:
+          - event:write
+          - config_agent:read
     APM_UI_annotation_object_post_200_response1:
       description: An example of a successful response from `POST /api/apm/services/opbeans-java/annotation`, which creates an annotation for a service named `opbeans-java`.
-      value: |
-        {
-          "_index": "observability-annotations",
-          "_id": "Lc9I93EBh6DbmkeV7nFX",
-          "_version": 1,
-          "_seq_no": 12,
-          "_primary_term": 1,
-          "found": true,
-          "_source": {
-            "message": "Deployment 1.2",
-            "@timestamp": "2020-05-08T10:31:30.452Z",
-            "service": {
-              "version": "1.2",
-              "name": "opbeans-java"
-            },
-            "tags": [
-              "apm",
-              "elastic.co",
-              "customer"
-            ],
-            "annotation": {
-              "type": "deployment"
-            },
-            "event": {
-              "created": "2020-05-09T02:34:43.937Z"
-            }
-          }
-        }
+      value:
+        _id: Lc9I93EBh6DbmkeV7nFX
+        _index: observability-annotations
+        _primary_term: 1
+        _seq_no: 12
+        _source:
+          '@timestamp': '2020-05-08T10:31:30.452Z'
+          annotation:
+            type: deployment
+          event:
+            created: '2020-05-09T02:34:43.937Z'
+          message: Deployment 1.2
+          service:
+            name: opbeans-java
+            version: '1.2'
+          tags:
+            - apm
+            - elastic.co
+            - customer
+        _version: 1
+        found: true
+    APM_UI_annotation_object_post_request1:
+      description: Run `POST /api/apm/services/{serviceName}/annotation` to create a deployment annotation for a service.
+      value:
+        '@timestamp': '2024-01-15T12:00:00.000Z'
+        message: Deployment 1.2.0
+        service:
+          environment: production
+          version: 1.2.0
+        tags:
+          - apm
+          - deployment
+    APM_UI_fleet_apm_server_schema_200_response1:
+      description: An example of a successful response from `POST /api/apm/fleet/apm_server_schema`. The response body is intentionally empty.
+      value: {}
+    APM_UI_source_maps_delete_200_response1:
+      description: An example of a successful response from `DELETE /api/apm/sourcemaps/{id}`. The response body is intentionally empty.
+      value: {}
     APM_UI_source_maps_get_200_response1:
       description: A successful response from `GET /api/apm/sourcemaps`.
-      value: |
-        {
-          "artifacts": [
-            {
-              "type": "sourcemap",
-              "identifier": "foo-1.0.0",
-              "relative_url": "/api/fleet/artifacts/foo-1.0.0/644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
-              "body": {
-                "serviceName": "foo",
-                "serviceVersion": "1.0.0",
-                "bundleFilepath": "/test/e2e/general-usecase/bundle.js",
-                "sourceMap": {
-                  "version": 3,
-                  "file": "static/js/main.chunk.js",
-                  "sources": [
-                    "fleet-source-map-client/src/index.css",
-                    "fleet-source-map-client/src/App.js",
-                    "webpack:///./src/index.css?bb0a",
-                    "fleet-source-map-client/src/index.js",
-                    "fleet-source-map-client/src/reportWebVitals.js"
-                  ],
-                  "sourcesContent": [
-                    "content"
-                  ],
-                  "mappings": "mapping",
-                  "sourceRoot": ""
-                }
-              },
-              "created": "2021-07-09T20:47:44.812Z",
-              "id": "apm:foo-1.0.0-644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
-              "compressionAlgorithm": "zlib",
-              "decodedSha256": "644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
-              "decodedSize": 441,
-              "encodedSha256": "024c72749c3e3dd411b103f7040ae62633558608f480bce4b108cf5b2275bd24",
-              "encodedSize": 237,
-              "encryptionAlgorithm": "none",
-              "packageName": "apm"
-            }
-          ]
-        }
+      value:
+        artifacts:
+          - body:
+              bundleFilepath: /test/e2e/general-usecase/bundle.js
+              serviceName: foo
+              serviceVersion: 1.0.0
+              sourceMap:
+                file: static/js/main.chunk.js
+                mappings: mapping
+                sourceRoot: ''
+                sources:
+                  - fleet-source-map-client/src/index.css
+                  - fleet-source-map-client/src/App.js
+                  - webpack:///./src/index.css?bb0a
+                  - fleet-source-map-client/src/index.js
+                  - fleet-source-map-client/src/reportWebVitals.js
+                sourcesContent:
+                  - content
+                version: 3
+            compressionAlgorithm: zlib
+            created: '2021-07-09T20:47:44.812Z'
+            decodedSha256: 644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456
+            decodedSize: 441
+            encodedSha256: 024c72749c3e3dd411b103f7040ae62633558608f480bce4b108cf5b2275bd24
+            encodedSize: 237
+            encryptionAlgorithm: none
+            id: apm:foo-1.0.0-644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456
+            identifier: foo-1.0.0
+            packageName: apm
+            relative_url: /api/fleet/artifacts/foo-1.0.0/644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456
+            type: sourcemap
     APM_UI_source_maps_upload_200_response1:
       description: A successful response from `POST /api/apm/sourcemaps`.
       value:
@@ -69020,6 +68990,11 @@ components:
     APM_UI_search_agent_configuration_object:
       type: object
       properties:
+        error:
+          description: |
+            If provided, the agent configuration will be marked as error and `applied_by_agent` will be set to `false`.
+            This is useful for cases where the agent configuration was not applied successfully.
+          type: string
         etag:
           description: If etags match then `applied_by_agent` field will be set to `true`
           example: 0bc3b5ebf18fba8163fe4c96f491e3767a358f85
