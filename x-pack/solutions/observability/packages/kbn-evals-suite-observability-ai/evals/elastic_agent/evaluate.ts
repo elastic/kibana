@@ -5,10 +5,9 @@
  * 2.0.
  */
 
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { createEvaluate } from '../shared/create_evaluate';
 
-const OBSERVABILITY_AGENT_ID = 'observability.agent';
+export const evaluate = createEvaluate(agentBuilderDefaultAgentId);
 
-export const evaluate = createEvaluate(OBSERVABILITY_AGENT_ID);
-
-export type { EvaluateDatasetFn as EvaluateObservabilityAgentDataset } from '../shared/create_evaluate';
+export type { EvaluateDatasetFn } from '../shared/create_evaluate';

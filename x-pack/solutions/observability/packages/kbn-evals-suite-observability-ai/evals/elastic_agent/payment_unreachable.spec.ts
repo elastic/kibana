@@ -8,4 +8,4 @@
 import { evaluate } from './evaluate';
 import { paymentUnreachableScenario } from '../shared/scenarios/payment_unreachable';
 
-paymentUnreachableScenario(evaluate, 'Observability Agent');
+paymentUnreachableScenario(evaluate, 'Elastic Agent');
