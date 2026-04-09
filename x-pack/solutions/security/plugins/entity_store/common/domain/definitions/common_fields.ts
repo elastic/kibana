@@ -10,12 +10,13 @@ import type { EntityType, EntityField, FieldEvaluation } from './entity_schema';
 import { collectValues, newestValue, oldestValue } from './field_retention_operations';
 
 export const ENTITY_RELATIONSHIP_IDENTIFIER_FIELDS = [
-  'entity_id',
-  'host_id',
-  'user_id',
-  'email',
-  'hostname',
-  'username',
+  'entity.id',
+  'host.id',
+  'user.id',
+  'user.email',
+  'host.name',
+  'user.name',
+  'service.name',
 ] as const;
 
 const ENTITY_RELATIONSHIP_COLLECT_LEAVES = [

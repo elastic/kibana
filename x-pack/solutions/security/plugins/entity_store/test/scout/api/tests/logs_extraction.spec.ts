@@ -1101,13 +1101,19 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           entity: {
             relationships: {
               owns: {
-                email: ['owner-rel-test@example.com'],
-                user_id: ['00u_rel_test'],
-                hostname: ['asset-rel-01'],
+                user: {
+                  email: ['owner-rel-test@example.com'],
+                  id: ['00u_rel_test'],
+                },
+                host: {
+                  name: ['asset-rel-01'],
+                },
               },
               supervises: {
-                email: ['supervisee@example.com'],
-                username: ['supervisor_login'],
+                user: {
+                  email: ['supervisee@example.com'],
+                  name: ['supervisor_login'],
+                },
               },
             },
           },
@@ -1138,14 +1144,17 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
 
       const owns = relationships!.owns as Record<string, unknown> | undefined;
       expect(owns).toBeDefined();
-      expect(normalizeKeywordList(owns!.email)).toStrictEqual(['owner-rel-test@example.com']);
-      expect(normalizeKeywordList(owns!.user_id)).toStrictEqual(['00u_rel_test']);
-      expect(normalizeKeywordList(owns!.hostname)).toStrictEqual(['asset-rel-01']);
+      const ownsUser = owns!.user as Record<string, unknown> | undefined;
+      const ownsHost = owns!.host as Record<string, unknown> | undefined;
+      expect(normalizeKeywordList(ownsUser?.email)).toStrictEqual(['owner-rel-test@example.com']);
+      expect(normalizeKeywordList(ownsUser?.id)).toStrictEqual(['00u_rel_test']);
+      expect(normalizeKeywordList(ownsHost?.name)).toStrictEqual(['asset-rel-01']);
 
       const supervises = relationships!.supervises as Record<string, unknown> | undefined;
       expect(supervises).toBeDefined();
-      expect(normalizeKeywordList(supervises!.email)).toStrictEqual(['supervisee@example.com']);
-      expect(normalizeKeywordList(supervises!.username)).toStrictEqual(['supervisor_login']);
+      const supervisesUser = supervises!.user as Record<string, unknown> | undefined;
+      expect(normalizeKeywordList(supervisesUser?.email)).toStrictEqual(['supervisee@example.com']);
+      expect(normalizeKeywordList(supervisesUser?.name)).toStrictEqual(['supervisor_login']);
     }
   );
 });

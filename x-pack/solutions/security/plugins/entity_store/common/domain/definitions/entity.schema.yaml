@@ -12,29 +12,33 @@ components:
       type: object
       additionalProperties: false
       description: >-
-        identifier values for a given relationship
+        identifier values for a given relationship (ECS-style dotted field names)
       properties:
-        entity_id:
+        'entity.id':
           type: array
           items:
             type: string
-        host_id:
+        'host.id':
           type: array
           items:
             type: string
-        user_id:
+        'user.id':
           type: array
           items:
             type: string
-        email:
+        'user.email':
           type: array
           items:
             type: string
-        hostname:
+        'host.name':
           type: array
           items:
             type: string
-        username:
+        'user.name':
+          type: array
+          items:
+            type: string
+        'service.name':
           type: array
           items:
             type: string

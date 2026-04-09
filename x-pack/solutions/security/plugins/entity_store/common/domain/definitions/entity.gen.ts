@@ -17,17 +17,18 @@
 import { z } from '@kbn/zod/v4';
 
 /**
- * identifier values for a given relationship
+ * identifier values for a given relationship (ECS-style dotted field names)
  */
 export type EntityRelationshipIdentifiers = z.infer<typeof EntityRelationshipIdentifiers>;
 export const EntityRelationshipIdentifiers = z
   .object({
-    entity_id: z.array(z.string()).optional(),
-    host_id: z.array(z.string()).optional(),
-    user_id: z.array(z.string()).optional(),
-    email: z.array(z.string()).optional(),
-    hostname: z.array(z.string()).optional(),
-    username: z.array(z.string()).optional(),
+    'entity.id': z.array(z.string()).optional(),
+    'host.id': z.array(z.string()).optional(),
+    'user.id': z.array(z.string()).optional(),
+    'user.email': z.array(z.string()).optional(),
+    'host.name': z.array(z.string()).optional(),
+    'user.name': z.array(z.string()).optional(),
+    'service.name': z.array(z.string()).optional(),
   })
   .strict();
 
