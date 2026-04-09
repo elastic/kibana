@@ -18,6 +18,7 @@ import {
   defaultRolesFixture,
   requestAuthFixture,
 } from '../../fixtures/scope/worker';
+import { logTestFileFixture } from '../../fixtures/scope/test';
 import type {
   CoreWorkerFixtures,
   EsArchiverFixture,
@@ -80,5 +81,6 @@ export const apiTest = mergeTests(
   defaultRolesFixture,
   requestAuthFixture,
   esArchiverFixture,
-  linkedEsFixtures
+  linkedEsFixtures,
+  logTestFileFixture
 ) as unknown as TestType<{}, ApiWorkerFixtures>;

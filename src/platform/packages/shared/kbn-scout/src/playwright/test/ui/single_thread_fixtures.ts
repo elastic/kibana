@@ -35,6 +35,7 @@ import {
   validateTagsFixture,
   persistentContextFixture,
   perfTrackerFixture,
+  logTestFileFixture,
 } from '../../fixtures/scope/test';
 import type {
   BrowserAuthFixture,
@@ -59,6 +60,7 @@ export const scoutFixtures = mergeTests(
   scoutPageFixture,
   pageObjectsFixture,
   validateTagsFixture,
+  logTestFileFixture,
   // performance fixtures
   perfTrackerFixture
 );
