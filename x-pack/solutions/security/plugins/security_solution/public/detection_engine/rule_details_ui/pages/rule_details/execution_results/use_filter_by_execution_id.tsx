@@ -34,7 +34,7 @@ import type {
 } from '../../../../../common/store/inputs/model';
 import { isAbsoluteTimeRange, isRelativeTimeRange } from '../../../../../common/store/inputs/model';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
-import * as i18n from '../execution_log_table/translations';
+import * as i18n from './translations';
 
 const EXECUTION_UUID_FIELD_NAME = 'kibana.alert.rule.execution.uuid';
 

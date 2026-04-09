@@ -6,14 +6,24 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
 import { Header } from '../../flyout_v2/document/header';
 import { NotesDetails } from '../../flyout_v2/notes';
 import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
+
+export const MISSING_METADATA_CALLOUT = i18n.translate(
+  'xpack.securitySolution.flyout.document.header.missingMetadataCallout',
+  {
+    defaultMessage:
+      'Some of the content below might not be loading correctly. To ensure the best experience, please add `METADATA _id,_index` to your query.',
+  }
+);
 
 export interface AlertFlyoutHeaderProps {
   /**
@@ -88,20 +98,33 @@ export const AlertFlyoutHeader = ({
     };
   }, [servicesPromise, storePromise]);
 
+  const isMissingMetadata = !hit.raw._id || !hit.raw._index;
+  const metadataCallout = isMissingMetadata ? (
+    <>
+      <EuiCallOut announceOnMount size="s" title={MISSING_METADATA_CALLOUT} />
+      <EuiSpacer size="s" />
+    </>
+  ) : null;
+
   if (!services || !store) {
-    return null;
+    return metadataCallout;
   }
 
-  return flyoutProviders({
-    services,
-    store,
-    children: (
-      <Header
-        hit={hit}
-        renderCellActions={noopCellActionRenderer}
-        onAlertUpdated={onAlertUpdated}
-        onShowNotes={openNotesFlyout}
-      />
-    ),
-  });
+  return (
+    <>
+      {metadataCallout}
+      {flyoutProviders({
+        services,
+        store,
+        children: (
+          <Header
+            hit={hit}
+            renderCellActions={noopCellActionRenderer}
+            onAlertUpdated={onAlertUpdated}
+            onShowNotes={openNotesFlyout}
+          />
+        ),
+      })}
+    </>
+  );
 };
