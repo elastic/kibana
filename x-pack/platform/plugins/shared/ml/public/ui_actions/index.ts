@@ -16,10 +16,6 @@ import {
   SWIM_LANE_SELECTION_TRIGGER,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { MlPluginStart, MlStartDependencies } from '../plugin';
-export { APPLY_INFLUENCER_FILTERS_ACTION } from './apply_influencer_filters_action';
-export { APPLY_TIME_RANGE_SELECTION_ACTION } from './apply_time_range_action';
-export { OPEN_IN_ANOMALY_EXPLORER_ACTION } from './open_in_anomaly_explorer_action';
-export { CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION } from './open_vis_in_ml_action';
 import { CONTROLLED_BY_SINGLE_METRIC_VIEWER_FILTER } from './constants';
 /**
  * Register ML UI actions
