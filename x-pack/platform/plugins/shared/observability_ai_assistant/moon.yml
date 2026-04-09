@@ -69,8 +69,8 @@ dependsOn:
   - '@kbn/ai-assistant-management-plugin'
   - '@kbn/agent-builder-plugin'
   - '@kbn/zod'
-  - '@kbn/shared-ux-ai-components'
   - '@kbn/search-inference-endpoints'
+  - '@kbn/shared-ux-ai-components'
 tags:
   - plugin
   - prod
