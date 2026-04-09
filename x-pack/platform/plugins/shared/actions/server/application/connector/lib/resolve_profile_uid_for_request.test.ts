@@ -15,47 +15,33 @@ describe('resolveProfileUidForRequest', () => {
     const uid = await resolveProfileUidForRequest({
       request,
       getCurrentUser: async () => ({ profile_uid: 'from-user' }),
-      getCurrentUserProfileUid: async () => 'from-user-profile',
       getCurrentUserProfileIdFromAPIKey: async () => 'from-api-key',
     });
     expect(uid).toBe('from-user');
   });
 
-  it('falls back to getCurrentUserProfileUid when getCurrentUser returns null', async () => {
+  it('falls back to getCurrentUserProfileIdFromAPIKey when getCurrentUser returns null', async () => {
     const uid = await resolveProfileUidForRequest({
       request,
       getCurrentUser: async () => null,
-      getCurrentUserProfileUid: async () => 'from-user-profile',
-      getCurrentUserProfileIdFromAPIKey: async () => 'from-api-key',
-    });
-    expect(uid).toBe('from-user-profile');
-  });
-
-  it('falls back to getCurrentUserProfileIdFromAPIKey when getCurrentUserProfileUid is unavailable', async () => {
-    const uid = await resolveProfileUidForRequest({
-      request,
-      getCurrentUser: async () => null,
-      getCurrentUserProfileUid: async () => undefined,
       getCurrentUserProfileIdFromAPIKey: async () => 'from-api-key',
     });
     expect(uid).toBe('from-api-key');
   });
 
-  it('falls back to getCurrentUserProfileUid when user has no profile_uid', async () => {
+  it('falls back to getCurrentUserProfileIdFromAPIKey when user has no profile_uid', async () => {
     const uid = await resolveProfileUidForRequest({
       request,
       getCurrentUser: async () => ({}),
-      getCurrentUserProfileUid: async () => 'from-user-profile',
       getCurrentUserProfileIdFromAPIKey: async () => 'from-api-key',
     });
-    expect(uid).toBe('from-user-profile');
+    expect(uid).toBe('from-api-key');
   });
 
   it('returns undefined when both sources yield nothing', async () => {
     const uid = await resolveProfileUidForRequest({
       request,
       getCurrentUser: async () => null,
-      getCurrentUserProfileUid: async () => undefined,
       getCurrentUserProfileIdFromAPIKey: async () => undefined,
     });
     expect(uid).toBeUndefined();

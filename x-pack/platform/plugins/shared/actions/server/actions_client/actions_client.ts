@@ -127,7 +127,6 @@ export interface ConstructorOptions {
   isESOCanEncrypt: boolean;
   connectorLifecycleListeners?: ConnectorLifecycleListener[];
   getCurrentUser?: (request: KibanaRequest) => Promise<{ profile_uid?: string } | null>;
-  getCurrentUserProfileUid?: (request: KibanaRequest) => Promise<string | undefined>;
   getCurrentUserProfileIdFromAPIKey?: (request: KibanaRequest) => Promise<string | undefined>;
 }
 
@@ -156,7 +155,6 @@ export interface ActionsClientContext {
   isESOCanEncrypt: boolean;
   connectorLifecycleListeners?: ConnectorLifecycleListener[];
   getCurrentUser?: (request: KibanaRequest) => Promise<{ profile_uid?: string } | null>;
-  getCurrentUserProfileUid?: (request: KibanaRequest) => Promise<string | undefined>;
   getCurrentUserProfileIdFromAPIKey?: (request: KibanaRequest) => Promise<string | undefined>;
 }
 
@@ -191,7 +189,6 @@ export class ActionsClient {
     isESOCanEncrypt,
     connectorLifecycleListeners,
     getCurrentUser,
-    getCurrentUserProfileUid,
     getCurrentUserProfileIdFromAPIKey,
   }: ConstructorOptions) {
     this.context = {
@@ -217,7 +214,6 @@ export class ActionsClient {
       isESOCanEncrypt,
       connectorLifecycleListeners,
       getCurrentUser: getCurrentUser ?? getCurrentUserNoop,
-      getCurrentUserProfileUid: getCurrentUserProfileUid ?? noop,
       getCurrentUserProfileIdFromAPIKey: getCurrentUserProfileIdFromAPIKey ?? noop,
     };
   }
@@ -258,13 +254,10 @@ export class ActionsClient {
   /**
    * Get all connectors with in-memory connectors
    */
-  public async getAll({
-    includeSystemActions = false,
-  }: { includeSystemActions?: boolean } = {}): Promise<ConnectorWithExtraFindData[]> {
-    return getAll({
-      context: this.context,
-      includeSystemActions,
-    });
+  public async getAll({ includeSystemActions = false } = {}): Promise<
+    ConnectorWithExtraFindData[]
+  > {
+    return getAll({ context: this.context, includeSystemActions });
   }
 
   /**

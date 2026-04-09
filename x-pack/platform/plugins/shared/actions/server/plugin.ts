@@ -587,16 +587,6 @@ export class ActionsPlugin
         connectorLifecycleListeners: this.connectorLifecycleListeners,
         getCurrentUser: async (requestWithAuth: KibanaRequest) =>
           core.security.authc.getCurrentUser(requestWithAuth),
-        getCurrentUserProfileUid: async (requestWithAuth: KibanaRequest) => {
-          try {
-            const currentUserProfile = await core.userProfile.getCurrent({
-              request: requestWithAuth,
-            });
-            return currentUserProfile?.uid;
-          } catch {
-            return undefined;
-          }
-        },
         getCurrentUserProfileIdFromAPIKey,
       });
     };
@@ -1022,16 +1012,6 @@ export class ActionsPlugin
             connectorLifecycleListeners,
             getCurrentUser: async (requestWithAuth: KibanaRequest) =>
               coreStart.security.authc.getCurrentUser(requestWithAuth),
-            getCurrentUserProfileUid: async (requestWithAuth: KibanaRequest) => {
-              try {
-                const currentUserProfile = await coreStart.userProfile.getCurrent({
-                  request: requestWithAuth,
-                });
-                return currentUserProfile?.uid;
-              } catch {
-                return undefined;
-              }
-            },
             getCurrentUserProfileIdFromAPIKey: async (requestWithAuth: KibanaRequest) => {
               try {
                 const response = await coreStart.elasticsearch.client
