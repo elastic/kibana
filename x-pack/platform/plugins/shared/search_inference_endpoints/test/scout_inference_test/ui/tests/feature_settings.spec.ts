@@ -10,6 +10,18 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import { mockInferenceEndpoints } from '../fixtures/mock_data/inference_endpoints';
 
+const MOCK_ROUTE = '**/internal/inference_endpoints/endpoints';
+
+async function setupMockEndpoints(page: Parameters<Parameters<typeof test>[2]>[0]['page']) {
+  await page.route(MOCK_ROUTE, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ inference_endpoints: mockInferenceEndpoints }),
+    });
+  });
+}
+
 test.describe(
   'Feature Settings',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
@@ -19,27 +31,29 @@ test.describe(
       await pageObjects.featureSettings.goto();
     });
 
-    test('page header is visible', async ({ pageObjects }) => {
+    test('displays page header', async ({ pageObjects }) => {
       await expect(pageObjects.featureSettings.pageHeader).toBeVisible();
     });
 
-    test('page loads with default model section and controls', async ({ pageObjects }) => {
+    test('renders default model section and controls', async ({ pageObjects }) => {
       const { featureSettings } = pageObjects;
 
-      await test.step('header controls are present', async () => {
+      await test.step('verify header controls', async () => {
         await expect(featureSettings.saveButton).toBeVisible();
         await expect(featureSettings.saveButton).toBeDisabled();
         await expect(featureSettings.apiDocumentationLink).toBeVisible();
       });
 
-      await test.step('default model section is visible', async () => {
+      await test.step('verify default model section', async () => {
         await expect(featureSettings.defaultModelSection).toBeVisible();
         await expect(featureSettings.defaultModelComboBox).toBeVisible();
         await expect(featureSettings.disallowOtherModelsCheckbox).toBeVisible();
       });
     });
 
-    test('disallow other models hides feature sections', async ({ pageObjects }) => {
+    test('toggling disallow other models hides and restores feature sections', async ({
+      pageObjects,
+    }) => {
       const { featureSettings } = pageObjects;
 
       await test.step('enable disallow other models', async () => {
@@ -59,7 +73,9 @@ test.describe(
       });
     });
 
-    test('feature sections render with sub-feature cards', async ({ pageObjects }) => {
+    test('renders feature sections with sub-feature cards and endpoint rows', async ({
+      pageObjects,
+    }) => {
       const { featureSettings } = pageObjects;
 
       await test.step('at least one feature section is visible', async () => {
@@ -76,104 +92,46 @@ test.describe(
       });
     });
 
-    test('fixture plugin registers Test Inference feature section', async ({ pageObjects }) => {
+    test('renders fixture sub-feature cards', async ({ pageObjects }) => {
       const { featureSettings } = pageObjects;
 
-      await test.step('Test Inference section is visible', async () => {
-        await expect(featureSettings.content).toContainText('Test Inference');
+      await test.step('first fixture sub-feature card is visible', async () => {
+        await expect(featureSettings.subFeatureCard('test_feature_alpha')).toBeVisible();
       });
 
-      await test.step('Test Feature Alpha sub-feature is visible', async () => {
-        await expect(featureSettings.content).toContainText('Test Feature Alpha');
-      });
-
-      await test.step('Test Feature Beta sub-feature is visible', async () => {
-        await expect(featureSettings.content).toContainText('Test Feature Beta');
+      await test.step('second fixture sub-feature card is visible', async () => {
+        await expect(featureSettings.subFeatureCard('test_feature_beta')).toBeVisible();
       });
     });
 
-    test('add model popover opens with search on Alpha', async ({ pageObjects }) => {
+    test('opens add model popover with search input', async ({ pageObjects }) => {
       const { featureSettings } = pageObjects;
 
-      await test.step('open add model popover on Alpha', async () => {
+      await test.step('click add model button and verify search is visible', async () => {
         await featureSettings.addModelButton('test_feature_alpha').click();
         await expect(featureSettings.addModelSearch).toBeVisible();
       });
     });
 
-    test('add model popover search filters results on Alpha', async ({ page, pageObjects }) => {
+    test('cancelling reset to defaults modal preserves state', async ({ pageObjects }) => {
       const { featureSettings } = pageObjects;
 
-      await test.step('mock inference endpoints', async () => {
-        await featureSettings.mockInferenceEndpoints(mockInferenceEndpoints);
-        await page.reload();
-        await featureSettings.goto();
-      });
-
-      await test.step('open popover on Alpha and verify models are listed', async () => {
-        await featureSettings.addModelButton('test_feature_alpha').click();
-        await expect(featureSettings.addModelSearch).toBeVisible();
-        await expect(featureSettings.addModelOptions).not.toHaveCount(0);
-      });
-
-      await test.step('search filters the model list', async () => {
-        const countBeforeSearch = await featureSettings.addModelOptions.count();
-        await featureSettings.addModelSearch.fill('anthropic');
-        const countAfterSearch = await featureSettings.addModelOptions.count();
-        expect(countAfterSearch).toBeLessThan(countBeforeSearch);
-        expect(countAfterSearch).toBeGreaterThan(0);
-      });
-    });
-
-    test('selecting a model on Alpha adds it to the assigned models list', async ({
-      page,
-      pageObjects,
-    }) => {
-      const { featureSettings } = pageObjects;
-
-      await test.step('mock inference endpoints', async () => {
-        await featureSettings.mockInferenceEndpoints(mockInferenceEndpoints);
-        await page.reload();
-        await featureSettings.goto();
-      });
-
-      const initialCount = await featureSettings.allEndpointRows.count();
-
-      await test.step('select a model from Alpha popover', async () => {
-        await featureSettings.addModelButton('test_feature_alpha').click();
-        await expect(featureSettings.addModelSearch).toBeVisible();
-        // eslint-disable-next-line playwright/no-nth-methods -- selecting the first available model from the popover list
-        await featureSettings.addModelOptions.first().click();
-      });
-
-      await test.step('endpoint row count increases', async () => {
-        await expect(featureSettings.allEndpointRows).toHaveCount(initialCount + 1);
-      });
-
-      await test.step('save button becomes enabled', async () => {
-        await expect(featureSettings.saveButton).toBeEnabled();
-      });
-    });
-
-    test('reset to defaults modal cancel on Test Inference', async ({ pageObjects }) => {
-      const { featureSettings } = pageObjects;
-
-      await test.step('click reset link opens confirmation modal', async () => {
+      await test.step('open reset to defaults modal', async () => {
         await featureSettings.resetLink('Test Inference').click();
         await expect(featureSettings.resetDefaultsModal).toBeVisible();
       });
 
-      await test.step('cancel closes the modal without changes', async () => {
+      await test.step('cancel closes modal without changes', async () => {
         await featureSettings.resetDefaultsCancelButton.click();
         await expect(featureSettings.resetDefaultsModal).toBeHidden();
         await expect(featureSettings.saveButton).toBeDisabled();
       });
     });
 
-    test('copy to modal cancel on Alpha', async ({ pageObjects }) => {
+    test('cancelling copy to modal closes without changes', async ({ pageObjects }) => {
       const { featureSettings } = pageObjects;
 
-      await test.step('click copy to on Alpha opens modal', async () => {
+      await test.step('open copy to modal', async () => {
         await featureSettings.copyToButton('test_feature_alpha').click();
         await expect(featureSettings.copyToModalApply).toBeVisible();
         await expect(featureSettings.copyToModalApply).toBeDisabled();
@@ -185,45 +143,107 @@ test.describe(
       });
     });
 
-    test('copy to from Alpha to Beta updates Beta endpoint list', async ({ page, pageObjects }) => {
+    test('searching in add model popover filters the results', async ({ page, pageObjects }) => {
       const { featureSettings } = pageObjects;
+      await setupMockEndpoints(page);
+      await featureSettings.goto();
 
-      await test.step('mock inference endpoints', async () => {
-        await featureSettings.mockInferenceEndpoints(mockInferenceEndpoints);
-        await page.reload();
-        await featureSettings.goto();
-      });
+      try {
+        await test.step('open popover and verify models are listed', async () => {
+          await featureSettings.addModelButton('test_feature_alpha').click();
+          await expect(featureSettings.addModelSearch).toBeVisible();
+          await expect(featureSettings.addModelOptions).not.toHaveCount(0);
+        });
 
-      const betaCard = featureSettings.subFeatureCard('test_feature_beta');
+        await test.step('typing a search term reduces the list', async () => {
+          const countBeforeSearch = await featureSettings.addModelOptions.count();
+          await featureSettings.addModelSearch.fill('anthropic');
+          await expect
+            .poll(() => featureSettings.addModelOptions.count(), {
+              message: 'Expected filtered options to be fewer than initial',
+            })
+            .toBeLessThan(countBeforeSearch);
+          await expect(featureSettings.addModelOptions).not.toHaveCount(0);
+        });
+      } finally {
+        await page.unroute(MOCK_ROUTE);
+      }
+    });
 
-      await test.step('Beta contains its original endpoint before copy', async () => {
-        await expect(betaCard).toContainText('openai');
-        await expect(betaCard).not.toContainText('anthropic');
-      });
+    test('selecting a model from the popover adds it to the endpoint list', async ({
+      page,
+      pageObjects,
+    }) => {
+      const { featureSettings } = pageObjects;
+      await setupMockEndpoints(page);
+      await featureSettings.goto();
 
-      await test.step('open copy-to modal from Alpha', async () => {
-        await featureSettings.copyToButton('test_feature_alpha').click();
-        await expect(featureSettings.copyToModalApply).toBeVisible();
-        await expect(featureSettings.copyToModalApply).toBeDisabled();
-      });
+      try {
+        const alphaRows = featureSettings.endpointRowsFor('test_feature_alpha');
+        await expect(alphaRows).not.toHaveCount(0);
+        const initialCount = await alphaRows.count();
 
-      await test.step('select Beta as target', async () => {
-        await featureSettings.copyToModalCheckbox('test_feature_beta').click();
-      });
+        await test.step('open popover and select the first model', async () => {
+          await featureSettings.addModelButton('test_feature_alpha').click();
+          await expect(featureSettings.addModelSearch).toBeVisible();
+          // eslint-disable-next-line playwright/no-nth-methods -- selecting the first available model from the popover list
+          await featureSettings.addModelOptions.first().click();
+        });
 
-      await test.step('apply copies Alpha models to Beta', async () => {
-        await expect(featureSettings.copyToModalApply).toBeEnabled();
-        await featureSettings.copyToModalApply.click();
-        await expect(featureSettings.copyToModalApply).toBeHidden();
-      });
+        await test.step('endpoint row count increases by one', async () => {
+          await expect(alphaRows).toHaveCount(initialCount + 1);
+        });
 
-      await test.step('Beta now contains Alpha endpoint after copy', async () => {
-        await expect(betaCard).toContainText('anthropic');
-      });
+        await test.step('save button becomes enabled', async () => {
+          await expect(featureSettings.saveButton).toBeEnabled();
+        });
+      } finally {
+        await page.unroute(MOCK_ROUTE);
+      }
+    });
 
-      await test.step('save button becomes enabled after copy', async () => {
-        await expect(featureSettings.saveButton).toBeEnabled();
-      });
+    test('copy to applies source endpoint list to the target sub-feature', async ({
+      page,
+      pageObjects,
+    }) => {
+      const { featureSettings } = pageObjects;
+      await setupMockEndpoints(page);
+      await featureSettings.goto();
+
+      try {
+        const betaCard = featureSettings.subFeatureCard('test_feature_beta');
+
+        await test.step('target sub-feature shows its original endpoint', async () => {
+          await expect(betaCard).toContainText('openai');
+          await expect(betaCard).not.toContainText('anthropic');
+        });
+
+        await test.step('open copy to modal from source sub-feature', async () => {
+          await featureSettings.copyToButton('test_feature_alpha').click();
+          await expect(featureSettings.copyToModalApply).toBeVisible();
+          await expect(featureSettings.copyToModalApply).toBeDisabled();
+        });
+
+        await test.step('select target sub-feature', async () => {
+          await featureSettings.copyToModalCheckbox('test_feature_beta').click();
+        });
+
+        await test.step('apply copies endpoints to target', async () => {
+          await expect(featureSettings.copyToModalApply).toBeEnabled();
+          await featureSettings.copyToModalApply.click();
+          await expect(featureSettings.copyToModalApply).toBeHidden();
+        });
+
+        await test.step('target sub-feature now contains source endpoint', async () => {
+          await expect(betaCard).toContainText('anthropic');
+        });
+
+        await test.step('save button becomes enabled', async () => {
+          await expect(featureSettings.saveButton).toBeEnabled();
+        });
+      } finally {
+        await page.unroute(MOCK_ROUTE);
+      }
     });
   }
 );
