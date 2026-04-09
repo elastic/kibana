@@ -120,6 +120,28 @@ describe('createGroupPanelRenderer', () => {
       expect(screen.queryByLabelText('Open entity details')).not.toBeInTheDocument();
       expect(screen.getByText('fallback-entity-id')).toBeInTheDocument();
     });
+
+    it('updates from entity ID to target name when metadata arrives after grouping data', () => {
+      const bucket = createMockBucket({ key: 'target-id' });
+
+      // Phase 1: grouping data arrived, metadata still loading — shows entity ID
+      const rendererBefore = createGroupPanelRenderer(emptyMetadata);
+      const { rerender } = render(
+        <>{rendererBefore(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket)}</>
+      );
+      expect(screen.getByText('target-id')).toBeInTheDocument();
+      expect(screen.queryByLabelText('Open entity details')).not.toBeInTheDocument();
+
+      // Phase 2: metadata arrived — new renderer shows target name + flyout button
+      const metadata: TargetMetadataMap = new Map([
+        ['target-id', { name: 'alice-target', type: EntityType.user, riskScore: 85.0 }],
+      ]);
+      const rendererAfter = createGroupPanelRenderer(metadata);
+      rerender(<>{rendererAfter(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket)}</>);
+      expect(screen.getByText('alice-target')).toBeInTheDocument();
+      expect(screen.queryByText('target-id')).not.toBeInTheDocument();
+      expect(screen.getByLabelText('Open entity details')).toBeInTheDocument();
+    });
   });
 
   it('returns undefined for unknown group types', () => {
@@ -216,6 +238,25 @@ describe('createGroupStatsRenderer', () => {
       render(<TestProviders>{stats[1].component}</TestProviders>);
 
       expect(screen.getByText('—')).toBeInTheDocument();
+    });
+
+    it('updates risk score from en-dash to actual value when metadata arrives after grouping data', () => {
+      const bucket = createMockBucket({ key: 'target-id', doc_count: 3 });
+
+      // Phase 1: no metadata — shows en-dash
+      const rendererBefore = createGroupStatsRenderer(emptyMetadata);
+      const statsBefore = rendererBefore(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
+      const { rerender } = render(<TestProviders>{statsBefore[1].component}</TestProviders>);
+      expect(screen.getByText('—')).toBeInTheDocument();
+
+      // Phase 2: metadata arrived — shows actual risk score
+      const metadata: TargetMetadataMap = new Map([
+        ['target-id', { name: 'test', type: EntityType.user, riskScore: 92.5 }],
+      ]);
+      const rendererAfter = createGroupStatsRenderer(metadata);
+      const statsAfter = rendererAfter(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
+      rerender(<TestProviders>{statsAfter[1].component}</TestProviders>);
+      expect(screen.getByText('92.50')).toBeInTheDocument();
     });
   });
 
