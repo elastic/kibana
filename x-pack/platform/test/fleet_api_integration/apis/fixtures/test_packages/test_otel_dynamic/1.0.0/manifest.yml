@@ -19,10 +19,10 @@ policy_templates:
     vars:
       - name: data_stream.dataset
         required: true
-        default: generic.otel
+        default: generic
         title: Dataset name
         description: >
-          Set the name for your dataset. Defaults to generic.otel which routes all signals
+          Set the name for your dataset. Defaults to generic which routes all signals
           to the shared generic data streams. Override to isolate this package's data
           into named data streams.
         type: text

@@ -165,21 +165,17 @@ export function generateOtelcolConfig({
   return attachOtelcolExporter(config, dataOutput, proxy, logger);
 }
 
-function buildDataStreamStatements(
-  type: string,
-  dataset: string | null,
-  namespace: string
-): string[] {
+function buildDataStreamStatements(type: string, dataset: string, namespace: string): string[] {
   return [
     `set(attributes["data_stream.type"], "${type}")`,
-    ...(dataset !== null ? [`set(attributes["data_stream.dataset"], "${dataset}")`] : []),
+    `set(attributes["data_stream.dataset"], "${dataset}")`,
     `set(attributes["data_stream.namespace"], "${namespace}")`,
   ];
 }
 
 function generateOtelTypeTransforms(
   type: string,
-  dataset: string | null,
+  dataset: string,
   namespace: string
 ): Record<string, any> {
   switch (type) {

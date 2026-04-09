@@ -128,13 +128,13 @@ export default function (providerContext: FtrProviderContext) {
     // -------------------------------------------------------------------------
     // Test 1 (OTLP scenario): dynamic_signal_types: true → dataset set from package default
     // -------------------------------------------------------------------------
-    it('sets data_stream.dataset to the package default (generic.otel) in routing transforms for dynamic_signal_types packages (OTLP scenario)', async () => {
+    it('sets data_stream.dataset to the package default (generic) in routing transforms for dynamic_signal_types packages (OTLP scenario)', async () => {
       const agentPolicyId = await createAgentPolicy();
 
       try {
         // Create a package policy using the dynamic OTel package.
         // Input key: {policyTemplateName}-{inputType} = otlpreceiver-otelcol
-        // Stream key: dataset = generic.otel (declared as default in the package manifest var)
+        // Stream key: dataset = generic (declared as default in the package manifest var)
         await supertest
           .post('/api/fleet/package_policies')
           .set('kbn-xsrf', 'xxxx')
@@ -147,7 +147,7 @@ export default function (providerContext: FtrProviderContext) {
               'otlpreceiver-otelcol': {
                 enabled: true,
                 streams: {
-                  'generic.otel': { enabled: true, vars: {} },
+                  generic: { enabled: true, vars: {} },
                 },
               },
             },
