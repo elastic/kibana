@@ -376,7 +376,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const newQuery = {
         id: 'fourth',
-        type: 'match' as const,
         title: 'fourth query',
         description: '',
         esql: {
@@ -385,7 +384,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       };
       const updateThirdQuery = {
         id: 'third',
-        type: 'match' as const,
         title: 'third query',
         description: '',
         esql: {
@@ -424,7 +422,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(bulkResponse).to.have.property('acknowledged', true);
 
       const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
-      expect(getQueriesResponse.queries).to.eql([firstQuery, updateThirdQuery, newQuery]);
+      expect(getQueriesResponse.queries).to.eql([
+        firstQuery,
+        { ...updateThirdQuery, type: 'match' },
+        { ...newQuery, type: 'match' },
+      ]);
 
       const updatedRules = await alertingApi.searchRules(roleAuthc, '');
       expect(updatedRules.body.data).to.have.length(3);
