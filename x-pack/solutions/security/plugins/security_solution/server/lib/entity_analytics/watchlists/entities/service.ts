@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { getLatestEntitiesIndexName } from '@kbn/entity-store/server';
+import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/server';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
@@ -77,7 +77,7 @@ export const createWatchlistEntitiesService = ({
 
     while (fetchMore) {
       const response = await esClient.search<EntityStoreEntity>({
-        index: getLatestEntitiesIndexName(namespace),
+        index: getEntitiesAlias(ENTITY_LATEST, namespace),
         size: 1000,
         sort: ['_doc'],
         search_after: searchAfter,
