@@ -15,8 +15,9 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { hasAgentWriteAccess, canChangeAgentVisibility } from '@kbn/agent-builder-common';
+import { canChangeAgentVisibility } from '@kbn/agent-builder-common';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
+import { useCanEditAgent } from '../../../hooks/agents/use_can_edit_agent';
 import { useSkillsService } from '../../../hooks/skills/use_skills';
 import { usePluginsService } from '../../../hooks/plugins/use_plugins';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
@@ -44,24 +45,14 @@ export const AgentOverview: React.FC = () => {
     services: { uiSettings },
   } = useKibana();
 
-  const { manageAgents, isAdmin } = useUiPrivileges();
+  const { isAdmin } = useUiPrivileges();
   const { currentUser } = useCurrentUser();
 
   const { agent, isLoading } = useAgentBuilderAgentById(agentId);
   const { skills: allSkills } = useSkillsService();
   const { plugins: allPlugins } = usePluginsService();
-
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
-
-  const canEditAgent = useMemo(() => {
-    if (!manageAgents || !agent) return false;
-    return hasAgentWriteAccess({
-      visibility: agent.visibility,
-      owner: agent.created_by,
-      currentUser: currentUser ?? undefined,
-      isAdmin,
-    });
-  }, [manageAgents, agent, currentUser, isAdmin]);
+  const canEditAgent = useCanEditAgent({ agent });
 
   const canChangeVisibility = useMemo(() => {
     if (!isExperimentalFeaturesEnabled || !agent) return false;
@@ -166,6 +157,7 @@ export const AgentOverview: React.FC = () => {
           currentInstructions={agent.configuration?.instructions ?? ''}
           showWorkflowSection={showWorkflowSection}
           workflowIds={agent.configuration?.workflow_ids ?? []}
+          canEditAgent={canEditAgent}
           onOpenEditFlyout={() => setIsEditFlyoutOpen(true)}
         />
 
