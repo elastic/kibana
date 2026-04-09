@@ -158,6 +158,7 @@ export class ServiceManager {
       elasticsearch,
       spaces,
       config: this.config,
+      getToolRegistry: tools.getRegistry,
     });
 
     const runnerFactory = new RunnerFactoryImpl({

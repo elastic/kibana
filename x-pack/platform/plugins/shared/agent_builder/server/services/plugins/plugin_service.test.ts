@@ -96,6 +96,7 @@ describe('PluginsService', () => {
   let start: PluginsServiceStart;
   let mockClient: jest.Mocked<PluginClient>;
   let mockSkillClient: jest.Mocked<SkillClient>;
+  let mockToolRegistry: { has: jest.Mock };
   const mockRequest = {} as KibanaRequest;
 
   beforeEach(() => {
@@ -123,6 +124,10 @@ describe('PluginsService', () => {
       deleteByPluginId: jest.fn(),
     };
 
+    mockToolRegistry = {
+      has: jest.fn().mockResolvedValue(true),
+    };
+
     mockCreateClient.mockReturnValue(mockClient);
     mockCreateSkillClient.mockReturnValue(mockSkillClient);
 
@@ -140,6 +145,7 @@ describe('PluginsService', () => {
       logger: loggerMock.create(),
       elasticsearch: mockElasticsearch as any,
       config: { enabled: true, githubBaseUrl: 'https://github.com' },
+      getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
     });
   });
 
@@ -438,6 +444,63 @@ describe('PluginsService', () => {
           expect.objectContaining({ id: 'my-plugin-with-tools', tool_ids: ['x', 'y'] }),
           expect.objectContaining({ id: 'my-plugin-no-tools', tool_ids: [] }),
         ]);
+      });
+
+      it('throws when allowedTools references tools that do not exist', async () => {
+        const archive = createMockParsedArchive({
+          skills: [
+            {
+              dirName: 'bad-tools',
+              meta: {
+                name: 'Bad Tools',
+                description: 'References missing tools',
+                allowedTools: ['existing-tool', 'missing-tool'],
+              },
+              content: 'Content.',
+              referencedFiles: [],
+            },
+          ],
+        });
+
+        mockToolRegistry.has.mockImplementation(async (id: string) => id === 'existing-tool');
+        mockParsePluginFromUrl.mockResolvedValue(archive);
+        mockClient.findByName.mockResolvedValue(undefined);
+
+        await expect(
+          start.installPlugin({
+            request: mockRequest,
+            source: { type: 'url', url: 'https://example.com/plugin.zip' },
+          })
+        ).rejects.toThrow(/missing-tool/);
+
+        expect(mockSkillClient.bulkCreate).not.toHaveBeenCalled();
+        expect(mockClient.create).not.toHaveBeenCalled();
+      });
+
+      it('succeeds when skills have no allowedTools', async () => {
+        const archive = createMockParsedArchive({
+          skills: [
+            {
+              dirName: 'simple',
+              meta: { name: 'Simple', description: 'No tools' },
+              content: 'Content.',
+              referencedFiles: [],
+            },
+          ],
+        });
+
+        mockParsePluginFromUrl.mockResolvedValue(archive);
+        mockClient.findByName.mockResolvedValue(undefined);
+        mockClient.create.mockResolvedValue(createMockPersistedPlugin());
+        mockSkillClient.bulkCreate.mockResolvedValue([]);
+
+        await start.installPlugin({
+          request: mockRequest,
+          source: { type: 'url', url: 'https://example.com/plugin.zip' },
+        });
+
+        expect(mockToolRegistry.has).not.toHaveBeenCalled();
+        expect(mockSkillClient.bulkCreate).toHaveBeenCalledTimes(1);
       });
     });
   });
