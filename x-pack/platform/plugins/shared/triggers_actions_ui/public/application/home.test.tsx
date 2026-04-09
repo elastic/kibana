@@ -49,7 +49,16 @@ const { useGetRuleTypesPermissions } = jest.requireMock(
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
-const queryClient = new QueryClient();
+const renderHome = (props: RouteComponentProps<MatchParams>) =>
+  render(
+    <IntlProvider locale="en">
+      <Router history={props.history}>
+        <QueryClientProvider client={new QueryClient()}>
+          <TriggersActionsUIHome {...props} />
+        </QueryClientProvider>
+      </Router>
+    </IntlProvider>
+  );
 
 describe('home', () => {
   beforeEach(() => {
@@ -74,15 +83,7 @@ describe('home', () => {
       },
     };
 
-    render(
-      <IntlProvider locale="en">
-        <Router history={props.history}>
-          <QueryClientProvider client={queryClient}>
-            <TriggersActionsUIHome {...props} />
-          </QueryClientProvider>
-        </Router>
-      </IntlProvider>
-    );
+    renderHome(props);
 
     expect(await screen.findByTestId('rulesListComponents')).toBeInTheDocument();
   });
@@ -104,15 +105,7 @@ describe('home', () => {
       },
     };
 
-    render(
-      <IntlProvider locale="en">
-        <Router history={props.history}>
-          <QueryClientProvider client={queryClient}>
-            <TriggersActionsUIHome {...props} />
-          </QueryClientProvider>
-        </Router>
-      </IntlProvider>
-    );
+    renderHome(props);
 
     // Just rules and logs
     expect(screen.getAllByRole('tab').length).toBe(2);
@@ -137,15 +130,7 @@ describe('home', () => {
       },
     };
 
-    render(
-      <IntlProvider locale="en">
-        <Router history={props.history}>
-          <QueryClientProvider client={queryClient}>
-            <TriggersActionsUIHome {...props} />
-          </QueryClientProvider>
-        </Router>
-      </IntlProvider>
-    );
+    renderHome(props);
 
     // Just rules
     expect(screen.getAllByRole('tab').length).toBe(1);
@@ -182,15 +167,7 @@ describe('home', () => {
         },
       };
 
-      render(
-        <IntlProvider locale="en">
-          <Router history={props.history}>
-            <QueryClientProvider client={queryClient}>
-              <TriggersActionsUIHome {...props} />
-            </QueryClientProvider>
-          </Router>
-        </IntlProvider>
-      );
+      renderHome(props);
 
       expect(await screen.findByTestId('createRuleButton')).toBeInTheDocument();
       expect(await screen.findByTestId('rulesSettingsLink')).toBeInTheDocument();
@@ -218,19 +195,11 @@ describe('home', () => {
         },
       };
 
-      render(
-        <IntlProvider locale="en">
-          <Router history={props.history}>
-            <QueryClientProvider client={queryClient}>
-              <TriggersActionsUIHome {...props} />
-            </QueryClientProvider>
-          </Router>
-        </IntlProvider>
-      );
+      renderHome(props);
 
-      expect(await screen.queryByTestId('createRuleButton')).not.toBeInTheDocument();
       expect(await screen.findByTestId('rulesSettingsLink')).toBeInTheDocument();
       expect(await screen.findByTestId('documentationLink')).toBeInTheDocument();
+      expect(screen.queryByTestId('createRuleButton')).not.toBeInTheDocument();
     });
   });
 });

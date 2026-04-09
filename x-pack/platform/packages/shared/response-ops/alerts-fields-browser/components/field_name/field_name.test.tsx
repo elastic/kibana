@@ -17,10 +17,6 @@ const defaultProps = {
 };
 
 describe('FieldName', () => {
-  beforeEach(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-
   test('it renders the field name', () => {
     render(<FieldName {...defaultProps} />);
 

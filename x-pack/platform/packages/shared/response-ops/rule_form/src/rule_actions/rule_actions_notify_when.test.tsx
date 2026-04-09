@@ -30,52 +30,61 @@ describe('ruleActionsNotifyWhen', () => {
     );
   }
 
+  const expectDefaultFrequency = () => {
+    const summaryOrPerRuleSelect = screen.getByTestId('summaryOrPerRuleSelect');
+    expect(summaryOrPerRuleSelect.textContent).toContain('For each alert');
+
+    const notifyWhenSelect = screen.getByTestId('notifyWhenSelect');
+    expect(notifyWhenSelect.textContent).toContain('On status changes');
+  };
+
   it('renders the passed-in frequency on load', () => {
     // Default frequency: summary=false, notifyWhen=CHANGE
-    setup();
+    const { rerender } = setup();
+    expectDefaultFrequency();
+
+    // Re-render with DEFAULT_FREQUENCY again
+    rerender(
+      <RuleActionsNotifyWhen
+        frequency={DEFAULT_FREQUENCY}
+        throttle={DEFAULT_FREQUENCY.throttle ? Number(DEFAULT_FREQUENCY.throttle[0]) : null}
+        throttleUnit={DEFAULT_FREQUENCY.throttle ? DEFAULT_FREQUENCY.throttle[1] : 'm'}
+        onChange={jest.fn()}
+        onUseDefaultMessage={jest.fn()}
+        hasAlertsMappings
+      />
+    );
+    expectDefaultFrequency();
+
+    // Render with throttle frequency
+    const throttleFrequency = {
+      ...DEFAULT_FREQUENCY,
+      throttle: '5h',
+      notifyWhen: RuleNotifyWhen.THROTTLE,
+    };
+
+    rerender(
+      <RuleActionsNotifyWhen
+        frequency={throttleFrequency}
+        throttle={Number(throttleFrequency.throttle[0])}
+        throttleUnit={throttleFrequency.throttle[1]}
+        onChange={jest.fn()}
+        onUseDefaultMessage={jest.fn()}
+        hasAlertsMappings
+      />
+    );
     {
       const summaryOrPerRuleSelect = screen.getByTestId('summaryOrPerRuleSelect');
       expect(summaryOrPerRuleSelect.textContent).toContain('For each alert');
 
-      // EuiSuperSelect renders a button; selected option's inputDisplay text is shown
       const notifyWhenSelect = screen.getByTestId('notifyWhenSelect');
-      expect(notifyWhenSelect.textContent).toContain('On status changes');
-    }
-
-    // Re-render with DEFAULT_FREQUENCY again
-    setup(DEFAULT_FREQUENCY);
-    {
-      const summaryOrPerRuleSelect = screen.getAllByTestId('summaryOrPerRuleSelect')[1];
-      expect(summaryOrPerRuleSelect.textContent).toContain('For each alert');
-
-      const notifyWhenSelect = screen.getAllByTestId('notifyWhenSelect')[1];
-      expect(notifyWhenSelect.textContent).toContain('On status changes');
-    }
-
-    // Render with throttle frequency
-    setup({
-      ...DEFAULT_FREQUENCY,
-      throttle: '5h',
-      notifyWhen: RuleNotifyWhen.THROTTLE,
-    });
-    {
-      const summaryOrPerRuleSelects = screen.getAllByTestId('summaryOrPerRuleSelect');
-      const summaryOrPerRuleSelect = summaryOrPerRuleSelects[summaryOrPerRuleSelects.length - 1];
-      expect(summaryOrPerRuleSelect.textContent).toContain('For each alert');
-
-      const notifyWhenSelects = screen.getAllByTestId('notifyWhenSelect');
-      const notifyWhenSelect = notifyWhenSelects[notifyWhenSelects.length - 1];
       expect(notifyWhenSelect.textContent).toContain('On custom action intervals');
     }
 
-    const throttleInputs = screen.getAllByTestId('throttleInput');
-    const throttleInput = throttleInputs[throttleInputs.length - 1] as HTMLInputElement;
+    const throttleInput = screen.getByTestId('throttleInput') as HTMLInputElement;
     expect(Number(throttleInput.value)).toEqual(5);
 
-    const throttleUnitInputs = screen.getAllByTestId('throttleUnitInput');
-    const throttleUnitInput = throttleUnitInputs[
-      throttleUnitInputs.length - 1
-    ] as HTMLSelectElement;
+    const throttleUnitInput = screen.getByTestId('throttleUnitInput') as HTMLSelectElement;
     expect(throttleUnitInput.value).toEqual('h');
   });
 

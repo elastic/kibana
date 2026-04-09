@@ -54,7 +54,7 @@ describe.skip('UpdateConnector renders', () => {
     expect(screen.getByTestId('connector-servicenow-jwt-key-id-form-input')).toBeInTheDocument();
     expect(screen.getByTestId('connector-servicenow-private-key-form-input')).toBeInTheDocument();
     expect(
-      screen.queryByTestId('connector-servicenow-private-key-password-form-input')
+      screen.getByTestId('connector-servicenow-private-key-password-form-input')
     ).toBeInTheDocument();
   });
 
@@ -164,12 +164,12 @@ describe.skip('UpdateConnector renders', () => {
     });
   });
 
-  it('should cancel the update when cancel button clicked', () => {
+  it('should cancel the update when cancel button clicked', async () => {
     const onCancel = jest.fn();
     renderUpdateConnector({ onCancel });
 
     expect(onCancel).not.toHaveBeenCalled();
-    screen.getByTestId('snUpdateInstallationCancel').click();
+    await userEvent.click(screen.getByTestId('snUpdateInstallationCancel'));
     expect(onCancel).toHaveBeenCalled();
   });
 

@@ -54,10 +54,9 @@ describe('event_log_list_status_filter', () => {
     await userEvent.click(screen.getByRole('button'));
 
     // EUI popovers render in a portal (outside `container`), so use screen queries
-    const statusItems = screen.getAllByRole('option');
-    expect(statusItems.length).toEqual(4);
+    expect(screen.getAllByRole('option')).toHaveLength(4);
 
-    await userEvent.click(statusItems[0]);
+    await userEvent.click(screen.getAllByRole('option')[0]);
     expect(onChangeMock).toHaveBeenCalledWith(['success']);
 
     rerender(
@@ -69,7 +68,7 @@ describe('event_log_list_status_filter', () => {
     const badge1 = container.querySelector('.euiNotificationBadge');
     expect(badge1?.textContent).toEqual('1');
 
-    await userEvent.click(statusItems[1]);
+    await userEvent.click(screen.getAllByRole('option')[1]);
     expect(onChangeMock).toHaveBeenCalledWith(['success', 'failure']);
 
     rerender(
@@ -84,7 +83,7 @@ describe('event_log_list_status_filter', () => {
     const badge2 = container.querySelector('.euiNotificationBadge');
     expect(badge2?.textContent).toEqual('2');
 
-    await userEvent.click(statusItems[0]);
+    await userEvent.click(screen.getAllByRole('option')[0]);
     expect(onChangeMock).toHaveBeenCalledWith(['failure']);
   });
 });

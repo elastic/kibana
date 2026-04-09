@@ -41,7 +41,16 @@ const { useGetRuleTypesPermissions } = jest.requireMock(
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
-const queryClient = new QueryClient();
+const renderRulesPage = (history = createMemoryHistory({ initialEntries: ['/'] })) =>
+  render(
+    <IntlProvider locale="en">
+      <Router history={history}>
+        <QueryClientProvider client={new QueryClient()}>
+          <RulesPage />
+        </QueryClientProvider>
+      </Router>
+    </IntlProvider>
+  );
 
 describe('rulesPage', () => {
   beforeEach(() => {
@@ -52,30 +61,14 @@ describe('rulesPage', () => {
 
   it('renders rule list components', async () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
-    render(
-      <IntlProvider locale="en">
-        <Router history={history}>
-          <QueryClientProvider client={queryClient}>
-            <RulesPage />
-          </QueryClientProvider>
-        </Router>
-      </IntlProvider>
-    );
+    renderRulesPage(history);
 
     expect(await screen.findByTestId('rulesListComponents')).toBeInTheDocument();
   });
 
   it('shows the correct number of tabs', async () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
-    render(
-      <IntlProvider locale="en">
-        <Router history={history}>
-          <QueryClientProvider client={queryClient}>
-            <RulesPage />
-          </QueryClientProvider>
-        </Router>
-      </IntlProvider>
-    );
+    renderRulesPage(history);
 
     // Just rules and logs
     expect(screen.getAllByRole('tab').length).toBe(2);
@@ -87,15 +80,7 @@ describe('rulesPage', () => {
     });
     const history = createMemoryHistory({ initialEntries: ['/'] });
 
-    render(
-      <IntlProvider locale="en">
-        <Router history={history}>
-          <QueryClientProvider client={queryClient}>
-            <RulesPage />
-          </QueryClientProvider>
-        </Router>
-      </IntlProvider>
-    );
+    renderRulesPage(history);
 
     // Just rules
     expect(screen.getAllByRole('tab').length).toBe(1);
@@ -119,15 +104,7 @@ describe('rulesPage', () => {
         authorizedToCreateAnyRules: true,
       });
       const history = createMemoryHistory({ initialEntries: ['/'] });
-      render(
-        <IntlProvider locale="en">
-          <Router history={history}>
-            <QueryClientProvider client={queryClient}>
-              <RulesPage />
-            </QueryClientProvider>
-          </Router>
-        </IntlProvider>
-      );
+      renderRulesPage(history);
 
       expect(await screen.findByTestId('createRuleButton')).toBeInTheDocument();
       expect(await screen.findByTestId('rulesSettingsLink')).toBeInTheDocument();
@@ -140,19 +117,11 @@ describe('rulesPage', () => {
         authorizedToCreateAnyRules: false,
       });
       const history = createMemoryHistory({ initialEntries: ['/'] });
-      render(
-        <IntlProvider locale="en">
-          <Router history={history}>
-            <QueryClientProvider client={queryClient}>
-              <RulesPage />
-            </QueryClientProvider>
-          </Router>
-        </IntlProvider>
-      );
+      renderRulesPage(history);
 
-      expect(await screen.queryByTestId('createRuleButton')).not.toBeInTheDocument();
       expect(await screen.findByTestId('rulesSettingsLink')).toBeInTheDocument();
       expect(await screen.findByTestId('documentationLink')).toBeInTheDocument();
+      expect(screen.queryByTestId('createRuleButton')).not.toBeInTheDocument();
     });
   });
 });
