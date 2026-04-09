@@ -106,11 +106,7 @@ describe('FROM Validation', () => {
           ...mockContext,
           views: [{ name: 'my_saved_view', query: 'FROM logs' }],
         };
-        fromExpectErrors(
-          'FROM other_view',
-          ['Unknown data source "other_view"'],
-          contextWithViews
-        );
+        fromExpectErrors('FROM other_view', ['Unknown data source "other_view"'], contextWithViews);
       });
 
       test('uses "Unknown index" (not "Unknown data source") for unknown source inside subquery', () => {
