@@ -125,13 +125,13 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 ### OAuth 2.0 Authorization Code (recommended for per-user access) [servicenow-search-oauth-auth-code]
 
-Use this method to let individual users sign in to ServiceNow through {{kib}}. {{kib}} stores refreshable tokens on each user's behalf.
+Use this method to let individual users sign in to ServiceNow through {{kib}}. {{kib}} stores refreshable tokens on user's behalf.
 
-1. Select **System OAuth > Application Registry**.
+1. Select **System OAuth** > **Application Registry**.
 2. Select **New**, then select **Create an OAuth API endpoint for external clients**.
 3. Configure the application as follows:
    - **Name**: Enter a name for the application (for example, `Elastic Kibana`).
-   - **Redirect URL**: Enter {{kib}}'s connector OAuth callback URL. Copy the following pattern and substitute your public {{kib}} hostname:
+   - **Redirect URL**: Enter {{kib}}'s connector OAuth callback URL. Copy the following pattern and replace your public {{kib}} hostname:
 
      ```text
      https://<your-kibana-host>/api/actions/connector/_oauth_callback
