@@ -305,7 +305,7 @@ describe('useDashboardMenuItems', () => {
         waitFor(async () => {
           expect(openConfirmSpy).toHaveBeenCalled();
           expect(mockAsyncResetToLastSavedState).toHaveBeenCalled();
-          expect(mockSetViewMode).toHaveBeenCalled();
+          expect(mockSetViewMode).toHaveBeenCalledWith('view');
         });
       });
     });
