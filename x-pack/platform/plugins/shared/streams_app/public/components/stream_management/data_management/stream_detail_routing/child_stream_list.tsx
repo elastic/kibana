@@ -163,30 +163,30 @@ export function ChildStreamList({ availableStreams = [] }: { availableStreams?: 
             options={
               isWiredStream
                 ? [
-                    {
-                      id: 'ingestMode',
-                      label: i18n.translate(
-                        'xpack.streams.streamDetailRouting.childStreamList.ingestModeLabel',
-                        { defaultMessage: 'Index' }
-                      ),
-                    },
-                    {
-                      id: 'queryMode',
-                      label: i18n.translate(
-                        'xpack.streams.streamDetailRouting.childStreamList.queryModeLabel',
-                        { defaultMessage: 'Query' }
-                      ),
-                    },
-                  ]
+                  {
+                    id: 'ingestMode',
+                    label: i18n.translate(
+                      'xpack.streams.streamDetailRouting.childStreamList.ingestModeLabel',
+                      { defaultMessage: 'Index' }
+                    ),
+                  },
+                  {
+                    id: 'queryMode',
+                    label: i18n.translate(
+                      'xpack.streams.streamDetailRouting.childStreamList.queryModeLabel',
+                      { defaultMessage: 'Query' }
+                    ),
+                  },
+                ]
                 : [
-                    {
-                      id: 'queryMode',
-                      label: i18n.translate(
-                        'xpack.streams.streamDetailRouting.childStreamList.queryModeLabel',
-                        { defaultMessage: 'Query' }
-                      ),
-                    },
-                  ]
+                  {
+                    id: 'queryMode',
+                    label: i18n.translate(
+                      'xpack.streams.streamDetailRouting.childStreamList.queryModeLabel',
+                      { defaultMessage: 'Query' }
+                    ),
+                  },
+                ]
             }
             idSelected={selectedChildStreamMode}
             onChange={handleModeChange}
@@ -511,7 +511,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
                 <ReviewSuggestionsForm
                   acceptSuggestion={acceptSuggestion}
                   aiFeatures={aiFeatures}
-                  definition={definition}
+                  definition={definition as Streams.WiredStream.GetResponse}
                   isLoadingSuggestions={isLoadingSuggestions}
                   onRegenerate={refineSuggestionsForStream}
                   previewSuggestion={previewSuggestion}
@@ -646,12 +646,12 @@ function QueryModeChildrenList() {
                 content={
                   !canManage
                     ? i18n.translate(
-                        'xpack.streams.queryModeChildrenList.cannotCreateQueryStream',
-                        {
-                          defaultMessage:
-                            "You don't have sufficient privileges to create query streams.",
-                        }
-                      )
+                      'xpack.streams.queryModeChildrenList.cannotCreateQueryStream',
+                      {
+                        defaultMessage:
+                          "You don't have sufficient privileges to create query streams.",
+                      }
+                    )
                     : undefined
                 }
               >

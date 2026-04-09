@@ -18,7 +18,7 @@ import { createDocumentsCountCollectorActor } from '../state_management/stream_r
 const percentageFormatter = getPercentageFormatter({ precision: 2 });
 
 export const useMatchRate = (
-  definition: Streams.ingest.all.GetResponse,
+  definition: Streams.WiredStream.GetResponse,
   partition: PartitionSuggestion
 ) => {
   const { data } = useKibana().dependencies.start;

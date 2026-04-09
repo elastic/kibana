@@ -47,7 +47,7 @@ export function SuggestedStreamPanel({
   isSelectedForBulk,
   onToggleSelection,
 }: {
-  definition: Streams.ingest.all.GetResponse;
+  definition: Streams.WiredStream.GetResponse;
   partition: PartitionSuggestion;
   onDismiss(): void;
   onPreview(toggle: boolean): void;
