@@ -6,18 +6,21 @@
  */
 
 import React from 'react';
-import type { EuiButtonProps } from '@elastic/eui';
+import type { AiButtonDefaultProps } from '@kbn/shared-ux-ai-components';
 import type { AIFeatures } from '../../../../../hooks/use_ai_features';
 import { ConnectorListButtonBase } from '../../../../connector_list_button/connector_list_button';
 
-export interface GenerateSuggestionButtonProps extends EuiButtonProps {
+export interface GenerateSuggestionButtonProps
+  extends Omit<AiButtonDefaultProps, 'onClick' | 'iconType'> {
   onClick(connectorId: string): void;
   aiFeatures: AIFeatures;
+  showConnectorSelector?: boolean;
 }
 
 export const GenerateSuggestionButton = ({
   aiFeatures,
   onClick,
+  showConnectorSelector,
   ...rest
 }: GenerateSuggestionButtonProps) => {
   const handleClick = () => {
@@ -29,6 +32,7 @@ export const GenerateSuggestionButton = ({
   return (
     <ConnectorListButtonBase
       aiFeatures={aiFeatures}
+      showConnectorSelector={showConnectorSelector}
       buttonProps={{
         size: 's',
         iconType: 'sparkles',

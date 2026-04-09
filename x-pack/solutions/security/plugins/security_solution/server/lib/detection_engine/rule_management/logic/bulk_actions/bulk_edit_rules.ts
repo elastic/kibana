@@ -8,6 +8,8 @@
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 
+import type { Rule } from '@kbn/alerting-plugin/common';
+import type { DetectionRulesAuthz } from '../../../../../../common/detection_engine/rule_management/authz';
 import { convertObjectKeysToCamelCase } from '../../../../../utils/object_case_converters';
 import type { BulkActionEditPayload } from '../../../../../../common/api/detection_engine/rule_management';
 
@@ -25,6 +27,7 @@ import { validateBulkEditRule } from './validations';
 import type { PrebuiltRulesCustomizationStatus } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { createDefaultInternalRuleSource } from '../detection_rules_client/mergers/rule_source/create_default_internal_rule_source';
+import { isOnlyActionsWithReadAuth } from './utils';
 
 export interface BulkEditRulesArguments {
   actionsClient: ActionsClient;
@@ -33,6 +36,7 @@ export interface BulkEditRulesArguments {
   actions: BulkActionEditPayload[];
   rules: RuleAlertType[];
   mlAuthz: MlAuthz;
+  rulesAuthz: DetectionRulesAuthz;
   ruleCustomizationStatus: PrebuiltRulesCustomizationStatus;
 }
 
@@ -50,13 +54,11 @@ export const bulkEditRules = async ({
   rules,
   actions,
   mlAuthz,
+  rulesAuthz,
   ruleCustomizationStatus,
 }: BulkEditRulesArguments) => {
   // Split operations
   const { attributesActions, paramsActions } = splitBulkEditActions(actions);
-  const operations = attributesActions
-    .map((attribute) => bulkEditActionToRulesClientOperation(actionsClient, attribute))
-    .flat();
 
   // Check if there are any prebuilt rules and fetch their base versions
   const prebuiltRules = rules.filter((rule) => rule.params.immutable);
@@ -71,51 +73,65 @@ export const bulkEditRules = async ({
   );
   const currentRulesMap = new Map(rules.map((rule) => [rule.id, rule]));
 
+  const paramsModifier = async (partiallyModifiedRule: Rule<RuleParams>) => {
+    const ruleParams = partiallyModifiedRule.params;
+
+    await validateBulkEditRule({
+      mlAuthz,
+      rulesAuthz,
+      ruleType: ruleParams.type,
+      edit: actions,
+      immutable: ruleParams.immutable,
+      ruleCustomizationStatus,
+    });
+
+    const currentRule = currentRulesMap.get(partiallyModifiedRule.id);
+
+    invariant(currentRule, "Unable to extract rule's current data in paramsModifier");
+
+    const { modifiedParams, isParamsUpdateSkipped } = ruleParamsModifier(ruleParams, paramsActions);
+
+    const nextRule = convertAlertingRuleToRuleResponse({
+      ...partiallyModifiedRule,
+      params: modifiedParams,
+    });
+
+    if (nextRule.immutable === true) {
+      const baseRule = baseVersionsMap.get(nextRule.rule_id);
+      const ruleSource = calculateExternalRuleSource({
+        baseRule,
+        currentRule: convertAlertingRuleToRuleResponse(currentRule),
+        nextRule,
+      });
+
+      modifiedParams.ruleSource = convertObjectKeysToCamelCase(ruleSource);
+    } else {
+      modifiedParams.ruleSource = createDefaultInternalRuleSource();
+    }
+
+    return { modifiedParams, isParamsUpdateSkipped };
+  };
+
+  if (attributesActions.length === 0 && isOnlyActionsWithReadAuth(paramsActions)) {
+    return rulesClient.bulkEditRuleParamsWithReadAuth<RuleParams>({
+      ids: Array.from(currentRulesMap.keys()),
+      // We don't run any attribute actions, the logic done is in the paramsModifier which performs
+      // the necessary array logic for different operation types (e.g. add, set, delete)
+      operations: [],
+      paramsModifier,
+    });
+  }
+
+  const operations = attributesActions
+    .map((attribute) => bulkEditActionToRulesClientOperation(actionsClient, attribute))
+    .flat();
+
   const result = await rulesClient.bulkEdit<RuleParams>({
     ids: Array.from(currentRulesMap.keys()),
     operations,
     // Rules Client applies operations to rules client aware fields like tags
     // the rule before passing it to paramsModifier().
-    paramsModifier: async (partiallyModifiedRule) => {
-      const ruleParams = partiallyModifiedRule.params;
-
-      await validateBulkEditRule({
-        mlAuthz,
-        ruleType: ruleParams.type,
-        edit: actions,
-        immutable: ruleParams.immutable,
-        ruleCustomizationStatus,
-      });
-
-      const currentRule = currentRulesMap.get(partiallyModifiedRule.id);
-
-      invariant(currentRule, "Unable to extract rule's current data in paramsModifier");
-
-      const { modifiedParams, isParamsUpdateSkipped } = ruleParamsModifier(
-        ruleParams,
-        paramsActions
-      );
-
-      const nextRule = convertAlertingRuleToRuleResponse({
-        ...partiallyModifiedRule,
-        params: modifiedParams,
-      });
-
-      if (nextRule.immutable === true) {
-        const baseRule = baseVersionsMap.get(nextRule.rule_id);
-        const ruleSource = calculateExternalRuleSource({
-          baseRule,
-          currentRule: convertAlertingRuleToRuleResponse(currentRule),
-          nextRule,
-        });
-
-        modifiedParams.ruleSource = convertObjectKeysToCamelCase(ruleSource);
-      } else {
-        modifiedParams.ruleSource = createDefaultInternalRuleSource();
-      }
-
-      return { modifiedParams, isParamsUpdateSkipped };
-    },
+    paramsModifier,
   });
 
   return result;
