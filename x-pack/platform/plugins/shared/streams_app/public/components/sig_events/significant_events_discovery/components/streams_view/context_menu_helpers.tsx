@@ -6,7 +6,6 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { InferenceConnector } from '@kbn/inference-common';
 import React from 'react';
 import { ConnectorIcon } from '../../../../connector_list_button/connector_icon';
@@ -52,13 +51,7 @@ export function buildConnectorMenuItem({
           <ConnectorIcon connectorName={connector?.name} />
         </EuiFlexItem>
         <EuiFlexItem className="eui-textTruncate" css={{ minWidth: 0 }}>
-          {i18n.translate(
-            'xpack.streams.significantEventsDiscovery.streamsView.connectorMenuItemModel',
-            {
-              defaultMessage: '{name}',
-              values: { name: connector?.name ?? '—' },
-            }
-          )}
+          {connector?.name ?? '—'}
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
