@@ -252,7 +252,7 @@ describe('getEarsAccessToken', () => {
   });
 
   describe('error handling', () => {
-    it('returns null and logs an error when requestEarsRefreshToken throws', async () => {
+    it('throws ConnectorAuthorizationError with reason refresh_failed when requestEarsRefreshToken throws', async () => {
       connectorTokenClient.get.mockResolvedValueOnce({
         hasErrors: false,
         connectorToken: expiredToken,
@@ -261,15 +261,17 @@ describe('getEarsAccessToken', () => {
         new Error('EARS endpoint unreachable')
       );
 
-      const result = await getEarsAccessToken(baseOpts);
+      const error = await getEarsAccessToken(baseOpts).catch((e) => e);
 
-      expect(result).toBeNull();
+      expect(error).toBeInstanceOf(ConnectorAuthorizationError);
+      expect(error.reason).toBe('refresh_failed');
+      expect(error.authMethod).toBe('oauth_authorization_code');
       expect(logger.error).toHaveBeenCalledWith(
         'Failed to refresh access token for connectorId: connector-1. Error: EARS endpoint unreachable'
       );
     });
 
-    it('returns null and logs an error when persisting the refreshed token fails', async () => {
+    it('throws ConnectorAuthorizationError with reason refresh_failed when persisting the refreshed token fails', async () => {
       connectorTokenClient.get.mockResolvedValueOnce({
         hasErrors: false,
         connectorToken: expiredToken,
@@ -279,9 +281,11 @@ describe('getEarsAccessToken', () => {
         new Error('DB write failed')
       );
 
-      const result = await getEarsAccessToken(baseOpts);
+      const error = await getEarsAccessToken(baseOpts).catch((e) => e);
 
-      expect(result).toBeNull();
+      expect(error).toBeInstanceOf(ConnectorAuthorizationError);
+      expect(error.reason).toBe('refresh_failed');
+      expect(error.authMethod).toBe('oauth_authorization_code');
       expect(logger.error).toHaveBeenCalledWith(
         'Failed to refresh access token for connectorId: connector-1. Error: DB write failed'
       );

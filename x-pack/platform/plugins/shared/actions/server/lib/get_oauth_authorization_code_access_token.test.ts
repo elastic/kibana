@@ -381,7 +381,7 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
   });
 
   describe('error handling', () => {
-    it('returns null and logs an error when requestOAuthRefreshToken throws', async () => {
+    it('returns null and logs an error when requestOAuthRefreshToken throws a non-auth error', async () => {
       connectorTokenClient.get.mockResolvedValueOnce({
         hasErrors: false,
         connectorToken: expiredToken,
@@ -396,6 +396,22 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
       expect(logger.error).toHaveBeenCalledWith(
         'Failed to refresh access token for connectorId: connector-1. Error: token endpoint unreachable'
       );
+    });
+
+    it('throws ConnectorAuthorizationError with reason token_revoked when the OAuth server returns invalid_grant', async () => {
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: expiredToken,
+      });
+      (requestOAuthRefreshToken as jest.Mock).mockRejectedValueOnce(
+        new Error('{"error":"invalid_grant","error_description":"Token has been revoked"}')
+      );
+
+      const error = await getOAuthAuthorizationCodeAccessToken(baseOpts).catch((e) => e);
+
+      expect(error).toBeInstanceOf(ConnectorAuthorizationError);
+      expect(error.reason).toBe('token_revoked');
+      expect(error.authMethod).toBe('oauth_authorization_code');
     });
 
     it('returns null and logs an error when persisting the refreshed token fails', async () => {

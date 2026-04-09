@@ -235,7 +235,7 @@ describe('getStoredTokenWithRefresh', () => {
   });
 
   describe('error handling', () => {
-    it('returns null and logs an error when refreshFn throws', async () => {
+    it('returns null and logs an error when refreshFn throws a non-auth error', async () => {
       connectorTokenClient.get.mockResolvedValueOnce({
         hasErrors: false,
         connectorToken: expiredToken,
@@ -248,6 +248,39 @@ describe('getStoredTokenWithRefresh', () => {
       expect(logger.error).toHaveBeenCalledWith(
         'Failed to refresh access token for connectorId: connector-1. Error: upstream auth failed'
       );
+    });
+
+    it('throws ConnectorAuthorizationError with reason token_revoked when the error contains invalid_grant', async () => {
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: expiredToken,
+      });
+      refreshFn.mockRejectedValueOnce(
+        new Error('{"error":"invalid_grant","error_description":"Token has been revoked"}')
+      );
+
+      const error = await getStoredTokenWithRefresh(baseOpts).catch((e) => e);
+
+      expect(error).toBeInstanceOf(ConnectorAuthorizationError);
+      expect(error.reason).toBe('token_revoked');
+      expect(error.authMethod).toBe('oauth_authorization_code');
+    });
+
+    it('throws ConnectorAuthorizationError with reason refresh_failed when treatRefreshFailureAsAuthError is true', async () => {
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: expiredToken,
+      });
+      refreshFn.mockRejectedValueOnce(new Error('opaque refresh error'));
+
+      const error = await getStoredTokenWithRefresh({
+        ...baseOpts,
+        treatRefreshFailureAsAuthError: true,
+      }).catch((e) => e);
+
+      expect(error).toBeInstanceOf(ConnectorAuthorizationError);
+      expect(error.reason).toBe('refresh_failed');
+      expect(error.authMethod).toBe('oauth_authorization_code');
     });
 
     it('returns null and logs an error when persisting the refreshed token fails', async () => {

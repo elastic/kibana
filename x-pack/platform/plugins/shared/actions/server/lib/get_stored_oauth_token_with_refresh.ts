@@ -42,6 +42,17 @@ export interface GetStoredTokenWithRefreshOpts {
    * and must return a new token response from the auth server.
    */
   refreshFn: (refreshToken: string) => Promise<OAuthTokenResponse>;
+  /**
+   * When true, treat any refresh failure as an authorization error requiring
+   * user re-authorization. Use when the refresh endpoint does not return
+   * structured error codes (e.g. EARS), so transient failures cannot be
+   * distinguished from permanent authorization failures.
+   *
+   * When false (default), only `invalid_grant` errors from the OAuth server
+   * are treated as authorization failures; other errors return null and let
+   * the caller decide whether to retry.
+   */
+  treatRefreshFailureAsAuthError?: boolean;
 }
 
 interface ExtractedStoredOAuthTokens {
@@ -94,6 +105,7 @@ export const getStoredTokenWithRefresh = async ({
   profileUid,
   authMode,
   refreshFn,
+  treatRefreshFailureAsAuthError = false,
 }: GetStoredTokenWithRefreshOpts): Promise<string | null> => {
   // Acquire lock scoped to the connector (shared mode) or to the connector + user (per-user mode),
   // so concurrent requests for different users don't block each other unnecessarily.
@@ -196,6 +208,26 @@ export const getStoredTokenWithRefresh = async ({
       logger.error(
         `Failed to refresh access token for connectorId: ${connectorId}. Error: ${err.message}`
       );
+
+      const isTokenRevoked =
+        typeof err.message === 'string' && err.message.includes('invalid_grant');
+
+      if (isTokenRevoked) {
+        throw new ConnectorAuthorizationError({
+          authMethod: 'oauth_authorization_code',
+          reason: 'token_revoked',
+          message: `Failed to refresh access token for connectorId: ${connectorId}. User must re-authorize.`,
+        });
+      }
+
+      if (treatRefreshFailureAsAuthError) {
+        throw new ConnectorAuthorizationError({
+          authMethod: 'oauth_authorization_code',
+          reason: 'refresh_failed',
+          message: `Failed to refresh access token for connectorId: ${connectorId}. User must re-authorize.`,
+        });
+      }
+
       return null;
     }
   });

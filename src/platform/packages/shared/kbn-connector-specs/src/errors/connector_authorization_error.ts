@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type ConnectorAuthorizationReason = 'no_token' | 'token_expired' | 'refresh_token_expired';
+export type ConnectorAuthorizationReason =
+  | 'no_token'
+  | 'token_expired'
+  | 'refresh_token_expired'
+  | 'token_revoked'
+  | 'refresh_failed';
 
 /**
  * Structured error thrown when a connector fails to authorize, and should

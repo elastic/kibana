@@ -63,6 +63,7 @@ export const getEarsAccessToken = async ({
     isPerUser,
     profileUid,
     authMode,
+    treatRefreshFailureAsAuthError: true,
     refreshFn: (refreshToken) =>
       requestEarsRefreshToken(provider, logger, { refreshToken }, configurationUtilities),
   });
