@@ -5705,16 +5705,16 @@
           },
           {
             "parentPluginId": "@kbn/agent-builder-common",
-            "id": "def-common.ConversationRound.pending_prompt",
-            "type": "Object",
+            "id": "def-common.ConversationRound.pending_prompts",
+            "type": "Array",
             "tags": [],
-            "label": "pending_prompt",
+            "label": "pending_prompts",
             "description": [
-              "if status is awaiting_prompt, contains the current prompt request"
+              "if status is awaiting_prompt, contains the current prompt requests"
             ],
             "signature": [
               "ConfirmationPrompt",
-              " | undefined"
+              "[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
             "lineNumber": 210,
