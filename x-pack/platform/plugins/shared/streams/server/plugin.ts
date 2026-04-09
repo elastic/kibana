@@ -22,12 +22,14 @@ import { registerRoutes } from '@kbn/server-route-repository';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
+import { isNotFoundError } from '@kbn/es-errors';
 import type { StreamsConfig } from '../common/config';
 import { configSchema, exposeToBrowserConfig } from '../common/config';
 import {
   STREAMS_API_PRIVILEGES,
   STREAMS_CONSUMER,
   STREAMS_FEATURE_ID,
+  STREAMS_SETTINGS_DOCUMENT_ID,
   STREAMS_TIERED_FEATURES,
   STREAMS_UI_PRIVILEGES,
 } from '../common/constants';
@@ -56,7 +58,9 @@ import { baseFields } from './lib/streams/component_templates/logs_layer';
 import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
 import { registerStreamsAgentBuilder } from './agent_builder/register';
 import { registerSignificantEventsInferenceFeatures } from './register_significant_events_inference_features';
+import { registerSuggestionsInferenceFeatures } from './register_suggestions_inference_features';
 import { PatternExtractionService } from './lib/pattern_extraction/pattern_extraction_service';
+import { createStreamsSettingsStorageClient } from './lib/streams/storage/streams_settings_storage_client';
 import {
   createContinuousKiExtractionWorkflowService,
   type ContinuousKiExtractionWorkflowService,
@@ -130,6 +134,10 @@ export class StreamsPlugin
       plugins.searchInferenceEndpoints,
       this.logger.get('inference-features')
     );
+    registerSuggestionsInferenceFeatures(
+      plugins.searchInferenceEndpoints,
+      this.logger.get('inference-features')
+    );
 
     const inferenceResolver = createInferenceResolver(this.logger);
 
@@ -194,6 +202,11 @@ export class StreamsPlugin
         isSecurityEnabled,
       });
 
+      const streamsSettingsStorageClient = createStreamsSettingsStorageClient(
+        coreStart.elasticsearch.client.asInternalUser,
+        this.logger
+      );
+
       return {
         scopedClusterClient,
         soClient,
@@ -209,6 +222,7 @@ export class StreamsPlugin
         uiSettingsClient,
         globalUiSettingsClient,
         taskClient,
+        streamsSettingsStorageClient,
         isSecurityEnabled,
       };
     };
@@ -320,73 +334,111 @@ export class StreamsPlugin
       );
     }
 
-    if (this.config.preconfigured.enabled) {
-      core
-        .getStartServices()
-        .then(async ([coreStart]) => {
-          const esClient = coreStart.elasticsearch.client.asInternalUser;
-          const soClient = coreStart.savedObjects.getUnsafeInternalClient();
-          // Since the RulesClient cannot be unscoped, we provide a stub client that
-          // will throw an error if rules or queries exist in the stream definition.
-          // This is a limitation of the config-based streams for now.
-          const rulesClient = {
-            bulkGetRules() {
-              throw new Error('Not implemented');
-            },
-            create() {
-              throw new Error('Not implemented');
-            },
-            update() {
-              throw new Error('Not implemented');
-            },
-          } as unknown as RulesClient;
+    core
+      .getStartServices()
+      .then(async ([coreStart]) => {
+        const soClient = coreStart.savedObjects.getUnsafeInternalClient();
+        const startupUiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
+        const esClient = coreStart.elasticsearch.client.asInternalUser;
 
-          const [attachmentClient, featureClient, queryClient] = await Promise.all([
-            attachmentService.getClient({ soClient, rulesClient }),
-            featureService.getClient(),
-            queryService.getClient({ esClient, soClient, rulesClient }),
-          ]);
-
-          const streamsClient = await streamsService.getClient({
-            attachmentClient,
-            queryClient,
-            featureClient,
+        if (this.config.preconfigured.enabled) {
+          const streamsSettingsStorageClient = createStreamsSettingsStorageClient(
             esClient,
-            esClientAsInternalUser: esClient,
-            uiSettingsClient: coreStart.uiSettings.asScopedToClient(soClient),
-            isSecurityEnabled: false,
-          });
+            this.logger
+          );
 
-          await streamsClient.enableStreams();
+          const streamsSettings = await streamsSettingsStorageClient
+            .get({ id: STREAMS_SETTINGS_DOCUMENT_ID })
+            .then((response) => response._source)
+            .catch((error) => {
+              if (isNotFoundError(error)) {
+                // This is an expected error that gets thrown when the settings
+                // document doesn't exist, which is the case on the initial startup.
+                return;
+              }
+              throw error;
+            });
 
-          await streamsClient.bulkUpsert(
-            this.config.preconfigured.stream_definitions.map(({ name, ...definition }) => ({
-              name,
-              request: Streams.all.UpsertRequest.parse(
-                ROOT_STREAM_NAMES.includes(name)
-                  ? {
-                      ...definition,
-                      stream: {
-                        ...definition.stream,
-                        ingest: {
-                          ...definition.stream.ingest,
-                          wired: {
-                            ...definition.stream.ingest.wired,
-                            fields: name === LOGS_ECS_STREAM_NAME ? ecsBaseFields : baseFields,
+          if (streamsSettings?.wired_streams_disabled_by_user) {
+            this.logger.info('Wired streams are disabled by user, skipping preconfiguration');
+          } else {
+            // Since the RulesClient cannot be unscoped, we provide a stub client that
+            // will throw an error if rules or queries exist in the stream definition.
+            // This is a limitation of the config-based streams for now.
+            const rulesClient = {
+              bulkGetRules() {
+                throw new Error('Not implemented');
+              },
+              create() {
+                throw new Error('Not implemented');
+              },
+              update() {
+                throw new Error('Not implemented');
+              },
+            } as unknown as RulesClient;
+
+            const attachmentClient = await attachmentService.getClient({ soClient, rulesClient });
+
+            // featureClient and queryClient are not needed for enableStreams()
+            // and bulkUpsert() during preconfiguration. Avoid creating them here
+            // because their initialization probes ELSER inference endpoints via
+            // the inference API, which triggers lazy model deployment in
+            // Elasticsearch — an unwanted side effect during startup that can
+            // interfere with ML tests and waste cluster resources.
+            const streamsClient = await streamsService.getClient({
+              attachmentClient,
+              esClient,
+              esClientAsInternalUser: esClient,
+              uiSettingsClient: coreStart.uiSettings.asScopedToClient(soClient),
+              isSecurityEnabled: false,
+            });
+
+            await streamsClient.enableStreams({ defer: true });
+
+            await streamsClient.bulkUpsert(
+              this.config.preconfigured.stream_definitions.map(({ name, ...definition }) => ({
+                name,
+                request: Streams.all.UpsertRequest.parse(
+                  ROOT_STREAM_NAMES.includes(name)
+                    ? {
+                        ...definition,
+                        stream: {
+                          ...definition.stream,
+                          ingest: {
+                            ...definition.stream.ingest,
+                            wired: {
+                              ...definition.stream.ingest.wired,
+                              fields: name === LOGS_ECS_STREAM_NAME ? ecsBaseFields : baseFields,
+                            },
                           },
                         },
-                      },
-                    }
-                  : definition
-              ),
-            }))
-          );
-          this.logger.info('Streams preconfigured successfully');
-        })
-        .catch((error) => {
-          this.logger.error(`Error preconfiguring streams: ${error}`);
-        });
-    }
+                      }
+                    : definition
+                ),
+              }))
+            );
+            this.logger.info('Streams preconfigured successfully');
+          }
+        }
+
+        startupUiSettingsClient
+          .get<boolean>(OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS)
+          .then((isWiredStreamViewsEnabled) =>
+            backfillWiredStreamViews({
+              esClient,
+              logger: this.logger,
+              isWiredStreamViewsEnabled,
+            })
+          )
+          .catch((err: Error) => {
+            this.logger.error(`Failed to backfill wired stream views on startup: ${err?.message}`, {
+              error: err,
+            });
+          });
+      })
+      .catch((error) => {
+        this.logger.error(`Error preconfiguring streams: ${error}`);
+      });
 
     return {};
   }
@@ -405,24 +457,6 @@ export class StreamsPlugin
     }
 
     this.processorSuggestionsService.setConsoleStart(plugins.console);
-
-    const soClient = core.savedObjects.getUnsafeInternalClient();
-    const startupUiSettingsClient = core.uiSettings.asScopedToClient(soClient);
-
-    startupUiSettingsClient
-      .get<boolean>(OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS)
-      .then((isWiredStreamViewsEnabled) =>
-        backfillWiredStreamViews({
-          esClient: core.elasticsearch.client.asInternalUser,
-          logger: this.logger,
-          isWiredStreamViewsEnabled,
-        })
-      )
-      .catch((err: Error) => {
-        this.logger.error(`Failed to backfill wired stream views on startup: ${err?.message}`, {
-          error: err,
-        });
-      });
 
     return {};
   }
