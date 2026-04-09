@@ -24,6 +24,26 @@ export type NonEmptyString = z.infer<typeof NonEmptyString>;
 export const NonEmptyString = z.string().min(1).superRefine(isNonEmptyString);
 
 /**
+ * An identifier containing only alphanumeric characters and underscores
+ */
+export type SafeIdentifier = z.infer<typeof SafeIdentifier>;
+export const SafeIdentifier = z
+  .string()
+  .min(1)
+  .max(255)
+  .regex(/^[a-zA-Z0-9_]+$/);
+
+/**
+ * A semantic version string (e.g. 1.0.0)
+ */
+export type SemVer = z.infer<typeof SemVer>;
+export const SemVer = z
+  .string()
+  .min(5)
+  .max(20)
+  .regex(/^\d+\.\d+\.\d+$/);
+
+/**
  * A universally unique identifier
  */
 export type UUID = z.infer<typeof UUID>;
