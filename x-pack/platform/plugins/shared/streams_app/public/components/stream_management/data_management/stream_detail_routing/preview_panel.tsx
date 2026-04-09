@@ -51,6 +51,9 @@ export function PreviewPanel() {
   const isQueryModeCreating = useStreamsRoutingSelector((snapshot) =>
     snapshot.matches({ ready: { queryMode: 'creating' } })
   );
+  const isQueryModeEditing = useStreamsRoutingSelector((snapshot) =>
+    snapshot.matches({ ready: { queryMode: 'editing' } })
+  );
   const isQueryModeIdle = useStreamsRoutingSelector((snapshot) =>
     snapshot.matches({ ready: { queryMode: 'idle' } })
   );
@@ -77,7 +80,7 @@ export function PreviewPanel() {
 
   let content;
 
-  if (isQueryModeCreating) {
+  if (isQueryModeCreating || isQueryModeEditing) {
     content = (
       <QueryStreamPreviewPanel
         streamName={definition.stream.name}
@@ -245,7 +248,7 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
     content = (
       <EuiEmptyPrompt
         data-test-subj="streamsAppRoutingPreviewEmptyPrompt"
-        icon={<AssetImage size="small" type="noDocuments" />}
+        icon={<AssetImage size="m" type="noDocuments" />}
         titleSize="xxs"
         title={
           <h2 data-test-subj="streamsAppRoutingPreviewEmptyPromptTitle">

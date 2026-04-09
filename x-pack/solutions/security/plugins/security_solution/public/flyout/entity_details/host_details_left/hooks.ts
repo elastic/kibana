@@ -11,14 +11,17 @@ import { EntityType } from '../../../../common/entity_analytics/types';
 import {
   getRiskInputTab,
   getInsightsInputTab,
+  getResolutionGroupTab,
 } from '../../../entity_analytics/components/entity_details_flyout';
 import type {
   LeftPanelTabsType,
   EntityDetailsLeftPanelTab,
 } from '../shared/components/left_panel/left_panel_header';
+import { getGraphViewTab } from '../shared/components/left';
 
 import type { HostDetailsPanelProps } from '.';
 import { HostDetailsPanelKey } from '.';
+import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_entity_resolution_license';
 
 export const useSelectedTab = (params: HostDetailsPanelProps, tabs: LeftPanelTabsType) => {
   const { openLeftPanel } = useExpandableFlyoutApi();
@@ -54,11 +57,21 @@ export const useTabs = ({
   hasMisconfigurationFindings,
   hasVulnerabilitiesFindings,
   hasNonClosedAlerts,
+  entityStoreEntityId,
 }: HostDetailsPanelProps): LeftPanelTabsType => {
+  const hasEntityResolutionLicense = useHasEntityResolutionLicense();
+
   return useMemo(() => {
-    const isRiskScoreTabAvailable = isRiskScoreExist && hostName;
+    const isRiskScoreTabAvailable = (isRiskScoreExist || entityStoreEntityId) && hostName;
     const riskScoreTab = isRiskScoreTabAvailable
-      ? [getRiskInputTab({ entityName: hostName ?? '', entityType: EntityType.host, scopeId })]
+      ? [
+          getRiskInputTab({
+            entityName: hostName ?? '',
+            entityType: EntityType.host,
+            scopeId,
+            entityId: entityStoreEntityId,
+          }),
+        ]
       : [];
 
     // Determine if the Insights tab should be included
@@ -75,7 +88,16 @@ export const useTabs = ({
           ]
         : [];
 
-    return [...riskScoreTab, ...insightsTab];
+    const graphViewTab = entityStoreEntityId
+      ? [getGraphViewTab({ entityId: entityStoreEntityId, scopeId })]
+      : [];
+
+    const resolutionTab =
+      entityStoreEntityId && hasEntityResolutionLicense
+        ? [getResolutionGroupTab({ entityId: entityStoreEntityId, entityType: EntityType.host })]
+        : [];
+
+    return [...riskScoreTab, ...insightsTab, ...graphViewTab, ...resolutionTab];
   }, [
     isRiskScoreExist,
     hostName,
@@ -84,5 +106,7 @@ export const useTabs = ({
     hasMisconfigurationFindings,
     hasVulnerabilitiesFindings,
     hasNonClosedAlerts,
+    entityStoreEntityId,
+    hasEntityResolutionLicense,
   ]);
 };

@@ -137,6 +137,7 @@ export function DateRangePickerDialog({ children }: PropsWithChildren) {
 
   return (
     <EuiPopover
+      aria-labelledby={panelId}
       css={width === 'full' && popoverWrapperFullWidthStyles}
       button={<DateRangePickerControl />}
       isOpen={isEditing}
@@ -146,7 +147,7 @@ export function DateRangePickerDialog({ children }: PropsWithChildren) {
       repositionToCrossAxis={false}
       display={width === 'auto' ? 'inline' : 'block'}
       ownFocus={false}
-      data-test-subj="dateRangePickerDialogTriggerWrapper"
+      data-test-subj="dateRangePickerPopoverTriggerWrapper"
       panelPaddingSize="none"
       panelRef={(node) => {
         panelRef.current = node;
@@ -154,6 +155,7 @@ export function DateRangePickerDialog({ children }: PropsWithChildren) {
       panelProps={{
         id: panelId,
         'aria-label': dialogTexts.ariaLabel,
+        'data-test-subj': 'dateRangePickerPopoverPanel',
         'aria-modal': undefined,
         tabIndex: -1,
         onKeyDown: onPanelKeyDown,

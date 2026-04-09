@@ -77,6 +77,12 @@ const mockEndpoints = [
     task_type: 'text_embedding',
     service_settings: { model_id: 'e5' },
   },
+  {
+    inference_id: 'ep-beta-tech-preview',
+    service: 'elastic',
+    task_type: 'chat_completion',
+    service_settings: { model_id: 'claude' },
+  },
 ];
 
 const feature: InferenceFeatureConfig = {
@@ -86,6 +92,8 @@ const feature: InferenceFeatureConfig = {
   featureDescription: 'A test feature',
   taskType: 'chat_completion',
   recommendedEndpoints: ['ep-1'],
+  isBeta: false,
+  isTechPreview: false,
 };
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => {
@@ -126,6 +134,40 @@ describe('SubFeatureCard', () => {
     expect(screen.getByText('Test Feature')).toBeInTheDocument();
     expect(screen.getByText('A test feature')).toBeInTheDocument();
     expect(screen.getByText('chat_completion')).toBeInTheDocument();
+  });
+
+  describe('feature status badges', () => {
+    it.each([
+      {
+        scenario: 'renders beta',
+        setup: {
+          ids: ['ep-beta-technical-preview'],
+          overrides: { isBeta: true },
+        },
+        expected: ['Beta'],
+      },
+      {
+        scenario: 'renders technical preview',
+        setup: {
+          ids: ['ep-beta-technical-preview'],
+          overrides: { isTechPreview: true },
+        },
+        expected: ['Technical Preview'],
+      },
+      {
+        scenario: 'renders both beta and technical preview',
+        setup: {
+          ids: ['ep-beta-technical-preview'],
+          overrides: { isBeta: true, isTechPreview: true },
+        },
+        expected: ['Beta', 'Technical Preview'],
+      },
+    ])('$scenario', ({ setup, expected }) => {
+      const { ids, overrides } = setup;
+
+      renderCard(ids, overrides);
+      expected.forEach((text) => expect(screen.getByText(text)).toBeInTheDocument());
+    });
   });
 
   it('renders all endpoint rows within collapsed count', () => {

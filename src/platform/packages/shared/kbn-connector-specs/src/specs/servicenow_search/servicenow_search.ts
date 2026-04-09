@@ -43,16 +43,6 @@ import type {
   GetAttachmentInput,
   DescribeTableInput,
 } from './types';
-import describeTableWorkflow from './workflows/describe_table.yaml';
-import getAttachmentWorkflow from './workflows/get_attachment.yaml';
-import getCommentsWorkflow from './workflows/get_comments.yaml';
-import getRecordWorkflow from './workflows/get_record.yaml';
-import getRecordWithCommentsWorkflow from './workflows/get_record_with_comments.yaml';
-import listKnowledgeBasesWorkflow from './workflows/list_knowledge_bases.yaml';
-import listRecordsWorkflow from './workflows/list_records.yaml';
-import listTablesWorkflow from './workflows/list_tables.yaml';
-import searchWorkflow from './workflows/search.yaml';
-
 export const ServicenowSearch: ConnectorSpec = {
   metadata: {
     id: '.servicenow_search',
@@ -72,6 +62,21 @@ export const ServicenowSearch: ConnectorSpec = {
         defaults: {},
         overrides: {
           meta: {
+            tokenUrl: {
+              placeholder: 'https://your-instance.service-now.com/oauth_token.do',
+            },
+            scope: { hidden: true },
+          },
+        },
+      },
+      {
+        type: 'oauth_authorization_code',
+        defaults: {},
+        overrides: {
+          meta: {
+            authorizationUrl: {
+              placeholder: 'https://your-instance.service-now.com/oauth_auth.do',
+            },
             tokenUrl: {
               placeholder: 'https://your-instance.service-now.com/oauth_token.do',
             },
@@ -300,6 +305,25 @@ export const ServicenowSearch: ConnectorSpec = {
     },
   },
 
+  skill: [
+    'ServiceNow connector — cross-action usage guidance for LLMs.',
+    '',
+    '## Discovery pattern',
+    'When the target table is unknown, start with listTables (optionally filter by query keyword),',
+    'then call describeTable on the chosen table to understand available fields before querying.',
+    '',
+    '## Knowledge articles',
+    'listKnowledgeBases → search (or listRecords) on kb_knowledge table.',
+    'Useful fields: sys_id, number, short_description, text, topic, category, author,',
+    'sys_created_on, sys_updated_on, workflow_state, kb_knowledge_base, kb_category.',
+    'To filter by knowledge base: include kb_knowledge_base=<kb_sys_id> in encodedQuery.',
+    '',
+    '## Attachments',
+    'Attachment sys_ids are not stored on the parent record. Find them first:',
+    '  listRecords(table=sys_attachment, encodedQuery=table_name=<table>^table_sys_id=<record_sys_id>)',
+    'Then call getAttachment with the attachment sys_id to retrieve base64-encoded content.',
+  ].join('\n'),
+
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.servicenowSearch.test.description', {
       defaultMessage: 'Verifies ServiceNow connection by fetching the current user record',
@@ -333,16 +357,4 @@ export const ServicenowSearch: ConnectorSpec = {
       }
     },
   },
-
-  agentBuilderWorkflows: [
-    describeTableWorkflow,
-    getAttachmentWorkflow,
-    getCommentsWorkflow,
-    getRecordWorkflow,
-    getRecordWithCommentsWorkflow,
-    listKnowledgeBasesWorkflow,
-    listRecordsWorkflow,
-    listTablesWorkflow,
-    searchWorkflow,
-  ],
 };

@@ -25,15 +25,18 @@ import type {
   UnifiedFieldListSidebarContainerProps,
 } from '@kbn/unified-field-list';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
+import type { RenderDocumentViewMeta } from '@kbn/unified-data-table';
 import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-chart-section-viewer';
 import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DocViewerRestorableState } from '@kbn/unified-doc-viewer';
 import type { SerializedError } from '@reduxjs/toolkit';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import type { DataCascadeRestorableState } from '@kbn/shared-ux-document-data-cascade';
 import type { DiscoverDataSource } from '../../../../../common/data_sources';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
 import type { DefaultEsqlQueryConfig } from '../../../../context_awareness';
+import type { CascadedDocumentsDataGridUiStateMap } from '../../components/layout/cascaded_documents';
 
 export interface InternalStateDataRequestParams {
   timeRangeAbsolute: TimeRange | undefined;
@@ -65,6 +68,10 @@ export interface DiscoverAppState {
    * Hide chart
    */
   hideChart?: boolean;
+  /**
+   * Hide table
+   */
+  hideTable?: boolean;
   /**
    * The current data source
    */
@@ -138,6 +145,7 @@ export const DEFAULT_PROFILE_STATE_FIELDS = [
   'rowHeight',
   'breakdownField',
   'hideChart',
+  'hideTable',
 ] as const;
 
 export type DefaultProfileStateField = (typeof DEFAULT_PROFILE_STATE_FIELDS)[number];
@@ -155,6 +163,15 @@ export interface DefaultProfileState {
   fieldsToReset: DefaultProfileStateFields;
   snapshotsByProfileId: ProfileStateSnapshotsByProfileId;
 }
+
+// This is used to identify heavy state values (e.g. long lists of nested objects)
+// that should be excluded from the Redux serializable/immutable checks to avoid
+// rendering delays when using Discover in dev builds
+export const HEAVY_STATE_KEYS = [
+  'cascadedDocumentsState',
+  'fieldListExistingFieldsInfo',
+  'renderDocumentViewMeta',
+];
 
 export interface TabState extends TabItem {
   initializationState:
@@ -194,8 +211,12 @@ export interface TabState extends TabItem {
     searchDraft?: Partial<UnifiedSearchDraft>;
     metricsGrid?: Partial<UnifiedMetricsGridRestorableState>;
     docViewer?: Partial<DocViewerRestorableState>;
+    dataCascade?: DataCascadeRestorableState;
+    cascadedDocumentsDataGridMap?: CascadedDocumentsDataGridUiStateMap;
   };
   expandedDoc: DataTableRecord | undefined;
+  expandedDocOwner: string | undefined;
+  renderDocumentViewMeta: RenderDocumentViewMeta | undefined;
   initialDocViewerTabId?: string;
 }
 

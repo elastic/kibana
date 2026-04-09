@@ -97,7 +97,6 @@ dependsOn:
   - '@kbn/test-jest-helpers'
   - '@kbn/core-saved-objects-utils-server'
   - '@kbn/automatic-import-plugin'
-  - '@kbn/automatic-import-v2-plugin'
   - '@kbn/core-security-server-mocks'
   - '@kbn/server-http-tools'
   - '@kbn/zod'
@@ -124,6 +123,7 @@ dependsOn:
   - '@kbn/css-utils'
   - '@kbn/rison'
   - '@kbn/rule-data-utils'
+  - '@kbn/doc-links'
 tags:
   - plugin
   - prod
@@ -140,5 +140,6 @@ fileGroups:
     - scripts/**/*
     - package.json
     - test/scout/**/*
+    - test/scout_automatic_import/**/*
     - '!target/**/*'
 tasks: {}

@@ -7,13 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
-import getAttachmentWorkflow from './workflows/get_attachment.yaml';
-import getMessageWorkflow from './workflows/get_message.yaml';
-import listMessagesWorkflow from './workflows/list_messages.yaml';
-import searchWorkflow from './workflows/search.yaml';
-
 const GMAIL_API_BASE = 'https://gmail.googleapis.com/gmail/v1/users/me';
 const DEFAULT_MAX_RESULTS = 10;
 const MAX_PAGE_SIZE = 100;
@@ -34,8 +30,11 @@ export const GmailConnector: ConnectorSpec = {
   metadata: {
     id: '.gmail',
     displayName: 'Gmail',
-    description: 'Search and read emails from Gmail',
+    description: i18n.translate('core.kibanaConnectorSpecs.gmail.metadata.description', {
+      defaultMessage: 'Search and read emails from Gmail',
+    }),
     minimumLicense: 'enterprise',
+    isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
   auth: {
@@ -43,6 +42,13 @@ export const GmailConnector: ConnectorSpec = {
       'bearer',
       {
         type: 'oauth_authorization_code',
+        overrides: {
+          meta: {
+            authorizationUrl: { hidden: true },
+            tokenUrl: { hidden: true },
+            scope: { hidden: true },
+          },
+        },
         defaults: {
           authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
           tokenUrl: 'https://oauth2.googleapis.com/token',
@@ -57,12 +63,14 @@ export const GmailConnector: ConnectorSpec = {
   actions: {
     searchMessages: {
       isTool: true,
+      description:
+        'Search for emails in Gmail. Use a specific query (from:, subject:, is:unread, after:, newer_than:Nd) and limit maxResults (e.g. 10-20) to avoid large responses.',
       input: z.object({
         query: z
           .string()
           .optional()
           .describe(
-            'Gmail search query. Use specific operators to narrow results and avoid large responses: from:, to:, subject:, is:unread, is:read, after:YYYY/MM/DD, before:YYYY/MM/DD, newer_than:Nd, has:attachment. Example: "from:alice@example.com is:unread newer_than:7d". Prefer narrow queries; do not search without filters.'
+            'Gmail search query using Gmail search operators. Supported operators: from:user@example.com (sender), to:user@example.com (recipient), subject:keyword (subject line), is:unread / is:read (read status), has:attachment (emails with attachments), after:YYYY/MM/DD / before:YYYY/MM/DD (absolute date range), newer_than:7d / older_than:30d (relative date — d=days, m=months, y=years), label:LABELNAME (by label). Combine operators freely: "from:alice@example.com is:unread newer_than:7d". Prefer narrow queries to avoid large responses.'
           ),
         maxResults: z
           .number()
@@ -99,6 +107,8 @@ export const GmailConnector: ConnectorSpec = {
     },
     getMessage: {
       isTool: true,
+      description:
+        'Retrieve one Gmail message by ID. You must call searchMessages or listMessages first to get message IDs, then pass one of those IDs here.',
       input: z.object({
         messageId: z
           .string()
@@ -132,6 +142,8 @@ export const GmailConnector: ConnectorSpec = {
     },
     getAttachment: {
       isTool: true,
+      description:
+        'Retrieve one Gmail attachment by message ID and attachment ID. Call getMessage with format "full" first to get attachment IDs from payload.parts[].body.attachmentId (and parts[].filename for the file name).',
       input: z.object({
         messageId: z
           .string()
@@ -161,6 +173,8 @@ export const GmailConnector: ConnectorSpec = {
     },
     listMessages: {
       isTool: true,
+      description:
+        'List Gmail message IDs by label (e.g. INBOX, SENT). Prefer searchMessages when the user has a specific query; limit maxResults (e.g. 10-20) to keep context small.',
       input: z.object({
         maxResults: z
           .number()
@@ -173,7 +187,9 @@ export const GmailConnector: ConnectorSpec = {
         labelIds: z
           .array(z.string())
           .optional()
-          .describe('Only return messages with these label IDs (e.g. INBOX, SENT)'),
+          .describe(
+            'Filter messages by Gmail label IDs (e.g. ["INBOX"], ["SENT"], ["UNREAD"]). Use this to scope to a mailbox folder. Omit to list from all labels. Prefer searchMessages when you need query-based filtering.'
+          ),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {
@@ -226,10 +242,12 @@ export const GmailConnector: ConnectorSpec = {
       }
     },
   },
-  agentBuilderWorkflows: [
-    getAttachmentWorkflow,
-    getMessageWorkflow,
-    listMessagesWorkflow,
-    searchWorkflow,
-  ],
+
+  skill: [
+    '## Gmail multi-step workflow',
+    '',
+    '1. **Find messages** — call `searchMessages` (query-based) or `listMessages` (label-based) to get message IDs.',
+    '2. **Read a message** — call `getMessage` with one of those IDs. Use `format: "minimal"` (default) for headers only; use `format: "full"` when the user needs the body or attachment metadata.',
+    '3. **Download an attachment** (optional) — call `getMessage` with `format: "full"` first, then call `getAttachment` with the `messageId` and an `attachmentId` from `payload.parts[].body.attachmentId`.',
+  ].join('\n'),
 };

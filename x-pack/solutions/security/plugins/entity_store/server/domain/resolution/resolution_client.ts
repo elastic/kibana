@@ -10,7 +10,7 @@ import type { BulkResponse, SearchResponse } from '@elastic/elasticsearch/lib/ap
 import type { Logger } from '@kbn/logging';
 import { ENTITY_ID_FIELD } from '../../../common/domain/definitions/common_fields';
 import { getFieldValue } from '../../../common/domain/euid/commons';
-import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
+import { getEntitiesAlias, ENTITY_LATEST } from '../../../common/domain/entity_index';
 import {
   ChainResolutionError,
   EntitiesNotFoundError,
@@ -76,7 +76,7 @@ export class ResolutionClient {
    * (can't link an entity that has aliases pointing to it).
    */
   public async linkEntities(targetId: string, rawEntityIds: string[]): Promise<LinkResult> {
-    const index = getLatestEntitiesIndexName(this.namespace);
+    const index = getEntitiesAlias(ENTITY_LATEST, this.namespace);
 
     // 1. Deduplicate entity_ids
     const entityIds = [...new Set(rawEntityIds)];
@@ -145,7 +145,7 @@ export class ResolutionClient {
    * Unlinked entities become standalone.
    */
   public async unlinkEntities(rawEntityIds: string[]): Promise<UnlinkResult> {
-    const index = getLatestEntitiesIndexName(this.namespace);
+    const index = getEntitiesAlias(ENTITY_LATEST, this.namespace);
 
     // 1. Deduplicate and fetch all entities
     const entityIds = [...new Set(rawEntityIds)];
@@ -188,7 +188,7 @@ export class ResolutionClient {
    * Standalone entities return as the target with empty aliases.
    */
   public async getResolutionGroup(entityId: string): Promise<ResolutionGroup> {
-    const index = getLatestEntitiesIndexName(this.namespace);
+    const index = getEntitiesAlias(ENTITY_LATEST, this.namespace);
 
     // 1. Fetch the requested entity
     const { sources } = await this.fetchAndValidateEntities([entityId]);
@@ -284,7 +284,7 @@ export class ResolutionClient {
    * Throws EntitiesNotFoundError if any IDs are missing.
    */
   private async fetchAndValidateEntities(entityIds: string[]): Promise<FetchedEntities> {
-    const index = getLatestEntitiesIndexName(this.namespace);
+    const index = getEntitiesAlias(ENTITY_LATEST, this.namespace);
     const response = await searchEntitiesByIds(this.esClient, {
       index,
       entityIdField: ENTITY_ID_FIELD,
@@ -317,7 +317,7 @@ export class ResolutionClient {
    * Returns a map from entity ID → list of alias entity IDs.
    */
   private async findEntitiesWithAliases(entityIds: string[]): Promise<Map<string, string[]>> {
-    const index = getLatestEntitiesIndexName(this.namespace);
+    const index = getEntitiesAlias(ENTITY_LATEST, this.namespace);
     const response = await searchByResolvedToField(this.esClient, {
       index,
       resolvedToField: RESOLVED_TO_FIELD,

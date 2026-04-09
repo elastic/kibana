@@ -20,6 +20,7 @@ import { CellActionsProvider } from '@kbn/cell-actions';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { ExecutionTrackerProvider } from '@kbn/workflows-ui';
 import { EntityStoreEuidApiProvider, useInstallEntityStoreV2 } from '@kbn/entity-store/public';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { THREAT_HUNTING_AGENT_ID, APP_NAME } from '../../common/constants';
 import { UpsellingProvider } from '../common/components/upselling_provider';
 import { ManageUserInfo } from '../detections/components/user_info';
@@ -123,9 +124,14 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
   // Set conversation flyout active config on mount, clear on unmount
   useEffect(() => {
     if (services.agentBuilder?.setChatConfig) {
+      const skillsEnabled = services.uiSettings.get<boolean>(
+        AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+        false
+      );
+
       services.agentBuilder.setChatConfig({
         sessionTag: 'security',
-        agentId: THREAT_HUNTING_AGENT_ID,
+        ...(skillsEnabled ? {} : { agentId: THREAT_HUNTING_AGENT_ID }),
         newConversation: false,
       });
     }
@@ -135,7 +141,7 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
         services.agentBuilder.clearChatConfig();
       }
     };
-  }, [services.agentBuilder]);
+  }, [services.agentBuilder, services.uiSettings]);
 
   return (
     <KibanaContextProvider

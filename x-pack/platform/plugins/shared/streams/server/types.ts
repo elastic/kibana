@@ -27,10 +27,18 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { FieldsMetadataServerStart } from '@kbn/fields-metadata-plugin/server';
+import type {
+  FieldsMetadataServerSetup,
+  FieldsMetadataServerStart,
+} from '@kbn/fields-metadata-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { ConsoleStart as ConsoleServerStart } from '@kbn/console-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type {
+  SearchInferenceEndpointsPluginSetup,
+  SearchInferenceEndpointsPluginStart,
+} from '@kbn/search-inference-endpoints/server';
 import type { StreamsConfig } from '../common/config';
 
 export interface StreamsServer {
@@ -41,8 +49,10 @@ export interface StreamsServer {
   actions: ActionsPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   inference: InferenceServerStart;
+  licensing: LicensingPluginStart;
   isServerless: boolean;
   taskManager: TaskManagerStartContract;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
 }
 
 export interface ElasticsearchAccessorOptions {
@@ -57,8 +67,11 @@ export interface StreamsPluginSetupDependencies {
   ruleRegistry: RuleRegistryPluginSetup;
   features: FeaturesPluginSetup;
   usageCollection: UsageCollectionSetup;
+  fieldsMetadata: FieldsMetadataServerSetup;
   cloud?: CloudSetup;
   globalSearch?: GlobalSearchPluginSetup;
+  workflowsManagement?: WorkflowsServerPluginSetup;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
 }
 
 export interface StreamsPluginStartDependencies {
@@ -73,4 +86,5 @@ export interface StreamsPluginStartDependencies {
   fieldsMetadata: FieldsMetadataServerStart;
   console: ConsoleServerStart;
   spaces?: SpacesPluginStart;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
 }
