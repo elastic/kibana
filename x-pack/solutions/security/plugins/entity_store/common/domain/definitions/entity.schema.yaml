@@ -83,6 +83,22 @@ components:
               type: boolean
             mfa_enabled:
               type: boolean
+            storage_class:
+              type: string
+              description: Storage tier or class assigned to a storage resource (e.g. hot, warm, cold, standard, archive).
+            permissions:
+              type: array
+              items:
+                type: string
+              description: Action-level permissions granted to this entity (not roles or groups).
+            known_redirect:
+              type: array
+              items:
+                type: string
+              description: Known redirect URIs or URLs (e.g. OAuth application callbacks).
+            oauth_consent_restriction:
+              type: string
+              description: OAuth consent restriction (e.g. admin_only, verified_only, unrestricted).
         behaviors:
           type: object
           additionalProperties: false
@@ -114,6 +130,8 @@ components:
           type: object
           additionalProperties: false
           properties:
+            administers:
+              $ref: '#/components/schemas/EntityRelationshipIdentifiers'
             communicates_with:
               $ref: '#/components/schemas/EntityRelationshipIdentifiers'
             depends_on:

@@ -63,6 +63,22 @@ export const EntityField = z
         asset: z.boolean().optional(),
         managed: z.boolean().optional(),
         mfa_enabled: z.boolean().optional(),
+        /**
+         * Storage tier or class assigned to a storage resource (e.g. hot, warm, cold, standard, archive).
+         */
+        storage_class: z.string().optional(),
+        /**
+         * Action-level permissions granted to this entity (not roles or groups).
+         */
+        granted_permissions: z.array(z.string()).optional(),
+        /**
+         * Known redirect URIs or URLs (e.g. OAuth application callbacks).
+         */
+        known_redirect: z.array(z.string()).optional(),
+        /**
+         * OAuth consent restriction (e.g. admin_only, verified_only, unrestricted).
+         */
+        oauth_consent_restriction: z.string().optional(),
       })
       .strict()
       .optional(),
@@ -89,6 +105,7 @@ export const EntityField = z
       .optional(),
     relationships: z
       .object({
+        administrators: EntityRelationshipIdentifiers.optional(),
         communicates_with: EntityRelationshipIdentifiers.optional(),
         depends_on: EntityRelationshipIdentifiers.optional(),
         owns_inferred: EntityRelationshipIdentifiers.optional(),

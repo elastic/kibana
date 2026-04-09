@@ -19,6 +19,7 @@ export const ENTITY_RELATIONSHIP_IDENTIFIER_FIELDS = [
 ] as const;
 
 const ENTITY_RELATIONSHIP_COLLECT_LEAVES = [
+  'administers',
   'communicates_with',
   'depends_on',
   'owns_inferred',
@@ -101,6 +102,30 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       mapping: { type: 'boolean' },
       allowAPIUpdate: true,
     }),
+    newestValue({
+      source: `${prefix}.attributes.storage_class`,
+      destination: 'entity.attributes.storage_class',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    collectValues({
+      source: `${prefix}.attributes.permissions`,
+      destination: 'entity.attributes.granted_permissions',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    collectValues({
+      source: `${prefix}.attributes.known_redirects`,
+      destination: 'entity.attributes.known_redirect',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    newestValue({
+      source: `${prefix}.attributes.oauth_consent_restriction`,
+      destination: 'entity.attributes.oauth_consent_restriction',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
 
     // LIFECYCLE ------------------------------------------------------------
     oldestValue({
@@ -140,7 +165,6 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
     }),
 
     // RELATIONSHIPS ------------------------------------------------------------
-    // Each leaf is an object of keyword arrays (a collection of identifiers); see ECS RFC entity.relationships.*.
     ...ENTITY_RELATIONSHIP_COLLECT_LEAVES.flatMap((leaf) =>
       ENTITY_RELATIONSHIP_IDENTIFIER_FIELDS.map((idField) =>
         collectValues({
