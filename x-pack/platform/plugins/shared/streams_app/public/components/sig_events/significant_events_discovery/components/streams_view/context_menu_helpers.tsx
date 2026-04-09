@@ -55,7 +55,7 @@ export function buildConnectorMenuItem({
           {i18n.translate(
             'xpack.streams.significantEventsDiscovery.streamsView.connectorMenuItemModel',
             {
-              defaultMessage: 'Model {name}',
+              defaultMessage: '{name}',
               values: { name: connector?.name ?? '—' },
             }
           )}
