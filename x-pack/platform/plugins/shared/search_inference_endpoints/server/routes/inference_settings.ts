@@ -9,7 +9,6 @@ import type { IRouter, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ApiPrivileges } from '@kbn/core-security-server';
 import { i18n } from '@kbn/i18n';
-import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import {
   INFERENCE_SETTINGS_SO_TYPE,
   INFERENCE_SETTINGS_ID,
@@ -21,7 +20,7 @@ import { APIRoutes } from '../../common/types';
 import { inferenceSettingsSchemaV1 } from '../saved_objects/schema/v1';
 import { fetchInferenceEndpoints } from '../lib/fetch_inference_endpoints';
 import type { InferenceFeatureRegistry } from '../inference_feature_registry';
-import type { InferenceFeatureConfig } from '../types';
+import { resolveFeatureEndpointIds } from '../inference_endpoints';
 import { errorHandler } from '../utils/error_handler';
 import { parseInferenceSettingsSO, validateInferenceSettings } from '../utils/inference_settings';
 
@@ -30,42 +29,25 @@ const EMPTY_SETTINGS: InferenceSettingsResponse = {
   data: { features: [] },
 };
 
-const getEffectiveEndpoints = (
-  feature: InferenceFeatureConfig,
-  recommendedEndpointsById: Map<string, string[]>
-): string[] => {
-  if (feature.recommendedEndpoints.length > 0) {
-    return feature.recommendedEndpoints;
-  }
-  if (feature.parentFeatureId) {
-    const parentEndpoints = recommendedEndpointsById.get(feature.parentFeatureId) ?? [];
-    if (parentEndpoints.length > 0) {
-      return parentEndpoints;
-    }
-  }
-  return [defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION];
-};
-
 const findInvalidEndpoints = (
   settings: InferenceSettingsAttributes,
-  features: InferenceFeatureConfig[],
-  liveEndpointIds: Set<string>
+  featureRegistry: InferenceFeatureRegistry,
+  liveEndpointIds: Set<string>,
+  logger: Logger
 ): string[] => {
-  const recommendedEndpointsById = new Map(
-    features.map((f) => [f.featureId, f.recommendedEndpoints])
-  );
-  const savedMap = new Map(
-    settings.features.map((f) => [f.feature_id, f.endpoints.map((e) => e.id)])
-  );
-
+  const soFeaturesMap = new Map(settings.features.map((f) => [f.feature_id, f]));
+  const features = featureRegistry.getAll();
   const childFeatures = features.filter((f) => f.parentFeatureId !== undefined);
   const allEffectiveIds = new Set<string>();
 
   for (const feature of childFeatures) {
-    const saved = savedMap.get(feature.featureId);
-    const effectiveIds =
-      saved && saved.length > 0 ? saved : getEffectiveEndpoints(feature, recommendedEndpointsById);
-    for (const id of effectiveIds) {
+    const { ids } = resolveFeatureEndpointIds(
+      featureRegistry,
+      soFeaturesMap,
+      feature.featureId,
+      logger
+    );
+    for (const id of ids) {
       allEffectiveIds.add(id);
     }
   }
@@ -115,8 +97,12 @@ export const defineInferenceSettingsRoutes = ({
           try {
             const { inferenceEndpoints } = await fetchInferenceEndpoints(esClient);
             const liveIds = new Set(inferenceEndpoints.map((ep) => ep.inference_id));
-            const registeredFeatures = featureRegistry.getAll();
-            const invalid = findInvalidEndpoints(settingsBody.data, registeredFeatures, liveIds);
+            const invalid = findInvalidEndpoints(
+              settingsBody.data,
+              featureRegistry,
+              liveIds,
+              logger
+            );
             return { ...settingsBody, invalidEndpoints: invalid };
           } catch (e) {
             logger.warn(`Failed to validate inference endpoints: ${e.message}`);
