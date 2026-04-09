@@ -135,6 +135,70 @@ const dataCollectionMethodOptions: Array<EuiComboBoxOptionOption<string>> = [
   { value: 'udp', label: 'UDP' },
 ];
 
+interface AnalyzeLogsValidationParams {
+  integrationTitle: string;
+  dataStreamTitle: string;
+  description?: string;
+  connectorId?: string;
+  dataStreamDescription?: string;
+  dataCollectionMethod?: string[];
+  hasDuplicateDataStreamName: boolean;
+  logsSourceOption: string;
+  logSample?: string;
+  selectedIndex: string;
+  indexValidationError?: string;
+}
+
+const getAnalyzeLogsValidationReasons = (params: AnalyzeLogsValidationParams): string[] => {
+  const reasons: string[] = [];
+  if (!params.integrationTitle) {
+    reasons.push(formI18n.TITLE_REQUIRED);
+  } else {
+    if (!isValidNameFormat(params.integrationTitle)) {
+      reasons.push(formI18n.NAME_INVALID_FORMAT);
+    }
+    if (!startsWithLetter(params.integrationTitle)) {
+      reasons.push(formI18n.NAME_MUST_START_WITH_LETTER);
+    }
+  }
+  if (!params.description?.trim()) {
+    reasons.push(formI18n.DESCRIPTION_REQUIRED);
+  }
+  if (!params.connectorId?.trim()) {
+    reasons.push(formI18n.CONNECTOR_REQUIRED);
+  }
+  if (!params.dataStreamTitle) {
+    reasons.push(formI18n.DATA_STREAM_TITLE_REQUIRED);
+  } else {
+    if (params.hasDuplicateDataStreamName) {
+      reasons.push(formI18n.DATA_STREAM_TITLE_ALREADY_EXISTS);
+    }
+    if (!isValidNameFormat(params.dataStreamTitle)) {
+      reasons.push(formI18n.NAME_INVALID_FORMAT);
+    }
+    if (!startsWithLetter(params.dataStreamTitle)) {
+      reasons.push(formI18n.NAME_MUST_START_WITH_LETTER);
+    }
+  }
+  if (!params.dataStreamDescription?.trim()) {
+    reasons.push(formI18n.DATA_STREAM_DESCRIPTION_REQUIRED);
+  }
+  if (!params.dataCollectionMethod?.length) {
+    reasons.push(formI18n.DATA_COLLECTION_METHOD_REQUIRED);
+  }
+  if (params.logsSourceOption === 'file' && !params.logSample) {
+    reasons.push(formI18n.LOG_SAMPLE_REQUIRED);
+  }
+  if (params.logsSourceOption === 'index') {
+    if (!params.selectedIndex) {
+      reasons.push(formI18n.SELECTED_INDEX_REQUIRED);
+    } else if (params.indexValidationError) {
+      reasons.push(params.indexValidationError);
+    }
+  }
+  return reasons;
+};
+
 export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ onClose }) => {
   const { euiTheme } = useEuiTheme();
   const styles = useLayoutStyles();
@@ -270,67 +334,35 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
     isLoading ||
     isUploadingSamples;
 
-  const analyzeLogsValidationReasons = useMemo(() => {
-    const reasons: string[] = [];
-    if (!integrationTitle) {
-      reasons.push(formI18n.TITLE_REQUIRED);
-    } else {
-      if (!isValidNameFormat(integrationTitle)) {
-        reasons.push(formI18n.NAME_INVALID_FORMAT);
-      }
-      if (!startsWithLetter(integrationTitle)) {
-        reasons.push(formI18n.NAME_MUST_START_WITH_LETTER);
-      }
-    }
-    if (!formData?.description?.trim()) {
-      reasons.push(formI18n.DESCRIPTION_REQUIRED);
-    }
-    if (!formData?.connectorId?.trim()) {
-      reasons.push(formI18n.CONNECTOR_REQUIRED);
-    }
-    if (!dataStreamTitle) {
-      reasons.push(formI18n.DATA_STREAM_TITLE_REQUIRED);
-    } else {
-      if (hasDuplicateDataStreamName) {
-        reasons.push(formI18n.DATA_STREAM_TITLE_ALREADY_EXISTS);
-      }
-      if (!isValidNameFormat(dataStreamTitle)) {
-        reasons.push(formI18n.NAME_INVALID_FORMAT);
-      }
-      if (!startsWithLetter(dataStreamTitle)) {
-        reasons.push(formI18n.NAME_MUST_START_WITH_LETTER);
-      }
-    }
-    if (!formData?.dataStreamDescription?.trim()) {
-      reasons.push(formI18n.DATA_STREAM_DESCRIPTION_REQUIRED);
-    }
-    if (!formData?.dataCollectionMethod?.length) {
-      reasons.push(formI18n.DATA_COLLECTION_METHOD_REQUIRED);
-    }
-    if (logsSourceOption === 'file' && !logSample) {
-      reasons.push(formI18n.LOG_SAMPLE_REQUIRED);
-    }
-    if (logsSourceOption === 'index') {
-      if (!selectedIndex) {
-        reasons.push(formI18n.SELECTED_INDEX_REQUIRED);
-      } else if (indexValidationError) {
-        reasons.push(indexValidationError);
-      }
-    }
-    return reasons;
-  }, [
-    integrationTitle,
-    dataStreamTitle,
-    formData?.description,
-    formData?.connectorId,
-    formData?.dataStreamDescription,
-    formData?.dataCollectionMethod,
-    hasDuplicateDataStreamName,
-    logsSourceOption,
-    logSample,
-    selectedIndex,
-    indexValidationError,
-  ]);
+  const analyzeLogsValidationReasons = useMemo(
+    () =>
+      getAnalyzeLogsValidationReasons({
+        integrationTitle,
+        dataStreamTitle,
+        description: formData?.description,
+        connectorId: formData?.connectorId,
+        dataStreamDescription: formData?.dataStreamDescription,
+        dataCollectionMethod: formData?.dataCollectionMethod,
+        hasDuplicateDataStreamName,
+        logsSourceOption,
+        logSample,
+        selectedIndex,
+        indexValidationError,
+      }),
+    [
+      integrationTitle,
+      dataStreamTitle,
+      formData?.description,
+      formData?.connectorId,
+      formData?.dataStreamDescription,
+      formData?.dataCollectionMethod,
+      hasDuplicateDataStreamName,
+      logsSourceOption,
+      logSample,
+      selectedIndex,
+      indexValidationError,
+    ]
+  );
 
   const analyzeLogsDisabledTooltipContent = useMemo(() => {
     if (!isAnalyzeDisabled) {
