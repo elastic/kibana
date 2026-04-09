@@ -17,7 +17,7 @@ export interface RegistryProxySettings {
   proxyRejectUnauthorizedCertificates?: boolean;
 }
 
-type ProxyAgent = HttpsProxyAgent | HttpProxyAgent;
+type ProxyAgent = HttpsProxyAgent | HttpProxyAgent<any>;
 type GetProxyAgentParams = RegistryProxySettings & { targetUrl: string };
 
 export function getRegistryProxyUrl(): string | undefined {
@@ -27,10 +27,10 @@ export function getRegistryProxyUrl(): string | undefined {
 
 export function getProxyAgent(options: GetProxyAgentParams): ProxyAgent {
   const isHttps = options.targetUrl.startsWith('https:');
-  const agentOptions = isHttps ? getProxyAgentOptions(options) : options.proxyUrl;
+  const proxyParsed = new URL(options.proxyUrl);
   const agent: ProxyAgent = isHttps
-    ? new HttpsProxyAgent(agentOptions)
-    : new HttpProxyAgent(agentOptions);
+    ? new HttpsProxyAgent(getProxyAgentOptions(options))
+    : new HttpProxyAgent(proxyParsed);
 
   return agent;
 }

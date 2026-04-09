@@ -22,15 +22,15 @@ export interface ArtifactRepositoryProxySettings {
   proxyRejectUnauthorizedCertificates?: boolean;
 }
 
-type ProxyAgent = HttpsProxyAgent | HttpProxyAgent;
+type ProxyAgent = HttpsProxyAgent | HttpProxyAgent<any>;
 type GetProxyAgentParams = ArtifactRepositoryProxySettings & { targetUrl: string };
 
 function getProxyAgent(options: GetProxyAgentParams): ProxyAgent {
   const isHttps = options.targetUrl.startsWith('https:');
-  const agentOptions = isHttps ? getProxyAgentOptions(options) : options.proxyUrl;
+  const proxyParsed = new URL(options.proxyUrl);
   const agent: ProxyAgent = isHttps
-    ? new HttpsProxyAgent(agentOptions)
-    : new HttpProxyAgent(agentOptions);
+    ? new HttpsProxyAgent(getProxyAgentOptions(options))
+    : new HttpProxyAgent(proxyParsed);
 
   return agent;
 }
