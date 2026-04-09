@@ -70,7 +70,7 @@ export type {
 
 // Chart types
 export type {
-  XYState,
+  XYVisualizationState,
   XYReferenceLineLayerConfig,
   XYLayerConfig,
   ValidLayer,
@@ -122,7 +122,6 @@ export type { InlineEditLensEmbeddableContext } from './trigger_actions/open_len
 export type { ChartInfo } from './chart_info_api';
 
 export { LENS_LAYER_TYPES as layerTypes } from '@kbn/lens-common';
-export { LENS_EMBEDDABLE_TYPE } from '../common/constants';
 
 export {
   EditorFrameServiceProvider,

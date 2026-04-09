@@ -12,7 +12,7 @@ import { schema } from '@kbn/config-schema';
 import { DEFAULT_HEADER_ROW_HEIGHT_LINES, DEFAULT_ROW_HEIGHT_LINES } from '@kbn/lens-common';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { applyColorToSchema, colorByValueSchema, colorMappingSchema } from '../color';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import {
   collapseBySchema,
   dslOnlyPanelInfoSchema,
@@ -25,6 +25,16 @@ import {
 } from './shared';
 import { horizontalAlignmentSchema } from '../alignments';
 import { bucketOperationDefinitionSchema } from '../bucket_ops';
+import { builderEnums } from '../enums';
+import { objectUnion } from './utils/object_union';
+
+/**
+ * Datatable supports an additional "badge" mode (render colored values as badges),
+ * so it uses a datatable-specific schema rather than the shared applyColorToSchema.
+ */
+const applyColorToDatatableSchema = schema.oneOf([applyColorToSchema, schema.literal('badge')], {
+  meta: { description: 'Where to apply the color for datatable (value, background, or badge)' },
+});
 
 /**
  * Sorting configuration for the datatable. Only one column can be sorted at a time.
@@ -41,9 +51,7 @@ const sortingSchema = schema.oneOf(
           min: 0,
           meta: { description: 'Index of the column/row to sort by (0-based)' },
         }),
-        direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
-          meta: { description: 'Sort direction' },
-        }),
+        direction: builderEnums.direction({ meta: { description: 'Sort direction' } }),
       },
       { meta: { description: 'Sort by a metric or row column' } }
     ),
@@ -65,9 +73,7 @@ const sortingSchema = schema.oneOf(
             description: 'Array of pivot values, one for each split_metrics_by column in order',
           },
         }),
-        direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
-          meta: { description: 'Sort direction' },
-        }),
+        direction: builderEnums.direction({ meta: { description: 'Sort direction' } }),
       },
       {
         meta: {
@@ -184,20 +190,29 @@ const datatableStateSharedOptionsSchema = {
    */
   sort_by: schema.maybe(sortingSchema),
   /**
-   * Whether to show row numbers
+   * Show row numbers
    */
-  show_row_numbers: schema.maybe(
-    schema.boolean({ meta: { description: 'Whether to show row numbers' } })
+  row_numbers: schema.maybe(
+    schema.object(
+      {
+        visible: schema.boolean({ meta: { description: 'Show row numbers' } }),
+      },
+      {
+        meta: {
+          description: 'Configuration for row numbers',
+        },
+      }
+    )
   ),
 };
 
 const datatableStateCommonOptionsSchema = {
   /**
-   * Where to apply the color (background or value)
+   * Where to apply the color (background, value or badge)
    */
-  apply_color_to: schema.maybe(applyColorToSchema),
+  apply_color_to: schema.maybe(applyColorToDatatableSchema),
   /**
-   * Whether to show the column
+   * Show the column
    */
   visible: schema.maybe(schema.boolean({ defaultValue: true })),
   /**
@@ -365,7 +380,7 @@ export const datatableStateSchemaNoESQL = schema.object(
     ...sharedPanelInfoSchema,
     ...dslOnlyPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetSchema,
+    ...dataSourceSchema,
     ...datatableStateSharedOptionsSchema,
     /**
      * Metric columns configuration, must define operation.
@@ -417,7 +432,7 @@ export const datatableStateSchemaESQL = schema.object(
     type: schema.literal('data_table'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
+    ...dataSourceEsqlTableSchema,
     ...datatableStateSharedOptionsSchema,
     /**
      * Metric columns configuration, must define operation.
@@ -476,7 +491,7 @@ export const datatableStateSchemaESQL = schema.object(
   }
 );
 
-export const datatableStateSchema = schema.oneOf(
+export const datatableStateSchema = objectUnion(
   [datatableStateSchemaNoESQL, datatableStateSchemaESQL],
   {
     meta: {

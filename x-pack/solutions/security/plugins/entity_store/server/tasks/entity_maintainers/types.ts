@@ -7,7 +7,8 @@
 
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { CRUDClient } from '../../domain/crud';
+import type { LicenseType } from '@kbn/licensing-types';
+import type { EntityUpdateClient } from '../../domain/crud';
 
 export const EntityMaintainerTaskStatus = {
   NEVER_STARTED: 'never_started',
@@ -35,6 +36,7 @@ export type EntityMaintainerTelemetryEventType =
 export interface EntityMaintainerRegistryData {
   interval: string;
   description?: string;
+  minLicense: LicenseType;
 }
 
 export interface EntityMaintainerTaskEntry extends EntityMaintainerRegistryData {
@@ -66,7 +68,7 @@ interface EntityMaintainerTaskMethodContext {
   logger: Logger;
   fakeRequest: KibanaRequest;
   esClient: ElasticsearchClient;
-  crudClient: CRUDClient;
+  crudClient: EntityUpdateClient;
 }
 
 export type EntityMaintainerTaskMethod = (
@@ -80,4 +82,5 @@ export interface RegisterEntityMaintainerConfig {
   initialState: EntityMaintainerState;
   run: EntityMaintainerTaskMethod;
   setup?: EntityMaintainerTaskMethod;
+  minLicense?: LicenseType;
 }

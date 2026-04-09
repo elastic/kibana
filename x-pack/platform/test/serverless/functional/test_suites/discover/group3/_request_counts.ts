@@ -10,14 +10,14 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const { common, svlCommonPage, discover, timePicker, header } = getPageObjects([
+  const { appMenu, common, svlCommonPage, discover, timePicker, header } = getPageObjects([
+    'appMenu',
     'common',
     'svlCommonPage',
     'discover',
     'timePicker',
     'header',
   ]);
-  const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const monacoEditor = getService('monacoEditor');
   const filterBar = getService('filterBar');
@@ -26,9 +26,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
 
   describe('discover request counts', function describeIndexTests() {
-    // failsOnMKI, see https://github.com/elastic/kibana/issues/259329
-    this.tags(['failsOnMKI']);
-
     before(async function () {
       await svlCommonPage.loginAsAdmin();
       await esArchiver.loadIfNeeded(
@@ -163,7 +160,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         log.debug('Clearing saved search');
         await expectSearches(type, 2, async () => {
-          await testSubjects.click('discoverNewButton');
+          await appMenu.clickMenuItem('discoverNewButton');
           if (type === 'esql') {
             await queryBar.clickQuerySubmitButton();
           }
@@ -215,7 +212,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should send 2 requests (chart + other bucket) when changing to a breakdown field with an other bucket', async () => {
-        await testSubjects.click('discoverNewButton');
+        await appMenu.clickMenuItem('discoverNewButton');
         await expectSearches(type, 2, async () => {
           await discover.chooseBreakdownField('geo.src');
         });

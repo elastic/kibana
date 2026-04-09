@@ -16,10 +16,10 @@ export type EntityTableRow<T extends BasicEntityData> = XOR<
      */
     field: string;
     /**
-     * It extracts an array of strings from the data. Each element is a valid field value.
-     * It is used for displaying MoreContainer.
+     * It extracts field value(s) from the data. Can be a single string or array (ES fields vary).
+     * Normalized to string[] when passed to DefaultFieldRenderer.
      */
-    getValues: (data: T) => string[] | null | undefined;
+    getValues: (data: T) => string | string[] | null | undefined;
     /**
      * It allows the customization of the rendered field.
      * The element is still rendered inside `DefaultFieldRenderer` getting `CellActions` and `MoreContainer` capabilities.
@@ -51,4 +51,8 @@ export type EntityTableRows<T extends BasicEntityData> = Array<EntityTableRow<T>
 
 export interface BasicEntityData {
   isLoading: boolean;
+  /**
+   * Canonical Entity Store id (`entity.id`) for preview links and flyout context when available.
+   */
+  entityId?: string;
 }

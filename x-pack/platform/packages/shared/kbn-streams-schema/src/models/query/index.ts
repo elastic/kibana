@@ -56,6 +56,7 @@ export namespace QueryStream {
   export interface Definition extends BaseStream.Definition {
     type: 'query';
     query: QueryWithEsql;
+    field_descriptions?: Record<string, string>;
   }
 
   export type Source = BaseStream.Source<QueryStream.Definition>;
@@ -76,6 +77,7 @@ const queryStreamDefinitionSchema = baseStreamDefinitionSchema
   .extend({
     type: z.literal('query'),
     query: QueryWithEsql.right,
+    field_descriptions: z.record(z.string(), z.string()).optional(),
   })
   .meta({ id: 'QueryStreamDefinition' });
 
@@ -91,6 +93,7 @@ const queryStreamUpsertRequestSchema = baseStreamUpsertRequestSchema
     stream: baseStreamUpsertDefinitionSchema.extend({
       type: z.literal('query'),
       query: QueryWithEsql.right,
+      field_descriptions: z.record(z.string(), z.string()).optional(),
     }),
   })
   .meta({ id: 'QueryStreamUpsertRequest' });

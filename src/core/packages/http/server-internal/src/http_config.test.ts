@@ -524,6 +524,72 @@ describe('versioned', () => {
   });
 });
 
+describe('serverTiming', () => {
+  it('defaults to true in dev', () => {
+    expect(config.schema.validate({}, { dev: true })).toMatchObject({
+      serverTiming: true,
+    });
+  });
+
+  it('defaults to false in production', () => {
+    expect(config.schema.validate({}, { dev: false })).toMatchObject({
+      serverTiming: false,
+    });
+  });
+
+  it('allows enabling in dev', () => {
+    expect(config.schema.validate({ serverTiming: true }, { dev: true })).toMatchObject({
+      serverTiming: true,
+    });
+  });
+
+  it('allows disabling in dev', () => {
+    expect(config.schema.validate({ serverTiming: false }, { dev: true })).toMatchObject({
+      serverTiming: false,
+    });
+  });
+
+  it('throws when trying to enable in production', () => {
+    expect(() => config.schema.validate({ serverTiming: true }, { dev: false })).toThrow();
+  });
+});
+
+describe('serverTimingElasticsearch', () => {
+  it('defaults to true in dev', () => {
+    expect(config.schema.validate({}, { dev: true })).toMatchObject({
+      serverTimingElasticsearch: true,
+    });
+  });
+
+  it('defaults to false in production', () => {
+    expect(config.schema.validate({}, { dev: false })).toMatchObject({
+      serverTimingElasticsearch: false,
+    });
+  });
+
+  it('allows enabling in dev', () => {
+    expect(
+      config.schema.validate({ serverTimingElasticsearch: true }, { dev: true })
+    ).toMatchObject({
+      serverTimingElasticsearch: true,
+    });
+  });
+
+  it('allows disabling in dev', () => {
+    expect(
+      config.schema.validate({ serverTimingElasticsearch: false }, { dev: true })
+    ).toMatchObject({
+      serverTimingElasticsearch: false,
+    });
+  });
+
+  it('throws when trying to enable in production', () => {
+    expect(() =>
+      config.schema.validate({ serverTimingElasticsearch: true }, { dev: false })
+    ).toThrow();
+  });
+});
+
 describe('restrictInternalApis', () => {
   it('is allowed on serverless and traditional', () => {
     expect(() => config.schema.validate({ restrictInternalApis: false }, {})).not.toThrow();

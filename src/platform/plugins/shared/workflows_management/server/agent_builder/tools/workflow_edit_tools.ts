@@ -10,7 +10,7 @@
 import { v4 } from 'uuid';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
-import { WORKFLOWS_AI_AGENT_SETTING_ID } from '@kbn/workflows/common/constants';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { z } from '@kbn/zod/v4';
 import type { EditResult, StepDefinition } from './yaml_edit_utils';
 import {
@@ -27,12 +27,13 @@ import {
   workflowTools,
 } from '../../../common/agent_builder/constants';
 import { parseYamlToJSONWithoutValidation } from '../../../common/lib/yaml';
+import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
+import type { WorkflowsAiTelemetryClient } from '../../telemetry/workflows_ai_telemetry_client';
 import type { AgentBuilderPluginSetupContract } from '../../types';
-import type { WorkflowsManagementApi } from '../../workflows_management/workflows_management_api';
 
 const workflowEditAvailability = {
   handler: async ({ uiSettings }: { uiSettings: { get: <T>(id: string) => Promise<T> } }) => {
-    const isEnabled = await uiSettings.get<boolean>(WORKFLOWS_AI_AGENT_SETTING_ID);
+    const isEnabled = await uiSettings.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
     return isEnabled
       ? ({ status: 'available' } as const)
       : ({ status: 'unavailable', reason: 'AI workflow authoring is disabled' } as const);
@@ -108,7 +109,8 @@ const emitDiffAndUpdateYaml = async (
   proposalId: string,
   description: string | undefined,
   workflowId: string | undefined,
-  workflowName: string | undefined
+  workflowName: string | undefined,
+  toolId: string
 ): Promise<{ diffAttachmentId: string; attachmentVersion: number | undefined }> => {
   const diffAttachment = await context.attachments.add({
     type: WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
@@ -135,6 +137,7 @@ const emitDiffAndUpdateYaml = async (
     workflowId,
     name: workflowName,
     attachmentVersion,
+    toolId,
   });
 
   return { diffAttachmentId: diffAttachment.id, attachmentVersion };
@@ -164,6 +167,11 @@ const runCompactValidation = async (
   }
 };
 
+const extractConversationId = (context: ToolHandlerContext): string | undefined => {
+  const agentEntry = context.runContext.stack.findLast((entry) => entry.type === 'agent');
+  return agentEntry && 'conversationId' in agentEntry ? agentEntry.conversationId : undefined;
+};
+
 const handleEditResult = async (
   result: EditResult,
   context: ToolHandlerContext,
@@ -173,9 +181,16 @@ const handleEditResult = async (
   workflowId: string | undefined,
   workflowName: string | undefined,
   toolId: string,
-  api: WorkflowsManagementApi
+  api: WorkflowsManagementApi,
+  telemetryClient: WorkflowsAiTelemetryClient
 ) => {
   if (!result.success) {
+    telemetryClient.reportEditResult({
+      toolId,
+      conversationId: extractConversationId(context),
+      editSuccess: false,
+      isCreation: false,
+    });
     return {
       results: [
         {
@@ -196,10 +211,19 @@ const handleEditResult = async (
     proposalId,
     description,
     workflowId,
-    workflowName
+    workflowName,
+    toolId
   );
 
   const validation = await runCompactValidation(result.yaml, api, context);
+
+  telemetryClient.reportEditResult({
+    toolId,
+    conversationId: extractConversationId(context),
+    editSuccess: true,
+    isCreation: false,
+    validation: validation ?? undefined,
+  });
 
   return {
     results: [
@@ -222,7 +246,8 @@ const handleEditResult = async (
 
 export function registerWorkflowEditTools(
   agentBuilder: AgentBuilderPluginSetupContract,
-  api: WorkflowsManagementApi
+  api: WorkflowsManagementApi,
+  aiTelemetryClient: WorkflowsAiTelemetryClient
 ): void {
   agentBuilder.tools.register({
     id: workflowTools.insertStep,
@@ -258,7 +283,8 @@ export function registerWorkflowEditTools(
         attachment.workflowId,
         attachment.name,
         workflowTools.insertStep,
-        api
+        api,
+        aiTelemetryClient
       );
     },
   });
@@ -292,7 +318,8 @@ export function registerWorkflowEditTools(
         attachment.workflowId,
         attachment.name,
         workflowTools.modifyStep,
-        api
+        api,
+        aiTelemetryClient
       );
     },
   });
@@ -327,7 +354,8 @@ export function registerWorkflowEditTools(
         attachment.workflowId,
         attachment.name,
         workflowTools.modifyStepProperty,
-        api
+        api,
+        aiTelemetryClient
       );
     },
   });
@@ -363,7 +391,8 @@ export function registerWorkflowEditTools(
         attachment.workflowId,
         attachment.name,
         workflowTools.modifyProperty,
-        api
+        api,
+        aiTelemetryClient
       );
     },
   });
@@ -393,7 +422,8 @@ export function registerWorkflowEditTools(
         attachment.workflowId,
         attachment.name,
         workflowTools.deleteStep,
-        api
+        api,
+        aiTelemetryClient
       );
     },
   });
@@ -427,6 +457,14 @@ export function registerWorkflowEditTools(
 
         const validation = await runCompactValidation(yaml, api, context);
 
+        aiTelemetryClient.reportEditResult({
+          toolId: workflowTools.replaceYaml,
+          conversationId: extractConversationId(context),
+          editSuccess: true,
+          isCreation: true,
+          validation: validation ?? undefined,
+        });
+
         return {
           results: [
             {
@@ -453,10 +491,19 @@ export function registerWorkflowEditTools(
         proposalId,
         description,
         attachment.workflowId,
-        attachment.name
+        attachment.name,
+        workflowTools.replaceYaml
       );
 
       const validation = await runCompactValidation(yaml, api, context);
+
+      aiTelemetryClient.reportEditResult({
+        toolId: workflowTools.replaceYaml,
+        conversationId: extractConversationId(context),
+        editSuccess: true,
+        isCreation: false,
+        validation: validation ?? undefined,
+      });
 
       return {
         results: [

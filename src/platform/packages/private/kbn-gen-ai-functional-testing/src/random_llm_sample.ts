@@ -13,7 +13,7 @@ import { sampleSize } from 'lodash';
  * Max number of LLMs (connectors / EIS models) to run per FTR suite when unset.
  * Override with {@link FTR_GEN_AI_LLM_SAMPLE_SIZE_ENV}.
  */
-export const DEFAULT_FTR_GEN_AI_LLM_SAMPLE_SIZE = 3;
+export const DEFAULT_FTR_GEN_AI_LLM_SAMPLE_SIZE = 1;
 
 /**
  * Set to a positive integer to cap how many LLMs are exercised in each FTR run.

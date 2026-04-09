@@ -8,3 +8,4 @@
  */
 
 export const ENABLED_TRIGGER_TABS = ['alert', 'index', 'manual', 'historical'] as const;
+export const ENABLED_STEP_TRIGGER_TABS = ['manual', 'historical'] as const;

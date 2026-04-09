@@ -197,7 +197,7 @@ Array [
             Download CSV
             <span
               color="inherit"
-              data-euiicon-type="arrowDown"
+              data-euiicon-type="chevronSingleDown"
             />
           </span>
         </button>
@@ -462,7 +462,7 @@ Array [
                   </span>
                   <span
                     color="inherit"
-                    data-euiicon-type="arrowDown"
+                    data-euiicon-type="chevronSingleDown"
                   />
                 </span>
               </button>
@@ -489,7 +489,7 @@ Array [
             Download CSV
             <span
               color="inherit"
-              data-euiicon-type="arrowDown"
+              data-euiicon-type="chevronSingleDown"
             />
           </span>
         </button>

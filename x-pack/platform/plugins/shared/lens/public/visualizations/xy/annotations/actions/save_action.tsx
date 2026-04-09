@@ -28,7 +28,7 @@ import type {
 import type {
   XYByReferenceAnnotationLayerConfig,
   XYAnnotationLayerConfig,
-  XYState,
+  XYVisualizationState,
 } from '../../types';
 import {
   getAnnotationLayerTitle,
@@ -83,7 +83,7 @@ export const SaveModal = ({
       confirmButtonLabel={
         <>
           <div>
-            <EuiIcon type="save" />
+            <EuiIcon type="save" aria-hidden={true} />
           </div>
           <div>
             {i18n.translate(
@@ -188,9 +188,9 @@ export const onSave = async ({
   goToAnnotationLibrary,
   startServices,
 }: {
-  state: XYState;
+  state: XYVisualizationState;
   layer: XYAnnotationLayerConfig;
-  setState: StateSetter<XYState, unknown>;
+  setState: StateSetter<XYVisualizationState, unknown>;
   registerLibraryAnnotationGroup: (props: {
     id: string;
     group: EventAnnotationGroupConfig;
@@ -310,9 +310,9 @@ export const getSaveLayerAction = ({
   goToAnnotationLibrary,
   startServices,
 }: {
-  state: XYState;
+  state: XYVisualizationState;
   layer: XYAnnotationLayerConfig;
-  setState: StateSetter<XYState, unknown>;
+  setState: StateSetter<XYVisualizationState, unknown>;
   registerLibraryAnnotationGroup: RegisterLibraryAnnotationGroupFunction;
   eventAnnotationService: EventAnnotationServiceType;
   toasts: ToastsStart;

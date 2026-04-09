@@ -21,7 +21,7 @@ export const CPSUnsupportedWarning: FC = () => {
     services: { cps, storage },
   } = useMlKibana();
 
-  const isCpsEnabled = Boolean(cps?.cpsManager);
+  const isCpsEnabled = Boolean(cps?.cpsManager && cps.cpsManager.getTotalProjectCount() > 1);
   const [isDismissed, setIsDismissed] = useState(() => {
     return isCpsEnabled ? storage.get(CPS_UNSUPPORTED_CALLOUT_STORAGE_KEY) === true : false;
   });

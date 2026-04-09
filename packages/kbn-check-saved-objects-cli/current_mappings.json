@@ -301,6 +301,214 @@
       }
     }
   },
+  "alerting_api_key_pending_invalidation": {
+    "dynamic": false,
+    "properties": {
+      "apiKeyId": {
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "uiamApiKey": {
+        "type": "binary"
+      }
+    }
+  },
+  "alerting_notification_policy": {
+    "dynamic": false,
+    "properties": {
+      "auth": {
+        "properties": {
+          "apiKey": {
+            "type": "binary"
+          },
+          "createdByUser": {
+            "type": "boolean"
+          },
+          "owner": {
+            "type": "keyword"
+          }
+        },
+        "type": "object"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "createdBy": {
+        "type": "keyword"
+      },
+      "createdByUsername": {
+        "type": "keyword"
+      },
+      "description": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "destinations": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "type": {
+            "type": "keyword"
+          }
+        },
+        "type": "object"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "groupBy": {
+        "type": "keyword"
+      },
+      "groupingMode": {
+        "type": "keyword"
+      },
+      "tags": {
+        "type": "keyword"
+      },
+      "name": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "snoozedUntil": {
+        "type": "date"
+      },
+      "throttle": {
+        "properties": {
+          "strategy": {
+            "type": "keyword"
+          }
+        },
+        "type": "object"
+      },
+      "updatedAt": {
+        "type": "date"
+      },
+      "updatedBy": {
+        "type": "keyword"
+      },
+      "updatedByUsername": {
+        "type": "keyword"
+      }
+    }
+  },
+  "alerting_rule": {
+    "dynamic": false,
+    "properties": {
+      "createdAt": {
+        "type": "date"
+      },
+      "createdBy": {
+        "type": "keyword"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "evaluation": {
+        "properties": {
+          "query": {
+            "properties": {
+              "base": {
+                "type": "text"
+              },
+              "condition": {
+                "type": "text"
+              }
+            }
+          }
+        }
+      },
+      "grouping": {
+        "properties": {
+          "fields": {
+            "type": "keyword"
+          }
+        }
+      },
+      "kind": {
+        "type": "keyword"
+      },
+      "metadata": {
+        "properties": {
+          "description": {
+            "type": "text"
+          },
+          "name": {
+            "fields": {
+              "keyword": {
+                "type": "keyword"
+              }
+            },
+            "type": "text"
+          },
+          "owner": {
+            "type": "keyword"
+          },
+          "tags": {
+            "type": "keyword"
+          }
+        }
+      },
+      "no_data": {
+        "properties": {
+          "behavior": {
+            "type": "keyword"
+          },
+          "timeframe": {
+            "type": "keyword"
+          }
+        }
+      },
+      "recovery_policy": {
+        "properties": {
+          "query": {
+            "properties": {
+              "base": {
+                "type": "text"
+              },
+              "condition": {
+                "type": "text"
+              }
+            }
+          },
+          "type": {
+            "type": "keyword"
+          }
+        }
+      },
+      "schedule": {
+        "properties": {
+          "every": {
+            "type": "keyword"
+          },
+          "lookback": {
+            "type": "keyword"
+          }
+        }
+      },
+      "time_field": {
+        "type": "keyword"
+      },
+      "updatedAt": {
+        "type": "date"
+      },
+      "updatedBy": {
+        "type": "keyword"
+      }
+    }
+  },
   "alerting_rule_template": {
     "dynamic": false,
     "properties": {
@@ -1134,31 +1342,6 @@
       }
     }
   },
-  "data_connector": {
-    "dynamic": false,
-    "properties": {
-      "kscIds": {
-        "type": "keyword"
-      },
-      "name": {
-        "fields": {
-          "keyword": {
-            "type": "keyword"
-          }
-        },
-        "type": "text"
-      },
-      "toolIds": {
-        "type": "keyword"
-      },
-      "type": {
-        "type": "keyword"
-      },
-      "workflowIds": {
-        "type": "keyword"
-      }
-    }
-  },
   "data_stream-config": {
     "dynamic": false,
     "properties": {
@@ -1170,6 +1353,9 @@
       },
       "integration_id": {
         "type": "keyword"
+      },
+      "title": {
+        "type": "text"
       },
       "job_info": {
         "properties": {
@@ -1492,6 +1678,9 @@
       "install_version": {
         "type": "keyword"
       },
+      "installed_as_dependency": {
+        "type": "boolean"
+      },
       "installed_es": {
         "properties": {
           "deferred": {
@@ -1534,9 +1723,6 @@
       "latest_install_failed_attempts": {
         "enabled": false,
         "type": "object"
-      },
-      "installed_as_dependency": {
-        "type": "boolean"
       },
       "name": {
         "type": "keyword"
@@ -2029,6 +2215,9 @@
       "is_protected": {
         "type": "boolean"
       },
+      "is_verifier": {
+        "type": "boolean"
+      },
       "keep_monitoring_alive": {
         "type": "boolean"
       },
@@ -2109,6 +2298,15 @@
       },
       "vars": {
         "type": "flattened"
+      },
+      "verification_failed_at": {
+        "type": "date"
+      },
+      "verification_started_at": {
+        "type": "date"
+      },
+      "verification_status": {
+        "type": "keyword"
       }
     }
   },
@@ -2469,6 +2667,9 @@
       "is_protected": {
         "type": "boolean"
       },
+      "is_verifier": {
+        "type": "boolean"
+      },
       "keep_monitoring_alive": {
         "type": "boolean"
       },
@@ -2647,6 +2848,9 @@
       },
       "name": {
         "type": "keyword"
+      },
+      "otel_exporter_config_yaml": {
+        "type": "text"
       },
       "output_id": {
         "index": false,
@@ -4202,10 +4406,6 @@
     "dynamic": false,
     "properties": {}
   },
-  "streams-significant-events-settings": {
-    "dynamic": false,
-    "properties": {}
-  },
   "synthetics-dynamic-settings": {
     "dynamic": false,
     "properties": {}
@@ -4723,6 +4923,23 @@
       },
       "riskModifier": {
         "type": "float"
+      }
+    }
+  },
+  "watchlist-entity-source": {
+    "dynamic": false,
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      },
+      "managed": {
+        "type": "boolean"
+      },
+      "name": {
+        "type": "text"
+      },
+      "type": {
+        "type": "keyword"
       }
     }
   },
