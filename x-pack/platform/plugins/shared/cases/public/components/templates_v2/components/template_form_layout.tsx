@@ -90,13 +90,10 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     (fieldName: string, value: string, control: string) => {
       const trimmedValue = value.trim();
 
-      // Remove default when: numeric field is cleared, or array field is empty
-      const isArrayControl =
-        control === FieldType.USER_PICKER || control === FieldType.CHECKBOX_GROUP;
       const isEmptyNumeric = control === FieldType.INPUT_NUMBER && trimmedValue === '';
-      const isEmptyArray = isArrayControl && (value === '[]' || value === '');
+      const isEmptyUserPicker = control === FieldType.USER_PICKER && value === '';
 
-      if (isEmptyNumeric || isEmptyArray) {
+      if (isEmptyNumeric || isEmptyUserPicker) {
         const updatedYaml = removeYamlFieldDefault(yamlValueRef.current, fieldName);
         if (updatedYaml !== yamlValueRef.current) {
           onYamlChange(updatedYaml);
@@ -113,8 +110,14 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
         } catch {
           parsedValue = [];
         }
+      } else if (control === FieldType.USER_PICKER) {
+        try {
+          parsedValue = JSON.parse(value) as string[];
+        } catch {
+          parsedValue = [];
+        }
       } else {
-        parsedValue = value;
+        parsedValue = trimmedValue;
       }
       const updatedYaml = updateYamlFieldDefault(yamlValueRef.current, fieldName, parsedValue);
       if (updatedYaml !== yamlValueRef.current) {

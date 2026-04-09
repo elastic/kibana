@@ -40,7 +40,10 @@ const tryParseJsonArray = (value: string): unknown[] | null => {
  * Converts a JS value to a yaml-library AST node suitable for use as metadata.default.
  * Arrays of objects are turned into proper YAML sequences; scalars stay as-is.
  */
-const toYamlDefaultNode = (doc: Document, value: string | number): unknown => {
+const toYamlDefaultNode = (doc: Document, value: FieldDefaultValue): unknown => {
+  if (Array.isArray(value)) {
+    return doc.createNode(value);
+  }
   if (typeof value === 'string') {
     const parsed = tryParseJsonArray(value);
     if (parsed !== null) {
