@@ -1,0 +1,3 @@
+# summary:
+description: An example of a successful response from `PUT /api/apm/settings/agent-configuration`. The response body is intentionally empty.
+value: {}
