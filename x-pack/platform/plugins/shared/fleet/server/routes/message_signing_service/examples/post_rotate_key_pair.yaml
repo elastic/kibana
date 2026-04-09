@@ -18,11 +18,7 @@ responses:
             value:
               statusCode: 400
               error: 'Bad Request'
-              message: >-
-                Warning: this API will cause a key pair to rotate and should not be necessary in normal operation.
-                If you proceed, you may need to reinstall Agents in your network. You must acknowledge the risks
-                of rotating the key pair with acknowledge=true in the request parameters.
-                For more information, reach out to your administrator.
+              message: 'Warning: this API will cause a key pair to rotate and should not be necessary in normal operation.  If you proceed, you may need to reinstall Agents in your network. You must acknowledge the risks of rotating the key pair with acknowledge=true in the request parameters.  For more information, reach out to your administrator.'
   500:
     description: 'Internal Server Error'
     content:
