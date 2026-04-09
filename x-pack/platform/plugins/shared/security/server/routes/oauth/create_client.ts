@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { clientLogoSchema } from './schemas';
 import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
@@ -33,12 +34,7 @@ export function defineCreateOAuthClientRoute({
             schema.oneOf([schema.literal('public'), schema.literal('confidential')])
           ),
           client_metadata: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-          client_logo: schema.maybe(
-            schema.object({
-              media_type: schema.string(),
-              data: schema.string(),
-            })
-          ),
+          client_logo: schema.maybe(clientLogoSchema),
         }),
       },
       options: {
