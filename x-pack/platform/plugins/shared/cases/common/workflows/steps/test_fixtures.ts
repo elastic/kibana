@@ -5,6 +5,16 @@
  * 2.0.
  */
 
+import { OBSERVABLE_TYPE_IPV4 } from '../../constants';
+
+const observablesFixture = [
+  {
+    id: 'cpaon3223fj2omwcpown9pv',
+    typeKey: OBSERVABLE_TYPE_IPV4.key,
+    value: '10.0.0.8',
+  },
+];
+
 export const createCaseRequestFixture = {
   title: 'My new case',
   description: 'A description',
@@ -78,6 +88,17 @@ export const createCaseResponseFixture = {
   totalAlerts: 0,
   totalComment: 1,
   version: 'WzQ3LDFd',
+  observables: [
+    {
+      id: 'cpaon3223fj2omwcpown9pv',
+      typeKey: OBSERVABLE_TYPE_IPV4.key,
+      value: '10.0.0.8',
+      updatedAt: '2020-02-20T15:07:57.995Z',
+      createdAt: '2020-02-20T15:02:57.995Z',
+      description: 'test description',
+    },
+  ],
+  total_observables: 1,
 };
 
 export const caseIdFixture = 'case-1';
@@ -181,7 +202,7 @@ export const addEventsInputFixture = {
 
 export const addObservablesInputFixture = {
   case_id: caseIdFixture,
-  observables: [{ typeKey: 'ip', value: '10.0.0.8' }],
+  observables: observablesFixture,
 };
 
 export const addTagInputFixture = {
@@ -245,4 +266,78 @@ export const findCasesOutputFixture = {
   page: 1,
   per_page: 20,
   total: 1,
+};
+
+export const alertIdFixture = 'alert-id-1';
+
+export const getCasesByAlertIdInputFixture = {
+  alert_id: alertIdFixture,
+  owner: 'securitySolution',
+};
+
+export const getCasesByAlertIdOutputFixture = {
+  cases: [
+    {
+      id: caseIdFixture,
+      title: 'Another horrible breach!!',
+      description: 'Security banana Issue',
+      status: 'open',
+      createdAt: '2020-02-19T23:06:33.798Z',
+      totals: { alerts: 1, events: 0, userComments: 0 },
+    },
+  ],
+};
+
+export const userCommentFixture = {
+  id: 'comment-1',
+  type: 'user' as const,
+  comment: 'Investigating now',
+  owner: 'securitySolution',
+  created_at: '2020-02-19T23:06:33.798Z',
+  created_by: {
+    full_name: 'Leslie Knope',
+    username: 'lknope',
+    email: 'leslie.knope@elastic.co',
+  },
+  pushed_at: null,
+  pushed_by: null,
+  updated_at: null,
+  updated_by: null,
+  version: 'WzQ3LDFc',
+};
+
+export const getAllAttachmentsInputFixture = {
+  case_id: caseIdFixture,
+};
+
+export const getAllAttachmentsOutputFixture = {
+  attachments: [userCommentFixture],
+};
+
+export const observableIdFixture = 'obs-1';
+
+export const updateObservableInputFixture = {
+  case_id: caseIdFixture,
+  observable_id: observableIdFixture,
+  value: '10.0.0.42',
+  description: 'Updated source IP',
+};
+
+export const deleteObservableInputFixture = {
+  case_id: caseIdFixture,
+  observable_id: observableIdFixture,
+};
+
+export const deleteObservableOutputFixture = {
+  case_id: caseIdFixture,
+  observable_id: observableIdFixture,
+};
+
+export const getCasesInputFixture = {
+  case_ids: [caseIdFixture, 'case-2'],
+};
+
+export const getCasesOutputFixture = {
+  cases: [createCaseResponseFixture],
+  errors: [],
 };

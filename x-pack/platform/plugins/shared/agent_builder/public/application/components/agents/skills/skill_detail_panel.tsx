@@ -27,14 +27,16 @@ interface SkillDetailPanelProps {
   skillId: string;
   onEdit: () => void;
   onRemove: () => void;
-  isReadOnly?: boolean;
+  isAutoIncluded: boolean;
+  canEditAgent: boolean;
 }
 
 export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
   skillId,
   onEdit,
   onRemove,
-  isReadOnly = false,
+  isAutoIncluded = false,
+  canEditAgent,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { skill, isLoading } = useSkill({ skillId });
@@ -46,7 +48,7 @@ export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
         isLoading={isLoading}
         isEmpty={!skill}
         title={skill?.name ?? skillId}
-        showAutoIcon={isReadOnly}
+        showAutoIcon={isAutoIncluded}
         headerContent={
           <>
             <EuiText
@@ -69,31 +71,17 @@ export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
             </EuiText>
           </>
         }
-        headerActions={(openConfirmRemove) =>
-          isReadOnly ? (
-            <EuiBadge color="hollow">{labels.agentSkills.autoIncludedBadgeLabel}</EuiBadge>
-          ) : (
-            <EuiFlexGroup gutterSize="s" responsive={false}>
-              {!skill?.readonly && (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty iconType="pencil" size="xs" onClick={onEdit}>
-                    {labels.skills.editSkillButtonLabel}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  iconType="cross"
-                  size="xs"
-                  color="danger"
-                  onClick={openConfirmRemove}
-                >
-                  {labels.agentSkills.removeSkillButtonLabel}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )
-        }
+        headerActions={(openConfirmRemove) => (
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <SkillHeaderActions
+              openConfirmRemove={openConfirmRemove}
+              canEditAgent={canEditAgent}
+              isAutoIncluded={isAutoIncluded}
+              isReadOnly={skill?.readonly ?? false}
+              onEdit={onEdit}
+            />
+          </EuiFlexGroup>
+        )}
         confirmRemove={{
           title: labels.agentSkills.removeSkillConfirmTitle(skill?.name ?? skillId),
           body: labels.agentSkills.removeSkillConfirmBody,
@@ -130,6 +118,48 @@ export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
       {selectedToolId && (
         <ToolReadOnlyFlyout toolId={selectedToolId} onClose={() => setSelectedToolId(null)} />
       )}
+    </>
+  );
+};
+
+const SkillHeaderActions = ({
+  openConfirmRemove,
+  canEditAgent,
+  isAutoIncluded,
+  isReadOnly,
+  onEdit,
+}: {
+  openConfirmRemove: () => void;
+  canEditAgent: boolean;
+  isAutoIncluded: boolean;
+  isReadOnly: boolean;
+  onEdit: () => void;
+}) => {
+  if (isAutoIncluded) {
+    return (
+      <EuiFlexItem grow={false}>
+        <EuiBadge color="hollow">{labels.agentSkills.autoIncludedBadgeLabel}</EuiBadge>
+      </EuiFlexItem>
+    );
+  }
+  if (!canEditAgent) {
+    return null;
+  }
+
+  return (
+    <>
+      {!isReadOnly && (
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty iconType="pencil" size="xs" onClick={onEdit}>
+            {labels.skills.editSkillButtonLabel}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty iconType="cross" size="xs" color="danger" onClick={openConfirmRemove}>
+          {labels.agentSkills.removeSkillButtonLabel}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
     </>
   );
 };

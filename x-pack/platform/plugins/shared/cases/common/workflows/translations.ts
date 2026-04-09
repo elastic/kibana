@@ -487,3 +487,110 @@ export const CUSTOM_FIELD_NOT_FOUND_MESSAGE = (fieldName: string) =>
     defaultMessage: 'Custom field "{fieldName}" was not found in case configuration.',
     values: { fieldName },
   });
+
+export const GET_CASES_BY_ALERT_ID_STEP_LABEL = i18n.translate(
+  'xpack.cases.workflowSteps.getCasesByAlertId.label',
+  {
+    defaultMessage: 'Cases - Get cases by alert ID',
+  }
+);
+
+export const GET_CASES_BY_ALERT_ID_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.getCasesByAlertId.description',
+  {
+    defaultMessage: 'Retrieves all cases that contain a specific alert',
+  }
+);
+
+export const GET_CASES_BY_ALERT_ID_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.getCasesByAlertId.documentation.details',
+  {
+    defaultMessage:
+      'This step returns all cases that have the given alert attached. Use it to check for duplicates before creating a new case, or to fan-out work across multiple existing cases. An optional owner filter narrows results to a specific solution.',
+  }
+);
+
+export const GET_ALL_ATTACHMENTS_STEP_LABEL = i18n.translate(
+  'xpack.cases.workflowSteps.getAllAttachments.label',
+  {
+    defaultMessage: 'Cases - Get all case attachments',
+  }
+);
+
+export const GET_ALL_ATTACHMENTS_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.getAllAttachments.description',
+  {
+    defaultMessage: 'Retrieves all attachments for a case in a single call',
+  }
+);
+
+export const GET_ALL_ATTACHMENTS_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.getAllAttachments.documentation.details',
+  {
+    defaultMessage:
+      'This step fetches every attachment associated with a case without pagination. Use this when you need the complete set of attachments for decisioning — for example, checking evidence before closing or escalating.',
+  }
+);
+
+export const UPDATE_OBSERVABLE_STEP_LABEL = i18n.translate(
+  'xpack.cases.workflowSteps.updateObservable.label',
+  {
+    defaultMessage: 'Cases - Update observable',
+  }
+);
+
+export const UPDATE_OBSERVABLE_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.updateObservable.description',
+  {
+    defaultMessage: 'Updates the value and description of an existing observable on a case',
+  }
+);
+
+export const UPDATE_OBSERVABLE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.updateObservable.documentation.details',
+  {
+    defaultMessage:
+      'This step updates an observable that already exists on a case. Provide the case ID, the observable ID, the new value, and an optional description. The updated case is returned.',
+  }
+);
+
+export const DELETE_OBSERVABLE_STEP_LABEL = i18n.translate(
+  'xpack.cases.workflowSteps.deleteObservable.label',
+  {
+    defaultMessage: 'Cases - Delete observable',
+  }
+);
+
+export const DELETE_OBSERVABLE_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.deleteObservable.description',
+  {
+    defaultMessage: 'Removes an observable from a case',
+  }
+);
+
+export const DELETE_OBSERVABLE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.deleteObservable.documentation.details',
+  {
+    defaultMessage:
+      'This step deletes the specified observable from the case. The step echoes back the case_id and observable_id that were removed.',
+  }
+);
+
+export const GET_CASES_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.getCases.label', {
+  defaultMessage: 'Cases - Get cases',
+});
+
+export const GET_CASES_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.getCases.description',
+  {
+    defaultMessage: 'Batch-retrieves multiple cases by their IDs in a single call',
+  }
+);
+
+export const GET_CASES_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.getCases.documentation.details',
+  {
+    defaultMessage:
+      'This step retrieves up to 1000 cases in a single request. Any IDs that could not be fetched are reported in the errors array. Use this to avoid N sequential get operations in fan-out workflows.',
+  }
+);

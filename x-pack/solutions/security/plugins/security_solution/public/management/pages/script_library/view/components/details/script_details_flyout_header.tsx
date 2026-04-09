@@ -8,11 +8,11 @@
 import React, { memo } from 'react';
 import {
   EuiFlexGroup,
-  EuiTitle,
-  EuiText,
-  EuiToolTip,
   EuiFlexItem,
   EuiFlyoutHeader,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import type { SupportedHostOsType } from '../../../../../../../common/endpoint/constants';

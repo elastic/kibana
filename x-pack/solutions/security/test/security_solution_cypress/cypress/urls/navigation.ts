@@ -16,6 +16,8 @@ export const DASHBOARDS_URL = '/app/security/dashboards';
 export const ASSETS_URL = '/app/security/assets';
 export const ENDPOINTS_URL = '/app/security/administration/endpoints';
 export const POLICIES_URL = '/app/security/administration/policy';
+/** Any artifact tab lives under this path prefix (trusted apps, event filters, blocklist, etc.) */
+export const ADMINISTRATION_URL_PREFIX = '/app/security/administration';
 export const TRUSTED_APPS_URL = '/app/security/administration/trusted_apps';
 export const EVENT_FILTERS_URL = '/app/security/administration/event_filters';
 export const BLOCKLIST_URL = '/app/security/administration/blocklist';
@@ -113,6 +115,3 @@ export const CUSTOM_ROLES_URL = 'app/management/security/roles/edit';
 // Alerting
 export const STACK_RULES_URL = 'app/management/insightsAndAlerting/triggersActions/rules';
 export const MAINTENANCE_WINDOW_URL = 'app/management/insightsAndAlerting/maintenanceWindows';
-
-// AI Rule Creation
-export const AI_RULE_CREATION_URL = '/app/security/rules/ai_rule_creation';

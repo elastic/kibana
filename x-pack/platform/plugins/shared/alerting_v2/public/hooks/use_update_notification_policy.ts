@@ -30,6 +30,7 @@ export const useUpdateNotificationPolicy = () => {
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: notificationPolicyKeys.lists(), exact: false });
       queryClient.invalidateQueries({ queryKey: notificationPolicyKeys.detail(id), exact: false });
+      queryClient.invalidateQueries({ queryKey: notificationPolicyKeys.allTags(), exact: false });
       toasts.addSuccess(
         i18n.translate('xpack.alertingV2.notificationPolicy.updateSuccess', {
           defaultMessage: 'Notification policy updated successfully',

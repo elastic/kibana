@@ -58,7 +58,7 @@ steps:
     label: 'Pick Test Group Run Order'
     agents:
       machineType: n2-standard-2
-    timeout_in_minutes: 10
+    timeout_in_minutes: 15
     env:
       # Unit-tests don't depend on Chrome's versions, integration tests , so we don't need to run those
       LIMIT_CONFIG_TYPE: 'functional'

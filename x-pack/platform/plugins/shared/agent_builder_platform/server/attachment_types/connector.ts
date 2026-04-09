@@ -10,18 +10,17 @@ import {
   AttachmentType,
   connectorAttachmentDataSchema,
 } from '@kbn/agent-builder-common/attachments';
-import { ToolType } from '@kbn/agent-builder-common';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import type { WorkflowAttachmentBoundedTool } from '@kbn/agent-builder-server/attachments/tools';
+import { formatSchemaForLlm } from '@kbn/agent-builder-server';
 import { getConnectorSpec } from '@kbn/connector-specs';
 
 /**
  * Creates the definition for the `connector` attachment type.
  *
  * Connector attachments represent a connector instance attached to a conversation,
- * along with its workflow tools. The tools are embedded in the attachment data
- * (populated by the connector lifecycle hook at creation time) so that
- * `getBoundedTools()` is self-contained without needing tool registry access.
+ * along with its available sub-actions. When a ConnectorSpec is found, the
+ * sub-actions (with `isTool: true`) are listed directly from the spec so the
+ * agent knows how to call them via `execute_connector_sub_action`.
  */
 export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
   AttachmentType.connector,
@@ -42,46 +41,59 @@ export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
 
     format: (attachment) => {
       const {
+        connector_id: connectorId,
         connector_name: connectorName,
         connector_type: connectorType,
-        tools,
       } = attachment.data;
+
+      const spec = getConnectorSpec(connectorType);
+      const subActionEntries = spec
+        ? Object.entries(spec.actions).filter(([, action]) => action.isTool)
+        : [];
 
       return {
         getRepresentation: () => {
-          const spec = getConnectorSpec(connectorType);
           const description = spec?.metadata.description ?? connectorType;
 
           const parts: string[] = [
             `Connector: ${connectorName} (${connectorType})`,
             `Description: ${description}`,
+            `Connector ID: ${connectorId}`,
           ];
 
-          if (tools.length > 0) {
-            parts.push('Available tools:');
-            for (const tool of tools) {
-              parts.push(`  - ${tool.tool_id}: ${tool.description}`);
+          if (subActionEntries.length > 0) {
+            parts.push('');
+            parts.push(
+              'Available sub-actions (use the execute_connector_sub_action tool with ' +
+                `connectorId="${connectorId}"):`
+            );
+            for (const [actionName, action] of subActionEntries) {
+              const actionDesc = action.description ?? actionName;
+              const paramsSummary = action.input
+                ? formatSchemaForLlm(action.input)
+                : 'No parameters';
+              parts.push(`  - ${actionName}: ${actionDesc}`);
+              parts.push(`    Parameters: ${paramsSummary}`);
+            }
+
+            // Include skill content after the sub-action listing
+            if (spec?.skill) {
+              parts.push('');
+              parts.push(spec.skill);
             }
           }
 
           return { type: 'text', value: parts.join('\n') };
         },
 
-        getBoundedTools: (): WorkflowAttachmentBoundedTool[] => {
-          return tools.map((tool) => ({
-            id: tool.tool_id,
-            type: ToolType.workflow,
-            description: tool.description,
-            configuration: { workflow_id: tool.configuration.workflow_id },
-          }));
-        },
+        getBoundedTools: () => [],
       };
     },
 
     getTools: () => [],
 
     getAgentDescription: () => {
-      return 'A connector attachment represents an external service connector with its associated workflow tools. The tools provided by the connector can be used to interact with the external service.';
+      return 'A connector attachment represents an external service connector with available sub-actions. Use the execute_connector_sub_action tool with the connector ID and sub-action name to interact with the external service.';
     },
   };
 };

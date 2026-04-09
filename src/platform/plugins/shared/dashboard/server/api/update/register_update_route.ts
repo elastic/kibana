@@ -9,6 +9,7 @@
 
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
 import { once } from 'lodash';
 import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
@@ -16,9 +17,12 @@ import { getRouteConfig } from '../get_route_config';
 import { getUpdateRequestBodySchema, getUpdateResponseBodySchema } from './schemas';
 import { update } from './update';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
+import { telemetryHandler } from '../telemetry_handler';
+import { writeErrorHandler } from '../write_error_handler';
 
 export function registerUpdateRoute(
   router: VersionedRouter<RequestHandlerContext>,
+  usageCounter: UsageCounter | undefined,
   isDashboardAppRequest: boolean
 ) {
   const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
@@ -54,30 +58,31 @@ export function registerUpdateRoute(
             body: () => getUpdateResponseBodySchema(isDashboardAppRequest),
             description: 'created',
           },
+          400: {
+            description: 'invalid request',
+          },
           403: {
             description: 'forbidden',
           },
         },
       }),
     },
-    async (ctx, req, res) => {
-      try {
-        const result = await update(
-          ctx,
-          getCachedDashboardStateSchema(),
-          req.params.id,
-          req.body,
-          isDashboardAppRequest
-        );
-        return result.meta.updated_at === result.meta.created_at
-          ? res.created({ body: result })
-          : res.ok({ body: result });
-      } catch (e) {
-        if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden({ body: { message: e.message } });
+    async (ctx, req, res) =>
+      telemetryHandler(req, usageCounter, async () => {
+        try {
+          const result = await update(
+            ctx,
+            getCachedDashboardStateSchema(),
+            req.params.id,
+            req.body,
+            isDashboardAppRequest
+          );
+          return result.meta.updated_at === result.meta.created_at
+            ? res.created({ body: result })
+            : res.ok({ body: result });
+        } catch (e) {
+          return writeErrorHandler(e, res);
         }
-        return res.badRequest({ body: { message: e.message } });
-      }
-    }
+      })
   );
 }

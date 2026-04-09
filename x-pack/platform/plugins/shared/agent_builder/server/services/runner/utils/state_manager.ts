@@ -15,10 +15,11 @@ export const createConversationStateManager = (
 
   // prefill tool state map with last round's tool state
   const lastRound = conversation ? conversation.rounds[conversation.rounds.length - 1] : undefined;
-  if (lastRound && lastRound.state) {
-    const nodeState = lastRound.state.agent.node;
-    if (nodeState.step === 'execute_tool') {
-      toolCallStateMap.set(nodeState.tool_call_id, nodeState.tool_state);
+  if (lastRound?.state) {
+    for (const node of lastRound.state.agent.nodes) {
+      if (node.step === 'execute_tool') {
+        toolCallStateMap.set(node.tool_call_id, node.tool_state);
+      }
     }
   }
 

@@ -43,18 +43,25 @@ function DiscoverFlyoutStreamFieldContent({
   const { value, loading, error } = useResolvedDefinitionName({
     streamsRepositoryClient,
     doc,
+    cpsHasLinkedProjects: renderCpsWarning,
   });
 
   if (loading) return <EuiLoadingSpinner size="s" />;
 
-  if (!value || error) return <span>-</span>;
+  const { name, existsLocally } = value ?? {};
+
+  if (!name || error) return <span>-</span>;
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-      <EuiLink href={locator.getRedirectUrl({ name: value })}>
-        <EuiText size="xs">{value}</EuiText>
-      </EuiLink>
-      {renderCpsWarning && <CpsWarningIcon />}
+      {existsLocally ? (
+        <EuiLink href={locator.getRedirectUrl({ name })}>
+          <EuiText size="xs">{name}</EuiText>
+        </EuiLink>
+      ) : (
+        <EuiText size="xs">{name}</EuiText>
+      )}
+      {renderCpsWarning && <CpsWarningIcon existsLocally={existsLocally ?? false} />}
     </EuiFlexGroup>
   );
 }
@@ -64,9 +71,16 @@ const CPS_WARNING_MESSAGE = i18n.translate('xpack.streams.discoverFlyout.cpsWarn
     'Cross-project search is active. This document may come from a linked project and might not be available in Streams.',
 });
 
-const CpsWarningIcon = () => (
+const CPS_WARNING_NOT_LOCAL_MESSAGE = i18n.translate(
+  'xpack.streams.discoverFlyout.cpsWarningNotLocal',
+  {
+    defaultMessage: 'This document comes from a linked project and is not available in Streams.',
+  }
+);
+
+const CpsWarningIcon = ({ existsLocally }: { existsLocally: boolean }) => (
   <EuiIconTip
-    content={CPS_WARNING_MESSAGE}
+    content={existsLocally ? CPS_WARNING_MESSAGE : CPS_WARNING_NOT_LOCAL_MESSAGE}
     type="warning"
     size="s"
     color="warning"

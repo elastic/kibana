@@ -24,7 +24,7 @@ export interface CloudConnectorUsageItem {
   updated_at: string;
 }
 
-interface CloudConnectorUsageResponse {
+export interface CloudConnectorUsageResponse {
   items: CloudConnectorUsageItem[];
   total: number;
   page: number;

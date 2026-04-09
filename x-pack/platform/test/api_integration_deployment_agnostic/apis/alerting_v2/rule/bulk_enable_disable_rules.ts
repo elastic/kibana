@@ -12,6 +12,12 @@ import type { RoleCredentials } from '../../../services';
 const RULE_API_PATH = '/api/alerting/v2/rules';
 const RULE_SO_TYPE = 'alerting_rule';
 
+/** Bulk ops only include `truncated` / `totalMatched` when a filter matches more than BULK_FILTER_MAX_RULES (see @kbn/alerting-v2-schemas). */
+function expectNoBulkTruncationMetadata(body: Record<string, unknown>) {
+  expect(body).to.not.have.property('truncated');
+  expect(body).to.not.have.property('totalMatched');
+}
+
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const samlAuth = getService('samlAuth');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -88,6 +94,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.body.rules.length).to.be(2);
         expect(response.body.errors).to.be.an('array');
         expect(response.body.errors.length).to.be(0);
+        expectNoBulkTruncationMetadata(response.body);
 
         for (const rule of response.body.rules) {
           expect(rule.enabled).to.be(false);
@@ -114,6 +121,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(disableResponse1.status).to.be(200);
         expect(disableResponse1.body.rules.length).to.be(1);
         expect(disableResponse1.body.rules[0].enabled).to.be(false);
+        expectNoBulkTruncationMetadata(disableResponse1.body);
 
         // Disable it again — should succeed without errors
         const disableResponse2 = await supertestWithoutAuth
@@ -126,6 +134,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(disableResponse2.body.rules.length).to.be(1);
         expect(disableResponse2.body.rules[0].enabled).to.be(false);
         expect(disableResponse2.body.errors.length).to.be(0);
+        expectNoBulkTruncationMetadata(disableResponse2.body);
       });
 
       it('should return errors for non-existent rule ids', async () => {
@@ -142,6 +151,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.body.rules[0].id).to.be(rule.id);
         expect(response.body.rules[0].enabled).to.be(false);
         expect(response.body.errors.length).to.be(1);
+        expectNoBulkTruncationMetadata(response.body);
         expect(response.body.errors[0].id).to.be('non-existent-id');
         expect(response.body.errors[0].error).to.be.an('object');
       });
@@ -171,6 +181,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(disableResponse.status).to.be(200);
         expect(disableResponse.body.rules.length).to.be(2);
+        expectNoBulkTruncationMetadata(disableResponse.body);
 
         // Re-enable the rules
         const response = await supertestWithoutAuth
@@ -184,6 +195,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.body.rules.length).to.be(2);
         expect(response.body.errors).to.be.an('array');
         expect(response.body.errors.length).to.be(0);
+        expectNoBulkTruncationMetadata(response.body);
 
         for (const rule of response.body.rules) {
           expect(rule.enabled).to.be(true);
@@ -213,6 +225,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.body.rules.length).to.be(1);
         expect(response.body.rules[0].enabled).to.be(true);
         expect(response.body.errors.length).to.be(0);
+        expectNoBulkTruncationMetadata(response.body);
       });
 
       it('should return errors for non-existent rule ids', async () => {
@@ -236,6 +249,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.body.rules[0].id).to.be(rule.id);
         expect(response.body.rules[0].enabled).to.be(true);
         expect(response.body.errors.length).to.be(1);
+        expectNoBulkTruncationMetadata(response.body);
         expect(response.body.errors[0].id).to.be('non-existent-id');
         expect(response.body.errors[0].error).to.be.an('object');
       });
@@ -271,6 +285,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(disableResponse.status).to.be(200);
         expect(disableResponse.body.rules.length).to.be(2);
+        expectNoBulkTruncationMetadata(disableResponse.body);
 
         // Verify rule 3 is still enabled
         const rule3AfterDisable = await getRule(roleAuthc, rule3.id);
@@ -286,6 +301,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(enableResponse.status).to.be(200);
         expect(enableResponse.body.rules.length).to.be(1);
         expect(enableResponse.body.rules[0].enabled).to.be(true);
+        expectNoBulkTruncationMetadata(enableResponse.body);
 
         // Final state: rule1=enabled, rule2=disabled, rule3=enabled
         const finalRule1 = await getRule(roleAuthc, rule1.id);
@@ -320,6 +336,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.status).to.be(200);
         expect(response.body.errors).to.be.an('array');
         expect(response.body.errors.length).to.be(0);
+        expectNoBulkTruncationMetadata(response.body);
 
         const disabledIds = response.body.rules.map((r: { id: string }) => r.id);
         expect(disabledIds).to.contain(alertRule1.id);
@@ -366,11 +383,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const alertRule = await createRule(roleAuthc, 'alert-enable-1', { kind: 'alert' });
 
         // Disable all rules first
-        await supertestWithoutAuth
+        const preDisable = await supertestWithoutAuth
           .post(`${RULE_API_PATH}/_bulk_disable`)
           .set(roleAuthc.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
           .send({ ids: [signalRule1.id, signalRule2.id, alertRule.id] });
+
+        expect(preDisable.status).to.be(200);
+        expectNoBulkTruncationMetadata(preDisable.body);
 
         // Enable only signal rules via filter
         const response = await supertestWithoutAuth
@@ -382,6 +402,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.status).to.be(200);
         expect(response.body.errors).to.be.an('array');
         expect(response.body.errors.length).to.be(0);
+        expectNoBulkTruncationMetadata(response.body);
 
         const enabledIds = response.body.rules.map((r: { id: string }) => r.id);
         expect(enabledIds).to.contain(signalRule1.id);
@@ -415,6 +436,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.body.rules).to.be.an('array');
         expect(response.body.rules.length).to.be(0);
         expect(response.body.errors.length).to.be(0);
+        expectNoBulkTruncationMetadata(response.body);
       });
 
       it('should return 400 when both ids and filter are provided', async () => {

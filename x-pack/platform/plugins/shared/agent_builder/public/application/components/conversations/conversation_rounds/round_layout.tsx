@@ -78,7 +78,8 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
 }) => {
   const [roundContainerMinHeight, setRoundContainerMinHeight] = useState(0);
   const [hasBeenLoading, setHasBeenLoading] = useState(false);
-  const { steps, response, input, status, pending_prompt: pendingPrompt } = rawRound;
+  const [promptResponses, setPromptResponses] = useState<Record<string, { allow: boolean }>>({});
+  const { steps, response, input, status, pending_prompts: pendingPrompts } = rawRound;
 
   const {
     isResponseLoading,
@@ -90,12 +91,13 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
 
   const isLoadingCurrentRound = isResponseLoading && isCurrentRound;
   const isErrorCurrentRound = Boolean(error) && isCurrentRound;
-  // Don't show prompt if we're already resuming (user already clicked confirm/cancel)
-  // This prevents the prompt from reappearing when server data is refetched
+  // Don't show prompts if we're already resuming (user already clicked confirm/cancel)
+  // This prevents prompts from reappearing when server data is refetched
   const isAwaitingPrompt =
     isCurrentRound &&
     status === ConversationRoundStatus.awaitingPrompt &&
-    pendingPrompt &&
+    pendingPrompts &&
+    pendingPrompts.length > 0 &&
     !isResuming;
 
   const cumulativeAttachmentRefs = useMemo(() => {
@@ -103,13 +105,24 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     return computeCumulativeRefs(allRounds, roundIndex);
   }, [allRounds, roundIndex, response?.message]);
 
-  const handleConfirm = useCallback(() => {
-    resumeRound({ promptId: pendingPrompt!.id, confirm: true });
-  }, [resumeRound, pendingPrompt]);
+  const confirmationPrompts = useMemo(
+    () => (pendingPrompts ?? []).filter(isConfirmationPrompt),
+    [pendingPrompts]
+  );
 
-  const handleCancel = useCallback(() => {
-    resumeRound({ promptId: pendingPrompt!.id, confirm: false });
-  }, [resumeRound, pendingPrompt]);
+  const handlePromptResponse = useCallback(
+    (promptId: string, allow: boolean) => {
+      setPromptResponses((prev) => {
+        const updated = { ...prev, [promptId]: { allow } };
+        const allAnswered = confirmationPrompts.every((p) => updated[p.id] !== undefined);
+        if (allAnswered) {
+          resumeRound({ prompts: updated });
+        }
+        return updated;
+      });
+    },
+    [confirmationPrompts, resumeRound]
+  );
 
   // Track if this round has ever been in a loading state during this session
   useEffect(() => {
@@ -171,17 +184,20 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
         )}
       </EuiFlexItem>
 
-      {/* Confirmation Prompt */}
-      {isAwaitingPrompt && isConfirmationPrompt(pendingPrompt) && (
-        <EuiFlexItem grow={false}>
-          <ConfirmationPrompt
-            prompt={pendingPrompt}
-            onConfirm={handleConfirm}
-            onCancel={handleCancel}
-            isLoading={isResuming}
-          />
-        </EuiFlexItem>
-      )}
+      {/* Confirmation Prompts */}
+      {isAwaitingPrompt &&
+        confirmationPrompts.map((prompt) => (
+          <EuiFlexItem grow={false} key={prompt.id}>
+            <ConfirmationPrompt
+              prompt={prompt}
+              onConfirm={() => handlePromptResponse(prompt.id, true)}
+              onCancel={() => handlePromptResponse(prompt.id, false)}
+              isLoading={isResuming}
+              isAnswered={promptResponses[prompt.id] !== undefined}
+              answeredValue={promptResponses[prompt.id]?.allow}
+            />
+          </EuiFlexItem>
+        ))}
 
       {/* Response Message - hidden when awaiting confirmation */}
       {!isAwaitingPrompt && (

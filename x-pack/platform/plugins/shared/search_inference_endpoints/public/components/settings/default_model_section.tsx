@@ -113,6 +113,7 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings }) =
         <EuiDescribedFormGroup
           data-test-subj="defaultModelSection"
           fullWidth
+          gutterSize="xl"
           title={
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem>

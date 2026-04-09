@@ -12,7 +12,7 @@ import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
 import { mockRiskScoreState } from '../../shared/mocks';
 import { HostPanelContent } from './content';
-import { mockObservedHostData } from '../mocks';
+import { mockObservedHostData, mockEntityRecord } from '../mocks';
 
 const riskScoreData = { ...mockRiskScoreState, data: [] };
 
@@ -48,6 +48,26 @@ export const Default = {
   ),
 
   name: 'default',
+};
+
+export const WithGraphVisualization = {
+  render: () => (
+    <HostPanelContent
+      observedHost={mockObservedHostData}
+      riskScoreState={riskScoreData}
+      contextID={'test-host-details'}
+      scopeId={'test-scopeId'}
+      openDetailsPanel={() => {}}
+      identityFields={{ 'host.name': 'test-host-name' }}
+      onAssetCriticalityChange={() => {}}
+      recalculatingScore={false}
+      isPreviewMode={false}
+      entityRecord={mockEntityRecord}
+      entityStoreEntityId={mockEntityRecord.entity.id}
+    />
+  ),
+
+  name: 'with graph visualization',
 };
 
 export const NoObservedData = {

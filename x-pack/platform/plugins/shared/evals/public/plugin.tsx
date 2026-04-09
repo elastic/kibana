@@ -16,6 +16,8 @@ import type {
   EvalsStartDependencies,
 } from './types';
 
+const MANAGEMENT_KEYWORDS = ['evals', 'evaluations', 'ai', 'llm', 'trace', 'tracing'] as const;
+
 export class EvalsPublicPlugin
   implements
     Plugin<EvalsPublicSetup, EvalsPublicStart, EvalsSetupDependencies, EvalsStartDependencies>
@@ -31,7 +33,7 @@ export class EvalsPublicPlugin
           defaultMessage: PLUGIN_NAME,
         }),
         order: 2,
-        keywords: ['evals', 'evaluations', 'ai', 'llm', 'trace', 'tracing'],
+        keywords: [...MANAGEMENT_KEYWORDS],
         capabilitiesId: PLUGIN_ID,
         mount: async (mountParams) => {
           const { mountManagementSection } = await import('./management_section/mount_section');

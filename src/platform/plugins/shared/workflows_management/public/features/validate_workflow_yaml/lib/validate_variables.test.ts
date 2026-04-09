@@ -8,31 +8,47 @@
  */
 
 import type { WorkflowYaml } from '@kbn/workflows';
+import { DynamicWorkflowContextSchema } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 
-// Mock the imports
 jest.mock('../../workflow_context/lib/get_context_for_path');
+jest.mock('../../workflow_context/lib/get_workflow_context_schema');
+jest.mock('../../workflow_context/lib/extend_context_with_template_locals');
 jest.mock('./validate_variable');
 jest.mock('../../../../common/lib/yaml/get_scalar_value_at_offset');
 
 import { validateVariable } from './validate_variable';
 import { validateVariables } from './validate_variables';
 import { getScalarValueAtOffset } from '../../../../common/lib/yaml/get_scalar_value_at_offset';
-import { getContextSchemaForPath } from '../../workflow_context/lib/get_context_for_path';
+import { getContextSchemaWithTemplateLocals } from '../../workflow_context/lib/extend_context_with_template_locals';
+import { getContextSchemaForStep } from '../../workflow_context/lib/get_context_for_path';
+import { getWorkflowContextSchema } from '../../workflow_context/lib/get_workflow_context_schema';
 import type { VariableItem, YamlValidationResult } from '../model/types';
 
 const mockGetScalarValueAtOffset = getScalarValueAtOffset as jest.MockedFunction<
   typeof getScalarValueAtOffset
 >;
 
-const mockGetContextSchemaForPath = getContextSchemaForPath as jest.MockedFunction<
-  typeof getContextSchemaForPath
+const mockGetContextSchemaForStep = getContextSchemaForStep as jest.MockedFunction<
+  typeof getContextSchemaForStep
 >;
+const mockGetWorkflowContextSchema = getWorkflowContextSchema as jest.MockedFunction<
+  typeof getWorkflowContextSchema
+>;
+const mockGetContextSchemaWithTemplateLocals =
+  getContextSchemaWithTemplateLocals as jest.MockedFunction<
+    typeof getContextSchemaWithTemplateLocals
+  >;
 const mockValidateVariable = validateVariable as jest.MockedFunction<typeof validateVariable>;
 
 describe('validateVariables', () => {
+  const mockStepSchema = {};
+
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetWorkflowContextSchema.mockReturnValue(DynamicWorkflowContextSchema);
+    mockGetContextSchemaForStep.mockReturnValue(mockStepSchema as any);
+    mockGetContextSchemaWithTemplateLocals.mockReturnValue(mockStepSchema as any);
   });
 
   const createVariableItem = (overrides: Partial<VariableItem> = {}): VariableItem => ({
@@ -55,11 +71,19 @@ describe('validateVariables', () => {
     triggers: [{ type: 'manual' }],
     steps: [
       {
-        name: 'Test Step',
+        name: 'step-a',
         type: 'test',
-        with: {
-          value: '{{test.variable}}',
-        },
+        with: { value: '{{test.variable}}' },
+      },
+      {
+        name: 'step-b',
+        type: 'test',
+        with: { value: '{{test.variable2}}' },
+      },
+      {
+        name: 'step-c',
+        type: 'test',
+        with: { value: '{{test.variable3}}' },
       },
     ],
   } as WorkflowYaml;
@@ -73,8 +97,7 @@ describe('validateVariables', () => {
       createVariableItem({ key: 'var3' }),
     ];
 
-    mockGetContextSchemaForPath.mockReturnValue({} as any);
-    mockValidateVariable.mockReturnValue({} as YamlValidationResult); // No errors
+    mockValidateVariable.mockReturnValue({} as YamlValidationResult);
 
     const result = validateVariables(variables, mockWorkflowGraph, mockWorkflowDefinition);
 
@@ -88,8 +111,6 @@ describe('validateVariables', () => {
       createVariableItem({ key: 'invalidVar' }),
       createVariableItem({ key: 'anotherInvalidVar' }),
     ];
-
-    mockGetContextSchemaForPath.mockReturnValue({} as any);
 
     mockValidateVariable
       .mockReturnValueOnce({
@@ -138,9 +159,11 @@ describe('validateVariables', () => {
   });
 
   it('should handle context schema errors', () => {
-    const variables = [createVariableItem({ key: 'var1', yamlPath: ['invalid', 'path'] })];
+    const variables = [
+      createVariableItem({ key: 'var1', yamlPath: ['steps', 0, 'with', 'value'] }),
+    ];
 
-    mockGetContextSchemaForPath.mockImplementation(() => {
+    mockGetContextSchemaForStep.mockImplementation(() => {
       throw new Error('Invalid path');
     });
 
@@ -159,21 +182,20 @@ describe('validateVariables', () => {
 
   it('should process mixed valid and invalid variables', () => {
     const variables = [
-      createVariableItem({ key: 'valid1' }),
-      createVariableItem({ key: 'invalid1' }),
-      createVariableItem({ key: 'valid2' }),
-      createVariableItem({ key: 'contextError' }),
-      createVariableItem({ key: 'invalid2' }),
+      createVariableItem({ key: 'valid1', yamlPath: ['steps', 0, 'with', 'a'] }),
+      createVariableItem({ key: 'invalid1', yamlPath: ['steps', 0, 'with', 'b'] }),
+      createVariableItem({ key: 'valid2', yamlPath: ['steps', 0, 'with', 'c'] }),
+      createVariableItem({ key: 'contextError', yamlPath: ['steps', 1, 'with', 'd'] }),
+      createVariableItem({ key: 'invalid2', yamlPath: ['steps', 2, 'with', 'e'] }),
     ];
 
-    mockGetContextSchemaForPath
-      .mockReturnValueOnce({} as any) // valid1
-      .mockReturnValueOnce({} as any) // invalid1
-      .mockReturnValueOnce({} as any) // valid2
+    // step-a succeeds (used by valid1, invalid1, valid2), step-b throws (contextError), step-c succeeds (invalid2)
+    mockGetContextSchemaForStep
+      .mockReturnValueOnce({} as any)
       .mockImplementationOnce(() => {
         throw new Error('Context error');
-      }) // contextError
-      .mockReturnValueOnce({} as any); // invalid2
+      })
+      .mockReturnValueOnce({} as any);
 
     mockValidateVariable
       .mockReturnValueOnce({
@@ -187,7 +209,7 @@ describe('validateVariables', () => {
         endLineNumber: 1,
         endColumn: 10,
         owner: 'variable-validation',
-      }) // valid1
+      })
       .mockReturnValueOnce({
         id: 'error-1',
         message: 'Variable invalid1 is invalid',
@@ -211,7 +233,7 @@ describe('validateVariables', () => {
         endLineNumber: 1,
         endColumn: 10,
         owner: 'variable-validation',
-      }) // valid2
+      })
       .mockReturnValueOnce({
         id: 'error-2',
         message: 'Variable invalid2 is invalid',
@@ -241,7 +263,7 @@ describe('validateVariables', () => {
     const result = validateVariables([], mockWorkflowGraph, mockWorkflowDefinition);
 
     expect(result).toEqual([]);
-    expect(mockGetContextSchemaForPath).not.toHaveBeenCalled();
+    expect(mockGetContextSchemaForStep).not.toHaveBeenCalled();
     expect(mockValidateVariable).not.toHaveBeenCalled();
   });
 
@@ -252,17 +274,15 @@ describe('validateVariables', () => {
     });
 
     const mockContext = { someSchema: true };
-    mockGetContextSchemaForPath.mockReturnValue(mockContext as any);
+    mockGetContextSchemaForStep.mockReturnValue(mockContext as any);
     mockValidateVariable.mockReturnValue({} as YamlValidationResult);
 
     validateVariables([variable], mockWorkflowGraph, mockWorkflowDefinition);
 
-    expect(mockGetContextSchemaForPath).toHaveBeenCalledWith(
-      mockWorkflowDefinition,
+    expect(mockGetContextSchemaForStep).toHaveBeenCalledWith(
+      expect.anything(),
       mockWorkflowGraph,
-      ['steps', 0, 'params', 'value'],
-      undefined,
-      0
+      'step-a'
     );
     expect(mockValidateVariable).toHaveBeenCalledWith(variable, mockContext);
   });
@@ -274,7 +294,6 @@ describe('validateVariables', () => {
       yamlPath: ['steps', 0, 'foreach'],
     });
 
-    mockGetContextSchemaForPath.mockReturnValue({} as any);
     mockValidateVariable.mockReturnValue({
       id: 'foreach-error',
       message: 'Foreach parameter can be an array or a JSON string',
@@ -309,7 +328,9 @@ describe('validateVariables', () => {
     });
     const mockModel = {
       getOffsetAt: jest.fn((pos: { lineNumber: number; column: number }) => {
-        if (pos.lineNumber === 1 && pos.column === 1) return variableOffsetInDoc;
+        if (pos.lineNumber === 1 && pos.column === 1) {
+          return variableOffsetInDoc;
+        }
         return 0;
       }),
       getValue: jest.fn(() => ''),
@@ -323,11 +344,18 @@ describe('validateVariables', () => {
         scalarStart + templateString.length,
       ],
     } as any);
-    // Use real getContextSchemaForPath so it applies template locals via getContextSchemaWithTemplateLocals
-    const { getContextSchemaForPath: realGetContextSchemaForPath } = jest.requireActual<
+    // Use real implementations so template locals are applied
+    const { getContextSchemaForStep: realGetContextSchemaForStep } = jest.requireActual<
       typeof import('../../workflow_context/lib/get_context_for_path')
     >('../../workflow_context/lib/get_context_for_path');
-    mockGetContextSchemaForPath.mockImplementation(realGetContextSchemaForPath);
+    mockGetContextSchemaForStep.mockImplementation(realGetContextSchemaForStep);
+    const { getContextSchemaWithTemplateLocals: realGetContextSchemaWithTemplateLocals } =
+      jest.requireActual<
+        typeof import('../../workflow_context/lib/extend_context_with_template_locals')
+      >('../../workflow_context/lib/extend_context_with_template_locals');
+    mockGetContextSchemaWithTemplateLocals.mockImplementation(
+      realGetContextSchemaWithTemplateLocals
+    );
     mockValidateVariable.mockReturnValue({
       ...variableItem,
       message: null,
@@ -359,7 +387,6 @@ describe('validateVariables', () => {
       offset: 0,
     });
 
-    mockGetContextSchemaForPath.mockReturnValue({} as any);
     mockValidateVariable.mockReturnValue({
       id: 'test-error',
       message: 'Test error message',

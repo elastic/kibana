@@ -10,7 +10,7 @@
 import { v4 } from 'uuid';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
-import { WORKFLOWS_AI_AGENT_SETTING_ID } from '@kbn/workflows/common/constants';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { z } from '@kbn/zod/v4';
 import type { EditResult, StepDefinition } from './yaml_edit_utils';
 import {
@@ -33,7 +33,7 @@ import type { AgentBuilderPluginSetupContract } from '../../types';
 
 const workflowEditAvailability = {
   handler: async ({ uiSettings }: { uiSettings: { get: <T>(id: string) => Promise<T> } }) => {
-    const isEnabled = await uiSettings.get<boolean>(WORKFLOWS_AI_AGENT_SETTING_ID);
+    const isEnabled = await uiSettings.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
     return isEnabled
       ? ({ status: 'available' } as const)
       : ({ status: 'unavailable', reason: 'AI workflow authoring is disabled' } as const);

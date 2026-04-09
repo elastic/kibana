@@ -2180,7 +2180,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async triggerCSVDownloadExport() {
       await this.clickExportButton();
       // simply clicking the export button is enough, to trigger the CSV download in lens
-      await exports.clickPopoverItem('CSV', this.clickExportButton);
+      await exports.clickPopoverItem('CSV', async () => {
+        await this.clickExportButton();
+        return true;
+      });
     },
 
     async setCSVDownloadDebugFlag(value: boolean = true) {

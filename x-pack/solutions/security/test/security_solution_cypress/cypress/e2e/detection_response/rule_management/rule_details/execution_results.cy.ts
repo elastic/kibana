@@ -44,8 +44,8 @@ import {
   EXECUTION_DETAILS_FLYOUT_INDEX_DURATION,
 } from '../../../../screens/rule_details';
 
-// Matches hh:mm:ss:SSS (normal) or ddd:hh:mm:ss:SSS
-const DURATION_FORMAT_REGEXP = /^\d{2}:\d{2}:\d{2}:\d{3}$|^\d{3}:\d{2}:\d{2}:\d{2}:\d{3}$/;
+// Matches duration strings like "123ms", "1s 234ms", "2m 1s 500ms", etc.
+const DURATION_FORMAT_REGEXP = /\d+(\.\d+)?(ns|ms|s|m|h|d|y)/;
 
 const TEST_INDEX = 'test-execution-results';
 
@@ -99,11 +99,11 @@ describe(
       login();
     });
 
-    it.skip('should display real execution data after the rule executes', function () {
+    it('should display real execution data after the rule executes', function () {
       visit(ruleDetailsUrl(this.ruleId));
       goToExecutionLogTab();
 
-      waitForExecutionResultsTableToBePopulated(1);
+      waitForExecutionResultsTableToBePopulated();
 
       // Table row: verify key columns have expected values
       getExecutionResultsTableRows()
@@ -128,14 +128,14 @@ describe(
         cy.get(EXECUTION_DETAILS_FLYOUT_HEADER_RUN_TYPE).should('have.text', 'Scheduled');
 
         // Alerts section
+        cy.get(EXECUTION_DETAILS_FLYOUT_CANDIDATE_COUNT).invoke('text').should('eq', '1');
         cy.get(EXECUTION_DETAILS_FLYOUT_ALERT_COUNT).invoke('text').should('eq', '1');
-        cy.get(EXECUTION_DETAILS_FLYOUT_CANDIDATE_COUNT).should('exist'); // TODO: Change to number once we start populating the field
 
         // Indices section
-        cy.get(EXECUTION_DETAILS_FLYOUT_MATCHED_INDICES).should('exist'); // TODO: Change to number once we start populating the field
+        cy.get(EXECUTION_DETAILS_FLYOUT_MATCHED_INDICES).invoke('text').should('eq', '1');
         cy.get(EXECUTION_DETAILS_FLYOUT_FROZEN_INDICES).invoke('text').should('eq', '0');
 
-        // Execution metrics section
+        // Timing section
         cy.get(EXECUTION_DETAILS_FLYOUT_GAP_DURATION).should('have.text', '—');
         cy.get(EXECUTION_DETAILS_FLYOUT_SCHEDULING_DELAY)
           .invoke('text')
@@ -144,7 +144,7 @@ describe(
           .invoke('text')
           .should('match', DURATION_FORMAT_REGEXP);
 
-        // Duration breakdown section
+        // Execution duration breakdown section
         cy.get(EXECUTION_DETAILS_FLYOUT_SEARCH_DURATION)
           .invoke('text')
           .should('match', DURATION_FORMAT_REGEXP);

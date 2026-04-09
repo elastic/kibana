@@ -11,6 +11,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
+import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { useContextOverrideData } from './use_context_override_data';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import {
@@ -37,6 +38,7 @@ export const WorkflowDetailTestStepModal = React.memo(() => {
   const { setSelectedExecution } = useWorkflowUrlState();
   const getContextOverrideData = useContextOverrideData();
   const { runIndividualStep } = useWorkflowActions();
+  const { canExecuteWorkflow } = useWorkflowsCapabilities();
 
   const workflowId = useSelector(selectWorkflowId);
   const testStepModalOpenStepId = useSelector(selectTestStepModalOpenStepId);
@@ -109,7 +111,7 @@ export const WorkflowDetailTestStepModal = React.memo(() => {
     ]
   );
 
-  if (!testStepModalOpenStepId || !contextOverride) {
+  if (!testStepModalOpenStepId || !contextOverride || !canExecuteWorkflow) {
     return null;
   }
 

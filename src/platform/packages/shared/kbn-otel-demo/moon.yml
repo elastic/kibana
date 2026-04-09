@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/dev-cli-runner'
   - '@kbn/repo-info'
   - '@kbn/object-utils'
+  - '@kbn/edot-collector'
 tags:
   - shared-server
   - package

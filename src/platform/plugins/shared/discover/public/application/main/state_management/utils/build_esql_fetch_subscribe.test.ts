@@ -249,7 +249,7 @@ describe('buildEsqlFetchSubscribe', () => {
           appState: { columns: ['field1', 'field2'] },
         });
       },
-      { timeout: 2000 }
+      { timeout: 5000 }
     );
   });
 

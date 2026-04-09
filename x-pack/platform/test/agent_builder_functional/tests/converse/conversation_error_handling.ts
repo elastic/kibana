@@ -25,12 +25,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const es = getService('es');
   const browser = getService('browser');
 
-  // Failing: See https://github.com/elastic/kibana/issues/260729
-  describe.skip('Conversation Error Handling', function () {
+  describe('Conversation Error Handling', function () {
     let llmProxy: LlmProxy;
 
     before(async () => {
       llmProxy = await createLlmProxy(log);
+      await deleteConnectors(supertest);
       await createConnector(llmProxy, supertest);
       await agentBuilder.navigateToApp();
     });
@@ -44,6 +44,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         wait_for_completion: true,
         refresh: true,
         conflicts: 'proceed',
+        ignore_unavailable: true,
       });
     });
 

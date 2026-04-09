@@ -12,12 +12,20 @@ export class OtelHostFlowPage {
 
   private readonly exploreLogsButton: Locator;
   private readonly exploreMetricsButton: Locator;
+  private readonly dataReceivedIndicator: Locator;
 
   constructor(page: Page) {
     this.page = page;
 
-    this.exploreLogsButton = this.page.getByTestId('obltOnboardingExploreLogs');
-    this.exploreMetricsButton = this.page.getByTestId('obltOnboardingExploreMetrics');
+    this.exploreLogsButton = this.page.getByTestId(
+      'observabilityOnboardingDataIngestStatusActionLink-logs'
+    );
+    this.exploreMetricsButton = this.page.getByTestId(
+      'observabilityOnboardingDataIngestStatusActionLink-metrics'
+    );
+    this.dataReceivedIndicator = this.page
+      .getByTestId('observabilityOnboardingOtelHostDataProgressIndicator')
+      .getByText('We are monitoring your host');
   }
 
   public async selectPlatform(osName: string) {
@@ -54,6 +62,13 @@ export class OtelHostFlowPage {
 
   public async clickLogsExplorationCTA() {
     await this.exploreLogsButton.click();
+  }
+
+  public async assertDataReceivedIndicator(): Promise<void> {
+    await expect(
+      this.dataReceivedIndicator,
+      'Data received indicator should be visible'
+    ).toBeVisible({ timeout: 5 * 60_000 });
   }
 
   public async assertLogsExplorationButtonVisible() {

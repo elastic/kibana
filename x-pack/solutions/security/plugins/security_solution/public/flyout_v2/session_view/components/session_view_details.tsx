@@ -20,6 +20,7 @@ import { AlertsTab } from './alerts_tab';
 import { MetadataTab } from './metadata_tab';
 import { ProcessTab } from './process_tab';
 import { useKibana } from '../../../common/lib/kibana';
+import { useDefaultDocumentFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
 
 export const SESSION_VIEW_DETAILS_TEST_ID = `${PREFIX}SessionViewDetails` as const;
 
@@ -52,6 +53,10 @@ export interface SessionViewDetailsProps {
    * Callback function to jump to a specific event in SessionView
    */
   onJumpToEvent: (event: ProcessEvent) => void;
+  /**
+   * Callback invoked after alert mutations to refresh parent flyout content.
+   */
+  onAlertUpdated: () => void;
 }
 
 /**
@@ -66,11 +71,13 @@ export const SessionViewDetails = memo(
     investigatedAlertId,
     renderCellActions,
     onJumpToEvent,
+    onAlertUpdated,
   }: SessionViewDetailsProps) => {
     const { services } = useKibana();
     const { overlays } = services;
     const store = useStore();
     const history = useHistory();
+    const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
     const onShowAlertDetails = useCallback(
       (alertId: string, alertIndex: string) => {
@@ -84,18 +91,22 @@ export const SessionViewDetails = memo(
                 documentId={alertId}
                 indexName={alertIndex}
                 renderCellActions={renderCellActions}
+                onAlertUpdated={onAlertUpdated}
               />
             ),
           }),
-          {
-            ownFocus: false,
-            resizable: true,
-            session: 'inherit',
-            size: 's',
-          }
+          { ...defaultFlyoutProperties, session: 'inherit' }
         );
       },
-      [history, overlays, renderCellActions, services, store]
+      [
+        defaultFlyoutProperties,
+        history,
+        onAlertUpdated,
+        overlays,
+        renderCellActions,
+        services,
+        store,
+      ]
     );
 
     const handleJumpToEvent = useCallback(

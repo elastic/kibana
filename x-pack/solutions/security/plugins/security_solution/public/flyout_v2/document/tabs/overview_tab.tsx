@@ -23,20 +23,28 @@ export interface OverviewTabProps {
    * Pass cell action renderer to the analyzer graph in the visualizations section of the overview tab.
    */
   renderCellActions: CellActionRenderer;
+  /**
+   * Callback invoked after alert mutations to refresh parent flyout content.
+   */
+  onAlertUpdated: () => void;
 }
 
 /**
  * Overview view displayed in the document details expandable flyout right section
  */
-export const OverviewTab = memo(({ hit, renderCellActions }: OverviewTabProps) => (
+export const OverviewTab = memo(({ hit, renderCellActions, onAlertUpdated }: OverviewTabProps) => (
   <>
     <AboutSection hit={hit} />
     <EuiHorizontalRule margin="m" />
     <InvestigationSection hit={hit} renderCellActions={renderCellActions} />
     <EuiHorizontalRule margin="m" />
-    <VisualizationsSection hit={hit} renderCellActions={renderCellActions} />
+    <VisualizationsSection
+      hit={hit}
+      renderCellActions={renderCellActions}
+      onAlertUpdated={onAlertUpdated}
+    />
     <EuiHorizontalRule margin="m" />
-    <InsightsSection hit={hit} />
+    <InsightsSection hit={hit} onAlertUpdated={onAlertUpdated} />
   </>
 ));
 

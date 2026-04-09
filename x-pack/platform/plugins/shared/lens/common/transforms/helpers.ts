@@ -50,6 +50,13 @@ export function stripInheritedContext(state: LensSerializedState): StrippedLensS
     drilldowns,
   } = state;
 
+  if (attributes) {
+    // We need to strip id and type property that were leaked into attributes by Lens embeddable logic.
+    // See https://github.com/elastic/kibana/issues/250115
+    if ('type' in attributes) delete attributes.type;
+    if ('id' in attributes) delete attributes.id;
+  }
+
   return stripUndefined({
     ref_id,
     attributes,

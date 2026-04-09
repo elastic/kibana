@@ -24,6 +24,7 @@ import {
   STREAMS_FEATURE_IDENTIFICATION_SAVED_EVENT_TYPE,
   STREAMS_FEATURE_IDENTIFICATION_DELETED_EVENT_TYPE,
   STREAMS_TAB_VISITED_EVENT_TYPE,
+  STREAMS_SIGNIFICANT_EVENTS_INSIGHT_FEEDBACK_EVENT_TYPE,
 } from './constants';
 import {
   streamsAIGrokSuggestionAcceptedSchema,
@@ -43,6 +44,7 @@ import {
   streamsFeatureIdentificationSavedSchema,
   streamsFeatureIdentificationDeletedSchema,
   streamsTabVisitedSchema,
+  streamsInsightFeedbackSchema,
 } from './schemas';
 
 const streamsAttachmentCountEventType = {
@@ -135,6 +137,11 @@ const streamsTabVisitedEventType = {
   schema: streamsTabVisitedSchema,
 };
 
+const streamsInsightFeedbackEventType = {
+  eventType: STREAMS_SIGNIFICANT_EVENTS_INSIGHT_FEEDBACK_EVENT_TYPE,
+  schema: streamsInsightFeedbackSchema,
+};
+
 export {
   streamsAttachmentCountEventType,
   streamsAttachmentClickEventType,
@@ -154,4 +161,5 @@ export {
   streamsFeatureIdentificationSavedEventType,
   streamsFeatureIdentificationDeletedEventType,
   streamsTabVisitedEventType,
+  streamsInsightFeedbackEventType,
 };

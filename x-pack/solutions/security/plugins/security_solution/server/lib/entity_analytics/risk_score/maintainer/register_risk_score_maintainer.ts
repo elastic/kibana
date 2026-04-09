@@ -6,18 +6,31 @@
  */
 
 import type { EntityStoreSetupContract } from '@kbn/entity-store/server';
+import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import { INTERVAL } from '../tasks/constants';
 import {
   createRiskScoreMaintainer,
   type RegisterRiskScoreMaintainerDeps,
 } from './risk_score_maintainer';
 
+export type RegisterRiskScoreMaintainerOptions = RegisterRiskScoreMaintainerDeps & {
+  entityStore: EntityStoreSetupContract | undefined;
+  telemetry: AnalyticsServiceSetup;
+};
+
+/**
+ * Registers the risk score maintainer with the entity store.
+ *
+ * The experimental flag (riskScoringMaintainerEnabled) gates maintainer
+ * registration at plugin startup. The UI setting (entityStoreV2Enabled)
+ * independently controls id-based scoring and entity store dual-write at
+ * runtime. Both gates are intentionally separate so the maintainer can be
+ * toggled without restarting Kibana.
+ */
 export const registerRiskScoreMaintainer = ({
   entityStore,
   ...deps
-}: RegisterRiskScoreMaintainerDeps & {
-  entityStore: EntityStoreSetupContract | undefined;
-}): void => {
+}: RegisterRiskScoreMaintainerOptions): void => {
   if (!entityStore) {
     deps.logger.info('Entity Store is unavailable; skipping risk score maintainer registration.');
     return;

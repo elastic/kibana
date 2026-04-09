@@ -23,6 +23,8 @@ import { columnPresetActions } from '@kbn/shared-ux-column-presets';
 import type { GetGapsSummaryByRuleIdsResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/get_gaps_summary_by_rule_ids';
 import moment from 'moment';
 import React, { useMemo } from 'react';
+import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { RulesTableEmptyColumnName } from './rules_table_empty_column_name';
 import type { SecurityJob } from '../../../../common/components/ml_popover/types';
 import {
@@ -36,7 +38,6 @@ import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze_badge';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
-import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { PopoverItems } from '../../../../common/components/popover_items';
 import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import {
@@ -48,7 +49,6 @@ import { RuleStatusBadge } from '../../../common/components/rule_execution_statu
 import { RuleSwitch } from '../../../common/components/rule_switch';
 import { SeverityBadge } from '../../../../common/components/severity_badge';
 import * as i18n from '../../../common/translations';
-import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details/use_rule_details_tabs';
 import type { Rule } from '../../../rule_management/logic';
 import { useRulesTableContext } from './rules_table/rules_table_context';
 import { useHasActionsPrivileges } from './use_has_actions_privileges';
@@ -67,13 +67,13 @@ import {
   gapStatusTooltipUnfilled,
   gapStatusTooltipFilled,
 } from './translations';
+import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details/use_rule_details_tabs';
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
 type GapSummaryEntry = GetGapsSummaryByRuleIdsResponseBody['data'][number];
 
 interface ColumnsProps {
-  hasCRUDPermissions: boolean;
   isLoadingJobs: boolean;
   mlJobs: SecurityJob[];
   startMlJobs: (jobIds: string[] | undefined) => Promise<void>;
@@ -87,13 +87,11 @@ interface ActionColumnsProps {
 
 const loadingActionsSet = new Set(['disable', 'enable', 'edit', 'delete', 'run', 'fill_gaps']);
 
-export const useEnabledColumn = ({
-  hasCRUDPermissions,
-  startMlJobs,
-}: ColumnsProps): TableColumn => {
+export const useEnabledColumn = ({ startMlJobs }: ColumnsProps): TableColumn => {
   const hasMlPermissions = useHasMlPermissions();
   const hasActionsPrivileges = useHasActionsPrivileges();
   const { loadingRulesAction, loadingRuleIds } = useRulesTableContext().state;
+  const canEnableDisableRules = useUserPrivileges().rulesPrivileges.enableDisable.edit;
 
   const loadingIds = useMemo(
     () => (loadingActionsSet.has(loadingRulesAction ?? '') ? loadingRuleIds : []),
@@ -111,7 +109,7 @@ export const useEnabledColumn = ({
             rule,
             hasMlPermissions,
             hasActionsPrivileges,
-            hasCRUDPermissions
+            canEnableDisableRules
           )}
         >
           <RuleSwitch
@@ -120,7 +118,7 @@ export const useEnabledColumn = ({
             startMlJobsIfNeeded={() => startMlJobs(getMachineLearningJobId(rule))}
             isDisabled={
               !canEditRuleWithActions(rule, hasActionsPrivileges) ||
-              !hasCRUDPermissions ||
+              !canEnableDisableRules ||
               (isMlRule(rule.type) && !hasMlPermissions)
             }
             isLoading={loadingIds.includes(rule.id)}
@@ -133,7 +131,7 @@ export const useEnabledColumn = ({
       maxWidth: '6em',
       sortable: true,
     }),
-    [hasMlPermissions, hasActionsPrivileges, hasCRUDPermissions, loadingIds, startMlJobs]
+    [hasMlPermissions, hasActionsPrivileges, canEnableDisableRules, loadingIds, startMlJobs]
   );
 };
 
@@ -333,7 +331,6 @@ const useActionsColumn = ({
 export interface UseColumnsProps extends ColumnsProps, ActionColumnsProps {}
 
 export const useRulesColumns = ({
-  hasCRUDPermissions,
   isLoadingJobs,
   mlJobs,
   startMlJobs,
@@ -349,7 +346,6 @@ export const useRulesColumns = ({
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
 
   const enabledColumn = useEnabledColumn({
-    hasCRUDPermissions,
     isLoadingJobs,
     mlJobs,
     startMlJobs,
@@ -414,16 +410,9 @@ export const useRulesColumns = ({
       },
       snoozeColumn,
       enabledColumn,
-      ...(hasCRUDPermissions ? [actionsColumn] : []),
-    ],
-    [
-      showRelatedIntegrations,
-      executionStatusColumn,
-      snoozeColumn,
-      enabledColumn,
-      hasCRUDPermissions,
       actionsColumn,
-    ]
+    ],
+    [showRelatedIntegrations, executionStatusColumn, snoozeColumn, enabledColumn, actionsColumn]
   );
 };
 
@@ -616,7 +605,6 @@ export const TOTAL_UNFILLED_DURATION_COLUMN = {
 };
 
 export const useMonitoringColumns = ({
-  hasCRUDPermissions,
   isLoadingJobs,
   mlJobs,
   startMlJobs,
@@ -632,7 +620,6 @@ export const useMonitoringColumns = ({
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
 
   const enabledColumn = useEnabledColumn({
-    hasCRUDPermissions,
     isLoadingJobs,
     mlJobs,
     startMlJobs,
@@ -659,14 +646,13 @@ export const useMonitoringColumns = ({
       executionStatusColumn,
       LAST_EXECUTION_COLUMN,
       enabledColumn,
-      ...(hasCRUDPermissions ? [actionsColumn] : []),
+      actionsColumn,
     ],
     [
       actionsColumn,
       enabledColumn,
       executionStatusColumn,
       gapDurationColumn,
-      hasCRUDPermissions,
       showRelatedIntegrations,
       gapStatusColumn,
     ]

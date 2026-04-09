@@ -177,7 +177,7 @@ export function MetricIndicator({ indexFields, isLoadingIndex, dataView }: Metri
               data-test-subj="timesliceMetricIndicatorAddMetricButton"
               color={'primary'}
               size="xs"
-              iconType={'plusInCircleFilled'}
+              iconType={'plusCircle'}
               onClick={handleAddMetric}
               isDisabled={disableAdd}
               aria-label={i18n.translate(

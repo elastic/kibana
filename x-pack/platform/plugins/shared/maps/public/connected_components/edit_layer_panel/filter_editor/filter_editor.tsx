@@ -197,7 +197,7 @@ export class FilterEditor extends Component<Props, State> {
         : i18n.translate('xpack.maps.layerPanel.filterEditor.addFilterButtonLabel', {
             defaultMessage: 'Set filter',
           });
-    const openButtonIcon = query && query.query ? 'pencil' : 'plusInCircleFilled';
+    const openButtonIcon = query && query.query ? 'pencil' : 'plusCircle';
 
     return (
       <EuiButtonEmpty

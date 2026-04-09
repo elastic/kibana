@@ -54,10 +54,10 @@
         "label": "GenAiSettingsConfigType",
         "description": [],
         "signature": [
-          "{ readonly showAiBreadcrumb: boolean; readonly showSpacesIntegration: boolean; readonly showAiAssistantsVisibilitySetting: boolean; readonly showChatExperienceSetting: boolean; readonly showAnonymizationProfileSettings: boolean; }"
+          "{ readonly showAiBreadcrumb: boolean; readonly showSpacesIntegration: boolean; readonly showAiAssistantsVisibilitySetting: boolean; readonly showChatExperienceSetting: boolean; }"
         ],
         "path": "x-pack/platform/plugins/private/gen_ai_settings/common/config.ts",
-        "lineNumber": 23,
+        "lineNumber": 22,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

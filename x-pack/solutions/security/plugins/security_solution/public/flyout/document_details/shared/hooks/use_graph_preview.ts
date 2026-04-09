@@ -15,8 +15,7 @@ import {
 import type { GetFieldsData } from './use_get_fields_data';
 import { getField, getFieldArray } from '../utils';
 import { useBasicDataFromDetailsData } from './use_basic_data_from_details_data';
-import { useHasGraphVisualizationLicense } from '../../../../common/hooks/use_has_graph_visualization_license';
-import { useEntityStoreStatus } from '../../../../entity_analytics/components/entity_store/hooks/use_entity_store';
+import { useShouldShowGraph } from '../../../shared/hooks/use_should_show_graph';
 
 export interface UseGraphPreviewParams {
   /**
@@ -34,6 +33,7 @@ export interface UseGraphPreviewParams {
    */
   dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
 }
+
 /**
  * Interface for the result of the useGraphPreview hook
  */
@@ -109,13 +109,6 @@ export const useGraphPreview = ({
 
   const action: string[] | undefined = get(['event', 'action'], ecsData);
 
-  // Check if user license is high enough to access graph visualization
-  const hasRequiredLicense = useHasGraphVisualizationLicense();
-
-  // Check if entity store is running
-  const { data: entityStoreStatus } = useEntityStoreStatus();
-  const isEntityStoreRunning = entityStoreStatus?.status === 'running';
-
   // Check if graph has all required data fields for graph visualization
   const hasGraphData =
     Boolean(timestamp) &&
@@ -125,7 +118,7 @@ export const useGraphPreview = ({
     targetIds.length > 0;
 
   // Combine all conditions: data availability + license + entity store running
-  const shouldShowGraph = hasGraphData && hasRequiredLicense && isEntityStoreRunning;
+  const shouldShowGraph = useShouldShowGraph() && hasGraphData;
 
   const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
 

@@ -39,7 +39,7 @@ function toGetMaintainersResponseItem(
 export function registerGetMaintainers(router: EntityStorePluginRouter) {
   router.versioned
     .get({
-      path: ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_GET,
+      path: ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_GET,
       access: 'internal',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

@@ -13,6 +13,7 @@ import type { FormValues } from '../types';
 import { deriveAlertDelayModeFromStateTransition } from '../utils/rule_request_mappers';
 import { StateTransitionCountField } from './state_transition_count_field';
 import { StateTransitionTimeframeField } from './state_transition_timeframe_field';
+import { useRuleFormMeta } from '../contexts';
 
 type DelayMode = 'immediate' | 'breaches' | 'duration';
 
@@ -60,6 +61,7 @@ const DEFAULT_PENDING_TIMEFRAME = '2m';
 
 export const AlertDelayField = () => {
   const { control, getValues, setValue } = useFormContext<FormValues>();
+  const { layout } = useRuleFormMeta();
   const stateTransition = useWatch({ control, name: 'stateTransition' });
   const selectedMode = useWatch({ control, name: 'stateTransitionAlertDelayMode' });
   const displayMode: DelayMode =
@@ -121,7 +123,7 @@ export const AlertDelayField = () => {
     >
       <>
         <EuiButtonGroup
-          buttonSize="s"
+          buttonSize={layout === 'flyout' ? 'compressed' : 's'}
           legend={i18n.translate('xpack.alertingV2.ruleForm.alertDelay.delayModeLegend', {
             defaultMessage: 'Alert delay mode',
           })}

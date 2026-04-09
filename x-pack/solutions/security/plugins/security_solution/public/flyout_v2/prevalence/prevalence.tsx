@@ -6,6 +6,7 @@
  */
 
 import dateMath from '@elastic/datemath';
+import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn, OnTimeChangeProps } from '@elastic/eui';
@@ -14,15 +15,19 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
   EuiInMemoryTable,
   EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiSuperDatePicker,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { ToolsFlyoutHeader } from '../shared/components/tools_flyout_header';
 import type { PrevalenceDetailsRow } from './utils/get_columns';
 import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana';
@@ -47,6 +52,10 @@ let isColdFrozenTierCalloutDismissedInTab = false;
 export const resetColdFrozenTierCalloutDismissedStateForTests = () => {
   isColdFrozenTierCalloutDismissedInTab = false;
 };
+
+const TITLE = i18n.translate('xpack.securitySolution.flyout.prevalence.title', {
+  defaultMessage: 'Prevalence',
+});
 
 export interface PrevalenceDetailsProps {
   /**
@@ -76,6 +85,7 @@ export const PrevalenceDetails: React.FC<PrevalenceDetailsProps> = ({
   scopeId,
   columns,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const { storage, uiSettings, serverless } = useKibana().services;
   const isServerless = !!serverless;
   const isColdAndFrozenTiersExcluded = uiSettings.get<boolean>(
@@ -255,36 +265,46 @@ export const PrevalenceDetails: React.FC<PrevalenceDetailsProps> = ({
 
   return (
     <>
-      {!error && !isPlatinumPlus && upsell}
-      <EuiPanel>
-        {!isServerless && !isColdFrozenTierCalloutDismissed && coldFrozenTierCallout}
-        <EuiSuperDatePicker
-          start={start}
-          end={end}
-          onTimeChange={onTimeChange}
-          data-test-subj={PREVALENCE_DETAILS_DATE_PICKER_TEST_ID}
-          width="full"
-        />
-        <EuiSpacer size="m" />
-        <EuiInMemoryTable
-          items={error ? [] : items}
-          columns={columns}
-          loading={loading}
-          data-test-subj={PREVALENCE_DETAILS_TABLE_TEST_ID}
-          tableCaption={i18n.translate(
-            'xpack.securitySolution.flyout.prevalence.prevalenceCaption',
-            {
-              defaultMessage: 'Prevalence insights',
+      <EuiFlyoutHeader
+        hasBorder
+        css={css`
+          padding-block-end: ${euiTheme.size.m} !important;
+        `}
+      >
+        <ToolsFlyoutHeader hit={hit} title={TITLE} />
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        {!error && !isPlatinumPlus && upsell}
+        <EuiPanel>
+          {!isServerless && !isColdFrozenTierCalloutDismissed && coldFrozenTierCallout}
+          <EuiSuperDatePicker
+            start={start}
+            end={end}
+            onTimeChange={onTimeChange}
+            data-test-subj={PREVALENCE_DETAILS_DATE_PICKER_TEST_ID}
+            width="full"
+          />
+          <EuiSpacer size="m" />
+          <EuiInMemoryTable
+            items={error ? [] : items}
+            columns={columns}
+            loading={loading}
+            data-test-subj={PREVALENCE_DETAILS_TABLE_TEST_ID}
+            tableCaption={i18n.translate(
+              'xpack.securitySolution.flyout.prevalence.prevalenceCaption',
+              {
+                defaultMessage: 'Prevalence insights',
+              }
+            )}
+            noItemsMessage={
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.prevalence.noDataDescription"
+                defaultMessage="No prevalence data available."
+              />
             }
-          )}
-          noItemsMessage={
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.prevalence.noDataDescription"
-              defaultMessage="No prevalence data available."
-            />
-          }
-        />
-      </EuiPanel>
+          />
+        </EuiPanel>
+      </EuiFlyoutBody>
     </>
   );
 };

@@ -245,6 +245,25 @@ describe('getVariablesSchema', () => {
     expect(schema.safeParse(undefined).success).toBe(true);
   });
 
+  it('uses precomputedPredecessors when provided, skipping graph traversal', () => {
+    const dataSet: MockGraphNode = {
+      id: 'setVars',
+      type: 'data.set',
+      stepType: 'data.set',
+      configuration: {
+        type: 'data.set',
+        with: { injected: 'value' },
+      },
+    };
+
+    const graph = createMockWorkflowGraph({ stepNode: undefined, predecessors: [] });
+    const schema = getVariablesSchema(graph, 'anyStep', [dataSet] as any);
+
+    expect(schema.safeParse({ injected: 'hello' }).success).toBe(true);
+    expect(graph.getStepNode).not.toHaveBeenCalled();
+    expect(graph.getAllPredecessors).not.toHaveBeenCalled();
+  });
+
   it('later data.set predecessors override earlier ones for the same key', () => {
     const stepNode: MockGraphNode = {
       id: 'myStep',

@@ -3252,4 +3252,217 @@ steps:
       expect(result.diagnostics).toEqual([]);
     });
   });
+
+  describe('disableAllWorkflows', () => {
+    it('should return zero counts when no enabled workflows exist', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0 } },
+      } as any);
+
+      const result = await service.disableAllWorkflows();
+
+      expect(result).toEqual({ total: 0, disabled: 0, failures: [] });
+    });
+
+    it('should bulk-disable all enabled workflows and unschedule tasks', async () => {
+      const enabledWorkflows = [
+        {
+          _id: 'wf-1',
+          _source: {
+            ...mockWorkflowDocument._source,
+            name: 'Workflow 1',
+            enabled: true,
+            yaml: 'name: Workflow 1\nenabled: true',
+          },
+        },
+        {
+          _id: 'wf-2',
+          _source: {
+            ...mockWorkflowDocument._source,
+            name: 'Workflow 2',
+            enabled: true,
+            yaml: 'name: Workflow 2\nenabled: true',
+          },
+        },
+      ];
+
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: enabledWorkflows, total: { value: 2 } },
+      } as any);
+
+      mockEsClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ index: { _id: 'wf-1', status: 200 } }, { index: { _id: 'wf-2', status: 200 } }],
+      } as any);
+
+      const result = await service.disableAllWorkflows();
+
+      expect(result.total).toBe(2);
+      expect(result.disabled).toBe(2);
+      expect(result.failures).toEqual([]);
+
+      expect(mockEsClient.bulk).toHaveBeenCalledTimes(1);
+      const bulkCall = mockEsClient.bulk.mock.calls[0][0] as any;
+      expect(bulkCall.refresh).toBe(true);
+
+      const docs = bulkCall.operations.filter((op: any) => op.enabled !== undefined);
+      expect(docs).toHaveLength(2);
+      expect(docs[0].enabled).toBe(false);
+      expect(docs[1].enabled).toBe(false);
+    });
+
+    it('should report failures for individual bulk operation errors', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'wf-1',
+              _source: {
+                ...mockWorkflowDocument._source,
+                enabled: true,
+                yaml: 'name: Test\nenabled: true',
+              },
+            },
+          ],
+          total: { value: 1 },
+        },
+      } as any);
+
+      mockEsClient.bulk.mockResolvedValue({
+        errors: true,
+        items: [{ index: { _id: 'wf-1', status: 500, error: { reason: 'index_closed' } } }],
+      } as any);
+
+      const result = await service.disableAllWorkflows();
+
+      expect(result.total).toBe(1);
+      expect(result.disabled).toBe(0);
+      expect(result.failures).toEqual([{ id: 'wf-1', error: 'index_closed' }]);
+    });
+
+    it('should handle bulk API errors gracefully', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'wf-1',
+              _source: {
+                ...mockWorkflowDocument._source,
+                enabled: true,
+                yaml: 'name: Test\nenabled: true',
+              },
+            },
+          ],
+          total: { value: 1 },
+        },
+      } as any);
+
+      mockEsClient.bulk.mockRejectedValue(new Error('cluster unavailable'));
+
+      const result = await service.disableAllWorkflows();
+
+      expect(result.total).toBe(1);
+      expect(result.disabled).toBe(0);
+      expect(result.failures).toEqual([{ id: 'wf-1', error: 'cluster unavailable' }]);
+    });
+
+    it('should paginate through all enabled workflows using search_after', async () => {
+      const makeHit = (id: string, sortValue: number) => ({
+        _id: id,
+        _source: {
+          ...mockWorkflowDocument._source,
+          name: `Workflow ${id}`,
+          enabled: true,
+          yaml: `name: Workflow ${id}\nenabled: true`,
+        },
+        sort: [sortValue, 0],
+      });
+
+      const page1Hits = Array.from({ length: 1000 }, (_, i) => makeHit(`wf-${i}`, 1000 - i));
+      const page2Hits = [makeHit('wf-1000', 0), makeHit('wf-1001', -1)];
+
+      mockEsClient.search
+        .mockResolvedValueOnce({
+          hits: { hits: page1Hits, total: { value: 1002 } },
+        } as any)
+        .mockResolvedValueOnce({
+          hits: { hits: page2Hits },
+        } as any);
+
+      mockEsClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [],
+      } as any);
+
+      const result = await service.disableAllWorkflows();
+
+      expect(mockEsClient.search).toHaveBeenCalledTimes(2);
+      const secondSearchCall = mockEsClient.search.mock.calls[1][0] as any;
+      expect(secondSearchCall.search_after).toEqual([1, 0]);
+
+      expect(result.total).toBe(1002);
+      expect(mockEsClient.bulk).toHaveBeenCalledTimes(2);
+    });
+
+    it("should unschedule tasks per page with only that page's disabled IDs", async () => {
+      const mockTaskScheduler = {
+        unscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
+        scheduleWorkflowTask: jest.fn(),
+      };
+      service.setTaskScheduler(mockTaskScheduler as any);
+
+      const makeHitWithSort = (id: string, sortValue: number) => ({
+        _id: id,
+        _source: {
+          ...mockWorkflowDocument._source,
+          name: `Workflow ${id}`,
+          enabled: true,
+          yaml: `name: Workflow ${id}\nenabled: true`,
+        },
+        sort: [sortValue, 0],
+      });
+
+      const page1Hits = Array.from({ length: 1000 }, (_, i) =>
+        makeHitWithSort(`wf-${i}`, 1000 - i)
+      );
+      const page2Hits = [makeHitWithSort('wf-1000', 0), makeHitWithSort('wf-1001', -1)];
+
+      mockEsClient.search
+        .mockResolvedValueOnce({ hits: { hits: page1Hits, total: { value: 1002 } } } as any)
+        .mockResolvedValueOnce({ hits: { hits: page2Hits } } as any);
+
+      const page1Items = page1Hits.map((h) => ({ index: { _id: h._id, status: 200 } }));
+      const page2Items = page2Hits.map((h) => ({ index: { _id: h._id, status: 200 } }));
+
+      mockEsClient.bulk
+        .mockResolvedValueOnce({ errors: false, items: page1Items } as any)
+        .mockResolvedValueOnce({ errors: false, items: page2Items } as any);
+
+      await service.disableAllWorkflows();
+
+      expect(mockTaskScheduler.unscheduleWorkflowTasks).toHaveBeenCalledTimes(1002);
+
+      const page1Calls = mockTaskScheduler.unscheduleWorkflowTasks.mock.calls.slice(0, 1000);
+      const page2Calls = mockTaskScheduler.unscheduleWorkflowTasks.mock.calls.slice(1000);
+
+      expect(page1Calls.map((c: any) => c[0])).toEqual(page1Hits.map((h) => h._id));
+      expect(page2Calls.map((c: any) => c[0])).toEqual(['wf-1000', 'wf-1001']);
+    });
+
+    it('should not call unschedule when no workflows were disabled', async () => {
+      const mockTaskScheduler = {
+        unscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
+        scheduleWorkflowTask: jest.fn(),
+      };
+      service.setTaskScheduler(mockTaskScheduler as any);
+
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0 } },
+      } as any);
+
+      await service.disableAllWorkflows();
+
+      expect(mockTaskScheduler.unscheduleWorkflowTasks).not.toHaveBeenCalled();
+    });
+  });
 });

@@ -17,11 +17,17 @@ interface ActionBase {
   instancesLabel?: string;
   iconColor?: string;
   stability?: StepStabilityLevel;
+  /**
+   * Ids from the root menu down through this row (for groups: path to open this group).
+   * Set in `getActionOptions` for O(1) navigation when selecting from search.
+   */
+  pathIds?: readonly string[];
 }
 
 export interface ActionGroup extends ActionBase {
   iconType: IconType;
   options: ActionOptionData[];
+  nestedGroups?: ActionGroup[];
 }
 
 export interface ActionConnectorGroup extends ActionBase {

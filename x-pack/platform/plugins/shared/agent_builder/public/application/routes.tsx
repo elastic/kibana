@@ -7,6 +7,7 @@
 
 import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { useMemo } from 'react';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
 import { AppLayout } from './components/layout/app_layout';
 import { RootRedirect } from './components/redirects/root_redirect';
@@ -24,7 +25,7 @@ export const AgentBuilderRoutes: React.FC<{}> = () => {
       <Routes>
         {enabledRoutes.map((route) => (
           <Route key={route.path} path={route.path} exact>
-            {route.element}
+            <TrackApplicationView viewId={route.viewId}>{route.element}</TrackApplicationView>
           </Route>
         ))}
 

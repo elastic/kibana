@@ -98,6 +98,8 @@ export const ModelSettings: React.FC = () => {
         data-test-subj="modelSettingsPageHeader"
         pageTitle={i18n.SETTINGS_TITLE}
         bottomBorder
+        paddingSize="none"
+        restrictWidth={true}
         rightSideItems={[
           <EuiButton
             fill
@@ -121,7 +123,12 @@ export const ModelSettings: React.FC = () => {
           </EuiButtonEmpty>,
         ]}
       />
-      <EuiPageTemplate.Section data-test-subj="modelSettingsContent">
+      <EuiSpacer size="l" />
+      <EuiPageTemplate.Section
+        paddingSize="none"
+        data-test-subj="modelSettingsContent"
+        restrictWidth={true}
+      >
         <DefaultModelSection defaultModelSettings={defaultModelSettings} />
         {disallowOtherModels ? null : (
           <>

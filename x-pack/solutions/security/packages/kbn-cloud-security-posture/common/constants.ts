@@ -108,12 +108,6 @@ export const FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings-defa
 export const CLOUD_SECURITY_PLUGIN_VERSION = '1.9.0';
 
 /**
- * Entity store latest index pattern for LOOKUP JOIN queries.
- * The <space> placeholder should be replaced with the actual space ID.
- */
-export const ENTITIES_LATEST_INDEX = '.entities.v2.latest.security_<space>';
-
-/**
  * Relationship fields available in the generic entities index.
  * These represent static/configuration-based relationships between entities.
  *

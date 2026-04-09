@@ -13,7 +13,7 @@ import {
   DEFAULT_ESQL_OPTIONS_LIST_STATE,
   MAX_OPTIONS_LIST_REQUEST_SIZE,
 } from '@kbn/controls-constants';
-import { controlSchema, dataControlSchema } from './control_schema';
+import { controlTitleSchema, dataControlSchema } from './control_schema';
 
 const SELECTIONS_MAX = 10000;
 
@@ -40,48 +40,53 @@ export const optionsListSortSchema = schema.object(
 
 export const optionsListSelectionSchema = schema.oneOf([schema.string(), schema.number()]);
 
-const optionsListControlBaseParameters = {
+const optionsListControlBaseParameters = schema.object({
   display_settings: schema.maybe(optionsListDisplaySettingsSchema),
+});
+
+export const optionsListDSLControlSchema = schema.object({
+  ...optionsListControlBaseParameters.getPropSchemas(),
+  ...dataControlSchema.getPropSchemas(),
+  exclude: schema.boolean({ defaultValue: DEFAULT_DSL_OPTIONS_LIST_STATE.exclude }),
+  exists_selected: schema.boolean({
+    defaultValue: DEFAULT_DSL_OPTIONS_LIST_STATE.exists_selected,
+  }),
+  run_past_timeout: schema.boolean({
+    defaultValue: DEFAULT_DSL_OPTIONS_LIST_STATE.run_past_timeout,
+  }),
+  search_technique: optionsListSearchTechniqueSchema,
+  selected_options: schema.arrayOf(optionsListSelectionSchema, {
+    defaultValue: DEFAULT_DSL_OPTIONS_LIST_STATE.selected_options,
+    maxSize: SELECTIONS_MAX,
+  }),
+  single_select: schema.boolean({ defaultValue: DEFAULT_DSL_OPTIONS_LIST_STATE.single_select }),
+  sort: optionsListSortSchema,
+});
+
+const baseEsqlControl = {
+  ...controlTitleSchema.getPropSchemas(),
+  ...optionsListControlBaseParameters.getPropSchemas(),
+  selected_options: schema.arrayOf(schema.string(), { maxSize: SELECTIONS_MAX }),
+  single_select: schema.boolean({ defaultValue: DEFAULT_ESQL_OPTIONS_LIST_STATE.single_select }),
+  variable_name: schema.string(),
+  variable_type: schema.oneOf([
+    schema.literal('fields'),
+    schema.literal('values'),
+    schema.literal('functions'),
+    schema.literal('time_literal'),
+    schema.literal('multi_values'),
+  ]),
 };
 
-export const optionsListDSLControlSchema = dataControlSchema
-  .extends(optionsListControlBaseParameters)
-  .extends({
-    exclude: schema.boolean({ defaultValue: DEFAULT_DSL_OPTIONS_LIST_STATE.exclude }),
-    exists_selected: schema.boolean({
-      defaultValue: DEFAULT_DSL_OPTIONS_LIST_STATE.exists_selected,
-    }),
-    run_past_timeout: schema.boolean({
-      defaultValue: DEFAULT_DSL_OPTIONS_LIST_STATE.run_past_timeout,
-    }),
-    search_technique: optionsListSearchTechniqueSchema,
-    selected_options: schema.arrayOf(optionsListSelectionSchema, {
-      defaultValue: DEFAULT_DSL_OPTIONS_LIST_STATE.selected_options,
-      maxSize: SELECTIONS_MAX,
-    }),
-    single_select: schema.boolean({ defaultValue: DEFAULT_DSL_OPTIONS_LIST_STATE.single_select }),
-    sort: optionsListSortSchema,
-  });
-
-export const optionsListESQLControlSchema = controlSchema
-  .extends(optionsListControlBaseParameters)
-  .extends({
-    selected_options: schema.arrayOf(schema.string(), { maxSize: SELECTIONS_MAX }),
-    single_select: schema.boolean({ defaultValue: DEFAULT_ESQL_OPTIONS_LIST_STATE.single_select }),
-    variable_name: schema.string(),
-    variable_type: schema.oneOf([
-      schema.literal('fields'),
-      schema.literal('values'),
-      schema.literal('functions'),
-      schema.literal('time_literal'),
-      schema.literal('multi_values'),
-    ]),
+export const optionsListESQLControlSchema = schema.discriminatedUnion('control_type', [
+  schema.object({
+    ...baseEsqlControl,
+    control_type: schema.literal('STATIC_VALUES'),
+    available_options: schema.arrayOf(schema.string(), { maxSize: MAX_OPTIONS_LIST_REQUEST_SIZE }),
+  }),
+  schema.object({
+    ...baseEsqlControl,
+    control_type: schema.literal('VALUES_FROM_QUERY'),
     esql_query: schema.string(),
-    control_type: schema.oneOf([
-      schema.literal('STATIC_VALUES'),
-      schema.literal('VALUES_FROM_QUERY'),
-    ]),
-    available_options: schema.maybe(
-      schema.arrayOf(schema.string(), { maxSize: MAX_OPTIONS_LIST_REQUEST_SIZE })
-    ),
-  });
+  }),
+]);

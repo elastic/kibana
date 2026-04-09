@@ -23,6 +23,7 @@ import {
   createRelevanceSearchTool,
   naturalLanguageSearchToolName,
 } from './inner_tools';
+import type { TopSnippetsConfig } from '../steps/extract_snippets';
 import { getSearchPrompt } from './prompts';
 import { isIndexPattern } from './target_patterns';
 import type { SearchTarget } from './types';
@@ -67,14 +68,22 @@ export const createSearchToolGraph = ({
   esClient,
   logger,
   events,
+  topSnippetsConfig,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
   logger: Logger;
   events: ToolEventEmitter;
+  topSnippetsConfig?: TopSnippetsConfig;
 }) => {
   const getTools = (state: StateType) => {
-    const relevanceTool = createRelevanceSearchTool({ model, esClient, events, logger });
+    const relevanceTool = createRelevanceSearchTool({
+      model,
+      esClient,
+      events,
+      logger,
+      topSnippetsConfig,
+    });
     const nlSearchTool = createNaturalLanguageSearchTool({
       model,
       esClient,

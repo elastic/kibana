@@ -13,3 +13,6 @@ export const MAX_DURATION = '365d';
 
 /** Minimum allowed interval for schedule.every */
 export const MIN_SCHEDULE_INTERVAL = '5s';
+
+/** Maximum rules processed in one filter-based bulk operation (select-all). */
+export const BULK_FILTER_MAX_RULES = 10_000;

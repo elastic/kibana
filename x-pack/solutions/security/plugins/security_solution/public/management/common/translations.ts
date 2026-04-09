@@ -33,6 +33,15 @@ export const EVENT_FILTERS_TAB = i18n.translate('xpack.securitySolution.eventFil
   defaultMessage: 'Event filters',
 });
 
+export const HOST_ISOLATION_EXCEPTIONS_TAB = i18n.translate(
+  'xpack.securitySolution.artifacts.tabs.hostIsolationExceptions',
+  { defaultMessage: 'Host isolation exceptions' }
+);
+
+export const BLOCKLIST_TAB = i18n.translate('xpack.securitySolution.artifacts.tabs.blocklist', {
+  defaultMessage: 'Blocklist',
+});
+
 export const OS_TITLES: Readonly<{ [K in OperatingSystem]: string }> = {
   [OperatingSystem.WINDOWS]: i18n.translate('xpack.securitySolution.administration.os.windows', {
     defaultMessage: 'Windows',

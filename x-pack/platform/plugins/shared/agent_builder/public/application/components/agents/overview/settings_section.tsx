@@ -41,6 +41,7 @@ export interface SettingsSectionProps {
   currentInstructions: string;
   showWorkflowSection: boolean;
   workflowIds: string[];
+  canEditAgent: boolean;
   onOpenEditFlyout: () => void;
 }
 
@@ -49,6 +50,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
   currentInstructions,
   showWorkflowSection,
   workflowIds,
+  canEditAgent,
   onOpenEditFlyout,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -80,7 +82,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                 {currentInstructions || overviewLabels.customInstructionsOnboardingText}
               </EuiText>
             </div>
-            {!currentInstructions && (
+            {!currentInstructions && canEditAgent ? (
               <EuiButtonEmpty
                 size="s"
                 flush="left"
@@ -89,7 +91,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
               >
                 {overviewLabels.addInstructionsLink}
               </EuiButtonEmpty>
-            )}
+            ) : null}
           </EuiPanel>
         </EuiFlexItem>
 

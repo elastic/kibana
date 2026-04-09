@@ -6,34 +6,18 @@
  */
 
 import expect from '@kbn/expect';
-import type SuperTest from 'supertest';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { AgentBuilderUiFtrProviderContext } from '../../../agent_builder/services/functional';
 import { createTestMcpServer, type McpServerSimulator } from '../../utils/mcp_server_simulator';
 import { createMcpConnector, deleteConnectors } from '../../utils/connector_helpers';
-
-const TOOL_PREFIX = 'ftr.mcp.';
-
-async function deleteToolsByPrefix(supertest: SuperTest.Agent, prefix: string): Promise<void> {
-  const response = await supertest.get('/api/agent_builder/tools').expect(200);
-  const tools = response.body.results || [];
-
-  await Promise.allSettled(
-    tools
-      .filter((tool: { id: string }) => tool.id.startsWith(prefix))
-      .map((tool: { id: string }) =>
-        supertest.delete(`/api/agent_builder/tools/${tool.id}`).set('kbn-xsrf', 'true')
-      )
-  );
-}
+import { deleteAllTools } from '../../utils/tool_helpers';
 
 export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProviderContext) {
   const { agentBuilder } = getPageObjects(['agentBuilder']);
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
 
-  // Failing: See https://github.com/elastic/kibana/issues/248906
-  describe.skip('MCP tools', function () {
+  describe('MCP tools', function () {
     let mcpServer: McpServerSimulator;
     let mcpServerUrl: string;
     let connectorId: string;
@@ -50,13 +34,13 @@ export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProvid
 
     after(async () => {
       await deleteConnectors(supertest);
-      await deleteToolsByPrefix(supertest, TOOL_PREFIX);
+      await deleteAllTools(supertest);
       await mcpServer.stop();
     });
 
     describe('creating MCP tools', function () {
       it('should create an MCP tool by selecting connector and tool', async () => {
-        const toolId = `${TOOL_PREFIX}create.${Date.now()}`;
+        const toolId = `ftr.mcp.${Date.now()}`;
 
         await agentBuilder.navigateToNewTool();
         await testSubjects.existOrFail('agentBuilderToolFormPage');
@@ -91,7 +75,7 @@ export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProvid
 
     describe('editing MCP tools', function () {
       it('should edit an MCP tool description', async () => {
-        const toolId = `${TOOL_PREFIX}edit.${Date.now()}`;
+        const toolId = `ftr.mcp.edit.${Date.now()}`;
         const newDescription = 'Updated MCP tool description';
 
         // Create tool via API
@@ -126,8 +110,8 @@ export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProvid
 
     describe('cloning MCP tools', function () {
       it('should clone an MCP tool and select a different server tool (add)', async () => {
-        const sourceToolId = `${TOOL_PREFIX}clone.source.${Date.now()}`;
-        const clonedToolId = `${TOOL_PREFIX}clone.copy.${Date.now()}`;
+        const sourceToolId = `ftr.mcp.clone.source.${Date.now()}`;
+        const clonedToolId = `ftr.mcp.clone.copy.${Date.now()}`;
 
         // Create source tool via API (using 'add' tool)
         await supertest
@@ -170,7 +154,7 @@ export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProvid
 
     describe('deleting MCP tools', function () {
       it('should delete an MCP tool', async () => {
-        const toolId = `${TOOL_PREFIX}delete.${Date.now()}`;
+        const toolId = `ftr.mcp.delete.${Date.now()}`;
 
         // Create tool via API
         await supertest
@@ -205,7 +189,7 @@ export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProvid
 
     describe('executing MCP tools', function () {
       it('should execute the add tool and receive correct result', async () => {
-        const toolId = `${TOOL_PREFIX}execute.${Date.now()}`;
+        const toolId = `ftr.mcp.execute.${Date.now()}`;
 
         // Create tool via API using the 'add' tool
         await supertest
@@ -249,7 +233,7 @@ export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProvid
 
     describe('bulk importing MCP tools', function () {
       it('should bulk import MCP tools via the UI', async () => {
-        const namespace = `${TOOL_PREFIX}bulk.${Date.now()}`;
+        const namespace = `ftr.mcp.bulk.${Date.now()}`;
 
         // Navigate to bulk import page via the Manage MCP menu
         await agentBuilder.navigateToToolsLanding();

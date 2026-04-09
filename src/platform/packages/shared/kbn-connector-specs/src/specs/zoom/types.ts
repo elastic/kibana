@@ -108,8 +108,10 @@ export const ZoomListMeetingsInputSchema = z.object({
   type: z
     .enum(['scheduled', 'live', 'upcoming', 'upcoming_meetings', 'previous_meetings'])
     .default('upcoming')
-    .describe('Meeting type filter'),
-  pageSize: z.number().min(1).max(300).optional().describe('Number of results per page'),
+    .describe(
+      'Meeting type filter. Values: scheduled (all scheduled meetings), live (in-progress), upcoming (default, future meetings), upcoming_meetings (similar to upcoming), previous_meetings (past meetings).'
+    ),
+  pageSize: z.number().min(1).max(300).optional().describe('Number of results per page (1-300)'),
   nextPageToken: z.string().optional().describe('Pagination token from a previous response'),
 });
 export type ZoomListMeetingsInput = z.infer<typeof ZoomListMeetingsInputSchema>;
@@ -136,7 +138,7 @@ export const ZoomListUserRecordingsInputSchema = z.object({
     .describe('User ID or email. Use "me" for the authenticated user.'),
   from: z.string().optional().describe('Start date (YYYY-MM-DD). Defaults to current date.'),
   to: z.string().optional().describe('End date (YYYY-MM-DD). Range cannot exceed 1 month.'),
-  pageSize: z.number().min(1).max(300).optional().describe('Number of results per page'),
+  pageSize: z.number().min(1).max(300).optional().describe('Number of results per page (1-300)'),
   nextPageToken: z.string().optional().describe('Pagination token from a previous response'),
 });
 export type ZoomListUserRecordingsInput = z.infer<typeof ZoomListUserRecordingsInputSchema>;
@@ -161,18 +163,18 @@ export type ZoomDownloadRecordingFileInput = z.infer<typeof ZoomDownloadRecordin
 
 export const ZoomGetMeetingParticipantsInputSchema = z.object({
   meetingId: z.string().describe('Past meeting ID or UUID'),
-  pageSize: z.number().min(1).max(300).optional().describe('Number of results per page'),
+  pageSize: z.number().min(1).max(300).optional().describe('Number of results per page (1-300)'),
   nextPageToken: z.string().optional().describe('Pagination token from a previous response'),
 });
 export type ZoomGetMeetingParticipantsInput = z.infer<typeof ZoomGetMeetingParticipantsInputSchema>;
 
 export const ZoomGetMeetingRegistrantsInputSchema = z.object({
-  meetingId: z.string().describe('Meeting ID'),
+  meetingId: z.string().describe('Meeting ID or UUID'),
   status: z
     .enum(['pending', 'approved', 'denied'])
     .optional()
     .describe('Filter by registration status. Defaults to approved.'),
-  pageSize: z.number().min(1).max(300).optional().describe('Number of results per page'),
+  pageSize: z.number().min(1).max(300).optional().describe('Number of results per page (1-300)'),
   nextPageToken: z.string().optional().describe('Pagination token from a previous response'),
 });
 export type ZoomGetMeetingRegistrantsInput = z.infer<typeof ZoomGetMeetingRegistrantsInputSchema>;

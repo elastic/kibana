@@ -232,6 +232,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const dissectMetrics = processorsMetrics['dissect-uuid'];
         const grokMetrics = processorsMetrics.draft;
 
+        if (!dissectMetrics || !grokMetrics) {
+          throw new Error('Expected metrics for dissect and grok processors');
+        }
+
         expect(dissectMetrics.detected_fields).to.eql([
           'attributes.parsed_level',
           'attributes.parsed_message',
@@ -289,6 +293,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const dissectMetrics = processorsMetrics['dissect-uuid'];
         const grokMetrics = processorsMetrics.draft;
 
+        if (!dissectMetrics || !grokMetrics) {
+          throw new Error('Expected metrics for dissect and grok processors');
+        }
+
         expect(dissectMetrics.failed_rate).to.be(0.25);
         expect(dissectMetrics.parsed_rate).to.be(0.75);
         expect(grokMetrics.failed_rate).to.be(0.75);
@@ -322,6 +330,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const processorsMetrics = response.body.processors_metrics;
         const dissectMetrics = processorsMetrics['dissect-uuid'];
+
+        if (!dissectMetrics) {
+          throw new Error('Expected metrics for dissect processor');
+        }
 
         expect(dissectMetrics.failed_rate).to.be(0);
         expect(dissectMetrics.parsed_rate).to.be(0.25);
@@ -410,6 +422,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const processorsMetrics = response.body.processors_metrics;
         const grokMetrics = processorsMetrics.draft;
 
+        if (!grokMetrics) {
+          throw new Error('Expected metrics for grok processor');
+        }
+
         expect(grokMetrics.errors).to.eql([
           {
             processor_id: 'draft',
@@ -465,6 +481,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
           const processorsMetrics = response.body.processors_metrics;
           const processorMetrics = processorsMetrics.draft;
+
+          if (!processorMetrics) {
+            throw new Error('Expected metrics for draft processor');
+          }
 
           expect(processorMetrics.errors).to.eql([
             {

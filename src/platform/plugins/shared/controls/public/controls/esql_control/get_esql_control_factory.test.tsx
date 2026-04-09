@@ -51,7 +51,6 @@ describe('ESQLControlApi', () => {
       available_options: ['option1', 'option2'],
       variable_name: 'variable1',
       variable_type: 'values',
-      esql_query: 'FROM foo | WHERE column = ?variable1',
       control_type: 'STATIC_VALUES',
     };
     const { api } = await factory.buildEmbeddable({
@@ -78,8 +77,7 @@ describe('ESQLControlApi', () => {
       available_options: ['option1', 'option2'],
       variable_name: 'variable1',
       variable_type: 'values',
-      esql_query: 'FROM foo | WHERE column = ?variable1',
-      control_type: 'STATIC_VALUES',
+      control_type: EsqlControlType.STATIC_VALUES,
     };
     const { api } = await factory.buildEmbeddable({
       initializeDrilldownsManager: jest.fn(),
@@ -91,7 +89,6 @@ describe('ESQLControlApi', () => {
     expect(api.serializeState()).toStrictEqual({
       available_options: ['option1', 'option2'],
       control_type: 'STATIC_VALUES',
-      esql_query: 'FROM foo | WHERE column = ?variable1',
       selected_options: ['option1'],
       title: undefined,
       variable_name: 'variable1',
@@ -105,7 +102,6 @@ describe('ESQLControlApi', () => {
       const initialState: OptionsListESQLControlState = {
         ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
         selected_options: ['option1'],
-        available_options: ['option1', 'option2'],
         variable_name: 'variable1',
         variable_type: 'values',
         esql_query: 'FROM foo | STATS BY column',
@@ -171,7 +167,6 @@ describe('ESQLControlApi', () => {
         available_options: ['option1', 'option2'],
         variable_name: 'variable1',
         variable_type: 'values',
-        esql_query: 'FROM foo | WHERE column = ?variable1',
         control_type: 'STATIC_VALUES',
       };
       const { Component, api } = await factory.buildEmbeddable({

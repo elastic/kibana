@@ -33,3 +33,11 @@ export const EnhancedAlertFlyoutHeaderLazy = withSuspense(
     }))
   )
 );
+
+export const EnhancedAlertFlyoutFooterLazy = withSuspense(
+  lazy(() =>
+    import('./enhanced_alert_flyout_footer').then((module) => ({
+      default: module.EnhancedAlertFlyoutFooter,
+    }))
+  )
+);

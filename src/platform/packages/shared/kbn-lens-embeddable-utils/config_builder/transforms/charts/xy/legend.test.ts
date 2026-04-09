@@ -9,7 +9,6 @@
 
 import type { XYState } from '../../../schema';
 import { convertLegendToAPIFormat, convertLegendToStateFormat } from './legend';
-import { LegendLayout } from '@kbn/chart-expressions-common';
 import type { XYVisualizationState } from '@kbn/lens-common';
 
 describe('XY Legend Transforms', () => {
@@ -34,23 +33,6 @@ describe('XY Legend Transforms', () => {
 
   const cases: readonly LegendCase[] = [
     {
-      title: 'outside bottom list legend persists truncate.max_pixels',
-      state: {
-        isVisible: true,
-        shouldTruncate: true,
-        position: 'bottom',
-        layout: LegendLayout.List,
-        maxPixels: 320,
-      },
-      api: {
-        visibility: 'visible',
-        placement: 'outside',
-        position: 'bottom',
-        layout: { type: 'list', truncate: { max_pixels: 320 } },
-      },
-      forbiddenApiPaths: ['layout.truncate.max_lines'],
-    },
-    {
       title: 'inside grid legend persists truncate.max_lines',
       state: {
         isVisible: true,
@@ -70,22 +52,6 @@ describe('XY Legend Transforms', () => {
         layout: { type: 'grid', truncate: { max_lines: 2 } },
       },
       forbiddenApiPaths: ['layout.truncate.max_pixels'],
-    },
-    {
-      title: 'outside top list legend persists default truncate.max_pixels = 250',
-      state: {
-        isVisible: true,
-        shouldTruncate: true,
-        position: 'top',
-        layout: LegendLayout.List,
-      },
-      api: {
-        visibility: 'visible',
-        placement: 'outside',
-        position: 'top',
-        layout: { type: 'list', truncate: { max_pixels: 250 } },
-      },
-      forbiddenApiPaths: ['layout.truncate.max_lines'],
     },
     {
       title: 'outside right grid legend persists truncate.max_lines',

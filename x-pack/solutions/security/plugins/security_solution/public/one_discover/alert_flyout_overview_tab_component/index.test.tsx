@@ -33,6 +33,14 @@ jest.mock('../../common/components/discover_in_timeline/provider', () => ({
   ),
 }));
 
+jest.mock('../../cases/components/provider/provider', () => ({
+  CaseProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
+jest.mock('../../assistant/provider', () => ({
+  AssistantProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
 const mockUseInitDataViewManager = jest.fn();
 jest.mock('../../data_view_manager/hooks/use_init_data_view_manager', () => ({
   useInitDataViewManager: () => mockUseInitDataViewManager(),
@@ -45,6 +53,7 @@ jest.mock('../../common/hooks/use_experimental_features', () => ({
 }));
 
 describe('AlertFlyoutOverviewTab', () => {
+  const onAlertUpdated = jest.fn();
   const servicesMock = {
     core: { overlays: {} },
     uiActions: {
@@ -94,6 +103,7 @@ describe('AlertFlyoutOverviewTab', () => {
           hit={hit}
           servicesPromise={servicesPromise}
           storePromise={storePromise}
+          onAlertUpdated={onAlertUpdated}
         />
       );
     });
@@ -139,6 +149,7 @@ describe('AlertFlyoutOverviewTab', () => {
           hit={hit}
           servicesPromise={servicesPromise}
           storePromise={storePromise}
+          onAlertUpdated={onAlertUpdated}
         />
       );
       await servicesPromise;
@@ -174,6 +185,7 @@ describe('AlertFlyoutOverviewTab', () => {
           hit={hit}
           servicesPromise={servicesPromise}
           storePromise={storePromise}
+          onAlertUpdated={onAlertUpdated}
         />
       );
       await Promise.resolve();
@@ -205,6 +217,7 @@ describe('AlertFlyoutOverviewTab', () => {
           hit={hit}
           servicesPromise={servicesPromise}
           storePromise={storePromise}
+          onAlertUpdated={onAlertUpdated}
         />
       );
       await Promise.resolve();
@@ -241,6 +254,7 @@ describe('AlertFlyoutOverviewTab', () => {
           hit={hit}
           servicesPromise={servicesPromise}
           storePromise={Promise.resolve(storeLoading as never)}
+          onAlertUpdated={onAlertUpdated}
         />
       );
       await Promise.resolve();
@@ -252,6 +266,7 @@ describe('AlertFlyoutOverviewTab', () => {
           hit={hit}
           servicesPromise={servicesPromise}
           storePromise={Promise.resolve(storeReady as never)}
+          onAlertUpdated={onAlertUpdated}
         />
       );
       await Promise.resolve();
@@ -279,6 +294,7 @@ describe('AlertFlyoutOverviewTab', () => {
           hit={hit}
           servicesPromise={Promise.resolve(servicesMock)}
           storePromise={Promise.resolve(store as never)}
+          onAlertUpdated={onAlertUpdated}
         />
       </Router>
     );

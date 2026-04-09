@@ -68,6 +68,7 @@ function calculateProcessorFailureRates(
 
   if (simulation.processors_metrics) {
     for (const [processorId, metrics] of Object.entries(simulation.processors_metrics)) {
+      if (!metrics) continue;
       failureRates[processorId] = metrics.failed_rate;
     }
   }

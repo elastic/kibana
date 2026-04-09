@@ -148,6 +148,22 @@ export const cleanupSavedQuery = (id: string) => {
   });
 };
 
+export const cleanupSavedQueryByName = (name: string) => {
+  request<{ data: SavedQuerySO[] }>({
+    method: 'GET',
+    url: `/api/osquery/saved_queries?id=${encodeURIComponent(name)}&pageSize=1`,
+    headers: {
+      'Elastic-Api-Version': API_VERSIONS.public.v1,
+    },
+    failOnStatusCode: false,
+  }).then((response) => {
+    const match = response.body?.data?.[0];
+    if (match?.saved_object_id) {
+      cleanupSavedQuery(match.saved_object_id);
+    }
+  });
+};
+
 export const loadPack = (payload: Partial<PackItem> = {}, space = 'default') =>
   request<{ data: PackSavedObject }>({
     method: 'POST',

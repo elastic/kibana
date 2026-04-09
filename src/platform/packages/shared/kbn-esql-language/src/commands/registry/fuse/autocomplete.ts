@@ -24,6 +24,7 @@ import { ESQL_STRING_TYPES } from '../../definitions/types';
 import { columnExists, findFinalWord } from '../../definitions/utils/autocomplete/helpers';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
+import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 import {
   extractFuseArgs,
   findCommandOptionByName,
@@ -213,7 +214,6 @@ async function withOptionAutocomplete(innerText: string, command: ESQLAstFuseCom
         kind: 'Reference',
         detail: '{ ... }',
         text: '{ $0 }',
-        sortText: '0',
         asSnippet: true,
       }),
     ];
@@ -230,7 +230,6 @@ async function withOptionAutocomplete(innerText: string, command: ESQLAstFuseCom
             label: '60',
             text: '60',
             kind: 'Value',
-            sortText: '1',
             detail: i18n.translate(
               'kbn-esql-language.esql.autocomplete.fuse.rank_constant_default',
               {
@@ -275,7 +274,7 @@ function fuseArgumentsAutocomplete(command: ESQLAstFuseCommand): ISuggestionItem
           defaultMessage: 'Linear combination of scores',
         }),
         text: 'linear ',
-        sortText: '0',
+        category: SuggestionCategory.VALUE,
       },
       {
         label: 'rrf',
@@ -284,7 +283,7 @@ function fuseArgumentsAutocomplete(command: ESQLAstFuseCommand): ISuggestionItem
           defaultMessage: 'Reciprocal rank fusion',
         }),
         text: 'rrf ',
-        sortText: '0',
+        category: SuggestionCategory.VALUE,
       }
     );
   }
@@ -298,7 +297,6 @@ function fuseArgumentsAutocomplete(command: ESQLAstFuseCommand): ISuggestionItem
           'Defaults to _score. Designates which column to use to retrieve the relevance scores of the input',
       }),
       text: 'SCORE BY ',
-      sortText: '1',
     });
   }
 
@@ -310,7 +308,6 @@ function fuseArgumentsAutocomplete(command: ESQLAstFuseCommand): ISuggestionItem
         defaultMessage: 'Defaults to _fork. Designates which column represents the result set',
       }),
       text: 'GROUP BY ',
-      sortText: '2',
     });
   }
 
@@ -322,12 +319,11 @@ function fuseArgumentsAutocomplete(command: ESQLAstFuseCommand): ISuggestionItem
         defaultMessage: 'Defaults to _id, _index. Rows with matching key_columns values are merged',
       }),
       text: 'KEY BY ',
-      sortText: '3',
     });
   }
 
   if (!withOption) {
-    suggestions.push({ ...withCompleteItem, sortText: '4' });
+    suggestions.push(withCompleteItem);
   }
 
   return suggestions.map((s) => withAutoSuggest(s));

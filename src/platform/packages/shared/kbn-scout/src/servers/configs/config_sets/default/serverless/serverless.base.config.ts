@@ -11,7 +11,7 @@ import { resolve, join } from 'path';
 import { format as formatUrl } from 'url';
 import Fs from 'fs';
 
-import { CA_CERT_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
+import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
 import {
   fleetPackageRegistryDockerImage,
   defineDockerServersConfig,
@@ -19,8 +19,11 @@ import {
 import { getDockerFileMountPath } from '@kbn/es';
 import {
   MOCK_IDP_REALM_NAME,
+  MOCK_IDP_UIAM_CLOUD_ID,
   MOCK_IDP_UIAM_ORGANIZATION_ID,
   MOCK_IDP_UIAM_PROJECT_ID,
+  MOCK_IDP_UIAM_SERVICE_URL,
+  MOCK_IDP_UIAM_SHARED_SECRET,
 } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ScoutServerConfig } from '../../../../../types';
@@ -36,6 +39,9 @@ const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/
  * if this is defined it takes precedence over the `packageRegistryOverride` variable
  */
 const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
+
+// Indicates whether the config is used on CI or locally.
+const isRunOnCI = process.env.CI;
 
 const servers = {
   elasticsearch: {
@@ -94,6 +100,7 @@ export const defaultConfig: ScoutServerConfig = {
     ],
     ssl: true, // SSL is required for SAML realm
   },
+  esServerlessOptions: { uiam: true },
   kbnTestServer: {
     buildArgs: [],
     env: {
@@ -150,7 +157,7 @@ export const defaultConfig: ScoutServerConfig = {
       '--xpack.cloud.base_url=https://fake-cloud.elastic.co',
       '--xpack.cloud.billing_url=/billing/overview/',
       '--xpack.cloud.deployments_url=/deployments',
-      '--xpack.cloud.id=ftr_fake_cloud_id',
+      `--xpack.cloud.id=${MOCK_IDP_UIAM_CLOUD_ID}`,
       `--xpack.cloud.organization_id=${MOCK_IDP_UIAM_ORGANIZATION_ID}`,
       '--xpack.cloud.organization_url=/account/',
       '--xpack.cloud.profile_url=/user/settings/',
@@ -194,6 +201,13 @@ export const defaultConfig: ScoutServerConfig = {
           ],
         },
       ])}`,
+      ...(isRunOnCI ? [] : ['--mockIdpPlugin.uiam.enabled=true']),
+      `--xpack.security.uiam.enabled=true`,
+      `--xpack.security.uiam.url=${MOCK_IDP_UIAM_SERVICE_URL}`,
+      `--xpack.security.uiam.sharedSecret=${MOCK_IDP_UIAM_SHARED_SECRET}`,
+      `--xpack.security.uiam.ssl.certificate=${KBN_CERT_PATH}`,
+      `--xpack.security.uiam.ssl.key=${KBN_KEY_PATH}`,
+      '--xpack.security.uiam.ssl.verificationMode=none',
     ],
   },
 };

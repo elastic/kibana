@@ -22,6 +22,7 @@ import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { AnalyzerGraph } from '../../analyzer';
 import { useSessionViewConfig } from '../../session_view/hooks/use_session_view_config';
 import { SessionView } from '../../session_view';
+import { defaultToolsFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
 
 export const VISUALIZATION_SECTION_TEST_ID = `${PREFIX}Visualizations` as const;
 
@@ -43,6 +44,10 @@ export interface VisualizationsSectionProps {
    * Optional prop to pass cell action renderer to the analyzer graph.
    */
   renderCellActions: CellActionRenderer;
+  /**
+   * Callback invoked after alert mutations to refresh parent flyout content.
+   */
+  onAlertUpdated: () => void;
 }
 
 /**
@@ -50,7 +55,7 @@ export interface VisualizationsSectionProps {
  * It contains analyzer preview and session view preview.
  */
 export const VisualizationsSection = memo(
-  ({ hit, renderCellActions }: VisualizationsSectionProps) => {
+  ({ hit, renderCellActions, onAlertUpdated }: VisualizationsSectionProps) => {
     const { services } = useKibana();
     const { overlays } = services;
     const store = useStore();
@@ -70,16 +75,17 @@ export const VisualizationsSection = memo(
             services,
             store,
             history,
-            children: <AnalyzerGraph hit={hit} renderCellActions={renderCellActions} />,
+            children: (
+              <AnalyzerGraph
+                hit={hit}
+                renderCellActions={renderCellActions}
+                onAlertUpdated={onAlertUpdated}
+              />
+            ),
           }),
-          {
-            ownFocus: false,
-            resizable: true,
-            size: 'm',
-            type: 'overlay',
-          }
+          { ...defaultToolsFlyoutProperties }
         ),
-      [history, hit, overlays, renderCellActions, services, store]
+      [history, hit, onAlertUpdated, overlays, renderCellActions, services, store]
     );
     const onShowSessionView = useCallback(
       () =>
@@ -94,19 +100,16 @@ export const VisualizationsSection = memo(
                 jumpToCursor={sessionViewConfig?.jumpToCursor}
                 jumpToEntityId={sessionViewConfig?.jumpToEntityId}
                 renderCellActions={renderCellActions}
+                onAlertUpdated={onAlertUpdated}
               />
             ),
           }),
-          {
-            ownFocus: false,
-            resizable: true,
-            size: 'm',
-            type: 'overlay',
-          }
+          { ...defaultToolsFlyoutProperties }
         ),
       [
         history,
         hit,
+        onAlertUpdated,
         overlays,
         renderCellActions,
         services,

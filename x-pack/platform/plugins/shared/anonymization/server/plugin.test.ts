@@ -14,6 +14,16 @@ import { ProfilesRepository } from './repository';
 import type { AnonymizationProfile, AnonymizationEntityClass } from '@kbn/anonymization-common';
 import type { AnonymizationProfileInitializer } from './types';
 
+// Allow tests to control ANONYMIZATION_FEATURE_ACTIVE per test via createPlugin(active)
+// without exposing any production config option.
+let mockFeatureActive = true;
+jest.mock('@kbn/anonymization-common', () => ({
+  ...jest.requireActual('@kbn/anonymization-common'),
+  get ANONYMIZATION_FEATURE_ACTIVE() {
+    return mockFeatureActive;
+  },
+}));
+
 jest.mock('./system_index', () => ({
   ensureProfilesIndex: jest.fn().mockResolvedValue(undefined),
 }));
@@ -31,8 +41,8 @@ const initializationMock = jest.requireMock('./initialization') as {
 };
 
 const createPlugin = (active = true) => {
+  mockFeatureActive = active;
   const initializerContext = coreMock.createPluginInitializerContext();
-  (initializerContext.config.get as jest.Mock).mockReturnValue({ active });
   return new AnonymizationPlugin(initializerContext);
 };
 
@@ -69,6 +79,7 @@ const createProfile = ({
 
 describe('AnonymizationPlugin policy resolution', () => {
   afterEach(() => {
+    mockFeatureActive = true;
     jest.clearAllMocks();
     jest.restoreAllMocks();
   });

@@ -19,10 +19,12 @@ import type {
 import type { SavedObjectReference } from '@kbn/core/server';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 import { getValueColumn } from '../../columns/esql_column';
+import { toLensStateFilterLanguage } from '../../columns/filter';
 import type {
   DataLayerType,
   ReferenceLineLayerType,
   AnnotationLayerByValueType,
+  XYState,
 } from '../../../schema/charts/xy';
 import { addLayerColumn, generateLayer } from '../../utils';
 import {
@@ -33,6 +35,7 @@ import {
   getIdForLayer,
   getAccessorNameForXY,
   isAPIDataLayer,
+  xyIconCompat,
 } from './helpers';
 import { fromMetricAPItoLensState } from '../../columns/metric';
 import { fromBucketLensApiToLensState } from '../../columns/buckets';
@@ -75,15 +78,21 @@ export function getValueColumns(
   ];
 }
 
-function buildDataLayer(layer: DataLayerType, i: number): XYDataLayerConfig {
+function buildDataLayer(config: XYState, layer: DataLayerType, i: number): XYDataLayerConfig {
   const seriesTypeLabel = (
     layer.type.includes('percentage') ? `${layer.type}_stacked` : layer.type
   ) as SeriesType;
-  const yConfig = layer.y.map<YConfig>((yMetric, index) => ({
-    ...(yMetric.color?.color ? { color: yMetric.color?.color } : {}),
-    ...(yMetric.axis ? { axisMode: yMetric.axis } : {}),
-    forAccessor: getAccessorNameForXY(layer, METRIC_ACCESSOR_PREFIX, index),
-  }));
+
+  const yConfig = layer.y.map<YConfig>((yMetric, index) => {
+    const axisId = yMetric?.axis_id ?? 'y';
+    const anchor = config.axis?.[axisId]?.anchor ?? (axisId === 'secondary_y' ? 'end' : 'start');
+    const axisMode = anchor === 'end' ? 'right' : 'left';
+    return {
+      ...(yMetric.color?.color ? { color: yMetric.color?.color } : {}),
+      axisMode,
+      forAccessor: getAccessorNameForXY(layer, METRIC_ACCESSOR_PREFIX, index),
+    };
+  });
   const meaningFulYConfig = yConfig.filter((y) => Object.values(y).length > 1);
   return {
     layerId: getIdForLayer(layer, i),
@@ -142,7 +151,7 @@ function buildByValueAnnotationLayer(
           label: annotation.label ?? 'Event',
           ...(annotation.visible != null ? { isHidden: !annotation.visible } : {}),
           ...(annotation.text?.visible != null ? { textVisibility: annotation.text.visible } : {}),
-          ...(annotation.icon ? { icon: annotation.icon } : {}),
+          ...(annotation.icon ? { icon: xyIconCompat.toState(annotation.icon) } : {}),
           ...(annotation.line?.stroke_width != null
             ? { lineWidth: annotation.line.stroke_width }
             : {}),
@@ -152,7 +161,11 @@ function buildByValueAnnotationLayer(
       return {
         type: 'query',
         id: `${layer.type}_event_${index}`,
-        filter: { type: 'kibana_query', ...annotation.query },
+        filter: {
+          type: 'kibana_query',
+          query: annotation.query.expression,
+          language: toLensStateFilterLanguage(annotation.query.language),
+        },
         label: annotation.label ?? 'Event',
         color: annotation.color?.color,
         ...(annotation.visible != null ? { isHidden: !annotation.visible } : {}),
@@ -160,7 +173,7 @@ function buildByValueAnnotationLayer(
         ...(annotation.extra_fields ? { extraFields: annotation.extra_fields } : {}),
         ...(annotation.text?.visible != null ? { textVisibility: annotation.text.visible } : {}),
         ...(annotation.text?.field ? { textField: annotation.text.field } : {}),
-        ...(annotation.icon ? { icon: annotation.icon } : {}),
+        ...(annotation.icon ? { icon: xyIconCompat.toState(annotation.icon) } : {}),
         ...(annotation.line?.stroke_width != null
           ? { lineWidth: annotation.line.stroke_width }
           : {}),
@@ -177,17 +190,21 @@ function buildReferenceLineLayer(
   layer: ReferenceLineLayerType,
   i: number
 ): XYReferenceLineLayerConfig {
-  const yConfig = layer.thresholds.map<YConfig>((threshold, index) => ({
-    icon: threshold.icon,
-    iconPosition: threshold.position,
-    lineWidth: threshold.stroke_width,
-    lineStyle: threshold.stroke_dash,
-    textVisibility: threshold.text?.visible,
-    fill: threshold.fill,
-    color: threshold.color?.color,
-    axisMode: threshold.axis,
-    forAccessor: getAccessorNameForXY(layer, REFERENCE_LINE_ACCESSOR_PREFIX, index),
-  }));
+  const yConfig = layer.thresholds.map<YConfig>((threshold, index) => {
+    const axisMode =
+      threshold.axis_id === 'secondary_y' ? 'right' : threshold.axis_id === 'x' ? 'bottom' : 'left';
+    return {
+      icon: xyIconCompat.toState(threshold.icon),
+      iconPosition: threshold.position,
+      lineWidth: threshold.stroke_width,
+      lineStyle: threshold.stroke_dash,
+      textVisibility: threshold.text?.visible,
+      fill: threshold.fill,
+      color: threshold.color?.color,
+      axisMode,
+      forAccessor: getAccessorNameForXY(layer, REFERENCE_LINE_ACCESSOR_PREFIX, index),
+    };
+  });
   return {
     layerType: 'referenceLine',
     layerId: getIdForLayer(layer, i),
@@ -197,6 +214,7 @@ function buildReferenceLineLayer(
 }
 
 export function buildXYLayer(
+  config: XYState,
   layer: unknown,
   i: number,
   dataViewId: string,
@@ -233,7 +251,7 @@ export function buildXYLayer(
   if (isAPIReferenceLineLayer(layer)) {
     return buildReferenceLineLayer(layer, i);
   }
-  return buildDataLayer(layer, i);
+  return buildDataLayer(config, layer, i);
 }
 
 export function buildFormBasedXYLayer(layer: unknown, i: number) {

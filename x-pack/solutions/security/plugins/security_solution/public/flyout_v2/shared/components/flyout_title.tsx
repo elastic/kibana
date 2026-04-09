@@ -38,6 +38,11 @@ export interface FlyoutTitleProps {
    */
   isLink?: boolean;
   /**
+   * Optional boolean to render the title in a smaller font size (`xs` instead of `s`).
+   * Should be used when the component is displayed in a tools flyout header.
+   */
+  isCompact?: boolean;
+  /**
    * Optional data test subject string
    */
   'data-test-subj'?: string;
@@ -52,6 +57,7 @@ export const FlyoutTitle: FC<FlyoutTitleProps> = memo(
     iconType,
     iconColor,
     isLink = false,
+    isCompact = false,
     'data-test-subj': dataTestSubj = 'flyoutTitle',
   }) => {
     const { euiTheme } = useEuiTheme();
@@ -74,13 +80,13 @@ export const FlyoutTitle: FC<FlyoutTitleProps> = memo(
 
     const titleComponent = useMemo(() => {
       return (
-        <EuiTitle size="s" data-test-subj={`${dataTestSubj}Text`}>
+        <EuiTitle size={isCompact ? 'xs' : 's'} data-test-subj={`${dataTestSubj}Text`}>
           <EuiTextColor color={isLink ? euiTheme.colors.textPrimary : undefined}>
             <span>{title}</span>
           </EuiTextColor>
         </EuiTitle>
       );
-    }, [dataTestSubj, title, isLink, euiTheme.colors.textPrimary]);
+    }, [dataTestSubj, isCompact, isLink, title, euiTheme.colors.textPrimary]);
 
     const linkIcon = useMemo(() => {
       return (

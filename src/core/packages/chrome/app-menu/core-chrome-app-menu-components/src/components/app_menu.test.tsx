@@ -89,43 +89,6 @@ describe('AppMenu', () => {
 
       expect(screen.getByText('Save')).toBeInTheDocument();
     });
-
-    it('should render secondary action item', () => {
-      const configWithSecondary: AppMenuConfig = {
-        secondaryActionItem: {
-          id: 'cancel',
-          label: 'Cancel',
-          run: jest.fn(),
-          iconType: 'cross',
-        },
-      };
-
-      render(<AppMenuComponent config={configWithSecondary} />);
-
-      expect(screen.getByText('Cancel')).toBeInTheDocument();
-    });
-
-    it('should render both primary and secondary action items', () => {
-      const configWithBoth: AppMenuConfig = {
-        primaryActionItem: {
-          id: 'save',
-          label: 'Save',
-          run: jest.fn(),
-          iconType: 'save',
-        },
-        secondaryActionItem: {
-          id: 'cancel',
-          label: 'Cancel',
-          run: jest.fn(),
-          iconType: 'cross',
-        },
-      };
-
-      render(<AppMenuComponent config={configWithBoth} />);
-
-      expect(screen.getByText('Save')).toBeInTheDocument();
-      expect(screen.getByText('Cancel')).toBeInTheDocument();
-    });
   });
 
   describe('responsive behavior', () => {

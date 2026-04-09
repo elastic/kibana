@@ -751,7 +751,7 @@
             "label": "processorsMetrics",
             "description": [],
             "signature": [
-              "Record<string, ",
+              "Partial<Record<string, ",
               {
                 "pluginId": "@kbn/streams-schema",
                 "scope": "common",
@@ -759,7 +759,7 @@
                 "section": "def-common.ProcessorMetrics",
                 "text": "ProcessorMetrics"
               },
-              "> | undefined"
+              ">> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
             "lineNumber": 23,

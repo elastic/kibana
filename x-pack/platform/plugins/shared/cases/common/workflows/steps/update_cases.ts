@@ -45,7 +45,7 @@ export const updateCasesStepCommonDefinition: CommonStepDefinition<
   UpdateCasesStepOutputSchema
 > = {
   id: UpdateCasesStepTypeId,
-  category: StepCategory.Kibana,
+  category: StepCategory.KibanaCases,
   label: i18n.UPDATE_CASES_STEP_LABEL,
   description: i18n.UPDATE_CASES_STEP_DESCRIPTION,
   documentation: {

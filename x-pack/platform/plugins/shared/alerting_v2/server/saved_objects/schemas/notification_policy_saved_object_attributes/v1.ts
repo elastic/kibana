@@ -21,6 +21,7 @@ export const notificationPolicySavedObjectAttributesSchema = schema.object({
   groupBy: schema.maybe(
     schema.nullable(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 10 }))
   ),
+  tags: schema.maybe(schema.nullable(schema.arrayOf(schema.string(), { maxSize: 20 }))),
   groupingMode: schema.maybe(
     schema.nullable(
       schema.oneOf([

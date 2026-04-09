@@ -11,7 +11,7 @@ import { omit } from 'lodash';
 
 import { schema, type TypeOf } from '@kbn/config-schema';
 
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { colorByValueSchema } from '../color';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import {
@@ -29,6 +29,7 @@ import {
 } from './shared';
 import { builderEnums } from '../enums';
 import { bucketOperationDefinitionSchema } from '../bucket_ops';
+import { objectUnion } from './utils/object_union';
 
 const legendSchemaProps = {
   truncate_after_lines: legendTruncateAfterLinesSchema,
@@ -151,7 +152,7 @@ export const heatmapStateSchemaNoESQL = schema.object(
     ...heatmapSharedStateSchema,
     ...heatmapAxesStateSchemaProps,
     ...dslOnlyPanelInfoSchema,
-    ...datasetSchema,
+    ...dataSourceSchema,
     metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
       heatmapStateMetricOptionsSchemaProps
     ),
@@ -163,13 +164,13 @@ export const heatmapStateSchemaESQL = schema.object(
   {
     ...heatmapSharedStateSchema,
     ...heatmapAxesStateESQLSchemaProps,
-    ...datasetEsqlTableSchema,
+    ...dataSourceEsqlTableSchema,
     metric: esqlColumnWithFormatSchema.extends(heatmapStateMetricOptionsSchemaProps),
   },
   { meta: { id: 'heatmapESQL', title: 'Heatmap Chart (ES|QL)' } }
 );
 
-export const heatmapStateSchema = schema.oneOf([heatmapStateSchemaNoESQL, heatmapStateSchemaESQL], {
+export const heatmapStateSchema = objectUnion([heatmapStateSchemaNoESQL, heatmapStateSchemaESQL], {
   meta: { id: 'heatmapChart', title: 'Heatmap Chart' },
 });
 

@@ -73,6 +73,8 @@ export const useSubscribeToChatEvents = ({
         step: createReasoningStep({
           reasoning: event.data.reasoning,
           transient: event.data.transient,
+          tool_call_id: event.data.tool_call_id,
+          tool_call_group_id: event.data.tool_call_group_id,
         }),
       });
       setAgentReasoning(event.data.reasoning);
@@ -125,7 +127,7 @@ export const useSubscribeToChatEvents = ({
         timeToFirstToken: event.data.time_to_first_token,
       });
     } else if (isPromptRequestEvent(event)) {
-      conversationActions.setPendingPrompt({
+      conversationActions.addPendingPrompt({
         prompt: event.data.prompt,
       });
       // Stop loading when a prompt is requested - the round is now awaiting user input

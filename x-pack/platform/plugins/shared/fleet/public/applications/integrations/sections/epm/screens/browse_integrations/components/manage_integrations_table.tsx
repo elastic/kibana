@@ -46,12 +46,12 @@ import type { ReviewIntegrationDetails } from './manage_integration_actions';
 import { CreateNewIntegrationButton } from './create_new_integration';
 
 export type DataStreamResultsFlyoutComponent = NonNullable<
-  ReturnType<typeof useStartServices>['automaticImportVTwo']
+  ReturnType<typeof useStartServices>['automaticImport']
 >['components']['DataStreamResultsFlyout'];
 export type DataStreamResponse =
   React.ComponentProps<DataStreamResultsFlyoutComponent>['dataStream'];
 export type TaskStatus = DataStreamResponse['status'];
-export interface AIV2Telemetry {
+export interface AutomaticImportTelemetry {
   reportEvent(event: string, data: Record<string, unknown>): void;
 }
 
@@ -108,7 +108,7 @@ export const ManageIntegrationsTable: React.FC<{
   const { euiTheme } = useEuiTheme();
   const {
     application,
-    automaticImportVTwo,
+    automaticImport,
     http,
     notifications,
     userProfile: userProfileService,
@@ -117,13 +117,13 @@ export const ManageIntegrationsTable: React.FC<{
   const hasReportedView = useRef(false);
   useEffect(() => {
     if (!isLoading && !hasReportedView.current) {
-      (automaticImportVTwo?.telemetry as AIV2Telemetry)?.reportEvent(
-        'aiv2_manage_integrations_table_viewed',
+      (automaticImport?.telemetry as AutomaticImportTelemetry)?.reportEvent(
+        'automatic_import_manage_integrations_table_viewed',
         {}
       );
       hasReportedView.current = true;
     }
-  }, [isLoading, automaticImportVTwo]);
+  }, [isLoading, automaticImport]);
 
   const integrationsWithActions = useMemo(() => {
     return integrations.map((item) => {
@@ -200,7 +200,7 @@ export const ManageIntegrationsTable: React.FC<{
 
   const goToEditIntegration = useCallback(
     (integrationId: string) => {
-      application.navigateToApp('automaticImportVTwo', {
+      application.navigateToApp('automaticImport', {
         path: `/edit/${integrationId}`,
       });
     },
@@ -209,7 +209,7 @@ export const ManageIntegrationsTable: React.FC<{
 
   const getEditIntegrationHref = useCallback(
     (integrationId: string) =>
-      application.getUrlForApp('automaticImportVTwo', {
+      application.getUrlForApp('automaticImport', {
         path: `/edit/${integrationId}`,
       }),
     [application]
@@ -219,7 +219,7 @@ export const ManageIntegrationsTable: React.FC<{
     async (integrationId: string) => {
       try {
         await http.delete(
-          `/api/automatic_import_v2/integrations/${encodeURIComponent(integrationId)}`,
+          `/api/automatic_import/integrations/${encodeURIComponent(integrationId)}`,
           { version: '1' }
         );
         notifications.toasts.addSuccess({
@@ -249,7 +249,7 @@ export const ManageIntegrationsTable: React.FC<{
           version?: string;
           dataStreams: DataStreamResponse[];
         };
-      }>(`/api/automatic_import_v2/integrations/${encodeURIComponent(integrationId)}`, {
+      }>(`/api/automatic_import/integrations/${encodeURIComponent(integrationId)}`, {
         version: '1',
       });
 
@@ -267,7 +267,7 @@ export const ManageIntegrationsTable: React.FC<{
     async (integrationId: string) => {
       try {
         const response = await http.get(
-          `/api/automatic_import_v2/integrations/${encodeURIComponent(integrationId)}/download`,
+          `/api/automatic_import/integrations/${encodeURIComponent(integrationId)}/download`,
           {
             version: '1',
             headers: { Accept: 'application/zip' },
@@ -287,8 +287,8 @@ export const ManageIntegrationsTable: React.FC<{
         link.click();
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
-        (automaticImportVTwo?.telemetry as AIV2Telemetry)?.reportEvent(
-          'aiv2_integration_download_zip_clicked',
+        (automaticImport?.telemetry as AutomaticImportTelemetry)?.reportEvent(
+          'automatic_import_integration_download_zip_clicked',
           {}
         );
       } catch (error) {
@@ -300,14 +300,14 @@ export const ManageIntegrationsTable: React.FC<{
         });
       }
     },
-    [http, notifications, automaticImportVTwo]
+    [http, notifications, automaticImport]
   );
 
   const approveAndDeployIntegration = useCallback(
     async (integrationId: string, version: string, categories: string[]) => {
       try {
         await http.post(
-          `/api/automatic_import_v2/integrations/${encodeURIComponent(integrationId)}/approve`,
+          `/api/automatic_import/integrations/${encodeURIComponent(integrationId)}/approve`,
           {
             version: '1',
             body: JSON.stringify({ version, categories }),
@@ -342,7 +342,7 @@ export const ManageIntegrationsTable: React.FC<{
     async (integrationId: string) => {
       try {
         const zipBlob = await http.get(
-          `/api/automatic_import_v2/integrations/${encodeURIComponent(integrationId)}/download`,
+          `/api/automatic_import/integrations/${encodeURIComponent(integrationId)}/download`,
           {
             version: '1',
             headers: { Accept: 'application/zip' },
@@ -575,7 +575,7 @@ export const ManageIntegrationsTable: React.FC<{
                 onEdit={goToEditIntegration}
                 onDelete={deleteIntegration}
                 DataStreamResultsFlyoutComponent={
-                  automaticImportVTwo?.components.DataStreamResultsFlyout
+                  automaticImport?.components.DataStreamResultsFlyout
                 }
                 onFetchReviewDetails={fetchIntegrationReviewDetails}
                 onApproveAndDeploy={approveAndDeployIntegration}
@@ -602,9 +602,7 @@ export const ManageIntegrationsTable: React.FC<{
             isPackageReady={isIntegrationPackageReady(item)}
             onEdit={goToEditIntegration}
             onDelete={deleteIntegration}
-            DataStreamResultsFlyoutComponent={
-              automaticImportVTwo?.components.DataStreamResultsFlyout
-            }
+            DataStreamResultsFlyoutComponent={automaticImport?.components.DataStreamResultsFlyout}
             onFetchReviewDetails={fetchIntegrationReviewDetails}
             onApproveAndDeploy={approveAndDeployIntegration}
             onDownloadZip={downloadZipPackage}
@@ -621,7 +619,7 @@ export const ManageIntegrationsTable: React.FC<{
       approveAndDeployIntegration,
       downloadZipPackage,
       installToCluster,
-      automaticImportVTwo?.components.DataStreamResultsFlyout,
+      automaticImport?.components.DataStreamResultsFlyout,
       euiTheme.colors.backgroundLightText,
       euiTheme.colors.textParagraph,
       euiTheme.colors.borderBasePlain,

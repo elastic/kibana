@@ -21,6 +21,142 @@
     "functions": [
       {
         "parentPluginId": "@kbn/apm-utils",
+        "id": "def-common.addSpanLabels",
+        "type": "Function",
+        "tags": [],
+        "label": "addSpanLabels",
+        "description": [],
+        "signature": [
+          "(labels: ",
+          {
+            "pluginId": "@kbn/apm-utils",
+            "scope": "common",
+            "docId": "kibKbnApmUtilsPluginApi",
+            "section": "def-common.Labels",
+            "text": "Labels"
+          },
+          ", opts?: AddLabelsOptions | undefined) => void"
+        ],
+        "path": "src/platform/packages/shared/kbn-apm-utils/src/add_labels.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-utils",
+            "id": "def-common.addSpanLabels.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "labels",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/apm-utils",
+                "scope": "common",
+                "docId": "kibKbnApmUtilsPluginApi",
+                "section": "def-common.Labels",
+                "text": "Labels"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-utils/src/add_labels.ts",
+            "lineNumber": 28,
+            "columnNumber": 31,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/apm-utils",
+            "id": "def-common.addSpanLabels.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "opts",
+            "description": [],
+            "signature": [
+              "AddLabelsOptions | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-utils/src/add_labels.ts",
+            "lineNumber": 28,
+            "columnNumber": 47,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-utils",
+        "id": "def-common.addTransactionLabels",
+        "type": "Function",
+        "tags": [],
+        "label": "addTransactionLabels",
+        "description": [],
+        "signature": [
+          "(labels: ",
+          {
+            "pluginId": "@kbn/apm-utils",
+            "scope": "common",
+            "docId": "kibKbnApmUtilsPluginApi",
+            "section": "def-common.Labels",
+            "text": "Labels"
+          },
+          ", opts?: AddLabelsOptions | undefined) => void"
+        ],
+        "path": "src/platform/packages/shared/kbn-apm-utils/src/add_labels.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-utils",
+            "id": "def-common.addTransactionLabels.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "labels",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/apm-utils",
+                "scope": "common",
+                "docId": "kibKbnApmUtilsPluginApi",
+                "section": "def-common.Labels",
+                "text": "Labels"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-utils/src/add_labels.ts",
+            "lineNumber": 33,
+            "columnNumber": 38,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/apm-utils",
+            "id": "def-common.addTransactionLabels.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "opts",
+            "description": [],
+            "signature": [
+              "AddLabelsOptions | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-utils/src/add_labels.ts",
+            "lineNumber": 33,
+            "columnNumber": 54,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-utils",
         "id": "def-common.instrumentAsyncMethods",
         "type": "Function",
         "tags": [],
@@ -150,7 +286,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
-        "lineNumber": 25,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -173,7 +309,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
-            "lineNumber": 25,
+            "lineNumber": 27,
             "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
@@ -206,7 +342,7 @@
           " | undefined) => Promise<T>"
         ],
         "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
-        "lineNumber": 37,
+        "lineNumber": 39,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -229,7 +365,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
-            "lineNumber": 38,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -248,7 +384,7 @@
               " | undefined) => Promise<T>"
             ],
             "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
-            "lineNumber": 39,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -266,7 +402,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
-            "lineNumber": 40,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -286,7 +422,7 @@
         "label": "SpanOptions",
         "description": [],
         "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
-        "lineNumber": 15,
+        "lineNumber": 17,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -299,7 +435,7 @@
             "label": "name",
             "description": [],
             "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
-            "lineNumber": 16,
+            "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -315,7 +451,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
-            "lineNumber": 17,
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -331,7 +467,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
-            "lineNumber": 18,
+            "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -347,7 +483,7 @@
               "Record<string, string> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
-            "lineNumber": 19,
+            "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -363,7 +499,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
-            "lineNumber": 20,
+            "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -373,7 +509,25 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/apm-utils",
+        "id": "def-common.Labels",
+        "type": "Type",
+        "tags": [],
+        "label": "Labels",
+        "description": [],
+        "signature": [
+          "{ [x: string]: string | number | boolean | null | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-apm-utils/src/add_labels.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

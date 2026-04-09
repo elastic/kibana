@@ -188,7 +188,7 @@ const KEY_CODES = {
 export class QueryStringInput extends PureComponent<QueryStringInputProps, State> {
   static defaultProps = {
     storageKey: KIBANA_USER_QUERY_LANGUAGE_KEY,
-    iconType: 'search',
+    iconType: 'magnify',
     isClearable: true,
   };
 
@@ -732,6 +732,9 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
   public componentWillUnmount() {
     if (this.abortController) this.abortController.abort();
     if (this.updateSuggestions.cancel) this.updateSuggestions.cancel();
+    if (this.props.onChangeQueryInputFocus) {
+      this.props.onChangeQueryInputFocus(false);
+    }
     this.componentIsUnmounting = true;
     window.removeEventListener('resize', this.handleResize);
     if (this.hasScrollListener) window.removeEventListener('scroll', this.onOutsideClick);

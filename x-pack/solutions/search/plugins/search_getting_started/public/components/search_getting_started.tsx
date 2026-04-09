@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 import { EuiPageTemplate } from '@elastic/eui';
-import { GETTING_STARTED_LOCALSTORAGE_KEY } from '@kbn/search-shared-ui';
+import { GETTING_STARTED_SESSIONSTORAGE_KEY } from '@kbn/search-shared-ui';
 import { useUsageTracker } from '../contexts/usage_tracker_context';
 import { AnalyticsEvents } from '../../common';
 import { SearchGettingStartedPageTemplate } from '../layout/page_template';
@@ -21,7 +21,7 @@ export const SearchGettingStartedPage: React.FC = () => {
   const usageTracker = useUsageTracker();
   useEffect(() => {
     usageTracker.load(AnalyticsEvents.gettingStartedLoaded);
-    localStorage.setItem(GETTING_STARTED_LOCALSTORAGE_KEY, 'true');
+    sessionStorage.setItem(GETTING_STARTED_SESSIONSTORAGE_KEY, 'true');
   }, [usageTracker]);
 
   return (

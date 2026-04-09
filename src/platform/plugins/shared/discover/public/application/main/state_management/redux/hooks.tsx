@@ -52,6 +52,11 @@ export const useInternalStateGetState = (): (() => DiscoverInternalState) => {
   return store.getState as () => DiscoverInternalState;
 };
 
+export const useInternalStateSubscribe = (): ((listener: () => void) => () => void) => {
+  const { store } = useContext(internalStateContext);
+  return store.subscribe;
+};
+
 export const useInternalStateSelector: TypedUseSelectorHook<DiscoverInternalState> =
   createSelectorHook(internalStateContext);
 

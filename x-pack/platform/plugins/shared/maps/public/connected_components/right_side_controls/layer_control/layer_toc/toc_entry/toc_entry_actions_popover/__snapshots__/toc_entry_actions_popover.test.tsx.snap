@@ -58,7 +58,7 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
                 "disabled": false,
                 "icon": <EuiIcon
                   size="m"
-                  type="expand"
+                  type="maximize"
                 />,
                 "name": "Fit to data",
                 "onClick": [Function],
@@ -68,7 +68,7 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
                 "data-test-subj": "layerVisibilityToggleButton",
                 "icon": <EuiIcon
                   size="m"
-                  type="eyeClosed"
+                  type="eyeSlash"
                 />,
                 "name": "Hide layer",
                 "onClick": [Function],
@@ -173,7 +173,7 @@ exports[`TOCEntryActionsPopover should disable Edit features when edit mode acti
                 "disabled": false,
                 "icon": <EuiIcon
                   size="m"
-                  type="expand"
+                  type="maximize"
                 />,
                 "name": "Fit to data",
                 "onClick": [Function],
@@ -183,7 +183,7 @@ exports[`TOCEntryActionsPopover should disable Edit features when edit mode acti
                 "data-test-subj": "layerVisibilityToggleButton",
                 "icon": <EuiIcon
                   size="m"
-                  type="eyeClosed"
+                  type="eyeSlash"
                 />,
                 "name": "Hide layer",
                 "onClick": [Function],
@@ -288,7 +288,7 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
                 "disabled": true,
                 "icon": <EuiIcon
                   size="m"
-                  type="expand"
+                  type="maximize"
                 />,
                 "name": "Fit to data",
                 "onClick": [Function],
@@ -298,7 +298,7 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
                 "data-test-subj": "layerVisibilityToggleButton",
                 "icon": <EuiIcon
                   size="m"
-                  type="eyeClosed"
+                  type="eyeSlash"
                 />,
                 "name": "Hide layer",
                 "onClick": [Function],
@@ -404,7 +404,7 @@ exports[`TOCEntryActionsPopover should have "show layer" action when layer is no
                 "disabled": false,
                 "icon": <EuiIcon
                   size="m"
-                  type="expand"
+                  type="maximize"
                 />,
                 "name": "Fit to data",
                 "onClick": [Function],
@@ -519,7 +519,7 @@ exports[`TOCEntryActionsPopover should not show edit actions in read only mode 1
                 "disabled": false,
                 "icon": <EuiIcon
                   size="m"
-                  type="expand"
+                  type="maximize"
                 />,
                 "name": "Fit to data",
                 "onClick": [Function],
@@ -529,7 +529,7 @@ exports[`TOCEntryActionsPopover should not show edit actions in read only mode 1
                 "data-test-subj": "layerVisibilityToggleButton",
                 "icon": <EuiIcon
                   size="m"
-                  type="eyeClosed"
+                  type="eyeSlash"
                 />,
                 "name": "Hide layer",
                 "onClick": [Function],
@@ -603,7 +603,7 @@ exports[`TOCEntryActionsPopover should show "show this layer only" action when t
                 "disabled": false,
                 "icon": <EuiIcon
                   size="m"
-                  type="expand"
+                  type="maximize"
                 />,
                 "name": "Fit to data",
                 "onClick": [Function],
@@ -613,7 +613,7 @@ exports[`TOCEntryActionsPopover should show "show this layer only" action when t
                 "data-test-subj": "layerVisibilityToggleButton",
                 "icon": <EuiIcon
                   size="m"
-                  type="eyeClosed"
+                  type="eyeSlash"
                 />,
                 "name": "Hide layer",
                 "onClick": [Function],

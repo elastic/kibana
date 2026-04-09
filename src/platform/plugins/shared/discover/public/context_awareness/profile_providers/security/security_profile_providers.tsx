@@ -13,6 +13,7 @@ import { isCCSRemoteIndexName } from '@kbn/es-query';
 import {
   AlertEventOverviewLazy,
   EnhancedAlertEventOverviewLazy,
+  EnhancedAlertFlyoutFooterLazy,
   EnhancedAlertFlyoutHeaderLazy,
 } from './components';
 import { SECURITY_PROFILE_ID } from './constants';
@@ -73,6 +74,16 @@ export const createSecurityDocumentProfileProviders = (
 
             return prevDocViewer.docViewsRegistry(registry);
           },
+          renderFooter:
+            isAlert || isEvent
+              ? (props) => (
+                  <EnhancedAlertFlyoutFooterLazy
+                    {...props}
+                    providerServices={providerServices}
+                    fallbackRenderFooter={prevDocViewer.renderFooter}
+                  />
+                )
+              : prevDocViewer.renderFooter,
         };
       },
     },

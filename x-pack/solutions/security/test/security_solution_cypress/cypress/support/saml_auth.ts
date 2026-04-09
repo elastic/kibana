@@ -17,6 +17,7 @@ import { resolve } from 'path';
 import axios from 'axios';
 import fs from 'fs';
 import yaml from 'js-yaml';
+import { MOCK_IDP_UIAM_ORGANIZATION_ID } from '@kbn/mock-idp-utils';
 import { DEFAULT_SERVERLESS_ROLE } from '../env_var_names_constants';
 
 export const samlAuthentication = async (
@@ -70,6 +71,11 @@ export const samlAuthentication = async (
     log,
     isCloud: config.env.CLOUD_SERVERLESS,
     cloudUsersFilePath,
+    serverless: {
+      uiam: true,
+      projectType: 'security',
+      organizationId: MOCK_IDP_UIAM_ORGANIZATION_ID,
+    },
   });
 
   const adminCookieHeader = await sessionManager.getApiCredentialsForRole('admin');

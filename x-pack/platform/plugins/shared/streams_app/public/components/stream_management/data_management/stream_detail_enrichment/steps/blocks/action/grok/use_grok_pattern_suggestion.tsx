@@ -118,7 +118,7 @@ export function useGrokPatternSuggestion(abortController: ReturnType<typeof useA
       );
 
       finishTrackingAndReport(1, [
-        simulationResult.processors_metrics[SUGGESTED_GROK_PROCESSOR_ID].parsed_rate,
+        simulationResult.processors_metrics[SUGGESTED_GROK_PROCESSOR_ID]?.parsed_rate ?? 0,
       ]);
 
       return { grokProcessor, simulationResult };

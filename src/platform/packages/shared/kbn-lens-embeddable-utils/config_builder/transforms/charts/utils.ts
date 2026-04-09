@@ -27,6 +27,7 @@ import { buildReferences, getAdhocDataviews, isTextBasedLayer, nonNullable } fro
 import { LENS_LAYER_SUFFIX } from '../constants';
 import type { APIAdHocDataView, APIDataView } from '../columns/types';
 import type { AnyMetricLensStateColumn } from '../columns/types';
+import type { XScaleSchemaType } from '../../schema/charts/shared';
 
 export function getSharedChartLensStateToAPI(
   config: Pick<LensAttributes, 'title' | 'description'>
@@ -214,9 +215,7 @@ export function getReversibleMappings<
  * Determines the x-axis scale type based on column metadata type.
  * Returns 'temporal' for date columns, 'linear' for numeric columns, and 'ordinal' for others.
  */
-export function getScaleTypeFromColumnType(
-  columnType: string | undefined
-): 'temporal' | 'linear' | 'ordinal' {
+export function getScaleTypeFromColumnType(columnType: string | undefined): XScaleSchemaType {
   if (columnType === 'date') {
     return 'temporal';
   } else if (columnType === 'number') {

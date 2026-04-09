@@ -70,6 +70,7 @@ const BaseSchema = {
   ca_sha256: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   ca_trusted_fingerprint: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   config_yaml: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  otel_exporter_config_yaml: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   ssl: schema.maybe(
     schema.oneOf([
       schema.literal(null),
@@ -362,8 +363,11 @@ export const OutputResponseSchema = schema.object({
 });
 
 export const UpdateOutputSchema = schema.oneOf([
-  schema.object({ ...ElasticSearchUpdateSchema }),
-  schema.object({ ...RemoteElasticSearchUpdateSchema }),
-  schema.object({ ...LogstashUpdateSchema }),
-  schema.object({ ...KafkaUpdateSchema }),
+  schema.object({ ...ElasticSearchUpdateSchema }, { meta: { id: 'update_output_elasticsearch' } }),
+  schema.object(
+    { ...RemoteElasticSearchUpdateSchema },
+    { meta: { id: 'update_output_remote_elasticsearch' } }
+  ),
+  schema.object({ ...LogstashUpdateSchema }, { meta: { id: 'update_output_logstash' } }),
+  schema.object({ ...KafkaUpdateSchema }, { meta: { id: 'update_output_kafka' } }),
 ]);

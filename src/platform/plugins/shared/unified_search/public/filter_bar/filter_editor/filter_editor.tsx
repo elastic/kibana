@@ -351,7 +351,9 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
             placeholder={strings.getSelectDataView()}
             options={this.state.indexPatterns}
             selectedOptions={selectedDataView ? [selectedDataView] : []}
-            getLabel={(indexPattern) => indexPattern?.getName()}
+            getLabel={(indexPattern) =>
+              indexPattern?.getName?.() ?? indexPattern?.name ?? indexPattern?.title ?? ''
+            }
             onChange={this.onIndexPatternChange}
             isClearable={false}
             data-test-subj="filterIndexPatternsSelect"
@@ -573,7 +575,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
       return;
     }
 
-    const newIndex = index || this.state.indexPatterns[0].id!;
+    const newIndex = index || this.state.indexPatterns[0]?.id || this.state.indexPatterns[0]?.title;
     try {
       const body = JSON.parse(queryDsl);
       return buildCustomFilter(newIndex, body, disabled, negate, customLabel || null, $state.store);

@@ -23,6 +23,7 @@ steps:
     command: .buildkite/scripts/steps/functional/performance_playwright.sh
     env:
       PERFORMANCE_ENABLE_TELEMETRY: true
+      JOURNEYS_GROUP: daily
     agents:
       queue: kb-static-ubuntu
     depends_on: build

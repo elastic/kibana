@@ -352,9 +352,6 @@ export const serviceDetailRoute = {
             defaultMessage: 'Infrastructure',
           }),
           element: <InfraOverview />,
-          searchBarOptions: {
-            showUnifiedSearchBar: false,
-          },
         }),
         params: t.partial({
           query: t.partial({

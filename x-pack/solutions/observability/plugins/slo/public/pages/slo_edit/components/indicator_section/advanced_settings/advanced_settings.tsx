@@ -36,7 +36,7 @@ export function AdvancedSettings() {
       buttonContent={
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="controlsVertical" size="m" />
+            <EuiIcon type="controls" size="m" />
           </EuiFlexItem>
 
           <EuiFlexItem>

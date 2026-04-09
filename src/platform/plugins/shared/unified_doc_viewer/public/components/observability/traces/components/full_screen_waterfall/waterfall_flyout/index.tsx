@@ -80,6 +80,7 @@ export interface Props {
   loading: boolean;
   dataView: DocViewRenderProps['dataView'];
   dataTestSubj?: string;
+  hasAnimation?: boolean;
   flyoutContentId: FlyoutContentId;
   children: React.ReactNode;
   skipNextEventReport?: boolean;
@@ -93,6 +94,7 @@ export function WaterfallFlyout({
   children,
   title,
   dataTestSubj,
+  hasAnimation,
   flyoutContentId,
   skipNextEventReport,
 }: Props) {
@@ -117,6 +119,7 @@ export function WaterfallFlyout({
       onClose={onCloseFlyout}
       aria-labelledby={flyoutTitleId}
       id={flyoutId}
+      hasAnimation={hasAnimation}
     >
       <EuiFlyoutHeader>
         <EuiSkeletonTitle isLoading={loading}>

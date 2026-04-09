@@ -10,16 +10,14 @@
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
 
-export const controlSchema = schema.object(
-  {
-    title: schema.maybe(
-      schema.string({ meta: { description: 'A human-readable title for the control' } })
-    ),
-  },
-  { unknowns: 'allow' }
-);
+export const controlTitleSchema = schema.object({
+  title: schema.maybe(
+    schema.string({ meta: { description: 'A human-readable title for the control' } })
+  ),
+});
 
-export const dataControlSchema = controlSchema.extends({
+export const dataControlSchema = schema.object({
+  ...controlTitleSchema.getPropSchemas(),
   data_view_id: schema.string({
     meta: { description: 'The ID of the data view that the control is tied to' }, // this will generate a reference
   }),

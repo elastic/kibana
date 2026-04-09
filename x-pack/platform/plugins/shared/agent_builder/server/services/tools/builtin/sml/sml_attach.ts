@@ -20,7 +20,9 @@ const smlAttachSchema = z.object({
     .array(z.string())
     .min(1)
     .max(50)
-    .describe('One or more chunk_id values exactly as returned by sml_search.'),
+    .describe(
+      'One or more chunk_id values exactly as returned by sml_search, or the path after sml:// in a user @-mention link.'
+    ),
 });
 
 /**
@@ -34,7 +36,8 @@ export const createSmlAttachTool = ({
   type: ToolType.builtin,
   description:
     'Attach assets found by sml_search to the conversation. ' +
-    'Pass one or more chunk_id strings exactly as returned by sml_search. ' +
+    'When the user @-mentions an SML asset, their message contains a link like [@label](sml://CHUNK_ID); call this tool with that CHUNK_ID first so the asset is available as a conversation attachment before other work. ' +
+    'Pass one or more chunk_id strings exactly as returned by sml_search or taken from those sml:// links. ' +
     'Chunk id follows the format: attachment_type:origin_id:uuid and could be referenced by sml://{attachment_type}/{origin_id}. ' +
     'Each chunk is resolved into a full conversation attachment (e.g. a Lens visualization). ' +
     'Chunks that cannot be resolved return individual errors without failing the entire call.',

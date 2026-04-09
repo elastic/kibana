@@ -87,6 +87,7 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = (props) => {
   const shouldUseIcon = !symbol && (isBuiltIn || isDefaultAgent || Boolean(icon));
 
   const borderAndShapeStyles = css`
+    line-height: 1;
     border: 1px solid ${euiTheme.colors.borderBaseSubdued};
     ${shape === 'circle' ? 'border-radius: 50%;' : roundedBorderRadiusStyles}
   `;
@@ -100,7 +101,7 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = (props) => {
     `;
     return (
       <EuiPanel hasBorder={false} hasShadow={false} css={panelStyles} paddingSize="xs">
-        <EuiIcon type={iconType} size={iconSize} />
+        <EuiIcon type={iconType} size={iconSize} aria-hidden={true} />
       </EuiPanel>
     );
   }

@@ -19,11 +19,6 @@ const validCreateData = {
   evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
 };
 
-const validCreateDataWithCondition = {
-  ...validCreateData,
-  evaluation: { query: { base: 'FROM logs-* | LIMIT 1', condition: 'count > 0' } },
-};
-
 describe('createRuleDataSchema', () => {
   describe('valid payloads', () => {
     it('accepts a minimal valid payload and applies defaults', () => {
@@ -38,22 +33,10 @@ describe('createRuleDataSchema', () => {
       });
     });
 
-    it('accepts a minimal valid payload with condition', () => {
-      const result = createRuleDataSchema.parse(validCreateDataWithCondition);
-
-      expect(result).toEqual({
-        kind: 'alert',
-        metadata: { name: 'test rule' },
-        time_field: '@timestamp',
-        schedule: { every: '5m' },
-        evaluation: { query: { base: 'FROM logs-* | LIMIT 1', condition: 'count > 0' } },
-      });
-    });
-
     it('accepts a full payload with all optional fields', () => {
       const result = createRuleDataSchema.parse({
-        ...validCreateDataWithCondition,
-        metadata: { name: 'test rule', owner: 'team-a', labels: ['label-1', 'label-2'] },
+        ...validCreateData,
+        metadata: { name: 'test rule', owner: 'team-a', tags: ['label-1', 'label-2'] },
         time_field: 'event.created',
         schedule: { every: '5m', lookback: '10m' },
         grouping: { fields: ['host.name'] },
@@ -72,7 +55,7 @@ describe('createRuleDataSchema', () => {
 
       expect(result).toEqual(
         expect.objectContaining({
-          metadata: { name: 'test rule', owner: 'team-a', labels: ['label-1', 'label-2'] },
+          metadata: { name: 'test rule', owner: 'team-a', tags: ['label-1', 'label-2'] },
           time_field: 'event.created',
           schedule: { every: '5m', lookback: '10m' },
           grouping: { fields: ['host.name'] },
@@ -165,13 +148,13 @@ describe('createRuleDataSchema', () => {
     });
   });
 
-  describe('metadata.labels', () => {
-    it('rejects labels exceeding 100 items', () => {
+  describe('metadata.tags', () => {
+    it('rejects tags exceeding 100 items', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
         metadata: {
           name: 'test rule',
-          labels: Array.from({ length: 101 }, (_, i) => `label-${i}`),
+          tags: Array.from({ length: 101 }, (_, i) => `label-${i}`),
         },
       });
 
@@ -181,7 +164,7 @@ describe('createRuleDataSchema', () => {
     it('rejects a label exceeding 64 characters', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        metadata: { name: 'test rule', labels: ['a'.repeat(65)] },
+        metadata: { name: 'test rule', tags: ['a'.repeat(65)] },
       });
 
       expect(result.success).toBe(false);
@@ -276,62 +259,6 @@ describe('createRuleDataSchema', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
         evaluation: { query: { base: 'FROM |' } },
-      });
-      expect(result.success).toBe(false);
-    });
-  });
-
-  describe('evaluation.query.condition', () => {
-    it('accepts an alert rule without condition', () => {
-      const result = createRuleDataSchema.safeParse(validCreateData);
-      expect(result.success).toBe(true);
-      expect(result.data?.evaluation.query.condition).toBeUndefined();
-    });
-
-    it('accepts an alert rule with condition', () => {
-      const result = createRuleDataSchema.safeParse(validCreateDataWithCondition);
-      expect(result.success).toBe(true);
-      expect(result.data?.evaluation.query.condition).toBe('count > 0');
-    });
-
-    it('accepts a signal rule without condition', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        kind: 'signal',
-      });
-      expect(result.success).toBe(true);
-    });
-
-    it('rejects a signal rule with condition', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateDataWithCondition,
-        kind: 'signal',
-      });
-      expect(result.success).toBe(false);
-      expect(result.error?.issues[0].path).toEqual(['evaluation', 'query', 'condition']);
-    });
-
-    it('requires condition when no_data is configured', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        no_data: { behavior: 'no_data', timeframe: '10m' },
-      });
-      expect(result.success).toBe(false);
-      expect(result.error?.issues[0].path).toEqual(['evaluation', 'query', 'condition']);
-    });
-
-    it('accepts no_data with condition present', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateDataWithCondition,
-        no_data: { behavior: 'no_data', timeframe: '10m' },
-      });
-      expect(result.success).toBe(true);
-    });
-
-    it('rejects an empty condition string', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        evaluation: { query: { base: 'FROM logs-* | LIMIT 1', condition: '' } },
       });
       expect(result.success).toBe(false);
     });
@@ -595,52 +522,6 @@ describe('createRuleDataSchema', () => {
       });
       expect(result.success).toBe(false);
     });
-
-    it('accepts recovery_policy with type "query" and query.condition', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        recovery_policy: {
-          type: 'query',
-          query: { base: 'FROM logs-* | LIMIT 1', condition: 'status == "ok"' },
-        },
-      });
-      expect(result.success).toBe(true);
-      expect(result.data?.recovery_policy?.query?.condition).toBe('status == "ok"');
-    });
-
-    it('accepts recovery_policy with type "query" without condition', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        recovery_policy: {
-          type: 'query',
-          query: { base: 'FROM logs-* | LIMIT 1' },
-        },
-      });
-      expect(result.success).toBe(true);
-      expect(result.data?.recovery_policy?.query?.condition).toBeUndefined();
-    });
-
-    it('rejects recovery_policy with an empty condition string', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        recovery_policy: {
-          type: 'query',
-          query: { base: 'FROM logs-* | LIMIT 1', condition: '' },
-        },
-      });
-      expect(result.success).toBe(false);
-    });
-
-    it('rejects recovery_policy condition exceeding 5000 characters', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        recovery_policy: {
-          type: 'query',
-          query: { base: 'FROM logs-* | LIMIT 1', condition: 'x'.repeat(5001) },
-        },
-      });
-      expect(result.success).toBe(false);
-    });
   });
 
   describe('artifacts value length', () => {
@@ -853,9 +734,9 @@ describe('updateRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
-    it('rejects more than 100 labels', () => {
+    it('rejects more than 100 tags', () => {
       const result = updateRuleDataSchema.safeParse({
-        metadata: { labels: Array.from({ length: 101 }, (_, i) => `label-${i}`) },
+        metadata: { tags: Array.from({ length: 101 }, (_, i) => `label-${i}`) },
       });
 
       expect(result.success).toBe(false);

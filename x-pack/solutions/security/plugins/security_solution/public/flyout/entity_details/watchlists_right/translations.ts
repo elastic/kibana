@@ -51,3 +51,13 @@ export const WATCHLIST_INDEX_PATTERN_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.entityAnalytics.watchlists.flyout.indexPatternPlaceholder',
   { defaultMessage: 'Search for an index pattern' }
 );
+
+export const WATCHLIST_CSV_DATA_SOURCE_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.watchlists.flyout.csvDataSourceTitle',
+  { defaultMessage: 'CSV Data Source' }
+);
+
+export const WATCHLIST_CSV_DATA_SOURCE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.watchlists.flyout.csvDataSourceDescription',
+  { defaultMessage: 'Add entities to this watchlist by uploading a CSV file.' }
+);

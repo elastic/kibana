@@ -10,8 +10,9 @@ import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { noop } from 'lodash/fp';
 import { useEntityStoreEuidApi, FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
+import { EuiSpacer } from '@elastic/eui';
 import type { ESQuery } from '../../../../common/typed_json';
-import { buildEntityNameFilter } from '../../../../common/search_strategy';
+import { buildEntityNameFilter, type RiskSeverity } from '../../../../common/search_strategy';
 import { useUiSetting } from '../../../common/lib/kibana';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import type { Refetch } from '../../../common/types';
@@ -30,12 +31,19 @@ import type { IdentityFields } from '../../document_details/shared/utils';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { useNavigateToServiceDetails } from './hooks/use_navigate_to_service_details';
 import { useEntityFromStore } from '../shared/hooks/use_entity_from_store';
+import { getRiskFromEntityRecord } from '../shared/entity_store_risk_utils';
+import { FlyoutBody } from '../../shared/components/flyout_body';
+import { useEntityPanelTabs, TABLE_TAB_ID } from '../shared/hooks/use_entity_panel_tabs';
+import { EntityPanelHeaderTabs } from '../shared/components/entity_panel_tabs';
+import { EntityStoreTableTab } from '../shared/components/entity_store_table_tab';
+import { EntitySummaryGrid } from '../shared/components/entity_summary_grid';
 
 export interface ServicePanelProps extends Record<string, unknown> {
   contextID: string;
   scopeId: string;
   entityId: string;
   serviceName: string;
+  isPreviewMode?: boolean;
 }
 
 export interface ServicePanelExpandableFlyoutProps extends FlyoutPanelProps {
@@ -49,7 +57,14 @@ const FIRST_RECORD_PAGINATION = {
   querySize: 1,
 };
 
-export const ServicePanel = ({ contextID, scopeId, entityId, serviceName }: ServicePanelProps) => {
+export const ServicePanel = ({
+  contextID,
+  scopeId,
+  entityId,
+  serviceName,
+  isPreviewMode = false,
+}: ServicePanelProps) => {
+  const safeContextID = contextID ?? scopeId ?? 'service-panel';
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
   const serviceStoreIdentityFields = useMemo(
     () => (!entityId && serviceName ? { 'service.name': serviceName } : undefined),
@@ -120,7 +135,10 @@ export const ServicePanel = ({ contextID, scopeId, entityId, serviceName }: Serv
     serviceName,
     entityId,
     scopeId,
+    contextID: safeContextID,
     isRiskScoreExist,
+    identityFields: documentEntityIdentifiers,
+    isPreviewMode,
     entityStoreEntityId,
   });
 
@@ -138,6 +156,18 @@ export const ServicePanel = ({ contextID, scopeId, entityId, serviceName }: Serv
     [openDetailsPanel, defaultTab]
   );
 
+  const { tabs, selectedTabId, setSelectedTabId } = useEntityPanelTabs({
+    entityRecord: entityFromStoreResult.entityRecord ?? null,
+  });
+
+  const tabsNode = tabs ? (
+    <EntityPanelHeaderTabs
+      tabs={tabs}
+      selectedTabId={selectedTabId}
+      setSelectedTabId={setSelectedTabId}
+    />
+  ) : undefined;
+
   if (observedService.isLoading) {
     return <FlyoutLoading />;
   }
@@ -147,21 +177,47 @@ export const ServicePanel = ({ contextID, scopeId, entityId, serviceName }: Serv
       <FlyoutNavigation
         flyoutIsExpandable={isRiskScoreExist || !!entityStoreEntityId}
         expandDetails={openPanelFirstTab}
+        isPreviewMode={isPreviewMode}
         isRulePreview={scopeId === TableId.rulePreview}
       />
-      <ServicePanelHeader serviceName={serviceName} observedService={observedService} />
-      <ServicePanelContent
-        entityRecord={entityFromStoreResult.entityRecord ?? undefined}
+      <ServicePanelHeader
         serviceName={serviceName}
         observedService={observedService}
-        riskScoreState={riskScoreState}
-        recalculatingScore={recalculatingScore}
-        onAssetCriticalityChange={calculateEntityRiskScore}
-        contextID={contextID}
-        scopeId={scopeId}
-        openDetailsPanel={openDetailsPanel}
-        entityStoreEntityId={entityStoreEntityId}
+        isEntityInStore={!!entityFromStoreResult.entityRecord}
+        riskLevel={
+          entityFromStoreResult.entityRecord
+            ? ((getRiskFromEntityRecord(entityFromStoreResult.entityRecord)?.calculated_level ??
+                'Unknown') as RiskSeverity)
+            : undefined
+        }
       />
+      <FlyoutBody>
+        {entityFromStoreResult.entityRecord && (
+          <EntitySummaryGrid
+            entityRecord={entityFromStoreResult.entityRecord}
+            criticalityLevel={entityFromStoreResult.entityRecord?.asset?.criticality}
+          />
+        )}
+        {tabsNode}
+        {tabs && <EuiSpacer size="l" />}
+        {tabs && selectedTabId === TABLE_TAB_ID && entityFromStoreResult.entityRecord ? (
+          <EntityStoreTableTab entityRecord={entityFromStoreResult.entityRecord} />
+        ) : (
+          <ServicePanelContent
+            entityRecord={entityFromStoreResult.entityRecord ?? undefined}
+            serviceName={serviceName}
+            observedService={observedService}
+            riskScoreState={riskScoreState}
+            recalculatingScore={recalculatingScore}
+            onAssetCriticalityChange={calculateEntityRiskScore}
+            contextID={safeContextID}
+            scopeId={scopeId}
+            openDetailsPanel={openDetailsPanel}
+            isPreviewMode={isPreviewMode}
+            entityStoreEntityId={entityStoreEntityId}
+          />
+        )}
+      </FlyoutBody>
     </>
   );
 };

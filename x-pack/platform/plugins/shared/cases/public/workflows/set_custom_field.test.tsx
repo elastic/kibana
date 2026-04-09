@@ -77,7 +77,7 @@ describe('createSetCustomFieldStepDefinition', () => {
     const { definition } = setup();
 
     expect(definition.id).toBe('cases.setCustomField');
-    expect(definition.category).toBe('kibana');
+    expect(definition.category).toBe('kibana.cases');
     expect(definition.documentation?.examples?.length).toBeGreaterThan(0);
   });
 

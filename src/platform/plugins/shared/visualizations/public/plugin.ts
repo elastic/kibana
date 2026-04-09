@@ -480,12 +480,8 @@ export class VisualizationsPlugin
     expressions.registerFunction(visDimensionExpressionFunction);
     expressions.registerFunction(xyDimensionExpressionFunction);
     embeddable.registerReactEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, async () => {
-      const {
-        plugins: { embeddable: embeddableStart },
-      } = start();
-
-      const { getVisualizeEmbeddableFactory } = await import('./embeddable/embeddable_module');
-      return getVisualizeEmbeddableFactory({ embeddableStart });
+      const { visualizeEmbeddableFactory } = await import('./embeddable/embeddable_module');
+      return visualizeEmbeddableFactory;
     });
     embeddable.registerAddFromLibraryType<VisualizationSavedObjectAttributes>({
       onAdd: async (container, savedObject) => {

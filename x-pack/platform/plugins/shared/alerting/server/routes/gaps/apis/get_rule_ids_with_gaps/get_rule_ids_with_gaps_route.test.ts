@@ -10,6 +10,7 @@ import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
+import { gapReasonType } from '../../../../../common/constants/gap_reason';
 import { getRuleIdsWithGapsRoute } from './get_rule_ids_with_gaps_route';
 
 const rulesClient = rulesClientMock.create();
@@ -126,6 +127,33 @@ describe('getRuleIdsWithGapsRoute', () => {
     const [, handler] = router.post.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { body: mockBody });
     await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
+  });
+
+  test('should pass excluded_reasons through to rulesClient', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    const excludedReasons = [gapReasonType.RULE_DISABLED];
+
+    getRuleIdsWithGapsRoute(router, licenseState);
+
+    rulesClient.getRuleIdsWithGaps.mockResolvedValueOnce(mockResult);
+    const bodyWithExcludedReasons = {
+      ...mockBody,
+      excluded_reasons: excludedReasons,
+    };
+    const [, handler] = router.post.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      { body: bodyWithExcludedReasons }
+    );
+
+    await handler(context, req, res);
+
+    expect(rulesClient.getRuleIdsWithGaps).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        excludedReasons,
+      })
+    );
   });
 
   test('should transform response with summary correctly', async () => {

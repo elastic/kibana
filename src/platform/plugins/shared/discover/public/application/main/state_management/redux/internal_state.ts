@@ -31,6 +31,7 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
 import { DISCOVER_QUERY_MODE_KEY } from '../../../../../common/constants';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
@@ -497,6 +498,27 @@ export const internalStateSlice = createSlice({
     ) =>
       withTab(state, action.payload, (tab) => {
         tab.uiState.docViewer = action.payload.docViewerUiState;
+      }),
+
+    setDataCascadeUiState: (
+      state,
+      action: TabAction<{ dataCascadeUiState: TabState['uiState']['dataCascade'] }>
+    ) =>
+      withTab(state, action.payload, (tab) => {
+        tab.uiState.dataCascade = action.payload.dataCascadeUiState;
+      }),
+
+    setCascadedDocumentsDataGridUiState: (
+      state,
+      action: TabAction<{
+        nodeId: string;
+        dataGridUiState: Partial<UnifiedDataTableRestorableState>;
+      }>
+    ) =>
+      withTab(state, action.payload, (tab) => {
+        tab.uiState.cascadedDocumentsDataGridMap ??= {};
+        tab.uiState.cascadedDocumentsDataGridMap[action.payload.nodeId] =
+          action.payload.dataGridUiState;
       }),
   },
   extraReducers: (builder) => {

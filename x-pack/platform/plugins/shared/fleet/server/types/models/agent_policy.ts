@@ -221,6 +221,15 @@ export const AgentPolicyBaseSchema = {
       ),
     ])
   ),
+  is_verifier: schema.maybe(
+    schema.boolean({
+      defaultValue: false,
+      meta: {
+        description:
+          'Indicates this is a short-lived verifier policy used for OTel permission verification.',
+      },
+    })
+  ),
 };
 
 function validateGlobalDataTagInput(tags: GlobalDataTag[]): string | undefined {
@@ -305,6 +314,10 @@ export const AgentPolicySchemaV4 = AgentPolicySchemaV3.extends({
   ),
 });
 
+export const AgentPolicySchemaV5 = AgentPolicySchemaV4.extends({
+  is_verifier: schema.maybe(schema.boolean()),
+});
+
 export const NewAgentPolicySchema = AgentPolicySchemaV3.extends({
   supports_agentless: schema.maybe(
     schema.oneOf([
@@ -375,6 +388,7 @@ export const AgentPolicyResponseSchema = AgentPolicySchema.extends({
       )
     )
   ),
+  created_at: schema.maybe(schema.string()),
   package_policies: schema.maybe(
     schema.oneOf([
       schema.arrayOf(schema.string(), { maxSize: 10000 }),

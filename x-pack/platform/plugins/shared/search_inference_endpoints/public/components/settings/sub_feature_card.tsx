@@ -152,7 +152,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
         >
           <EuiFlexGroup responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiTitle size="s">
+              <EuiTitle size="xs">
                 <h4>{feature.featureName}</h4>
               </EuiTitle>
             </EuiFlexItem>

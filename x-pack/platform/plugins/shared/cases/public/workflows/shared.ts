@@ -23,7 +23,7 @@ export function createPublicCaseStepDefinition<
 >(definition: PublicStepDefinition<Input, Output, Config>) {
   return createPublicStepDefinition({
     icon: React.lazy(() =>
-      import('@elastic/eui/es/components/icon/assets/app_cases').then(({ icon }) => ({
+      import('@elastic/eui/es/components/icon/assets/briefcase').then(({ icon }) => ({
         default: icon,
       }))
     ),

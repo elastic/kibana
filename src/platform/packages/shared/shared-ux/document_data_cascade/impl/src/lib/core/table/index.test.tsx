@@ -19,7 +19,7 @@ describe('table', () => {
     children,
     data = [],
     helper: Helper = React.Fragment,
-  }: PropsWithChildren<{ data?: GroupNode[]; helper?: React.FC<PropsWithChildren> }>) => (
+  }: PropsWithChildren<{ helper?: React.FC<PropsWithChildren>; data?: GroupNode[] }>) => (
     <DataCascadeProvider data={data} cascadeGroups={[]}>
       <Helper>{children}</Helper>
     </DataCascadeProvider>
@@ -43,7 +43,7 @@ describe('table', () => {
           enableRowSelection: false,
           header: jest.fn(),
           rowCell: jest.fn(),
-        } as TableProps<GroupNode, unknown>,
+        } satisfies TableProps<GroupNode, unknown>,
       });
 
       expect(result.current).toHaveProperty('headerColumns');
@@ -68,7 +68,7 @@ describe('table', () => {
           enableRowSelection: false,
           header: jest.fn(),
           rowCell: jest.fn(),
-        } as TableProps<GroupNode, unknown>,
+        } satisfies TableProps<GroupNode, unknown>,
       });
 
       expect(result.current.rows.length).toBe(data.length);
@@ -93,7 +93,7 @@ describe('table', () => {
             enableRowSelection: false,
             header: jest.fn(),
             rowCell: jest.fn(),
-          } as TableProps<GroupNode, unknown>,
+          } satisfies TableProps<GroupNode, unknown>,
         });
 
         expect(Object.keys(cascadeState.table.expanded ?? {})).toHaveLength(0);
@@ -124,7 +124,7 @@ describe('table', () => {
             enableRowSelection: false,
             header: jest.fn(),
             rowCell: jest.fn(),
-          } as TableProps<GroupNode, unknown>,
+          } satisfies TableProps<GroupNode, unknown>,
         });
 
         // Initially no rows should be expanded
@@ -161,7 +161,7 @@ describe('table', () => {
             enableRowSelection: false,
             header: jest.fn(),
             rowCell: jest.fn(),
-          } as TableProps<GroupNode, unknown>,
+          } satisfies TableProps<GroupNode, unknown>,
         });
 
         // Initially no rows should be expanded

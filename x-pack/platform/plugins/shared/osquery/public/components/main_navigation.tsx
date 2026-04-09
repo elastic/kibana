@@ -26,6 +26,7 @@ import { PAGE_ROUTING_PATHS } from '../common/page_paths';
 import { ManageIntegrationLink } from './manage_integration_link';
 import { useKibana } from '../common/lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
+import { getHistoryFilters } from '../actions/history_filter_storage';
 
 enum Section {
   LiveQueries = 'live_queries',
@@ -64,7 +65,10 @@ export const MainNavigation = () => {
   });
 
   const historySection = isHistoryEnabled ? Section.History : Section.LiveQueries;
-  const historyNavProps = useRouterNavigate(historySection);
+  const persistedHistoryQs = isHistoryEnabled ? getHistoryFilters() : '';
+  const historyNavProps = useRouterNavigate(
+    persistedHistoryQs ? `${historySection}${persistedHistoryQs}` : historySection
+  );
   const packsNavProps = useRouterNavigate(Section.Packs);
   const savedQueriesNavProps = useRouterNavigate(Section.SavedQueries);
   const newQueryNavProps = useRouterNavigate('/new');

@@ -127,14 +127,15 @@ describe('transformPanelsOut', () => {
               "x": 0,
               "y": 0,
             },
+            "id": "2e814ac0-33c2-4676-9d29-e1f868cddebd",
             "type": "markdown",
-            "uid": "2e814ac0-33c2-4676-9d29-e1f868cddebd",
           },
           Object {
             "collapsed": true,
             "grid": Object {
               "y": 15,
             },
+            "id": "bcebc09a-270f-42ef-8d45-daf5f5f4f511",
             "panels": Array [
               Object {
                 "config": Object {
@@ -146,12 +147,11 @@ describe('transformPanelsOut', () => {
                   "x": 0,
                   "y": 0,
                 },
+                "id": "d724d87b-2256-4c8b-8aa3-55bc0b8881c6",
                 "type": "markdown",
-                "uid": "d724d87b-2256-4c8b-8aa3-55bc0b8881c6",
               },
             ],
             "title": "Section 1",
-            "uid": "bcebc09a-270f-42ef-8d45-daf5f5f4f511",
           },
         ],
         "warnings": Array [],

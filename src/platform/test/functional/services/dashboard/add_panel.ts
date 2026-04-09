@@ -18,6 +18,7 @@ export class DashboardAddPanelService extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly savedObjectsFinder = this.ctx.getService('savedObjectsFinder');
   private readonly toasts = this.ctx.getService('toasts');
+  private readonly appMenu = this.ctx.getPageObject('appMenu');
 
   private async dismissToastsAndClick(element: WebElementWrapper) {
     await this.toasts.dismissAll();
@@ -35,7 +36,7 @@ export class DashboardAddPanelService extends FtrService {
 
   async clickTopNavAddMenu() {
     this.log.debug('DashboardAddPanel.clickTopNavAddMenu');
-    await this.testSubjects.click('dashboardAddTopNavButton');
+    await this.appMenu.clickMenuItem('dashboardAddTopNavButton');
   }
 
   async clickAddFromLibrary() {
@@ -101,7 +102,9 @@ export class DashboardAddPanelService extends FtrService {
     this.log.debug('DashboardAddPanel.openAddPanelFlyout');
     await this.clickTopNavAddMenu();
     await this.testSubjects.click('dashboardOpenAddPanelFlyoutButton');
-    await this.testSubjects.existOrFail('dashboardPanelSelectionFlyout');
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail('dashboardPanelSelectionFlyout');
+    });
     await this.retry.try(async () => {
       return await this.testSubjects.exists('dashboardPanelSelectionList');
     });

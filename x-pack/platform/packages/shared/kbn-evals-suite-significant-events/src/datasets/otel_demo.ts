@@ -26,51 +26,61 @@ export const otelDemoDataset: DatasetConfig = {
             id: 'entity-frontend',
             text: 'Must identify frontend service as an entity (evidence: resource.attributes.app=frontend OR resource.attributes.app.kubernetes.io/name=frontend OR resource.attributes.k8s.deployment.name=frontend)',
             score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'frontend' } }],
           },
           {
             id: 'entity-checkout',
             text: 'Must identify checkout service as an entity (evidence: resource.attributes.app=checkout)',
             score: 2,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'checkout' } }],
           },
           {
             id: 'entity-cart',
             text: 'Must identify cart service as an entity (evidence: resource.attributes.app=cart; cartservice logs)',
             score: 2,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'cart' } }],
           },
           {
             id: 'entity-payment',
             text: 'Must identify payment service as an entity (evidence: resource.attributes.app=payment; paymentservice container metadata)',
             score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'payment' } }],
           },
           {
             id: 'entity-product-catalog',
             text: 'Must identify product-catalog service as an entity (evidence: resource.attributes.app=product-catalog OR resource.attributes.app.kubernetes.io/name=product-catalog OR resource.attributes.k8s.deployment.name=product-catalog)',
             score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'product-catalog' } }],
           },
           {
             id: 'entity-shipping',
             text: 'Must identify shipping service as an entity (evidence: resource.attributes.app=shipping)',
             score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'shipping' } }],
           },
           {
             id: 'entity-email',
             text: 'Must identify email service as an entity (evidence: resource.attributes.app=email)',
             score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'email' } }],
           },
           {
             id: 'entity-ad',
             text: 'Must identify ad service as an entity (evidence: resource.attributes.app=ad)',
             score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'ad' } }],
           },
           {
             id: 'entity-recommendation',
             text: 'Must identify recommendation service as an entity (evidence: resource.attributes.app=recommendation)',
             score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'recommendation' } }],
           },
           {
             id: 'entity-quote',
             text: 'Must identify quote service as an entity (evidence: resource.attributes.app=quote)',
             score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'quote' } }],
           },
           {
             id: 'dep-checkout-payment',
@@ -93,7 +103,6 @@ export const otelDemoDataset: DatasetConfig = {
       metadata: {
         difficulty: 'easy',
         failure_domain: 'none',
-        failure_mode: 'healthy_baseline',
       },
     },
     {
@@ -121,11 +130,13 @@ export const otelDemoDataset: DatasetConfig = {
             id: 'entity-checkout',
             text: 'Must identify checkout service as an entity (evidence: resource.attributes.app=checkout)',
             score: 2,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'checkout' } }],
           },
           {
             id: 'entity-payment',
             text: 'Must identify payment service as an entity and downstream target (evidence: resource.attributes.app=payment and/or paymentservice container metadata)',
             score: 2,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'payment' } }],
           },
           {
             id: 'dep-checkout-payment',
@@ -136,6 +147,7 @@ export const otelDemoDataset: DatasetConfig = {
             id: 'entity-frontend',
             text: 'Must identify frontend service (evidence: resource.attributes.app=frontend; upstream impact)',
             score: 1,
+            sampling_filters: [{ term: { 'resource.attributes.app': 'frontend' } }],
           },
           {
             id: 'error-signatures',
@@ -432,7 +444,6 @@ export const otelDemoDataset: DatasetConfig = {
       metadata: {
         difficulty: 'easy',
         failure_domain: 'none',
-        failure_mode: 'healthy_baseline',
       },
     },
     {

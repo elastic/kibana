@@ -207,12 +207,12 @@ describe('evaluateMatchers', () => {
       expect(matched).toHaveLength(1);
     });
 
-    it('matches rule.labels via array membership', () => {
+    it('matches rule.tags via array membership', () => {
       const episode = createAlertEpisode({ rule_id: 'r1' });
-      const rule = createRule({ id: 'r1', labels: ['production', 'critical'] });
+      const rule = createRule({ id: 'r1', tags: ['production', 'critical'] });
       const policy = createNotificationPolicy({
         id: 'p1',
-        matcher: 'rule.labels: "production"',
+        matcher: 'rule.tags: "production"',
       });
 
       const matched = evaluateMatchers(
@@ -226,10 +226,10 @@ describe('evaluateMatchers', () => {
 
     it('matches combined episode and rule conditions', () => {
       const episode = createAlertEpisode({ rule_id: 'r1', episode_status: 'active' });
-      const rule = createRule({ id: 'r1', labels: ['production'] });
+      const rule = createRule({ id: 'r1', tags: ['production'] });
       const policy = createNotificationPolicy({
         id: 'p1',
-        matcher: 'episode_status: active and rule.labels: "production"',
+        matcher: 'episode_status: active and rule.tags: "production"',
       });
 
       const matched = evaluateMatchers(
@@ -241,12 +241,12 @@ describe('evaluateMatchers', () => {
       expect(matched).toHaveLength(1);
     });
 
-    it('does not match rule.labels when rule has no matching labels', () => {
+    it('does not match rule.tags when rule has no matching tags', () => {
       const episode = createAlertEpisode({ rule_id: 'r1' });
-      const rule = createRule({ id: 'r1', labels: [] });
+      const rule = createRule({ id: 'r1', tags: [] });
       const policy = createNotificationPolicy({
         id: 'p1',
-        matcher: 'rule.labels: "production"',
+        matcher: 'rule.tags: "production"',
       });
 
       const matched = evaluateMatchers(
@@ -260,10 +260,10 @@ describe('evaluateMatchers', () => {
 
     it('does not match when combined condition is partially met', () => {
       const episode = createAlertEpisode({ rule_id: 'r1', episode_status: 'inactive' });
-      const rule = createRule({ id: 'r1', labels: ['production'] });
+      const rule = createRule({ id: 'r1', tags: ['production'] });
       const policy = createNotificationPolicy({
         id: 'p1',
-        matcher: 'episode_status: active and rule.labels: "production"',
+        matcher: 'episode_status: active and rule.tags: "production"',
       });
 
       const matched = evaluateMatchers(

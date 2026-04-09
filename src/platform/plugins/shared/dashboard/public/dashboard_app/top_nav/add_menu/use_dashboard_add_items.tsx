@@ -122,7 +122,7 @@ export const useDashboardAddItems = ({ dashboardApi }: Props): AppMenuPopoverIte
         label: i18n.translate('dashboard.solutionToolbar.editorMenuButtonLabel', {
           defaultMessage: 'New panel',
         }),
-        iconType: 'plusInCircle',
+        iconType: 'plusCircle',
         order: 2,
         testId: 'dashboardOpenAddPanelFlyoutButton',
         run: openAddPanelFlyout,
@@ -142,7 +142,7 @@ export const useDashboardAddItems = ({ dashboardApi }: Props): AppMenuPopoverIte
         label: i18n.translate('dashboard.solutionToolbar.controlsMenuButtonLabel', {
           defaultMessage: 'Controls',
         }),
-        iconType: 'controlsHorizontal',
+        iconType: 'controls',
         order: 4,
         testId: 'dashboard-controls-menu-button',
         items: controlItems,

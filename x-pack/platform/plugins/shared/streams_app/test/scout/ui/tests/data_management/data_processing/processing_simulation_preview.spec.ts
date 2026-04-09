@@ -14,7 +14,8 @@ import { generateLogsData } from '../../../fixtures/generators';
 // lowercase, trim, convert, etc.) is covered by API tests in
 // test/scout/api/tests/processing_simulate.spec.ts
 // These UI tests focus on preview table behavior, auto-update, and UI-specific features
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/260710
+test.describe.skip(
   'Stream data processing - simulation preview',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {

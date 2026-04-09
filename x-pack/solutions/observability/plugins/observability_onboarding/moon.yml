@@ -60,6 +60,7 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/ingest-hub-plugin'
   - '@kbn/shared-ux-utility'
+  - '@kbn/core-elasticsearch-server'
 tags:
   - plugin
   - prod

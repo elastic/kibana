@@ -25,14 +25,12 @@ import type {
   AppMenuPopoverItem,
   AppMenuPrimaryActionItem,
   AppMenuRunActionParams,
-  AppMenuSecondaryActionItem,
 } from '@kbn/core-chrome-app-menu-components';
 import type {
   DiscoverAppMenuItemType,
   DiscoverAppMenuPopoverItem,
   DiscoverAppMenuPrimaryActionItem,
   DiscoverAppMenuRunActionParams,
-  DiscoverAppMenuSecondaryActionItem,
 } from '@kbn/discover-utils';
 import type { DiscoverServices } from '../../../../../build_services';
 
@@ -77,7 +75,6 @@ export async function runAppMenuAction({
   appMenuItem:
     | DiscoverAppMenuItemType
     | DiscoverAppMenuPrimaryActionItem
-    | DiscoverAppMenuSecondaryActionItem
     | DiscoverAppMenuPopoverItem;
   anchorElement: HTMLElement;
   services: DiscoverServices;
@@ -125,8 +122,6 @@ type EnhancedAppMenuItem<T> = T extends DiscoverAppMenuItemType
   ? AppMenuItemType
   : T extends DiscoverAppMenuPrimaryActionItem
   ? AppMenuPrimaryActionItem
-  : T extends DiscoverAppMenuSecondaryActionItem
-  ? AppMenuSecondaryActionItem
   : T extends DiscoverAppMenuPopoverItem
   ? AppMenuPopoverItem
   : never;
@@ -134,7 +129,6 @@ type EnhancedAppMenuItem<T> = T extends DiscoverAppMenuItemType
 type DiscoverAppMenuItem =
   | DiscoverAppMenuItemType
   | DiscoverAppMenuPrimaryActionItem
-  | DiscoverAppMenuSecondaryActionItem
   | DiscoverAppMenuPopoverItem;
 
 /**

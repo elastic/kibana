@@ -14,92 +14,93 @@ export const TABLE_CAPTION = i18n.translate(
   }
 );
 
-export const COLUMN_STATUS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.statusColumn',
+export const STATUS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.status',
   {
     defaultMessage: 'Status',
   }
 );
 
-export const COLUMN_STATUS_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.statusColumnTooltip',
+export const STATUS_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.statusTooltip',
   {
     defaultMessage: 'Overall status of execution.',
   }
 );
 
-export const COLUMN_RUN_TYPE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.runTypeColumn',
+export const RUN_TYPE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.runType',
   {
     defaultMessage: 'Run type',
   }
 );
 
-export const COLUMN_RUN_TYPE_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.runTypeColumnTooltip',
+export const RUN_TYPE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.runTypeTooltip',
   {
     defaultMessage: 'Whether this was a standard scheduled execution or a manual backfill run.',
   }
 );
 
-export const COLUMN_TIMESTAMP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.timestampColumn',
+export const TIMESTAMP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.timestamp',
   {
     defaultMessage: 'Timestamp',
   }
 );
 
-export const COLUMN_TIMESTAMP_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.timestampColumnTooltip',
+export const TIMESTAMP_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.timestampTooltip',
   {
     defaultMessage: 'Datetime rule execution initiated.',
   }
 );
 
-export const COLUMN_DURATION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.durationColumn',
+export const DURATION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.duration',
   {
     defaultMessage: 'Execution duration',
   }
 );
 
-export const COLUMN_DURATION_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.durationColumnTooltip',
+export const DURATION_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.durationTooltip',
   {
-    defaultMessage: 'The length of time it took for the rule to run (hh:mm:ss:SSS).',
+    defaultMessage: 'The length of time it took for the rule to run.',
   }
 );
 
-export const COLUMN_ALERTS_CREATED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.alertsCreatedColumn',
+export const ALERTS_CREATED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.alertsCreated',
   {
     defaultMessage: 'Alerts created',
   }
 );
 
-export const COLUMN_ALERTS_CREATED_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.alertsCreatedColumnTooltip',
+export const ALERTS_CREATED_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.alertsCreatedTooltip',
   {
-    defaultMessage: 'Number of new alerts generated during this execution.',
+    defaultMessage:
+      'Number of alerts eventually indexed in Elasticsearch after de-duplication and suppression.',
   }
 );
 
-export const COLUMN_MESSAGE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.messageColumn',
+export const MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.message',
   {
     defaultMessage: 'Message',
   }
 );
 
-export const COLUMN_MESSAGE_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.messageColumnTooltip',
+export const MESSAGE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.messageTooltip',
   {
     defaultMessage: 'Relevant message from execution outcome.',
   }
 );
 
-export const COLUMN_ACTIONS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.actionsColumn',
+export const ACTIONS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.actions',
   {
     defaultMessage: 'Actions',
   }
@@ -229,15 +230,15 @@ export const FLYOUT_ACCORDION_ALERTS = i18n.translate(
 export const FLYOUT_TOOLTIP_ALERTS_CREATED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutTooltipAlertsCreated',
   {
-    defaultMessage: 'Number of new alerts generated during this execution.',
+    defaultMessage:
+      'Number of alerts eventually indexed in Elasticsearch after de-duplication and suppression.',
   }
 );
 
 export const FLYOUT_TOOLTIP_CANDIDATE_ALERTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutTooltipCandidateAlerts',
   {
-    defaultMessage:
-      'Number of events that matched the rule query before deduplication and filtering.',
+    defaultMessage: 'Number of detected alerts before applying de-duplication and suppression.',
   }
 );
 
@@ -258,19 +259,19 @@ export const FLYOUT_ACCORDION_DURATION_BREAKDOWN = i18n.translate(
 export const FLYOUT_TOOLTIP_SEARCH_DURATION = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutTooltipSearchDuration',
   {
-    defaultMessage: 'The length of time it took to search for alerts (hh:mm:ss:SSS).',
+    defaultMessage: 'Time spent on Elasticsearch search requests in total during rule execution.',
   }
 );
 
 export const FLYOUT_TOOLTIP_INDEXING_TOTAL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutTooltipIndexingTotal',
   {
-    defaultMessage: 'The length of time it took to index detected alerts (hh:mm:ss:SSS).',
+    defaultMessage: 'Time spent on indexing detected alerts.',
   }
 );
 
-export const FLYOUT_ACCORDION_EXECUTION_METRICS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutAccordionExecutionMetrics',
+export const FLYOUT_ACCORDION_TIMING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutAccordionTiming',
   {
     defaultMessage: 'Timing',
   }
@@ -287,14 +288,14 @@ export const FLYOUT_TOOLTIP_GAP_DURATION = i18n.translate(
 export const FLYOUT_TOOLTIP_SCHEDULING_DELAY = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutTooltipSchedulingDelay',
   {
-    defaultMessage: 'The length of time from rule scheduled till rule executed (hh:mm:ss:SSS).',
+    defaultMessage: 'The length of time from rule scheduled till rule executed.',
   }
 );
 
 export const FLYOUT_TOOLTIP_EXECUTION_DURATION = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutTooltipExecutionDuration',
   {
-    defaultMessage: 'The length of time it took for the rule to run (hh:mm:ss:SSS).',
+    defaultMessage: 'The length of time it took for the rule to run.',
   }
 );
 
@@ -343,7 +344,7 @@ export const FLYOUT_ACCORDION_INDICES = i18n.translate(
 export const FLYOUT_TOOLTIP_MATCHED_INDICES = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutTooltipMatchedIndices',
   {
-    defaultMessage: 'Number of indices that contained matching source events.',
+    defaultMessage: `Number of indices matching rule's index patterns`,
   }
 );
 

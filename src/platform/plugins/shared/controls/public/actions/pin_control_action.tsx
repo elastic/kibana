@@ -71,7 +71,7 @@ export class PinControlAction
 
   public getIconType({ embeddable }: EmbeddableApiContext) {
     if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
-    return embeddable.parentApi.panelIsPinned(embeddable.uuid) ? 'pinFilled' : 'pin';
+    return embeddable.parentApi.panelIsPinned(embeddable.uuid) ? 'pinFill' : 'pin';
   }
 
   public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {

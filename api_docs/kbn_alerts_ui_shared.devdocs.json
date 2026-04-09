@@ -743,7 +743,7 @@
           "; categories?: string[] | undefined; }) => JSX.Element | null"
         ],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/maintenance_window_callout/index.tsx",
-        "lineNumber": 24,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -756,7 +756,7 @@
             "label": "{\n  kibanaServices,\n  categories,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/maintenance_window_callout/index.tsx",
-            "lineNumber": 27,
+            "lineNumber": 30,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -772,7 +772,7 @@
                   "KibanaServices"
                 ],
                 "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/maintenance_window_callout/index.tsx",
-                "lineNumber": 28,
+                "lineNumber": 31,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -788,7 +788,7 @@
                   "string[] | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/maintenance_window_callout/index.tsx",
-                "lineNumber": 29,
+                "lineNumber": 32,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1126,7 +1126,7 @@
           "QueryOptionsOverrides",
           "<({ http, ruleTypeIds }: ",
           "FetchAlertsIndexNamesParams",
-          ") => Promise<string[]>, string[], unknown, string[]>, \"onError\" | \"context\" | \"enabled\" | \"staleTime\" | \"refetchOnWindowFocus\"> | undefined) => ",
+          ") => Promise<string[]>, string[], unknown, string[]>, \"onError\" | \"context\" | \"enabled\" | \"retry\" | \"staleTime\" | \"refetchOnWindowFocus\"> | undefined) => ",
           "UseQueryResult",
           "<string[], unknown>"
         ],
@@ -1165,7 +1165,7 @@
               "QueryOptionsOverrides",
               "<({ http, ruleTypeIds }: ",
               "FetchAlertsIndexNamesParams",
-              ") => Promise<string[]>, string[], unknown, string[]>, \"onError\" | \"context\" | \"enabled\" | \"staleTime\" | \"refetchOnWindowFocus\"> | undefined"
+              ") => Promise<string[]>, string[], unknown, string[]>, \"onError\" | \"context\" | \"enabled\" | \"retry\" | \"staleTime\" | \"refetchOnWindowFocus\"> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/hooks/use_fetch_alerts_index_names_query.ts",
             "lineNumber": 29,

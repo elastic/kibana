@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
+import { DEFAULT_EXCLUDED_GAP_REASONS, gapReasonType } from '@kbn/alerting-plugin/common';
 
 import type { CoreSetup, UiSettingsParams } from '@kbn/core/server';
 import {
@@ -45,6 +46,7 @@ import {
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE,
   EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
+  EXCLUDED_GAP_REASONS_KEY,
   EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
   INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION,
   IP_REPUTATION_LINKS_SETTING,
@@ -484,6 +486,29 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: false,
       solutionViews: ['classic', 'security'],
+    },
+    [EXCLUDED_GAP_REASONS_KEY]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.excludedGapReasonsLabel', {
+        defaultMessage: 'Excluded gap reasons',
+      }),
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.excludedGapReasonsDescription',
+        {
+          defaultMessage:
+            'Gap reason types to exclude from gap monitoring and auto-fill scheduling.',
+        }
+      ),
+      type: 'array',
+      value: DEFAULT_EXCLUDED_GAP_REASONS,
+      requiresPageReload: false,
+      readonly: true,
+      schema: schema.arrayOf(
+        schema.oneOf([
+          schema.literal(gapReasonType.RULE_DISABLED),
+          schema.literal(gapReasonType.RULE_DID_NOT_RUN),
+        ]),
+        { maxSize: Object.values(gapReasonType).length }
+      ),
     },
     ...getDefaultValueReportSettings(),
     ...(experimentalFeatures.extendedRuleExecutionLoggingEnabled

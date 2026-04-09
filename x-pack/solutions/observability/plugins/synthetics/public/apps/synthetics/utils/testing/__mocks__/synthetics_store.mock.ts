@@ -164,6 +164,12 @@ export const mockState: SyntheticsAppState = {
     error: null,
   },
   maintenanceWindows: {},
+  monitorHealth: {
+    data: null,
+    loading: false,
+    loaded: false,
+    error: null,
+  },
 };
 
 function getBrowserJourneyMockSlice() {

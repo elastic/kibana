@@ -57,7 +57,7 @@ export const DashboardListingEmptyPrompt = ({
         <EuiButton
           onClick={createItem}
           fill
-          iconType="plusInCircle"
+          iconType="plusCircle"
           data-test-subj="newItemButton"
           disabled={disableCreateDashboardButton}
         >
@@ -109,7 +109,7 @@ export const DashboardListingEmptyPrompt = ({
   if (!getDashboardCapabilities().showWriteControls) {
     return (
       <EuiEmptyPrompt
-        iconType="glasses"
+        iconType="readOnly"
         title={
           <h1 id="dashboardListingHeading" data-test-subj="emptyListPrompt">
             {noItemsStrings.getReadonlyTitle()}

@@ -48,7 +48,7 @@ describe('executeEsqlQuery', () => {
       null,
       undefined
     );
-    expect(result).toEqual(mockDatatable);
+    expect(result).toEqual(mockDatatable.rows);
   });
 
   it('should pass input to the expression execution', async () => {

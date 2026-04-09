@@ -8,7 +8,14 @@
  */
 
 import type { Type } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import type {
+  ObjectResultType,
+  ObjectType,
+  Props,
+  TypeOptions,
+} from '@kbn/config-schema/src/types';
+import type { ObjectUnionType } from './charts/utils/object_union';
+import { objectUnion } from './charts/utils/object_union';
 import type { MetricState } from './charts/metric';
 import { metricStateSchema } from './charts/metric';
 import type { LegacyMetricState } from './charts/legacy_metric';
@@ -47,20 +54,20 @@ import { pieStateSchema } from './charts/pie';
  *  - Defining the `LensApiState` type from the schema types
  *  - Exporting this value as `Type<LensApiState>`
  */
-export const _lensApiStateSchema: any = schema.oneOf(
+export const _lensApiStateSchema: any = objectUnion(
   [
-    metricStateSchema,
-    legacyMetricStateSchema,
-    xyStateSchema,
-    gaugeStateSchema,
-    heatmapStateSchema,
-    tagcloudStateSchema,
-    regionMapStateSchema,
-    datatableStateSchema,
-    pieStateSchema,
-    mosaicStateSchema,
-    treemapStateSchema,
-    waffleStateSchema,
+    ...metricStateSchema.getUnionTypes(),
+    ...legacyMetricStateSchema.getUnionTypes(),
+    ...xyStateSchema.getUnionTypes(),
+    ...gaugeStateSchema.getUnionTypes(),
+    ...heatmapStateSchema.getUnionTypes(),
+    ...tagcloudStateSchema.getUnionTypes(),
+    ...regionMapStateSchema.getUnionTypes(),
+    ...datatableStateSchema.getUnionTypes(),
+    ...pieStateSchema.getUnionTypes(),
+    ...mosaicStateSchema.getUnionTypes(),
+    ...treemapStateSchema.getUnionTypes(),
+    ...waffleStateSchema.getUnionTypes(),
   ],
   { meta: { id: 'lensApiState', title: 'Visualizations' } }
 );
@@ -81,9 +88,24 @@ export type LensApiState =
 
 export const lensApiStateSchema: Type<LensApiState> = _lensApiStateSchema;
 
+/**
+ * Extends `lensApiStateSchema` with extra props and options.
+ *
+ * This type will be be union of all `LensApiState` intersected with the new props.
+ */
+export function extendLensApiStateSchema<T extends Props>(
+  props: T,
+  options?: TypeOptions<LensApiState & T>
+): Type<LensApiState & ObjectResultType<T>> {
+  // these types are a bit of a hack mainly due to the tsc compiler limit
+  // but baseSchema can extend with any props correctly and return the correct `Type` wrapper
+  const baseSchema = _lensApiStateSchema as ObjectUnionType<[ObjectType<any>], LensApiState & T>;
+  return baseSchema.extends(props, options as any).toType();
+}
+
 export type { MetricState, metricStateSchemaNoESQL } from './charts/metric';
 export type { LegacyMetricState, legacyMetricStateSchemaNoESQL } from './charts/legacy_metric';
-export type { XYState } from './charts/xy';
+export type { XYState, XYStateNoESQL, XYStateESQL, XYLayer } from './charts/xy';
 export type { GaugeState, gaugeStateSchemaNoESQL } from './charts/gauge';
 export type { HeatmapState, heatmapStateSchemaNoESQL } from './charts/heatmap';
 export type { TagcloudState, TagcloudStateNoESQL, TagcloudStateESQL } from './charts/tagcloud';

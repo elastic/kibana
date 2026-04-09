@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, type Props, type TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema, type Props } from '@kbn/config-schema';
 
 import {
   countMetricOperationSchema,
@@ -149,14 +150,17 @@ export function mergeAllBucketsWithChartDimensionSchema<T extends Props>(baseSch
   ]);
 }
 
-export const xScaleSchema = schema.maybe(
-  schema.oneOf([schema.literal('ordinal'), schema.literal('temporal'), schema.literal('linear')], {
+/**
+ * X-axis scale type for data transformation
+ */
+export const xScaleSchema = schema.oneOf(
+  [schema.literal('ordinal'), schema.literal('temporal'), schema.literal('linear')],
+  {
     meta: {
       // IMPORTANT: This description guides LLM agents - modify with caution and test agent behavior after changes
       description:
-        "X-axis scale type for ES|QL charts. Use 'temporal' for timestamp/date fields (e.g., @timestamp, DATE_TRUNC results). Use 'ordinal' for categorical/text fields. Use 'linear' for numeric fields.",
+        "X-axis scale type. Use 'temporal' for timestamp/date fields (e.g., @timestamp, DATE_TRUNC results). Use 'ordinal' for categorical/text fields. Use 'linear' for numeric fields.",
     },
-  })
+  }
 );
-
 export type XScaleSchemaType = TypeOf<typeof xScaleSchema>;

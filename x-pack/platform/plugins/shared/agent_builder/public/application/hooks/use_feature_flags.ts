@@ -6,13 +6,10 @@
  */
 
 import { useMemo } from 'react';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { FeatureFlags } from '../route_config';
 import { useExperimentalFeatures } from './use_experimental_features';
 
 export const useFeatureFlags = (): FeatureFlags => {
   const experimental = useExperimentalFeatures();
-  const connectors = useUiSetting<boolean>(AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID);
-  return useMemo(() => ({ experimental, connectors }), [experimental, connectors]);
+  return useMemo(() => ({ experimental }), [experimental]);
 };

@@ -7,6 +7,8 @@
 
 import { z } from '@kbn/zod/v4';
 
+import { BULK_FILTER_MAX_RULES } from './constants';
+
 /**
  * Schema for bulk operation request bodies.
  *
@@ -22,7 +24,12 @@ export const bulkOperationParamsSchema = z
       .max(100)
       .optional()
       .describe('Explicit list of rule IDs to operate on.'),
-    filter: z.string().optional().describe('KQL filter string to match rules.'),
+    filter: z
+      .string()
+      .optional()
+      .describe(
+        `KQL filter string to match rules. At most ${BULK_FILTER_MAX_RULES} matching rules are processed per request.`
+      ),
   })
   .refine((data) => data.ids != null || data.filter != null, {
     message: 'Either ids or filter must be provided.',

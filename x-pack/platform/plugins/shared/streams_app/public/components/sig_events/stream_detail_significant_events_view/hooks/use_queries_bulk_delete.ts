@@ -12,23 +12,23 @@ import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../../hooks/sig_events/use_fe
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useQueriesApi } from '../../../../hooks/sig_events/use_queries_api';
 
-interface UseQueriesBulkDeleteParams {
+interface UseRulesDemoteParams {
   definition: Streams.all.Definition;
   onSuccess?: () => void;
 }
 
-export function useQueriesBulkDelete({ definition, onSuccess }: UseQueriesBulkDeleteParams) {
+export function useRulesDemote({ definition, onSuccess }: UseRulesDemoteParams) {
   const {
     core: {
       notifications: { toasts },
     },
   } = useKibana();
   const queryClient = useQueryClient();
-  const { deleteQueriesInBulk } = useQueriesApi();
+  const { demote } = useQueriesApi();
 
   const mutation = useMutation<void, Error, string[]>({
     mutationFn: async (queryIds) => {
-      await deleteQueriesInBulk({ queryIds, streamName: definition.name });
+      await demote({ queryIds });
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY });
@@ -47,14 +47,14 @@ export function useQueriesBulkDelete({ definition, onSuccess }: UseQueriesBulkDe
   });
 
   return {
-    deleteRulesInBulk: async (queryIds: string[]) => {
+    demoteRules: async (queryIds: string[]) => {
       if (queryIds.length === 0) {
         return;
       }
 
       await mutation.mutateAsync(queryIds);
     },
-    isDeleting: mutation.isLoading,
+    isPending: mutation.isLoading,
   };
 }
 

@@ -40,6 +40,7 @@ export interface RequestBasicOptions extends IEsSearchRequest {
   kuery?: string;
   factoryQueryType?: FactoryQueryTypes;
   componentTemplateExists?: boolean;
+  ccsEnabled?: boolean;
 }
 
 /** A mapping of semantic fields to their document counterparts */

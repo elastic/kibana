@@ -27,6 +27,17 @@ import { getOrCreateFilterStore, destroyFilterStore } from './filter_store';
  */
 export const useGraphFilters = (
   scopeId: string,
+  initialEntityIds: Array<{
+    /**
+     * The ID of the entity.
+     */
+    id: string;
+
+    /**
+     * Whether this entity is the origin of the graph (for centering).
+     */
+    isOrigin: boolean;
+  }>,
   dataViewId: string
 ): {
   searchFilters: Filter[];
@@ -39,7 +50,8 @@ export const useGraphFilters = (
   // Update dataViewId when it changes
   useEffect(() => {
     store.setDataViewId(dataViewId);
-  }, [store, dataViewId]);
+    store.setInitialEntityIds(initialEntityIds);
+  }, [store, dataViewId, initialEntityIds]);
 
   // Clean up store on unmount or when scopeId changes
   useEffect(() => {
@@ -91,13 +103,17 @@ export const useGraphFilters = (
 
   // Convert expandedEntityIds Set to API format
   const entityIdsForApi = useMemo(() => {
-    if (expandedEntityIds.size === 0) return undefined;
+    if (expandedEntityIds.size === 0) return initialEntityIds;
 
-    return Array.from(expandedEntityIds).map((id) => ({
-      id,
-      isOrigin: false, // User-expanded entities are not the graph origin
-    }));
-  }, [expandedEntityIds]);
+    return initialEntityIds.concat(
+      Array.from(expandedEntityIds)
+        .filter((id) => !initialEntityIds.some((entity) => entity.id === id))
+        .map((id) => ({
+          id,
+          isOrigin: false, // User-expanded entities are not the graph origin
+        }))
+    );
+  }, [expandedEntityIds, initialEntityIds]);
 
   return {
     searchFilters,

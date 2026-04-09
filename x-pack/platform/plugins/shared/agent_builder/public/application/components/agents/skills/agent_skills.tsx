@@ -24,6 +24,8 @@ import {
 } from '@elastic/eui';
 import type { PublicSkillDefinition, PublicSkillSummary } from '@kbn/agent-builder-common';
 import { useMutation, useQueryClient } from '@kbn/react-query';
+import { searchParamNames } from '../../../search_param_names';
+import { useQueryState } from '../../../hooks/use_query_state';
 import { labels } from '../../../utils/i18n';
 import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -41,6 +43,8 @@ import { SkillCreateFlyout } from './skill_create_flyout';
 import { PageWrapper } from '../common/page_wrapper';
 import { ICON_DIMENSIONS } from '../common/constants';
 import { useListDetailPageStyles } from '../common/styles';
+import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
+import { useCanEditAgent } from '../../../hooks/agents/use_can_edit_agent';
 
 export const AgentSkills: React.FC = () => {
   const { agentId } = useParams<{ agentId: string }>();
@@ -52,9 +56,11 @@ export const AgentSkills: React.FC = () => {
 
   const { agent, isLoading: agentLoading } = useAgentBuilderAgentById(agentId);
   const { skills: allSkills, isLoading: skillsLoading } = useSkillsService();
+  const { manageSkills } = useUiPrivileges();
+  const canEditAgent = useCanEditAgent({ agent });
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSkillId, setSelectedSkillId] = useState<string | null>(null);
+  const [selectedSkillId, setSelectedSkillId] = useQueryState<string>(searchParamNames.skillId);
   const pendingSelectSkillIdRef = useRef<string | null>(null);
   const [editingSkillId, setEditingSkillId] = useState<string | null>(null);
   const [isCreateFlyoutOpen, setIsCreateFlyoutOpen] = useState(false);
@@ -103,6 +109,8 @@ export const AgentSkills: React.FC = () => {
   }, [allSkills, agentSkillIdSet, enableElasticCapabilities, builtinSkills]);
 
   useEffect(() => {
+    if (agentLoading || skillsLoading) return;
+
     if (pendingSelectSkillIdRef.current) {
       const pendingInActive = activeSkills.some((s) => s.id === pendingSelectSkillIdRef.current);
       if (pendingInActive) {
@@ -122,7 +130,7 @@ export const AgentSkills: React.FC = () => {
         setSelectedSkillId(activeSkills[0]?.id ?? null);
       }
     }
-  }, [activeSkills, selectedSkillId]);
+  }, [activeSkills, selectedSkillId, setSelectedSkillId, agentLoading, skillsLoading]);
 
   const filteredActiveSkills = useMemo(() => {
     if (!searchQuery.trim()) return activeSkills;
@@ -233,44 +241,50 @@ export const AgentSkills: React.FC = () => {
                   {labels.agentSkills.manageAllSkills}
                 </EuiButtonEmpty>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiPopover
-                  aria-label={labels.agentSkills.addSkillButton}
-                  button={
-                    <EuiButton
-                      fill
-                      iconType="plusInCircle"
-                      iconSide="left"
-                      onClick={() => setIsAddMenuOpen((prev) => !prev)}
-                    >
-                      {labels.agentSkills.addSkillButton}
-                    </EuiButton>
-                  }
-                  isOpen={isAddMenuOpen}
-                  closePopover={() => setIsAddMenuOpen(false)}
-                  anchorPosition="downLeft"
-                  panelPaddingSize="none"
-                >
-                  <EuiContextMenuPanel
-                    items={[
-                      <EuiContextMenuItem
-                        key="importFromLibrary"
-                        icon="importAction"
-                        onClick={handleImportFromLibrary}
+              {canEditAgent && (
+                <EuiFlexItem grow={false}>
+                  <EuiPopover
+                    aria-label={labels.agentSkills.addSkillButton}
+                    button={
+                      <EuiButton
+                        fill
+                        iconType="plusInCircle"
+                        iconSide="left"
+                        onClick={() => setIsAddMenuOpen((prev) => !prev)}
                       >
-                        {labels.agentSkills.importFromLibraryMenuItem}
-                      </EuiContextMenuItem>,
-                      <EuiContextMenuItem
-                        key="createSkill"
-                        icon="pencil"
-                        onClick={handleOpenCreateFlyout}
-                      >
-                        {labels.agentSkills.createSkillMenuItem}
-                      </EuiContextMenuItem>,
-                    ]}
-                  />
-                </EuiPopover>
-              </EuiFlexItem>
+                        {labels.agentSkills.addSkillButton}
+                      </EuiButton>
+                    }
+                    isOpen={isAddMenuOpen}
+                    closePopover={() => setIsAddMenuOpen(false)}
+                    anchorPosition="downLeft"
+                    panelPaddingSize="none"
+                  >
+                    <EuiContextMenuPanel
+                      items={[
+                        <EuiContextMenuItem
+                          key="importFromLibrary"
+                          icon="importAction"
+                          onClick={handleImportFromLibrary}
+                        >
+                          {labels.agentSkills.importFromLibraryMenuItem}
+                        </EuiContextMenuItem>,
+                        ...(manageSkills
+                          ? [
+                              <EuiContextMenuItem
+                                key="createSkill"
+                                icon="pencil"
+                                onClick={handleOpenCreateFlyout}
+                              >
+                                {labels.agentSkills.createSkillMenuItem}
+                              </EuiContextMenuItem>,
+                            ]
+                          : []),
+                      ]}
+                    />
+                  </EuiPopover>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -311,7 +325,8 @@ export const AgentSkills: React.FC = () => {
                   onSelect={(s) => setSelectedSkillId(s.id)}
                   onRemove={handleRemoveSkill}
                   isRemoving={mutatingSkillId === skill.id}
-                  readOnly={enableElasticCapabilities && skill.readonly}
+                  isAutoIncluded={enableElasticCapabilities && skill.readonly}
+                  canEditAgent={canEditAgent}
                 />
               ))
             )}
@@ -324,10 +339,11 @@ export const AgentSkills: React.FC = () => {
               skillId={selectedSkillId}
               onEdit={() => setEditingSkillId(selectedSkillId)}
               onRemove={handleRemoveSelectedSkill}
-              isReadOnly={
+              isAutoIncluded={
                 enableElasticCapabilities &&
                 (activeSkills.find((s) => s.id === selectedSkillId)?.readonly ?? false)
               }
+              canEditAgent={canEditAgent}
             />
           ) : (
             <EuiFlexGroup

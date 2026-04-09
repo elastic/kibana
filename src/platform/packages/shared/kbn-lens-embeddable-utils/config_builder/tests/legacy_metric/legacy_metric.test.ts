@@ -8,6 +8,7 @@
  */
 
 import { legacyMetricStateSchema } from '../../schema/charts/legacy_metric';
+import type { LensApiState } from '../../schema';
 import { validateConverter, validateAPIConverter } from '../validate';
 import {
   customColorByValueAttributes,
@@ -54,8 +55,10 @@ describe('Legacy Metric', () => {
       validateAPIConverter(basicLegacyMetricWithDataView, legacyMetricStateSchema);
     });
 
-    it('should convert a ESQL-based legacy metric chart', () => {
-      validateAPIConverter(esqlLegacyMetric, legacyMetricStateSchema);
+    it('should reject a ESQL-based legacy metric chart', () => {
+      expect(() =>
+        validateAPIConverter(esqlLegacyMetric as unknown as LensApiState, legacyMetricStateSchema)
+      ).toThrow();
     });
 
     it('should convert a comprehensive legacy metric chart with ad hoc data view', () => {
@@ -66,8 +69,13 @@ describe('Legacy Metric', () => {
       validateAPIConverter(comprehensiveLegacyMetricWithDataView, legacyMetricStateSchema);
     });
 
-    it('should convert a comprehensive ESQL-based legacy metric chart', () => {
-      validateAPIConverter(comprehensiveEsqlLegacyMetric, legacyMetricStateSchema);
+    it('should reject a comprehensive ESQL-based legacy metric chart', () => {
+      expect(() =>
+        validateAPIConverter(
+          comprehensiveEsqlLegacyMetric as unknown as LensApiState,
+          legacyMetricStateSchema
+        )
+      ).toThrow();
     });
 
     it('should convert a legacy metric chart with apply_color_to, but without color', () => {

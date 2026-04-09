@@ -66,6 +66,7 @@ export const useWorkflowBulkActions = ({
 
   const canDeleteWorkflow = application?.capabilities.workflowsManagement.deleteWorkflow;
   const canUpdateWorkflow = application?.capabilities.workflowsManagement.updateWorkflow;
+  const canReadWorkflow = application?.capabilities.workflowsManagement.readWorkflow;
 
   const isDisabled = selectedWorkflows.length === 0;
 
@@ -217,7 +218,7 @@ export const useWorkflowBulkActions = ({
     }
 
     const hasExportableWorkflows = selectedWorkflows.some((w) => w.definition !== null);
-    if (hasExportableWorkflows) {
+    if (canReadWorkflow && hasExportableWorkflows) {
       mainPanelItems.push({
         name: i18n.translate('workflows.bulkActions.export', {
           defaultMessage: 'Export',
@@ -268,6 +269,7 @@ export const useWorkflowBulkActions = ({
     selectedWorkflows,
     canUpdateWorkflow,
     canDeleteWorkflow,
+    canReadWorkflow,
     isDisabled,
     handleEnableWorkflows,
     handleDisableWorkflows,

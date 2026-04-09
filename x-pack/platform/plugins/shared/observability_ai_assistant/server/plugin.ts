@@ -29,6 +29,10 @@ import { registerUsageCollector } from './collectors/usage';
 import { toolCallEvent } from './analytics/tool_call';
 import { conversationDeleteEvent } from './analytics/conversation_delete';
 import { conversationDuplicateEvent } from './analytics/conversation_duplicate';
+import {
+  observabilityParentFeature,
+  observabilityAIAssistantInferenceFeatures,
+} from './inference_feature';
 export class ObservabilityAIAssistantPlugin
   implements
     Plugin<
@@ -91,6 +95,27 @@ export class ObservabilityAIAssistantPlugin
         },
       },
     });
+
+    if (plugins.searchInferenceEndpoints) {
+      plugins.searchInferenceEndpoints.features.register(observabilityParentFeature);
+
+      const failures: string[] = [];
+      for (const feature of observabilityAIAssistantInferenceFeatures) {
+        const result = plugins.searchInferenceEndpoints.features.register(feature);
+        if (!result.ok) {
+          failures.push(`${feature.featureId}: ${result.error}`);
+        }
+      }
+      if (failures.length) {
+        this.logger.warn(
+          `Failed to register inference feature for Observability AI Assistant: ${failures.join(
+            '; '
+          )}`
+        );
+      } else {
+        this.logger.debug('Registered Observability AI Assistant inference features');
+      }
+    }
 
     const routeHandlerPlugins = mapValues(plugins, (value, key) => {
       return {

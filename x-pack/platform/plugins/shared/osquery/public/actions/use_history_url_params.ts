@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { parse, stringify } from 'query-string';
 import type { SourceFilter } from '../../common/api/unified_history/types';
+import { saveHistoryFilters } from './history_filter_storage';
 
 export const DEFAULT_START_DATE = 'now-24h';
 export const DEFAULT_END_DATE = 'now';
@@ -111,12 +112,22 @@ export const useHistoryUrlParams = () => {
 
   const filters = useMemo(() => parseHistoryUrlParams(search), [search]);
 
+  // Sync sessionStorage with the current URL on mount and whenever the
+  // search string changes (e.g. user manually edits the URL bar).
+  useEffect(() => {
+    saveHistoryFilters(search);
+  }, [search]);
+
   const replaceUrl = useCallback(
     (nextFilters: HistoryUrlFilters) => {
       const serialized = serializeHistoryUrlParams(nextFilters);
       const qs = stringify(serialized, { sort: false, skipNull: true });
+      const nextSearch = qs ? `?${qs}` : '';
+      // Eager save — the useEffect above will also fire after history.replace,
+      // but writing here avoids a brief window where sessionStorage is stale.
+      saveHistoryFilters(nextSearch);
       const currentPathname = history.location.pathname;
-      history.replace({ pathname: currentPathname, search: qs ? `?${qs}` : '' });
+      history.replace({ pathname: currentPathname, search: nextSearch });
     },
     [history]
   );

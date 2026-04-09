@@ -55,6 +55,6 @@ export const POLICY_ARTIFACT_EMPTY_UNEXISTING_LABELS = Object.freeze({
   ),
   emptyUnexistingImportButtonTitle: i18n.translate(
     'xpack.securitySolution.endpoint.policy.artifacts.empty.unexisting.importAction',
-    { defaultMessage: 'Import artifact list' }
+    { defaultMessage: 'Import artifacts' }
   ),
 });

@@ -38,7 +38,7 @@ export const RowActionButtons = ({
         />
       ) : null}
       <EuiButtonIcon
-        iconType="plusInCircle"
+        iconType="plusCircle"
         color="primary"
         aria-label={ADD_BUTTON_TITLE}
         title={ADD_BUTTON_TITLE}

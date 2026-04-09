@@ -7,7 +7,7 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { useAlertingRulesCache } from './use_alerting_rules_cache';
-import type { FindRulesResponse } from '@kbn/alerting-v2-plugin/public/services/rules_api';
+import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 

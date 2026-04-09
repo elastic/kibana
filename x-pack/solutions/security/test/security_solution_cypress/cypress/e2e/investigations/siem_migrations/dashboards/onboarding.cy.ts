@@ -106,7 +106,7 @@ describe(
         },
         { interval: 500, timeout: 12000 }
       );
-      visit(GET_STARTED_URL);
+      visit(`${GET_STARTED_URL}/siem_migrations`);
     });
 
     after(() => {

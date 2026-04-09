@@ -26,7 +26,8 @@
     "@kbn/spaces-plugin",
     "@kbn/eval-kql",
     "@kbn/es-query",
-    "@kbn/std"
+    "@kbn/std",
+    "@kbn/core-http-common"
   ],
   "exclude": ["target/**/*"]
 }

@@ -23,6 +23,11 @@ import { addEventsStepDefinition } from './steps/add_events';
 import { findSimilarCasesStepDefinition } from './steps/find_similar_cases';
 import { addObservablesStepDefinition } from './steps/add_observables';
 import { addTagsStepDefinition } from './steps/add_tags';
+import { getCasesByAlertIdStepDefinition } from './steps/get_cases_by_alert_id';
+import { getAllAttachmentsStepDefinition } from './steps/get_all_attachments';
+import { updateObservableStepDefinition } from './steps/update_observable';
+import { deleteObservableStepDefinition } from './steps/delete_observable';
+import { getCasesStepDefinition } from './steps/get_cases';
 import {
   assignCaseStepDefinition,
   closeCaseStepDefinition,
@@ -64,4 +69,9 @@ export function registerCaseWorkflowSteps(
   workflowsExtensions.registerStepDefinition(addObservablesStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(addTagsStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(setCategoryStepDefinition(getCasesClient));
+  workflowsExtensions.registerStepDefinition(getCasesByAlertIdStepDefinition(getCasesClient));
+  workflowsExtensions.registerStepDefinition(getAllAttachmentsStepDefinition(getCasesClient));
+  workflowsExtensions.registerStepDefinition(updateObservableStepDefinition(getCasesClient));
+  workflowsExtensions.registerStepDefinition(deleteObservableStepDefinition(getCasesClient));
+  workflowsExtensions.registerStepDefinition(getCasesStepDefinition(getCasesClient));
 }

@@ -488,6 +488,80 @@
     "functions": [
       {
         "parentPluginId": "@kbn/core-security-server",
+        "id": "def-server.decodeApiKeyId",
+        "type": "Function",
+        "tags": [],
+        "label": "decodeApiKeyId",
+        "description": [],
+        "signature": [
+          "(encodedApiKey: string) => string | undefined"
+        ],
+        "path": "src/core/packages/security/server/src/authentication/api_keys/utils.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.decodeApiKeyId.$1",
+            "type": "string",
+            "tags": [],
+            "label": "encodedApiKey",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/utils.ts",
+            "lineNumber": 24,
+            "columnNumber": 32,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-server.extractApiKeyIdFromAuthzHeader",
+        "type": "Function",
+        "tags": [],
+        "label": "extractApiKeyIdFromAuthzHeader",
+        "description": [],
+        "signature": [
+          "(authorizationHeader: string | string[] | undefined) => string | undefined"
+        ],
+        "path": "src/core/packages/security/server/src/authentication/api_keys/utils.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.extractApiKeyIdFromAuthzHeader.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "authorizationHeader",
+            "description": [],
+            "signature": [
+              "string | string[] | undefined"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/utils.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
         "id": "def-server.isCreateRestAPIKeyParams",
         "type": "Function",
         "tags": [],
@@ -621,7 +695,7 @@
           "NativeAPIKeysType"
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/index.ts",
-        "lineNumber": 45,
+        "lineNumber": 46,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -638,7 +712,7 @@
               " | null"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/index.ts",
-            "lineNumber": 46,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -659,7 +733,7 @@
           "NativeAPIKeysWithContextType"
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/index.ts",
-        "lineNumber": 49,
+        "lineNumber": 50,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -676,7 +750,7 @@
               " | null"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/index.ts",
-            "lineNumber": 50,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

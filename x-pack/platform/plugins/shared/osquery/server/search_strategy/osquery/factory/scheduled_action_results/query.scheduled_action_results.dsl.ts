@@ -8,6 +8,7 @@
 import type { ISearchRequestParams } from '@kbn/search-types';
 import { ACTION_RESPONSES_DATA_STREAM_INDEX } from '../../../../../common/constants';
 import type { ScheduledActionResultsRequestOptions } from '../../../../../common/search_strategy';
+import { prefixIndexPatternsWithCcs } from '../../../../utils/ccs_utils';
 
 export const buildScheduledActionResultsQuery = ({
   scheduleId,
@@ -15,6 +16,7 @@ export const buildScheduledActionResultsQuery = ({
   spaceId,
   sort,
   pagination,
+  ccsEnabled,
 }: ScheduledActionResultsRequestOptions): ISearchRequestParams => {
   const filterQuery: Array<Record<string, unknown>> = [
     { term: { schedule_id: scheduleId } },
@@ -25,9 +27,14 @@ export const buildScheduledActionResultsQuery = ({
     filterQuery.push({ term: { space_id: spaceId } });
   }
 
+  const index = prefixIndexPatternsWithCcs(
+    `${ACTION_RESPONSES_DATA_STREAM_INDEX}*`,
+    ccsEnabled ?? false
+  );
+
   return {
     allow_no_indices: true,
-    index: `${ACTION_RESPONSES_DATA_STREAM_INDEX}*`,
+    index,
     ignore_unavailable: true,
     aggs: {
       aggs: {

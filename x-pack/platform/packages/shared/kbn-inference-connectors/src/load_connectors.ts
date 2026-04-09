@@ -12,6 +12,7 @@ import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
+import { fetchConnectorById } from './fetch_connector_by_id';
 import { fetchConnectorsForFeature } from './fetch_connectors_for_feature';
 import { isOpenAiProviderType } from './openai_provider_type_guard';
 import type { AIConnector } from './types';
@@ -39,26 +40,13 @@ export const toAIConnector = (connector: InferenceConnectorFromApi): AIConnector
       : undefined,
 });
 
-export const applyConnectorSettings = <T extends { id: string }>(
-  allConnectors: T[],
-  settings: SettingsStart
-): T[] => {
-  const defaultConnectorId = settings.client.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
-  const defaultConnectorOnly = settings.client.get<boolean>(
-    GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
-    false
-  );
-
-  if (defaultConnectorOnly && defaultConnectorId) {
-    const connector = allConnectors.find((c) => c.id === defaultConnectorId);
-    return connector ? [connector] : allConnectors;
-  }
-  return allConnectors;
-};
-
 /**
  * Fetches AI connectors for a given feature, maps them to {@link AIConnector},
  * and applies the default-connector UI settings filter.
+ *
+ * When the "default connector only" setting is active and a default connector
+ * ID is configured, the connector is retrieved directly by ID rather than
+ * filtered from the feature connector list.
  */
 export const loadConnectors = async ({
   http,
@@ -69,7 +57,33 @@ export const loadConnectors = async ({
   featureId: string;
   settings: SettingsStart;
 }): Promise<AIConnector[]> => {
-  const { connectors } = await fetchConnectorsForFeature(http, featureId);
+  const defaultConnectorId = settings.client.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
+  const defaultConnectorOnly = settings.client.get<boolean>(
+    GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+    false
+  );
+
+  if (defaultConnectorOnly) {
+    if (!defaultConnectorId) {
+      return [];
+    }
+    const connector = await fetchConnectorById(http, defaultConnectorId);
+    if (connector) {
+      return [connector];
+    } else {
+      return [];
+    }
+  }
+
+  const { connectors, soEntryFound } = await fetchConnectorsForFeature(http, featureId);
   const aiConnectors = connectors.map(toAIConnector);
-  return applyConnectorSettings(aiConnectors, settings);
+
+  if (!soEntryFound && defaultConnectorId) {
+    const defaultConnector = await fetchConnectorById(http, defaultConnectorId);
+    if (defaultConnector) {
+      return [defaultConnector, ...aiConnectors.filter((c) => c.id !== defaultConnectorId)];
+    }
+  }
+
+  return aiConnectors;
 };

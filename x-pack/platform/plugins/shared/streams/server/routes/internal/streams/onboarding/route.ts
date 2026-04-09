@@ -53,6 +53,15 @@ export const onboardingTaskRoute = createServerRoute({
         .describe(
           'Optional list of steps to perform as part of stream onboarding in the specified sequence. By default it will execute all steps.'
         ),
+      connectors: z
+        .object({
+          features: z.string().optional().describe('Connector ID for features identification.'),
+          queries: z.string().optional().describe('Connector ID for queries generation.'),
+        })
+        .optional()
+        .describe(
+          'Optional per-step connector overrides. When omitted the server resolves connectors from the inference feature registry.'
+        ),
     }),
   }),
   handler: async ({ params, request, getScopedClients, server }): Promise<OnboardingTaskResult> => {
@@ -85,6 +94,7 @@ export const onboardingTaskRoute = createServerRoute({
                 to: body.to,
                 steps: body.steps,
                 saveQueries,
+                connectors: body.connectors,
               },
               request,
             },

@@ -8,6 +8,10 @@
 import { isCCSRemoteIndexName } from '@kbn/es-query';
 import { ERROR_CORRELATION_THRESHOLD } from '../../../../common/correlations/constants';
 import type { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
+import type {
+  CommonCorrelationsQueryParams,
+  EntityType,
+} from '../../../../common/correlations/types';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { fetchPValues } from './fetch_p_values';
 import { fetchDurationHistogramRangeSteps } from './fetch_duration_histogram_range_steps';
@@ -40,7 +44,15 @@ describe('fetchPValues', () => {
     },
   } as unknown as APMEventClient;
 
-  const defaultParams = {
+  const defaultEntityType: EntityType = 'transaction';
+
+  const defaultParams: CommonCorrelationsQueryParams & {
+    apmEventClient: APMEventClient;
+    durationMin?: number;
+    durationMax?: number;
+    fieldCandidates: string[];
+    entityType: EntityType;
+  } = {
     apmEventClient: mockApmEventClient,
     start: 0,
     end: 1000000,
@@ -48,6 +60,7 @@ describe('fetchPValues', () => {
     kuery: '',
     query: { match_all: {} },
     fieldCandidates: ['service.version', 'service.environment'],
+    entityType: defaultEntityType,
   };
 
   beforeEach(() => {

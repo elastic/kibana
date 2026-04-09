@@ -10998,7 +10998,7 @@
           "BaseMetadata"
         ],
         "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
-        "lineNumber": 78,
+        "lineNumber": 79,
         "columnNumber": 3,
         "deprecated": false,
         "trackAdoption": false,
@@ -11014,7 +11014,7 @@
               "[key: string]:  unknown"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
-            "lineNumber": 79,
+            "lineNumber": 80,
             "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
@@ -16208,6 +16208,10 @@
               {
                 "plugin": "workflowsManagement",
                 "path": "src/platform/plugins/shared/workflows_management/public/features/workflow_context/lib/get_context_for_path.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/validate_variables.ts"
               }
             ],
             "children": [
@@ -17470,8 +17474,8 @@
                 "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/common_attributes.gen.ts"
               },
               {
-                "plugin": "automaticImportVTwo",
-                "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/primitive.gen.ts"
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/common/model/primitive.gen.ts"
               },
               {
                 "plugin": "@kbn/openapi-common",
@@ -17488,6 +17492,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/common/api/endpoint/model/schema/common.gen.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/entity_analytics/lead_generation/types.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -18473,12 +18481,16 @@
                 "path": "x-pack/platform/plugins/shared/cases/common/bundled-types.gen.ts"
               },
               {
-                "plugin": "@kbn/alerting-v2-schemas",
-                "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts"
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/bundled-types.gen.ts"
               },
               {
-                "plugin": "@kbn/alerting-v2-schemas",
-                "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts"
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/bundled-types.gen.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/bundled-types.gen.ts"
               },
               {
                 "plugin": "agentBuilder",
@@ -18685,6 +18697,22 @@
                 "path": "x-pack/solutions/security/packages/kbn-securitysolution-lists-common/api/model/list_schemas.gen.ts"
               },
               {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_log_extraction.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_log_extraction.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_ccs_extract_to_updates.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_ccs_extract_to_updates.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/asset_criticality/common.gen.ts"
               },
@@ -18777,20 +18805,8 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/watchlists/management/common.gen.ts"
               },
               {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_log_extraction.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_log_extraction.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_ccs_extract_to_updates.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_ccs_extract_to_updates.ts"
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/entity_analytics/lead_generation/types.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -30714,6 +30730,10 @@
           },
           {
             "plugin": "agentBuilder",
+            "path": "x-pack/platform/plugins/shared/agent_builder/public/application/components/skills/skill_form_validation.ts"
+          },
+          {
+            "plugin": "agentBuilder",
             "path": "x-pack/platform/plugins/shared/agent_builder/public/application/components/tools/form/validation/esql_tool_form_validation.ts"
           },
           {
@@ -30771,6 +30791,10 @@
           {
             "plugin": "cases",
             "path": "x-pack/platform/plugins/shared/cases/server/connectors/cases/schema.ts"
+          },
+          {
+            "plugin": "@kbn/agent-builder-common",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/validation.ts"
           },
           {
             "plugin": "@kbn/alerting-v2-schemas",

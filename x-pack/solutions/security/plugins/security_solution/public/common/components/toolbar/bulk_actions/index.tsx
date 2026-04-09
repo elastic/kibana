@@ -7,7 +7,7 @@
 
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiPopover, EuiButtonEmpty, EuiContextMenu } from '@elastic/eui';
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 import type { AlertTableContextMenuItem } from '../../../../detections/components/alerts_table/types';
 
@@ -19,6 +19,7 @@ interface OwnProps {
   onClearSelection: () => void;
   bulkActionItems: AlertTableContextMenuItem[];
   bulkActionPanels: EuiContextMenuPanelDescriptor[];
+  closePopoverRef?: React.MutableRefObject<() => void>;
 }
 
 const BulkActionsContainer = styled.div`
@@ -39,6 +40,7 @@ const BulkActionsComponent: React.FC<OwnProps> = ({
   onClearSelection,
   bulkActionItems,
   bulkActionPanels,
+  closePopoverRef,
 }) => {
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 
@@ -50,11 +52,11 @@ const BulkActionsComponent: React.FC<OwnProps> = ({
     setIsActionsPopoverOpen(false);
   }, [setIsActionsPopoverOpen]);
 
-  const closeIfPopoverIsOpen = useCallback(() => {
-    if (isActionsPopoverOpen) {
-      setIsActionsPopoverOpen(false);
+  useEffect(() => {
+    if (closePopoverRef) {
+      closePopoverRef.current = closeActionPopover;
     }
-  }, [isActionsPopoverOpen]);
+  }, [closePopoverRef, closeActionPopover]);
 
   const toggleSelectAll = useCallback(() => {
     if (!showClearSelection) {
@@ -76,10 +78,7 @@ const BulkActionsComponent: React.FC<OwnProps> = ({
   );
 
   return (
-    <BulkActionsContainer
-      onClick={closeIfPopoverIsOpen}
-      data-test-subj="bulk-actions-button-container"
-    >
+    <BulkActionsContainer data-test-subj="bulk-actions-button-container">
       <EuiPopover
         isOpen={isActionsPopoverOpen}
         anchorPosition="upCenter"

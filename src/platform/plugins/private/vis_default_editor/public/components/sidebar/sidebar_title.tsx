@@ -102,7 +102,7 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
       css={[styles.titleContainer, styles.linkedSearch]}
     >
       <EuiFlexItem grow={false}>
-        <EuiIcon type="search" />
+        <EuiIcon type="magnify" />
       </EuiFlexItem>
 
       <EuiFlexItem grow={false} className="eui-textTruncate">

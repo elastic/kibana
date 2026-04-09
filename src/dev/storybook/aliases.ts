@@ -81,4 +81,5 @@ export const storybookAliases = {
   unified_tabs: 'src/platform/packages/shared/kbn-unified-tabs/.storybook',
   upgrade_assistant: 'x-pack/platform/packages/private/upgrade-assistant/public/.storybook',
   workflows_management: 'src/platform/plugins/shared/workflows_management/.storybook',
+  workflows_ui: 'src/platform/packages/shared/kbn-workflows-ui/.storybook',
 };

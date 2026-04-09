@@ -95,7 +95,7 @@ export const LinkEditor = ({
           className="linkEditorBackButton"
           flush="left"
           color="text"
-          iconType={'arrowLeft'}
+          iconType={'chevronSingleLeft'}
           onClick={() => onClose()}
         >
           <EuiTitle size="s" aria-label={LinksStrings.editor.linkEditor.getGoBackAriaLabel()}>

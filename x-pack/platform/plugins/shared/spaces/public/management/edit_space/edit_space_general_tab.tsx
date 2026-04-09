@@ -173,6 +173,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
   const onClickCancel = useCallback(() => {
     setShowAlteringActiveSpaceDialog(false);
     setShowUserImpactWarning(false);
+    setIsDirty(false);
     backToSpacesList();
   }, [backToSpacesList]);
 

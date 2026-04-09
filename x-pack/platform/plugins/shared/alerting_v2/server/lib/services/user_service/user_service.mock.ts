@@ -25,16 +25,16 @@ const mockProfile: UserProfileWithSecurity = {
 
 export function createUserService(): {
   userService: UserService;
-  userProfile: jest.Mocked<UserProfileServiceStart>;
+  userProfileService: jest.Mocked<UserProfileServiceStart>;
 } {
   const request = httpServerMock.createKibanaRequest();
-  const userProfile = userProfileServiceMock.createStart();
+  const userProfileService = userProfileServiceMock.createStart();
 
-  userProfile.getCurrent.mockResolvedValue(createUserProfile());
+  userProfileService.getCurrent.mockResolvedValue(createUserProfile());
 
   return {
-    userService: new UserService(request, userProfile),
-    userProfile,
+    userService: new UserService(request, userProfileService),
+    userProfileService,
   };
 }
 

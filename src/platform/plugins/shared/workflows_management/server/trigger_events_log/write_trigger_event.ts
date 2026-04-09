@@ -11,10 +11,13 @@ import type { TriggerEventsDataStreamClient } from './trigger_events_data_stream
 
 export interface WriteTriggerEventParams {
   timestamp: string;
+  /** Unique id for this trigger dispatch (correlates audit doc and scheduled executions). */
+  eventId: string;
   triggerId: string;
   spaceId: string;
   subscriptions: string[];
   payload: Record<string, unknown>;
+  sourceExecutionId?: string;
 }
 
 export async function writeTriggerEvent(
@@ -23,10 +26,14 @@ export async function writeTriggerEvent(
 ): Promise<void> {
   const doc = {
     '@timestamp': params.timestamp,
+    eventId: params.eventId,
     triggerId: params.triggerId,
     spaceId: params.spaceId,
     subscriptions: params.subscriptions,
     payload: params.payload,
+    ...(params.sourceExecutionId !== undefined && params.sourceExecutionId !== ''
+      ? { sourceExecutionId: params.sourceExecutionId }
+      : {}),
   };
   await client.create({
     documents: [doc],

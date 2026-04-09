@@ -192,6 +192,7 @@ const buildKIQueryGenerationValidationIssues = ({
   queriesCount,
   validSyntaxCount,
   executionHitCount,
+  includeExecutionHitRate,
   invalidCategoriesCount,
   invalidSeveritiesCount,
   missingExpectedCategories,
@@ -201,6 +202,7 @@ const buildKIQueryGenerationValidationIssues = ({
   queriesCount: number;
   validSyntaxCount: number;
   executionHitCount: number;
+  includeExecutionHitRate: boolean;
   invalidCategoriesCount: number;
   invalidSeveritiesCount: number;
   missingExpectedCategories: string[];
@@ -214,7 +216,7 @@ const buildKIQueryGenerationValidationIssues = ({
       `${queriesCount - validSyntaxCount}/${queriesCount} queries have invalid ES|QL syntax`
     );
   }
-  if (executionHitCount < queriesCount) {
+  if (includeExecutionHitRate && executionHitCount < queriesCount) {
     issues.push(`${queriesCount - executionHitCount}/${queriesCount} queries returned no hits`);
   }
   if (invalidCategoriesCount > 0) {
@@ -241,6 +243,7 @@ const evaluateKIQueryGenerationCode = async ({
   sampleLogs,
   expectedCategories,
   expectedEsqlSubstrings,
+  includeExecutionHitRate,
   esClient,
   logger,
 }: {
@@ -248,6 +251,7 @@ const evaluateKIQueryGenerationCode = async ({
   sampleLogs: string[];
   expectedCategories: string[];
   expectedEsqlSubstrings: string[];
+  includeExecutionHitRate: boolean;
   esClient: ElasticsearchClient;
   logger?: Logger;
 }) => {
@@ -289,7 +293,7 @@ const evaluateKIQueryGenerationCode = async ({
 
   const scoreComponents = [
     syntaxValidityRate,
-    executionHitRate,
+    ...(includeExecutionHitRate ? [executionHitRate] : []),
     categoryComplianceRate,
     severityComplianceRate,
     ...(expectedCategoryCoverageRate == null ? [] : [expectedCategoryCoverageRate]),
@@ -307,6 +311,7 @@ const evaluateKIQueryGenerationCode = async ({
     queriesCount: queries.length,
     validSyntaxCount,
     executionHitCount,
+    includeExecutionHitRate,
     invalidCategoriesCount,
     invalidSeveritiesCount,
     missingExpectedCategories,
@@ -343,19 +348,21 @@ const createKIQueryGenerationCodeEvaluator = (
 ): Evaluator<KIQueryGenerationEvaluationExample, KIQueryGenerationOutput> => ({
   name: 'ki_query_generation_code_evaluator',
   kind: 'CODE' as const,
-  evaluate: async ({ output, input, expected }) => {
+  evaluate: async ({ output, input, expected, metadata }) => {
     const queries = getQueriesFromOutput(output ?? []);
     const { sample_logs: sampleLogs } = input;
     const expectedCategories = (expected.expected_categories ?? []).map((category) =>
       category.toLowerCase()
     );
     const expectedEsqlSubstrings = expected.esql_substrings ?? [];
+    const hasFailureMode = Boolean(metadata?.failure_mode);
 
     return evaluateKIQueryGenerationCode({
       queries,
       sampleLogs,
       expectedCategories,
       expectedEsqlSubstrings,
+      includeExecutionHitRate: hasFailureMode,
       esClient,
       logger,
     });

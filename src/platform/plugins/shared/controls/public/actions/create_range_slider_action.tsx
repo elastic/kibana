@@ -27,7 +27,7 @@ export const createRangeSliderControlAction =
       id: RANGE_SLIDER_ACTION,
       type: RANGE_SLIDER_CONTROL,
       order: 0,
-      getIconType: () => 'controlsHorizontal',
+      getIconType: () => 'controls',
       getDisplayName: () =>
         i18n.translate('controls.rangeSlider.displayName', {
           defaultMessage: 'Range slider',

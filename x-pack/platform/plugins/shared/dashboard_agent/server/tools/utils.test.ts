@@ -9,6 +9,7 @@ import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachmen
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Logger } from '@kbn/core/server';
 import { resolvePanelsFromAttachments } from './manage_dashboard/utils';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 const createMockLogger = (): Logger =>
   ({
@@ -72,7 +73,7 @@ describe('resolvePanelsFromAttachments', () => {
     expect(result.failures).toEqual([]);
     expect(result.panels).toHaveLength(1);
     expect(result.panels[0]).toMatchObject({
-      type: 'lens',
+      type: LENS_EMBEDDABLE_TYPE,
       config: {
         title: 'Request count',
         attributes: expect.objectContaining({

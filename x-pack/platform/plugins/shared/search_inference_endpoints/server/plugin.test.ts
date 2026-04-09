@@ -54,7 +54,11 @@ describe('SearchInferenceEndpointsPlugin', () => {
         minimumLicense: 'enterprise',
         category: DEFAULT_APP_CATEGORIES.management,
         management: {
-          ml: [ELASTIC_INFERENCE_SERVICE_APP_ID, INFERENCE_ENDPOINTS_APP_ID, MODEL_SETTINGS_APP_ID],
+          modelManagement: [
+            ELASTIC_INFERENCE_SERVICE_APP_ID,
+            INFERENCE_ENDPOINTS_APP_ID,
+            MODEL_SETTINGS_APP_ID,
+          ],
         },
       });
     });
@@ -66,7 +70,11 @@ describe('SearchInferenceEndpointsPlugin', () => {
 
       expect(feature.privileges?.all).toMatchObject({
         management: {
-          ml: [ELASTIC_INFERENCE_SERVICE_APP_ID, INFERENCE_ENDPOINTS_APP_ID, MODEL_SETTINGS_APP_ID],
+          modelManagement: [
+            ELASTIC_INFERENCE_SERVICE_APP_ID,
+            INFERENCE_ENDPOINTS_APP_ID,
+            MODEL_SETTINGS_APP_ID,
+          ],
         },
       });
     });

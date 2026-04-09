@@ -187,6 +187,64 @@ describe('MetricsExperienceGrid', () => {
     expect(getByTestId('metricsExperienceToolbarFullScreen')).toBeInTheDocument();
   });
 
+  it('renders only the METRICS_INFO error state when fetch fails', () => {
+    useFetchMetricsDataMock.mockReturnValue({
+      metricItems: [],
+      allDimensions: [],
+      loading: false,
+      error: new Error('METRICS_INFO failed'),
+    });
+    useMetricFieldsFilterMock.mockReturnValue({ filteredMetricItems: [] });
+
+    const { getByTestId, queryByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+      wrapper: IntlProvider,
+    });
+
+    expect(getByTestId('metricsInfoError')).toBeInTheDocument();
+    expect(getByTestId('metricsInfoErrorTitle')).toHaveTextContent('Unable to load visualization');
+    expect(getByTestId('metricsInfoErrorDescription')).toHaveTextContent(
+      'trouble retrieving the information needed for this visualization'
+    );
+    expect(queryByTestId('toggleActions')).not.toBeInTheDocument();
+  });
+
+  it('does not render the METRICS_INFO error state for AbortError (shows chart grid instead)', () => {
+    const abortError = new Error('Aborted');
+    abortError.name = 'AbortError';
+
+    useFetchMetricsDataMock.mockReturnValue({
+      metricItems: [],
+      allDimensions: [],
+      loading: false,
+      error: abortError,
+    });
+    useMetricFieldsFilterMock.mockReturnValue({ filteredMetricItems: [] });
+
+    const { queryByTestId, getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+      wrapper: IntlProvider,
+    });
+
+    expect(queryByTestId('metricsInfoError')).not.toBeInTheDocument();
+    expect(getByTestId('toggleActions')).toBeInTheDocument();
+  });
+
+  it('shows loading empty state instead of METRICS_INFO error while fetch is in progress', () => {
+    useFetchMetricsDataMock.mockReturnValue({
+      metricItems: [],
+      allDimensions: [],
+      loading: true,
+      error: new Error('stale error while refetching'),
+    });
+    useMetricFieldsFilterMock.mockReturnValue({ filteredMetricItems: [] });
+
+    const { queryByTestId, getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+      wrapper: IntlProvider,
+    });
+
+    expect(queryByTestId('metricsInfoError')).not.toBeInTheDocument();
+    expect(getByTestId('metricsExperienceProgressBar')).toBeInTheDocument();
+  });
+
   it('shows and updates the search input when the search button is clicked', () => {
     jest.useFakeTimers();
 

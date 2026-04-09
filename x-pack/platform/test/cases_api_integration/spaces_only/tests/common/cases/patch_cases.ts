@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { nullUser, postCaseReq, postCaseResp } from '../../../../common/lib/mock';
@@ -67,6 +68,45 @@ export default ({ getService }: FtrProviderContext): void => {
         },
         expectedHttpCode: 404,
         auth: getAuthWithSuperUser('space2'),
+      });
+    });
+
+    it('should close a case with a valid closeReason in space1', async () => {
+      const postedCase = await createCase(supertestWithoutAuth, postCaseReq, 200, authSpace1);
+      const patchedCases = await updateCase({
+        supertest: supertestWithoutAuth,
+        params: {
+          cases: [
+            {
+              id: postedCase.id,
+              version: postedCase.version,
+              status: CaseStatuses.closed,
+              closeReason: 'false_positive',
+            },
+          ],
+        },
+        auth: authSpace1,
+      });
+
+      expect(patchedCases[0].status).to.eql(CaseStatuses.closed);
+    });
+
+    it('should reject a close request with an invalid closeReason in space1', async () => {
+      const postedCase = await createCase(supertestWithoutAuth, postCaseReq, 200, authSpace1);
+      await updateCase({
+        supertest: supertestWithoutAuth,
+        params: {
+          cases: [
+            {
+              id: postedCase.id,
+              version: postedCase.version,
+              status: CaseStatuses.closed,
+              closeReason: 'invalid_custom_reason_not_in_settings',
+            },
+          ],
+        },
+        expectedHttpCode: 400,
+        auth: authSpace1,
       });
     });
   });

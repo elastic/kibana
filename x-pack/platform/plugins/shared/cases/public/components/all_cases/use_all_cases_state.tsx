@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { useEffect, useRef, useCallback, useMemo, useState } from 'react';
-import { useLocation, useHistory } from 'react-router-dom';
+import type { Context } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import type { History } from 'history';
+import { UNSAFE_NavigationContext } from 'react-router-dom-v5-compat';
 import deepEqual from 'react-fast-compare';
 import { isEmpty } from 'lodash';
 
@@ -37,7 +39,7 @@ export function useAllCasesState(isModalView: boolean = false): UseAllCasesState
   const isStateLoadedFromLocalStorage = useRef(false);
   const isFirstRun = useRef(false);
   const [tableState, setTableState] = useState<AllCasesTableState>(DEFAULT_CASES_TABLE_STATE);
-  const [urlState, setUrlState] = useAllCasesUrlState();
+  const [urlState, setUrlState] = useAllCasesUrlState(isModalView);
   const [localStorageState, setLocalStorageState] = useAllCasesLocalStorage();
   const { isFetching: isLoadingCasesConfiguration } = useGetCaseConfiguration();
 
@@ -112,30 +114,37 @@ export function useAllCasesState(isModalView: boolean = false): UseAllCasesState
   };
 }
 
-const useAllCasesUrlState = (): [
-  AllCasesURLState,
-  (updated: AllCasesTableState, mode?: 'push' | 'replace') => void
-] => {
-  const history = useHistory();
-  const location = useLocation();
+const useAllCasesUrlState = (
+  isModalView: boolean
+): [AllCasesURLState, (updated: AllCasesTableState, mode?: 'push' | 'replace') => void] => {
+  const navigationContext = useContext(
+    UNSAFE_NavigationContext as unknown as Context<{ navigator?: History } | undefined>
+  );
+  const history = navigationContext?.navigator;
+
   const {
     data: { customFields: customFieldsConfiguration },
   } = useGetCaseConfiguration();
 
-  const urlParams = parseUrlParams(new URLSearchParams(decodeURIComponent(location.search)));
+  const search = history?.location?.search ?? '';
+  const urlParams = parseUrlParams(new URLSearchParams(decodeURIComponent(search)));
   const parsedUrlParams = allCasesUrlStateDeserializer(urlParams, customFieldsConfiguration);
 
   const updateQueryParams = useCallback(
     (updated: AllCasesTableState, mode: 'push' | 'replace' = 'push') => {
+      if (history == null || isModalView) {
+        return;
+      }
+
       const updatedQuery = allCasesUrlStateSerializer(updated);
-      const search = stringifyUrlParams(updatedQuery, location.search);
+      const updatedSearch = stringifyUrlParams(updatedQuery, history.location.search);
 
       history[mode]({
-        ...location,
-        search,
+        ...history.location,
+        search: updatedSearch,
       });
     },
-    [history, location]
+    [history, isModalView]
   );
 
   return [parsedUrlParams, updateQueryParams];

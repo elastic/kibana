@@ -40,12 +40,7 @@ export const getColumns = ({
 }: GetColumnsArgs): Array<EuiBasicTableColumn<UnifiedExecutionResult>> => [
   {
     field: 'outcome.status',
-    name: (
-      <TableHeaderTooltipCell
-        title={i18n.COLUMN_STATUS}
-        tooltipContent={i18n.COLUMN_STATUS_TOOLTIP}
-      />
-    ),
+    name: <TableHeaderTooltipCell title={i18n.STATUS} tooltipContent={i18n.STATUS_TOOLTIP} />,
     render: (_: unknown, record: UnifiedExecutionResult) => (
       <span data-test-subj="executionResultsTableCellStatus">
         <ExecutionStatusIndicator
@@ -59,12 +54,7 @@ export const getColumns = ({
   },
   {
     field: 'backfill',
-    name: (
-      <TableHeaderTooltipCell
-        title={i18n.COLUMN_RUN_TYPE}
-        tooltipContent={i18n.COLUMN_RUN_TYPE_TOOLTIP}
-      />
-    ),
+    name: <TableHeaderTooltipCell title={i18n.RUN_TYPE} tooltipContent={i18n.RUN_TYPE_TOOLTIP} />,
     render: (_: unknown, record: UnifiedExecutionResult) => {
       const typeStr = record.backfill ? RULE_EXECUTION_TYPE_BACKFILL : RULE_EXECUTION_TYPE_STANDARD;
       return (
@@ -77,12 +67,7 @@ export const getColumns = ({
   },
   {
     field: 'execution_start',
-    name: (
-      <TableHeaderTooltipCell
-        title={i18n.COLUMN_TIMESTAMP}
-        tooltipContent={i18n.COLUMN_TIMESTAMP_TOOLTIP}
-      />
-    ),
+    name: <TableHeaderTooltipCell title={i18n.TIMESTAMP} tooltipContent={i18n.TIMESTAMP_TOOLTIP} />,
     render: (value: string) => (
       <span data-test-subj="executionResultsTableCellTimestamp">
         <FormattedDate value={value} fieldName="execution_start" />
@@ -93,12 +78,7 @@ export const getColumns = ({
   },
   {
     field: 'execution_duration_ms',
-    name: (
-      <TableHeaderTooltipCell
-        title={i18n.COLUMN_DURATION}
-        tooltipContent={i18n.COLUMN_DURATION_TOOLTIP}
-      />
-    ),
+    name: <TableHeaderTooltipCell title={i18n.DURATION} tooltipContent={i18n.DURATION_TOOLTIP} />,
     render: (value: number | null) => (
       <span data-test-subj="executionResultsTableCellDuration">
         {value !== null ? humanizeDuration(value) : '—'}
@@ -111,8 +91,8 @@ export const getColumns = ({
     field: 'metrics.alert_counts.new',
     name: (
       <TableHeaderTooltipCell
-        title={i18n.COLUMN_ALERTS_CREATED}
-        tooltipContent={i18n.COLUMN_ALERTS_CREATED_TOOLTIP}
+        title={i18n.ALERTS_CREATED}
+        tooltipContent={i18n.ALERTS_CREATED_TOOLTIP}
       />
     ),
     render: (_: unknown, record: UnifiedExecutionResult) => (
@@ -124,12 +104,7 @@ export const getColumns = ({
   },
   {
     field: 'outcome.message',
-    name: (
-      <TableHeaderTooltipCell
-        title={i18n.COLUMN_MESSAGE}
-        tooltipContent={i18n.COLUMN_MESSAGE_TOOLTIP}
-      />
-    ),
+    name: <TableHeaderTooltipCell title={i18n.MESSAGE} tooltipContent={i18n.MESSAGE_TOOLTIP} />,
     render: (_: unknown, record: UnifiedExecutionResult) => (
       <span data-test-subj="executionResultsTableCellMessage">
         <EuiTextBlockTruncate lines={2}>{record.outcome.message ?? '—'}</EuiTextBlockTruncate>
@@ -137,7 +112,7 @@ export const getColumns = ({
     ),
   },
   {
-    name: i18n.COLUMN_ACTIONS,
+    name: i18n.ACTIONS,
     actions: [
       {
         name: i18n.ACTION_FILTER_BY_EXECUTION_ID,

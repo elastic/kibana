@@ -51,10 +51,6 @@ export class AgentBuilderPlatformPlugin
     setupDeps.agentBuilder.sml.registerType(visualizationSmlType);
 
     const connectorSmlType = createConnectorSmlType({
-      getToolRegistry: async (request) => {
-        const [, startDeps] = await coreSetup.getStartServices();
-        return startDeps.agentBuilder.tools.getRegistry({ request });
-      },
       getActionSavedObjectsClient: async (request) => {
         const [coreStart] = await coreSetup.getStartServices();
         return coreStart.savedObjects.getScopedClient(request, { includedHiddenTypes: ['action'] });

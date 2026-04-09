@@ -27,6 +27,7 @@ const contentLength = testedContent.length;
 const renderMarkdownEditor = (overrideProps?: Partial<MarkdownEditorProps>) => {
   const isEditing$ = new BehaviorSubject(true);
   const isPreview$ = new BehaviorSubject(false);
+  const settings$ = new BehaviorSubject(undefined) as MarkdownEditorProps['settings$'];
   return render(
     <>
       <MarkdownEditorPreviewSwitch
@@ -42,6 +43,7 @@ const renderMarkdownEditor = (overrideProps?: Partial<MarkdownEditorProps>) => {
         onCancel={jest.fn()}
         onSave={jest.fn()}
         isPreview$={isPreview$}
+        settings$={settings$}
         {...overrideProps}
       />
     </>

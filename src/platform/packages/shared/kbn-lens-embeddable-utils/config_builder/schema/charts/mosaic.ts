@@ -11,7 +11,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema } from '../color';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import {
   collapseBySchema,
   dslOnlyPanelInfoSchema,
@@ -26,6 +26,7 @@ import {
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
+import { objectUnion } from './utils/object_union';
 import { groupIsNotCollapsed } from '../../utils';
 
 const mosaicStateSharedSchema = {
@@ -97,7 +98,7 @@ export const mosaicStateSchemaNoESQL = schema.object(
     type: schema.literal('mosaic'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetSchema,
+    ...dataSourceSchema,
     ...dslOnlyPanelInfoSchema,
     ...mosaicStateSharedSchema,
     ...dslOnlyPanelInfoSchema,
@@ -149,7 +150,7 @@ export const mosaicStateSchemaESQL = schema.object(
     type: schema.literal('mosaic'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
+    ...dataSourceEsqlTableSchema,
     ...mosaicStateSharedSchema,
     /**
      * Primary value configuration, must define operation. In ES|QL mode, uses column-based configuration.
@@ -189,7 +190,7 @@ export const mosaicStateSchemaESQL = schema.object(
   }
 );
 
-export const mosaicStateSchema = schema.oneOf([mosaicStateSchemaNoESQL, mosaicStateSchemaESQL], {
+export const mosaicStateSchema = objectUnion([mosaicStateSchemaNoESQL, mosaicStateSchemaESQL], {
   meta: {
     id: 'mosaicChart',
     title: 'Mosaic Chart',

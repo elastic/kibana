@@ -93,7 +93,7 @@ describe(
 
       role.login();
       createBedrockConnector();
-      visit(GET_STARTED_URL);
+      visit(`${GET_STARTED_URL}/siem_migrations`);
     });
 
     after(() => {

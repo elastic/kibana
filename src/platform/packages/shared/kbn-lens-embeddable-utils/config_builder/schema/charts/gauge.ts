@@ -15,10 +15,11 @@ import {
   metricOperationDefinitionSchema,
 } from '../metric_ops';
 import { colorByValueSchema } from '../color';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import { mergeAllMetricsWithChartDimensionSchema } from './shared';
 import { builderEnums } from '../enums';
+import { objectUnion } from './utils/object_union';
 
 const gaugeStateSharedOptionsSchema = {
   shape: schema.maybe(
@@ -113,9 +114,11 @@ const gaugeStateMetricOptionsSchema = {
     )
   ),
   /**
-   * Sub title
+   * Subtitle
    */
-  sub_title: schema.maybe(schema.string({ meta: { description: 'Sub title' } })),
+  subtitle: schema.maybe(
+    schema.string({ meta: { description: 'Subtitle below the gauge value' } })
+  ),
   /**
    * Color configuration
    */
@@ -150,7 +153,7 @@ export const gaugeStateSchemaNoESQL = schema.object(
     ...sharedPanelInfoSchema,
     ...dslOnlyPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetSchema,
+    ...dataSourceSchema,
     ...gaugeStateSharedOptionsSchema,
     /**
      * Primary value configuration, must define operation.
@@ -168,7 +171,7 @@ export const gaugeStateSchemaESQL = schema.object(
     type: schema.literal('gauge'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
+    ...dataSourceEsqlTableSchema,
     ...gaugeStateSharedOptionsSchema,
     /**
      * Primary value configuration, must define operation.
@@ -181,7 +184,7 @@ export const gaugeStateSchemaESQL = schema.object(
   { meta: { id: 'gaugeESQL', title: 'Gauge Chart (ES|QL)' } }
 );
 
-export const gaugeStateSchema = schema.oneOf([gaugeStateSchemaNoESQL, gaugeStateSchemaESQL], {
+export const gaugeStateSchema = objectUnion([gaugeStateSchemaNoESQL, gaugeStateSchemaESQL], {
   meta: { id: 'gaugeChart', title: 'Gauge Chart' },
 });
 

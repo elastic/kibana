@@ -208,6 +208,7 @@ paths:
                     - 15c1929b-0af7-42bd-85a8-56e234cc7c4e
                   items:
                     type: string
+                  maxItems: 100
                   type: array
                 searchIds:
                   description: >-
@@ -218,6 +219,7 @@ paths:
                     - 6ce1b592-84e3-4b4a-9552-f189d4b82075
                   items:
                     type: string
+                  maxItems: 100
                   type: array
               required:
                 - savedObjectIds

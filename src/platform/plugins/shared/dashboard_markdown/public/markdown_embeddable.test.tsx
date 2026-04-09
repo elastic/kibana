@@ -99,6 +99,22 @@ describe('MarkdownEmbeddable', () => {
     expect(link).toHaveAttribute('target', '_blank');
   });
 
+  it('resolves document relative links against current URL', async () => {
+    await renderEmbeddable({
+      initialState: { content: '[go to discover](discover)' },
+    });
+    const link = screen.getByRole('link', { name: /go to discover/i });
+    expect(link).toHaveAttribute('href', '/discover');
+  });
+
+  it('does not modify absolute links during relative resolution', async () => {
+    await renderEmbeddable({
+      initialState: { content: '[elastic](https://elastic.co)' },
+    });
+    const link = screen.getByRole('link', { name: /elastic/i });
+    expect(link).toHaveAttribute('href', 'https://elastic.co');
+  });
+
   it('shows renderer in view mode, shows editor in edit mode', async () => {
     const { embeddable } = await renderEmbeddable({
       initialState: { content: 'HELLO' },
@@ -224,6 +240,7 @@ describe('MarkdownEmbeddable', () => {
 
     expect(embeddable.api.getSerializedStateByValue()).toEqual({
       content: 'by value markdown',
+      settings: { open_links_in_new_tab: true },
     });
   });
 
@@ -252,6 +269,49 @@ describe('MarkdownEmbeddable', () => {
       title: 'Some title',
       description: 'some description',
       hide_title: true,
+      settings: { open_links_in_new_tab: true },
+    });
+  });
+
+  describe('open links in new tab setting', () => {
+    it('renders links with target="_self" when open_links_in_new_tab is false', async () => {
+      await renderEmbeddable({
+        initialState: {
+          content: '[click here](https://example.com)',
+          settings: { open_links_in_new_tab: false },
+        },
+      });
+      const link = screen.getByRole('link', { name: /click here/i });
+      expect(link).toHaveAttribute('target', '_self');
+    });
+
+    it('toggles link target via the settings popover in edit mode', async () => {
+      const { embeddable } = await renderEmbeddable({
+        initialState: {
+          content: '[click here](https://example.com)',
+          settings: { open_links_in_new_tab: true },
+        },
+      });
+
+      // Verify initial state: links open in new tab
+      expect(screen.getByRole('link', { name: /click here/i })).toHaveAttribute('target', '_blank');
+
+      // Enter edit mode
+      await act(async () => {
+        await embeddable.api.onEdit();
+      });
+
+      // Open the settings popover and toggle the switch off
+      await userEvent.click(screen.getByRole('button', { name: /Settings/i }));
+      const toggle = await screen.findByRole('switch');
+      expect(toggle).toBeChecked();
+      await userEvent.click(toggle);
+
+      // Discard to exit edit mode (settings changes are applied immediately, not via Apply)
+      await userEvent.click(screen.getByRole('button', { name: /Discard/i }));
+
+      // Links should now open in the same tab
+      expect(screen.getByRole('link', { name: /click here/i })).toHaveAttribute('target', '_self');
     });
   });
 });

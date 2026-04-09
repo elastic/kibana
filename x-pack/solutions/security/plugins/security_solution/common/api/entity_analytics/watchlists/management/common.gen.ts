@@ -43,6 +43,10 @@ export const WatchlistObject = z.object({
    */
   entitySourceIds: z.array(z.string()).optional(),
   /**
+   * Number of entities in the watchlist
+   */
+  entityCount: z.number().optional(),
+  /**
    * Timestamp indicating when the watchlist was created
    */
   createdAt: z.string().datetime().optional(),

@@ -6,7 +6,9 @@
  */
 
 import { useReducer, useMemo, useCallback } from 'react';
+import { BULK_FILTER_MAX_RULES } from '@kbn/alerting-v2-schemas';
 import { escapeQuotes } from '@kbn/es-query';
+import { buildApiRulesListCombinedFilter } from '../../common/utils/build_rules_list_kql';
 import type { BulkOperationParams } from '../services/rules_api';
 
 interface BulkSelectState {
@@ -73,9 +75,13 @@ interface UseBulkSelectProps {
   totalItemCount: number;
   /** The visible page of items. */
   items: Array<{ id: string }>;
+  /** Facet filter KQL, same as list-rules `filter` query param. */
+  filter?: string;
+  /** Debounced search string, same as list-rules `search` query param. */
+  search?: string;
 }
 
-export const useBulkSelect = ({ totalItemCount, items }: UseBulkSelectProps) => {
+export const useBulkSelect = ({ totalItemCount, items, filter, search }: UseBulkSelectProps) => {
   const [state, dispatch] = useReducer(reducer, {
     ...initialState,
     selectedIds: new Set<string>(),
@@ -88,8 +94,11 @@ export const useBulkSelect = ({ totalItemCount, items }: UseBulkSelectProps) => 
       return 0;
     }
     if (state.isAllSelected) {
-      // All selected minus the exclusion set
-      return totalItemCount - state.selectedIds.size;
+      const logical = totalItemCount - state.selectedIds.size;
+      if (totalItemCount > BULK_FILTER_MAX_RULES) {
+        return Math.min(logical, BULK_FILTER_MAX_RULES);
+      }
+      return logical;
     }
     // Only IDs that are actually on the current page count
     return itemIds.filter((id) => state.selectedIds.has(id)).length;
@@ -175,17 +184,20 @@ export const useBulkSelect = ({ totalItemCount, items }: UseBulkSelectProps) => 
    */
   const getBulkParams = useCallback((): BulkOperationParams => {
     if (state.isAllSelected) {
+      const listScope = buildApiRulesListCombinedFilter({ filter, search }) ?? '';
       const excludedIds = [...state.selectedIds];
       if (excludedIds.length === 0) {
-        // Select all, no exclusions → match-all filter
-        return { filter: '' };
+        return { filter: listScope };
       }
       const exclusionClauses = excludedIds.map((id) => `id: "${escapeQuotes(id)}"`).join(' or ');
+      if (listScope) {
+        return { filter: `(${listScope}) AND NOT (${exclusionClauses})` };
+      }
       return { filter: `NOT (${exclusionClauses})` };
     }
 
     return { ids: [...state.selectedIds] };
-  }, [state]);
+  }, [state, filter, search]);
 
   return useMemo(
     () => ({

@@ -1,0 +1,22 @@
+{
+  "type": "plugin",
+  "id": "@kbn/query-activity-plugin",
+  "owner": "@elastic/kibana-management",
+  "description": "This plugin provides a UI to view and manage query activity.",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "queryActivity",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "query_activity"],
+    "requiredPlugins": [
+      "features",
+      "management",
+      "share"
+    ],
+    "requiredBundles": [
+      "esUiShared"
+    ]
+  }
+}

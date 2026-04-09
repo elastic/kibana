@@ -17,7 +17,11 @@ import {
 import { ALL_ENTITY_TYPES } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import { getLatestEntityIndexTemplateConfig } from './latest_index_template';
-import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
+import {
+  getLatestEntitiesIndexName,
+  getEntitiesAlias,
+  ENTITY_LATEST,
+} from '../../../common/domain/entity_index';
 import {
   getEntityDefinitionComponentTemplate,
   getUpdatesEntityDefinitionComponentTemplate,
@@ -63,7 +67,10 @@ export async function installIndicesAndDataStreams(
 ) {
   await Promise.all([
     (async () => {
-      await createIndex(esClient, getLatestEntitiesIndexName(namespace), { throwIfExists: false });
+      await createIndex(esClient, getLatestEntitiesIndexName(namespace), {
+        throwIfExists: false,
+        aliases: { [getEntitiesAlias(ENTITY_LATEST, namespace)]: {} },
+      });
       logger.debug(`created latest entity index in ${namespace}`);
     })(),
 

@@ -259,8 +259,10 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     onOpenEventPreview,
     onOpenNetworkPreview,
   }: GraphInvestigationProps) => {
+    const emptyEntityIds = useMemo(() => [], []);
     const { searchFilters, setSearchFilters, entityIdsForApi } = useGraphFilters(
       scopeId,
+      entityIds ?? emptyEntityIds,
       dataView?.id ?? ''
     );
     const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
@@ -270,26 +272,6 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     );
     const lastValidEsQuery = useRef<EsQuery | undefined>();
     const [kquery, setKQuery] = useState<Query>(EMPTY_QUERY);
-
-    // Merge user-expanded entity IDs with initial entity IDs for the API
-    const mergedEntityIdsForApi = useMemo(() => {
-      const initial = entityIds ?? [];
-      const expanded = entityIdsForApi ?? [];
-
-      if (initial.length === 0 && expanded.length === 0) return undefined;
-
-      // Merge: initial entityIds keep their isOrigin flag, expanded ones are not origin
-      const mergedMap = new Map<string, { id: string; isOrigin: boolean }>();
-      for (const entry of initial) {
-        mergedMap.set(entry.id, entry);
-      }
-      for (const entry of expanded) {
-        if (!mergedMap.has(entry.id)) {
-          mergedMap.set(entry.id, entry);
-        }
-      }
-      return Array.from(mergedMap.values());
-    }, [entityIds, entityIdsForApi]);
 
     const onInvestigateInTimelineCallback = useCallback(() => {
       const query = { ...kquery };
@@ -355,7 +337,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           esQuery,
           start: timeRange.from,
           end: timeRange.to,
-          entityIds: mergedEntityIdsForApi,
+          entityIds: entityIdsForApi,
           pinnedIds,
         },
         nodesLimit: GRAPH_NODES_LIMIT,

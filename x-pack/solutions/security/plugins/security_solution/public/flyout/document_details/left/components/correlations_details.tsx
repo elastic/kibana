@@ -12,6 +12,8 @@ import { useDocumentDetailsContext } from '../../shared/context';
 import { CorrelationsDetails as CorrelationsDetailsV2 } from '../../../../flyout_v2/correlations';
 import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
 import { ALERT_PREVIEW_BANNER } from '../../preview/constants';
+import { AttackDetailsPreviewPanelKey } from '../../../attack_details/constants/panel_keys';
+import { ATTACK_PREVIEW_BANNER } from '../../../attack_details/context';
 
 export const CORRELATIONS_TAB_ID = 'correlations';
 
@@ -31,6 +33,15 @@ export const CorrelationsDetails: React.FC = () => {
     [openPreviewPanel, scopeId]
   );
 
+  const onShowAttack = useCallback(
+    (attackId: string, indexName: string) =>
+      openPreviewPanel({
+        id: AttackDetailsPreviewPanelKey,
+        params: { attackId, indexName, banner: ATTACK_PREVIEW_BANNER },
+      }),
+    [openPreviewPanel]
+  );
+
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
 
   return (
@@ -39,6 +50,7 @@ export const CorrelationsDetails: React.FC = () => {
       scopeId={scopeId}
       isRulePreview={isRulePreview}
       onShowAlert={onShowAlert}
+      onShowAttack={onShowAttack}
       hidePreviewLink={false}
     />
   );

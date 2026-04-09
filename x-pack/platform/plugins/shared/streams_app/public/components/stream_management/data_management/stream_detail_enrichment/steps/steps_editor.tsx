@@ -343,7 +343,6 @@ export const StepsEditor = React.memo(() => {
                 <EuiFlexItem grow={false}>
                   <GenerateSuggestionButton
                     aiFeatures={aiFeatures}
-                    iconType="refresh"
                     size="s"
                     onClick={(connectorId) =>
                       suggestPipeline({ connectorId, streamName: stream.name })

@@ -42,6 +42,7 @@ export interface TracesFlyout {
   readonly logs: {
     readonly section: Locator;
     readonly openInDiscoverButton: Locator;
+    readonly totalDocuments: Locator;
   };
 
   readonly spanLinks: {
@@ -72,14 +73,17 @@ export interface TracesFlyout {
       readonly spanLinks: {
         readonly openInDiscoverButton: Locator;
       };
+      readonly similarErrors: {
+        readonly section: Locator;
+        readonly occurrencesChart: Locator;
+        readonly errorCallout: Locator;
+      };
       close(): Promise<void>;
     };
   };
 }
 
 export function createTracesFlyout(page: ScoutPage): TracesFlyout {
-  const timelineFlyout = page.getByRole('dialog', { name: 'Trace timeline' });
-
   return {
     overviewTab: page.testSubj.locator('docViewerTab-doc_view_obs_traces_overview'),
 
@@ -128,6 +132,10 @@ export function createTracesFlyout(page: ScoutPage): TracesFlyout {
     logs: {
       section: page.testSubj.locator('unifiedDocViewerLogsSection'),
       openInDiscoverButton: page.testSubj.locator('unifiedDocViewerLogsOpenInDiscoverButton'),
+      totalDocuments: page.testSubj
+        .locator('unifiedDocViewerLogsSection')
+        .locator('[data-test-subj="savedSearchTotalDocuments"]')
+        .locator('strong'),
     },
 
     spanLinks: {
@@ -136,6 +144,7 @@ export function createTracesFlyout(page: ScoutPage): TracesFlyout {
     },
 
     waterfallFlyout: (() => {
+      const timelineFlyout = page.testSubj.locator('traceWaterfallFlyout');
       const childDocContainer = page.locator('[id^="documentDetailFlyout"]');
       return {
         container: timelineFlyout,
@@ -175,6 +184,15 @@ export function createTracesFlyout(page: ScoutPage): TracesFlyout {
           spanLinks: {
             openInDiscoverButton: childDocContainer.locator(
               '[data-test-subj="docViewerSpanLinksOpenInDiscoverButton"]'
+            ),
+          },
+          similarErrors: {
+            section: childDocContainer.locator('[data-test-subj="docViewerSimilarErrorsSection"]'),
+            occurrencesChart: childDocContainer.locator(
+              '[data-test-subj="docViewerSimilarErrorsOccurrencesChart"]'
+            ),
+            errorCallout: childDocContainer.locator(
+              '[data-test-subj="docViewerSimilarErrorsOccurrencesChart"] [data-test-subj="embeddable-lens-failure"]'
             ),
           },
           async close() {

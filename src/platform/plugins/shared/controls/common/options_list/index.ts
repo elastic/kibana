@@ -15,4 +15,3 @@ export type {
   OptionsListSuccessResponse,
   OptionsListSuggestions,
 } from './types';
-export { isOptionsListESQLControlState } from './types';

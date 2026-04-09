@@ -327,7 +327,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                         {
                           error: {
                             message:
-                              'EndpointArtifactError: Endpoint authorization failure. Importing artifacts to a different space requires global artifact management privilege',
+                              "EndpointArtifactError: Endpoint authorization failure. This artifact can't be imported because you don't have permission to manage artifacts in other spaces. Contact your administrator for access.",
                             status_code: 403,
                           },
                           item_id: 'wrong-item',
@@ -373,7 +373,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                         {
                           error: {
                             message:
-                              'EndpointArtifactError: Endpoint authorization failure. Management of global artifacts requires additional privilege (global artifact management)',
+                              "EndpointArtifactError: Endpoint authorization failure. This artifact can't be imported because you don't have permission to manage global artifacts. Contact your administrator for access.",
                             status_code: 403,
                           },
                           item_id: 'wrong-item',
@@ -498,7 +498,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                         {
                           error: {
                             message:
-                              'EndpointArtifactError: Endpoint authorization failure. Importing artifacts that are not visible in the current space is not allowed',
+                              "EndpointArtifactError: Endpoint authorization failure. This artifact can't be imported because it isn't visible in the current space. Try importing it from a matching space or a space with access to the related policy.",
                             status_code: 403,
                           },
                           item_id: 'not-visible-in-current-space-because-unassigned',
@@ -507,7 +507,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                         {
                           error: {
                             message:
-                              'EndpointArtifactError: Endpoint authorization failure. Importing artifacts that are not visible in the current space is not allowed',
+                              "EndpointArtifactError: Endpoint authorization failure. This artifact can't be imported because it isn't visible in the current space. Try importing it from a matching space or a space with access to the related policy.",
                             status_code: 403,
                           },
                           item_id: 'not-visible-in-current-space-because-assigned-only-there',
@@ -555,7 +555,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                           {
                             error: {
                               message:
-                                'EndpointArtifactError: Endpoint authorization failure. Importing artifacts to a different space requires global artifact management privilege',
+                                "EndpointArtifactError: Endpoint authorization failure. This artifact can't be imported because you don't have permission to manage artifacts in other spaces. Contact your administrator for access.",
                               status_code: 403,
                             },
                             item_id: 'global-artifact-with-invalid-space-id',
@@ -564,7 +564,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                           {
                             error: {
                               message:
-                                'EndpointArtifactError: Endpoint authorization failure. Importing artifacts to a different space requires global artifact management privilege',
+                                "EndpointArtifactError: Endpoint authorization failure. This artifact can't be imported because you don't have permission to manage artifacts in other spaces. Contact your administrator for access.",
                               status_code: 403,
                             },
                             item_id: 'per-policy-artifact-with-invalid-space-id',
@@ -611,7 +611,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                           {
                             error: {
                               message:
-                                'EndpointArtifactError: Importing artifacts with invalid owner space IDs is not allowed. The following space ID is invalid or unaccessible by current user: i-dont-exist-1',
+                                "EndpointArtifactError: This artifact can't be imported because it belongs to a space you don't have access to. Update the artifact in its original space and try again.",
                               status_code: 403,
                             },
                             item_id: 'global-artifact-with-invalid-space-id',
@@ -620,7 +620,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                           {
                             error: {
                               message:
-                                'EndpointArtifactError: Importing artifacts with invalid owner space IDs is not allowed. The following space IDs are invalid or unaccessible by current user: i-dont-exist-2, i-dont-exist-3',
+                                "EndpointArtifactError: This artifact can't be imported because it belongs to a space you don't have access to. Update the artifact in its original space and try again.",
                               status_code: 403,
                             },
                             item_id: 'per-policy-artifact-with-invalid-space-id',
@@ -1350,7 +1350,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                         {
                           error: {
                             message:
-                              'EndpointArtifactError: Endpoint authorization failure. Management of global artifacts requires additional privilege (global artifact management)',
+                              "EndpointArtifactError: Endpoint authorization failure. This artifact can't be imported because you don't have permission to manage global artifacts. Contact your administrator for access.",
                             status_code: 403,
                           },
                           item_id: 'imported-artifact',

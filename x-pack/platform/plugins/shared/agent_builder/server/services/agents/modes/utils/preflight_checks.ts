@@ -33,11 +33,13 @@ export const ensureValidInput = ({
     }
   }
 
-  // prompt pending - we need a prompt response to continue
-  if (lastRound?.pending_prompt && lastRoundStatus === ConversationRoundStatus.awaitingPrompt) {
-    if (!hasPromptResponse(lastRound.pending_prompt.id, input)) {
+  // prompt pending - we need prompt responses for all pending prompts to continue
+  const pendingPrompts = lastRound?.pending_prompts ?? [];
+  if (pendingPrompts.length > 0 && lastRoundStatus === ConversationRoundStatus.awaitingPrompt) {
+    const missingResponses = pendingPrompts.filter((p) => !hasPromptResponse(p.id, input));
+    if (missingResponses.length > 0) {
       throw createBadRequestError(
-        `Conversation is awaiting a prompt response, but none was provided.`
+        `Conversation is awaiting prompt responses, but ${missingResponses.length} response(s) are missing.`
       );
     }
   }

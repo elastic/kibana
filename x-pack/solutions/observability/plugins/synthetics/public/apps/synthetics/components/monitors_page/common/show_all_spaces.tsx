@@ -93,7 +93,7 @@ const SelectablePopover = ({ space }: { space: Space }) => {
   const button = (
     <EuiButtonEmpty
       data-test-subj="syntheticsClickMeToLoadAContextMenuButton"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
       size="xs"

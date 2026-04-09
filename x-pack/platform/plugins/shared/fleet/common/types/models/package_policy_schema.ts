@@ -274,9 +274,9 @@ export const NewPackagePolicySchema = schema.object({
 
 /**
  * Snapshot of the package policy SO schema as of model version 10.22.0.
- * Permissive on enabled, inputs, and package so the SO layer can store internal
- * shapes (e.g. compiled_input, minimal fixtures). If NewPackagePolicySchema gains
- * new fields, create PackagePolicySchemaV{next} that extends this one.
+ * Permissive on enabled, inputs, and package so the SO layer can store
+ * internal shapes (e.g. compiled_input, minimal fixtures). If NewPackagePolicySchema
+ * gains new fields, create PackagePolicySchemaV{next} that extends this one.
  */
 export const PackagePolicySchemaV22 = NewPackagePolicySchema.extends(
   {

@@ -10,6 +10,9 @@ import expect from '@kbn/expect';
 import { adminTestUser } from '@kbn/test';
 
 import {
+  ACCESS_CONTROL_EDITOR_PASSWORD,
+  ACCESS_CONTROL_EDITOR_USERNAME,
+  createAccessControlEditorUser,
   createSimpleUser,
   loginAsKibanaAdmin,
   loginAsNotObjectOwner,
@@ -31,6 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await security.testUser.setRoles(['kibana_savedobjects_editor']);
       await createSimpleUser(es);
+      await createAccessControlEditorUser(es);
     });
     after(async () => {
       await security.testUser.restoreDefaults();
@@ -303,8 +307,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('should reject', function () {
-      this.tags('skipFIPS');
-
       it('when attempting to overwrite an object owned by another user if not admin', async () => {
         const { cookie: objectOwnerCookie, profileUid: adminUid } = await loginAsKibanaAdmin(
           supertestWithoutAuth
@@ -326,8 +328,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { cookie: otherOwnerCookie } = await loginAsNotObjectOwner(
           supertestWithoutAuth,
-          'test_user',
-          'changeme'
+          ACCESS_CONTROL_EDITOR_USERNAME,
+          ACCESS_CONTROL_EDITOR_PASSWORD
         );
 
         const overwriteResponse = await supertestWithoutAuth

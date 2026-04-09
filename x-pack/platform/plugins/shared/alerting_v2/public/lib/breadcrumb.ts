@@ -15,7 +15,9 @@ export type AlertingV2BreadcrumbPage =
   | 'rule_details'
   | 'notification_policies_list'
   | 'notification_policy_create'
-  | 'notification_policy_edit';
+  | 'notification_policy_edit'
+  | 'episodes_list'
+  | 'episode_details';
 
 export const getAlertingV2Breadcrumb = (
   page: AlertingV2BreadcrumbPage,
@@ -67,6 +69,16 @@ export const getAlertingV2Breadcrumb = (
         text: i18n.translate('xpack.alertingV2.breadcrumbs.notificationPolicyEditTitle', {
           defaultMessage: 'Edit',
         }),
+      };
+    case 'episodes_list':
+      return {
+        text: i18n.translate('xpack.alertingV2.breadcrumbs.episodesListTitle', {
+          defaultMessage: 'Alert episodes',
+        }),
+      };
+    case 'episode_details':
+      return {
+        text: options?.ruleName ?? '',
       };
   }
 };

@@ -18,7 +18,6 @@ import type { InternalServices } from './services/types';
 import { createServices } from './services/create_services';
 import type { WorkplaceAIAppConfig } from './config';
 import { AppLogger } from './utils';
-import { registerWorkplaceAIDataTypes } from './data_types';
 import { rerankStepDefinition } from './steps';
 import type {
   WorkplaceAIAppPluginSetup,
@@ -67,9 +66,6 @@ export class WorkplaceAIAppPlugin
     });
 
     registerFeatures({ features: setupDeps.features });
-
-    // Register custom data types with the data sources registry
-    registerWorkplaceAIDataTypes({ dataCatalog: setupDeps.dataCatalog });
 
     return {};
   }

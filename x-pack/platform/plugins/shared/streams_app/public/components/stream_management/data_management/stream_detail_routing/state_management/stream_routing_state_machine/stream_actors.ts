@@ -96,7 +96,7 @@ export function createForkStreamActor({
 
 /**
  * Delete stream actor factory
- * This actor is used to fork a stream, creating a new stream with the same definition
+ * This actor is used to delete a stream
  */
 export type DeleteStreamResponse = APIReturnType<'DELETE /api/streams/{name} 2023-10-31'>;
 export interface DeleteStreamInput {
@@ -169,6 +169,17 @@ export const createQueryStreamSuccessNotifier =
     toasts.addSuccess({
       title: i18n.translate('xpack.streams.streamDetailRouting.queryStreamCreated', {
         defaultMessage: 'Query stream created',
+      }),
+      toastLifeTimeMs: 3000,
+    });
+  };
+
+export const updateQueryStreamSuccessNotifier =
+  ({ toasts }: { toasts: IToasts }) =>
+  () => {
+    toasts.addSuccess({
+      title: i18n.translate('xpack.streams.streamDetailRouting.queryStreamUpdated', {
+        defaultMessage: 'Query stream updated',
       }),
       toastLifeTimeMs: 3000,
     });

@@ -9,9 +9,9 @@ import { i18n } from '@kbn/i18n';
 import type { VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import {
   APP_ID,
+  DOC_TYPE,
   getBasePath,
   getEditPath,
-  LENS_EMBEDDABLE_TYPE,
   LENS_ICON,
   STAGE_ID,
 } from '../common/constants';
@@ -36,7 +36,7 @@ export const lensVisTypeAlias: VisTypeAlias = {
   stage: STAGE_ID,
   appExtensions: {
     visualizations: {
-      docTypes: [LENS_EMBEDDABLE_TYPE],
+      docTypes: [DOC_TYPE],
       searchFields: ['title^3'],
       clientOptions: { update: { overwrite: true } },
       client: getLensBasicClient,
@@ -53,7 +53,7 @@ export const lensVisTypeAlias: VisTypeAlias = {
           icon: LENS_ICON,
           stage: STAGE_ID,
           savedObjectType: type,
-          type: LENS_EMBEDDABLE_TYPE,
+          type: DOC_TYPE,
           typeTitle: i18n.translate('xpack.lens.visTypeAlias.type', { defaultMessage: 'Lens' }),
         };
       },

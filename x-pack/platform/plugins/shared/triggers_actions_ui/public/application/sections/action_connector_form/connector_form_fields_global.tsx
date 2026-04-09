@@ -5,26 +5,56 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useState, useCallback, useEffect } from 'react';
 
-import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type {
+  FieldConfig,
+  ValidationCancelablePromise,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
+  UseField,
+  useFormContext,
+  useFormData,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { Field, HiddenField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { i18n } from '@kbn/i18n';
+import { toSlugIdentifier, isValidSlugIdentifier } from '@kbn/std';
+import { useKibana } from '../../../common/lib/kibana';
+import { checkConnectorIdAvailability } from '../../lib/action_connector_api';
 
 interface ConnectorFormData {
   name: string;
+  id: string;
 }
 
 interface ConnectorFormFieldsProps {
   canSave: boolean;
+  isEdit: boolean;
 }
 
-const { emptyField } = fieldValidators;
+const { emptyField, maxLengthField } = fieldValidators;
+
+const CONNECTOR_ID_EXISTS_ERROR = i18n.translate(
+  'xpack.triggersActionsUI.sections.actionConnectorForm.error.connectorIdExists',
+  {
+    defaultMessage: 'A connector is already using this ID. Choose a different ID.',
+  }
+);
+
+const CONNECTOR_ID_CHECK_FAILED_ERROR = i18n.translate(
+  'xpack.triggersActionsUI.sections.actionConnectorForm.error.connectorIdCheckFailed',
+  {
+    defaultMessage: 'Unable to verify connector ID availability.',
+  }
+);
+
+const CONNECTOR_ID_MAX_LENGTH = 36;
 
 const nameConfig: FieldConfig<{ name: string }, ConnectorFormData> = {
-  label: 'Connector name',
+  label: i18n.translate('xpack.triggersActionsUI.sections.actionConnectorForm.nameFieldLabel', {
+    defaultMessage: 'Connector name',
+  }),
   validations: [
     {
       validator: emptyField(
@@ -39,10 +69,116 @@ const nameConfig: FieldConfig<{ name: string }, ConnectorFormData> = {
   ],
 };
 
-const ConnectorFormFieldsGlobalComponent: React.FC<ConnectorFormFieldsProps> = ({ canSave }) => {
+const createIdConfig = (
+  isEdit: boolean,
+  http: ReturnType<typeof useKibana>['services']['http']
+): FieldConfig<{ id: string }, ConnectorFormData> => ({
+  label: i18n.translate('xpack.triggersActionsUI.sections.actionConnectorForm.idFieldLabel', {
+    defaultMessage: 'Connector ID',
+  }),
+  helpText: isEdit
+    ? i18n.translate('xpack.triggersActionsUI.sections.actionConnectorForm.idFieldHelpTextEdit', {
+        defaultMessage: 'After creating the connector ID, you cannot change it.',
+      })
+    : i18n.translate('xpack.triggersActionsUI.sections.actionConnectorForm.idFieldHelpText', {
+        defaultMessage: 'A unique identifier for the connector.',
+      }),
+  validations: [
+    {
+      validator: emptyField(
+        i18n.translate(
+          'xpack.triggersActionsUI.sections.actionConnectorForm.error.requiredIdText',
+          {
+            defaultMessage: 'Connector ID is required.',
+          }
+        )
+      ),
+    },
+    {
+      validator: maxLengthField({
+        length: CONNECTOR_ID_MAX_LENGTH,
+        message: i18n.translate(
+          'xpack.triggersActionsUI.sections.actionConnectorForm.error.connectorIdTooLong',
+          {
+            defaultMessage: 'Connector ID must be {maxLength} characters or less.',
+            values: { maxLength: CONNECTOR_ID_MAX_LENGTH },
+          }
+        ),
+      }),
+    },
+    {
+      validator: ({ value }) => {
+        if (!value || typeof value !== 'string') return;
+        if (!isValidSlugIdentifier(value)) {
+          return {
+            message: i18n.translate(
+              'xpack.triggersActionsUI.sections.actionConnectorForm.error.invalidIdFormat',
+              {
+                defaultMessage: 'Only lowercase letters, numbers, and hyphens are allowed.',
+              }
+            ),
+          };
+        }
+      },
+    },
+    {
+      isAsync: true,
+      validator: ({ value }) => {
+        if (isEdit || !value || typeof value !== 'string') return;
+        let cancelFn: () => void = () => {};
+
+        const promise = new Promise<{ message: string } | void>((resolve) => {
+          const timerId = setTimeout(async () => {
+            try {
+              const { isAvailable } = await checkConnectorIdAvailability({ http, id: value });
+              resolve(isAvailable ? undefined : { message: CONNECTOR_ID_EXISTS_ERROR });
+            } catch {
+              resolve({ message: CONNECTOR_ID_CHECK_FAILED_ERROR });
+            }
+          }, 500);
+
+          cancelFn = () => {
+            clearTimeout(timerId);
+            resolve(undefined);
+          };
+        }) as ValidationCancelablePromise<string>;
+        promise.cancel = cancelFn;
+        return promise;
+      },
+    },
+  ],
+});
+
+const ConnectorFormFieldsGlobalComponent: React.FC<ConnectorFormFieldsProps> = ({
+  canSave,
+  isEdit,
+}) => {
+  const { http } = useKibana().services;
+  const { setFieldValue } = useFormContext();
+  const [{ name }] = useFormData<ConnectorFormData>({ watch: ['name', 'id'] });
+  const [usingCustomIdentifier, setUsingCustomIdentifier] = useState(false);
+
+  useEffect(() => {
+    if (!isEdit && !usingCustomIdentifier && name) {
+      const slug = toSlugIdentifier(name).slice(0, CONNECTOR_ID_MAX_LENGTH);
+      setFieldValue('id', slug);
+    }
+  }, [name, isEdit, setFieldValue, usingCustomIdentifier]);
+
+  const handleIdChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newValue = e.target.value;
+      const expectedValue = toSlugIdentifier(name || '');
+      setUsingCustomIdentifier(newValue !== expectedValue);
+      setFieldValue('id', newValue);
+    },
+    [name, setFieldValue]
+  );
+
+  const idConfig = createIdConfig(isEdit, http);
+
   return (
     <>
-      <UseField path="id" component={HiddenField} />
       <UseField path="actionTypeId" component={HiddenField} />
       <UseField path="isDeprecated" component={HiddenField} />
       <UseField
@@ -51,6 +187,20 @@ const ConnectorFormFieldsGlobalComponent: React.FC<ConnectorFormFieldsProps> = (
         component={Field}
         componentProps={{
           euiFieldProps: { readOnly: !canSave, 'data-test-subj': 'nameInput', fullWidth: true },
+        }}
+      />
+      <UseField
+        path="id"
+        component={Field}
+        config={idConfig}
+        componentProps={{
+          euiFieldProps: {
+            readOnly: !canSave || isEdit,
+            disabled: isEdit,
+            'data-test-subj': 'connectorIdInput',
+            fullWidth: true,
+            onChange: handleIdChange,
+          },
         }}
       />
     </>

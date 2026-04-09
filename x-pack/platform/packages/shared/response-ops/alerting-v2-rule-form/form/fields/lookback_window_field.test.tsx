@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { LookbackWindowField } from './lookback_window_field';
-import { createFormWrapper } from '../../test_utils';
+import { createFormWrapper, createMockServices } from '../../test_utils';
 
 describe('LookbackWindowField', () => {
   it('renders the lookback window label', () => {
@@ -39,6 +39,15 @@ describe('LookbackWindowField', () => {
     expect(screen.getByTestId('lookbackWindow')).toBeInTheDocument();
     expect(screen.getByTestId('lookbackWindowNumberInput')).toBeInTheDocument();
     expect(screen.getByTestId('lookbackWindowUnitInput')).toBeInTheDocument();
+  });
+
+  it('renders correctly in flyout layout', () => {
+    render(<LookbackWindowField />, {
+      wrapper: createFormWrapper({}, createMockServices(), { layout: 'flyout' }),
+    });
+
+    expect(screen.getByText('Lookback Window')).toBeInTheDocument();
+    expect(screen.getByTestId('lookbackWindowNumberInput')).toBeInTheDocument();
   });
 
   it('allows clearing the number input and typing a new value', () => {

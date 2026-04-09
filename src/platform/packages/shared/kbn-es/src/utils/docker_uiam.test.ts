@@ -190,6 +190,8 @@ describe(`#runUiamContainer()`, () => {
             "--env",
             "quarkus.log.category.\\"co.elastic.cloud.uiam\\".level=DEBUG",
             "--env",
+            "quarkus.log.category.\\"co.elastic.cloud.uiam.app.authentication.ClientCertificateExtractor\\".level=INFO",
+            "--env",
             "quarkus.log.console.json.enabled=false",
             "--env",
             "quarkus.log.level=INFO",

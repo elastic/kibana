@@ -164,7 +164,7 @@ export class DatasourceComponent extends PureComponent {
         <div className="canvasDataSource__section">
           <EuiButtonEmpty
             iconSide="right"
-            iconType="arrowRight"
+            iconType="chevronSingleRight"
             onClick={() => setSelecting(!selecting)}
             className="canvasDataSource__triggerButton"
             flush="left"

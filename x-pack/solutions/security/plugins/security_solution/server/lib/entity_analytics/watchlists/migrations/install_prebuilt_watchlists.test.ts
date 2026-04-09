@@ -12,7 +12,10 @@ import {
 } from '@kbn/core/server/mocks';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { installPrebuiltWatchlists } from './install_prebuilt_watchlists';
-import { PRIVILEGED_USER_WATCHLIST_ID } from '../../../../../common/entity_analytics/watchlists/constants';
+import {
+  PRIVILEGED_USER_WATCHLIST_ID,
+  PRIVILEGED_USER_WATCHLIST_NAME,
+} from '../../../../../common/entity_analytics/watchlists/constants';
 import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 
 const mockWatchlistGet = jest.fn();
@@ -106,7 +109,7 @@ describe('installPrebuiltWatchlists', function () {
 
     expect(mockWatchlistCreate).toHaveBeenCalledTimes(1);
     expect(mockLogger.info).toHaveBeenCalledWith(
-      expect.stringContaining(`Prebuilt watchlist '${PRIVILEGED_USER_WATCHLIST_ID}' initialized.`)
+      expect.stringContaining(`Prebuilt watchlist '${PRIVILEGED_USER_WATCHLIST_NAME}' initialized.`)
     );
   });
 
@@ -128,14 +131,14 @@ describe('installPrebuiltWatchlists', function () {
 
     expect(mockWatchlistCreate).toHaveBeenCalledWith(
       expect.objectContaining({
-        name: PRIVILEGED_USER_WATCHLIST_ID,
+        name: PRIVILEGED_USER_WATCHLIST_NAME,
         description: 'System-managed watchlist for tracking privileged users',
         managed: true,
       }),
       { id: PRIVILEGED_USER_WATCHLIST_ID }
     );
     expect(mockLogger.info).toHaveBeenCalledWith(
-      expect.stringContaining(`Prebuilt watchlist '${PRIVILEGED_USER_WATCHLIST_ID}' initialized.`)
+      expect.stringContaining(`Prebuilt watchlist '${PRIVILEGED_USER_WATCHLIST_NAME}' initialized.`)
     );
   });
 
@@ -148,7 +151,7 @@ describe('installPrebuiltWatchlists', function () {
     expect(mockWatchlistCreate).not.toHaveBeenCalled();
     expect(mockLogger.error).toHaveBeenCalledWith(
       expect.stringContaining(
-        `Error checking prebuilt watchlist '${PRIVILEGED_USER_WATCHLIST_ID}': Connection refused`
+        `Error checking prebuilt watchlist '${PRIVILEGED_USER_WATCHLIST_NAME}': Connection refused`
       )
     );
   });

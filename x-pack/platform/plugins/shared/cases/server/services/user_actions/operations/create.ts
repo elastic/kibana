@@ -26,6 +26,7 @@ import { isUserActionType } from '../../../../common/utils/user_actions';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import { BuilderFactory } from '../builder_factory';
 import type {
+  AddSyncedAlertsCountToUserActionsParams,
   BuildUserActionsDictParams,
   BuilderParameters,
   BulkCreateAttachmentUserAction,
@@ -86,6 +87,29 @@ export class UserActionPersister {
       updatedFields
         .filter((field) => UserActionPersister.userActionFieldsAllowed.has(field))
         .forEach((field) => {
+          // Special case for status as it can possibly have an associated closeReason (syncing to alerts)
+          // Persist the closeReason to the status userAction
+          if (field === UserActionTypes.status && updatedCase.updatedAttributes.status != null) {
+            const userActionBuilder = this.builderFactory.getBuilder(UserActionTypes.status);
+            const statusUserAction = userActionBuilder?.build({
+              caseId,
+              owner,
+              user,
+              payload: {
+                status: updatedCase.updatedAttributes.status,
+                closeReason: updatedCase.closeReason,
+                syncAlerts:
+                  updatedCase.updatedAttributes.settings?.syncAlerts ??
+                  originalCase.attributes.settings.syncAlerts,
+              },
+            });
+
+            if (statusUserAction != null) {
+              userActions.push(statusUserAction);
+            }
+            return;
+          }
+
           const originalValue = get(originalCase, ['attributes', field]);
           const newValue = get(updatedCase, ['updatedAttributes', field]);
           userActions.push(
@@ -101,6 +125,43 @@ export class UserActionPersister {
         });
 
       acc[caseId] = userActions;
+      return acc;
+    }, {});
+  }
+  // Returns a new UserActionsDict with syncedAlertCountCount added to status actions
+  public addSyncedAlertsCountToUserActions({
+    userActionsDict,
+    syncedAlertCountCountByCaseId,
+  }: AddSyncedAlertsCountToUserActionsParams): UserActionsDict {
+    return Object.keys(userActionsDict).reduce<UserActionsDict>((acc, caseId) => {
+      const syncedAlertCountCount = syncedAlertCountCountByCaseId.get(caseId);
+      const userActions = userActionsDict[caseId];
+
+      if (syncedAlertCountCount == null) {
+        acc[caseId] = userActions;
+        return acc;
+      }
+
+      acc[caseId] = userActions.map((userAction) => {
+        if (userAction.parameters.attributes.type !== UserActionTypes.status) {
+          return userAction;
+        }
+
+        return {
+          ...userAction,
+          parameters: {
+            ...userAction.parameters,
+            attributes: {
+              ...userAction.parameters.attributes,
+              payload: {
+                ...userAction.parameters.attributes.payload,
+                syncedAlertCount: syncedAlertCountCount,
+              },
+            },
+          },
+        };
+      });
+
       return acc;
     }, {});
   }

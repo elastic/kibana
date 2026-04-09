@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
@@ -35,13 +35,6 @@ const DOCUMENT_NOT_FOUND = i18n.translate(
   }
 );
 
-const SOMETHING_WENT_WRONG = i18n.translate(
-  'xpack.securitySolution.flyout.document.overviewWrapper.somethingWentWrong',
-  {
-    defaultMessage: 'Something went wrong.',
-  }
-);
-
 const FETCH_ERROR = i18n.translate(
   'xpack.securitySolution.flyout.document.overviewWrapper.fetchError',
   {
@@ -62,6 +55,10 @@ export interface DocumentFlyoutWrapperProps {
    * A function that renders cell actions for the overview tab.
    */
   renderCellActions: CellActionRenderer;
+  /**
+   * Callback invoked after alert mutations to refresh parent and current flyouts.
+   */
+  onAlertUpdated: () => void;
 }
 
 /**
@@ -70,22 +67,29 @@ export interface DocumentFlyoutWrapperProps {
  * It is currently used in Analyzer when opening a document from the detail panel.
  */
 export const DocumentFlyoutWrapper = memo(
-  ({ documentId, indexName, renderCellActions }: DocumentFlyoutWrapperProps) => {
+  ({ documentId, indexName, renderCellActions, onAlertUpdated }: DocumentFlyoutWrapperProps) => {
     const { dataView, status } = useDataView(PageScope.default);
 
     const isDataViewLoading = status === 'loading' || status === 'pristine';
     const isDataViewInvalid =
       status === 'error' || (status === 'ready' && !dataView.hasMatchedIndices());
 
-    const shouldSkipSearch =
-      isDataViewLoading || isDataViewInvalid || !documentId || !indexName || !dataView;
+    const shouldSkipSearch = useMemo(
+      () => isDataViewLoading || isDataViewInvalid || !documentId || !indexName || !dataView,
+      [dataView, documentId, indexName, isDataViewInvalid, isDataViewLoading]
+    );
 
-    const [requestState, hit] = useEsDocSearch({
+    const [requestState, hit, refetchDocument] = useEsDocSearch({
       id: documentId ?? '',
       index: indexName,
       dataView,
       skip: shouldSkipSearch,
     });
+
+    const handleAlertUpdated = useCallback(() => {
+      onAlertUpdated();
+      refetchDocument();
+    }, [onAlertUpdated, refetchDocument]);
 
     const isAlert = useMemo(
       () => hit && (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
@@ -120,7 +124,13 @@ export const DocumentFlyoutWrapper = memo(
     }
 
     if (requestState === ElasticRequestState.Found && hit) {
-      return <DocumentFlyout hit={hit} renderCellActions={renderCellActions} />;
+      return (
+        <DocumentFlyout
+          hit={hit}
+          renderCellActions={renderCellActions}
+          onAlertUpdated={handleAlertUpdated}
+        />
+      );
     }
 
     if (requestState === ElasticRequestState.NotFound) {
@@ -147,15 +157,7 @@ export const DocumentFlyoutWrapper = memo(
       );
     }
 
-    return (
-      <EuiCallOut
-        announceOnMount
-        color="danger"
-        iconType="warning"
-        title={SOMETHING_WENT_WRONG}
-        data-test-subj="document-overview-something-went-wrong"
-      />
-    );
+    return null;
   }
 );
 

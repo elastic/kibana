@@ -14,7 +14,7 @@ import { useFirstLastSeen } from '../../../../common/containers/use_first_last_s
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import type { HostItem } from '../../../../../common/search_strategy';
 import { Direction, NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../common/search_strategy';
-import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from '..';
+import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from '../constants';
 import type { inputsModel } from '../../../../common/store';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import type { InspectResponse } from '../../../../types';

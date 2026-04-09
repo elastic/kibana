@@ -183,6 +183,8 @@ export const importRulesRoute = (
               endpointService,
               spaceId,
               rulesToImport: validatedActionRules,
+              checkOsqueryResponseActionAuthz:
+                ctx.securitySolution.getCheckOsqueryResponseActionAuthz(),
             });
 
           const ruleChunks = chunk(CHUNK_PARSED_OBJECT_SIZE, validatedResponseActionsRules);

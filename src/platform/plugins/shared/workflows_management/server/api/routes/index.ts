@@ -39,5 +39,5 @@ export function defineRoutes(
 
   registerWorkflowRoutes(deps);
   registerExecutionRoutes(deps);
-  registerInternalRoutes({ router, getWorkflowExecutionEngine });
+  registerInternalRoutes(deps, getWorkflowExecutionEngine);
 }

@@ -28,7 +28,7 @@
         "label": "ComponentTemplateFlyoutProps",
         "description": [],
         "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-        "lineNumber": 153,
+        "lineNumber": 158,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -41,7 +41,7 @@
             "label": "componentTemplateName",
             "description": [],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 154,
+            "lineNumber": 159,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -57,7 +57,7 @@
               "() => void"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 155,
+            "lineNumber": 160,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -152,7 +152,7 @@
         "label": "DatastreamFlyoutProps",
         "description": [],
         "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-        "lineNumber": 164,
+        "lineNumber": 169,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -165,7 +165,7 @@
             "label": "datastreamName",
             "description": [],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 165,
+            "lineNumber": 170,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -181,7 +181,7 @@
               "() => void"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 166,
+            "lineNumber": 171,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -199,7 +199,7 @@
         "label": "EmptyListContent",
         "description": [],
         "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-        "lineNumber": 37,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -215,7 +215,7 @@
               "(args: { createIndexButton: React.ReactElement<any, any> | null; }) => React.ReactElement<any, any> | null"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-            "lineNumber": 38,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -228,7 +228,7 @@
                 "label": "args",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-                "lineNumber": 38,
+                "lineNumber": 35,
                 "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -244,7 +244,7 @@
                       "React.ReactElement<any, any> | null"
                     ],
                     "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-                    "lineNumber": 40,
+                    "lineNumber": 37,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -443,7 +443,7 @@
         "label": "ExtensionsSetup",
         "description": [],
         "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-        "lineNumber": 53,
+        "lineNumber": 50,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -459,7 +459,7 @@
               "(action: any) => void"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-            "lineNumber": 55,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -475,7 +475,7 @@
                   "any"
                 ],
                 "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-                "lineNumber": 55,
+                "lineNumber": 52,
                 "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -495,7 +495,7 @@
               "(banner: any) => void"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-            "lineNumber": 57,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -511,7 +511,7 @@
                   "any"
                 ],
                 "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-                "lineNumber": 57,
+                "lineNumber": 54,
                 "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -531,7 +531,7 @@
               "(filter: any) => void"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-            "lineNumber": 59,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -547,7 +547,7 @@
                   "any"
                 ],
                 "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-                "lineNumber": 59,
+                "lineNumber": 56,
                 "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -575,7 +575,7 @@
               ") => void"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-            "lineNumber": 61,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -597,7 +597,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-                "lineNumber": 61,
+                "lineNumber": 58,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -625,7 +625,7 @@
               ") => void"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-            "lineNumber": 63,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -647,7 +647,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-                "lineNumber": 63,
+                "lineNumber": 60,
                 "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -675,7 +675,7 @@
               ") => void"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-            "lineNumber": 65,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -697,7 +697,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-                "lineNumber": 65,
+                "lineNumber": 62,
                 "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -725,7 +725,7 @@
               ") => void"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-            "lineNumber": 67,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -747,7 +747,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-                "lineNumber": 67,
+                "lineNumber": 64,
                 "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -775,7 +775,7 @@
               ") => void"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-            "lineNumber": 69,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -797,7 +797,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-                "lineNumber": 69,
+                "lineNumber": 66,
                 "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -825,7 +825,7 @@
               ") => void"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-            "lineNumber": 71,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -847,78 +847,11 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-                "lineNumber": 71,
+                "lineNumber": 68,
                 "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/index-management-shared-types",
-            "id": "def-common.ExtensionsSetup.setIndexDetailsPageRoute",
-            "type": "Function",
-            "tags": [],
-            "label": "setIndexDetailsPageRoute",
-            "description": [],
-            "signature": [
-              "(route: ",
-              {
-                "pluginId": "@kbn/index-management-shared-types",
-                "scope": "common",
-                "docId": "kibKbnIndexManagementSharedTypesPluginApi",
-                "section": "def-common.IndexDetailsPageRoute",
-                "text": "IndexDetailsPageRoute"
-              },
-              ", detailsTabId?: string | undefined) => void"
-            ],
-            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-            "lineNumber": 73,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/index-management-shared-types",
-                "id": "def-common.ExtensionsSetup.setIndexDetailsPageRoute.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "route",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/index-management-shared-types",
-                    "scope": "common",
-                    "docId": "kibKbnIndexManagementSharedTypesPluginApi",
-                    "section": "def-common.IndexDetailsPageRoute",
-                    "text": "IndexDetailsPageRoute"
-                  }
-                ],
-                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-                "lineNumber": 73,
-                "columnNumber": 28,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/index-management-shared-types",
-                "id": "def-common.ExtensionsSetup.setIndexDetailsPageRoute.$2",
-                "type": "string",
-                "tags": [],
-                "label": "detailsTabId",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-                "lineNumber": 73,
-                "columnNumber": 58,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
               }
             ],
             "returnComment": []
@@ -1013,7 +946,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-        "lineNumber": 125,
+        "lineNumber": 130,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1026,7 +959,7 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 126,
+            "lineNumber": 131,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1042,7 +975,7 @@
         "label": "IndexAttributes",
         "description": [],
         "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-        "lineNumber": 128,
+        "lineNumber": 133,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1058,7 +991,7 @@
               "string | number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 129,
+            "lineNumber": 134,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1074,7 +1007,7 @@
               "string | number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 130,
+            "lineNumber": 135,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1090,7 +1023,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 131,
+            "lineNumber": 136,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1106,7 +1039,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 132,
+            "lineNumber": 137,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1122,7 +1055,7 @@
               "string | string[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 133,
+            "lineNumber": 138,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1138,7 +1071,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 134,
+            "lineNumber": 139,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1154,7 +1087,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 135,
+            "lineNumber": 140,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1170,7 +1103,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 138,
+            "lineNumber": 143,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1187,7 +1120,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 139,
+            "lineNumber": 144,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1203,7 +1136,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 140,
+            "lineNumber": 145,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1220,7 +1153,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 144,
+            "lineNumber": 149,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1237,7 +1170,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 145,
+            "lineNumber": 150,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1253,7 +1186,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 146,
+            "lineNumber": 151,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1269,7 +1202,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 147,
+            "lineNumber": 152,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1285,7 +1218,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 148,
+            "lineNumber": 153,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1301,7 +1234,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 149,
+            "lineNumber": 154,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1317,7 +1250,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 150,
+            "lineNumber": 155,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1566,75 +1499,6 @@
       },
       {
         "parentPluginId": "@kbn/index-management-shared-types",
-        "id": "def-common.IndexDetailsPageRoute",
-        "type": "Interface",
-        "tags": [],
-        "label": "IndexDetailsPageRoute",
-        "description": [],
-        "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-        "lineNumber": 33,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/index-management-shared-types",
-            "id": "def-common.IndexDetailsPageRoute.renderRoute",
-            "type": "Function",
-            "tags": [],
-            "label": "renderRoute",
-            "description": [],
-            "signature": [
-              "(indexName: string, detailsTabId?: string | undefined) => string"
-            ],
-            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-            "lineNumber": 34,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/index-management-shared-types",
-                "id": "def-common.IndexDetailsPageRoute.renderRoute.$1",
-                "type": "string",
-                "tags": [],
-                "label": "indexName",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-                "lineNumber": 34,
-                "columnNumber": 17,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/index-management-shared-types",
-                "id": "def-common.IndexDetailsPageRoute.renderRoute.$2",
-                "type": "string",
-                "tags": [],
-                "label": "detailsTabId",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-                "lineNumber": 34,
-                "columnNumber": 36,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/index-management-shared-types",
         "id": "def-common.IndexDetailsTab",
         "type": "Interface",
         "tags": [],
@@ -1794,7 +1658,7 @@
                     "label": "euiTheme",
                     "description": [],
                     "signature": [
-                      "{ colors: { primary: string; accent: string; accentSecondary: string; success: string; warning: string; danger: string; primaryText: string; accentText: string; successText: string; warningText: string; dangerText: string; textPrimary: string; textAccent: string; textAccentSecondary: string; textNeutral: string; textSuccess: string; textWarning: string; textRisk: string; textDanger: string; textAssistance: string; emptyShade: string; lightestShade: string; lightShade: string; mediumShade: string; darkShade: string; darkestShade: string; fullShade: string; body: string; highlight: string; disabled: string; disabledText: string; shadow: string; text: string; title: string; subduedText: string; link: string; textParagraph: string; textHeading: string; textSubdued: string; textDisabled: string; textInverse: string; textInk: string; textGhost: string; backgroundBasePrimary: string; backgroundBaseAccent: string; backgroundBaseAccentSecondary: string; backgroundBaseNeutral: string; backgroundBaseSuccess: string; backgroundBaseWarning: string; backgroundBaseRisk: string; backgroundBaseDanger: string; backgroundBaseAssistance: string; backgroundBaseSubdued: string; backgroundBasePlain: string; backgroundBaseDisabled: string; backgroundBaseHighlighted: string; backgroundBaseFormsPrepend: string; backgroundBaseFormsControlDisabled: string; backgroundBaseInteractiveHover: string; backgroundBaseInteractiveHoverAssistance: string; backgroundBaseInteractiveSelect: string; backgroundBaseInteractiveSelectHover: string; backgroundBaseInteractiveOverlay: string; backgroundBaseSkeletonEdge: string; backgroundBaseSkeletonMiddle: string; backgroundLightPrimary: string; backgroundLightAccent: string; backgroundLightAccentSecondary: string; backgroundLightNeutral: string; backgroundLightSuccess: string; backgroundLightWarning: string; backgroundLightRisk: string; backgroundLightDanger: string; backgroundLightAssistance: string; backgroundLightText: string; backgroundFilledPrimary: string; backgroundFilledAccent: string; backgroundFilledAccentSecondary: string; backgroundFilledNeutral: string; backgroundFilledSuccess: string; backgroundFilledWarning: string; backgroundFilledRisk: string; backgroundFilledDanger: string; backgroundFilledAssistance: string; backgroundFilledText: string; backgroundTransparent: string; backgroundTransparentPrimary: string; backgroundTransparentAccent: string; backgroundTransparentAccentSecondary: string; backgroundTransparentNeutral: string; backgroundTransparentSuccess: string; backgroundTransparentWarning: string; backgroundTransparentRisk: string; backgroundTransparentDanger: string; backgroundTransparentSubdued: string; backgroundTransparentHighlighted: string; backgroundTransparentPlain: string; borderBasePrimary: string; borderBaseAccent: string; borderBaseAccentSecondary: string; borderBaseNeutral: string; borderBaseSuccess: string; borderBaseWarning: string; borderBaseRisk: string; borderBaseDanger: string; borderBaseAssistance: string; borderBasePlain: string; borderBaseSubdued: string; borderBaseProminent: string; borderBaseDisabled: string; borderBaseFloating: string; borderBaseFormsColorSwatch: string; borderInteractiveFormsHoverPlain: string; borderInteractiveFormsHoverProminent: string; borderInteractiveFormsHoverDanger: string; borderStrongPrimary: string; borderStrongAccent: string; borderStrongAccentSecondary: string; borderStrongNeutral: string; borderStrongSuccess: string; borderStrongWarning: string; borderStrongRisk: string; borderStrongDanger: string; borderStrongAssistance: string; borderStrongText: string; vis: { euiColorVis0: string; euiColorVis1: string; euiColorVis2: string; euiColorVis3: string; euiColorVis4: string; euiColorVis5: string; euiColorVis6: string; euiColorVis7: string; euiColorVis8: string; euiColorVis9: string; euiColorVis10: string; euiColorVis11: string; euiColorVisBehindText0: string; euiColorVisBehindText1: string; euiColorVisBehindText2: string; euiColorVisBehindText3: string; euiColorVisBehindText4: string; euiColorVisBehindText5: string; euiColorVisBehindText6: string; euiColorVisBehindText7: string; euiColorVisBehindText8: string; euiColorVisBehindText9: string; euiColorVisBehindText10: string; euiColorVisBehindText11: string; euiColorVisText0: string; euiColorVisText1: string; euiColorVisText2: string; euiColorVisText3: string; euiColorVisText4: string; euiColorVisText5: string; euiColorVisText6: string; euiColorVisText7: string; euiColorVisText8: string; euiColorVisText9: string; euiColorVisText10: string; euiColorVisText11: string; euiColorVisNeutral0: string; euiColorVisNeutral1: string; euiColorVisSuccess0: string; euiColorVisSuccess1: string; euiColorVisWarning0: string; euiColorVisWarning1: string; euiColorVisRisk0: string; euiColorVisRisk1: string; euiColorVisDanger0: string; euiColorVisDanger1: string; euiColorVisAssistance: string; euiColorVisBase0: string; euiColorVisGrey0: string; euiColorVisGrey1: string; euiColorVisGrey2: string; euiColorVisGrey3: string; euiColorVisWarm0: string; euiColorVisWarm1: string; euiColorVisWarm2: string; euiColorVisCool0: string; euiColorVisCool1: string; euiColorVisCool2: string; euiColorVisComplementary0: string; euiColorVisComplementary1: string; }; severity: { unknown: string; success: string; neutral: string; warning: string; risk: string; danger: string; assistance: string; }; LIGHT: { primary: string; accent: string; accentSecondary: string; success: string; warning: string; danger: string; primaryText: string; accentText: string; successText: string; warningText: string; dangerText: string; textPrimary: string; textAccent: string; textAccentSecondary: string; textNeutral: string; textSuccess: string; textWarning: string; textRisk: string; textDanger: string; textAssistance: string; emptyShade: string; lightestShade: string; lightShade: string; mediumShade: string; darkShade: string; darkestShade: string; fullShade: string; body: string; highlight: string; disabled: string; disabledText: string; shadow: string; text: string; title: string; subduedText: string; link: string; textParagraph: string; textHeading: string; textSubdued: string; textDisabled: string; textInverse: string; textInk: string; textGhost: string; backgroundBasePrimary: string; backgroundBaseAccent: string; backgroundBaseAccentSecondary: string; backgroundBaseNeutral: string; backgroundBaseSuccess: string; backgroundBaseWarning: string; backgroundBaseRisk: string; backgroundBaseDanger: string; backgroundBaseAssistance: string; backgroundBaseSubdued: string; backgroundBasePlain: string; backgroundBaseDisabled: string; backgroundBaseHighlighted: string; backgroundBaseFormsPrepend: string; backgroundBaseFormsControlDisabled: string; backgroundBaseInteractiveHover: string; backgroundBaseInteractiveHoverAssistance: string; backgroundBaseInteractiveSelect: string; backgroundBaseInteractiveSelectHover: string; backgroundBaseInteractiveOverlay: string; backgroundBaseSkeletonEdge: string; backgroundBaseSkeletonMiddle: string; backgroundLightPrimary: string; backgroundLightAccent: string; backgroundLightAccentSecondary: string; backgroundLightNeutral: string; backgroundLightSuccess: string; backgroundLightWarning: string; backgroundLightRisk: string; backgroundLightDanger: string; backgroundLightAssistance: string; backgroundLightText: string; backgroundFilledPrimary: string; backgroundFilledAccent: string; backgroundFilledAccentSecondary: string; backgroundFilledNeutral: string; backgroundFilledSuccess: string; backgroundFilledWarning: string; backgroundFilledRisk: string; backgroundFilledDanger: string; backgroundFilledAssistance: string; backgroundFilledText: string; backgroundTransparent: string; backgroundTransparentPrimary: string; backgroundTransparentAccent: string; backgroundTransparentAccentSecondary: string; backgroundTransparentNeutral: string; backgroundTransparentSuccess: string; backgroundTransparentWarning: string; backgroundTransparentRisk: string; backgroundTransparentDanger: string; backgroundTransparentSubdued: string; backgroundTransparentHighlighted: string; backgroundTransparentPlain: string; borderBasePrimary: string; borderBaseAccent: string; borderBaseAccentSecondary: string; borderBaseNeutral: string; borderBaseSuccess: string; borderBaseWarning: string; borderBaseRisk: string; borderBaseDanger: string; borderBaseAssistance: string; borderBasePlain: string; borderBaseSubdued: string; borderBaseProminent: string; borderBaseDisabled: string; borderBaseFloating: string; borderBaseFormsColorSwatch: string; borderInteractiveFormsHoverPlain: string; borderInteractiveFormsHoverProminent: string; borderInteractiveFormsHoverDanger: string; borderStrongPrimary: string; borderStrongAccent: string; borderStrongAccentSecondary: string; borderStrongNeutral: string; borderStrongSuccess: string; borderStrongWarning: string; borderStrongRisk: string; borderStrongDanger: string; borderStrongAssistance: string; borderStrongText: string; vis: { euiColorVis0: string; euiColorVis1: string; euiColorVis2: string; euiColorVis3: string; euiColorVis4: string; euiColorVis5: string; euiColorVis6: string; euiColorVis7: string; euiColorVis8: string; euiColorVis9: string; euiColorVis10: string; euiColorVis11: string; euiColorVisBehindText0: string; euiColorVisBehindText1: string; euiColorVisBehindText2: string; euiColorVisBehindText3: string; euiColorVisBehindText4: string; euiColorVisBehindText5: string; euiColorVisBehindText6: string; euiColorVisBehindText7: string; euiColorVisBehindText8: string; euiColorVisBehindText9: string; euiColorVisBehindText10: string; euiColorVisBehindText11: string; euiColorVisText0: string; euiColorVisText1: string; euiColorVisText2: string; euiColorVisText3: string; euiColorVisText4: string; euiColorVisText5: string; euiColorVisText6: string; euiColorVisText7: string; euiColorVisText8: string; euiColorVisText9: string; euiColorVisText10: string; euiColorVisText11: string; euiColorVisNeutral0: string; euiColorVisNeutral1: string; euiColorVisSuccess0: string; euiColorVisSuccess1: string; euiColorVisWarning0: string; euiColorVisWarning1: string; euiColorVisRisk0: string; euiColorVisRisk1: string; euiColorVisDanger0: string; euiColorVisDanger1: string; euiColorVisAssistance: string; euiColorVisBase0: string; euiColorVisGrey0: string; euiColorVisGrey1: string; euiColorVisGrey2: string; euiColorVisGrey3: string; euiColorVisWarm0: string; euiColorVisWarm1: string; euiColorVisWarm2: string; euiColorVisCool0: string; euiColorVisCool1: string; euiColorVisCool2: string; euiColorVisComplementary0: string; euiColorVisComplementary1: string; }; severity: { unknown: string; success: string; neutral: string; warning: string; risk: string; danger: string; assistance: string; }; }; DARK: { primary: string; accent: string; accentSecondary: string; success: string; warning: string; danger: string; primaryText: string; accentText: string; successText: string; warningText: string; dangerText: string; textPrimary: string; textAccent: string; textAccentSecondary: string; textNeutral: string; textSuccess: string; textWarning: string; textRisk: string; textDanger: string; textAssistance: string; emptyShade: string; lightestShade: string; lightShade: string; mediumShade: string; darkShade: string; darkestShade: string; fullShade: string; body: string; highlight: string; disabled: string; disabledText: string; shadow: string; text: string; title: string; subduedText: string; link: string; textParagraph: string; textHeading: string; textSubdued: string; textDisabled: string; textInverse: string; textInk: string; textGhost: string; backgroundBasePrimary: string; backgroundBaseAccent: string; backgroundBaseAccentSecondary: string; backgroundBaseNeutral: string; backgroundBaseSuccess: string; backgroundBaseWarning: string; backgroundBaseRisk: string; backgroundBaseDanger: string; backgroundBaseAssistance: string; backgroundBaseSubdued: string; backgroundBasePlain: string; backgroundBaseDisabled: string; backgroundBaseHighlighted: string; backgroundBaseFormsPrepend: string; backgroundBaseFormsControlDisabled: string; backgroundBaseInteractiveHover: string; backgroundBaseInteractiveHoverAssistance: string; backgroundBaseInteractiveSelect: string; backgroundBaseInteractiveSelectHover: string; backgroundBaseInteractiveOverlay: string; backgroundBaseSkeletonEdge: string; backgroundBaseSkeletonMiddle: string; backgroundLightPrimary: string; backgroundLightAccent: string; backgroundLightAccentSecondary: string; backgroundLightNeutral: string; backgroundLightSuccess: string; backgroundLightWarning: string; backgroundLightRisk: string; backgroundLightDanger: string; backgroundLightAssistance: string; backgroundLightText: string; backgroundFilledPrimary: string; backgroundFilledAccent: string; backgroundFilledAccentSecondary: string; backgroundFilledNeutral: string; backgroundFilledSuccess: string; backgroundFilledWarning: string; backgroundFilledRisk: string; backgroundFilledDanger: string; backgroundFilledAssistance: string; backgroundFilledText: string; backgroundTransparent: string; backgroundTransparentPrimary: string; backgroundTransparentAccent: string; backgroundTransparentAccentSecondary: string; backgroundTransparentNeutral: string; backgroundTransparentSuccess: string; backgroundTransparentWarning: string; backgroundTransparentRisk: string; backgroundTransparentDanger: string; backgroundTransparentSubdued: string; backgroundTransparentHighlighted: string; backgroundTransparentPlain: string; borderBasePrimary: string; borderBaseAccent: string; borderBaseAccentSecondary: string; borderBaseNeutral: string; borderBaseSuccess: string; borderBaseWarning: string; borderBaseRisk: string; borderBaseDanger: string; borderBaseAssistance: string; borderBasePlain: string; borderBaseSubdued: string; borderBaseProminent: string; borderBaseDisabled: string; borderBaseFloating: string; borderBaseFormsColorSwatch: string; borderInteractiveFormsHoverPlain: string; borderInteractiveFormsHoverProminent: string; borderInteractiveFormsHoverDanger: string; borderStrongPrimary: string; borderStrongAccent: string; borderStrongAccentSecondary: string; borderStrongNeutral: string; borderStrongSuccess: string; borderStrongWarning: string; borderStrongRisk: string; borderStrongDanger: string; borderStrongAssistance: string; borderStrongText: string; vis: { euiColorVis0: string; euiColorVis1: string; euiColorVis2: string; euiColorVis3: string; euiColorVis4: string; euiColorVis5: string; euiColorVis6: string; euiColorVis7: string; euiColorVis8: string; euiColorVis9: string; euiColorVis10: string; euiColorVis11: string; euiColorVisBehindText0: string; euiColorVisBehindText1: string; euiColorVisBehindText2: string; euiColorVisBehindText3: string; euiColorVisBehindText4: string; euiColorVisBehindText5: string; euiColorVisBehindText6: string; euiColorVisBehindText7: string; euiColorVisBehindText8: string; euiColorVisBehindText9: string; euiColorVisBehindText10: string; euiColorVisBehindText11: string; euiColorVisText0: string; euiColorVisText1: string; euiColorVisText2: string; euiColorVisText3: string; euiColorVisText4: string; euiColorVisText5: string; euiColorVisText6: string; euiColorVisText7: string; euiColorVisText8: string; euiColorVisText9: string; euiColorVisText10: string; euiColorVisText11: string; euiColorVisNeutral0: string; euiColorVisNeutral1: string; euiColorVisSuccess0: string; euiColorVisSuccess1: string; euiColorVisWarning0: string; euiColorVisWarning1: string; euiColorVisRisk0: string; euiColorVisRisk1: string; euiColorVisDanger0: string; euiColorVisDanger1: string; euiColorVisAssistance: string; euiColorVisBase0: string; euiColorVisGrey0: string; euiColorVisGrey1: string; euiColorVisGrey2: string; euiColorVisGrey3: string; euiColorVisWarm0: string; euiColorVisWarm1: string; euiColorVisWarm2: string; euiColorVisCool0: string; euiColorVisCool1: string; euiColorVisCool2: string; euiColorVisComplementary0: string; euiColorVisComplementary1: string; }; severity: { unknown: string; success: string; neutral: string; warning: string; risk: string; danger: string; assistance: string; }; }; plainLight: string; plainDark: string; }; base: number; size: { xxs: string; xs: string; s: string; m: string; base: string; l: string; xl: string; xxl: string; xxxl: string; xxxxl: string; }; font: { family: string; familyCode?: string | undefined; familySerif?: string | undefined; featureSettings?: string | undefined; defaultUnits: \"em\" | \"px\" | \"rem\"; baseline: number; lineHeightMultiplier: number; scale: { m: number; s: number; xs: number; l: number; xl: number; xxl: number; xxs: number; xxxs: number; }; weight: { light: ",
+                      "{ colors: { primary: string; accent: string; accentSecondary: string; success: string; warning: string; danger: string; primaryText: string; accentText: string; successText: string; warningText: string; dangerText: string; textPrimary: string; textAccent: string; textAccentSecondary: string; textNeutral: string; textSuccess: string; textWarning: string; textRisk: string; textDanger: string; textAssistance: string; emptyShade: string; lightestShade: string; lightShade: string; mediumShade: string; darkShade: string; darkestShade: string; fullShade: string; body: string; highlight: string; disabled: string; disabledText: string; shadow: string; text: string; title: string; subduedText: string; link: string; textParagraph: string; textHeading: string; textSubdued: string; textDisabled: string; textInverse: string; textInk: string; textGhost: string; backgroundBasePrimary: string; backgroundBaseAccent: string; backgroundBaseAccentSecondary: string; backgroundBaseNeutral: string; backgroundBaseSuccess: string; backgroundBaseWarning: string; backgroundBaseRisk: string; backgroundBaseDanger: string; backgroundBaseAssistance: string; backgroundBaseSubdued: string; backgroundBasePlain: string; backgroundBaseDisabled: string; backgroundBaseHighlighted: string; backgroundBaseFormsPrepend: string; backgroundBaseFormsControlDisabled: string; backgroundBaseInteractiveHover: string; backgroundBaseInteractiveHoverAssistance: string; backgroundBaseInteractiveSelect: string; backgroundBaseInteractiveSelectHover: string; backgroundBaseInteractiveOverlay: string; backgroundBaseSkeletonEdge: string; backgroundBaseSkeletonMiddle: string; backgroundLightPrimary: string; backgroundLightAccent: string; backgroundLightAccentSecondary: string; backgroundLightNeutral: string; backgroundLightSuccess: string; backgroundLightWarning: string; backgroundLightRisk: string; backgroundLightDanger: string; backgroundLightAssistance: string; backgroundLightText: string; backgroundFilledPrimary: string; backgroundFilledAccent: string; backgroundFilledAccentSecondary: string; backgroundFilledNeutral: string; backgroundFilledSuccess: string; backgroundFilledWarning: string; backgroundFilledRisk: string; backgroundFilledDanger: string; backgroundFilledAssistance: string; backgroundFilledText: string; backgroundTransparent: string; backgroundTransparentPrimary: string; backgroundTransparentAccent: string; backgroundTransparentAccentSecondary: string; backgroundTransparentNeutral: string; backgroundTransparentSuccess: string; backgroundTransparentWarning: string; backgroundTransparentRisk: string; backgroundTransparentDanger: string; backgroundTransparentSubdued: string; backgroundTransparentHighlighted: string; backgroundTransparentPlain: string; borderBasePrimary: string; borderBaseAccent: string; borderBaseAccentSecondary: string; borderBaseNeutral: string; borderBaseSuccess: string; borderBaseWarning: string; borderBaseRisk: string; borderBaseDanger: string; borderBaseAssistance: string; borderBasePlain: string; borderBaseSubdued: string; borderBaseProminent: string; borderBaseDisabled: string; borderBaseFloating: string; borderBaseFormsColorSwatch: string; borderInteractiveFormsHoverPlain: string; borderInteractiveFormsHoverProminent: string; borderInteractiveFormsHoverDanger: string; borderStrongPrimary: string; borderStrongAccent: string; borderStrongAccentSecondary: string; borderStrongNeutral: string; borderStrongSuccess: string; borderStrongWarning: string; borderStrongRisk: string; borderStrongDanger: string; borderStrongAssistance: string; borderStrongText: string; vis: { euiColorVis0: string; euiColorVis1: string; euiColorVis2: string; euiColorVis3: string; euiColorVis4: string; euiColorVis5: string; euiColorVis6: string; euiColorVis7: string; euiColorVis8: string; euiColorVis9: string; euiColorVisBehindText0: string; euiColorVisBehindText1: string; euiColorVisBehindText2: string; euiColorVisBehindText3: string; euiColorVisBehindText4: string; euiColorVisBehindText5: string; euiColorVisBehindText6: string; euiColorVisBehindText7: string; euiColorVisBehindText8: string; euiColorVisBehindText9: string; euiColorVisText0: string; euiColorVisText1: string; euiColorVisText2: string; euiColorVisText3: string; euiColorVisText4: string; euiColorVisText5: string; euiColorVisText6: string; euiColorVisText7: string; euiColorVisText8: string; euiColorVisText9: string; euiColorVisNeutral0: string; euiColorVisNeutral1: string; euiColorVisSuccess0: string; euiColorVisSuccess1: string; euiColorVisWarning0: string; euiColorVisWarning1: string; euiColorVisRisk0: string; euiColorVisRisk1: string; euiColorVisDanger0: string; euiColorVisDanger1: string; euiColorVisBase0: string; euiColorVisGrey0: string; euiColorVisGrey1: string; euiColorVisGrey2: string; euiColorVisGrey3: string; euiColorVisWarm0: string; euiColorVisWarm1: string; euiColorVisWarm2: string; euiColorVisCool0: string; euiColorVisCool1: string; euiColorVisCool2: string; euiColorVisComplementary0: string; euiColorVisComplementary1: string; }; severity: { unknown: string; success: string; neutral: string; warning: string; risk: string; danger: string; }; LIGHT: { primary: string; accent: string; accentSecondary: string; success: string; warning: string; danger: string; primaryText: string; accentText: string; successText: string; warningText: string; dangerText: string; textPrimary: string; textAccent: string; textAccentSecondary: string; textNeutral: string; textSuccess: string; textWarning: string; textRisk: string; textDanger: string; textAssistance: string; emptyShade: string; lightestShade: string; lightShade: string; mediumShade: string; darkShade: string; darkestShade: string; fullShade: string; body: string; highlight: string; disabled: string; disabledText: string; shadow: string; text: string; title: string; subduedText: string; link: string; textParagraph: string; textHeading: string; textSubdued: string; textDisabled: string; textInverse: string; textInk: string; textGhost: string; backgroundBasePrimary: string; backgroundBaseAccent: string; backgroundBaseAccentSecondary: string; backgroundBaseNeutral: string; backgroundBaseSuccess: string; backgroundBaseWarning: string; backgroundBaseRisk: string; backgroundBaseDanger: string; backgroundBaseAssistance: string; backgroundBaseSubdued: string; backgroundBasePlain: string; backgroundBaseDisabled: string; backgroundBaseHighlighted: string; backgroundBaseFormsPrepend: string; backgroundBaseFormsControlDisabled: string; backgroundBaseInteractiveHover: string; backgroundBaseInteractiveHoverAssistance: string; backgroundBaseInteractiveSelect: string; backgroundBaseInteractiveSelectHover: string; backgroundBaseInteractiveOverlay: string; backgroundBaseSkeletonEdge: string; backgroundBaseSkeletonMiddle: string; backgroundLightPrimary: string; backgroundLightAccent: string; backgroundLightAccentSecondary: string; backgroundLightNeutral: string; backgroundLightSuccess: string; backgroundLightWarning: string; backgroundLightRisk: string; backgroundLightDanger: string; backgroundLightAssistance: string; backgroundLightText: string; backgroundFilledPrimary: string; backgroundFilledAccent: string; backgroundFilledAccentSecondary: string; backgroundFilledNeutral: string; backgroundFilledSuccess: string; backgroundFilledWarning: string; backgroundFilledRisk: string; backgroundFilledDanger: string; backgroundFilledAssistance: string; backgroundFilledText: string; backgroundTransparent: string; backgroundTransparentPrimary: string; backgroundTransparentAccent: string; backgroundTransparentAccentSecondary: string; backgroundTransparentNeutral: string; backgroundTransparentSuccess: string; backgroundTransparentWarning: string; backgroundTransparentRisk: string; backgroundTransparentDanger: string; backgroundTransparentSubdued: string; backgroundTransparentHighlighted: string; backgroundTransparentPlain: string; borderBasePrimary: string; borderBaseAccent: string; borderBaseAccentSecondary: string; borderBaseNeutral: string; borderBaseSuccess: string; borderBaseWarning: string; borderBaseRisk: string; borderBaseDanger: string; borderBaseAssistance: string; borderBasePlain: string; borderBaseSubdued: string; borderBaseProminent: string; borderBaseDisabled: string; borderBaseFloating: string; borderBaseFormsColorSwatch: string; borderInteractiveFormsHoverPlain: string; borderInteractiveFormsHoverProminent: string; borderInteractiveFormsHoverDanger: string; borderStrongPrimary: string; borderStrongAccent: string; borderStrongAccentSecondary: string; borderStrongNeutral: string; borderStrongSuccess: string; borderStrongWarning: string; borderStrongRisk: string; borderStrongDanger: string; borderStrongAssistance: string; borderStrongText: string; vis: { euiColorVis0: string; euiColorVis1: string; euiColorVis2: string; euiColorVis3: string; euiColorVis4: string; euiColorVis5: string; euiColorVis6: string; euiColorVis7: string; euiColorVis8: string; euiColorVis9: string; euiColorVisBehindText0: string; euiColorVisBehindText1: string; euiColorVisBehindText2: string; euiColorVisBehindText3: string; euiColorVisBehindText4: string; euiColorVisBehindText5: string; euiColorVisBehindText6: string; euiColorVisBehindText7: string; euiColorVisBehindText8: string; euiColorVisBehindText9: string; euiColorVisText0: string; euiColorVisText1: string; euiColorVisText2: string; euiColorVisText3: string; euiColorVisText4: string; euiColorVisText5: string; euiColorVisText6: string; euiColorVisText7: string; euiColorVisText8: string; euiColorVisText9: string; euiColorVisNeutral0: string; euiColorVisNeutral1: string; euiColorVisSuccess0: string; euiColorVisSuccess1: string; euiColorVisWarning0: string; euiColorVisWarning1: string; euiColorVisRisk0: string; euiColorVisRisk1: string; euiColorVisDanger0: string; euiColorVisDanger1: string; euiColorVisBase0: string; euiColorVisGrey0: string; euiColorVisGrey1: string; euiColorVisGrey2: string; euiColorVisGrey3: string; euiColorVisWarm0: string; euiColorVisWarm1: string; euiColorVisWarm2: string; euiColorVisCool0: string; euiColorVisCool1: string; euiColorVisCool2: string; euiColorVisComplementary0: string; euiColorVisComplementary1: string; }; severity: { unknown: string; success: string; neutral: string; warning: string; risk: string; danger: string; }; }; DARK: { primary: string; accent: string; accentSecondary: string; success: string; warning: string; danger: string; primaryText: string; accentText: string; successText: string; warningText: string; dangerText: string; textPrimary: string; textAccent: string; textAccentSecondary: string; textNeutral: string; textSuccess: string; textWarning: string; textRisk: string; textDanger: string; textAssistance: string; emptyShade: string; lightestShade: string; lightShade: string; mediumShade: string; darkShade: string; darkestShade: string; fullShade: string; body: string; highlight: string; disabled: string; disabledText: string; shadow: string; text: string; title: string; subduedText: string; link: string; textParagraph: string; textHeading: string; textSubdued: string; textDisabled: string; textInverse: string; textInk: string; textGhost: string; backgroundBasePrimary: string; backgroundBaseAccent: string; backgroundBaseAccentSecondary: string; backgroundBaseNeutral: string; backgroundBaseSuccess: string; backgroundBaseWarning: string; backgroundBaseRisk: string; backgroundBaseDanger: string; backgroundBaseAssistance: string; backgroundBaseSubdued: string; backgroundBasePlain: string; backgroundBaseDisabled: string; backgroundBaseHighlighted: string; backgroundBaseFormsPrepend: string; backgroundBaseFormsControlDisabled: string; backgroundBaseInteractiveHover: string; backgroundBaseInteractiveHoverAssistance: string; backgroundBaseInteractiveSelect: string; backgroundBaseInteractiveSelectHover: string; backgroundBaseInteractiveOverlay: string; backgroundBaseSkeletonEdge: string; backgroundBaseSkeletonMiddle: string; backgroundLightPrimary: string; backgroundLightAccent: string; backgroundLightAccentSecondary: string; backgroundLightNeutral: string; backgroundLightSuccess: string; backgroundLightWarning: string; backgroundLightRisk: string; backgroundLightDanger: string; backgroundLightAssistance: string; backgroundLightText: string; backgroundFilledPrimary: string; backgroundFilledAccent: string; backgroundFilledAccentSecondary: string; backgroundFilledNeutral: string; backgroundFilledSuccess: string; backgroundFilledWarning: string; backgroundFilledRisk: string; backgroundFilledDanger: string; backgroundFilledAssistance: string; backgroundFilledText: string; backgroundTransparent: string; backgroundTransparentPrimary: string; backgroundTransparentAccent: string; backgroundTransparentAccentSecondary: string; backgroundTransparentNeutral: string; backgroundTransparentSuccess: string; backgroundTransparentWarning: string; backgroundTransparentRisk: string; backgroundTransparentDanger: string; backgroundTransparentSubdued: string; backgroundTransparentHighlighted: string; backgroundTransparentPlain: string; borderBasePrimary: string; borderBaseAccent: string; borderBaseAccentSecondary: string; borderBaseNeutral: string; borderBaseSuccess: string; borderBaseWarning: string; borderBaseRisk: string; borderBaseDanger: string; borderBaseAssistance: string; borderBasePlain: string; borderBaseSubdued: string; borderBaseProminent: string; borderBaseDisabled: string; borderBaseFloating: string; borderBaseFormsColorSwatch: string; borderInteractiveFormsHoverPlain: string; borderInteractiveFormsHoverProminent: string; borderInteractiveFormsHoverDanger: string; borderStrongPrimary: string; borderStrongAccent: string; borderStrongAccentSecondary: string; borderStrongNeutral: string; borderStrongSuccess: string; borderStrongWarning: string; borderStrongRisk: string; borderStrongDanger: string; borderStrongAssistance: string; borderStrongText: string; vis: { euiColorVis0: string; euiColorVis1: string; euiColorVis2: string; euiColorVis3: string; euiColorVis4: string; euiColorVis5: string; euiColorVis6: string; euiColorVis7: string; euiColorVis8: string; euiColorVis9: string; euiColorVisBehindText0: string; euiColorVisBehindText1: string; euiColorVisBehindText2: string; euiColorVisBehindText3: string; euiColorVisBehindText4: string; euiColorVisBehindText5: string; euiColorVisBehindText6: string; euiColorVisBehindText7: string; euiColorVisBehindText8: string; euiColorVisBehindText9: string; euiColorVisText0: string; euiColorVisText1: string; euiColorVisText2: string; euiColorVisText3: string; euiColorVisText4: string; euiColorVisText5: string; euiColorVisText6: string; euiColorVisText7: string; euiColorVisText8: string; euiColorVisText9: string; euiColorVisNeutral0: string; euiColorVisNeutral1: string; euiColorVisSuccess0: string; euiColorVisSuccess1: string; euiColorVisWarning0: string; euiColorVisWarning1: string; euiColorVisRisk0: string; euiColorVisRisk1: string; euiColorVisDanger0: string; euiColorVisDanger1: string; euiColorVisBase0: string; euiColorVisGrey0: string; euiColorVisGrey1: string; euiColorVisGrey2: string; euiColorVisGrey3: string; euiColorVisWarm0: string; euiColorVisWarm1: string; euiColorVisWarm2: string; euiColorVisCool0: string; euiColorVisCool1: string; euiColorVisCool2: string; euiColorVisComplementary0: string; euiColorVisComplementary1: string; }; severity: { unknown: string; success: string; neutral: string; warning: string; risk: string; danger: string; }; }; plainLight: string; plainDark: string; }; base: number; size: { xxs: string; xs: string; s: string; m: string; base: string; l: string; xl: string; xxl: string; xxxl: string; xxxxl: string; }; font: { family: string; familyCode?: string | undefined; familySerif?: string | undefined; featureSettings?: string | undefined; defaultUnits: \"em\" | \"px\" | \"rem\"; baseline: number; lineHeightMultiplier: number; scale: { m: number; s: number; xs: number; l: number; xl: number; xxl: number; xxs: number; xxxs: number; }; weight: { light: ",
                       "Property",
                       ".FontWeight | undefined; regular: ",
                       "Property",
@@ -1984,7 +1848,7 @@
                       "Property",
                       ".BoxShadow | undefined; up: ",
                       "Property",
-                      ".BoxShadow | undefined; }; }; }; components: { badgeBackground: string; badgeBackgroundSubdued: string; badgeBorderColorHollow: string; badgeIconButtonBackgroundHover: string; bottomBarBackground: string; breadcrumbsApplicationBackground: string; breadcrumbsApplicationColor: string; buttonGroupBackgroundDisabledSelected: string; buttonGroupBorderColor: string; buttonGroupBorderColorSelected: string; buttonGroupFocusColor: string; codeBackground: string; codeBackgroundSelected: string; codeColor: string; codeInlineBackground: string; codeInlineColor: string; codeCommentColor: string; codeSelectorColor: string; codeStringColor: string; codeTagColor: string; codeNameColor: string; codeNumberColor: string; codeInlineCodeKeywordColor: string; codeKeywordColor: string; codeFunctionTitleColor: string; codeTypeColor: string; codeAttributeColor: string; codeSymbolColor: string; codeParamsColor: string; codeMetaColor: string; codeTitleColor: string; codeSectionColor: string; codeAdditionColor: string; codeDeletionColor: string; codeSelectorClassColor: string; codeSelectorIdColor: string; collapsibleNavGroupBackground: string; collapsibleNavGroupBackgroundDark: string; dataGridBorderColor: string; dataGridVerticalLineBorderColor: string; dataGridRowBackground: string; dataGridRowBackgroundHover: string; dataGridRowBackgroundSelect: string; dataGridRowBackgroundSelectHover: string; dataGridRowBackgroundMarked: string; dataGridRowBackgroundMarkedHover: string; dataGridRowBorderActive: string; dataGridRowBorderHover: string; dataGridRowBorderMarked: string; dataGridRowStripesBackground: string; dataGridRowStripesBackgroundHover: string; dataGridRowStripesBackgroundStriped: string; dataGridRowStripesBackgroundStripedHover: string; dataGridRowStripesBackgroundSelect: string; dataGridRowStripesBackgroundSelectHover: string; dragDropDraggingBackground: string; dragDropDraggingOverBackground: string; headerBackground: string; headerDarkBackground: string; headerDarkSearchBorderColor: string; headerDarkSectionItemBackgroundFocus: string; filterButtonBadgeBackgroundHover: string; filterSelectItemBackgroundFocusDisabled: string; flyoutFooterBackground: string; flyoutCloseButtonInsideBackground: string; listGroupItemBackgroundPrimaryActive: string; listGroupItemBackgroundSubduedActive: string; listGroupItemBackgroundHover: string; listGroupItemBackgroundPrimaryHover: string; loadingSpinnerBorder: string; loadingSpinnerHighlight: string; loadingChartMonoBackground0: string; loadingChartMonoBackground1: string; loadingChartMonoBackground2: string; loadingChartMonoBackground3: string; markBackground: string; markdownFormatTableBorderColor: string; overlayMaskBackground: string; overlayMaskBackgroundHighContrast: string; popoverPanelBackground: string; popoverFooterBorderColor: string; scrollbarTrackColor: string; sideNavItemEmphasizedBackground: string; selectableListItemBorderColor: string; skeletonBackgroundSkeletonMiddleHighContrast: string; switchBackgroundOn: string; switchBackgroundOff: string; switchUncompressedBackgroundDisabled: string; switchCompressedBackgroundDisabled: string; switchMiniBackgroundDisabled: string; switchThumbBackgroundDisabled: string; switchThumbBorderOn: string; switchThumbBorderOff: string; switchIconDisabled: string; tableRowBackgroundHover: string; tableRowBackgroundSelected: string; tableRowBackgroundSelectedHover: string; tableRowInteractiveBackgroundHover: string; tableRowInteractiveBackgroundFocus: string; tableRowBackgroundMarked: string; tableRowBackgroundMarkedHover: string; tableCellSortableIconColor: string; tableFooterBackground: string; tooltipBackground: string; tooltipBorder: string; tooltipBorderFloating: string; tourFooterBackground: string; tourStepIndicatorInactiveColor: string; tourStepIndicatorActiveColor: string; treeViewItemBackgroundHover: string; buttons: { backgroundPrimary: string; backgroundAccent: string; backgroundAccentSecondary: string; backgroundNeutral: string; backgroundSuccess: string; backgroundWarning: string; backgroundRisk: string; backgroundDanger: string; backgroundText: string; backgroundDisabled: string; backgroundPrimaryHover: string; backgroundAccentHover: string; backgroundAccentSecondaryHover: string; backgroundNeutralHover: string; backgroundSuccessHover: string; backgroundWarningHover: string; backgroundRiskHover: string; backgroundDangerHover: string; backgroundAssistanceHover: string; backgroundTextHover: string; backgroundPrimaryActive: string; backgroundAccentActive: string; backgroundAccentSecondaryActive: string; backgroundNeutralActive: string; backgroundSuccessActive: string; backgroundWarningActive: string; backgroundRiskActive: string; backgroundDangerActive: string; backgroundTextActive: string; backgroundFilledPrimary: string; backgroundFilledAccent: string; backgroundFilledAccentSecondary: string; backgroundFilledNeutral: string; backgroundFilledSuccess: string; backgroundFilledWarning: string; backgroundFilledRisk: string; backgroundFilledDanger: string; backgroundFilledText: string; backgroundFilledDisabled: string; backgroundFilledPrimaryHover: string; backgroundFilledAccentHover: string; backgroundFilledAccentSecondaryHover: string; backgroundFilledNeutralHover: string; backgroundFilledSuccessHover: string; backgroundFilledWarningHover: string; backgroundFilledRiskHover: string; backgroundFilledDangerHover: string; backgroundFilledAssistanceHover: string; backgroundFilledTextHover: string; backgroundFilledPrimaryActive: string; backgroundFilledAccentActive: string; backgroundFilledAccentSecondaryActive: string; backgroundFilledNeutralActive: string; backgroundFilledSuccessActive: string; backgroundFilledWarningActive: string; backgroundFilledRiskActive: string; backgroundFilledDangerActive: string; backgroundFilledTextActive: string; backgroundEmptyPrimaryHover: string; backgroundEmptyAccentHover: string; backgroundEmptyAccentSecondaryHover: string; backgroundEmptyNeutralHover: string; backgroundEmptySuccessHover: string; backgroundEmptyWarningHover: string; backgroundEmptyRiskHover: string; backgroundEmptyDangerHover: string; backgroundEmptyTextHover: string; backgroundEmptyPrimaryActive: string; backgroundEmptyAccentActive: string; backgroundEmptyAccentSecondaryActive: string; backgroundEmptyNeutralActive: string; backgroundEmptySuccessActive: string; backgroundEmptyWarningActive: string; backgroundEmptyRiskActive: string; backgroundEmptyDangerActive: string; backgroundEmptyTextActive: string; textColorPrimary: string; textColorAccent: string; textColorAccentSecondary: string; textColorNeutral: string; textColorSuccess: string; textColorWarning: string; textColorRisk: string; textColorDanger: string; textColorText: string; textColorDisabled: string; textColorFilledPrimary: string; textColorFilledAccent: string; textColorFilledAccentSecondary: string; textColorFilledNeutral: string; textColorFilledSuccess: string; textColorFilledWarning: string; textColorFilledRisk: string; textColorFilledDanger: string; textColorFilledText: string; textColorFilledDisabled: string; LIGHT: { backgroundPrimary: string; backgroundAccent: string; backgroundAccentSecondary: string; backgroundNeutral: string; backgroundSuccess: string; backgroundWarning: string; backgroundRisk: string; backgroundDanger: string; backgroundText: string; backgroundDisabled: string; backgroundPrimaryHover: string; backgroundAccentHover: string; backgroundAccentSecondaryHover: string; backgroundNeutralHover: string; backgroundSuccessHover: string; backgroundWarningHover: string; backgroundRiskHover: string; backgroundDangerHover: string; backgroundAssistanceHover: string; backgroundTextHover: string; backgroundPrimaryActive: string; backgroundAccentActive: string; backgroundAccentSecondaryActive: string; backgroundNeutralActive: string; backgroundSuccessActive: string; backgroundWarningActive: string; backgroundRiskActive: string; backgroundDangerActive: string; backgroundTextActive: string; backgroundFilledPrimary: string; backgroundFilledAccent: string; backgroundFilledAccentSecondary: string; backgroundFilledNeutral: string; backgroundFilledSuccess: string; backgroundFilledWarning: string; backgroundFilledRisk: string; backgroundFilledDanger: string; backgroundFilledText: string; backgroundFilledDisabled: string; backgroundFilledPrimaryHover: string; backgroundFilledAccentHover: string; backgroundFilledAccentSecondaryHover: string; backgroundFilledNeutralHover: string; backgroundFilledSuccessHover: string; backgroundFilledWarningHover: string; backgroundFilledRiskHover: string; backgroundFilledDangerHover: string; backgroundFilledAssistanceHover: string; backgroundFilledTextHover: string; backgroundFilledPrimaryActive: string; backgroundFilledAccentActive: string; backgroundFilledAccentSecondaryActive: string; backgroundFilledNeutralActive: string; backgroundFilledSuccessActive: string; backgroundFilledWarningActive: string; backgroundFilledRiskActive: string; backgroundFilledDangerActive: string; backgroundFilledTextActive: string; backgroundEmptyPrimaryHover: string; backgroundEmptyAccentHover: string; backgroundEmptyAccentSecondaryHover: string; backgroundEmptyNeutralHover: string; backgroundEmptySuccessHover: string; backgroundEmptyWarningHover: string; backgroundEmptyRiskHover: string; backgroundEmptyDangerHover: string; backgroundEmptyTextHover: string; backgroundEmptyPrimaryActive: string; backgroundEmptyAccentActive: string; backgroundEmptyAccentSecondaryActive: string; backgroundEmptyNeutralActive: string; backgroundEmptySuccessActive: string; backgroundEmptyWarningActive: string; backgroundEmptyRiskActive: string; backgroundEmptyDangerActive: string; backgroundEmptyTextActive: string; textColorPrimary: string; textColorAccent: string; textColorAccentSecondary: string; textColorNeutral: string; textColorSuccess: string; textColorWarning: string; textColorRisk: string; textColorDanger: string; textColorText: string; textColorDisabled: string; textColorFilledPrimary: string; textColorFilledAccent: string; textColorFilledAccentSecondary: string; textColorFilledNeutral: string; textColorFilledSuccess: string; textColorFilledWarning: string; textColorFilledRisk: string; textColorFilledDanger: string; textColorFilledText: string; textColorFilledDisabled: string; }; DARK: { backgroundPrimary: string; backgroundAccent: string; backgroundAccentSecondary: string; backgroundNeutral: string; backgroundSuccess: string; backgroundWarning: string; backgroundRisk: string; backgroundDanger: string; backgroundText: string; backgroundDisabled: string; backgroundPrimaryHover: string; backgroundAccentHover: string; backgroundAccentSecondaryHover: string; backgroundNeutralHover: string; backgroundSuccessHover: string; backgroundWarningHover: string; backgroundRiskHover: string; backgroundDangerHover: string; backgroundAssistanceHover: string; backgroundTextHover: string; backgroundPrimaryActive: string; backgroundAccentActive: string; backgroundAccentSecondaryActive: string; backgroundNeutralActive: string; backgroundSuccessActive: string; backgroundWarningActive: string; backgroundRiskActive: string; backgroundDangerActive: string; backgroundTextActive: string; backgroundFilledPrimary: string; backgroundFilledAccent: string; backgroundFilledAccentSecondary: string; backgroundFilledNeutral: string; backgroundFilledSuccess: string; backgroundFilledWarning: string; backgroundFilledRisk: string; backgroundFilledDanger: string; backgroundFilledText: string; backgroundFilledDisabled: string; backgroundFilledPrimaryHover: string; backgroundFilledAccentHover: string; backgroundFilledAccentSecondaryHover: string; backgroundFilledNeutralHover: string; backgroundFilledSuccessHover: string; backgroundFilledWarningHover: string; backgroundFilledRiskHover: string; backgroundFilledDangerHover: string; backgroundFilledAssistanceHover: string; backgroundFilledTextHover: string; backgroundFilledPrimaryActive: string; backgroundFilledAccentActive: string; backgroundFilledAccentSecondaryActive: string; backgroundFilledNeutralActive: string; backgroundFilledSuccessActive: string; backgroundFilledWarningActive: string; backgroundFilledRiskActive: string; backgroundFilledDangerActive: string; backgroundFilledTextActive: string; backgroundEmptyPrimaryHover: string; backgroundEmptyAccentHover: string; backgroundEmptyAccentSecondaryHover: string; backgroundEmptyNeutralHover: string; backgroundEmptySuccessHover: string; backgroundEmptyWarningHover: string; backgroundEmptyRiskHover: string; backgroundEmptyDangerHover: string; backgroundEmptyTextHover: string; backgroundEmptyPrimaryActive: string; backgroundEmptyAccentActive: string; backgroundEmptyAccentSecondaryActive: string; backgroundEmptyNeutralActive: string; backgroundEmptySuccessActive: string; backgroundEmptyWarningActive: string; backgroundEmptyRiskActive: string; backgroundEmptyDangerActive: string; backgroundEmptyTextActive: string; textColorPrimary: string; textColorAccent: string; textColorAccentSecondary: string; textColorNeutral: string; textColorSuccess: string; textColorWarning: string; textColorRisk: string; textColorDanger: string; textColorText: string; textColorDisabled: string; textColorFilledPrimary: string; textColorFilledAccent: string; textColorFilledAccentSecondary: string; textColorFilledNeutral: string; textColorFilledSuccess: string; textColorFilledWarning: string; textColorFilledRisk: string; textColorFilledDanger: string; textColorFilledText: string; textColorFilledDisabled: string; }; }; forms: { background: string; backgroundDisabled: string; backgroundReadOnly: string; backgroundFocused: string; backgroundAutofilled: string; backgroundDropping: string; prependBackground: string; border: string; borderDisabled: string; borderFocused: string; borderInvalid: string; borderHovered: string; borderInvalidHovered: string; borderAutofilled: string; borderAutofilledHovered: string; clearButtonBackground: string; controlBorder: string; controlBorderSelected: string; controlBorderDisabled: string; controlBackgroundUnselected: string; controlBackgroundDisabled: string; colorHasPlaceholder: string; colorDisabled: string; iconDisabled: string; maxWidth: string; LIGHT: { background: string; backgroundDisabled: string; backgroundReadOnly: string; backgroundFocused: string; backgroundAutofilled: string; backgroundDropping: string; prependBackground: string; border: string; borderDisabled: string; borderFocused: string; borderInvalid: string; borderHovered: string; borderInvalidHovered: string; borderAutofilled: string; borderAutofilledHovered: string; clearButtonBackground: string; controlBorder: string; controlBorderSelected: string; controlBorderDisabled: string; controlBackgroundUnselected: string; controlBackgroundDisabled: string; colorHasPlaceholder: string; colorDisabled: string; iconDisabled: string; }; DARK: { background: string; backgroundDisabled: string; backgroundReadOnly: string; backgroundFocused: string; backgroundAutofilled: string; backgroundDropping: string; prependBackground: string; border: string; borderDisabled: string; borderFocused: string; borderInvalid: string; borderHovered: string; borderInvalidHovered: string; borderAutofilled: string; borderAutofilledHovered: string; clearButtonBackground: string; controlBorder: string; controlBorderSelected: string; controlBorderDisabled: string; controlBackgroundUnselected: string; controlBackgroundDisabled: string; colorHasPlaceholder: string; colorDisabled: string; iconDisabled: string; }; }; LIGHT: { badgeBackground: string; badgeBackgroundSubdued: string; badgeBorderColorHollow: string; badgeIconButtonBackgroundHover: string; bottomBarBackground: string; breadcrumbsApplicationBackground: string; breadcrumbsApplicationColor: string; buttonGroupBackgroundDisabledSelected: string; buttonGroupBorderColor: string; buttonGroupBorderColorSelected: string; buttonGroupFocusColor: string; codeBackground: string; codeBackgroundSelected: string; codeColor: string; codeInlineBackground: string; codeInlineColor: string; codeCommentColor: string; codeSelectorColor: string; codeStringColor: string; codeTagColor: string; codeNameColor: string; codeNumberColor: string; codeInlineCodeKeywordColor: string; codeKeywordColor: string; codeFunctionTitleColor: string; codeTypeColor: string; codeAttributeColor: string; codeSymbolColor: string; codeParamsColor: string; codeMetaColor: string; codeTitleColor: string; codeSectionColor: string; codeAdditionColor: string; codeDeletionColor: string; codeSelectorClassColor: string; codeSelectorIdColor: string; collapsibleNavGroupBackground: string; collapsibleNavGroupBackgroundDark: string; dataGridBorderColor: string; dataGridVerticalLineBorderColor: string; dataGridRowBackground: string; dataGridRowBackgroundHover: string; dataGridRowBackgroundSelect: string; dataGridRowBackgroundSelectHover: string; dataGridRowBackgroundMarked: string; dataGridRowBackgroundMarkedHover: string; dataGridRowBorderActive: string; dataGridRowBorderHover: string; dataGridRowBorderMarked: string; dataGridRowStripesBackground: string; dataGridRowStripesBackgroundHover: string; dataGridRowStripesBackgroundStriped: string; dataGridRowStripesBackgroundStripedHover: string; dataGridRowStripesBackgroundSelect: string; dataGridRowStripesBackgroundSelectHover: string; dragDropDraggingBackground: string; dragDropDraggingOverBackground: string; headerBackground: string; headerDarkBackground: string; headerDarkSearchBorderColor: string; headerDarkSectionItemBackgroundFocus: string; filterButtonBadgeBackgroundHover: string; filterSelectItemBackgroundFocusDisabled: string; flyoutFooterBackground: string; flyoutCloseButtonInsideBackground: string; listGroupItemBackgroundPrimaryActive: string; listGroupItemBackgroundSubduedActive: string; listGroupItemBackgroundHover: string; listGroupItemBackgroundPrimaryHover: string; loadingSpinnerBorder: string; loadingSpinnerHighlight: string; loadingChartMonoBackground0: string; loadingChartMonoBackground1: string; loadingChartMonoBackground2: string; loadingChartMonoBackground3: string; markBackground: string; markdownFormatTableBorderColor: string; overlayMaskBackground: string; overlayMaskBackgroundHighContrast: string; popoverPanelBackground: string; popoverFooterBorderColor: string; scrollbarTrackColor: string; sideNavItemEmphasizedBackground: string; selectableListItemBorderColor: string; skeletonBackgroundSkeletonMiddleHighContrast: string; switchBackgroundOn: string; switchBackgroundOff: string; switchUncompressedBackgroundDisabled: string; switchCompressedBackgroundDisabled: string; switchMiniBackgroundDisabled: string; switchThumbBackgroundDisabled: string; switchThumbBorderOn: string; switchThumbBorderOff: string; switchIconDisabled: string; tableRowBackgroundHover: string; tableRowBackgroundSelected: string; tableRowBackgroundSelectedHover: string; tableRowInteractiveBackgroundHover: string; tableRowInteractiveBackgroundFocus: string; tableRowBackgroundMarked: string; tableRowBackgroundMarkedHover: string; tableCellSortableIconColor: string; tableFooterBackground: string; tooltipBackground: string; tooltipBorder: string; tooltipBorderFloating: string; tourFooterBackground: string; tourStepIndicatorInactiveColor: string; tourStepIndicatorActiveColor: string; treeViewItemBackgroundHover: string; }; DARK: { badgeBackground: string; badgeBackgroundSubdued: string; badgeBorderColorHollow: string; badgeIconButtonBackgroundHover: string; bottomBarBackground: string; breadcrumbsApplicationBackground: string; breadcrumbsApplicationColor: string; buttonGroupBackgroundDisabledSelected: string; buttonGroupBorderColor: string; buttonGroupBorderColorSelected: string; buttonGroupFocusColor: string; codeBackground: string; codeBackgroundSelected: string; codeColor: string; codeInlineBackground: string; codeInlineColor: string; codeCommentColor: string; codeSelectorColor: string; codeStringColor: string; codeTagColor: string; codeNameColor: string; codeNumberColor: string; codeInlineCodeKeywordColor: string; codeKeywordColor: string; codeFunctionTitleColor: string; codeTypeColor: string; codeAttributeColor: string; codeSymbolColor: string; codeParamsColor: string; codeMetaColor: string; codeTitleColor: string; codeSectionColor: string; codeAdditionColor: string; codeDeletionColor: string; codeSelectorClassColor: string; codeSelectorIdColor: string; collapsibleNavGroupBackground: string; collapsibleNavGroupBackgroundDark: string; dataGridBorderColor: string; dataGridVerticalLineBorderColor: string; dataGridRowBackground: string; dataGridRowBackgroundHover: string; dataGridRowBackgroundSelect: string; dataGridRowBackgroundSelectHover: string; dataGridRowBackgroundMarked: string; dataGridRowBackgroundMarkedHover: string; dataGridRowBorderActive: string; dataGridRowBorderHover: string; dataGridRowBorderMarked: string; dataGridRowStripesBackground: string; dataGridRowStripesBackgroundHover: string; dataGridRowStripesBackgroundStriped: string; dataGridRowStripesBackgroundStripedHover: string; dataGridRowStripesBackgroundSelect: string; dataGridRowStripesBackgroundSelectHover: string; dragDropDraggingBackground: string; dragDropDraggingOverBackground: string; headerBackground: string; headerDarkBackground: string; headerDarkSearchBorderColor: string; headerDarkSectionItemBackgroundFocus: string; filterButtonBadgeBackgroundHover: string; filterSelectItemBackgroundFocusDisabled: string; flyoutFooterBackground: string; flyoutCloseButtonInsideBackground: string; listGroupItemBackgroundPrimaryActive: string; listGroupItemBackgroundSubduedActive: string; listGroupItemBackgroundHover: string; listGroupItemBackgroundPrimaryHover: string; loadingSpinnerBorder: string; loadingSpinnerHighlight: string; loadingChartMonoBackground0: string; loadingChartMonoBackground1: string; loadingChartMonoBackground2: string; loadingChartMonoBackground3: string; markBackground: string; markdownFormatTableBorderColor: string; overlayMaskBackground: string; overlayMaskBackgroundHighContrast: string; popoverPanelBackground: string; popoverFooterBorderColor: string; scrollbarTrackColor: string; sideNavItemEmphasizedBackground: string; selectableListItemBorderColor: string; skeletonBackgroundSkeletonMiddleHighContrast: string; switchBackgroundOn: string; switchBackgroundOff: string; switchUncompressedBackgroundDisabled: string; switchCompressedBackgroundDisabled: string; switchMiniBackgroundDisabled: string; switchThumbBackgroundDisabled: string; switchThumbBorderOn: string; switchThumbBorderOff: string; switchIconDisabled: string; tableRowBackgroundHover: string; tableRowBackgroundSelected: string; tableRowBackgroundSelectedHover: string; tableRowInteractiveBackgroundHover: string; tableRowInteractiveBackgroundFocus: string; tableRowBackgroundMarked: string; tableRowBackgroundMarkedHover: string; tableCellSortableIconColor: string; tableFooterBackground: string; tooltipBackground: string; tooltipBorder: string; tooltipBorderFloating: string; tourFooterBackground: string; tourStepIndicatorInactiveColor: string; tourStepIndicatorActiveColor: string; treeViewItemBackgroundHover: string; }; }; flags: { shadowVariant: \"refresh\" | \"classic\"; }; overrides?: { HCM: { colors?: { LIGHT?: { primary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; accent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; accentSecondary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; success?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; warning?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; danger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; primaryText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; accentText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; successText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; warningText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; dangerText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textPrimary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textAccent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textAccentSecondary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textNeutral?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textSuccess?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textWarning?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textRisk?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textDanger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textAssistance?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; emptyShade?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; lightestShade?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; lightShade?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; mediumShade?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; darkShade?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; darkestShade?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; fullShade?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; body?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; highlight?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; disabled?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; disabledText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; shadow?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; text?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; title?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; subduedText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; link?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textParagraph?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textHeading?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textSubdued?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textDisabled?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textInverse?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textInk?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textGhost?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBasePrimary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseAccent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseAccentSecondary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseNeutral?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseSuccess?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseWarning?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseRisk?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseDanger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseAssistance?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseSubdued?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBasePlain?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseDisabled?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseHighlighted?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseFormsPrepend?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseFormsControlDisabled?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseInteractiveHover?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseInteractiveHoverAssistance?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseInteractiveSelect?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseInteractiveSelectHover?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseInteractiveOverlay?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseSkeletonEdge?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseSkeletonMiddle?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightPrimary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightAccent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightAccentSecondary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightNeutral?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightSuccess?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightWarning?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightRisk?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightDanger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightAssistance?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledPrimary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledAccent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledAccentSecondary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledNeutral?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledSuccess?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledWarning?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledRisk?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledDanger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledAssistance?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparent?: string | undefined; backgroundTransparentPrimary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentAccent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentAccentSecondary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentNeutral?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentSuccess?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentWarning?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentRisk?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentDanger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentSubdued?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentHighlighted?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentPlain?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBasePrimary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseAccent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseAccentSecondary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseNeutral?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseSuccess?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseWarning?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseRisk?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseDanger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseAssistance?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBasePlain?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseSubdued?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseProminent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseDisabled?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseFloating?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseFormsColorSwatch?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderInteractiveFormsHoverPlain?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderInteractiveFormsHoverProminent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderInteractiveFormsHoverDanger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongPrimary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongAccent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongAccentSecondary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongNeutral?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongSuccess?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongWarning?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongRisk?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongDanger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongAssistance?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; vis?: { euiColorVis0?: string | undefined; euiColorVis1?: string | undefined; euiColorVis2?: string | undefined; euiColorVis3?: string | undefined; euiColorVis4?: string | undefined; euiColorVis5?: string | undefined; euiColorVis6?: string | undefined; euiColorVis7?: string | undefined; euiColorVis8?: string | undefined; euiColorVis9?: string | undefined; euiColorVis10?: string | undefined; euiColorVis11?: string | undefined; euiColorVisBehindText0?: string | undefined; euiColorVisBehindText1?: string | undefined; euiColorVisBehindText2?: string | undefined; euiColorVisBehindText3?: string | undefined; euiColorVisBehindText4?: string | undefined; euiColorVisBehindText5?: string | undefined; euiColorVisBehindText6?: string | undefined; euiColorVisBehindText7?: string | undefined; euiColorVisBehindText8?: string | undefined; euiColorVisBehindText9?: string | undefined; euiColorVisBehindText10?: string | undefined; euiColorVisBehindText11?: string | undefined; euiColorVisText0?: string | undefined; euiColorVisText1?: string | undefined; euiColorVisText2?: string | undefined; euiColorVisText3?: string | undefined; euiColorVisText4?: string | undefined; euiColorVisText5?: string | undefined; euiColorVisText6?: string | undefined; euiColorVisText7?: string | undefined; euiColorVisText8?: string | undefined; euiColorVisText9?: string | undefined; euiColorVisText10?: string | undefined; euiColorVisText11?: string | undefined; euiColorVisNeutral0?: string | undefined; euiColorVisNeutral1?: string | undefined; euiColorVisSuccess0?: string | undefined; euiColorVisSuccess1?: string | undefined; euiColorVisWarning0?: string | undefined; euiColorVisWarning1?: string | undefined; euiColorVisRisk0?: string | undefined; euiColorVisRisk1?: string | undefined; euiColorVisDanger0?: string | undefined; euiColorVisDanger1?: string | undefined; euiColorVisAssistance?: string | undefined; euiColorVisBase0?: string | undefined; euiColorVisGrey0?: string | undefined; euiColorVisGrey1?: string | undefined; euiColorVisGrey2?: string | undefined; euiColorVisGrey3?: string | undefined; euiColorVisWarm0?: string | undefined; euiColorVisWarm1?: string | undefined; euiColorVisWarm2?: string | undefined; euiColorVisCool0?: string | undefined; euiColorVisCool1?: string | undefined; euiColorVisCool2?: string | undefined; euiColorVisComplementary0?: string | undefined; euiColorVisComplementary1?: string | undefined; } | undefined; severity?: { unknown?: string | undefined; success?: string | undefined; neutral?: string | undefined; warning?: string | undefined; risk?: string | undefined; danger?: string | undefined; assistance?: string | undefined; } | undefined; } | undefined; DARK?: { primary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; accent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; accentSecondary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; success?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; warning?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; danger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; primaryText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; accentText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; successText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; warningText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; dangerText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textPrimary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textAccent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textAccentSecondary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textNeutral?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textSuccess?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textWarning?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textRisk?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textDanger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textAssistance?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; emptyShade?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; lightestShade?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; lightShade?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; mediumShade?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; darkShade?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; darkestShade?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; fullShade?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; body?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; highlight?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; disabled?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; disabledText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; shadow?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; text?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; title?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; subduedText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; link?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textParagraph?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textHeading?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textSubdued?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textDisabled?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textInverse?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textInk?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textGhost?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBasePrimary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseAccent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseAccentSecondary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseNeutral?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseSuccess?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseWarning?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseRisk?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseDanger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseAssistance?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseSubdued?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBasePlain?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseDisabled?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseHighlighted?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseFormsPrepend?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseFormsControlDisabled?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseInteractiveHover?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseInteractiveHoverAssistance?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseInteractiveSelect?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseInteractiveSelectHover?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseInteractiveOverlay?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseSkeletonEdge?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseSkeletonMiddle?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightPrimary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightAccent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightAccentSecondary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightNeutral?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightSuccess?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightWarning?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightRisk?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightDanger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightAssistance?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledPrimary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledAccent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledAccentSecondary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledNeutral?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledSuccess?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledWarning?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledRisk?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledDanger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledAssistance?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparent?: string | undefined; backgroundTransparentPrimary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentAccent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentAccentSecondary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentNeutral?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentSuccess?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentWarning?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentRisk?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentDanger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentSubdued?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentHighlighted?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentPlain?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBasePrimary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseAccent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseAccentSecondary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseNeutral?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseSuccess?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseWarning?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseRisk?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseDanger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseAssistance?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBasePlain?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseSubdued?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseProminent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseDisabled?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseFloating?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseFormsColorSwatch?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderInteractiveFormsHoverPlain?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderInteractiveFormsHoverProminent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderInteractiveFormsHoverDanger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongPrimary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongAccent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongAccentSecondary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongNeutral?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongSuccess?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongWarning?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongRisk?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongDanger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongAssistance?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; vis?: { euiColorVis0?: string | undefined; euiColorVis1?: string | undefined; euiColorVis2?: string | undefined; euiColorVis3?: string | undefined; euiColorVis4?: string | undefined; euiColorVis5?: string | undefined; euiColorVis6?: string | undefined; euiColorVis7?: string | undefined; euiColorVis8?: string | undefined; euiColorVis9?: string | undefined; euiColorVis10?: string | undefined; euiColorVis11?: string | undefined; euiColorVisBehindText0?: string | undefined; euiColorVisBehindText1?: string | undefined; euiColorVisBehindText2?: string | undefined; euiColorVisBehindText3?: string | undefined; euiColorVisBehindText4?: string | undefined; euiColorVisBehindText5?: string | undefined; euiColorVisBehindText6?: string | undefined; euiColorVisBehindText7?: string | undefined; euiColorVisBehindText8?: string | undefined; euiColorVisBehindText9?: string | undefined; euiColorVisBehindText10?: string | undefined; euiColorVisBehindText11?: string | undefined; euiColorVisText0?: string | undefined; euiColorVisText1?: string | undefined; euiColorVisText2?: string | undefined; euiColorVisText3?: string | undefined; euiColorVisText4?: string | undefined; euiColorVisText5?: string | undefined; euiColorVisText6?: string | undefined; euiColorVisText7?: string | undefined; euiColorVisText8?: string | undefined; euiColorVisText9?: string | undefined; euiColorVisText10?: string | undefined; euiColorVisText11?: string | undefined; euiColorVisNeutral0?: string | undefined; euiColorVisNeutral1?: string | undefined; euiColorVisSuccess0?: string | undefined; euiColorVisSuccess1?: string | undefined; euiColorVisWarning0?: string | undefined; euiColorVisWarning1?: string | undefined; euiColorVisRisk0?: string | undefined; euiColorVisRisk1?: string | undefined; euiColorVisDanger0?: string | undefined; euiColorVisDanger1?: string | undefined; euiColorVisAssistance?: string | undefined; euiColorVisBase0?: string | undefined; euiColorVisGrey0?: string | undefined; euiColorVisGrey1?: string | undefined; euiColorVisGrey2?: string | undefined; euiColorVisGrey3?: string | undefined; euiColorVisWarm0?: string | undefined; euiColorVisWarm1?: string | undefined; euiColorVisWarm2?: string | undefined; euiColorVisCool0?: string | undefined; euiColorVisCool1?: string | undefined; euiColorVisCool2?: string | undefined; euiColorVisComplementary0?: string | undefined; euiColorVisComplementary1?: string | undefined; } | undefined; severity?: { unknown?: string | undefined; success?: string | undefined; neutral?: string | undefined; warning?: string | undefined; risk?: string | undefined; danger?: string | undefined; assistance?: string | undefined; } | undefined; } | undefined; plainLight?: string | undefined; plainDark?: string | undefined; } | undefined; base?: number | undefined; size?: { xxs?: string | undefined; xs?: string | undefined; s?: string | undefined; m?: string | undefined; base?: string | undefined; l?: string | undefined; xl?: string | undefined; xxl?: string | undefined; xxxl?: string | undefined; xxxxl?: string | undefined; } | undefined; font?: { family?: string | undefined; familyCode?: ",
+                      ".BoxShadow | undefined; }; }; }; components: { badgeBackground: string; badgeBackgroundSubdued: string; badgeBorderColorHollow: string; badgeIconButtonBackgroundHover: string; bottomBarBackground: string; breadcrumbsApplicationBackground: string; breadcrumbsApplicationColor: string; buttonGroupBackgroundDisabledSelected: string; buttonGroupBorderColor: string; buttonGroupBorderColorSelected: string; buttonGroupFocusColor: string; codeBackground: string; codeBackgroundSelected: string; codeColor: string; codeInlineBackground: string; codeInlineColor: string; codeCommentColor: string; codeSelectorColor: string; codeStringColor: string; codeTagColor: string; codeNameColor: string; codeNumberColor: string; codeInlineCodeKeywordColor: string; codeKeywordColor: string; codeFunctionTitleColor: string; codeTypeColor: string; codeAttributeColor: string; codeSymbolColor: string; codeParamsColor: string; codeMetaColor: string; codeTitleColor: string; codeSectionColor: string; codeAdditionColor: string; codeDeletionColor: string; codeSelectorClassColor: string; codeSelectorIdColor: string; collapsibleNavGroupBackground: string; collapsibleNavGroupBackgroundDark: string; dataGridBorderColor: string; dataGridVerticalLineBorderColor: string; dataGridRowBackground: string; dataGridRowBackgroundHover: string; dataGridRowBackgroundSelect: string; dataGridRowBackgroundSelectHover: string; dataGridRowBackgroundMarked: string; dataGridRowBackgroundMarkedHover: string; dataGridRowBorderActive: string; dataGridRowBorderHover: string; dataGridRowBorderMarked: string; dataGridRowStripesBackground: string; dataGridRowStripesBackgroundHover: string; dataGridRowStripesBackgroundStriped: string; dataGridRowStripesBackgroundStripedHover: string; dataGridRowStripesBackgroundSelect: string; dataGridRowStripesBackgroundSelectHover: string; dragDropDraggingBackground: string; dragDropDraggingOverBackground: string; headerBackground: string; headerDarkBackground: string; headerDarkSearchBorderColor: string; headerDarkSectionItemBackgroundFocus: string; filterButtonBadgeBackgroundHover: string; filterSelectItemBackgroundFocusDisabled: string; flyoutFooterBackground: string; flyoutCloseButtonInsideBackground: string; listGroupItemBackgroundPrimaryActive: string; listGroupItemBackgroundSubduedActive: string; listGroupItemBackgroundHover: string; listGroupItemBackgroundPrimaryHover: string; loadingSpinnerBorder: string; loadingSpinnerHighlight: string; loadingChartMonoBackground0: string; loadingChartMonoBackground1: string; loadingChartMonoBackground2: string; loadingChartMonoBackground3: string; markBackground: string; markdownFormatTableBorderColor: string; overlayMaskBackground: string; overlayMaskBackgroundHighContrast: string; popoverPanelBackground: string; popoverFooterBorderColor: string; scrollbarTrackColor: string; sideNavItemEmphasizedBackground: string; selectableListItemBorderColor: string; skeletonBackgroundSkeletonMiddleHighContrast: string; switchBackgroundOn: string; switchBackgroundOff: string; switchUncompressedBackgroundDisabled: string; switchCompressedBackgroundDisabled: string; switchMiniBackgroundDisabled: string; switchThumbBackgroundDisabled: string; switchThumbBorderOn: string; switchThumbBorderOff: string; switchIconDisabled: string; tableRowBackgroundHover: string; tableRowBackgroundSelected: string; tableRowBackgroundSelectedHover: string; tableRowInteractiveBackgroundHover: string; tableRowInteractiveBackgroundFocus: string; tableRowBackgroundMarked: string; tableRowBackgroundMarkedHover: string; tableCellSortableIconColor: string; tableFooterBackground: string; tooltipBackground: string; tooltipBorder: string; tooltipBorderFloating: string; tourFooterBackground: string; tourStepIndicatorInactiveColor: string; tourStepIndicatorActiveColor: string; treeViewItemBackgroundHover: string; buttons: { backgroundPrimary: string; backgroundAccent: string; backgroundAccentSecondary: string; backgroundNeutral: string; backgroundSuccess: string; backgroundWarning: string; backgroundRisk: string; backgroundDanger: string; backgroundText: string; backgroundDisabled: string; backgroundPrimaryHover: string; backgroundAccentHover: string; backgroundAccentSecondaryHover: string; backgroundNeutralHover: string; backgroundSuccessHover: string; backgroundWarningHover: string; backgroundRiskHover: string; backgroundDangerHover: string; backgroundAssistanceHover: string; backgroundTextHover: string; backgroundPrimaryActive: string; backgroundAccentActive: string; backgroundAccentSecondaryActive: string; backgroundNeutralActive: string; backgroundSuccessActive: string; backgroundWarningActive: string; backgroundRiskActive: string; backgroundDangerActive: string; backgroundTextActive: string; backgroundFilledPrimary: string; backgroundFilledAccent: string; backgroundFilledAccentSecondary: string; backgroundFilledNeutral: string; backgroundFilledSuccess: string; backgroundFilledWarning: string; backgroundFilledRisk: string; backgroundFilledDanger: string; backgroundFilledText: string; backgroundFilledDisabled: string; backgroundFilledPrimaryHover: string; backgroundFilledAccentHover: string; backgroundFilledAccentSecondaryHover: string; backgroundFilledNeutralHover: string; backgroundFilledSuccessHover: string; backgroundFilledWarningHover: string; backgroundFilledRiskHover: string; backgroundFilledDangerHover: string; backgroundFilledAssistanceHover: string; backgroundFilledTextHover: string; backgroundFilledPrimaryActive: string; backgroundFilledAccentActive: string; backgroundFilledAccentSecondaryActive: string; backgroundFilledNeutralActive: string; backgroundFilledSuccessActive: string; backgroundFilledWarningActive: string; backgroundFilledRiskActive: string; backgroundFilledDangerActive: string; backgroundFilledTextActive: string; backgroundEmptyPrimaryHover: string; backgroundEmptyAccentHover: string; backgroundEmptyAccentSecondaryHover: string; backgroundEmptyNeutralHover: string; backgroundEmptySuccessHover: string; backgroundEmptyWarningHover: string; backgroundEmptyRiskHover: string; backgroundEmptyDangerHover: string; backgroundEmptyTextHover: string; backgroundEmptyPrimaryActive: string; backgroundEmptyAccentActive: string; backgroundEmptyAccentSecondaryActive: string; backgroundEmptyNeutralActive: string; backgroundEmptySuccessActive: string; backgroundEmptyWarningActive: string; backgroundEmptyRiskActive: string; backgroundEmptyDangerActive: string; backgroundEmptyTextActive: string; textColorPrimary: string; textColorAccent: string; textColorAccentSecondary: string; textColorNeutral: string; textColorSuccess: string; textColorWarning: string; textColorRisk: string; textColorDanger: string; textColorText: string; textColorDisabled: string; textColorFilledPrimary: string; textColorFilledAccent: string; textColorFilledAccentSecondary: string; textColorFilledNeutral: string; textColorFilledSuccess: string; textColorFilledWarning: string; textColorFilledRisk: string; textColorFilledDanger: string; textColorFilledText: string; textColorFilledDisabled: string; LIGHT: { backgroundPrimary: string; backgroundAccent: string; backgroundAccentSecondary: string; backgroundNeutral: string; backgroundSuccess: string; backgroundWarning: string; backgroundRisk: string; backgroundDanger: string; backgroundText: string; backgroundDisabled: string; backgroundPrimaryHover: string; backgroundAccentHover: string; backgroundAccentSecondaryHover: string; backgroundNeutralHover: string; backgroundSuccessHover: string; backgroundWarningHover: string; backgroundRiskHover: string; backgroundDangerHover: string; backgroundAssistanceHover: string; backgroundTextHover: string; backgroundPrimaryActive: string; backgroundAccentActive: string; backgroundAccentSecondaryActive: string; backgroundNeutralActive: string; backgroundSuccessActive: string; backgroundWarningActive: string; backgroundRiskActive: string; backgroundDangerActive: string; backgroundTextActive: string; backgroundFilledPrimary: string; backgroundFilledAccent: string; backgroundFilledAccentSecondary: string; backgroundFilledNeutral: string; backgroundFilledSuccess: string; backgroundFilledWarning: string; backgroundFilledRisk: string; backgroundFilledDanger: string; backgroundFilledText: string; backgroundFilledDisabled: string; backgroundFilledPrimaryHover: string; backgroundFilledAccentHover: string; backgroundFilledAccentSecondaryHover: string; backgroundFilledNeutralHover: string; backgroundFilledSuccessHover: string; backgroundFilledWarningHover: string; backgroundFilledRiskHover: string; backgroundFilledDangerHover: string; backgroundFilledAssistanceHover: string; backgroundFilledTextHover: string; backgroundFilledPrimaryActive: string; backgroundFilledAccentActive: string; backgroundFilledAccentSecondaryActive: string; backgroundFilledNeutralActive: string; backgroundFilledSuccessActive: string; backgroundFilledWarningActive: string; backgroundFilledRiskActive: string; backgroundFilledDangerActive: string; backgroundFilledTextActive: string; backgroundEmptyPrimaryHover: string; backgroundEmptyAccentHover: string; backgroundEmptyAccentSecondaryHover: string; backgroundEmptyNeutralHover: string; backgroundEmptySuccessHover: string; backgroundEmptyWarningHover: string; backgroundEmptyRiskHover: string; backgroundEmptyDangerHover: string; backgroundEmptyTextHover: string; backgroundEmptyPrimaryActive: string; backgroundEmptyAccentActive: string; backgroundEmptyAccentSecondaryActive: string; backgroundEmptyNeutralActive: string; backgroundEmptySuccessActive: string; backgroundEmptyWarningActive: string; backgroundEmptyRiskActive: string; backgroundEmptyDangerActive: string; backgroundEmptyTextActive: string; textColorPrimary: string; textColorAccent: string; textColorAccentSecondary: string; textColorNeutral: string; textColorSuccess: string; textColorWarning: string; textColorRisk: string; textColorDanger: string; textColorText: string; textColorDisabled: string; textColorFilledPrimary: string; textColorFilledAccent: string; textColorFilledAccentSecondary: string; textColorFilledNeutral: string; textColorFilledSuccess: string; textColorFilledWarning: string; textColorFilledRisk: string; textColorFilledDanger: string; textColorFilledText: string; textColorFilledDisabled: string; }; DARK: { backgroundPrimary: string; backgroundAccent: string; backgroundAccentSecondary: string; backgroundNeutral: string; backgroundSuccess: string; backgroundWarning: string; backgroundRisk: string; backgroundDanger: string; backgroundText: string; backgroundDisabled: string; backgroundPrimaryHover: string; backgroundAccentHover: string; backgroundAccentSecondaryHover: string; backgroundNeutralHover: string; backgroundSuccessHover: string; backgroundWarningHover: string; backgroundRiskHover: string; backgroundDangerHover: string; backgroundAssistanceHover: string; backgroundTextHover: string; backgroundPrimaryActive: string; backgroundAccentActive: string; backgroundAccentSecondaryActive: string; backgroundNeutralActive: string; backgroundSuccessActive: string; backgroundWarningActive: string; backgroundRiskActive: string; backgroundDangerActive: string; backgroundTextActive: string; backgroundFilledPrimary: string; backgroundFilledAccent: string; backgroundFilledAccentSecondary: string; backgroundFilledNeutral: string; backgroundFilledSuccess: string; backgroundFilledWarning: string; backgroundFilledRisk: string; backgroundFilledDanger: string; backgroundFilledText: string; backgroundFilledDisabled: string; backgroundFilledPrimaryHover: string; backgroundFilledAccentHover: string; backgroundFilledAccentSecondaryHover: string; backgroundFilledNeutralHover: string; backgroundFilledSuccessHover: string; backgroundFilledWarningHover: string; backgroundFilledRiskHover: string; backgroundFilledDangerHover: string; backgroundFilledAssistanceHover: string; backgroundFilledTextHover: string; backgroundFilledPrimaryActive: string; backgroundFilledAccentActive: string; backgroundFilledAccentSecondaryActive: string; backgroundFilledNeutralActive: string; backgroundFilledSuccessActive: string; backgroundFilledWarningActive: string; backgroundFilledRiskActive: string; backgroundFilledDangerActive: string; backgroundFilledTextActive: string; backgroundEmptyPrimaryHover: string; backgroundEmptyAccentHover: string; backgroundEmptyAccentSecondaryHover: string; backgroundEmptyNeutralHover: string; backgroundEmptySuccessHover: string; backgroundEmptyWarningHover: string; backgroundEmptyRiskHover: string; backgroundEmptyDangerHover: string; backgroundEmptyTextHover: string; backgroundEmptyPrimaryActive: string; backgroundEmptyAccentActive: string; backgroundEmptyAccentSecondaryActive: string; backgroundEmptyNeutralActive: string; backgroundEmptySuccessActive: string; backgroundEmptyWarningActive: string; backgroundEmptyRiskActive: string; backgroundEmptyDangerActive: string; backgroundEmptyTextActive: string; textColorPrimary: string; textColorAccent: string; textColorAccentSecondary: string; textColorNeutral: string; textColorSuccess: string; textColorWarning: string; textColorRisk: string; textColorDanger: string; textColorText: string; textColorDisabled: string; textColorFilledPrimary: string; textColorFilledAccent: string; textColorFilledAccentSecondary: string; textColorFilledNeutral: string; textColorFilledSuccess: string; textColorFilledWarning: string; textColorFilledRisk: string; textColorFilledDanger: string; textColorFilledText: string; textColorFilledDisabled: string; }; }; forms: { background: string; backgroundDisabled: string; backgroundReadOnly: string; backgroundFocused: string; backgroundAutofilled: string; backgroundDropping: string; prependBackground: string; border: string; borderDisabled: string; borderFocused: string; borderInvalid: string; borderHovered: string; borderInvalidHovered: string; borderAutofilled: string; borderAutofilledHovered: string; clearButtonBackground: string; controlBorder: string; controlBorderSelected: string; controlBorderDisabled: string; controlBackgroundUnselected: string; controlBackgroundDisabled: string; colorHasPlaceholder: string; colorDisabled: string; iconDisabled: string; maxWidth: string; LIGHT: { background: string; backgroundDisabled: string; backgroundReadOnly: string; backgroundFocused: string; backgroundAutofilled: string; backgroundDropping: string; prependBackground: string; border: string; borderDisabled: string; borderFocused: string; borderInvalid: string; borderHovered: string; borderInvalidHovered: string; borderAutofilled: string; borderAutofilledHovered: string; clearButtonBackground: string; controlBorder: string; controlBorderSelected: string; controlBorderDisabled: string; controlBackgroundUnselected: string; controlBackgroundDisabled: string; colorHasPlaceholder: string; colorDisabled: string; iconDisabled: string; }; DARK: { background: string; backgroundDisabled: string; backgroundReadOnly: string; backgroundFocused: string; backgroundAutofilled: string; backgroundDropping: string; prependBackground: string; border: string; borderDisabled: string; borderFocused: string; borderInvalid: string; borderHovered: string; borderInvalidHovered: string; borderAutofilled: string; borderAutofilledHovered: string; clearButtonBackground: string; controlBorder: string; controlBorderSelected: string; controlBorderDisabled: string; controlBackgroundUnselected: string; controlBackgroundDisabled: string; colorHasPlaceholder: string; colorDisabled: string; iconDisabled: string; }; }; LIGHT: { badgeBackground: string; badgeBackgroundSubdued: string; badgeBorderColorHollow: string; badgeIconButtonBackgroundHover: string; bottomBarBackground: string; breadcrumbsApplicationBackground: string; breadcrumbsApplicationColor: string; buttonGroupBackgroundDisabledSelected: string; buttonGroupBorderColor: string; buttonGroupBorderColorSelected: string; buttonGroupFocusColor: string; codeBackground: string; codeBackgroundSelected: string; codeColor: string; codeInlineBackground: string; codeInlineColor: string; codeCommentColor: string; codeSelectorColor: string; codeStringColor: string; codeTagColor: string; codeNameColor: string; codeNumberColor: string; codeInlineCodeKeywordColor: string; codeKeywordColor: string; codeFunctionTitleColor: string; codeTypeColor: string; codeAttributeColor: string; codeSymbolColor: string; codeParamsColor: string; codeMetaColor: string; codeTitleColor: string; codeSectionColor: string; codeAdditionColor: string; codeDeletionColor: string; codeSelectorClassColor: string; codeSelectorIdColor: string; collapsibleNavGroupBackground: string; collapsibleNavGroupBackgroundDark: string; dataGridBorderColor: string; dataGridVerticalLineBorderColor: string; dataGridRowBackground: string; dataGridRowBackgroundHover: string; dataGridRowBackgroundSelect: string; dataGridRowBackgroundSelectHover: string; dataGridRowBackgroundMarked: string; dataGridRowBackgroundMarkedHover: string; dataGridRowBorderActive: string; dataGridRowBorderHover: string; dataGridRowBorderMarked: string; dataGridRowStripesBackground: string; dataGridRowStripesBackgroundHover: string; dataGridRowStripesBackgroundStriped: string; dataGridRowStripesBackgroundStripedHover: string; dataGridRowStripesBackgroundSelect: string; dataGridRowStripesBackgroundSelectHover: string; dragDropDraggingBackground: string; dragDropDraggingOverBackground: string; headerBackground: string; headerDarkBackground: string; headerDarkSearchBorderColor: string; headerDarkSectionItemBackgroundFocus: string; filterButtonBadgeBackgroundHover: string; filterSelectItemBackgroundFocusDisabled: string; flyoutFooterBackground: string; flyoutCloseButtonInsideBackground: string; listGroupItemBackgroundPrimaryActive: string; listGroupItemBackgroundSubduedActive: string; listGroupItemBackgroundHover: string; listGroupItemBackgroundPrimaryHover: string; loadingSpinnerBorder: string; loadingSpinnerHighlight: string; loadingChartMonoBackground0: string; loadingChartMonoBackground1: string; loadingChartMonoBackground2: string; loadingChartMonoBackground3: string; markBackground: string; markdownFormatTableBorderColor: string; overlayMaskBackground: string; overlayMaskBackgroundHighContrast: string; popoverPanelBackground: string; popoverFooterBorderColor: string; scrollbarTrackColor: string; sideNavItemEmphasizedBackground: string; selectableListItemBorderColor: string; skeletonBackgroundSkeletonMiddleHighContrast: string; switchBackgroundOn: string; switchBackgroundOff: string; switchUncompressedBackgroundDisabled: string; switchCompressedBackgroundDisabled: string; switchMiniBackgroundDisabled: string; switchThumbBackgroundDisabled: string; switchThumbBorderOn: string; switchThumbBorderOff: string; switchIconDisabled: string; tableRowBackgroundHover: string; tableRowBackgroundSelected: string; tableRowBackgroundSelectedHover: string; tableRowInteractiveBackgroundHover: string; tableRowInteractiveBackgroundFocus: string; tableRowBackgroundMarked: string; tableRowBackgroundMarkedHover: string; tableCellSortableIconColor: string; tableFooterBackground: string; tooltipBackground: string; tooltipBorder: string; tooltipBorderFloating: string; tourFooterBackground: string; tourStepIndicatorInactiveColor: string; tourStepIndicatorActiveColor: string; treeViewItemBackgroundHover: string; }; DARK: { badgeBackground: string; badgeBackgroundSubdued: string; badgeBorderColorHollow: string; badgeIconButtonBackgroundHover: string; bottomBarBackground: string; breadcrumbsApplicationBackground: string; breadcrumbsApplicationColor: string; buttonGroupBackgroundDisabledSelected: string; buttonGroupBorderColor: string; buttonGroupBorderColorSelected: string; buttonGroupFocusColor: string; codeBackground: string; codeBackgroundSelected: string; codeColor: string; codeInlineBackground: string; codeInlineColor: string; codeCommentColor: string; codeSelectorColor: string; codeStringColor: string; codeTagColor: string; codeNameColor: string; codeNumberColor: string; codeInlineCodeKeywordColor: string; codeKeywordColor: string; codeFunctionTitleColor: string; codeTypeColor: string; codeAttributeColor: string; codeSymbolColor: string; codeParamsColor: string; codeMetaColor: string; codeTitleColor: string; codeSectionColor: string; codeAdditionColor: string; codeDeletionColor: string; codeSelectorClassColor: string; codeSelectorIdColor: string; collapsibleNavGroupBackground: string; collapsibleNavGroupBackgroundDark: string; dataGridBorderColor: string; dataGridVerticalLineBorderColor: string; dataGridRowBackground: string; dataGridRowBackgroundHover: string; dataGridRowBackgroundSelect: string; dataGridRowBackgroundSelectHover: string; dataGridRowBackgroundMarked: string; dataGridRowBackgroundMarkedHover: string; dataGridRowBorderActive: string; dataGridRowBorderHover: string; dataGridRowBorderMarked: string; dataGridRowStripesBackground: string; dataGridRowStripesBackgroundHover: string; dataGridRowStripesBackgroundStriped: string; dataGridRowStripesBackgroundStripedHover: string; dataGridRowStripesBackgroundSelect: string; dataGridRowStripesBackgroundSelectHover: string; dragDropDraggingBackground: string; dragDropDraggingOverBackground: string; headerBackground: string; headerDarkBackground: string; headerDarkSearchBorderColor: string; headerDarkSectionItemBackgroundFocus: string; filterButtonBadgeBackgroundHover: string; filterSelectItemBackgroundFocusDisabled: string; flyoutFooterBackground: string; flyoutCloseButtonInsideBackground: string; listGroupItemBackgroundPrimaryActive: string; listGroupItemBackgroundSubduedActive: string; listGroupItemBackgroundHover: string; listGroupItemBackgroundPrimaryHover: string; loadingSpinnerBorder: string; loadingSpinnerHighlight: string; loadingChartMonoBackground0: string; loadingChartMonoBackground1: string; loadingChartMonoBackground2: string; loadingChartMonoBackground3: string; markBackground: string; markdownFormatTableBorderColor: string; overlayMaskBackground: string; overlayMaskBackgroundHighContrast: string; popoverPanelBackground: string; popoverFooterBorderColor: string; scrollbarTrackColor: string; sideNavItemEmphasizedBackground: string; selectableListItemBorderColor: string; skeletonBackgroundSkeletonMiddleHighContrast: string; switchBackgroundOn: string; switchBackgroundOff: string; switchUncompressedBackgroundDisabled: string; switchCompressedBackgroundDisabled: string; switchMiniBackgroundDisabled: string; switchThumbBackgroundDisabled: string; switchThumbBorderOn: string; switchThumbBorderOff: string; switchIconDisabled: string; tableRowBackgroundHover: string; tableRowBackgroundSelected: string; tableRowBackgroundSelectedHover: string; tableRowInteractiveBackgroundHover: string; tableRowInteractiveBackgroundFocus: string; tableRowBackgroundMarked: string; tableRowBackgroundMarkedHover: string; tableCellSortableIconColor: string; tableFooterBackground: string; tooltipBackground: string; tooltipBorder: string; tooltipBorderFloating: string; tourFooterBackground: string; tourStepIndicatorInactiveColor: string; tourStepIndicatorActiveColor: string; treeViewItemBackgroundHover: string; }; }; flags: { shadowVariant: \"refresh\" | \"classic\"; }; overrides?: { HCM: { colors?: { LIGHT?: { primary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; accent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; accentSecondary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; success?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; warning?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; danger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; primaryText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; accentText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; successText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; warningText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; dangerText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textPrimary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textAccent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textAccentSecondary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textNeutral?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textSuccess?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textWarning?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textRisk?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textDanger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textAssistance?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; emptyShade?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; lightestShade?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; lightShade?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; mediumShade?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; darkShade?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; darkestShade?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; fullShade?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; body?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; highlight?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; disabled?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; disabledText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; shadow?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; text?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; title?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; subduedText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; link?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textParagraph?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textHeading?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textSubdued?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textDisabled?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textInverse?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textInk?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textGhost?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBasePrimary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseAccent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseAccentSecondary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseNeutral?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseSuccess?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseWarning?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseRisk?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseDanger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseAssistance?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseSubdued?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBasePlain?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseDisabled?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseHighlighted?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseFormsPrepend?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseFormsControlDisabled?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseInteractiveHover?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseInteractiveHoverAssistance?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseInteractiveSelect?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseInteractiveSelectHover?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseInteractiveOverlay?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseSkeletonEdge?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseSkeletonMiddle?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightPrimary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightAccent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightAccentSecondary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightNeutral?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightSuccess?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightWarning?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightRisk?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightDanger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightAssistance?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledPrimary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledAccent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledAccentSecondary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledNeutral?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledSuccess?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledWarning?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledRisk?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledDanger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledAssistance?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparent?: string | undefined; backgroundTransparentPrimary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentAccent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentAccentSecondary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentNeutral?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentSuccess?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentWarning?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentRisk?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentDanger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentSubdued?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentHighlighted?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentPlain?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBasePrimary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseAccent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseAccentSecondary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseNeutral?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseSuccess?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseWarning?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseRisk?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseDanger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseAssistance?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBasePlain?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseSubdued?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseProminent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseDisabled?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseFloating?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseFormsColorSwatch?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderInteractiveFormsHoverPlain?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderInteractiveFormsHoverProminent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderInteractiveFormsHoverDanger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongPrimary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongAccent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongAccentSecondary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongNeutral?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongSuccess?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongWarning?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongRisk?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongDanger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongAssistance?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; vis?: { euiColorVis0?: string | undefined; euiColorVis1?: string | undefined; euiColorVis2?: string | undefined; euiColorVis3?: string | undefined; euiColorVis4?: string | undefined; euiColorVis5?: string | undefined; euiColorVis6?: string | undefined; euiColorVis7?: string | undefined; euiColorVis8?: string | undefined; euiColorVis9?: string | undefined; euiColorVisBehindText0?: string | undefined; euiColorVisBehindText1?: string | undefined; euiColorVisBehindText2?: string | undefined; euiColorVisBehindText3?: string | undefined; euiColorVisBehindText4?: string | undefined; euiColorVisBehindText5?: string | undefined; euiColorVisBehindText6?: string | undefined; euiColorVisBehindText7?: string | undefined; euiColorVisBehindText8?: string | undefined; euiColorVisBehindText9?: string | undefined; euiColorVisText0?: string | undefined; euiColorVisText1?: string | undefined; euiColorVisText2?: string | undefined; euiColorVisText3?: string | undefined; euiColorVisText4?: string | undefined; euiColorVisText5?: string | undefined; euiColorVisText6?: string | undefined; euiColorVisText7?: string | undefined; euiColorVisText8?: string | undefined; euiColorVisText9?: string | undefined; euiColorVisNeutral0?: string | undefined; euiColorVisNeutral1?: string | undefined; euiColorVisSuccess0?: string | undefined; euiColorVisSuccess1?: string | undefined; euiColorVisWarning0?: string | undefined; euiColorVisWarning1?: string | undefined; euiColorVisRisk0?: string | undefined; euiColorVisRisk1?: string | undefined; euiColorVisDanger0?: string | undefined; euiColorVisDanger1?: string | undefined; euiColorVisBase0?: string | undefined; euiColorVisGrey0?: string | undefined; euiColorVisGrey1?: string | undefined; euiColorVisGrey2?: string | undefined; euiColorVisGrey3?: string | undefined; euiColorVisWarm0?: string | undefined; euiColorVisWarm1?: string | undefined; euiColorVisWarm2?: string | undefined; euiColorVisCool0?: string | undefined; euiColorVisCool1?: string | undefined; euiColorVisCool2?: string | undefined; euiColorVisComplementary0?: string | undefined; euiColorVisComplementary1?: string | undefined; } | undefined; severity?: { unknown?: string | undefined; success?: string | undefined; neutral?: string | undefined; warning?: string | undefined; risk?: string | undefined; danger?: string | undefined; } | undefined; } | undefined; DARK?: { primary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; accent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; accentSecondary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; success?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; warning?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; danger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; primaryText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; accentText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; successText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; warningText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; dangerText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textPrimary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textAccent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textAccentSecondary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textNeutral?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textSuccess?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textWarning?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textRisk?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textDanger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textAssistance?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; emptyShade?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; lightestShade?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; lightShade?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; mediumShade?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; darkShade?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; darkestShade?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; fullShade?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; body?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; highlight?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; disabled?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; disabledText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; shadow?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; text?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; title?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; subduedText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; link?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textParagraph?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textHeading?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textSubdued?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textDisabled?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textInverse?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textInk?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; textGhost?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBasePrimary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseAccent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseAccentSecondary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseNeutral?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseSuccess?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseWarning?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseRisk?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseDanger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseAssistance?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseSubdued?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBasePlain?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseDisabled?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseHighlighted?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseFormsPrepend?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseFormsControlDisabled?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseInteractiveHover?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseInteractiveHoverAssistance?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseInteractiveSelect?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseInteractiveSelectHover?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseInteractiveOverlay?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseSkeletonEdge?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundBaseSkeletonMiddle?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightPrimary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightAccent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightAccentSecondary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightNeutral?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightSuccess?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightWarning?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightRisk?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightDanger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightAssistance?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundLightText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledPrimary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledAccent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledAccentSecondary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledNeutral?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledSuccess?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledWarning?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledRisk?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledDanger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledAssistance?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundFilledText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparent?: string | undefined; backgroundTransparentPrimary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentAccent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentAccentSecondary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentNeutral?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentSuccess?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentWarning?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentRisk?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentDanger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentSubdued?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentHighlighted?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; backgroundTransparentPlain?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBasePrimary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseAccent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseAccentSecondary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseNeutral?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseSuccess?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseWarning?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseRisk?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseDanger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseAssistance?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBasePlain?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseSubdued?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseProminent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseDisabled?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseFloating?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderBaseFormsColorSwatch?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderInteractiveFormsHoverPlain?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderInteractiveFormsHoverProminent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderInteractiveFormsHoverDanger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongPrimary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongAccent?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongAccentSecondary?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongNeutral?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongSuccess?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongWarning?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongRisk?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongDanger?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongAssistance?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; borderStrongText?: string | { LIGHT?: string | undefined; DARK?: string | undefined; } | undefined; vis?: { euiColorVis0?: string | undefined; euiColorVis1?: string | undefined; euiColorVis2?: string | undefined; euiColorVis3?: string | undefined; euiColorVis4?: string | undefined; euiColorVis5?: string | undefined; euiColorVis6?: string | undefined; euiColorVis7?: string | undefined; euiColorVis8?: string | undefined; euiColorVis9?: string | undefined; euiColorVisBehindText0?: string | undefined; euiColorVisBehindText1?: string | undefined; euiColorVisBehindText2?: string | undefined; euiColorVisBehindText3?: string | undefined; euiColorVisBehindText4?: string | undefined; euiColorVisBehindText5?: string | undefined; euiColorVisBehindText6?: string | undefined; euiColorVisBehindText7?: string | undefined; euiColorVisBehindText8?: string | undefined; euiColorVisBehindText9?: string | undefined; euiColorVisText0?: string | undefined; euiColorVisText1?: string | undefined; euiColorVisText2?: string | undefined; euiColorVisText3?: string | undefined; euiColorVisText4?: string | undefined; euiColorVisText5?: string | undefined; euiColorVisText6?: string | undefined; euiColorVisText7?: string | undefined; euiColorVisText8?: string | undefined; euiColorVisText9?: string | undefined; euiColorVisNeutral0?: string | undefined; euiColorVisNeutral1?: string | undefined; euiColorVisSuccess0?: string | undefined; euiColorVisSuccess1?: string | undefined; euiColorVisWarning0?: string | undefined; euiColorVisWarning1?: string | undefined; euiColorVisRisk0?: string | undefined; euiColorVisRisk1?: string | undefined; euiColorVisDanger0?: string | undefined; euiColorVisDanger1?: string | undefined; euiColorVisBase0?: string | undefined; euiColorVisGrey0?: string | undefined; euiColorVisGrey1?: string | undefined; euiColorVisGrey2?: string | undefined; euiColorVisGrey3?: string | undefined; euiColorVisWarm0?: string | undefined; euiColorVisWarm1?: string | undefined; euiColorVisWarm2?: string | undefined; euiColorVisCool0?: string | undefined; euiColorVisCool1?: string | undefined; euiColorVisCool2?: string | undefined; euiColorVisComplementary0?: string | undefined; euiColorVisComplementary1?: string | undefined; } | undefined; severity?: { unknown?: string | undefined; success?: string | undefined; neutral?: string | undefined; warning?: string | undefined; risk?: string | undefined; danger?: string | undefined; } | undefined; } | undefined; plainLight?: string | undefined; plainDark?: string | undefined; } | undefined; base?: number | undefined; size?: { xxs?: string | undefined; xs?: string | undefined; s?: string | undefined; m?: string | undefined; base?: string | undefined; l?: string | undefined; xl?: string | undefined; xxl?: string | undefined; xxxl?: string | undefined; xxxxl?: string | undefined; } | undefined; font?: { family?: string | undefined; familyCode?: ",
                       "RecursivePartial",
                       "<string | undefined>; familySerif?: ",
                       "RecursivePartial",
@@ -2130,7 +1994,7 @@
         "label": "IndexManagementPluginSetup",
         "description": [],
         "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-        "lineNumber": 95,
+        "lineNumber": 100,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2152,7 +2016,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 96,
+            "lineNumber": 101,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2174,7 +2038,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 97,
+            "lineNumber": 102,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2198,7 +2062,7 @@
               ") => Promise<() => void>"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 98,
+            "lineNumber": 103,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2220,7 +2084,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-                "lineNumber": 98,
+                "lineNumber": 103,
                 "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2247,7 +2111,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 99,
+            "lineNumber": 104,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2271,7 +2135,7 @@
               ") => void; }"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 100,
+            "lineNumber": 105,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2287,7 +2151,7 @@
         "label": "IndexManagementPluginStart",
         "description": [],
         "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-        "lineNumber": 105,
+        "lineNumber": 110,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2309,7 +2173,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 106,
+            "lineNumber": 111,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2331,7 +2195,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 107,
+            "lineNumber": 112,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2357,7 +2221,7 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 108,
+            "lineNumber": 113,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2370,7 +2234,7 @@
                 "label": "deps",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-                "lineNumber": 108,
+                "lineNumber": 113,
                 "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2387,7 +2251,7 @@
                       "<unknown>"
                     ],
                     "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-                    "lineNumber": 109,
+                    "lineNumber": 114,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -2418,7 +2282,7 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 111,
+            "lineNumber": 116,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2431,7 +2295,7 @@
                 "label": "deps",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-                "lineNumber": 111,
+                "lineNumber": 116,
                 "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2448,7 +2312,7 @@
                       "<unknown>"
                     ],
                     "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-                    "lineNumber": 112,
+                    "lineNumber": 117,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -2479,7 +2343,7 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 114,
+            "lineNumber": 119,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2492,7 +2356,7 @@
                 "label": "deps",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-                "lineNumber": 114,
+                "lineNumber": 119,
                 "columnNumber": 47,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2509,7 +2373,7 @@
                       "<unknown>"
                     ],
                     "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-                    "lineNumber": 115,
+                    "lineNumber": 120,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -2540,7 +2404,7 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 117,
+            "lineNumber": 122,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2553,7 +2417,7 @@
                 "label": "deps",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-                "lineNumber": 117,
+                "lineNumber": 122,
                 "columnNumber": 43,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2570,7 +2434,7 @@
                       "<unknown>"
                     ],
                     "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-                    "lineNumber": 118,
+                    "lineNumber": 123,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -2601,7 +2465,7 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 120,
+            "lineNumber": 125,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2614,7 +2478,7 @@
                 "label": "deps",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-                "lineNumber": 120,
+                "lineNumber": 125,
                 "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2631,7 +2495,7 @@
                       "<unknown>"
                     ],
                     "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-                    "lineNumber": 121,
+                    "lineNumber": 126,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -2652,7 +2516,7 @@
         "label": "IndexMappingProps",
         "description": [],
         "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-        "lineNumber": 169,
+        "lineNumber": 174,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2675,7 +2539,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 170,
+            "lineNumber": 175,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2691,7 +2555,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 171,
+            "lineNumber": 176,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2707,7 +2571,7 @@
         "label": "IndexSettingProps",
         "description": [],
         "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-        "lineNumber": 173,
+        "lineNumber": 178,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2720,7 +2584,7 @@
             "label": "indexName",
             "description": [],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 174,
+            "lineNumber": 179,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2736,7 +2600,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 175,
+            "lineNumber": 180,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2752,7 +2616,7 @@
         "label": "IndexTemplateFlyoutProps",
         "description": [],
         "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-        "lineNumber": 158,
+        "lineNumber": 163,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2765,7 +2629,7 @@
             "label": "indexTemplateName",
             "description": [],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 159,
+            "lineNumber": 164,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2781,7 +2645,7 @@
               "() => void"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 160,
+            "lineNumber": 165,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2799,7 +2663,7 @@
               "() => void"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 161,
+            "lineNumber": 166,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2909,7 +2773,7 @@
         "label": "IndicesListColumn",
         "description": [],
         "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-        "lineNumber": 44,
+        "lineNumber": 41,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2922,7 +2786,7 @@
             "label": "fieldName",
             "description": [],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-            "lineNumber": 45,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2935,7 +2799,7 @@
             "label": "label",
             "description": [],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-            "lineNumber": 46,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2948,7 +2812,7 @@
             "label": "order",
             "description": [],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-            "lineNumber": 47,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2972,7 +2836,7 @@
               ") => React.ReactNode) | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-            "lineNumber": 48,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2994,7 +2858,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-                "lineNumber": 48,
+                "lineNumber": 45,
                 "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3022,7 +2886,7 @@
               ") => any) | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-            "lineNumber": 50,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3044,7 +2908,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-                "lineNumber": 50,
+                "lineNumber": 47,
                 "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3251,7 +3115,7 @@
           "<D, E>"
         ],
         "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-        "lineNumber": 177,
+        "lineNumber": 182,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3267,7 +3131,7 @@
               "D | null"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 178,
+            "lineNumber": 183,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3283,7 +3147,7 @@
               "E | null"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 179,
+            "lineNumber": 184,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3797,7 +3661,7 @@
           ", \"history\" | \"setBreadcrumbs\"> & { element: HTMLElement | null; }"
         ],
         "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-        "lineNumber": 90,
+        "lineNumber": 95,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3829,7 +3693,7 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-        "lineNumber": 88,
+        "lineNumber": 93,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3850,7 +3714,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          " & ({ page: \"index_list\"; filter?: string | undefined; includeHiddenIndices?: boolean | undefined; } | { page: \"data_stream_index_list\"; dataStreamName: string; } | { page: \"data_streams_details\"; dataStreamName?: string | undefined; } | { page: \"index_template\"; indexTemplate: string; } | { page: \"index_template_edit\"; indexTemplate: string; } | { page: \"index_template_clone\"; indexTemplate: string; } | { page: \"create_template\"; } | { page: \"component_template\"; componentTemplate: string; } | { page: \"component_template_list\"; filter?: string | undefined; } | { page: \"edit_component_template\"; componentTemplate: string; } | { page: \"clone_component_template\"; componentTemplate: string; } | { page: \"create_component_template\"; componentTemplate: string; })"
+          " & ({ page: \"index_list\"; filter?: string | undefined; includeHiddenIndices?: boolean | undefined; } | { page: \"data_stream_index_list\"; dataStreamName: string; } | { page: \"data_streams_details\"; dataStreamName?: string | undefined; } | { page: \"index_template\"; indexTemplate: string; } | { page: \"index_template_edit\"; indexTemplate: string; } | { page: \"index_template_clone\"; indexTemplate: string; } | { page: \"create_template\"; } | { page: \"component_template\"; componentTemplate: string; } | { page: \"component_template_list\"; filter?: string | undefined; } | { page: \"edit_component_template\"; componentTemplate: string; } | { page: \"clone_component_template\"; componentTemplate: string; } | { page: \"create_component_template\"; componentTemplate: string; } | { page: \"index_details\"; indexName: string; tab?: string | undefined; })"
         ],
         "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
         "lineNumber": 36,

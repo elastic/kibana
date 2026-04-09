@@ -852,6 +852,10 @@ export interface ResolverProps {
    * Renderer used by Resolver panels for field cell actions.
    */
   renderCellActions: CellActionRenderer;
+  /**
+   * Optional callback invoked after alert mutations in nested flyouts.
+   */
+  onAlertUpdated?: () => void;
 }
 
 /**

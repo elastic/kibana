@@ -1,5 +1,5 @@
 {
-  "sha1": "1fb90397c55c21672f8b5aa31b44b968baac1bfa",
+  "sha1": "591467697e5b80c8d9e4b425a878a5259344170d",
   "tests": [
     {
       "id": "4402bb6f4421c38-1054e603e578b92",
@@ -310,6 +310,48 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/flyout/alert_details_url_sync.spec.ts",
         "line": 33,
         "column": 14
+      }
+    },
+    {
+      "id": "a1e93b8abddca76-5a5001b848eec67",
+      "title": "Run workflow alert action should show success toast with workflow link and open workflows app in new tab after executing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/investigations/run_workflow_action.spec.ts",
+        "line": 80,
+        "column": 12
+      }
+    },
+    {
+      "id": "a1e93b8abddca76-8915aaa7eb7bfbc",
+      "title": "Run workflow alert action should open the workflow selection panel when Run workflow is clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/investigations/run_workflow_action.spec.ts",
+        "line": 152,
+        "column": 12
+      }
+    },
+    {
+      "id": "a1e93b8abddca76-29e66346f3c0670",
+      "title": "Run workflow alert action should show Run workflow action in bulk actions and open the bulk panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/investigations/run_workflow_action.spec.ts",
+        "line": 170,
+        "column": 12
       }
     },
     {

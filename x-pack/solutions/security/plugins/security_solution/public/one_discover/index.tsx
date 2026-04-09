@@ -6,5 +6,6 @@
  */
 
 export { getCellRendererForGivenRecord } from './cell_renderers';
+export { AlertFlyoutFooter } from './alert_flyout_footer_component';
 export { AlertFlyoutHeader } from './alert_flyout_header_component';
 export { AlertFlyoutOverviewTab } from './alert_flyout_overview_tab_component';

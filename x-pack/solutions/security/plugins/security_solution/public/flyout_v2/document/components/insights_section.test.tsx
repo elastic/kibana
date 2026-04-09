@@ -88,6 +88,7 @@ const nonAlertMockHit = createMockHit({
   'event.kind': 'event',
   'signal.rule.id': 'rule-2',
 });
+const onAlertUpdated = jest.fn();
 
 describe('InsightsSection', () => {
   const mockUseExpandSection = jest.mocked(useExpandSection);
@@ -104,7 +105,7 @@ describe('InsightsSection', () => {
       <IntlProvider locale="en">
         <Provider store={store}>
           <Router history={history}>
-            <InsightsSection hit={hit} />
+            <InsightsSection hit={hit} onAlertUpdated={onAlertUpdated} />
           </Router>
         </Provider>
       </IntlProvider>
@@ -170,7 +171,7 @@ describe('InsightsSection', () => {
       <IntlProvider locale="en">
         <Provider store={store}>
           <Router history={history}>
-            <InsightsSection hit={nonAlertMockHit} />
+            <InsightsSection hit={nonAlertMockHit} onAlertUpdated={onAlertUpdated} />
           </Router>
         </Provider>
       </IntlProvider>

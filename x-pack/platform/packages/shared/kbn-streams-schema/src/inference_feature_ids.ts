@@ -20,3 +20,14 @@ export const STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID =
 /** Discovery and significant event generation. */
 export const STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID =
   'streams_sig_events_discovery' as const;
+
+/** Parent feature for Streams (Inference Feature Registry). */
+export const STREAMS_INFERENCE_PARENT_FEATURE_ID = 'streams' as const;
+
+/** Partitioning suggestions. */
+export const STREAMS_PARTITIONING_SUGGESTIONS_INFERENCE_FEATURE_ID =
+  'streams_partitioning_suggestions' as const;
+
+/** Processing suggestions (pipelines, grok/dissect processors). */
+export const STREAMS_PROCESSING_SUGGESTIONS_INFERENCE_FEATURE_ID =
+  'streams_processing_suggestions' as const;

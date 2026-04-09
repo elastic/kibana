@@ -159,7 +159,7 @@ describe('createDetectionRuleTool', () => {
       ]);
     });
 
-    it('returns rule as success result', async () => {
+    it('creates an attachment with the rule result', async () => {
       const mockRule = {
         name: 'Test Rule',
         query: 'FROM test | limit 100',
@@ -171,13 +171,19 @@ describe('createDetectionRuleTool', () => {
         errors: [],
       });
 
-      const result = await tool.handler(
-        { user_query: userQuery },
-        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-          modelProvider: mockModelProvider,
-          events: mockEvents,
-        })
-      );
+      const mockAttachmentId = 'ai-rule-creation';
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+        modelProvider: mockModelProvider,
+        events: mockEvents,
+      });
+      (context.attachments.add as jest.Mock).mockResolvedValue({
+        id: mockAttachmentId,
+        type: 'security.rule',
+        versions: [],
+        current_version: 1,
+      });
+
+      const result = await tool.handler({ user_query: userQuery }, context);
 
       expect(result).toEqual({
         results: [
@@ -186,9 +192,20 @@ describe('createDetectionRuleTool', () => {
             data: {
               success: true,
               rule: mockRule,
+              attachmentId: mockAttachmentId,
+              version: 1,
             },
           },
         ],
+      });
+      expect(context.attachments.add).toHaveBeenCalledWith({
+        id: 'ai-rule-creation',
+        type: 'security.rule',
+        data: {
+          text: JSON.stringify(mockRule),
+          attachmentLabel: 'Test Rule',
+        },
+        description: 'Rule: Test Rule',
       });
       expect(mockIterativeAgent.invoke).toHaveBeenCalledWith({ userQuery });
     });

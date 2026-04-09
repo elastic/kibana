@@ -300,6 +300,53 @@ describe('buildResultsQuery', () => {
     });
   });
 
+  describe('CCS support', () => {
+    const basePagination = { activePage: 0, querySize: 10, cursorStart: 0 };
+    const baseSort = [{ field: '@timestamp' as const, direction: Direction.desc }];
+
+    it('should include remote cluster patterns when ccsEnabled is true', () => {
+      const options: ResultsRequestOptions = {
+        actionId: 'action-ccs',
+        pagination: basePagination,
+        sort: baseSort,
+        ccsEnabled: true,
+      };
+
+      const result = buildResultsQuery(options);
+
+      expect(result.index).toBe('logs-osquery_manager.result*,*:logs-osquery_manager.result*');
+    });
+
+    it('should include remote cluster patterns for each namespace when ccsEnabled is true', () => {
+      const options: ResultsRequestOptions = {
+        actionId: 'action-ccs',
+        pagination: basePagination,
+        sort: baseSort,
+        integrationNamespaces: ['default', 'ns1'],
+        ccsEnabled: true,
+      };
+
+      const result = buildResultsQuery(options);
+
+      expect(result.index).toBe(
+        'logs-osquery_manager.result-default,logs-osquery_manager.result-ns1,*:logs-osquery_manager.result-default,*:logs-osquery_manager.result-ns1'
+      );
+    });
+
+    it('should not modify index when ccsEnabled is false', () => {
+      const options: ResultsRequestOptions = {
+        actionId: 'action-no-ccs',
+        pagination: basePagination,
+        sort: baseSort,
+        ccsEnabled: false,
+      };
+
+      const result = buildResultsQuery(options);
+
+      expect(result.index).toBe('logs-osquery_manager.result*');
+    });
+  });
+
   describe('schedule-based filtering', () => {
     it('should filter by schedule_id and execution count when scheduleId and executionCount are provided', () => {
       const options: ResultsRequestOptions = {

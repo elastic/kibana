@@ -547,6 +547,37 @@ export const ExternalService = z
   .nullable();
 
 /**
+ * A single observable attached to a case.
+ */
+export type CaseObservable = z.infer<typeof CaseObservable>;
+export const CaseObservable = z.object({
+  /**
+   * The observable identifier.
+   */
+  id: z.string(),
+  /**
+   * The observable type key.
+   */
+  typeKey: z.string(),
+  /**
+   * The observable value.
+   */
+  value: z.string(),
+  /**
+   * An optional description for the observable.
+   */
+  description: z.string().nullable(),
+  /**
+   * When the observable was created.
+   */
+  createdAt: z.string().datetime(),
+  /**
+   * When the observable was last updated.
+   */
+  updatedAt: z.string().datetime().nullable(),
+});
+
+/**
  * The status of the case.
  */
 export type CaseStatus = z.infer<typeof CaseStatus>;
@@ -619,6 +650,10 @@ export const CaseResponseProperties = z.object({
   duration: z.number().int().nullable(),
   external_service: ExternalService,
   id: z.string(),
+  /**
+   * Observables attached to the case.
+   */
+  observables: z.array(CaseObservable),
   owner: Owner,
   settings: Settings,
   severity: CaseSeverity,
@@ -627,6 +662,10 @@ export const CaseResponseProperties = z.object({
   title: z.string(),
   totalAlerts: z.number().int(),
   totalComment: z.number().int(),
+  /**
+   * The number of observables attached to the case.
+   */
+  total_observables: z.number().int().nullable(),
   /**
    * The number of events attached to the case.
    */
@@ -642,6 +681,23 @@ export const Response4Xx = z.object({
   message: z.string().optional(),
   statusCode: z.number().int().optional(),
 });
+
+/**
+  * The close reason to sync to attached alerts when closing the case. Can be one of following predefined reasons: [false_positive, duplicate, true_positive, benign_positive, automated_closure, other] or a custom reason provided by the user.
+
+  */
+export type CaseCloseSyncReason = z.infer<typeof CaseCloseSyncReason>;
+export const CaseCloseSyncReason = z.union([
+  z.enum([
+    'false_positive',
+    'duplicate',
+    'true_positive',
+    'benign_positive',
+    'automated_closure',
+    'other',
+  ]),
+  z.string(),
+]);
 
 /**
  * The update case API request body varies depending on the type of connector.
@@ -703,6 +759,7 @@ export const UpdateCaseRequest = z.object({
         status: CaseStatus.optional(),
         tags: CaseTags.optional(),
         title: CaseTitle.optional(),
+        closeReason: CaseCloseSyncReason.optional(),
         /**
       * The current version of the case. To determine this value, use the get case or search cases (`_find`) APIs.
 
@@ -736,6 +793,51 @@ export const SearchFieldsTypeEnum = SearchFieldsType.enum;
 
 export type SearchFieldsTypeArray = z.infer<typeof SearchFieldsTypeArray>;
 export const SearchFieldsTypeArray = z.array(SearchFieldsType);
+
+/**
+ * Counts of alerts, events, and user comments attached to a case.
+ */
+export type AttachmentTotals = z.infer<typeof AttachmentTotals>;
+export const AttachmentTotals = z.object({
+  /**
+   * Number of alert attachments on the case.
+   */
+  alerts: z.number().int(),
+  /**
+   * Number of event attachments on the case.
+   */
+  events: z.number().int(),
+  /**
+   * Number of user comment attachments on the case.
+   */
+  userComments: z.number().int(),
+});
+
+/**
+  * Summary of a case returned when listing cases that contain a given alert. This is a subset of the full case response.
+
+  */
+export type RelatedCase = z.infer<typeof RelatedCase>;
+export const RelatedCase = z.object({
+  /**
+   * The case identifier.
+   */
+  id: z.string(),
+  /**
+   * The case title.
+   */
+  title: z.string(),
+  /**
+   * The case description.
+   */
+  description: z.string(),
+  status: CaseStatus,
+  /**
+   * When the case was created.
+   */
+  createdAt: z.string().datetime(),
+  totals: AttachmentTotals,
+});
 
 /**
  * Indicates whether a case is automatically closed when it is pushed to external systems (`close-by-pushing`) or not automatically closed (`close-by-user`).
@@ -1022,6 +1124,10 @@ export const CaseResponseGetCase = z.object({
   duration: z.number().int().nullable(),
   external_service: ExternalService,
   id: z.string(),
+  /**
+   * Observables attached to the case.
+   */
+  observables: z.array(CaseObservable),
   owner: Owner,
   settings: Settings,
   severity: CaseSeverity,
@@ -1033,6 +1139,10 @@ export const CaseResponseGetCase = z.object({
    * The number of user comments on the case. Use the find case comments API to retrieve comment content.
    */
   totalComment: z.number().int(),
+  /**
+   * The number of observables attached to the case.
+   */
+  total_observables: z.number().int().nullable(),
   /**
    * The number of events attached to the case.
    */

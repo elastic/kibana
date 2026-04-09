@@ -88,11 +88,7 @@ export function TraceContextLogEvents({
       actions={actions}
     >
       <div tabIndex={0} className="eui-yScrollWithShadows" style={{ maxHeight: '400px' }}>
-        <LogEventsComponent
-          nonHighlightingQuery={query}
-          timeRange={savedSearchTimeRange}
-          index={indexes.logs}
-        />
+        <LogEventsComponent query={query} timeRange={savedSearchTimeRange} index={indexes.logs} />
       </div>
     </ContentFrameworkSection>
   );

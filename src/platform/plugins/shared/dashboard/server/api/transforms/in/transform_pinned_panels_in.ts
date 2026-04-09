@@ -29,7 +29,7 @@ export function transformPinnedPanelsIn(pinnedPanels?: PinnedPanelsState): {
   let references: Reference[] = [];
   const updatedPinnedPanels = Object.fromEntries(
     pinnedPanels.map((controlState, index) => {
-      const { uid = uuidv4(), type } = controlState;
+      const { id = uuidv4(), type } = controlState;
       const transforms = embeddableService.getTransforms(type);
 
       let transformedControlState = { ...controlState } as Partial<
@@ -41,7 +41,7 @@ export function transformPinnedPanelsIn(pinnedPanels?: PinnedPanelsState): {
           // prefix all the reference names with their IDs so that they are unique
           references = [
             ...references,
-            ...prefixReferencesFromPanel(uid, transformed.references ?? []),
+            ...prefixReferencesFromPanel(id, transformed.references ?? []),
           ];
           // update the reference names in the SO so that we can inject the references later
           const transformedState = transformed.state as Writable<LegacyStoredPinnedControlState>;
@@ -50,7 +50,7 @@ export function transformPinnedPanelsIn(pinnedPanels?: PinnedPanelsState): {
               ...transformedControlState,
               config: {
                 ...transformedState,
-                dataViewRefName: `${uid}:${transformedState.dataViewRefName}`,
+                dataViewRefName: `${id}:${transformedState.dataViewRefName}`,
               },
             };
           }
@@ -69,7 +69,7 @@ export function transformPinnedPanelsIn(pinnedPanels?: PinnedPanelsState): {
 
       const { width, grow, config } = transformedControlState;
       return [
-        uid,
+        id,
         {
           order: index,
           type,

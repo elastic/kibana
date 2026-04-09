@@ -77,7 +77,7 @@ jest.mock('react-use/lib/useLocalStorage', () => ({
 const mockDataView: DataView = {
   id: 'test-data-view',
   title: 'test-index',
-  getIndexPattern: () => '.entities.v2.latest.security_default',
+  getIndexPattern: () => 'entities-latest-default',
   timeFieldName: '@timestamp',
   fields: {
     getByName: () => undefined,

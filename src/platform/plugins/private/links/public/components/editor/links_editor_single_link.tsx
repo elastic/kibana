@@ -97,7 +97,7 @@ export const LinksEditorSingleLink = ({
             aria-label={LinksStrings.editor.panelEditor.getDragHandleAriaLabel()}
             data-test-subj="panelEditorLink--dragHandle"
           >
-            <EuiIcon type="grab" />
+            <EuiIcon type="dragVertical" />
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem className="linksPanelEditorLinkText">

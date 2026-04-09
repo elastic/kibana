@@ -20,6 +20,7 @@ export interface DurationInputProps {
   unitAriaLabel: string;
   dataTestSubj: string;
   idPrefix: string;
+  compressed?: boolean;
 }
 
 /**
@@ -32,7 +33,17 @@ export interface DurationInputProps {
  */
 export const DurationInput = React.forwardRef<HTMLInputElement, DurationInputProps>(
   (
-    { value, onChange, fallback, errors, numberLabel, unitAriaLabel, dataTestSubj, idPrefix },
+    {
+      value,
+      onChange,
+      fallback,
+      errors,
+      numberLabel,
+      unitAriaLabel,
+      dataTestSubj,
+      idPrefix,
+      compressed,
+    },
     ref
   ) => {
     const effectiveValue = value || fallback || '1m';
@@ -77,6 +88,7 @@ export const DurationInput = React.forwardRef<HTMLInputElement, DurationInputPro
               prepend={numberLabel ? [numberLabel] : undefined}
               isInvalid={!!errors}
               name="interval"
+              compressed={compressed}
               data-test-subj={`${idPrefix}NumberInput`}
               id={`${idPrefix}NumberInput`}
               aria-label={numberLabel || undefined}
@@ -88,6 +100,7 @@ export const DurationInput = React.forwardRef<HTMLInputElement, DurationInputPro
               value={intervalUnit}
               options={getTimeOptions(intervalNumber ?? 1)}
               onChange={onIntervalUnitChange}
+              compressed={compressed}
               data-test-subj={`${idPrefix}UnitInput`}
               aria-label={unitAriaLabel}
             />

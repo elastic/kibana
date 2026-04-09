@@ -8,35 +8,13 @@
 import { EuiFieldNumber, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
+import { DEFAULT_THROTTLE_INTERVAL, DURATION_UNIT_LABELS } from '../../constants';
 
 type DurationUnit = 's' | 'm' | 'h' | 'd';
 
-const DURATION_UNIT_OPTIONS: Array<{ value: DurationUnit; text: string }> = [
-  {
-    value: 's',
-    text: i18n.translate('xpack.alertingV2.notificationPolicy.form.durationInput.seconds', {
-      defaultMessage: 'second(s)',
-    }),
-  },
-  {
-    value: 'm',
-    text: i18n.translate('xpack.alertingV2.notificationPolicy.form.durationInput.minutes', {
-      defaultMessage: 'minute(s)',
-    }),
-  },
-  {
-    value: 'h',
-    text: i18n.translate('xpack.alertingV2.notificationPolicy.form.durationInput.hours', {
-      defaultMessage: 'hour(s)',
-    }),
-  },
-  {
-    value: 'd',
-    text: i18n.translate('xpack.alertingV2.notificationPolicy.form.durationInput.days', {
-      defaultMessage: 'day(s)',
-    }),
-  },
-];
+const DURATION_UNIT_OPTIONS: Array<{ value: DurationUnit; text: string }> = (
+  ['s', 'm', 'h', 'd'] as const
+).map((unit) => ({ value: unit, text: DURATION_UNIT_LABELS[unit] }));
 
 const VALID_UNITS: ReadonlySet<DurationUnit> = new Set(['s', 'm', 'h', 'd']);
 
@@ -83,11 +61,18 @@ export function DurationInput({
     }
 
     const num = parseInt(raw, 10);
-    if (!Number.isNaN(num)) {
+    if (!Number.isNaN(num) && num > 0) {
       setDurationValue(num);
-      if (num > 0) {
-        onChange(`${num}${durationUnit}`);
-      }
+      onChange(`${num}${durationUnit}`);
+    }
+  };
+
+  const handleBlur = () => {
+    if (!value || typeof durationValue !== 'number' || durationValue <= 0) {
+      const parsed = parseDuration(DEFAULT_THROTTLE_INTERVAL);
+      setDurationValue(parsed.value);
+      setDurationUnit(parsed.unit);
+      onChange(DEFAULT_THROTTLE_INTERVAL);
     }
   };
 
@@ -120,6 +105,7 @@ export function DurationInput({
       min={1}
       value={durationValue}
       onChange={handleValueChange}
+      onBlur={handleBlur}
       fullWidth
       isInvalid={isInvalid}
       data-test-subj={dataTestSubj ?? 'durationValueInput'}

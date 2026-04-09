@@ -29,6 +29,10 @@ import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { CorrelationsDetails } from '../../correlations';
 import { ThreatIntelligenceDetails } from '../../threat_intelligence';
+import {
+  defaultToolsFlyoutProperties,
+  useDefaultDocumentFlyoutProperties,
+} from '../../shared/hooks/use_default_flyout_properties';
 
 export const INSIGHTS_SECTION_TEST_ID = `${PREFIX}InsightsSection` as const;
 
@@ -46,17 +50,22 @@ export interface InsightsSectionProps {
    * Document to display in the overview tab
    */
   hit: DataTableRecord;
+  /**
+   * Callback invoked after alert mutations to refresh parent flyout content.
+   */
+  onAlertUpdated: () => void;
 }
 
 /**
  * Insights section of the overview tab.
  * Content to be added soon.
  */
-export const InsightsSection = memo(({ hit }: InsightsSectionProps) => {
+export const InsightsSection = memo(({ hit, onAlertUpdated }: InsightsSectionProps) => {
   const { services } = useKibana();
   const { overlays } = services;
   const store = useStore();
   const history = useHistory();
+  const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const isInSecurityApp = useIsInSecurityApp();
 
   const expanded = useExpandSection({
@@ -90,12 +99,7 @@ export const InsightsSection = memo(({ hit }: InsightsSectionProps) => {
         history,
         children: <ThreatIntelligenceDetails hit={hit} />,
       }),
-      {
-        ownFocus: false,
-        resizable: true,
-        size: 'm',
-        type: 'overlay',
-      }
+      { ...defaultToolsFlyoutProperties }
     );
   }, [history, hit, overlays, services, store]);
   const onShowAlert = useCallback(
@@ -110,12 +114,13 @@ export const InsightsSection = memo(({ hit }: InsightsSectionProps) => {
               documentId={id}
               indexName={indexName}
               renderCellActions={cellActionRenderer}
+              onAlertUpdated={onAlertUpdated}
             />
           ),
         }),
-        { ownFocus: false, resizable: true, session: 'inherit', size: 's' }
+        { ...defaultFlyoutProperties, session: 'inherit' }
       ),
-    [history, services, store]
+    [defaultFlyoutProperties, history, onAlertUpdated, services, store]
   );
   const onShowCorrelationsDetails = useCallback(() => {
     overlays.openSystemFlyout(
@@ -132,12 +137,7 @@ export const InsightsSection = memo(({ hit }: InsightsSectionProps) => {
           />
         ),
       }),
-      {
-        ownFocus: false,
-        resizable: true,
-        size: 'm',
-        type: 'overlay',
-      }
+      { ...defaultToolsFlyoutProperties }
     );
   }, [history, hit, onShowAlert, overlays, services, store]);
   const onShowPrevalenceDetails = useCallback(() => {
@@ -155,12 +155,7 @@ export const InsightsSection = memo(({ hit }: InsightsSectionProps) => {
           />
         ),
       }),
-      {
-        ownFocus: false,
-        resizable: true,
-        size: 'm',
-        type: 'overlay',
-      }
+      { ...defaultToolsFlyoutProperties }
     );
   }, [history, hit, investigationFields, isInSecurityApp, overlays, services, store]);
 

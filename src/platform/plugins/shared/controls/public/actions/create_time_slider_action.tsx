@@ -35,7 +35,7 @@ const compatibilityCheck = (api: unknown | null) =>
 export const createTimeSliderAction = (): ActionDefinition<EmbeddableApiContext> => ({
   id: ACTION_CREATE_TIME_SLIDER,
   order: 0,
-  getIconType: () => 'controlsHorizontal',
+  getIconType: () => 'controls',
   couldBecomeCompatible: ({ embeddable }) => apiCanPinPanels(embeddable),
   getCompatibilityChangesSubject: ({ embeddable }) =>
     apiSupportsTimeSliderControl(embeddable) ? embeddable.layoutChanged$ : undefined,

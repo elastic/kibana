@@ -53,6 +53,7 @@ import type {
   DeletePackageWithoutVersionRequestSchema,
   BulkInstallPackagesFromRegistryRequestSchema,
   GetStatsRequestSchema,
+  GetDependenciesRequestSchema,
   FleetRequestHandler,
   UpdatePackageRequestSchema,
   UpdatePackageWithoutVersionRequestSchema,
@@ -94,7 +95,7 @@ import {
   licenseService,
   packagePolicyService,
 } from '../../services';
-import { getPackageUsageStats } from '../../services/epm/packages/get';
+import { getPackageUsageStats, getPackageDependencies } from '../../services/epm/packages/get';
 import {
   bulkRollbackAvailableCheck,
   isIntegrationRollbackTTLExpired,
@@ -347,6 +348,14 @@ export const getStatsHandler: FleetRequestHandler<
     response: await getPackageUsageStats({ savedObjectsClient, pkgName }),
   };
   return response.ok({ body });
+};
+
+export const getDependenciesHandler: FleetRequestHandler<
+  TypeOf<typeof GetDependenciesRequestSchema.params>
+> = async (context, request, response) => {
+  const { pkgName, pkgVersion } = request.params;
+  const items = await getPackageDependencies(pkgName, pkgVersion);
+  return response.ok({ body: { items } });
 };
 
 export const installPackageFromRegistryHandler: FleetRequestHandler<

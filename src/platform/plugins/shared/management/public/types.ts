@@ -47,10 +47,12 @@ export interface DefinedSections {
   data: ManagementSection;
   insightsAndAlerting: ManagementSection;
   machineLearning: ManagementSection;
+  modelManagement: ManagementSection;
   security: ManagementSection;
   kibana: ManagementSection;
   stack: ManagementSection;
   ai: ManagementSection;
+  clusterPerformance: ManagementSection;
 }
 
 export interface ManagementStart {
@@ -83,10 +85,12 @@ export enum ManagementSectionId {
   Data = 'data',
   InsightsAndAlerting = 'insightsAndAlerting',
   MachineLearning = 'ml',
+  ModelManagement = 'modelManagement',
   Security = 'security',
   Kibana = 'kibana',
   Stack = 'stack',
   AI = 'ai',
+  ClusterPerformance = 'clusterPerformance',
 }
 
 export type Unmount = () => Promise<void> | void;

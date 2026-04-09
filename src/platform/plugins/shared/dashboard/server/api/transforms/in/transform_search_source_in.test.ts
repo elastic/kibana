@@ -34,4 +34,15 @@ describe('transformSearchSourceIn', () => {
       ]
     `);
   });
+
+  test('should map as code query to stored query format', () => {
+    const { searchSourceJSON } = transformSearchSourceIn(undefined, {
+      expression: 'service.name: "kibana"',
+      language: 'kql',
+    });
+
+    expect(searchSourceJSON).toBe(
+      '{"query":{"query":"service.name: \\"kibana\\"","language":"kuery"}}'
+    );
+  });
 });

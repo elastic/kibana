@@ -80,10 +80,10 @@ test.describe(
       await expect(pageObjects.streams.getSuggestPipelineButton()).toBeVisible();
 
       // Mock no connectors and verify button is hidden
-      await page.route('**/internal/streams/connectors', async (route) => {
+      await page.route('**/internal/search_inference_endpoints/connectors*', async (route) => {
         await route.fulfill({
           status: 200,
-          body: JSON.stringify({ connectors: [] }),
+          body: JSON.stringify({ connectors: [], allConnectors: [], soEntryFound: false }),
         });
       });
       await page.reload();

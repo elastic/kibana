@@ -10,6 +10,13 @@
       "prUrl": "https://github.com/elastic/kibana/pull/258986"
     },
     {
+      "path": "/api/fleet/outputs/{outputId}",
+      "method": "put",
+      "reason": "PUT request body uses UpdateOutputSchema with meta IDs, changing inline anyOf members to $ref components. Data shape is identical; adds otel_exporter_config_yaml field.",
+      "approvedBy": "elastic/fleet",
+      "prUrl": "https://github.com/elastic/kibana/pull/259308"
+    },
+    {
       "path": "/api/fleet/agent_policies",
       "method": "get",
       "reason": "Optional package policy stream data_stream.type in 200 responses for OTel inputs with dynamic_signal_types (composable integrations).",

@@ -45,7 +45,7 @@ export const formatResearcherActionHistory = ({
         continue;
       }
 
-      formatted.push(createToolCallMessage(action.tool_calls));
+      formatted.push(createToolCallMessage(action.tool_calls, action.message));
     }
     if (isExecuteToolAction(action)) {
       formatted.push(

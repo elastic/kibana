@@ -23,6 +23,8 @@ import type {
   PerformRuleInstallationResponseBody,
   PerformRuleUpgradeRequestBody,
   PerformRuleUpgradeResponseBody,
+  ReviewRuleDeprecationRequestBody,
+  ReviewRuleDeprecationResponseBody,
   RevertPrebuiltRulesRequest,
   RevertPrebuiltRulesResponseBody,
   ReviewRuleInstallationRequestBody,
@@ -38,6 +40,7 @@ import {
   PERFORM_RULE_UPGRADE_URL,
   PREBUILT_RULES_STATUS_URL,
   REVERT_PREBUILT_RULES_URL,
+  REVIEW_RULE_DEPRECATION_URL,
   REVIEW_RULE_INSTALLATION_URL,
   REVIEW_RULE_UPGRADE_URL,
 } from '../../../../common/api/detection_engine/prebuilt_rules';
@@ -671,6 +674,27 @@ export const getPrebuiltRulesStatus = async ({
       signal,
     }
   );
+
+/**
+ * Review deprecated prebuilt rules
+ *
+ * @param signal AbortSignal for cancelling request
+ *
+ * @throws An error if response is not OK
+ */
+export const reviewRuleDeprecation = async ({
+  signal,
+  request,
+}: {
+  signal: AbortSignal | undefined;
+  request: ReviewRuleDeprecationRequestBody;
+}): Promise<ReviewRuleDeprecationResponseBody> =>
+  KibanaServices.get().http.fetch<ReviewRuleDeprecationResponseBody>(REVIEW_RULE_DEPRECATION_URL, {
+    method: 'POST',
+    version: '1',
+    signal,
+    body: JSON.stringify(request),
+  });
 
 /**
  * Review prebuilt rules upgrade

@@ -162,7 +162,7 @@ export const initRoutes = (
 
   registerAssetInventoryRoutes({ router, logger });
 
-  registerSiemReadinessRoutes({ router, logger });
+  registerSiemReadinessRoutes({ router, logger, isServerless });
 
   registerTrialCompanionRoutes(trialCompanionDeps);
 

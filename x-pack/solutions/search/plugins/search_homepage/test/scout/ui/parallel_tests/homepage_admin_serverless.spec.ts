@@ -13,7 +13,7 @@ test.describe('Homepage - Admin: Serverless search', { tag: [...tags.serverless.
   test.beforeEach(async ({ page, browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await page.addInitScript(() => {
-      window.localStorage.setItem('gettingStartedVisited', 'true');
+      window.sessionStorage.setItem('gettingStartedVisited', 'true');
     });
     await pageObjects.homepage.goto();
   });

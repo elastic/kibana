@@ -44,14 +44,13 @@ describe('useUpdateRule', () => {
     metadata: {
       name: 'Updated Rule',
       enabled: true,
-      labels: ['tag1', 'tag2'],
+      tags: ['tag1', 'tag2'],
     },
     timeField: '@timestamp',
     schedule: { every: '5m', lookback: '1m' },
     evaluation: {
       query: {
         base: 'FROM logs | LIMIT 10',
-        condition: '',
       },
     },
     grouping: { fields: ['host.name'] },
@@ -127,9 +126,8 @@ describe('useUpdateRule', () => {
       result.current.updateRule(validFormData);
     });
 
-    // Note: empty condition field is omitted, absent optional fields are null
     const expectedPayload = {
-      metadata: { name: 'Updated Rule', labels: ['tag1', 'tag2'] },
+      metadata: { name: 'Updated Rule', tags: ['tag1', 'tag2'] },
       time_field: '@timestamp',
       schedule: { every: '5m', lookback: '1m' },
       evaluation: { query: { base: 'FROM logs | LIMIT 10' } },
@@ -170,35 +168,7 @@ describe('useUpdateRule', () => {
     });
   });
 
-  it('includes evaluation condition when non-empty', async () => {
-    const { http, result } = setupUseUpdateRule();
-
-    http.patch.mockResolvedValue({ id: ruleId, metadata: { name: 'Condition Rule' } });
-
-    const formData: FormValues = {
-      ...validFormData,
-      evaluation: {
-        query: {
-          base: 'FROM logs | STATS count() BY host',
-          condition: 'WHERE count > 100',
-        },
-      },
-    };
-
-    await act(async () => {
-      result.current.updateRule(formData);
-    });
-
-    await waitFor(() => {
-      const body = getLastPatchedBody(http);
-      expect(body.evaluation.query).toEqual({
-        base: 'FROM logs | STATS count() BY host',
-        condition: 'WHERE count > 100',
-      });
-    });
-  });
-
-  it('includes recovery_policy with condition-only mode using evaluation base', async () => {
+  it('maps recovery_policy with base query', async () => {
     const { http, result } = setupUseUpdateRule();
 
     http.patch.mockResolvedValue({ id: ruleId, metadata: { name: 'Recovery Rule' } });
@@ -209,12 +179,13 @@ describe('useUpdateRule', () => {
       evaluation: {
         query: {
           base: 'FROM logs | STATS count() BY host',
-          condition: 'WHERE count > 100',
         },
       },
       recoveryPolicy: {
         type: 'query',
-        query: { condition: 'WHERE count <= 50' },
+        query: {
+          base: 'FROM logs | STATS count() BY host | WHERE count <= 50',
+        },
       },
     };
 
@@ -227,8 +198,7 @@ describe('useUpdateRule', () => {
       expect(body.recovery_policy).toEqual({
         type: 'query',
         query: {
-          base: 'FROM logs | STATS count() BY host',
-          condition: 'WHERE count <= 50',
+          base: 'FROM logs | STATS count() BY host | WHERE count <= 50',
         },
       });
     });

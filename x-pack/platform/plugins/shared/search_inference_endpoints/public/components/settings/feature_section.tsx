@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiPanel,
+  EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -80,6 +81,7 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
               </EuiFlexItem>
             ) : null}
           </EuiFlexGroup>
+          <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
             <p>{parentDescription}</p>
           </EuiText>

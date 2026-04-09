@@ -28,6 +28,7 @@ import { MAX_NESTING_LEVEL, getSegments } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import { useScrollToActive } from '@kbn/core-chrome-navigation/src/hooks/use_scroll_to_active';
 import type { DraggableProvided } from '@hello-pangea/dnd';
+import { useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { NestedView } from '../../../nested_view';
 import { CurrentStreamEntry } from './current_stream_entry';
@@ -38,7 +39,11 @@ import {
   useStreamRoutingEvents,
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
-import { IdleQueryStreamEntry, CreatingQueryStreamEntry } from './query_stream_entry';
+import {
+  IdleQueryStreamEntry,
+  CreatingQueryStreamEntry,
+  EditingQueryStreamEntry,
+} from './query_stream_entry';
 import { ReviewSuggestionsForm } from './review_suggestions_form/review_suggestions_form';
 import { GenerateSuggestionButton } from './review_suggestions_form/generate_suggestions_button';
 import { AdditionalChargesCallout } from '../shared/additional_charges_callout';
@@ -108,6 +113,17 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
     return snapshot.matches({ ready: 'ingestMode' }) ? 'ingestMode' : 'queryMode';
   });
 
+  const hasActiveQueryModeForm = useStreamsRoutingSelector(
+    (state) =>
+      state.matches({ ready: { queryMode: 'editing' } }) ||
+      state.matches({ ready: { queryMode: 'creating' } })
+  );
+
+  const handleModeChange = useDiscardConfirm(
+    (mode: string) => changeChildStreamsMode(mode as ChildStreamMode),
+    { enabled: hasActiveQueryModeForm }
+  );
+
   return (
     <EuiFlexGroup
       direction="column"
@@ -148,7 +164,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
             },
           ]}
           idSelected={idSelected}
-          onChange={(mode) => changeChildStreamsMode(mode as ChildStreamMode)}
+          onChange={handleModeChange}
           buttonSize="compressed"
           color="primary"
           data-test-subj="streamsAppChildStreamTypeSelector"
@@ -172,6 +188,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
     isLoadingSuggestions,
     suggestions,
     suggestionReason,
+    refinementHistory,
     resetForm,
     previewSuggestion,
     acceptSuggestion,
@@ -233,14 +250,39 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
     }
   };
 
-  const getSuggestionsForStream = (connectorId: string) => {
-    fetchSuggestions({
-      streamName: definition.stream.name,
-      connectorId,
-      start: timeState.start,
-      end: timeState.end,
-    });
-  };
+  const getSuggestionsForStream = useCallback(
+    (connectorId: string) => {
+      fetchSuggestions({
+        streamName: definition.stream.name,
+        connectorId,
+        start: timeState.start,
+        end: timeState.end,
+      });
+    },
+    [fetchSuggestions, definition.stream.name, timeState.start, timeState.end]
+  );
+
+  const refineSuggestionsForStream = useCallback(
+    (connectorId: string, userPrompt?: string) => {
+      fetchSuggestions({
+        streamName: definition.stream.name,
+        connectorId,
+        start: timeState.start,
+        end: timeState.end,
+        userPrompt,
+        existingPartitions: suggestions ?? undefined,
+        refinementHistory: refinementHistory.length > 0 ? refinementHistory : undefined,
+      });
+    },
+    [
+      fetchSuggestions,
+      definition.stream.name,
+      timeState.start,
+      timeState.end,
+      suggestions,
+      refinementHistory,
+    ]
+  );
 
   const renderCreateButton = () => {
     return (
@@ -266,7 +308,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
                   isDisabled={isEditingOrReorderingStreams}
                   aiFeatures={aiFeatures}
                 >
-                  {suggestPartitionsWithAIText}
+                  {suggestPartitionsText}
                 </GenerateSuggestionButton>
               </EuiFlexItem>
               {showAdditionalChargesCallout && (
@@ -287,7 +329,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
                 onClick={createNewRule}
                 disabled={!canCreateRoutingRules || maxNestingLevel}
               >
-                {createPartitionManuallyText}
+                {createPartitionText}
               </CreateButtonComponent>
             </EuiToolTip>
           </EuiFlexItem>
@@ -333,7 +375,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
             isDisabled={isEditingOrReorderingStreams}
             aiFeatures={aiFeatures}
           >
-            {suggestPartitionsWithAIText}
+            {suggestPartitionsText}
           </GenerateSuggestionButton>
           {showAdditionalChargesCallout && (
             <>
@@ -426,7 +468,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
                   aiFeatures={aiFeatures}
                   isLoadingSuggestions={isLoadingSuggestions}
                   onDismiss={resetForm}
-                  onRegenerate={getSuggestionsForStream}
+                  onRetry={getSuggestionsForStream}
                   isDisabled={isEditingOrReorderingStreams}
                   reason={suggestionReason}
                 />
@@ -436,7 +478,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
                   aiFeatures={aiFeatures}
                   definition={definition}
                   isLoadingSuggestions={isLoadingSuggestions}
-                  onRegenerate={getSuggestionsForStream}
+                  onRegenerate={refineSuggestionsForStream}
                   previewSuggestion={previewSuggestion}
                   rejectSuggestion={rejectSuggestion}
                   resetForm={resetForm}
@@ -467,7 +509,13 @@ function QueryModeChildrenList() {
   const isCreating = useStreamsRoutingSelector((state) =>
     state.matches({ ready: { queryMode: 'creating' } })
   );
-  const { createQueryStream } = useStreamRoutingEvents();
+  const isEditing = useStreamsRoutingSelector((state) =>
+    state.matches({ ready: { queryMode: 'editing' } })
+  );
+  const editingStreamName = useStreamsRoutingSelector(
+    (snapshot) => snapshot.context.editingQueryStreamName
+  );
+  const { createQueryStream, editQueryStream } = useStreamRoutingEvents();
   const canManage = definition.privileges.manage;
 
   // Get child query stream names from the definition
@@ -513,7 +561,17 @@ function QueryModeChildrenList() {
                 last={pos === childQueryStreamNames.length - 1 && !isCreating}
                 first={pos === 0}
               >
-                <IdleQueryStreamEntry streamName={streamName} />
+                {isEditing && editingStreamName === streamName ? (
+                  <EditingQueryStreamEntry
+                    streamName={streamName}
+                    parentStreamName={definition.stream.name}
+                  />
+                ) : (
+                  <IdleQueryStreamEntry
+                    streamName={streamName}
+                    onEdit={canManage && !isCreating && !isEditing ? editQueryStream : undefined}
+                  />
+                )}
               </NestedView>
             </EuiFlexItem>
           ))}
@@ -528,7 +586,7 @@ function QueryModeChildrenList() {
         </EuiFlexGroup>
       </EuiFlexItem>
       {/* Create button */}
-      {!isCreating && (
+      {!isCreating && !isEditing && (
         <EuiFlexItem grow={false}>
           <EuiFlexGroup
             justifyContent="center"
@@ -590,13 +648,16 @@ const cannotManageRoutingRulesText = i18n.translate(
   }
 );
 
-const suggestPartitionsWithAIText = i18n.translate(
+const suggestPartitionsText = i18n.translate(
   'xpack.streams.streamDetailRouting.childStreamList.suggestPartitions',
   {
-    defaultMessage: 'Suggest partitions with AI',
+    defaultMessage: 'Get partitions suggestions',
   }
 );
 
-const createPartitionManuallyText = i18n.translate('xpack.streams.streamDetailRouting.addRule', {
-  defaultMessage: 'Create partition manually',
-});
+const createPartitionText = i18n.translate(
+  'xpack.streams.streamDetailRouting.childStreamList.createPartition',
+  {
+    defaultMessage: 'Create partition',
+  }
+);

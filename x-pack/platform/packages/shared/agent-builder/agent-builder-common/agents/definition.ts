@@ -86,9 +86,7 @@ export interface AgentConfiguration {
    */
   instructions?: string;
   /**
-   * If set to true, the custom instructions will be used as a replacement for the system prompt instead of extending it.
-   *
-   * This will impact both the research and answer prompts. For custom per-step instructions, use the `research` and `answer` configuration fields instead.
+   * @deprecated does nothing anymore - agent no longer have specific instructions to override
    */
   replace_default_instructions?: boolean;
 
@@ -136,7 +134,7 @@ export interface AgentResearchStepConfiguration {
    */
   instructions?: string;
   /**
-   * If set to true, the custom instructions will be used as a replacement for the system prompt instead of extending it.
+   * @deprecated does nothing anymore - agent no longer have specific instructions to override
    */
   replace_default_instructions?: boolean;
 }
@@ -147,7 +145,7 @@ export interface AgentAnswerStepConfiguration {
    */
   instructions?: string;
   /**
-   * If set to true, the custom instructions will be used as a replacement for the system prompt instead of extending it.
+   * @deprecated does nothing anymore - agent no longer have specific instructions to override
    */
   replace_default_instructions?: boolean;
 }

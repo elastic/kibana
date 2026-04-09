@@ -76,6 +76,21 @@ export async function getMinikubeIp(): Promise<string> {
 }
 
 /**
+ * Resolves the IP address for host.minikube.internal from minikube's /etc/hosts.
+ * Pods use CoreDNS which doesn't resolve this hostname, so the IP is needed
+ * for hostAliases in pod specs that need to reach the host machine.
+ */
+export async function getMinikubeHostGatewayIp(): Promise<string | undefined> {
+  try {
+    const { stdout } = await execa('minikube', ['ssh', 'grep host.minikube.internal /etc/hosts']);
+    const ip = stdout.trim().split(/\s+/)[0];
+    return ip || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
  * Waits for all pods in a namespace to be ready
  */
 export async function waitForPodsReady(

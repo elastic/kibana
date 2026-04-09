@@ -12,13 +12,14 @@ import { schema } from '@kbn/config-schema';
 import { LENS_TAGCLOUD_DEFAULT_STATE } from '@kbn/lens-common';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema } from '../color';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import { builderEnums } from '../enums';
 import {
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
+import { objectUnion } from './utils/object_union';
 
 const tagcloudStateTagsByOptionsSchema = {
   /**
@@ -78,7 +79,7 @@ export const tagcloudStateSchemaNoESQL = schema.object(
     ...sharedPanelInfoSchema,
     ...dslOnlyPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetSchema,
+    ...dataSourceSchema,
     ...tagcloudStateSharedOptionsSchema,
     /**
      * Primary value configuration, must define operation.
@@ -97,7 +98,7 @@ export const tagcloudStateSchemaESQL = schema.object(
     type: schema.literal('tag_cloud'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
+    ...dataSourceEsqlTableSchema,
     ...tagcloudStateSharedOptionsSchema,
     /**
      * Primary value configuration, must define operation.
@@ -111,7 +112,7 @@ export const tagcloudStateSchemaESQL = schema.object(
   { meta: { id: 'tagcloudESQL', title: 'Tag Cloud Chart (ES|QL)' } }
 );
 
-export const tagcloudStateSchema = schema.oneOf(
+export const tagcloudStateSchema = objectUnion(
   [tagcloudStateSchemaNoESQL, tagcloudStateSchemaESQL],
   {
     meta: { id: 'tagcloudChart', title: 'Tag Cloud Chart' },

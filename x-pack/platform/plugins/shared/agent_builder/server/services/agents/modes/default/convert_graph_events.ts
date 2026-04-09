@@ -105,25 +105,25 @@ export const convertGraphEvents = ({
           const nextAction = addedActions[addedActions.length - 1];
 
           if (isToolCallAction(nextAction)) {
-            const { tool_calls: toolCalls, message: messageText } = nextAction;
+            const { tool_calls: toolCalls, message: messageText = '' } = nextAction;
             if (toolCalls.length > 0) {
-              let hasReasoningEvent = false;
-              const toolCallGroupId = toolCalls.length > 1 ? uuidv4() : undefined;
+              const toolCallGroupId = uuidv4();
+
+              if (messageText.trim().length > 0) {
+                events.push(createReasoningEvent(messageText, { toolCallGroupId }));
+              }
 
               for (const toolCall of toolCalls) {
                 const toolId = toolIdentifierFromToolCall(toolCall, toolManager.getToolIdMapping());
-                const { toolCallId, args } = toolCall;
+                const { toolCallId, args: toolCallArgs, reasoning } = toolCall;
 
-                const { _reasoning, ...toolCallArgs } = args;
-                if (_reasoning) {
-                  events.push(createReasoningEvent(_reasoning));
-                  hasReasoningEvent = true;
+                if (reasoning && reasoning.trim().length > 0) {
+                  events.push(createReasoningEvent(reasoning, { toolCallId, toolCallGroupId }));
                 }
 
                 toolCallIdToIdMap.set(toolCall.toolCallId, toolId);
 
                 const isBrowserTool = toolId.startsWith(BROWSER_TOOL_PREFIX);
-
                 if (isBrowserTool) {
                   events.push(
                     createBrowserToolCallEvent({
@@ -142,9 +142,6 @@ export const convertGraphEvents = ({
                     })
                   );
                 }
-              }
-              if (messageText && !hasReasoningEvent) {
-                events.push(createReasoningEvent(messageText));
               }
             }
           }
@@ -196,15 +193,17 @@ export const convertGraphEvents = ({
             }
 
             if (isToolPromptAction(action)) {
-              resultEvents.push(
-                createPromptRequestEvent({
-                  prompt: action.prompt,
-                  source: {
-                    type: AgentPromptRequestSourceType.toolCall,
-                    tool_call_id: action.tool_call_id,
-                  },
-                })
-              );
+              for (const { prompt, tool_call_id } of action.prompts) {
+                resultEvents.push(
+                  createPromptRequestEvent({
+                    prompt,
+                    source: {
+                      type: AgentPromptRequestSourceType.toolCall,
+                      tool_call_id,
+                    },
+                  })
+                );
+              }
             }
           }
 

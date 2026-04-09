@@ -46,7 +46,7 @@ export const useShowRelatedAttacks = ({
   );
 
   return {
-    show: enableAlertsAndAttacksAlignment && attackIds.length > 0,
+    show: enableAlertsAndAttacksAlignment,
     attackIds,
   };
 };

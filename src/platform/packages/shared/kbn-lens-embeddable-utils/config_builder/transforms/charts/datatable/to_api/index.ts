@@ -11,8 +11,8 @@ import type { SavedObjectReference } from '@kbn/core/server';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { DatatableState } from '../../../../schema';
 import {
-  buildDatasetStateESQL,
-  buildDatasetStateNoESQL,
+  buildDataSourceStateESQL,
+  buildDataSourceStateNoESQL,
   generateApiLayer,
   isTextBasedLayer,
 } from '../../../utils';
@@ -28,20 +28,20 @@ export function buildVisualizationAPI(
   adhocReferences?: SavedObjectReference[]
 ): DatatableState {
   if (isTextBasedLayer(layer)) {
-    const dataset = buildDatasetStateESQL(layer);
+    const dataSource = buildDataSourceStateESQL(layer);
 
     const { columnIdMapping, ...columns } = convertDatatableColumnsToAPI(layer, visualization);
 
     return {
       type: 'data_table',
-      dataset,
+      data_source: dataSource,
       ...generateApiLayer(layer),
       ...columns,
       ...convertAppearanceToAPIFormat(visualization, columnIdMapping),
     };
   }
 
-  const dataset = buildDatasetStateNoESQL(
+  const dataSource = buildDataSourceStateNoESQL(
     layer,
     layerId,
     adHocDataViews,
@@ -53,7 +53,7 @@ export function buildVisualizationAPI(
 
   return {
     type: 'data_table',
-    dataset,
+    data_source: dataSource,
     ...generateApiLayer(layer),
     ...columns,
     ...convertAppearanceToAPIFormat(visualization, columnIdMapping),

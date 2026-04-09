@@ -27,7 +27,6 @@ export default createTestConfig({
     require.resolve('../../test_suites/reporting'),
     require.resolve('../../test_suites/grok_debugger'),
     require.resolve('../../test_suites/painless_lab'),
-    require.resolve('../../test_suites/console'),
     require.resolve('../../test_suites/saved_objects_management'),
     require.resolve('../../test_suites/telemetry'),
     require.resolve('../../test_suites/data_usage'),
@@ -47,7 +46,7 @@ export default createTestConfig({
     // useful for testing (also enabled in MKI QA)
     '--coreApp.allowDynamicConfigOverrides=true',
     `--xpack.securitySolutionServerless.cloudSecurityUsageReportingTaskInterval=5s`,
-    `--xpack.securitySolutionServerless.usageApi.url=http://localhost:8081`,
+    `--xpack.securitySolutionServerless.usageApi.url=http://localhost:8089`,
     '--xpack.dataUsage.enabled=true',
     '--xpack.dataUsage.enableExperimental=[]',
     // dataUsage.autoops* config is set in kibana controller

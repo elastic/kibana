@@ -17,6 +17,8 @@ import type { AIFeatures } from '../../../../../hooks/use_ai_features';
 import type { UseGenAIConnectorsResult } from '../../../../../hooks/use_genai_connectors';
 import { InferenceConnectorType } from '@kbn/inference-common';
 
+const MOCK_MODEL_SETTINGS_URL = '/app/management/modelManagement/model_settings';
+
 jest.mock('../../../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     core: {
@@ -35,6 +37,10 @@ jest.mock('../../../../../hooks/use_kibana', () => ({
       },
     },
   }),
+}));
+
+jest.mock('../../../../../hooks/use_model_settings_url', () => ({
+  useModelSettingsUrl: () => MOCK_MODEL_SETTINGS_URL,
 }));
 
 const createMockConnector = (connectorId: string, name: string) => ({
@@ -57,7 +63,6 @@ const createMockGenAiConnectors = (
   selectConnector: jest.fn(),
   reloadConnectors: jest.fn(),
   isConnectorSelectionRestricted: false,
-  defaultConnector: undefined,
   ...overrides,
 });
 
@@ -106,10 +111,7 @@ describe('GenerateSuggestionButton', () => {
 
       const link = screen.getByRole('link', { name: /enable ai assistant features/i });
       expect(link).toBeInTheDocument();
-      expect(link).toHaveAttribute(
-        'href',
-        '/test/app/management/insightsAndAlerting/triggersActionsConnectors/connectors'
-      );
+      expect(link).toHaveAttribute('href', MOCK_MODEL_SETTINGS_URL);
     });
   });
 

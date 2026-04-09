@@ -14,7 +14,7 @@ import {
   CorrelationsDetailsAlertsTable,
 } from './correlations_details_alerts_table';
 import { getColumns } from '../utils/get_columns';
-import { usePaginatedAlerts } from '../../../flyout/document_details/left/hooks/use_paginated_alerts';
+import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { mockFlyoutApi } from '../../../flyout/document_details/shared/mocks/mock_flyout_context';
 import { mockContextValue } from '../../../flyout/document_details/shared/mocks/mock_context';
@@ -22,7 +22,7 @@ import { RULE_PREVIEW_BANNER, RulePreviewPanelKey } from '../../../flyout/rule_d
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
-jest.mock('../../../flyout/document_details/left/hooks/use_paginated_alerts');
+jest.mock('../hooks/use_paginated_alerts');
 jest.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../common/hooks/is_in_security_app');

@@ -35,7 +35,7 @@ export const addPanelFromLibrary: (...params: OnAddParams) => Promise<void> = as
     {
       panelType: SEARCH_EMBEDDABLE_TYPE,
       serializedState: {
-        discover_session_id: savedObject.id,
+        ref_id: savedObject.id,
         overrides: {},
       },
     },

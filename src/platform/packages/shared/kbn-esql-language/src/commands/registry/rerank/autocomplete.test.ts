@@ -51,7 +51,7 @@ const OPERATOR_SUGGESTIONS = {
 // Helper to add placeholder to operator labels for test expectations
 const addPlaceholder = (operators: string[]) => operators.map((op) => `${op} $0`);
 
-const QUERY_LITERAL = buildConstantsDefinitions([QUERY_TEXT_SNIPPET], '', '1')[0].text;
+const QUERY_LITERAL = buildConstantsDefinitions([QUERY_TEXT_SNIPPET], '')[0].text;
 const NEXT_ACTIONS = [
   withCompleteItem.text,
   commaCompleteItem.text.endsWith(' ') ? commaCompleteItem.text : `${commaCompleteItem.text} `,

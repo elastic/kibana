@@ -20,6 +20,7 @@ export interface NumberInputProps {
   max?: number;
   step?: number;
   prepend?: string | React.ReactElement | Array<string | React.ReactElement>;
+  compressed?: boolean;
   'data-test-subj'?: string;
   id?: string;
   name?: string;

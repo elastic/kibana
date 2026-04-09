@@ -11,6 +11,7 @@ export interface SolutionViewSwitchCalloutInternalProps {
   manageSpacesUrl: string;
   updateSpace: (solution: SupportedSolutionView) => Promise<void>;
   showError: (error: unknown) => void;
+  onDismiss: () => void;
 }
 
 export interface SolutionViewSwitchCalloutProps {

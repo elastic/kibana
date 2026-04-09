@@ -116,6 +116,8 @@ const INTERNAL_READ_EXCEPTIONS: Record<string, string[]> = {
   'PUT:/api/workflows/workflow/{id}': [WORKFLOWS_INDEX],
   'DELETE:/api/workflows/workflow/{id}': [WORKFLOWS_INDEX],
   'DELETE:/api/workflows': [WORKFLOWS_INDEX],
+  // Existence check before cancelAllActiveWorkflowExecutions (see WorkflowsManagementApi.cancelAllActiveWorkflowExecutions)
+  'POST:/api/workflows/workflow/{workflowId}/executions/cancel': [WORKFLOWS_INDEX],
 };
 
 /**
@@ -258,6 +260,9 @@ const ROUTE_REQUEST_FIXTURES: Record<string, { params?: any; body?: any; query?:
   },
   'POST:/api/workflows/executions/{executionId}/cancel': {
     params: { executionId: 'test-exec-id' },
+  },
+  'POST:/api/workflows/workflow/{workflowId}/executions/cancel': {
+    params: { workflowId: 'test-workflow-id' },
   },
   'GET:/api/workflows/executions/{executionId}': {
     params: { executionId: 'test-exec-id' },

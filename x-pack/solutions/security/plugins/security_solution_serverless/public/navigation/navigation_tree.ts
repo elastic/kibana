@@ -27,110 +27,117 @@ const SOLUTION_NAME = i18n.translate(
 export const createNavigationTree = async (
   services: Services,
   chatExperience: AIChatExperience = AIChatExperience.Classic
-): Promise<NavigationTreeDefinition> => ({
-  body: [
-    {
-      id: 'security_solution_home',
-      link: securityLink(SecurityPageName.landing),
-      title: SOLUTION_NAME,
-      icon: 'logoSecurity',
-      renderAs: 'home',
-    },
-    {
-      link: 'discover',
-      icon: 'productDiscover',
-    },
-    defaultNavigationTree.dashboards(),
-    defaultNavigationTree.rules(),
-    services.uiSettings.get(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING, false)
-      ? defaultNavigationTree.alertDetections()
-      : {
-          id: SecurityPageName.alerts,
-          icon: 'warning',
-          link: securityLink(SecurityPageName.alerts),
-        },
-    {
-      link: 'workflows',
-    },
-    ...(chatExperience === AIChatExperience.Agent
-      ? [
-          {
-            icon: 'productAgent',
-            link: 'agent_builder' as AppDeepLinkId,
+): Promise<NavigationTreeDefinition> => {
+  const showAlertingV2 = Boolean(services.application.capabilities.alertingVTwo);
+  return {
+    body: [
+      {
+        id: 'security_solution_home',
+        link: securityLink(SecurityPageName.landing),
+        title: SOLUTION_NAME,
+        icon: 'logoSecurity',
+        renderAs: 'home',
+      },
+      {
+        link: 'discover',
+        icon: 'productDiscover',
+      },
+      defaultNavigationTree.dashboards(),
+      defaultNavigationTree.rules(),
+      services.uiSettings.get(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING, false)
+        ? defaultNavigationTree.alertDetections()
+        : {
+            id: SecurityPageName.alerts,
+            icon: 'warning',
+            link: securityLink(SecurityPageName.alerts),
           },
-        ]
-      : []),
-    {
-      id: SecurityPageName.attackDiscovery,
-      icon: 'bolt',
-      link: securityLink(SecurityPageName.attackDiscovery),
-    },
-    {
-      id: SecurityPageName.cloudSecurityPostureFindings,
-      icon: 'bullseye',
-      link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
-    },
-    defaultNavigationTree.cases(),
-    defaultNavigationTree.entityAnalytics(),
-    defaultNavigationTree.explore(),
-    defaultNavigationTree.investigations(),
-    {
-      id: SecurityPageName.threatIntelligence,
-      icon: 'processor',
-      link: securityLink(SecurityPageName.threatIntelligence),
-    },
-    {
-      id: SecurityPageName.assetInventory,
-      icon: 'listCheck',
-      link: securityLink(SecurityPageName.assetInventory),
-    },
-    defaultNavigationTree.assets(services),
-    defaultNavigationTree.ml(),
-  ],
-  footer: [
-    {
-      id: SecurityGroupName.launchpad,
-      title: i18nStrings.launchPad.title,
-      renderAs: 'panelOpener',
-      icon: 'rocket',
-      children: [
-        {
-          children: [
+      {
+        link: 'workflows',
+      },
+      ...(chatExperience === AIChatExperience.Agent
+        ? [
             {
-              id: SecurityPageName.landing,
-              link: securityLink(SecurityPageName.landing),
+              icon: 'productAgent',
+              link: 'agent_builder' as AppDeepLinkId,
             },
-            {
-              id: SecurityPageName.siemReadiness,
-              link: securityLink(SecurityPageName.siemReadiness),
-            },
-            {
-              // value report
-              id: SecurityPageName.aiValue,
-              link: securityLink(SecurityPageName.aiValue),
-            },
-          ],
-        },
-        {
-          title: i18nStrings.launchPad.migrations.title,
-          children: [
-            {
-              id: SecurityPageName.siemMigrationsRules,
-              link: securityLink(SecurityPageName.siemMigrationsRules),
-            },
-            {
-              id: SecurityPageName.siemMigrationsDashboards,
-              link: securityLink(SecurityPageName.siemMigrationsDashboards),
-            },
-          ],
-        },
-      ],
-    },
-    {
-      link: 'dev_tools',
-      title: i18nStrings.devTools,
-      icon: 'code',
-    },
-    createManagementFooterItemsTree(chatExperience),
-  ],
-});
+          ]
+        : []),
+      {
+        id: SecurityPageName.attackDiscovery,
+        icon: 'bolt',
+        link: securityLink(SecurityPageName.attackDiscovery),
+      },
+      {
+        id: SecurityPageName.cloudSecurityPostureFindings,
+        icon: 'bullseye',
+        link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
+      },
+      defaultNavigationTree.cases(),
+      defaultNavigationTree.entityAnalytics(),
+      defaultNavigationTree.explore(),
+      defaultNavigationTree.investigations(),
+      {
+        id: SecurityPageName.threatIntelligence,
+        icon: 'processor',
+        link: securityLink(SecurityPageName.threatIntelligence),
+      },
+      {
+        id: SecurityPageName.assetInventory,
+        icon: 'listCheck',
+        link: securityLink(SecurityPageName.assetInventory),
+      },
+      defaultNavigationTree.assets(services),
+      defaultNavigationTree.ml(),
+    ],
+    footer: [
+      {
+        id: SecurityGroupName.launchpad,
+        title: i18nStrings.launchPad.title,
+        renderAs: 'panelOpener',
+        icon: 'rocket',
+        children: [
+          {
+            children: [
+              {
+                id: SecurityPageName.landing,
+                link: securityLink(SecurityPageName.landing),
+              },
+              {
+                id: SecurityPageName.siemReadiness,
+                link: securityLink(SecurityPageName.siemReadiness),
+              },
+              {
+                // value report
+                id: SecurityPageName.aiValue,
+                link: securityLink(SecurityPageName.aiValue),
+              },
+            ],
+          },
+          {
+            title: i18nStrings.launchPad.migrations.title,
+            children: [
+              {
+                id: SecurityPageName.siemMigrationsManage,
+                link: securityLink(SecurityPageName.siemMigrationsManage),
+              },
+              {
+                id: SecurityPageName.siemMigrationsRules,
+                link: securityLink(SecurityPageName.siemMigrationsRules),
+              },
+              {
+                id: SecurityPageName.siemMigrationsDashboards,
+                link: securityLink(SecurityPageName.siemMigrationsDashboards),
+              },
+            ],
+          },
+        ],
+      },
+      {
+        link: 'dev_tools',
+        title: i18nStrings.devTools,
+        icon: 'code',
+      },
+      createManagementFooterItemsTree(chatExperience, showAlertingV2),
+    ],
+  };
+};

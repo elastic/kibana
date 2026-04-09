@@ -11,6 +11,7 @@ import { fireEvent, waitFor } from '@testing-library/react';
 import { createFleetTestRendererMock } from '../../../../../../../../mock';
 import type { TestRenderer } from '../../../../../../../../mock';
 import { useAgentless } from '../../../single_page_layout/hooks/setup_technology';
+import { DATA_STREAM_TYPE_VAR_NAME } from '../../../../../../../../../common/constants';
 
 import type {
   PackageInfo,
@@ -637,6 +638,63 @@ describe('PackagePolicyInputStreamConfig', () => {
         expect(
           Array.from(radioGroup.children).find((child) => child.textContent === 'Traces')
         ).toBeInTheDocument();
+      });
+    });
+
+    it('should show use_apm toggle when data_stream.type is traces for non-dynamic otelcol input', async () => {
+      const packageInfoNonDynamic: PackageInfo = {
+        ...mockPackageInfo,
+        type: 'input',
+        policy_templates: [
+          {
+            name: 'otel_template',
+            title: 'OTel Template',
+            description: 'OTel',
+            input: 'otelcol',
+            type: 'logs',
+            template_path: 'input.yml.hbs',
+            dynamic_signal_types: false,
+            vars: [],
+          },
+        ],
+      } as unknown as PackageInfo;
+
+      const tracesInputStream: NewPackagePolicyInputStream = {
+        ...mockOtelPolicyInputStream,
+        vars: {
+          [DATA_STREAM_TYPE_VAR_NAME]: { type: 'string', value: 'traces' },
+        },
+      };
+
+      render(mockOtelInputStream, tracesInputStream, packageInfoNonDynamic);
+
+      await waitFor(() => {
+        expect(renderResult.getByText('Enable Elastic APM Enrichment')).toBeInTheDocument();
+      });
+    });
+
+    it('should not show use_apm toggle when data_stream.type is not traces', async () => {
+      const packageInfoNonDynamic: PackageInfo = {
+        ...mockPackageInfo,
+        type: 'input',
+        policy_templates: [
+          {
+            name: 'otel_template',
+            title: 'OTel Template',
+            description: 'OTel',
+            input: 'otelcol',
+            type: 'logs',
+            template_path: 'input.yml.hbs',
+            dynamic_signal_types: false,
+            vars: [],
+          },
+        ],
+      } as unknown as PackageInfo;
+
+      render(mockOtelInputStream, mockOtelPolicyInputStream, packageInfoNonDynamic);
+
+      await waitFor(() => {
+        expect(renderResult.queryByText('Enable Elastic APM Enrichment')).not.toBeInTheDocument();
       });
     });
   });

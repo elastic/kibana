@@ -12,7 +12,7 @@ import { RecoveryDelayField } from './recovery_delay_field';
 import { AlertDelayField } from './alert_delay_field';
 import type { FormValues } from '../types';
 import { mapFormValuesToUpdateRequest } from '../utils/rule_request_mappers';
-import { createFormWrapper } from '../../test_utils';
+import { createFormWrapper, createMockServices } from '../../test_utils';
 
 let getFormValues: (() => FormValues) | undefined;
 
@@ -112,6 +112,14 @@ describe('RecoveryDelayField', () => {
   it('renders the mode toggle button group', () => {
     render(<RecoveryDelayField />, {
       wrapper: createFormWrapper({ kind: 'alert' }),
+    });
+
+    expect(screen.getByTestId('recoveryDelayMode')).toBeInTheDocument();
+  });
+
+  it('renders correctly in flyout layout', () => {
+    render(<RecoveryDelayField />, {
+      wrapper: createFormWrapper({ kind: 'alert' }, createMockServices(), { layout: 'flyout' }),
     });
 
     expect(screen.getByTestId('recoveryDelayMode')).toBeInTheDocument();

@@ -19,6 +19,9 @@ jest.mock('../../../../../hooks/use_onboarding_service', () => ({
 jest.mock('./agentless_available_callout');
 jest.mock('./active_integrations_callout');
 jest.mock('./endpoint_callout');
+jest.mock('./migrations_callout', () => ({
+  MigrationsCallout: () => null,
+}));
 
 describe('IntegrationCardTopCallout', () => {
   beforeEach(() => {

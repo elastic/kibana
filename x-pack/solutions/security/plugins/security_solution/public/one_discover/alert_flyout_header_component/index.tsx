@@ -6,10 +6,13 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
 import { Header } from '../../flyout_v2/document/header';
+import { NotesDetails } from '../../flyout_v2/notes';
+import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 
 export interface AlertFlyoutHeaderProps {
@@ -18,22 +21,48 @@ export interface AlertFlyoutHeaderProps {
    */
   hit: DataTableRecord;
   /**
-   * A promise that resolves to the services required to render the flyout header.
+   * The document record used to render the flyout header.
    */
   servicesPromise: Promise<StartServices>;
   /**
    * A promise that resolves to a Security Solution redux store for flyout rendering.
    */
   storePromise: Promise<SecurityAppStore>;
+  /**
+   * Callback invoked after alert mutations to refresh the Discover table.
+   */
+  onAlertUpdated: () => void;
 }
 
 export const AlertFlyoutHeader = ({
   hit,
   servicesPromise,
   storePromise,
+  onAlertUpdated,
 }: AlertFlyoutHeaderProps) => {
+  const history = useHistory();
   const [services, setServices] = useState<StartServices | null>(null);
   const [store, setStore] = useState<SecurityAppStore | null>(null);
+  const openNotesFlyout = useCallback(() => {
+    if (!services || !store) {
+      return;
+    }
+
+    services.overlays?.openSystemFlyout(
+      flyoutProviders({
+        services,
+        store,
+        history,
+        children: <NotesDetails hit={hit} />,
+      }),
+      {
+        ownFocus: false,
+        resizable: true,
+        size: 'm',
+        type: 'overlay',
+      }
+    );
+  }, [history, hit, services, store]);
 
   useEffect(() => {
     let isCanceled = false;
@@ -66,6 +95,13 @@ export const AlertFlyoutHeader = ({
   return flyoutProviders({
     services,
     store,
-    children: <Header hit={hit} />,
+    children: (
+      <Header
+        hit={hit}
+        renderCellActions={noopCellActionRenderer}
+        onAlertUpdated={onAlertUpdated}
+        onShowNotes={openNotesFlyout}
+      />
+    ),
   });
 };

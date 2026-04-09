@@ -428,6 +428,13 @@ export class NotificationPolicyClient {
       conditions.push(nodeBuilder.is(`${attrPrefix}.enabled`, params.enabled ? 'true' : 'false'));
     }
 
+    if (params.tags && params.tags.length > 0) {
+      const tagConditions = params.tags.map((tag) => nodeBuilder.is(`${attrPrefix}.tags`, tag));
+      conditions.push(
+        tagConditions.length === 1 ? tagConditions[0] : nodeBuilder.or(tagConditions)
+      );
+    }
+
     if (conditions.length === 0) {
       return undefined;
     }
@@ -449,6 +456,12 @@ export class NotificationPolicyClient {
     };
 
     return sortFieldMap[sortField];
+  }
+
+  public async getAllTags(params?: { search?: string }): Promise<string[]> {
+    return this.notificationPolicySavedObjectService.getDistinctTags({
+      search: params?.search,
+    });
   }
 
   public async deleteNotificationPolicy({ id }: { id: string }): Promise<void> {

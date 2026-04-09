@@ -40,6 +40,7 @@ const privMonLinks: LinkItem = {
   skipUrlState: false,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
   licenseType: 'platinum',
+  hideWhenExperimentalKey: 'entityAnalyticsEntityStoreV2',
 };
 
 const eaOverviewLinks: LinkItem = {

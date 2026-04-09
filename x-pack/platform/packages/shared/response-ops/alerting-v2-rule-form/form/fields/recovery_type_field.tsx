@@ -11,6 +11,7 @@ import { Controller, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import type { RecoveryPolicyType } from '@kbn/alerting-v2-schemas';
 import type { FormValues } from '../types';
+import { useRuleFormMeta } from '../contexts';
 
 const RECOVERY_TYPE_OPTIONS: Array<{ value: RecoveryPolicyType; text: string }> = [
   {
@@ -36,6 +37,7 @@ const RECOVERY_TYPE_OPTIONS: Array<{ value: RecoveryPolicyType; text: string }> 
  */
 export const RecoveryTypeField = () => {
   const { control } = useFormContext<FormValues>();
+  const { layout } = useRuleFormMeta();
 
   return (
     <Controller
@@ -56,6 +58,7 @@ export const RecoveryTypeField = () => {
             value={field.value}
             onChange={(e) => field.onChange(e.target.value)}
             fullWidth
+            compressed={layout === 'flyout'}
             data-test-subj="recoveryTypeSelect"
           />
         </EuiFormRow>

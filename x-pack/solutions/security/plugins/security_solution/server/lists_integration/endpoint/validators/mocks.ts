@@ -70,6 +70,10 @@ export class BaseValidatorMock extends BaseValidator {
     return this.validateCanCreateGlobalArtifacts(item);
   }
 
+  _validateCanImportGlobalArtifacts(item: ExceptionItemLikeOptions): Promise<void> {
+    return this.validateCanImportGlobalArtifacts(item);
+  }
+
   _validateCanUpdateItemInActiveSpace(
     updatedItem: Partial<Pick<ExceptionListItemSchema, 'tags'>>,
     currentSavedItem: ExceptionListItemSchema

@@ -12,6 +12,21 @@ import type { NotificationPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { I18nProvider } from '@kbn/i18n-react';
 import { NotificationPolicyFormFlyout } from './notification_policy_form_flyout';
 
+jest.mock('@kbn/core-di-browser', () => ({
+  useService: (token: unknown) => {
+    if (token === 'application') {
+      return {
+        getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
+      };
+    }
+    if (token === 'uiSettings') {
+      return { get: () => true };
+    }
+    return {};
+  },
+  CoreStart: (key: string) => key,
+}));
+
 jest.mock('../form/components/matcher_input', () => ({
   MatcherInput: (props: {
     value: string;
@@ -28,6 +43,10 @@ jest.mock('../form/components/matcher_input', () => ({
 
 jest.mock('../../../hooks/use_fetch_data_fields', () => ({
   useFetchDataFields: () => ({ data: undefined, isLoading: false }),
+}));
+
+jest.mock('../../../hooks/use_fetch_tags', () => ({
+  useFetchTags: () => ({ data: [], isLoading: false }),
 }));
 
 jest.mock('../../../hooks/use_fetch_workflows', () => ({
@@ -92,7 +111,7 @@ describe('NotificationPolicyFormFlyout', () => {
     renderFlyout({ onClose, onSave: jest.fn() });
 
     expect(screen.getByTestId(TEST_SUBJ.title)).toHaveTextContent('Create notification policy');
-    expect(screen.getByTestId(TEST_SUBJ.submitButton)).toHaveTextContent('Save');
+    expect(screen.getByTestId(TEST_SUBJ.submitButton)).toHaveTextContent('Create policy');
 
     await user.click(screen.getByTestId(TEST_SUBJ.cancelButton));
     expect(onClose).toHaveBeenCalledTimes(1);
@@ -139,6 +158,7 @@ describe('NotificationPolicyFormFlyout', () => {
       enabled: true,
       matcher: 'data.severity : "critical"',
       groupBy: ['host.name', 'service.name'],
+      tags: ['production'],
       groupingMode: 'per_field',
       throttle: { strategy: 'time_interval', interval: '5m' },
       snoozedUntil: null,
@@ -158,7 +178,7 @@ describe('NotificationPolicyFormFlyout', () => {
     renderFlyout({ onClose: jest.fn(), onUpdate, initialValues });
 
     expect(screen.getByTestId(TEST_SUBJ.title)).toHaveTextContent('Edit notification policy');
-    expect(screen.getByTestId(TEST_SUBJ.submitButton)).toHaveTextContent('Update');
+    expect(screen.getByTestId(TEST_SUBJ.submitButton)).toHaveTextContent('Update policy');
 
     await user.click(screen.getByTestId(TEST_SUBJ.nameInput));
     await user.tab();
@@ -175,6 +195,7 @@ describe('NotificationPolicyFormFlyout', () => {
       name: 'Critical production alerts',
       description: 'Routes critical alerts',
       groupingMode: 'per_field',
+      tags: ['production'],
       matcher: 'data.severity : "critical"',
       groupBy: ['host.name', 'service.name'],
       throttle: { strategy: 'time_interval', interval: '5m' },

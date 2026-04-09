@@ -86,7 +86,7 @@ test.describe('Discover app - saved search embeddable', { tag: tags.deploymentAg
     });
 
     await page.reload();
-    await page.waitForLoadingIndicatorHidden();
+    await page.testSubj.waitForSelector('dashboardContainer', { timeout: 20000 });
     await expect(
       page.testSubj.locator('embeddableError'),
       'Embeddable error should be displayed'

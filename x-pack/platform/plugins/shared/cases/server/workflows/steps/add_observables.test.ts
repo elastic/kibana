@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { OBSERVABLE_TYPE_IPV4 } from '../../../common/constants';
 import { createCaseResponseFixture } from '../../../common/fixtures/create_case';
 import type { CasesClient } from '../../client';
 import { addObservablesStepDefinition } from './add_observables';
@@ -25,7 +26,7 @@ describe('addObservablesStepDefinition', () => {
     await definition.handler(
       createContext({
         case_id: 'case-1',
-        observables: [{ typeKey: 'ip', value: '10.0.0.8' }],
+        observables: [{ typeKey: OBSERVABLE_TYPE_IPV4.key, value: '10.0.0.8' }],
       })
     );
 
@@ -33,7 +34,7 @@ describe('addObservablesStepDefinition', () => {
     expect(get).toHaveBeenCalledWith({ id: 'case-1', includeComments: false });
     expect(bulkAddObservables).toHaveBeenCalledWith({
       caseId: 'case-1',
-      observables: [{ typeKey: 'ip', value: '10.0.0.8', description: null }],
+      observables: [{ typeKey: OBSERVABLE_TYPE_IPV4.key, value: '10.0.0.8', description: null }],
     });
   });
 });

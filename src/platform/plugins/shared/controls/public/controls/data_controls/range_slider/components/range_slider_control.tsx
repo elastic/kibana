@@ -232,7 +232,7 @@ export const RangeSliderControl: FC<Props> = ({
                 >
                   <EuiToken
                     tabIndex={0}
-                    iconType="alert"
+                    iconType="warning"
                     size="s"
                     color="euiColorVis9"
                     shape="square"

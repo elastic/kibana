@@ -80,6 +80,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             .map((key) => `--xpack.${key}.enabled=false`),
           // Note: we fake a cloud deployment as the solution view is only available in cloud
           '--xpack.cloud.id=ftr_fake_cloud_id:aGVsbG8uY29tOjQ0MyRFUzEyM2FiYyRrYm4xMjNhYmM=',
+          '--xpack.cloud.is_ece=true',
           '--xpack.cloud.base_url=https://cloud.elastic.co',
           '--xpack.cloud.deployment_url=/deployments/deploymentId',
         ],

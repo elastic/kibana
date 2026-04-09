@@ -36,19 +36,33 @@ describe('SalesforceConnector', () => {
       expect(types).toContain('oauth_client_credentials');
     });
 
-    it('supports oauth_authorization_code with correct Salesforce defaults', () => {
+    it('supports oauth_authorization_code with correct Salesforce defaults and placeholders', () => {
       const oauthType = (
         SalesforceConnector.auth?.types as Array<
-          string | { type: string; defaults?: Record<string, unknown> }
+          | string
+          | {
+              type: string;
+              defaults?: Record<string, unknown>;
+              overrides?: Record<string, unknown>;
+            }
         >
       ).find((t) => typeof t === 'object' && t.type === 'oauth_authorization_code');
       expect(oauthType).toBeDefined();
       expect(oauthType).toMatchObject({
         type: 'oauth_authorization_code',
         defaults: {
-          authorizationUrl: 'https://login.salesforce.com/services/oauth2/authorize',
-          tokenUrl: 'https://login.salesforce.com/services/oauth2/token',
           scope: 'api refresh_token',
+        },
+        overrides: {
+          meta: {
+            authorizationUrl: {
+              placeholder: 'https://login.salesforce.com/services/oauth2/authorize',
+            },
+            tokenUrl: {
+              placeholder: 'https://login.salesforce.com/services/oauth2/token',
+            },
+            scope: { hidden: true },
+          },
         },
       });
     });

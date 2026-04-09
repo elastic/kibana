@@ -57,7 +57,6 @@ describe('create_case common step definition', () => {
         status: 'not-a-valid-status',
       },
     };
-
     expect(OutputSchema.safeParse(invalidOutput).success).toBe(false);
   });
 });

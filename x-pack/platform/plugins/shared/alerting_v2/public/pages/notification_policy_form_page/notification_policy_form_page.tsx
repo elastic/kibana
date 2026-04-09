@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPageHeader,
+  EuiPageTemplate,
   EuiSpacer,
 } from '@elastic/eui';
 import type {
@@ -160,7 +161,7 @@ const NotificationPolicyFormPageContent = ({
   const isLoading = isCreating || isUpdating;
 
   return (
-    <>
+    <EuiPageTemplate.Section paddingSize="none" restrictWidth={true}>
       <EuiFlexGroup justifyContent="flexStart">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
@@ -193,43 +194,44 @@ const NotificationPolicyFormPageContent = ({
         data-test-subj="pageTitle"
       />
       <EuiSpacer size="m" />
-      <div style={{ maxWidth: 750 }}>
-        <FormProvider {...methods}>
-          <NotificationPolicyForm />
-        </FormProvider>
-        <EuiSpacer size="l" />
-        <EuiFlexGroup justifyContent="flexStart" gutterSize="m">
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              onClick={handleSubmit}
-              isLoading={isLoading}
-              disabled={!isSubmitEnabled}
-              data-test-subj="submitButton"
-            >
-              {isEditMode ? (
-                <FormattedMessage
-                  id="xpack.alertingV2.notificationPolicy.formPage.update"
-                  defaultMessage="Update"
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.alertingV2.notificationPolicy.formPage.save"
-                  defaultMessage="Save"
-                />
-              )}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onCancel} isLoading={isLoading} data-test-subj="cancelButton">
+
+      <FormProvider {...methods}>
+        <NotificationPolicyForm />
+      </FormProvider>
+
+      <EuiSpacer size="l" />
+
+      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty onClick={onCancel} isLoading={isLoading} data-test-subj="cancelButton">
+            <FormattedMessage
+              id="xpack.alertingV2.notificationPolicy.formPage.cancel"
+              defaultMessage="Cancel"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            onClick={handleSubmit}
+            isLoading={isLoading}
+            disabled={!isSubmitEnabled}
+            data-test-subj="submitButton"
+          >
+            {isEditMode ? (
               <FormattedMessage
-                id="xpack.alertingV2.notificationPolicy.formPage.cancel"
-                defaultMessage="Cancel"
+                id="xpack.alertingV2.notificationPolicy.formPage.update"
+                defaultMessage="Update policy"
               />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
-    </>
+            ) : (
+              <FormattedMessage
+                id="xpack.alertingV2.notificationPolicy.formPage.save"
+                defaultMessage="Create policy"
+              />
+            )}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPageTemplate.Section>
   );
 };

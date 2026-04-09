@@ -14,6 +14,7 @@ import {
   createAppRootMockRenderer,
 } from '../../../../../../common/mock/endpoint';
 import { EndpointScriptsGenerator } from '../../../../../../../common/endpoint/data_generators/endpoint_scripts_generator';
+import { SCRIPT_LIBRARY_ALLOWED_FILE_TYPES } from '../../../../../../../common/endpoint/service/script_library/constants';
 
 describe('EndpointScriptEditForm', () => {
   let render: (props?: EndpointScriptEditFormProps) => ReturnType<AppContextTestRender['render']>;
@@ -62,7 +63,7 @@ describe('EndpointScriptEditForm', () => {
       'Path to executable file (only for archive files)',
       'Name',
       'Operating systems',
-      'Types',
+      'Categories',
       'Description',
       'Instructions',
       'Examples',
@@ -170,7 +171,33 @@ describe('EndpointScriptEditForm', () => {
         expect.objectContaining({
           script: expect.objectContaining({
             fileType: 'archive',
-            pathToExecutable: '',
+            pathToExecutable: ' ',
+          }),
+          hasFormChanged: true,
+          isValid: false,
+        })
+      );
+    });
+
+    it('should allow adding spaces in `Path to executable` field for archive file type and not trim the value on blur', async () => {
+      const { getByTestId } = renderResult;
+
+      const fileTypeSelect = getByTestId('test-file-type-select') as HTMLSelectElement;
+      fireEvent.change(fileTypeSelect, { target: { value: 'archive' } });
+
+      const pathToExecutableInput = getByTestId('test-path-to-executable-input');
+      await userEvent.type(pathToExecutableInput, '   /test/executable file.sh   ');
+      await userEvent.tab();
+
+      expect(pathToExecutableInput).not.toHaveAttribute('aria-invalid', 'true');
+      const pathToExecutableRow = getByTestId('test-path-to-executable-row');
+      const euiFormErrorText = pathToExecutableRow.querySelector('.euiFormErrorText');
+      expect(euiFormErrorText).not.toBeInTheDocument();
+      expect(onChangeMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          script: expect.objectContaining({
+            fileType: 'archive',
+            pathToExecutable: '   /test/executable file.sh   ',
           }),
           hasFormChanged: true,
           isValid: false,
@@ -221,7 +248,7 @@ describe('EndpointScriptEditForm', () => {
       expect(onChangeMock).not.toHaveBeenCalled();
     });
 
-    it.each(['script', 'archive'])(
+    it.each(SCRIPT_LIBRARY_ALLOWED_FILE_TYPES)(
       'should trigger form `isValid: true` when required fields are filled for a `%s` type file',
       async (testFileType) => {
         const { getByTestId, container } = renderResult;
@@ -287,7 +314,7 @@ describe('EndpointScriptEditForm', () => {
     });
 
     it.each([
-      ['tags', 'Types optional'],
+      ['tags', 'Categories optional'],
       ['description', 'Description optional'],
       ['instructions', 'Instructions optional'],
       ['example', 'Examples optional'],

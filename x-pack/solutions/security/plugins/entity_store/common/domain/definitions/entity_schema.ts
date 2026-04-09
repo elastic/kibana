@@ -38,10 +38,18 @@ const euidSeparatorSchema = z.object({
 });
 
 // Field evaluation: pre-evaluate a field before euid generation (first match wins; fallback to source value or fallbackValue).
-const fieldEvaluationWhenClauseSchema = z.object({
+const fieldEvaluationWhenClauseSourceMatchSchema = z.object({
   sourceMatchesAny: z.array(z.string()),
   then: z.string(),
 });
+const fieldEvaluationWhenClauseConditionSchema = z.object({
+  condition: streamlangConditionSchema,
+  then: z.string(),
+});
+const fieldEvaluationWhenClauseSchema = z.union([
+  fieldEvaluationWhenClauseSourceMatchSchema,
+  fieldEvaluationWhenClauseConditionSchema,
+]);
 
 const fieldEvaluationSourceSchema = z.union([
   z.object({ field: z.string() }),

@@ -13,7 +13,6 @@ import type { FormValues } from '../types';
 import { FieldGroup } from './field_group';
 import { RecoveryTypeField } from '../fields/recovery_type_field';
 import { RecoveryBaseQueryOnlyField } from '../fields/recovery_base_query_only_field';
-import { RecoveryBaseAndConditionField } from '../fields/recovery_base_and_condition_field';
 import { useRuleFormServices } from '../contexts';
 import { useRecoveryValidation } from '../hooks/use_recovery_validation';
 import { AlertDelayField } from '../fields/alert_delay_field';
@@ -26,9 +25,6 @@ import { RecoveryDelayField } from '../fields/recovery_delay_field';
  * - Alert delay (pending state transition: immediate / breaches / duration)
  * - A dropdown to select recovery type (no_breach vs. custom query)
  * - When `query` type is selected:
- *   - If an evaluation condition (WHERE clause) exists:
- *     uses RecoveryBaseAndConditionField (split mode with WHERE clause editor)
- *   - If no evaluation condition exists:
  *     uses RecoveryBaseQueryOnlyField (full ES|QL editor with "not same as eval" validation)
  * - Recovery delay (recovering state transition: immediate / breaches / duration)
  */
@@ -51,6 +47,7 @@ export const AlertConditionsFieldGroup = () => {
       title={i18n.translate('xpack.alertingV2.ruleForm.alertConditions', {
         defaultMessage: 'Alert conditions',
       })}
+      defaultOpen
     >
       <AlertDelayField />
       <EuiSpacer size="m" />
@@ -58,11 +55,7 @@ export const AlertConditionsFieldGroup = () => {
       {recoveryType === 'query' && (
         <>
           <EuiSpacer size="m" />
-          {recoveryValidation.hasEvaluationCondition ? (
-            <RecoveryBaseAndConditionField validation={recoveryValidation} />
-          ) : (
-            <RecoveryBaseQueryOnlyField validation={recoveryValidation} />
-          )}
+          <RecoveryBaseQueryOnlyField validation={recoveryValidation} />
         </>
       )}
       <EuiSpacer size="m" />

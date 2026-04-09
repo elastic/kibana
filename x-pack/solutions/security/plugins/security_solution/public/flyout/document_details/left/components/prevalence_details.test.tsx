@@ -51,6 +51,10 @@ jest.mock('../../../../common/lib/kibana', () => {
   return {
     useKibana: () => ({
       services: {
+        application: {
+          getUrlForApp: (_appId: string, { path }: { path: string }) =>
+            `/app/securitySolutionUI${path}`,
+        },
         telemetry: mockedTelemetry,
         storage: { get: mockStorage },
         uiSettings: {
@@ -59,6 +63,8 @@ jest.mock('../../../../common/lib/kibana', () => {
         serverless: mockServerless,
       },
     }),
+    useDateFormat: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
+    useTimeZone: () => 'UTC',
     useUiSetting: () => false,
   };
 });

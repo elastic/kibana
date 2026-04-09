@@ -54,6 +54,7 @@ export {
   InternalStateProvider,
   useInternalStateDispatch,
   useInternalStateGetState,
+  useInternalStateSubscribe,
   useInternalStateSelector,
   CurrentTabProvider,
   useCurrentTabSelector,

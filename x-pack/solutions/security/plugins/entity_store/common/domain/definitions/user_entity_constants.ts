@@ -7,7 +7,7 @@
 
 /**
  * Canonical `entity.namespace` value for non-IDP local user identity
- * (`userEntityDefinition` ranking branch, pre-agg overrides, streamlang conditions).
+ * (`userEntityDefinition` ranking branch, fieldEvaluations, streamlang conditions).
  */
 export const USER_ENTITY_NAMESPACE = {
   Local: 'local',
@@ -38,7 +38,7 @@ export const LOCAL_NAMESPACE_EXCLUDED_USER_NAMES = [
   'service',
 ] as const;
 
-/** Allowed values for `entity.confidence` (user pre-agg overrides and extracted metadata). */
+/** Allowed values for `entity.confidence` (user after-stats overrides and extracted metadata). */
 export const ENTITY_CONFIDENCE = {
   High: 'high',
   Medium: 'medium',

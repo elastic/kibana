@@ -25,7 +25,7 @@ import {
   ExecutionStatusFilter,
   useReadExecutionResults,
 } from '../../../../rule_monitoring';
-import { ExecutionDetailsFlyout } from './execution_details_flyout';
+import { ExecutionDetailsFlyout } from './flyout/execution_details_flyout';
 import { HeaderSection } from '../../../../../common/components/header_section';
 import {
   RUN_TYPE_FILTERS,
@@ -40,10 +40,6 @@ import type {
   UnifiedExecutionStatus,
 } from '../../../../../../common/api/detection_engine/rule_monitoring';
 
-const datePickerFlexItemCss = css`
-  max-width: 582px;
-`;
-
 const RULE_STATUS_TO_UNIFIED: Partial<Record<RuleExecutionStatus, UnifiedExecutionStatus>> = {
   succeeded: 'success',
   'partial failure': 'warning',
@@ -52,14 +48,14 @@ const RULE_STATUS_TO_UNIFIED: Partial<Record<RuleExecutionStatus, UnifiedExecuti
 
 interface ExecutionResultsTableProps {
   ruleId: string;
-  selectAlertsTab: () => void;
+  navigateToAlertsTab: () => void;
 }
 
 export const ExecutionResultsTable: React.FC<ExecutionResultsTableProps> = ({
   ruleId,
-  selectAlertsTab,
+  navigateToAlertsTab,
 }) => {
-  const onFilterByExecutionId = useFilterByExecutionId(selectAlertsTab);
+  const onFilterByExecutionId = useFilterByExecutionId(navigateToAlertsTab);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(5);
   const [selectedItem, setSelectedItem] = useState<UnifiedExecutionResult | null>(null);
@@ -166,15 +162,21 @@ export const ExecutionResultsTable: React.FC<ExecutionResultsTableProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem css={datePickerFlexItemCss}>
+        <EuiFlexItem grow={false}>
           <EuiSuperDatePicker
             start={start}
             end={end}
             onTimeChange={onTimeChangeCallback}
             onRefresh={onRefreshCallback}
             isLoading={isFetching}
-            width="full"
+            width="auto"
             data-test-subj="executionResultsDatePicker"
+            css={css`
+              .euiPopover {
+                /* Make sure time value buttons don't get cut off */
+                overflow: visible;
+              }
+            `}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

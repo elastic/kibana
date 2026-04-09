@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DescriptionField } from './description_field';
-import { createFormWrapper } from '../../test_utils';
+import { createFormWrapper, createMockServices } from '../../test_utils';
 
 describe('DescriptionField', () => {
   it('renders "Add description" button when no description value exists', () => {
@@ -71,6 +71,17 @@ describe('DescriptionField', () => {
     await user.type(textarea, 'My new description');
 
     expect(textarea).toHaveValue('My new description');
+  });
+
+  it('renders correctly in flyout layout', async () => {
+    const user = userEvent.setup();
+    render(<DescriptionField />, {
+      wrapper: createFormWrapper({}, createMockServices(), { layout: 'flyout' }),
+    });
+
+    await user.click(screen.getByTestId('addDescriptionButton'));
+
+    expect(screen.getByTestId('ruleDescriptionInput')).toBeInTheDocument();
   });
 
   it('keeps textarea visible after clearing the value', async () => {

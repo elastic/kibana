@@ -41,10 +41,10 @@ test.describe(
     }) => {
       // Mock the connectors endpoint to return no connectors, ensuring AI features
       // are disabled regardless of the environment (local, ECH, serverless)
-      await page.route('**/internal/streams/connectors', async (route) => {
+      await page.route('**/internal/search_inference_endpoints/connectors*', async (route) => {
         await route.fulfill({
           status: 200,
-          body: JSON.stringify({ connectors: [] }),
+          body: JSON.stringify({ connectors: [], allConnectors: [], soEntryFound: false }),
         });
       });
       await page.reload();

@@ -8,18 +8,24 @@
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { EuiButton } from '@elastic/eui';
+import type {
+  ScriptLibraryAllowedFileType,
+  ScriptTagKey,
+} from '../../../../../../common/endpoint/service/script_library/constants';
+import type { SupportedHostOsType } from '../../../../../../common/endpoint/constants';
+import { ManagementPageLoader } from '../../../../components/management_page_loader';
+import type { AugmentedListScriptsRequestQuery } from '../../../../hooks/script_library/use_get_scripts_list';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { getScriptsLibraryPath } from '../../../../common/url_routing';
 import type {
   EndpointScript,
   SortableScriptLibraryFields,
 } from '../../../../../../common/endpoint/types';
-import type { ListScriptsRequestQuery } from '../../../../../../common/api/endpoint';
 import { useKibana, useToasts } from '../../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { SCRIPT_LIBRARY_LABELS as pageLabels } from '../../translations';
 import { AdministrationListPage } from '../../../../components/administration_list_page';
-import { useGetEndpointScriptsList } from '../../../../hooks/script_library';
+import { useWithScriptLibraryData } from '../../../../hooks/script_library';
 import { ScriptLibraryTable, type ScriptLibraryTableProps } from './script_library_table';
 import { useUrlPagination } from '../../../../hooks/use_url_pagination';
 import type { ScriptLibraryUrlParams } from './script_library_url_params';
@@ -29,6 +35,7 @@ import { EndpointScriptDeleteModal } from './script_delete_modal';
 import { DiscardChangesModal } from './discard_changes_modal';
 import { NoDataEmptyPrompt } from './no_data_empty_prompt';
 import { NewPageBanner } from './new_page_banner/new_page_banner';
+import { ScriptLibraryFilters } from './data_filters';
 
 export const SCRIPT_LIBRARY_PAGE_STORAGE_KEY =
   'securitySolution.endpointManagement.scriptLibrary.showNewPageBanner';
@@ -49,7 +56,10 @@ export const ScriptLibrary = memo<ScriptLibraryProps>(({ 'data-test-subj': dataT
 
   const { pagination: paginationFromUrlParams } = useUrlPagination();
   const {
-    kuery: kueryFromUrl,
+    os: osFilterFromUrl,
+    fileType: fileTypeFilterFromUrl,
+    category: categoryFilterFromUrl,
+    searchTerms: searchTermsFromUrl,
     sortDirection: sortDirectionFromUrl,
     sortField: sortFieldFromUrl,
     setPagingAndSortingParams,
@@ -95,8 +105,11 @@ export const ScriptLibrary = memo<ScriptLibraryProps>(({ 'data-test-subj': dataT
     [paginationFromUrlParams.page, paginationFromUrlParams.pageSize]
   );
 
-  const [queryParams, setQueryParams] = useState<ListScriptsRequestQuery>({
-    kuery: kueryFromUrl,
+  const [queryParams, setQueryParams] = useState<AugmentedListScriptsRequestQuery>({
+    fileType: fileTypeFilterFromUrl ?? [],
+    os: osFilterFromUrl ?? [],
+    category: categoryFilterFromUrl ?? [],
+    searchTerms: searchTermsFromUrl ?? [],
     sortField: sortFieldFromUrl as SortableScriptLibraryFields,
     sortDirection: sortDirectionFromUrl,
     page: safePaging.page,
@@ -104,37 +117,37 @@ export const ScriptLibrary = memo<ScriptLibraryProps>(({ 'data-test-subj': dataT
   });
 
   const {
+    isPageInitializing,
+    doesDataExist,
     data: scriptsData,
     isFetching,
-    isFetched,
     error: scriptsLibraryFetchError,
     refetch: reFetchEndpointScriptsList,
-  } = useGetEndpointScriptsList(queryParams, {
+  } = useWithScriptLibraryData(queryParams, {
     enabled: canReadScriptsLibrary,
     retry: false,
   });
 
-  const doesDataExist = useMemo(
-    () => isFetched && scriptsData?.total !== undefined && scriptsData.total > 0,
-    [isFetched, scriptsData?.total]
-  );
-
   // update query state from URL params on page re-load or URL changes
   useEffect(() => {
-    setQueryParams({
-      kuery: kueryFromUrl,
+    setQueryParams((prevState) => ({
+      ...prevState,
+      os: osFilterFromUrl,
+      fileType: fileTypeFilterFromUrl,
+      category: categoryFilterFromUrl,
+      searchTerms: searchTermsFromUrl,
       sortField: sortFieldFromUrl as SortableScriptLibraryFields,
       sortDirection: sortDirectionFromUrl,
       page: safePaging.page,
       pageSize: safePaging.pageSize,
-    });
+    }));
+
     setSelectedItemForFlyout(
       selectedScriptId
         ? scriptsData?.data.find((script) => script.id === selectedScriptId)
         : undefined
     );
   }, [
-    kueryFromUrl,
     sortDirectionFromUrl,
     sortFieldFromUrl,
     safePaging.page,
@@ -142,10 +155,54 @@ export const ScriptLibrary = memo<ScriptLibraryProps>(({ 'data-test-subj': dataT
     scriptsData?.data,
     selectedScriptId,
     setSelectedItemForFlyout,
+    osFilterFromUrl,
+    fileTypeFilterFromUrl,
+    categoryFilterFromUrl,
+    searchTermsFromUrl,
   ]);
 
   const totalItemCount = useMemo(() => scriptsData?.total ?? 0, [scriptsData?.total]);
   const tableItems = useMemo(() => scriptsData?.data ?? [], [scriptsData?.data]);
+
+  const onChangePlatformFilter = useCallback(
+    (selectedPlatforms: string[]) => {
+      setQueryParams((prevState) => ({
+        ...prevState,
+        os: selectedPlatforms as SupportedHostOsType[],
+      }));
+    },
+    [setQueryParams]
+  );
+
+  const onChangeFileTypeFilter = useCallback(
+    (selectedFileTypes: string[]) => {
+      setQueryParams((prevState) => ({
+        ...prevState,
+        fileType: selectedFileTypes as ScriptLibraryAllowedFileType[],
+      }));
+    },
+    [setQueryParams]
+  );
+
+  const onChangeTagsFilter = useCallback(
+    (selectedCategory: string[]) => {
+      setQueryParams((prevState) => ({
+        ...prevState,
+        category: selectedCategory as ScriptTagKey[],
+      }));
+    },
+    [setQueryParams]
+  );
+
+  const onChangeSearchTermsFilter = useCallback(
+    (searchTerms: string[]) => {
+      setQueryParams((prevState) => ({
+        ...prevState,
+        searchTerms,
+      }));
+    },
+    [setQueryParams]
+  );
 
   const onChangeScriptsTable = useCallback<ScriptLibraryTableProps['onChange']>(
     ({ page, sort }) => {
@@ -239,6 +296,10 @@ export const ScriptLibrary = memo<ScriptLibraryProps>(({ 'data-test-subj': dataT
     }
   }, [scriptsLibraryFetchError, toasts, isFetching]);
 
+  if (isPageInitializing) {
+    return <ManagementPageLoader data-test-subj={getTestId('pageLoader')} />;
+  }
+
   return (
     <>
       {showNewPageBanner && (
@@ -300,19 +361,29 @@ export const ScriptLibrary = memo<ScriptLibraryProps>(({ 'data-test-subj': dataT
         )}
 
         {doesDataExist ? (
-          <ScriptLibraryTable
-            data-test-subj={getTestId('table')}
-            items={tableItems}
-            isLoading={isFetching}
-            onChange={onChangeScriptsTable}
-            onClickAction={onClickAction}
-            queryParams={queryParams}
-            totalItemCount={totalItemCount}
-            sort={{
-              field: scriptsData?.sortField as SortableScriptLibraryFields,
-              direction: scriptsData?.sortDirection,
-            }}
-          />
+          <>
+            <ScriptLibraryFilters
+              {...{
+                onChangePlatformFilter,
+                onChangeFileTypeFilter,
+                onChangeTagsFilter,
+                onChangeSearchTermsFilter,
+              }}
+            />
+            <ScriptLibraryTable
+              data-test-subj={getTestId('table')}
+              items={tableItems}
+              isLoading={isFetching}
+              onChange={onChangeScriptsTable}
+              onClickAction={onClickAction}
+              queryParams={queryParams}
+              totalItemCount={totalItemCount}
+              sort={{
+                field: scriptsData?.sortField as SortableScriptLibraryFields,
+                direction: scriptsData?.sortDirection,
+              }}
+            />
+          </>
         ) : (
           <NoDataEmptyPrompt
             onClick={() => onClickAction({ show: 'create' })}

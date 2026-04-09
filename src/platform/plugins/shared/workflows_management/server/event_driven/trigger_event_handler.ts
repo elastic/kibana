@@ -8,6 +8,7 @@
  */
 
 import pLimit from 'p-limit';
+import { v4 as generateUuid } from 'uuid';
 import type { Logger } from '@kbn/core/server';
 import type { WorkflowDetailDto, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
@@ -36,10 +37,12 @@ async function writeTriggerEvents(
   logEventsEnabled: boolean,
   params: {
     timestamp: string;
+    eventId: string;
     triggerId: string;
     spaceId: string;
     subscriptions: string[];
     payload: Record<string, unknown>;
+    sourceExecutionId?: string;
   },
   logger: Logger
 ): Promise<void> {
@@ -61,6 +64,7 @@ interface ScheduleEventParams {
   payload: Record<string, unknown>;
   timestamp: string;
   spaceId: string;
+  eventId: string;
   eventChainContext?: EventChainContext;
   triggerId: string;
 }
@@ -72,7 +76,7 @@ function getEventContextForScheduledWorkflow(
   logger: Logger
 ): Record<string, unknown> | null {
   const { payload, timestamp, spaceId, eventChainContext, triggerId } = eventParams;
-  const newDepth = (eventChainContext?.depth ?? -1) + 1;
+  const newDepth = (eventChainContext?.depth ?? 0) + 1;
   if (newDepth > maxEventChainDepth) {
     logger.warn(
       `Event chain depth (${newDepth}) exceeds max (${maxEventChainDepth}); skipping workflow ${workflow.id} (trigger: ${triggerId}, space: ${spaceId}) to prevent unbounded chains.`
@@ -124,6 +128,7 @@ async function scheduleMatchingWorkflows(
           {
             eventDispatchTimestamp: eventParams.timestamp,
             eventTriggerId: eventParams.triggerId,
+            eventId: eventParams.eventId,
           }
         );
         return 'success';
@@ -211,8 +216,14 @@ export function createTriggerEventHandler({
     }
 
     const { timestamp, triggerId, payload, request, spaceId, eventChainContext } = params;
+    const eventId = generateUuid();
 
-    const eventContextForResolution = { ...payload, timestamp, spaceId, eventChainDepth: 0 };
+    const eventContextForResolution = {
+      ...payload,
+      timestamp,
+      spaceId,
+      eventChainDepth: 1,
+    };
     const resolutionStartMs = Date.now();
     const { workflows, stats: resolutionStats } = await resolveMatchingWorkflowSubscriptions({
       triggerId,
@@ -230,7 +241,18 @@ export function createTriggerEventHandler({
     await writeTriggerEvents(
       getTriggerEventsClient(),
       logEventsEnabled,
-      { timestamp, triggerId, spaceId, subscriptions, payload },
+      {
+        timestamp,
+        eventId,
+        triggerId,
+        spaceId,
+        subscriptions,
+        payload,
+        ...(eventChainContext?.sourceExecutionId !== undefined &&
+        eventChainContext.sourceExecutionId !== ''
+          ? { sourceExecutionId: eventChainContext.sourceExecutionId }
+          : {}),
+      },
       logger
     );
 
@@ -241,7 +263,7 @@ export function createTriggerEventHandler({
         api,
         workflows,
         spaceId,
-        { payload, timestamp, spaceId, eventChainContext, triggerId },
+        { payload, timestamp, spaceId, eventId, eventChainContext, triggerId },
         maxEventChainDepth,
         request,
         logger
@@ -255,6 +277,11 @@ export function createTriggerEventHandler({
     reportDispatchedEvent({
       ...baseTelemetry,
       eventChainDepth: eventChainContext?.depth ?? 0,
+      eventId,
+      ...(eventChainContext?.sourceExecutionId !== undefined &&
+      eventChainContext.sourceExecutionId !== ''
+        ? { sourceExecutionId: eventChainContext.sourceExecutionId }
+        : {}),
       auditOnly: !executionEnabled && logEventsEnabled,
       subscriberResolutionMs,
       ...resolutionStats,

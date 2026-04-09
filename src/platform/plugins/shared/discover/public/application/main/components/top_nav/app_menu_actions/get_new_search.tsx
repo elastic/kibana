@@ -20,11 +20,11 @@ export const getNewSearchAppMenuItem = ({
 }): DiscoverAppMenuItemType => {
   return {
     id: AppMenuActionId.new,
-    order: 1,
+    order: 4,
     label: i18n.translate('discover.localMenu.localMenu.newDiscoverSessionTitle', {
       defaultMessage: 'New',
     }),
-    iconType: 'plusCircle',
+    iconType: 'plus',
     testId: 'discoverNewButton',
     href: newSearchUrl,
     run: () => {

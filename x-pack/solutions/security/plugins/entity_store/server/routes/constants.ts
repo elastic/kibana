@@ -13,6 +13,10 @@ export const DEFAULT_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
   requiredPrivileges: ['securitySolution'],
 };
 
+export const RESOLUTION_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
+  requiredPrivileges: ['securitySolution', 'securitySolution-entity-analytics'],
+};
+
 export type LogExtractionInstallParams = z.infer<typeof LogExtractionInstallParams>;
 // timeout: intentionally excluded from LogExtractionBodyParams
 // TODO: add timeout once we have a way to set it as a task override param

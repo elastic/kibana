@@ -6,19 +6,13 @@
  */
 
 import React, { useCallback, useRef, useMemo, useState } from 'react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FormValues } from './types';
 import { EditModeToggle, type EditMode } from './components/edit_mode_toggle';
+import { SubmissionButtons } from './components/submission_buttons';
 import {
   RuleFormProvider,
   useRuleFormServices,
@@ -29,11 +23,9 @@ import {
 import { YamlRuleForm } from './yaml_rule_form';
 import { GuiRuleForm } from './gui_rule_form';
 import { RulePreviewPanel } from './fields/rule_preview_panel';
-import { NameField } from './fields/name_field';
 import { ErrorCallOut } from './error_callout';
 import { useCreateRule } from './hooks/use_create_rule';
 import { useUpdateRule } from './hooks/use_update_rule';
-import { RULE_FORM_ID } from './constants';
 
 export type { RuleFormServices } from './contexts';
 
@@ -63,59 +55,6 @@ export interface RuleFormProps {
   /** When provided, the form operates in edit mode and uses PATCH instead of POST on submission. */
   ruleId?: string;
 }
-
-interface SubmissionButtonsProps {
-  isSubmitting: boolean;
-  onCancel?: () => void;
-  submitLabel?: React.ReactNode;
-  cancelLabel?: React.ReactNode;
-}
-
-const SubmissionButtons = ({
-  isSubmitting,
-  onCancel,
-  submitLabel,
-  cancelLabel,
-}: SubmissionButtonsProps) => {
-  const defaultSubmitLabel = (
-    <FormattedMessage id="xpack.alertingV2.ruleForm.submitLabel" defaultMessage="Save" />
-  );
-
-  const defaultCancelLabel = (
-    <FormattedMessage id="xpack.alertingV2.ruleForm.cancelLabel" defaultMessage="Cancel" />
-  );
-
-  return (
-    <>
-      <EuiHorizontalRule />
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        {onCancel && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={onCancel}
-              isDisabled={isSubmitting}
-              data-test-subj="ruleV2FormCancelButton"
-            >
-              {cancelLabel ?? defaultCancelLabel}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        )}
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            type="submit"
-            form={RULE_FORM_ID}
-            isLoading={isSubmitting}
-            fill
-            iconType="plusInCircle"
-            data-test-subj="ruleV2FormSubmitButton"
-          >
-            {submitLabel ?? defaultSubmitLabel}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
-  );
-};
 
 /**
  * Inner content component that renders the appropriate form based on edit mode.
@@ -195,28 +134,30 @@ const RuleFormContent = ({
   const formContent = (
     <>
       <ErrorCallOut />
-      {isYamlMode ? (
-        includeYaml && (
-          <EditModeToggle
-            editMode={editMode}
-            onChange={handleModeChange}
-            disabled={isDisabled || isSubmitting}
-          />
-        )
-      ) : (
-        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-          <EuiFlexItem>
-            <NameField />
+      {includeYaml && (
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="spaceBetween"
+          responsive={false}
+          gutterSize="m"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h3>
+                <FormattedMessage
+                  id="xpack.alertingV2.ruleForm.ruleConfigurationHeading"
+                  defaultMessage="Rule configuration"
+                />
+              </h3>
+            </EuiTitle>
           </EuiFlexItem>
-          {includeYaml && (
-            <EuiFlexItem grow={false}>
-              <EditModeToggle
-                editMode={editMode}
-                onChange={handleModeChange}
-                disabled={isDisabled || isSubmitting}
-              />
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <EditModeToggle
+              editMode={editMode}
+              onChange={handleModeChange}
+              disabled={isDisabled || isSubmitting}
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       )}
       <EuiSpacer size="m" />
@@ -238,6 +179,7 @@ const RuleFormContent = ({
           onCancel={onCancel}
           submitLabel={submitLabel}
           cancelLabel={cancelLabel}
+          ruleId={ruleId}
         />
       )}
     </>

@@ -202,10 +202,12 @@ export const getDefaultAwsCredentialConfig = ({
       value: credentialsType,
       type: 'text',
     },
-    'aws.supports_cloud_connectors': {
-      value: showCloudConnectors,
-      type: 'bool',
-    },
+    ...(findVariableDef(packageInfo, 'aws.supports_cloud_connectors') && {
+      'aws.supports_cloud_connectors': {
+        value: showCloudConnectors,
+        type: 'bool' as const,
+      },
+    }),
   };
 
   return config;
@@ -244,10 +246,12 @@ export const getDefaultGcpCredentialConfig = (
       value: credentialType,
       type: 'text',
     },
-    'gcp.supports_cloud_connectors': {
-      value: showCloudConnectors,
-      type: 'bool',
-    },
+    ...(findVariableDef(packageInfo, 'gcp.supports_cloud_connectors') && {
+      'gcp.supports_cloud_connectors': {
+        value: showCloudConnectors,
+        type: 'bool' as const,
+      },
+    }),
   };
 
   return config;
@@ -502,10 +506,12 @@ export const getDefaultAzureCredentialsConfig = (
       value: credentialType,
       type: 'text',
     },
-    'azure.supports_cloud_connectors': {
-      value: showCloudConnectors,
-      type: 'bool',
-    },
+    ...(findVariableDef(packageInfo, 'azure.supports_cloud_connectors') && {
+      'azure.supports_cloud_connectors': {
+        value: showCloudConnectors,
+        type: 'bool' as const,
+      },
+    }),
   };
 
   return config;
@@ -564,6 +570,7 @@ export const getCloudCredentialVarsConfig = ({
   optionId,
   showCloudConnectors,
   provider,
+  packageInfo,
 }: GetAwsCredentialTypeConfigParams): Record<string, PackagePolicyConfigRecordEntry> => {
   const supportsCloudConnector =
     setupTechnology === SetupTechnology.AGENTLESS &&
@@ -571,12 +578,15 @@ export const getCloudCredentialVarsConfig = ({
     showCloudConnectors;
 
   const credentialType = `${provider}.credentials.type`;
-  const supportCloudConnectors = `${provider}.supports_cloud_connectors`;
+  const supportCloudConnectorsKey = `${provider}.supports_cloud_connectors`;
+  const varExistsInPackage = packageInfo
+    ? !!findVariableDef(packageInfo, supportCloudConnectorsKey)
+    : true;
 
-  if (showCloudConnectors) {
+  if (showCloudConnectors && varExistsInPackage) {
     return {
       [credentialType]: { value: optionId },
-      [supportCloudConnectors]: { value: supportsCloudConnector },
+      [supportCloudConnectorsKey]: { value: supportsCloudConnector },
     };
   }
 

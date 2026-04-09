@@ -8,6 +8,7 @@
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFlyout } from '@elastic/eui';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
+import type { ScriptLibraryAllowedFileType } from '../../../../../../../common/endpoint/service/script_library/constants';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { useSetUrlParams } from '../../../../../components/artifact_list_page/hooks/use_set_url_params';
 import type { ListScriptsRequestQuery } from '../../../../../../../common/api/endpoint';
@@ -128,7 +129,7 @@ export const EndpointScriptFlyout = memo<EndpointScriptFlyoutProps>(
     const submitScriptItem = useMemo(
       () => ({
         ...formState.scriptItem,
-        fileType: formState.scriptItem.fileType as 'archive' | 'script',
+        fileType: formState.scriptItem.fileType as ScriptLibraryAllowedFileType,
         pathToExecutable:
           formState.scriptItem.fileType === 'archive'
             ? (formState.scriptItem.pathToExecutable as string)

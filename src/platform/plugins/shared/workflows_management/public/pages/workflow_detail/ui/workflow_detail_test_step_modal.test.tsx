@@ -9,8 +9,10 @@
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowDetailTestStepModal } from './workflow_detail_test_step_modal';
-import { createUseKibanaMockValue } from '../../../mocks';
+import { initialLoadingState } from '../../../entities/workflows/store/workflow_detail/utils/loading_states';
+import { mockWorkflowsManagementCapabilities } from '../../../hooks/__mocks__/use_workflows_capabilities';
 import { TestWrapper } from '../../../shared/test_utils';
 
 // --- Mocks ---
@@ -30,8 +32,16 @@ jest.mock('react-redux', () => {
 
 jest.mock('../../../hooks/use_kibana');
 
-const mockKibanaValue = createUseKibanaMockValue();
-const mockAddError = mockKibanaValue.services.notifications.toasts.addError as jest.Mock;
+const mockAddError = jest.fn();
+const mockKibanaValue = {
+  services: {
+    notifications: {
+      toasts: {
+        addError: mockAddError,
+      },
+    },
+  },
+};
 
 jest.mock('../../../hooks/use_space_id', () => ({
   useSpaceId: () => 'default',
@@ -84,20 +94,31 @@ jest.mock('../../../features/run_workflow/ui/step_execute_modal', () => ({
   ),
 }));
 
+jest.mock('@kbn/workflows-ui', () => ({
+  ...jest.requireActual('@kbn/workflows-ui'),
+  useWorkflowsCapabilities: jest.fn(),
+}));
+
+const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
+  typeof useWorkflowsCapabilities
+>;
+
 // Selector state for useSelector mock
 let mockSelectorState: Record<string, unknown> = {};
 
-const buildMockState = (overrides: Record<string, unknown> = {}) => ({
+const buildMockState = (detailOverrides: Record<string, unknown> = {}) => ({
   detail: {
+    yamlString: 'name: Test\nsteps:\n  - name: step1\n    type: noop',
+    isYamlSynced: true,
     workflow: { id: 'wf-1', name: 'Test Workflow' },
     testStepModalOpenStepId: undefined,
     replay: undefined,
     execution: undefined,
-    yamlString: 'name: Test\nsteps:\n  - name: step1\n    type: noop',
-    computed: {
-      workflowGraph: null,
-    },
-    ...overrides,
+    computed: { workflowGraph: null },
+    loading: initialLoadingState,
+    hasYamlSchemaValidationErrors: false,
+    activeTab: 'workflow',
+    ...detailOverrides,
   },
 });
 
@@ -105,7 +126,8 @@ describe('WorkflowDetailTestStepModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // Re-configure auto-mock after clearAllMocks
+    mockUseWorkflowsCapabilities.mockReturnValue(mockWorkflowsManagementCapabilities);
+
     const { useKibana } = jest.requireMock('../../../hooks/use_kibana') as {
       useKibana: jest.Mock;
     };
@@ -215,6 +237,25 @@ describe('WorkflowDetailTestStepModal', () => {
         })
       );
     });
+  });
+
+  it('does not render when executeWorkflow is not granted', () => {
+    mockUseWorkflowsCapabilities.mockReturnValue({
+      ...mockWorkflowsManagementCapabilities,
+      canExecuteWorkflow: false,
+    });
+
+    mockSelectorState = buildMockState({
+      testStepModalOpenStepId: 'step1',
+    });
+
+    const { queryByTestId } = render(
+      <TestWrapper>
+        <WorkflowDetailTestStepModal />
+      </TestWrapper>
+    );
+
+    expect(queryByTestId('step-execute-modal')).not.toBeInTheDocument();
   });
 
   it('should use error.message as fallback when body.message is not available', async () => {

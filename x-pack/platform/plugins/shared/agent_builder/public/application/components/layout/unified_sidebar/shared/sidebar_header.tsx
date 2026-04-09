@@ -19,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
 import { useAgentBuilderAgents } from '../../../../hooks/agents/use_agents';
+import { useNavigation } from '../../../../hooks/use_navigation';
 import { appPaths } from '../../../../utils/app_paths';
 import { AgentAvatar } from '../../../common/agent_avatar';
 import { AgentSelector } from './agent_selector';
@@ -32,6 +33,9 @@ const labels = {
   }),
   toggleSidebar: i18n.translate('xpack.agentBuilder.sidebar.header.toggleSidebar', {
     defaultMessage: 'Toggle sidebar',
+  }),
+  newConversation: i18n.translate('xpack.agentBuilder.sidebar.header.newConversation', {
+    defaultMessage: 'New conversation',
   }),
 };
 
@@ -52,6 +56,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const navigate = useNavigate();
+  const { navigateToAgentBuilderUrl } = useNavigation();
   const { agents } = useAgentBuilderAgents();
   const currentAgent = agents.find((a) => a.id === agentId);
 
@@ -88,9 +93,24 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
           />
         </EuiFlexItem>
         {currentAgent && sidebarView === 'conversation' && (
-          <EuiFlexItem grow={false}>
-            <AgentAvatar agent={currentAgent} size="m" color="subdued" shape="circle" />
-          </EuiFlexItem>
+          <>
+            <EuiFlexItem grow={false}>
+              <AgentAvatar agent={currentAgent} size="m" color="subdued" shape="circle" />
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType="plus"
+                display="base"
+                color="text"
+                size="s"
+                aria-label={labels.newConversation}
+                onClick={() =>
+                  navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }))
+                }
+              />
+            </EuiFlexItem>
+          </>
         )}
       </EuiFlexGroup>
     );

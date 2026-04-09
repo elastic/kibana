@@ -11,7 +11,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema, staticColorSchema } from '../color';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import {
   collapseBySchema,
   dslOnlyPanelInfoSchema,
@@ -31,6 +31,7 @@ import {
   validateColoringAssignments,
   valueDisplaySchema,
 } from './partition_shared';
+import { objectUnion } from './utils/object_union';
 import { groupIsNotCollapsed } from '../../utils';
 
 /**
@@ -127,7 +128,7 @@ export const pieStateSchemaNoESQL = schema.object(
     type: pieTypeSchema,
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetSchema,
+    ...dataSourceSchema,
     ...dslOnlyPanelInfoSchema,
     ...pieStateSharedSchema,
     ...dslOnlyPanelInfoSchema,
@@ -170,7 +171,7 @@ export const pieStateSchemaESQL = schema.object(
     type: pieTypeSchema,
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
+    ...dataSourceEsqlTableSchema,
     ...pieStateSharedSchema,
     metrics: schema.arrayOf(
       esqlColumnWithFormatSchema.extends(partitionStatePrimaryMetricOptionsSchema, {
@@ -203,7 +204,7 @@ export const pieStateSchemaESQL = schema.object(
 /**
  * Complete pie chart configuration supporting both standard and ES|QL queries
  */
-export const pieStateSchema = schema.oneOf([pieStateSchemaNoESQL, pieStateSchemaESQL], {
+export const pieStateSchema = objectUnion([pieStateSchemaNoESQL, pieStateSchemaESQL], {
   meta: {
     id: 'pieChart',
     title: 'Pie Chart',

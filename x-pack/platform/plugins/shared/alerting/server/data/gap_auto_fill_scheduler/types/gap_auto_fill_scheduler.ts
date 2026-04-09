@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { GapReasonType } from '../../../../common/constants/gap_reason';
+
 export interface GapAutoFillSchedulerSO {
   id: string;
   name: string;
@@ -16,6 +18,7 @@ export interface GapAutoFillSchedulerSO {
   scope: string[];
   ruleTypes: Array<{ type: string; consumer: string }>;
   ruleTypeConsumerPairs: string[];
+  excludedReasons?: GapReasonType[];
   createdBy?: string | null;
   updatedBy?: string | null;
   createdAt: string;

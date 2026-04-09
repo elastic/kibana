@@ -17,8 +17,8 @@ import { getMissingPrivileges } from '../utils/get_missing_privileges';
 export function registerInstall(router: EntityStorePluginRouter) {
   router.versioned
     .post({
-      path: ENTITY_STORE_ROUTES.INSTALL,
-      access: 'internal',
+      path: ENTITY_STORE_ROUTES.public.INSTALL,
+      access: 'public',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -26,7 +26,7 @@ export function registerInstall(router: EntityStorePluginRouter) {
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v2,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(BodySchema),

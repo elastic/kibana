@@ -1,0 +1,583 @@
+{
+  "id": "@kbn/search-agent",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/search-agent",
+        "id": "def-common.agents",
+        "type": "Array",
+        "tags": [],
+        "label": "agents",
+        "description": [],
+        "signature": [
+          "{ id: string; name: string; description: string; labels: string[]; avatar_icon: string; configuration: { instructions: string; }; }[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-agent/src/agents/index.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-agent",
+        "id": "def-common.skills",
+        "type": "Array",
+        "tags": [],
+        "label": "skills",
+        "description": [],
+        "signature": [
+          "{ id: string; name: string; description: string; content: string; }[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-agent/src/skills/index.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/search-agent",
+        "id": "def-common.catalogEcommerceSkill",
+        "type": "Object",
+        "tags": [],
+        "label": "catalogEcommerceSkill",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-search-agent/src/skills/catalog_ecommerce.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-agent",
+            "id": "def-common.catalogEcommerceSkill.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-agent/src/skills/catalog_ecommerce.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-agent",
+            "id": "def-common.catalogEcommerceSkill.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-agent/src/skills/catalog_ecommerce.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-agent",
+            "id": "def-common.catalogEcommerceSkill.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-agent/src/skills/catalog_ecommerce.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-agent",
+            "id": "def-common.catalogEcommerceSkill.content",
+            "type": "string",
+            "tags": [],
+            "label": "content",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-agent/src/skills/catalog_ecommerce.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-agent",
+        "id": "def-common.elasticsearchOnboardingAgent",
+        "type": "Object",
+        "tags": [],
+        "label": "elasticsearchOnboardingAgent",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-search-agent/src/agents/elasticsearch_onboarding.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-agent",
+            "id": "def-common.elasticsearchOnboardingAgent.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-agent/src/agents/elasticsearch_onboarding.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-agent",
+            "id": "def-common.elasticsearchOnboardingAgent.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-agent/src/agents/elasticsearch_onboarding.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-agent",
+            "id": "def-common.elasticsearchOnboardingAgent.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-agent/src/agents/elasticsearch_onboarding.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-agent",
+            "id": "def-common.elasticsearchOnboardingAgent.labels",
+            "type": "Array",
+            "tags": [],
+            "label": "labels",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-agent/src/agents/elasticsearch_onboarding.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-agent",
+            "id": "def-common.elasticsearchOnboardingAgent.avatar_icon",
+            "type": "string",
+            "tags": [],
+            "label": "avatar_icon",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-agent/src/agents/elasticsearch_onboarding.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-agent",
+            "id": "def-common.elasticsearchOnboardingAgent.configuration",
+            "type": "Object",
+            "tags": [],
+            "label": "configuration",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-agent/src/agents/elasticsearch_onboarding.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/search-agent",
+                "id": "def-common.elasticsearchOnboardingAgent.configuration.instructions",
+                "type": "string",
+                "tags": [],
+                "label": "instructions",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-search-agent/src/agents/elasticsearch_onboarding.ts",
+                "lineNumber": 20,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-agent",
+        "id": "def-common.hybridSearchSkill",
+        "type": "Object",
+        "tags": [],
+        "label": "hybridSearchSkill",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-search-agent/src/skills/hybrid_search.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-agent",
+            "id": "def-common.hybridSearchSkill.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-agent/src/skills/hybrid_search.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-agent",
+            "id": "def-common.hybridSearchSkill.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-agent/src/skills/hybrid_search.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-agent",
+            "id": "def-common.hybridSearchSkill.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-agent/src/skills/hybrid_search.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-agent",
+            "id": "def-common.hybridSearchSkill.content",
+            "type": "string",
+            "tags": [],
+            "label": "content",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-agent/src/skills/hybrid_search.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-agent",
+        "id": "def-common.keywordSearchSkill",
+        "type": "Object",
+        "tags": [],
+        "label": "keywordSearchSkill",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-search-agent/src/skills/keyword_search.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-agent",
+            "id": "def-common.keywordSearchSkill.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-agent/src/skills/keyword_search.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-agent",
+            "id": "def-common.keywordSearchSkill.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-agent/src/skills/keyword_search.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-agent",
+            "id": "def-common.keywordSearchSkill.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-agent/src/skills/keyword_search.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-agent",
+            "id": "def-common.keywordSearchSkill.content",
+            "type": "string",
+            "tags": [],
+            "label": "content",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-agent/src/skills/keyword_search.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-agent",
+        "id": "def-common.ragChatbotSkill",
+        "type": "Object",
+        "tags": [],
+        "label": "ragChatbotSkill",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-search-agent/src/skills/rag_chatbot.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-agent",
+            "id": "def-common.ragChatbotSkill.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-agent/src/skills/rag_chatbot.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-agent",
+            "id": "def-common.ragChatbotSkill.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-agent/src/skills/rag_chatbot.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-agent",
+            "id": "def-common.ragChatbotSkill.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-agent/src/skills/rag_chatbot.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-agent",
+            "id": "def-common.ragChatbotSkill.content",
+            "type": "string",
+            "tags": [],
+            "label": "content",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-agent/src/skills/rag_chatbot.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-agent",
+        "id": "def-common.semanticSearchSkill",
+        "type": "Object",
+        "tags": [],
+        "label": "semanticSearchSkill",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-search-agent/src/skills/semantic_search.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-agent",
+            "id": "def-common.semanticSearchSkill.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-agent/src/skills/semantic_search.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-agent",
+            "id": "def-common.semanticSearchSkill.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-agent/src/skills/semantic_search.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-agent",
+            "id": "def-common.semanticSearchSkill.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-agent/src/skills/semantic_search.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-agent",
+            "id": "def-common.semanticSearchSkill.content",
+            "type": "string",
+            "tags": [],
+            "label": "content",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-agent/src/skills/semantic_search.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-agent",
+        "id": "def-common.vectorDatabaseSkill",
+        "type": "Object",
+        "tags": [],
+        "label": "vectorDatabaseSkill",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-search-agent/src/skills/vector_database.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-agent",
+            "id": "def-common.vectorDatabaseSkill.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-agent/src/skills/vector_database.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-agent",
+            "id": "def-common.vectorDatabaseSkill.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-agent/src/skills/vector_database.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-agent",
+            "id": "def-common.vectorDatabaseSkill.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-agent/src/skills/vector_database.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-agent",
+            "id": "def-common.vectorDatabaseSkill.content",
+            "type": "string",
+            "tags": [],
+            "label": "content",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-agent/src/skills/vector_database.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

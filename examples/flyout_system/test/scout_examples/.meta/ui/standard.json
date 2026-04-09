@@ -1,0 +1,31 @@
+{
+  "sha1": "67b0f178aca54362429ec918024e8e136f04fd3c",
+  "tests": [
+    {
+      "id": "41a78a77f1ad1c5-f17c8832d70b41f",
+      "title": "Flyout System - EuiFlyout component Session J: open main flyout, open child flyout A, both remain visible",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/flyout_with_component.spec.ts",
+        "line": 19,
+        "column": 7
+      }
+    },
+    {
+      "id": "41a78a77f1ad1c5-b201acb79cc68d7",
+      "title": "Flyout System - EuiFlyout component Back button: navigate from Session X overlay back to Session J push flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/flyout_with_component.spec.ts",
+        "line": 40,
+        "column": 7
+      }
+    }
+  ]
+}

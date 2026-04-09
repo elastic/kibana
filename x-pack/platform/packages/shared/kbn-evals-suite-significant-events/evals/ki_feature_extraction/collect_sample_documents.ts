@@ -17,47 +17,14 @@ import {
 
 const SAMPLE_DOCS_MAX = 50;
 
-const getAppNameFromFields = (fields: Record<string, unknown>): string | undefined => {
-  const app = fields['resource.attributes.app'];
-  if (Array.isArray(app)) {
-    return app[0];
-  }
-  return undefined;
-};
-
-const extractRequiredAppsFromCriteria = (scenario: KIFeatureExtractionScenario): string[] => {
-  const apps = new Set<string>();
-
-  for (const criteria of scenario.output.criteria) {
-    if (typeof criteria === 'string') continue;
-
-    const id = (criteria as { id?: unknown }).id;
-    if (typeof id !== 'string') continue;
-
-    if (id.startsWith('entity-')) {
-      apps.add(id.slice('entity-'.length));
-      continue;
-    }
-
-    if (id.startsWith('dep-')) {
-      const parts = id.slice('dep-'.length).split('-').filter(Boolean);
-      for (const part of parts) apps.add(part);
-    }
-  }
-
-  return [...apps].filter(Boolean);
-};
-
 const addUniqueHitsToSample = ({
   hits,
   docs,
   seen,
-  uniqueApps,
 }: {
   hits: Array<SearchHit<Record<string, unknown>>>;
   docs: Array<SearchHit<Record<string, unknown>>>;
   seen: Set<string>;
-  uniqueApps: Set<string>;
 }): void => {
   for (const hit of hits) {
     if (!hit._id || !hit.fields || isEmpty(hit.fields)) {
@@ -70,11 +37,6 @@ const addUniqueHitsToSample = ({
 
     seen.add(hit._id);
     docs.push(hit);
-
-    const app = getAppNameFromFields(hit.fields);
-    if (app) {
-      uniqueApps.add(app);
-    }
 
     if (docs.length >= SAMPLE_DOCS_MAX) {
       break;
@@ -94,28 +56,33 @@ export const collectSampleDocuments = async ({
   const query = scenario.input.log_query_filter ?? [{ match_all: {} }];
 
   const docs: Array<SearchHit<Record<string, unknown>>> = [];
-  const uniqueApps = new Set<string>();
   const seen = new Set<string>();
-  const requiredApps = extractRequiredAppsFromCriteria(scenario);
+  const criteriaWithFilters = scenario.output.criteria.filter(
+    (criterion) => (criterion.sampling_filters?.length ?? 0) > 0
+  );
 
-  const requiredAppResults = await Promise.all(
-    requiredApps.map((app) =>
-      getSampleDocuments({
-        esClient,
-        index: MANAGED_STREAM_SEARCH_PATTERN,
-        start: 0,
-        end: Date.now(),
-        filter: [...query, { term: { 'resource.attributes.app': app } }],
-        size: 1,
-      })
-    )
+  const samplingFilterResults = await Promise.all(
+    criteriaWithFilters.flatMap((criterion) => {
+      const { sampling_filters = [], ...details } = criterion;
+
+      return sampling_filters.map(async (filter) => {
+        const { hits } = await getSampleDocuments({
+          esClient,
+          index: MANAGED_STREAM_SEARCH_PATTERN,
+          start: 0,
+          end: Date.now(),
+          filter: [...query, filter],
+          size: 1,
+        });
+        return { hits, criterion: details, filter };
+      });
+    })
   );
 
   addUniqueHitsToSample({
-    hits: requiredAppResults.flatMap(({ hits }) => hits),
+    hits: samplingFilterResults.flatMap(({ hits }) => hits),
     docs,
     seen,
-    uniqueApps,
   });
 
   if (docs.length < SAMPLE_DOCS_MAX) {
@@ -128,23 +95,22 @@ export const collectSampleDocuments = async ({
       size: SAMPLE_DOCS_MAX - docs.length,
     });
 
-    addUniqueHitsToSample({ hits, docs, seen, uniqueApps });
+    addUniqueHitsToSample({ hits, docs, seen });
+  }
+
+  const samplingFiltersWithNoHits = samplingFilterResults.filter(({ hits }) => hits.length === 0);
+  if (samplingFiltersWithNoHits.length > 0) {
+    log.warning(
+      `${samplingFiltersWithNoHits.length} sampling filters returned no matching document:\n
+      ${samplingFiltersWithNoHits
+        .map(({ criterion, filter }) => JSON.stringify({ criterion, filter }, null, 2))
+        .join('\n')}`
+    );
+    return docs;
   }
 
   log.info(
-    `Collected ${docs.length} sample document(s) across ${uniqueApps.size} app(s): ${[
-      ...uniqueApps,
-    ].join(', ')}`
+    `Successfully collected ${docs.length} sample documents (${criteriaWithFilters.length} criteria with sampling filters)`
   );
-
-  const missingApps = requiredApps.filter((app) => !uniqueApps.has(app));
-  if (missingApps.length > 0) {
-    log.warning(
-      `Sample is missing required app(s) from criteria: ${missingApps.join(
-        ', '
-      )} (criteria may not be satisfiable from available logs)`
-    );
-  }
-
   return docs;
 };

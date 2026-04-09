@@ -24,6 +24,7 @@ import {
   gapStatus,
   MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_MS,
 } from '../../../../common/constants';
+import { gapReasonType } from '../../../../common/constants/gap_reason';
 import * as gapAutoFillSchedulerTask from './gap_auto_fill_scheduler_task';
 import { createGapAutoFillSchedulerEventLogger } from './gap_auto_fill_scheduler_event_log';
 import { rulesClientMock } from '../../../rules_client.mock';
@@ -115,6 +116,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
     maxBackfills: 100,
     numRetries: 3,
     ruleTypes: [{ type: 'test-rule-type', consumer: 'test-consumer' }],
+    excludedReasons: [gapReasonType.RULE_DISABLED],
     scheduledTaskId: 'test-task-id',
     createdAt: '2024-01-01T00:00:00.000Z',
     updatedAt: '2024-01-01T00:00:00.000Z',

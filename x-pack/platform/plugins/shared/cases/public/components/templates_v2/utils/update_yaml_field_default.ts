@@ -8,10 +8,12 @@
 import { parseDocument, isMap, isSeq, isScalar } from 'yaml';
 import { load as parseYaml } from 'js-yaml';
 
+export type FieldDefaultValue = string | number | string[];
+
 interface FieldDefinition {
   name: string;
   metadata?: {
-    default?: string | number;
+    default?: FieldDefaultValue;
   };
 }
 
@@ -26,7 +28,7 @@ interface ParsedDefinition {
 export const updateYamlFieldDefault = (
   yaml: string,
   fieldName: string,
-  newValue: string | number
+  newValue: FieldDefaultValue
 ): string => {
   if (!yaml || yaml.trim() === '') {
     return yaml;
@@ -71,6 +73,58 @@ export const updateYamlFieldDefault = (
           } else {
             // Update or add default in existing metadata
             metadataNode.set('default', newValue);
+          }
+          break;
+        }
+      }
+    }
+
+    return doc.toString();
+  } catch {
+    return yaml;
+  }
+};
+
+/**
+ * Removes `metadata.default` for a specific field in the YAML definition.
+ * Uses the `yaml` library's parseDocument to preserve comments and formatting.
+ */
+export const removeYamlFieldDefault = (yaml: string, fieldName: string): string => {
+  if (!yaml || yaml.trim() === '') {
+    return yaml;
+  }
+
+  try {
+    const parsed = parseYaml(yaml) as ParsedDefinition;
+    if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.fields)) {
+      return yaml;
+    }
+    const fieldExists = parsed.fields.some((field) => field.name === fieldName);
+    if (!fieldExists) {
+      return yaml;
+    }
+
+    const doc = parseDocument(yaml);
+    const root = doc.contents;
+
+    if (!isMap(root)) {
+      return yaml;
+    }
+
+    const fieldsNode = root.get('fields', true);
+    if (!isSeq(fieldsNode)) {
+      return yaml;
+    }
+
+    for (const item of fieldsNode.items) {
+      if (isMap(item)) {
+        const nameNode = item.get('name', true);
+        const name = isScalar(nameNode) ? String(nameNode.value) : null;
+
+        if (name === fieldName) {
+          const metadataNode = item.get('metadata', true);
+          if (isMap(metadataNode)) {
+            metadataNode.delete('default');
           }
           break;
         }

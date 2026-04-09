@@ -1,0 +1,91 @@
+{
+  "id": "queryActivity",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "queryActivity",
+      "id": "def-public.QueryActivityPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "QueryActivityPluginSetup",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/query_activity/public/types.ts",
+      "lineNumber": 20,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "queryActivity",
+      "id": "def-public.QueryActivityPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "QueryActivityPluginStart",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/query_activity/public/types.ts",
+      "lineNumber": 23,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "queryActivity",
+      "id": "def-server.QueryActivityServerSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "QueryActivityServerSetup",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/query_activity/server/types.ts",
+      "lineNumber": 15,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "queryActivity",
+      "id": "def-server.QueryActivityServerStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "QueryActivityServerStart",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/query_activity/server/types.ts",
+      "lineNumber": 18,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

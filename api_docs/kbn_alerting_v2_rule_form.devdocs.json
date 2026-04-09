@@ -5,6 +5,104 @@
     "functions": [
       {
         "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.deriveAlertDelayModeFromStateTransition",
+        "type": "Function",
+        "tags": [],
+        "label": "deriveAlertDelayModeFromStateTransition",
+        "description": [
+          "Derives alert-delay mode from persisted `state_transition` (same rules as `AlertDelayField`)."
+        ],
+        "signature": [
+          "(stateTransition?: ",
+          "StateTransition",
+          " | null | undefined) => ",
+          {
+            "pluginId": "@kbn/alerting-v2-rule-form",
+            "scope": "public",
+            "docId": "kibKbnAlertingV2RuleFormPluginApi",
+            "section": "def-public.StateTransitionDelayMode",
+            "text": "StateTransitionDelayMode"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
+        "lineNumber": 73,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.deriveAlertDelayModeFromStateTransition.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "stateTransition",
+            "description": [],
+            "signature": [
+              "StateTransition",
+              " | null | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.deriveRecoveryDelayModeFromStateTransition",
+        "type": "Function",
+        "tags": [],
+        "label": "deriveRecoveryDelayModeFromStateTransition",
+        "description": [
+          "Derives recovery-delay mode from persisted `state_transition` (same rules as `RecoveryDelayField`)."
+        ],
+        "signature": [
+          "(stateTransition?: ",
+          "StateTransition",
+          " | null | undefined) => ",
+          {
+            "pluginId": "@kbn/alerting-v2-rule-form",
+            "scope": "public",
+            "docId": "kibKbnAlertingV2RuleFormPluginApi",
+            "section": "def-public.StateTransitionDelayMode",
+            "text": "StateTransitionDelayMode"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
+        "lineNumber": 82,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.deriveRecoveryDelayModeFromStateTransition.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "stateTransition",
+            "description": [],
+            "signature": [
+              "StateTransition",
+              " | null | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
         "id": "def-public.DynamicRuleForm",
         "type": "Function",
         "tags": [],
@@ -257,10 +355,10 @@
             "section": "def-public.FormValues",
             "text": "FormValues"
           },
-          ") => { kind: any; metadata: { name: string; description?: string | undefined; owner?: string | undefined; labels?: string[] | undefined; }; time_field: string; schedule: { every: string; lookback?: string | undefined; }; evaluation: { query: { base: string; condition?: string | undefined; }; }; recovery_policy?: { type: any; query?: { base?: string | undefined; condition?: string | undefined; } | undefined; } | undefined; state_transition?: any; grouping?: { fields: string[]; } | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | undefined; artifacts?: { id: string; type: string; value: string; }[] | undefined; }"
+          ") => { kind: any; metadata: { name: string; description?: string | undefined; owner?: string | undefined; tags?: string[] | undefined; }; time_field: string; schedule: { every: string; lookback?: string | undefined; }; evaluation: { query: { base: string; }; }; recovery_policy?: { type: any; query?: { base?: string | undefined; } | undefined; } | undefined; state_transition?: any; grouping?: { fields: string[]; } | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | undefined; artifacts?: { id: string; type: string; value: string; }[] | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
-        "lineNumber": 205,
+        "lineNumber": 210,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -282,7 +380,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
-            "lineNumber": 205,
+            "lineNumber": 210,
             "columnNumber": 46,
             "deprecated": false,
             "trackAdoption": false,
@@ -320,7 +418,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
-        "lineNumber": 175,
+        "lineNumber": 189,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -342,7 +440,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
-            "lineNumber": 175,
+            "lineNumber": 189,
             "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
@@ -370,10 +468,10 @@
             "section": "def-public.FormValues",
             "text": "FormValues"
           },
-          ") => { metadata?: { name?: string | undefined; description?: string | undefined; owner?: string | undefined; labels?: string[] | undefined; } | undefined; time_field?: string | undefined; schedule?: any; evaluation?: { query?: { base?: string | undefined; condition?: string | undefined; } | undefined; } | undefined; recovery_policy?: any; state_transition?: any; grouping?: any; no_data?: any; artifacts?: any; enabled?: boolean | undefined; }"
+          ") => { metadata?: { name?: string | undefined; description?: string | undefined; owner?: string | undefined; tags?: string[] | undefined; } | undefined; time_field?: string | undefined; schedule?: any; evaluation?: { query?: { base?: string | undefined; } | undefined; } | undefined; recovery_policy?: any; state_transition?: any; grouping?: any; no_data?: any; artifacts?: any; enabled?: boolean | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
-        "lineNumber": 215,
+        "lineNumber": 220,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -395,7 +493,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
-            "lineNumber": 215,
+            "lineNumber": 220,
             "columnNumber": 46,
             "deprecated": false,
             "trackAdoption": false,
@@ -426,7 +524,7 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
-        "lineNumber": 238,
+        "lineNumber": 243,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -442,7 +540,7 @@
               "Record<any, any>"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
-            "lineNumber": 238,
+            "lineNumber": 243,
             "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false,
@@ -1079,7 +1177,7 @@
           "\nForm values for creating a new alerting rule.\nThis interface defines the contract for the rule creation form,\nindependent of the API schema to allow for controlled evolution."
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/types.ts",
-        "lineNumber": 61,
+        "lineNumber": 62,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1095,7 +1193,7 @@
               "any"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/types.ts",
-            "lineNumber": 67,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1111,7 +1209,7 @@
               "RuleMetadata"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/types.ts",
-            "lineNumber": 68,
+            "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1124,7 +1222,7 @@
             "label": "timeField",
             "description": [],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/types.ts",
-            "lineNumber": 69,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1140,7 +1238,7 @@
               "RuleSchedule"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/types.ts",
-            "lineNumber": 70,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1156,7 +1254,7 @@
               "RuleEvaluation"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/types.ts",
-            "lineNumber": 71,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1173,7 +1271,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/types.ts",
-            "lineNumber": 72,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1190,7 +1288,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/types.ts",
-            "lineNumber": 73,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1207,7 +1305,39 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/types.ts",
-            "lineNumber": 74,
+            "lineNumber": 75,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.FormValues.stateTransitionAlertDelayMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "stateTransitionAlertDelayMode",
+            "description": [],
+            "signature": [
+              "\"duration\" | \"immediate\" | \"breaches\""
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/types.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.FormValues.stateTransitionRecoveryDelayMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "stateTransitionRecoveryDelayMode",
+            "description": [],
+            "signature": [
+              "\"duration\" | \"immediate\" | \"breaches\""
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/types.ts",
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1224,7 +1354,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/types.ts",
-            "lineNumber": 75,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1488,7 +1618,7 @@
           "\nCommon rule request shape shared between create and update payloads.\nContains all fields except `kind` (only required for create)."
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
-        "lineNumber": 121,
+        "lineNumber": 135,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1501,10 +1631,10 @@
             "label": "metadata",
             "description": [],
             "signature": [
-              "{ name: string; description?: string | undefined; owner?: string | undefined; labels?: string[] | undefined; }"
+              "{ name: string; description?: string | undefined; owner?: string | undefined; tags?: string[] | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
-            "lineNumber": 126,
+            "lineNumber": 140,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1517,7 +1647,7 @@
             "label": "time_field",
             "description": [],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
-            "lineNumber": 127,
+            "lineNumber": 141,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1533,7 +1663,7 @@
               "{ every: string; lookback?: string | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
-            "lineNumber": 128,
+            "lineNumber": 142,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1546,10 +1676,10 @@
             "label": "evaluation",
             "description": [],
             "signature": [
-              "{ query: { base: string; condition?: string | undefined; }; }"
+              "{ query: { base: string; }; }"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
-            "lineNumber": 129,
+            "lineNumber": 143,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1565,7 +1695,7 @@
               "{ fields: string[]; } | undefined"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
-            "lineNumber": 130,
+            "lineNumber": 144,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1578,10 +1708,10 @@
             "label": "recovery_policy",
             "description": [],
             "signature": [
-              "{ type: any; query?: { base?: string | undefined; condition?: string | undefined; } | undefined; } | undefined"
+              "{ type: any; query?: { base?: string | undefined; } | undefined; } | undefined"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
-            "lineNumber": 131,
+            "lineNumber": 145,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1597,7 +1727,7 @@
               "{ pending_count?: number | undefined; pending_timeframe?: string | undefined; recovering_count?: number | undefined; recovering_timeframe?: string | undefined; } | undefined"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
-            "lineNumber": 132,
+            "lineNumber": 146,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1613,7 +1743,7 @@
               "RuleArtifactPayload | undefined"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
-            "lineNumber": 138,
+            "lineNumber": 152,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2035,6 +2165,20 @@
     "misc": [
       {
         "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.DEFAULT_RULE_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_RULE_NAME",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/constants.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
         "id": "def-public.RULE_FORM_ID",
         "type": "string",
         "tags": [],
@@ -2046,7 +2190,7 @@
           "\"ruleV2Form\""
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/constants.ts",
-        "lineNumber": 9,
+        "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2064,6 +2208,25 @@
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/contexts/rule_form_context.tsx",
         "lineNumber": 24,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.StateTransitionDelayMode",
+        "type": "Type",
+        "tags": [],
+        "label": "StateTransitionDelayMode",
+        "description": [
+          "Alert / recovery delay segment control (matches `AlertDelayField` / `RecoveryDelayField`)."
+        ],
+        "signature": [
+          "\"duration\" | \"immediate\" | \"breaches\""
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/types.ts",
+        "lineNumber": 11,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

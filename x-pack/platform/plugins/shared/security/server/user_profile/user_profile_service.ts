@@ -12,6 +12,7 @@ import type {
 import pLimit from 'p-limit';
 
 import type { IClusterClient, Logger } from '@kbn/core/server';
+import { extractApiKeyIdFromAuthzHeader } from '@kbn/core-security-server';
 import type {
   CheckUserProfilesPrivilegesResponse,
   UserProfileBulkGetParams,
@@ -288,8 +289,15 @@ export class UserProfileService {
     request: UserProfileGetCurrentParams['request']
   ): Promise<string | undefined> {
     try {
+      const id = extractApiKeyIdFromAuthzHeader(request.headers.authorization);
+      if (!id) {
+        this.logger.debug(`Failed to decode API key ID from Authorization header.`);
+        return undefined;
+      }
+
       const response = await clusterClient.asScoped(request).asCurrentUser.security.getApiKey({
         with_profile_uid: true,
+        id,
       });
 
       if (response.api_keys && response.api_keys.length > 0) {

@@ -5,31 +5,17 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core-http-server';
 import {
   ALERT_EPISODE_ACTION_TYPE,
   createTagAlertActionBodySchema,
 } from '@kbn/alerting-v2-schemas';
+import type { AlertActionsClient } from '../../lib/alert_actions_client';
+import { createAlertActionsClientMock } from '../../lib/alert_actions_client/alert_actions_client.mock';
 import { createAlertActionRouteForType } from './create_alert_action_route_for_type';
+import { createRouteDependencies } from '../test_utils';
 
 describe('createAlertActionRouteForType', () => {
-  const noContentResult = { noContent: true };
-  const customErrorResult = { customError: true };
-
-  const buildDeps = (body: Record<string, unknown>) => {
-    const request = {
-      params: { group_hash: 'group-1' },
-      body,
-    };
-    const response = {
-      noContent: jest.fn().mockReturnValue(noContentResult),
-      customError: jest.fn().mockReturnValue(customErrorResult),
-    };
-    const alertActionsClient = {
-      createAction: jest.fn(),
-    };
-    return { request, response, alertActionsClient };
-  };
-
   it('creates a route class with expected static metadata', () => {
     const suffix = '_tag';
     const RouteClass = createAlertActionRouteForType({
@@ -49,10 +35,15 @@ describe('createAlertActionRouteForType', () => {
       pathSuffix: '_tag',
       bodySchema: createTagAlertActionBodySchema,
     });
-    const { request, response, alertActionsClient } = buildDeps({ tags: ['p1'] });
-    const route = new RouteClass(request as any, response as any, alertActionsClient as any);
+    const { ctx } = createRouteDependencies();
+    const request = {
+      params: { group_hash: 'group-1' },
+      body: { tags: ['p1'] },
+    } as unknown as KibanaRequest;
+    const alertActionsClient = createAlertActionsClientMock();
+    const route = new RouteClass(ctx, request, alertActionsClient as unknown as AlertActionsClient);
 
-    const result = await route.handle();
+    await route.handle();
 
     expect(alertActionsClient.createAction).toHaveBeenCalledWith({
       groupHash: 'group-1',
@@ -61,7 +52,7 @@ describe('createAlertActionRouteForType', () => {
         tags: ['p1'],
       },
     });
-    expect(result).toBe(noContentResult);
+    expect(ctx.response.noContent).toHaveBeenCalled();
   });
 
   it('maps thrown error to customError response', async () => {
@@ -70,13 +61,17 @@ describe('createAlertActionRouteForType', () => {
       pathSuffix: '_tag',
       bodySchema: createTagAlertActionBodySchema,
     });
-    const { request, response, alertActionsClient } = buildDeps({ tags: ['p1'] });
+    const { ctx } = createRouteDependencies();
+    const request = {
+      params: { group_hash: 'group-1' },
+      body: { tags: ['p1'] },
+    } as unknown as KibanaRequest;
+    const alertActionsClient = createAlertActionsClientMock();
     alertActionsClient.createAction.mockRejectedValueOnce(new Error('boom'));
-    const route = new RouteClass(request as any, response as any, alertActionsClient as any);
+    const route = new RouteClass(ctx, request, alertActionsClient as unknown as AlertActionsClient);
 
-    const result = await route.handle();
+    await route.handle();
 
-    expect(response.customError).toHaveBeenCalledTimes(1);
-    expect(result).toBe(customErrorResult);
+    expect(ctx.response.customError).toHaveBeenCalledTimes(1);
   });
 });

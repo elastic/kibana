@@ -33,7 +33,7 @@ export interface ShowRelatedAlertsBySameSourceEventResult {
 export const useShowRelatedAlertsBySameSourceEvent = ({
   hit,
 }: ShowRelatedAlertsBySameSourceEventParams): ShowRelatedAlertsBySameSourceEventResult => {
-  const originalEventId = (getFieldValue(hit, ALERT_ANCESTORS_ID) as string) ?? hit.id;
+  const originalEventId = (getFieldValue(hit, ALERT_ANCESTORS_ID) as string) ?? hit.raw._id ?? '';
 
   return useMemo(
     () => ({

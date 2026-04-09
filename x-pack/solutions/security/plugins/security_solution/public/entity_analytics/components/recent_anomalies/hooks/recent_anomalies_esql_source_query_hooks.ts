@@ -7,11 +7,11 @@
 
 import type { EntityStoreEuid } from '@kbn/entity-store/public';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { getLatestEntitiesIndexName } from '@kbn/entity-store/common';
 import { ML_ANOMALIES_INDEX } from '../../../../../common/constants';
 import { useIntervalForHeatmap } from '../anomaly_heatmap_interval';
 import type { AnomalyBand } from '../anomaly_bands';
 import { getHiddenBandsFilters } from '../hidden_bands_filter';
-import { getLatestEntitiesIndexName } from '../../home/constants';
 
 export type ViewByMode = 'entity' | 'jobId';
 

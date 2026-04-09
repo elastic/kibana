@@ -16,6 +16,7 @@ import { DeleteRuleRoute } from '../routes/rules/delete_rule_route';
 import { BulkDeleteRulesRoute } from '../routes/rules/bulk_delete_rules_route';
 import { BulkEnableRulesRoute } from '../routes/rules/bulk_enable_rules_route';
 import { BulkDisableRulesRoute } from '../routes/rules/bulk_disable_rules_route';
+import { GetRuleTagsRoute } from '../routes/rules/get_rule_tags_route';
 import { BulkCreateAlertActionRoute } from '../routes/alert_actions/bulk_create_alert_action_route';
 import { CreateAckAlertActionRoute } from '../routes/alert_actions/create_ack_alert_action_route';
 import { CreateUnackAlertActionRoute } from '../routes/alert_actions/create_unack_alert_action_route';
@@ -37,6 +38,7 @@ import { UpdateNotificationPolicyApiKeyRoute } from '../routes/notification_poli
 import { DeleteNotificationPolicyRoute } from '../routes/notification_policies/delete_notification_policy_route';
 import { MatcherValueSuggestionsRoute } from '../routes/suggestions/matcher_value_suggestions_route';
 import { MatcherDataFieldsRoute } from '../routes/suggestions/matcher_data_fields_route';
+import { NotificationPolicyTagsRoute } from '../routes/suggestions/notification_policy_tags_route';
 
 export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(CreateRuleRoute);
@@ -48,6 +50,7 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(BulkDeleteRulesRoute);
   bind(Route).toConstantValue(BulkEnableRulesRoute);
   bind(Route).toConstantValue(BulkDisableRulesRoute);
+  bind(Route).toConstantValue(GetRuleTagsRoute);
   bind(Route).toConstantValue(CreateAckAlertActionRoute);
   bind(Route).toConstantValue(CreateUnackAlertActionRoute);
   bind(Route).toConstantValue(CreateTagAlertActionRoute);
@@ -69,4 +72,5 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(BulkActionNotificationPoliciesRoute);
   bind(Route).toConstantValue(MatcherValueSuggestionsRoute);
   bind(Route).toConstantValue(MatcherDataFieldsRoute);
+  bind(Route).toConstantValue(NotificationPolicyTagsRoute);
 }

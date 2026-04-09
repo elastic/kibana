@@ -6,7 +6,7 @@
  */
 
 import numeral from '@elastic/numeral';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
@@ -23,6 +23,7 @@ import type {
   SetEventsDeleted,
   SetEventsLoading,
 } from '../../../../../common/types';
+import type { TimelineItem } from '../../../../../common/search_strategy';
 import { BulkActions } from '.';
 import { useBulkActionItems } from './use_bulk_action_items';
 import type { AlertWorkflowStatus, Refetch } from '../../../types';
@@ -42,6 +43,7 @@ interface OwnProps {
   onActionFailure?: OnUpdateAlertStatusError;
   customBulkActions?: CustomBulkActionProp[];
   customRefetch?: Refetch;
+  data: TimelineItem[];
 }
 
 export type StatefulAlertBulkActionsProps = OwnProps & PropsFromRedux;
@@ -63,6 +65,7 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
     onActionFailure,
     customBulkActions,
     customRefetch,
+    data,
   }) => {
     const dispatch = useDispatch();
 
@@ -174,8 +177,13 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
       [dispatch, id]
     );
 
+    const eventIds = useMemo(() => Object.keys(selectedEventIds), [selectedEventIds]);
+
+    const closePopoverRef = useRef<() => void>(() => {});
+    const closePopover = useCallback(() => closePopoverRef.current(), []);
+
     const { items: bulkActionItems, panels: bulkActionsPanels } = useBulkActionItems({
-      eventIds: Object.keys(selectedEventIds),
+      eventIds,
       currentStatus: filterStatus,
       ...(showClearSelection ? { query } : {}),
       setEventsLoading,
@@ -184,6 +192,8 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
       onUpdateSuccess,
       onUpdateFailure,
       customBulkActions,
+      data,
+      closePopover,
     });
 
     return (
@@ -196,6 +206,7 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
         onClearSelection={onClearSelection}
         bulkActionItems={bulkActionItems}
         bulkActionPanels={bulkActionsPanels}
+        closePopoverRef={closePopoverRef}
       />
     );
   }

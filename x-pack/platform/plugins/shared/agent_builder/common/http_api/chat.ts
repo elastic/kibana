@@ -36,11 +36,11 @@ export interface ChatRequestBodyPayload {
 
 export type ChatResponse = Omit<
   ConversationRound,
-  'id' | 'input' | 'pending_prompt' | 'response' | 'state'
+  'id' | 'input' | 'pending_prompts' | 'response' | 'state'
 > & {
   conversation_id: string;
   round_id: string;
   response: Partial<AssistantResponse> & {
-    prompt?: PromptRequest;
+    prompts?: PromptRequest[];
   };
 };

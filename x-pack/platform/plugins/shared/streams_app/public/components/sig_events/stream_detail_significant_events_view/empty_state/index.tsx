@@ -20,9 +20,9 @@ import { i18n } from '@kbn/i18n';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 import React from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useModelSettingsUrl } from '../../../../hooks/use_model_settings_url';
 import noSigEventsImage from './no_sig_events.svg';
 
-const ML_MODEL_SETTINGS_PATH = '/ml/model_settings';
 const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
 
 export function EmptyState({
@@ -40,12 +40,10 @@ export function EmptyState({
 }) {
   const { core } = useKibana();
   const defaultConnector = core.uiSettings.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
+  const modelSettingsUrl = useModelSettingsUrl();
 
   const isDefaultAiConnectorMissing =
     !defaultConnector || defaultConnector === NO_DEFAULT_CONNECTOR;
-  const genAiSettingsUrl = core.application.getUrlForApp('management', {
-    path: ML_MODEL_SETTINGS_PATH,
-  });
 
   return (
     <EuiEmptyPrompt
@@ -53,7 +51,7 @@ export function EmptyState({
       title={
         <h2>
           {i18n.translate('xpack.streams.significantEvents.emptyState.title', {
-            defaultMessage: 'No Significant events yet',
+            defaultMessage: "This stream's knowledge indicators have not been extracted yet",
           })}
         </h2>
       }
@@ -71,7 +69,7 @@ export function EmptyState({
             <EuiText size="s" textAlign="center" color="subdued">
               {i18n.translate('xpack.streams.significantEvents.emptyState.description', {
                 defaultMessage:
-                  'Significant events runs on generated content which we use for context to create meaningful insights. Enable it for this stream.',
+                  'Generate knowledge indicators to teach the system about this stream. These indicators are the foundation for detecting significant events.',
               })}
             </EuiText>
           </EuiFlexItem>
@@ -85,9 +83,11 @@ export function EmptyState({
               >
                 <p>
                   {NO_DEFAULT_CONNECTOR_CALLOUT_DESCRIPTION}{' '}
-                  <EuiLink href={genAiSettingsUrl} external>
-                    {NO_DEFAULT_CONNECTOR_CALLOUT_LINK_LABEL}
-                  </EuiLink>
+                  {modelSettingsUrl && (
+                    <EuiLink href={modelSettingsUrl} external>
+                      {NO_DEFAULT_CONNECTOR_CALLOUT_LINK_LABEL}
+                    </EuiLink>
+                  )}
                 </p>
               </EuiCallOut>
             </EuiFlexItem>
@@ -105,7 +105,7 @@ export function EmptyState({
                 ) : null}
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    fill
+                    size="m"
                     color="primary"
                     isLoading={isGenerating}
                     isDisabled={isGenerateDisabled || isGenerating}
@@ -115,7 +115,7 @@ export function EmptyState({
                       ? isCanceling
                         ? CANCELING_BUTTON_LABEL
                         : GENERATING_BUTTON_LABEL
-                      : GENERATE_BUTTON_LABEL}
+                      : ONBOARD_STREAM_BUTTON_LABEL}
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -134,10 +134,10 @@ const NO_SIGNIFICANT_EVENTS_IMAGE_ALT = i18n.translate(
   }
 );
 
-const GENERATE_BUTTON_LABEL = i18n.translate(
-  'xpack.streams.significantEvents.emptyState.generateButtonLabel',
+const ONBOARD_STREAM_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.significantEvents.emptyState.onboardStreamButtonLabel',
   {
-    defaultMessage: 'Generate',
+    defaultMessage: 'Generate knowledge indicators',
   }
 );
 

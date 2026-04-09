@@ -24,7 +24,17 @@ import {
   getEuidEsqlEvaluation,
   getFieldEvaluationsEsql,
 } from '@kbn/entity-store/common/domain/euid';
-import { formatJsonProperty, buildEntityEnrichment, checkIfEntitiesIndexLookupMode } from './utils';
+import {
+  concatJsonObjectPropertyEsqlExprSafe,
+  buildEntityEnrichment,
+  checkIfEntitiesIndexLookupMode,
+  concatJsonObjectPropertyBool,
+  JSON_OBJECT_START,
+  JSON_OBJECT_END,
+  JSON_OBJECT_SEPARATOR,
+  concatJsonObjectPropertyEsqlExprAsString,
+  concatJsonObjectPropertyString,
+} from './utils';
 import { getTargetEuidEsqlEvaluation } from './target_euid';
 import { SECURITY_ALERTS_PARTIAL_IDENTIFIER } from '../../../common/constants';
 import type { EsQuery, OriginEventId, EventEdge } from './types';
@@ -341,7 +351,7 @@ const TYPED_ENTITY_PREFIXES = ['user', 'host', 'service'] as const;
  * For typed entities, values come from saved _sf_* variables (pre-LOOKUP JOIN).
  * For generic entities, the value is the EUID column itself (which IS the raw
  * entity.id value post MV_EXPAND).
- * Uses REPLACE to fix the "{," pattern that occurs when the first property is null.
+ * Uses REPLACE to fix null properties.
  */
 const buildSourceFieldsJson = (fields: readonly string[], euidColumn: string): string => {
   const properties = fields
@@ -351,10 +361,8 @@ const buildSourceFieldsJson = (fields: readonly string[], euidColumn: string): s
       if (typePrefix) {
         // Typed field: only include when EUID matches the entity type
         const column = ENTITY_FIELD_COLUMN_MAP[field] ?? `\`${field}\``;
-        return `CASE(STARTS_WITH(${euidColumn}, "${typePrefix}:"), ${formatJsonProperty(
-          field,
-          `TO_STRING(${column})`
-        )}, "")`;
+        return `CASE(STARTS_WITH(${euidColumn}, "${typePrefix}:"),
+          ${concatJsonObjectPropertyEsqlExprSafe(field, `TO_STRING(${column})`)}, "")`;
       }
 
       // Generic field: include when EUID doesn't match any typed prefix
@@ -362,13 +370,16 @@ const buildSourceFieldsJson = (fields: readonly string[], euidColumn: string): s
       const notTypedCondition = TYPED_ENTITY_PREFIXES.map(
         (p) => `NOT STARTS_WITH(${euidColumn}, "${p}:")`
       ).join(' AND ');
-      return `CASE(${notTypedCondition}, ${formatJsonProperty(
-        field,
-        `TO_STRING(${euidColumn})`
-      )}, "")`;
+      return `CASE(${notTypedCondition},
+        ${concatJsonObjectPropertyEsqlExprSafe(field, `TO_STRING(${euidColumn})`)}, "")`;
     })
-    .join(',\n      ');
-  return `REPLACE(CONCAT(",\\"sourceFields\\":{", ${properties}, "}"), "\\\\{,", "{")`;
+    .join(`, ${JSON_OBJECT_SEPARATOR},\n      `);
+  return `
+  REPLACE(
+    REPLACE(
+      REPLACE(CONCAT("\\"sourceFields\\":", ${JSON_OBJECT_START}, ${properties}, ${JSON_OBJECT_END}), "[,]+", ","),
+    "\\\\{,", ${JSON_OBJECT_START}),
+  ",}", ${JSON_OBJECT_END})`;
 };
 
 const buildActorSourceFieldsEsql = (): string =>
@@ -388,41 +399,56 @@ const buildEnrichedEntityFieldsEsql = (): string => {
 // Put required fields first (no comma prefix), optional fields use comma prefix
 | EVAL actorEntityField = CASE(
     actorEntityName IS NOT NULL OR actorEntityType IS NOT NULL OR actorEntitySubType IS NOT NULL,
-    CONCAT(",\\"entity\\":", "{",
-      "\\"availableInEntityStore\\":true",
-      ${formatJsonProperty('name', 'actorEntityName')},
-      ${formatJsonProperty('type', 'actorEntityType')},
-      ${formatJsonProperty('sub_type', 'actorEntitySubType')},
+    CONCAT("\\"entity\\":",
+    ${JSON_OBJECT_START},
+      ${concatJsonObjectPropertyBool('availableInEntityStore', true)},
+      CASE(actorEntityName IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsString('name', 'actorEntityName')}), ""),
+      CASE(actorEntityType IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsString('type', 'actorEntityType')}), ""),
+      CASE(actorEntitySubType IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsString('sub_type', 'actorEntitySubType')}), ""),
+      CASE(actorEntityEngineType IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsString('engine_type', 'actorEntityEngineType')}), ""),
       CASE(
         actorHostIp IS NOT NULL,
-        CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(actorHostIp), "\\"", "}"),
-        ""
-      ),
-      ${buildActorSourceFieldsEsql()},
-    "}"),
-    CONCAT(",\\"entity\\":", "{",
-      "\\"availableInEntityStore\\":false",
-      ${buildActorSourceFieldsEsql()},
-    "}")
+        CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":",
+        ${JSON_OBJECT_START},
+          "\\"ip\\":\\"", TO_STRING(actorHostIp), "\\"",
+        ${JSON_OBJECT_END}), ""),
+      ${JSON_OBJECT_SEPARATOR}, ${buildActorSourceFieldsEsql()},
+    ${JSON_OBJECT_END}),
+    CONCAT("\\"entity\\":", ${JSON_OBJECT_START},
+      ${concatJsonObjectPropertyBool('availableInEntityStore', false)},
+      ${JSON_OBJECT_SEPARATOR}, ${buildActorSourceFieldsEsql()},
+    ${JSON_OBJECT_END})
   )
 | EVAL targetEntityField = CASE(
     targetEntityName IS NOT NULL OR targetEntityType IS NOT NULL OR targetEntitySubType IS NOT NULL,
-    CONCAT(",\\"entity\\":", "{",
-      "\\"availableInEntityStore\\":true",
-      ${formatJsonProperty('name', 'targetEntityName')},
-      ${formatJsonProperty('type', 'targetEntityType')},
-      ${formatJsonProperty('sub_type', 'targetEntitySubType')},
+    CONCAT("\\"entity\\":",
+    ${JSON_OBJECT_START},
+      ${concatJsonObjectPropertyBool('availableInEntityStore', true)},
+      CASE(targetEntityName IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsString('name', 'targetEntityName')}), ""),
+      CASE(targetEntityType IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsString('type', 'targetEntityType')}), ""),
+      CASE(targetEntitySubType IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsString('sub_type', 'targetEntitySubType')}), ""),
+      CASE(targetEntityEngineType IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsString('engine_type', 'targetEntityEngineType')}), ""),
       CASE(
         targetHostIp IS NOT NULL,
-        CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(targetHostIp), "\\"", "}"),
-        ""
-      ),
-      ${buildTargetSourceFieldsEsql()},
-    "}"),
-    CONCAT(",\\"entity\\":", "{",
-      "\\"availableInEntityStore\\":false",
-      ${buildTargetSourceFieldsEsql()},
-    "}")
+        CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":",
+        ${JSON_OBJECT_START},
+          "\\"ip\\":\\"", TO_STRING(targetHostIp), "\\"",
+        ${JSON_OBJECT_END}), ""),
+      ${JSON_OBJECT_SEPARATOR}, ${buildTargetSourceFieldsEsql()},
+    ${JSON_OBJECT_END}),
+    CONCAT("\\"entity\\":",
+    ${JSON_OBJECT_START},
+      ${concatJsonObjectPropertyBool('availableInEntityStore', false)},
+      ${JSON_OBJECT_SEPARATOR}, ${buildTargetSourceFieldsEsql()},
+    ${JSON_OBJECT_END})
   )`;
 };
 
@@ -455,37 +481,41 @@ ${buildEntityEnrichment(isLookupIndexAvailable, spaceId)}
 ${buildEnrichedEntityFieldsEsql()}
 `
     : `
-| EVAL actorEntityField = CONCAT(",\\"entity\\":", "{",
-    "\\"availableInEntityStore\\":false",
-    ${buildActorSourceFieldsEsql()},
-  "}")
-| EVAL targetEntityField = CONCAT(",\\"entity\\":", "{",
-    "\\"availableInEntityStore\\":false",
-    ${buildTargetSourceFieldsEsql()},
-  "}")
+| EVAL actorEntityField = CONCAT("\\"entity\\":",
+  ${JSON_OBJECT_START},
+    ${concatJsonObjectPropertyBool('availableInEntityStore', false)},
+    ${JSON_OBJECT_SEPARATOR}, ${buildActorSourceFieldsEsql()},
+  ${JSON_OBJECT_END})
+| EVAL targetEntityField = CONCAT("\\"entity\\":",
+  ${JSON_OBJECT_START},
+    ${concatJsonObjectPropertyBool('availableInEntityStore', false)},
+    ${JSON_OBJECT_SEPARATOR}, ${buildTargetSourceFieldsEsql()},
+  ${JSON_OBJECT_END})
 // Fallback to null string with non-enriched entity metadata
 | EVAL actorEntityName = TO_STRING(null)
 | EVAL actorEntityType = TO_STRING(null)
 | EVAL actorEntitySubType = TO_STRING(null)
 | EVAL actorHostIp = TO_STRING(null)
+| EVAL actorEntityEngineType = TO_STRING(null)
 | EVAL targetEntityName = TO_STRING(null)
 | EVAL targetEntityType = TO_STRING(null)
 | EVAL targetEntitySubType = TO_STRING(null)
 | EVAL targetHostIp = TO_STRING(null)
+| EVAL targetEntityEngineType = TO_STRING(null)
 `
 }
 // Create actor and target data with entity data
 
-| EVAL actorDocData = CONCAT("{",
-    "\\"id\\":\\"", actorEntityId, "\\"",
-    ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
-    actorEntityField,
-  "}")
-| EVAL targetDocData = CONCAT("{",
-    "\\"id\\":\\"", COALESCE(targetEntityId, ""), "\\"",
-    ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
-    targetEntityField,
-  "}")
+| EVAL actorDocData = CONCAT(${JSON_OBJECT_START},
+    ${concatJsonObjectPropertyEsqlExprAsString('id', 'actorEntityId')},
+    ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', DOCUMENT_TYPE_ENTITY)},
+    ${JSON_OBJECT_SEPARATOR}, actorEntityField,
+  ${JSON_OBJECT_END})
+| EVAL targetDocData = CONCAT(${JSON_OBJECT_START},
+    ${concatJsonObjectPropertyEsqlExprAsString('id', 'COALESCE(targetEntityId, "")')},
+    ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', DOCUMENT_TYPE_ENTITY)},
+    ${JSON_OBJECT_SEPARATOR}, targetEntityField,
+  ${JSON_OBJECT_END})
 
 // Map host and source values to enriched contextual data
 | EVAL sourceIps = source.ip

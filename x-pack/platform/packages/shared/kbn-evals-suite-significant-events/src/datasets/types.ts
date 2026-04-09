@@ -7,13 +7,14 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { EvaluationCriterion } from '@kbn/evals';
+import type { EvaluationCriterionStructured } from '@kbn/evals/src/evaluators/criteria';
 import type { GcsConfig } from '../data_generators/replay';
 import type { ValidKIFeatureType } from '../evaluators/ki_feature_extraction/evaluators';
 
 interface ScenarioMetadata {
   difficulty: 'easy' | 'medium' | 'hard';
   failure_domain: string;
-  failure_mode: string;
+  failure_mode?: string;
 }
 
 export interface SnapshotSourceOverride {
@@ -39,13 +40,19 @@ export interface KIQueryGenerationScenario {
   snapshot_source?: SnapshotSourceOverride;
 }
 
+export interface SamplingCriterion extends EvaluationCriterionStructured {
+  // Query filters used to collect sample documents that match this criterion.
+  // Each filter is executed individually to collect exactly one sample document.
+  sampling_filters?: QueryDslQueryContainer[];
+}
+
 export interface KIFeatureExtractionScenario {
   input: {
     scenario_id: string;
     log_query_filter?: QueryDslQueryContainer[];
   };
   output: {
-    criteria: EvaluationCriterion[];
+    criteria: SamplingCriterion[];
     min_features?: number;
     max_features?: number;
     required_types?: ValidKIFeatureType[];

@@ -15,6 +15,7 @@ import { isArray } from 'lodash';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { useGoBack } from '../../../common/use_go_back';
+import { pagePathGetters } from '../../../common/page_paths';
 import type { LocationStateWithFromHistory } from '../../../common/use_go_back';
 import { LiveQuery } from '../../../live_queries';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
@@ -29,7 +30,7 @@ const NewLiveQueryPageComponent = () => {
   useBreadcrumbs(isHistoryEnabled ? 'new_query' : 'live_query_new');
   const { replace } = useHistory();
   const location = useLocation<LocationState>();
-  const backNavigationTarget = isHistoryEnabled ? 'history' : 'live_queries';
+  const backNavigationTarget = isHistoryEnabled ? pagePathGetters.history() : 'live_queries';
   const handleGoBack = useGoBack(backNavigationTarget);
   const backNavigationProps = useRouterNavigate(backNavigationTarget, handleGoBack);
   const [initialFormData, setInitialFormData] = useState<Record<string, unknown> | undefined>({});

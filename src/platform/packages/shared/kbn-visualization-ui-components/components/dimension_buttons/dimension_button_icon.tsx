@@ -60,7 +60,7 @@ const IconFromAccessorConfig = ({ accessorConfig }: { accessorConfig: AccessorCo
       )}
       {accessorConfig.triggerIconType === 'invisible' && (
         <EuiIcon
-          type="eyeClosed"
+          type="eyeSlash"
           color="subdued"
           aria-label={i18n.translate(
             'visualizationUiComponents.dimensionButtonIcon.invisibleIndicatorLabel',

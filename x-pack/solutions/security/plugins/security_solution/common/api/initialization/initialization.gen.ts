@@ -35,13 +35,23 @@ export const InitializationFlowErrorResult = z.object({
   error: z.string().nullable(),
 });
 
-/**
- * Generic ready result used as a placeholder for flows whose payload schema has not yet been defined.
- */
-export type InitializationFlowReadyResult = z.infer<typeof InitializationFlowReadyResult>;
-export const InitializationFlowReadyResult = z.object({
+export type DataViewPayload = z.infer<typeof DataViewPayload>;
+export const DataViewPayload = z.object({
+  id: z.string(),
+  title: z.string(),
+  patternList: z.array(z.string()),
+});
+
+export type SecurityDataViewsReadyResult = z.infer<typeof SecurityDataViewsReadyResult>;
+export const SecurityDataViewsReadyResult = z.object({
   status: z.literal('ready'),
-  payload: z.unknown(),
+  payload: z.object({
+    defaultDataView: DataViewPayload,
+    alertDataView: DataViewPayload,
+    attackDataView: DataViewPayload.optional(),
+    kibanaDataViews: z.array(DataViewPayload),
+    signalIndexName: z.string(),
+  }),
 });
 
 /**
@@ -53,7 +63,7 @@ export const InitializationFlowsResult = z.object({
     .union([CreateListIndicesReadyResult, InitializationFlowErrorResult])
     .optional(),
   'security-data-views': z
-    .union([InitializationFlowReadyResult, InitializationFlowErrorResult])
+    .union([SecurityDataViewsReadyResult, InitializationFlowErrorResult])
     .optional(),
 });
 

@@ -55,7 +55,7 @@ export const getGraph = async ({
     }] in [spaceId: ${spaceId}] [indexPatterns: ${indexPatterns.join(',')}]`
   );
 
-  const { events, relationships } = await fetchGraph({
+  const { events, relationships, entities } = await fetchGraph({
     esClient,
     logger,
     start,
@@ -69,5 +69,5 @@ export const getGraph = async ({
     entityIds,
   });
 
-  return parseRecords(logger, events, relationships, nodesLimit);
+  return parseRecords(logger, events, relationships, entities, nodesLimit);
 };

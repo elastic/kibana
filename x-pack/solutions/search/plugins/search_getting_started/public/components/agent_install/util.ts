@@ -5,41 +5,22 @@
  * 2.0.
  */
 
-import {
-  INSTALL_LINES_CURSOR,
-  INSTALL_LINES_CLI,
-  USE_CASE_MESSAGES,
-  type Environment,
-  type UseCaseId,
-} from './constants';
+import { INSTALL_LINES_CLI, type Environment, AGENT_ONBOARDING_MESSAGE } from './constants';
 
-export const buildPrompt = (useCaseId: UseCaseId, environment: Environment): string => {
-  const message = USE_CASE_MESSAGES[useCaseId];
-  const skillLine =
-    useCaseId === 'general-search' ? undefined : `Follow the /${useCaseId} skill for my use case.`;
-
+export const buildPrompt = (environment: Environment): string => {
   switch (environment) {
-    case 'cursor':
-      return joinLines(INSTALL_LINES_CURSOR, message, skillLine);
     case 'cli':
-      return joinLines(INSTALL_LINES_CLI, message, skillLine);
+      return joinLines(INSTALL_LINES_CLI, AGENT_ONBOARDING_MESSAGE);
     case 'agent-builder':
       // Agent builder already has the full instructions (except skills) registered server-side
       // via registerSearchAgent, so we only send the use-case message.
-      return message;
+      return AGENT_ONBOARDING_MESSAGE;
     default:
       throw new Error(`Unsupported environment: ${environment}`);
   }
 };
 
-const joinLines = (
-  installLines: readonly string[],
-  message: string,
-  skillLine: string | undefined
-): string => {
+const joinLines = (installLines: readonly string[], message: string): string => {
   const parts = [...installLines, message];
-  if (skillLine) {
-    parts.push(skillLine);
-  }
   return parts.join('\n');
 };

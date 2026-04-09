@@ -5,6 +5,62 @@
     "functions": [
       {
         "parentPluginId": "@kbn/core-http-browser",
+        "id": "def-public.buildPath",
+        "type": "Function",
+        "tags": [],
+        "label": "buildPath",
+        "description": [
+          "\nBuilds a URL path from a route template by URI-encoding path params.\n"
+        ],
+        "signature": [
+          "(path: string, params: HttpPathParams) => string"
+        ],
+        "path": "src/core/packages/http/browser/src/utils.ts",
+        "lineNumber": 55,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-browser",
+            "id": "def-public.buildPath.$1",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/core/packages/http/browser/src/utils.ts",
+            "lineNumber": 68,
+            "columnNumber": 27,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-http-browser",
+            "id": "def-public.buildPath.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "HttpPathParams"
+            ],
+            "path": "src/core/packages/http/browser/src/utils.ts",
+            "lineNumber": 68,
+            "columnNumber": 41,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-browser",
         "id": "def-public.isHttpFetchError",
         "type": "Function",
         "tags": [],

@@ -259,7 +259,7 @@ export function Assignments({
                     <EuiContextMenuItem
                       data-test-subj="lns-colorMapping-addAllAssignments"
                       key="item-1"
-                      icon="listAdd"
+                      icon="plusCircle"
                       size="s"
                       onClick={() => {
                         setShowOtherActions(false);

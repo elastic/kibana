@@ -17,7 +17,7 @@ import { WORKFLOWS_EVENTS_DATA_STREAM } from './constants';
 export const initializeTriggerEventsDataStream = (coreDataStreams: DataStreamsSetup): void => {
   coreDataStreams.registerDataStream({
     name: WORKFLOWS_EVENTS_DATA_STREAM,
-    version: 1,
+    version: 2,
     template: {
       mappings: triggerEventsMappings,
     },
@@ -28,18 +28,22 @@ const triggerEventsMappings = {
   dynamic: false,
   properties: {
     '@timestamp': mappings.date(),
+    eventId: mappings.keyword(),
     triggerId: mappings.keyword(),
     spaceId: mappings.keyword(),
     subscriptions: mappings.keyword(),
+    sourceExecutionId: mappings.keyword(),
     payload: mappings.object({ properties: {} }),
   },
 } satisfies MappingsDefinition;
 
 export interface TriggerEventDocument {
   '@timestamp': string;
+  eventId: string;
   triggerId: string;
   spaceId: string;
   subscriptions: string[];
+  sourceExecutionId?: string;
   payload: Record<string, unknown>;
 }
 

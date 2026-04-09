@@ -19,14 +19,17 @@ import {
   waitForPodsReady,
   deleteNamespace,
   getMinikubeIp,
+  getMinikubeHostGatewayIp,
 } from './util/assert_minikube_available';
 import { getFullOtelCollectorConfig } from './get_otel_collector_config';
+import { getEdotK8sCollectorConfig } from './get_edot_k8s_collector_config';
 import { writeFile } from './util/file_utils';
 import { readKibanaConfig } from './read_kibana_config';
 import { enableStreams } from './util/enable_streams';
 import { createDataView } from './util/create_data_view';
 import { resolveKibanaUrl } from './util/resolve_kibana_url';
 import { buildCustomImages } from './util/build_custom_images';
+import { resolveEdotCollectorVersion } from './util/resolve_edot_collector_version';
 import type { DemoType, FailureScenario } from './types';
 import {
   getDemoConfig,
@@ -102,6 +105,7 @@ export async function deployDemo({
   version,
   scenarioIds = [],
   forceRebuildImages = false,
+  useVanillaCollector = false,
 }: {
   log: ToolingLog;
   demoType?: DemoType;
@@ -110,6 +114,7 @@ export async function deployDemo({
   version?: string;
   scenarioIds?: string[];
   forceRebuildImages?: boolean;
+  useVanillaCollector?: boolean;
 }): Promise<DeployResult> {
   await assertKubectlAvailable();
   await assertMinikubeAvailable();
@@ -232,14 +237,49 @@ export async function deployDemo({
     log.write('');
   }
 
+  // Resolve collector image: EDOT by default, vanilla with --vanilla
+  let collectorImage: string;
+  if (useVanillaCollector) {
+    collectorImage = 'otel/opentelemetry-collector-contrib:0.115.1';
+  } else {
+    const edotVersion = await resolveEdotCollectorVersion(log);
+    collectorImage = `docker.elastic.co/elastic-agent/elastic-otel-collector:${edotVersion}`;
+  }
+  log.info(`Using collector: ${collectorImage}`);
+
   // Generate OTel Collector configuration
-  const collectorConfig = getFullOtelCollectorConfig({
-    elasticsearchEndpoint: elasticsearchHost,
-    username: kibanaCredentials.username,
-    password: kibanaCredentials.password,
-    logsIndex,
-    namespace: demoConfig.namespace,
-  });
+  const collectorConfig = useVanillaCollector
+    ? getFullOtelCollectorConfig({
+        elasticsearchEndpoint: elasticsearchHost,
+        username: kibanaCredentials.username,
+        password: kibanaCredentials.password,
+        logsIndex,
+        namespace: demoConfig.namespace,
+        demoId: demoConfig.id,
+      })
+    : getEdotK8sCollectorConfig({
+        elasticsearchEndpoint: elasticsearchHost,
+        username: kibanaCredentials.username,
+        password: kibanaCredentials.password,
+        namespace: demoConfig.namespace,
+        demoId: demoConfig.id,
+        logsIndex,
+      });
+
+  // Resolve host gateway IP so pods can reach host.minikube.internal via hostAliases.
+  // CoreDNS inside pods doesn't resolve this hostname from minikube's /etc/hosts.
+  const hostAliases: Array<{ ip: string; hostnames: string[] }> = [];
+  if (elasticsearchHost.includes('host.minikube.internal')) {
+    const gatewayIp = await getMinikubeHostGatewayIp();
+    if (gatewayIp) {
+      hostAliases.push({ ip: gatewayIp, hostnames: ['host.minikube.internal'] });
+      log.debug(`Resolved host.minikube.internal → ${gatewayIp} (will inject as hostAlias)`);
+    } else {
+      log.warning(
+        'Could not resolve host.minikube.internal IP — collector may fail to reach Elasticsearch'
+      );
+    }
+  }
 
   // Generate Kubernetes manifests with scenario overrides
   log.info('Generating Kubernetes manifests...');
@@ -253,6 +293,8 @@ export async function deployDemo({
     logsIndex,
     collectorConfigYaml: collectorConfig,
     envOverrides,
+    hostAliases: hostAliases.length > 0 ? hostAliases : undefined,
+    collectorImage,
   });
 
   log.debug(`Writing manifests to ${manifestsFilePath}`);
@@ -406,6 +448,7 @@ export async function ensureOtelDemo({
   teardown = false,
   scenarioIds = [],
   forceRebuildImages = false,
+  useVanillaCollector = false,
 }: {
   log: ToolingLog;
   signal: AbortSignal;
@@ -416,6 +459,7 @@ export async function ensureOtelDemo({
   teardown?: boolean;
   scenarioIds?: string[];
   forceRebuildImages?: boolean;
+  useVanillaCollector?: boolean;
 }) {
   if (teardown) {
     await teardownDemo({ log, demoType });
@@ -430,6 +474,7 @@ export async function ensureOtelDemo({
     version,
     scenarioIds,
     forceRebuildImages,
+    useVanillaCollector,
   });
 
   await streamDemoLogs({ log, namespace, signal });

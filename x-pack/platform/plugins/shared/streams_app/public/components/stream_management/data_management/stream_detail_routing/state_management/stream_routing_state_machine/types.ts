@@ -51,6 +51,7 @@ export interface StreamRoutingContext {
   editingSuggestionIndex: number | null;
   editedSuggestion: PartitionSuggestion | null;
   isRefreshing: boolean;
+  editingQueryStreamName: string | null;
   isConditionEditorValid: boolean;
   bulkFork: {
     items: BulkForkItem[];
@@ -64,6 +65,10 @@ export type StreamRoutingEvent =
   | { type: 'queryStream.create' }
   | { type: 'queryStream.cancel' }
   | { type: 'queryStream.save'; name: string; esqlQuery: string }
+  | { type: 'queryStream.edit'; name: string }
+  | { type: 'queryStream.cancelEdit' }
+  | { type: 'queryStream.delete' }
+  | { type: 'queryStream.update'; name: string; esqlQuery: string }
   | { type: 'routingRule.cancel' }
   | { type: 'routingRule.change'; routingRule: Partial<RoutingDefinitionWithUIAttributes> }
   | { type: 'routingRule.create' }

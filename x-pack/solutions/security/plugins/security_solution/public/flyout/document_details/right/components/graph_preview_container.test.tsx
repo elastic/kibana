@@ -55,6 +55,10 @@ jest.mock('../../../../common/hooks/use_experimental_features', () => ({
 
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
+jest.mock('../../../shared/hooks/use_should_show_graph', () => ({
+  useShouldShowGraph: jest.fn().mockReturnValue(false),
+}));
+
 jest.mock('../../shared/hooks/use_graph_preview');
 jest.mock('@kbn/cloud-security-posture-graph/src/hooks', () => ({
   useFetchGraphData: jest.fn(),

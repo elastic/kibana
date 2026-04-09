@@ -260,6 +260,15 @@ components:
             - resolution
           description: >-
             Distinguishes base, propagated, and resolution scores.
+        related_entities:
+          type: array
+          items:
+            type: object
+            properties:
+              entity_id:
+                type: string
+              relationship_type:
+                type: string
 
     RiskScoreEntityIdentifierWeights:
       type: number

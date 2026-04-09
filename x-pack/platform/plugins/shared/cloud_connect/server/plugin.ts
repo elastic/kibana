@@ -58,6 +58,7 @@ export class CloudConnectedPlugin
   private readonly logger: Logger;
   private readonly config: CloudConnectConfig;
   private licenseSubscription?: Subscription;
+  private isEss = false;
   private cloudApiUrl?: string;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -71,6 +72,14 @@ export class CloudConnectedPlugin
     plugins: CloudConnectedSetupDeps
   ): CloudConnectedPluginSetup {
     this.logger.debug('cloudConnected: Setup');
+
+    // Skip plugin registration if running on ESS.
+    // CCM is enabled for ECE deployments and self-managed clusters.
+    if (plugins.cloud?.isCloudEnabled && !plugins.cloud?.isEce) {
+      this.logger.debug('cloudConnected: Skipping setup - running on ESS');
+      this.isEss = true;
+      return {};
+    }
 
     // Register the feature with privileges
     plugins.features.registerKibanaFeature(cloudConnectedFeature);
@@ -96,6 +105,11 @@ export class CloudConnectedPlugin
 
   public start(core: CoreStart, plugins: CloudConnectedStartDeps): CloudConnectedPluginStart {
     this.logger.debug('cloudConnected: Started');
+
+    // No-op if running on ESS (plugin is effectively disabled there).
+    if (this.isEss) {
+      return {};
+    }
 
     this.licenseSubscription = registerCloudConnectLicenseSync({
       savedObjects: core.savedObjects,

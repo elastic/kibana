@@ -27,7 +27,6 @@ export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
   const searchRoute = router.get({
     path: LENS_VIS_API_PATH,
     access: LENS_API_ACCESS,
-    enableQueryVersion: true,
     summary: 'Search visualizations',
     description: 'Get list of visualizations.',
     options: {

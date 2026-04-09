@@ -7,12 +7,12 @@
 
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
+import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/public';
+import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { ENTITY_RESOLVED_TOAST, RESOLUTION_ERROR_TITLE } from '../translations';
 import { RESOLUTION_GROUP_QUERY_KEY } from './use_resolution_group';
-
-const RESOLUTION_LINK_ROUTE = '/internal/security/entity_store/resolution/link';
 
 interface LinkEntitiesParams {
   target_id: string;
@@ -32,8 +32,8 @@ export const useLinkEntities = () => {
 
   return useMutation<LinkEntitiesResponse, IHttpFetchError, LinkEntitiesParams>({
     mutationFn: (params) =>
-      http.fetch<LinkEntitiesResponse>(RESOLUTION_LINK_ROUTE, {
-        version: '2',
+      http.fetch<LinkEntitiesResponse>(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK, {
+        version: API_VERSIONS.public.v1,
         method: 'POST',
         body: JSON.stringify(params),
       }),

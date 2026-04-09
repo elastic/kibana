@@ -55,7 +55,8 @@ export function SuggestedRulesFlyout({ streamName, onClose }: SuggestedRulesFlyo
   } = useKibana();
   const queryClient = useQueryClient();
 
-  const { count, queries, queryIds, refetch, isLoading } = usePromotableQueries(streamName);
+  const { queries, refetch, isLoading } = usePromotableQueries(streamName);
+  const queryIds = queries.map(({ query }) => query.id);
   const [selectedQueryRow, setSelectedQueryRow] = useState<SignificantEventQueryRow | null>(null);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 20 });
   const { promote, removeQuery } = useQueriesApi();
@@ -207,7 +208,7 @@ export function SuggestedRulesFlyout({ streamName, onClose }: SuggestedRulesFlyo
           <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiText size="s" color="subdued">
-                {SHOWING_RULES_LABEL(count)}
+                {SHOWING_RULES_LABEL(queries.length)}
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>

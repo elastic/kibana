@@ -80,6 +80,7 @@ export const AttackEntitiesDetails: React.FC = memo(() => {
               timestamp={timestampOrFallback}
               scopeId={scopeId}
               expandedOnFirstRender={false}
+              isAttackDetails={true}
             />
             <EuiSpacer size="s" />
           </React.Fragment>
@@ -105,6 +106,7 @@ export const AttackEntitiesDetails: React.FC = memo(() => {
               timestamp={timestampOrFallback}
               scopeId={scopeId}
               expandedOnFirstRender={false}
+              isAttackDetails={true}
             />
             <EuiSpacer size="s" />
           </React.Fragment>

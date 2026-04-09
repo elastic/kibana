@@ -409,6 +409,98 @@ describe('NotificationPolicySavedObjectService', () => {
     });
   });
 
+  describe('getDistinctTags', () => {
+    const makeTagsAggResponse = (
+      buckets: Array<{ key: string }>,
+      opts?: { omitAggregations?: boolean }
+    ) => {
+      const base = { saved_objects: [], total: 0, per_page: 0, page: 1 };
+      if (opts?.omitAggregations) return base;
+      return { ...base, aggregations: { tags: { buckets } } };
+    };
+
+    it('returns tags from aggregation buckets', async () => {
+      mockSoClient.find.mockResolvedValue(
+        makeTagsAggResponse([{ key: 'production' }, { key: 'critical' }, { key: 'staging' }])
+      );
+
+      const result = await service.getDistinctTags();
+
+      expect(result).toEqual(['production', 'critical', 'staging']);
+      expect(mockSoClient.find).toHaveBeenCalledWith({
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        perPage: 0,
+        aggs: {
+          tags: {
+            terms: {
+              field: `${NOTIFICATION_POLICY_SAVED_OBJECT_TYPE}.attributes.tags`,
+              size: 100,
+              order: { _key: 'asc' },
+            },
+          },
+        },
+      });
+    });
+
+    it('passes include prefix pattern when search is provided', async () => {
+      mockSoClient.find.mockResolvedValue(makeTagsAggResponse([{ key: 'production' }]));
+
+      const result = await service.getDistinctTags({ search: 'prod' });
+
+      expect(result).toEqual(['production']);
+      expect(mockSoClient.find).toHaveBeenCalledWith({
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        perPage: 0,
+        aggs: {
+          tags: {
+            terms: {
+              field: `${NOTIFICATION_POLICY_SAVED_OBJECT_TYPE}.attributes.tags`,
+              size: 100,
+              order: { _key: 'asc' },
+              include: 'prod.*',
+            },
+          },
+        },
+      });
+    });
+
+    it('escapes special regex characters in search', async () => {
+      mockSoClient.find.mockResolvedValue(makeTagsAggResponse([]));
+
+      await service.getDistinctTags({ search: 'test[foo' });
+
+      expect(mockSoClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          aggs: {
+            tags: {
+              terms: expect.objectContaining({
+                include: 'test\\[foo.*',
+              }),
+            },
+          },
+        })
+      );
+    });
+
+    it('returns empty array when aggregations are missing', async () => {
+      mockSoClient.find.mockResolvedValue(makeTagsAggResponse([], { omitAggregations: true }));
+
+      const result = await service.getDistinctTags();
+
+      expect(result).toEqual([]);
+    });
+
+    it('filters out empty bucket keys', async () => {
+      mockSoClient.find.mockResolvedValue(
+        makeTagsAggResponse([{ key: 'production' }, { key: '' }, { key: 'staging' }])
+      );
+
+      const result = await service.getDistinctTags();
+
+      expect(result).toEqual(['production', 'staging']);
+    });
+  });
+
   describe('findAllDecrypted', () => {
     const mockClose = jest.fn();
 

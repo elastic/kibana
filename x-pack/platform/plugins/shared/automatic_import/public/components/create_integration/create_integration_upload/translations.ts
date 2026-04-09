@@ -25,6 +25,10 @@ export const INSTALL_BUTTON = i18n.translate(
   }
 );
 
+export const BACK_BUTTON = i18n.translate('xpack.automaticImport.createIntegrationUpload.back', {
+  defaultMessage: 'Back',
+});
+
 export const CLOSE_BUTTON = i18n.translate('xpack.automaticImport.createIntegrationUpload.close', {
   defaultMessage: 'Close',
 });
@@ -32,3 +36,10 @@ export const CLOSE_BUTTON = i18n.translate('xpack.automaticImport.createIntegrat
 export const UPLOAD_ERROR = i18n.translate('xpack.automaticImport.createIntegrationUpload.error', {
   defaultMessage: 'Error installing package',
 });
+
+export const SUCCESS_TITLE = i18n.translate(
+  'xpack.automaticImport.createIntegrationUpload.successTitle',
+  {
+    defaultMessage: 'Integration installed successfully',
+  }
+);

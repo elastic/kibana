@@ -12,6 +12,7 @@ import type { EntityType } from '../../../../common';
 import {
   ENTITY_STORE_ROUTES,
   HISTORY_INDEX_PATTERN,
+  LATEST_ALIAS,
   LATEST_INDEX,
   UPDATES_INDEX,
 } from './constants';
@@ -52,9 +53,9 @@ export const ingestDoc = async (esClient: EsClient, body: Record<string, unknown
   });
 
 export const searchDocById = async (esClient: EsClient, id: string) => {
-  await esClient.indices.refresh({ index: LATEST_INDEX });
+  await esClient.indices.refresh({ index: LATEST_ALIAS });
   return await esClient.search({
-    index: LATEST_INDEX,
+    index: LATEST_ALIAS,
     version: true,
     query: {
       bool: {
@@ -87,8 +88,9 @@ export const seedUserEntity = async (
   esClient: EsClient,
   { entityId, namespace, email, timestamp }: SeedUserEntityOptions
 ) => {
+  const ts = timestamp ?? new Date().toISOString();
   await esClient.index({
-    index: LATEST_INDEX,
+    index: LATEST_ALIAS,
     id: hashEuid(entityId),
     refresh: 'wait_for',
     pipeline: '_none',
@@ -98,12 +100,16 @@ export const seedUserEntity = async (
         name: entityId,
         EngineMetadata: { Type: 'user' },
         namespace,
+        lifecycle: {
+          first_seen: ts,
+          last_seen: ts,
+        },
       },
       user: {
         email,
         name: entityId,
       },
-      '@timestamp': timestamp ?? new Date().toISOString(),
+      '@timestamp': ts,
     },
   });
 };
@@ -124,9 +130,9 @@ export const waitForResolution = async (
   let lastSource: Record<string, unknown> | undefined;
 
   while (Date.now() - start < timeoutMs) {
-    await esClient.indices.refresh({ index: LATEST_INDEX });
+    await esClient.indices.refresh({ index: LATEST_ALIAS });
     const response = await esClient.search({
-      index: LATEST_INDEX,
+      index: LATEST_ALIAS,
       query: { bool: { filter: [{ term: { 'entity.id': entityId } }] } },
       size: 1,
     });
@@ -167,9 +173,9 @@ export const assertNotResolved = async (
   const start = Date.now();
 
   while (Date.now() - start < timeoutMs) {
-    await esClient.indices.refresh({ index: LATEST_INDEX });
+    await esClient.indices.refresh({ index: LATEST_ALIAS });
     const response = await esClient.search({
-      index: LATEST_INDEX,
+      index: LATEST_ALIAS,
       query: { bool: { filter: [{ term: { 'entity.id': entityId } }] } },
       size: 1,
     });
@@ -205,7 +211,7 @@ export const triggerMaintainerRun = async (
 ) => {
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     const response = await apiClient.post(
-      ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_RUN(maintainerId),
+      ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_RUN(maintainerId),
       {
         headers,
         responseType: 'json',
@@ -244,7 +250,7 @@ export const forceLogExtraction = async (
   fromDateISO: string,
   toDateISO: string
 ) =>
-  await apiClient.post(ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION(entityType), {
+  await apiClient.post(ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION(entityType), {
     headers,
     responseType: 'json',
     body: { fromDateISO, toDateISO },

@@ -9,7 +9,7 @@
 
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { MARKDOWN_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import { getMarkdownCRUResponseBody } from '../../saved_object_utils';
+import { getMarkdownCRUResponseBody } from '../get_cru_response_body';
 import type { MarkdownReadResponseBody } from './types';
 import type { MarkdownAttributes } from '../../markdown_saved_object';
 

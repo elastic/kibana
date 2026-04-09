@@ -26,9 +26,6 @@ import type {
   ListChatMessagesInput,
   SearchMessagesInput,
 } from './types';
-import listWorkflow from './workflows/list.yaml';
-import searchWorkflow from './workflows/search.yaml';
-
 /**
  * Returns the base path for user-scoped Microsoft Graph API endpoints.
  * When a userId is provided, returns `/users/{userId}` (for app-only auth).
@@ -109,6 +106,8 @@ export const MicrosoftTeams: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/api/user-list-joinedteams
     listJoinedTeams: {
       isTool: true,
+      description:
+        "List the Microsoft Teams that the authenticated user (or a specified user) has joined. Use this to discover available teams before drilling into channels or messages. With delegated auth (bearer token), omit userId to list the signed-in user's teams. With app-only auth (client credentials), userId is required.",
       input: ListJoinedTeamsInputSchema,
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input: ListJoinedTeamsInput) => {
@@ -135,6 +134,8 @@ export const MicrosoftTeams: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/api/channel-list
     listChannels: {
       isTool: true,
+      description:
+        'List all channels in a Microsoft Teams team. Use this to discover channel IDs before fetching messages with listChannelMessages. Requires the team ID (obtainable via listJoinedTeams).',
       input: ListChannelsInputSchema,
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input: ListChannelsInput) => {
@@ -154,6 +155,8 @@ export const MicrosoftTeams: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/api/channel-list-messages
     listChannelMessages: {
       isTool: true,
+      description:
+        'Retrieve recent messages from a Microsoft Teams channel. Returns message content, sender, timestamp, and web URL for each message. Use listJoinedTeams and listChannels first to obtain teamId and channelId. Use the top parameter to control how many messages are returned (max 50).',
       input: ListChannelMessagesInputSchema,
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input: ListChannelMessagesInput) => {
@@ -175,6 +178,8 @@ export const MicrosoftTeams: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/api/chat-list
     listChats: {
       isTool: true,
+      description:
+        'List Microsoft Teams chats (direct messages and group chats) for the authenticated user or a specified user. Use this to discover chat IDs before fetching messages with listChatMessages. With delegated auth (bearer token), omit userId. With app-only auth (client credentials), userId is required.',
       input: ListChatsInputSchema,
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input: ListChatsInput) => {
@@ -199,6 +204,8 @@ export const MicrosoftTeams: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/api/chat-list-messages
     listChatMessages: {
       isTool: true,
+      description:
+        'Retrieve recent messages from a Microsoft Teams direct message or group chat. Returns message content, sender, timestamp, and web URL. Use listChats first to obtain the chatId. Use the top parameter to control how many messages are returned (max 50).',
       input: ListChatMessagesInputSchema,
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input: ListChatMessagesInput) => {
@@ -218,13 +225,8 @@ export const MicrosoftTeams: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/search-concept-chat-messages
     searchMessages: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.microsoftTeams.actions.searchMessages.description',
-        {
-          defaultMessage:
-            'Search Teams messages using the Microsoft Graph Search API. Requires delegated authentication (bearer token). Not supported with app-only (client credentials) auth — Microsoft does not allow application permissions for chatMessage search.',
-        }
-      ),
+      description:
+        'Search Teams messages using the Microsoft Graph Search API. Requires delegated authentication (bearer token). Not supported with app-only (client credentials) auth — Microsoft does not allow application permissions for chatMessage search.',
       input: SearchMessagesInputSchema,
       output: z
         .object({
@@ -274,6 +276,18 @@ export const MicrosoftTeams: ConnectorSpec = {
     },
   },
 
+  skill: [
+    'Microsoft Teams connector — usage guidance:',
+    '',
+    'NAVIGATION PATTERNS:',
+    '- Team channels: listJoinedTeams → listChannels (with teamId) → listChannelMessages (with teamId + channelId)',
+    '- Direct/group chats: listChats → listChatMessages (with chatId)',
+    '',
+    'AUTH DIFFERENCES (delegated vs app-only):',
+    '- Delegated auth (bearer token): userId is optional — omit it to operate as the signed-in user.',
+    '- App-only auth (client credentials): userId is REQUIRED for listJoinedTeams and listChats.',
+  ].join('\n'),
+
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.microsoftTeams.test.description', {
       defaultMessage: 'Verifies Microsoft Teams connection by listing joined teams',
@@ -307,6 +321,4 @@ export const MicrosoftTeams: ConnectorSpec = {
       }
     },
   },
-
-  agentBuilderWorkflows: [listWorkflow, searchWorkflow],
 };

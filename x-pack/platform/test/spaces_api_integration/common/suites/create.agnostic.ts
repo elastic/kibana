@@ -93,7 +93,7 @@ export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
         'securitySolutionAttackDiscovery',
         'securitySolutionCasesV3',
         'securitySolutionNotes',
-        'securitySolutionRulesV3',
+        'securitySolutionRulesV4',
         'securitySolutionSiemMigrations',
         'securitySolutionTimeline',
         'siemV5',

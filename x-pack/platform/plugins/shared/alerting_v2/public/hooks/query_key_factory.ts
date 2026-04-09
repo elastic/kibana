@@ -8,10 +8,17 @@
 export const ruleKeys = {
   all: ['rule'] as const,
   lists: () => [...ruleKeys.all, 'list'] as const,
-  list: (filters: { page: number; perPage: number; search?: string }) =>
-    [...ruleKeys.lists(), filters] as const,
+  list: (filters: {
+    page: number;
+    perPage: number;
+    filter?: string;
+    search?: string;
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
+  }) => [...ruleKeys.lists(), filters] as const,
   details: () => [...ruleKeys.all, 'details'] as const,
   detail: (id: string) => [...ruleKeys.details(), id] as const,
+  tags: () => [...ruleKeys.all, 'tags'] as const,
 };
 
 export const workflowKeys = {
@@ -35,8 +42,11 @@ export const notificationPolicyKeys = {
     page: number;
     perPage: number;
     search?: string;
+    tags?: string[];
     enabled?: boolean;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
   }) => [...notificationPolicyKeys.lists(), filters] as const,
+  allTags: () => [...notificationPolicyKeys.all, 'tags'] as const,
+  tags: (search?: string) => [...notificationPolicyKeys.allTags(), { search }] as const,
 };

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { dashboardSmlType } from './dashboard';
+export { createDashboardSmlType } from './dashboard';

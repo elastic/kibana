@@ -22,7 +22,7 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/field-formats-plugin'
   - '@kbn/i18n'
-  - '@kbn/alerting-v2-plugin'
+  - '@kbn/alerting-v2-schemas'
   - '@kbn/esql-types'
   - '@kbn/expressions-plugin'
   - '@kbn/core-http-browser-mocks'
@@ -33,6 +33,8 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/react-hooks'
   - '@kbn/alerting-v2-constants'
+  - '@kbn/es-types'
+  - '@kbn/search-types'
 tags:
   - shared-browser
   - package

@@ -23,7 +23,7 @@ interface SendMessageState {
   cancel: () => void;
   cleanConversation: () => void;
   removeError: () => void;
-  resumeRound: (opts: { promptId: string; confirm: boolean }) => void;
+  resumeRound: (opts: { prompts: Record<string, { allow: boolean }> }) => void;
   isResuming: boolean;
   regenerate: () => void;
   isRegenerating: boolean;

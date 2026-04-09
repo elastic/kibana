@@ -9,23 +9,30 @@ import type { Logger } from '@kbn/core/server';
 import type {
   InitializationFlowId,
   InitializeSecuritySolutionResponse,
-  InitializationFlowReadyResult,
   InitializationFlowErrorResult,
+  CreateListIndicesReadyResult,
+  SecurityDataViewsReadyResult,
 } from '../../../common/api/initialization';
 import {
   INITIALIZATION_FLOW_CREATE_LIST_INDICES,
+  INITIALIZATION_FLOW_SECURITY_DATA_VIEWS,
   INITIALIZATION_FLOW_STATUS_ERROR,
 } from '../../../common/api/initialization';
 
-type FlowResult = InitializationFlowReadyResult | InitializationFlowErrorResult;
+type FlowResult =
+  | CreateListIndicesReadyResult
+  | SecurityDataViewsReadyResult
+  | InitializationFlowErrorResult;
 import type { InitializationFlowContext, InitializationFlowDefinition } from './types';
 import { createListIndicesInitializationFlow } from './flows/create_list_indices';
+import { initializeSecurityDataViewsFlow } from './flows/initialize_security_data_views';
 
 // Each flow has a different ProvisionContext type, so `any` is needed to store
 // them in a single map. Type safety is preserved inside each flow definition.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const flows: Partial<Record<InitializationFlowId, InitializationFlowDefinition<any>>> = {
+const flows: Record<InitializationFlowId, InitializationFlowDefinition<any>> = {
   [INITIALIZATION_FLOW_CREATE_LIST_INDICES]: createListIndicesInitializationFlow,
+  [INITIALIZATION_FLOW_SECURITY_DATA_VIEWS]: initializeSecurityDataViewsFlow,
 };
 
 export class FlowInitializationError extends Error {}
@@ -85,5 +92,7 @@ export const runInitializationFlows = async (
     return acc;
   }, {} as Record<InitializationFlowId, FlowResult>);
 
-  return { flows: flowResults };
+  // Each flow's runtime routing ensures the correct result type per flow ID.
+  // The static type cannot capture this, so we cast at the boundary.
+  return { flows: flowResults } as unknown as InitializeSecuritySolutionResponse;
 };

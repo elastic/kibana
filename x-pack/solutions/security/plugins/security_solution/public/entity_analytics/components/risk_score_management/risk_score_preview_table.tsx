@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiInMemoryTable } from '@elastic/eui';
+import React, { useCallback } from 'react';
+import { EuiInMemoryTable, EuiLink } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
@@ -15,9 +16,49 @@ import type { RiskSeverity } from '../../../../common/search_strategy';
 import { RiskScoreLevel } from '../severity/common';
 import { EntityDetailsLink } from '../../../common/components/links';
 import type { EntityType } from '../../../../common/entity_analytics/types';
+import {
+  EntityPanelKeyByType,
+  EntityPanelParamByType,
+} from '../../../flyout/entity_details/shared/constants';
 
 type RiskScoreColumn = EuiBasicTableColumn<EntityRiskScoreRecord> & {
   field: keyof EntityRiskScoreRecord;
+};
+
+const PREVIEW_TABLE_SCOPE_ID = 'risk-score-preview';
+
+const EntityFlyoutLink = ({
+  entityId,
+  displayName,
+  entityType,
+}: {
+  entityId: string;
+  displayName: string;
+  entityType: EntityType;
+}) => {
+  const { openRightPanel } = useExpandableFlyoutApi();
+  const panelKey = EntityPanelKeyByType[entityType];
+  const paramName = EntityPanelParamByType[entityType];
+
+  const onClick = useCallback(() => {
+    if (panelKey && paramName) {
+      openRightPanel({
+        id: panelKey,
+        params: {
+          [paramName]: displayName,
+          contextID: PREVIEW_TABLE_SCOPE_ID,
+          scopeId: PREVIEW_TABLE_SCOPE_ID,
+          entityId,
+        },
+      });
+    }
+  }, [openRightPanel, panelKey, paramName, displayName, entityId]);
+
+  if (!panelKey) {
+    return <>{displayName}</>;
+  }
+
+  return <EuiLink onClick={onClick}>{displayName}</EuiLink>;
 };
 
 export const RiskScorePreviewTable = ({
@@ -36,9 +77,12 @@ export const RiskScorePreviewTable = ({
           defaultMessage="Name"
         />
       ),
-      render: (entityName: string) => (
-        <EntityDetailsLink entityName={entityName} entityType={type} />
-      ),
+      render: (idValue: string, record: EntityRiskScoreRecord) => {
+        if (record.id_field === 'entity.id') {
+          return <EntityFlyoutLink entityId={idValue} displayName={idValue} entityType={type} />;
+        }
+        return <EntityDetailsLink entityName={idValue} entityType={type} />;
+      },
     },
     {
       field: 'calculated_level',

@@ -7,16 +7,16 @@
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
-  EuiListGroup,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  useIsWithinBreakpoints,
-  useEuiTheme,
-  EuiListGroupItem,
   EuiHorizontalRule,
-  EuiSpacer,
-  EuiButtonIcon,
   EuiIcon,
+  EuiListGroup,
+  EuiListGroupItem,
+  EuiSpacer,
+  useEuiTheme,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { partition } from 'lodash/fp';
 import classNames from 'classnames';
@@ -35,6 +35,12 @@ export const TOGGLE_PANEL_LABEL = i18n.translate('securitySolutionPackages.sideN
   defaultMessage: 'Toggle panel nav',
 });
 
+/**
+ * - `splitButton`: separate link row and spaces button to open the secondary panel (default)
+ * - `unifiedRow`: single row with trailing chevron; primary click navigates to the first child and toggles the panel
+ */
+export type SolutionSideNavInteractionVariant = 'splitButton' | 'unifiedRow';
+
 export interface SolutionSideNavProps {
   /** All the items to display in the side navigation */
   items: SolutionSideNavItem[];
@@ -46,6 +52,10 @@ export interface SolutionSideNavProps {
   panelBottomOffset?: string;
   /** Css value for the top offset of the secondary panel. defaults to the generic kibana header height */
   panelTopOffset?: string;
+  /**
+   * Presentation and interaction for panel opener rows. When `unifiedRow`, selected rows use primary background.
+   */
+  navLinkInteractionVariant?: SolutionSideNavInteractionVariant;
   /**
    * The tracker function to enable navigation Telemetry, this has to be bound with the plugin `appId`
    * e.g.: usageCollection?.reportUiCounter?.bind(null, appId)
@@ -62,6 +72,7 @@ export const SolutionSideNav: React.FC<SolutionSideNavProps> = React.memo(functi
   selectedId,
   panelBottomOffset,
   panelTopOffset,
+  navLinkInteractionVariant = 'splitButton',
   tracker,
 }) {
   const isMobileSize = useIsWithinBreakpoints(['xs', 's']);
@@ -121,6 +132,8 @@ export const SolutionSideNav: React.FC<SolutionSideNavProps> = React.memo(functi
                 activePanelNavId={activePanelNavId}
                 isMobileSize={isMobileSize}
                 onOpenPanelNav={openPanelNav}
+                onClosePanelNav={onClosePanelNav}
+                navLinkInteractionVariant={navLinkInteractionVariant}
               />
             </EuiFlexItem>
             <EuiFlexItem />
@@ -131,6 +144,8 @@ export const SolutionSideNav: React.FC<SolutionSideNavProps> = React.memo(functi
                 activePanelNavId={activePanelNavId}
                 isMobileSize={isMobileSize}
                 onOpenPanelNav={openPanelNav}
+                onClosePanelNav={onClosePanelNav}
+                navLinkInteractionVariant={navLinkInteractionVariant}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -155,6 +170,8 @@ interface SolutionSideNavItemsProps {
   activePanelNavId: ActivePanelNav;
   isMobileSize: boolean;
   onOpenPanelNav: (id: string) => void;
+  onClosePanelNav: () => void;
+  navLinkInteractionVariant: SolutionSideNavInteractionVariant;
   categories?: SeparatorLinkCategory[];
 }
 /**
@@ -170,6 +187,8 @@ const SolutionSideNavItems: React.FC<SolutionSideNavItemsProps> = React.memo(
     activePanelNavId,
     isMobileSize,
     onOpenPanelNav,
+    onClosePanelNav,
+    navLinkInteractionVariant,
   }) {
     if (!categories?.length) {
       return (
@@ -182,6 +201,8 @@ const SolutionSideNavItems: React.FC<SolutionSideNavItemsProps> = React.memo(
               isActive={activePanelNavId === item.id}
               isMobileSize={isMobileSize}
               onOpenPanelNav={onOpenPanelNav}
+              onClosePanelNav={onClosePanelNav}
+              navLinkInteractionVariant={navLinkInteractionVariant}
             />
           ))}
         </>
@@ -214,6 +235,8 @@ const SolutionSideNavItems: React.FC<SolutionSideNavItemsProps> = React.memo(
                   isActive={activePanelNavId === item.id}
                   isMobileSize={isMobileSize}
                   onOpenPanelNav={onOpenPanelNav}
+                  onClosePanelNav={onClosePanelNav}
+                  navLinkInteractionVariant={navLinkInteractionVariant}
                 />
               ))}
               <EuiSpacer size="s" />
@@ -230,7 +253,9 @@ interface SolutionSideNavItemProps {
   isSelected: boolean;
   isActive: boolean;
   onOpenPanelNav: (id: string) => void;
+  onClosePanelNav: () => void;
   isMobileSize: boolean;
+  navLinkInteractionVariant: SolutionSideNavInteractionVariant;
 }
 /**
  * The Solution side navigation item component.
@@ -238,13 +263,40 @@ interface SolutionSideNavItemProps {
  * and it adds a button to open the item secondary panel if needed.
  */
 const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
-  function SolutionSideNavItem({ item, isSelected, isActive, isMobileSize, onOpenPanelNav }) {
+  function SolutionSideNavItem({
+    item,
+    isSelected,
+    isActive,
+    isMobileSize,
+    onOpenPanelNav,
+    navLinkInteractionVariant,
+  }) {
     const { euiTheme } = useEuiTheme();
     const { tracker } = useTelemetryContext();
 
-    const { id, href, label, items, onClick, iconType, appendSeparator } = item;
+    const {
+      id,
+      href,
+      label,
+      items: childItems,
+      onClick,
+      iconType,
+      appendSeparator,
+      prependSeparator,
+    } = item;
 
-    const solutionSideNavItemStyles = SolutionSideNavItemStyles(euiTheme);
+    const firstPanelChild = useMemo(
+      () => childItems?.find((child) => !child.disabled),
+      [childItems]
+    );
+
+    const effectiveHref =
+      navLinkInteractionVariant === 'unifiedRow' && firstPanelChild ? firstPanelChild.href : href;
+
+    const solutionSideNavItemStyles = SolutionSideNavItemStyles(
+      euiTheme,
+      navLinkInteractionVariant === 'unifiedRow' && isSelected ? 'primary' : 'default'
+    );
     const itemClassNames = classNames(
       'solutionSideNavItem',
       { 'solutionSideNavItem--isSelected': isSelected },
@@ -253,16 +305,42 @@ const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
     const buttonClassNames = classNames('solutionSideNavItemButton');
 
     const hasPanelNav = useMemo(
-      () => !isMobileSize && items != null && items.length > 0,
-      [items, isMobileSize]
+      () => !isMobileSize && childItems != null && childItems.length > 0,
+      [childItems, isMobileSize]
     );
+
+    const listItemLabel = useMemo(() => {
+      if (hasPanelNav && navLinkInteractionVariant === 'unifiedRow') {
+        return (
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="none"
+            responsive={false}
+            css={css`
+              width: 100%;
+            `}
+          >
+            <EuiFlexItem grow>{label}</EuiFlexItem>
+            <EuiFlexItem grow={false} css={{ marginRight: euiTheme.size.s }}>
+              <EuiIcon
+                type="arrowRight"
+                color="subdued"
+                aria-hidden={true}
+                data-test-subj={`solutionSideNavItemPanelHint-${id}`}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      }
+      return label;
+    }, [hasPanelNav, navLinkInteractionVariant, label, id, euiTheme.size.s]);
 
     const onLinkClicked: React.MouseEventHandler = useCallback(
       (ev) => {
         tracker?.(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.NAVIGATION}${id}`);
         onClick?.(ev);
       },
-      [id, onClick, tracker]
+      [tracker, id, onClick]
     );
 
     const onButtonClick: React.MouseEventHandler = useCallback(() => {
@@ -270,30 +348,32 @@ const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
       onOpenPanelNav(id);
     }, [id, onOpenPanelNav, tracker]);
 
-    const itemLabel = useMemo(() => {
-      if (iconType == null) {
-        return label;
-      }
-      return (
-        <EuiFlexGroup alignItems="center" gutterSize="none">
-          <EuiFlexItem>{label}</EuiFlexItem>
-          <EuiFlexItem grow={0} id={`solutionSideNavCustomIconItem-${id}`}>
-            <EuiIcon type={iconType} color="text" aria-hidden={true} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    }, [iconType, label, id]);
+    const onSingleRowLinkClick: React.MouseEventHandler = useCallback(
+      (ev) => {
+        ev.preventDefault();
+        if (!hasPanelNav) {
+          onLinkClicked(ev);
+          return;
+        }
+        onButtonClick(ev);
+      },
+      [hasPanelNav, onButtonClick, onLinkClicked]
+    );
 
     return (
       <>
+        {prependSeparator ? <EuiHorizontalRule margin="xs" /> : null}
         <EuiFlexGroup alignItems="center" gutterSize="xs">
           <EuiFlexItem>
             <EuiListGroup gutterSize="none">
               <EuiListGroupItem
-                label={itemLabel}
-                href={href}
+                iconType={iconType}
+                label={listItemLabel}
+                href={effectiveHref}
                 wrapText
-                onClick={onLinkClicked}
+                onClick={
+                  navLinkInteractionVariant === 'unifiedRow' ? onSingleRowLinkClick : onLinkClicked
+                }
                 className={itemClassNames}
                 color="text"
                 size="s"
@@ -302,7 +382,7 @@ const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
               />
             </EuiListGroup>
           </EuiFlexItem>
-          {hasPanelNav && (
+          {hasPanelNav && navLinkInteractionVariant === 'splitButton' && (
             <EuiFlexItem grow={0}>
               <EuiButtonIcon
                 className={buttonClassNames}

@@ -73,7 +73,7 @@ export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: P
   const popoverButton = (
     <EuiButtonIcon
       data-test-subj="exploratoryViewSeriesActionsButton"
-      iconType="boxesHorizontal"
+      iconType="boxesVertical"
       onClick={changePopoverVisibility}
       color="text"
       aria-label={POPOVER_BUTTON_LABEL}
@@ -118,7 +118,7 @@ export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: P
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 key="hideSeries"
-                icon={series.hidden ? 'eye' : 'eyeClosed'}
+                icon={series.hidden ? 'eye' : 'eyeSlash'}
                 onClick={toggleSeries}
                 aria-label={series.hidden ? SHOW_SERIES_LABEL : HIDE_SERIES_LABEL}
               >

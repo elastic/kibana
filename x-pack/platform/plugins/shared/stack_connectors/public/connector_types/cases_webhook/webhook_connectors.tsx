@@ -56,6 +56,7 @@ const fields = {
 type PossibleStepNumbers = 1 | 2 | 3 | 4;
 const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
+  isEdit,
 }) => {
   const { docLinks } = useKibana().services;
   const { isValid, getFields, validateFields } = useFormContext();
@@ -197,7 +198,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
         {i18n.DOC_LINK}
       </EuiLink>
       <EuiSpacer size="l" />
-      <AuthStep readOnly={readOnly} display={currentStep === 1} />
+      <AuthStep readOnly={readOnly} isEdit={isEdit} display={currentStep === 1} />
       <CreateStep readOnly={readOnly} display={currentStep === 2} />
       <GetStep readOnly={readOnly} display={currentStep === 3} />
       <UpdateStep readOnly={readOnly} display={currentStep === 4} />

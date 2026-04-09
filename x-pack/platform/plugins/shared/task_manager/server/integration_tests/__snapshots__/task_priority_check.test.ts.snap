@@ -7,6 +7,10 @@ Array [
     "taskType": "ad_hoc_run-backfill",
   },
   Object {
+    "priority": 50,
+    "taskType": "autoImport-dataStream-task",
+  },
+  Object {
     "priority": 1,
     "taskType": "agent_builder:sml_crawler",
   },

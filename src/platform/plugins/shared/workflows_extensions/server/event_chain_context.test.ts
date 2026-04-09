@@ -10,11 +10,21 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import {
   EVENT_CHAIN_DEPTH_HEADER,
-  EVENT_CHAIN_SOURCE_WORKFLOW_HEADER,
+  EVENT_CHAIN_SOURCE_EXECUTION_HEADER,
   getEventChainContext,
   getOutboundEventChainHeaders,
   setWorkflowEventChainContext,
 } from './event_chain_context';
+
+/** Simulate a request that carries x-elastic-internal-origin (e.g. from kibana.request step). */
+function internalRequest(headers: Record<string, string | string[]>): KibanaRequest {
+  return { headers, isInternalApiRequest: true } as unknown as KibanaRequest;
+}
+
+/** Simulate a request from an external (untrusted) caller — no x-elastic-internal-origin. */
+function externalRequest(headers: Record<string, string | string[]>): KibanaRequest {
+  return { headers, isInternalApiRequest: false } as unknown as KibanaRequest;
+}
 
 describe('event_chain_context', () => {
   it('returns undefined when request has no context set and no header', () => {
@@ -24,114 +34,118 @@ describe('event_chain_context', () => {
 
   it('returns context after setWorkflowEventChainContext', () => {
     const request = {} as KibanaRequest;
-    setWorkflowEventChainContext(request, { depth: 0, sourceWorkflowId: 'wf-1' });
+    setWorkflowEventChainContext(request, { depth: 0, sourceExecutionId: 'exec-1' });
     expect(getEventChainContext(request)).toEqual({
       depth: 0,
-      sourceWorkflowId: 'wf-1',
+      sourceExecutionId: 'exec-1',
     });
   });
 
   it('overwrites context when set again', () => {
     const request = {} as KibanaRequest;
     setWorkflowEventChainContext(request, { depth: 0 });
-    setWorkflowEventChainContext(request, { depth: 1, sourceWorkflowId: 'wf-2' });
+    setWorkflowEventChainContext(request, { depth: 1, sourceExecutionId: 'exec-2' });
     expect(getEventChainContext(request)).toEqual({
       depth: 1,
-      sourceWorkflowId: 'wf-2',
+      sourceExecutionId: 'exec-2',
     });
   });
 
-  it('returns context from header when symbol is not set (HTTP path)', () => {
-    const request = {
-      headers: { [EVENT_CHAIN_DEPTH_HEADER]: '2' },
-    } as unknown as KibanaRequest;
-    expect(getEventChainContext(request)).toEqual({ depth: 2 });
+  it('symbol takes precedence over headers even for internal requests', () => {
+    const request = internalRequest({ [EVENT_CHAIN_DEPTH_HEADER]: '2' });
+    setWorkflowEventChainContext(request, { depth: 0, sourceExecutionId: 'exec-1' });
+    expect(getEventChainContext(request)).toEqual({ depth: 0, sourceExecutionId: 'exec-1' });
   });
 
-  it('returns context from header with case-insensitive header name', () => {
-    const request = {
-      headers: { 'X-Kibana-Event-Chain-Depth': '1' },
-    } as unknown as KibanaRequest;
-    expect(getEventChainContext(request)).toEqual({ depth: 1 });
-  });
+  describe('internal requests (x-elastic-internal-origin present)', () => {
+    it('returns context from depth header', () => {
+      expect(getEventChainContext(internalRequest({ [EVENT_CHAIN_DEPTH_HEADER]: '2' }))).toEqual({
+        depth: 2,
+      });
+    });
 
-  it('returns context with sourceWorkflowId from headers (HTTP path)', () => {
-    const request = {
-      headers: {
-        [EVENT_CHAIN_DEPTH_HEADER]: '2',
-        [EVENT_CHAIN_SOURCE_WORKFLOW_HEADER]: 'wf-loop',
-      },
-    } as unknown as KibanaRequest;
-    expect(getEventChainContext(request)).toEqual({
-      depth: 2,
-      sourceWorkflowId: 'wf-loop',
+    it('parses depth with case-insensitive header name', () => {
+      expect(getEventChainContext(internalRequest({ 'X-Kibana-Event-Chain-Depth': '1' }))).toEqual({
+        depth: 1,
+      });
+    });
+
+    it('returns context with sourceExecutionId from headers', () => {
+      expect(
+        getEventChainContext(
+          internalRequest({
+            [EVENT_CHAIN_DEPTH_HEADER]: '2',
+            [EVENT_CHAIN_SOURCE_EXECUTION_HEADER]: 'exec-loop',
+          })
+        )
+      ).toEqual({ depth: 2, sourceExecutionId: 'exec-loop' });
+    });
+
+    it('parses sourceExecutionId with case-insensitive header name', () => {
+      expect(
+        getEventChainContext(
+          internalRequest({
+            [EVENT_CHAIN_DEPTH_HEADER]: '1',
+            'X-Kibana-Event-Chain-Source-Execution-Id': 'exec-parent',
+          })
+        )
+      ).toEqual({ depth: 1, sourceExecutionId: 'exec-parent' });
+    });
+
+    it('returns undefined when depth header value is invalid', () => {
+      expect(
+        getEventChainContext(internalRequest({ [EVENT_CHAIN_DEPTH_HEADER]: 'invalid' }))
+      ).toBeUndefined();
+    });
+
+    it('returns undefined when depth header value is negative', () => {
+      expect(
+        getEventChainContext(internalRequest({ [EVENT_CHAIN_DEPTH_HEADER]: '-1' }))
+      ).toBeUndefined();
+    });
+
+    it('returns undefined when depth header value is an array with null first element', () => {
+      expect(
+        getEventChainContext(internalRequest({ [EVENT_CHAIN_DEPTH_HEADER]: [null as any] }))
+      ).toBeUndefined();
+    });
+
+    it('returns undefined when depth header value is an array with non-string first element', () => {
+      expect(
+        getEventChainContext(internalRequest({ [EVENT_CHAIN_DEPTH_HEADER]: [42 as any] }))
+      ).toBeUndefined();
+    });
+
+    it('returns undefined when depth header value is an empty string', () => {
+      expect(
+        getEventChainContext(internalRequest({ [EVENT_CHAIN_DEPTH_HEADER]: '' }))
+      ).toBeUndefined();
+    });
+
+    it('uses first element when depth header value is a string array', () => {
+      expect(
+        getEventChainContext(internalRequest({ [EVENT_CHAIN_DEPTH_HEADER]: ['3', '5'] }))
+      ).toEqual({ depth: 3 });
     });
   });
 
-  it('returns context with sourceWorkflowId with case-insensitive source-workflow header', () => {
-    const request = {
-      headers: {
-        [EVENT_CHAIN_DEPTH_HEADER]: '1',
-        'X-Kibana-Event-Chain-Source-Workflow': 'my-workflow-id',
-      },
-    } as unknown as KibanaRequest;
-    expect(getEventChainContext(request)).toEqual({
-      depth: 1,
-      sourceWorkflowId: 'my-workflow-id',
+  describe('external requests (no x-elastic-internal-origin)', () => {
+    it('returns undefined even when depth header is present', () => {
+      expect(
+        getEventChainContext(externalRequest({ [EVENT_CHAIN_DEPTH_HEADER]: '2' }))
+      ).toBeUndefined();
     });
-  });
 
-  it('symbol takes precedence over header', () => {
-    const request = {
-      headers: { [EVENT_CHAIN_DEPTH_HEADER]: '2' },
-    } as unknown as KibanaRequest;
-    setWorkflowEventChainContext(request, { depth: 0, sourceWorkflowId: 'wf-1' });
-    expect(getEventChainContext(request)).toEqual({
-      depth: 0,
-      sourceWorkflowId: 'wf-1',
+    it('returns undefined even when both chain headers are present', () => {
+      expect(
+        getEventChainContext(
+          externalRequest({
+            [EVENT_CHAIN_DEPTH_HEADER]: '0',
+            [EVENT_CHAIN_SOURCE_EXECUTION_HEADER]: 'attacker-exec',
+          })
+        )
+      ).toBeUndefined();
     });
-  });
-
-  it('returns undefined when header value is invalid', () => {
-    const request = {
-      headers: { [EVENT_CHAIN_DEPTH_HEADER]: 'invalid' },
-    } as unknown as KibanaRequest;
-    expect(getEventChainContext(request)).toBeUndefined();
-  });
-
-  it('returns undefined when header value is negative', () => {
-    const request = {
-      headers: { [EVENT_CHAIN_DEPTH_HEADER]: '-1' },
-    } as unknown as KibanaRequest;
-    expect(getEventChainContext(request)).toBeUndefined();
-  });
-
-  it('returns undefined when header value is an array with null first element', () => {
-    const request = {
-      headers: { [EVENT_CHAIN_DEPTH_HEADER]: [null as any] },
-    } as unknown as KibanaRequest;
-    expect(getEventChainContext(request)).toBeUndefined();
-  });
-
-  it('returns undefined when header value is an array with non-string first element', () => {
-    const request = {
-      headers: { [EVENT_CHAIN_DEPTH_HEADER]: [42 as any] },
-    } as unknown as KibanaRequest;
-    expect(getEventChainContext(request)).toBeUndefined();
-  });
-
-  it('returns undefined when header value is an empty string', () => {
-    const request = {
-      headers: { [EVENT_CHAIN_DEPTH_HEADER]: '' },
-    } as unknown as KibanaRequest;
-    expect(getEventChainContext(request)).toBeUndefined();
-  });
-
-  it('uses first element when header value is a string array', () => {
-    const request = {
-      headers: { [EVENT_CHAIN_DEPTH_HEADER]: ['3', '5'] },
-    } as unknown as KibanaRequest;
-    expect(getEventChainContext(request)).toEqual({ depth: 3 });
   });
 
   describe('getOutboundEventChainHeaders', () => {
@@ -140,32 +154,62 @@ describe('event_chain_context', () => {
       expect(getOutboundEventChainHeaders(request)).toEqual({});
     });
 
-    it('returns both headers when context is set on request (sourceWorkflowId empty when not set)', () => {
+    it('returns depth header only when sourceExecutionId is not set', () => {
       const request = {} as KibanaRequest;
       setWorkflowEventChainContext(request, { depth: 3 });
       expect(getOutboundEventChainHeaders(request)).toEqual({
         [EVENT_CHAIN_DEPTH_HEADER]: '3',
-        [EVENT_CHAIN_SOURCE_WORKFLOW_HEADER]: '',
       });
     });
 
-    it('returns both headers when context comes from depth header only', () => {
-      const request = {
-        headers: { [EVENT_CHAIN_DEPTH_HEADER]: '0' },
-      } as unknown as KibanaRequest;
+    it('returns empty object when request has headers but no in-process Symbol', () => {
+      const request = internalRequest({ [EVENT_CHAIN_DEPTH_HEADER]: '0' });
+      // getOutboundEventChainHeaders reads via getEventChainContext which returns { depth: 0 }
+      // for an internal request, so this correctly produces outbound headers
       expect(getOutboundEventChainHeaders(request)).toEqual({
         [EVENT_CHAIN_DEPTH_HEADER]: '0',
-        [EVENT_CHAIN_SOURCE_WORKFLOW_HEADER]: '',
       });
     });
 
-    it('returns depth and sourceWorkflowId headers when context has both', () => {
+    it('returns depth and sourceExecutionId headers when context has both', () => {
       const request = {} as KibanaRequest;
-      setWorkflowEventChainContext(request, { depth: 1, sourceWorkflowId: 'wf-emit-loop' });
+      setWorkflowEventChainContext(request, { depth: 1, sourceExecutionId: 'exec-emit-loop' });
       expect(getOutboundEventChainHeaders(request)).toEqual({
         [EVENT_CHAIN_DEPTH_HEADER]: '1',
-        [EVENT_CHAIN_SOURCE_WORKFLOW_HEADER]: 'wf-emit-loop',
+        [EVENT_CHAIN_SOURCE_EXECUTION_HEADER]: 'exec-emit-loop',
       });
+    });
+  });
+
+  describe('outbound HTTP header round-trip (kibana.request path)', () => {
+    it('restores depth and sourceExecutionId on a new internal request from headers', () => {
+      // Simulate fakeRequest in the execution engine with Symbol set
+      const engineRequest = {} as KibanaRequest;
+      const original = { depth: 2, sourceExecutionId: 'parent-exec-uuid' };
+      setWorkflowEventChainContext(engineRequest, original);
+
+      // kibana.request step produces outbound headers from Symbol context
+      const outbound = getOutboundEventChainHeaders(engineRequest);
+
+      // The inbound request on the receiving Kibana server has isInternalApiRequest: true
+      // because kibana.request step sends x-elastic-internal-origin: Kibana
+      const inbound = internalRequest(outbound);
+      expect(getEventChainContext(inbound)).toEqual(original);
+    });
+  });
+
+  /**
+   * Security: x-kibana-event-chain-depth must not be trusted from external callers.
+   *
+   * An external caller including x-kibana-event-chain-depth: 0 on any HTTP request
+   * that reaches a Kibana route which subsequently calls emitEvent would reset the
+   * chain counter, granting extra event-chain hops beyond the configured maxChainDepth.
+   * The gate on isInternalApiRequest prevents this.
+   */
+  describe('security: header depth is not trusted from external callers', () => {
+    it('does not trust depth=0 from an external caller with no in-process context', () => {
+      const ctx = getEventChainContext(externalRequest({ [EVENT_CHAIN_DEPTH_HEADER]: '0' }));
+      expect(ctx).toBeUndefined();
     });
   });
 });

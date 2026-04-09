@@ -9,7 +9,7 @@ This package runs in CI on every PR. It compares the current branch's OAS files 
 **Flow:**
 
 ```
-git show base OAS → oasdiff diff → parse → filter to TF APIs → apply allowlist → report
+git show base OAS → oasdiff diff → parse → filter to TF APIs → apply allowlist → report → notify owners
 ```
 
 **Key components:**
@@ -20,10 +20,10 @@ git show base OAS → oasdiff diff → parse → filter to TF APIs → apply all
    - `parse_oasdiff.ts` - Converts oasdiff JSON output to `BreakingChange[]`
    - `breaking_rules.ts` - Allowlist filtering
 
-2. **`src/terraform/`** - Terraform impact analysis
+2. **`src/terraform/`** - Terraform impact analysis and ownership
 
-   - `check_terraform_impact.ts` - Matches breaking changes against TF provider APIs
-   - `load_terraform_apis.ts` - Loads TF API inventory from `terraform_provider_apis.yaml`
+   - `check_terraform_impact.ts` - Matches breaking changes against TF provider APIs, carries `owners`
+   - `load_terraform_apis.ts` - Loads TF API inventory (including `owners`) from `terraform_provider_apis.yaml`
 
 3. **`src/report/`** - Error formatting and user guidance
 
@@ -80,6 +80,23 @@ For approved breaking changes, add entries to `allowlist.json`:
 **Required fields:** `path`, `method`, `reason`, `approvedBy`
 **Optional fields:** `prUrl`, `expiresAt`
 
+## API Ownership
+
+Each entry in `terraform_provider_apis.yaml` has an `owners` field listing the GitHub team handle(s) responsible for that API (derived from `.github/CODEOWNERS`):
+
+```yaml
+- path: /api/spaces/space
+  methods: [GET, POST]
+  resource: elasticstack_kibana_space
+  owners: ['@elastic/kibana-security']
+```
+
+When adding a new Terraform-consumed API, always set `owners` to the team that owns the plugin/package registering the route.
+
+### CI notifications
+
+When the contracts check **fails** (i.e. there are non-allowlisted TF-impacting breaking changes), CI automatically posts (or updates) a PR comment that **@mentions the owning teams** for the affected endpoints. No comment is posted when the check passes. This ensures the right people are notified and can decide whether to fix the change or add an approved allowlist entry.
+
 ## Usage
 
 ### CI (automatic)
@@ -109,6 +126,7 @@ node scripts/check_api_contracts.js \
 - `--mergeBase` - Merge base commit SHA (used in CI, skips remote resolution)
 - `--allowlistPath` - Override allowlist path
 - `--terraformApisPath` - Override TF API inventory path
+- `--reportPath` - Write a JSON impact report to this path (used by CI for PR notifications)
 
 **Prerequisites:** oasdiff must be installed and available in PATH (or set `OASDIFF_BIN`):
 
@@ -119,9 +137,11 @@ brew install oasdiff
 
 ## Handling CI Failures
 
-1. **Review the report** - identifies which endpoints and what changed
+When the check fails, CI posts a PR comment tagging the owning teams for the affected endpoints.
+
+1. **Review the report** - identifies which endpoints, what changed, and who owns them
 2. **If unintentional:** fix the code to maintain compatibility
-3. **If intentional:** add an allowlist entry with team approval
+3. **If intentional:** add an allowlist entry with team approval and coordinate with `@elastic/terraform-provider`
 
 ## Troubleshooting
 

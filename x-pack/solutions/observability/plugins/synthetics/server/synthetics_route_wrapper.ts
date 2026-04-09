@@ -9,6 +9,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { isEmpty } from 'lodash';
 import { isKibanaResponse } from '@kbn/core-http-server';
 import { MonitorConfigRepository } from './services/monitor_config_repository';
+import { MonitorIntegrationHealthApi } from './services/monitor_integration_health_api';
 import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { isTestUser, SyntheticsEsClient } from './lib';
 import { SYNTHETICS_INDEX_PATTERN } from '../common/constants';
@@ -65,6 +66,13 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
 
       const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
+      const monitorIntegrationHealthApi = new MonitorIntegrationHealthApi(
+        server,
+        savedObjectsClient,
+        monitorConfigRepository,
+        spaceId
+      );
+
       try {
         const data = {
           syntheticsEsClient,
@@ -76,6 +84,7 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
           spaceId,
           syntheticsMonitorClient,
           monitorConfigRepository,
+          monitorIntegrationHealthApi,
         };
 
         const res = await server.fleet.runWithCache(() => syntheticsRoute.handler(data));

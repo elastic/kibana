@@ -192,7 +192,7 @@ export function DateRangePickerControl() {
           hasAutoRefresh && settings.autoRefresh?.isEnabled ? (
             <DateRangePickerAutoRefreshButton
               isPaused={settings.autoRefresh.isPaused}
-              interval={settings.autoRefresh.interval}
+              intervalMs={settings.autoRefresh.intervalMs}
               secondsRemaining={autoRefreshSecondsRemaining}
               onClick={toggleAutoRefresh}
               disabled={disabled}

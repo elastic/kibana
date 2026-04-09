@@ -11,6 +11,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
   describe('rule_v2', () => {
     loadTestFile(require.resolve('./create_rule'));
     loadTestFile(require.resolve('./get_rule'));
+    loadTestFile(require.resolve('./get_rule_tags'));
     loadTestFile(require.resolve('./list_rules'));
     loadTestFile(require.resolve('./update_rule'));
     loadTestFile(require.resolve('./delete_rule'));

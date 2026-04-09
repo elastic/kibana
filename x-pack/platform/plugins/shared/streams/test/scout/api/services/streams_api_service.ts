@@ -36,6 +36,7 @@ export interface StreamsTestApiService {
   createQueryStream: (streamName: string, esql: string) => Promise<void>;
   updateStream: (streamName: string, body: { ingest: IngestUpsertRequest }) => Promise<void>;
   deleteStream: (streamName: string) => Promise<void>;
+  restoreDataStream: (streamName: string) => Promise<void>;
   forkStream: (
     parentStream: string,
     childStream: string,
@@ -171,6 +172,15 @@ export function getStreamsTestApiService({
         await kbnClient.request({
           method: 'DELETE',
           path: `/api/streams/${streamName}`,
+        });
+      });
+    },
+
+    async restoreDataStream(streamName: string) {
+      await measurePerformanceAsync(log, 'streamsTestApi.restoreDataStream', async () => {
+        await kbnClient.request({
+          method: 'POST',
+          path: `/internal/streams/${streamName}/_restore_data_stream`,
         });
       });
     },

@@ -233,7 +233,8 @@ evaluate.describe(
               },
               output: {
                 criteria: [
-                  'Clearly communicate that this requires sequence analysis (e.g. EQL) rather than ES|QL, or recommend EQL where appropriate.',
+                  'Explicitly recommend EQL (Event Query Language) as the appropriate query type for sequence-based analysis.',
+                  'Must NOT generate an ES|QL query to answer this; ES|QL cannot express event ordering or sequences.',
                   'Do not fabricate login or sequence data.',
                 ],
               },

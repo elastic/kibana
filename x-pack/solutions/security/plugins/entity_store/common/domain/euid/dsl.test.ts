@@ -285,7 +285,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       expect(result?.bool?.must_not).toBeUndefined();
     });
 
-    it('returns filter for user.name and host.id when whenConditionTrueSetFieldsPreAgg sets entity.namespace to local (non-IDP)', () => {
+    it('returns filter for user.name and host.id when fieldEvaluations set entity.namespace to local (non-IDP)', () => {
       const result = getEuidDslFilterBasedOnDocument('user', {
         user: { name: 'alice' },
         host: { id: 'host-1' },
