@@ -90,6 +90,7 @@ const journeyTargetGroups: JourneyTargetGroups = {
     'streams_field_mapping',
     'streams_wired_hierarchy',
   ],
+  metricsExperience: ['metrics_experience_grid'],
 };
 
 const readFilesRecursively = (dir: string, callback: Function) => {
