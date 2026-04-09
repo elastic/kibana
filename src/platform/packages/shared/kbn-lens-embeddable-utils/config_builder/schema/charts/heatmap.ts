@@ -29,6 +29,7 @@ import {
 } from './shared';
 import { builderEnums } from '../enums';
 import { bucketOperationDefinitionSchema } from '../bucket_ops';
+import { objectUnion } from './utils/object_union';
 
 const legendSchemaProps = {
   truncate_after_lines: legendTruncateAfterLinesSchema,
@@ -169,7 +170,7 @@ export const heatmapStateSchemaESQL = schema.object(
   { meta: { id: 'heatmapESQL', title: 'Heatmap Chart (ES|QL)' } }
 );
 
-export const heatmapStateSchema = schema.oneOf([heatmapStateSchemaNoESQL, heatmapStateSchemaESQL], {
+export const heatmapStateSchema = objectUnion([heatmapStateSchemaNoESQL, heatmapStateSchemaESQL], {
   meta: { id: 'heatmapChart', title: 'Heatmap Chart' },
 });
 
