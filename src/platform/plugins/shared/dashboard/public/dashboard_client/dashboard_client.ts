@@ -18,6 +18,7 @@ import {
   DASHBOARD_API_PATH,
   DASHBOARD_API_VERSION,
   DASHBOARD_APP_API_PATH,
+  DASHBOARD_APP_API_VERSION,
   DASHBOARD_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
 import type {
@@ -53,7 +54,7 @@ export const dashboardClient = {
     accessMode?: SavedObjectAccessControl['accessMode']
   ) => {
     return coreServices.http.post<DashboardCreateResponseBody>(DASHBOARD_APP_API_PATH, {
-      version: DASHBOARD_API_VERSION,
+      version: DASHBOARD_APP_API_VERSION,
       body: JSON.stringify({
         ...dashboardState,
         ...(accessMode && { access_control: { access_mode: accessMode } }),
@@ -73,7 +74,7 @@ export const dashboardClient = {
 
     const { body, response } = await coreServices.http
       .get<DashboardReadResponseBody>(buildDashboardAppPath(id), {
-        version: DASHBOARD_API_VERSION,
+        version: DASHBOARD_APP_API_VERSION,
         asResponse: true,
       })
       .catch((e) => {
@@ -116,7 +117,7 @@ export const dashboardClient = {
     const updateResponse = await coreServices.http.put<DashboardUpdateResponseBody>(
       buildDashboardAppPath(id),
       {
-        version: DASHBOARD_API_VERSION,
+        version: DASHBOARD_APP_API_VERSION,
         body: JSON.stringify(dashboardState),
       }
     );

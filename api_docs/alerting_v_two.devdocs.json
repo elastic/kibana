@@ -130,7 +130,7 @@
           "ContainerModule"
         ],
         "path": "x-pack/platform/plugins/shared/alerting_v2/public/index.ts",
-        "lineNumber": 30,
+        "lineNumber": 34,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
