@@ -128,6 +128,8 @@
     "@kbn/as-code-data-views-transforms",
     "@kbn/as-code-filters-schema",
     "@kbn/as-code-filters-transforms",
+    "@kbn/as-code-shared-schemas",
+    "@kbn/as-code-shared-transforms",
     "@kbn/scout",
     "@kbn/scout-synthtrace",
     "@kbn/synthtrace-client",

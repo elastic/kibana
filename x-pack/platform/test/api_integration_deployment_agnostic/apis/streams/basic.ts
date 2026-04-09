@@ -93,7 +93,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     };
   }
 
-  describe('Basic functionality', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/262155
+  describe.skip('Basic functionality', () => {
     async function getWiredStatus() {
       const response = await viewerApiClient.fetch('GET /api/streams/_status').expect(200);
       return response.body;

@@ -39,6 +39,8 @@ const CATEGORY_PRIORITIES: Record<SuggestionCategory, number> = {
   [SuggestionCategory.FUNCTION_AGG]: 500,
   [SuggestionCategory.FUNCTION_SCALAR]: 500,
 
+  [SuggestionCategory.COMMAND]: 550, // Source commands (FROM, SET)
+
   [SuggestionCategory.RECOMMENDED_QUERY_WITH_PRIORITY]: 590, // Search query (higher priority)
   [SuggestionCategory.RECOMMENDED_QUERY]: 600,
 
@@ -50,7 +52,7 @@ const CONTEXT_BOOSTS: Partial<Record<Location, Partial<Record<SuggestionCategory
   [Location.STATS]: {
     [SuggestionCategory.LANGUAGE_KEYWORD]: -40, // From 50 to 10 (after CUSTOM_ACTION)
     [SuggestionCategory.FUNCTION_AGG]: -100, // From 500 to 400
-    [SuggestionCategory.FUNCTION_TIME_SERIES_AGG]: -151, // From 500 to 349 (before fields at 350)
+    [SuggestionCategory.FUNCTION_TIME_SERIES_AGG]: -201, // From 500 to 299 (before all fields)
   },
   [Location.STATS_BY]: {
     [SuggestionCategory.USER_DEFINED_COLUMN]: -300, // From 300 to 0

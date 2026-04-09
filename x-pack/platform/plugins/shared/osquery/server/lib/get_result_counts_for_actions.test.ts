@@ -115,6 +115,21 @@ describe('getResultCountsForActions', () => {
     );
   });
 
+  it('uses CCS-prefixed index when ccsEnabled is true', async () => {
+    const esClient = createMockEsClient({
+      aggregations: { action_ids: { buckets: [] } },
+    });
+
+    await getResultCountsForActions(esClient, ['action-1'], 'default', true);
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index:
+          'logs-osquery_manager.action.responses-default,*:logs-osquery_manager.action.responses-default',
+      })
+    );
+  });
+
   it('batches requests when action IDs exceed 1000', async () => {
     const actionIds = Array.from({ length: 1500 }, (_, i) => `action-${i}`);
 

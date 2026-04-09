@@ -10,10 +10,15 @@ import { AIMessage, ToolMessage } from '@langchain/core/messages';
 import type {
   AssistantResponse,
   ConversationRoundStep,
+  ReasoningStep,
   ToolCallStep,
   ToolCallWithResult,
 } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus, isToolCallStep } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStatus,
+  isReasoningStep,
+  isToolCallStep,
+} from '@kbn/agent-builder-common';
 import {
   createAIMessage,
   createUserMessage,
@@ -102,8 +107,11 @@ export const roundToLangchain = async (
   // steps
   if (!ignoreSteps) {
     const groups = groupToolCallSteps(round.steps);
+    const reasoningSteps = round.steps.filter(isReasoningStep);
     for (const group of groups) {
-      messages.push(...(await createGroupedToolCallMessages(group, { resultTransformer })));
+      messages.push(
+        ...(await createGroupedToolCallMessages(group, { resultTransformer, reasoningSteps }))
+      );
     }
   }
 
@@ -197,16 +205,33 @@ export const groupToolCallSteps = (steps: ConversationRoundStep[]): ToolCallStep
  */
 const createGroupedToolCallMessages = async (
   toolCalls: ToolCallWithResult[],
-  { resultTransformer }: { resultTransformer?: ToolCallResultTransformer } = {}
+  {
+    resultTransformer,
+    reasoningSteps = [],
+  }: { resultTransformer?: ToolCallResultTransformer; reasoningSteps?: ReasoningStep[] } = {}
 ): Promise<BaseMessage[]> => {
+  const groupId = toolCalls[0]?.tool_call_group_id;
+  const groupReasoning = groupId
+    ? reasoningSteps
+        .filter((s) => s.tool_call_group_id === groupId && !s.tool_call_id)
+        .map((s) => s.reasoning)
+        .join('\n')
+    : '';
+
   const aiMessage = new AIMessage({
-    content: '',
-    tool_calls: toolCalls.map((toolCall) => ({
-      id: toolCall.tool_call_id,
-      name: sanitizeToolId(toolCall.tool_id),
-      args: toolCall.params,
-      type: 'tool_call' as const,
-    })),
+    content: groupReasoning,
+    tool_calls: toolCalls.map((toolCall) => {
+      const stepReasoning = reasoningSteps
+        .filter((s) => s.tool_call_id === toolCall.tool_call_id)
+        .map((s) => s.reasoning)
+        .join('\n');
+      return {
+        id: toolCall.tool_call_id,
+        name: sanitizeToolId(toolCall.tool_id),
+        args: stepReasoning ? { _reasoning: stepReasoning, ...toolCall.params } : toolCall.params,
+        type: 'tool_call' as const,
+      };
+    }),
   });
 
   const toolMessages: ToolMessage[] = [];
