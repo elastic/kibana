@@ -330,7 +330,7 @@ export class SearchInterceptor {
     const search = ({
       abortSignal = searchAbortController.getSignal(),
       pollLength,
-    }: Pick<ISearchOptions, 'abortSignal' | 'pollLength'> = {}) => {
+    }: Pick<ISearchOptions, 'abortSignal'> & { pollLength?: string } = {}) => {
       const [{ isSearchStored }, afterPoll] = searchTracker?.beforePoll() ?? [
         { isSearchStored: false },
         () => {},
@@ -522,7 +522,7 @@ export class SearchInterceptor {
    */
   private runSearch(
     { params, ...request }: IKibanaSearchRequest,
-    options?: ISearchOptions
+    options?: ISearchOptions & { pollLength?: string }
   ): Promise<IKibanaSearchResponse> {
     const { abortSignal } = options || {};
 
