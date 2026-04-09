@@ -13,12 +13,12 @@ import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { UiamOAuthType } from '@kbn/core-security-server';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
-import { defineListOAuthConnectionsRoute } from './list_connections';
+import { defineGetOAuthClientRoute } from './get_client';
 import type { InternalAuthenticationServiceStart } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
 
-describe('List OAuth Connections route', () => {
+describe('Get OAuth Client route', () => {
   function getMockContext(
     licenseCheckResult: { state: string; message?: string } = { state: 'valid' }
   ) {
@@ -36,28 +36,51 @@ describe('List OAuth Connections route', () => {
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
     mockRouteDefinitionParams.getAuthenticationService.mockReturnValue(authc);
 
-    defineListOAuthConnectionsRoute(mockRouteDefinitionParams);
+    defineGetOAuthClientRoute(mockRouteDefinitionParams);
 
     const [, handler] = mockRouteDefinitionParams.router.get.mock.calls.find(
-      ([{ path }]) => path === '/internal/security/oauth/connections'
+      ([{ path }]) => path === '/internal/security/oauth/clients/{client_id}'
     )!;
     routeHandler = handler;
   });
 
-  it('returns connections list on success', async () => {
-    const mockResponse = {
-      connections: [{ id: 'conn1', client_id: 'c1', resource: 'urn:test' }],
-    };
-    oauthMock.listConnections.mockResolvedValue(mockResponse);
+  it('returns result of license checker', async () => {
+    const mockContext = getMockContext({ state: 'invalid', message: 'test forbidden message' });
+    const response = await routeHandler(
+      mockContext,
+      httpServerMock.createKibanaRequest(),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(403);
+    expect(response.payload).toEqual({ message: 'test forbidden message' });
+  });
+
+  it('returns single client on success', async () => {
+    const mockClient = { id: 'client-1', resource: 'urn:test', client_name: 'Test' };
+    oauthMock.listClients.mockResolvedValue({ clients: [mockClient] });
 
     const response = await routeHandler(
       getMockContext(),
-      httpServerMock.createKibanaRequest({ query: {} }),
+      httpServerMock.createKibanaRequest({ params: { client_id: 'client-1' } }),
       kibanaResponseFactory
     );
 
     expect(response.status).toBe(200);
-    expect(response.payload).toEqual(mockResponse);
+    expect(response.payload).toEqual(mockClient);
+    expect(oauthMock.listClients).toHaveBeenCalledWith(expect.anything(), 'client-1');
+  });
+
+  it('returns 404 when client is not found', async () => {
+    oauthMock.listClients.mockResolvedValue({ clients: [] });
+
+    const response = await routeHandler(
+      getMockContext(),
+      httpServerMock.createKibanaRequest({ params: { client_id: 'nonexistent' } }),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(404);
   });
 
   it('returns 404 when OAuth is not available', async () => {
@@ -65,7 +88,7 @@ describe('List OAuth Connections route', () => {
 
     const response = await routeHandler(
       getMockContext(),
-      httpServerMock.createKibanaRequest({ query: {} }),
+      httpServerMock.createKibanaRequest({ params: { client_id: 'client-1' } }),
       kibanaResponseFactory
     );
 
@@ -73,14 +96,14 @@ describe('List OAuth Connections route', () => {
   });
 
   it('returns error from service', async () => {
-    oauthMock.listConnections.mockRejectedValue(Boom.internal('Server error'));
+    oauthMock.listClients.mockRejectedValue(Boom.forbidden('Forbidden'));
 
     const response = await routeHandler(
       getMockContext(),
-      httpServerMock.createKibanaRequest({ query: {} }),
+      httpServerMock.createKibanaRequest({ params: { client_id: 'client-1' } }),
       kibanaResponseFactory
     );
 
-    expect(response.status).toBe(500);
+    expect(response.status).toBe(403);
   });
 });

@@ -51,13 +51,15 @@ export function defineUpdateOAuthClientRoute({
         const { oauth } = getAuthenticationService();
         if (!oauth) {
           return response.notFound({
-            body: { message: 'OAuth management is not available' },
+            body: { message: 'OAuth management is not available: UIAM is not configured' },
           });
         }
 
         const result = await oauth.updateClient(request, request.params.client_id, request.body);
         if (!result) {
-          return response.badRequest({ body: { message: 'OAuth management is not available' } });
+          return response.notFound({
+            body: { message: 'OAuth management is not available: security features are disabled' },
+          });
         }
 
         return response.ok({ body: result });

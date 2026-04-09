@@ -40,7 +40,7 @@ export function defineListOAuthConnectionsRoute({
         const { oauth } = getAuthenticationService();
         if (!oauth) {
           return response.notFound({
-            body: { message: 'OAuth management is not available' },
+            body: { message: 'OAuth management is not available: UIAM is not configured' },
           });
         }
 
@@ -50,7 +50,9 @@ export function defineListOAuthConnectionsRoute({
           request.query.connection_id
         );
         if (!result) {
-          return response.badRequest({ body: { message: 'OAuth management is not available' } });
+          return response.notFound({
+            body: { message: 'OAuth management is not available: security features are disabled' },
+          });
         }
 
         return response.ok({ body: result });

@@ -73,7 +73,7 @@ describe('Create OAuth Client route', () => {
   });
 
   it('returns 404 when OAuth is not available', async () => {
-    authc.oauth = null as any;
+    authc.oauth = null;
 
     const response = await routeHandler(
       getMockContext(),

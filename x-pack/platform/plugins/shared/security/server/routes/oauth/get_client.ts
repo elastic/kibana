@@ -11,13 +11,13 @@ import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
-export function defineCreateOAuthClientRoute({
+export function defineGetOAuthClientRoute({
   router,
   getAuthenticationService,
 }: RouteDefinitionParams) {
-  router.post(
+  router.get(
     {
-      path: '/internal/security/oauth/clients',
+      path: '/internal/security/oauth/clients/{client_id}',
       security: {
         authz: {
           enabled: false,
@@ -26,19 +26,8 @@ export function defineCreateOAuthClientRoute({
         },
       },
       validate: {
-        body: schema.object({
-          resource: schema.string(),
-          client_name: schema.maybe(schema.string()),
-          client_type: schema.maybe(
-            schema.oneOf([schema.literal('public'), schema.literal('confidential')])
-          ),
-          client_metadata: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-          client_logo: schema.maybe(
-            schema.object({
-              media_type: schema.string(),
-              data: schema.string(),
-            })
-          ),
+        params: schema.object({
+          client_id: schema.string(),
         }),
       },
       options: {
@@ -54,14 +43,21 @@ export function defineCreateOAuthClientRoute({
           });
         }
 
-        const result = await oauth.createClient(request, request.body);
+        const result = await oauth.listClients(request, request.params.client_id);
         if (!result) {
           return response.notFound({
             body: { message: 'OAuth management is not available: security features are disabled' },
           });
         }
 
-        return response.ok({ body: result });
+        const client = result.clients[0];
+        if (!client) {
+          return response.notFound({
+            body: { message: `OAuth client [${request.params.client_id}] not found` },
+          });
+        }
+
+        return response.ok({ body: client });
       } catch (error) {
         return response.customError(wrapIntoCustomErrorResponse(error));
       }
