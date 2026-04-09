@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { escapeStringValue } from '@kbn/esql-utils';
+import { escapeEsqlStringValue } from '@kbn/esql-utils';
 
 /**
  * The underlying data source for rule events.
@@ -19,4 +19,4 @@ export const RULE_EVENTS_ESQL_SOURCE = '.rule-events';
 export const RULE_EVENTS_ESQL_BASE_QUERY = `FROM ${RULE_EVENTS_ESQL_SOURCE}`;
 
 export const buildRuleEventsEsqlQuery = (ruleId: string): string =>
-  `${RULE_EVENTS_ESQL_BASE_QUERY} | WHERE rule.id == ${escapeStringValue(ruleId)}`;
+  `${RULE_EVENTS_ESQL_BASE_QUERY} | WHERE rule.id == ${escapeEsqlStringValue(ruleId)}`;

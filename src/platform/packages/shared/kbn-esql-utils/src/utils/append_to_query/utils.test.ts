@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { appendToESQLQuery, escapeStringValue } from './utils';
+import { appendToESQLQuery, escapeEsqlStringValue } from './utils';
 
 describe('appendToESQLQuery', () => {
   it('append the text on a new line after the query', () => {
@@ -26,32 +26,32 @@ describe('appendToESQLQuery', () => {
   });
 });
 
-describe('escapeStringValue', () => {
+describe('escapeEsqlStringValue', () => {
   it('wraps value in double quotes', () => {
-    expect(escapeStringValue('hello')).toBe('"hello"');
+    expect(escapeEsqlStringValue('hello')).toBe('"hello"');
   });
 
   it('escapes backslashes', () => {
-    expect(escapeStringValue('path\\to\\file')).toBe('"path\\\\to\\\\file"');
+    expect(escapeEsqlStringValue('path\\to\\file')).toBe('"path\\\\to\\\\file"');
   });
 
   it('escapes double quotes', () => {
-    expect(escapeStringValue('say "hello"')).toBe('"say \\"hello\\""');
+    expect(escapeEsqlStringValue('say "hello"')).toBe('"say \\"hello\\""');
   });
 
   it('escapes newlines', () => {
-    expect(escapeStringValue('line1\nline2')).toBe('"line1\\nline2"');
+    expect(escapeEsqlStringValue('line1\nline2')).toBe('"line1\\nline2"');
   });
 
   it('escapes carriage returns', () => {
-    expect(escapeStringValue('line1\rline2')).toBe('"line1\\rline2"');
+    expect(escapeEsqlStringValue('line1\rline2')).toBe('"line1\\rline2"');
   });
 
   it('escapes tabs', () => {
-    expect(escapeStringValue('col1\tcol2')).toBe('"col1\\tcol2"');
+    expect(escapeEsqlStringValue('col1\tcol2')).toBe('"col1\\tcol2"');
   });
 
   it('handles all special characters combined', () => {
-    expect(escapeStringValue('a\\b"c\nd\re\tf')).toBe('"a\\\\b\\"c\\nd\\re\\tf"');
+    expect(escapeEsqlStringValue('a\\b"c\nd\re\tf')).toBe('"a\\\\b\\"c\\nd\\re\\tf"');
   });
 });

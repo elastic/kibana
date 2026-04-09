@@ -30,7 +30,7 @@ import {
   BooleanRelation,
 } from '@kbn/es-query';
 import { sanitazeESQLInput } from './sanitaze_input';
-import { escapeStringValue } from './append_to_query/utils';
+import { escapeEsqlStringValue } from './append_to_query/utils';
 
 export interface FilterTranslationResult {
   /** Combined WHERE expression fragment (all translatable filters ANDed), empty string if none */
@@ -239,7 +239,7 @@ const translateQueryStringFilter = (filter: QueryStringFilter): string | null =>
     return null;
   }
 
-  return `QSTR(${escapeStringValue(queryString)})`;
+  return `QSTR(${escapeEsqlStringValue(queryString)})`;
 };
 
 const escapeFieldName = (fieldName: string): string => {
@@ -258,12 +258,12 @@ const formatRangeValue = (value: string | number): string => {
   if (!isNaN(num) && value.trim() !== '') {
     return String(num);
   }
-  return escapeStringValue(value);
+  return escapeEsqlStringValue(value);
 };
 
 const formatESQLValue = (value: string | number | boolean): string => {
   if (typeof value === 'string') {
-    return escapeStringValue(value);
+    return escapeEsqlStringValue(value);
   }
   return String(value);
 };

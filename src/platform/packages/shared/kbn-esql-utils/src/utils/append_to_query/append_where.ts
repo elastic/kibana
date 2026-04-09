@@ -12,7 +12,7 @@ import { Parser, Walker } from '@elastic/esql';
 import { sanitazeESQLInput } from '../sanitaze_input';
 import {
   getOperator,
-  escapeStringValue,
+  escapeEsqlStringValue,
   appendToESQLQuery,
   PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING,
   extractMatchFunctionDetails,
@@ -45,7 +45,7 @@ function createFilterExpression(
       return { expression: '', isMultiValue: true };
     }
     const matchClauses = value.map((val) => {
-      const escapedValue = typeof val === 'string' ? escapeStringValue(val) : val;
+      const escapedValue = typeof val === 'string' ? escapeEsqlStringValue(val) : val;
       return `MATCH(${fieldName}, ${escapedValue})`;
     });
 
@@ -61,7 +61,7 @@ function createFilterExpression(
   // Handle single values with standard operators
   const { operator } = getOperator(operation);
 
-  const filterValue = typeof value === 'string' ? escapeStringValue(value) : value;
+  const filterValue = typeof value === 'string' ? escapeEsqlStringValue(value) : value;
   let fieldName = sanitazeESQLInput(field);
 
   if (!fieldName) {
@@ -159,7 +159,7 @@ function handleExistingFilterForMultiValues(
           value.includes(details.literalValue)
         ) {
           const fieldName = sanitazeESQLInput(field);
-          const escapedValue = escapeStringValue(details.literalValue);
+          const escapedValue = escapeEsqlStringValue(details.literalValue);
           const matchString = `MATCH(${fieldName}, ${escapedValue})`;
           matchesToNegate.push(matchString);
         }
@@ -238,7 +238,7 @@ export function appendWhereClauseToESQLQuery(
     );
   }
   // Handles single value filters
-  const filterValue = typeof value === 'string' ? escapeStringValue(value) : value;
+  const filterValue = typeof value === 'string' ? escapeEsqlStringValue(value) : value;
 
   const shouldCheckFilterValue = whereAstText.includes(String(filterValue));
   if (whereAstText.includes(field) && shouldCheckFilterValue) {

@@ -72,7 +72,7 @@ export function getSupportedOperators(): SupportedOperators[] {
 /**
  * Escapes a string value for use in ES|QL queries by escaping special characters
  */
-export function escapeStringValue(val: string): string {
+export function escapeEsqlStringValue(val: string): string {
   return `"${val
     .replace(/\\/g, '\\\\')
     .replace(/\"/g, '\\"')
