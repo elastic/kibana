@@ -144,6 +144,18 @@ export function extendPlaywrightPage({
  * await page.gotoApp('discover);
  * ```
  */
+export function forwardBrowserConsoleLogs(page: Page, log: ScoutLogger) {
+  page.on('console', (msg) => {
+    const type = msg.type();
+    const text = msg.text();
+    if (type === 'error') {
+      log.error(`[browser:console] ${text}`);
+    } else if (type === 'warning') {
+      log.warning(`[browser:console] ${text}`);
+    }
+  });
+}
+
 export const scoutPageFixture = base.extend<
   { page: ScoutPage; log: ScoutLogger },
   { kbnUrl: KibanaUrl }
@@ -153,6 +165,7 @@ export const scoutPageFixture = base.extend<
     use: (extendedPage: ScoutPage) => Promise<void>
   ) => {
     const extendedPage = extendPlaywrightPage({ page, kbnUrl });
+    forwardBrowserConsoleLogs(page, log);
 
     log.serviceLoaded('scoutPage');
     await use(extendedPage);
