@@ -39,6 +39,16 @@ delete_baseline_archives() {
   find "$archive_dir" -type f -name "${old_version}_baseline_*.zip" -delete
 }
 
+run_skipped_test() {
+  local test_file="src/core/server/integration_tests/saved_objects/migrations/group1/create_test_archives.test.ts"
+  echo --- Temporarily unskipping and running "$test_file"
+  sed -i "s/describe\.skip(/describe(/" "$test_file"
+  local exit_code=0
+  node scripts/jest_integration.js -u "$test_file" || exit_code=$?
+  sed -i "s/describe(/describe.skip(/" "$test_file"
+  return "$exit_code"
+}
+
 store_old_version
 
 update_package_json_version
@@ -53,7 +63,7 @@ update_kibana_migrator_utils
 delete_baseline_archives
 
 # Run integration tests to update snapshots
-node scripts/jest_integration.js -u src/core/server/integration_tests/saved_objects/migrations/group1/create_test_archives.test.ts
+run_skipped_test
 node scripts/jest_integration.js -u src/core/server/integration_tests/saved_objects/migrations/group1/v2_migration.test.ts
 
 
