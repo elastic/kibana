@@ -72,28 +72,55 @@ function buildGroupingsWhereClauses(
   }, query);
 }
 
+type EsqlQueryBuilder = ReturnType<typeof esql.from>;
+type EsqlExpression = ReturnType<typeof esql.exp>;
+
+function buildApmEsqlQuery(
+  slo: SLOWithSummaryResponse,
+  transactionIndex: string,
+  params: Parameters<typeof buildBaseWhereClauses>[1],
+  {
+    preEvalWhere,
+    evalGoodCondition,
+    conditionGood,
+    conditionBad,
+  }: {
+    preEvalWhere?: (query: EsqlQueryBuilder) => EsqlQueryBuilder;
+    evalGoodCondition: EsqlExpression;
+    conditionGood: EsqlExpression;
+    conditionBad: EsqlExpression;
+  }
+): string {
+  let query = esql.from(transactionIndex);
+  query = buildBaseWhereClauses(query, params);
+  query = buildGroupingsWhereClauses(query, slo.groupings);
+  if (preEvalWhere) query = preEvalWhere(query);
+  query = query.pipe`EVAL ${esql.col(
+    SLO_EVENT_FILTER_VARIABLE
+  )} = CASE(${evalGoodCondition}, ${SLO_EVENT_GOOD}, ${SLO_EVENT_BAD})`;
+  query = query.pipe`WHERE (?${esql.col(
+    SLO_EVENT_FILTER_VARIABLE
+  )} == ${SLO_EVENT_BAD} AND ${conditionBad}) OR (?${esql.col(
+    SLO_EVENT_FILTER_VARIABLE
+  )} == ${SLO_EVENT_GOOD} AND ${conditionGood}) OR ?${esql.col(
+    SLO_EVENT_FILTER_VARIABLE
+  )} == ${SLO_EVENT_ALL}`;
+  return query.print();
+}
+
 function buildApmLatencyEsqlQuery(slo: SLOWithSummaryResponse, transactionIndex: string): string {
   if (!apmTransactionDurationIndicatorSchema.is(slo.indicator)) return '';
 
   const { params } = slo.indicator;
   // threshold is in ms, transaction.duration.us is in microseconds
   const thresholdUs = Math.trunc(params.threshold * 1000);
+  const col = esql.col(TRANSACTION_DURATION);
 
-  let query = esql.from(transactionIndex);
-  query = buildBaseWhereClauses(query, params);
-  query = buildGroupingsWhereClauses(query, slo.groupings);
-  query = query.pipe`EVAL ${esql.col(SLO_EVENT_FILTER_VARIABLE)} = CASE(${esql.col(
-    TRANSACTION_DURATION
-  )} <= ${thresholdUs}, ${SLO_EVENT_GOOD}, ${SLO_EVENT_BAD})`;
-  query = query.pipe`WHERE (?${esql.col(
-    SLO_EVENT_FILTER_VARIABLE
-  )} == ${SLO_EVENT_BAD} AND ${esql.col(TRANSACTION_DURATION)} > ${thresholdUs}) OR (?${esql.col(
-    SLO_EVENT_FILTER_VARIABLE
-  )} == ${SLO_EVENT_GOOD} AND ${esql.col(TRANSACTION_DURATION)} <= ${thresholdUs}) OR ?${esql.col(
-    SLO_EVENT_FILTER_VARIABLE
-  )} == ${SLO_EVENT_ALL}`;
-
-  return query.print();
+  return buildApmEsqlQuery(slo, transactionIndex, params, {
+    evalGoodCondition: esql.exp`${col} <= ${thresholdUs}`,
+    conditionGood: esql.exp`${col} <= ${thresholdUs}`,
+    conditionBad: esql.exp`${col} > ${thresholdUs}`,
+  });
 }
 
 function buildApmAvailabilityEsqlQuery(
@@ -103,23 +130,14 @@ function buildApmAvailabilityEsqlQuery(
   if (!apmTransactionErrorRateIndicatorSchema.is(slo.indicator)) return '';
 
   const { params } = slo.indicator;
+  const col = esql.col(EVENT_OUTCOME);
 
-  let query = esql.from(transactionIndex);
-  query = buildBaseWhereClauses(query, params);
-  query = buildGroupingsWhereClauses(query, slo.groupings);
-  query = query.where`${esql.col(EVENT_OUTCOME)} IN ("success", "failure")`;
-  query = query.pipe`EVAL ${esql.col(SLO_EVENT_FILTER_VARIABLE)} = CASE(${esql.col(
-    EVENT_OUTCOME
-  )} == "success", ${SLO_EVENT_GOOD}, ${SLO_EVENT_BAD})`;
-  query = query.pipe`WHERE (?${esql.col(
-    SLO_EVENT_FILTER_VARIABLE
-  )} == ${SLO_EVENT_BAD} AND ${esql.col(EVENT_OUTCOME)} == "failure") OR (?${esql.col(
-    SLO_EVENT_FILTER_VARIABLE
-  )} == ${SLO_EVENT_GOOD} AND ${esql.col(EVENT_OUTCOME)} == "success") OR ?${esql.col(
-    SLO_EVENT_FILTER_VARIABLE
-  )} == ${SLO_EVENT_ALL}`;
-
-  return query.print();
+  return buildApmEsqlQuery(slo, transactionIndex, params, {
+    preEvalWhere: (query) => query.where`${col} IN ("success", "failure")`,
+    evalGoodCondition: esql.exp`${col} == "success"`,
+    conditionGood: esql.exp`${col} == "success"`,
+    conditionBad: esql.exp`${col} == "failure"`,
+  });
 }
 
 function buildSloEventControl(selectedOption: SloEventType = SLO_EVENT_ALL) {
