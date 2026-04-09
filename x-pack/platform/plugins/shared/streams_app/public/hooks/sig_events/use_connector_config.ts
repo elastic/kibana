@@ -13,7 +13,7 @@ import {
 } from '@kbn/streams-schema';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { useEffect, useState } from 'react';
-import type { OnboardingConfig } from '../../components/sig_events/significant_events_discovery/components/streams_view/generate_split_button';
+import type { OnboardingConfig } from '../../components/sig_events/significant_events_discovery/components/streams_view/types';
 import { useAIFeatures } from '../use_ai_features';
 import { useInferenceFeatureConnectors } from './use_inference_feature_connectors';
 

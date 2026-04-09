@@ -223,15 +223,15 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
     });
   }, [onboardingStatusUpdateQueue, processStatusUpdateQueue, streamsListFetch.data]);
 
+  const isStreamActionable = (streamName: string) => {
+    const result = streamOnboardingResultMap[streamName];
+    if (!result) return false;
+    return ![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(result.status);
+  };
+
   const getActionableStreamNames = () =>
     selectedStreams
-      .filter((item) => {
-        const status = streamOnboardingResultMap[item.stream.name]?.status;
-        return (
-          status === undefined ||
-          ![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(status)
-        );
-      })
+      .filter((item) => isStreamActionable(item.stream.name))
       .map((item) => item.stream.name);
 
   const bulkScheduleOnboardingTask = async (
@@ -361,13 +361,7 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
           selection={{
             selected: selectedStreams,
             onSelectionChange: setSelectedStreams,
-            selectable: (row) => {
-              const status = streamOnboardingResultMap[row.stream.name]?.status;
-              return (
-                status === undefined ||
-                ![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(status)
-              );
-            },
+            selectable: (row) => isStreamActionable(row.stream.name),
           }}
           onOnboardStreamActionClick={onOnboardStreamActionClick}
           onStopOnboardingActionClick={onStopOnboardingActionClick}

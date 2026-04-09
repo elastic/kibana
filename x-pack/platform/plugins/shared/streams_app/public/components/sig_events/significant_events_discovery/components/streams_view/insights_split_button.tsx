@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiContextMenu, EuiSplitButton, useGeneratedHtmlId } from '@elastic/eui';
 import type { InferenceConnector } from '@kbn/inference-common';
-import { useBoolean } from '@kbn/react-hooks';
-import React, { useCallback, useMemo, useState } from 'react';
-import { ConnectorSubPanel } from './generate_split_button';
+import React, { useCallback } from 'react';
+import { ConnectorSubPanel } from './connector_sub_panel';
 import {
   CONNECTOR_LOAD_ERROR,
   DISCOVER_INSIGHTS_BUTTON_LABEL,
@@ -18,6 +16,8 @@ import {
 } from './translations';
 import { useModelSettingsUrl } from '../../../../../hooks/use_model_settings_url';
 import { buildConnectorMenuItem, buildModelSettingsMenuItems } from './context_menu_helpers';
+import { ContextMenuSplitButton } from './context_menu_split_button';
+import type { MenuHelpers } from './context_menu_split_button';
 
 interface InsightsSplitButtonProps {
   allConnectors: InferenceConnector[];
@@ -40,35 +40,17 @@ export const InsightsSplitButton = ({
   isLoading,
   isDisabled,
 }: InsightsSplitButtonProps) => {
-  const [isOpen, { off: close, toggle }] = useBoolean(false);
-  const [menuResetKey, setMenuResetKey] = useState(0);
-  const popoverId = useGeneratedHtmlId({ prefix: 'insightsConfigPopover' });
   const managementUrl = useModelSettingsUrl();
-
-  const resetMenu = useCallback(() => setMenuResetKey((k) => k + 1), []);
-
-  const handleClose = useCallback(() => {
-    close();
-    resetMenu();
-  }, [close, resetMenu]);
-
-  const handleConnectorSelect = useCallback(
-    (connectorId: string) => {
-      onConnectorChange(connectorId);
-      resetMenu();
-    },
-    [onConnectorChange, resetMenu]
-  );
 
   const discoveryConnector = allConnectors.find((c) => c.connectorId === displayConnectorId);
 
-  const contextMenuPanels = useMemo(
-    () => [
+  const buildPanels = useCallback(
+    ({ resetMenu, closeMenu }: MenuHelpers) => [
       {
         id: 0,
         items: [
           buildConnectorMenuItem(discoveryConnector, 1),
-          ...buildModelSettingsMenuItems(managementUrl, handleClose),
+          ...buildModelSettingsMenuItems(managementUrl, closeMenu),
         ],
       },
       {
@@ -80,7 +62,10 @@ export const InsightsSplitButton = ({
             connectors={allConnectors}
             resolvedConnectorId={resolvedConnectorId}
             selectedConnectorId={displayConnectorId}
-            onSelect={handleConnectorSelect}
+            onSelect={(connectorId: string) => {
+              onConnectorChange(connectorId);
+              resetMenu();
+            }}
           />
         ),
       },
@@ -88,52 +73,27 @@ export const InsightsSplitButton = ({
     [
       discoveryConnector,
       managementUrl,
-      handleClose,
       allConnectors,
       resolvedConnectorId,
       displayConnectorId,
-      handleConnectorSelect,
+      onConnectorChange,
     ]
   );
 
   return (
-    <EuiSplitButton
-      size="m"
+    <ContextMenuSplitButton
+      primaryLabel={DISCOVER_INSIGHTS_BUTTON_LABEL}
+      onPrimaryClick={onRun}
+      isPrimaryDisabled={isDisabled || isLoading}
+      primaryDataTestSubj="significant_events_discover_insights_button"
+      secondaryAriaLabel={DISCOVER_INSIGHTS_CONFIG_ARIA_LABEL}
+      secondaryDataTestSubj="significant_events_insights_connector_trigger"
+      buildPanels={buildPanels}
+      error={connectorError}
+      errorTitle={CONNECTOR_LOAD_ERROR}
       color="text"
       isLoading={isLoading}
       data-test-subj="significant_events_discover_insights_split_button"
-    >
-      <EuiSplitButton.ActionPrimary
-        onClick={onRun}
-        isDisabled={isDisabled}
-        data-test-subj="significant_events_discover_insights_button"
-      >
-        {DISCOVER_INSIGHTS_BUTTON_LABEL}
-      </EuiSplitButton.ActionPrimary>
-      <EuiSplitButton.ActionSecondary
-        iconType="arrowDown"
-        aria-label={DISCOVER_INSIGHTS_CONFIG_ARIA_LABEL}
-        data-test-subj="significant_events_insights_connector_trigger"
-        onClick={toggle}
-        popoverProps={{
-          id: popoverId,
-          isOpen,
-          closePopover: handleClose,
-          anchorPosition: 'downRight',
-          panelPaddingSize: 'none',
-          children: connectorError ? (
-            <EuiCallOut
-              announceOnMount
-              color="danger"
-              size="s"
-              title={CONNECTOR_LOAD_ERROR}
-              css={{ margin: 8 }}
-            />
-          ) : (
-            <EuiContextMenu key={menuResetKey} initialPanelId={0} panels={contextMenuPanels} />
-          ),
-        }}
-      />
-    </EuiSplitButton>
+    />
   );
 };
