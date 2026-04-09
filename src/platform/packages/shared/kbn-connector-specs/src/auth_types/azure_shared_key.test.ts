@@ -114,6 +114,28 @@ describe('Azure Shared Key auth', () => {
     });
   });
 
+  describe('getRequestUrl (via interceptor)', () => {
+    it('throws if query params are embedded in the URL string', async () => {
+      const axiosInstance = axios.create();
+      const mockCtx = {
+        logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+        getCustomHostSettings: () => undefined,
+        getToken: async () => null,
+        proxySettings: undefined,
+        sslSettings: { verificationMode: 'full' as const },
+      } as unknown as AuthContext;
+
+      await AzureSharedKeyAuth.configure(mockCtx, axiosInstance, {
+        accountName: 'myaccount',
+        accountKey: 'dGVzdGtleQ==',
+      });
+
+      await expect(
+        axiosInstance.get('https://myaccount.blob.core.windows.net/?comp=list')
+      ).rejects.toThrow('query params must be passed via config.params');
+    });
+  });
+
   describe('buildCanonicalizedHeaders', () => {
     it('includes only x-ms-* headers, lowercased and sorted', () => {
       const headers: Record<string, string> = {

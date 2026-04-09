@@ -113,14 +113,12 @@ function getRequestUrl(config: InternalAxiosRequestConfig): {
     throw new Error('[azure-shared-key] an absolute URL is required for request signing');
   }
   const parsed = new URL(urlPath);
+  if (parsed.search) {
+    throw new Error(
+      '[azure-shared-key] query params must be passed via config.params, not embedded in the URL string'
+    );
+  }
   const searchParams: Record<string, string> = {};
-  parsed.searchParams.forEach((value, key) => {
-    searchParams[key] = value;
-  });
-  // Merge in config.params (axios sends these as query string; they may not be in url yet).
-  // Assumption: params are only ever passed via config.params, never embedded in the URL string
-  // directly. If both carry the same key, config.params wins — this must match axios's own merge
-  // behaviour, otherwise the canonical resource will diverge from the actual request URL → 403.
   const params = config.params as Record<string, unknown> | undefined;
   if (params && typeof params === 'object') {
     for (const [key, value] of Object.entries(params)) {
