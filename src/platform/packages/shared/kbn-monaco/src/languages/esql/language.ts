@@ -171,6 +171,7 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
         model: monaco.editor.ITextModel,
         position: monaco.Position
       ): Promise<monaco.languages.CompletionList> {
+        // Avoid returning suggestions for unfocused editors sharing the same model.
         const editors = monaco.editor.getEditors().filter((editor) => editor.getModel() === model);
         const modelHasTextFocus =
           editors.length === 0 || editors.some((editor) => editor.hasTextFocus());
