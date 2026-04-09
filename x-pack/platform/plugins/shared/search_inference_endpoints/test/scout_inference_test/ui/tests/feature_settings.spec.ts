@@ -146,11 +146,7 @@ test.describe(
         await test.step('typing a search term reduces the list', async () => {
           const countBeforeSearch = await featureSettings.addModelOptions.count();
           await featureSettings.addModelSearch.fill('anthropic');
-          await expect
-            .poll(() => featureSettings.addModelOptions.count(), {
-              message: 'Expected filtered options to be fewer than initial',
-            })
-            .toBeLessThan(countBeforeSearch);
+          await expect(featureSettings.addModelOptions).not.toHaveCount(countBeforeSearch);
           await expect(featureSettings.addModelOptions).not.toHaveCount(0);
         });
       } finally {
