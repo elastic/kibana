@@ -909,10 +909,7 @@ run(
       default: {
         fix: true,
       },
-      help: `
-${VALIDATION_RUN_HELP}
-      --no-fix               Disable lint auto-fix
-      `,
+      help: [...VALIDATION_RUN_HELP, { flag: '--no-fix', description: 'Disable lint auto-fix' }],
     },
   }
 );

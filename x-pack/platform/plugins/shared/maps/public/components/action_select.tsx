@@ -63,7 +63,9 @@ export class ActionSelect extends Component<Props, State> {
         value: action.id,
         inputDisplay: (
           <div>
-            {iconType ? <EuiIcon className="mapActionSelectIcon" type={iconType} /> : null}
+            {iconType ? (
+              <EuiIcon className="mapActionSelectIcon" type={iconType} aria-hidden={true} />
+            ) : null}
             {action.getDisplayName(actionContext)}
           </div>
         ),
