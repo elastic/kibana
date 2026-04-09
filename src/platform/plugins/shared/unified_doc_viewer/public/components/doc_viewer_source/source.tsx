@@ -41,8 +41,8 @@ interface SourceViewerProps {
 }
 
 interface SourceViewerRestorableState {
-  // Fetched JSON for the current doc
-  jsonValue: string;
+  // Fetched JSON keyed by doc identity
+  jsonByDoc: { docKey: string; value: string } | null;
   // JSON viewer scroll position
   viewerScrollTop: number;
 }
@@ -63,16 +63,20 @@ const InternalDocViewerSource = ({
   onRefresh,
 }: SourceViewerProps) => {
   const styles = useMemoCss(componentStyles);
+  const currentDocKey = `${index ?? ''}:${id}`;
 
   const [editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor>();
   const [editorHeight, setEditorHeight] = useState<number>();
-  const [jsonValue, setJsonValue] = useRestorableState('jsonValue', '');
+  const [jsonByDoc, setJsonByDoc] = useRestorableState('jsonByDoc', null);
+  const isCurrentDocJsonCached = jsonByDoc?.docKey === currentDocKey;
+  const jsonValue = isCurrentDocJsonCached ? jsonByDoc.value : '';
+
   const [requestState, hit] = useEsDocSearch({
     id,
     index,
     dataView,
     esqlHit,
-    skip: jsonValue !== '',
+    skip: isCurrentDocJsonCached && jsonByDoc.value !== '',
   });
 
   const scrollTopRef = useRestorableRef('viewerScrollTop', 0);
@@ -80,9 +84,12 @@ const InternalDocViewerSource = ({
 
   useEffect(() => {
     if (requestState === ElasticRequestState.Found && hit) {
-      setJsonValue(JSON.stringify(omit(hit.raw, '_score'), undefined, 2));
+      setJsonByDoc({
+        docKey: currentDocKey,
+        value: JSON.stringify(omit(hit.raw, '_score'), undefined, 2),
+      });
     }
-  }, [requestState, hit, setJsonValue]);
+  }, [requestState, hit, currentDocKey, setJsonByDoc]);
 
   // setting editor height to fill the available space of the document flyout
   useEffect(() => {

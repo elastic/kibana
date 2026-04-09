@@ -129,4 +129,94 @@ describe('Source Viewer component', () => {
     expect(jsonCodeEditor.props().jsonValue).toContain('message');
     expect(jsonCodeEditor.props().jsonValue).toContain('_id');
   });
+
+  test('updates JSON content when switching to a different document', () => {
+    jest.spyOn(hooks, 'useEsDocSearch').mockImplementation(({ id, index, skip }) => {
+      if (skip) {
+        return [2, null, () => {}];
+      }
+
+      const mockHit = buildDataTableRecord({
+        _index: index,
+        _id: id,
+        _source: {
+          message: `message-${index}-${id}`,
+        },
+      });
+
+      return [2, mockHit, () => {}];
+    });
+
+    const comp = mountWithIntl(
+      <DocViewerSource
+        id={'1'}
+        index={'index1'}
+        dataView={mockDataView}
+        width={123}
+        onRefresh={() => {}}
+      />
+    );
+
+    let jsonCodeEditor = comp.find(JsonCodeEditorCommon);
+    expect(jsonCodeEditor.props().jsonValue).toContain('message-index1-1');
+
+    comp.setProps({
+      id: '1',
+      index: 'index2',
+      dataView: mockDataView,
+      width: 123,
+      onRefresh: () => {},
+    });
+    comp.update();
+
+    jsonCodeEditor = comp.find(JsonCodeEditorCommon);
+    expect(jsonCodeEditor.props().jsonValue).toContain('message-index2-1');
+    expect(jsonCodeEditor.props().jsonValue).not.toContain('message-index1-1');
+  });
+
+  test('skips fetching JSON if the document is cached', () => {
+    let hasFetchedForDoc = false;
+
+    jest.spyOn(hooks, 'useEsDocSearch').mockImplementation(({ id, index, skip }) => {
+      if (!hasFetchedForDoc) {
+        hasFetchedForDoc = true;
+        expect(skip).toBe(false);
+
+        const mockHit = buildDataTableRecord({
+          _index: index,
+          _id: id,
+          _source: {
+            message: `message-${index}-${id}`,
+          },
+        });
+
+        return [2, mockHit, () => {}];
+      }
+
+      expect(skip).toBe(true);
+      return [2, null, () => {}];
+    });
+
+    const comp = mountWithIntl(
+      <DocViewerSource
+        id={'1'}
+        index={'index1'}
+        dataView={mockDataView}
+        width={123}
+        onRefresh={() => {}}
+      />
+    );
+
+    comp.setProps({
+      id: '1',
+      index: 'index1',
+      dataView: mockDataView,
+      width: 124,
+      onRefresh: () => {},
+    });
+    comp.update();
+
+    const jsonCodeEditor = comp.find(JsonCodeEditorCommon);
+    expect(jsonCodeEditor.props().jsonValue).toContain('message-index1-1');
+  });
 });
