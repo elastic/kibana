@@ -17,7 +17,7 @@ import type {
   RuleCreateProps,
 } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { getStepsData } from '../../../../common/helpers';
-import { AiRuleCreationEventTypes } from '../../../../../common/lib/telemetry/types';
+import { RuleCreationEventTypes } from '../../../../../common/lib/telemetry/types';
 import type { FormHook } from '../../../../../shared_imports';
 import type {
   DefineStepRule,
@@ -116,7 +116,7 @@ export const useAgentBuilderRuleCreation = ({
 
       const session = aiRuleCreation.getSession() ?? aiRuleCreation.startSession();
       aiRuleCreation.incrementApplyCount();
-      telemetry.reportEvent(AiRuleCreationEventTypes.AppliedToForm, {
+      telemetry.reportEvent(RuleCreationEventTypes.AiAppliedToForm, {
         ruleType: rule.type,
         sessionId: session.sessionId,
         durationSinceSessionStartMs: Date.now() - session.startTimestamp,

@@ -82,7 +82,7 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 import { AddRuleAttachmentToChatButton } from '../../components/add_rule_attachment_to_chat_button';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useAgentBuilderRuleCreation } from '../rule_creation/hooks/use_agent_builder_rule_creation';
-import { AiRuleCreationEventTypes } from '../../../../common/lib/telemetry/types';
+import { RuleCreationEventTypes } from '../../../../common/lib/telemetry/types';
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const { addSuccess } = useAppToasts();
@@ -426,15 +426,17 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
       ...(ruleId ? { id: ruleId } : {}),
     });
 
-    if (isAiRuleUpdateRef.current) {
-      const session = aiRuleCreation.getSession();
-      telemetry.reportEvent(AiRuleCreationEventTypes.RuleEdited, {
-        sessionId: session?.sessionId ?? '',
-        ruleType: updatedRule.type,
-        enabled: updatedRule.enabled,
-        numberOfEdits: session?.applyCount ?? 0,
-        durationSinceSessionStartMs: session ? Date.now() - session.startTimestamp : 0,
-      });
+    const aiSession = aiRuleCreation.getSession();
+    const isAiEdited = isAiRuleUpdateRef.current;
+    telemetry.reportEvent(RuleCreationEventTypes.RuleEdited, {
+      creationSource: isAiEdited ? 'ai' : 'manual',
+      sessionId: aiSession?.sessionId ?? '',
+      ruleType: updatedRule.type,
+      enabled: updatedRule.enabled,
+      numberOfAiEdits: aiSession?.applyCount ?? 0,
+      durationSinceSessionStartMs: aiSession ? Date.now() - aiSession.startTimestamp : 0,
+    });
+    if (isAiEdited) {
       aiRuleCreation.clearSession();
     }
 

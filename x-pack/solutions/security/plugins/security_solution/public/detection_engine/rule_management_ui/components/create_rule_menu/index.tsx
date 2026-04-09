@@ -24,7 +24,7 @@ import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { SecurityPageName } from '../../../../app/types';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import { useKibana } from '../../../../common/lib/kibana';
-import { AiRuleCreationEventTypes } from '../../../../common/lib/telemetry/types';
+import { RuleCreationEventTypes } from '../../../../common/lib/telemetry/types';
 import { useSecurityAgentId } from '../../../../agent_builder/hooks/use_security_agent_id';
 import {
   NEW_FEATURES_TOUR_STORAGE_KEYS,
@@ -135,7 +135,8 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
     closePopover();
 
     const session = aiRuleCreation.startSession();
-    telemetry.reportEvent(AiRuleCreationEventTypes.CreationInitialized, {
+    telemetry.reportEvent(RuleCreationEventTypes.CreationInitialized, {
+      creationSource: 'ai',
       sessionId: session.sessionId,
     });
 
