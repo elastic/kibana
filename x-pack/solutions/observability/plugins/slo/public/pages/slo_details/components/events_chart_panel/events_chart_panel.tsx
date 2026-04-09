@@ -16,13 +16,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  apmTransactionDurationIndicatorSchema,
-  apmTransactionErrorRateIndicatorSchema,
-  type SLOWithSummaryResponse,
-} from '@kbn/slo-schema';
+import { type SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { TimeRange } from '@kbn/es-query';
 import React, { useCallback, useMemo } from 'react';
+import { isApmIndicatorType } from '../../../../utils/slo/indicator';
 import { useGetPreviewData } from '../../../../hooks/use_get_preview_data';
 import { useFetchApmIndices } from '../../../../hooks/use_fetch_apm_indices';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -45,9 +42,7 @@ export interface Props {
 export function EventsChartPanel({ slo, range, dynamicTimeRange = false, onBrushed }: Props) {
   const { discover, uiSettings } = useKibana().services;
 
-  const isApmSlo =
-    apmTransactionDurationIndicatorSchema.is(slo.indicator) ||
-    apmTransactionErrorRateIndicatorSchema.is(slo.indicator);
+  const isApmSlo = isApmIndicatorType(slo.indicator);
 
   const {
     data: { transaction: transactionIndex },
