@@ -39,7 +39,7 @@ export async function requestOAuthAuthorizationCodeToken(
   logger: Logger,
   params: AuthorizationCodeOAuthRequestParams,
   configurationUtilities: ActionsConfigurationUtilities,
-  useBasicAuth: boolean = true,
+  useBasicAuth: boolean = true, // Default to true (OAuth 2.0 recommended practice)
   tokenResponseOptions?: TokenResponseOptions
 ): Promise<OAuthTokenResponse> {
   return await requestOAuthToken<AuthorizationCodeOAuthRequestParams>(

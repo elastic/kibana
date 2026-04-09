@@ -32,13 +32,13 @@ const authSchema = z
       hidden: true, // Hidden from UI - uses connector spec defaults
     }),
     scopeParamName: z.string().optional().meta({
-      hidden: true, // Override the authorization URL query param name (default: 'scope')
+      hidden: true, // Override the authorization URL query param name (falls back to 'scope')
     }),
     accessTokenPath: z.string().optional().meta({
-      hidden: true, // JSON path for access_token in the token response (default: 'access_token')
+      hidden: true, // JSON path for access_token in the token response (falls back to 'access_token')
     }),
     tokenTypePath: z.string().optional().meta({
-      hidden: true, // JSON path for token_type in the token response (default: 'token_type')
+      hidden: true, // JSON path for token_type in the token response (falls back to 'token_type')
     }),
     tokenType: z.string().optional().meta({
       hidden: true, // Literal token type for Authorization header, bypasses response extraction

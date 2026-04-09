@@ -94,6 +94,16 @@ interface ConstructorOptions {
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
 }
 
+const RESERVED_AUTH_URL_PARAMS = new Set([
+  'client_id',
+  'response_type',
+  'redirect_uri',
+  'state',
+  'code_challenge',
+  'code_challenge_method',
+  'scope',
+]);
+
 /**
  * Service for handling OAuth2 Authorization Code flow operations
  *
@@ -241,6 +251,11 @@ export class OAuthAuthorizationService {
     authUrl.searchParams.set('code_challenge_method', 'S256');
 
     if (scope) {
+      if (scopeParamName && RESERVED_AUTH_URL_PARAMS.has(scopeParamName)) {
+        throw new Error(
+          `scopeParamName "${scopeParamName}" conflicts with a reserved OAuth parameter`
+        );
+      }
       authUrl.searchParams.set(scopeParamName ?? 'scope', scope);
     }
 

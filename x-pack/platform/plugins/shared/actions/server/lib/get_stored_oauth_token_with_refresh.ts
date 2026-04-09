@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { capitalize, get } from 'lodash';
+import { get } from 'lodash';
 import pLimit from 'p-limit';
 import type { Logger } from '@kbn/core/server';
 import type { OAuthTokenResponse } from './request_oauth_token';
@@ -170,7 +170,7 @@ export const getStoredTokenWithRefresh = async ({
     try {
       const tokenResult = await refreshFn(storedRefreshToken);
 
-      const newAccessToken = `${capitalize(tokenResult.tokenType)} ${tokenResult.accessToken}`;
+      const newAccessToken = `${tokenResult.tokenType} ${tokenResult.accessToken}`;
 
       const updatedRefreshToken: string | undefined =
         tokenResult.refreshToken ?? storedRefreshToken;

@@ -362,6 +362,25 @@ describe('OAuthAuthorizationService', () => {
       expect(parsed.searchParams.get('user_scope')).toBe('channels:read chat:write');
     });
 
+    it.each(['client_id', 'response_type', 'redirect_uri', 'state', 'code_challenge', 'scope'])(
+      'throws when scopeParamName is the reserved param "%s"',
+      (reserved) => {
+        const service = createService();
+
+        expect(() =>
+          service.buildAuthorizationUrl({
+            baseAuthorizationUrl: 'https://provider.example.com/authorize',
+            clientId: 'my-client-id',
+            scope: 'openid',
+            scopeParamName: reserved,
+            redirectUri: 'https://kibana.example.com/callback',
+            state: 'state-value',
+            codeChallenge: 'challenge-value',
+          })
+        ).toThrow(`scopeParamName "${reserved}" conflicts with a reserved OAuth parameter`);
+      }
+    );
+
     it('defaults to scope param name when scopeParamName is undefined', () => {
       const service = createService();
 

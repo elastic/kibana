@@ -654,7 +654,7 @@ describe('oauthCallbackRoute', () => {
 
     expect(mockConnectorTokenClientInstance.createWithRefreshToken).toHaveBeenCalledWith(
       expect.objectContaining({
-        accessToken: 'Bearer xoxp-slack-user-token',
+        accessToken: 'bearer xoxp-slack-user-token',
       })
     );
 

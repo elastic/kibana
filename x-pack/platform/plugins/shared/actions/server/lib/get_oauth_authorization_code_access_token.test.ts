@@ -317,6 +317,38 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
       });
     });
 
+    it('forwards tokenResponseOptions to requestOAuthRefreshToken', async () => {
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: expiredToken,
+      });
+      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+
+      const tokenResponseOptions = {
+        accessTokenPath: 'authed_user.access_token',
+        tokenTypePath: 'authed_user.token_type',
+        tokenType: 'Bearer',
+      };
+
+      await getOAuthAuthorizationCodeAccessToken({
+        ...baseOpts,
+        tokenResponseOptions,
+      });
+
+      expect(requestOAuthRefreshToken).toHaveBeenCalledWith(
+        'https://auth.example.com/oauth/token',
+        logger,
+        expect.objectContaining({
+          refreshToken: 'stored-refresh-token',
+          clientId: 'my-client-id',
+          clientSecret: 'my-client-secret',
+        }),
+        configurationUtilities,
+        true,
+        tokenResponseOptions
+      );
+    });
+
     it('falls back to the existing refresh token when the response omits one', async () => {
       connectorTokenClient.get.mockResolvedValueOnce({
         hasErrors: false,
@@ -459,6 +491,36 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
         expect.any(Object),
         expect.any(Boolean),
         undefined
+      );
+      expect(result).toBe('Bearer new-access-token');
+    });
+
+    it('forwards tokenResponseOptions to requestOAuthRefreshToken for per-user token refresh', async () => {
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: expiredPerUserToken,
+      });
+      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+
+      const tokenResponseOptions = {
+        accessTokenPath: 'authed_user.access_token',
+        tokenType: 'Bearer',
+      };
+
+      const result = await getOAuthAuthorizationCodeAccessToken({
+        ...baseOpts,
+        authMode: 'per-user',
+        profileUid: 'profile-1',
+        tokenResponseOptions,
+      });
+
+      expect(requestOAuthRefreshToken).toHaveBeenCalledWith(
+        'https://auth.example.com/oauth/token',
+        expect.any(Object),
+        expect.objectContaining({ refreshToken: 'stored-per-user-refresh-token' }),
+        expect.any(Object),
+        true,
+        tokenResponseOptions
       );
       expect(result).toBe('Bearer new-access-token');
     });

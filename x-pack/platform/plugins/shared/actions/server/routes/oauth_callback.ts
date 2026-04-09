@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { capitalize, escape } from 'lodash';
+import { escape } from 'lodash';
 import { OAuthAuthorizationService } from '../lib';
 import type { ActionsPluginsStart } from '../plugin';
 import type { ILicenseState } from '../lib';
@@ -623,7 +623,7 @@ export const oauthCallbackRoute = (
             tokenType: 'access_token',
             profileUid,
           });
-          const formattedToken = `${capitalize(tokenResult.tokenType)} ${tokenResult.accessToken}`;
+          const formattedToken = `${tokenResult.tokenType} ${tokenResult.accessToken}`;
           await userConnectorTokenClient.createWithRefreshToken({
             connectorId: stateConnectorId,
             accessToken: formattedToken,

@@ -394,6 +394,131 @@ describe('requestOAuthToken', () => {
     });
   });
 
+  test('siblingOrRoot falls back to top-level when nested sibling fields are absent', async () => {
+    const configurationUtilities = actionsConfigMock.create();
+    axiosInstanceMock.mockReturnValueOnce({
+      status: 200,
+      data: {
+        ok: true,
+        authed_user: {
+          access_token: 'xoxp-user-token',
+          token_type: 'bearer',
+        },
+        expires_in: 43200,
+        refresh_token: 'top-level-refresh',
+        refresh_token_expires_in: 604800,
+      },
+    });
+
+    const result = await requestOAuthToken<TestOAuthRequestParams>(
+      'https://slack.com/api/oauth.v2.access',
+      'authorization_code',
+      configurationUtilities,
+      mockLogger,
+      { client_id: 'slack-client', client_secret: 'slack-secret' },
+      false,
+      { accessTokenPath: 'authed_user.access_token', tokenTypePath: 'authed_user.token_type' }
+    );
+
+    expect(result).toEqual({
+      tokenType: 'bearer',
+      accessToken: 'xoxp-user-token',
+      expiresIn: 43200,
+      refreshToken: 'top-level-refresh',
+      refreshTokenExpiresIn: 604800,
+    });
+  });
+
+  test('siblingOrRoot prefers nested sibling over top-level when both exist', async () => {
+    const configurationUtilities = actionsConfigMock.create();
+    axiosInstanceMock.mockReturnValueOnce({
+      status: 200,
+      data: {
+        authed_user: {
+          access_token: 'nested-token',
+          token_type: 'bearer',
+          expires_in: 100,
+          refresh_token: 'nested-refresh',
+        },
+        expires_in: 999,
+        refresh_token: 'top-refresh',
+      },
+    });
+
+    const result = await requestOAuthToken<TestOAuthRequestParams>(
+      'https://test',
+      'authorization_code',
+      configurationUtilities,
+      mockLogger,
+      { client_id: 'id', client_secret: 'secret' },
+      false,
+      { accessTokenPath: 'authed_user.access_token', tokenTypePath: 'authed_user.token_type' }
+    );
+
+    expect(result).toEqual({
+      tokenType: 'bearer',
+      accessToken: 'nested-token',
+      expiresIn: 100,
+      refreshToken: 'nested-refresh',
+      refreshTokenExpiresIn: undefined,
+    });
+  });
+
+  test('siblingOrRoot reads from top-level when accessTokenPath is not nested', async () => {
+    const configurationUtilities = actionsConfigMock.create();
+    axiosInstanceMock.mockReturnValueOnce({
+      status: 200,
+      data: {
+        access_token: 'flat-token',
+        token_type: 'Bearer',
+        expires_in: 3600,
+        refresh_token: 'flat-refresh',
+        refresh_expires_in: 86400,
+      },
+    });
+
+    const result = await requestOAuthToken<TestOAuthRequestParams>(
+      'https://test',
+      'authorization_code',
+      configurationUtilities,
+      mockLogger,
+      { client_id: 'id', client_secret: 'secret' },
+      false,
+      { accessTokenPath: 'access_token' }
+    );
+
+    expect(result).toEqual({
+      tokenType: 'Bearer',
+      accessToken: 'flat-token',
+      expiresIn: 3600,
+      refreshToken: 'flat-refresh',
+      refreshTokenExpiresIn: 86400,
+    });
+  });
+
+  test('siblingOrRoot resolves refresh_expires_in falling back to refresh_token_expires_in', async () => {
+    const configurationUtilities = actionsConfigMock.create();
+    axiosInstanceMock.mockReturnValueOnce({
+      status: 200,
+      data: {
+        access_token: 'token',
+        token_type: 'Bearer',
+        refresh_token: 'refresh',
+        refresh_token_expires_in: 604800,
+      },
+    });
+
+    const result = await requestOAuthToken<TestOAuthRequestParams>(
+      'https://test',
+      'authorization_code',
+      configurationUtilities,
+      mockLogger,
+      { client_id: 'id', client_secret: 'secret' }
+    );
+
+    expect(result.refreshTokenExpiresIn).toBe(604800);
+  });
+
   test('uses tokenType literal override instead of extracting from response', async () => {
     const configurationUtilities = actionsConfigMock.create();
     axiosInstanceMock.mockReturnValueOnce({
