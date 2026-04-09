@@ -29,18 +29,18 @@ describe('resolveUserAuthStatusForConnector', () => {
     const status = await resolveUserAuthStatusForConnector({
       authMode: 'shared',
       connectorId: 'c1',
-      profileUids: ['p1'],
+      profileUid: 'p1',
       savedObjectsClient,
     });
     expect(status).toBe('not_applicable');
     expect(getUserTokenConnectorsSoMock).not.toHaveBeenCalled();
   });
 
-  it('returns not_connected when authMode is per-user but profileUids is empty', async () => {
+  it('returns not_connected when authMode is per-user but profileUid is undefined', async () => {
     const status = await resolveUserAuthStatusForConnector({
       authMode: 'per-user',
       connectorId: 'c1',
-      profileUids: [],
+      profileUid: undefined,
       savedObjectsClient,
     });
     expect(status).toBe('not_connected');
@@ -52,7 +52,7 @@ describe('resolveUserAuthStatusForConnector', () => {
     const status = await resolveUserAuthStatusForConnector({
       authMode: 'per-user',
       connectorId: 'c1',
-      profileUids: ['p1'],
+      profileUid: 'p1',
       savedObjectsClient,
     });
     expect(status).toBe('connected');
@@ -67,7 +67,7 @@ describe('resolveUserAuthStatusForConnector', () => {
     const status = await resolveUserAuthStatusForConnector({
       authMode: 'per-user',
       connectorId: 'c1',
-      profileUids: ['p1'],
+      profileUid: 'p1',
       savedObjectsClient,
     });
     expect(status).toBe('not_connected');

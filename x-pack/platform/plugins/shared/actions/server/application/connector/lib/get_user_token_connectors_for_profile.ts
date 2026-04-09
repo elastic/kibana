@@ -9,26 +9,19 @@ import type { SavedObjectClientForFind } from '../../../data/connector/types/par
 import { getUserTokenConnectorsSo } from '../../../data/connector/get_user_token_connectors_so';
 import type { GetUserTokenConnectorsSoResult } from '../../../data/connector/types';
 
-export async function mergeUserTokenConnectorsForProfiles({
+export async function getUserTokenConnectorsForProfile({
   savedObjectsClient,
-  profileUids,
+  profileUid,
 }: {
   savedObjectsClient: SavedObjectClientForFind;
-  profileUids: string[];
+  profileUid: string | undefined;
 }): Promise<GetUserTokenConnectorsSoResult> {
-  const uniqueUids = [...new Set(profileUids.filter(Boolean))];
-  if (uniqueUids.length === 0) {
+  if (!profileUid) {
     return { connectorIds: [] };
   }
 
-  const connectorIdSet = new Set<string>();
-  for (const profileUid of uniqueUids) {
-    const { connectorIds } = await getUserTokenConnectorsSo({
-      savedObjectsClient,
-      profileUid,
-    });
-    connectorIds.forEach((id) => connectorIdSet.add(id));
-  }
-
-  return { connectorIds: [...connectorIdSet] };
+  return getUserTokenConnectorsSo({
+    savedObjectsClient,
+    profileUid,
+  });
 }

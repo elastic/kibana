@@ -10,7 +10,7 @@ import { findConnectorsSo } from '../../../../data/connector';
 import type { GetUserTokenConnectorsSoResult } from '../../../../data/connector/types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { getAuthMode } from '../../lib/get_auth_mode';
-import { mergeUserTokenConnectorsForProfiles, resolveProfileUidForRequest } from '../../lib';
+import { getUserTokenConnectorsForProfile, resolveProfileUidForRequest } from '../../lib';
 import { filterInferenceConnectors } from '../get_all/get_all';
 import type { GetAuthStatusParams, GetAuthStatusResult } from './types';
 import type { Connector } from '../../types';
@@ -49,11 +49,10 @@ export async function getAuthStatus({
     getCurrentUser: context.getCurrentUser,
     getCurrentUserProfileIdFromAPIKey: context.getCurrentUserProfileIdFromAPIKey,
   });
-  const profileUids = profileUid ? [profileUid] : [];
 
-  const userTokenConnectors = await mergeUserTokenConnectorsForProfiles({
+  const userTokenConnectors = await getUserTokenConnectorsForProfile({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
-    profileUids,
+    profileUid,
   });
 
   const isUnsetOrDefaultSpace = !context.spaceId || context.spaceId === 'default';

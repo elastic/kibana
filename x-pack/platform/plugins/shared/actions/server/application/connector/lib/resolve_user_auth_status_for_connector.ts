@@ -7,28 +7,28 @@
 
 import type { SavedObjectClientForFind } from '../../../data/connector/types/params';
 import type { Connector } from '../types';
-import { mergeUserTokenConnectorsForProfiles } from './merge_user_token_connectors_for_profiles';
+import { getUserTokenConnectorsForProfile } from './get_user_token_connectors_for_profile';
 
 export async function resolveUserAuthStatusForConnector({
   authMode,
   connectorId,
-  profileUids,
+  profileUid,
   savedObjectsClient,
 }: {
   authMode: Connector['authMode'];
   connectorId: string;
-  profileUids: string[];
+  profileUid: string | undefined;
   savedObjectsClient: SavedObjectClientForFind;
 }): Promise<'connected' | 'not_connected' | 'not_applicable'> {
   if (authMode !== 'per-user') {
     return 'not_applicable';
   }
-  if (profileUids.length === 0) {
+  if (!profileUid) {
     return 'not_connected';
   }
-  const { connectorIds } = await mergeUserTokenConnectorsForProfiles({
+  const { connectorIds } = await getUserTokenConnectorsForProfile({
     savedObjectsClient,
-    profileUids,
+    profileUid,
   });
   return connectorIds.includes(connectorId) ? 'connected' : 'not_connected';
 }
