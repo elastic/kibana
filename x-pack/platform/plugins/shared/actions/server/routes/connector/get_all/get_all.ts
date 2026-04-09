@@ -44,9 +44,10 @@ export const getAllConnectorsRoute = (
       },
     },
     router.handleLegacyErrors(
-      verifyAccessAndContext(licenseState, async function (context, _req, res) {
+      verifyAccessAndContext(licenseState, async function (context, req, res) {
         const actionsClient = (await context.actions).getActionsClient();
         const result = await actionsClient.getAll();
+
         const responseBody: GetAllConnectorsResponseV1 =
           transformGetAllConnectorsResponseV1(result);
         return res.ok({ body: responseBody });
