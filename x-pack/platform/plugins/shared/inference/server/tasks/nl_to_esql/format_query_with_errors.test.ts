@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ESQLMessage, EditorError } from '@elastic/esql/types';
+import type { ESQLMessage, EditorError } from '@kbn/esql-language/src/commands/definitions/types';
 import { formatQueryWithErrors } from './format_query_with_errors';
 
 describe('formatQueryWithErrors', () => {

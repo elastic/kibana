@@ -9,7 +9,7 @@
 import { type EsqlFieldType, esqlFieldTypes } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
-import type { ESQLNumericLiteralType } from '@elastic/esql/types';
+import type { ESQLLocation, ESQLNumericLiteralType } from '@elastic/esql/types';
 import type { Location } from '../registry/types';
 import type { inlineCastsMapping } from './generated/inline_casts_mapping';
 
@@ -488,6 +488,27 @@ export interface ValidationErrors {
 
 export type ErrorTypes = keyof ValidationErrors;
 export type ErrorValues<K extends ErrorTypes> = ValidationErrors[K]['type'];
+
+export interface ESQLMessage {
+  type: 'error' | 'warning';
+  text: string;
+  location: ESQLLocation;
+  code: string;
+  errorType?: 'semantic';
+  requiresCallback?: 'getColumnsFor' | 'getSources' | 'getPolicies' | 'getJoinIndices' | string;
+  underlinedWarning?: boolean;
+  quickFix?: { title: string; action: () => void };
+}
+
+export interface EditorError {
+  startLineNumber: number;
+  endLineNumber: number;
+  startColumn: number;
+  endColumn: number;
+  message: string;
+  code: string;
+  severity: 'error' | 'warning' | number;
+}
 
 /**
  * Handles numeric types in ES|QL.

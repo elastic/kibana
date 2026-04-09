@@ -43,6 +43,12 @@ export type MonacoMessage = monaco.editor.IMarkerData & {
 
   // By default warnings are not underlined, use this flag to indicate it should be
   underlinedWarning?: boolean;
+
+  quickFix?: {
+    title: string;
+    // A function that recieves the current query and returns it corrected.
+    action: (query: string) => string;
+  };
 };
 
 export type ESQLDependencies = ESQLCallbacks &
