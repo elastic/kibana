@@ -1,0 +1,14 @@
+steps:
+  - command: .buildkite/scripts/pipelines/pull_request/safety_check.sh
+    label: 'Safety Check'
+    agents:
+      machineType: n2d-standard-16
+      preemptible: true
+      spotZones: us-central1-b,us-central1-c,us-central1-f
+      diskSizeGb: 105
+    key: safety_check
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
