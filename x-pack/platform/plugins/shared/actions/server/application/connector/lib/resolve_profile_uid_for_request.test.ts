@@ -11,11 +11,20 @@ import { resolveProfileUidForRequest } from './resolve_profile_uid_for_request';
 describe('resolveProfileUidForRequest', () => {
   const request = httpServerMock.createKibanaRequest();
 
-  it('returns profile_uid from getCurrentUser when present', async () => {
+  it('prefers API key profile UID over currentUser profile_uid to match with how task execution gets the profileUid', async () => {
     const uid = await resolveProfileUidForRequest({
       request,
       getCurrentUser: async () => ({ profile_uid: 'from-user' }),
       getCurrentUserProfileIdFromAPIKey: async () => 'from-api-key',
+    });
+    expect(uid).toBe('from-api-key');
+  });
+
+  it('falls back to currentUser profile_uid when API key returns undefined', async () => {
+    const uid = await resolveProfileUidForRequest({
+      request,
+      getCurrentUser: async () => ({ profile_uid: 'from-user' }),
+      getCurrentUserProfileIdFromAPIKey: async () => undefined,
     });
     expect(uid).toBe('from-user');
   });
