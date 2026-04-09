@@ -156,11 +156,8 @@ dependsOn:
   - '@kbn/apm-types'
   - '@kbn/apm-types-shared'
   - '@kbn/cps'
-  - '@kbn/cell-actions'
-  - '@kbn/unified-data-table'
-  - '@kbn/alerting-v2-plugin'
-  - '@kbn/alerting-v2-episodes-ui'
   - '@kbn/expressions-plugin'
+  - '@kbn/ingest-hub-plugin'
 tags:
   - plugin
   - prod

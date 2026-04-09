@@ -28,7 +28,6 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
   const getRoute = router.get({
     path: `${LENS_VIS_API_PATH}/{id}`,
     access: LENS_API_ACCESS,
-    enableQueryVersion: true,
     summary: 'Get visualization',
     description: 'Get a visualization from id.',
     options: {
@@ -82,11 +81,6 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
 
       try {
         const { result } = await client.get(req.params.id);
-
-        if (result.item.error) {
-          throw result.item.error;
-        }
-
         const responseItem = getLensResponseItem(builder, result.item);
 
         return res.ok<TypeOf<typeof lensGetResponseBodySchema>>({

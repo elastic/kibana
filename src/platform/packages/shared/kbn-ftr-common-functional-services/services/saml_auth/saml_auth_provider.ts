@@ -12,6 +12,8 @@ import { SamlSessionManager } from '@kbn/test';
 import expect from '@kbn/expect';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { resolve } from 'path';
+import getopts from 'getopts';
+import type { ServerlessProjectType } from '@kbn/es';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { getAuthProvider } from './get_auth_provider';
 import type { InternalRequestHeader } from './default_request_headers';
@@ -53,6 +55,11 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
   const customRolesFileName = process.env.ROLES_FILENAME_OVERRIDE;
   const cloudUsersFilePath = resolve(REPO_ROOT, '.ftr', customRolesFileName ?? 'role_users.json');
 
+  const kbnServerOptions = getopts(config.get('kbnTestServer.serverArgs'), {
+    boolean: ['xpack.security.uiam.enabled'],
+    string: ['serverless', 'xpack.cloud.organization_id'],
+  });
+
   // Sharing the instance within FTR config run means cookies are persistent for each role between tests.
   const sessionManager = new SamlSessionManager({
     hostOptions: {
@@ -69,6 +76,13 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
       sourcePath: authRoleProvider.getRolesDefinitionPath(),
     },
     cloudUsersFilePath,
+    serverless: !!kbnServerOptions.serverless
+      ? {
+          uiam: kbnServerOptions['xpack.security.uiam.enabled'] ?? false,
+          projectType: kbnServerOptions.serverless as ServerlessProjectType,
+          organizationId: kbnServerOptions['xpack.cloud.organization_id']!,
+        }
+      : undefined,
   });
 
   const DEFAULT_ROLE = authRoleProvider.getDefaultRole();
