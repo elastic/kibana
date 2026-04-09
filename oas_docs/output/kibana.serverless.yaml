@@ -43703,9 +43703,8 @@ paths:
                         - type: string
                         - type: number
                         - type: boolean
-                        - enum:
-                            - null
                         - {}
+                      nullable: true
                     maxItems: 2
                     type: array
                   total:
@@ -70357,72 +70356,13 @@ components:
                         - id
                     - type: string
         shipper:
-          additionalProperties: false
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
           nullable: true
-          type: object
-          properties:
-            compression_level:
-              nullable: true
-              type: number
-            disk_queue_compression_enabled:
-              nullable: true
-              type: boolean
-            disk_queue_enabled:
-              default: false
-              nullable: true
-              type: boolean
-            disk_queue_encryption_enabled:
-              nullable: true
-              type: boolean
-            disk_queue_max_size:
-              nullable: true
-              type: number
-            disk_queue_path:
-              nullable: true
-              type: string
-            loadbalance:
-              nullable: true
-              type: boolean
-            max_batch_bytes:
-              nullable: true
-              type: number
-            mem_queue_events:
-              nullable: true
-              type: number
-            queue_flush_timeout:
-              nullable: true
-              type: number
-          required:
-            - disk_queue_path
-            - disk_queue_max_size
-            - disk_queue_encryption_enabled
-            - disk_queue_compression_enabled
-            - compression_level
-            - loadbalance
-            - mem_queue_events
-            - queue_flush_timeout
-            - max_batch_bytes
         ssl:
-          additionalProperties: false
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_ssl'
           nullable: true
-          type: object
-          properties:
-            certificate:
-              type: string
-            certificate_authorities:
-              items:
-                type: string
-              maxItems: 10
-              type: array
-            key:
-              type: string
-            verification_mode:
-              enum:
-                - full
-                - none
-                - certificate
-                - strict
-              type: string
         type:
           enum:
             - elasticsearch
@@ -70469,35 +70409,15 @@ components:
             - none
           type: string
         compression_level:
-          anyOf:
-            - items: {}
-              type: array
-            - type: boolean
-            - type: number
-            - type: object
-            - type: string
-          nullable: true
-          oneOf:
-            - type: number
-            - not: {}
+          type: number
         config_yaml:
           nullable: true
           type: string
         connection_type:
-          anyOf:
-            - items: {}
-              type: array
-            - type: boolean
-            - type: number
-            - type: object
-            - type: string
-          nullable: true
-          oneOf:
-            - enum:
-                - plaintext
-                - encryption
-              type: string
-            - not: {}
+          enum:
+            - plaintext
+            - encryption
+          type: string
         hash:
           additionalProperties: false
           type: object
@@ -70552,27 +70472,8 @@ components:
             - hash
           type: string
         password:
-          anyOf:
-            - items: {}
-              type: array
-            - type: boolean
-            - type: number
-            - type: object
-            - type: string
           nullable: true
-          oneOf:
-            - not: {}
-            - anyOf:
-                - items: {}
-                  type: array
-                - type: boolean
-                - type: number
-                - type: object
-                - type: string
-              nullable: true
-              oneOf:
-                - type: string
-                - not: {}
+          type: string
         proxy_id:
           nullable: true
           type: string
@@ -70640,72 +70541,13 @@ components:
               required:
                 - key
         shipper:
-          additionalProperties: false
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
           nullable: true
-          type: object
-          properties:
-            compression_level:
-              nullable: true
-              type: number
-            disk_queue_compression_enabled:
-              nullable: true
-              type: boolean
-            disk_queue_enabled:
-              default: false
-              nullable: true
-              type: boolean
-            disk_queue_encryption_enabled:
-              nullable: true
-              type: boolean
-            disk_queue_max_size:
-              nullable: true
-              type: number
-            disk_queue_path:
-              nullable: true
-              type: string
-            loadbalance:
-              nullable: true
-              type: boolean
-            max_batch_bytes:
-              nullable: true
-              type: number
-            mem_queue_events:
-              nullable: true
-              type: number
-            queue_flush_timeout:
-              nullable: true
-              type: number
-          required:
-            - disk_queue_path
-            - disk_queue_max_size
-            - disk_queue_encryption_enabled
-            - disk_queue_compression_enabled
-            - compression_level
-            - loadbalance
-            - mem_queue_events
-            - queue_flush_timeout
-            - max_batch_bytes
         ssl:
-          additionalProperties: false
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_ssl'
           nullable: true
-          type: object
-          properties:
-            certificate:
-              type: string
-            certificate_authorities:
-              items:
-                type: string
-              maxItems: 10
-              type: array
-            key:
-              type: string
-            verification_mode:
-              enum:
-                - full
-                - none
-                - certificate
-                - strict
-              type: string
         timeout:
           type: number
         topic:
@@ -70715,28 +70557,15 @@ components:
             - kafka
           type: string
         username:
-          anyOf:
-            - items: {}
-              type: array
-            - type: boolean
-            - type: number
-            - type: object
-            - type: string
           nullable: true
-          oneOf:
-            - type: string
-            - not: {}
+          type: string
         version:
           type: string
       required:
         - name
         - type
         - hosts
-        - compression_level
         - auth_type
-        - connection_type
-        - username
-        - password
       title: new_output_kafka
       type: object
     Kibana_HTTP_APIs_new_output_logstash:
@@ -70803,72 +70632,13 @@ components:
                         - id
                     - type: string
         shipper:
-          additionalProperties: false
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
           nullable: true
-          type: object
-          properties:
-            compression_level:
-              nullable: true
-              type: number
-            disk_queue_compression_enabled:
-              nullable: true
-              type: boolean
-            disk_queue_enabled:
-              default: false
-              nullable: true
-              type: boolean
-            disk_queue_encryption_enabled:
-              nullable: true
-              type: boolean
-            disk_queue_max_size:
-              nullable: true
-              type: number
-            disk_queue_path:
-              nullable: true
-              type: string
-            loadbalance:
-              nullable: true
-              type: boolean
-            max_batch_bytes:
-              nullable: true
-              type: number
-            mem_queue_events:
-              nullable: true
-              type: number
-            queue_flush_timeout:
-              nullable: true
-              type: number
-          required:
-            - disk_queue_path
-            - disk_queue_max_size
-            - disk_queue_encryption_enabled
-            - disk_queue_compression_enabled
-            - compression_level
-            - loadbalance
-            - mem_queue_events
-            - queue_flush_timeout
-            - max_batch_bytes
         ssl:
-          additionalProperties: false
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_ssl'
           nullable: true
-          type: object
-          properties:
-            certificate:
-              type: string
-            certificate_authorities:
-              items:
-                type: string
-              maxItems: 10
-              type: array
-            key:
-              type: string
-            verification_mode:
-              enum:
-                - full
-                - none
-                - certificate
-                - strict
-              type: string
         type:
           enum:
             - logstash
@@ -70973,72 +70743,13 @@ components:
           nullable: true
           type: string
         shipper:
-          additionalProperties: false
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
           nullable: true
-          type: object
-          properties:
-            compression_level:
-              nullable: true
-              type: number
-            disk_queue_compression_enabled:
-              nullable: true
-              type: boolean
-            disk_queue_enabled:
-              default: false
-              nullable: true
-              type: boolean
-            disk_queue_encryption_enabled:
-              nullable: true
-              type: boolean
-            disk_queue_max_size:
-              nullable: true
-              type: number
-            disk_queue_path:
-              nullable: true
-              type: string
-            loadbalance:
-              nullable: true
-              type: boolean
-            max_batch_bytes:
-              nullable: true
-              type: number
-            mem_queue_events:
-              nullable: true
-              type: number
-            queue_flush_timeout:
-              nullable: true
-              type: number
-          required:
-            - disk_queue_path
-            - disk_queue_max_size
-            - disk_queue_encryption_enabled
-            - disk_queue_compression_enabled
-            - compression_level
-            - loadbalance
-            - mem_queue_events
-            - queue_flush_timeout
-            - max_batch_bytes
         ssl:
-          additionalProperties: false
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_ssl'
           nullable: true
-          type: object
-          properties:
-            certificate:
-              type: string
-            certificate_authorities:
-              items:
-                type: string
-              maxItems: 10
-              type: array
-            key:
-              type: string
-            verification_mode:
-              enum:
-                - full
-                - none
-                - certificate
-                - strict
-              type: string
         sync_integrations:
           type: boolean
         sync_uninstalled_integrations:
@@ -71129,72 +70840,13 @@ components:
                         - id
                     - type: string
         shipper:
-          additionalProperties: true
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
           nullable: true
-          type: object
-          properties:
-            compression_level:
-              nullable: true
-              type: number
-            disk_queue_compression_enabled:
-              nullable: true
-              type: boolean
-            disk_queue_enabled:
-              default: false
-              nullable: true
-              type: boolean
-            disk_queue_encryption_enabled:
-              nullable: true
-              type: boolean
-            disk_queue_max_size:
-              nullable: true
-              type: number
-            disk_queue_path:
-              nullable: true
-              type: string
-            loadbalance:
-              nullable: true
-              type: boolean
-            max_batch_bytes:
-              nullable: true
-              type: number
-            mem_queue_events:
-              nullable: true
-              type: number
-            queue_flush_timeout:
-              nullable: true
-              type: number
-          required:
-            - disk_queue_path
-            - disk_queue_max_size
-            - disk_queue_encryption_enabled
-            - disk_queue_compression_enabled
-            - compression_level
-            - loadbalance
-            - mem_queue_events
-            - queue_flush_timeout
-            - max_batch_bytes
         ssl:
-          additionalProperties: true
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_ssl'
           nullable: true
-          type: object
-          properties:
-            certificate:
-              type: string
-            certificate_authorities:
-              items:
-                type: string
-              maxItems: 10
-              type: array
-            key:
-              type: string
-            verification_mode:
-              enum:
-                - full
-                - none
-                - certificate
-                - strict
-              type: string
         type:
           enum:
             - elasticsearch
@@ -71241,35 +70893,15 @@ components:
             - none
           type: string
         compression_level:
-          anyOf:
-            - items: {}
-              type: array
-            - type: boolean
-            - type: number
-            - type: object
-            - type: string
-          nullable: true
-          oneOf:
-            - type: number
-            - not: {}
+          type: number
         config_yaml:
           nullable: true
           type: string
         connection_type:
-          anyOf:
-            - items: {}
-              type: array
-            - type: boolean
-            - type: number
-            - type: object
-            - type: string
-          nullable: true
-          oneOf:
-            - enum:
-                - plaintext
-                - encryption
-              type: string
-            - not: {}
+          enum:
+            - plaintext
+            - encryption
+          type: string
         hash:
           additionalProperties: true
           type: object
@@ -71324,27 +70956,8 @@ components:
             - hash
           type: string
         password:
-          anyOf:
-            - items: {}
-              type: array
-            - type: boolean
-            - type: number
-            - type: object
-            - type: string
           nullable: true
-          oneOf:
-            - not: {}
-            - anyOf:
-                - items: {}
-                  type: array
-                - type: boolean
-                - type: number
-                - type: object
-                - type: string
-              nullable: true
-              oneOf:
-                - type: string
-                - not: {}
+          type: string
         proxy_id:
           nullable: true
           type: string
@@ -71412,72 +71025,13 @@ components:
               required:
                 - key
         shipper:
-          additionalProperties: true
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
           nullable: true
-          type: object
-          properties:
-            compression_level:
-              nullable: true
-              type: number
-            disk_queue_compression_enabled:
-              nullable: true
-              type: boolean
-            disk_queue_enabled:
-              default: false
-              nullable: true
-              type: boolean
-            disk_queue_encryption_enabled:
-              nullable: true
-              type: boolean
-            disk_queue_max_size:
-              nullable: true
-              type: number
-            disk_queue_path:
-              nullable: true
-              type: string
-            loadbalance:
-              nullable: true
-              type: boolean
-            max_batch_bytes:
-              nullable: true
-              type: number
-            mem_queue_events:
-              nullable: true
-              type: number
-            queue_flush_timeout:
-              nullable: true
-              type: number
-          required:
-            - disk_queue_path
-            - disk_queue_max_size
-            - disk_queue_encryption_enabled
-            - disk_queue_compression_enabled
-            - compression_level
-            - loadbalance
-            - mem_queue_events
-            - queue_flush_timeout
-            - max_batch_bytes
         ssl:
-          additionalProperties: true
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_ssl'
           nullable: true
-          type: object
-          properties:
-            certificate:
-              type: string
-            certificate_authorities:
-              items:
-                type: string
-              maxItems: 10
-              type: array
-            key:
-              type: string
-            verification_mode:
-              enum:
-                - full
-                - none
-                - certificate
-                - strict
-              type: string
         timeout:
           type: number
         topic:
@@ -71487,28 +71041,15 @@ components:
             - kafka
           type: string
         username:
-          anyOf:
-            - items: {}
-              type: array
-            - type: boolean
-            - type: number
-            - type: object
-            - type: string
           nullable: true
-          oneOf:
-            - type: string
-            - not: {}
+          type: string
         version:
           type: string
       required:
         - name
         - type
         - hosts
-        - compression_level
         - auth_type
-        - connection_type
-        - username
-        - password
       title: output_kafka
       type: object
     Kibana_HTTP_APIs_output_logstash:
@@ -71575,72 +71116,13 @@ components:
                         - id
                     - type: string
         shipper:
-          additionalProperties: true
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
           nullable: true
-          type: object
-          properties:
-            compression_level:
-              nullable: true
-              type: number
-            disk_queue_compression_enabled:
-              nullable: true
-              type: boolean
-            disk_queue_enabled:
-              default: false
-              nullable: true
-              type: boolean
-            disk_queue_encryption_enabled:
-              nullable: true
-              type: boolean
-            disk_queue_max_size:
-              nullable: true
-              type: number
-            disk_queue_path:
-              nullable: true
-              type: string
-            loadbalance:
-              nullable: true
-              type: boolean
-            max_batch_bytes:
-              nullable: true
-              type: number
-            mem_queue_events:
-              nullable: true
-              type: number
-            queue_flush_timeout:
-              nullable: true
-              type: number
-          required:
-            - disk_queue_path
-            - disk_queue_max_size
-            - disk_queue_encryption_enabled
-            - disk_queue_compression_enabled
-            - compression_level
-            - loadbalance
-            - mem_queue_events
-            - queue_flush_timeout
-            - max_batch_bytes
         ssl:
-          additionalProperties: true
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_ssl'
           nullable: true
-          type: object
-          properties:
-            certificate:
-              type: string
-            certificate_authorities:
-              items:
-                type: string
-              maxItems: 10
-              type: array
-            key:
-              type: string
-            verification_mode:
-              enum:
-                - full
-                - none
-                - certificate
-                - strict
-              type: string
         type:
           enum:
             - logstash
@@ -71745,72 +71227,13 @@ components:
           nullable: true
           type: string
         shipper:
-          additionalProperties: true
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
           nullable: true
-          type: object
-          properties:
-            compression_level:
-              nullable: true
-              type: number
-            disk_queue_compression_enabled:
-              nullable: true
-              type: boolean
-            disk_queue_enabled:
-              default: false
-              nullable: true
-              type: boolean
-            disk_queue_encryption_enabled:
-              nullable: true
-              type: boolean
-            disk_queue_max_size:
-              nullable: true
-              type: number
-            disk_queue_path:
-              nullable: true
-              type: string
-            loadbalance:
-              nullable: true
-              type: boolean
-            max_batch_bytes:
-              nullable: true
-              type: number
-            mem_queue_events:
-              nullable: true
-              type: number
-            queue_flush_timeout:
-              nullable: true
-              type: number
-          required:
-            - disk_queue_path
-            - disk_queue_max_size
-            - disk_queue_encryption_enabled
-            - disk_queue_compression_enabled
-            - compression_level
-            - loadbalance
-            - mem_queue_events
-            - queue_flush_timeout
-            - max_batch_bytes
         ssl:
-          additionalProperties: true
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_ssl'
           nullable: true
-          type: object
-          properties:
-            certificate:
-              type: string
-            certificate_authorities:
-              items:
-                type: string
-              maxItems: 10
-              type: array
-            key:
-              type: string
-            verification_mode:
-              enum:
-                - full
-                - none
-                - certificate
-                - strict
-              type: string
         sync_integrations:
           type: boolean
         sync_uninstalled_integrations:
@@ -71827,6 +71250,73 @@ components:
         - type
         - hosts
       title: output_remote_elasticsearch
+      type: object
+    Kibana_HTTP_APIs_output_shipper:
+      additionalProperties: true
+      properties:
+        compression_level:
+          nullable: true
+          type: number
+        disk_queue_compression_enabled:
+          nullable: true
+          type: boolean
+        disk_queue_enabled:
+          default: false
+          nullable: true
+          type: boolean
+        disk_queue_encryption_enabled:
+          nullable: true
+          type: boolean
+        disk_queue_max_size:
+          nullable: true
+          type: number
+        disk_queue_path:
+          nullable: true
+          type: string
+        loadbalance:
+          nullable: true
+          type: boolean
+        max_batch_bytes:
+          nullable: true
+          type: number
+        mem_queue_events:
+          nullable: true
+          type: number
+        queue_flush_timeout:
+          nullable: true
+          type: number
+      required:
+        - disk_queue_path
+        - disk_queue_max_size
+        - disk_queue_encryption_enabled
+        - disk_queue_compression_enabled
+        - compression_level
+        - loadbalance
+        - mem_queue_events
+        - queue_flush_timeout
+        - max_batch_bytes
+      title: output_shipper
+      type: object
+    Kibana_HTTP_APIs_output_ssl:
+      additionalProperties: true
+      properties:
+        certificate:
+          type: string
+        certificate_authorities:
+          items:
+            type: string
+          maxItems: 10
+          type: array
+        key:
+          type: string
+        verification_mode:
+          enum:
+            - full
+            - none
+            - certificate
+            - strict
+          type: string
+      title: output_ssl
       type: object
     Kibana_HTTP_APIs_QueryStreamUpsertRequest:
       additionalProperties: false
@@ -72981,72 +72471,13 @@ components:
                         - id
                     - type: string
         shipper:
-          additionalProperties: false
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
           nullable: true
-          type: object
-          properties:
-            compression_level:
-              nullable: true
-              type: number
-            disk_queue_compression_enabled:
-              nullable: true
-              type: boolean
-            disk_queue_enabled:
-              default: false
-              nullable: true
-              type: boolean
-            disk_queue_encryption_enabled:
-              nullable: true
-              type: boolean
-            disk_queue_max_size:
-              nullable: true
-              type: number
-            disk_queue_path:
-              nullable: true
-              type: string
-            loadbalance:
-              nullable: true
-              type: boolean
-            max_batch_bytes:
-              nullable: true
-              type: number
-            mem_queue_events:
-              nullable: true
-              type: number
-            queue_flush_timeout:
-              nullable: true
-              type: number
-          required:
-            - disk_queue_path
-            - disk_queue_max_size
-            - disk_queue_encryption_enabled
-            - disk_queue_compression_enabled
-            - compression_level
-            - loadbalance
-            - mem_queue_events
-            - queue_flush_timeout
-            - max_batch_bytes
         ssl:
-          additionalProperties: false
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_ssl'
           nullable: true
-          type: object
-          properties:
-            certificate:
-              type: string
-            certificate_authorities:
-              items:
-                type: string
-              maxItems: 10
-              type: array
-            key:
-              type: string
-            verification_mode:
-              enum:
-                - full
-                - none
-                - certificate
-                - strict
-              type: string
         type:
           enum:
             - elasticsearch
@@ -73089,35 +72520,15 @@ components:
             - none
           type: string
         compression_level:
-          anyOf:
-            - items: {}
-              type: array
-            - type: boolean
-            - type: number
-            - type: object
-            - type: string
-          nullable: true
-          oneOf:
-            - type: number
-            - not: {}
+          type: number
         config_yaml:
           nullable: true
           type: string
         connection_type:
-          anyOf:
-            - items: {}
-              type: array
-            - type: boolean
-            - type: number
-            - type: object
-            - type: string
-          nullable: true
-          oneOf:
-            - enum:
-                - plaintext
-                - encryption
-              type: string
-            - not: {}
+          enum:
+            - plaintext
+            - encryption
+          type: string
         hash:
           additionalProperties: false
           type: object
@@ -73172,27 +72583,8 @@ components:
             - hash
           type: string
         password:
-          anyOf:
-            - items: {}
-              type: array
-            - type: boolean
-            - type: number
-            - type: object
-            - type: string
           nullable: true
-          oneOf:
-            - not: {}
-            - anyOf:
-                - items: {}
-                  type: array
-                - type: boolean
-                - type: number
-                - type: object
-                - type: string
-              nullable: true
-              oneOf:
-                - type: string
-                - not: {}
+          type: string
         proxy_id:
           nullable: true
           type: string
@@ -73260,72 +72652,13 @@ components:
               required:
                 - key
         shipper:
-          additionalProperties: false
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
           nullable: true
-          type: object
-          properties:
-            compression_level:
-              nullable: true
-              type: number
-            disk_queue_compression_enabled:
-              nullable: true
-              type: boolean
-            disk_queue_enabled:
-              default: false
-              nullable: true
-              type: boolean
-            disk_queue_encryption_enabled:
-              nullable: true
-              type: boolean
-            disk_queue_max_size:
-              nullable: true
-              type: number
-            disk_queue_path:
-              nullable: true
-              type: string
-            loadbalance:
-              nullable: true
-              type: boolean
-            max_batch_bytes:
-              nullable: true
-              type: number
-            mem_queue_events:
-              nullable: true
-              type: number
-            queue_flush_timeout:
-              nullable: true
-              type: number
-          required:
-            - disk_queue_path
-            - disk_queue_max_size
-            - disk_queue_encryption_enabled
-            - disk_queue_compression_enabled
-            - compression_level
-            - loadbalance
-            - mem_queue_events
-            - queue_flush_timeout
-            - max_batch_bytes
         ssl:
-          additionalProperties: false
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_ssl'
           nullable: true
-          type: object
-          properties:
-            certificate:
-              type: string
-            certificate_authorities:
-              items:
-                type: string
-              maxItems: 10
-              type: array
-            key:
-              type: string
-            verification_mode:
-              enum:
-                - full
-                - none
-                - certificate
-                - strict
-              type: string
         timeout:
           type: number
         topic:
@@ -73335,25 +72668,12 @@ components:
             - kafka
           type: string
         username:
-          anyOf:
-            - items: {}
-              type: array
-            - type: boolean
-            - type: number
-            - type: object
-            - type: string
           nullable: true
-          oneOf:
-            - type: string
-            - not: {}
+          type: string
         version:
           type: string
       required:
         - name
-        - compression_level
-        - connection_type
-        - username
-        - password
       title: update_output_kafka
       type: object
     Kibana_HTTP_APIs_update_output_logstash:
@@ -73418,72 +72738,13 @@ components:
                         - id
                     - type: string
         shipper:
-          additionalProperties: false
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
           nullable: true
-          type: object
-          properties:
-            compression_level:
-              nullable: true
-              type: number
-            disk_queue_compression_enabled:
-              nullable: true
-              type: boolean
-            disk_queue_enabled:
-              default: false
-              nullable: true
-              type: boolean
-            disk_queue_encryption_enabled:
-              nullable: true
-              type: boolean
-            disk_queue_max_size:
-              nullable: true
-              type: number
-            disk_queue_path:
-              nullable: true
-              type: string
-            loadbalance:
-              nullable: true
-              type: boolean
-            max_batch_bytes:
-              nullable: true
-              type: number
-            mem_queue_events:
-              nullable: true
-              type: number
-            queue_flush_timeout:
-              nullable: true
-              type: number
-          required:
-            - disk_queue_path
-            - disk_queue_max_size
-            - disk_queue_encryption_enabled
-            - disk_queue_compression_enabled
-            - compression_level
-            - loadbalance
-            - mem_queue_events
-            - queue_flush_timeout
-            - max_batch_bytes
         ssl:
-          additionalProperties: false
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_ssl'
           nullable: true
-          type: object
-          properties:
-            certificate:
-              type: string
-            certificate_authorities:
-              items:
-                type: string
-              maxItems: 10
-              type: array
-            key:
-              type: string
-            verification_mode:
-              enum:
-                - full
-                - none
-                - certificate
-                - strict
-              type: string
         type:
           enum:
             - logstash
@@ -73582,72 +72843,13 @@ components:
           nullable: true
           type: string
         shipper:
-          additionalProperties: false
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
           nullable: true
-          type: object
-          properties:
-            compression_level:
-              nullable: true
-              type: number
-            disk_queue_compression_enabled:
-              nullable: true
-              type: boolean
-            disk_queue_enabled:
-              default: false
-              nullable: true
-              type: boolean
-            disk_queue_encryption_enabled:
-              nullable: true
-              type: boolean
-            disk_queue_max_size:
-              nullable: true
-              type: number
-            disk_queue_path:
-              nullable: true
-              type: string
-            loadbalance:
-              nullable: true
-              type: boolean
-            max_batch_bytes:
-              nullable: true
-              type: number
-            mem_queue_events:
-              nullable: true
-              type: number
-            queue_flush_timeout:
-              nullable: true
-              type: number
-          required:
-            - disk_queue_path
-            - disk_queue_max_size
-            - disk_queue_encryption_enabled
-            - disk_queue_compression_enabled
-            - compression_level
-            - loadbalance
-            - mem_queue_events
-            - queue_flush_timeout
-            - max_batch_bytes
         ssl:
-          additionalProperties: false
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_ssl'
           nullable: true
-          type: object
-          properties:
-            certificate:
-              type: string
-            certificate_authorities:
-              items:
-                type: string
-              maxItems: 10
-              type: array
-            key:
-              type: string
-            verification_mode:
-              enum:
-                - full
-                - none
-                - certificate
-                - strict
-              type: string
         sync_integrations:
           type: boolean
         sync_uninstalled_integrations:
