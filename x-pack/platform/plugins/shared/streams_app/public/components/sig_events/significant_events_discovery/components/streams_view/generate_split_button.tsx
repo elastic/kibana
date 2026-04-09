@@ -57,6 +57,26 @@ export const GenerateSplitButton = ({
     [allConnectors, config.connectors.queries]
   );
 
+  const onSelectFeaturesConnector = useCallback(
+    (connectorId: string) => {
+      onConfigChange({
+        ...config,
+        connectors: { ...config.connectors, features: connectorId },
+      });
+    },
+    [config, onConfigChange]
+  );
+
+  const onSelectQueriesConnector = useCallback(
+    (connectorId: string) => {
+      onConfigChange({
+        ...config,
+        connectors: { ...config.connectors, queries: connectorId },
+      });
+    },
+    [config, onConfigChange]
+  );
+
   const buildPanels = useCallback(
     ({ resetMenu, closeMenu }: MenuHelpers) => [
       {
@@ -91,10 +111,7 @@ export const GenerateSplitButton = ({
         resolvedConnectorId: featuresResolvedConnectorId,
         selectedConnectorId: config.connectors.features,
         onSelect: (connectorId) => {
-          onConfigChange({
-            ...config,
-            connectors: { ...config.connectors, features: connectorId },
-          });
+          onSelectFeaturesConnector(connectorId);
           resetMenu();
         },
       }),
@@ -103,10 +120,7 @@ export const GenerateSplitButton = ({
         resolvedConnectorId: queriesResolvedConnectorId,
         selectedConnectorId: config.connectors.queries,
         onSelect: (connectorId) => {
-          onConfigChange({
-            ...config,
-            connectors: { ...config.connectors, queries: connectorId },
-          });
+          onSelectQueriesConnector(connectorId);
           resetMenu();
         },
       }),
@@ -118,8 +132,10 @@ export const GenerateSplitButton = ({
       allConnectors,
       featuresResolvedConnectorId,
       queriesResolvedConnectorId,
-      config,
-      onConfigChange,
+      config.connectors.features,
+      config.connectors.queries,
+      onSelectFeaturesConnector,
+      onSelectQueriesConnector,
       onRunFeaturesOnly,
       onRunQueriesOnly,
     ]
