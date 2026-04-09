@@ -29,6 +29,7 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../../common/es_fields/apm';
+import { ApmIndexSettingsContextProvider } from '../../../../context/apm_index_settings/apm_index_settings_context';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { TimeRangeMetadataContextProvider } from '../../../../context/time_range_metadata/time_range_metadata_context';
 import { getComparisonChartTheme } from '../../../shared/time_comparison/get_comparison_chart_theme';
@@ -98,33 +99,18 @@ export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAp
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      <TimeRangeMetadataContextProvider
-        start={from}
-        end={to}
-        kuery=""
-        useSpanName={false}
-        uiSettings={services.uiSettings!}
-      >
-        <ChartPointerEventContextProvider>
-          <EuiFlexItem>
-            <LatencyChart
-              alert={alert}
-              transactionType={transactionType}
-              transactionName={transactionName}
-              serviceName={serviceName}
-              environment={environment}
-              start={from}
-              end={to}
-              comparisonChartTheme={comparisonChartTheme}
-              timeZone={timeZone}
-              latencyAggregationType={latencyAggregationType}
-              comparisonEnabled={false}
-              offset={''}
-              threshold={thresholdComponent}
-            />
-            <EuiSpacer size="s" />
-            <EuiFlexGroup direction="row" gutterSize="s">
-              <ThroughputChart
+      <ApmIndexSettingsContextProvider>
+        <TimeRangeMetadataContextProvider
+          start={from}
+          end={to}
+          kuery=""
+          useSpanName={false}
+          uiSettings={services.uiSettings!}
+        >
+          <ChartPointerEventContextProvider>
+            <EuiFlexItem>
+              <LatencyChart
+                alert={alert}
                 transactionType={transactionType}
                 transactionName={transactionName}
                 serviceName={serviceName}
@@ -132,24 +118,41 @@ export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAp
                 start={from}
                 end={to}
                 comparisonChartTheme={comparisonChartTheme}
+                timeZone={timeZone}
+                latencyAggregationType={latencyAggregationType}
                 comparisonEnabled={false}
                 offset={''}
-                timeZone={timeZone}
+                threshold={thresholdComponent}
               />
-              <FailedTransactionChart
-                transactionType={transactionType}
-                transactionName={transactionName}
-                serviceName={serviceName}
-                environment={environment}
-                start={from}
-                end={to}
-                comparisonChartTheme={comparisonChartTheme}
-                timeZone={timeZone}
-              />
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </ChartPointerEventContextProvider>
-      </TimeRangeMetadataContextProvider>
+              <EuiSpacer size="s" />
+              <EuiFlexGroup direction="row" gutterSize="s">
+                <ThroughputChart
+                  transactionType={transactionType}
+                  transactionName={transactionName}
+                  serviceName={serviceName}
+                  environment={environment}
+                  start={from}
+                  end={to}
+                  comparisonChartTheme={comparisonChartTheme}
+                  comparisonEnabled={false}
+                  offset={''}
+                  timeZone={timeZone}
+                />
+                <FailedTransactionChart
+                  transactionType={transactionType}
+                  transactionName={transactionName}
+                  serviceName={serviceName}
+                  environment={environment}
+                  start={from}
+                  end={to}
+                  comparisonChartTheme={comparisonChartTheme}
+                  timeZone={timeZone}
+                />
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </ChartPointerEventContextProvider>
+        </TimeRangeMetadataContextProvider>
+      </ApmIndexSettingsContextProvider>
     </EuiFlexGroup>
   );
 }

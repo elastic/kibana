@@ -47,6 +47,7 @@
       "observabilityAgentBuilder",
       "agentBuilder",
       "aiops",
+      "apmSourcesAccess",
       "cases",
       "discover",
       "exploratoryView",

@@ -34,7 +34,7 @@ import { yLabelFormat } from './helpers';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { TransactionTypeSelect } from './transaction_type_select';
-import { ViewInAPMButton } from './view_in_apm_button';
+import { RedMetricsChartActions } from './red_metrics_chart_actions';
 
 type ErrorRate =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate'>;
@@ -199,14 +199,15 @@ function FailedTransactionChart({
           <EuiFlexItem>
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <ViewInAPMButton
-                  serviceName={serviceName}
-                  environment={environment}
-                  from={start}
-                  to={end}
-                  kuery={kuery}
-                  transactionName={transactionName}
-                  transactionType={transactionType}
+                <RedMetricsChartActions
+                  queryParams={{
+                    serviceName,
+                    environment,
+                    transactionName,
+                    transactionType,
+                    kuery,
+                  }}
+                  timeRange={{ from: start, to: end }}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
