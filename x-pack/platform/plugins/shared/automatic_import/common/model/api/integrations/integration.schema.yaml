@@ -242,10 +242,7 @@ paths:
           required: false
           description: The intent of the download request. When set to 'install', install telemetry is reported.
           schema:
-            type: string
-            enum:
-              - download
-              - install
+            $ref: "#/components/schemas/DownloadIntent"
       responses:
         200:
           description: The integration zip package.
@@ -310,6 +307,12 @@ paths:
 components:
   x-codegen-enabled: true
   schemas:
+    DownloadIntent:
+      description: The intent of the download request.
+      type: string
+      enum:
+        - download
+        - install
     ApproveIntegrationRequest:
       type: object
       additionalProperties: false

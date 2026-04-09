@@ -25,6 +25,14 @@ import {
   IntegrationResponse,
 } from '../../common_attributes.gen';
 
+/**
+ * The intent of the download request.
+ */
+export type DownloadIntent = z.infer<typeof DownloadIntent>;
+export const DownloadIntent = z.enum(['download', 'install']);
+export type DownloadIntentEnum = typeof DownloadIntent.enum;
+export const DownloadIntentEnum = DownloadIntent.enum;
+
 export type ApproveIntegrationRequest = z.infer<typeof ApproveIntegrationRequest>;
 export const ApproveIntegrationRequest = z
   .object({
@@ -128,6 +136,19 @@ export type DeleteAutoImportIntegrationRequestParamsInput = z.input<
   typeof DeleteAutoImportIntegrationRequestParams
 >;
 
+export type DownloadAutoImportIntegrationRequestQuery = z.infer<
+  typeof DownloadAutoImportIntegrationRequestQuery
+>;
+export const DownloadAutoImportIntegrationRequestQuery = z.object({
+  /**
+   * The intent of the download request. When set to 'install', install telemetry is reported.
+   */
+  intent: DownloadIntent.optional(),
+});
+export type DownloadAutoImportIntegrationRequestQueryInput = z.input<
+  typeof DownloadAutoImportIntegrationRequestQuery
+>;
+
 export type DownloadAutoImportIntegrationRequestParams = z.infer<
   typeof DownloadAutoImportIntegrationRequestParams
 >;
@@ -140,18 +161,6 @@ export const DownloadAutoImportIntegrationRequestParams = z.object({
 export type DownloadAutoImportIntegrationRequestParamsInput = z.input<
   typeof DownloadAutoImportIntegrationRequestParams
 >;
-
-export enum DownloadIntentEnum {
-  download = 'download',
-  install = 'install',
-}
-
-export type DownloadAutoImportIntegrationRequestQuery = z.infer<
-  typeof DownloadAutoImportIntegrationRequestQuery
->;
-export const DownloadAutoImportIntegrationRequestQuery = z.object({
-  intent: z.enum([DownloadIntentEnum.download, DownloadIntentEnum.install]).optional(),
-});
 
 export type GetAllAutoImportIntegrationsResponse = z.infer<
   typeof GetAllAutoImportIntegrationsResponse

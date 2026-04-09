@@ -151,7 +151,7 @@ describe('downloadIntegrationRoute telemetry', () => {
       }),
     } as unknown as AutomaticImportPluginRequestHandlerContext);
 
-  const makeRequest = (intent?: DownloadIntentEnum) =>
+  const makeRequest = (intent?: (typeof DownloadIntentEnum)[keyof typeof DownloadIntentEnum]) =>
     httpServerMock.createKibanaRequest({
       method: 'get',
       path: DOWNLOAD_PATH,
