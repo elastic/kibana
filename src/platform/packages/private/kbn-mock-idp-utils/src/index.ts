@@ -28,4 +28,9 @@ export {
   MOCK_IDP_UIAM_PROJECT_ID,
 } from './constants';
 
-export { createMockIdpMetadata, createSAMLResponse, ensureSAMLRoleMapping } from './utils';
+export {
+  createMockIdpMetadata,
+  createSAMLResponse,
+  ensureSAMLRoleMapping,
+  getSAMLRequestId,
+} from './utils';
