@@ -5,42 +5,46 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { InferenceConnector } from '@kbn/inference-common';
 import React from 'react';
 import { ConnectorIcon } from '../../../../connector_list_button/connector_icon';
-import { MODEL_SETTINGS_LABEL } from './translations';
+import { ConnectorSubPanel } from './connector_sub_panel';
+import { MODEL_SELECTION_PANEL_TITLE } from './translations';
 
-export function buildModelSettingsMenuItems(
-  managementUrl: string | undefined,
-  onClose: () => void
-) {
-  if (!managementUrl) return [];
-  return [
-    { isSeparator: true as const },
-    {
-      name: (
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem>{MODEL_SETTINGS_LABEL}</EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="popout" size="s" color="subdued" aria-hidden={true} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-      icon: 'gear' as const,
-      onClick: () => {
-        window.open(managementUrl, '_blank', 'noreferrer');
-        onClose();
-      },
-    },
-  ];
+export function buildConnectorSelectionPanel({
+  connectors,
+  resolvedConnectorId,
+  selectedConnectorId,
+  onSelect,
+}: {
+  connectors: InferenceConnector[];
+  resolvedConnectorId: string | undefined;
+  selectedConnectorId: string | undefined;
+  onSelect: (connectorId: string) => void;
+}) {
+  return {
+    title: MODEL_SELECTION_PANEL_TITLE,
+    width: 240,
+    content: (
+      <ConnectorSubPanel
+        connectors={connectors}
+        resolvedConnectorId={resolvedConnectorId}
+        selectedConnectorId={selectedConnectorId}
+        onSelect={onSelect}
+      />
+    ),
+  };
 }
 
-export function buildConnectorMenuItem(
-  connector: InferenceConnector | undefined,
-  panelId: number
-): { name: React.ReactNode; panel: number } {
+export function buildConnectorMenuItem({
+  connector,
+  panelId,
+}: {
+  connector: InferenceConnector | undefined;
+  panelId: number;
+}): { name: React.ReactNode; panel: number } {
   return {
     name: (
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>

@@ -14,12 +14,9 @@ import {
   GENERATE_FEATURES_TOOLTIP,
   GENERATE_QUERIES_BUTTON_LABEL,
   GENERATE_QUERIES_TOOLTIP,
-  MODEL_SELECTION_PANEL_TITLE,
   GENERATE_CONFIG_ARIA_LABEL,
 } from './translations';
-import { useModelSettingsUrl } from '../../../../../hooks/use_model_settings_url';
-import { buildConnectorMenuItem, buildModelSettingsMenuItems } from './context_menu_helpers';
-import { ConnectorSubPanel } from './connector_sub_panel';
+import { buildConnectorMenuItem, buildConnectorSelectionPanel } from './context_menu_helpers';
 import type { OnboardingConfig } from './types';
 import { ContextMenuSplitButton } from './context_menu_split_button';
 import type { MenuHelpers } from './context_menu_split_button';
@@ -51,8 +48,6 @@ export const GenerateSplitButton = ({
   isRunDisabled,
   isConfigDisabled,
 }: GenerateSplitButtonProps) => {
-  const managementUrl = useModelSettingsUrl();
-
   const featuresConnector = useMemo(
     () => allConnectors.find((c) => c.connectorId === config.connectors.features),
     [allConnectors, config.connectors.features]
@@ -62,43 +57,9 @@ export const GenerateSplitButton = ({
     [allConnectors, config.connectors.queries]
   );
 
-  const buildConnectorSubPanel = useCallback(
-    ({
-      panelId,
-      connectorKey,
-      resolvedId,
-      resetMenu,
-    }: {
-      panelId: number;
-      connectorKey: keyof OnboardingConfig['connectors'];
-      resolvedId: string | undefined;
-      resetMenu: () => void;
-    }) => ({
-      id: panelId,
-      title: MODEL_SELECTION_PANEL_TITLE,
-      width: 240,
-      content: (
-        <ConnectorSubPanel
-          connectors={allConnectors}
-          resolvedConnectorId={resolvedId}
-          selectedConnectorId={config.connectors[connectorKey]}
-          onSelect={(connectorId: string) => {
-            onConfigChange({
-              ...config,
-              connectors: { ...config.connectors, [connectorKey]: connectorId },
-            });
-            resetMenu();
-          }}
-        />
-      ),
-    }),
-    [allConnectors, config, onConfigChange]
-  );
-
   const buildPanels = useCallback(
     ({ resetMenu, closeMenu }: MenuHelpers) => [
       {
-        id: 0,
         items: [
           {
             name: GENERATE_FEATURES_BUTTON_LABEL,
@@ -110,7 +71,7 @@ export const GenerateSplitButton = ({
             toolTipContent: GENERATE_FEATURES_TOOLTIP,
             toolTipProps: { position: 'right' as const },
           },
-          buildConnectorMenuItem(featuresConnector, 1),
+          buildConnectorMenuItem({ connector: featuresConnector, panelId: 1 }),
           { isSeparator: true as const },
           {
             name: GENERATE_QUERIES_BUTTON_LABEL,
@@ -122,31 +83,43 @@ export const GenerateSplitButton = ({
             toolTipContent: GENERATE_QUERIES_TOOLTIP,
             toolTipProps: { position: 'right' as const },
           },
-          buildConnectorMenuItem(queriesConnector, 2),
-          ...buildModelSettingsMenuItems(managementUrl, closeMenu),
+          buildConnectorMenuItem({ connector: queriesConnector, panelId: 2 }),
         ],
       },
-      buildConnectorSubPanel({
-        panelId: 1,
-        connectorKey: 'features',
-        resolvedId: featuresResolvedConnectorId,
-        resetMenu,
+      buildConnectorSelectionPanel({
+        connectors: allConnectors,
+        resolvedConnectorId: featuresResolvedConnectorId,
+        selectedConnectorId: config.connectors.features,
+        onSelect: (connectorId) => {
+          onConfigChange({
+            ...config,
+            connectors: { ...config.connectors, features: connectorId },
+          });
+          resetMenu();
+        },
       }),
-      buildConnectorSubPanel({
-        panelId: 2,
-        connectorKey: 'queries',
-        resolvedId: queriesResolvedConnectorId,
-        resetMenu,
+      buildConnectorSelectionPanel({
+        connectors: allConnectors,
+        resolvedConnectorId: queriesResolvedConnectorId,
+        selectedConnectorId: config.connectors.queries,
+        onSelect: (connectorId) => {
+          onConfigChange({
+            ...config,
+            connectors: { ...config.connectors, queries: connectorId },
+          });
+          resetMenu();
+        },
       }),
     ],
     [
       isRunDisabled,
       featuresConnector,
       queriesConnector,
-      managementUrl,
+      allConnectors,
       featuresResolvedConnectorId,
       queriesResolvedConnectorId,
-      buildConnectorSubPanel,
+      config,
+      onConfigChange,
       onRunFeaturesOnly,
       onRunQueriesOnly,
     ]

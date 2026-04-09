@@ -7,15 +7,12 @@
 
 import type { InferenceConnector } from '@kbn/inference-common';
 import React, { useCallback, useMemo } from 'react';
-import { ConnectorSubPanel } from './connector_sub_panel';
 import {
   CONNECTOR_LOAD_ERROR,
   DISCOVER_INSIGHTS_BUTTON_LABEL,
   DISCOVER_INSIGHTS_CONFIG_ARIA_LABEL,
-  MODEL_SELECTION_PANEL_TITLE,
 } from './translations';
-import { useModelSettingsUrl } from '../../../../../hooks/use_model_settings_url';
-import { buildConnectorMenuItem, buildModelSettingsMenuItems } from './context_menu_helpers';
+import { buildConnectorMenuItem, buildConnectorSelectionPanel } from './context_menu_helpers';
 import { ContextMenuSplitButton } from './context_menu_split_button';
 import type { MenuHelpers } from './context_menu_split_button';
 
@@ -40,47 +37,27 @@ export const InsightsSplitButton = ({
   isLoading,
   isDisabled,
 }: InsightsSplitButtonProps) => {
-  const managementUrl = useModelSettingsUrl();
-
   const discoveryConnector = useMemo(
     () => allConnectors.find((c) => c.connectorId === displayConnectorId),
     [allConnectors, displayConnectorId]
   );
 
   const buildPanels = useCallback(
-    ({ resetMenu, closeMenu }: MenuHelpers) => [
+    ({ resetMenu }: MenuHelpers) => [
       {
-        id: 0,
-        items: [
-          buildConnectorMenuItem(discoveryConnector, 1),
-          ...buildModelSettingsMenuItems(managementUrl, closeMenu),
-        ],
+        items: [buildConnectorMenuItem({ connector: discoveryConnector, panelId: 1 })],
       },
-      {
-        id: 1,
-        title: MODEL_SELECTION_PANEL_TITLE,
-        width: 240,
-        content: (
-          <ConnectorSubPanel
-            connectors={allConnectors}
-            resolvedConnectorId={resolvedConnectorId}
-            selectedConnectorId={displayConnectorId}
-            onSelect={(connectorId: string) => {
-              onConnectorChange(connectorId);
-              resetMenu();
-            }}
-          />
-        ),
-      },
+      buildConnectorSelectionPanel({
+        connectors: allConnectors,
+        resolvedConnectorId,
+        selectedConnectorId: displayConnectorId,
+        onSelect: (connectorId) => {
+          onConnectorChange(connectorId);
+          resetMenu();
+        },
+      }),
     ],
-    [
-      discoveryConnector,
-      managementUrl,
-      allConnectors,
-      resolvedConnectorId,
-      displayConnectorId,
-      onConnectorChange,
-    ]
+    [discoveryConnector, allConnectors, resolvedConnectorId, displayConnectorId, onConnectorChange]
   );
 
   return (

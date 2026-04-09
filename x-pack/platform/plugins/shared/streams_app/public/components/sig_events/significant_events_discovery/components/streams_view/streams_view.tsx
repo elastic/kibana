@@ -129,6 +129,7 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
     getInsightsTaskStatus,
   ]);
 
+  // When we started the insights task from this view and it completes, show toast
   useEffect(() => {
     if (!isWaitingForInsightsTask || !insightsTask) return;
     if (insightsTask.status !== TaskStatus.Completed && insightsTask.status !== TaskStatus.Failed) {

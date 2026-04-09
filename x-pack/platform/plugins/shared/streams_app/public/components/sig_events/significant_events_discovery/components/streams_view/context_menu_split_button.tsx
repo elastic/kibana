@@ -8,6 +8,9 @@
 import {
   EuiCallOut,
   EuiContextMenu,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
   EuiSplitButton,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -16,6 +19,17 @@ import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { useBoolean } from '@kbn/react-hooks';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { ComponentProps } from 'react';
+import { useModelSettingsUrl } from '../../../../../hooks/use_model_settings_url';
+import { MODEL_SETTINGS_LABEL } from './translations';
+
+const modelSettingsMenuName = (
+  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+    <EuiFlexItem>{MODEL_SETTINGS_LABEL}</EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiIcon type="popout" size="s" color="subdued" aria-hidden={true} />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 export interface MenuHelpers {
   resetMenu: () => void;
@@ -33,7 +47,7 @@ interface ContextMenuSplitButtonProps {
   isSecondaryDisabled?: boolean;
   secondaryDataTestSubj?: string;
 
-  buildPanels: (helpers: MenuHelpers) => EuiContextMenuPanelDescriptor[];
+  buildPanels: (helpers: MenuHelpers) => Array<Omit<EuiContextMenuPanelDescriptor, 'id'>>;
 
   error?: Error;
   errorTitle?: string;
@@ -63,6 +77,7 @@ export const ContextMenuSplitButton = ({
   const [isOpen, { off: close, toggle }] = useBoolean(false);
   const [menuResetKey, setMenuResetKey] = useState(0);
   const popoverId = useGeneratedHtmlId({ prefix: 'contextMenuSplitButton' });
+  const managementUrl = useModelSettingsUrl();
 
   const resetMenu = useCallback(() => setMenuResetKey((k) => k + 1), []);
 
@@ -71,9 +86,41 @@ export const ContextMenuSplitButton = ({
     resetMenu();
   }, [close, resetMenu]);
 
-  const panels = useMemo(
-    () => buildPanels({ resetMenu, closeMenu }),
-    [buildPanels, resetMenu, closeMenu]
+  const panels = useMemo(() => {
+    const builtPanels = buildPanels({ resetMenu, closeMenu });
+
+    const settingsItems = managementUrl
+      ? [
+          { isSeparator: true as const },
+          {
+            name: modelSettingsMenuName,
+            icon: 'gear' as const,
+            href: managementUrl,
+            target: '_blank',
+            onClick: closeMenu,
+          },
+        ]
+      : [];
+
+    return builtPanels.map((panel, index) => ({
+      ...panel,
+      id: index,
+      ...(index === 0 && panel.items && settingsItems.length > 0
+        ? { items: [...panel.items, ...settingsItems] }
+        : {}),
+    }));
+  }, [buildPanels, resetMenu, closeMenu, managementUrl]);
+
+  const popoverContent = error ? (
+    <EuiCallOut
+      announceOnMount
+      color="danger"
+      size="s"
+      title={errorTitle}
+      css={{ margin: euiTheme.size.s }}
+    />
+  ) : (
+    <EuiContextMenu key={menuResetKey} initialPanelId={0} panels={panels} />
   );
 
   return (
@@ -98,17 +145,7 @@ export const ContextMenuSplitButton = ({
           closePopover: closeMenu,
           anchorPosition: 'downRight',
           panelPaddingSize: 'none',
-          children: error ? (
-            <EuiCallOut
-              announceOnMount
-              color="danger"
-              size="s"
-              title={errorTitle}
-              css={{ margin: euiTheme.size.s }}
-            />
-          ) : (
-            <EuiContextMenu key={menuResetKey} initialPanelId={0} panels={panels} />
-          ),
+          children: popoverContent,
         }}
       />
     </EuiSplitButton>
