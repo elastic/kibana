@@ -1,0 +1,102 @@
+overlay: 1.0.0
+info:
+  title: Overlays for the Visualizations API
+  version: 0.0.1
+actions:
+  # ──────────────────────────────────────────────
+  # Tag description
+  # ──────────────────────────────────────────────
+  - target: '$.tags[?(@.name=="Visualizations")]'
+    description: Add tag description with getting started content, externalDocs, and displayName
+    update:
+      description: |
+        Create, retrieve, update, and delete [Kibana visualizations](https://www.elastic.co/docs/explore-analyze/visualize/lens). Visualizations created through this API are saved to your [visualization library](https://www.elastic.co/docs/explore-analyze/visualize/visualize-library) and can be added to dashboards as linked panels.
+
+        ## When to use this API
+
+        - Use this API to create reusable charts saved to the visualization library. You can then embed them in dashboards as **linked from library** panels using the visualization ID.
+        - Use the [Dashboards API](https://www.elastic.co/docs/api/doc/kibana/operation/operation-createdashboard) when you want to define a complete dashboard in one request, or when you need ES|QL-based visualizations.
+
+        ## Get started
+
+        Before you begin:
+
+        - **Authentication**: Refer to [Authentication](https://www.elastic.co/docs/api/doc/kibana#authentication) in the Kibana API documentation.
+        - **CSRF protection**: Write operations (`POST`, `PUT`, `DELETE`) require the `kbn-xsrf: true` header.
+        - **Spaces**: If you use non-default [Kibana spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces), prepend `s/{space_id}/` to the path.
+
+        ### Try it now
+
+        Create your first visualization right now. The following example creates a line chart showing log entries over time. You can run it as-is once you have the [Kibana sample logs dataset](https://www.elastic.co/docs/explore-analyze/index#add-sample-data) installed:
+
+        ```bash
+        curl -X POST "${KIBANA_URL}/api/visualizations" \
+          -H "Authorization: ApiKey ${API_KEY}" \
+          -H "kbn-xsrf: true" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "type": "xy",
+            "title": "Total log entries over time",
+            "data_source": {
+              "type": "data_view_spec",
+              "index_pattern": "kibana_sample_data_logs",
+              "time_field": "timestamp"
+            },
+            "query": {
+              "query": ""
+            },
+            "filters": [],
+            "layers": [
+              {
+                "type": "line",
+                "x": {
+                  "operation": "date_histogram",
+                  "field": "timestamp"
+                },
+                "y": [
+                  {
+                    "operation": "count"
+                  }
+                ]
+              }
+            ]
+          }'
+        ```
+
+        All examples on this page use [Kibana sample datasets](https://www.elastic.co/docs/explore-analyze/index#add-sample-data) (`kibana_sample_data_logs`, `kibana_sample_data_ecommerce`, `kibana_sample_data_flights`). To use your own data, replace the `index_pattern` and field names.
+
+        ### How a visualization is structured
+
+        Every visualization has three required parts:
+
+        - **`type`**: the chart to render. This is the discriminator — it determines what other fields are required. A `metric` payload looks nothing like an `xy` payload.
+        - **`data_source`**: how data is fetched. Use `"type": "data_view_spec"` with an inline index pattern, or `"type": "data_view_reference"` with the ID of an existing saved data view.
+        - **`query`** and **`filters`**: filter the data. Both are required even when empty (`"query": { "query": "" }` and `"filters": []`).
+
+        Everything else is chart-specific — `layers` for XY charts, `metrics` for metric charts, and so on. Refer to the request schema on the [Create a visualization](https://www.elastic.co/docs/api/doc/kibana/operation/operation-createvisualization) endpoint for the full shape of each type.
+
+        > warn
+        > ES|QL data source (`data_source.type: "esql"`) is not supported by this API. To create ES|QL visualizations programmatically, use the [Dashboards API](https://www.elastic.co/docs/api/doc/kibana/operation/operation-createdashboard).
+
+        ### Chart types
+
+        The `type` field in the request body determines the chart type:
+
+        | Type | Chart | Documentation |
+        |------|-------|---------------|
+        | `xy` | Bar, line, area (and stacked/percentage variants) | [Bar](https://www.elastic.co/docs/explore-analyze/visualize/charts/bar-charts), [Line](https://www.elastic.co/docs/explore-analyze/visualize/charts/line-charts), [Area](https://www.elastic.co/docs/explore-analyze/visualize/charts/area-charts) |
+        | `metric` | Single value metric | [Metric](https://www.elastic.co/docs/explore-analyze/visualize/charts/metric-charts) |
+        | `gauge` | Gauge (bullet, circular) | [Gauge](https://www.elastic.co/docs/explore-analyze/visualize/charts/gauge-charts) |
+        | `pie` | Pie | [Pie](https://www.elastic.co/docs/explore-analyze/visualize/charts/pie-charts) |
+        | `donut` | Donut | [Pie](https://www.elastic.co/docs/explore-analyze/visualize/charts/pie-charts) |
+        | `data_table` | Data table | [Table](https://www.elastic.co/docs/explore-analyze/visualize/charts/tables) |
+        | `heatmap` | Heat map | [Heat map](https://www.elastic.co/docs/explore-analyze/visualize/charts/heat-map-charts) |
+        | `tag_cloud` | Tag cloud | [Tag cloud](https://www.elastic.co/docs/explore-analyze/visualize/charts/tag-cloud-charts) |
+        | `treemap` | Treemap | [Treemap](https://www.elastic.co/docs/explore-analyze/visualize/charts/treemap-charts) |
+        | `waffle` | Waffle | [Waffle](https://www.elastic.co/docs/explore-analyze/visualize/charts/waffle-charts) |
+        | `mosaic` | Mosaic | [Mosaic](https://www.elastic.co/docs/explore-analyze/visualize/charts/mosaic-charts) |
+        | `region_map` | Region map (choropleth) | [Region map](https://www.elastic.co/docs/explore-analyze/visualize/charts/region-map-charts) |
+      externalDocs:
+        description: Visualizations documentation
+        url: https://www.elastic.co/docs/explore-analyze/visualize/lens
+      x-displayName: Visualizations
