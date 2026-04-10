@@ -95,7 +95,7 @@ actions:
 
         | Type | Content |
         |------|---------|
-        | `vis` | Visualization (bar, line, metric, and so on) — supports both data view and ES&#124;QL queries |
+        | `vis` | Visualization (bar, line, metric, and so on), supports both data view and ES&#124;QL queries |
         | `discover_session` | Discover session |
         | `image` | Image |
         | `markdown` | Markdown text |
