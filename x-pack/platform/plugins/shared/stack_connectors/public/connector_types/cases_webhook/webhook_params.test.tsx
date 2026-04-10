@@ -81,6 +81,6 @@ describe('WebhookParamsFields renders', () => {
         ]}
       />
     );
-    expect((screen.getByTestId('commentsTextArea') as HTMLTextAreaElement).disabled).toEqual(true);
+    expect(screen.getByTestId('commentsTextArea')).toBeDisabled();
   });
 });
