@@ -78,6 +78,7 @@ paths:
               examples:
                 initEntityEngineExample:
                   summary: Host engine initialized
+                  description: A host engine was successfully initialized and is now in the installing state.
                   value:
                     type: host
                     indexPattern: ''

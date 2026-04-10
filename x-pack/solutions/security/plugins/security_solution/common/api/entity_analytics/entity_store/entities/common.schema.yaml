@@ -215,7 +215,7 @@ components:
           $ref: '#/components/schemas/EntityField'
         user:
           type: object
-          description: ECS user fields collected on the entity.
+          description: Elastic Common Schema (ECS) user fields collected on the entity.
           additionalProperties: false
           properties:
             full_name:
@@ -283,7 +283,7 @@ components:
           $ref: '#/components/schemas/EntityField'
         host:
           type: object
-          description: ECS host fields collected on the entity.
+          description: Elastic Common Schema (ECS) host fields collected on the entity.
           additionalProperties: false
           properties:
             hostname:
@@ -327,7 +327,7 @@ components:
             os:
               type: object
               additionalProperties: false
-              description: ECS host.os fields collected on the entity latest index.
+              description: Elastic Common Schema (ECS) host.os fields collected on the entity latest index.
               properties:
                 name:
                   oneOf:
@@ -384,7 +384,7 @@ components:
           $ref: '#/components/schemas/EntityField'
         service:
           type: object
-          description: ECS service fields collected on the entity.
+          description: Elastic Common Schema (ECS) service fields collected on the entity.
           additionalProperties: false
           properties:
             name:

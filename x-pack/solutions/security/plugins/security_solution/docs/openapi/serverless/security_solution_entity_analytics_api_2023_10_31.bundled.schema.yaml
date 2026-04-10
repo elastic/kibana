@@ -1087,6 +1087,9 @@ paths:
             application/json:
               examples:
                 initEntityStoreExample:
+                  description: >-
+                    The Entity Store was successfully initialized, creating host
+                    and user engines in the installing state.
                   summary: Entity Store initialized with host and user engines
                   value:
                     engines:
@@ -1192,6 +1195,9 @@ paths:
             application/json:
               examples:
                 listEntityEnginesExample:
+                  description: >-
+                    Returns a list with one running host engine and one stopped
+                    user engine.
                   summary: Two engines installed
                   value:
                     count: 2
@@ -1293,6 +1299,9 @@ paths:
             application/json:
               examples:
                 getEntityEngineExample:
+                  description: >-
+                    Returns the engine descriptor for a host engine that is
+                    currently running with default settings.
                   summary: A running host engine
                   value:
                     delay: 1m
@@ -1381,6 +1390,9 @@ paths:
             application/json:
               examples:
                 initEntityEngineExample:
+                  description: >-
+                    A host engine was successfully initialized and is now in the
+                    installing state.
                   summary: Host engine initialized
                   value:
                     delay: 1m
@@ -1420,6 +1432,9 @@ paths:
             application/json:
               examples:
                 startEntityEngineExample:
+                  description: >-
+                    The engine was successfully started and is now processing
+                    data.
                   summary: Engine started successfully
                   value:
                     started: true
@@ -1453,6 +1468,9 @@ paths:
             application/json:
               examples:
                 stopEntityEngineExample:
+                  description: >-
+                    The engine was successfully stopped and is no longer
+                    processing data.
                   summary: Engine stopped successfully
                   value:
                     stopped: true
@@ -1478,6 +1496,9 @@ paths:
             application/json:
               examples:
                 applyDataviewIndicesExample:
+                  description: >-
+                    All running engines were successfully updated with the
+                    current data view index patterns.
                   summary: All engines updated
                   value:
                     result:
@@ -1511,6 +1532,9 @@ paths:
             application/json:
               examples:
                 partialSuccessExample:
+                  description: >-
+                    The host engine was updated but the user engine failed due
+                    to insufficient privileges.
                   summary: One engine failed
                   value:
                     errors:
@@ -1542,6 +1566,15 @@ paths:
         '500':
           content:
             application/json:
+              examples:
+                serverErrorExample:
+                  description: >-
+                    An unexpected error occurred while applying data view
+                    indices.
+                  summary: Internal server error
+                  value:
+                    body: An internal error occurred while updating engine indices
+                    statusCode: 500
               schema:
                 type: object
                 properties:
@@ -1594,6 +1627,9 @@ paths:
             application/json:
               examples:
                 deleteEntityExample:
+                  description: >-
+                    The entity was found and successfully removed from the
+                    latest index.
                   summary: Entity deleted
                   value:
                     deleted: true
@@ -1821,6 +1857,9 @@ paths:
             application/json:
               examples:
                 entityStoreRunning:
+                  description: >-
+                    The Entity Store is running with both host and user engines
+                    started and using default settings.
                   summary: Entity Store running with two engines
                   value:
                     engines:
@@ -2356,8 +2395,8 @@ components:
           type: integer
         filter:
           description: >-
-            An optional KQL filter applied to source documents before
-            aggregation.
+            An optional Kibana Query Language (KQL) filter applied to source
+            documents before aggregation.
           example: 'host.name: "my-host"'
           type: string
         frequency:
@@ -2828,7 +2867,7 @@ components:
               type: string
         host:
           additionalProperties: false
-          description: ECS host fields collected on the entity.
+          description: Elastic Common Schema (ECS) host fields collected on the entity.
           type: object
           properties:
             architecture:
@@ -2868,7 +2907,9 @@ components:
               type: string
             os:
               additionalProperties: false
-              description: ECS host.os fields collected on the entity latest index.
+              description: >-
+                Elastic Common Schema (ECS) host.os fields collected on the
+                entity latest index.
               type: object
               properties:
                 family:
@@ -3228,7 +3269,7 @@ components:
               type: string
         service:
           additionalProperties: false
-          description: ECS service fields collected on the entity.
+          description: Elastic Common Schema (ECS) service fields collected on the entity.
           type: object
           properties:
             entity:
@@ -3385,7 +3426,7 @@ components:
               type: string
         user:
           additionalProperties: false
-          description: ECS user fields collected on the entity.
+          description: Elastic Common Schema (ECS) user fields collected on the entity.
           type: object
           properties:
             domain:

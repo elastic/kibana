@@ -29,6 +29,7 @@ paths:
               examples:
                 listEntityEnginesExample:
                   summary: Two engines installed
+                  description: Returns a list with one running host engine and one stopped user engine.
                   value:
                     count: 2
                     engines:

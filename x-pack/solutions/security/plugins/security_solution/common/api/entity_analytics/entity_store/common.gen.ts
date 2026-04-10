@@ -25,7 +25,7 @@ export type EntityTypeEnum = typeof EntityType.enum;
 export const EntityTypeEnum = EntityType.enum;
 
 /**
- * The top-level ECS field group that the entity maps to.
+ * The top-level Elastic Common Schema (ECS) field group that the entity maps to.
  */
 export type BaseECSEntityField = z.infer<typeof BaseECSEntityField>;
 export const BaseECSEntityField = z.enum(['user', 'host', 'service', 'entity']);
@@ -55,7 +55,7 @@ export const EngineDescriptor = z.object({
   indexPattern: IndexPattern,
   status: EngineStatus,
   /**
-   * An optional KQL filter applied to source documents before aggregation.
+   * An optional Kibana Query Language (KQL) filter applied to source documents before aggregation.
    */
   filter: z.string().optional(),
   /**

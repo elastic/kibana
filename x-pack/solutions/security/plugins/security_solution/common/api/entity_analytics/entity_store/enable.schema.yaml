@@ -85,6 +85,7 @@ paths:
               examples:
                 initEntityStoreExample:
                   summary: Entity Store initialized with host and user engines
+                  description: The Entity Store was successfully initialized, creating host and user engines in the installing state.
                   value:
                     succeeded: true
                     engines:

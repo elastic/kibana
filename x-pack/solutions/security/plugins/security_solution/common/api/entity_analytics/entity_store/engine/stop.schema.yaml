@@ -33,5 +33,6 @@ paths:
               examples:
                 stopEntityEngineExample:
                   summary: Engine stopped successfully
+                  description: The engine was successfully stopped and is no longer processing data.
                   value:
                     stopped: true

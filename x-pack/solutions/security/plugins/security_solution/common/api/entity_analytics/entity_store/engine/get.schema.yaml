@@ -28,6 +28,7 @@ paths:
               examples:
                 getEntityEngineExample:
                   summary: A running host engine
+                  description: Returns the engine descriptor for a host engine that is currently running with default settings.
                   value:
                     type: host
                     indexPattern: ''

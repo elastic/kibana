@@ -21,6 +21,7 @@ paths:
               examples:
                 allPrivilegesGranted:
                   summary: User has all required privileges
+                  description: The current user has all Elasticsearch cluster and index privileges required to operate the Entity Store.
                   value:
                     has_all_required: true
                     has_read_permissions: true

@@ -50,6 +50,7 @@ paths:
               examples:
                 entityStoreRunning:
                   summary: Entity Store running with two engines
+                  description: The Entity Store is running with both host and user engines started and using default settings.
                   value:
                     status: running
                     engines:

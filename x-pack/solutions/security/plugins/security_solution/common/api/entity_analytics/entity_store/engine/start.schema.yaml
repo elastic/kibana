@@ -33,5 +33,6 @@ paths:
               examples:
                 startEntityEngineExample:
                   summary: Engine started successfully
+                  description: The engine was successfully started and is now processing data.
                   value:
                     started: true

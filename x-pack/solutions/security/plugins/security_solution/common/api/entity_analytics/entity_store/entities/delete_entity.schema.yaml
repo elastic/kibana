@@ -49,6 +49,7 @@ paths:
               examples:
                 deleteEntityExample:
                   summary: Entity deleted
+                  description: The entity was found and successfully removed from the latest index.
                   value:
                     deleted: true
         '404':

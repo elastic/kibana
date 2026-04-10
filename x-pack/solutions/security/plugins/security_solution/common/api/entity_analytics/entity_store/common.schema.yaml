@@ -16,7 +16,7 @@ components:
         - generic
     BaseECSEntityField:
       type: string
-      description: The top-level ECS field group that the entity maps to.
+      description: The top-level Elastic Common Schema (ECS) field group that the entity maps to.
       enum:
         - user
         - host
@@ -39,7 +39,7 @@ components:
           $ref: '#/components/schemas/EngineStatus'
         filter:
           type: string
-          description: An optional KQL filter applied to source documents before aggregation.
+          description: An optional Kibana Query Language (KQL) filter applied to source documents before aggregation.
           example: 'host.name: "my-host"'
         fieldHistoryLength:
           type: integer

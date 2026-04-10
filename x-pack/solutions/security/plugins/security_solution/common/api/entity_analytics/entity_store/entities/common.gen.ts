@@ -251,7 +251,7 @@ export const UserEntity = z
     '@timestamp': z.string().datetime().optional(),
     entity: EntityField,
     /**
-     * ECS user fields collected on the entity.
+     * Elastic Common Schema (ECS) user fields collected on the entity.
      */
     user: z
       .object({
@@ -312,7 +312,7 @@ export const HostEntity = z
     '@timestamp': z.string().datetime().optional(),
     entity: EntityField,
     /**
-     * ECS host fields collected on the entity.
+     * Elastic Common Schema (ECS) host fields collected on the entity.
      */
     host: z
       .object({
@@ -349,7 +349,7 @@ export const HostEntity = z
          */
         architecture: z.array(z.string()).optional(),
         /**
-         * ECS host.os fields collected on the entity latest index.
+         * Elastic Common Schema (ECS) host.os fields collected on the entity latest index.
          */
         os: z
           .object({
@@ -393,7 +393,7 @@ export const ServiceEntity = z
     '@timestamp': z.string().datetime().optional(),
     entity: EntityField,
     /**
-     * ECS service fields collected on the entity.
+     * Elastic Common Schema (ECS) service fields collected on the entity.
      */
     service: z
       .object({
