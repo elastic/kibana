@@ -24,6 +24,7 @@ import {
 } from './pages';
 import type { ObservabilityOnboardingAppServices } from '..';
 import { useManagedOtlpServiceAvailability } from './shared/use_managed_otlp_service_availability';
+import { CommentOverlay } from './comment_overlay/comment_overlay';
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,7 @@ export function ObservabilityOnboardingFlow() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <CommentOverlay />
       <Routes>
         <Route path="/auto-detect">
           <AutoDetectPage />

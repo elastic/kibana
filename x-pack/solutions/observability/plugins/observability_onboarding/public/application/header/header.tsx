@@ -16,7 +16,6 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
   EuiPageTemplate,
   EuiSpacer,
   EuiText,
@@ -133,6 +132,18 @@ export function Header() {
                     size="s"
                     iconType="productAgent"
                     color="primary"
+                    onClick={() => {
+                      const isMac = navigator.platform.toUpperCase().includes('MAC');
+                      window.dispatchEvent(
+                        new KeyboardEvent('keydown', {
+                          code: 'Semicolon',
+                          key: ';',
+                          metaKey: isMac,
+                          ctrlKey: !isMac,
+                          bubbles: true,
+                        })
+                      );
+                    }}
                     css={css`
                       position: relative;
                       &:hover, &:focus {
@@ -175,36 +186,34 @@ export function Header() {
       </EuiPageTemplate.Section>
 
       {isSkillsModalOpen && (
-        <EuiOverlayMask>
-          <EuiModal onClose={() => setIsSkillsModalOpen(false)} style={{ maxWidth: 560 }}>
-            <EuiModalHeader>
-              <EuiModalHeaderTitle>Copy prompt to your coding agent</EuiModalHeaderTitle>
-            </EuiModalHeader>
-            <EuiModalBody>
-              <EuiText size="s" color="subdued">
-                <p>Paste this prompt into any coding agent to install the Elastic Observability onboarding skills.</p>
-              </EuiText>
-              <EuiSpacer size="m" />
-              <EuiCodeBlock language="markdown" fontSize="s" paddingSize="m" isCopyable>
-                {`Install the observability onboarding skill:\n\`\`\`sh\nnpx skills add elastic/agent-skills --skill observability-onboarding -y\n\`\`\`\n\nHelp me get started with Elastic Observability.`}
-              </EuiCodeBlock>
-            </EuiModalBody>
-            <EuiModalFooter>
-              <EuiButtonEmpty onClick={() => setIsSkillsModalOpen(false)}>Close</EuiButtonEmpty>
-              <EuiButton
-                fill
-                onClick={() => {
-                  navigator.clipboard.writeText(
-                    'Install the observability onboarding skill:\n```sh\nnpx skills add elastic/agent-skills --skill observability-onboarding -y\n```\n\nHelp me get started with Elastic Observability.'
-                  );
-                  setIsSkillsModalOpen(false);
-                }}
-              >
-                Copy to clipboard
-              </EuiButton>
-            </EuiModalFooter>
-          </EuiModal>
-        </EuiOverlayMask>
+        <EuiModal onClose={() => setIsSkillsModalOpen(false)} style={{ maxWidth: 560 }}>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>Copy prompt to your coding agent</EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody>
+            <EuiText size="s" color="subdued">
+              <p>Paste this prompt into any coding agent to install the Elastic Observability onboarding skills.</p>
+            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiCodeBlock language="markdown" fontSize="s" paddingSize="m" isCopyable>
+              {`Install the observability onboarding skill:\n\`\`\`sh\nnpx skills add elastic/agent-skills --skill observability-onboarding -y\n\`\`\`\n\nHelp me get started with Elastic Observability.`}
+            </EuiCodeBlock>
+          </EuiModalBody>
+          <EuiModalFooter>
+            <EuiButtonEmpty onClick={() => setIsSkillsModalOpen(false)}>Close</EuiButtonEmpty>
+            <EuiButton
+              fill
+              onClick={() => {
+                navigator.clipboard.writeText(
+                  'Install the observability onboarding skill:\n```sh\nnpx skills add elastic/agent-skills --skill observability-onboarding -y\n```\n\nHelp me get started with Elastic Observability.'
+                );
+                setIsSkillsModalOpen(false);
+              }}
+            >
+              Copy to clipboard
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
       )}
     </>
   );
