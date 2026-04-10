@@ -259,12 +259,12 @@ export type EsWorkflowCreate = Omit<
 
 export const MAX_WORKFLOW_YAML_LENGTH = 1_048_576;
 const MAX_BULK_CREATE_WORKFLOWS = 500;
-// IDs must start and end with an alphanumeric character, contain only alphanumeric chars,
-// hyphens, or underscores in the middle, and be between 3 and 255 chars long.
+// IDs must start and end with an alphanumeric character (lowercase only), contain only alphanumeric chars,
+// hyphens in the middle, and be between 3 and 255 chars long.
 // This supports semantic IDs ("security-alert-enrichment"), legacy workflow-{uuid} format,
-// plain UUIDs, and snake_case names, while rejecting leading/trailing separators and
+// plain UUIDs, while rejecting leading/trailing separators, snake case and
 // special characters like spaces, dots, or '@'.
-export const WORKFLOW_ID_PATTERN = /^[a-zA-Z0-9]([a-zA-Z0-9_-]*[a-zA-Z0-9])?$/;
+export const WORKFLOW_ID_PATTERN = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
 
 export const CreateWorkflowCommandSchema = z.object({
   yaml: z.string().max(MAX_WORKFLOW_YAML_LENGTH),
