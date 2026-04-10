@@ -12,13 +12,29 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
+        "adjust_capacity_for_elasticsearch_errors": true,
         "allow_reading_invalid_state": true,
         "api_key_type": "es",
         "auto_calculate_default_ech_capacity": false,
+        "capacity": "auto",
         "claim_strategy": "mget",
         "discovery": Object {
           "active_nodes_lookback": "30s",
           "interval": 10000,
+        },
+        "dynamic_capacity": Object {
+          "max_event_loop_delay_ms": 10000,
+          "max_event_loop_utilization": 0.85,
+          "max_heap_used_fraction": 0.85,
+          "max_process_cpu_utilization": 0.85,
+          "min_utilization_for_projection": 30,
+          "scale_down_consecutive_unhealthy_readings": 3,
+          "scale_down_cooldown_ms": 30000,
+          "scale_down_step": 1,
+          "scale_interval_ms": 10000,
+          "scale_up_min_post_claim_utilization_pct": 90,
+          "scale_up_step": 1,
+          "upper_bound": 100,
         },
         "event_loop_delay": Object {
           "monitor": true,
@@ -75,13 +91,29 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
+        "adjust_capacity_for_elasticsearch_errors": true,
         "allow_reading_invalid_state": true,
         "api_key_type": "es",
         "auto_calculate_default_ech_capacity": false,
+        "capacity": "auto",
         "claim_strategy": "mget",
         "discovery": Object {
           "active_nodes_lookback": "30s",
           "interval": 10000,
+        },
+        "dynamic_capacity": Object {
+          "max_event_loop_delay_ms": 10000,
+          "max_event_loop_utilization": 0.85,
+          "max_heap_used_fraction": 0.85,
+          "max_process_cpu_utilization": 0.85,
+          "min_utilization_for_projection": 30,
+          "scale_down_consecutive_unhealthy_readings": 3,
+          "scale_down_cooldown_ms": 30000,
+          "scale_down_step": 1,
+          "scale_interval_ms": 10000,
+          "scale_up_min_post_claim_utilization_pct": 90,
+          "scale_up_step": 1,
+          "upper_bound": 100,
         },
         "event_loop_delay": Object {
           "monitor": true,
@@ -136,13 +168,29 @@ describe('config validation', () => {
     };
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
+        "adjust_capacity_for_elasticsearch_errors": true,
         "allow_reading_invalid_state": true,
         "api_key_type": "es",
         "auto_calculate_default_ech_capacity": false,
+        "capacity": "auto",
         "claim_strategy": "mget",
         "discovery": Object {
           "active_nodes_lookback": "30s",
           "interval": 10000,
+        },
+        "dynamic_capacity": Object {
+          "max_event_loop_delay_ms": 10000,
+          "max_event_loop_utilization": 0.85,
+          "max_heap_used_fraction": 0.85,
+          "max_process_cpu_utilization": 0.85,
+          "min_utilization_for_projection": 30,
+          "scale_down_consecutive_unhealthy_readings": 3,
+          "scale_down_cooldown_ms": 30000,
+          "scale_down_step": 1,
+          "scale_interval_ms": 10000,
+          "scale_up_min_post_claim_utilization_pct": 90,
+          "scale_up_step": 1,
+          "upper_bound": 100,
         },
         "event_loop_delay": Object {
           "monitor": true,
@@ -306,5 +354,19 @@ describe('config validation', () => {
     };
 
     expect(() => configSchema.validate(config)).not.toThrow();
+  });
+
+  test('allows overriding only one dynamic_capacity setting', () => {
+    const config: Record<string, unknown> = {
+      dynamic_capacity: {
+        upper_bound: 75,
+      },
+    };
+
+    const result = configSchema.validate(config);
+    expect(result.dynamic_capacity.upper_bound).toBe(75);
+    expect(result.dynamic_capacity.scale_interval_ms).toBe(10000);
+    expect(result.dynamic_capacity.scale_down_step).toBe(1);
+    expect(result.dynamic_capacity.max_event_loop_utilization).toBe(0.85);
   });
 });

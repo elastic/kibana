@@ -17,6 +17,18 @@ export const DEFAULT_MAX_WORKERS = 10;
 export const DEFAULT_POLL_INTERVAL = 3000;
 export const MGET_DEFAULT_POLL_INTERVAL = 500;
 export const DEFAULT_VERSION_CONFLICT_THRESHOLD = 80;
+export const MAX_DYNAMIC_CAPACITY = MAX_WORKERS_LIMIT;
+export const DEFAULT_DYNAMIC_CAPACITY_SCALE_INTERVAL_MS = 10 * 1000;
+export const DEFAULT_DYNAMIC_CAPACITY_SCALE_UP_STEP = 1;
+export const DEFAULT_DYNAMIC_CAPACITY_SCALE_DOWN_STEP = 1;
+export const DEFAULT_DYNAMIC_CAPACITY_SCALE_UP_MIN_POST_CLAIM_UTILIZATION_PCT = 90;
+export const DEFAULT_DYNAMIC_CAPACITY_MAX_EVENT_LOOP_UTILIZATION = 0.85;
+export const DEFAULT_DYNAMIC_CAPACITY_MAX_HEAP_USED_FRACTION = 0.85;
+export const DEFAULT_DYNAMIC_CAPACITY_MAX_PROCESS_CPU_UTILIZATION = 0.85;
+export const DEFAULT_DYNAMIC_CAPACITY_MAX_EVENT_LOOP_DELAY_MS = 10 * 1000;
+export const DEFAULT_DYNAMIC_CAPACITY_SCALE_DOWN_COOLDOWN_MS = 30 * 1000;
+export const DEFAULT_DYNAMIC_CAPACITY_SCALE_DOWN_CONSECUTIVE_UNHEALTHY_READINGS = 3;
+export const DEFAULT_DYNAMIC_CAPACITY_MIN_UTILIZATION_FOR_PROJECTION = 30;
 
 // Monitoring Constants
 // ===================
@@ -98,7 +110,11 @@ export const configSchema = schema.object(
       defaultValue: ApiKeyType.ES,
     }),
     /* The number of normal cost tasks that this Kibana instance will run simultaneously */
-    capacity: schema.maybe(schema.number({ min: MIN_CAPACITY, max: MAX_CAPACITY })),
+    capacity: schema.oneOf(
+      [schema.number({ min: MIN_CAPACITY, max: MAX_CAPACITY }), schema.literal('auto')],
+      { defaultValue: 'auto' }
+    ),
+    adjust_capacity_for_elasticsearch_errors: schema.boolean({ defaultValue: true }),
     discovery: schema.object({
       active_nodes_lookback: schema.string({
         defaultValue: DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION,
@@ -218,6 +234,61 @@ export const configSchema = schema.object(
         min: 1,
       })
     ),
+    dynamic_capacity: schema.object({
+      upper_bound: schema.number({
+        defaultValue: MAX_DYNAMIC_CAPACITY,
+        min: MIN_CAPACITY,
+        max: MAX_DYNAMIC_CAPACITY,
+      }),
+      scale_interval_ms: schema.number({
+        defaultValue: DEFAULT_DYNAMIC_CAPACITY_SCALE_INTERVAL_MS,
+        min: 1000,
+      }),
+      scale_up_step: schema.number({
+        defaultValue: DEFAULT_DYNAMIC_CAPACITY_SCALE_UP_STEP,
+        min: 1,
+      }),
+      scale_down_step: schema.number({
+        defaultValue: DEFAULT_DYNAMIC_CAPACITY_SCALE_DOWN_STEP,
+        min: 1,
+      }),
+      scale_up_min_post_claim_utilization_pct: schema.number({
+        defaultValue: DEFAULT_DYNAMIC_CAPACITY_SCALE_UP_MIN_POST_CLAIM_UTILIZATION_PCT,
+        min: 0,
+        max: 100,
+      }),
+      max_event_loop_utilization: schema.number({
+        defaultValue: DEFAULT_DYNAMIC_CAPACITY_MAX_EVENT_LOOP_UTILIZATION,
+        min: 0,
+        max: 1,
+      }),
+      max_heap_used_fraction: schema.number({
+        defaultValue: DEFAULT_DYNAMIC_CAPACITY_MAX_HEAP_USED_FRACTION,
+        min: 0,
+        max: 1,
+      }),
+      max_process_cpu_utilization: schema.number({
+        defaultValue: DEFAULT_DYNAMIC_CAPACITY_MAX_PROCESS_CPU_UTILIZATION,
+        min: 0,
+      }),
+      min_utilization_for_projection: schema.number({
+        defaultValue: DEFAULT_DYNAMIC_CAPACITY_MIN_UTILIZATION_FOR_PROJECTION,
+        min: 0,
+        max: 100,
+      }),
+      max_event_loop_delay_ms: schema.number({
+        defaultValue: DEFAULT_DYNAMIC_CAPACITY_MAX_EVENT_LOOP_DELAY_MS,
+        min: 0,
+      }),
+      scale_down_cooldown_ms: schema.number({
+        defaultValue: DEFAULT_DYNAMIC_CAPACITY_SCALE_DOWN_COOLDOWN_MS,
+        min: 0,
+      }),
+      scale_down_consecutive_unhealthy_readings: schema.number({
+        defaultValue: DEFAULT_DYNAMIC_CAPACITY_SCALE_DOWN_CONSECUTIVE_UNHEALTHY_READINGS,
+        min: 1,
+      }),
+    }),
     claim_strategy: schema.string({ defaultValue: CLAIM_STRATEGY_MGET }),
     request_timeouts: requestTimeoutsConfig,
     auto_calculate_default_ech_capacity: schema.boolean({ defaultValue: false }),

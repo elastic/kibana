@@ -20,6 +20,7 @@ import type {
   CoreSetup,
   Logger,
   CoreStart,
+  OpsMetrics,
 } from '@kbn/core/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
@@ -148,6 +149,7 @@ export class TaskManagerPlugin
   private kibanaDiscoveryService?: KibanaDiscoveryService;
   private heapSizeLimit: number = 0;
   private numOfKibanaInstances$: Subject<number> = new BehaviorSubject(1);
+  private opsMetrics$?: Observable<OpsMetrics>;
   private canEncryptSavedObjects: boolean;
   private licenseSubscriber?: PublicMethodsOf<LicenseSubscriber>;
   private invalidateApiKeyFn?: ApiKeyInvalidationFn;
@@ -191,12 +193,10 @@ export class TaskManagerPlugin
       getClusterClient: () => clusterClientPromise,
     });
 
-    core.metrics
-      .getOpsMetrics$()
-      .pipe(distinctUntilChanged())
-      .subscribe((metrics) => {
-        this.heapSizeLimit = metrics.process.memory.heap.size_limit;
-      });
+    this.opsMetrics$ = core.metrics.getOpsMetrics$().pipe(distinctUntilChanged());
+    this.opsMetrics$.subscribe((metrics) => {
+      this.heapSizeLimit = metrics.process.memory.heap.size_limit;
+    });
 
     setupSavedObjects(core.savedObjects);
 
@@ -419,6 +419,7 @@ export class TaskManagerPlugin
         taskPartitioner,
         startingCapacity,
         eventLogger: this.taskEventLogger!,
+        opsMetrics$: this.opsMetrics$,
       });
     }
 

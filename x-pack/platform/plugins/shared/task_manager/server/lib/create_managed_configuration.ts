@@ -42,7 +42,7 @@ const CAPACITY_INCREASE_PERCENTAGE = 1.05;
 const POLL_INTERVAL_DECREASE_PERCENTAGE = 0.95;
 const POLL_INTERVAL_INCREASE_PERCENTAGE = 1.2;
 
-interface ErrorScanResult {
+export interface ErrorScanResult {
   count: number;
   isBlockException: boolean;
 }
@@ -260,15 +260,27 @@ export function calculateStartingCapacity(
   logger: Logger,
   defaultCapacity: number
 ): number {
-  if (config.capacity !== undefined && config.max_workers !== undefined) {
+  const hasNumericCapacity = typeof config.capacity === 'number';
+  const hasAutoCapacity = config.capacity === 'auto';
+
+  if (hasNumericCapacity && config.max_workers !== undefined) {
     logger.warn(
       `Both "xpack.task_manager.capacity" and "xpack.task_manager.max_workers" configs are set, max_workers will be ignored in favor of capacity and the setting should be removed.`
     );
   }
 
-  if (config.capacity) {
+  if (hasAutoCapacity && config.max_workers !== undefined) {
+    logger.warn(
+      `Both "xpack.task_manager.capacity" and "xpack.task_manager.max_workers" configs are set, max_workers will be ignored in favor of capacity and the setting should be removed.`
+    );
+  }
+
+  if (hasNumericCapacity) {
     // Use capacity if explicitly set
-    return config.capacity!;
+    return config.capacity;
+  } else if (hasAutoCapacity) {
+    // Use default capacity as baseline when dynamic capacity is enabled via `capacity: auto`
+    return defaultCapacity;
   } else if (config.max_workers) {
     // Otherwise use max_worker value as capacity, capped at MAX_CAPACITY
     return Math.min(config.max_workers, MAX_CAPACITY);

@@ -14,6 +14,7 @@ import { tap } from 'rxjs';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, ExecutionContextStart, IBasePath } from '@kbn/core/server';
 
+import type { OpsMetrics } from '@kbn/core/server';
 import type { Result } from './lib/result_type';
 import { asErr, mapErr, asOk, map, mapOk, isOk } from './lib/result_type';
 import type { TaskManagerConfig } from './config';
@@ -55,12 +56,13 @@ import type { ClaimOwnershipResult } from './task_claimers';
 import type { TaskPartitioner } from './lib/task_partitioner';
 import type { TaskPoller } from './polling/task_poller';
 import {
-  createCapacityScan,
   createPollIntervalScan,
   countErrors,
   ADJUST_THROUGHPUT_INTERVAL,
 } from './lib/create_managed_configuration';
 import { createRunningAveragedStat } from './monitoring/task_run_calculators';
+import { reconcileTasksOnStartup } from './lib/task_reconciliation';
+import { createCapacityConfigurationStream } from './lib/capacity_configuration_stream';
 
 const MAX_BUFFER_OPERATIONS = 100;
 
@@ -81,6 +83,7 @@ export interface TaskPollingLifecycleOpts {
   taskPartitioner: TaskPartitioner;
   startingCapacity: number;
   eventLogger: TaskEventLogger;
+  opsMetrics$?: Observable<OpsMetrics>;
 }
 
 export type TaskLifecycleEvent =
@@ -122,6 +125,10 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private config: TaskManagerConfig;
   private currentPollInterval: number;
   private currentTmUtilization$ = new BehaviorSubject<number>(0);
+  private currentTmObservedUtilization$ = new BehaviorSubject<number>(0);
+  private isElasticsearchAndSOAvailable = false;
+  private hasReconciledOnStartup = false;
+  private reconcileOnStartupPromise?: Promise<void>;
 
   private eventLogger: TaskEventLogger;
 
@@ -144,6 +151,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     taskPartitioner,
     startingCapacity,
     eventLogger,
+    opsMetrics$,
   }: TaskPollingLifecycleOpts) {
     this.basePathService = basePathService;
     this.logger = logger;
@@ -160,11 +168,15 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     const errorCheck$ = countErrors(taskStore.errors$, ADJUST_THROUGHPUT_INTERVAL);
     const window = WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS / this.currentPollInterval;
     const tmUtilizationQueue = createRunningAveragedStat<number>(window);
-    this.capacityConfiguration$ = errorCheck$.pipe(
-      createCapacityScan(config, logger, startingCapacity),
-      startWith(startingCapacity),
-      distinctUntilChanged()
-    );
+    this.capacityConfiguration$ = createCapacityConfigurationStream({
+      config,
+      logger,
+      startingCapacity,
+      errorCheck$,
+      postClaimUtilizationPct$: this.currentTmUtilization$,
+      projectionUtilizationPct$: this.currentTmObservedUtilization$,
+      opsMetrics$,
+    });
     this.pollIntervalConfiguration$ = errorCheck$.pipe(
       withLatestFrom(this.currentTmUtilization$),
       createPollIntervalScan(logger, this.currentPollInterval, claimStrategy, tmUtilizationQueue),
@@ -238,12 +250,9 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
     this.subscribeToPoller(this.poller.events$);
 
-    elasticsearchAndSOAvailability$.subscribe((areESAndSOAvailable) => {
-      if (areESAndSOAvailable && !this.started) {
-        this.poller.start();
-        this.started = true;
-      }
-    });
+    elasticsearchAndSOAvailability$.subscribe((areESAndSOAvailable) =>
+      this.handleAvailabilityChange(areESAndSOAvailable)
+    );
   }
 
   public get events(): Observable<TaskLifecycleEvent> {
@@ -252,6 +261,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
   public stop() {
     this.poller.stop();
+    this.started = false;
   }
 
   public getCurrentTasksInPool(): string[] {
@@ -354,6 +364,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
             // Get the actual utilization as a percentage
             let tmUtilization = this.pool.usedCapacityPercentage;
+            this.currentTmObservedUtilization$.next(tmUtilization);
 
             // Check whether there are any tasks left unclaimed
             // If we're not at capacity and there are unclaimed tasks, then
@@ -391,6 +402,47 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
           )
         );
       });
+  }
+
+  private handleAvailabilityChange(areESAndSOAvailable: boolean) {
+    this.isElasticsearchAndSOAvailable = areESAndSOAvailable;
+
+    if (!areESAndSOAvailable) {
+      if (this.started) {
+        this.poller.stop();
+        this.started = false;
+      }
+      return;
+    }
+
+    if (this.hasReconciledOnStartup) {
+      if (!this.started) {
+        this.poller.start();
+        this.started = true;
+      }
+      return;
+    }
+
+    if (!this.reconcileOnStartupPromise) {
+      this.reconcileOnStartupPromise = reconcileTasksOnStartup({
+        taskStore: this.store,
+        logger: this.logger,
+      })
+        .then(() => undefined)
+        .catch((error) => {
+          this.logger.error(
+            `Startup task reconciliation failed. Continuing by starting the poller. Error: ${error.message}`
+          );
+        })
+        .finally(() => {
+          this.hasReconciledOnStartup = true;
+          this.reconcileOnStartupPromise = undefined;
+          if (this.isElasticsearchAndSOAvailable && !this.started) {
+            this.poller.start();
+            this.started = true;
+          }
+        });
+    }
   }
 }
 

@@ -30,6 +30,7 @@ import { ApiKeyType, CLAIM_STRATEGY_MGET, DEFAULT_KIBANAS_PER_PARTITION } from '
 import { TaskPartitioner } from './lib/task_partitioner';
 import type { KibanaDiscoveryService } from './kibana_discovery_service';
 import { TaskEventType } from './task_events';
+import { reconcileTasksOnStartup } from './lib/task_reconciliation';
 
 const executionContext = executionContextServiceMock.createSetupContract();
 let mockTaskClaiming = taskClaimingMock.create({});
@@ -43,6 +44,14 @@ jest.mock('./queries/task_claiming', () => {
 
 jest.mock('./constants', () => ({
   CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: ['report', 'quickReport'],
+}));
+
+jest.mock('./lib/task_reconciliation', () => ({
+  reconcileTasksOnStartup: jest.fn().mockResolvedValue({
+    recoveredTasks: [],
+    updated: 0,
+    limitedByMaxTasks: false,
+  }),
 }));
 
 interface EsError extends Error {
@@ -112,6 +121,21 @@ describe('TaskPollingLifecycle', () => {
       },
       auto_calculate_default_ech_capacity: false,
       api_key_type: ApiKeyType.ES,
+      adjust_capacity_for_elasticsearch_errors: true,
+      dynamic_capacity: {
+        upper_bound: 100,
+        scale_interval_ms: 10000,
+        scale_up_step: 1,
+        scale_down_step: 1,
+        scale_up_min_post_claim_utilization_pct: 90,
+        max_event_loop_utilization: 0.85,
+        max_heap_used_fraction: 0.85,
+        max_process_cpu_utilization: 0.85,
+        min_utilization_for_projection: 30,
+        max_event_loop_delay_ms: 10000,
+        scale_down_cooldown_ms: 30000,
+        scale_down_consecutive_unhealthy_readings: 3,
+      },
     },
     basePathService: httpServiceMock.createBasePath(),
     taskStore: mockTaskStore,
@@ -132,6 +156,7 @@ describe('TaskPollingLifecycle', () => {
   beforeEach(() => {
     mockTaskClaiming = taskClaimingMock.create({});
     (TaskClaiming as jest.Mock<TaskClaimingClass>).mockClear();
+    (reconcileTasksOnStartup as jest.Mock).mockClear();
     clock = sinon.useFakeTimers();
   });
 
@@ -152,7 +177,7 @@ describe('TaskPollingLifecycle', () => {
       },
     });
 
-    test('begins polling once the ES and SavedObjects services are available', () => {
+    test('begins polling once the ES and SavedObjects services are available', async () => {
       const elasticsearchAndSOAvailability$ = new Subject<boolean>();
       new TaskPollingLifecycle({ ...taskManagerOpts, elasticsearchAndSOAvailability$ });
 
@@ -160,9 +185,40 @@ describe('TaskPollingLifecycle', () => {
       expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).not.toHaveBeenCalled();
 
       elasticsearchAndSOAvailability$.next(true);
-
+      await Promise.resolve();
+      await Promise.resolve();
       clock.tick(150);
       expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
+    });
+
+    test('reconciles once and restarts polling when ES availability toggles', async () => {
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        config: {
+          ...taskManagerOpts.config,
+          poll_interval: 100,
+        },
+        elasticsearchAndSOAvailability$,
+      });
+
+      elasticsearchAndSOAvailability$.next(true);
+      await Promise.resolve();
+      await Promise.resolve();
+      clock.tick(150);
+      expect(reconcileTasksOnStartup).toHaveBeenCalledTimes(1);
+      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalledTimes(1);
+
+      elasticsearchAndSOAvailability$.next(false);
+      clock.tick(300);
+      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalledTimes(1);
+
+      elasticsearchAndSOAvailability$.next(true);
+      await Promise.resolve();
+      await Promise.resolve();
+      clock.tick(150);
+      expect(reconcileTasksOnStartup).toHaveBeenCalledTimes(1);
+      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalledTimes(2);
     });
 
     test('provides TaskClaiming with the capacity available when strategy = CLAIM_STRATEGY_UPDATE_BY_QUERY', () => {
@@ -200,7 +256,7 @@ describe('TaskPollingLifecycle', () => {
   });
 
   describe('stop', () => {
-    test('stops polling if stop() is called', () => {
+    test('stops polling if stop() is called', async () => {
       const elasticsearchAndSOAvailability$ = new Subject<boolean>();
       const pollingLifecycle = new TaskPollingLifecycle({
         elasticsearchAndSOAvailability$,
@@ -213,7 +269,8 @@ describe('TaskPollingLifecycle', () => {
 
       expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalledTimes(0);
       elasticsearchAndSOAvailability$.next(true);
-
+      await Promise.resolve();
+      await Promise.resolve();
       clock.tick(50);
       expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalledTimes(1);
 
@@ -330,7 +387,10 @@ describe('TaskPollingLifecycle', () => {
       );
 
       elasticsearchAndSOAvailability$.next(true);
-      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
+      await retryUntil(
+        'claimAvailableTasks called',
+        () => mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mock.calls.length > 0
+      );
       await retryUntil('workerUtilizationEvent emitted', () => {
         return !!emittedEvents.find(
           (event: TaskLifecycleEvent) => event.id === 'workerUtilization'
@@ -370,7 +430,10 @@ describe('TaskPollingLifecycle', () => {
       );
 
       elasticsearchAndSOAvailability$.next(true);
-      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
+      await retryUntil(
+        'claimAvailableTasks called',
+        () => mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mock.calls.length > 0
+      );
       await retryUntil('workerUtilizationEvent emitted', () => {
         return !!emittedEvents.find(
           (event: TaskLifecycleEvent) => event.id === 'workerUtilization'
@@ -405,7 +468,10 @@ describe('TaskPollingLifecycle', () => {
       );
 
       elasticsearchAndSOAvailability$.next(true);
-      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
+      await retryUntil(
+        'claimAvailableTasks called',
+        () => mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mock.calls.length > 0
+      );
       await retryUntil('workerUtilizationEvent emitted', () => {
         return !!emittedEvents.find(
           (event: TaskLifecycleEvent) => event.id === 'workerUtilization'
@@ -438,7 +504,10 @@ describe('TaskPollingLifecycle', () => {
       );
 
       elasticsearchAndSOAvailability$.next(true);
-      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
+      await retryUntil(
+        'claimAvailableTasks called',
+        () => mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mock.calls.length > 0
+      );
       await retryUntil('pollingCycleEvent emitted', () => {
         return !!emittedEvents.find(
           (event: TaskLifecycleEvent) => event.type === TaskEventType.TASK_POLLING_CYCLE
@@ -480,7 +549,10 @@ describe('TaskPollingLifecycle', () => {
       );
 
       elasticsearchAndSOAvailability$.next(true);
-      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
+      await retryUntil(
+        'claimAvailableTasks called',
+        () => mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mock.calls.length > 0
+      );
       await retryUntil('pollingCycleEvent emitted', () => {
         return !!emittedEvents.find(
           (event: TaskLifecycleEvent) => event.type === TaskEventType.TASK_POLLING_CYCLE
@@ -521,7 +593,10 @@ describe('TaskPollingLifecycle', () => {
       );
 
       elasticsearchAndSOAvailability$.next(true);
-      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
+      await retryUntil(
+        'claimAvailableTasks called',
+        () => mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mock.calls.length > 0
+      );
       await retryUntil('pollingCycleEvent emitted', () => {
         return !!emittedEvents.find(
           (event: TaskLifecycleEvent) => event.type === TaskEventType.TASK_POLLING_CYCLE
