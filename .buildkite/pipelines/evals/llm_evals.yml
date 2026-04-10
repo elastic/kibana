@@ -68,7 +68,7 @@ steps:
           # Weekly pipeline model allowlist (per-suite):
           # - Core tier: default for most suites (one flagship per provider).
           # - Extended tier: includes additional model sizes for suites that benefit from them.
-          # - Canonical per-suite config lives in evals.suites.json `weeklyEisModelGroups`;
+          # - Canonical per-suite config lives in evals.suites.json `weeklyEisModelGroups`
           #   these YAML anchors must stay in sync. See also DEFAULT_WEEKLY_EIS_MODELS in eval_pipeline.ts.
           #
           # NOTE: Use `eis/<modelId>` values (not connector ids) so we can filter purely on the discovered
