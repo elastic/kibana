@@ -74,6 +74,8 @@ export {
 } from './src/jest/run_contract';
 export type { JestConfigResult, JestValidationResult } from './src/jest/run_contract';
 
+export { runJestAll } from './src/jest/run_all';
+
 export * from './src/kbn_archiver_cli';
 
 export * from '@kbn/kbn-client';
