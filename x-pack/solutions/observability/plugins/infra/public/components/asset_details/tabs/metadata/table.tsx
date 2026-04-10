@@ -42,9 +42,9 @@ const VALUE_LABEL = i18n.translate('xpack.infra.metadataEmbeddable.value', {
 /**
  * Component translations
  */
-const SEARCH_PLACEHOLDER = i18n.translate('xpack.infra.metadataEmbeddable.searchForMetadata', {
-  defaultMessage: 'Search for metadata…',
-});
+// const SEARCH_PLACEHOLDER = i18n.translate('xpack.infra.metadataEmbeddable.searchForMetadata', {
+//   defaultMessage: 'Search for metadata…',
+// });
 
 const NO_METADATA_FOUND = i18n.translate('xpack.infra.metadataEmbeddable.noMetadataFound', {
   defaultMessage: 'No metadata found.',
