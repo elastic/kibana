@@ -80,7 +80,7 @@ export const registerApp = ({
     keywords: ['agent builder', 'ai agent', 'chat agent'],
     updater$: appUpdater$,
     deepLinks: buildAgentBuilderDeepLinks(false),
-    defaultPath: '/manage/agents',
+    defaultPath: '/agents',
     async mount({ element, history, onAppLeave }: AppMountParameters) {
       const { mountApp } = await import('./application');
       const [coreStart, startDependencies] = await core.getStartServices();

@@ -226,7 +226,7 @@ export class AgentBuilderPlugin
       .pipe(distinctUntilChanged())
       .subscribe((experimentalFeaturesEnabled) => {
         this.appUpdater$.next(() => ({
-          deepLinks: buildAgentBuilderDeepLinks(experimentalFeaturesEnabled === true),
+          deepLinks: buildAgentBuilderDeepLinks(experimentalFeaturesEnabled),
         }));
       });
 
@@ -304,6 +304,5 @@ export class AgentBuilderPlugin
 
   stop() {
     this.experimentalDeepLinksSubscription?.unsubscribe();
-    this.experimentalDeepLinksSubscription = undefined;
   }
 }
