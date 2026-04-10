@@ -54,7 +54,7 @@ For code-first plugins, the schema library determines how to add field descripti
 | Library | How to detect | Field descriptions |
 |---------|--------------|-------------------|
 | `@kbn/config-schema` | Imports from `'@kbn/config-schema'` | `meta: { description: '...' }` on schema calls |
-| Zod | Imports from `'@kbn/zod'` or `'zod'` | `.describe('...')` on schema calls |
+| Zod | Imports from `'@kbn/zod'` or `'@kbn/zod/v4'` | `.meta({ description: '...' })` on schema calls |
 
 For spec-first plugins, this doesn't apply — field descriptions go in the YAML specs regardless of what the generated code uses.
 
@@ -137,17 +137,42 @@ When `schema.maybe()` wraps another schema call, place `meta` on the inner call,
 
 When a field is used in both request and response schemas, write a single description that works for both contexts. If the meaning differs by context, use separate schema definitions.
 
+### Schema IDs for shared schemas
+
+If the same schema appears in multiple routes, versions, or status codes, give it an ID via `meta.id`. This lets the OAS generator emit a `$ref` to `#/components/schemas/<id>` instead of inlining the full schema every time.
+
+With `@kbn/config-schema`:
+
+```typescript
+export const addressSchema = schema.object(
+  { street: schema.string(), city: schema.string() },
+  { meta: { id: 'Address', description: 'Mailing address for a foo resource.' } }
+);
+```
+
+With Zod:
+
+```typescript
+export const addressSchema = z
+  .object({ street: z.string(), city: z.string() })
+  .meta({ id: 'Address', description: 'Mailing address for a foo resource.' });
+```
+
+If an API uses tagged unions, prefer `schema.discriminatedUnion('type', [...])` or `z.discriminatedUnion('type', [...])` over a plain union. With Zod, when each variant has its own `.meta({ id })`, the OAS generator produces a discriminator mapping automatically.
+
 ### Zod field descriptions
 
-For plugins using Zod schemas, use `.describe()`:
+For plugins using Zod schemas, use `.meta({ description })`:
 
 ```typescript
 // Before
 name: z.string(),
 
 // After
-name: z.string().describe('A display name for the stream.'),
+name: z.string().meta({ description: 'A display name for the stream.' }),
 ```
+
+**Important:** `.meta()` is immutable — it returns a new schema. Always attach `.meta()` at definition time. Calling it later does not update the schema that your route already references.
 
 ### Route-level summary and description
 
@@ -263,5 +288,7 @@ Before moving to verification, confirm every item below is complete. Do not proc
 - **Shared schema fields**: When a shared schema field (like a path parameter) is used by multiple routes with different HTTP methods, write a single description that works for all contexts, or use per-route schema definitions if the semantics differ.
 - **Custom route wrappers**: Some plugins use custom wrappers around the core router (e.g. `createCasesRoute`). The underlying config shape is the same — look at what the wrapper passes through.
 - **`operationId` typos**: Fix these opportunistically when spotted in YAML path files. Search the codebase for references to the old `operationId` before renaming — generated clients derive method names from it, and the workflows/connector pipeline maintains an explicit allowlist of operation IDs.
+- **Missing schema IDs**: If you see the same schema inlined repeatedly in the generated OAS, add `meta.id` (or `.meta({ id })` for Zod) to the shared schema definition so the generator emits a `$ref` instead.
+- **Zod `.meta()` immutability**: `.meta()` returns a new schema. If you call `.meta()` after the schema is already referenced by a route, the route keeps the old schema without your metadata. Always attach `.meta()` at definition time.
 - **OAS-incompatible schema types**: Some `@kbn/config-schema` types (`schema.byteSize()`, `schema.duration()`, `schema.any()`, `schema.conditional()`, etc.) produce poor or lossy OAS. See `dev_docs/tutorials/generating_oas_for_http_apis.mdx` for the full compatibility table and preferred alternatives.
 - **Availability metadata**: Routes and fields can declare `availability: { since, stability }` to generate `x-state` annotations in the OAS. If a route is missing this metadata, flag it to the developer — the values require knowledge of release history.
