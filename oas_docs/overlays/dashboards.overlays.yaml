@@ -125,7 +125,7 @@ actions:
 
         ## Embedding library items
 
-        `vis`, `discover_session`, and `markdown` panels can be embedded **inline** (full config stored in the dashboard) or **linked from library** (references a saved object by ID).
+        `vis`, `discover_session`, and `markdown` panels can be embedded **inline** (full config stored in the dashboard) or **linked from library** (references a library item by ID).
 
         For the full `config` schema for visualization panels, including chart types, metric operations, and breakdowns, refer to the [Visualizations API](https://www.elastic.co/docs/api/doc/kibana/operation/operation-createvisualization).
 
@@ -159,7 +159,7 @@ actions:
           }
           ```
 
-        - **Linked from library**: references a saved object in your library by its [Kibana saved object ID](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects). Use `ref_id` with any supported panel type (`vis`, `discover_session`, `markdown`). Use the [Visualizations API](https://www.elastic.co/docs/api/doc/kibana/operation/operation-createvisualization) to create and retrieve IDs for visualization saved objects.
+        - **Linked from library**: references an item in your library by its ID. Use `ref_id` with any supported panel type (`vis`, `discover_session`, `markdown`). Use the [Visualizations API](https://www.elastic.co/docs/api/doc/kibana/operation/operation-createvisualization) to create and retrieve IDs for visualization items.
 
           ```json
           {
