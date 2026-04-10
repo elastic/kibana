@@ -17,13 +17,14 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
+import {
+  STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+  STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+} from '@kbn/streams-schema';
 import React from 'react';
-import { useKibana } from '../../../../hooks/use_kibana';
+import { useInferenceFeatureConnectors } from '../../../../hooks/sig_events/use_inference_feature_connectors';
+import { useModelSettingsUrl } from '../../../../hooks/use_model_settings_url';
 import noSigEventsImage from './no_sig_events.svg';
-
-const ML_MODEL_SETTINGS_PATH = '/ml/model_settings';
-const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
 
 export function EmptyState({
   isGenerating,
@@ -38,14 +39,19 @@ export function EmptyState({
   onCancelGenerationClick: () => void;
   onGenerateSuggestionsClick: () => void;
 }) {
-  const { core } = useKibana();
-  const defaultConnector = core.uiSettings.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
+  const featuresConnectors = useInferenceFeatureConnectors(
+    STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID
+  );
+  const queriesConnectors = useInferenceFeatureConnectors(
+    STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID
+  );
 
-  const isDefaultAiConnectorMissing =
-    !defaultConnector || defaultConnector === NO_DEFAULT_CONNECTOR;
-  const genAiSettingsUrl = core.application.getUrlForApp('management', {
-    path: ML_MODEL_SETTINGS_PATH,
-  });
+  const isConnectorLoading = featuresConnectors.loading || queriesConnectors.loading;
+  const isConnectorMissing =
+    !isConnectorLoading &&
+    (!featuresConnectors.resolvedConnectorId || !queriesConnectors.resolvedConnectorId);
+
+  const modelSettingsUrl = useModelSettingsUrl();
 
   return (
     <EuiEmptyPrompt
@@ -53,7 +59,7 @@ export function EmptyState({
       title={
         <h2>
           {i18n.translate('xpack.streams.significantEvents.emptyState.title', {
-            defaultMessage: 'No Significant events yet',
+            defaultMessage: "This stream's knowledge indicators have not been extracted yet",
           })}
         </h2>
       }
@@ -71,23 +77,25 @@ export function EmptyState({
             <EuiText size="s" textAlign="center" color="subdued">
               {i18n.translate('xpack.streams.significantEvents.emptyState.description', {
                 defaultMessage:
-                  'Significant events runs on generated content which we use for context to create meaningful insights. Enable it for this stream.',
+                  'Generate knowledge indicators to teach the system about this stream. These indicators are the foundation for detecting significant events.',
               })}
             </EuiText>
           </EuiFlexItem>
-          {isDefaultAiConnectorMissing ? (
+          {isConnectorMissing ? (
             <EuiFlexItem>
               <EuiCallOut
                 announceOnMount
-                title={NO_DEFAULT_CONNECTOR_CALLOUT_TITLE}
+                title={NO_CONNECTOR_CALLOUT_TITLE}
                 color="warning"
                 iconType="warning"
               >
                 <p>
-                  {NO_DEFAULT_CONNECTOR_CALLOUT_DESCRIPTION}{' '}
-                  <EuiLink href={genAiSettingsUrl} external>
-                    {NO_DEFAULT_CONNECTOR_CALLOUT_LINK_LABEL}
-                  </EuiLink>
+                  {NO_CONNECTOR_CALLOUT_DESCRIPTION}{' '}
+                  {modelSettingsUrl && (
+                    <EuiLink href={modelSettingsUrl} external>
+                      {NO_CONNECTOR_CALLOUT_LINK_LABEL}
+                    </EuiLink>
+                  )}
                 </p>
               </EuiCallOut>
             </EuiFlexItem>
@@ -105,17 +113,17 @@ export function EmptyState({
                 ) : null}
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    fill
+                    size="m"
                     color="primary"
                     isLoading={isGenerating}
-                    isDisabled={isGenerateDisabled || isGenerating}
+                    isDisabled={isGenerateDisabled || isGenerating || isConnectorLoading}
                     onClick={onGenerateSuggestionsClick}
                   >
                     {isGenerating
                       ? isCanceling
                         ? CANCELING_BUTTON_LABEL
                         : GENERATING_BUTTON_LABEL
-                      : GENERATE_BUTTON_LABEL}
+                      : ONBOARD_STREAM_BUTTON_LABEL}
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -134,10 +142,10 @@ const NO_SIGNIFICANT_EVENTS_IMAGE_ALT = i18n.translate(
   }
 );
 
-const GENERATE_BUTTON_LABEL = i18n.translate(
-  'xpack.streams.significantEvents.emptyState.generateButtonLabel',
+const ONBOARD_STREAM_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.significantEvents.emptyState.onboardStreamButtonLabel',
   {
-    defaultMessage: 'Generate',
+    defaultMessage: 'Generate knowledge indicators',
   }
 );
 
@@ -162,23 +170,23 @@ const CANCEL_GENERATION_BUTTON_ARIA_LABEL = i18n.translate(
   }
 );
 
-const NO_DEFAULT_CONNECTOR_CALLOUT_TITLE = i18n.translate(
-  'xpack.streams.significantEvents.emptyState.noDefaultConnectorCalloutTitle',
+const NO_CONNECTOR_CALLOUT_TITLE = i18n.translate(
+  'xpack.streams.significantEvents.emptyState.noConnectorCalloutTitle',
   {
-    defaultMessage: 'No default connector configured',
+    defaultMessage: 'No connector configured',
   }
 );
 
-const NO_DEFAULT_CONNECTOR_CALLOUT_DESCRIPTION = i18n.translate(
-  'xpack.streams.significantEvents.emptyState.noDefaultConnectorCalloutDescription',
+const NO_CONNECTOR_CALLOUT_DESCRIPTION = i18n.translate(
+  'xpack.streams.significantEvents.emptyState.noConnectorCalloutDescription',
   {
     defaultMessage:
-      'Generating significant events requires a default AI connector. Open Model Settings to configure one.',
+      'Generating knowledge indicators requires an AI connector. Open Model Settings to configure one.',
   }
 );
 
-const NO_DEFAULT_CONNECTOR_CALLOUT_LINK_LABEL = i18n.translate(
-  'xpack.streams.significantEvents.emptyState.noDefaultConnectorCalloutLinkLabel',
+const NO_CONNECTOR_CALLOUT_LINK_LABEL = i18n.translate(
+  'xpack.streams.significantEvents.emptyState.noConnectorCalloutLinkLabel',
   {
     defaultMessage: 'Open Model Settings',
   }
