@@ -40,7 +40,8 @@ export interface TimeSeriesQueryParameters {
 export async function fetchDataViewBase(
   esClient: ElasticsearchClient,
   index: string | string[],
-  fieldNames: string[]
+  fieldNames: string[],
+  projectRouting?: string
 ): Promise<DataViewBase> {
   const indices = Array.isArray(index) ? index : [index];
   const title = indices.join(',');
@@ -50,6 +51,7 @@ export async function fetchDataViewBase(
     fields: fieldNames,
     ignore_unavailable: true,
     allow_no_indices: true,
+    ...(projectRouting ? { project_routing: projectRouting } : {}),
   });
 
   const fields: DataViewFieldBase[] = [];
@@ -88,6 +90,7 @@ export async function timeSeriesQuery(
     dateStart,
     dateEnd,
     filterKuery,
+    project_routing: projectRouting,
   } = queryParams;
 
   const window = `${timeWindowSize}${timeWindowUnit}`;
@@ -101,7 +104,7 @@ export async function timeSeriesQuery(
     const fieldNames = getKqlFieldNames(kueryNode);
     if (fieldNames.length > 0) {
       try {
-        dataView = await fetchDataViewBase(esClient, index, fieldNames);
+        dataView = await fetchDataViewBase(esClient, index, fieldNames, projectRouting);
       } catch (err) {
         logger.warn(
           `indexThreshold timeSeriesQuery: failed to fetch field caps for filter, falling back to untyped conversion: ${err.message}`
@@ -150,6 +153,7 @@ export async function timeSeriesQuery(
     }),
     ignore_unavailable: true,
     allow_no_indices: true,
+    ...(projectRouting ? { project_routing: projectRouting } : {}),
   };
 
   // add the aggregations

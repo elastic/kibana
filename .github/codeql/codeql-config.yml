@@ -113,6 +113,7 @@ paths-ignore:
   - src/platform/packages/shared/kbn-es
   - src/platform/packages/shared/kbn-es-archiver
   - src/platform/packages/shared/kbn-expect
+  - src/platform/packages/shared/kbn-kbn-client
   - src/platform/packages/shared/kbn-openapi-*
   - src/platform/packages/shared/kbn-scout
   - src/platform/packages/shared/kbn-storybook
