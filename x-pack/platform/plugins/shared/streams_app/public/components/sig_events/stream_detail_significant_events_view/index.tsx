@@ -162,6 +162,10 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     ? getKnowledgeIndicatorItemId(selectedKnowledgeIndicator)
     : undefined;
 
+  const closeFlyout = useCallback(() => {
+    setSelectedKnowledgeIndicator(null);
+  }, []);
+
   const toggleSelectedKnowledgeIndicator = useCallback((knowledgeIndicator: KnowledgeIndicator) => {
     setSelectedKnowledgeIndicator((currentKnowledgeIndicator) => {
       if (!currentKnowledgeIndicator) {
@@ -298,6 +302,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                 statusFilter={knowledgeIndicatorStatusFilter}
                 selectedKnowledgeIndicatorId={selectedKnowledgeIndicatorId}
                 onViewDetails={toggleSelectedKnowledgeIndicator}
+                onActionComplete={closeFlyout}
               />
             )}
           </EuiPanel>
@@ -307,7 +312,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
         <KnowledgeIndicatorDetailsFlyout
           knowledgeIndicator={selectedKnowledgeIndicator}
           occurrencesByQueryId={occurrencesByQueryId}
-          onClose={() => setSelectedKnowledgeIndicator(null)}
+          onClose={closeFlyout}
         />
       ) : null}
 

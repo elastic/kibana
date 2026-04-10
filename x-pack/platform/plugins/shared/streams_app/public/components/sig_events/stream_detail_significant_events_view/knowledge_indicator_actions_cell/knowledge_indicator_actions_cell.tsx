@@ -22,9 +22,14 @@ export const KI_ROW_ACTION_MUTATION_KEY = ['ki-row-action'];
 interface Props {
   knowledgeIndicator: KnowledgeIndicator;
   onDeleteRequest: (knowledgeIndicator: KnowledgeIndicator) => void;
+  onActionComplete?: () => void;
 }
 
-export function KnowledgeIndicatorActionsCell({ knowledgeIndicator, onDeleteRequest }: Props) {
+export function KnowledgeIndicatorActionsCell({
+  knowledgeIndicator,
+  onDeleteRequest,
+  onActionComplete,
+}: Props) {
   const streamName = getKnowledgeIndicatorStreamName(knowledgeIndicator);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
   const [isActionInProgress, setIsActionInProgress] = useState(false);
@@ -54,6 +59,7 @@ export function KnowledgeIndicatorActionsCell({ knowledgeIndicator, onDeleteRequ
     onSuccess: async () => {
       await invalidateKnowledgeIndicatorsData();
       toasts.addSuccess({ title: KI_EXCLUDE_ACTION_SUCCESS_TOAST_TITLE });
+      onActionComplete?.();
     },
     onError: (error) => {
       toasts.addError(error, { title: KI_EXCLUDE_ACTION_ERROR_TOAST_TITLE });
@@ -68,6 +74,7 @@ export function KnowledgeIndicatorActionsCell({ knowledgeIndicator, onDeleteRequ
     onSuccess: async () => {
       await invalidateKnowledgeIndicatorsData();
       toasts.addSuccess({ title: KI_RESTORE_ACTION_SUCCESS_TOAST_TITLE });
+      onActionComplete?.();
     },
     onError: (error) => {
       toasts.addError(error, { title: KI_RESTORE_ACTION_ERROR_TOAST_TITLE });
@@ -82,6 +89,7 @@ export function KnowledgeIndicatorActionsCell({ knowledgeIndicator, onDeleteRequ
     onSuccess: async () => {
       await invalidateKnowledgeIndicatorsData();
       toasts.addSuccess({ title: KI_PROMOTE_ACTION_SUCCESS_TOAST_TITLE });
+      onActionComplete?.();
     },
     onError: (error) => {
       toasts.addError(error, { title: KI_PROMOTE_ACTION_ERROR_TOAST_TITLE });

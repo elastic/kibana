@@ -128,6 +128,7 @@ export function DiscoveryKnowledgeIndicatorsTable() {
       onSuccess: () => {
         setSelectedKnowledgeIndicators([]);
         setKnowledgeIndicatorsToDelete([]);
+        setSelectedKnowledgeIndicator(null);
       },
     }
   );
@@ -295,6 +296,7 @@ export function DiscoveryKnowledgeIndicatorsTable() {
           toasts.addWarning({ title: partialTitle });
         }
         setSelectedKnowledgeIndicators([]);
+        setSelectedKnowledgeIndicator(null);
       } catch (error) {
         toasts.addError(error instanceof Error ? error : new Error(String(error)), {
           title: errorTitle,
@@ -434,6 +436,7 @@ export function DiscoveryKnowledgeIndicatorsTable() {
           <KnowledgeIndicatorActionsCell
             knowledgeIndicator={ki}
             onDeleteRequest={(item) => setKnowledgeIndicatorsToDelete([item])}
+            onActionComplete={() => setSelectedKnowledgeIndicator(null)}
           />
         ),
       },

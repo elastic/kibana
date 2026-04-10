@@ -39,6 +39,7 @@ interface KnowledgeIndicatorsTableProps {
   statusFilter: 'active' | 'excluded';
   selectedKnowledgeIndicatorId?: string;
   onViewDetails: (knowledgeIndicator: KnowledgeIndicator) => void;
+  onActionComplete?: () => void;
 }
 
 export function KnowledgeIndicatorsTable({
@@ -50,6 +51,7 @@ export function KnowledgeIndicatorsTable({
   statusFilter,
   selectedKnowledgeIndicatorId,
   onViewDetails,
+  onActionComplete,
 }: KnowledgeIndicatorsTableProps) {
   const [selectedKnowledgeIndicators, setSelectedKnowledgeIndicators] = useState<
     KnowledgeIndicator[]
@@ -63,6 +65,7 @@ export function KnowledgeIndicatorsTable({
     onSuccess: () => {
       setSelectedKnowledgeIndicators([]);
       setKnowledgeIndicatorsToDelete([]);
+      onActionComplete?.();
     },
   });
 
@@ -213,11 +216,12 @@ export function KnowledgeIndicatorsTable({
           <KnowledgeIndicatorActionsCell
             knowledgeIndicator={knowledgeIndicator}
             onDeleteRequest={(item) => setKnowledgeIndicatorsToDelete([item])}
+            onActionComplete={onActionComplete}
           />
         ),
       },
     ],
-    [occurrencesByQueryId, onViewDetails, selectedKnowledgeIndicatorId]
+    [occurrencesByQueryId, onActionComplete, onViewDetails, selectedKnowledgeIndicatorId]
   );
 
   return (
