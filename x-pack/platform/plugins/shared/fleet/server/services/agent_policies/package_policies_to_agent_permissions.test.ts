@@ -833,7 +833,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
             privileges: ['auto_configure', 'create_doc'],
           },
           {
-            names: ['logs-generic.otel-test'],
+            names: ['logs-otel-traces-test'],
             privileges: ['auto_configure', 'create_doc'],
           },
         ],
@@ -889,7 +889,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
             privileges: ['auto_configure', 'create_doc'],
           },
           {
-            names: ['logs-generic.otel-*'],
+            names: ['logs-otel-traces-*'],
             privileges: ['auto_configure', 'create_doc'],
           },
         ],

@@ -3,8 +3,8 @@ name: test_otel_dynamic
 title: Test OTel Dynamic Signal Types
 description: >-
   Test package for verifying OTel routing when dynamic_signal_types is true.
-  Simulates OTLP / Kafka-style input packages where the source system is unknown
-  and dataset routing should be deferred to the ES exporter.
+  Simulates OTLP / Kafka-style input packages where the source system is unknown;
+  Fleet still emits data_stream.dataset in generated OTTL (defaults from this manifest).
 type: input
 version: 1.0.0
 license: basic
