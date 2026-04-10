@@ -18481,6 +18481,18 @@
                 "path": "x-pack/platform/plugins/shared/cases/common/bundled-types.gen.ts"
               },
               {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/bundled-types.gen.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/bundled-types.gen.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/bundled-types.gen.ts"
+              },
+              {
                 "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/services/tools/tool_types/esql/create_schema.ts"
               },
@@ -18609,56 +18621,56 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_preview/rule_preview.gen.ts"
               },
               {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/common/api/endpoint/model/schema/common.gen.ts"
               },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/common/api/endpoint/model/schema/common.gen.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts"
               },
               {
                 "plugin": "@kbn/securitysolution-lists-common",
@@ -30718,6 +30730,10 @@
           },
           {
             "plugin": "agentBuilder",
+            "path": "x-pack/platform/plugins/shared/agent_builder/public/application/components/skills/skill_form_validation.ts"
+          },
+          {
+            "plugin": "agentBuilder",
             "path": "x-pack/platform/plugins/shared/agent_builder/public/application/components/tools/form/validation/esql_tool_form_validation.ts"
           },
           {
@@ -30775,6 +30791,10 @@
           {
             "plugin": "cases",
             "path": "x-pack/platform/plugins/shared/cases/server/connectors/cases/schema.ts"
+          },
+          {
+            "plugin": "@kbn/agent-builder-common",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/validation.ts"
           },
           {
             "plugin": "@kbn/alerting-v2-schemas",

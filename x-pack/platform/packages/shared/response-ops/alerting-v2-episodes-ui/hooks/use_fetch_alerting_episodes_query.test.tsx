@@ -6,13 +6,15 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import type { Datatable, ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fetchAlertingEpisodes } from '../apis/fetch_alerting_episodes';
 import { useFetchAlertingEpisodesQuery } from './use_fetch_alerting_episodes_query';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { useAlertingEpisodesDataView } from './use_alerting_episodes_data_view';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { AlertEpisode } from '../queries/episodes_query';
 import { createQueryClientWrapper, createTestQueryClient } from './test_utils';
 
 jest.mock('../apis/fetch_alerting_episodes');
@@ -34,12 +36,28 @@ const http = httpServiceMock.createStartContract();
 const { dataViews } = dataPluginMock.createStartContract();
 const mockExpressions = {} as ExpressionsStart;
 
-const mockEpisodesData = {
-  rows: [
-    { '@timestamp': '2024-03-01T10:00:00Z', 'episode.id': 'episode-1' },
-    { '@timestamp': '2024-03-01T09:00:00Z', 'episode.id': 'episode-2' },
-  ],
-} as unknown as Datatable;
+const mockEpisodesData: AlertEpisode[] = [
+  {
+    '@timestamp': '2024-03-01T10:00:00Z',
+    'episode.id': 'episode-1',
+    'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+    'rule.id': 'rule-1',
+    group_hash: 'gh-1',
+    first_timestamp: '2024-03-01T10:00:00Z',
+    last_timestamp: '2024-03-01T10:00:00Z',
+    duration: 0,
+  },
+  {
+    '@timestamp': '2024-03-01T09:00:00Z',
+    'episode.id': 'episode-2',
+    'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+    'rule.id': 'rule-1',
+    group_hash: 'gh-2',
+    first_timestamp: '2024-03-01T09:00:00Z',
+    last_timestamp: '2024-03-01T09:00:00Z',
+    duration: 0,
+  },
+];
 
 const queryClient = createTestQueryClient();
 const wrapper = createQueryClientWrapper(queryClient);
@@ -115,11 +133,7 @@ describe('useFetchAlertingEpisodesQuery', () => {
   it('should handle empty results', async () => {
     const pageSize = 10;
 
-    fetchAlertingEpisodesMock.mockResolvedValue({
-      type: 'datatable' as const,
-      columns: [],
-      rows: [],
-    } as unknown as Datatable);
+    fetchAlertingEpisodesMock.mockResolvedValue([]);
 
     const { result } = renderHook(
       () =>
@@ -132,7 +146,7 @@ describe('useFetchAlertingEpisodesQuery', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(result.current.data?.rows).toEqual([]);
+    expect(result.current.data).toEqual([]);
   });
 
   it('should use keepPreviousData for smooth transitions', async () => {
