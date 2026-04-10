@@ -9,7 +9,6 @@ import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiImage,
   EuiLink,
   EuiPanel,
@@ -48,11 +47,7 @@ export const CustomizeLandingEmptyState: React.FC<CustomizeLandingEmptyStateProp
 }) => {
   const { euiTheme } = useEuiTheme();
 
-  const centerShell = css`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+  const centerShellLayout = css`
     box-sizing: border-box;
     width: 100%;
     min-height: var(--kbn-application--content-height, 100vh);
@@ -89,22 +84,29 @@ export const CustomizeLandingEmptyState: React.FC<CustomizeLandingEmptyStateProp
   `;
 
   const footerRegionCss = css`
-    padding: 24px;
+    padding: ${euiTheme.size.l};
     background-color: ${euiTheme.colors.backgroundBaseSubdued};
     border-radius: 0 0 ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium};
   `;
 
   const mainPadding = css`
-    padding: ${euiTheme.size.l};
+    padding: ${euiTheme.size.m} ${euiTheme.size.l};
   `;
 
   return (
-    <div css={centerShell}>
+    <EuiFlexGroup
+      direction="column"
+      alignItems="center"
+      justifyContent="center"
+      gutterSize="none"
+      responsive={false}
+      css={centerShellLayout}
+    >
       <EuiPanel
         grow={false}
         data-test-subj={dataTestSubj}
         color="plain"
-        hasBorder
+        hasShadow
         borderRadius="m"
         paddingSize="none"
         css={panelCss}
@@ -121,9 +123,9 @@ export const CustomizeLandingEmptyState: React.FC<CustomizeLandingEmptyStateProp
               <EuiTitle size="m">
                 <h2>{title}</h2>
               </EuiTitle>
-              <EuiSpacer size="s" />
+              <EuiSpacer size="m" />
               <EuiText
-                size="s"
+                size="m"
                 color="subdued"
                 css={css`
                   text-align: left;
@@ -144,7 +146,7 @@ export const CustomizeLandingEmptyState: React.FC<CustomizeLandingEmptyStateProp
               </EuiText>
               {primaryAction || secondaryAction ? (
                 <>
-                  <EuiSpacer size="m" />
+                  <EuiSpacer size="l" />
                   <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
                     {primaryAction ? <EuiFlexItem grow={false}>{primaryAction}</EuiFlexItem> : null}
                     {secondaryAction ? (
@@ -168,11 +170,10 @@ export const CustomizeLandingEmptyState: React.FC<CustomizeLandingEmptyStateProp
         </div>
         {footer ? (
           <>
-            <EuiHorizontalRule margin="none" />
             <div css={footerRegionCss}>{footer}</div>
           </>
         ) : null}
       </EuiPanel>
-    </div>
+    </EuiFlexGroup>
   );
 };

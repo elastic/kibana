@@ -272,12 +272,12 @@ export const AgentPlugins: React.FC = () => {
   );
 
   const pluginsEmptyStateFooter = (
-    <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiIcon type="info" color="subdued" aria-hidden={true} />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiText size="xs" color="subdued">
+        <EuiText size="s" color="subdued">
           {labels.agentPlugins.emptyStateFooter}
         </EuiText>
       </EuiFlexItem>
