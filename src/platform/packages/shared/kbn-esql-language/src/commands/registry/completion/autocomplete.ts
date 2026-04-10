@@ -136,7 +136,6 @@ export async function autocomplete(
           values: false,
           addSpaceAfterField: false,
           openSuggestions: false,
-          promoteToTop: true,
         }))
       );
 
@@ -174,7 +173,6 @@ export async function autocomplete(
           ...buildConstantsDefinitions(
             [promptSnippetText],
             '',
-            '1',
             undefined,
             undefined,
             SuggestionCategory.CONSTANT_VALUE

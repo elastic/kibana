@@ -211,7 +211,7 @@ describe('search embeddable transform utils', () => {
             density: DataGridDensity.COMPACT,
             header_row_height: 'auto',
             row_height: 'auto',
-            query: { language: 'kuery', query: '' },
+            query: { language: 'kql', expression: '' },
             filters: [],
             data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'data-view-1' },
           },
@@ -277,7 +277,7 @@ describe('search embeddable transform utils', () => {
         description: 'my description',
         tabs: [
           {
-            query: { language: 'kuery', query: 'service.type: "elasticsearch"' },
+            query: { language: 'kql', expression: 'service.type: "elasticsearch"' },
             filters: [
               {
                 type: ASCODE_FILTER_TYPE.CONDITION,
@@ -470,7 +470,7 @@ describe('search embeddable transform utils', () => {
             density: DataGridDensity.COMPACT,
             header_row_height: 'auto',
             row_height: 'auto',
-            query: { language: 'kuery', query: '' },
+            query: { language: 'kql', expression: '' },
             filters: [],
             rows_per_page: 100,
             sample_size: 1000,
@@ -521,7 +521,7 @@ describe('search embeddable transform utils', () => {
             density: DataGridDensity.COMPACT,
             header_row_height: 50,
             row_height: 30,
-            query: { language: 'kuery', query: '' },
+            query: { language: 'kql', expression: '' },
             filters: [],
             rows_per_page: 25,
             sample_size: 500,
@@ -641,8 +641,8 @@ describe('search embeddable transform utils', () => {
       // timeRestore/timeRange are intentionally dropped at the simplified API level
       expect(revertedTabAttrs.rowHeight).toBe(initialTabAttrs.rowHeight);
       expect(revertedTabAttrs.headerRowHeight).toBe(initialTabAttrs.headerRowHeight);
-      expect(revertedTabAttrs.kibanaSavedObjectMeta.searchSourceJSON).toBe(
-        initialTabAttrs.kibanaSavedObjectMeta.searchSourceJSON
+      expect(JSON.parse(revertedTabAttrs.kibanaSavedObjectMeta.searchSourceJSON)).toEqual(
+        JSON.parse(initialTabAttrs.kibanaSavedObjectMeta.searchSourceJSON)
       );
 
       expect(revertedRefs).toEqual(references);
@@ -1003,6 +1003,7 @@ describe('search embeddable transform utils', () => {
         ref_id: 'data-view-1',
       });
       expect('view_mode' in result && result.view_mode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
+      expect('query' in result && result.query).toEqual({ language: 'kql', expression: '' });
     });
   });
 
@@ -1016,7 +1017,7 @@ describe('search embeddable transform utils', () => {
         density: DataGridDensity.COMPACT,
         header_row_height: 'auto',
         row_height: 'auto',
-        query: { language: 'kuery', query: '' },
+        query: { language: 'kql', expression: '' },
         filters: [],
         rows_per_page: 100,
         sample_size: 500,
@@ -1050,7 +1051,7 @@ describe('search embeddable transform utils', () => {
         density: DataGridDensity.COMPACT,
         header_row_height: 3,
         row_height: 3,
-        query: { language: 'kuery', query: '' },
+        query: { language: 'kql', expression: '' },
         filters: [],
         data_source: {
           type: AS_CODE_DATA_VIEW_SPEC_TYPE,

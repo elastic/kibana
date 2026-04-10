@@ -14,21 +14,28 @@ export const NAME_COLUMN_HEADER = i18n.translate('xpack.streams.streamsTreeTable
 export const SIGNIFICANT_EVENTS_COLUMN_HEADER = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsTree.significantEventsColumnName',
   {
-    defaultMessage: 'Significant Events',
+    defaultMessage: 'Events',
+  }
+);
+
+export const SIGNIFICANT_EVENTS_COLUMN_TOOLTIP = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsTree.significantEventsColumnTooltip',
+  {
+    defaultMessage: 'Number of results produced by created rules.',
   }
 );
 
 export const QUERIES_COLUMN_HEADER = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsTree.queriesColumnName',
   {
-    defaultMessage: 'Queries',
+    defaultMessage: 'KI Queries',
   }
 );
 
 export const KNOWLEDGE_INDICATORS_COLUMN_HEADER = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsTree.knowledgeIndicatorsColumnName',
   {
-    defaultMessage: 'Knowledge Indicators',
+    defaultMessage: 'KI Features',
   }
 );
 
@@ -143,5 +150,75 @@ export const NO_INSIGHTS_TOAST_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsView.noInsightsToastTitle',
   {
     defaultMessage: 'No Significant Events found',
+  }
+);
+
+export const GENERATE_FEATURES_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.generateFeaturesButtonLabel',
+  {
+    defaultMessage: 'Generate KI Features',
+  }
+);
+
+export const GENERATE_QUERIES_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.generateQueriesButtonLabel',
+  {
+    defaultMessage: 'Generate KI Queries',
+  }
+);
+
+export const ONBOARDING_CONFIG_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.onboardingConfigPopoverAriaLabel',
+  {
+    defaultMessage: 'Configure onboarding steps and connectors',
+  }
+);
+
+export const ONBOARDING_CONFIG_POPOVER_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.onboardingConfigPopoverTitle',
+  {
+    defaultMessage: 'Onboarding configuration',
+  }
+);
+
+export const FEATURES_STEP_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.featuresStepLabel',
+  {
+    defaultMessage: 'KI Features',
+  }
+);
+
+export const QUERIES_STEP_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.queriesStepLabel',
+  {
+    defaultMessage: 'KI Queries',
+  }
+);
+
+export const RUN_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.runButtonLabel',
+  {
+    defaultMessage: 'Run',
+  }
+);
+
+export const INSIGHTS_CONNECTOR_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.insightsConnectorPopoverAriaLabel',
+  {
+    defaultMessage: 'Configure discovery connector',
+  }
+);
+
+export const INSIGHTS_CONNECTOR_POPOVER_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.insightsConnectorPopoverTitle',
+  {
+    defaultMessage: 'Discovery connector',
+  }
+);
+
+export const CONNECTOR_LOAD_ERROR = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.connectorLoadError',
+  {
+    defaultMessage: 'Failed to load connectors',
   }
 );

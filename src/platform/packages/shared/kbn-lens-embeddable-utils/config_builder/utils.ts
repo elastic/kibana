@@ -366,8 +366,8 @@ export function isLensLegacyAttributes(config: unknown): config is LensAttribute
 
 export function isEsqlTableTypeDataSource(
   dataSource: DataSourceType
-): dataSource is Extract<DataSourceType, { type: 'esql' | 'table' }> {
-  return dataSource.type === 'esql' || dataSource.type === 'table';
+): dataSource is Extract<DataSourceType, { type: 'esql' }> {
+  return dataSource.type === 'esql';
 }
 
 export function groupIsNotCollapsed(def: {

@@ -23,7 +23,6 @@ const appendSeparatorCompletionItem: ISuggestionItem = withAutoSuggest({
   }),
   kind: 'Reference',
   label: 'APPEND_SEPARATOR',
-  sortText: '1',
   text: 'APPEND_SEPARATOR = ',
 });
 
@@ -51,7 +50,6 @@ export async function autocomplete(
       i18n.translate('kbn-esql-language.esql.autocomplete.aPatternString', {
         defaultMessage: 'A pattern string',
       }),
-      undefined,
       {
         advanceCursorAndOpenSuggestions: true,
       }
