@@ -46,21 +46,19 @@ actions:
                   "h": 10
                 },
                 "config": {
-                  "attributes": {
-                    "type": "metric",
-                    "title": "Total log entries",
-                    "data_source": {
-                      "type": "data_view_spec",
-                      "index_pattern": "kibana_sample_data_logs",
-                      "time_field": "timestamp"
-                    },
-                    "metrics": [
-                      {
-                        "type": "primary",
-                        "operation": "count"
-                      }
-                    ]
-                  }
+                  "type": "metric",
+                  "title": "Total log entries",
+                  "data_source": {
+                    "type": "data_view_spec",
+                    "index_pattern": "kibana_sample_data_logs",
+                    "time_field": "timestamp"
+                  },
+                  "metrics": [
+                    {
+                      "type": "primary",
+                      "operation": "count"
+                    }
+                  ]
                 }
               }
             ]
@@ -114,9 +112,9 @@ actions:
 
         Visualization panels can be embedded **inline** (full config stored in the dashboard) or **linked from library** (references a saved visualization by ID).
 
-        For the full `config.attributes` schema, including chart types, metric operations, and breakdowns, refer to the [Visualizations API](https://www.elastic.co/docs/api/doc/kibana/operation/operation-createvisualization).
+        For the full `config` schema, including chart types, metric operations, and breakdowns, refer to the [Visualizations API](https://www.elastic.co/docs/api/doc/kibana/operation/operation-createvisualization).
 
-        - **Inline**: use when the visualization is specific to this dashboard or must work across Kibana spaces. The visualization configuration goes inside `config.attributes`:
+        - **Inline**: use when the visualization is specific to this dashboard or must work across Kibana spaces. The visualization configuration goes directly inside `config`:
 
           ```json
           {
@@ -128,22 +126,20 @@ actions:
               "h": 10
             },
             "config": {
-              "attributes": {
-                "type": "metric",
-                "title": "Average bytes",
-                "data_source": {
-                  "type": "data_view_spec",
-                  "index_pattern": "kibana_sample_data_logs",
-                  "time_field": "timestamp"
-                },
-                "metrics": [
-                  {
-                    "type": "primary",
-                    "operation": "average",
-                    "field": "bytes"
-                  }
-                ]
-              }
+              "type": "metric",
+              "title": "Average bytes",
+              "data_source": {
+                "type": "data_view_spec",
+                "index_pattern": "kibana_sample_data_logs",
+                "time_field": "timestamp"
+              },
+              "metrics": [
+                {
+                  "type": "primary",
+                  "operation": "average",
+                  "field": "bytes"
+                }
+              ]
             }
           }
           ```
@@ -169,7 +165,7 @@ actions:
 
         To create ES|QL-based charts, embed them inline as `vis` panels and set `data_source.type` to `"esql"`.
 
-        - **`metric` charts**: `data_source` goes at the top level of `attributes`. Reference query result columns in `metrics` using `operation: "value"` and `column`:
+        - **`metric` charts**: reference query result columns in `metrics` using `operation: "value"` and `column`:
 
           ```json
           {
@@ -181,21 +177,19 @@ actions:
               "h": 6
             },
             "config": {
-              "attributes": {
-                "type": "metric",
-                "title": "Total requests",
-                "data_source": {
-                  "type": "esql",
-                  "query": "FROM logs-* | STATS count = COUNT()"
-                },
-                "metrics": [
-                  {
-                    "type": "primary",
-                    "operation": "value",
-                    "column": "count"
-                  }
-                ]
-              }
+              "type": "metric",
+              "title": "Total requests",
+              "data_source": {
+                "type": "esql",
+                "query": "FROM logs-* | STATS count = COUNT()"
+              },
+              "metrics": [
+                {
+                  "type": "primary",
+                  "operation": "value",
+                  "column": "count"
+                }
+              ]
             }
           }
           ```
