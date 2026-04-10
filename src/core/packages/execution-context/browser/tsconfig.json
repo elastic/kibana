@@ -11,7 +11,12 @@
     "**/*.ts"
   ],
   "kbn_references": [
-    "@kbn/core-execution-context-common"
+    "@kbn/core-execution-context-common",
+    "@kbn/core-base-browser-internal",
+    "@kbn/core-analytics-browser",
+    "@kbn/core-analytics-browser-mocks",
+    "@kbn/utility-types",
+    "@kbn/lazy-object"
   ],
   "exclude": [
     "target/**/*",

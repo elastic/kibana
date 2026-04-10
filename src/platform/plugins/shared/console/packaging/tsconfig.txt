@@ -27,7 +27,7 @@
     "@kbn/core-base-browser-internal",
     "@kbn/core-injected-metadata-browser-internal",
     "@kbn/core-http-browser-internal",
-    "@kbn/core-execution-context-browser-internal",
+    "@kbn/core-execution-context-browser",
     "@kbn/core-fatal-errors-browser-internal",
     "@kbn/core-analytics-browser-internal",
     "@kbn/core-theme-browser-internal",

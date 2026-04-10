@@ -28,7 +28,7 @@ dependsOn:
   - '@kbn/licensing-plugin'
   - '@kbn/features-plugin'
   - '@kbn/core-doc-links-browser-mocks'
-  - '@kbn/core-execution-context-browser-mocks'
+  - '@kbn/core-execution-context-browser'
   - '@kbn/test-jest-helpers'
   - '@kbn/i18n'
   - '@kbn/safer-lodash-set'

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-browser/mocks';
 import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { HttpService } from '@kbn/core-http-browser-internal';

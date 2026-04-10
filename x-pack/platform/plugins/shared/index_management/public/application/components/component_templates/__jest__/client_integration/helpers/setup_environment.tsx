@@ -10,7 +10,7 @@ import type { LocationDescriptorObject } from 'history';
 
 import type { CoreStart, HttpSetup } from '@kbn/core/public';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
-import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-browser/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import {
   notificationServiceMock,

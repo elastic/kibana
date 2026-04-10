@@ -11,7 +11,7 @@ import { isEmpty, omitBy } from 'lodash';
 import { format } from 'url';
 import { BehaviorSubject } from 'rxjs';
 import type { ExecutionContextSetup } from '@kbn/core-execution-context-browser';
-import { ExecutionContextContainer } from '@kbn/core-execution-context-browser-internal';
+import { ExecutionContextContainer } from '@kbn/core-execution-context-browser/internal';
 import type {
   IBasePath,
   HttpInterceptor,

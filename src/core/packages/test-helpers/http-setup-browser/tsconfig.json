@@ -11,7 +11,7 @@
     "**/*.ts"
   ],
   "kbn_references": [
-    "@kbn/core-execution-context-browser-mocks",
+    "@kbn/core-execution-context-browser",
     "@kbn/core-fatal-errors-browser-mocks",
     "@kbn/core-injected-metadata-browser-mocks",
     "@kbn/core-http-browser-internal"

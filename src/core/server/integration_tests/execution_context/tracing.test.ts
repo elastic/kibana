@@ -8,7 +8,7 @@
  */
 
 import { setTimeout as timer } from 'timers/promises';
-import { ExecutionContextContainer } from '@kbn/core-execution-context-browser-internal';
+import { ExecutionContextContainer } from '@kbn/core-execution-context-browser/internal';
 import type { createRoot } from '@kbn/core-test-helpers-kbn-server';
 import {
   createTestServers,

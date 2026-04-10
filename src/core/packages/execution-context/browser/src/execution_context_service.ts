@@ -14,10 +14,7 @@ import { map } from 'rxjs';
 import type { CoreService } from '@kbn/core-base-browser-internal';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import type {
-  ExecutionContextSetup,
-  ExecutionContextStart,
-} from '@kbn/core-execution-context-browser';
+import type { ExecutionContextSetup, ExecutionContextStart } from './types';
 
 // Should be exported from elastic/apm-rum
 export type LabelValue = string | number | boolean;

@@ -9,8 +9,8 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { ExecutionContextSetup } from '@kbn/core-execution-context-browser';
-import type { ExecutionContextService } from '@kbn/core-execution-context-browser-internal';
+import type { ExecutionContextSetup } from './types';
+import type { ExecutionContextService } from './execution_context_service';
 import { lazyObject } from '@kbn/lazy-object';
 
 const createContractMock = (): jest.Mocked<ExecutionContextSetup> =>

@@ -10,7 +10,7 @@
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import type { ExecutionContextSetup } from '@kbn/core-execution-context-browser';
+import type { ExecutionContextSetup } from './types';
 import { ExecutionContextService } from './execution_context_service';
 
 describe('ExecutionContextService', () => {

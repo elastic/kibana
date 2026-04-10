@@ -5583,14 +5583,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-execution-context-browser-internal@link:src/core/packages/execution-context/browser-internal":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-execution-context-browser-mocks@link:src/core/packages/execution-context/browser-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-execution-context-browser@link:src/core/packages/execution-context/browser":
   version "0.0.0"
   uid ""
