@@ -346,6 +346,7 @@ export const ManageIntegrationsTable: React.FC<{
           {
             version: '1',
             headers: { Accept: 'application/zip' },
+            query: { intent: 'install' },
           }
         );
 
@@ -665,14 +666,18 @@ export const ManageIntegrationsTable: React.FC<{
       checked: selectedStatuses.includes('cancelled') ? 'on' : undefined,
     },
   ];
-  const filteredIntegrations = integrationsWithActions.filter((item) => {
-    const matchesAction =
-      selectedActions.length === 0 ||
-      (item.availableAction !== undefined && selectedActions.includes(item.availableAction));
-    const matchesStatus =
-      selectedStatuses.length === 0 || selectedStatuses.includes(item.displayStatus);
-    return matchesAction && matchesStatus;
-  });
+  const filteredIntegrations = useMemo(
+    () =>
+      integrationsWithActions.filter((item) => {
+        const matchesAction =
+          selectedActions.length === 0 ||
+          (item.availableAction !== undefined && selectedActions.includes(item.availableAction));
+        const matchesStatus =
+          selectedStatuses.length === 0 || selectedStatuses.includes(item.displayStatus);
+        return matchesAction && matchesStatus;
+      }),
+    [integrationsWithActions, selectedActions, selectedStatuses]
+  );
 
   const filterButtonStyle = css`
     .euiFilterButton {
