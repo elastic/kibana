@@ -12,7 +12,8 @@ export type { ChromeComponentsDeps } from './src/context';
 
 export { ClassicHeader } from './src/classic';
 export { ProjectHeader } from './src/project';
-export { AppHeader, GlobalHeader } from './src/chrome_next';
+export { AppHeader, AppHeaderShell, GlobalHeader, GlobalHeaderShell } from './src/chrome_next';
+export type { AppHeaderShellProps, GlobalHeaderShellProps } from './src/chrome_next';
 export { GridLayoutProjectSideNav } from './src/project/sidenav/grid_layout_sidenav';
 export { Sidebar } from './src/sidebar';
 export { AppMenuBar } from './src/project/app_menu';

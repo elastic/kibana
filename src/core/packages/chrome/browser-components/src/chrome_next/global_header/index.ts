@@ -8,3 +8,5 @@
  */
 
 export { GlobalHeader } from './global_header';
+export { GlobalHeaderShell } from './global_header_shell';
+export type { GlobalHeaderShellProps } from './global_header_shell';

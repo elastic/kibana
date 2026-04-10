@@ -8,3 +8,5 @@
  */
 
 export { AppHeader } from './app_header';
+export { AppHeaderShell } from './app_header_shell';
+export type { AppHeaderShellProps } from './app_header_shell';
