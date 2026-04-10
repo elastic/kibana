@@ -144,7 +144,7 @@ export const PIPELINE_SUGGESTION_DATASETS: PipelineSuggestionEvaluationDataset[]
         input: {
           stream_name: 'logs.otel.apache',
           system: 'Apache',
-          sample_document_count: 100,
+          sample_document_count: 1000,
         },
         output: {
           source_id: 'apache-error',
@@ -202,7 +202,7 @@ export const PIPELINE_SUGGESTION_DATASETS: PipelineSuggestionEvaluationDataset[]
         input: {
           stream_name: 'logs.otel.openssh',
           system: 'OpenSSH',
-          sample_document_count: 100,
+          sample_document_count: 1000,
         },
         output: {
           source_id: 'openssh-auth',
@@ -273,7 +273,7 @@ export const PIPELINE_SUGGESTION_DATASETS: PipelineSuggestionEvaluationDataset[]
         input: {
           stream_name: 'logs.otel.zookeeper',
           system: 'Zookeeper',
-          sample_document_count: 100,
+          sample_document_count: 1000,
         },
         output: {
           source_id: 'zookeeper',
@@ -331,7 +331,7 @@ export const PIPELINE_SUGGESTION_DATASETS: PipelineSuggestionEvaluationDataset[]
         input: {
           stream_name: 'logs.otel.hdfs',
           system: 'HDFS',
-          sample_document_count: 100,
+          sample_document_count: 1000,
         },
         output: {
           source_id: 'hdfs',
@@ -389,7 +389,7 @@ export const PIPELINE_SUGGESTION_DATASETS: PipelineSuggestionEvaluationDataset[]
         input: {
           stream_name: 'logs.otel.spark',
           system: 'Spark',
-          sample_document_count: 100,
+          sample_document_count: 1000,
         },
         output: {
           source_id: 'spark',

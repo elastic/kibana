@@ -15,7 +15,7 @@ import { validateQueries } from './validate_queries';
 import { getParser } from './get_parser';
 import { getQueries } from './get_queries';
 import { parseDataset } from './parse_dataset';
-import { createLoghubGenerator } from './create_loghub_generator';
+import { createLoghubGenerator, type LoghubTimestampLayout } from './create_loghub_generator';
 import type { StreamLogGenerator } from '../types';
 
 const getSystems = once(async ({ log }: { log: ToolingLog }): Promise<LoghubSystem[]> => {
@@ -30,12 +30,14 @@ export async function getLoghubGenerators({
   distribution,
   rpm,
   streamType,
+  timestampLayout = 'source',
 }: {
   systems?: string[];
   log: ToolingLog;
   distribution: 'uniform' | 'relative';
   rpm: number;
   streamType: 'classic' | 'wired';
+  timestampLayout?: LoghubTimestampLayout;
 }): Promise<StreamLogGenerator[]> {
   let systems = await getSystems({ log });
 
@@ -71,8 +73,7 @@ export async function getLoghubGenerators({
         const share = systemRpm / totalRpm;
         targetRpm = rpm === undefined ? Math.min(100, systemRpm) : share * rpm;
       } else {
-        // Uniform: never round down below a fair share (e.g. rpm=100 across 6 systems).
-        targetRpm = Math.ceil(rpm / results.length);
+        targetRpm = Math.round(rpm / results.length);
       }
 
       return createLoghubGenerator({
@@ -81,6 +82,7 @@ export async function getLoghubGenerators({
         log,
         targetRpm: Math.max(1, targetRpm),
         streamType,
+        timestampLayout,
       });
     })
   );
