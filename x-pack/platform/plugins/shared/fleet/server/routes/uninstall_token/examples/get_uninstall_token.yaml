@@ -36,4 +36,4 @@ responses:
             value:
               statusCode: 404
               error: 'Not Found'
-              message: 'Uninstall Token not found with id token-id-1'
+              message: 'Uninstall Token not found with ID token-id-1'
