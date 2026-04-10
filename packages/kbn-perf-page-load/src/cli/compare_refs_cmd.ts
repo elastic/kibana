@@ -146,6 +146,12 @@ export const compareRefsCmd: Command<{}> = {
     }
 
     const [ref1, ref2] = positional.map(String);
+    let label1 = ref1 || 'cwd';
+    let label2 = ref2 || 'cwd';
+    if (label1 === label2) {
+      label1 = `${label1}-baseline`;
+      label2 = `${label2}-compare`;
+    }
     const dist = flagsReader.boolean('dist');
     const throttle = flagsReader.string('throttle') ?? 'provided';
     const thresholdStr = flagsReader.string('threshold') ?? '5';
@@ -158,16 +164,16 @@ export const compareRefsCmd: Command<{}> = {
       throw createFailError('DevTools throttling requires dist bundles (--dist).');
     }
 
-    log.info(`=== Phase 1/2: ${ref1} ===`);
-    const results1 = await runInWorktree(ref1, ref1, dist, throttle, log);
+    log.info(`=== Phase 1/2: ${label1} ===`);
+    const results1 = await runInWorktree(ref1 || undefined, label1, dist, throttle, log);
 
-    log.info(`=== Phase 2/2: ${ref2} ===`);
-    const results2 = await runInWorktree(ref2, ref2, dist, throttle, log);
+    log.info(`=== Phase 2/2: ${label2} ===`);
+    const results2 = await runInWorktree(ref2 || undefined, label2, dist, throttle, log);
 
     const { table, regressions } = formatComparisonResults(
-      ref1,
+      label1,
       results1,
-      ref2,
+      label2,
       results2,
       threshold
     );
