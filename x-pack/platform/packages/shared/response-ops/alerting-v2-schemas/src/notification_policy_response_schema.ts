@@ -61,7 +61,7 @@ export const notificationPolicyResponseSchema = z.object({
   updatedAt: z.string().describe('The ISO datetime when the notification policy was last updated.'),
 });
 
-export type NotificationPolicyResponseFromSchema = z.infer<typeof notificationPolicyResponseSchema>;
+export type NotificationPolicyResponse = z.infer<typeof notificationPolicyResponseSchema>;
 
 export const findNotificationPoliciesResponseSchema = z
   .object({
@@ -72,7 +72,7 @@ export const findNotificationPoliciesResponseSchema = z
   })
   .describe('Paginated list of notification policies.');
 
-export type FindNotificationPoliciesResponseFromSchema = z.infer<
+export type FindNotificationPoliciesResponse = z.infer<
   typeof findNotificationPoliciesResponseSchema
 >;
 
@@ -91,6 +91,6 @@ export const bulkActionNotificationPoliciesResponseSchema = z
   })
   .describe('Result of a bulk notification policy operation.');
 
-export type BulkActionNotificationPoliciesResponseFromSchema = z.infer<
+export type BulkActionNotificationPoliciesResponse = z.infer<
   typeof bulkActionNotificationPoliciesResponseSchema
 >;
