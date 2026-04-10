@@ -100,7 +100,7 @@ export default ({ getService }: FtrProviderContext) => {
           ml.api.assertResponseStatusCode(200, status, body);
 
           expect(body).to.have.property('field_selection');
-          // eslint-disable-next-line @typescript-eslint/naming-convention
+
           const { memory_estimation, field_selection } = body;
           const fieldObject = field_selection[0];
           expect(memory_estimation).to.have.property('expected_memory_with_disk');

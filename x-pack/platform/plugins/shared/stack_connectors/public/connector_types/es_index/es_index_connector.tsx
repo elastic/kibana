@@ -42,6 +42,7 @@ import {
   useKibana,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import * as translations from './translations';
+import { indexNameValidator } from './validation';
 
 interface TimeFieldOptions {
   value: string;
@@ -54,11 +55,6 @@ const getIndexConfig = (docLinks: DocLinksStart): FieldConfig => ({
   label: translations.INDEX_LABEL,
   helpText: (
     <>
-      <FormattedMessage
-        id="xpack.stackConnectors.components.index.howToBroadenSearchQueryDescription"
-        defaultMessage="Use * to broaden your query."
-      />
-      <EuiSpacer size="s" />
       <EuiLink href={docLinks.links.alerting.indexAction} target="_blank">
         <FormattedMessage
           id="xpack.stackConnectors.components.index.configureIndexHelpLabel"
@@ -73,7 +69,9 @@ const getIndexConfig = (docLinks: DocLinksStart): FieldConfig => ({
     },
     {
       validator: indexPatternField(i18n),
-      type: VALIDATION_TYPES.ARRAY_ITEM,
+    },
+    {
+      validator: indexNameValidator(),
     },
   ],
 });
@@ -176,11 +174,6 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
               error={errorMessage}
               helpText={
                 <>
-                  <FormattedMessage
-                    id="xpack.stackConnectors.components.index.howToBroadenSearchQueryDescription"
-                    defaultMessage="Use * to broaden your query."
-                  />
-                  <EuiSpacer size="s" />
                   <EuiLink href={docLinks.links.alerting.indexAction} target="_blank">
                     <FormattedMessage
                       id="xpack.stackConnectors.components.index.configureIndexHelpLabel"
@@ -200,6 +193,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
                 options={indexOptions}
                 data-test-subj="connectorIndexesComboBox"
                 data-testid="connectorIndexesComboBox"
+                placeholder={translations.INDEX_NAME_PLACEHOLDER}
                 selectedOptions={
                   index
                     ? [

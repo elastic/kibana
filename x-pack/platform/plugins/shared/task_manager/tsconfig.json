@@ -38,6 +38,9 @@
     "@kbn/rrule",
     "@kbn/logging-mocks",
     "@kbn/spaces-utils",
+    "@kbn/es-errors",
+    "@kbn/core-execution-context-server-mocks",
+    "@kbn/core-execution-context-common",
   ],
   "exclude": ["target/**/*"]
 }

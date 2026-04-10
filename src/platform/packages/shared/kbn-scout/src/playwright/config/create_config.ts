@@ -56,6 +56,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
           name: `setup-${project?.name}`,
           use: project?.use ? { ...project.use } : {},
           testMatch: /global.setup\.ts/,
+          timeout: 180000, // Default to 3 minutes for global setup
         },
         { ...project, dependencies: [`setup-${project?.name}`] },
       ])
@@ -86,6 +87,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
       testIdAttribute: 'data-test-subj',
       serversConfigDir: SCOUT_SERVERS_ROOT,
       [VALID_CONFIG_MARKER]: true,
+      runGlobalSetup: options.runGlobalSetup,
       /* Base URL to use in actions like `await page.goto('/')`. */
       // baseURL: 'http://127.0.0.1:3000',
 

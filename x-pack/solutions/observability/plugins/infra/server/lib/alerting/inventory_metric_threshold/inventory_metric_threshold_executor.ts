@@ -271,9 +271,8 @@ export const createInventoryMetricThresholdExecutor =
           nextState === AlertStates.WARNING ? WARNING_ACTIONS_ID : FIRED_ACTIONS_ID;
 
         const additionalContext = results && results.length > 0 ? results[0][group].context : {};
-        additionalContext.tags = Array.from(
-          new Set([...(additionalContext.tags ?? []), ...ruleTags])
-        );
+        const contextTags = [additionalContext.tags ?? []].flat();
+        additionalContext.tags = Array.from(new Set([...contextTags, ...ruleTags]));
 
         const evaluationValues = getEvaluationValues<ConditionResult>(results, group);
         const thresholds = getThresholds<InventoryMetricConditions>(criteria);

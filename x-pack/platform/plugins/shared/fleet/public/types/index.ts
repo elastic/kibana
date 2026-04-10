@@ -143,9 +143,11 @@ export type {
   BulkGetAgentPoliciesResponse,
   RegistryPolicyIntegrationTemplate,
   EnrollmentSettingsFleetServerPolicy,
+  EnrollmentSettingsProxy,
   GetEnrollmentSettingsRequest,
   GetEnrollmentSettingsResponse,
   GetSpaceSettingsResponse,
+  ProxyConfig,
 } from '../../common/types';
 export {
   entries,

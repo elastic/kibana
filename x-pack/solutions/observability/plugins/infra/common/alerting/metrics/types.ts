@@ -35,6 +35,8 @@ export enum AlertStates {
   ERROR,
 }
 
+export type NoDataBehavior = 'recover' | 'remainActive' | 'alertOnNoData';
+
 // Types for the executor
 
 export interface InventoryMetricConditions {
@@ -65,6 +67,7 @@ export interface MetricThresholdParams {
   sourceId?: string;
   alertOnNoData?: boolean;
   alertOnGroupDisappear?: boolean;
+  noDataBehavior?: NoDataBehavior;
 }
 
 interface BaseMetricExpressionParams {

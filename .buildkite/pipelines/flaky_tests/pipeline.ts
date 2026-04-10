@@ -10,7 +10,7 @@
 import { groups } from './groups.json';
 import { TestSuiteType } from './constants';
 import type { BuildkiteStep } from '#pipeline-utils';
-import { expandAgentQueue } from '#pipeline-utils';
+import { expandAgentQueue, collectEnvFromLabels } from '#pipeline-utils';
 
 const configJson = process.env.KIBANA_FLAKY_TEST_RUNNER_CONFIG;
 if (!configJson) {
@@ -46,6 +46,45 @@ function getScoutConfigGroupType(configPath: string): string | null {
     return match[1];
   }
   return null;
+}
+
+function getScoutServerRunFlags(configPath: string): string[] {
+  const groupType = getScoutConfigGroupType(configPath);
+
+  if (!groupType) {
+    throw new Error(
+      `Unable to determine scout config group type from path: ${configPath}. ` +
+        `Expected path to match platform pattern (x-pack/platform/... or src/platform/...) ` +
+        `or solution pattern (x-pack/solutions/<solution>/plugins/...)`
+    );
+  }
+
+  if (groupType === 'platform') {
+    return [
+      '--arch stateful --domain classic',
+      '--arch serverless --domain search',
+      '--arch serverless --domain observability_complete',
+      '--arch serverless --domain security_complete',
+    ];
+  }
+
+  if (groupType === 'workplaceai') {
+    return ['--arch serverless --domain workplaceai'];
+  }
+  if (groupType === 'observability') {
+    return [
+      '--arch stateful --domain classic',
+      '--arch serverless --domain observability_complete',
+    ];
+  }
+  if (groupType === 'security') {
+    return ['--arch stateful --domain classic', '--arch serverless --domain security_complete'];
+  }
+  if (groupType === 'search') {
+    return ['--arch stateful --domain classic', '--arch serverless --domain search'];
+  }
+
+  throw new Error(`Unknown solution type: ${groupType}.`);
 }
 
 function getTestSuitesFromJson(json: string) {
@@ -143,9 +182,11 @@ if (totalJobs > MAX_JOBS) {
 }
 
 const steps: BuildkiteStep[] = [];
+const envFromLabels = collectEnvFromLabels(process.env.GITHUB_PR_LABELS);
 const pipeline = {
   env: {
     IGNORE_SHIP_CI_STATS_ERROR: 'true',
+    ...envFromLabels,
   },
   steps,
 };
@@ -179,7 +220,6 @@ for (const testSuite of testSuites) {
       agents: expandAgentQueue('n2-4-spot'),
       depends_on: 'build',
       timeout_in_minutes: 150,
-      cancel_on_build_failing: true,
       retry: {
         automatic: [{ exit_status: '-1', limit: 3 }],
       },
@@ -189,13 +229,14 @@ for (const testSuite of testSuites) {
 
   if (testSuite.type === 'scoutConfig') {
     const usesParallelWorkers = testSuite.scoutConfig.endsWith('parallel.playwright.config.ts');
-    const scoutConfigGroupType = getScoutConfigGroupType(testSuite.scoutConfig);
+    const serverRunFlags = getScoutServerRunFlags(testSuite.scoutConfig);
 
     steps.push({
-      command: `.buildkite/scripts/steps/test/scout_configs.sh`,
+      command: `.buildkite/scripts/steps/test/scout_flaky_configs.sh`,
       env: {
         SCOUT_CONFIG: testSuite.scoutConfig,
-        SCOUT_CONFIG_GROUP_TYPE: scoutConfigGroupType!,
+        SCOUT_REPORTER_ENABLED: 'true',
+        SCOUT_SERVER_RUN_FLAGS: serverRunFlags.join('\n'),
       },
       key: `${TestSuiteType.SCOUT}-${suiteIndex++}`,
       label: `${testSuite.scoutConfig}`,
@@ -206,7 +247,6 @@ for (const testSuite of testSuites) {
       agents: expandAgentQueue(usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
       depends_on: 'build',
       timeout_in_minutes: 60,
-      cancel_on_build_failing: true,
       retry: {
         automatic: [{ exit_status: '-1', limit: 3 }],
       },
@@ -224,10 +264,17 @@ for (const testSuite of testSuites) {
         );
       }
       const agentQueue = suiteName.includes('defend_workflows') ? 'n2-4-virt' : 'n2-4-spot';
+      const diskSizeOverride =
+        {
+          osquery_cypress: 115,
+          security_serverless_osquery: 115,
+          defend_workflows: 120,
+        }[suiteName] || 105;
+
       steps.push({
         command: `.buildkite/scripts/steps/functional/${suiteName}.sh`,
         label: group.name,
-        agents: expandAgentQueue(agentQueue),
+        agents: expandAgentQueue(agentQueue, diskSizeOverride),
         key: `${TestSuiteType.CYPRESS}-${suiteIndex++}`,
         depends_on: 'build',
         timeout_in_minutes: 150,
@@ -235,7 +282,6 @@ for (const testSuite of testSuites) {
         concurrency,
         concurrency_group: process.env.UUID,
         concurrency_method: 'eager',
-        cancel_on_build_failing: true,
         retry: {
           automatic: [{ exit_status: '-1', limit: 3 }],
         },

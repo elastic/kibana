@@ -7,12 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter } from '@kbn/es-query';
+import type { Filter, FilterMeta } from '@kbn/es-query';
+import { isCombinedFilter } from '@kbn/es-query';
+
+const removeUndefinedProperty = (obj: Record<string, any>, key: string): void => {
+  if (obj[key] === undefined) {
+    delete obj[key];
+  }
+};
 
 export function cleanFiltersForSerialize(filters?: Filter[]): Filter[] {
   if (!filters) return [];
   return filters.map((filter) => {
-    if (filter.meta?.value) delete filter.meta.value;
-    return filter;
+    if (!filter.meta) {
+      return filter;
+    }
+
+    const cleanedFilter = { ...filter };
+    if (typeof cleanedFilter.meta.value !== 'undefined') {
+      // Create a new filter object with meta excluding 'value'
+      delete cleanedFilter.meta.value;
+    }
+
+    removeUndefinedProperty(cleanedFilter.meta, 'key');
+    removeUndefinedProperty(cleanedFilter.meta, 'alias');
+
+    if (isCombinedFilter(filter) && filter.meta?.params) {
+      // Recursively clean filters in combined filters
+      cleanedFilter.meta.params = cleanFiltersForSerialize(
+        cleanedFilter.meta.params as Filter[]
+      ) as FilterMeta['params'];
+    }
+
+    return cleanedFilter;
   });
 }

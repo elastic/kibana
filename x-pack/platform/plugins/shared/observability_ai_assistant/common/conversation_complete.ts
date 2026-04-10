@@ -111,7 +111,6 @@ export enum ChatCompletionErrorCode {
   InternalError = 'internalError',
   NotFoundError = 'notFoundError',
   TokenLimitReachedError = 'tokenLimitReachedError',
-  FunctionNotFoundError = 'functionNotFoundError',
   FunctionLimitExceededError = 'functionLimitExceededError',
 }
 
@@ -121,9 +120,6 @@ interface ErrorMetaAttributes {
   [ChatCompletionErrorCode.TokenLimitReachedError]: {
     tokenLimit?: number;
     tokenCount?: number;
-  };
-  [ChatCompletionErrorCode.FunctionNotFoundError]: {
-    name: string;
   };
   [ChatCompletionErrorCode.FunctionLimitExceededError]: {};
 }
@@ -169,13 +165,6 @@ export function createInternalServerError(
   return new ChatCompletionError(ChatCompletionErrorCode.InternalError, originalErrorMessage);
 }
 
-export function createFunctionNotFoundError(name: string) {
-  return new ChatCompletionError(
-    ChatCompletionErrorCode.FunctionNotFoundError,
-    `Function "${name}" called but was not available`
-  );
-}
-
 export function createFunctionLimitExceededError() {
   return new ChatCompletionError(
     ChatCompletionErrorCode.FunctionLimitExceededError,
@@ -189,15 +178,6 @@ export function isTokenLimitReachedError(
   return (
     error instanceof ChatCompletionError &&
     error.code === ChatCompletionErrorCode.TokenLimitReachedError
-  );
-}
-
-export function isFunctionNotFoundError(
-  error: Error
-): error is ChatCompletionError<ChatCompletionErrorCode.FunctionNotFoundError> {
-  return (
-    error instanceof ChatCompletionError &&
-    error.code === ChatCompletionErrorCode.FunctionNotFoundError
   );
 }
 

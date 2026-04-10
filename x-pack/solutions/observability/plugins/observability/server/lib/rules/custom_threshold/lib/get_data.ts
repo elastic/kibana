@@ -8,7 +8,7 @@
 import type { SearchResponse, AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { EsQueryConfig } from '@kbn/es-query';
+import type { DataViewBase, EsQueryConfig } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
 import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import type {
@@ -107,6 +107,7 @@ export const getData = async (
   timeFieldName: string,
   groupBy: string | undefined | string[],
   searchConfiguration: SearchConfigurationType,
+  dataView: DataViewBase | undefined,
   esQueryConfig: EsQueryConfig,
   compositeSize: number,
   alertOnGroupDisappear: boolean,
@@ -175,6 +176,7 @@ export const getData = async (
           timeFieldName,
           groupBy,
           searchConfiguration,
+          dataView,
           esQueryConfig,
           compositeSize,
           alertOnGroupDisappear,
@@ -219,6 +221,7 @@ export const getData = async (
       compositeSize,
       alertOnGroupDisappear,
       searchConfiguration,
+      dataView,
       esQueryConfig,
       runtimeMappings,
       lastPeriodEnd,

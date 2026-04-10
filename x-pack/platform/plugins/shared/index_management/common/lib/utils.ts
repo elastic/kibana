@@ -11,6 +11,7 @@ import type {
   TemplateSerialized,
   IndexMode,
   IndexSettings,
+  Mappings,
 } from '../types';
 
 /**
@@ -27,23 +28,53 @@ import type {
  */
 export const buildTemplateSettings = (
   template?: TemplateDeserialized['template'],
-  indexMode?: IndexMode
+  indexMode?: IndexMode,
+  options: { preferMappingsSourceMode?: boolean } = {}
 ): IndexSettings | undefined => {
+  const { preferMappingsSourceMode = false } = options;
   // Extract existing settings, separating index settings from other settings
-  const { index: existingIndexSettings, ...otherSettings } = template?.settings || {};
+  const {
+    index: existingIndexSettings,
+    'index.mapping.source.mode': flatSourceMode,
+    ...otherSettings
+  } = template?.settings || {};
 
   // Remove mode from existing index settings as we'll set it from indexMode parameter
-  const { mode: _existingMode, ...otherIndexSettings } = existingIndexSettings || {};
+  const {
+    mode: existingMode,
+    mapping: existingMappingSettings,
+    ...otherIndexSettings
+  } = existingIndexSettings || {};
 
   // Build index settings: include if we have indexMode to set or other index settings to preserve
   const hasIndexMode = indexMode !== undefined;
-  const hasOtherIndexSettings = Object.keys(otherIndexSettings).length > 0;
+  const hasOtherIndexSettings =
+    Object.keys(otherIndexSettings).length > 0 || existingMode !== undefined;
+
+  const { source: existingSourceSettings, ...otherMappingSettings } = existingMappingSettings || {};
+  const sourceModeFromMappings = template?.mappings?._source?.mode;
+
+  // Only migrate source mode from mappings if we prefer it (e.g. during serialization)
+  const sourceMode = preferMappingsSourceMode
+    ? sourceModeFromMappings ?? existingSourceSettings?.mode ?? flatSourceMode
+    : existingSourceSettings?.mode ?? flatSourceMode;
+
+  const hasSourceMode = sourceMode !== undefined;
+  const hasOtherMappingSettings = Object.keys(otherMappingSettings).length > 0;
 
   const indexSettings =
-    hasIndexMode || hasOtherIndexSettings
+    hasIndexMode || hasOtherIndexSettings || hasSourceMode || hasOtherMappingSettings
       ? {
           ...otherIndexSettings,
-          ...(hasIndexMode && { mode: indexMode }),
+          ...(hasIndexMode ? { mode: indexMode } : existingMode && { mode: existingMode }),
+          ...((sourceMode || hasOtherMappingSettings) && {
+            mapping: {
+              ...otherMappingSettings,
+              ...(sourceMode && {
+                source: { ...(existingSourceSettings ?? {}), mode: sourceMode },
+              }),
+            },
+          }),
         }
       : undefined;
 
@@ -53,8 +84,46 @@ export const buildTemplateSettings = (
     ...(indexSettings && { index: indexSettings }),
   };
 
-  // Return undefined if settings object is empty
-  return Object.keys(settings).length > 0 ? settings : undefined;
+  // Return undefined if settings object is empty, unless the original settings object existed
+  if (Object.keys(settings).length > 0) {
+    return settings;
+  }
+  return template?.settings ? {} : undefined;
+};
+
+export const buildTemplateMappings = (
+  template?: { mappings?: Mappings } | TemplateDeserialized['template'],
+  options: { preferMappingsSourceMode?: boolean } = {}
+): Mappings | undefined => {
+  const { preferMappingsSourceMode = false } = options;
+  // Extract existing mappings, separating source mappings from other mappings
+  const { _source: existingSourceMappings, ...otherMappings } = template?.mappings || {};
+
+  // Remove mode from existing source mappings as we'll set it from template settings
+  const { mode: existingSourceMode, ...otherSourceMappings } = existingSourceMappings || {};
+  const hasOtherSourceMappings = Object.keys(otherSourceMappings).length > 0;
+
+  // If not preferring mappings source mode (e.g. deserializing), preserve the existing source mode in mappings
+  const sourceMappings =
+    hasOtherSourceMappings || (!preferMappingsSourceMode && existingSourceMode !== undefined)
+      ? {
+          ...otherSourceMappings,
+          ...(!preferMappingsSourceMode &&
+            existingSourceMode !== undefined && { mode: existingSourceMode }),
+        }
+      : undefined;
+
+  // Build mappings object: only include if we have source mappings or other mappings
+  const mappings = {
+    ...otherMappings,
+    ...(sourceMappings && { _source: sourceMappings }),
+  };
+
+  // Return undefined if mappings object is empty, unless the original mappings object existed
+  if (Object.keys(mappings).length > 0) {
+    return mappings;
+  }
+  return template?.mappings ? {} : undefined;
 };
 
 /**

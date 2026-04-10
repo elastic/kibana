@@ -61,6 +61,7 @@ export const deleteAlertsForQuery = async (
         },
         { signal: abortController.signal }
       );
+      pitId = searchResponse.pit_id ?? pitId;
 
       if (searchResponse.hits.hits.length === 0) {
         searchAfter = null;

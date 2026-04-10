@@ -332,7 +332,7 @@ export function createConfig(
         'restart, please set xpack.security.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
     );
 
-    encryptionKey = crypto.randomBytes(16).toString('hex');
+    encryptionKey = crypto.randomBytes(32).toString('hex');
   }
 
   const hashedEncryptionKey = crypto.createHash('sha3-256').update(encryptionKey).digest('base64');

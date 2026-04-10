@@ -9,6 +9,7 @@ import type { IKibanaResponse, IRouter } from '@kbn/core/server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
+import type { ESProcessorItem, SamplesFormat } from '../../common';
 import { ANALYZE_LOGS_PATH, AnalyzeLogsRequestBody, AnalyzeLogsResponse } from '../../common';
 import { FLEET_ALL_ROLE, INTEGRATIONS_ALL_ROLE, ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getLogFormatDetectionGraph } from '../graphs/log_type_detection/graph';
@@ -103,7 +104,12 @@ export function registerAnalyzeLogsRoutes(
           const graphResults = await graph
             .withConfig({ runName: 'Log Format' })
             .invoke(logFormatParameters, options);
-          const graphLogFormat = graphResults.results.samplesFormat.name;
+          const results = graphResults.results as {
+            samplesFormat: SamplesFormat;
+            parsedSamples: string[];
+            additionalProcessors: ESProcessorItem[];
+          };
+          const graphLogFormat = results.samplesFormat.name;
 
           switch (graphLogFormat) {
             case 'unsupported':

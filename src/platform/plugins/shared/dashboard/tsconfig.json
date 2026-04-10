@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["*.ts", ".storybook/**/*.ts", "common/**/*", "public/**/*", "server/**/*"],
+  "include": ["*.ts", ".storybook/**/*.ts", "common/**/*", "public/**/*", "server/**/*", "test/scout/**/*", "test/scout_oas_schema/**/*", "test/scout_oas_schema/**/*.json"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/inspector-plugin",
@@ -85,7 +85,9 @@
     "@kbn/esql-types",
     "@kbn/saved-objects-tagging-plugin",
     "@kbn/react-kibana-context-theme",
-    "@kbn/std"
+    "@kbn/std",
+    "@kbn/scout",
+    "@kbn/test"
   ],
   "exclude": ["target/**/*"]
 }

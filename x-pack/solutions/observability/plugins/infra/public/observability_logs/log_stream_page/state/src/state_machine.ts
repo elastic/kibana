@@ -100,6 +100,7 @@ export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPag
           states: {
             initializingQuery: {
               meta: {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
                 _DX_warning_:
                   "The Query machine must be invoked and complete initialisation before the Position machine is invoked. This is due to legacy URL dependencies on the 'logPosition' key, we need to read the key before it is reset by the Position machine.",
               },
@@ -135,6 +136,7 @@ export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPag
             },
             initializingPositions: {
               meta: {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
                 _DX_warning_:
                   "The Position machine must be invoked after the Query machine has been invoked and completed initialisation. This is due to the Query machine having some legacy URL dependencies on the 'logPosition' key, we don't want the Position machine to reset the URL parameters before the Query machine has had a chance to read them.",
               },

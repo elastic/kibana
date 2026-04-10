@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export { test } from './single_thread_fixtures';
+export { test, apiTest } from './single_thread_fixtures';
 export { spaceTest } from './parallel_run_fixtures';
 export type * from './types';
+export { mergeTests } from '@kbn/scout';

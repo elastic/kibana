@@ -23,6 +23,8 @@ import {
   BulkGetAgentPoliciesRequestSchema,
   GetAutoUpgradeAgentsStatusRequestSchema,
   GetAutoUpgradeAgentsStatusResponseSchema,
+  RunAgentPolicyRevisionsCleanupTaskRequestSchema,
+  RunAgentPolicyRevisionsCleanupTaskResponseSchema,
 } from '../../types';
 
 import { K8S_API_ROUTES } from '../../../common/constants';
@@ -41,6 +43,7 @@ import {
   getK8sManifest,
   bulkGetAgentPoliciesHandler,
   getAutoUpgradeAgentsStatusHandler,
+  RunAgentPolicyRevisionsCleanupTaskHandler,
 } from './handlers';
 
 export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
@@ -303,5 +306,33 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         validate: { request: GetK8sManifestRequestSchema },
       },
       downloadK8sManifest
+    );
+  router.versioned
+    .post({
+      path: AGENT_POLICY_API_ROUTES.CLEANUP_REVISIONS_PATTERN,
+      access: 'internal',
+      enableQueryVersion: true,
+      fleetAuthz: {
+        fleet: { allAgentPolicies: true, readAgents: true },
+      },
+      summary: `Run a task to cleanup excess agent policy revisions`,
+      options: {
+        tags: ['oas-tag:Elastic Agent policies'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: RunAgentPolicyRevisionsCleanupTaskRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => RunAgentPolicyRevisionsCleanupTaskResponseSchema,
+            },
+          },
+        },
+      },
+      RunAgentPolicyRevisionsCleanupTaskHandler
     );
 };

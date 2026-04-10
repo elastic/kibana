@@ -120,6 +120,7 @@ export function AccessAgreementPage({ http, fatalErrors, notifications }: Props)
         />
       }
     >
+      <EuiSpacer size="xl" />
       {content}
       <EuiSpacer size="xxl" />
     </AuthenticationStatePage>

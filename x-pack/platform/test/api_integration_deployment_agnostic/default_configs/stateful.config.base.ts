@@ -13,12 +13,13 @@ import {
   MOCK_IDP_ATTRIBUTE_NAME,
 } from '@kbn/mock-idp-utils';
 import {
-  fleetPackageRegistryDockerImage,
   esTestConfig,
   kbnTestConfig,
   systemIndicesSuperuser,
   FtrConfigProviderContext,
   defineDockerServersConfig,
+  dockerRegistryPort,
+  packageRegistryDocker,
 } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import path from 'path';
@@ -42,24 +43,15 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     if (options.esServerArgs || options.kbnServerArgs) {
       throw new Error(
-        `FTR doesn't provision custom ES/Kibana server arguments into the ESS deployment.
-  It may lead to unexpected test failures on Cloud. Please contact #appex-qa.`
+        `Deployment-agnostic configs run unchanged on ECH (Elastic Cloud). Custom ES/Kibana server args passed here
+  won't be set on ECH and will cause unexpected test failures.
+  If your test needs a feature flag, create a config under feature_flag_configs/ using
+  createStatefulFeatureFlagTestConfig from feature_flag.stateful.config.base.ts.`
       );
     }
 
     // if config is executed on CI or locally
     const isRunOnCI = process.env.CI;
-
-    const packageRegistryConfig = path.join(__dirname, './fixtures/package_registry_config.yml');
-    const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
-
-    /**
-     * This is used by CI to set the docker registry port
-     * you can also define this environment variable locally when running tests which
-     * will spin up a local docker package registry locally for you
-     * if this is defined it takes precedence over the `packageRegistryOverride` variable
-     */
-    const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
 
     const xPackAPITestsConfig = await readConfigFile(
       require.resolve('../../api_integration/config.ts')
@@ -91,16 +83,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
       servers,
       testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       dockerServers: defineDockerServersConfig({
-        registry: {
-          enabled: !!dockerRegistryPort,
-          image: fleetPackageRegistryDockerImage,
-          portInContainer: 8080,
-          port: dockerRegistryPort,
-          args: dockerArgs,
-          waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes,
-          preferCached: true,
-        },
+        registry: packageRegistryDocker,
       }),
       testFiles: options.testFiles,
       security: { disableTestUser: true },
@@ -112,6 +95,8 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
         exclude: [...(options.suiteTags?.exclude || []), 'skipStateful'],
       },
 
+      // ⚠️  Do not add server args here to make tests pass as they won't be set on ECH (Elastic Cloud Hosted).
+      //     If your test needs a feature flag, use createStatefulFeatureFlagTestConfig (feature_flag_configs/).
       esTestCluster: {
         ...xPackAPITestsConfig.get('esTestCluster'),
         serverArgs: [
@@ -134,6 +119,8 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
           path.resolve(REPO_ROOT, STATEFUL_ROLES_ROOT_PATH, 'roles.yml'),
         ],
       },
+      // ⚠️  Do not add server args here to make tests pass as they won't be set on ECH (Elastic Cloud Hosted).
+      //     If your test needs a feature flag, use createStatefulFeatureFlagTestConfig (feature_flag_configs/).
       kbnTestServer: {
         ...xPackAPITestsConfig.get('kbnTestServer'),
         serverArgs: [

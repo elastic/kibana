@@ -24,20 +24,20 @@ export const FindExceptionListsFilter = z.string();
 
 export type FindExceptionListsRequestQuery = z.infer<typeof FindExceptionListsRequestQuery>;
 export const FindExceptionListsRequestQuery = z.object({
-  /** 
+  /**
       * Filters the returned results according to the value of the specified field.
 
 Uses the `so type.field name:field` value syntax, where `so type` can be:
 
 - `exception-list`: Specify a space-aware exception list.
 - `exception-list-agnostic`: Specify an exception list that is shared across spaces.
- 
+
       */
   filter: FindExceptionListsFilter.optional(),
-  /** 
+  /**
       * Determines whether the returned containers are Kibana associated with a Kibana space
 or available in all spaces (`agnostic` or `single`)
- 
+
       */
   namespace_type: ArrayFromString(ExceptionNamespaceType).optional().default(['single']),
   /**

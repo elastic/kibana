@@ -13,7 +13,6 @@ import {
   coreWorkerFixtures,
   esArchiverFixture,
   uiSettingsFixture,
-  synthtraceFixture,
   lighthouseFixture,
 } from '../../fixtures/scope/worker';
 import type {
@@ -25,7 +24,6 @@ import type {
   ScoutLogger,
   ScoutTestConfig,
   UiSettingsFixture,
-  SynthtraceFixture,
 } from '../../fixtures/scope/worker';
 import {
   scoutPageFixture,
@@ -49,7 +47,6 @@ export const scoutFixtures = mergeTests(
   coreWorkerFixtures,
   esArchiverFixture,
   uiSettingsFixture,
-  synthtraceFixture,
   // api fixtures
   apiServicesFixture,
   // test scope fixtures
@@ -77,9 +74,6 @@ export interface ScoutWorkerFixtures extends ApiServicesFixture {
   esArchiver: EsArchiverFixture;
   uiSettings: UiSettingsFixture;
   apiServices: ApiServicesFixture;
-  apmSynthtraceEsClient: SynthtraceFixture['apmSynthtraceEsClient'];
-  infraSynthtraceEsClient: SynthtraceFixture['infraSynthtraceEsClient'];
-  otelSynthtraceEsClient: SynthtraceFixture['otelSynthtraceEsClient'];
 }
 
 export const lighthouseFixtures = mergeTests(scoutFixtures, persistentContext, lighthouseFixture);

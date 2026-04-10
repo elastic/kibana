@@ -59,6 +59,10 @@ export type AssistantMessage = MessageBase<MessageRole.Assistant> & {
    * Note that LLM with parallel tool invocation can potentially call multiple tools at the same time.
    */
   toolCalls?: ToolCall[];
+  /**
+   * Optional refusal reason returned by the model when content is filtered.
+   */
+  refusal?: string | null;
 };
 
 /**

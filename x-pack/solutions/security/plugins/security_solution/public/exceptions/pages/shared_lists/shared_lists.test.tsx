@@ -48,6 +48,17 @@ jest.mock('../../../detections/containers/detection_engine/lists/use_lists_confi
   useListsConfig: jest.fn().mockReturnValue({ loading: false }),
 }));
 
+jest.mock('../../hooks/use_endpoint_exceptions_capability');
+jest.mock('../../components/create_shared_exception_list', () => ({
+  CreateSharedListFlyout: ({ handleCloseFlyout }: { handleCloseFlyout: () => void }) => (
+    <div data-test-subj="createSharedExceptionListFlyout">
+      <button type="button" data-test-subj="closeFlyoutButton" onClick={handleCloseFlyout}>
+        {'Close'}
+      </button>
+    </div>
+  ),
+}));
+
 describe('SharedLists', () => {
   const mockHistory = generateHistoryMock();
   const exceptionList1 = getExceptionListSchemaMock();
@@ -236,6 +247,36 @@ describe('SharedLists', () => {
       expect(allDeleteActions).toEqual([]);
       const allExportActions = wrapper.queryAllByTestId('sharedListOverflowCardActionItemExport');
       expect(allExportActions).toEqual([]);
+    });
+  });
+
+  it('returns focus to the create button when the create shared list flyout is closed', async () => {
+    (useUserData as jest.Mock).mockReturnValue([
+      { loading: false, canUserCRUD: true, canUserREAD: true },
+    ]);
+
+    const wrapper = render(
+      <TestProviders>
+        <SharedLists />
+      </TestProviders>
+    );
+
+    const createButtonText = wrapper.getByText('Create shared exception list');
+    const createButton = createButtonText.closest('button')!;
+    fireEvent.click(createButton);
+
+    const createListOption = wrapper.getByTestId('manageExceptionListCreateExceptionListButton');
+    fireEvent.click(createListOption);
+
+    await waitFor(() => {
+      expect(wrapper.getByTestId('createSharedExceptionListFlyout')).toBeInTheDocument();
+    });
+
+    const closeFlyoutButton = wrapper.getByTestId('closeFlyoutButton');
+    fireEvent.click(closeFlyoutButton);
+
+    await waitFor(() => {
+      expect(createButton).toHaveFocus();
     });
   });
 });

@@ -186,5 +186,32 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
       await searchBar.clearValue();
       return searchBar.type(query);
     },
+
+    async clickNextPageButton() {
+      return await testSubjects.click('apiKeysTableNextPageButton');
+    },
+
+    async clickPreviousPageButton() {
+      return await testSubjects.click('apiKeysTablePreviousPageButton');
+    },
+
+    async clickRefreshButton() {
+      return await testSubjects.click('apiKeysTableRefreshButton');
+    },
+
+    async isNextPageButtonEnabled() {
+      const button = await testSubjects.find('apiKeysTableNextPageButton');
+      return await button.isEnabled();
+    },
+
+    async isPreviousPageButtonEnabled() {
+      const button = await testSubjects.find('apiKeysTablePreviousPageButton');
+      return await button.isEnabled();
+    },
+
+    async getDisplayedApiKeyCount() {
+      const rows = await testSubjects.findAll('~apiKeyRowName');
+      return rows.length;
+    },
   };
 }

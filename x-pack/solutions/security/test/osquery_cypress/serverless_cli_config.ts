@@ -35,7 +35,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           SERVERLESS_NODES[0].name
         }:${securitySolutionCypressConfig.get('servers.elasticsearch.port')}`,
         `--xpack.fleet.packages.0.name=osquery_manager`,
-        `--xpack.fleet.packages.0.version=latest`,
+        `--xpack.fleet.packages.0.version=1.18.0`,
       ],
     },
 

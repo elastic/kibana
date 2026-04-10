@@ -1,21 +1,21 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
-  "exclude": [
-    "target/**/*",
-  ],
+  "exclude": ["target/**/*"],
   "include": [
     // add all the folders containing files to be compiled
     ".storybook/**/*",
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "tasks/**/*",
     "server/**/*.json",
     "scripts/**/*",
     "package.json",
-    "../../../../../typings/**/*"
+    "../../../../../typings/**/*",
+    "test/scout/**/*"
   ],
   "kbn_references": [
     "@kbn/core",

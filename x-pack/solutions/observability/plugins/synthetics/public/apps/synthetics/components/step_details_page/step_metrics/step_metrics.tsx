@@ -42,8 +42,8 @@ export const StepMetrics = () => {
       </EuiFlexGroup>
 
       <EuiSpacer size="s" />
-      <EuiFlexGrid gutterSize="l" columns={3}>
-        {stepMetrics.map(({ label, value, helpText, formatted }) => {
+      <EuiFlexGrid data-test-subj="synth-step-metrics" gutterSize="l" columns={3}>
+        {stepMetrics.map(({ label, value, helpText, formatted, dataTestSubj }) => {
           const prevVal = prevMetrics.find((prev) => prev.label === label);
 
           if (label)
@@ -58,6 +58,7 @@ export const StepMetrics = () => {
                   helpText={helpText}
                   currentFormatted={formatted}
                   previousFormatted={prevVal?.formatted}
+                  dataTestSubj={dataTestSubj}
                 />
               </EuiFlexItem>
             );

@@ -78,7 +78,7 @@ node x-pack/platform/plugins/shared/dataset_quality/scripts/api --runner --grep-
 
 For tests using package registry we have enabled a configuration that uses a dockerized lite version to execute the tests in the CI, this will reduce the flakyness of them when calling the real endpoint.
 
-To be able to run this version locally you must have a docker daemon running in your systema and set `FLEET_PACKAGE_REGISTRY_PORT` env var. In order to set this variable execute
+To be able to run this version locally you must have a docker daemon running in your system and set `FLEET_PACKAGE_REGISTRY_PORT` env var. In order to set this variable execute
 
 ```
 export set FLEET_PACKAGE_REGISTRY_PORT=12345

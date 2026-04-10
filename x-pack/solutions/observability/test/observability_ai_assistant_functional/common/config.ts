@@ -65,7 +65,12 @@ async function getTestConfig({
   kibanaConfig: Record<string, any> | undefined;
   readConfigFile: FtrConfigProviderContext['readConfigFile'];
 }) {
-  const testConfig = await readConfigFile(require.resolve('../../functional/config.base.ts'));
+  // This has been changed from the original config.base.ts
+  // to avoid the usage of the dockerized package registry
+  // problem is apmSynthtraceKibanaClient initialization happens before the docker container is started
+  const testConfig = await readConfigFile(
+    require.resolve('@kbn/test-suites-xpack-platform/functional/config.base')
+  );
 
   const getScopedApiClientForUsername = (username: string) =>
     getScopedApiClient(kibanaServer, username);

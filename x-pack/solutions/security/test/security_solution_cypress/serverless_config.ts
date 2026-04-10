@@ -39,6 +39,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ])}`,
         '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',
+        `--xpack.fleet.developer.bundledPackageLocation=./inexistentDir`,
+        `--xpack.fleet.internal.registry.kibanaVersionCheckEnabled=true`,
       ],
       runOptions: {
         wait: FLEET_PLUGIN_READY_LOG_MESSAGE_REGEXP,

@@ -90,7 +90,7 @@ export type TaskManagerStartContract = Pick<
   | 'bulkSchedule'
   | 'bulkUpdateState'
 > &
-  Pick<TaskStore, 'fetch' | 'aggregate' | 'get' | 'remove' | 'bulkRemove'> & {
+  Pick<TaskStore, 'fetch' | 'aggregate' | 'get' | 'bulkGet' | 'remove' | 'bulkRemove'> & {
     removeIfExists: TaskStore['remove'];
   } & {
     supportsEphemeralTasks: () => boolean;
@@ -333,6 +333,7 @@ export class TaskManagerPlugin
       canEncryptSavedObjects: this.canEncryptSavedObjects,
       getIsSecurityEnabled: this.licenseSubscriber?.getIsSecurityEnabled,
       basePath: http.basePath,
+      executionContext,
     });
 
     const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
@@ -438,6 +439,7 @@ export class TaskManagerPlugin
       aggregate: (opts: AggregationOpts): Promise<estypes.SearchResponse<ConcreteTaskInstance>> =>
         taskStore.aggregate(opts),
       get: (id: string) => taskStore.get(id),
+      bulkGet: (...args) => taskStore.bulkGet(...args),
       remove: (id: string) => taskStore.remove(id),
       bulkRemove: (ids: string[]) => taskStore.bulkRemove(ids),
       removeIfExists: (id: string) => removeIfExists(taskStore, id),

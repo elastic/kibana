@@ -20,7 +20,7 @@ export const createIngestPipeline = async ({
 }) => {
   const processors =
     typeof options.processors === 'string' ? JSON.parse(options.processors) : options.processors;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+
   const { name, description, version, on_failure } = options;
 
   try {

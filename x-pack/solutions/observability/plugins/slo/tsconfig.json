@@ -106,6 +106,7 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/server-route-repository-utils",
     "@kbn/lock-manager",
+    "@kbn/core-elasticsearch-server-utils",
     "@kbn/deeplinks-management",
     "@kbn/react-query",
   ]

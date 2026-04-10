@@ -54,10 +54,7 @@ describe('Processor: Set', () => {
     await saveNewProcessor();
 
     // Expect form error as "field" is required parameter
-    expect(form.getErrorsMessages()).toEqual([
-      'A field value is required.',
-      'A value is required.',
-    ]);
+    expect(form.getErrorsMessages()).toEqual(['A field value is required.']);
   });
 
   test('saves with default parameter value', async () => {
@@ -191,5 +188,60 @@ describe('Processor: Set', () => {
       // eslint-disable-next-line prettier/prettier
       value: { value_1: 'aaa\"bbb', value_2: 'aaa(bbb' },
     });
+  });
+
+  test('saves with empty string as value', async () => {
+    const {
+      actions: { saveNewProcessor },
+      form,
+    } = testBed;
+
+    form.setInputValue('fieldNameField.input', 'field_1');
+
+    form.setInputValue('textValueField.input', '');
+
+    await saveNewProcessor();
+
+    const processors = getProcessorValue(onUpdate, SET_TYPE);
+    expect(processors[0][SET_TYPE]).toEqual({
+      field: 'field_1',
+      value: '',
+    });
+  });
+
+  test('saves with "0" as value', async () => {
+    const {
+      actions: { saveNewProcessor },
+      form,
+    } = testBed;
+
+    form.setInputValue('fieldNameField.input', 'field_1');
+
+    form.setInputValue('textValueField.input', '0');
+
+    await saveNewProcessor();
+
+    const processors = getProcessorValue(onUpdate, SET_TYPE);
+    // "0" is JSON-parsed to the number 0 during serialization
+    expect(processors[0][SET_TYPE].field).toEqual('field_1');
+    expect(processors[0][SET_TYPE].value).toEqual(0);
+  });
+
+  test('saves with "false" as value', async () => {
+    const {
+      actions: { saveNewProcessor },
+      form,
+    } = testBed;
+
+    form.setInputValue('fieldNameField.input', 'field_1');
+
+    form.setInputValue('textValueField.input', 'false');
+
+    await saveNewProcessor();
+
+    const processors = getProcessorValue(onUpdate, SET_TYPE);
+    // "false" is JSON-parsed to the boolean false during serialization
+    expect(processors[0][SET_TYPE].field).toEqual('field_1');
+    expect(processors[0][SET_TYPE].value).toEqual(false);
   });
 });

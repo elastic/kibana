@@ -35,7 +35,16 @@ export async function removeLockIndexWithIncorrectMappings(
     return;
   }
 
-  const { mappings } = res[LOCKS_CONCRETE_INDEX_NAME];
+  const indexMappings = Object.values(res);
+  if (indexMappings.length === 0) {
+    logger.warn(`No mappings found for "${LOCKS_CONCRETE_INDEX_NAME}"`);
+    return;
+  }
+  const { mappings } = indexMappings[0];
+  if (!mappings) {
+    logger.debug(`Mappings object is empty for "${LOCKS_CONCRETE_INDEX_NAME}"`);
+    return;
+  }
   const hasIncorrectMappings =
     mappings.properties?.token?.type !== 'keyword' ||
     mappings.properties?.expiresAt?.type !== 'date';
@@ -96,7 +105,12 @@ export async function ensureTemplatesAndIndexCreated(
       error instanceof errors.ResponseError &&
       error.body.error.type === 'resource_already_exists_exception';
 
-    if (isIndexAlreadyExistsError) {
+    // Handle the case where the index name already exists as an alias (e.g., after a reindex operation during cluster upgrade)
+    const isIndexNameExistsAsAliasError =
+      error instanceof errors.ResponseError &&
+      error.body.error.type === 'invalid_index_name_exception';
+
+    if (isIndexAlreadyExistsError || isIndexNameExistsAsAliasError) {
       logger.debug(`Index ${LOCKS_CONCRETE_INDEX_NAME} already exists. Skipping creation.`);
       return;
     }

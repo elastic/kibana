@@ -75,15 +75,21 @@ export const toggleVisibleColumn = ({
   columnId,
   visibleColumns,
   defaultVisibleColumns,
+  columns,
 }: {
   columnId: string;
   visibleColumns: string[];
   defaultVisibleColumns: string[];
+  columns: EuiDataGridColumn[];
 }): string[] => {
-  if (visibleColumns.includes(columnId)) {
-    return visibleColumns.filter((vc) => vc !== columnId);
+  const isVisible = visibleColumns.includes(columnId);
+  const isEnabled = columns.some((col) => col.id === columnId);
+
+  if (isVisible) {
+    return isEnabled ? visibleColumns : visibleColumns.filter((vc) => vc !== columnId);
   } else {
     const defaultIndex = defaultVisibleColumns.findIndex((id) => id === columnId);
+
     if (defaultIndex >= 0) {
       // If the column isn't shown, but it's part of the default config, show it in the same
       // position as in the default config

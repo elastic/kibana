@@ -11,7 +11,7 @@ import { monaco } from '../../monaco_imports';
 
 export interface Language extends monaco.languages.IMonarchLanguage {
   default: string;
-  brackets: any;
+  brackets: monaco.languages.IMonarchLanguage['brackets'];
   keywords: string[];
   symbols: RegExp;
   escapes: RegExp;
@@ -23,13 +23,13 @@ export interface Language extends monaco.languages.IMonarchLanguage {
   operators: string[];
 }
 
-export const lexerRules = {
+export const lexerRules: Language = {
   default: '',
   // painless does not use < >, so we define our own
   brackets: [
-    ['{', '}', 'delimiter.curly'],
-    ['[', ']', 'delimiter.square'],
-    ['(', ')', 'delimiter.parenthesis'],
+    { open: '{', close: '}', token: 'delimiter.curly' },
+    { open: '[', close: ']', token: 'delimiter.square' },
+    { open: '(', close: ')', token: 'delimiter.parenthesis' },
   ],
   keywords: [
     'if',
@@ -169,7 +169,7 @@ export const lexerRules = {
       [/'/, 'string', '@pop'],
     ],
   },
-} as Language;
+};
 
 export const languageConfiguration: monaco.languages.LanguageConfiguration = {
   brackets: [

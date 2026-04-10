@@ -50,7 +50,9 @@ const fetchAvailableRuleAssetIds = async ({
   ruleAssetsClient: IPrebuiltRuleAssetsClient;
 }): Promise<string[]> => {
   const incomingRuleIds = rules.map((rule) => rule.rule_id);
-  const availableRuleAssetSpecifiers = await ruleAssetsClient.fetchLatestVersions(incomingRuleIds);
+  const availableRuleAssetSpecifiers = await ruleAssetsClient.fetchLatestVersions({
+    ruleIds: incomingRuleIds,
+  });
 
   return availableRuleAssetSpecifiers.map((specifier) => specifier.rule_id);
 };

@@ -16,7 +16,7 @@ import moment from 'moment';
 import type { Agent } from '../../types';
 import { appContextService } from '..';
 import { SO_SEARCH_LIMIT } from '../../../common/constants';
-import { agentsKueryNamespaceFilter } from '../spaces/agent_namespaces';
+import { agentsKueryNamespaceFilter, buildFilterWithNamespace } from '../spaces/agent_namespaces';
 
 import { getAgentActions } from './actions';
 import { closePointInTime, getAgentsByKuery } from './crud';
@@ -221,9 +221,7 @@ export abstract class ActionRunner {
 
     const getAgents = async () => {
       const namespaceFilter = await agentsKueryNamespaceFilter(this.actionParams.spaceId);
-      const kuery = namespaceFilter
-        ? `${namespaceFilter} AND ${this.actionParams.kuery}`
-        : this.actionParams.kuery;
+      const kuery = buildFilterWithNamespace(namespaceFilter, this.actionParams.kuery);
 
       return getAgentsByKuery(this.esClient, this.soClient, {
         kuery,

@@ -37,6 +37,7 @@ export const createPureLogStreamPositionStateMachine = (initialContext: LogStrea
       states: {
         uninitialized: {
           meta: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             _DX_warning_:
               "The Position machine cannot initializeFromUrl until after the Query machine has initialized, this is due to a dual dependency on the 'logPosition' URL parameter for legacy reasons.",
           },

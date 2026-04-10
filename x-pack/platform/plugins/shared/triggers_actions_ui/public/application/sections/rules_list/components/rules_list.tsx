@@ -69,12 +69,10 @@ import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_m
 import { RulesListPrompts } from './rules_list_prompts';
 import { ALERT_STATUS_LICENSE_ERROR } from '../translations';
 import { useKibana } from '../../../../common/lib/kibana';
-import { CreateRuleButton } from './create_rule_button';
 import { ManageLicenseModal } from './manage_license_modal';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { RulesListClearRuleFilterBanner } from './rules_list_clear_rule_filter_banner';
 import { RulesListTable, convertRulesToTableItems } from './rules_list_table';
-import { RulesListDocLink } from './rules_list_doc_link';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
 import { BulkSnoozeModalWithApi as BulkSnoozeModal } from './bulk_snooze_modal';
 import { BulkSnoozeScheduleModalWithApi as BulkSnoozeScheduleModal } from './bulk_snooze_schedule_modal';
@@ -94,7 +92,6 @@ import {
   MULTIPLE_RULE_TITLE,
 } from '../translations';
 import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
-import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
 import { useRulesListUiState as useUiState } from '../../../hooks/use_rules_list_ui_state';
 import { useRulesListFilterStore } from './hooks/use_rules_list_filter_store';
 
@@ -122,7 +119,6 @@ export interface RulesListProps {
   onStatusFilterChange?: (status: RuleStatus[]) => void;
   onTypeFilterChange?: (type: string[]) => void;
   onRefresh?: (refresh: Date) => void;
-  setHeaderActions?: (components?: React.ReactNode[]) => void;
   initialSelectedConsumer?: RuleCreationValidConsumer | null;
   navigateToEditRuleForm?: (ruleId: string) => void;
 }
@@ -165,7 +161,6 @@ export const RulesList = ({
   onStatusFilterChange,
   onTypeFilterChange,
   onRefresh,
-  setHeaderActions,
   navigateToEditRuleForm,
 }: RulesListProps) => {
   const history = useHistory();
@@ -657,20 +652,6 @@ export const RulesList = ({
 
   const openRuleTypeModal = useCallback(() => {
     setRuleTypeModalVisibility(true);
-  }, []);
-
-  useEffect(() => {
-    setHeaderActions?.([
-      ...(authorizedToCreateAnyRules ? [<CreateRuleButton openFlyout={openRuleTypeModal} />] : []),
-      <RulesSettingsLink
-        alertDeleteCategoryIds={['management', 'observability', 'securitySolution']}
-      />,
-      <RulesListDocLink />,
-    ]);
-  }, [authorizedToCreateAnyRules]);
-
-  useEffect(() => {
-    return () => setHeaderActions?.();
   }, []);
 
   const [isDeleteModalFlyoutVisible, setIsDeleteModalVisibility] = useState<boolean>(false);

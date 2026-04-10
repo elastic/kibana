@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Annotation } from '@langchain/langgraph';
+import { Annotation, messagesStateReducer } from '@langchain/langgraph';
+import type { BaseMessage } from '@langchain/core/messages';
 import { uniq } from 'lodash/fp';
 import type { RuleTranslationResult } from '../../../../../../common/siem_migrations/constants';
 import type {
@@ -33,6 +34,14 @@ export const migrateRuleState = Annotation.Root({
   comments: Annotation<RuleMigrationRule['comments']>({
     // Translation subgraph causes the original main graph comments to be concatenated again, we need to deduplicate them.
     reducer: (current, value) => uniq(value ? (current ?? []).concat(value) : current),
+    default: () => [],
+  }),
+  nl_query: Annotation<string>({
+    reducer: (current, value) => value ?? current,
+    default: () => '',
+  }),
+  messages: Annotation<BaseMessage[]>({
+    reducer: messagesStateReducer,
     default: () => [],
   }),
 });

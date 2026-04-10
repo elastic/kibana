@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout/**/*"],
   "kbn_references": [
     "@kbn/features-plugin",
     "@kbn/licensing-plugin",
@@ -52,7 +52,8 @@
     "@kbn/core-chrome-browser",
     "@kbn/core-lifecycle-server",
     "@kbn/core-user-profile-browser-mocks",
-    "@kbn/spaces-utils"
+    "@kbn/spaces-utils",
+    "@kbn/scout",
   ],
   "exclude": [
     "target/**/*",

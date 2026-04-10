@@ -99,6 +99,7 @@ export const createMockPluginStart = async (
     taskManager: {
       schedule: jest.fn().mockImplementation(() => ({ id: 'taskId' })),
       ensureScheduled: jest.fn(),
+      bulkGet: jest.fn(),
     },
     licensing: {
       ...licensingMock.createStart(),

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import chalk from 'chalk';
 import { extractByJsonPointer } from '../../../utils/extract_by_json_pointer';
 import { isPlainObjectType } from '../../../utils/is_plain_object_type';
 import { parseRef } from '../../../utils/parse_ref';
@@ -60,16 +61,20 @@ export function createNamespaceComponentsProcessor(pointer: string): DocumentNod
     // `components.securitySchemes`. It means items in `security` implicitly reference
     // `components.securitySchemes` items which should be handled.
     onNodeLeave(node, context) {
-      // Handle mappings
-      if (context.parentKey === 'mapping' && isPlainObjectType(node)) {
+      // Handle the Discriminator Object mappings
+      if (
+        context.parentKey === 'mapping' &&
+        context.parent?.parentKey === 'discriminator' &&
+        isPlainObjectType(node)
+      ) {
         for (const key of Object.keys(node)) {
           const maybeRef = node[key];
 
           if (typeof maybeRef !== 'string' || !isLocalRef(maybeRef)) {
             throw new Error(
-              `Expected mappings to have local references but got "${maybeRef}" in ${JSON.stringify(
-                node
-              )}`
+              `Expected mappings to have local references but got "${chalk.blueBright(
+                JSON.stringify(maybeRef)
+              )}" in ${chalk.bold(JSON.stringify(node))}`
             );
           }
 
@@ -77,6 +82,7 @@ export function createNamespaceComponentsProcessor(pointer: string): DocumentNod
         }
       }
 
+      // Security Requirement Object
       if ('security' in node && Array.isArray(node.security)) {
         for (const securityRequirements of node.security) {
           prefixObjectKeys(securityRequirements);

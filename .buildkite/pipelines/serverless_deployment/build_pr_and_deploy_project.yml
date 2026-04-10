@@ -63,7 +63,7 @@ steps:
           machineType: n2-standard-16
           preemptible: true
           diskSizeGb: 150
-        timeout_in_minutes: 60
+        timeout_in_minutes: 90
         retry:
           automatic:
             - exit_status: '-1'

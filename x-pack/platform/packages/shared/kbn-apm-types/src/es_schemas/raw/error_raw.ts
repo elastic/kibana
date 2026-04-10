@@ -61,6 +61,9 @@ export interface ErrorRaw extends APMBaseDoc {
     log?: Log;
     stack_trace?: string;
     custom?: Record<string, unknown>;
+    message?: string;
+    code?: string;
+    type?: string;
   };
 
   // Shared by errors and transactions

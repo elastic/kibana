@@ -14,6 +14,7 @@ import { AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
 import { omit } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
+import type { TimeRange } from '@kbn/es-query';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import { getSharingData, showPublicUrlSwitch } from '../../../../../utils/get_sharing_data';
 import type { DiscoverAppLocatorParams } from '../../../../../../common/app_locator';
@@ -60,14 +61,14 @@ export const getShareAppMenuItem = ({
     const filters = services.filterManager.getFilters();
 
     // Share -> Get links -> Snapshot
-    const params: DiscoverAppLocatorParams = {
+    const params: DiscoverAppLocatorParams & { timeRange: TimeRange | undefined } = {
       ...omit(appState, 'dataSource'),
       ...(savedSearch.id ? { savedSearchId: savedSearch.id } : {}),
       ...(dataView?.isPersisted()
         ? { dataViewId: dataView?.id }
         : { dataViewSpec: dataView?.toMinimalSpec() }),
       filters,
-      timeRange,
+      timeRange: timeRange ?? undefined,
       refreshInterval,
     };
     const relativeUrl = locator.getRedirectUrl(params);

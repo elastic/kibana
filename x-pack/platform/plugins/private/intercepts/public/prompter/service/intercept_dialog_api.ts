@@ -12,13 +12,13 @@ import * as Rx from 'rxjs';
 
 import { InterceptTelemetry } from './telemetry';
 
-interface InterceptSteps extends Pick<EuiTourStepProps, 'title'> {
+export interface InterceptSteps extends Pick<EuiTourStepProps, 'title'> {
   id: string;
   /**
    * expects a react component that will be rendered in the dialog, and expects a callback to be called with the value
    * of the step when the user is done with the step.
    */
-  content: FC<{ onValue: (value: unknown) => void }>;
+  content: FC<{ onValue: (value: unknown) => void; responseMap: Record<string, unknown> }>;
 }
 
 interface StartingInterceptStep extends InterceptSteps {
@@ -33,16 +33,19 @@ interface InterceptProgressEvent {
   runId: Intercept['runId'];
   stepId: string;
   stepResponse: unknown;
+  interceptId: string;
 }
 
 interface InterceptCompletionEvent {
   runId: Intercept['runId'];
   response: Record<string, unknown>;
+  interceptId: string;
 }
 
 interface InterceptDismissalEvent {
   runId: Intercept['runId'];
   stepId: string;
+  interceptId: string;
 }
 
 /**

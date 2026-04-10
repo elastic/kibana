@@ -53,7 +53,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           'servers.elasticsearch.port'
         )}`,
         `--xpack.fleet.packages.0.name=osquery_manager`,
-        `--xpack.fleet.packages.0.version=latest`,
+        `--xpack.fleet.packages.0.version=1.18.0`,
       ],
     },
   };
