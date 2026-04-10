@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Subscription } from 'rxjs';
+import { take } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { Plugin } from '@kbn/core/public';
 import { type CoreSetup, type CoreStart, type PluginInitializerContext } from '@kbn/core/public';
@@ -42,8 +42,6 @@ export class GenAiSettingsPlugin
       GenAiSettingsStartDeps
     >
 {
-  private licensingSubscription?: Subscription;
-
   constructor(private initializerContext: PluginInitializerContext<GenAiSettingsConfigType>) {}
 
   public setup(
@@ -58,7 +56,7 @@ export class GenAiSettingsPlugin
       const hasAnonymizationPrivilege =
         capabilities.anonymization?.show === true || capabilities.anonymization?.manage === true;
 
-      this.licensingSubscription = licensing.license$.subscribe((license) => {
+      licensing.license$.pipe(take(1)).subscribe((license) => {
         const hasEnterpriseLicense = license?.hasAtLeast('enterprise') ?? false;
 
         if (hasEnterpriseLicense && (hasConnectorsReadPrivilege || hasAnonymizationPrivilege)) {
@@ -90,9 +88,5 @@ export class GenAiSettingsPlugin
 
   public start(coreStart: CoreStart): GenAiSettingsPluginStart {
     return {};
-  }
-
-  public stop() {
-    this.licensingSubscription?.unsubscribe();
   }
 }
