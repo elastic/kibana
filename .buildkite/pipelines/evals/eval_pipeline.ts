@@ -80,6 +80,10 @@ const MODEL_GROUP_ALIASES: Record<string, string[]> = {
     'eis/google-gemini-3.0-flash',
     'eis/google-gemini-3.1-pro',
     'eis/openai-gpt-5.2',
+    'eis/openai-gpt-5.4',
+    'eis/openai-gpt-5.4-pro',
+    'eis/openai-gpt-5.4-mini',
+    'eis/openai-gpt-5.4-nano',
     'eis/openai-gpt-oss-120b',
   ],
 };
