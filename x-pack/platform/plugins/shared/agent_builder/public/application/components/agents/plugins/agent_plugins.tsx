@@ -21,9 +21,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PluginDefinition } from '@kbn/agent-builder-common';
 import { useMutation, useQueryClient } from '@kbn/react-query';
@@ -53,7 +51,6 @@ import { useCanEditAgent } from '../../../hooks/agents/use_can_edit_agent';
 
 export const AgentPlugins: React.FC = () => {
   const { agentId } = useParams<{ agentId: string }>();
-  const { euiTheme } = useEuiTheme();
   const styles = useListDetailPageStyles();
   const { createAgentBuilderUrl, navigateToAgentBuilderUrl } = useNavigation();
   const { agentService, docLinksService } = useAgentBuilderServices();
@@ -359,58 +356,48 @@ export const AgentPlugins: React.FC = () => {
       ) : null}
 
       {showCustomizeEmptyState ? (
-        <EuiFlexGroup
-          justifyContent="center"
-          alignItems="center"
-          css={css`
-            flex: 1;
-            min-height: 280px;
-            padding: ${euiTheme.size.xl} 0;
-          `}
-        >
-          <CustomizeLandingEmptyState
-            dataTestSubj="agentPluginsCustomizeEmptyState"
-            illustrationSrc={pluginsIllustration}
-            title={labels.agentPlugins.emptyStateTitle}
-            description={pluginsEmptyDescription}
-            learnMoreHref={docLinksService.agentBuilderAgents}
-            learnMoreLabel={labels.customizeLandingEmptyState.learnMore}
-            learnMoreSuffix={labels.agentPlugins.emptyStateLearnMoreSuffix}
-            footer={pluginsEmptyStateFooter}
-            primaryAction={
-              canEditAgent ? (
-                <EuiPopover
-                  aria-label={labels.agentPlugins.emptyStateAddButton}
-                  button={
-                    <EuiButton
-                      data-test-subj="agentPluginsCustomizeEmptyStateInstallButton"
-                      fill
-                      iconType="plus"
-                      iconSide="left"
-                      onClick={() => setIsEmptyInstallMenuOpen((prev) => !prev)}
-                    >
-                      {labels.agentPlugins.emptyStateAddButton}
-                    </EuiButton>
-                  }
-                  isOpen={isEmptyInstallMenuOpen}
-                  closePopover={() => setIsEmptyInstallMenuOpen(false)}
-                  anchorPosition="downCenter"
-                  panelPaddingSize="none"
-                >
-                  <PluginAddMenuPanel
-                    onInstallFromUrlOrZip={handleOpenInstallFlyout}
-                    onAddFromLibrary={handleOpenLibrary}
-                  />
-                </EuiPopover>
-              ) : undefined
-            }
-            secondaryAction={
-              <EuiButtonEmpty href={createAgentBuilderUrl(appPaths.manage.plugins)}>
-                {labels.agentPlugins.manageAllPlugins}
-              </EuiButtonEmpty>
-            }
-          />
-        </EuiFlexGroup>
+        <CustomizeLandingEmptyState
+          dataTestSubj="agentPluginsCustomizeEmptyState"
+          illustrationSrc={pluginsIllustration}
+          title={labels.agentPlugins.emptyStateTitle}
+          description={pluginsEmptyDescription}
+          learnMoreHref={docLinksService.agentBuilderAgents}
+          learnMoreLabel={labels.customizeLandingEmptyState.learnMore}
+          learnMoreSuffix={labels.agentPlugins.emptyStateLearnMoreSuffix}
+          footer={pluginsEmptyStateFooter}
+          primaryAction={
+            canEditAgent ? (
+              <EuiPopover
+                aria-label={labels.agentPlugins.emptyStateAddButton}
+                button={
+                  <EuiButton
+                    data-test-subj="agentPluginsCustomizeEmptyStateInstallButton"
+                    fill
+                    iconType="plus"
+                    iconSide="left"
+                    onClick={() => setIsEmptyInstallMenuOpen((prev) => !prev)}
+                  >
+                    {labels.agentPlugins.emptyStateAddButton}
+                  </EuiButton>
+                }
+                isOpen={isEmptyInstallMenuOpen}
+                closePopover={() => setIsEmptyInstallMenuOpen(false)}
+                anchorPosition="downCenter"
+                panelPaddingSize="none"
+              >
+                <PluginAddMenuPanel
+                  onInstallFromUrlOrZip={handleOpenInstallFlyout}
+                  onAddFromLibrary={handleOpenLibrary}
+                />
+              </EuiPopover>
+            ) : undefined
+          }
+          secondaryAction={
+            <EuiButtonEmpty href={createAgentBuilderUrl(appPaths.manage.plugins)}>
+              {labels.agentPlugins.manageAllPlugins}
+            </EuiButtonEmpty>
+          }
+        />
       ) : (
         <EuiFlexGroup gutterSize="none" responsive={false} css={styles.body}>
           <EuiFlexItem grow={false} css={styles.searchColumn}>

@@ -20,9 +20,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ToolDefinition, ToolSelection } from '@kbn/agent-builder-common';
 import { defaultAgentToolIds } from '@kbn/agent-builder-common';
@@ -121,7 +119,6 @@ const ActiveToolsList: React.FC<{
 
 export const AgentTools: React.FC = () => {
   const { agentId } = useParams<{ agentId: string }>();
-  const { euiTheme } = useEuiTheme();
   const styles = useListDetailPageStyles();
   const { createAgentBuilderUrl, navigateToAgentBuilderUrl } = useNavigation();
   const { agentService, docLinksService } = useAgentBuilderServices();
@@ -361,44 +358,34 @@ export const AgentTools: React.FC = () => {
       ) : null}
 
       {showCustomizeEmptyState ? (
-        <EuiFlexGroup
-          justifyContent="center"
-          alignItems="center"
-          css={css`
-            flex: 1;
-            min-height: 280px;
-            padding: ${euiTheme.size.xl} 0;
-          `}
-        >
-          <CustomizeLandingEmptyState
-            dataTestSubj="agentToolsCustomizeEmptyState"
-            illustrationSrc={toolsIllustration}
-            title={labels.agentTools.emptyStateTitle}
-            description={toolsEmptyDescription}
-            learnMoreHref={docLinksService.tools}
-            learnMoreLabel={labels.customizeLandingEmptyState.learnMore}
-            learnMoreSuffix={labels.agentTools.emptyStateLearnMoreSuffix}
-            footer={toolsEmptyStateFooter}
-            primaryAction={
-              canEditAgent ? (
-                <EuiButton
-                  data-test-subj="agentToolsCustomizeEmptyStateAddButton"
-                  fill
-                  iconType="plus"
-                  iconSide="left"
-                  onClick={openLibrary}
-                >
-                  {labels.agentTools.emptyStateAddButton}
-                </EuiButton>
-              ) : undefined
-            }
-            secondaryAction={
-              <EuiButtonEmpty href={createAgentBuilderUrl(appPaths.manage.tools)}>
-                {labels.agentTools.manageAllTools}
-              </EuiButtonEmpty>
-            }
-          />
-        </EuiFlexGroup>
+        <CustomizeLandingEmptyState
+          dataTestSubj="agentToolsCustomizeEmptyState"
+          illustrationSrc={toolsIllustration}
+          title={labels.agentTools.emptyStateTitle}
+          description={toolsEmptyDescription}
+          learnMoreHref={docLinksService.tools}
+          learnMoreLabel={labels.customizeLandingEmptyState.learnMore}
+          learnMoreSuffix={labels.agentTools.emptyStateLearnMoreSuffix}
+          footer={toolsEmptyStateFooter}
+          primaryAction={
+            canEditAgent ? (
+              <EuiButton
+                data-test-subj="agentToolsCustomizeEmptyStateAddButton"
+                fill
+                iconType="plus"
+                iconSide="left"
+                onClick={openLibrary}
+              >
+                {labels.agentTools.emptyStateAddButton}
+              </EuiButton>
+            ) : undefined
+          }
+          secondaryAction={
+            <EuiButtonEmpty href={createAgentBuilderUrl(appPaths.manage.tools)}>
+              {labels.agentTools.manageAllTools}
+            </EuiButtonEmpty>
+          }
+        />
       ) : (
         <EuiFlexGroup gutterSize="none" responsive={false} css={styles.body}>
           <EuiFlexItem grow={false} css={styles.searchColumn}>
