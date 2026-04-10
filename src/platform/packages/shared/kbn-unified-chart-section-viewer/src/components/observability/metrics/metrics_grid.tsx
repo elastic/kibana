@@ -107,13 +107,9 @@ export const MetricsGrid = ({
     <FieldsMetadataProvider fields={metricItems} services={services}>
       <A11yGridWrapper
         ref={gridRef}
-        aria-label={i18n.translate('metricsExperience.gridAriaLabel', {
-          defaultMessage: 'Metric charts grid. Use arrow keys to navigate.',
-        })}
         gridRows={gridRows}
         gridColumns={gridColumns}
         onKeyDown={handleKeyDown}
-        data-test-subj="unifiedMetricsExperienceGrid"
       >
         <EuiFlexGrid
           gutterSize="s"
