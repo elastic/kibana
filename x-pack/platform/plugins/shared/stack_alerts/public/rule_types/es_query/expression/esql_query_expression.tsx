@@ -279,10 +279,11 @@ export const EsqlQueryExpression: React.FC<
           });
           const indexPattern: string = esqlDataView.getIndexPattern();
 
+          const projectRouting = getProjectRoutingFromEsqlQuery(queryObj.esql);
           const fieldSpecs = await dataViews.getFieldsForWildcard({
             pattern: indexPattern,
             allowNoIndex: true,
-            projectRouting: getProjectRoutingFromEsqlQuery(queryObj.esql),
+            ...(projectRouting ? { projectRouting } : {}),
           });
 
           const currentEsFields = convertFieldSpecToFieldOption(fieldSpecs, false);

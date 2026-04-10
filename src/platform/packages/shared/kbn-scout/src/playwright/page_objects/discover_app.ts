@@ -187,11 +187,11 @@ export class DiscoverApp {
   // Waits for the document table to be fully rendered and stable
   async waitForDocTableRendered() {
     const table = this.page.testSubj.locator('discoverDocTable');
-    await expect(table).toBeVisible();
-
     const minDurationMs = 2_000;
     const pollIntervalMs = 100;
     const totalTimeoutMs = 30_000;
+
+    await expect(table).toBeVisible({ timeout: totalTimeoutMs });
 
     let stableSince: number | null = null;
 
