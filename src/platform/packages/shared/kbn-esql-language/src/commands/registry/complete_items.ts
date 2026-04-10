@@ -157,12 +157,19 @@ export function findConstantPlaceholderType(
   return undefined;
 }
 
-export function buildMapValueCompleteItem(value: string): ISuggestionItem {
+export function buildMapValueCompleteItem(value: string, label: string = ''): ISuggestionItem {
+  const detail = i18n.translate('kbn-esql-ast.esql.autocomplete.mapValuePlaceholderDetail', {
+    defaultMessage: 'Insert {label} as value for the map key',
+    values: { label: label || value },
+  });
+  const asSnippet = value.includes('$0');
+
   return {
-    label: value,
+    label: label || value,
     text: value,
     kind: 'Constant',
-    detail: value,
+    detail,
+    asSnippet,
     category: SuggestionCategory.CONSTANT_VALUE,
   };
 }
@@ -334,13 +341,14 @@ export const mmrLambdaValueSuggestion: ISuggestionItem = {
 // Map Expression Builders
 // ================================
 
-export type MapValueType = 'string' | 'number' | 'boolean' | 'map';
+export type MapValueType = 'string' | 'number' | 'boolean' | 'map' | 'array';
 
 export const MAP_VALUE_SNIPPETS: Record<MapValueType, string> = {
   string: '"$0"',
   number: '',
   boolean: '',
   map: '{ $0 }',
+  array: '[ $0 ]',
 };
 
 export interface MapKeySuggestionOptions {
@@ -348,16 +356,19 @@ export interface MapKeySuggestionOptions {
   rangeToReplace?: { start: number; end: number };
 }
 
-export const subqueryCompleteItem: ISuggestionItem = withAutoSuggest({
-  label: '(FROM ...)',
-  text: '(FROM $0)',
-  asSnippet: true,
-  kind: 'Method',
-  detail: i18n.translate('kbn-esql-language.esql.autocomplete.subqueryFromDoc', {
-    defaultMessage: 'Adds a nested ES|QL query to your current query',
-  }),
-  category: SuggestionCategory.CUSTOM_ACTION,
-});
+export function buildSubqueryCompleteItem(filterText?: string): ISuggestionItem {
+  return withAutoSuggest({
+    label: '(FROM ...)',
+    text: '(FROM $0)',
+    asSnippet: true,
+    kind: 'Method',
+    detail: i18n.translate('kbn-esql-language.esql.autocomplete.subqueryFromDoc', {
+      defaultMessage: 'Adds a nested ES|QL query to your current query',
+    }),
+    ...(filterText && { filterText }),
+    category: SuggestionCategory.SUBQUERY,
+  });
+}
 
 export const minMaxValueCompleteItem: ISuggestionItem = {
   label: 'minmax',
