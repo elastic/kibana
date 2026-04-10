@@ -2661,25 +2661,6 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture-common",
-        "id": "def-common.ENTITIES_LATEST_INDEX",
-        "type": "string",
-        "tags": [],
-        "label": "ENTITIES_LATEST_INDEX",
-        "description": [
-          "\nEntity store latest index pattern for LOOKUP JOIN queries.\nThe <space> placeholder should be replaced with the actual space ID."
-        ],
-        "signature": [
-          "\".entities.v2.latest.security_<space>\""
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 114,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cloud-security-posture-common",
         "id": "def-common.FINDINGS_INDEX_PATTERN",
         "type": "string",
         "tags": [],
@@ -3285,7 +3266,7 @@
           "readonly [\"accesses_frequently\", \"accesses_infrequently\", \"communicates_with\", \"depends_on\", \"owns\", \"owns_inferred\", \"resolution.resolved_to\", \"supervises\"]"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 124,
+        "lineNumber": 118,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3299,7 +3280,7 @@
         "label": "ENTITY_RELATIONSHIP_LABELS",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 135,
+        "lineNumber": 129,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3312,7 +3293,7 @@
             "label": "accesses_frequently",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-            "lineNumber": 139,
+            "lineNumber": 133,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3325,7 +3306,7 @@
             "label": "accesses_infrequently",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-            "lineNumber": 140,
+            "lineNumber": 134,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3338,7 +3319,7 @@
             "label": "communicates_with",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-            "lineNumber": 141,
+            "lineNumber": 135,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3351,7 +3332,7 @@
             "label": "depends_on",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-            "lineNumber": 142,
+            "lineNumber": 136,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3364,7 +3345,7 @@
             "label": "owns",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-            "lineNumber": 143,
+            "lineNumber": 137,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3377,7 +3358,7 @@
             "label": "owns_inferred",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-            "lineNumber": 144,
+            "lineNumber": 138,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3390,7 +3371,7 @@
             "label": "'resolution.resolved_to'",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-            "lineNumber": 145,
+            "lineNumber": 139,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3403,7 +3384,7 @@
             "label": "supervises",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-            "lineNumber": 146,
+            "lineNumber": 140,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3573,7 +3554,7 @@
           "readonly [\"user.entity.id\", \"host.entity.id\", \"service.entity.id\", \"entity.id\"]"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 153,
+        "lineNumber": 147,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3592,7 +3573,7 @@
           "readonly [\"user.email\", \"user.id\", \"user.name\", \"host.id\", \"host.name\", \"host.hostname\", \"service.name\", \"entity.id\"]"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 176,
+        "lineNumber": 170,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3611,7 +3592,7 @@
           "readonly [\"user.target.entity.id\", \"host.target.entity.id\", \"service.target.entity.id\", \"entity.target.id\"]"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 164,
+        "lineNumber": 158,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3630,7 +3611,7 @@
           "readonly [\"user.target.email\", \"user.target.id\", \"user.target.name\", \"host.target.id\", \"host.target.name\", \"host.target.hostname\", \"service.target.name\", \"entity.target.id\"]"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 195,
+        "lineNumber": 189,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
