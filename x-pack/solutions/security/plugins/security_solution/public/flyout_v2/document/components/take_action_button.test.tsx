@@ -16,7 +16,6 @@ import { useAlertAssigneesActions } from '../../../detections/components/alerts_
 import { useAlertTagsActions } from '../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions';
 import { useInvestigateInTimeline } from '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
-import { useRunAlertWorkflowPanel } from '../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 import { TakeActionButton } from './take_action_button';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
@@ -30,9 +29,38 @@ jest.mock(
   '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
 );
 jest.mock('../../../common/hooks/is_in_security_app');
+
+const mockUseRunAlertWorkflowPanel = jest.fn().mockReturnValue({
+  runWorkflowMenuItem: [],
+  runAlertWorkflowPanel: [],
+});
 jest.mock(
-  '../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel'
+  '../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel',
+  () => ({
+    useRunAlertWorkflowPanel: (...args: unknown[]) => mockUseRunAlertWorkflowPanel(...args),
+  })
 );
+
+const mockUseRunDocumentWorkflowPanel = jest.fn().mockReturnValue({
+  runWorkflowMenuItem: [],
+  runDocumentWorkflowPanel: [],
+});
+jest.mock(
+  '../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel',
+  () => ({
+    useRunDocumentWorkflowPanel: (...args: unknown[]) => mockUseRunDocumentWorkflowPanel(...args),
+  })
+);
+jest.mock('../../../common/lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      application: {
+        getUrlForApp: (_appId: string, { path }: { path: string }) =>
+          `/app/securitySolutionUI/${path}`,
+      },
+    },
+  }),
+}));
 
 const mockUseAddToCaseActions = useAddToCaseActions as jest.Mock;
 const mockUseAlertsActions = useAlertsActions as jest.Mock;
@@ -53,8 +81,6 @@ const mockNonEcsData: TimelineNonEcsData[] = [{ field: 'host.name', value: ['tes
 const mockRefetchFlyoutData = jest.fn().mockResolvedValue(undefined);
 const mockOnAlertUpdated = jest.fn();
 const mockOnShowNotes = jest.fn();
-const mockUseRunAlertWorkflowPanel = useRunAlertWorkflowPanel as jest.Mock;
-
 const defaultProps = {
   hit: createMockHit(),
   ecsData: mockEcsData,
@@ -290,6 +316,52 @@ describe('<TakeActionButton />', () => {
       expect(queryByText('Run workflow')).not.toBeInTheDocument();
     });
 
+    it('should use useRunAlertWorkflowPanel menu items for alert documents', () => {
+      const alertWorkflowItem = { name: 'Alert workflow', onClick: jest.fn() };
+      mockUseRunAlertWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: [alertWorkflowItem],
+        runAlertWorkflowPanel: [],
+      });
+      mockUseRunDocumentWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: [{ name: 'Document workflow', onClick: jest.fn() }],
+        runDocumentWorkflowPanel: [],
+      });
+
+      const alertHit = createMockHit({ 'event.kind': 'signal' });
+      const { getByTestId, getByText, queryByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: alertHit,
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(getByText('Alert workflow')).toBeInTheDocument();
+      expect(queryByText('Document workflow')).not.toBeInTheDocument();
+    });
+
+    it('should use useRunDocumentWorkflowPanel menu items for non-alert documents', () => {
+      mockUseRunAlertWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: [{ name: 'Alert workflow', onClick: jest.fn() }],
+        runAlertWorkflowPanel: [],
+      });
+      const documentWorkflowItem = { name: 'Document workflow', onClick: jest.fn() };
+      mockUseRunDocumentWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: [documentWorkflowItem],
+        runDocumentWorkflowPanel: [],
+      });
+
+      const eventHit = createMockHit({ 'event.kind': 'event' });
+      const { getByTestId, getByText, queryByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: eventHit,
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(getByText('Document workflow')).toBeInTheDocument();
+      expect(queryByText('Alert workflow')).not.toBeInTheDocument();
+    });
+
     it('should exclude some items when event.kind is not set', () => {
       const { getByTestId, getByText, queryByText } = renderTakeActionButton({
         ...defaultProps,
@@ -316,5 +388,117 @@ describe('<TakeActionButton />', () => {
     fireEvent.click(getByText('Add note'));
 
     expect(mockOnShowNotes).toHaveBeenCalledTimes(1);
+  });
+
+  describe('Explore action (Discover context only)', () => {
+    const alertHit = createMockHit({
+      'event.kind': 'signal',
+      '@timestamp': '2024-01-01T00:00:00.000Z',
+    });
+    const eventHit = createMockHit({
+      'event.kind': 'event',
+      '@timestamp': '2024-01-01T00:00:00.000Z',
+    });
+
+    beforeEach(() => {
+      jest.spyOn(window, 'open').mockImplementation(() => null);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should not show the explore action when in Security app', () => {
+      mockUseIsInSecurityApp.mockReturnValue(true);
+      const { getByTestId, queryByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: alertHit,
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(queryByText('Explore in Alerts')).not.toBeInTheDocument();
+      expect(queryByText('Explore in Timeline')).not.toBeInTheDocument();
+    });
+
+    it('should show "Explore in Alerts" for alert documents in Discover', () => {
+      mockUseIsInSecurityApp.mockReturnValue(false);
+      const { getByTestId, getByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: alertHit,
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(getByText('Explore in Alerts')).toBeInTheDocument();
+    });
+
+    it('should show "Explore in Timeline" for non-alert documents in Discover', () => {
+      mockUseIsInSecurityApp.mockReturnValue(false);
+      const { getByTestId, getByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: eventHit,
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(getByText('Explore in Timeline')).toBeInTheDocument();
+    });
+
+    it('should open a new tab when "Explore in Alerts" is clicked', () => {
+      mockUseIsInSecurityApp.mockReturnValue(false);
+      const { getByTestId, getByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: alertHit,
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+      fireEvent.click(getByText('Explore in Alerts'));
+
+      expect(window.open).toHaveBeenCalledWith(
+        expect.stringContaining('timeline'),
+        '_blank',
+        'noopener,noreferrer'
+      );
+    });
+
+    it('should open a new tab when "Explore in Timeline" is clicked', () => {
+      mockUseIsInSecurityApp.mockReturnValue(false);
+      const { getByTestId, getByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: eventHit,
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+      fireEvent.click(getByText('Explore in Timeline'));
+
+      expect(window.open).toHaveBeenCalledWith(
+        expect.stringContaining('timeline'),
+        '_blank',
+        'noopener,noreferrer'
+      );
+    });
+
+    it('should use kibana.alert.url directly when present on an alert document', () => {
+      mockUseIsInSecurityApp.mockReturnValue(false);
+      const hitWithAlertUrl = createMockHit({
+        'event.kind': 'signal',
+        'kibana.alert.url': 'https://kibana.example.com/app/security/alerts/redirect/abc123',
+      });
+
+      const { getByTestId, getByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: hitWithAlertUrl,
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+      fireEvent.click(getByText('Explore in Alerts'));
+
+      expect(window.open).toHaveBeenCalledWith(
+        'https://kibana.example.com/app/security/alerts/redirect/abc123',
+        '_blank',
+        'noopener,noreferrer'
+      );
+    });
   });
 });
