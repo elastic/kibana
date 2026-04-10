@@ -52,7 +52,7 @@ const AxiosErrorSchema = z.object({
   response: z
     .object({
       status: z.number().optional(),
-      headers: z.record(z.string()).optional(),
+      headers: z.record(z.string(), z.string()).optional(),
     })
     .optional(),
   message: z.string().optional(),
