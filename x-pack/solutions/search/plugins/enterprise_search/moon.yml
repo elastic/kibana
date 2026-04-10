@@ -92,10 +92,20 @@ tags:
   - prod
   - group-search
   - private
+  - jest-unit-tests
 fileGroups:
   src:
     - common/**/*
     - public/**/*
     - server/**/*
     - '!target/**/*'
+  jest-config:
+    - common/jest.config.js
+    - public/applications/analytics/jest.config.js
+    - public/applications/applications/jest.config.js
+    - public/applications/enterprise_search_content/jest.config.js
+    - public/applications/enterprise_search_redirect/jest.config.js
+    - public/applications/shared/jest.config.js
+    - public/jest.config.js
+    - server/jest.config.js
 tasks: {}

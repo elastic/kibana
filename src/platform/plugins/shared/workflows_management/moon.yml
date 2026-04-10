@@ -96,6 +96,7 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/management-settings-ids'
+  - '@kbn/std'
 tags:
   - plugin
   - prod
@@ -115,4 +116,5 @@ fileGroups:
     - '!target/**/*'
   jest-config:
     - jest.config.js
+    - server/jest.config.js
 tasks: {}

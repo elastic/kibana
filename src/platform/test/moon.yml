@@ -79,6 +79,7 @@ tags:
   - dev
   - group-platform
   - shared
+  - jest-unit-tests
 fileGroups:
   src:
     - '**/*'
@@ -89,4 +90,7 @@ fileGroups:
     - '!target/**/*'
     - '!*/plugins/**/*'
     - '!plugins/**/*'
+  jest-config:
+    - api_integration/jest.config.js
+    - functional/jest.config.js
 tasks: {}

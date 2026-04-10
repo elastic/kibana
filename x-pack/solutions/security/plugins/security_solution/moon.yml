@@ -295,6 +295,7 @@ tags:
   - prod
   - group-security
   - private
+  - jest-unit-tests
 fileGroups:
   src:
     - common/**/*
@@ -310,4 +311,54 @@ fileGroups:
     - '!target/**/*'
     - '!**/cypress/**'
     - '!public/management/cypress.config.ts'
+  jest-config:
+    - common/jest.config.js
+    - public/agent_builder/jest.config.js
+    - public/app/jest.config.js
+    - public/asset_inventory/jest.config.js
+    - public/assistant/jest.config.js
+    - public/attack_discovery/jest.config.js
+    - public/cases/jest.config.js
+    - public/cloud_security_posture/jest.config.js
+    - public/common/jest.config.js
+    - public/configurations/jest.config.js
+    - public/dashboards/jest.config.js
+    - public/data_view_manager/jest.config.js
+    - public/detection_engine/jest.config.js
+    - public/detections/jest.config.js
+    - public/entity_analytics/jest.config.js
+    - public/exceptions/jest.config.js
+    - public/explore/jest.config.js
+    - public/flyout/jest.config.js
+    - public/flyout_v2/jest.config.js
+    - public/jest.config.js
+    - public/management/jest.config.js
+    - public/notes/jest.config.js
+    - public/onboarding/jest.config.js
+    - public/one_discover/jest.config.js
+    - public/overview/jest.config.js
+    - public/reports/jest.config.js
+    - public/resolver/jest.config.js
+    - public/rules/jest.config.js
+    - public/security_integrations/jest.config.js
+    - public/siem_migrations/jest.config.js
+    - public/siem_readiness/jest.config.js
+    - public/sourcerer/jest.config.js
+    - public/threat_intelligence/jest.config.js
+    - public/timelines/jest.config.js
+    - public/trial_companion/jest.config.js
+    - scripts/jest.config.js
+    - server/agent_builder/jest.config.js
+    - server/assistant/jest.config.js
+    - server/client/jest.config.js
+    - server/endpoint/jest.config.js
+    - server/fleet_integration/jest.config.js
+    - server/jest.config.js
+    - server/lib/jest.config.js
+    - server/lists_integration/jest.config.js
+    - server/routes/jest.config.js
+    - server/search_strategy/jest.config.js
+    - server/threat_intelligence/jest.config.js
+    - server/usage/jest.config.js
+    - server/utils/jest.config.js
 tasks: {}
