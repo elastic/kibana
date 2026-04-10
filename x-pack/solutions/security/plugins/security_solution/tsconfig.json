@@ -195,8 +195,6 @@
     "@kbn/field-utils",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-analytics-browser",
-    "@kbn/core-i18n-browser",
-    "@kbn/core-theme-browser",
     "@kbn/automatic-import-plugin",
     "@kbn/config",
     "@kbn/openapi-common",

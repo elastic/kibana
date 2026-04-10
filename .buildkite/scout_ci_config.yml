@@ -32,6 +32,7 @@ plugins:
     - osquery
     - painless_lab
     - profiling
+    - saved_objects_management
     - search_getting_started
     - search_homepage
     - security
