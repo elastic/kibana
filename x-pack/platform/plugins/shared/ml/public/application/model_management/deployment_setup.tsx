@@ -735,19 +735,10 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
 
   const isModelNotDownloaded = model ? isModelDownloadItem(model) : true;
 
-  const isRerank = model ? isRerankModelItem(model) : false;
+  const isRerank = model ? isRerankModelItem(model) : undefined;
 
   const getDefaultParams = useCallback((): DeploymentParamsUI => {
     const defaultVCPUUsage: DeploymentParamsUI['vCPUUsage'] = showNodeInfo ? 'medium' : 'low';
-
-    const rerankDefaultParams: DeploymentParamsUI = {
-      deploymentId: `${modelId}_search`,
-      optimized: 'optimizedForSearch',
-      vCPUUsage: defaultVCPUUsage,
-      adaptiveResources: true,
-    };
-
-    if (isRerank) return rerankDefaultParams;
 
     const defaultParams = {
       deploymentId: `${modelId}_ingest`,
@@ -756,9 +747,18 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
       adaptiveResources: true,
     } as const;
 
-    if (isModelNotDownloaded) {
-      return defaultParams;
-    }
+    const searchParams = {
+      ...defaultParams,
+      deploymentId: `${modelId}_search`,
+      optimized: 'optimizedForSearch',
+    } as const;
+
+    // model observable hasn't resolved yet; will update config once isRerank is known.
+    if (isRerank === undefined) return defaultParams;
+
+    if (isRerank) return searchParams;
+
+    if (isModelNotDownloaded) return defaultParams;
 
     const uiParams = isNLPModelItem(model)
       ? model?.stats?.deployment_stats.map((v) =>
@@ -767,12 +767,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
       : [];
 
     return uiParams?.some((v) => v.optimized === 'optimizedForIngest')
-      ? {
-          deploymentId: `${modelId}_search`,
-          optimized: 'optimizedForSearch',
-          vCPUUsage: defaultVCPUUsage,
-          adaptiveResources: true,
-        }
+      ? searchParams
       : defaultParams;
   }, [deploymentParamsMapper, isModelNotDownloaded, model, modelId, showNodeInfo, isRerank]);
 
@@ -781,19 +776,17 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
   const [config, setConfig] = useState<DeploymentParamsUI>(initialParams ?? getDefaultParams());
 
   useEffect(() => {
-    if (initialParams !== undefined || model === undefined || !isRerank) {
+    if (initialParams !== undefined || model === undefined || isRerank !== true) {
       return;
     }
 
+    // force search optimization for rerank models.
     setConfig((prev) => {
-      if (prev.optimized === 'optimizedForIngest' && prev.deploymentId === `${modelId}_ingest`) {
-        return {
-          ...prev,
-          deploymentId: `${modelId}_search`,
-          optimized: 'optimizedForSearch',
-        };
+      const next = { ...prev, optimized: 'optimizedForSearch' as const };
+      if (prev.deploymentId === `${modelId}_ingest`) {
+        next.deploymentId = `${modelId}_search`;
       }
-      return prev;
+      return next;
     });
   }, [initialParams, model, modelId, isRerank]);
 
@@ -951,7 +944,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
           form={'startDeploymentForm'}
           onClick={onConfigChange.bind(null, config)}
           fill
-          disabled={Object.keys(errors).length > 0}
+          disabled={Object.keys(errors).length > 0 || (!isUpdate && isRerank === undefined)}
           data-test-subj={'mlModelsStartDeploymentModalStartButton'}
         >
           {isUpdate ? (
