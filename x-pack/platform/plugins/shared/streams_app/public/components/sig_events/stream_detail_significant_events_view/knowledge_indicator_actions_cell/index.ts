@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export {
-  KnowledgeIndicatorActionsCell,
-  KI_ROW_ACTION_MUTATION_KEY,
-} from './knowledge_indicator_actions_cell';
+export { KnowledgeIndicatorActionsCell } from './knowledge_indicator_actions_cell';

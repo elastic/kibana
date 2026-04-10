@@ -26,7 +26,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useDebouncedValue } from '@kbn/react-hooks';
-import { useIsMutating } from '@kbn/react-query';
 import { COMPUTED_FEATURE_TYPES, isComputedFeature } from '@kbn/streams-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import React, { useState, useCallback, useMemo } from 'react';
@@ -40,10 +39,7 @@ import { LoadingPanel } from '../../../../loading_panel';
 import { SparkPlot } from '../../../../spark_plot';
 import { TableTitle } from '../../../stream_detail_systems/table_title';
 import { getConfidenceColor } from '../../../stream_detail_significant_events_view/utils/get_confidence_color';
-import {
-  KnowledgeIndicatorActionsCell,
-  KI_ROW_ACTION_MUTATION_KEY,
-} from '../../../stream_detail_significant_events_view/knowledge_indicator_actions_cell';
+import { KnowledgeIndicatorActionsCell } from '../../../stream_detail_significant_events_view/knowledge_indicator_actions_cell';
 import { KnowledgeIndicatorDetailsFlyout } from '../../../stream_detail_significant_events_view/knowledge_indicator_details_flyout';
 import { DeleteTableItemsModal } from '../../../stream_detail_significant_events_view/delete_table_items_modal';
 import { KnowledgeIndicatorsTypeFilter } from '../../../stream_detail_significant_events_view/knowledge_indicators_type_filter';
@@ -144,7 +140,6 @@ export function KnowledgeIndicatorsTable() {
   });
 
   const [isBulkOperationInProgress, setIsBulkOperationInProgress] = useState(false);
-  const isRowActionInProgress = useIsMutating({ mutationKey: KI_ROW_ACTION_MUTATION_KEY }) > 0;
 
   const selectedKnowledgeIndicatorId = selectedKnowledgeIndicator
     ? getKnowledgeIndicatorItemId(selectedKnowledgeIndicator)
@@ -295,7 +290,7 @@ export function KnowledgeIndicatorsTable() {
     [executeBulkFeatureOperation, restoreFeaturesInBulk]
   );
 
-  const isOperationInProgress = isDeleting || isBulkOperationInProgress || isRowActionInProgress;
+  const isOperationInProgress = isDeleting || isBulkOperationInProgress;
 
   const { selectionContainsNonExcludable, isSelectionActionsDisabled } = useMemo(() => {
     const containsQueries = selectedKnowledgeIndicators.some((ki) => ki.kind === 'query');
@@ -415,15 +410,14 @@ export function KnowledgeIndicatorsTable() {
         align: 'right',
         render: (ki: KnowledgeIndicator) => (
           <KnowledgeIndicatorActionsCell
+            streamName={getKnowledgeIndicatorStreamName(ki)}
             knowledgeIndicator={ki}
             onDeleteRequest={(item) => setKnowledgeIndicatorsToDelete([item])}
-            onActionComplete={closeFlyout}
           />
         ),
       },
     ],
     [
-      closeFlyout,
       occurrencesByQueryId,
       selectedKnowledgeIndicatorId,
       toggleSelectedKnowledgeIndicator,

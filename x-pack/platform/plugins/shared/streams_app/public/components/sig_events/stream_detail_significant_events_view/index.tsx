@@ -304,7 +304,6 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                 statusFilter={knowledgeIndicatorStatusFilter}
                 selectedKnowledgeIndicatorId={selectedKnowledgeIndicatorId}
                 onViewDetails={toggleSelectedKnowledgeIndicator}
-                onActionComplete={closeFlyout}
               />
             )}
           </EuiPanel>
