@@ -5,19 +5,6 @@ notify:
     if: (build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9x]+\$/) && (build.state == 'passed' || build.state == 'failed')
   - slack:
       channels:
-        - '#kibana-operations'
-      message: |
-        🚦 Pipeline waiting for approval 🚦
-        Repo: `${REPO}`
-
-        Ready to fetch DRA artifacts - please unblock when ready.
-        New version: `${NEW_VERSION}`
-        Branch: `${BRANCH}`
-        Workflow: `${WORKFLOW}`
-        ${BUILDKITE_BUILD_URL}
-    if: build.state == "blocked"
-  - slack:
-      channels:
         - '#mission-control'
       message: |
         Kibana has been bumped to `${NEW_VERSION}` on branch `${BRANCH}` and a DRA build has begun.
