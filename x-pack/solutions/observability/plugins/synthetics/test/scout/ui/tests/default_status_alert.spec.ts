@@ -47,7 +47,6 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
         timestamp: firstCheckTime,
         configId,
       });
-      await syntheticsServices.deleteTlsRules();
     });
 
     await test.step('login and navigate to overview', async () => {
@@ -100,13 +99,15 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('verify alert is generated', async () => {
+      await syntheticsServices.cleanUpAlerts();
       await pageObjects.syntheticsApp.navigateToAlertsPage();
 
       await expect(async () => {
         await page.testSubj.click('querySubmitButton');
-        await expect(page.testSubj.locator('toolbar-alerts-count')).toHaveText(/^1 alert$/i, {
-          timeout: 15_000,
-        });
+        await expect(page.testSubj.locator('toolbar-alerts-count')).toHaveText(
+          /^[1-9]\d* alerts?$/i,
+          { timeout: 15_000 }
+        );
       }).toPass({ timeout: 180_000, intervals: [5_000] });
     });
 

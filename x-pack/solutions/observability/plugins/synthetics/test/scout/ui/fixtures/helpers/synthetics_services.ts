@@ -53,7 +53,6 @@ export interface SyntheticsServicesFixture {
   cleanUp: () => Promise<void>;
   cleanUpAlerts: () => Promise<void>;
   deleteCustomRules: () => Promise<void>;
-  deleteTlsRules: () => Promise<void>;
   deleteConnectors: () => Promise<void>;
   deleteMonitorByQuery: (query: string) => Promise<void>;
   deleteMonitors: () => Promise<void>;
@@ -347,24 +346,6 @@ function createSyntheticsServices(
     }
   };
 
-  const deleteTlsRules = async () => {
-    const { data } = await kbnClient.request<{
-      data: Array<{ id: string; rule_type_id: string }>;
-    }>({
-      path: '/api/alerting/rules/_find?per_page=100',
-      method: 'GET',
-    });
-    const rules = (data as any).data ?? [];
-    for (const rule of rules) {
-      if (rule.rule_type_id === 'xpack.synthetics.alerts.tls') {
-        await kbnClient.request({
-          path: `/api/alerting/rule/${rule.id}`,
-          method: 'DELETE',
-        });
-      }
-    }
-  };
-
   const deleteConnectors = async () => {
     const { data } = await kbnClient.request({
       path: '/api/actions/connectors',
@@ -609,7 +590,6 @@ function createSyntheticsServices(
     cleanUp,
     cleanUpAlerts,
     deleteCustomRules,
-    deleteTlsRules,
     deleteConnectors,
     deleteMonitorByQuery,
     deleteMonitors,
