@@ -24,6 +24,9 @@ export interface FetchSuggestedPartitionsParams {
   connectorId: string;
   start: number;
   end: number;
+  userPrompt?: string;
+  existingPartitions?: PartitionSuggestion[];
+  refinementHistory?: string[];
 }
 
 export interface PartitionSuggestion {
@@ -55,6 +58,7 @@ export function useReviewSuggestionsForm() {
   );
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [selectedSuggestionNames, setSelectedSuggestionNames] = useState<Set<string>>(new Set());
+  const [refinementHistory, setRefinementHistory] = useState<string[]>([]);
 
   const abortController = useAbortController();
 
@@ -70,10 +74,24 @@ export function useReviewSuggestionsForm() {
               connector_id: params.connectorId,
               start: params.start,
               end: params.end,
+              ...(params.userPrompt ? { user_prompt: params.userPrompt } : {}),
+              ...(params.existingPartitions?.length
+                ? { existing_partitions: params.existingPartitions }
+                : {}),
+              ...(params.refinementHistory?.length
+                ? { refinement_history: params.refinementHistory }
+                : {}),
             },
           },
         })
       );
+
+      // Accumulate user prompt into refinement history
+      const { userPrompt } = params;
+      if (userPrompt) {
+        setRefinementHistory((prev) => [...prev, userPrompt]);
+      }
+
       setSuggestions(response.partitions);
       setSuggestionReason(response.reason);
     } catch (error) {
@@ -163,6 +181,7 @@ export function useReviewSuggestionsForm() {
     setSuggestions(undefined);
     setSelectedSuggestionNames(new Set());
     setSuggestionReason(undefined);
+    setRefinementHistory([]);
     resetPreview();
   };
 
@@ -174,6 +193,7 @@ export function useReviewSuggestionsForm() {
   return {
     suggestions,
     suggestionReason,
+    refinementHistory,
     removeSuggestion,
     isLoadingSuggestions,
     fetchSuggestions,

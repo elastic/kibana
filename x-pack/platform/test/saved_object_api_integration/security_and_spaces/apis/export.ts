@@ -34,11 +34,8 @@ const createTestCases = (spaceId: string) => {
   return { exportableObjects, exportableTypes, nonExportableObjectsAndTypes, allObjectsAndTypes };
 };
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertestWithoutAuth');
-  const esArchiver = getService('esArchiver');
-
-  const { addTests, createTestDefinitions } = exportTestSuiteFactory(esArchiver, supertest);
+export default function (context: FtrProviderContext) {
+  const { addTests, createTestDefinitions } = exportTestSuiteFactory(context);
   const createTests = (spaceId: string) => {
     const { exportableObjects, exportableTypes, nonExportableObjectsAndTypes, allObjectsAndTypes } =
       createTestCases(spaceId);

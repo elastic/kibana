@@ -33,6 +33,7 @@ import type {
   LensEditContextMapping,
 } from '@kbn/lens-common';
 import { getInitialDatasourceId, getResolvedDateRange, getRemoveOperation } from '../utils';
+import { isComingFromContainerView } from '../app_plugin/app_helpers';
 import { generateId } from '../id_generator';
 import { getVisualizeFieldSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
 import { selectDataViews, selectFramePublicAPI } from './selectors';
@@ -124,9 +125,6 @@ export const getPreloadedState = ({
     ? data.query.queryString.getDefaultQuery()
     : getQueryFromContext(initialContext, data);
 
-  const isDashboardListingOrigin =
-    embeddableEditorIncomingState?.originatingApp === 'dashboards' &&
-    Boolean(embeddableEditorIncomingState?.originatingPath?.includes('/list/'));
   const state: LensAppState = {
     ...initialState,
     isLoading: true,
@@ -141,7 +139,7 @@ export const getPreloadedState = ({
     searchSessionId: data.search.session.getSessionId() ?? '',
     resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
     isLinkedToOriginatingApp: Boolean(
-      (embeddableEditorIncomingState?.originatingApp && !isDashboardListingOrigin) ??
+      isComingFromContainerView(embeddableEditorIncomingState) ||
         (initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable)
     ),
     activeDatasourceId: initialDatasourceId,

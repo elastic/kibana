@@ -34,7 +34,7 @@ export async function fetchDurationFieldCandidates({
 }: CommonCorrelationsQueryParams & {
   query: estypes.QueryDslQueryContainer;
   apmEventClient: APMEventClient;
-  eventType: ProcessorEvent.transaction | ProcessorEvent.span;
+  eventType: ProcessorEvent;
 }): Promise<DurationFieldCandidatesResponse> {
   // Get all supported fields
   const respMapping = await apmEventClient.fieldCaps('get_field_caps', {
