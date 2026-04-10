@@ -15,6 +15,7 @@ import {
   EuiText,
   EuiPanel,
   EuiTitle,
+  useEuiMinBreakpoint,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -65,6 +66,7 @@ const AgentInstallPanel: React.FC<{
 
 export const AgentInstallSection = () => {
   const { euiTheme } = useEuiTheme();
+  const minBreakpointM = useEuiMinBreakpoint('m');
   const { services } = useKibana();
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
   const [modalPrompt, setModalPrompt] = useState('');
@@ -99,10 +101,9 @@ export const AgentInstallSection = () => {
               })} description={i18n.translate('xpack.gettingStarted.agentInstall.description', {
                 defaultMessage: 'Code with context using Elastic-certified skills.',
               })}>
-                <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
                   <EuiFlexItem grow={false}>
                     <EuiButton
-
                       onClick={handleOpenInClaudeCli}
                       data-test-subj="agentInstallLaunchBtn"
                       color="primary"
@@ -113,7 +114,7 @@ export const AgentInstallSection = () => {
                       })}
                     </EuiButton></EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+                    <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
                       <EuiFlexItem grow={false}>
                         <EuiIcon
                           color="subdued"
@@ -153,7 +154,17 @@ export const AgentInstallSection = () => {
           </EuiFlexItem>
           {
             services.agentBuilder ? (
-              <EuiFlexItem css={css`border-left: ${euiTheme.border.thin};`}>
+              <EuiFlexItem
+                css={css`
+                  border-top: ${euiTheme.border.thin};
+                  border-left: none;
+
+                  ${minBreakpointM} {
+                    border-top: none;
+                    border-left: ${euiTheme.border.thin};
+                  }
+                `}
+              >
                 <EuiPanel color="transparent" paddingSize="l">
                   <AgentInstallPanel
                     icon="productAgent"
