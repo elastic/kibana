@@ -8,7 +8,7 @@
 import { type BoundInferenceClient, MessageRole } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import type { FlattenRecord, ProcessingSimulationResponse, Streams } from '@kbn/streams-schema';
-import type { StreamlangDSL, GrokProcessor, DissectProcessor } from '@kbn/streamlang';
+import { addDeterministicCustomIdentifiers, type StreamlangDSL } from '@kbn/streamlang';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import {
   isOtelStream,
@@ -20,7 +20,7 @@ import {
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { SuggestIngestPipelinePrompt } from './prompt';
-import { getPipelineDefinitionJsonSchema, pipelineDefinitionSchema } from './schema';
+import { getPipelineDefinitionJsonSchema, type SuggestPipelineAgentSchema } from './schema';
 
 export interface SuggestProcessingPipelineResult {
   pipeline: StreamlangDSL | null;
@@ -30,26 +30,38 @@ export interface SuggestProcessingPipelineResult {
   };
 }
 
+/**
+ * Runs the ingest-pipeline suggestion agent. Callers supply the Zod schema that constrains tool
+ * arguments (full vs post-parse-only), sample `documents` that match that mode, and a
+ * pre-built **`initialDatasetAnalysisJson`** (document structure overview for the samples in `documents`);
+ * any seed grok/dissect step is composed **outside** this function.
+ */
 export async function suggestProcessingPipeline({
   definition,
   inferenceClient,
-  parsingProcessor,
+  agentPipelineSchema,
   maxSteps,
   signal,
   simulatePipeline,
   documents,
   fieldsMetadataClient,
   esClient,
+  initialDatasetAnalysisJson,
+  mappedFields: mappedFieldsOverride,
 }: {
   definition: Streams.ingest.all.Definition;
   inferenceClient: BoundInferenceClient;
-  parsingProcessor?: GrokProcessor | DissectProcessor;
+  agentPipelineSchema: SuggestPipelineAgentSchema;
   maxSteps?: number | undefined;
   signal: AbortSignal;
   simulatePipeline(pipeline: StreamlangDSL): Promise<ProcessingSimulationResponse>;
   documents: FlattenRecord[];
   fieldsMetadataClient: IFieldsMetadataClient;
   esClient: ElasticsearchClient;
+  /** Pre-computed JSON for `initial_dataset_analysis` (field layout / sample values for `documents`). */
+  initialDatasetAnalysisJson: string;
+  /** When set, avoids an extra field_caps call (callers already fetched for the overview). */
+  mappedFieldsOverride?: Record<string, string>;
 }): Promise<SuggestProcessingPipelineResult> {
   const effectiveMaxSteps = maxSteps ?? 10;
 
@@ -64,22 +76,9 @@ export async function suggestProcessingPipeline({
     };
   }
 
-  // Collect metrics for the initial pipeline
   const isOtel = isOtelStream(definition);
 
-  // Parallelize independent async operations
-  const [mappedFields, simulationResult] = await Promise.all([
-    getMappedFields(esClient, definition.name),
-    simulatePipeline({
-      steps: parsingProcessor ? [parsingProcessor] : [],
-    }),
-  ]);
-  const simulationMetrics = await getSimulationMetrics(
-    simulationResult,
-    fieldsMetadataClient,
-    isOtel,
-    mappedFields
-  );
+  const mappedFields = mappedFieldsOverride ?? (await getMappedFields(esClient, definition.name));
 
   const input = {
     stream: definition,
@@ -88,9 +87,8 @@ export async function suggestProcessingPipeline({
       : 'Elastic Common Schema (ECS)',
     content_field: isOtel ? OTEL_CONTENT_FIELD : ECS_CONTENT_FIELD,
     severity_field: isOtel ? OTEL_SEVERITY_FIELD : ECS_SEVERITY_FIELD,
-    pipeline_schema: JSON.stringify(getPipelineDefinitionJsonSchema(pipelineDefinitionSchema)),
-    initial_dataset_analysis: JSON.stringify(simulationMetrics),
-    parsing_processor: parsingProcessor ? JSON.stringify(parsingProcessor) : undefined,
+    pipeline_schema: JSON.stringify(getPipelineDefinitionJsonSchema(agentPipelineSchema)),
+    initial_dataset_analysis: initialDatasetAnalysisJson,
   };
 
   // Invoke the reasoning agent to suggest the ingest pipeline
@@ -102,7 +100,7 @@ export async function suggestProcessingPipeline({
     toolCallbacks: {
       simulate_pipeline: async (toolCall) => {
         // 1. Validate the pipeline schema
-        const pipeline = pipelineDefinitionSchema.safeParse(toolCall.function.arguments.pipeline);
+        const pipeline = agentPipelineSchema.safeParse(toolCall.function.arguments.pipeline);
         if (!pipeline.success) {
           return {
             response: {
@@ -114,7 +112,9 @@ export async function suggestProcessingPipeline({
         }
 
         // 2. Add customIdentifiers to steps for proper tracking in simulation results
-        const pipelineWithIdentifiers = addCustomIdentifiersToSteps(pipeline.data as StreamlangDSL);
+        const pipelineWithIdentifiers = addDeterministicCustomIdentifiers(
+          pipeline.data as StreamlangDSL
+        );
 
         // 3. Simulate the pipeline and collect metrics
         const simulateResult = await simulatePipeline(pipelineWithIdentifiers);
@@ -166,7 +166,7 @@ export async function suggestProcessingPipeline({
         };
       },
       commit_pipeline: async (toolCall) => {
-        const pipeline = pipelineDefinitionSchema.safeParse(toolCall.function.arguments.pipeline);
+        const pipeline = agentPipelineSchema.safeParse(toolCall.function.arguments.pipeline);
         if (!pipeline.success) {
           return {
             response: {
@@ -211,7 +211,7 @@ export async function suggestProcessingPipeline({
     );
   }
 
-  const commitPipeline = pipelineDefinitionSchema.safeParse(
+  const commitPipeline = agentPipelineSchema.safeParse(
     response.toolCalls[0].function.arguments.pipeline
   );
   if (!commitPipeline.success) {
@@ -221,27 +221,48 @@ export async function suggestProcessingPipeline({
     };
   }
 
-  // Add customIdentifier to each step for proper tracking in simulations
-  const pipelineWithIdentifiers = addCustomIdentifiersToSteps(commitPipeline.data as StreamlangDSL);
-
   return {
-    pipeline: pipelineWithIdentifiers,
+    pipeline: addDeterministicCustomIdentifiers(commitPipeline.data as StreamlangDSL),
     metadata,
   };
 }
 
+export type { SuggestPipelineAgentSchema } from './schema';
+export {
+  getPipelineDefinitionJsonSchema,
+  pipelineDefinitionSchema,
+  postParsePipelineDefinitionSchema,
+} from './schema';
+export { mergeSeedParsingProcessorIntoSuggestedPipeline } from './merge_seed_parsing_into_suggested_pipeline';
+
 /**
- * Adds customIdentifier to each step in the pipeline for proper tracking.
- * This ensures processors are tracked correctly in simulation results.
+ * Builds a JSON-serializable overview of sample document structure (fields, example values, schema hints)
+ * for the pipeline suggestion prompt—no ingest simulation or parse-rate semantics.
  */
-function addCustomIdentifiersToSteps(pipeline: StreamlangDSL): StreamlangDSL {
+export async function buildDocumentStructureOverviewForPipelinePrompt(
+  documents: FlattenRecord[],
+  fieldsMetadataClient: IFieldsMetadataClient,
+  isOtel: boolean,
+  mappedFields: Record<string, string>
+): Promise<{ document_count: number; fields: string[] }> {
+  const fields = await buildFieldSummaryLinesFromDocumentValues(
+    documents,
+    fieldsMetadataClient,
+    isOtel,
+    mappedFields
+  );
   return {
-    ...pipeline,
-    steps: pipeline.steps.map((step, index) => ({
-      ...step,
-      customIdentifier: step.customIdentifier || `${index}`,
-    })),
+    document_count: documents.length,
+    fields,
   };
+}
+
+/** Field types from the stream index (field_caps); reused for prompt overview + simulate tool metrics. */
+export async function fetchMappedFieldsForStreamProcessingSuggestions(
+  esClient: ElasticsearchClient,
+  streamIndexName: string
+) {
+  return getMappedFields(esClient, streamIndexName);
 }
 
 /**
@@ -353,52 +374,33 @@ async function getMappedFields(esClient: ElasticsearchClient, index: string) {
     }, {});
 }
 
-async function getSimulationMetrics(
-  simulationResult: ProcessingSimulationResponse,
+async function buildFieldSummaryLinesFromDocumentValues(
+  documents: FlattenRecord[],
   fieldsMetadataClient: IFieldsMetadataClient,
   isOtel: boolean,
   mappedFields: Record<string, string>
-) {
-  if (simulationResult.definition_error || simulationResult.documents.length === 0) {
-    return {
-      sampled: 0,
-      fields: [],
-      parse_rate: 0,
-    };
-  }
-
-  const documents = simulationResult.documents;
-  const sampled = documents.length;
-
-  // Calculate success/parsed rate
-  const parseRate = simulationResult.documents_metrics.parsed_rate * 100;
-
-  // Collect all unique fields and sample values from documents
+): Promise<string[]> {
   const fieldMap = new Map<string, Set<string | number | boolean | null>>();
 
   for (const doc of documents) {
-    if (doc.value) {
-      for (const [fieldName, fieldValue] of Object.entries(doc.value)) {
-        if (!fieldMap.has(fieldName)) {
-          fieldMap.set(fieldName, new Set());
-        }
-        const values = fieldMap.get(fieldName)!;
+    if (!doc) continue;
+    for (const [fieldName, fieldValue] of Object.entries(doc)) {
+      if (!fieldMap.has(fieldName)) {
+        fieldMap.set(fieldName, new Set());
+      }
+      const values = fieldMap.get(fieldName)!;
 
-        // Store sample values (limit to avoid memory issues)
-        if (values.size < 100) {
-          if (fieldValue != null) {
-            const stringValue = String(fieldValue);
-            // Truncate long values
-            values.add(
-              stringValue.length > 100 ? stringValue.substring(0, 100) + '...' : stringValue
-            );
-          }
-        }
+      if (values.size < 100 && fieldValue != null) {
+        const stringValue = String(fieldValue);
+        values.add(stringValue.length > 100 ? stringValue.substring(0, 100) + '...' : stringValue);
       }
     }
   }
 
-  // Check ECS status for all fields
+  if (fieldMap.size === 0) {
+    return [];
+  }
+
   const fieldNames = Array.from(fieldMap.keys());
   const fieldMetadataMap = await fieldsMetadataClient.find({
     fieldNames,
@@ -407,17 +409,11 @@ async function getSimulationMetrics(
 
   const fieldsMetadata = fieldMetadataMap.getFields();
 
-  // Build fields array with metrics
-  const fields = Array.from(fieldMap.entries()).map(([fieldName, values]) => {
+  return Array.from(fieldMap.entries()).map(([fieldName, values]) => {
     const metadata = fieldsMetadata[fieldName];
-
-    // Get actual type from mappedFields
     const actualType = mappedFields[fieldName] || 'unmapped';
-
-    // Build type display with ECS/metadata indicator
     const typeIndicator = metadata ? `${metadata.source}: ${metadata.type}` : actualType;
 
-    // Get distinct values count and samples
     const distinctValues = values.size;
     const sampleValues = Array.from(values).slice(0, 10);
     const remainingCount = distinctValues > 10 ? distinctValues - 10 : 0;
@@ -439,6 +435,36 @@ async function getSimulationMetrics(
 
     return `${fieldName} (${typeIndicator}) - ${valuesDescription}`;
   });
+}
+
+async function getSimulationMetrics(
+  simulationResult: ProcessingSimulationResponse,
+  fieldsMetadataClient: IFieldsMetadataClient,
+  isOtel: boolean,
+  mappedFields: Record<string, string>
+) {
+  if (simulationResult.definition_error || simulationResult.documents.length === 0) {
+    return {
+      sampled: 0,
+      fields: [],
+      parse_rate: 0,
+    };
+  }
+
+  const documents = simulationResult.documents;
+  const sampled = documents.length;
+  const parseRate = simulationResult.documents_metrics.parsed_rate * 100;
+
+  const flattenedDocs = documents
+    .map((d) => d.value)
+    .filter((v): v is FlattenRecord => v != null && typeof v === 'object');
+
+  const fields = await buildFieldSummaryLinesFromDocumentValues(
+    flattenedDocs,
+    fieldsMetadataClient,
+    isOtel,
+    mappedFields
+  );
 
   return {
     sampled,

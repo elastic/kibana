@@ -9,7 +9,14 @@ export { generateStreamDescription } from './src/description/generate_descriptio
 export { partitionStream } from './workflows/partition_stream';
 export {
   suggestProcessingPipeline,
+  mergeSeedParsingProcessorIntoSuggestedPipeline,
+  buildDocumentStructureOverviewForPipelinePrompt,
+  fetchMappedFieldsForStreamProcessingSuggestions,
+  getPipelineDefinitionJsonSchema,
+  pipelineDefinitionSchema,
+  postParsePipelineDefinitionSchema,
   type SuggestProcessingPipelineResult,
+  type SuggestPipelineAgentSchema,
 } from './workflows/suggest_processing_pipeline';
 export { generateSignificantEvents } from './src/significant_events/generate_significant_events';
 export {
