@@ -12,6 +12,7 @@ import constate from 'constate';
 import type { FC, PropsWithChildren } from 'react';
 import React, { useEffect, useRef, useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import { useKibana } from './use_kibana';
@@ -57,7 +58,13 @@ const InnerVerificationProvider: FC<PropsWithChildren<unknown>> = ({ children })
   return (
     <>
       {status === 'unverified' && (
-        <EuiModal onClose={() => setStatus('unknown')} maxWidth={euiThemeVars.euiBreakpoints.s}>
+        <EuiModal
+          aria-label={i18n.translate('interactiveSetup.verificationModal.ariaLabel', {
+            defaultMessage: 'Verification required',
+          })}
+          onClose={() => setStatus('unknown')}
+          maxWidth={euiThemeVars.euiBreakpoints.s}
+        >
           <EuiModalHeader>
             <VerificationCodeForm
               onSuccess={(values) => {

@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('does not refetch when returning to a previously expanded group', async () => {
       await runCascadeQuery();
 
-      const [firstRowId, secondRowId] = await discover.getCascadeLayoutRowIds();
+      const [firstRowId, secondRowId] = await discover.getCascadeLayoutVisibleRowIds();
       const baseline = await getCascadeRequestTimestamp();
 
       await discover.toggleCascadeLayoutRow(firstRowId);
@@ -93,7 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('does not refetch when re-expanding a group after switching tabs', async () => {
       await runCascadeQuery();
 
-      const [firstRowId] = await discover.getCascadeLayoutRowIds();
+      const [firstRowId] = await discover.getCascadeLayoutVisibleRowIds();
       const baseline = await getCascadeRequestTimestamp();
 
       await discover.toggleCascadeLayoutRow(firstRowId);
@@ -105,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await unifiedTabs.createNewTab();
       await runCascadeQuery();
 
-      const [secondTabRowId] = await discover.getCascadeLayoutRowIds();
+      const [secondTabRowId] = await discover.getCascadeLayoutVisibleRowIds();
       const secondTabBaseline = await getCascadeRequestTimestamp();
 
       await discover.toggleCascadeLayoutRow(secondTabRowId);
@@ -126,7 +126,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await unifiedTabs.selectTab(0);
       await discover.waitUntilTabIsLoaded();
 
-      const [firstRowId] = await discover.getCascadeLayoutRowIds();
+      const [firstRowId] = await discover.getCascadeLayoutVisibleRowIds();
       const baseline = await getCascadeRequestTimestamp();
 
       await discover.toggleCascadeLayoutRow(firstRowId);
