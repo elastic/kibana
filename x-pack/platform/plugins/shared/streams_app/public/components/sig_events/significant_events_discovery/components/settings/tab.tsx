@@ -437,11 +437,11 @@ export function SettingsTab() {
         <EuiPanel hasShadow={false} hasBorder={false}>
           <EuiCallOut
             size="s"
-            color="primary"
-            iconType="advancedSettingsApp"
+            color="warning"
+            iconType="warning"
             title={i18n.translate('xpack.streams.significantEventsDiscovery.settings.tuningInfo', {
               defaultMessage:
-                'These settings control how features are discovered and queries are searched. Changes take effect on the next run.',
+                'These are advanced settings that control how features are discovered and queries are searched. Incorrect values may degrade extraction quality or cause unexpected behavior. Changes take effect on the next run.',
             })}
           />
           <EuiSpacer size="m" />
