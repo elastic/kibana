@@ -19,7 +19,7 @@ import {
   getPackageMapPath,
   type PluginEntry,
 } from '../utils/plugin_discovery';
-import { DLL_MANIFEST } from './dll_manifest';
+import { loadDllManifest } from './dll_manifest';
 import { getExternals } from './externals';
 import {
   getSharedResolveConfig,
@@ -501,7 +501,7 @@ export async function createSingleCompileConfig(
       // being re-bundled into every plugin chunk.
       new rspack.DllReferencePlugin({
         context: repoRoot,
-        manifest: DLL_MANIFEST,
+        manifest: loadDllManifest(),
       }),
 
       // Define environment variables

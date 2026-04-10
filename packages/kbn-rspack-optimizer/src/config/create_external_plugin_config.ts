@@ -15,7 +15,7 @@ import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import { parseKbnImportReq } from '@kbn/repo-packages';
 import { discoverPlugins } from '../utils/plugin_discovery';
 import { findTargetEntry } from './create_single_compile_config';
-import { DLL_MANIFEST } from './dll_manifest';
+import { loadDllManifest } from './dll_manifest';
 import { getExternals } from './externals';
 import {
   getSharedResolveConfig,
@@ -252,7 +252,7 @@ export async function createExternalPluginConfig(
       new NodeLibsBrowserPlugin() as any,
       new rspack.DllReferencePlugin({
         context: repoRoot,
-        manifest: DLL_MANIFEST,
+        manifest: loadDllManifest(),
       }),
       new rspack.DefinePlugin({
         'process.env.NODE_ENV': JSON.stringify(dist ? 'production' : 'development'),

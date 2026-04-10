@@ -11,10 +11,18 @@ import Fs from 'fs';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 
 /**
- * Pre-built DLL manifest from @kbn/ui-shared-deps-npm.
- * Contains modules (npm deps + transitive deps) that are already bundled
- * into the DLL script (__kbnSharedDeps_npm__). DllReferencePlugin uses this to
+ * Load and sanitise the pre-built DLL manifest from @kbn/ui-shared-deps-npm.
+ *
+ * The manifest lists modules (npm deps + transitive deps) already bundled
+ * into the DLL script (__kbnSharedDeps_npm__). DllReferencePlugin uses it to
  * avoid re-bundling those modules in plugin chunks.
+ *
+ * IMPORTANT: this function reads the manifest lazily (at call time, not at
+ * import time). During distributable builds the DLL is rebuilt by
+ * BuildPackages *after* all task modules have been imported, so an
+ * eagerly-evaluated constant would capture a stale manifest with wrong
+ * module IDs. The legacy optimizer avoids this because it runs webpack
+ * inside forked worker processes that start after the DLL rebuild.
  *
  * The manifest is built by webpack's DllPlugin and contains `buildMeta` per
  * module. Rspack's DllReferencePlugin has two compatibility gaps:
@@ -35,7 +43,7 @@ import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
  *
  * NOTE: This can be removed once we delete the legacy optimizer and promote this one to be the optimizer.
  */
-export const DLL_MANIFEST = (() => {
+export function loadDllManifest() {
   const raw = JSON.parse(Fs.readFileSync(UiSharedDepsNpm.dllManifestPath, 'utf8'));
   for (const entry of Object.values(raw.content) as Array<{
     buildMeta?: { exportsType?: string; defaultObject?: string | boolean };
@@ -52,4 +60,4 @@ export const DLL_MANIFEST = (() => {
     }
   }
   return raw;
-})();
+}
