@@ -12,6 +12,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import {
   CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SINGLE_ACCOUNT,
   ORGANIZATION_ACCOUNT,
 } from '../../common/constants';
@@ -547,17 +548,20 @@ describe('CloudConnectorService', () => {
       per_page: 20,
     };
 
-    // Mock aggregation response for package policy counts (perPage: 0 means no docs returned)
+    // Mock package policies returned by find (getPackagePolicyCountsMap counts saved_objects in memory)
     const mockPackagePolicies = {
-      saved_objects: [],
+      saved_objects: [
+        {
+          id: 'pp-1',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          score: 1,
+          references: [],
+          attributes: { cloud_connector_id: 'cloud-connector-1' },
+        },
+      ],
       total: 1,
       page: 1,
-      per_page: 0,
-      aggregations: {
-        packagePolicyCounts: {
-          buckets: [{ key: 'cloud-connector-1', doc_count: 1 }],
-        },
-      },
+      per_page: 10000,
     };
 
     it('should get cloud connectors list successfully with computed packagePolicyCount', async () => {
