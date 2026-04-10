@@ -17,7 +17,7 @@ describe('deserializeLayout', () => {
         {
           grid: { x: 0, y: 0, w: 6, h: 6 },
           config: { title: 'panel One' },
-          uid: '1',
+          id: '1',
           type: 'testPanelType',
         },
         {
@@ -26,12 +26,12 @@ describe('deserializeLayout', () => {
           grid: {
             y: 6,
           },
-          uid: 'section1',
+          id: 'section1',
           panels: [
             {
               grid: { x: 0, y: 0, w: 6, h: 6 },
               config: { title: 'panel Three' },
-              uid: '3',
+              id: '3',
               type: 'testPanelType',
             },
           ],
@@ -39,14 +39,14 @@ describe('deserializeLayout', () => {
       ],
       [
         {
-          uid: 'control1',
+          id: 'control1',
           type: 'someType',
           width: 'small',
           grow: true,
           config: { someValue: 'test' },
         } as unknown as PinnedControlState,
         {
-          uid: 'control2',
+          id: 'control2',
           type: 'anotherType',
           config: { anotherValue: 1 },
         } as unknown as PinnedControlState,

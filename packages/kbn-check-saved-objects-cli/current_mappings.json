@@ -370,9 +370,6 @@
       "groupingMode": {
         "type": "keyword"
       },
-      "tags": {
-        "type": "keyword"
-      },
       "name": {
         "fields": {
           "keyword": {
@@ -384,6 +381,9 @@
       },
       "snoozedUntil": {
         "type": "date"
+      },
+      "tags": {
+        "type": "keyword"
       },
       "throttle": {
         "properties": {
@@ -1354,9 +1354,6 @@
       "integration_id": {
         "type": "keyword"
       },
-      "title": {
-        "type": "text"
-      },
       "job_info": {
         "properties": {
           "job_id": {
@@ -1376,6 +1373,9 @@
       },
       "result": {
         "properties": {}
+      },
+      "title": {
+        "type": "text"
       }
     }
   },
@@ -2215,6 +2215,9 @@
       "is_protected": {
         "type": "boolean"
       },
+      "is_verifier": {
+        "type": "boolean"
+      },
       "keep_monitoring_alive": {
         "type": "boolean"
       },
@@ -2295,6 +2298,15 @@
       },
       "vars": {
         "type": "flattened"
+      },
+      "verification_failed_at": {
+        "type": "date"
+      },
+      "verification_started_at": {
+        "type": "date"
+      },
+      "verification_status": {
+        "type": "keyword"
       }
     }
   },
@@ -2655,6 +2667,9 @@
       "is_protected": {
         "type": "boolean"
       },
+      "is_verifier": {
+        "type": "boolean"
+      },
       "keep_monitoring_alive": {
         "type": "boolean"
       },
@@ -2833,6 +2848,9 @@
       },
       "name": {
         "type": "keyword"
+      },
+      "otel_exporter_config_yaml": {
+        "type": "text"
       },
       "output_id": {
         "index": false,
@@ -3120,6 +3138,9 @@
   "integration-config": {
     "dynamic": false,
     "properties": {
+      "connector_id": {
+        "type": "keyword"
+      },
       "created_by": {
         "type": "keyword"
       },
