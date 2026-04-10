@@ -13,7 +13,7 @@ import {
   DEFAULT_ESQL_OPTIONS_LIST_STATE,
   DEFAULT_PINNED_CONTROL_STATE,
 } from '@kbn/controls-constants';
-import type { EsqlControlType } from '@kbn/esql-types';
+import { EsqlControlType } from '@kbn/esql-types';
 
 export const mockControlState: ControlPanelsState<OptionsListESQLControlState> = {
   panel1: {
@@ -25,8 +25,7 @@ export const mockControlState: ControlPanelsState<OptionsListESQLControlState> =
     variable_name: 'foo',
     title: 'Panel 1',
     selected_options: ['bar'],
-    esql_query: '',
-    control_type: 'STATIC_VALUES' as EsqlControlType,
+    control_type: EsqlControlType.STATIC_VALUES,
     order: 0,
   },
 };

@@ -124,11 +124,12 @@ export function DiscoverLayout() {
   const dataState: DataMainMsg = useDataState(main$);
   const discoverSession = useInternalStateSelector((state) => state.persistedDiscoverSession);
   const esqlVariables = useCurrentTabSelector((state) => state.esqlVariables);
-  const isCascadeLayoutSelected = useCurrentTabSelector((tab) =>
-    isCascadedDocumentsVisible(
-      tab.cascadedDocumentsState.availableCascadeGroups,
-      tab.appState.query
-    )
+  const isCascadeLayoutSelected = useCurrentTabSelector(
+    (tab) =>
+      isCascadedDocumentsVisible(
+        tab.cascadedDocumentsState.availableCascadeGroups,
+        tab.appState.query
+      ) && tab.cascadedDocumentsState.selectedCascadeGroups.length > 0
   );
 
   const fetchCounter = useRef<number>(0);
@@ -237,6 +238,7 @@ export function DiscoverLayout() {
       const fieldName = typeof field === 'string' ? field : field.name;
       // send the field type for casting
       const fieldType = typeof field !== 'string' ? field.type : undefined;
+      const esFieldType = typeof field !== 'string' ? field.esTypes?.[0] : undefined;
       // weird existence logic from Discover components
       // in the field it comes the operator _exists_ and in the value the field
       // I need to take care of it here but I think it should be handled on the fieldlist instead
@@ -255,7 +257,8 @@ export function DiscoverLayout() {
             fieldName === '_exists_' ? String(values) : fieldName,
             fieldName === '_exists_' || values == null ? undefined : values,
             getOperator(fieldName, values, operation),
-            fieldType
+            fieldType,
+            esFieldType
           );
 
       if (!updatedQuery) {
