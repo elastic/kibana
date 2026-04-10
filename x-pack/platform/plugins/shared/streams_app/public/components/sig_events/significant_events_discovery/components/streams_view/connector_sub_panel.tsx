@@ -49,7 +49,7 @@ export const ConnectorSubPanel = ({
   );
 
   return (
-    <EuiSelectable singleSelection options={options} onChange={handleChange}>
+    <EuiSelectable singleSelection="always" options={options} onChange={handleChange}>
       {(list) => list}
     </EuiSelectable>
   );
