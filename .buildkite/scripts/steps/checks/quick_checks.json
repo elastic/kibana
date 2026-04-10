@@ -99,5 +99,8 @@
   {
     "script": ".buildkite/scripts/steps/checks/verify_moon_projects.sh",
     "mayChangeFiles": true
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/jest_moon_coverage.sh"
   }
 ]
