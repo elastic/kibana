@@ -24,6 +24,7 @@ import { createRawKibanaPrivileges } from '@kbn/security-role-management-model/s
 import type { Space } from '@kbn/spaces-plugin/public';
 import { spacesManagerMock } from '@kbn/spaces-plugin/public/spaces_manager/mocks';
 import { getUiApi } from '@kbn/spaces-plugin/public/ui_api';
+
 import { EditRolePage } from './edit_role_page';
 import type { Role } from '../../../../common';
 import { licenseMock } from '../../../../common/licensing/index.mock';

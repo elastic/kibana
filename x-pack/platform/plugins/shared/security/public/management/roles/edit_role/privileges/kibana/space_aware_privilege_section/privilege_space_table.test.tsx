@@ -10,8 +10,8 @@ import React from 'react';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import type { Role, RoleKibanaPrivilege } from '@kbn/security-plugin-types-common';
 import { createKibanaPrivileges } from '@kbn/security-role-management-model/src/__fixtures__';
-import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { PrivilegeFormCalculator } from '@kbn/security-ui-components';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { PrivilegeSpaceTable } from './privilege_space_table';
 

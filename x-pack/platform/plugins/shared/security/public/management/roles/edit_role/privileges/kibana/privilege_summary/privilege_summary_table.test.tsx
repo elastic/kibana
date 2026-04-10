@@ -8,7 +8,6 @@
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { renderWithI18n } from '@kbn/test-jest-helpers';
 import type { RoleKibanaPrivilege } from '@kbn/security-plugin-types-common';
 import {
   createKibanaPrivileges,
@@ -16,6 +15,7 @@ import {
 } from '@kbn/security-role-management-model/src/__fixtures__';
 import { spacesManagerMock } from '@kbn/spaces-plugin/public/spaces_manager/mocks';
 import { getUiApi } from '@kbn/spaces-plugin/public/ui_api';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { getDisplayedFeaturePrivileges } from './__fixtures__';
 import type { PrivilegeSummaryTableProps } from './privilege_summary_table';
