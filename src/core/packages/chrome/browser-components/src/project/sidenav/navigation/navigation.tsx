@@ -75,14 +75,7 @@ const useNavigationItems = (): NavigationState | null => {
         );
         return {
           solutionId: nav.solutionId,
-          logoItem: isNextChrome
-            ? {
-                ...logoItem,
-                iconType: 'logoElastic' as const,
-                iconColor: 'text' as const,
-                hideLabel: true,
-              }
-            : logoItem,
+          logoItem: isNextChrome ? logoItem : logoItem,
           activeItemId,
           navItems,
         };
