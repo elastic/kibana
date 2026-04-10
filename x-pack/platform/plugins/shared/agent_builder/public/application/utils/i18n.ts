@@ -1935,6 +1935,25 @@ export const labels = {
     customizePlugins: i18n.translate('xpack.agentBuilder.overview.capabilities.customizePlugins', {
       defaultMessage: 'Customize',
     }),
+    toolsCapabilityLabel: (count: number) =>
+      i18n.translate('xpack.agentBuilder.overview.capabilities.tools', {
+        defaultMessage: '{count, plural, one {Tool} other {Tools}}',
+        values: { count },
+      }),
+    toolsDescription: i18n.translate('xpack.agentBuilder.overview.capabilities.toolsDescription', {
+      defaultMessage:
+        'Expose callable functions and integrations your agent can use while responding.',
+    }),
+    toolsOnboardingDescription: i18n.translate(
+      'xpack.agentBuilder.overview.capabilities.toolsOnboardingDescription',
+      {
+        defaultMessage:
+          'Give your agent ways to act. Tools let it search data, run workflows, and reach connected services instead of answering from memory alone.',
+      }
+    ),
+    customizeTools: i18n.translate('xpack.agentBuilder.overview.capabilities.customizeTools', {
+      defaultMessage: 'Customize',
+    }),
     connectorsDescription: i18n.translate(
       'xpack.agentBuilder.overview.capabilities.connectorsDescription',
       {
