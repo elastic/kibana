@@ -13,7 +13,6 @@
     "requiredPlugins": [
       "urlForwarding"
     ],
-    "requiredBundles": [],
-    "extraPublicDirs": ["common"]
+    "requiredBundles": []
   }
 }

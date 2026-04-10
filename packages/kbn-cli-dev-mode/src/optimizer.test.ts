@@ -396,7 +396,10 @@ describe('rspack path', () => {
 
     kbnOptimizer.runOptimizer.mockImplementation(() => update$);
     kbnOptimizer.OptimizerConfig.create.mockImplementation(
-      () => new MockOptimizerConfig() as unknown as ReturnType<typeof kbnOptimizer.OptimizerConfig.create>
+      () =>
+        new MockOptimizerConfig() as unknown as ReturnType<
+          typeof kbnOptimizer.OptimizerConfig.create
+        >
     );
     kbnOptimizer.logOptimizerState.mockImplementation(realOptimizer.logOptimizerState);
     kbnOptimizer.logOptimizerProgress.mockImplementation(realOptimizer.logOptimizerProgress);
