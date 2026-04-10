@@ -563,7 +563,7 @@ describe(
             loadPack({
               policy_ids: response.body.items[0].policy_ids,
               queries: {
-                [savedQueryName]: { ecs_mapping: {}, interval: 60, query: 'select * from uptime;' },
+                [savedQueryName]: { ecs_mapping: {}, interval: 10, query: 'select * from uptime;' },
               },
             })
           )

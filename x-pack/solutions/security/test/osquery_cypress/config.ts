@@ -54,6 +54,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         )}`,
         `--xpack.fleet.packages.0.name=osquery_manager`,
         `--xpack.fleet.packages.0.version=latest`,
+        `--xpack.fleet.experimentalFeatures.installIntegrationsKnowledge=false`,
+        `--xpack.task_manager.unsafe.exclude_task_types=["Fleet-Metrics-Task"]`,
       ],
     },
   };
