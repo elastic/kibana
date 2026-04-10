@@ -13,6 +13,15 @@ import { DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 
+const handleRequiredFields = (state: DataControlState) => {
+  if (!state.data_view_id.length) {
+    throw new Error('Must include a non-empty data view ID');
+  } else if (!state.field_name.length) {
+    throw new Error('Must include a non-empty field name ID');
+  }
+  return;
+};
+
 export function transformDataControlIn(
   state: DataControlState,
   referenceName: string
@@ -20,10 +29,12 @@ export function transformDataControlIn(
   state: Omit<DataControlState, 'data_view_id'> & { dataViewRefName: string };
   references?: Reference[];
 } {
-  const { data_view_id, ...rest } = state;
-  if (!data_view_id.length) {
-    throw new Error('Must include a non-empty data view ID');
+  try {
+    handleRequiredFields(state);
+  } catch (e) {
+    throw e;
   }
+  const { data_view_id, ...rest } = state;
   return {
     state: {
       ...rest,
@@ -65,17 +76,14 @@ export function transformDataControlOut<
   /**
    * Pre 9.4 the control state was stored in camelCase; these transforms ensure they are converted to snake_case
    */
-  const { title, use_global_filters, ignore_validations, field_name } =
+  const { title, use_global_filters, ignore_validations, field_name, data_view_id } =
     convertCamelCasedKeysToSnakeCase<LegacyStoredDataControlState>(
       state as LegacyStoredDataControlState
     );
 
   // get the data view ID from the reference, or fall back to an explicitly stored dataViewId
-  const dataViewId = dataViewRef?.id ?? state.dataViewId ?? '';
-  if (!dataViewId.length) {
-    throw new Error('Must include a non-empty data view ID');
-  }
-  return {
+  const dataViewId = dataViewRef?.id ?? data_view_id ?? '';
+  const convertedState = {
     ...DEFAULT_DATA_CONTROL_STATE,
     title,
     data_view_id: dataViewId,
@@ -83,6 +91,13 @@ export function transformDataControlOut<
     ...(typeof ignore_validations === 'boolean' && { ignore_validations }),
     field_name: field_name ?? '',
   };
+
+  try {
+    handleRequiredFields(convertedState);
+  } catch (e) {
+    throw e;
+  }
+  return convertedState;
 }
 
 function getLegacyReferenceName(controlId: string, refName: string) {
