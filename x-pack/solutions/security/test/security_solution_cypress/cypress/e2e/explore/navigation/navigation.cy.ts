@@ -305,6 +305,7 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
   });
 
   it('navigates to the Indicators page', () => {
+    ServerlessHeaders.showMoreItems();
     navigateFromHeaderTo(ServerlessHeaders.THREAT_INTELLIGENCE, true);
     cy.url().should('include', INDICATORS_URL);
   });

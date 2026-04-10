@@ -75,7 +75,11 @@ describe('AlertFlyoutHeader', () => {
   } as unknown as StartServices;
 
   it('wraps the header in KibanaContextProvider and ReactQueryClientProvider', async () => {
-    const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
+    const hit = {
+      id: '1',
+      raw: { _id: '1', _index: 'test' },
+      flattened: {},
+    } as unknown as DataTableRecord;
     const store = createStore(() => ({}));
     const storePromise = Promise.resolve(store as never);
     const history = createMemoryHistory({ initialEntries: ['/discover'] });
@@ -115,7 +119,11 @@ describe('AlertFlyoutHeader', () => {
   });
 
   it('renders under an existing parent router without nesting another router', async () => {
-    const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
+    const hit = {
+      id: '1',
+      raw: { _id: '1', _index: 'test' },
+      flattened: {},
+    } as unknown as DataTableRecord;
     const store = createStore(() => ({}));
     const history = createMemoryHistory({ initialEntries: ['/discover'] });
 
@@ -136,7 +144,11 @@ describe('AlertFlyoutHeader', () => {
   });
 
   it('renders shared document header in Discover', async () => {
-    const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
+    const hit = {
+      id: '1',
+      raw: { _id: '1', _index: 'test' },
+      flattened: {},
+    } as unknown as DataTableRecord;
     const store = createStore(() => ({}));
     const history = createMemoryHistory({ initialEntries: ['/discover'] });
 
@@ -190,5 +202,61 @@ describe('AlertFlyoutHeader', () => {
         type: 'overlay',
       })
     );
+  });
+
+  it('shows a callout when _id or _index are missing from hit.raw', async () => {
+    const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
+    const store = createStore(() => ({}));
+    const history = createMemoryHistory({ initialEntries: ['/discover'] });
+
+    render(
+      <Router history={history}>
+        <AlertFlyoutHeader
+          hit={hit}
+          servicesPromise={Promise.resolve(servicesMock)}
+          storePromise={Promise.resolve(store as never)}
+          onAlertUpdated={jest.fn()}
+        />
+      </Router>
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          'Some of the content below might not be loading correctly. To ensure the best experience, please add `METADATA _id,_index` to your query.'
+        )
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('does not show the callout when both _id and _index are present in hit.raw', async () => {
+    const hit = {
+      id: '1',
+      raw: { _id: '1', _index: 'test' },
+      flattened: {},
+    } as unknown as DataTableRecord;
+    const store = createStore(() => ({}));
+    const history = createMemoryHistory({ initialEntries: ['/discover'] });
+
+    render(
+      <Router history={history}>
+        <AlertFlyoutHeader
+          hit={hit}
+          servicesPromise={Promise.resolve(servicesMock)}
+          storePromise={Promise.resolve(store as never)}
+          onAlertUpdated={jest.fn()}
+        />
+      </Router>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('MockDocumentHeader')).toBeInTheDocument();
+    });
+
+    expect(
+      screen.queryByText(
+        'Some of the content below might not be loading correctly. To ensure the best experience, please add `METADATA _id,_index` to your query.'
+      )
+    ).not.toBeInTheDocument();
   });
 });

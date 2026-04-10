@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LoopBreakNode } from '@kbn/workflows/graph';
+import type { LoopBreakNode, WorkflowGraph } from '@kbn/workflows/graph';
 import { isLoopEnterScope } from './is_loop_enter_scope';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../../workflow_context_manager/step_execution_runtime_factory';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { WorkflowExecutionState } from '../../workflow_context_manager/workflow_execution_state';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import type { NodeImplementation } from '../node_implementation';
 
@@ -21,7 +22,9 @@ export class LoopBreakNodeImpl implements NodeImplementation {
     private stepExecutionRuntime: StepExecutionRuntime,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger,
-    private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory
+    private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
+    private workflowExecutionState: WorkflowExecutionState,
+    private workflowGraph: WorkflowGraph
   ) {}
 
   public run(): void {
@@ -38,6 +41,12 @@ export class LoopBreakNodeImpl implements NodeImplementation {
       this.stepExecutionRuntimeFactory,
       isLoopEnterScope,
       { inclusive: true }
+    );
+    const innerStepIds = this.workflowGraph.getInnerStepIds(this.node.loopStepId);
+    this.workflowExecutionState.evictStaleLoopOutputs(innerStepIds);
+    this.workflowLogger.logDebug(
+      `Evicted stale in-memory outputs for ${innerStepIds.size} inner step(s) of loop "${this.node.loopStepId}" after break`,
+      { workflow: { step_id: this.node.stepId } }
     );
     this.wfExecutionRuntimeManager.navigateToAfterNode(this.node.loopExitNodeId);
   }

@@ -2705,7 +2705,7 @@
         "label": "partitionStream",
         "description": [],
         "signature": [
-          "({\n  definition,\n  inferenceClient,\n  esClient,\n  logger,\n  start,\n  end,\n  maxSteps,\n  signal,\n  getFeatures,\n}: { definition: ",
+          "({\n  definition,\n  inferenceClient,\n  esClient,\n  logger,\n  start,\n  end,\n  maxSteps,\n  signal,\n  getFeatures,\n  userPrompt,\n  existingPartitions = [],\n  refinementHistory = [],\n}: { definition: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -2731,12 +2731,20 @@
             "section": "def-common.Logger",
             "text": "Logger"
           },
-          "; start: number; end: number; maxSteps?: number | undefined; signal: AbortSignal; getFeatures(params?: { type?: string[] | undefined; minConfidence?: number | undefined; limit?: number | undefined; } | undefined): Promise<any[]>; }) => Promise<",
+          "; start: number; end: number; maxSteps?: number | undefined; signal: AbortSignal; getFeatures(params?: { type?: string[] | undefined; minConfidence?: number | undefined; limit?: number | undefined; } | undefined): Promise<any[]>; userPrompt?: string | undefined; existingPartitions?: { name: string; condition: ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; }[] | undefined; refinementHistory?: string[] | undefined; }) => Promise<",
           "PartitionStreamResponse",
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
-        "lineNumber": 38,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2746,10 +2754,10 @@
             "id": "def-server.partitionStream.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  definition,\n  inferenceClient,\n  esClient,\n  logger,\n  start,\n  end,\n  maxSteps,\n  signal,\n  getFeatures,\n}",
+            "label": "{\n  definition,\n  inferenceClient,\n  esClient,\n  logger,\n  start,\n  end,\n  maxSteps,\n  signal,\n  getFeatures,\n  userPrompt,\n  existingPartitions = [],\n  refinementHistory = [],\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
-            "lineNumber": 48,
+            "lineNumber": 50,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -2772,7 +2780,7 @@
                   ".Definition"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
-                "lineNumber": 49,
+                "lineNumber": 51,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2794,7 +2802,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
-                "lineNumber": 50,
+                "lineNumber": 52,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3798,7 +3806,7 @@
                   "; }"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
-                "lineNumber": 51,
+                "lineNumber": 53,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3820,7 +3828,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
-                "lineNumber": 52,
+                "lineNumber": 54,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3833,7 +3841,7 @@
                 "label": "start",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
-                "lineNumber": 53,
+                "lineNumber": 55,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3846,7 +3854,7 @@
                 "label": "end",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
-                "lineNumber": 54,
+                "lineNumber": 56,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3862,7 +3870,7 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
-                "lineNumber": 55,
+                "lineNumber": 57,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3878,7 +3886,7 @@
                   "AbortSignal"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
-                "lineNumber": 56,
+                "lineNumber": 58,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3894,7 +3902,7 @@
                   "(params?: { type?: string[] | undefined; minConfidence?: number | undefined; limit?: number | undefined; } | undefined) => Promise<any[]>"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
-                "lineNumber": 57,
+                "lineNumber": 59,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3907,7 +3915,7 @@
                     "label": "params",
                     "description": [],
                     "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
-                    "lineNumber": 57,
+                    "lineNumber": 59,
                     "columnNumber": 24,
                     "deprecated": false,
                     "trackAdoption": false,
@@ -3923,7 +3931,7 @@
                           "string[] | undefined"
                         ],
                         "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
-                        "lineNumber": 58,
+                        "lineNumber": 60,
                         "columnNumber": 5,
                         "deprecated": false,
                         "trackAdoption": false
@@ -3939,7 +3947,7 @@
                           "number | undefined"
                         ],
                         "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
-                        "lineNumber": 59,
+                        "lineNumber": 61,
                         "columnNumber": 5,
                         "deprecated": false,
                         "trackAdoption": false
@@ -3955,7 +3963,7 @@
                           "number | undefined"
                         ],
                         "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
-                        "lineNumber": 60,
+                        "lineNumber": 62,
                         "columnNumber": 5,
                         "deprecated": false,
                         "trackAdoption": false
@@ -3964,6 +3972,62 @@
                   }
                 ],
                 "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/streams-ai",
+                "id": "def-server.partitionStream.$1.userPrompt",
+                "type": "string",
+                "tags": [],
+                "label": "userPrompt",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
+                "lineNumber": 64,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/streams-ai",
+                "id": "def-server.partitionStream.$1.existingPartitions",
+                "type": "Array",
+                "tags": [],
+                "label": "existingPartitions",
+                "description": [],
+                "signature": [
+                  "{ name: string; condition: ",
+                  {
+                    "pluginId": "@kbn/streamlang",
+                    "scope": "common",
+                    "docId": "kibKbnStreamlangPluginApi",
+                    "section": "def-common.Condition",
+                    "text": "Condition"
+                  },
+                  "; }[] | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
+                "lineNumber": 65,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/streams-ai",
+                "id": "def-server.partitionStream.$1.refinementHistory",
+                "type": "Array",
+                "tags": [],
+                "label": "refinementHistory",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
+                "lineNumber": 66,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
