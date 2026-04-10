@@ -72,8 +72,7 @@ if  [ $DISTRIBUTION_EXISTS -eq 0 ]; then
   echo "Distribution already exists, skipping build"
 else
   echo "--- Injecting Opik API key into kibana.yml"
-  OPIK_API_KEY="$(vault_get agent-builder-opik avillalba-opik)"
-  sed -i "s|{my key}|${OPIK_API_KEY}|g" config/kibana.yml
+  export OPIK_API_KEY="$(vault_get agent-builder-opik avillalba-opik)"
 
   node scripts/build \
     --skip-initialize \

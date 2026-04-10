@@ -13,7 +13,20 @@ import type { TemplateContext } from '../template_context';
 
 // IMPORTANT: Please notify @elastic/kibana-security if you're changing any of the Docker specific
 // configuration defaults. We rely on these defaults in the interactive setup mode.
-function generator({ imageFlavor }: TemplateContext) {
+function generator({ opikApiKey }: TemplateContext) {
+  const opikTracingConfig = opikApiKey
+    ? `
+telemetry.enabled: true
+telemetry.tracing.enabled: true
+telemetry.tracing.exporters:
+  - http:
+      url: 'https://www.comet.com/opik/api/v1/private/otel/v1/traces'
+      headers:
+        Authorization: '${opikApiKey}'
+        projectName: 'test-project'
+        Comet-Workspace: 'ana-villalba'`
+    : '';
+
   return dedent(`
   #
   # ** THIS IS AN AUTO-GENERATED FILE **
@@ -24,6 +37,10 @@ function generator({ imageFlavor }: TemplateContext) {
   server.shutdownTimeout: "5s"
   elasticsearch.hosts: [ "http://elasticsearch:9200" ]
   monitoring.ui.container.elasticsearch.enabled: true
+
+  elastic.apm.active: false
+  elastic.apm.contextPropagationOnly: false
+  ${opikTracingConfig}
   `);
 }
 
