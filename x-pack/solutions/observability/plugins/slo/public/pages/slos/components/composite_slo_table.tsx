@@ -21,16 +21,20 @@ import {
   EuiPopover,
   EuiSkeletonText,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { sloListLocatorID, type SloListLocatorParams } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
+import { observabilityPaths } from '@kbn/observability-plugin/common';
+import { encode } from '@kbn/rison';
 import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import type {
   FindCompositeSLOResponse,
   GetCompositeSLOResponse,
   HistoricalSummaryResponse,
 } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import React, { useCallback, useMemo, useState } from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { displayStatus } from '../../../components/slo/slo_badges/slo_status_badge';
@@ -38,6 +42,7 @@ import type {
   CompositeSloSortBy,
   CompositeSloSortDirection,
 } from '../../../hooks/use_fetch_composite_slo_list';
+import { useFetchActiveAlerts } from '../../../hooks/use_fetch_active_alerts';
 import { useKibana } from '../../../hooks/use_kibana';
 import { usePermissions } from '../../../hooks/use_permissions';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
@@ -100,6 +105,26 @@ export function CompositeSloTable({
   const [burnRateWindow, setBurnRateWindow] = useState<'5m' | '1h' | '1d'>('5m');
   const [isBurnRatePopoverOpen, setIsBurnRatePopoverOpen] = useState(false);
   const [openMemberHealthPopoverId, setOpenMemberHealthPopoverId] = useState<string | null>(null);
+
+  const memberSloIdsAndInstanceIds = useMemo(() => {
+    const seen = new Set<string>();
+    const pairs: Array<[string, string]> = [];
+    for (const item of results) {
+      for (const member of item.members) {
+        const instanceId = member.instanceId ?? ALL_VALUE;
+        const key = `${member.sloId}|${instanceId}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          pairs.push([member.sloId, instanceId]);
+        }
+      }
+    }
+    return pairs;
+  }, [results]);
+
+  const { data: activeAlerts } = useFetchActiveAlerts({
+    sloIdsAndInstanceIds: memberSloIdsAndInstanceIds,
+  });
 
   const toggleExpandRow = useCallback((item: CompositeSLOItem) => {
     setExpandedRowIds((prev) => {
@@ -336,6 +361,58 @@ export function CompositeSloTable({
         },
       },
       {
+        name: i18n.translate('xpack.slo.compositeSloList.columns.activeAlerts', {
+          defaultMessage: 'Active alerts',
+        }),
+        width: '100px',
+        render: (item: CompositeSLOItem) => {
+          const alertCount = item.members.reduce((sum, m) => {
+            return (
+              sum +
+              (activeAlerts.get({ id: m.sloId, instanceId: m.instanceId ?? ALL_VALUE }) ?? 0)
+            );
+          }, 0);
+
+          if (alertCount === 0) return null;
+
+          const kuery = `slo.id: (${item.members.map((m) => `"${m.sloId}"`).join(' OR ')})`;
+          const encodedKuery = encode({
+            kuery,
+            rangeFrom: 'now-15m',
+            rangeTo: 'now',
+          });
+
+          return (
+            <EuiToolTip
+              position="top"
+              content={i18n.translate('xpack.slo.compositeSloList.activeAlerts.tooltip', {
+                defaultMessage:
+                  '{count, plural, one {# burn rate alert} other {# burn rate alerts}} across member SLOs, click to view.',
+                values: { count: alertCount },
+              })}
+              display="block"
+            >
+              <EuiBadge
+                iconType="warning"
+                color="danger"
+                onClick={() =>
+                  navigateToUrl(
+                    `${basePath.prepend(observabilityPaths.alerts)}?_a=${encodedKuery}`
+                  )
+                }
+                onClickAriaLabel={i18n.translate(
+                  'xpack.slo.compositeSloList.activeAlerts.ariaLabel',
+                  { defaultMessage: 'active alerts badge' }
+                )}
+                css={{ cursor: 'pointer' }}
+              >
+                {alertCount}
+              </EuiBadge>
+            </EuiToolTip>
+          );
+        },
+      },
+      {
         name: (
           <EuiPopover
             button={
@@ -443,6 +520,7 @@ export function CompositeSloTable({
       },
     ],
     [
+      activeAlerts,
       basePath,
       burnRateWindow,
       detailsById,
