@@ -22,7 +22,7 @@ Guide developers through building product catalog and e-commerce search with Ela
 
 This skill provides deep implementation detail for catalog and e-commerce search. It is **not** the main conversation driver.
 
-After applying the guidance here, **re-read \`search.elasticsearch-onboarding\`** to resume the structured onboarding playbook (Steps 1–7: intent → data → mapping → build → test → iterate). That playbook controls sequencing, the one-question-at-a-time rule, and the Dev Tools API-snippet workflow. If \`search.elasticsearch-onboarding\` has not been loaded yet in this conversation, load it now — it is the primary conversation flow for all Elasticsearch search onboarding.
+After applying the guidance here, **re-read \`/elasticsearch-onboarding\`** to resume the structured onboarding playbook (Steps 1–7: intent → data → mapping → build → test → iterate). That playbook controls sequencing, the one-question-at-a-time rule, and the Dev Tools API-snippet workflow. If \`/elasticsearch-onboarding\` has not been loaded yet in this conversation, load it now — it is the primary conversation flow for all Elasticsearch search onboarding.
 
 ## 1. When to Use This Guide
 

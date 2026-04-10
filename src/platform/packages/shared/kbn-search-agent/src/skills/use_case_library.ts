@@ -22,7 +22,7 @@ Present this library when a user asks what they can build with Elasticsearch, wa
 
 This skill helps users explore what they can build. It is **not** the main conversation driver.
 
-Once the user picks a use case or is ready to start building, **re-read \`search.elasticsearch-onboarding\`** to enter the structured onboarding playbook (Steps 1–7: intent → data → mapping → build → test → iterate). That playbook controls sequencing, the one-question-at-a-time rule, and the Dev Tools API-snippet workflow. If \`search.elasticsearch-onboarding\` has not been loaded yet in this conversation, load it now — it is the primary conversation flow for all Elasticsearch search onboarding.
+Once the user picks a use case or is ready to start building, **re-read \`/elasticsearch-onboarding\`** to enter the structured onboarding playbook (Steps 1–7: intent → data → mapping → build → test → iterate). That playbook controls sequencing, the one-question-at-a-time rule, and the Dev Tools API-snippet workflow. If \`/elasticsearch-onboarding\` has not been loaded yet in this conversation, load it now — it is the primary conversation flow for all Elasticsearch search onboarding.
 
 ## How to Use This Library
 
