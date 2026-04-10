@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import {
-  EuiAccordion,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,6 +17,7 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
@@ -70,24 +70,22 @@ const containerStyles = css`
   overflow: hidden;
 `;
 
-const chatsAccordionStyles = css`
+const flexColumnStyles = css`
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+`;
 
-  .euiAccordion__childWrapper {
-    flex: 1;
-    min-height: 0;
-    overflow: hidden;
-  }
+const conversationListScrollStyles = css`
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+`;
 
-  .euiAccordion__children {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-  }
+const sectionLabelStyles = (euiTheme: EuiThemeComputed) => css`
+  padding: ${euiTheme.size.xs} ${euiTheme.size.s};
 `;
 
 export const ConversationSidebarView: React.FC = () => {
@@ -100,8 +98,6 @@ export const ConversationSidebarView: React.FC = () => {
   const { isFetched: isAgentsFetched } = useAgentBuilderAgents();
   const lastAgentId = useLastAgentId();
   const featureFlags = useFeatureFlags();
-
-  const hasSetCustomiseAccordionFirstTime = useRef(false);
 
   const { conversations = [] } = useConversationList({ agentId });
   const hasConversations = conversations.length > 0;
@@ -116,20 +112,7 @@ export const ConversationSidebarView: React.FC = () => {
 
   const isActive = (path: string) => pathname === path;
 
-  const isAnyNavItemActive = navItems.some((item) => isActive(item.path));
-
-  const [isCustomizeOpen, setIsCustomizeOpen] = useState(false);
-  const [isChatsOpen, setIsChatsOpen] = useState(true);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
-
-  // When the user refreshes on an agent settings route, ensure the Customize accordion is open
-  useEffect(() => {
-    if (isAnyNavItemActive && !isCustomizeOpen && !hasSetCustomiseAccordionFirstTime.current) {
-      setIsCustomizeOpen(true);
-      setIsChatsOpen(false);
-      hasSetCustomiseAccordionFirstTime.current = true;
-    }
-  }, [isAnyNavItemActive, isCustomizeOpen]);
 
   useEffect(() => {
     // Once agents have loaded, redirect to the last valid agent if the current agent ID
@@ -157,122 +140,91 @@ export const ConversationSidebarView: React.FC = () => {
     navigateToAgentBuilderUrl,
   ]);
 
-  const accordionButtonStyles = css`
-    padding: ${euiTheme.size.s} ${euiTheme.size.base};
-
-    .euiAccordion__triggerWrapper {
-      padding: 0 0 0 ${euiTheme.size.s};
-    }
-
-    .euiAccordion__iconButton {
-      color: ${euiTheme.colors.textParagraph};
-    }
-  `;
-
-  const buttonStyles = css`
-    color: ${euiTheme.colors.textSubdued};
-    font-weight: ${euiTheme.font.weight.semiBold};
-  `;
-
-  const conversationListStyles = css`
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    padding-top: ${euiTheme.size.base};
-  `;
-
   const handlePressNewConversation = () => {
-    setIsCustomizeOpen(false);
     navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }));
   };
 
   return (
     <div css={containerStyles} data-test-subj="agentBuilderSidebar-conversation">
       <EuiHorizontalRule margin="none" />
-      <EuiSpacer size="s" />
 
-      {/* Customize accordion - with agent settings nav items */}
-      <EuiAccordion
-        id="sidebar-customize"
-        buttonContent={
-          <EuiText css={buttonStyles} size="s">
-            {customizeLabel}
-          </EuiText>
-        }
-        arrowDisplay="right"
-        forceState={isCustomizeOpen ? 'open' : 'closed'}
-        onToggle={() => setIsCustomizeOpen((prev) => !prev)}
-        paddingSize="none"
-        css={accordionButtonStyles}
-      >
+      <div css={flexColumnStyles}>
         <div
-          css={css`
-            padding: ${euiTheme.size.s} 0;
-          `}
+          css={[
+            flexColumnStyles,
+            css`
+              padding: ${euiTheme.size.base};
+            `,
+          ]}
         >
-          <SidebarNavList
-            items={navItems}
-            isActive={isActive}
-            onItemClick={() => setIsChatsOpen(false)}
-          />
-        </div>
-      </EuiAccordion>
+          <div
+            css={css`
+              flex-shrink: 0;
+            `}
+          >
+            <EuiText size="xs" color="subdued" css={sectionLabelStyles(euiTheme)}>
+              {customizeLabel}
+            </EuiText>
+            <EuiSpacer size="xs" />
+            <SidebarNavList items={navItems} isActive={isActive} />
+          </div>
 
-      {/* Chats accordion - with conversation list */}
-      <EuiAccordion
-        id="sidebar-chats"
-        buttonContent={
-          <EuiText css={buttonStyles} size="s">
-            {chatsLabel}
-          </EuiText>
-        }
-        arrowDisplay="right"
-        forceState={isChatsOpen ? 'open' : 'closed'}
-        onToggle={() => setIsChatsOpen((prev) => !prev)}
-        buttonProps={{ 'data-test-subj': 'agentBuilderSidebarChatsToggle' }}
-        paddingSize="none"
-        css={[accordionButtonStyles, chatsAccordionStyles]}
-      >
-        <div css={conversationListStyles}>
-          <EuiFlexGroup gutterSize="xs" responsive={false}>
-            <EuiFlexItem grow={true}>
-              <EuiButton
-                fullWidth
-                iconType="plus"
-                size="s"
-                color="text"
-                onClick={handlePressNewConversation}
-                data-test-subj="agentBuilderSidebarNewConversationButton"
-              >
-                {newLabel}
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={true}>
-              <EuiButton
-                fullWidth
-                iconType="search"
-                size="s"
-                color="text"
-                aria-label={searchChatsAriaLabel}
-                onClick={() => setIsSearchModalOpen(true)}
-                disabled={!hasConversations}
-                data-test-subj="agentBuilderSidebarSearchChatsButton"
-              >
-                {searchLabel}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="m" />
-          <ConversationList
-            agentId={agentId}
-            currentConversationId={conversationId}
-            isNewConversationRoute={isNewConversationRoute}
-            onItemClick={() => setIsCustomizeOpen(false)}
-          />
-        </div>
-      </EuiAccordion>
+          <EuiSpacer size="l" />
 
-      <ConversationFooter />
+          <div css={flexColumnStyles}>
+            <EuiText size="xs" color="subdued" css={sectionLabelStyles(euiTheme)}>
+              {chatsLabel}
+            </EuiText>
+            <EuiSpacer size="s" />
+            {/* EuiFlexGroup defaults to flex-grow: 1 as a flex item; wrapper keeps list scroll area height */}
+            <div
+              css={css`
+                flex: 0 0 auto;
+                width: 100%;
+              `}
+            >
+              <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="flexStart">
+                <EuiFlexItem grow={true}>
+                  <EuiButton
+                    fullWidth
+                    iconType="plus"
+                    size="s"
+                    color="text"
+                    onClick={handlePressNewConversation}
+                    data-test-subj="agentBuilderSidebarNewConversationButton"
+                  >
+                    {newLabel}
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={true}>
+                  <EuiButton
+                    fullWidth
+                    iconType="search"
+                    size="s"
+                    color="text"
+                    aria-label={searchChatsAriaLabel}
+                    onClick={() => setIsSearchModalOpen(true)}
+                    disabled={!hasConversations}
+                    data-test-subj="agentBuilderSidebarSearchChatsButton"
+                  >
+                    {searchLabel}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </div>
+            <EuiSpacer size="m" />
+            <div css={conversationListScrollStyles}>
+              <ConversationList
+                agentId={agentId}
+                currentConversationId={conversationId}
+                isNewConversationRoute={isNewConversationRoute}
+              />
+            </div>
+          </div>
+        </div>
+
+        <ConversationFooter />
+      </div>
 
       {isSearchModalOpen && (
         <ConversationSearchModal
@@ -280,7 +232,6 @@ export const ConversationSidebarView: React.FC = () => {
           currentConversationId={conversationId}
           onClose={() => setIsSearchModalOpen(false)}
           onSelectConversation={(id) => {
-            setIsCustomizeOpen(false);
             navigateToAgentBuilderUrl(
               appPaths.agent.conversations.byId({ agentId, conversationId: id })
             );
