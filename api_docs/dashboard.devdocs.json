@@ -3962,6 +3962,23 @@
       },
       {
         "parentPluginId": "dashboard",
+        "id": "def-server.DashboardUpdateRequestBody",
+        "type": "Type",
+        "tags": [],
+        "label": "DashboardUpdateRequestBody",
+        "description": [],
+        "signature": [
+          "{ readonly [x: string]: any; }"
+        ],
+        "path": "src/platform/plugins/shared/dashboard/server/api/update/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
         "id": "def-server.DashboardUpdateResponseBody",
         "type": "Type",
         "tags": [],

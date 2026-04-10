@@ -166,7 +166,7 @@ describe('XY', () => {
             },
             {
               data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
-              type: 'referenceLines',
+              type: 'reference_lines',
               ignore_global_filters: false,
               sampling: 1,
               thresholds: [
@@ -331,7 +331,7 @@ describe('XY', () => {
               },
               {
                 data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
-                type: 'referenceLines',
+                type: 'reference_lines',
                 ignore_global_filters: false,
                 sampling: 1,
                 thresholds: [
@@ -481,7 +481,7 @@ describe('XY', () => {
                   index_pattern: 'companyIndex',
                   time_field: '@timestamp',
                 },
-                type: 'referenceLines',
+                type: 'reference_lines',
                 ignore_global_filters: false,
                 sampling: 1,
                 thresholds: [
@@ -699,9 +699,6 @@ describe('XY', () => {
             position: 'left',
             layout: {
               type: 'list',
-              truncate: {
-                max_pixels: 300,
-              },
             },
           },
           layers: [minimalLayer],
@@ -718,41 +715,6 @@ describe('XY', () => {
          - [legend.0.position]: types that failed validation:
           - [legend.position.0]: expected value to equal [top]
           - [legend.position.1]: expected value to equal [bottom]
-         - [legend.1.layout.type]: expected value to equal [grid]
-         - [legend.2.placement]: expected value to equal [inside]"
-      `);
-    });
-
-    it('should not allow both truncation values at the same time', () => {
-      expect(() =>
-        xyStateSchema.validate({
-          type: 'xy',
-          title: 'Valid list legend truncation',
-          legend: {
-            visibility: 'visible',
-            position: 'bottom',
-            layout: {
-              type: 'list',
-              truncate: {
-                max_lines: 2,
-                max_pixels: 320,
-              },
-            },
-          },
-          layers: [minimalLayer],
-        })
-      ).toThrowErrorMatchingInlineSnapshot(`
-        "types that failed validation:
-        - [0.legend]: types that failed validation:
-         - [legend.0.layout]: types that failed validation:
-          - [legend.layout.0.type]: expected value to equal [grid]
-          - [legend.layout.1.truncate.max_lines]: Additional properties are not allowed ('max_lines' was unexpected)
-         - [legend.1.layout.type]: expected value to equal [grid]
-         - [legend.2.placement]: expected value to equal [inside]
-        - [1.legend]: types that failed validation:
-         - [legend.0.layout]: types that failed validation:
-          - [legend.layout.0.type]: expected value to equal [grid]
-          - [legend.layout.1.truncate.max_lines]: Additional properties are not allowed ('max_lines' was unexpected)
          - [legend.1.layout.type]: expected value to equal [grid]
          - [legend.2.placement]: expected value to equal [inside]"
       `);
@@ -760,7 +722,7 @@ describe('XY', () => {
   });
 
   describe('legend layout schema', () => {
-    it('should allow list legend layout for top/bottom with truncate.max_pixels', () => {
+    it('should allow list legend layout for top/bottom', () => {
       expect(() =>
         xyStateSchema.validate({
           type: 'xy',
@@ -770,9 +732,6 @@ describe('XY', () => {
             position: 'bottom',
             layout: {
               type: 'list',
-              truncate: {
-                max_pixels: 320,
-              },
             },
           },
           layers: [minimalLayer],
