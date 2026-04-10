@@ -349,8 +349,9 @@ describe('FieldsMetadataClient class', () => {
     it('should resolve a field whose dataset cannot be correctly inferred from the field name by loading all datasets', async () => {
       // "system.process.summary.total" belongs to dataset "system.process_summary",
       // but the 2-segment heuristic would infer "system.process". When the caller
-      // does not supply an explicit dataset, the repository fetches all datasets
-      // for the integration in a single request, avoiding a wasted heuristic lookup.
+      // does not supply an explicit dataset, the repository first tries the
+      // heuristic-inferred dataset, and when the field is not found there, falls
+      // back to loading all datasets for the integration.
       const fieldInstance = await fieldsMetadataClient.getByName('system.process.summary.total');
 
       expectToBeDefined(fieldInstance);

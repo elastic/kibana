@@ -50,24 +50,31 @@ export class IntegrationFieldsRepository {
       return undefined;
     }
 
-    // When the caller provides an explicit dataset, use it directly.
-    // Otherwise the dataset was inferred from the field name via a heuristic
-    // that may be wrong (e.g. "system.process.summary.total" infers
-    // "system.process" but the field belongs to "system.process_summary").
-    // To avoid a redundant extraction when the heuristic is wrong, fetch
-    // all datasets for the integration in a single request.
-    const effectiveDataset = params.dataset ? dataset : ANY_DATASET;
-
-    let field = this.getCachedField(fieldName, { integration, dataset: effectiveDataset });
+    let field = this.getCachedField(fieldName, { integration, dataset });
 
     if (!field) {
       try {
-        await this.extractFields({ integration, dataset: effectiveDataset });
+        await this.extractFields({ integration, dataset });
       } catch (error) {
         throw new PackageNotFoundError(error.message);
       }
 
-      field = this.getCachedField(fieldName, { integration, dataset: effectiveDataset });
+      field = this.getCachedField(fieldName, { integration, dataset });
+    }
+
+    // When the dataset was inferred from the field name (not explicitly provided),
+    // the heuristic may have guessed the wrong dataset. For example,
+    // "system.process.summary.total" infers dataset "system.process", but the field
+    // actually belongs to "system.process_summary". Fall back to loading all datasets
+    // for the integration to find the field.
+    if (!field && !params.dataset) {
+      try {
+        await this.extractFields({ integration, dataset: ANY_DATASET });
+      } catch (error) {
+        throw new PackageNotFoundError(error.message);
+      }
+
+      field = this.getCachedField(fieldName, { integration, dataset: ANY_DATASET });
     }
 
     return field;
