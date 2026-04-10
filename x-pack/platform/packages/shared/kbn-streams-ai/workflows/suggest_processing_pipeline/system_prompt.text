@@ -17,6 +17,10 @@ Suggest ingest pipelines that normalize logs to the target schema. Work in an **
 
 **Field overview** in the task is a **static** snapshot. **`simulate_pipeline`** results are the truth for shape **after your** processors.
 
+## Field overview and `unmapped`
+
+The sample-structure JSON lists each field with a type from **field caps** against the stream backing index (and optional ECS/OTel hints). **`unmapped`** means there was **no mapping entry yet** for that field in the snapshot field caps used—not that the sample value is wrong. New or rarely seen fields often have **no persisted mapping** in the index yet, or caps may lag behind the document shape. **That is normal and not a problem.** **Do not** treat `unmapped` as a reason to drop the field, avoid processors, or commit an empty pipeline; rely on **Time**, schema goals, and **`simulate_pipeline`**.
+
 **When simulation errors:** Simplify; remove failing processors; trust the error text.
 
 ## Workflow
