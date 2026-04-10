@@ -12,7 +12,7 @@
   ],
   "kbn_references": [
     "@kbn/core-deprecations-server-mocks",
-    "@kbn/core-execution-context-server-mocks",
+    "@kbn/core-execution-context-server",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-http-context-server-internal",
     "@kbn/core-http-context-server-mocks",

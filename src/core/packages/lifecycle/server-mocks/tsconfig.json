@@ -18,7 +18,7 @@
     "@kbn/core-deprecations-server-mocks",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-environment-server-mocks",
-    "@kbn/core-execution-context-server-mocks",
+    "@kbn/core-execution-context-server",
     "@kbn/core-http-context-server-mocks",
     "@kbn/core-http-server-mocks",
     "@kbn/core-http-resources-server-mocks",

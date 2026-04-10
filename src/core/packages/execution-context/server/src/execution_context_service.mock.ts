@@ -8,11 +8,8 @@
  */
 
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import type { ExecutionContextSetup } from '@kbn/core-execution-context-server';
-import type {
-  IExecutionContext,
-  InternalExecutionContextSetup,
-} from '@kbn/core-execution-context-server-internal';
+import type { ExecutionContextSetup } from './contracts';
+import type { IExecutionContext, InternalExecutionContextSetup } from './execution_context_service';
 
 // attempted removal of any: unsuccessful! In theory, replaceable with <R>/R
 function withContextMock(context: KibanaExecutionContext | undefined, fn: () => any): any {

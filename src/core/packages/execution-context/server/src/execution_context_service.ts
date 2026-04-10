@@ -15,7 +15,7 @@ import type { Subscription } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import type { IExecutionContextContainer } from '@kbn/core-execution-context-server';
+import type { IExecutionContextContainer } from './types';
 import type { ExecutionContextConfigType } from './execution_context_config';
 import { ExecutionContextContainer, getParentContextFrom } from './execution_context_container';
 

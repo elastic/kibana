@@ -18,7 +18,7 @@ import {
   coreUsageStatsClientMock,
   coreUsageDataServiceMock,
 } from '@kbn/core-usage-data-server-mocks';
-import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server/mocks';
 import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import {
   registerResolveRoute,

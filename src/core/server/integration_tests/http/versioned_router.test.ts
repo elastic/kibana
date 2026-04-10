@@ -13,7 +13,7 @@ import Supertest from 'supertest';
 import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
 import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server/mocks';
 import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';

@@ -19,7 +19,7 @@ import type { MetricsServiceSetup } from '@kbn/core-metrics-server';
 import type { ServiceStatus, ServiceStatusLevel } from '@kbn/core-status-common';
 import { ServiceStatusLevels } from '@kbn/core-status-common';
 import { statusServiceMock } from '@kbn/core-status-server-mocks';
-import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server/mocks';
 import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';

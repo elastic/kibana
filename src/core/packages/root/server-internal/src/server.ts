@@ -21,7 +21,7 @@ import { ensureValidConfiguration } from '@kbn/core-config-server-internal';
 import { NodeService } from '@kbn/core-node-server-internal';
 import { AnalyticsService } from '@kbn/core-analytics-server-internal';
 import { EnvironmentService } from '@kbn/core-environment-server-internal';
-import { ExecutionContextService } from '@kbn/core-execution-context-server-internal';
+import { ExecutionContextService } from '@kbn/core-execution-context-server/internal';
 import { FeatureFlagsService } from '@kbn/core-feature-flags-server-internal';
 import { PrebootService } from '@kbn/core-preboot-server-internal';
 import { ContextService } from '@kbn/core-http-context-server-internal';

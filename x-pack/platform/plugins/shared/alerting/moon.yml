@@ -60,7 +60,7 @@ dependsOn:
   - '@kbn/core-saved-objects-api-server-mocks'
   - '@kbn/core-ui-settings-server-mocks'
   - '@kbn/core-test-helpers-kbn-server'
-  - '@kbn/core-execution-context-server-mocks'
+  - '@kbn/core-execution-context-server'
   - '@kbn/search-types'
   - '@kbn/alerting-state-types'
   - '@kbn/core-security-server'

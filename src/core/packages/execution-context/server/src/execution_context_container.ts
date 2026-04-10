@@ -8,7 +8,7 @@
  */
 
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import type { IExecutionContextContainer } from '@kbn/core-execution-context-server';
+import type { IExecutionContextContainer } from './types';
 
 // Switch to the standard Baggage header. blocked by
 // https://github.com/elastic/apm-agent-nodejs/issues/2102

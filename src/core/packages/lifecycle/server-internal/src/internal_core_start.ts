@@ -13,7 +13,7 @@ import type { InternalDeprecationsServiceStart } from '@kbn/core-deprecations-se
 import type { InternalUserActivityServiceStart } from '@kbn/core-user-activity-server-internal';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { InternalElasticsearchServiceStart } from '@kbn/core-elasticsearch-server-internal';
-import type { InternalExecutionContextStart } from '@kbn/core-execution-context-server-internal';
+import type { InternalExecutionContextStart } from '@kbn/core-execution-context-server/internal';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type { InternalHttpServiceStart } from '@kbn/core-http-server-internal';
 import type { InternalMetricsServiceStart } from '@kbn/core-metrics-server-internal';

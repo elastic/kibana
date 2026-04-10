@@ -13,7 +13,7 @@ import type { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import type { I18nServiceSetup } from '@kbn/core-i18n-server';
 import type { InternalElasticsearchServiceSetup } from '@kbn/core-elasticsearch-server-internal';
 import type { InternalEnvironmentServiceSetup } from '@kbn/core-environment-server-internal';
-import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
+import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server/internal';
 import type { InternalContextSetup } from '@kbn/core-http-context-server-internal';
 import type { InternalDeprecationsServiceSetup } from '@kbn/core-deprecations-server-internal';
 import type { InternalUserActivityServiceSetup } from '@kbn/core-user-activity-server-internal';

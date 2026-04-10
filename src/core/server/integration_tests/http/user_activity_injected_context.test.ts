@@ -13,7 +13,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { loggingServiceMock, loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server/mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import type { HttpService } from '@kbn/core-http-server-internal';

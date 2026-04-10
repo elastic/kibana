@@ -14,7 +14,7 @@ import { config as loggingConfig } from '@kbn/core-logging-server-internal';
 import { coreDeprecationProvider } from '@kbn/core-config-server-internal';
 import { nodeConfig } from '@kbn/core-node-server-internal';
 import { pidConfig } from '@kbn/core-environment-server-internal';
-import { executionContextConfig } from '@kbn/core-execution-context-server-internal';
+import { executionContextConfig } from '@kbn/core-execution-context-server/internal';
 import {
   config as httpConfig,
   cspConfig,

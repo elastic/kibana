@@ -11,7 +11,7 @@ import { resolve } from 'path';
 import { readFile } from 'fs/promises';
 import supertest from 'supertest';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server/mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import type { IRouter } from '@kbn/core-http-server';
