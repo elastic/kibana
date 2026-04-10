@@ -486,7 +486,10 @@ export const AgentPlugins: React.FC = () => {
       )}
 
       {isInstallFlyoutOpen && (
-        <InstallPluginFlyout onClose={closeInstallFlyout} onPluginInstalled={handleAddPlugin} />
+        <InstallPluginFlyout
+          onClose={closeInstallFlyout}
+          onPluginInstalled={(plugin) => handleAddPlugin(plugin, { selectOnSuccess: true })}
+        />
       )}
     </PageWrapper>
   );

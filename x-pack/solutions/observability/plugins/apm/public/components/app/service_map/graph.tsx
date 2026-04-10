@@ -140,13 +140,15 @@ function GraphInner({
 
   const handleNodeClick: NodeMouseHandler<ServiceMapNode> = useCallback(
     (_, node) => {
-      const newSelectedId = selectedNodeId === node.id ? null : node.id;
+      // Use ref so toggle logic always matches last committed selection without stale closure issues,
+      // and keep this callback stable for React Flow.
+      const newSelectedId = selectedNodeIdRef.current === node.id ? null : node.id;
       setSelectedNodeId(newSelectedId);
       setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, newSelectedId));
       setSelectedNodeForPopover(newSelectedId ? node : null);
       setSelectedEdgeForPopover(null);
     },
-    [selectedNodeId, setEdges, applyEdgeHighlighting]
+    [setEdges, applyEdgeHighlighting]
   );
   const handleEdgeClick: EdgeMouseHandler<ServiceMapEdgeType> = useCallback(
     (_, edge) => {
