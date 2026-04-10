@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+import type { Capabilities } from '@kbn/core-capabilities-common';
+
 import { canUserChangeSpaceChatExperience } from './can_change_space_chat_experience';
 
+const base: Capabilities = { navLinks: {}, management: {}, catalogue: {} };
+
 describe('canUserChangeSpaceChatExperience', () => {
-  const fullPrivileges = {
+  const fullPrivileges: Capabilities = {
+    ...base,
     advancedSettings: { save: true },
     observabilityAIAssistant: { show: true },
     securitySolutionAssistant: { 'ai-assistant': false },
@@ -19,6 +24,7 @@ describe('canUserChangeSpaceChatExperience', () => {
     expect(canUserChangeSpaceChatExperience(fullPrivileges)).toBe(true);
     expect(
       canUserChangeSpaceChatExperience({
+        ...base,
         advancedSettings: { save: true },
         observabilityAIAssistant: { show: false },
         securitySolutionAssistant: { 'ai-assistant': true },
@@ -59,6 +65,6 @@ describe('canUserChangeSpaceChatExperience', () => {
   });
 
   it('returns false for empty capabilities', () => {
-    expect(canUserChangeSpaceChatExperience({})).toBe(false);
+    expect(canUserChangeSpaceChatExperience(base)).toBe(false);
   });
 });

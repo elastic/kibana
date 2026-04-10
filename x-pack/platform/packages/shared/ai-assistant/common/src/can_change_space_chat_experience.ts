@@ -5,26 +5,14 @@
  * 2.0.
  */
 
-/**
- * Minimal slice of Kibana {@link Capabilities} used to decide if the user can
- * change the space-level chat experience on Gen AI Settings (aligned with
- * `enabled_features_context` + `chat_experience` save permission).
- */
-export interface ChatExperienceCapabilitiesInput {
-  advancedSettings?: { save?: boolean };
-  observabilityAIAssistant?: { show?: boolean };
-  securitySolutionAssistant?: { 'ai-assistant'?: boolean };
-  agentBuilder?: { manageAgents?: boolean };
-}
+import type { Capabilities } from '@kbn/core-capabilities-common';
 
 /**
  * Returns true when the user can persist the preferred chat experience UI setting
  * for the space (same conditions as showing an editable chat experience control
  * on Gen AI Settings).
  */
-export function canUserChangeSpaceChatExperience(
-  capabilities: ChatExperienceCapabilitiesInput
-): boolean {
+export function canUserChangeSpaceChatExperience(capabilities: Capabilities): boolean {
   const canSaveSpaceUiSettings = capabilities.advancedSettings?.save === true;
   const hasObservabilityAssistant = capabilities.observabilityAIAssistant?.show === true;
   const hasSecurityAssistant = capabilities.securitySolutionAssistant?.['ai-assistant'] === true;

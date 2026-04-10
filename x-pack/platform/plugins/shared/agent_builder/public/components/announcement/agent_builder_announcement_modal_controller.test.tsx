@@ -14,12 +14,16 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { HIDE_ANNOUNCEMENTS_ID } from '@kbn/management-settings-ids';
 import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common/telemetry';
+import type { Capabilities } from '@kbn/core/public';
+
 import { AgentBuilderAnnouncementModalController } from './agent_builder_announcement_modal_controller';
-import type { ChatExperienceCapabilitiesInput } from '@kbn/ai-assistant-common';
 
 const SPACE_ID = 'test-space';
 
-const capabilitiesAllowRevert: ChatExperienceCapabilitiesInput = {
+const capabilitiesAllowRevert: Capabilities = {
+  navLinks: {},
+  management: {},
+  catalogue: {},
   advancedSettings: { save: true },
   observabilityAIAssistant: { show: true },
   securitySolutionAssistant: { 'ai-assistant': false },
@@ -40,7 +44,7 @@ function buildServices({
   userProfileEnabled?: boolean;
   /** Overrides the JSON stored in user profile for per-space dismissal (default derives from announcementSeenInProfile). */
   agentBuilderSeenJson?: string;
-  chatExperienceCapabilities?: ChatExperienceCapabilitiesInput;
+  chatExperienceCapabilities?: Capabilities;
 } = {}) {
   const space$ = new BehaviorSubject({ id: spaceId, name: spaceId });
   const reportEvent = jest.fn();
@@ -217,10 +221,8 @@ describe('AgentBuilderAnnouncementModalController', () => {
   it('does not show revert when the user cannot change space-level chat experience', async () => {
     const { services } = buildServices({
       chatExperienceCapabilities: {
+        ...capabilitiesAllowRevert,
         advancedSettings: { save: false },
-        observabilityAIAssistant: { show: true },
-        securitySolutionAssistant: { 'ai-assistant': false },
-        agentBuilder: { manageAgents: true },
       },
     });
     renderController(services);
