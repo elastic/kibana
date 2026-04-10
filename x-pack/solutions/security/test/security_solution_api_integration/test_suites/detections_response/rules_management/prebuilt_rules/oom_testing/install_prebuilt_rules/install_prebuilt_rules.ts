@@ -19,12 +19,17 @@ import {
   PERFORM_RULE_INSTALLATION_URL,
   REVIEW_RULE_INSTALLATION_URL,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import {
+  INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
+  INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE,
+} from '@kbn/security-solution-plugin/common/api/initialization';
 import { deleteAllRules, waitFor } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteEndpointFleetPackage,
   deletePrebuiltRulesFleetPackage,
 } from '../../../../utils/rules/prebuilt_rules/delete_fleet_packages';
+import { initializeSecuritySolution } from '../../../../utils/rules/prebuilt_rules/initialize_security_solution';
 
 const KIBANA_STATUS_URL = '/api/status';
 
@@ -33,7 +38,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
   const retryService = getService('retry');
-  const detectionsApi = getService('detectionsApi');
 
   describe('@ess @serverless @skipInServerlessMKI Install from mocked prebuilt rule assets', () => {
     beforeEach(async () => {
@@ -86,21 +90,28 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('install prebuilt rules from a package', async () => {
-      const { statusCode: bootstrapPrebuiltRulesStatusCode, body: bootstrapPrebuiltRulesResponse } =
-        await detectionsApi.bootstrapPrebuiltRules();
+      const { statusCode: initStatusCode, body: initResponse } = await initializeSecuritySolution(
+        supertest,
+        [
+          INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
+          INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE,
+        ]
+      );
 
       // Assert body first to be able to see error messages in case of failure
-      expect(bootstrapPrebuiltRulesResponse).toMatchObject({
-        packages: expect.arrayContaining([
-          expect.objectContaining({
-            name: PREBUILT_RULES_PACKAGE_NAME,
-          }),
-          expect.objectContaining({
-            name: ENDPOINT_PACKAGE_NAME,
-          }),
-        ]),
+      expect(initResponse.flows[INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE]).toMatchObject({
+        status: 'ready',
+        payload: expect.objectContaining({
+          name: PREBUILT_RULES_PACKAGE_NAME,
+        }),
       });
-      expect(bootstrapPrebuiltRulesStatusCode).toBe(200);
+      expect(initResponse.flows[INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE]).toMatchObject({
+        status: 'ready',
+        payload: expect.objectContaining({
+          name: ENDPOINT_PACKAGE_NAME,
+        }),
+      });
+      expect(initStatusCode).toBe(200);
 
       const { body: reviewPrebuiltRulesForInstallationResponse } = await supertest
         .post(REVIEW_RULE_INSTALLATION_URL)
