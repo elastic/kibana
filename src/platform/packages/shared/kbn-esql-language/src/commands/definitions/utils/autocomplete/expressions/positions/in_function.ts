@@ -32,7 +32,12 @@ export async function suggestInFunction(ctx: ExpressionContext): Promise<ISugges
   } = ctx;
 
   const functionExpression = expressionRoot as ESQLFunction;
-  const paramContext = buildExpressionFunctionParameterContext(functionExpression, context);
+  const startingNewParam = STARTING_NEW_PARAM_REGEX.test(innerText);
+  const paramContext = buildExpressionFunctionParameterContext(
+    functionExpression,
+    context,
+    startingNewParam
+  );
 
   if (!paramContext) {
     return [];

@@ -72,7 +72,7 @@ export async function autocomplete(
     foundFunction &&
     (foundFunction.subtype === 'variadic-call' || foundFunction.subtype === 'binary-expression')
   ) {
-    filteringContext = buildCustomFilteringContext(command, foundFunction, context);
+    filteringContext = buildCustomFilteringContext(command, foundFunction, innerText, context);
 
     if (filteringContext) {
       const isInBy = isNodeWithinByClause(foundFunction, command);
@@ -385,13 +385,19 @@ interface StatsFilteringContext {
 function buildCustomFilteringContext(
   command: ESQLAstAllCommands,
   foundFunction: ESQLFunction | null,
+  innerText: string,
   context?: ICommandContext
 ): StatsFilteringContext | undefined {
   if (!foundFunction) {
     return undefined;
   }
 
-  const basicContext = buildExpressionFunctionParameterContext(foundFunction, context);
+  const shouldGetNextArgument = /,\s*$/.test(innerText);
+  const basicContext = buildExpressionFunctionParameterContext(
+    foundFunction,
+    context,
+    shouldGetNextArgument
+  );
 
   if (!basicContext) {
     return undefined;
