@@ -482,6 +482,7 @@ paths:
       summary: Handle OAuth callback
       tags:
         - connectors
+      x-state: ''
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -502,6 +503,7 @@ paths:
           description: Returns the OAuth callback script
       summary: ''
       tags: []
+      x-state: ''
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
