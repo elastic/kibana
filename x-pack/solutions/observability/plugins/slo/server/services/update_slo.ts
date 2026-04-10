@@ -96,10 +96,6 @@ export class UpdateSLO {
         await this.createPipeline(
           getSummaryPipelineTemplate(updatedSlo, this.spaceId, this.basePath)
         );
-
-        // Immediately update the existing summary docs with the non-breaking field changes
-        // (name, description, tags, ...) so they are visible without waiting for the next transform run.
-        await this.updateSummaryDocuments(updatedSlo);
       } catch (err) {
         this.logger.debug(
           `Cannot update the SLO summary pipeline [id: ${updatedSlo.id}, revision: ${updatedSlo.revision}]. ${err}`
@@ -119,6 +115,15 @@ export class UpdateSLO {
 
         throw err;
       }
+
+      // Best-effort: immediately propagate non-breaking field changes (name, description, tags, ...)
+      // to existing summary docs without waiting for the next transform run.
+      // Runs asynchronously so it does not block the response or affect pipeline rollback.
+      this.updateSummaryDocuments(updatedSlo).catch((err) => {
+        this.logger.debug(
+          `Failed to immediately update summary documents for SLO [id: ${updatedSlo.id}]. ${err}`
+        );
+      });
 
       return this.toResponse(updatedSlo);
     }
@@ -301,7 +306,7 @@ export class UpdateSLO {
     await this.scopedClusterClient.asCurrentUser.updateByQuery({
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
       conflicts: 'proceed',
-      refresh: true,
+      wait_for_completion: false,
       query: {
         bool: {
           filter: [{ term: { 'slo.id': slo.id } }, { term: { 'slo.revision': slo.revision } }],
