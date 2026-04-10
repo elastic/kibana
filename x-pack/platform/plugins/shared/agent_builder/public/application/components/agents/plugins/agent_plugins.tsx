@@ -109,6 +109,7 @@ export const AgentPlugins: React.FC = () => {
   useEffect(() => {
     if (agentLoading || pluginsLoading) return;
 
+    // When a newly added plugin is pending to be selected. Once it is active, select it.
     if (pendingSelectPluginIdRef.current) {
       const pendingInActive = activePlugins.some((p) => p.id === pendingSelectPluginIdRef.current);
       if (pendingInActive) {
@@ -118,15 +119,18 @@ export const AgentPlugins: React.FC = () => {
       }
     }
 
+    // Select first plugin when no plugin is currently selected, like on first render
     if (!selectedPluginId) {
       if (activePlugins.length > 0) {
         setSelectedPluginId(activePlugins[0].id);
       }
-    } else {
-      const stillActive = activePlugins.some((p) => p.id === selectedPluginId);
-      if (!stillActive) {
-        setSelectedPluginId(activePlugins[0]?.id ?? null);
-      }
+      return;
+    }
+
+    // Selected plugin is no longer active, for example after deleting a skill
+    const selectedPluginNotActive = activePlugins.every((p) => p.id !== selectedPluginId);
+    if (selectedPluginNotActive) {
+      setSelectedPluginId(activePlugins[0]?.id ?? null);
     }
   }, [activePlugins, selectedPluginId, setSelectedPluginId, agentLoading, pluginsLoading]);
 
