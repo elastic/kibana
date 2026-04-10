@@ -46,7 +46,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
   > = {
     type: ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, initializeStateApi, uuid, parentApi }) => {
-      const services = await getServices(getStartServices);
+      const services = await getServices(getStartServices, usageCollection);
       const subscriptions = new Subscription();
       const titleManager = initializeTitleManager(initialState);
       const timeRangeManager = initializeTimeRangeManager(initialState);
