@@ -11,7 +11,7 @@ import { useGetApplication } from './use_get_application';
 import { applicationFields, mappings } from './mocks';
 import { SwimlaneConnectorType } from './types';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { waitFor, render, screen } from '@testing-library/react';
+import { waitFor, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
@@ -192,10 +192,58 @@ describe('SwimlaneActionConnectorFields renders', () => {
     });
   });
 
-  // NOTE: The 'renders the correct options per field' test was removed because it asserted
-  // on the React `options` prop of EuiComboBox components, which is not accessible via the DOM
-  // in RTL. EuiComboBox renders options as list items only when the dropdown is open, making
-  // snapshot-style prop assertions not feasible without significant complexity.
+  test('renders the correct options per field', async () => {
+    getApplication.mockResolvedValue({
+      fields: applicationFields,
+    });
+
+    const actionConnector = {
+      actionTypeId: '.swimlane',
+      name: 'swimlane',
+      config: {
+        apiUrl: 'http://test.com',
+        appId: '1234567asbd32',
+        connectorType: 'all',
+        mappings,
+      },
+      secrets: {
+        apiToken: 'test',
+      },
+      isDeprecated: false,
+    };
+
+    render(
+      <ConnectorFormTestProvider connector={actionConnector}>
+        <SwimlaneActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('swimlaneApiUrlInput')).toBeInTheDocument();
+    });
+
+    await userEvent.click(screen.getByTestId('swimlaneConfigureMapping'));
+    await screen.findByTestId('swimlaneAlertIdInput');
+
+    // EuiComboBox uses react-window which doesn't render options in jsdom.
+    // Verify the selected values are displayed in each combobox input instead.
+    const verifyComboBoxValue = (testId: string, expectedValue: string) => {
+      const input = within(screen.getByTestId(testId)).getByRole('combobox') as HTMLInputElement;
+      expect(input.value).toBe(expectedValue);
+    };
+
+    verifyComboBoxValue('swimlaneAlertIdInput', 'Alert Id (alert-id)');
+    verifyComboBoxValue('swimlaneAlertNameInput', 'Rule Name (rule-name)');
+    verifyComboBoxValue('swimlaneSeverityInput', 'Severity (severity)');
+    verifyComboBoxValue('swimlaneCaseIdConfig', 'Case Id (case-id-name)');
+    verifyComboBoxValue('swimlaneCaseNameConfig', 'Case Name (case-name)');
+    verifyComboBoxValue('swimlaneCommentsConfig', 'Comments (notes)');
+    verifyComboBoxValue('swimlaneDescriptionConfig', 'Description (description)');
+  });
 
   describe('Validation', () => {
     const onSubmit = jest.fn();
