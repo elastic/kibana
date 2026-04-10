@@ -4409,6 +4409,10 @@
     "dynamic": false,
     "properties": {}
   },
+  "synthetics-ccs-settings": {
+    "dynamic": false,
+    "properties": {}
+  },
   "synthetics-dynamic-settings": {
     "dynamic": false,
     "properties": {}
