@@ -16,12 +16,10 @@ import type {
 import type {
   Alert,
   EsQuerySnapshot,
-  LegacyField,
   RuleRegistrySearchRequest,
   RuleRegistrySearchResponse,
 } from '@kbn/alerting-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { set } from '@kbn/safer-lodash-set';
 import { catchError, filter, lastValueFrom, map, of } from 'rxjs';
 
 export interface SearchAlertsParams {
@@ -84,8 +82,6 @@ export interface SearchAlertsParams {
 
 export interface SearchAlertsResult {
   alerts: Alert[];
-  oldAlertsData: LegacyField[][];
-  ecsAlertsData: unknown[];
   total: number;
   querySnapshot?: EsQuerySnapshot;
   error?: Error;
@@ -135,13 +131,10 @@ export const searchAlerts = ({
           const { rawResponse } = response;
           const total = parseTotalHits(rawResponse);
           const alerts = parseAlerts(rawResponse);
-          const { oldAlertsData, ecsAlertsData } = transformToLegacyFormat(alerts);
           const alertsError = parseFailure(rawResponse);
 
           return {
             alerts,
-            oldAlertsData,
-            ecsAlertsData,
             total,
             querySnapshot: {
               request: response?.inspect?.dsl ?? [],
@@ -154,8 +147,6 @@ export const searchAlerts = ({
         catchError((error) => {
           return of({
             alerts: [],
-            oldAlertsData: [],
-            ecsAlertsData: [],
             total: 0,
             error,
           });
@@ -205,31 +196,3 @@ const parseFailure = (
     ? new Error(failures[0].reason.reason)
     : undefined;
 };
-
-/**
- * Transforms the alerts to legacy formats (will be removed)
- * @deprecated Will be removed in v8.16.0
- */
-const transformToLegacyFormat = (alerts: Alert[]) =>
-  alerts.reduce<{
-    oldAlertsData: LegacyField[][];
-    ecsAlertsData: unknown[];
-  }>(
-    (acc, alert) => {
-      const itemOldData = Object.entries(alert).reduce<Array<{ field: string; value: string[] }>>(
-        (oldData, [key, value]) => {
-          oldData.push({ field: key, value: value as string[] });
-          return oldData;
-        },
-        []
-      );
-      const ecsData = Object.entries(alert).reduce((ecs, [key, value]) => {
-        set(ecs, key, value ?? []);
-        return ecs;
-      }, {});
-      acc.oldAlertsData.push(itemOldData);
-      acc.ecsAlertsData.push(ecsData);
-      return acc;
-    },
-    { oldAlertsData: [], ecsAlertsData: [] }
-  );

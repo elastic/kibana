@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { TableId } from '@kbn/securitysolution-data-table';
-import type { LegacyField } from '@kbn/alerting-types';
+import type { Alert } from '@kbn/alerting-types';
 import { PageScope } from '../../../../data_view_manager/constants';
 import type { CellValueElementProps } from '../../../../../common/types';
 import { CellValue } from '../../../../detections/configurations/security_solution_detections';
@@ -30,13 +30,26 @@ export const PreviewRenderCellValue: React.FC<
   rowRenderers,
   truncate,
 }) => {
-  const legacyAlert = useMemo(() => (data ?? []) as LegacyField[], [data]);
+  const alert = useMemo<Alert>(() => {
+    const result = (data ?? []).reduce<Record<string, unknown>>((acc, { field, value }) => {
+      if (field === '_id' || field === '_index') {
+        acc[field] = (value as string[])?.[0] ?? '';
+      } else {
+        acc[field] = value;
+      }
+      return acc;
+    }, {});
+    // Fallback _id/_index from ecsData if not in data
+    if (!result._id && ecsData?._id) result._id = ecsData._id;
+    if (!result._index && ecsData?._index) result._index = ecsData._index;
+    return result as Alert;
+  }, [data, ecsData]);
+
   return (
     <CellValue
       tableType={TableId.rulePreview}
       pageScope={PageScope.alerts}
-      legacyAlert={legacyAlert}
-      ecsAlert={ecsData}
+      alert={alert}
       asPlainText={true}
       setCellProps={setCellProps}
       isExpandable={isExpandable}

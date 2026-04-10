@@ -385,8 +385,6 @@ const AlertsTableContent = typedForwardRef(
 
     const {
       alerts = [],
-      oldAlertsData = [],
-      ecsAlertsData = [],
       total: alertsCount = -1,
       querySnapshot: alertsQuerySnapshot,
       error: alertsError,
@@ -524,10 +522,6 @@ const AlertsTableContent = typedForwardRef(
           alerts,
           alertsCount,
 
-          // TODO deprecate
-          ecsAlertsData,
-          oldAlertsData,
-
           browserFields: selectedAlertsFields,
           isLoadingCases: casesQuery.isFetching,
           cases: casesQuery.data,
@@ -568,8 +562,6 @@ const AlertsTableContent = typedForwardRef(
         fieldsQuery.isFetching,
         alerts,
         alertsCount,
-        ecsAlertsData,
-        oldAlertsData,
         selectedAlertsFields,
         pageIndex,
         setPageIndex,
