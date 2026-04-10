@@ -12,16 +12,6 @@ export const remoteSyntheticsClusterSchema = t.type({
   isConnected: t.boolean,
 });
 
-export const storedSyntheticsCCSSettingsSchema = t.intersection([
-  t.type({
-    useAllRemoteClusters: t.boolean,
-    selectedRemoteClusters: t.array(t.string),
-  }),
-  t.partial({
-    remoteKibanaUrls: t.record(t.string, t.string),
-  }),
-]);
-
 export const syntheticsCCSSettingsSchema = t.type({
   useAllRemoteClusters: t.boolean,
   selectedRemoteClusters: t.array(t.string),
@@ -29,5 +19,4 @@ export const syntheticsCCSSettingsSchema = t.type({
 });
 
 export type RemoteSyntheticsCluster = t.TypeOf<typeof remoteSyntheticsClusterSchema>;
-export type StoredSyntheticsCCSSettings = t.TypeOf<typeof storedSyntheticsCCSSettingsSchema>;
 export type SyntheticsCCSSettings = t.TypeOf<typeof syntheticsCCSSettingsSchema>;
