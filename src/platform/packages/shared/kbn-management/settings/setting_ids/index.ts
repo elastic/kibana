@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Actions settings
-export const EARS_OAUTH_ENABLED_SETTING_ID = 'actions:earsOAuthEnabled';
-
 // General settings
 export const DISABLE_REQUEST_BATCHING_ID = 'bfetch:disable';
 export const ELASTIC_CONSOLE_ENABLED_SETTING_ID = 'elasticRamen:enabled';
