@@ -25,10 +25,7 @@ import {
 import { useDataState } from '../../hooks/use_data_state';
 import { FetchStatus } from '../../../types';
 import { useFetchMoreRecords } from '../layout/use_fetch_more_records';
-import {
-  DISCOVER_DATA_ANALYST_AGENT_ID,
-  ESQL_QUERY_RESULTS_ATTACHMENT_TYPE,
-} from '../../../../../common/agent_builder';
+import { ESQL_QUERY_RESULTS_ATTACHMENT_TYPE } from '../../../../../common/agent_builder';
 
 const SESSION_TAG = 'discover';
 const MAX_SAMPLE_ROWS = 15;
@@ -221,7 +218,6 @@ export const DiscoverAgentBuilderConfig = () => {
 
     agentBuilder.setChatConfig({
       sessionTag: SESSION_TAG,
-      agentId: isEsqlMode ? DISCOVER_DATA_ANALYST_AGENT_ID : undefined,
       attachments,
       browserApiTools,
     });
@@ -234,7 +230,6 @@ export const DiscoverAgentBuilderConfig = () => {
     documentState.esqlQueryColumns,
     documentState.result,
     hasEsqlResults,
-    isEsqlMode,
     query,
     timeRange,
     totalHits,

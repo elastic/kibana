@@ -80,7 +80,6 @@ export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.observability}.agent`,
   `${internalNamespaces.search}.agent`,
   `${internalNamespaces.security}.agent`,
-  'discover.data_analyst',
   'elasticsearch-onboarding',
 ] as const;
 
@@ -106,6 +105,9 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // Platform – Dashboard
   'dashboard-management',
+
+  // Platform – Discover
+  'discover-data-analysis',
 
   // Platform – Streams
   'streams-exploration',
