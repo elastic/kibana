@@ -13,11 +13,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiPanel,
   EuiSpacer,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import type { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
@@ -61,32 +61,12 @@ const chatsLabel = i18n.translate('xpack.agentBuilder.sidebar.conversation.chats
   defaultMessage: 'Chats',
 });
 
-const containerStyles = css`
-  display: flex;
-  gap: 0;
-  flex-direction: column;
-  height: 100%;
-  width: 100%;
-  overflow: hidden;
-`;
-
-const flexColumnStyles = css`
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-`;
-
-const conversationListScrollStyles = css`
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-`;
-
-const sectionLabelStyles = (euiTheme: EuiThemeComputed) => css`
-  padding: ${euiTheme.size.xs} ${euiTheme.size.s};
-`;
+const conversationListScrollRegionLabel = i18n.translate(
+  'xpack.agentBuilder.sidebar.conversation.conversationListScrollRegion',
+  {
+    defaultMessage: 'Conversation list',
+  }
+);
 
 export const ConversationSidebarView: React.FC = () => {
   const { pathname } = useLocation();
@@ -113,6 +93,13 @@ export const ConversationSidebarView: React.FC = () => {
   const isActive = (path: string) => pathname === path;
 
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+
+  const sectionLabelCss = useMemo(
+    () => css`
+      padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+    `,
+    [euiTheme]
+  );
 
   useEffect(() => {
     // Once agents have loaded, redirect to the last valid agent if the current agent ID
@@ -145,86 +132,121 @@ export const ConversationSidebarView: React.FC = () => {
   };
 
   return (
-    <div css={containerStyles} data-test-subj="agentBuilderSidebar-conversation">
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="none"
+      responsive={false}
+      data-test-subj="agentBuilderSidebar-conversation"
+      className="eui-fullHeight"
+    >
       <EuiHorizontalRule margin="none" />
 
-      <div css={flexColumnStyles}>
-        <div
-          css={[
-            flexColumnStyles,
-            css`
-              padding: ${euiTheme.size.base};
-            `,
-          ]}
+      <EuiFlexItem grow className="eui-fullHeight">
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="none"
+          responsive={false}
+          className="eui-fullHeight"
         >
-          <div
-            css={css`
-              flex-shrink: 0;
-            `}
-          >
-            <EuiText size="xs" color="subdued" css={sectionLabelStyles(euiTheme)}>
-              {customizeLabel}
-            </EuiText>
-            <EuiSpacer size="xs" />
-            <SidebarNavList items={navItems} isActive={isActive} />
-          </div>
-
-          <EuiSpacer size="l" />
-
-          <div css={flexColumnStyles}>
-            <EuiText size="xs" color="subdued" css={sectionLabelStyles(euiTheme)}>
-              {chatsLabel}
-            </EuiText>
-            <EuiSpacer size="s" />
-            {/* EuiFlexGroup defaults to flex-grow: 1 as a flex item; wrapper keeps list scroll area height */}
-            <div
-              css={css`
-                flex: 0 0 auto;
-                width: 100%;
-              `}
+          <EuiFlexItem grow className="eui-fullHeight">
+            <EuiPanel
+              grow
+              hasBorder={false}
+              hasShadow={false}
+              paddingSize="m"
+              className="eui-fullHeight"
             >
-              <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="flexStart">
-                <EuiFlexItem grow={true}>
-                  <EuiButton
-                    fullWidth
-                    iconType="plus"
-                    size="s"
-                    color="text"
-                    onClick={handlePressNewConversation}
-                    data-test-subj="agentBuilderSidebarNewConversationButton"
-                  >
-                    {newLabel}
-                  </EuiButton>
+              <EuiFlexGroup
+                direction="column"
+                gutterSize="none"
+                responsive={false}
+                className="eui-fullHeight"
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued" css={sectionLabelCss}>
+                    {customizeLabel}
+                  </EuiText>
+                  <EuiSpacer size="xs" />
+                  <SidebarNavList items={navItems} isActive={isActive} />
                 </EuiFlexItem>
-                <EuiFlexItem grow={true}>
-                  <EuiButton
-                    fullWidth
-                    iconType="search"
-                    size="s"
-                    color="text"
-                    aria-label={searchChatsAriaLabel}
-                    onClick={() => setIsSearchModalOpen(true)}
-                    disabled={!hasConversations}
-                    data-test-subj="agentBuilderSidebarSearchChatsButton"
+
+                <EuiFlexItem grow={false}>
+                  <EuiSpacer size="l" />
+                </EuiFlexItem>
+
+                <EuiFlexItem grow className="eui-fullHeight">
+                  <EuiFlexGroup
+                    direction="column"
+                    gutterSize="none"
+                    responsive={false}
+                    className="eui-fullHeight"
                   >
-                    {searchLabel}
-                  </EuiButton>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color="subdued" css={sectionLabelCss}>
+                        {chatsLabel}
+                      </EuiText>
+                      <EuiSpacer size="s" />
+                    </EuiFlexItem>
+
+                    <EuiFlexItem grow={false}>
+                      <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="flexStart">
+                        <EuiFlexItem grow>
+                          <EuiButton
+                            fullWidth
+                            iconType="plus"
+                            size="s"
+                            color="text"
+                            onClick={handlePressNewConversation}
+                            data-test-subj="agentBuilderSidebarNewConversationButton"
+                          >
+                            {newLabel}
+                          </EuiButton>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow>
+                          <EuiButton
+                            fullWidth
+                            iconType="search"
+                            size="s"
+                            color="text"
+                            aria-label={searchChatsAriaLabel}
+                            onClick={() => setIsSearchModalOpen(true)}
+                            disabled={!hasConversations}
+                            data-test-subj="agentBuilderSidebarSearchChatsButton"
+                          >
+                            {searchLabel}
+                          </EuiButton>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+
+                    <EuiFlexItem grow={false}>
+                      <EuiSpacer size="m" />
+                    </EuiFlexItem>
+
+                    <EuiFlexItem
+                      grow
+                      tabIndex={0}
+                      role="region"
+                      aria-label={conversationListScrollRegionLabel}
+                      className="eui-yScroll"
+                    >
+                      <ConversationList
+                        agentId={agentId}
+                        currentConversationId={conversationId}
+                        isNewConversationRoute={isNewConversationRoute}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </div>
-            <EuiSpacer size="m" />
-            <div css={conversationListScrollStyles}>
-              <ConversationList
-                agentId={agentId}
-                currentConversationId={conversationId}
-                isNewConversationRoute={isNewConversationRoute}
-              />
-            </div>
-          </div>
-        </div>
+            </EuiPanel>
+          </EuiFlexItem>
 
-        <ConversationFooter />
-      </div>
+          <EuiFlexItem grow={false}>
+            <ConversationFooter />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
 
       {isSearchModalOpen && (
         <ConversationSearchModal
@@ -239,6 +261,6 @@ export const ConversationSidebarView: React.FC = () => {
           }}
         />
       )}
-    </div>
+    </EuiFlexGroup>
   );
 };
