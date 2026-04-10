@@ -7,6 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const TABLE_CAPTION = i18n.translate('xpack.evals.runsList.tableCaption', {
+  defaultMessage: 'Evaluation runs',
+});
+
 export const SEARCH_PLACEHOLDER = i18n.translate('xpack.evals.runsList.searchPlaceholder', {
   defaultMessage: 'Filter by branch...',
 });
@@ -62,4 +66,18 @@ export const SUITE_FILTER_ARIA_LABEL = i18n.translate('xpack.evals.runsList.suit
 
 export const SUITE_FILTER_ALL_OPTION = i18n.translate('xpack.evals.runsList.suiteFilterAllOption', {
   defaultMessage: 'All suites',
+});
+
+export const LOAD_ERROR_TITLE = i18n.translate('xpack.evals.runsList.loadErrorTitle', {
+  defaultMessage: 'Unable to load runs',
+});
+
+export const getLoadErrorBody = (errorMessage: string) =>
+  i18n.translate('xpack.evals.runsList.loadErrorBody', {
+    defaultMessage: 'An error occurred while loading runs: {errorMessage}',
+    values: { errorMessage },
+  });
+
+export const RETRY_BUTTON = i18n.translate('xpack.evals.runsList.retryButton', {
+  defaultMessage: 'Retry',
 });
