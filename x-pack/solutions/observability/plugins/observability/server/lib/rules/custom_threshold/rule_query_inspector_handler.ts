@@ -53,9 +53,9 @@ const getTimeRangeFromAlert = async (
     return undefined;
   }
 
-  const evalTimeRange = alert[ALERT_EVALUATION_TIME_RANGE] as
-    | { gte: string; lte: string }
-    | undefined;
+  const evalTimeRange = (alert as { [ALERT_EVALUATION_TIME_RANGE]?: { gte: string; lte: string } })[
+    ALERT_EVALUATION_TIME_RANGE
+  ];
 
   return evalTimeRange ? { gte: evalTimeRange.gte, lte: evalTimeRange.lte } : undefined;
 };
