@@ -156,7 +156,8 @@ export const AlertEventOverview: DocViewerComponent = ({ hit }) => {
             data-test-subj="exploreSecurity"
             href={exploreUrl}
             target="_blank"
-            iconType="link"
+            iconSide="right"
+            iconType="external"
             fill
             aria-label={i18n.overviewExploreButtonLabel(isAlert)}
           >
