@@ -24,6 +24,7 @@ export const dataControlSchema = schema.object({
   }),
   field_name: schema.string({
     meta: { description: 'The name of the field in the data view that the control is tied to' },
+    minLength: 1,
   }),
   use_global_filters: schema.boolean({
     defaultValue: DEFAULT_DATA_CONTROL_STATE.use_global_filters,
