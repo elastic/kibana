@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { v4 as generateUuid } from 'uuid';
+import { toSlugIdentifier } from '@kbn/std';
 import { isRecord } from '../../../../common/lib/type_guards';
 import { parseYamlToJSONWithoutValidation } from '../../../../common/lib/yaml';
 
@@ -42,17 +44,21 @@ function countInputs(raw: unknown): number {
   return 0;
 }
 
+export function generatePreviewId(name: string | null): string {
+  return name ? toSlugIdentifier(name) : `workflow-${generateUuid()}`;
+}
+
 /**
  * Extracts lightweight preview metadata from a raw workflow YAML string.
  * Uses unvalidated parsing so that even partially-valid YAML produces
  * whatever metadata is available.
  */
-export function extractWorkflowPreview(id: string, yaml: string): WorkflowPreview {
+export function extractWorkflowPreview(yaml: string): WorkflowPreview {
   const result = parseYamlToJSONWithoutValidation(yaml);
 
   if (!result.success || result.json == null || typeof result.json !== 'object') {
     return {
-      id,
+      id: generatePreviewId(null),
       name: null,
       description: null,
       triggers: [],
@@ -69,5 +75,13 @@ export function extractWorkflowPreview(id: string, yaml: string): WorkflowPrevie
   const inputCount = countInputs(json.inputs);
   const stepCount = Array.isArray(json.steps) ? json.steps.length : 0;
 
-  return { id, name, description, triggers, inputCount, stepCount, valid: true };
+  return {
+    id: generatePreviewId(name),
+    name,
+    description,
+    triggers,
+    inputCount,
+    stepCount,
+    valid: true,
+  };
 }

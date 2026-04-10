@@ -8,7 +8,6 @@
  */
 
 import JSZip from 'jszip';
-import { v4 as generateUuid } from 'uuid';
 import YAML from 'yaml';
 import { MAX_WORKFLOW_YAML_LENGTH } from '@kbn/workflows';
 import {
@@ -83,7 +82,7 @@ async function parseZipFile(buffer: ArrayBuffer): Promise<ClientPreflightResult>
 
     if (!isValidWorkflowId(id)) {
       parseErrors.push(
-        `Entry [${name}] has an invalid workflow ID: must match [a-zA-Z0-9._-] and be 1-255 characters`
+        `Entry [${name}] has an invalid workflow ID: must match [a-z0-9-] and be 3-255 characters`
       );
       // eslint-disable-next-line no-continue
       continue;
@@ -114,10 +113,10 @@ async function parseZipFile(buffer: ArrayBuffer): Promise<ClientPreflightResult>
       continue;
     }
 
-    const preview = extractWorkflowPreview(id, yaml);
+    const preview = extractWorkflowPreview(yaml);
     workflows.push(preview);
-    workflowIds.push(id);
-    rawWorkflows.push({ id, yaml });
+    workflowIds.push(preview.id);
+    rawWorkflows.push({ id: preview.id, yaml });
   }
 
   if (manifestParsed.data.exportedCount !== workflows.length) {
@@ -143,17 +142,15 @@ function parseYamlFile(content: string, filename: string): ClientPreflightResult
     );
   }
 
-  const id = `workflow-${generateUuid()}`;
-
-  const preview = extractWorkflowPreview(id, content);
+  const preview = extractWorkflowPreview(content);
 
   return {
     format: 'yaml',
     totalWorkflows: 1,
     parseErrors: [],
     workflows: [preview],
-    workflowIds: [id],
-    rawWorkflows: [{ id, yaml: content }],
+    workflowIds: [preview.id],
+    rawWorkflows: [{ id: preview.id, yaml: content }],
   };
 }
 

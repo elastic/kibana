@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { v4 as generateUuid } from 'uuid';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import type {
@@ -60,6 +59,7 @@ export interface ImportWorkflowsParams {
   workflows: Array<{ id: string; yaml: string }>;
   overwrite?: boolean;
   generateNewIds?: boolean;
+  conflictIds: Array<{ id: string; existingName: string }>;
 }
 
 // Context type for storing previous query data to enable rollback on mutation errors
@@ -383,13 +383,20 @@ export function useWorkflowActions() {
     ImportWorkflowsParams
   >({
     mutationKey: ['POST', 'workflows', '_bulk_create'],
-    mutationFn: ({ workflows, overwrite, generateNewIds }) => {
+    mutationFn: ({ workflows, overwrite, generateNewIds, conflictIds }) => {
       let processedWorkflows = workflows;
 
       if (generateNewIds) {
+        const conflictIdMapping = new Set(conflictIds.map((c) => c.id));
         const idMapping = new Map<string, string>();
         for (const w of workflows) {
-          idMapping.set(w.id, `workflow-${generateUuid()}`);
+          let id = w.id;
+          let counter = 0;
+          // add a numeric postfix to avoid collisions with existing workflows or other workflows in the same import batch
+          while (conflictIdMapping.has(id)) {
+            id = `${id}-${++counter}`;
+          }
+          idMapping.set(w.id, id);
         }
         processedWorkflows = workflows.map((w) => {
           const newId = idMapping.get(w.id);
