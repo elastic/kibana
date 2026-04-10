@@ -175,6 +175,15 @@ export default function (ctx: FtrProviderContext) {
           full_name: 'test user',
         });
 
+        // Ensure auth/session state from previous privilege scenarios is fully cleared
+        await security.forceLogout();
+
+        // Avoid stale app redirects/chrome-hidden states before switching users.
+        await common.navigateToUrl('home', '', {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+
         await security.login('global_discover_read_user', 'global_discover_read_user-password', {
           expectSpaceSelector: false,
         });
