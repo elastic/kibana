@@ -14,8 +14,8 @@ test.describe(
   { tag: ['@local-stateful-classic', '@local-serverless-search'] },
   () => {
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginAsPrivilegedUser();
       await pageObjects.featureSettings.mockConnectors();
+      await browserAuth.loginAsPrivilegedUser();
       await pageObjects.featureSettings.goto();
     });
 
