@@ -44,7 +44,7 @@ export async function getRuleExecutor(
       `Rule "${rule.id}" contains a STATS query that cannot produce document-level alerts. ` +
         `This is a transient state — the rule will be uninstalled on the next syncQueries cycle. Skipping execution.`
     );
-    return { state: { previousOriginalDocumentIds: state.previousOriginalDocumentIds ?? [] } };
+    return { state: { previousOriginalDocumentIds: [] } };
   }
 
   const previousOriginalDocumentIds = state.previousOriginalDocumentIds ?? [];

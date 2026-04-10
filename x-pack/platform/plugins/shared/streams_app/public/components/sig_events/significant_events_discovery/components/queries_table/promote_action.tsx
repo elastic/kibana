@@ -58,19 +58,23 @@ export function PromoteAction({ item }: { item: SignificantEventItem }) {
     ? PROMOTED_TOOLTIP_CONTENT
     : PROMOTE_QUERY_ACTION_TITLE;
 
+  const isDisabled = item.rule_backed || isStats || promoteMutation.isLoading;
+
   return (
-    <EuiToolTip content={label} disableScreenReaderOutput>
-      <EuiButtonIcon
-        iconType="plusCircle"
-        aria-label={label}
-        isLoading={promoteMutation.isLoading}
-        isDisabled={item.rule_backed || isStats || promoteMutation.isLoading}
-        onClick={() => {
-          promoteMutation.mutate({
-            queryIds: [item.query.id],
-          });
-        }}
-      />
+    <EuiToolTip content={label}>
+      <span>
+        <EuiButtonIcon
+          iconType="plusCircle"
+          aria-label={label}
+          isLoading={promoteMutation.isLoading}
+          isDisabled={isDisabled}
+          onClick={() => {
+            promoteMutation.mutate({
+              queryIds: [item.query.id],
+            });
+          }}
+        />
+      </span>
     </EuiToolTip>
   );
 }

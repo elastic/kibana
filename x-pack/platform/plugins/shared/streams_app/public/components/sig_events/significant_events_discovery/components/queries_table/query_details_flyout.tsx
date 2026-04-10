@@ -231,13 +231,13 @@ export function QueryDetailsFlyout({
         {/* Second header: title and metadata cards */}
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
-            <h2 id={flyoutTitleId}>{item.query.title}</h2>
+            <h2 id={flyoutTitleId}>{isEditMode ? title : item.query.title}</h2>
           </EuiTitle>
           <EuiSpacer size="m" />
           <EuiFlexGroup gutterSize="s" responsive={false} wrap>
             <EuiFlexItem>
               <FlyoutMetadataCard title={SEVERITY_DETAILS_LABEL}>
-                <SeverityBadge score={item.query.severity_score} />
+                <SeverityBadge score={isEditMode ? severityScore : item.query.severity_score} />
               </FlyoutMetadataCard>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -254,9 +254,9 @@ export function QueryDetailsFlyout({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          {queryType === QUERY_TYPE_STATS && (
-            <>
+        <EuiFlyoutBody
+          banner={
+            queryType === QUERY_TYPE_STATS && (
               <EuiCallOut
                 announceOnMount
                 title={STATS_CALLOUT_TITLE}
@@ -266,9 +266,9 @@ export function QueryDetailsFlyout({
               >
                 <p>{STATS_CALLOUT_DESCRIPTION}</p>
               </EuiCallOut>
-              <EuiSpacer size="s" />
-            </>
-          )}
+            )
+          }
+        >
           {!isEditMode && (
             <EuiFlexGroup direction="column" gutterSize="m">
               <EuiFlexItem>

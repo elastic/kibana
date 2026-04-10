@@ -26,7 +26,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { QUERY_TYPE_MATCH, QUERY_TYPE_STATS } from '@kbn/streams-schema';
+import { QUERY_TYPE_MATCH, QUERY_TYPE_STATS, deriveQueryType } from '@kbn/streams-schema';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
@@ -193,7 +193,10 @@ export function QueriesTable() {
         currentSelectedQuery !== null
           ? {
               ...currentSelectedQuery,
-              query: variables.updatedQuery,
+              query: {
+                ...variables.updatedQuery,
+                type: deriveQueryType(variables.updatedQuery.esql.query),
+              },
             }
           : currentSelectedQuery
       );
@@ -310,7 +313,7 @@ export function QueriesTable() {
       },
       {
         field: 'query.type',
-        name: i18n.translate('xpack.streams.queriesTable.typeColumn', {
+        name: i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.typeColumn', {
           defaultMessage: 'Type',
         }),
         width: '80px',
@@ -415,7 +418,7 @@ export function QueriesTable() {
           <h2>
             {i18n.translate(
               'xpack.streams.significantEventsDiscovery.queriesTable.emptyState.title',
-              { defaultMessage: 'Rules' }
+              { defaultMessage: 'Queries' }
             )}
           </h2>
         }
@@ -425,7 +428,7 @@ export function QueriesTable() {
               'xpack.streams.significantEventsDiscovery.queriesTable.emptyState.description',
               {
                 defaultMessage:
-                  'Once your streams data are onboarded, rules will be proposed for promotion. Promoting a rule activates it — matched events feed directly into Significant Events.',
+                  'Once your streams data are onboarded, queries will be proposed for promotion. Promoting a query activates it — matched events feed directly into Significant Events.',
               }
             )}
           </p>

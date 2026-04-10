@@ -802,16 +802,24 @@ export class QueryClient {
       throw installError;
     }
 
-    await this.syncQueryList(
-      definition,
-      allNextQueryLinks.map((link) => ({
-        [ASSET_ID]: link[ASSET_ID],
-        [ASSET_TYPE]: link[ASSET_TYPE],
-        query: link.query,
-        rule_backed: link.rule_backed,
-        rule_id: link.rule_id,
-      }))
-    );
+    try {
+      await this.syncQueryList(
+        definition,
+        allNextQueryLinks.map((link) => ({
+          [ASSET_ID]: link[ASSET_ID],
+          [ASSET_TYPE]: link[ASSET_TYPE],
+          query: link.query,
+          rule_backed: link.rule_backed,
+          rule_id: link.rule_id,
+        }))
+      );
+    } catch (syncError) {
+      this.dependencies.logger.error(
+        `syncQueryList failed after installQueries for stream "${definition.name}". ` +
+          `Alerting rules may be out of sync with stored query assets until the next sync cycle.`
+      );
+      throw syncError;
+    }
   }
 
   public async upsert(definition: Streams.all.Definition, query: StreamQuery) {
@@ -869,12 +877,12 @@ export class QueryClient {
     const { [stream]: currentQueryLinks } = await this.getStreamToQueryLinksMap([stream]);
     const currentIds = new Set(currentQueryLinks.map((link) => link.query.id));
     const indexOperationsMap = new Map(
-      operations
-        .filter((operation) => operation.index)
-        .map((operation) => [operation.index!.id, operation.index!])
+      operations.flatMap((operation) =>
+        operation.index ? [[operation.index.id, operation.index] as const] : []
+      )
     );
     const deleteOperationIds = new Set(
-      operations.filter((operation) => operation.delete).map((operation) => operation.delete!.id)
+      operations.flatMap((operation) => (operation.delete ? [operation.delete.id] : []))
     );
 
     const nextQueries: QueryLink[] = [
@@ -884,15 +892,17 @@ export class QueryClient {
           const update = indexOperationsMap.get(link.query.id);
           return update ? { ...link, query: update } : link;
         }),
-      ...operations
-        .filter((operation) => operation.index && !currentIds.has(operation.index.id))
-        .map((operation) =>
-          toQueryLinkFromQuery({
-            query: operation.index!,
-            stream,
-            ruleBacked: options?.createRules !== false,
-          })
-        ),
+      ...operations.flatMap((operation) =>
+        operation.index && !currentIds.has(operation.index.id)
+          ? [
+              toQueryLinkFromQuery({
+                query: operation.index,
+                stream,
+                ruleBacked: options?.createRules !== false,
+              }),
+            ]
+          : []
+      ),
     ];
 
     if (options?.createRules === false) {

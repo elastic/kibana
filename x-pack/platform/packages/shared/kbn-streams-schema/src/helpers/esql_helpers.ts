@@ -396,6 +396,19 @@ export function getStatsQueryHints(esql: string): string[] {
 
   checkIsNotNullDenominator(statsCmd, commandsFromStats, hints);
 
+  const byArgs = findStatsByArgs(esql);
+  if (byArgs) {
+    const nonBucketByColumns = byArgs.filter((arg) => {
+      const fnName = getAssignmentRhsFnName(arg);
+      return fnName !== 'bucket' && fnName !== 'tbucket';
+    });
+    if (nonBucketByColumns.length > 2) {
+      hints.push(
+        `Warning: ${nonBucketByColumns.length} non-temporal GROUP BY dimensions detected. High-cardinality combinations (>50 distinct groups per bucket) cause result explosion. Prefer at most 1–2 entity dimensions.`
+      );
+    }
+  }
+
   const disallowed = ['sort', 'limit', 'keep'];
   const found = commandsAfterStats
     .filter((cmd) => disallowed.includes(cmd.name))
@@ -451,6 +464,7 @@ function getAssignmentRhsFnName(arg: ByArg): string | null {
   if (Array.isArray(arg) || !('type' in arg)) return null;
   if (arg.type !== 'function' || !('name' in arg) || arg.name !== '=') return null;
   const rawRhs = (arg as { args: ESQLCommand['args'] }).args[1];
+  // The AST wraps some RHS expressions in a single-element array
   const rhs = Array.isArray(rawRhs) ? rawRhs[0] : rawRhs;
   if (rhs && !Array.isArray(rhs) && 'type' in rhs && rhs.type === 'function' && 'name' in rhs) {
     return (rhs.name as string).toLowerCase();

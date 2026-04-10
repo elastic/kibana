@@ -48,20 +48,14 @@ function msToEsqlBucketSize(ms: number): string {
 }
 
 function stripLimitCommand(esql: string): string {
-  let result: string;
-  try {
-    const { root } = Parser.parse(esql);
-    const commandsWithoutLimit = root.commands.filter(
-      (cmd) => !('name' in cmd && cmd.name === 'limit')
-    );
-    if (commandsWithoutLimit.length === root.commands.length) return esql;
-    result = BasicPrettyPrinter.print(
-      Builder.expression.query(commandsWithoutLimit as ESQLCommand[])
-    );
-  } catch {
-    result = esql.replace(/\|\s*LIMIT\s+\d+/gi, '');
-  }
-  return result.replace(/\s*\|\s*$/, '').trim();
+  const { root } = Parser.parse(esql);
+  const commandsWithoutLimit = root.commands.filter(
+    (cmd) => !('name' in cmd && cmd.name === 'limit')
+  );
+  if (commandsWithoutLimit.length === root.commands.length) return esql;
+  return BasicPrettyPrinter.print(
+    Builder.expression.query(commandsWithoutLimit as ESQLCommand[])
+  );
 }
 
 /**
@@ -83,12 +77,7 @@ function buildHistogramQuery(
   bucketSize: string,
   timestampField: string = '@timestamp'
 ): string {
-  let root;
-  try {
-    ({ root } = Parser.parse(esqlQuery));
-  } catch {
-    throw new Error(`Failed to parse ES|QL query for preview histogram: ${esqlQuery}`);
-  }
+  const { root } = Parser.parse(esqlQuery);
 
   const { value, unit } = parseBucketSize(bucketSize);
 
