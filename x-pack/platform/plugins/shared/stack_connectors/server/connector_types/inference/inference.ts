@@ -211,13 +211,10 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
         meta: true,
         requestTimeout: 180_000,
         signal: params.signal,
-        ...(params.telemetryMetadata?.pluginId
-          ? {
-              headers: {
-                'X-Elastic-Product-Use-Case': params.telemetryMetadata?.pluginId,
-              },
-            }
-          : {}),
+        headers: {
+          // always send a value for EIS
+          'X-Elastic-Product-Use-Case': params.telemetryMetadata?.pluginId ?? 'inference',
+        },
       }
     );
     // errors should be thrown as it will not be a stream response
