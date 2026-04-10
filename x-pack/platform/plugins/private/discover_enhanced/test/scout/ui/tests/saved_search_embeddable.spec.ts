@@ -85,7 +85,6 @@ test.describe('Discover app - saved search embeddable', { tag: tags.deploymentAg
     });
 
     await page.reload();
-    await page.waitForLoadingIndicatorHidden();
     await expect(
       page.testSubj.locator('embeddableError'),
       'Embeddable error should be displayed'

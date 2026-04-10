@@ -94,6 +94,8 @@ export const createRuleRoute = (router: SecuritySolutionPluginRouter): void => {
             endpointService: ctx.securitySolution.getEndpointService(),
             rulePayload: request.body,
             spaceId: ctx.securitySolution.getSpaceId(),
+            checkOsqueryResponseActionAuthz:
+              ctx.securitySolution.getCheckOsqueryResponseActionAuthz(),
           });
 
           const createdRule = await detectionRulesClient.createCustomRule({
