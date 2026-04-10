@@ -12,7 +12,14 @@ import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { warningsSchema } from '../warnings_schema';
 
 export function getSanitizeRequestBodySchema() {
-  return getDashboardStateSchema(true);
+  const dashboardProps = getDashboardStateSchema(true).getPropSchemas();
+
+  return schema.object({
+    ...dashboardProps,
+    // incoming title may be an empty string if on a new dashboard so we
+    // remove the minLength requirement
+    title: schema.string(),
+  });
 }
 
 export function getSanitizeResponseBodySchema() {

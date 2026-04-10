@@ -113,7 +113,7 @@ describe('transformPanelsOut', () => {
       },
     ];
     const panelsOut = transformPanelsOut(panelsJSON, sections);
-    getDashboardStateSchema(true).validate({ title: '', panels: panelsOut.panels });
+    getDashboardStateSchema(true).validate({ title: 'My dashboard', panels: panelsOut.panels });
     expect(panelsOut).toMatchInlineSnapshot(`
       Object {
         "panels": Array [
@@ -157,5 +157,10 @@ describe('transformPanelsOut', () => {
         "warnings": Array [],
       }
     `);
+  });
+
+  it('should require dashboard title minLength of 1', () => {
+    const strictSchema = getDashboardStateSchema(false);
+    expect(() => strictSchema.validate({ title: '' })).toThrow();
   });
 });
