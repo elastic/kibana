@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Os from 'os';
-
 jest.mock('@kbn/dev-cli-runner', () => ({
   run: jest.fn(),
 }));
@@ -22,10 +20,6 @@ jest.mock('@kbn/dev-validation-runner', () => ({
   resolveValidationBaseContext: jest.fn(),
   VALIDATION_RUN_HELP: [],
   VALIDATION_RUN_STRING_FLAGS: [],
-}));
-
-jest.mock('@kbn/moon', () => ({
-  getMoonExecutablePath: jest.fn().mockResolvedValue('/mock/moon'),
 }));
 
 jest.mock('@kbn/repo-info', () => ({
@@ -55,8 +49,20 @@ jest.mock('@kbn/tooling-log', () => ({
   })),
 }));
 
-jest.mock('@kbn/repo-packages', () => ({
-  getPackages: jest.fn(),
+const mockRunJestViaMoon = jest.fn();
+const mockFindJestConfig = jest.fn();
+
+jest.mock('@kbn/test', () => ({
+  runJestViaMoon: (...args: unknown[]) => mockRunJestViaMoon(...args),
+  findJestConfig: (...args: unknown[]) => mockFindJestConfig(...args),
+  JEST_CONFIG_NAMES: [
+    'jest.config.dev.js',
+    'jest.config.js',
+    'jest.config.cjs',
+    'jest.config.mjs',
+    'jest.config.ts',
+    'jest.config.json',
+  ],
 }));
 
 jest.mock('fs', () => ({
@@ -76,7 +82,6 @@ const mockExecuteTypeCheckValidation = jest.requireMock('./type_check_validation
   .executeTypeCheckValidation as jest.Mock;
 const mockExecuteEslintValidation = jest.requireMock('./eslint/run_eslint_contract')
   .executeEslintValidation as jest.Mock;
-const mockGetPackages = jest.requireMock('@kbn/repo-packages').getPackages as jest.Mock;
 const mockExistsSync = jest.requireMock('fs').existsSync as jest.Mock;
 const mockExeca = mockExecaFn;
 
@@ -127,7 +132,6 @@ const baseContext = {
 
 describe('run_check', () => {
   let stdoutSpy: jest.SpyInstance;
-  let cpusSpy: jest.SpyInstance;
   let previousExitCode: typeof process.exitCode;
 
   beforeAll(() => {
@@ -140,7 +144,6 @@ describe('run_check', () => {
     previousExitCode = process.exitCode;
     process.exitCode = undefined;
     stdoutSpy = jest.spyOn(process.stdout, 'write').mockReturnValue(true);
-    cpusSpy = jest.spyOn(Os, 'cpus').mockReturnValue(new Array(8).fill({}) as any);
     mockReadValidationRunFlags.mockReturnValue({});
     mockResolveValidationBaseContext.mockResolvedValue(baseContext);
     mockExistsSync.mockImplementation(
@@ -154,25 +157,22 @@ describe('run_check', () => {
       warningCount: 0,
     });
     mockExecuteTypeCheckValidation.mockResolvedValue({ projectCount: 2 });
-    mockGetPackages.mockReturnValue([
-      { directory: '/repo/packages/foo' },
-      { directory: '/repo/packages/bar' },
-    ]);
 
-    // Mock Moon jest run (success, 1 config ran, 5 tests via --json)
-    mockExeca.mockResolvedValue({
+    // Default: successful Moon jest run
+    mockRunJestViaMoon.mockResolvedValue({
+      taskCount: 1,
+      cachedCount: 0,
+      totalTests: 5,
+      failed: [],
       exitCode: 0,
-      stdout: [
-        'pass RunTask(@kbn/foo:jest) (1s 200ms, abc123)',
-        '@kbn/foo:jest | {"success":true,"numTotalTests":5,"numPassedTests":5,"numFailedTests":0,"testResults":[]}',
-      ].join('\n'),
-      stderr: '',
     });
+
+    // For fast path tests
+    mockFindJestConfig.mockReturnValue('packages/foo/jest.config.js');
   });
 
   afterEach(() => {
     process.exitCode = previousExitCode;
-    cpusSpy.mockRestore();
     stdoutSpy.mockRestore();
   });
 
@@ -312,11 +312,7 @@ describe('run_check', () => {
     expect(output).toContain('node scripts/jest packages/foo/src/bar.test.ts');
   });
 
-  it('still invokes Moon for downstream Jest tasks when the changed package has no local config', async () => {
-    mockGetPackages.mockReturnValue([
-      { directory: '/repo/packages/baz' },
-      { directory: '/repo/packages/foo' },
-    ]);
+  it('passes downstream flag to runJestViaMoon', async () => {
     mockResolveValidationBaseContext.mockResolvedValue({
       ...baseContext,
       contract: {
@@ -335,54 +331,31 @@ describe('run_check', () => {
 
     await handler(createArgs());
 
-    expect(mockExeca).toHaveBeenCalledWith(
-      '/mock/moon',
-      expect.arrayContaining(['--affected', '--stdin', '--downstream', 'deep']),
-      expect.any(Object)
+    expect(mockRunJestViaMoon).toHaveBeenCalledWith(
+      expect.objectContaining({
+        changedFiles: ['packages/baz/src/index.ts'],
+        downstream: 'deep',
+      })
     );
 
     const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
     expect(output).toContain('jest  ✓ 1 config ran, 5 tests');
   });
 
-  it('caps Moon concurrency at two for cache-heavy affected Jest runs', async () => {
-    mockGetPackages.mockReturnValue([
-      { directory: '/repo/packages/foo' },
-      { directory: '/repo/packages/bar' },
-      { directory: '/repo/packages/baz' },
-      { directory: '/repo/packages/qux' },
-    ]);
-    mockResolveValidationBaseContext.mockResolvedValue({
-      ...baseContext,
-      runContext: {
-        ...baseContext.runContext,
-        changedFiles: [
-          'packages/foo/src/index.ts',
-          'packages/bar/src/index.ts',
-          'packages/baz/src/index.ts',
-          'packages/qux/src/index.ts',
-        ],
-      },
-    });
-
-    await handler(createArgs());
-
-    expect(mockExeca).toHaveBeenCalledWith(
-      '/mock/moon',
-      expect.arrayContaining(['--concurrency', '2', '--maxWorkers=4']),
-      expect.any(Object)
-    );
-  });
-
   it('reports Moon Jest startup failures instead of saying no affected configs', async () => {
-    mockExeca.mockResolvedValue({
+    mockRunJestViaMoon.mockResolvedValue({
+      taskCount: 0,
+      cachedCount: 0,
+      totalTests: 0,
+      failed: [],
       exitCode: 1,
-      stdout: '',
-      stderr: [
+      failureExcerpt: [
         '@kbn/foo:jest | Error: task_runner::run_failed',
-        '@kbn/foo:jest | Broken startup before Jest JSON output',
-        'Error: task_runner::run_failed',
-      ].join('\n'),
+        'Broken startup before Jest JSON output',
+      ],
+      warnings: [
+        'Moon exited with code 1 but no Jest task output was parsed. The Jest task may have failed before producing JSON output — run jest directly to verify.',
+      ],
     });
 
     await handler(createArgs());
@@ -394,29 +367,38 @@ describe('run_check', () => {
     expect(output).not.toContain('jest  — no affected configs');
   });
 
-  it('uses the repo root Jest config when no package-level config is found', async () => {
-    mockExistsSync.mockImplementation((p: string) => p === '/repo/jest.config.js');
-    mockResolveValidationBaseContext.mockResolvedValue({
-      ...baseContext,
-      runContext: {
-        ...baseContext.runContext,
-        changedFiles: ['packages/foo/src/index.ts'],
-      },
-    });
-    mockExeca.mockResolvedValue({
-      exitCode: 0,
-      stdout: [
-        'fail RunTask(@kbn/foo:jest) (1s 200ms, abc123)',
-        '@kbn/foo:jest | {"success":false,"numTotalTests":1,"numPassedTests":0,"numFailedTests":1,"testResults":[{"name":"/repo/packages/foo/src/bar.test.ts","assertionResults":[{"status":"failed","fullName":"fails","failureMessages":["Error\\n    at /repo/packages/foo/src/bar.test.ts:12:3"]}]}]}',
-      ].join('\n'),
-      stderr: '',
+  it('reports failed Jest configs with failure details', async () => {
+    mockRunJestViaMoon.mockResolvedValue({
+      taskCount: 2,
+      cachedCount: 0,
+      totalTests: 3,
+      failed: [
+        {
+          project: '@kbn/foo',
+          configPath: 'packages/foo/jest.config.js',
+          cached: false,
+          passed: false,
+          testCount: 1,
+          failures: [
+            {
+              file: 'packages/foo/src/bar.test.ts',
+              line: 12,
+              name: 'bar should work',
+              message: 'Error: expected true\n    at /repo/packages/foo/src/bar.test.ts:12:3',
+            },
+          ],
+        },
+      ],
+      exitCode: 1,
     });
 
     await handler(createArgs());
 
     expect(process.exitCode).toBe(1);
     const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
-    expect(output).toContain('node scripts/jest --config jest.config.js');
+    expect(output).toContain('jest  ✗');
+    expect(output).toContain('FAIL packages/foo/src/bar.test.ts:12');
+    expect(output).toContain('node scripts/jest --config packages/foo/jest.config.js');
   });
 
   it('uses the repo root tsconfig in the tsc rerun command when no nearer config exists', async () => {
