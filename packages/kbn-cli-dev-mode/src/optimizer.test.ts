@@ -392,10 +392,12 @@ describe('rspack path', () => {
     jest.resetModules();
 
     const update$ = new Rx.Subject<OptimizerUpdate>();
-    const kbnOptimizer = await import('@kbn/optimizer');
+    const kbnOptimizer = jest.mocked(await import('@kbn/optimizer'));
 
     kbnOptimizer.runOptimizer.mockImplementation(() => update$);
-    kbnOptimizer.OptimizerConfig.create.mockImplementation(() => new MockOptimizerConfig());
+    kbnOptimizer.OptimizerConfig.create.mockImplementation(
+      () => new MockOptimizerConfig() as unknown as ReturnType<typeof kbnOptimizer.OptimizerConfig.create>
+    );
     kbnOptimizer.logOptimizerState.mockImplementation(realOptimizer.logOptimizerState);
     kbnOptimizer.logOptimizerProgress.mockImplementation(realOptimizer.logOptimizerProgress);
 

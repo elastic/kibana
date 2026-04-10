@@ -44,7 +44,7 @@ describe('worker', () => {
         totalSize: 100,
       });
 
-      process.emit('message' as never, {
+      (process as unknown as NodeJS.EventEmitter).emit('message', {
         type: 'start',
         options: {
           repoRoot: '/repo',
@@ -86,7 +86,7 @@ describe('worker', () => {
         totalSize: 0,
       });
 
-      process.emit('message' as never, {
+      (process as unknown as NodeJS.EventEmitter).emit('message', {
         type: 'start',
         options: {
           repoRoot: '/r',
@@ -126,7 +126,7 @@ describe('worker', () => {
         totalSize: 1024,
       });
 
-      process.emit('message' as never, {
+      (process as unknown as NodeJS.EventEmitter).emit('message', {
         type: 'start',
         options: { repoRoot: '/repo' },
       });
@@ -147,7 +147,7 @@ describe('worker', () => {
         errors: ['compile failed'],
       });
 
-      process.emit('message' as never, {
+      (process as unknown as NodeJS.EventEmitter).emit('message', {
         type: 'start',
         options: { repoRoot: '/repo' },
       });
@@ -165,7 +165,7 @@ describe('worker', () => {
     it('sends done with error message when runBuild throws', async () => {
       jest.mocked(runBuild).mockRejectedValue(new Error('boom'));
 
-      process.emit('message' as never, {
+      (process as unknown as NodeJS.EventEmitter).emit('message', {
         type: 'start',
         options: { repoRoot: '/repo' },
       });
@@ -191,7 +191,7 @@ describe('worker', () => {
         return { success: true, entryCount: 1, totalSize: 0 };
       });
 
-      process.emit('message' as never, {
+      (process as unknown as NodeJS.EventEmitter).emit('message', {
         type: 'start',
         options: { repoRoot: '/repo' },
       });
@@ -221,7 +221,7 @@ describe('worker', () => {
         totalSize: 0,
       });
 
-      process.emit('message' as never, {
+      (process as unknown as NodeJS.EventEmitter).emit('message', {
         type: 'start',
         options: { repoRoot: '/repo', watch: true },
       });
