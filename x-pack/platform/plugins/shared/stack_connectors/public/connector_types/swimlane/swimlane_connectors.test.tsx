@@ -138,8 +138,7 @@ describe('SwimlaneActionConnectorFields renders', () => {
     );
 
     await userEvent.click(screen.getByTestId('swimlaneConfigureMapping'));
-
-    await waitFor(() => {});
+    await screen.findByTestId('swimlaneCaseIdConfig');
     expect(screen.queryByTestId('swimlaneAlertIdInput')).not.toBeInTheDocument();
     expect(screen.queryByTestId('swimlaneAlertNameInput')).not.toBeInTheDocument();
     expect(screen.queryByTestId('swimlaneSeverityInput')).not.toBeInTheDocument();

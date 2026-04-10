@@ -151,13 +151,11 @@ describe('CollapsedItemActions', () => {
       expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
 
       await userEvent.click(screen.getByTestId('disableButton'));
-      await waitFor(async () => {
-        expect(screen.getByTestId('untrackAlertsModal')).toBeInTheDocument();
-        expect(bulkDisableRules).not.toHaveBeenCalled();
-      });
+      expect(await screen.findByTestId('untrackAlertsModal')).toBeInTheDocument();
+      expect(bulkDisableRules).not.toHaveBeenCalled();
 
       await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-      await waitFor(async () => {
+      await waitFor(() => {
         expect(bulkDisableRules).toHaveBeenCalledWith({ ids: ['1'], untrack: false });
       });
     });
@@ -171,13 +169,11 @@ describe('CollapsedItemActions', () => {
       expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
 
       await userEvent.click(screen.getByTestId('disableButton'));
-      await waitFor(async () => {
-        expect(screen.getByTestId('untrackAlertsModal')).toBeInTheDocument();
-        expect(bulkDisableRules).not.toHaveBeenCalled();
-      });
+      expect(await screen.findByTestId('untrackAlertsModal')).toBeInTheDocument();
+      expect(bulkDisableRules).not.toHaveBeenCalled();
 
       await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-      await waitFor(async () => {
+      await waitFor(() => {
         expect(bulkDisableRules).toHaveBeenCalledWith({ ids: ['1'], untrack: false });
       });
     });
@@ -191,8 +187,8 @@ describe('CollapsedItemActions', () => {
       expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
 
       await userEvent.click(screen.getByTestId('disableButton'));
-      await waitFor(async () => {
-        expect(screen.queryByTestId('untrackAlertsModal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('untrackAlertsModal')).not.toBeInTheDocument();
+      await waitFor(() => {
         expect(bulkDisableRules).toHaveBeenCalledWith({ ids: ['1'], untrack: false });
       });
     });

@@ -57,14 +57,11 @@ describe('rule_quick_edit_buttons', () => {
       renderComponent({ autoRecoverAlerts: true });
 
       await userEvent.click(screen.getByTestId('bulkDisable'));
-
-      await waitFor(async () => {
-        expect(screen.getByTestId('untrackAlertsModal')).toBeInTheDocument();
-        expect(onDisable).not.toHaveBeenCalled();
-      });
+      expect(await screen.findByTestId('untrackAlertsModal')).toBeInTheDocument();
+      expect(onDisable).not.toHaveBeenCalled();
 
       await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-      await waitFor(async () => {
+      await waitFor(() => {
         expect(onDisable).toHaveBeenCalledTimes(1);
         expect(onDisable).toHaveBeenCalledWith(false);
       });
@@ -74,14 +71,11 @@ describe('rule_quick_edit_buttons', () => {
       renderComponent({ autoRecoverAlerts: undefined });
 
       await userEvent.click(screen.getByTestId('bulkDisable'));
-
-      await waitFor(async () => {
-        expect(screen.getByTestId('untrackAlertsModal')).toBeInTheDocument();
-        expect(onDisable).not.toHaveBeenCalled();
-      });
+      expect(await screen.findByTestId('untrackAlertsModal')).toBeInTheDocument();
+      expect(onDisable).not.toHaveBeenCalled();
 
       await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-      await waitFor(async () => {
+      await waitFor(() => {
         expect(onDisable).toHaveBeenCalledTimes(1);
         expect(onDisable).toHaveBeenCalledWith(false);
       });
@@ -91,9 +85,8 @@ describe('rule_quick_edit_buttons', () => {
       renderComponent({ autoRecoverAlerts: false });
 
       await userEvent.click(screen.getByTestId('bulkDisable'));
-
-      await waitFor(async () => {
-        expect(screen.queryByTestId('untrackAlertsModal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('untrackAlertsModal')).not.toBeInTheDocument();
+      await waitFor(() => {
         expect(onDisable).toHaveBeenCalledWith(false);
       });
     });

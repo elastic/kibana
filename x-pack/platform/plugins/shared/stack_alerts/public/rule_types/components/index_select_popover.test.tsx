@@ -150,10 +150,7 @@ describe('IndexSelectPopover', () => {
     expect((searchInput as HTMLInputElement).value).toEqual('');
 
     await userEvent.type(searchInput, 'indexPattern1');
-
-    await waitFor(() => {
-      expect(searchInput.value).toEqual('indexPattern1');
-    });
+    expect(searchInput.value).toEqual('indexPattern1');
 
     // Options should be loaded - click first available option in the combobox options list
     // (scoped to avoid matching <select><option> elements from the time field selector)
