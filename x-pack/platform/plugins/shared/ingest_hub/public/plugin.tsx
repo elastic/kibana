@@ -15,6 +15,7 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { INGEST_HUB_APP_ID } from '@kbn/deeplinks-observability';
 import type { Observable } from 'rxjs';
 import { catchError, from, map, of, switchMap } from 'rxjs';
@@ -101,7 +102,9 @@ export class IngestHubPlugin
         const root = createRoot(element);
         root.render(
           coreStart.rendering.addContext(
-            <IngestHubApp ingestFlows={this.ingestFlows} history={history} />
+            <KibanaContextProvider services={coreStart}>
+              <IngestHubApp ingestFlows={this.ingestFlows} history={history} />
+            </KibanaContextProvider>
           )
         );
         return () => root.unmount();

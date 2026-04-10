@@ -14,7 +14,7 @@ import { IngestFlowTile } from './ingest_flow_tile';
 interface IngestFlowCategoryProps {
   category: string;
   flows: IngestFlow[];
-  onFlowClick: (flowId: string) => void;
+  onFlowClick: (appId: string, path: string) => void;
 }
 
 export const IngestFlowCategory: React.FC<IngestFlowCategoryProps> = ({
@@ -33,7 +33,10 @@ export const IngestFlowCategory: React.FC<IngestFlowCategoryProps> = ({
       <EuiFlexGrid columns={3} gutterSize="m">
         {sortedFlows.map((flow) => (
           <EuiFlexItem key={flow.id}>
-            <IngestFlowTile flow={flow} onClick={() => onFlowClick(flow.id)} />
+            <IngestFlowTile
+              flow={flow}
+              onClick={() => onFlowClick(flow.navigateTo.appId, flow.navigateTo.path)}
+            />
           </EuiFlexItem>
         ))}
       </EuiFlexGrid>

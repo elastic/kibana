@@ -5,31 +5,11 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
-import { dynamic } from '@kbn/shared-ux-utility';
 import { i18n } from '@kbn/i18n';
 import type { ObservabilityOnboardingPluginStartDeps } from '../plugin';
+import { PLUGIN_ID } from '../../common';
 
-export const registerIngestFlows = (
-  core: CoreStart,
-  plugins: ObservabilityOnboardingPluginStartDeps
-) => {
-  const isServerless = Boolean(plugins.cloud?.isServerlessEnabled);
-
-  const deps = {
-    core,
-    plugins,
-    isServerless,
-  };
-
-  const KubernetesFlow = dynamic(async () => {
-    const [{ createIngestFlowComponent }, { KubernetesPanel }] = await Promise.all([
-      import('./ingest_flow_wrapper'),
-      import('../application/quickstart_flows/kubernetes'),
-    ]);
-    return { default: createIngestFlowComponent(deps, KubernetesPanel) };
-  });
-
+export const registerIngestFlows = (plugins: ObservabilityOnboardingPluginStartDeps) => {
   plugins.ingestHub?.registerIngestFlow({
     id: 'kubernetes',
     title: i18n.translate('xpack.observability_onboarding.ingestHub.kubernetes.title', {
@@ -42,6 +22,6 @@ export const registerIngestFlows = (
     category: i18n.translate('xpack.observability_onboarding.ingestHub.category.containers', {
       defaultMessage: 'Containers',
     }),
-    component: KubernetesFlow,
+    navigateTo: { appId: PLUGIN_ID, path: '/kubernetes/?category=kubernetes' },
   });
 };

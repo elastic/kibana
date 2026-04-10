@@ -147,7 +147,7 @@ export class ObservabilityOnboardingPlugin
   public async start(core: CoreStart, plugins: ObservabilityOnboardingPluginStartDeps) {
     if (plugins.ingestHub) {
       const { registerIngestFlows } = await import('./ingest_hub/register_ingest_flows');
-      registerIngestFlows(core, plugins);
+      registerIngestFlows(plugins);
     }
     return {
       locators: this.locators,

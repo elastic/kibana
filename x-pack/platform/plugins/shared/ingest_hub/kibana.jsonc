@@ -10,6 +10,7 @@
     "browser": true,
     "server": false,
     "configPath": ["xpack", "ingestHub"],
-    "optionalPlugins": ["spaces", "cloud"]
+    "optionalPlugins": ["spaces", "cloud"],
+    "requiredBundles": ["kibanaReact"]
   }
 }

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { Fragment, useCallback, useMemo, useState } from 'react';
+import React, { Fragment, useCallback, useMemo } from 'react';
 import type { ScopedHistory } from '@kbn/core/public';
 import { EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Router } from '@kbn/shared-ux-router';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IngestFlow } from './types';
 import { IngestFlowCategory } from './components/ingest_flow_category';
-import { IngestFlowFlyout } from './components/ingest_flow_flyout';
 
 interface IngestHubAppProps {
   ingestFlows: IngestFlow[];
@@ -30,18 +30,16 @@ const groupByCategory = (flows: IngestFlow[]): Map<string, IngestFlow[]> => {
 };
 
 export const IngestHubApp: React.FC<IngestHubAppProps> = ({ ingestFlows, history }) => {
-  const [selectedFlowId, setSelectedFlowId] = useState<string | null>(null);
+  const { services } = useKibana();
 
   const categorizedFlows = useMemo(() => groupByCategory(ingestFlows), [ingestFlows]);
 
-  const selectedFlow = useMemo(
-    () => ingestFlows.find((flow) => flow.id === selectedFlowId) ?? null,
-    [ingestFlows, selectedFlowId]
+  const handleFlowClick = useCallback(
+    (appId: string, path: string) => {
+      services.application?.navigateToApp(appId, { path });
+    },
+    [services.application]
   );
-
-  const handleCloseFlyout = useCallback(() => {
-    setSelectedFlowId(null);
-  }, []);
 
   return (
     <Router history={history}>
@@ -54,17 +52,11 @@ export const IngestHubApp: React.FC<IngestHubAppProps> = ({ ingestFlows, history
         <EuiPageTemplate.Section>
           {[...categorizedFlows.entries()].map(([category, flows]) => (
             <Fragment key={category}>
-              <IngestFlowCategory
-                category={category}
-                flows={flows}
-                onFlowClick={setSelectedFlowId}
-              />
+              <IngestFlowCategory category={category} flows={flows} onFlowClick={handleFlowClick} />
               <EuiSpacer size="xl" />
             </Fragment>
           ))}
         </EuiPageTemplate.Section>
-
-        {selectedFlow && <IngestFlowFlyout flow={selectedFlow} onClose={handleCloseFlyout} />}
       </EuiPageTemplate>
     </Router>
   );
