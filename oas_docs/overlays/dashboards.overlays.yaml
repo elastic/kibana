@@ -156,7 +156,7 @@ actions:
               "h": 10
             },
             "config": {
-              "savedObjectId": "1e4f0a30-b3c5-11ef-bd7a-2b6b1a8c0f3d"
+              "ref_id": "1e4f0a30-b3c5-11ef-bd7a-2b6b1a8c0f3d"
             }
           }
           ```
@@ -186,7 +186,6 @@ actions:
               "metrics": [
                 {
                   "type": "primary",
-                  "operation": "value",
                   "column": "count"
                 }
               ]
