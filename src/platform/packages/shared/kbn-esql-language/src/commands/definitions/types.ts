@@ -499,16 +499,6 @@ export interface ESQLMessage {
   underlinedWarning?: boolean;
 }
 
-export interface EditorError {
-  startLineNumber: number;
-  endLineNumber: number;
-  startColumn: number;
-  endColumn: number;
-  message: string;
-  code: string;
-  severity: 'error' | 'warning' | number;
-}
-
 /**
  * Handles numeric types in ES|QL.
  */
