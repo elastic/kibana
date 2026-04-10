@@ -87,7 +87,7 @@ describe('Serialization utils', () => {
         density: DataGridDensity.COMPACT,
         header_row_height: 'auto',
         row_height: 'auto',
-        query: { language: 'kuery', query: '' },
+        query: { language: 'kql', expression: '' },
         filters: [],
         rows_per_page: 100,
         sample_size: 100,
