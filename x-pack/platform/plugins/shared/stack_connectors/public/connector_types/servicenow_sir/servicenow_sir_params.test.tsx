@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useGetChoices } from '../lib/servicenow/use_get_choices';
@@ -252,9 +252,9 @@ describe('ServiceNowSIRParamsFields renders', () => {
       onChoicesSuccess(choicesResponse.choices);
     });
 
-    const categorySelect = screen.getByTestId('categorySelect') as HTMLSelectElement;
-    const options = Array.from(categorySelect.querySelectorAll('option')).map((opt) => ({
-      value: opt.value,
+    const categorySelect = screen.getByTestId('categorySelect');
+    const options = within(categorySelect).getAllByRole('option').map((opt) => ({
+      value: (opt as HTMLOptionElement).value,
       text: opt.textContent,
     }));
     expect(options).toEqual([
@@ -278,9 +278,9 @@ describe('ServiceNowSIRParamsFields renders', () => {
       onChoicesSuccess(choicesResponse.choices);
     });
 
-    const subcategorySelect = screen.getByTestId('subcategorySelect') as HTMLSelectElement;
-    const options = Array.from(subcategorySelect.querySelectorAll('option')).map((opt) => ({
-      value: opt.value,
+    const subcategorySelect = screen.getByTestId('subcategorySelect');
+    const options = within(subcategorySelect).getAllByRole('option').map((opt) => ({
+      value: (opt as HTMLOptionElement).value,
       text: opt.textContent,
     }));
     expect(options).toEqual([
@@ -309,9 +309,9 @@ describe('ServiceNowSIRParamsFields renders', () => {
       onChoicesSuccess(choicesResponse.choices);
     });
 
-    const prioritySelect = screen.getByTestId('prioritySelect') as HTMLSelectElement;
-    const options = Array.from(prioritySelect.querySelectorAll('option')).map((opt) => ({
-      value: opt.value,
+    const prioritySelect = screen.getByTestId('prioritySelect');
+    const options = within(prioritySelect).getAllByRole('option').map((opt) => ({
+      value: (opt as HTMLOptionElement).value,
       text: opt.textContent,
     }));
     expect(options).toEqual([
