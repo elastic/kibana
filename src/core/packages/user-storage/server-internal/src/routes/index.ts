@@ -10,17 +10,14 @@
 import { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
 import type { IRouter } from '@kbn/core-http-server';
+import { AuthzDisabled } from '@kbn/core-security-server';
 import type {
   CoreRequestHandlerContext,
   RequestHandlerContext,
 } from '@kbn/core-http-request-handler-context-server';
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { UserStorageDefinition } from '@kbn/core-user-storage-common';
 import { USER_STORAGE_SO_TYPE, USER_STORAGE_GLOBAL_SO_TYPE } from '../saved_objects';
 import { UserStorageClient } from '../user_storage_client';
-
-const AUTHZ_DISABLED_REASON =
-  "User storage routes only give access to the current user's own data, scoped by profile_uid.";
 
 const FORBIDDEN_MESSAGE = 'User profile not available';
 
@@ -36,7 +33,6 @@ interface RegisterRoutesParams {
 const getSoClient = (coreCtx: CoreRequestHandlerContext) =>
   coreCtx.savedObjects.getClient({
     includedHiddenTypes: [USER_STORAGE_SO_TYPE, USER_STORAGE_GLOBAL_SO_TYPE],
-    excludedExtensions: [SECURITY_EXTENSION_ID],
   });
 
 const createClientOrNull = (
@@ -59,7 +55,7 @@ export const registerRoutes = ({ router, definitions, logger }: RegisterRoutesPa
       path: '/internal/user_storage',
       validate: false,
       security: {
-        authz: { enabled: false, reason: AUTHZ_DISABLED_REASON },
+        authz: AuthzDisabled.delegateToSOClient,
       },
     },
     async (requestHandlerContext, _request, response) => {
@@ -80,7 +76,7 @@ export const registerRoutes = ({ router, definitions, logger }: RegisterRoutesPa
         body: z.object({ value: z.unknown() }),
       },
       security: {
-        authz: { enabled: false, reason: AUTHZ_DISABLED_REASON },
+        authz: AuthzDisabled.delegateToSOClient,
       },
     },
     async (requestHandlerContext, request, response) => {
@@ -114,7 +110,7 @@ export const registerRoutes = ({ router, definitions, logger }: RegisterRoutesPa
         params: z.object({ key: z.string() }),
       },
       security: {
-        authz: { enabled: false, reason: AUTHZ_DISABLED_REASON },
+        authz: AuthzDisabled.delegateToSOClient,
       },
     },
     async (requestHandlerContext, request, response) => {

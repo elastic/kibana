@@ -14,7 +14,6 @@ import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { InternalSavedObjectsServiceStart } from '@kbn/core-saved-objects-server-internal';
 import type { SavedObjectsServiceSetup } from '@kbn/core-saved-objects-server';
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { InternalSecurityServiceStart } from '@kbn/core-security-server-internal';
 import type {
   UserStorageDefinition,
@@ -91,7 +90,6 @@ export class UserStorageService {
 
         const savedObjectsClient = savedObjects.getScopedClient(request, {
           includedHiddenTypes: [USER_STORAGE_SO_TYPE, USER_STORAGE_GLOBAL_SO_TYPE],
-          excludedExtensions: [SECURITY_EXTENSION_ID],
         });
 
         return new UserStorageClient({
