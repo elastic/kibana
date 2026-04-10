@@ -80,6 +80,9 @@ const createBaseXYCharts = async (
   await pageObjects.lens.saveAndReturn();
   await pageObjects.dashboard.waitForPanelsToLoad(1);
 
+  // Ensure the dashboard UI is fully stable before opening the next panel
+  await pageObjects.dashboard.waitForRenderComplete();
+
   await pageObjects.dashboard.openNewLensPanel();
   await pageObjects.lens.configureXYDimensions({
     y: { operation: 'count' },
@@ -94,8 +97,7 @@ const createBaseXYCharts = async (
   await pageObjects.dashboard.waitForPanelsToLoad(2);
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/258148
-spaceTest.describe.skip('Sync colors', { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe('Sync colors', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
     await scoutSpace.savedObjects.load(LENS_BASIC_KIBANA_ARCHIVE);
