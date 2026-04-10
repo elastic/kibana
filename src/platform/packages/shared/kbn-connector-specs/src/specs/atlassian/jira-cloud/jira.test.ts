@@ -52,6 +52,18 @@ describe('JiraConnector', () => {
     });
   });
 
+  describe('buildBaseUrl', () => {
+    it.each([
+      ['config is undefined', undefined],
+      ['subdomain is missing', {}],
+    ])('should throw a clear error when %s', async (_, config) => {
+      const ctx = { ...mockContext, config } as unknown as ActionContext;
+      await expect(
+        JiraConnector.actions.searchIssuesWithJql.handler(ctx, { jql: 'project = X' })
+      ).rejects.toThrow('Jira Cloud subdomain is required');
+    });
+  });
+
   describe('searchIssuesWithJql action', () => {
     it('should search issues with JQL and return response data', async () => {
       const mockResponse = {

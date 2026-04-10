@@ -35,7 +35,11 @@ const buildBaseUrl = (ctx: ActionContext): string => {
     }
     return `https://api.atlassian.com/ex/jira/${cloudId}`;
   }
-  return `https://${(ctx.config?.subdomain as string).trim()}.atlassian.net`;
+  const subdomain = String(ctx.config?.subdomain ?? '').trim();
+  if (subdomain === '') {
+    throw new Error('Jira Cloud subdomain is required');
+  }
+  return `https://${subdomain}.atlassian.net`;
 };
 
 export const JiraConnector: ConnectorSpec = {
