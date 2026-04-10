@@ -37300,13 +37300,42 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agents-all AND fleet-agent-policies-all AND fleet-settings-all.
+        List all Fleet-managed data streams with metadata including package, namespace, size, and last activity.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all AND fleet-agent-policies-all AND fleet-settings-all.
       operationId: get-fleet-data-streams
       parameters: []
       responses:
         '200':
           content:
             application/json:
+              examples:
+                getDataStreamsExample:
+                  description: List of Fleet-managed data streams
+                  value:
+                    data_streams:
+                      - dashboards:
+                          - id: nginx-overview
+                            title: Nginx Overview
+                        dataset: nginx.access
+                        index: logs-nginx.access-default
+                        last_activity_ms: 1700000000000
+                        namespace: default
+                        package: nginx
+                        package_version: 1.20.0
+                        serviceDetails: null
+                        size_in_bytes: 1048576
+                        size_in_bytes_formatted: 1mb
+                        type: logs
+                      - dashboards: []
+                        dataset: system.cpu
+                        index: metrics-system.cpu-default
+                        last_activity_ms: 1699999000000
+                        namespace: default
+                        package: system
+                        package_version: 1.38.0
+                        serviceDetails: null
+                        size_in_bytes: 524288
+                        size_in_bytes_formatted: 512kb
+                        type: metrics
               schema:
                 additionalProperties: false
                 type: object
@@ -37378,10 +37407,17 @@ paths:
                     type: array
                 required:
                   - data_streams
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -37399,7 +37435,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get data streams
       tags:
         - Data streams
