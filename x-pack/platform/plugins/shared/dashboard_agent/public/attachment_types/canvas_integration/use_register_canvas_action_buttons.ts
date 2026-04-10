@@ -29,6 +29,7 @@ interface UseRegisterCanvasActionButtonsParams {
   closeCanvas: () => void;
   openSidebarConversation?: () => void;
   savedObjectStatus: SavedObjectStatus;
+  canWriteDashboards: boolean;
 }
 
 export const useRegisterCanvasActionButtons = ({
@@ -42,12 +43,20 @@ export const useRegisterCanvasActionButtons = ({
   attachmentOrigin,
   isSidebar,
   savedObjectStatus,
+  canWriteDashboards,
 }: UseRegisterCanvasActionButtonsParams) => {
   const timeRangeRef = useLatest(timeRange);
   const attachmentOriginRef = useLatest(attachmentOrigin);
   const dashboardStateRef = useLatest(dashboardState);
   const openSidebarConversationRef = useLatest(openSidebarConversation);
   const savedObjectStatusRef = useLatest(savedObjectStatus);
+
+  const disabledReason = i18n.translate(
+    'xpack.dashboardAgent.attachments.dashboard.canvasWriteControlsDisabledReason',
+    {
+      defaultMessage: 'You need dashboard write permissions to edit or save dashboards.',
+    }
+  );
 
   useEffect(() => {
     if (!dashboardApi) {
@@ -64,7 +73,12 @@ export const useRegisterCanvasActionButtons = ({
           defaultMessage: 'Edit in Dashboards',
         }),
         type: ActionButtonType.PRIMARY,
+        disabled: !canWriteDashboards,
+        disabledReason: !canWriteDashboards ? disabledReason : undefined,
         handler: async () => {
+          if (!canWriteDashboards) {
+            return;
+          }
           const existingAttachmentOrigin =
             savedObjectStatusRef.current.status === 'resolved' &&
             savedObjectStatusRef.current.exists
@@ -89,7 +103,12 @@ export const useRegisterCanvasActionButtons = ({
       }),
       icon: 'save',
       type: ActionButtonType.PRIMARY,
+      disabled: !canWriteDashboards,
+      disabledReason: !canWriteDashboards ? disabledReason : undefined,
       handler: async () => {
+        if (!canWriteDashboards) {
+          return;
+        }
         const existingAttachmentOrigin =
           savedObjectStatusRef.current.status === 'resolved' && savedObjectStatusRef.current.exists
             ? attachmentOriginRef.current
@@ -117,5 +136,7 @@ export const useRegisterCanvasActionButtons = ({
     dashboardStateRef,
     savedObjectStatusRef,
     isSidebar,
+    canWriteDashboards,
+    disabledReason,
   ]);
 };

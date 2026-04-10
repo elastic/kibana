@@ -20,6 +20,7 @@ import type {
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { DashboardCanvasContent } from './canvas_integration/dashboard_canvas_content';
+import { DashboardCapabilitiesProvider } from './canvas_integration/dashboard_capabilities_context';
 import { createDashboardAppIntegration$ } from './dashboard_integration/dashboard_app_integration';
 import { previewAttachmentInDashboard } from './dashboard_integration/preview_attachment';
 import { selectDashboardAttachmentForSync } from './dashboard_integration/select_dashboard_attachment_for_sync';
@@ -29,11 +30,13 @@ export const registerDashboardAttachmentUiDefinition = ({
   dashboardLocator,
   unifiedSearch,
   dashboardPlugin,
+  canWriteDashboards,
 }: {
   agentBuilder: AgentBuilderPluginStart;
   dashboardLocator?: DashboardRendererProps['locator'];
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dashboardPlugin: DashboardStart;
+  canWriteDashboards: boolean;
 }): (() => void) => {
   const { attachments } = agentBuilder;
   let dashboardApi: DashboardApi | undefined;
@@ -93,13 +96,15 @@ export const registerDashboardAttachmentUiDefinition = ({
       };
     },
     renderCanvasContent: (props, callbacks) => (
-      <DashboardCanvasContent
-        {...props}
-        {...callbacks}
-        dashboardLocator={dashboardLocator}
-        searchBarComponent={unifiedSearch.ui.SearchBar}
-        checkSavedDashboardExist={checkSavedDashboardExist}
-      />
+      <DashboardCapabilitiesProvider value={{ canWriteDashboards }}>
+        <DashboardCanvasContent
+          {...props}
+          {...callbacks}
+          dashboardLocator={dashboardLocator}
+          searchBarComponent={unifiedSearch.ui.SearchBar}
+          checkSavedDashboardExist={checkSavedDashboardExist}
+        />
+      </DashboardCapabilitiesProvider>
     ),
     getActionButtons: ({ attachment, openCanvas, isCanvas, updateOrigin }) => {
       if (isCanvas) {

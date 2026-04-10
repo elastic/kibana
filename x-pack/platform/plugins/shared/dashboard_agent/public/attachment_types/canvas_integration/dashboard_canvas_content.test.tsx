@@ -14,6 +14,7 @@ import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import { DashboardCanvasContent } from './dashboard_canvas_content';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
+import { DashboardCapabilitiesProvider } from './dashboard_capabilities_context';
 
 jest.mock('@kbn/dashboard-plugin/public', () => ({
   DashboardRenderer: jest.fn(() => <div data-test-subj="dashboardRenderer" />),
@@ -70,7 +71,8 @@ describe('DashboardCanvasContent', () => {
   type DashboardCanvasContentProps = React.ComponentProps<typeof DashboardCanvasContent>;
 
   const renderDashboardCanvasContent = async (
-    propsOverride: Partial<DashboardCanvasContentProps> = {}
+    propsOverride: Partial<DashboardCanvasContentProps> = {},
+    { canWriteDashboards = true }: { canWriteDashboards?: boolean } = {}
   ) => {
     const registerActionButtons: jest.MockedFunction<
       DashboardCanvasContentProps['registerActionButtons']
@@ -95,7 +97,11 @@ describe('DashboardCanvasContent', () => {
       ...propsOverride,
     };
 
-    const renderResult = render(<DashboardCanvasContent {...props} />);
+    const renderResult = render(
+      <DashboardCapabilitiesProvider value={{ canWriteDashboards }}>
+        <DashboardCanvasContent {...props} />
+      </DashboardCapabilitiesProvider>
+    );
 
     // Wait for savedObjectStatus to resolve before DashboardRenderer is rendered
     await waitFor(() => {
@@ -134,7 +140,45 @@ describe('DashboardCanvasContent', () => {
     );
   });
 
+  it('registers disabled action buttons with an explanation when dashboard write access is unavailable', async () => {
+    const { registerActionButtons } = await renderDashboardCanvasContent(
+      {},
+      { canWriteDashboards: false }
+    );
+
+    expect(registerActionButtons).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: 'Edit in Dashboards',
+          disabled: true,
+          disabledReason: 'You need dashboard write permissions to edit or save dashboards.',
+        }),
+        expect.objectContaining({
+          label: 'Save',
+          disabled: true,
+          disabledReason: 'You need dashboard write permissions to edit or save dashboards.',
+        }),
+      ])
+    );
+  });
+
   describe('Edit in Dashboards button', () => {
+    it('should not navigate when dashboard write access is unavailable', async () => {
+      const { registerActionButtons, mockApi, closeCanvas, openSidebarConversation } =
+        await renderDashboardCanvasContent({}, { canWriteDashboards: false });
+
+      const buttons: ActionButton[] = registerActionButtons.mock.calls.at(-1)?.[0] ?? [];
+      const editButton = buttons.find((b) => b.label === 'Edit in Dashboards');
+
+      await act(async () => {
+        await editButton?.handler();
+      });
+
+      expect(mockApi.locator?.navigate).not.toHaveBeenCalled();
+      expect(closeCanvas).not.toHaveBeenCalled();
+      expect(openSidebarConversation).not.toHaveBeenCalled();
+    });
+
     it('should call closeCanvas and openSidebarConversation when isSidebar is false', async () => {
       const { registerActionButtons, closeCanvas, openSidebarConversation, mockApi } =
         await renderDashboardCanvasContent({
@@ -246,6 +290,27 @@ describe('DashboardCanvasContent', () => {
   });
 
   describe('Save button', () => {
+    it('should not run save handlers when dashboard write access is unavailable', async () => {
+      const updateOrigin = jest.fn().mockResolvedValue(undefined);
+      const { registerActionButtons, mockApi } = await renderDashboardCanvasContent(
+        {
+          updateOrigin,
+        },
+        { canWriteDashboards: false }
+      );
+
+      const buttons: ActionButton[] = registerActionButtons.mock.calls.at(-1)?.[0] ?? [];
+      const saveButton = buttons.find((b) => b.label === 'Save');
+
+      await act(async () => {
+        await saveButton?.handler();
+      });
+
+      expect(mockApi.runQuickSave).not.toHaveBeenCalled();
+      expect(mockApi.runInteractiveSave).not.toHaveBeenCalled();
+      expect(updateOrigin).not.toHaveBeenCalled();
+    });
+
     it('should run quick save when linked saved object exists', async () => {
       const attachmentWithOrigin: DashboardAttachment = {
         ...mockAttachment,
