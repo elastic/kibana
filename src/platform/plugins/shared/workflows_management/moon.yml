@@ -96,6 +96,8 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/management-settings-ids'
+  - '@kbn/use-observable'
+  - '@kbn/cloud-plugin'
 tags:
   - plugin
   - prod
