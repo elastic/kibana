@@ -144,7 +144,8 @@ export const GET_DATA_VIEW_DESCRIPTION =
 export const UPDATE_DATA_VIEW_DESCRIPTION =
   'Update an existing data view. Only the fields provided in the request body are updated.';
 
-export const DELETE_DATA_VIEW_DESCRIPTION = 'Delete a data view by its identifier.';
+export const DELETE_DATA_VIEW_DESCRIPTION =
+  'Delete a data view by its identifier. WARNING: When you delete a data view, it cannot be recovered.';
 
 export const GET_DEFAULT_DATA_VIEW_DESCRIPTION =
   'Retrieve the identifier of the default data view for the current Kibana space.';

@@ -76,7 +76,18 @@ const getDataViewsRouteFactory =
               },
             })
           ),
-          typeMeta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+          typeMeta: schema.maybe(
+            schema.object(
+              {},
+              {
+                unknowns: 'allow',
+                meta: {
+                  description:
+                    'Type-specific metadata. For rollup data views, contains information about rollup jobs and their capabilities.',
+                },
+              }
+            )
+          ),
           name: schema.maybe(
             schema.string({
               meta: { description: 'The human-readable display name for the data view.' },
