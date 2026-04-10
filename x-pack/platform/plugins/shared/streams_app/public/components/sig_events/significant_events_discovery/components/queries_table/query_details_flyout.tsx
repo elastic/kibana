@@ -396,9 +396,14 @@ const STREAM_LABEL = i18n.translate(
   { defaultMessage: 'Stream' }
 );
 
-const QUERY_INFORMATION_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.queryInformationTitle',
-  { defaultMessage: 'Query information' }
+const GENERAL_INFORMATION_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.generalInformationTitle',
+  { defaultMessage: 'General information' }
+);
+
+const QUERY_PANEL_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.queryPanelTitle',
+  { defaultMessage: 'Query' }
 );
 
 const TYPE_LABEL = i18n.translate(
