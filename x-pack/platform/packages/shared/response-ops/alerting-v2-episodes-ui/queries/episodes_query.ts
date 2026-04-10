@@ -8,7 +8,11 @@
 import type { ComposerQuery } from '@elastic/esql';
 import { esql } from '@elastic/esql';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
-import { ALERT_EVENTS_DATA_STREAM, PAGE_SIZE_ESQL_VARIABLE } from '../constants';
+import {
+  ALERT_EVENTS_DATA_STREAM,
+  ALERT_ACTIONS_DATA_STREAM,
+  PAGE_SIZE_ESQL_VARIABLE,
+} from '../constants';
 
 export interface AlertEpisode {
   '@timestamp': string;
@@ -79,7 +83,6 @@ export const buildEpisodesBaseQuery = (search?: string): ComposerQuery => {
   const query = esql.from(ALERT_EVENTS_DATA_STREAM).where`type == "alert"`;
 
   if (search) {
-    // The query string must be applied before EVALs and aggregations
     addQueryStringFilter(query, search);
   }
 
@@ -90,6 +93,9 @@ export const buildEpisodesBaseQuery = (search?: string): ComposerQuery => {
 
 /**
  * Builds an ES|QL query for episodes request with sorting and filtering.
+ *
+ * Joins `.rule-events` and `.alert-actions` so that user-driven deactivation
+ * is reflected in an `effective_status` column used for status filtering.
  */
 export const buildEpisodesQuery = (
   sortState: EpisodesSortState = { sortField: '@timestamp', sortDirection: 'desc' },
@@ -99,10 +105,23 @@ export const buildEpisodesQuery = (
   const sortDir = sortState.sortDirection.toUpperCase() as 'ASC' | 'DESC';
   const pageSizeParam = esql.par(undefined, PAGE_SIZE_ESQL_VARIABLE);
 
-  const query = buildEpisodesBaseQuery(filterState?.queryString?.trim());
+  const query = esql.from(ALERT_EVENTS_DATA_STREAM, ALERT_ACTIONS_DATA_STREAM)
+    .where`type == "alert" OR action_type IN ("deactivate", "activate")`
+    .pipe`INLINE STATS last_deactivate_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate") BY group_hash`
+    .where`type == "alert"`;
+
+  const search = filterState?.queryString?.trim();
+  if (search) {
+    addQueryStringFilter(query, search);
+  }
+
+  addEpisodeAggregation(query);
+
+  // Derive effective status: overridden to "inactive" when the latest action is "deactivate"
+  query.pipe`EVAL effective_status = CASE(last_deactivate_action == "deactivate", "inactive", episode.status)`;
 
   if (filterState?.status) {
-    query.where`episode.status == ${filterState.status}`;
+    query.where`effective_status == ${filterState.status}`;
   }
 
   if (filterState?.ruleId) {

@@ -98,8 +98,9 @@ test.describe(
         rangeTo: testData.END_DATE,
       });
 
-      await test.step('Verify errors table is visible', async () => {
+      await test.step('Verify error link is visible in overview errors table', async () => {
         await expect(serviceDetailsPage.overviewTab.serviceOverviewErrorsTable).toBeVisible();
+        await expect(serviceDetailsPage.errorsTab.getErrorLink('MockError')).toBeVisible();
       });
 
       await test.step('Click on an error', async () => {
