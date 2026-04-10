@@ -24,12 +24,12 @@ describe('FigmaConnector', () => {
     jest.clearAllMocks();
   });
 
-  it('should define all actions as tools for agent exposure', () => {
-    expect(FigmaConnector.actions.getFile.isTool).toBe(true);
-    expect(FigmaConnector.actions.renderNodes.isTool).toBe(true);
-    expect(FigmaConnector.actions.listProjectFiles.isTool).toBe(true);
-    expect(FigmaConnector.actions.listTeamProjects.isTool).toBe(true);
-    expect(FigmaConnector.actions.whoAmI.isTool).toBe(true);
+  it('should define every action (except test) as a tool for agent exposure', () => {
+    for (const actionName of Object.keys(FigmaConnector.actions)) {
+      if (actionName !== 'test') {
+        expect(FigmaConnector.actions[actionName].isTool).toBe(true);
+      }
+    }
   });
 
   describe('auth', () => {

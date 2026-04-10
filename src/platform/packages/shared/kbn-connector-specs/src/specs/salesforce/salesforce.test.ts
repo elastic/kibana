@@ -28,13 +28,12 @@ describe('SalesforceConnector', () => {
     jest.clearAllMocks();
   });
 
-  it('should define all actions as tools for agent exposure', () => {
-    expect(SalesforceConnector.actions.query.isTool).toBe(true);
-    expect(SalesforceConnector.actions.get_record.isTool).toBe(true);
-    expect(SalesforceConnector.actions.list_records.isTool).toBe(true);
-    expect(SalesforceConnector.actions.search.isTool).toBe(true);
-    expect(SalesforceConnector.actions.describe.isTool).toBe(true);
-    expect(SalesforceConnector.actions.download_file.isTool).toBe(true);
+  it('should define every action (except test) as a tool for agent exposure', () => {
+    for (const actionName of Object.keys(SalesforceConnector.actions)) {
+      if (actionName !== 'test') {
+        expect(SalesforceConnector.actions[actionName].isTool).toBe(true);
+      }
+    }
   });
 
   describe('auth', () => {
