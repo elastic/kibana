@@ -6,56 +6,22 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
 import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
 import { BASE_ALERTING_API_PATH } from '../../../../types';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 import type { RuleQueryInspectorRegistry } from '../../../../rule_query_inspector/registry';
-
-const paramSchema = schema.object({
-  id: schema.string({
-    meta: { description: 'The identifier for the rule.' },
-  }),
-});
-
-const querySchema = schema.object({
-  mode: schema.oneOf([schema.literal('build'), schema.literal('execute')], {
-    defaultValue: 'build',
-    meta: {
-      description:
-        'The inspection mode. Use "build" to return only the query, or "execute" to run the query and include the response.',
-    },
-  }),
-  start: schema.maybe(
-    schema.string({
-      meta: {
-        description:
-          'The start of the time range. When provided with end, the inspector uses this range instead of the current time.',
-      },
-    })
-  ),
-  end: schema.maybe(
-    schema.string({
-      meta: {
-        description:
-          'The end of the time range. When provided with start, the inspector uses this range instead of the current time.',
-      },
-    })
-  ),
-});
-
-const queryResultSchema = schema.object({
-  index: schema.string(),
-  request: schema.recordOf(schema.string(), schema.any()),
-  response: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-  label: schema.maybe(schema.string()),
-});
-
-const responseBodySchema = schema.object({
-  queries: schema.arrayOf(queryResultSchema),
-});
+import type {
+  RuleQueryInspectorRequestParamsV1,
+  RuleQueryInspectorRequestQueryV1,
+} from '../../../../../common/routes/rule/apis/rule_query_inspector';
+import {
+  ruleQueryInspectorParamsSchemaV1,
+  ruleQueryInspectorQuerySchemaV1,
+  ruleQueryInspectorResponseSchemaV1,
+  ruleQueryInspectorExamplesV1,
+} from '../../../../../common/routes/rule/apis/rule_query_inspector';
 
 export const ruleQueryInspectorRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -72,15 +38,16 @@ export const ruleQueryInspectorRoute = (
         description:
           'Returns the Elasticsearch query that a rule executes, and optionally its response.',
         tags: ['oas-tag:alerting'],
+        oasOperationObject: ruleQueryInspectorExamplesV1,
       },
       validate: {
         request: {
-          params: paramSchema,
-          query: querySchema,
+          params: ruleQueryInspectorParamsSchemaV1,
+          query: ruleQueryInspectorQuerySchemaV1,
         },
         response: {
           200: {
-            body: () => responseBodySchema,
+            body: () => ruleQueryInspectorResponseSchemaV1,
             description: 'Indicates a successful call.',
           },
           400: {
@@ -97,8 +64,8 @@ export const ruleQueryInspectorRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const alertingContext = await context.alerting;
         const rulesClient = await alertingContext.getRulesClient();
-        const { id: ruleId } = req.params;
-        const { mode } = req.query;
+        const { id: ruleId }: RuleQueryInspectorRequestParamsV1 = req.params;
+        const { mode }: RuleQueryInspectorRequestQueryV1 = req.query;
 
         const rule = await rulesClient.get({ id: ruleId });
 
@@ -114,7 +81,7 @@ export const ruleQueryInspectorRoute = (
           });
         }
 
-        const { start, end } = req.query;
+        const { start, end }: RuleQueryInspectorRequestQueryV1 = req.query;
         if ((start && !end) || (!start && end)) {
           return res.badRequest({
             body: { message: 'Both "start" and "end" must be provided together, or both omitted.' },

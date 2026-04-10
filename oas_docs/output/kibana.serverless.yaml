@@ -8440,33 +8440,6 @@ paths:
             type: string
       responses:
         '200':
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  queries:
-                    items:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        index:
-                          type: string
-                        label:
-                          type: string
-                        request:
-                          additionalProperties: {}
-                          type: object
-                        response:
-                          additionalProperties: {}
-                          type: object
-                      required:
-                        - index
-                        - request
-                    type: array
-                required:
-                  - queries
           description: Indicates a successful call.
         '400':
           description: Indicates the rule type is not supported or the request parameters are invalid.
