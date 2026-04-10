@@ -295,11 +295,6 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
                   {suggestPartitionsText}
                 </GenerateSuggestionButton>
               </EuiFlexItem>
-              {showAdditionalChargesCallout && (
-                <EuiFlexItem grow={false}>
-                  <AdditionalChargesCallout aiFeatures={aiFeatures} />
-                </EuiFlexItem>
-              )}
             </>
           )}
           <EuiFlexItem grow={false}>
@@ -318,6 +313,11 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
             </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
+        {showAdditionalChargesCallout && (
+          <EuiFlexItem grow={false}>
+            <AdditionalChargesCallout aiFeatures={aiFeatures} />
+          </EuiFlexItem>
+        )}
       </EuiFlexItem>
     );
   };
