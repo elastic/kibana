@@ -17,7 +17,11 @@ export const syntheticsCCSSettings: SavedObjectsType = {
   name: SO_SYNTHETICS_CCS_SETTINGS_TYPE,
   hidden: false,
   namespaceType: 'multiple-isolated',
-  modelVersions: {},
+  modelVersions: {
+    1: {
+      changes: [],
+    },
+  },
   mappings: {
     dynamic: false,
     properties: {},
