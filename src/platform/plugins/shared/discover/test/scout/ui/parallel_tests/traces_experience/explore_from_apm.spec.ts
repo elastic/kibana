@@ -283,6 +283,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('unified waterfall size warning is visible', async () => {
+          await expect(page.testSubj.locator('waterfall')).toBeVisible();
           await expect(page.testSubj.locator('waterfallSizeWarning')).toBeVisible();
         });
 
