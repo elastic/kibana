@@ -3280,18 +3280,6 @@ steps:
         await expectValid('incident-response-2024');
       });
 
-      it('should accept mixed-case IDs', async () => {
-        await expectValid('Security-Alert-Enrichment');
-      });
-
-      it('should accept snake_case IDs', async () => {
-        await expectValid('process_security_alerts');
-      });
-
-      it('should accept snake_case IDs with multiple segments', async () => {
-        await expectValid('analyze_user_behavior');
-      });
-
       it('should accept short 3-character IDs', async () => {
         await expectValid('dev');
       });
@@ -3348,6 +3336,18 @@ steps:
 
       it('should throw WorkflowValidationError for IDs ending with an underscore', async () => {
         await expectInvalid('alert_');
+      });
+
+      it('should throw uppercase mixed-case IDs', async () => {
+        await expectInvalid('Security-Alert-Enrichment');
+      });
+
+      it('should throw on snake_case IDs', async () => {
+        await expectInvalid('process_security_alerts');
+      });
+
+      it('should throw on snake_case IDs with multiple segments', async () => {
+        await expectInvalid('analyze_user_behavior');
       });
 
       it('should skip validation and auto-generate an ID when empty string is provided', async () => {
