@@ -15,14 +15,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLink,
   EuiLoadingSpinner,
   EuiPopover,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { PluginDefinition } from '@kbn/agent-builder-common';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useQueryState } from '../../../hooks/use_query_state';
@@ -30,7 +28,6 @@ import { searchParamNames } from '../../../search_param_names';
 import { labels } from '../../../utils/i18n';
 import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
-import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { usePluginsService } from '../../../hooks/plugins/use_plugins';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
@@ -43,8 +40,7 @@ import { PluginDetailPanel } from './plugin_detail_panel';
 import { InstallPluginFlyout } from './install_plugin_flyout';
 import { PluginAddMenuPanel } from './plugin_add_menu_panel';
 import { PageWrapper } from '../common/page_wrapper';
-import { CustomizeLandingEmptyState } from '../common/customize_landing_empty_state';
-import pluginsIllustration from '../overview/assets/projects-folder.svg';
+import { PluginsCustomizeEmptyState } from './plugins_customize_empty_state';
 import { ICON_DIMENSIONS } from '../common/constants';
 import { useListDetailPageStyles } from '../common/styles';
 import { useCanEditAgent } from '../../../hooks/agents/use_can_edit_agent';
@@ -52,9 +48,8 @@ import { useCanEditAgent } from '../../../hooks/agents/use_can_edit_agent';
 export const AgentPlugins: React.FC = () => {
   const { agentId } = useParams<{ agentId: string }>();
   const styles = useListDetailPageStyles();
-  const { createAgentBuilderUrl, navigateToAgentBuilderUrl } = useNavigation();
-  const { agentService, docLinksService } = useAgentBuilderServices();
-  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
+  const { createAgentBuilderUrl } = useNavigation();
+  const { agentService } = useAgentBuilderServices();
   const { addSuccessToast, addErrorToast } = useToasts();
   const queryClient = useQueryClient();
 
@@ -66,7 +61,6 @@ export const AgentPlugins: React.FC = () => {
   const [selectedPluginId, setSelectedPluginId] = useQueryState<string>(searchParamNames.pluginId);
   const pendingSelectPluginIdRef = useRef<string | null>(null);
   const [isHeaderInstallMenuOpen, setIsHeaderInstallMenuOpen] = useState(false);
-  const [isEmptyInstallMenuOpen, setIsEmptyInstallMenuOpen] = useState(false);
   const [mutatingPluginId, setMutatingPluginId] = useState<string | null>(null);
   const {
     isOpen: isLibraryOpen,
@@ -81,13 +75,11 @@ export const AgentPlugins: React.FC = () => {
 
   const handleOpenLibrary = useCallback(() => {
     setIsHeaderInstallMenuOpen(false);
-    setIsEmptyInstallMenuOpen(false);
     openLibrary();
   }, [openLibrary]);
 
   const handleOpenInstallFlyout = useCallback(() => {
     setIsHeaderInstallMenuOpen(false);
-    setIsEmptyInstallMenuOpen(false);
     openInstallFlyout();
   }, [openInstallFlyout]);
 
@@ -231,59 +223,6 @@ export const AgentPlugins: React.FC = () => {
 
   const showCustomizeEmptyState = activePlugins.length === 0 && !searchQuery.trim();
 
-  const pluginsEmptyDescription = isExperimentalFeaturesEnabled ? (
-    <FormattedMessage
-      id="xpack.agentBuilder.agentPlugins.customizeEmptyStateDescription"
-      defaultMessage="Each plugin adds a bundle of related skills to your agent in a single install. For individual capabilities, use {skills}. For callable functions and integrations, use {tools}."
-      values={{
-        skills: (
-          <EuiLink
-            data-test-subj="agentPluginsCustomizeEmptyStateLinkSkills"
-            onClick={() => navigateToAgentBuilderUrl(appPaths.agent.skills({ agentId: agentId! }))}
-          >
-            Skills
-          </EuiLink>
-        ),
-        tools: (
-          <EuiLink
-            data-test-subj="agentPluginsCustomizeEmptyStateLinkTools"
-            onClick={() => navigateToAgentBuilderUrl(appPaths.agent.tools({ agentId: agentId! }))}
-          >
-            Tools
-          </EuiLink>
-        ),
-      }}
-    />
-  ) : (
-    <FormattedMessage
-      id="xpack.agentBuilder.agentPlugins.customizeEmptyStateDescriptionNoExperimental"
-      defaultMessage="Each plugin adds a bundle of related skills to your agent in a single install. For individual capabilities, use {skills}."
-      values={{
-        skills: (
-          <EuiLink
-            data-test-subj="agentPluginsCustomizeEmptyStateLinkSkills"
-            onClick={() => navigateToAgentBuilderUrl(appPaths.agent.skills({ agentId: agentId! }))}
-          >
-            Skills
-          </EuiLink>
-        ),
-      }}
-    />
-  );
-
-  const pluginsEmptyStateFooter = (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiIcon type="info" color="subdued" aria-hidden={true} />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiText size="s" color="subdued">
-          {labels.agentPlugins.emptyStateFooter}
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-
   const isLoading = agentLoading || pluginsLoading;
 
   if (isLoading) {
@@ -356,47 +295,10 @@ export const AgentPlugins: React.FC = () => {
       ) : null}
 
       {showCustomizeEmptyState ? (
-        <CustomizeLandingEmptyState
-          dataTestSubj="agentPluginsCustomizeEmptyState"
-          illustrationSrc={pluginsIllustration}
-          title={labels.agentPlugins.emptyStateTitle}
-          description={pluginsEmptyDescription}
-          learnMoreHref={docLinksService.agentBuilderAgents}
-          learnMoreLabel={labels.customizeLandingEmptyState.learnMore}
-          learnMoreSuffix={labels.agentPlugins.emptyStateLearnMoreSuffix}
-          footer={pluginsEmptyStateFooter}
-          primaryAction={
-            canEditAgent ? (
-              <EuiPopover
-                aria-label={labels.agentPlugins.emptyStateAddButton}
-                button={
-                  <EuiButton
-                    data-test-subj="agentPluginsCustomizeEmptyStateInstallButton"
-                    fill
-                    iconType="plus"
-                    iconSide="left"
-                    onClick={() => setIsEmptyInstallMenuOpen((prev) => !prev)}
-                  >
-                    {labels.agentPlugins.emptyStateAddButton}
-                  </EuiButton>
-                }
-                isOpen={isEmptyInstallMenuOpen}
-                closePopover={() => setIsEmptyInstallMenuOpen(false)}
-                anchorPosition="downCenter"
-                panelPaddingSize="none"
-              >
-                <PluginAddMenuPanel
-                  onInstallFromUrlOrZip={handleOpenInstallFlyout}
-                  onAddFromLibrary={handleOpenLibrary}
-                />
-              </EuiPopover>
-            ) : undefined
-          }
-          secondaryAction={
-            <EuiButtonEmpty href={createAgentBuilderUrl(appPaths.manage.plugins)}>
-              {labels.agentPlugins.manageAllPlugins}
-            </EuiButtonEmpty>
-          }
+        <PluginsCustomizeEmptyState
+          canEditAgent={canEditAgent}
+          onAddFromLibrary={handleOpenLibrary}
+          onInstallFromUrlOrZip={handleOpenInstallFlyout}
         />
       ) : (
         <EuiFlexGroup gutterSize="none" responsive={false} css={styles.body}>

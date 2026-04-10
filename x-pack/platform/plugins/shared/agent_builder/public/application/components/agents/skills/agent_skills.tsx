@@ -15,7 +15,6 @@ import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiLoadingSpinner,
   EuiPopover,
   EuiSpacer,
@@ -23,7 +22,6 @@ import {
   EuiIcon,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { PublicSkillDefinition, PublicSkillSummary } from '@kbn/agent-builder-common';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { searchParamNames } from '../../../search_param_names';
@@ -31,7 +29,6 @@ import { useQueryState } from '../../../hooks/use_query_state';
 import { labels } from '../../../utils/i18n';
 import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
-import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { useSkillsService } from '../../../hooks/skills/use_skills';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
@@ -48,15 +45,13 @@ import { ICON_DIMENSIONS } from '../common/constants';
 import { useListDetailPageStyles } from '../common/styles';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { useCanEditAgent } from '../../../hooks/agents/use_can_edit_agent';
-import { CustomizeLandingEmptyState } from '../common/customize_landing_empty_state';
-import skillsIllustration from '../overview/assets/connected-power-plug.svg';
+import { SkillsCustomizeEmptyState } from './skills_customize_empty_state';
 
 export const AgentSkills: React.FC = () => {
   const { agentId } = useParams<{ agentId: string }>();
   const styles = useListDetailPageStyles();
-  const { createAgentBuilderUrl, navigateToAgentBuilderUrl } = useNavigation();
-  const { agentService, docLinksService } = useAgentBuilderServices();
-  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
+  const { createAgentBuilderUrl } = useNavigation();
+  const { agentService } = useAgentBuilderServices();
   const { addSuccessToast, addErrorToast } = useToasts();
   const queryClient = useQueryClient();
 
@@ -216,59 +211,6 @@ export const AgentSkills: React.FC = () => {
 
   const showCustomizeEmptyState = activeSkills.length === 0 && !searchQuery.trim();
 
-  const skillsEmptyDescription = isExperimentalFeaturesEnabled ? (
-    <FormattedMessage
-      id="xpack.agentBuilder.agentSkills.customizeEmptyStateDescription"
-      defaultMessage="Skills tell your agent how to approach specific tasks, like following a runbook or structuring a report. For bundled capabilities, use {plugins}. For callable functions and integrations, use {tools}."
-      values={{
-        plugins: (
-          <EuiLink
-            data-test-subj="agentSkillsCustomizeEmptyStateLinkPlugins"
-            onClick={() => navigateToAgentBuilderUrl(appPaths.agent.plugins({ agentId: agentId! }))}
-          >
-            Plugins
-          </EuiLink>
-        ),
-        tools: (
-          <EuiLink
-            data-test-subj="agentSkillsCustomizeEmptyStateLinkTools"
-            onClick={() => navigateToAgentBuilderUrl(appPaths.agent.tools({ agentId: agentId! }))}
-          >
-            Tools
-          </EuiLink>
-        ),
-      }}
-    />
-  ) : (
-    <FormattedMessage
-      id="xpack.agentBuilder.agentSkills.customizeEmptyStateDescriptionNoExperimental"
-      defaultMessage="Skills tell your agent how to approach specific tasks, like following a runbook or structuring a report. Attach {tools} so your agent can call functions and integrations."
-      values={{
-        tools: (
-          <EuiLink
-            data-test-subj="agentSkillsCustomizeEmptyStateLinkTools"
-            onClick={() => navigateToAgentBuilderUrl(appPaths.agent.tools({ agentId: agentId! }))}
-          >
-            Tools
-          </EuiLink>
-        ),
-      }}
-    />
-  );
-
-  const skillsEmptyStateFooter = (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiIcon type="info" color="subdued" aria-hidden={true} />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiText size="s" color="subdued">
-          {labels.agentSkills.emptyStateFooter}
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-
   const isLoading = agentLoading || skillsLoading;
 
   if (isLoading) {
@@ -359,34 +301,7 @@ export const AgentSkills: React.FC = () => {
       ) : null}
 
       {showCustomizeEmptyState ? (
-        <CustomizeLandingEmptyState
-          dataTestSubj="agentSkillsCustomizeEmptyState"
-          illustrationSrc={skillsIllustration}
-          title={labels.agentSkills.emptyStateTitle}
-          description={skillsEmptyDescription}
-          learnMoreHref={docLinksService.agentBuilderAgents}
-          learnMoreLabel={labels.customizeLandingEmptyState.learnMore}
-          learnMoreSuffix={labels.agentSkills.emptyStateLearnMoreSuffix}
-          footer={skillsEmptyStateFooter}
-          primaryAction={
-            canEditAgent ? (
-              <EuiButton
-                data-test-subj="agentSkillsCustomizeEmptyStateAddButton"
-                fill
-                iconType="plus"
-                iconSide="left"
-                onClick={openLibrary}
-              >
-                {labels.agentSkills.emptyStateAddButton}
-              </EuiButton>
-            ) : undefined
-          }
-          secondaryAction={
-            <EuiButtonEmpty href={createAgentBuilderUrl(appPaths.manage.skills)}>
-              {labels.agentSkills.manageAllSkills}
-            </EuiButtonEmpty>
-          }
-        />
+        <SkillsCustomizeEmptyState canEditAgent={canEditAgent} onOpenLibrary={openLibrary} />
       ) : (
         <EuiFlexGroup gutterSize="none" responsive={false} css={styles.body}>
           <EuiFlexItem grow={false} css={styles.searchColumn}>
