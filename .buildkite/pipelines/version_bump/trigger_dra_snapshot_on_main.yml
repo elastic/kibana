@@ -4,4 +4,4 @@ steps:
     trigger: kibana-artifacts-snapshot
     async: false
     build:
-      branch: '${BRANCH}'
+      branch: 'main'

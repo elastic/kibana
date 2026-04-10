@@ -1,5 +1,6 @@
 steps:
   # Step 1: Run the ES Snapshot Build
+  # TODO: the snapshot manifest is stored as metadata so it should be accessible to the promote step without needing to pass it through buildkite. Confirm that
   - command: .buildkite/scripts/steps/es_snapshots/build.sh
     key: build-es-snapshot
     label: Build ES Snapshot
