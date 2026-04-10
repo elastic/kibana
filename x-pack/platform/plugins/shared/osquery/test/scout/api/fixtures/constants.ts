@@ -20,6 +20,7 @@ export const API_PATHS = {
   DETECTION_RULES: 'api/detection_engine/rules',
   OSQUERY_SAVED_QUERIES: 'api/osquery/saved_queries',
   OSQUERY_PACKS: 'api/osquery/packs',
+  OSQUERY_LIVE_QUERIES: 'api/osquery/live_queries',
 } as const;
 
 const uniqueId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -58,5 +59,12 @@ export const getMinimalSavedQuery = (overrides: Record<string, unknown> = {}) =>
   id: `test-saved-query-${uniqueId()}`,
   query: 'select 1;',
   interval: '3600',
+  ...overrides,
+});
+
+export const getMinimalLiveQuery = (overrides: Record<string, unknown> = {}) => ({
+  agent_all: true,
+  query: 'select * from uptime;',
+  kuery: '',
   ...overrides,
 });
