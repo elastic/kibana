@@ -8,7 +8,6 @@
 import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
 
-import { I18nProvider } from '@kbn/i18n-react';
 import {
   createFeature,
   createKibanaPrivileges,
@@ -61,19 +60,6 @@ const areFeatureControlsDisabled = (): boolean => {
   const controls = screen.queryAllByTestId('primaryFeaturePrivilegeControl');
   if (controls.length === 0) return false;
   const btn = controls[0].querySelector('button') as HTMLButtonElement | null;
-  return btn?.disabled ?? false;
-};
-
-const getSelectedBasePrivilege = (container: HTMLElement): string | null => {
-  const baseGroup = container.querySelector('[data-test-subj="basePrivilegeButtonGroup"]');
-  const selected = baseGroup?.querySelector('[aria-pressed="true"]');
-  return selected?.getAttribute('data-test-subj') ?? null;
-};
-
-const areFeatureControlsDisabled = (container: HTMLElement): boolean => {
-  const btn = container.querySelector(
-    '[data-test-subj="primaryFeaturePrivilegeControl"] button'
-  ) as HTMLButtonElement | null;
   return btn?.disabled ?? false;
 };
 

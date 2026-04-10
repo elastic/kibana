@@ -9,7 +9,6 @@ import { fireEvent, screen, within } from '@testing-library/react';
 import React from 'react';
 
 import type { KibanaFeature, SubFeatureConfig } from '@kbn/features-plugin/public';
-import { I18nProvider } from '@kbn/i18n-react';
 import type { Role } from '@kbn/security-plugin-types-common';
 import {
   createFeature,
