@@ -7,15 +7,17 @@
 
 import React, { Fragment, useCallback, useMemo } from 'react';
 import type { ScopedHistory } from '@kbn/core/public';
-import { EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Router } from '@kbn/shared-ux-router';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
+import type { Observable } from 'rxjs';
 import type { IngestFlow } from './types';
 import { IngestFlowCategory } from './components/ingest_flow_category';
 
 interface IngestHubAppProps {
-  ingestFlows: IngestFlow[];
+  ingestFlows$: Observable<IngestFlow[]>;
   history: ScopedHistory;
 }
 
@@ -29,8 +31,9 @@ const groupByCategory = (flows: IngestFlow[]): Map<string, IngestFlow[]> => {
   return grouped;
 };
 
-export const IngestHubApp: React.FC<IngestHubAppProps> = ({ ingestFlows, history }) => {
+export const IngestHubApp: React.FC<IngestHubAppProps> = ({ ingestFlows$, history }) => {
   const { services } = useKibana();
+  const ingestFlows = useObservable(ingestFlows$, []);
 
   const categorizedFlows = useMemo(() => groupByCategory(ingestFlows), [ingestFlows]);
 
@@ -50,12 +53,32 @@ export const IngestHubApp: React.FC<IngestHubAppProps> = ({ ingestFlows, history
           })}
         />
         <EuiPageTemplate.Section>
-          {[...categorizedFlows.entries()].map(([category, flows]) => (
-            <Fragment key={category}>
-              <IngestFlowCategory category={category} flows={flows} onFlowClick={handleFlowClick} />
-              <EuiSpacer size="xl" />
-            </Fragment>
-          ))}
+          {ingestFlows.length === 0 ? (
+            <EuiEmptyPrompt
+              title={
+                <h2>
+                  {i18n.translate('xpack.ingestHub.emptyState.title', {
+                    defaultMessage: 'No data sources available',
+                  })}
+                </h2>
+              }
+              body={i18n.translate('xpack.ingestHub.emptyState.body', {
+                defaultMessage:
+                  'No onboarding flows have been registered. Data source integrations will appear here when available.',
+              })}
+            />
+          ) : (
+            [...categorizedFlows.entries()].map(([category, flows]) => (
+              <Fragment key={category}>
+                <IngestFlowCategory
+                  category={category}
+                  flows={flows}
+                  onFlowClick={handleFlowClick}
+                />
+                <EuiSpacer size="xl" />
+              </Fragment>
+            ))
+          )}
         </EuiPageTemplate.Section>
       </EuiPageTemplate>
     </Router>

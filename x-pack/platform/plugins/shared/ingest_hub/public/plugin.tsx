@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { INGEST_HUB_APP_ID } from '@kbn/deeplinks-observability';
 import type { Observable } from 'rxjs';
-import { catchError, from, map, of, switchMap } from 'rxjs';
+import { BehaviorSubject, catchError, from, map, of, switchMap } from 'rxjs';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type {
   IngestHubSetup,
@@ -63,7 +63,7 @@ const createNavigationAvailable$ = (
 export class IngestHubPlugin
   implements Plugin<IngestHubSetup, IngestHubStart, object, IngestHubStartDependencies>
 {
-  private readonly ingestFlows: IngestFlow[] = [];
+  private readonly ingestFlows$ = new BehaviorSubject<IngestFlow[]>([]);
 
   constructor(private readonly context: PluginInitializerContext) {}
 
@@ -103,7 +103,7 @@ export class IngestHubPlugin
         root.render(
           coreStart.rendering.addContext(
             <KibanaContextProvider services={coreStart}>
-              <IngestHubApp ingestFlows={this.ingestFlows} history={history} />
+              <IngestHubApp ingestFlows$={this.ingestFlows$} history={history} />
             </KibanaContextProvider>
           )
         );
@@ -118,7 +118,7 @@ export class IngestHubPlugin
     const isServerless = this.context.env.packageInfo.buildFlavor === 'serverless';
     return {
       registerIngestFlow: (flow: IngestFlow) => {
-        this.ingestFlows.push(flow);
+        this.ingestFlows$.next([...this.ingestFlows$.value, flow]);
       },
       navigationAvailable$: createNavigationAvailable$(coreStart, deps, isServerless),
     };
