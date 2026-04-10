@@ -59,21 +59,21 @@ export const CustomizeLandingEmptyState: React.FC<CustomizeLandingEmptyStateProp
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 168px;
-    height: 168px;
+    width: 215px;
+    height: 252px;
     flex-shrink: 0;
     background-color: ${euiTheme.colors.backgroundBaseSubdued};
     border-radius: ${euiTheme.border.radius.medium};
 
     @media (max-width: ${euiTheme.breakpoint.m - 1}px) {
       width: 100%;
-      max-width: 280px;
+      max-width: 215px;
       margin-inline: auto;
     }
   `;
 
   const panelCss = css`
-    max-width: 900px;
+    max-width: 805px;
     width: 100%;
   `;
 
@@ -147,7 +147,7 @@ export const CustomizeLandingEmptyState: React.FC<CustomizeLandingEmptyStateProp
                 data-test-subj={`${dataTestSubj}Illustration`}
                 src={illustrationSrc}
                 alt=""
-                size="l"
+                size={96}
               />
             </div>
           </EuiFlexItem>
