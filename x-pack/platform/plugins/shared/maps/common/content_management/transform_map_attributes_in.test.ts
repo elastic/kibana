@@ -104,7 +104,7 @@ describe('transformMapIn', () => {
     ).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
-          "mapStateJSON": "{\\"filters\\":[{\\"meta\\":{\\"field\\":\\"foo\\",\\"key\\":\\"foo\\",\\"type\\":\\"phrase\\"},\\"query\\":{\\"match_phrase\\":{\\"foo\\":\\"bar\\"}}}],\\"title\\":\\"my map\\"}",
+          "mapStateJSON": "{\\"filters\\":[{\\"meta\\":{\\"key\\":\\"foo\\",\\"field\\":\\"foo\\",\\"type\\":\\"phrase\\",\\"params\\":{\\"query\\":\\"bar\\"}},\\"query\\":{\\"match_phrase\\":{\\"foo\\":\\"bar\\"}}}]}",
           "title": "my map",
         },
         "references": Array [],
