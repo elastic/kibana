@@ -39,12 +39,12 @@ export function ChatActionsMenu({
   connectors,
   disabled,
   isConversationApp,
-  navigateToConnectorsManagementApp,
+  navigateToModelManagementApp,
 }: {
   connectors: UseGenAIConnectorsResult;
   disabled: boolean;
   isConversationApp: boolean;
-  navigateToConnectorsManagementApp: (application: ApplicationStart) => void;
+  navigateToModelManagementApp: (application: ApplicationStart) => void;
 }) {
   const { application, http, notifications, docLinks } = useKibana().services;
   const knowledgeBase = useKnowledgeBase();
@@ -110,7 +110,7 @@ export function ChatActionsMenu({
       name: (
         <div className="eui-textTruncate">
           {i18n.translate('xpack.aiAssistant.chatHeader.actions.connector', {
-            defaultMessage: 'Connector',
+            defaultMessage: 'Model',
           })}{' '}
           <strong>
             {
@@ -198,7 +198,7 @@ export function ChatActionsMenu({
                 id: 1,
                 width: 256,
                 title: i18n.translate('xpack.aiAssistant.chatHeader.actions.connector', {
-                  defaultMessage: 'Connector',
+                  defaultMessage: 'Model',
                 }),
                 content: (
                   <ConnectorSelectable
@@ -216,7 +216,7 @@ export function ChatActionsMenu({
                     }}
                     onManageConnectorsClick={() => {
                       toggleActionsMenu();
-                      navigateToConnectorsManagementApp(application!);
+                      navigateToModelManagementApp(application!);
                     }}
                   />
                 ),

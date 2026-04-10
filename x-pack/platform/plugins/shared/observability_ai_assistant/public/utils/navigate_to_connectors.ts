@@ -7,11 +7,11 @@
 
 import type { ApplicationStart, HttpStart } from '@kbn/core/public';
 
-export function getConnectorsManagementHref(http: HttpStart) {
+export function getModelManagementHref(http: HttpStart) {
   return http.basePath.prepend('/app/management/modelManagement/model_settings');
 }
 
-export function navigateToConnectorsManagementApp(application: ApplicationStart) {
+export function navigateToModelManagementApp(application: ApplicationStart) {
   application.navigateToApp('management', {
     path: '/modelManagement/model_settings',
   });

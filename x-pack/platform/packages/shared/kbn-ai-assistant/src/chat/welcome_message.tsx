@@ -52,6 +52,29 @@ export function WelcomeMessage({
 
   const [connectorFlyoutOpen, setConnectorFlyoutOpen] = useState(false);
 
+  const handleConnectorClick = () => {
+    if (application?.capabilities.management?.insightsAndAlerting?.triggersActions) {
+      setConnectorFlyoutOpen(true);
+    } else {
+      application?.navigateToApp('management', {
+        path: '/modelManagement/model_settings',
+      });
+    }
+  };
+
+  const onConnectorCreated = (createdConnector: ActionConnector) => {
+    setConnectorFlyoutOpen(false);
+
+    if (isSupportedConnectorType(createdConnector.actionTypeId)) {
+      connectors.reloadConnectors();
+    }
+  };
+
+  const ConnectorFlyout = useMemo(
+    () => triggersActionsUi.getAddConnectorFlyout,
+    [triggersActionsUi]
+  );
+
   return (
     <>
       <EuiFlexGroup
