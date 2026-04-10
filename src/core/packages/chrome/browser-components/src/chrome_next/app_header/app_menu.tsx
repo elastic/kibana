@@ -8,21 +8,17 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import { useHasLegacyActionMenu } from '../shared/chrome_hooks';
-import { HeaderActionMenu } from '../shared/header_action_menu';
-import { useProjectNextAppMenu } from './hooks';
+import { useHasLegacyActionMenu } from '../../shared/chrome_hooks';
+import { HeaderActionMenu } from '../../shared/header_action_menu';
+import { useAppHeaderMenu } from './hooks';
 
 const AppMenuComponent = lazy(async () => {
   const { AppMenuComponent: Component } = await import('@kbn/core-chrome-app-menu-components');
   return { default: Component };
 });
 
-/**
- * Renders the app menu for the Chrome-Next project header.
- * Fallback chain: merged AppMenuConfig -> legacy HeaderActionMenu -> nothing.
- */
-export const ProjectNextAppMenu = React.memo(() => {
-  const appMenuConfig = useProjectNextAppMenu();
+export const AppMenu = React.memo(() => {
+  const appMenuConfig = useAppHeaderMenu();
   const hasLegacyActionMenu = useHasLegacyActionMenu();
 
   if (appMenuConfig) {
@@ -40,4 +36,4 @@ export const ProjectNextAppMenu = React.memo(() => {
   return null;
 });
 
-ProjectNextAppMenu.displayName = 'ProjectNextAppMenu';
+AppMenu.displayName = 'AppMenu';

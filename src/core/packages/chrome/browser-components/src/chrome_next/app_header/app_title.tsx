@@ -32,11 +32,7 @@ const useTitleStyles = () => {
   }, [euiTheme]);
 };
 
-/**
- * Title region for the Chrome-Next project header: renders nothing when
- * `useTitle()` has no string; otherwise an `h1` with Emotion styles.
- */
-export const ProjectNextTitle = React.memo(() => {
+export const AppTitle = React.memo(() => {
   const title = useTitle();
   const styles = useTitleStyles();
 
@@ -47,4 +43,4 @@ export const ProjectNextTitle = React.memo(() => {
   return <h1 css={styles.title}>{title}</h1>;
 });
 
-ProjectNextTitle.displayName = 'ProjectNextTitle';
+AppTitle.displayName = 'AppTitle';

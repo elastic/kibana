@@ -7,24 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { HeaderExtension } from '../shared/header_extension';
-import { useAiButtons } from './hooks';
-
-export const AiButtonSlot = React.memo(() => {
-  const buttons = useAiButtons();
-
-  if (buttons.length === 0) {
-    return null;
-  }
-
-  return (
-    <>
-      {buttons.map((button, index) => (
-        <HeaderExtension key={index} extension={button.content} />
-      ))}
-    </>
-  );
-});
-
-AiButtonSlot.displayName = 'AiButtonSlot';
+export { GlobalHeader } from './global_header';

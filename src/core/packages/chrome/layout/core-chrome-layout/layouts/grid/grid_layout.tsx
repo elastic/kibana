@@ -15,7 +15,8 @@ import {
   ChromeComponentsProvider,
   ClassicHeader,
   ProjectHeader,
-  ProjectNextHeader,
+  AppHeader,
+  GlobalHeader,
   GridLayoutProjectSideNav,
   HeaderTopBanner,
   ChromelessHeader,
@@ -66,14 +67,12 @@ const layoutConfigs: {
   },
   projectNext: {
     chromeStyle: 'project',
-    headerHeight: 0,
+    headerHeight: 48,
     bannerHeight: 32,
 
-    /** Height is reported dynamically by ProjectNextHeader via useReportLayoutHeight */
     applicationTopBarHeight: 0,
     applicationMarginRight: 8,
     applicationMarginBottom: 8,
-    applicationMarginTop: 8,
     sidebarWidth: 0,
     footerHeight: 0,
     navigationWidth: 0,
@@ -124,8 +123,9 @@ const useChromeSlots = (nextChrome: boolean): ChromeSlots => {
   if (nextChrome) {
     return {
       ...base,
+      header: <GlobalHeader />,
       navigation: <GridLayoutProjectSideNav />,
-      applicationTopBar: <ProjectNextHeader />,
+      applicationTopBar: <AppHeader />,
     };
   }
 

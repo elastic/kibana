@@ -12,12 +12,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { useBackButton } from './hooks';
 
-/**
- * Back control for Chrome-Next project header: uses explicit `chrome.next.header` `back` when
- * set; otherwise the last non-last project breadcrumb with an `href` (≥2 crumbs; scanning
- * right to left). Renders nothing when neither applies.
- */
-export const ProjectNextBackButton = React.memo(() => {
+export const BackButton = React.memo(() => {
   const back = useBackButton();
 
   const ariaLabel = useMemo(() => {
@@ -25,12 +20,12 @@ export const ProjectNextBackButton = React.memo(() => {
       return '';
     }
     if (back.backDestinationLabel) {
-      return i18n.translate('core.ui.chrome.projectNextHeader.backButtonAriaLabelWithDestination', {
+      return i18n.translate('core.ui.chrome.appHeader.backButtonAriaLabelWithDestination', {
         defaultMessage: 'Back to {destination}',
         values: { destination: back.backDestinationLabel },
       });
     }
-    return i18n.translate('core.ui.chrome.projectNextHeader.backButtonAriaLabel', {
+    return i18n.translate('core.ui.chrome.appHeader.backButtonAriaLabel', {
       defaultMessage: 'Back',
     });
   }, [back]);
@@ -46,10 +41,10 @@ export const ProjectNextBackButton = React.memo(() => {
       display="empty"
       size="s"
       aria-label={ariaLabel}
-      data-test-subj="chromeProjectNextHeaderBack"
+      data-test-subj="chromeNextAppHeaderBack"
       href={back.backHref}
     />
   );
 });
 
-ProjectNextBackButton.displayName = 'ProjectNextBackButton';
+BackButton.displayName = 'BackButton';

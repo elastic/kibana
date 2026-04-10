@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { useAiButtons } from './use_ai_button';
-export { useProjectNextAppMenu } from './use_project_next_app_menu';
+export { useAppHeaderMenu } from './use_app_header_menu';
 export { useBackButton } from './use_back_button';
 export { useReportTopBarHeight } from './use_report_top_bar_height';
 export { useTitle } from './use_title';

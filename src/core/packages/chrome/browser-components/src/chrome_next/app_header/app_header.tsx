@@ -10,13 +10,12 @@
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
-import { ProjectNextBackButton } from './back_button';
-import { ProjectNextGlobalActions } from './global_actions';
+import { BackButton } from './back_button';
+import { GlobalActions } from './global_actions';
 import { useReportTopBarHeight } from './hooks';
-import { ProjectNextTitle } from './title';
-import { ProjectNextTrailingActions } from './trailing_actions';
+import { AppTitle } from './app_title';
+import { TrailingActions } from './trailing_actions';
 
-/** Application top bar height; aligns with project layout `applicationTopBarHeight`. */
 const APPLICATION_TOP_BAR_HEIGHT_PX = 48;
 
 const useHeaderStyles = () => {
@@ -74,25 +73,25 @@ const useHeaderStyles = () => {
   }, [euiTheme]);
 };
 
-export const ProjectNextHeader = React.memo(() => {
+export const AppHeader = React.memo(() => {
   const styles = useHeaderStyles();
   const heightRef = useReportTopBarHeight();
 
   return (
-    <div ref={heightRef} css={styles.root} data-test-subj="chromeProjectNextHeader">
+    <div ref={heightRef} css={styles.root} data-test-subj="chromeNextAppHeader">
       <div css={styles.primaryRow}>
-        <ProjectNextBackButton />
+        <BackButton />
         <div css={styles.titleCluster}>
           <div css={styles.titleGroup}>
-            <ProjectNextTitle />
-            <ProjectNextGlobalActions />
+            <AppTitle />
+            <GlobalActions />
           </div>
           <div css={styles.titleClusterSpacer} aria-hidden />
         </div>
-        <ProjectNextTrailingActions />
+        <TrailingActions />
       </div>
     </div>
   );
 });
 
-ProjectNextHeader.displayName = 'ProjectNextHeader';
+AppHeader.displayName = 'AppHeader';

@@ -10,10 +10,9 @@
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
-import { useHasLegacyActionMenu } from '../shared/chrome_hooks';
-import { AiButtonSlot } from './ai_button_slot';
-import { ProjectNextAppMenu } from './app_menu';
-import { useAiButtons, useProjectNextAppMenu } from './hooks';
+import { useHasLegacyActionMenu } from '../../shared/chrome_hooks';
+import { AppMenu } from './app_menu';
+import { useAppHeaderMenu } from './hooks';
 
 const useTrailingStyles = () => {
   const { euiTheme } = useEuiTheme();
@@ -31,28 +30,22 @@ const useTrailingStyles = () => {
   }, [euiTheme]);
 };
 
-/**
- * Trailing region of the Chrome-Next project header (app menu, AI button, future global actions).
- * Renders nothing when no trailing content is available.
- */
-export const ProjectNextTrailingActions = React.memo(() => {
-  const appMenuConfig = useProjectNextAppMenu();
+export const TrailingActions = React.memo(() => {
+  const appMenuConfig = useAppHeaderMenu();
   const hasLegacyActionMenu = useHasLegacyActionMenu();
-  const aiButtons = useAiButtons();
   const styles = useTrailingStyles();
 
-  const hasTrailingContent = !!appMenuConfig || hasLegacyActionMenu || aiButtons.length > 0;
+  const hasTrailingContent = !!appMenuConfig || hasLegacyActionMenu;
 
   if (!hasTrailingContent) {
     return null;
   }
 
   return (
-    <div css={styles.root} data-test-subj="chromeProjectNextHeaderTrailing">
-      <ProjectNextAppMenu />
-      <AiButtonSlot />
+    <div css={styles.root} data-test-subj="chromeNextAppHeaderTrailing">
+      <AppMenu />
     </div>
   );
 });
 
-ProjectNextTrailingActions.displayName = 'ProjectNextTrailingActions';
+TrailingActions.displayName = 'TrailingActions';

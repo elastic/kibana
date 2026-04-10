@@ -24,13 +24,13 @@ export interface ChromeNextHeaderConfig {
 
   /**
    * Badges inline next to the title. Chrome shows 1–2 as-is; for 3+, first badge plus "+N" popover
-   * for the rest. Max 200px per badge; `filled` is not exposed. TODO: render in `ProjectNextHeader`.
+   * for the rest. Max 200px per badge; `filled` is not exposed. TODO: render in `AppHeader`.
    */
   badges?: ChromeNextHeaderBadge[];
 
   /**
    * Second row below the title (max 3 items, all visible). Text (`EuiText`) or button (`EuiButtonEmpty`).
-   * TODO: render in `ProjectNextHeader`.
+   * TODO: render in `AppHeader`.
    */
   metadata?: ChromeNextHeaderMetadataSlotItem[];
 

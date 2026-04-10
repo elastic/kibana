@@ -11,9 +11,9 @@ import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { useNextHeader } from '../shared/chrome_hooks';
+import { useNextHeader } from '../../shared/chrome_hooks';
 
-const SHARE_ARIA_LABEL = i18n.translate('core.ui.chrome.projectNextHeader.globalShareAriaLabel', {
+const SHARE_ARIA_LABEL = i18n.translate('core.ui.chrome.appHeader.globalShareAriaLabel', {
   defaultMessage: 'Share',
 });
 
@@ -38,13 +38,7 @@ const useGlobalActionsStyles = () => {
   }, [euiTheme]);
 };
 
-/**
- * Fixed-order global object actions (editTitle, share, favorite) next to the Chrome-Next title.
- * Only renders actions the page opts into via `chrome.next.header.set({ globalActions })`.
- *
- * Favorite is a `ReactNode` slot so plugins own full behavior (clients, context, React Query).
- */
-export const ProjectNextGlobalActions = React.memo(() => {
+export const GlobalActions = React.memo(() => {
   const config = useNextHeader();
   const styles = useGlobalActionsStyles();
   const globalActions = config?.globalActions;
@@ -60,7 +54,7 @@ export const ProjectNextGlobalActions = React.memo(() => {
   }
 
   return (
-    <div css={styles.root} data-test-subj="chromeProjectNextHeaderGlobalActions">
+    <div css={styles.root} data-test-subj="chromeNextAppHeaderGlobalActions">
       {/* TODO: editTitle — Chrome-controlled inline title editor; wire onSave from config */}
       {share ? (
         <EuiButtonIcon
@@ -69,12 +63,12 @@ export const ProjectNextGlobalActions = React.memo(() => {
           display="empty"
           size="s"
           aria-label={SHARE_ARIA_LABEL}
-          data-test-subj="chromeProjectNextHeaderGlobalShare"
+          data-test-subj="chromeNextAppHeaderGlobalShare"
           onClick={share.onClick}
         />
       ) : null}
       {favorite ? (
-        <div css={styles.favoriteSlot} data-test-subj="chromeProjectNextHeaderGlobalFavoriteSlot">
+        <div css={styles.favoriteSlot} data-test-subj="chromeNextAppHeaderGlobalFavoriteSlot">
           {favorite}
         </div>
       ) : null}
@@ -82,4 +76,4 @@ export const ProjectNextGlobalActions = React.memo(() => {
   );
 });
 
-ProjectNextGlobalActions.displayName = 'ProjectNextGlobalActions';
+GlobalActions.displayName = 'GlobalActions';
