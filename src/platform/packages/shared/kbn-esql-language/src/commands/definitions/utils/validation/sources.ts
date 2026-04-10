@@ -16,12 +16,22 @@ function hasWildcard(name: string) {
   return /\*/.test(name);
 }
 
-export function validateSources(sources: ESQLSource[], context?: ICommandContext) {
+export interface ValidateSourcesOptions {
+  /** When true, use "Unknown data source" error (e.g. for FROM). When false, use "Unknown index" (e.g. for TS). */
+  useGenericDataSourceError?: boolean;
+}
+
+export function validateSources(
+  sources: ESQLSource[],
+  context?: ICommandContext,
+  options?: ValidateSourcesOptions
+) {
   const messages: ESQLMessage[] = [];
   const sourcesMap = new Set<string>([
     ...(context?.sources?.map((source) => source.name) ?? []),
     ...(context?.views?.map((view) => view.name) ?? []),
   ]);
+  const useGenericDataSourceError = options?.useGenericDataSourceError ?? false;
 
   for (const source of sources) {
     if (source.incomplete) {
@@ -34,7 +44,9 @@ export function validateSources(sources: ESQLSource[], context?: ICommandContext
       if (!sourceName) continue;
 
       if (!sourceExists(sourceName, sourcesMap) && !hasWildcard(sourceName)) {
-        messages.push(errors.unknownIndex(source));
+        messages.push(
+          useGenericDataSourceError ? errors.unknownDataSource(source) : errors.unknownIndex(source)
+        );
       }
     }
   }
