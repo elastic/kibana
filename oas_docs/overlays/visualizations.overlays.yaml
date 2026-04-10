@@ -10,11 +10,11 @@ actions:
     description: Add tag description with getting started content, externalDocs, and displayName
     update:
       description: |
-        Create, retrieve, update, and delete [Kibana visualizations](https://www.elastic.co/docs/explore-analyze/visualize/lens). Visualizations created through this API are saved to your [visualization library](https://www.elastic.co/docs/explore-analyze/visualize/visualize-library) and can be added to dashboards as linked panels.
+        Create, retrieve, update, and delete [Kibana visualizations](https://www.elastic.co/docs/explore-analyze/visualize/lens). Visualizations created through this API are saved to your [visualization library](https://www.elastic.co/docs/explore-analyze/visualize/visualize-library).
 
         ## When to use this API
 
-        - Use this API to create reusable charts saved to the visualization library. You can then embed them in dashboards as **linked from library** panels using the visualization ID.
+        - Use this API to create reusable charts saved to the visualization library. You can then embed them in dashboards by referencing their ID from the [Dashboards API](https://www.elastic.co/docs/api/doc/kibana/operation/operation-createdashboard).
         - Use the [Dashboards API](https://www.elastic.co/docs/api/doc/kibana/operation/operation-createdashboard) when you want to define a complete dashboard in one request, or when you need ES|QL-based visualizations.
 
         ## Get started
@@ -65,14 +65,11 @@ actions:
 
         Every visualization requires at minimum:
 
-        - **`type`**: the chart to render. This is the discriminator — it determines what other fields are required. A `metric` payload looks nothing like an `xy` payload.
-        - **`data_source`**: how data is fetched. Use `"type": "data_view_spec"` with an inline index pattern, or `"type": "data_view_reference"` with the ID of an existing saved data view. For most chart types (`metric`, `gauge`, `pie`, and so on), `data_source` is a top-level field. For XY charts it is a per-layer field inside `layers[]`.
-        - **`query`** and **`filters`**: optional panel-level filters. `query` takes the shape `{ "language": "kql", "expression": "" }` (`language` defaults to `kql`); `filters` is an array of filter objects. Both can be omitted entirely.
+        - **`type`**: the chart to render. Each chart type has its own required fields, so the full structure of the request body depends on which `type` you specify.
+        - **`data_source`**: how data is fetched. You can reference an existing Kibana data view by ID (`"type": "data_view_reference"`), define a data view inline using an index pattern (`"type": "data_view_spec"`), or use an ES|QL query (`"type": "esql"`). Note that ES|QL is only supported via the [Dashboards API](https://www.elastic.co/docs/api/doc/kibana/operation/operation-createdashboard). For most chart types, `data_source` is a top-level field. For XY charts, it belongs inside each layer in `layers[]`.
+        - **`query`** and **`filters`**: optional KQL or Lucene filters applied to all chart data. Both can be omitted.
 
-        Everything else is chart-specific — `layers` for XY charts, `metrics` for metric charts, and so on. Refer to the request schema on the [Create a visualization](https://www.elastic.co/docs/api/doc/kibana/operation/operation-createvisualization) endpoint for the full shape of each type.
-
-        > warn
-        > This API does not support the ES|QL data source (`data_source.type: "esql"`). To create ES|QL visualizations programmatically, use the [Dashboards API](https://www.elastic.co/docs/api/doc/kibana/operation/operation-createdashboard).
+        Everything else is chart-specific: `layers` for XY charts, `metrics` for metric charts, and so on. Refer to the request schema on the [Create a visualization](https://www.elastic.co/docs/api/doc/kibana/operation/operation-createvisualization) endpoint for the full shape of each type.
 
         ### Chart types
 
