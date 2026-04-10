@@ -20,7 +20,7 @@ const emptySpanCountResponse = {
   aggregations: { per_trace: { buckets: [] } },
 } as any;
 
-const emptyChildEnrichResponse = { hits: { hits: [] } } as any;
+const emptyChildEnrichResponse = { aggregations: { per_trace: { buckets: [] } } } as any;
 
 describe('GET /internal/evals/tracing/projects/{projectName}/traces', () => {
   const setup = () => {
@@ -67,9 +67,15 @@ describe('GET /internal/evals/tracing/projects/{projectName}/traces', () => {
     );
 
     const searchCall = esClient.search.mock.calls[0][0] as any;
-    expect(searchCall.query.bool.must_not).toEqual([{ exists: { field: 'parent_span_id' } }]);
+    expect(searchCall.query.bool.must_not).toEqual([
+      { exists: { field: 'parent_span_id' } },
+      { exists: { field: 'attributes.evaluator.name' } },
+    ]);
     expect(searchCall.query.bool.filter).toEqual(
-      expect.arrayContaining([{ term: { name: 'my-project' } }])
+      expect.arrayContaining([
+        { term: { name: 'my-project' } },
+        { terms: { 'scope.name': ['@kbn/evals', 'inference'] } },
+      ])
     );
   });
 
@@ -264,21 +270,31 @@ describe('GET /internal/evals/tracing/projects/{projectName}/traces', () => {
       } as any)
       .mockResolvedValueOnce(emptySpanCountResponse)
       .mockResolvedValueOnce({
-        hits: {
-          hits: [
-            {
-              _source: {
-                trace_id: 'trace-xyz',
-                name: 'llm.call',
-                attributes: {
-                  'gen_ai.prompt.id': 'alert-summarization',
-                  'gen_ai.request.model': 'gpt-4',
-                  'input.value': 'Some input',
-                  'output.value': 'Some output',
+        aggregations: {
+          per_trace: {
+            buckets: [
+              {
+                key: 'trace-xyz',
+                earliest_hit: {
+                  hits: {
+                    hits: [
+                      {
+                        _source: {
+                          trace_id: 'trace-xyz',
+                          attributes: {
+                            'gen_ai.prompt.id': 'alert-summarization',
+                            'gen_ai.request.model': 'gpt-4',
+                            'input.value': 'Some input',
+                            'output.value': 'Some output',
+                          },
+                        },
+                      },
+                    ],
+                  },
                 },
               },
-            },
-          ],
+            ],
+          },
         },
       } as any);
 
