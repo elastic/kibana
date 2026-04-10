@@ -146,7 +146,7 @@ const TimestampFieldRenderer = ({
     }
 
     // Auto-select @timestamp when no valid value is selected and the field is active
-    if (!isDisabled) {
+    if ((!value || !valueInList) && !isDisabled) {
       const timestampOption = optionsAsComboBoxOptions.find((el) => el.value === '@timestamp');
       if (timestampOption) {
         wasValueInTheListRef.current = true;
