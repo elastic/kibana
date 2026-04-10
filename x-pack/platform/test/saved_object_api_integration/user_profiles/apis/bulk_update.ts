@@ -5,6 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import { getTestDataLoader, SPACE_1, SPACE_2 } from '../../../common/lib/test_data_loader';
 import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import { loginAsInteractiveUser } from '../helpers';
 import { TEST_CASES } from '../../common/suites/create';
@@ -12,19 +13,33 @@ import { AUTHENTICATION } from '../../common/lib/authentication';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
-  const esArchiver = getService('esArchiver');
+  const testDataLoader = getTestDataLoader({ getService });
 
   describe('bulk_update', function () {
     before(async () => {
-      await esArchiver.load(
-        'x-pack/platform/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-      );
+      await testDataLoader.createFtrSpaces();
+      await testDataLoader.createFtrSavedObjectsData([
+        {
+          spaceName: null,
+          dataUrl:
+            'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/default_space.json',
+        },
+        {
+          spaceName: SPACE_1.id,
+          dataUrl:
+            'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/space_1.json',
+        },
+        {
+          spaceName: SPACE_2.id,
+          dataUrl:
+            'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/space_2.json',
+        },
+      ]);
     });
 
     after(async () => {
-      await esArchiver.unload(
-        'x-pack/platform/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-      );
+      await testDataLoader.deleteFtrSavedObjectsData();
+      await testDataLoader.deleteFtrSpaces();
     });
 
     it('updates updated_by with profile_id, created_by is untouched', async () => {
