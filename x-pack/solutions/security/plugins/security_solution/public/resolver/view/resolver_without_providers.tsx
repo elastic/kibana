@@ -145,7 +145,7 @@ export const ResolverWithoutProviders = React.memo(
     const onShowEvent = useCallback<NodeEventOnClick>(
       ({ documentId, indexName }) =>
         () =>
-          overlays?.openSystemFlyout(
+          overlays.openSystemFlyout(
             flyoutProviders({
               services,
               store,
@@ -159,7 +159,10 @@ export const ResolverWithoutProviders = React.memo(
                 />
               ),
             }),
-            { ...defaultFlyoutProperties, session: 'inherit' }
+            {
+              ...defaultFlyoutProperties,
+              session: 'inherit',
+            }
           ),
       [
         defaultFlyoutProperties,
@@ -189,7 +192,10 @@ export const ResolverWithoutProviders = React.memo(
               </EuiPanel>
             ),
           }),
-          { ...defaultFlyoutProperties, session: 'inherit' }
+          {
+            ...defaultFlyoutProperties,
+            session: 'inherit',
+          }
         );
       } else {
         openPreviewPanel({
