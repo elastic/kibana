@@ -13,8 +13,7 @@ import { css } from '@emotion/react';
 import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 
 import { COLLAPSED_WIDTH, EXPANDED_WIDTH } from '../../hooks/use_layout_width';
-import { FooterNav, FooterToolbar } from '../footer';
-import { HeaderToolbar } from '../header';
+import { Footer } from '../footer';
 import { Logo } from './logo';
 import { NestedSecondaryMenu } from '../nested_secondary_menu';
 import { Popover } from './popover';
@@ -41,24 +40,21 @@ export interface SideNavProps {
 
 interface SideNavComponent extends FC<SideNavProps> {
   Logo: typeof Logo;
-  HeaderToolbar: typeof HeaderToolbar;
   PrimaryMenu: typeof PrimaryMenu;
   Popover: typeof Popover;
   SecondaryMenu: typeof SecondaryMenu;
   NestedSecondaryMenu: typeof NestedSecondaryMenu;
-  FooterNav: typeof FooterNav;
-  FooterToolbar: typeof FooterToolbar;
+  Footer: typeof Footer;
   SidePanel: typeof SidePanel;
 }
 
 /**
  * A wrapper component for the side navigation that encapsulates:
  * - the logo,
- * - header and footer toolbars,
  * - the primary menu,
  * - the secondary menu used in the popover and in the side panel,
  * - the nested secondary menu used in the "More" menu,
- * - the footer navigation and toolbar,
+ * - the footer,
  * - the side panel.
  */
 export const SideNav: SideNavComponent = ({ children, isCollapsed }) => {
@@ -77,11 +73,9 @@ export const SideNav: SideNavComponent = ({ children, isCollapsed }) => {
 };
 
 SideNav.Logo = Logo;
-SideNav.HeaderToolbar = HeaderToolbar;
 SideNav.PrimaryMenu = PrimaryMenu;
 SideNav.Popover = Popover;
 SideNav.SecondaryMenu = SecondaryMenu;
 SideNav.NestedSecondaryMenu = NestedSecondaryMenu;
-SideNav.FooterNav = FooterNav;
-SideNav.FooterToolbar = FooterToolbar;
+SideNav.Footer = Footer;
 SideNav.SidePanel = SidePanel;

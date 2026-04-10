@@ -59,7 +59,7 @@ export interface SidePanelProps {
 }
 
 /**
- * Side navigation panel that opens on mouse click if the top-level item contains a submenu.
+ * Side navigation panel that opens on mouse click if the primary menu item contains a submenu.
  * Shows only in expanded mode.
  */
 export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX.Element => {

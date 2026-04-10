@@ -17,6 +17,7 @@ import type { SideNavLogo } from '../../../types';
 import { MenuItem } from '../menu_item';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 import { useTooltip } from '../../hooks/use_tooltip';
+import { getHighContrastSeparator } from '../../hooks/use_high_contrast_mode_styles';
 
 export interface LogoProps extends Omit<HTMLAttributes<HTMLAnchorElement>, 'onClick'>, SideNavLogo {
   id: string;
@@ -30,16 +31,30 @@ export const Logo = ({
   isCollapsed,
   isCurrent,
   isHighlighted,
-  hideLabel,
   label,
   ...props
 }: LogoProps): JSX.Element => {
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
   const { tooltipRef, handleMouseOut } = useTooltip();
 
+  /**
+   * **Icon size**
+   *
+   * In Figma, the logo icon is 20x20.
+   * `EuiIcon` supports `l` which is 24x24 and `m` which is 16x16.
+   *
+   * **Padding**
+   *
+   * 7px aligns better with other elements in the layout.
+   * We cannot use `euiTheme.size.s` because it's 8px.
+   */
   const wrapperStyles = css`
     position: relative;
     padding-top: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
+    padding-bottom: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
+
+    ${getHighContrastSeparator(euiThemeContext)}
 
     .euiText {
       font-weight: ${euiTheme.font.weight.bold};
@@ -64,7 +79,7 @@ export const Logo = ({
         data-test-subj={logoTestSubj}
         isHighlighted={isHighlighted}
         isCurrent={isCurrent}
-        isLabelVisible={!isCollapsed && !hideLabel}
+        isLabelVisible={!isCollapsed}
         isTruncated={false}
         {...props}
       >

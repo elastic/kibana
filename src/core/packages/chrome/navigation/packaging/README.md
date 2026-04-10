@@ -27,7 +27,6 @@ import { OneNavigation } from '@kbn/one-navigation';
 
 <OneNavigation
   items={navigationItems}
-  tools={chromeTools}
   logo={logoConfig}
   isCollapsed={false}
   activeItemId="dashboard"
@@ -36,8 +35,6 @@ import { OneNavigation } from '@kbn/one-navigation';
   setWidth={setWidth}
 />
 ```
-
-`items` contains navigable content only. Optional chrome controls like search and help are passed separately through `tools` (`headerTools` / `footerTools`). `onItemClick` is only invoked for navigable items and the logo.
 
 ### Peer dependencies
 

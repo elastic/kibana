@@ -64,30 +64,6 @@ const navigationItems = {
   ],
 };
 
-const navigationTools = {
-  headerTools: [
-    {
-      id: 'search',
-      label: 'Search',
-      iconType: 'search',
-      onClick: () => {},
-    },
-  ],
-  footerTools: [
-    {
-      id: 'help',
-      label: 'Help',
-      iconType: 'question',
-      sections: [
-        {
-          id: 'help-links',
-          items: [{ id: 'docs', label: 'Documentation', href: '/docs' }],
-        },
-      ],
-    },
-  ],
-};
-
 function App() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [activeItemId, setActiveItemId] = useState('dashboard');
@@ -104,7 +80,6 @@ function App() {
         activeItemId={activeItemId}
         isCollapsed={isCollapsed}
         items={navigationItems}
-        tools={navigationTools}
         logo={{
           label: 'Observability',
           id: 'observability',
@@ -184,12 +159,6 @@ export const navigationItems = {
   ],
 };
 ```
-
-Navigable content uses `items` only. Optional chrome controls (global search, help menus, etc.) are passed separately through `tools` as `headerTools` and `footerTools`. Those render in dedicated tool groups; `onItemClick` applies only to the logo and navigable items from `items`, not to tool triggers or links shown inside tool popovers.
-
-### Logo
-
-Pass a `SideNavLogo` object as `logo`. Set `hideLabel: true` to omit the text under the icon while the navigation is expanded; `label` is still used for the link’s accessible name and for the tooltip when the navigation is collapsed.
 
 ## Navigation Badges
 

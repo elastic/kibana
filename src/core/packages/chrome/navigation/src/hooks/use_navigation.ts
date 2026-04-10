@@ -32,7 +32,7 @@ interface NavigationState {
  * - `actualActiveItemId` - the actual active item ID. There can only be one `aria-current=page` link on the page.
  * - `visuallyActivePageId` - the visually active page ID. The link does not have to be `aria-current=page`, it can be a parent of an active page.
  * - `visuallyActiveSubpageId` - the visually active subpage ID.
- * - `openerNode` - the top-level item whose submenu is shown in the side panel.
+ * - `openerNode` - the primary menu item whose submenu is shown in the side panel.
  * - `isCollapsed` - whether the side nav is collapsed.
  * - `isSidePanelOpen` - whether the side panel is open.
  */

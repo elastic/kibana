@@ -39,25 +39,17 @@ import { useHoverTimeout } from '../../hooks/use_hover_timeout';
 import { useScroll } from '../../hooks/use_scroll';
 
 export interface PopoverIds {
-  popoverNavigationInstructionsId: string | undefined;
+  popoverNavigationInstructionsId: string;
 }
 
 export type PopoverChildren =
   | ReactNode
-  | ((closePopover: () => void, ids: PopoverIds) => ReactNode);
+  | ((closePopover: () => void, ids?: PopoverIds) => ReactNode);
 
 export interface PopoverProps {
-  anchorPosition?: 'rightUp' | 'rightDown';
   children?: PopoverChildren;
   container?: HTMLElement;
-  /**
-   * When `true`, the popover delegates keyboard navigation and focus
-   * management to its children (e.g. EuiSelectable). Only Escape is
-   * handled by the popover itself.
-   */
-  customContent?: boolean;
   hasContent: boolean;
-  popoverWidth?: number | string;
   isSidePanelOpen: boolean;
   isAnyPopoverLocked?: boolean;
   setIsLocked?: (isLocked: boolean) => void;
@@ -83,12 +75,9 @@ export interface PopoverProps {
  *   - Escape to move focus back to the trigger.
  */
 export const Popover = ({
-  anchorPosition: anchorPositionProp,
   children,
   container,
-  customContent = false,
   hasContent,
-  popoverWidth,
   isSidePanelOpen,
   isAnyPopoverLocked = false,
   setIsLocked = () => {},
@@ -203,10 +192,6 @@ export const Popover = ({
         return;
       }
 
-      if (customContent) {
-        return;
-      }
-
       if (e.key === 'Tab') {
         e.preventDefault();
         handleClose();
@@ -216,7 +201,7 @@ export const Popover = ({
 
       handleRovingIndex(e);
     },
-    [customContent, handleClose]
+    [handleClose]
   );
 
   const handleBlur: FocusEventHandler = useCallback(
@@ -276,15 +261,9 @@ export const Popover = ({
     width: 100%;
   `;
 
-  const resolvedWidth = popoverWidth
-    ? typeof popoverWidth === 'number'
-      ? `${popoverWidth}px`
-      : popoverWidth
-    : `${SIDE_PANEL_WIDTH}px`;
-
   const popoverContentStyles = css`
     --popover-max-height: 37.5rem;
-    width: ${resolvedWidth};
+    width: ${SIDE_PANEL_WIDTH}px;
     max-height: var(--popover-max-height);
     ${scrollStyles};
   `;
@@ -314,7 +293,7 @@ export const Popover = ({
       )}
       <EuiPopover
         aria-label={label}
-        anchorPosition={anchorPositionProp ?? 'rightUp'}
+        anchorPosition="rightUp"
         buffer={[TOP_BAR_HEIGHT + TOP_BAR_POPOVER_GAP, 0, BOTTOM_POPOVER_GAP, POPOVER_OFFSET]}
         button={enhancedTrigger}
         closePopover={handleClose}
@@ -336,10 +315,8 @@ export const Popover = ({
             popoverRef.current = ref;
 
             if (ref) {
-              if (!customContent) {
-                const elements = getFocusableElements(ref);
-                updateTabIndices(elements);
-              }
+              const elements = getFocusableElements(ref);
+              updateTabIndices(elements);
 
               if (shouldFocusOnOpen) {
                 focusFirstElement(popoverRef);
@@ -350,25 +327,19 @@ export const Popover = ({
           onKeyDown={handlePopoverKeyDown}
           css={popoverContentStyles}
         >
-          {!customContent && (
-            <EuiScreenReaderOnly>
-              <p id={popoverNavigationInstructionsId}>
-                {i18n.translate('core.ui.chrome.sideNavigation.popoverNavigationInstructions', {
-                  defaultMessage:
-                    'You are in the {label} secondary menu dialog. Use Up and Down arrow keys to navigate the menu. Press Escape to exit to the menu trigger.',
-                  values: {
-                    label,
-                  },
-                })}
-              </p>
-            </EuiScreenReaderOnly>
-          )}
+          <EuiScreenReaderOnly>
+            <p id={popoverNavigationInstructionsId}>
+              {i18n.translate('core.ui.chrome.sideNavigation.popoverNavigationInstructions', {
+                defaultMessage:
+                  'You are in the {label} secondary menu dialog. Use Up and Down arrow keys to navigate the menu. Press Escape to exit to the menu trigger.',
+                values: {
+                  label,
+                },
+              })}
+            </p>
+          </EuiScreenReaderOnly>
           {typeof children === 'function'
-            ? children(handleClose, {
-                popoverNavigationInstructionsId: customContent
-                  ? undefined
-                  : popoverNavigationInstructionsId,
-              })
+            ? children(handleClose, { popoverNavigationInstructionsId })
             : children}
         </div>
       </EuiPopover>

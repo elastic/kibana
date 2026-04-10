@@ -16,7 +16,7 @@ import { EuiProvider, EuiSpacer, EuiText, EuiCode, useEuiTheme } from '@elastic/
 // @ts-expect-error — package must be built first.
 import { OneNavigation } from '@kbn/one-navigation';
 // @ts-expect-error — package must be built first.
-import type { MenuItem, SecondaryMenuItem, SideNavLogo, ToolSlots } from '@kbn/one-navigation';
+import type { MenuItem, SecondaryMenuItem, SideNavLogo } from '@kbn/one-navigation';
 
 /** Returns a `className` that adds a divider after the Dashboard nav item. */
 const useNavDividerClass = () => {
@@ -108,39 +108,6 @@ const App = () => {
     href: '#/',
   };
 
-  const tools: ToolSlots = {
-    headerTools: [
-      {
-        id: 'search',
-        label: 'Search',
-        iconType: 'search',
-        onClick: () => {
-          // eslint-disable-next-line no-console
-          console.log('Search tool clicked');
-        },
-      },
-    ],
-    footerTools: [
-      {
-        id: 'help',
-        label: 'Help',
-        iconType: 'question',
-        sections: [
-          {
-            id: 'help-links',
-            items: [
-              {
-                id: 'documentation',
-                label: 'Documentation',
-                href: '#/help/documentation',
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  };
-
   const handleItemClick = (item: MenuItem | SecondaryMenuItem | SideNavLogo) => {
     // eslint-disable-next-line no-console
     console.log('Navigation item clicked:', item);
@@ -159,7 +126,6 @@ const App = () => {
         <OneNavigation
           {...{ activeItemId, logo }}
           items={navigationItems}
-          tools={tools}
           isCollapsed={isCollapsed}
           onItemClick={handleItemClick}
           onToggleCollapsed={setIsCollapsed}
