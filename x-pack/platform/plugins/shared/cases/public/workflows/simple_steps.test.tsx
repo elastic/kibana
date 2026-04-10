@@ -57,7 +57,7 @@ describe('new cases public step definitions', () => {
 
   it.each(steps)('returns expected metadata for %s', (definition) => {
     expect(definition.id.startsWith('cases.')).toBe(true);
-    expect(definition.category).toBe('kibana');
+    expect(definition.category).toBe('kibana.cases');
     expect(definition.documentation?.examples?.length).toBeGreaterThan(0);
   });
 

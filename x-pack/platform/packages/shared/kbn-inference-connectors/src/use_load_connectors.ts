@@ -11,9 +11,14 @@ import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError, HttpSetup } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import {
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+} from '@kbn/management-settings-ids';
 import { i18n } from '@kbn/i18n';
+import { fetchConnectorById } from './fetch_connector_by_id';
 import { fetchConnectorsForFeature } from './fetch_connectors_for_feature';
-import { toAIConnector, applyConnectorSettings } from './load_connectors';
+import { toAIConnector } from './load_connectors';
 import type { AIConnector } from './types';
 
 const QUERY_KEY = ['kbn-inference-connectors', 'load-connectors'];
@@ -50,9 +55,36 @@ export const useLoadConnectors = ({
   const query = useQuery(
     [...QUERY_KEY, featureId],
     async () => {
+      const defaultConnectorId = settings.client.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
+      const defaultConnectorOnly = settings.client.get<boolean>(
+        GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+        false
+      );
+
+      if (defaultConnectorOnly) {
+        if (!defaultConnectorId) {
+          return [];
+        }
+        const connector = await fetchConnectorById(http, defaultConnectorId);
+        if (connector) {
+          return [connector];
+        } else {
+          return [];
+        }
+      }
+
       const result = await fetchConnectorsForFeature(http, featureId);
       setSoEntryFound(result.soEntryFound);
-      return applyConnectorSettings(result.connectors.map(toAIConnector), settings);
+      const aiConnectors = result.connectors.map(toAIConnector);
+
+      if (!result.soEntryFound && defaultConnectorId) {
+        const defaultConnector = await fetchConnectorById(http, defaultConnectorId);
+        if (defaultConnector) {
+          return [defaultConnector, ...aiConnectors.filter((c) => c.id !== defaultConnectorId)];
+        }
+      }
+
+      return aiConnectors;
     },
     {
       retry: false,
@@ -65,7 +97,7 @@ export const useLoadConnectors = ({
               : error,
             {
               title: i18n.translate('inferenceConnectors.useLoadConnectors.errorMessage', {
-                defaultMessage: 'Error loading connectors',
+                defaultMessage: 'Error loading models',
               }),
             }
           );
