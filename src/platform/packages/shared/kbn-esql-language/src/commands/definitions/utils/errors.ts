@@ -15,9 +15,10 @@ import type {
   ESQLFunction,
   ESQLIdentifier,
   ESQLLocation,
-  ESQLMessage,
   ESQLSource,
+  ESQLMessage,
 } from '@elastic/esql/types';
+import { EsqlQuery, mutate } from '@elastic/esql';
 import type {
   ErrorTypes,
   ErrorValues,
@@ -25,6 +26,8 @@ import type {
   Signature,
   SupportedDataType,
 } from '../types';
+import { EsqlSettingNames } from '../generated/settings';
+import { UnmappedFieldsStrategy } from '../../registry/types';
 
 function getMessageAndTypeFromId<K extends ErrorTypes>({
   messageId,
@@ -32,7 +35,17 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
 }: {
   messageId: K;
   values: ErrorValues<K>;
-}): { message: string; type?: 'error' | 'warning'; underlinedWarning?: boolean } {
+}): {
+  message: string;
+  type?: 'error' | 'warning';
+  underlinedWarning?: boolean;
+  quickFix?: {
+    // HD improve types sharing
+    title: string;
+    // A function that recieves the current query and returns it corrected.
+    fixQuery: (query: string) => string;
+  };
+} {
   // Use a less strict type instead of doing a typecast on each message type
   const out = values as unknown as Record<string, string>;
   // i18n validation wants to the values prop to be declared inline, so need to unpack and redeclare again all props
@@ -43,6 +56,20 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           defaultMessage: 'Unknown column "{name}"',
           values: { name: out.name },
         }),
+        quickFix: {
+          title: i18n.translate('kbn-esql-language.esql.validation.unknownColumn.quickFix', {
+            defaultMessage: 'Load unmapped fields',
+          }),
+          fixQuery: (query: string) => {
+            const esqlQuery = EsqlQuery.fromSrc(query, { withFormatting: true });
+            mutate.commands.set.upsert(
+              esqlQuery.ast,
+              EsqlSettingNames.UNMAPPED_FIELDS,
+              UnmappedFieldsStrategy.LOAD
+            );
+            return esqlQuery.print({ multiline: true });
+          },
+        },
       };
     case 'unmappedColumnWarning':
       return {
@@ -507,8 +534,8 @@ export function getMessageFromId<K extends ErrorTypes>({
   values: ErrorValues<K>;
   locations: ESQLLocation;
 }): ESQLMessage {
-  const { message, type = 'error', underlinedWarning } = getMessageAndTypeFromId(payload);
-  return createMessage(type, message, locations, payload.messageId, underlinedWarning);
+  const { message, type = 'error', underlinedWarning, quickFix } = getMessageAndTypeFromId(payload);
+  return createMessage(type, message, locations, payload.messageId, underlinedWarning, quickFix);
 }
 
 export function createMessage(
@@ -516,7 +543,8 @@ export function createMessage(
   message: string,
   location: ESQLLocation,
   messageId: string,
-  underlinedWarning?: boolean
+  underlinedWarning?: boolean,
+  quickFix?: { title: string; action: (query: string) => string }
 ): ESQLMessage {
   return {
     type,
@@ -524,6 +552,7 @@ export function createMessage(
     location,
     code: messageId,
     underlinedWarning,
+    quickFix,
   };
 }
 

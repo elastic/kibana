@@ -62,10 +62,12 @@ function ErrorsWarningsContent({
   items,
   type,
   onErrorClick,
+  onQuickFixClick,
 }: {
   items: MonacoMessage[];
   type: 'error' | 'warning';
   onErrorClick: (error: MonacoMessage) => void;
+  onQuickFixClick: (error: MonacoMessage) => void;
 }) {
   const { euiTheme } = useEuiTheme();
   const { color } = getConstsByType(type, items.length);
@@ -98,29 +100,53 @@ function ErrorsWarningsContent({
               `}
               onClick={() => handleClick(item)}
             >
-              <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize="s" alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon type={type} color={color} size="s" aria-hidden="true" />
-                    </EuiFlexItem>
-                    <EuiFlexItem css={{ whiteSpace: 'nowrap' }}>
-                      {i18n.translate('esqlEditor.query.lineNumber', {
-                        defaultMessage: 'Line {lineNumber}',
-                        values: { lineNumber: item.startLineNumber },
-                      })}
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                <EuiFlexItem
-                  grow={false}
+              <div
+                css={css`
+                  display: grid;
+                  grid-template-columns: auto 1fr;
+                  column-gap: ${euiTheme.size.xl};
+                  row-gap: ${euiTheme.size.s};
+                  align-items: start;
+                `}
+              >
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type={type} color={color} size="s" aria-hidden={true} />
+                  </EuiFlexItem>
+                  <EuiFlexItem css={{ whiteSpace: 'nowrap' }}>
+                    {i18n.translate('esqlEditor.query.lineNumber', {
+                      defaultMessage: 'Line {lineNumber}',
+                      values: { lineNumber: item.startLineNumber },
+                    })}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <div
                   css={css`
                     ${euiTextBreakWord()}
                   `}
                 >
                   {item.message}
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                </div>
+                {item.quickFix ? (
+                  <EuiButtonEmpty
+                    size="xs"
+                    color="text"
+                    iconType="wrench"
+                    iconSize="s"
+                    data-test-subj="ESQLEditor-errors-warnings-content-quick-fix"
+                    aria-label={i18n.translate('esqlEditor.query.quickFix.ariaLabel', {
+                      defaultMessage: 'Quick fix: {title}',
+                      values: { title: item.quickFix.title },
+                    })}
+                    onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                      e.stopPropagation();
+                      onQuickFixClick(item);
+                    }}
+                  >
+                    {item.quickFix.title}
+                  </EuiButtonEmpty>
+                ) : null}
+              </div>
             </EuiDescriptionListDescription>
           );
         })}
@@ -135,6 +161,7 @@ export function ErrorsWarningsFooterPopover({
   type,
   setIsPopoverOpen,
   onErrorClick,
+  onQuickFixClick,
   isSpaceReduced,
   dataErrorsControl,
 }: {
@@ -143,6 +170,7 @@ export function ErrorsWarningsFooterPopover({
   type: 'error' | 'warning';
   setIsPopoverOpen: (flag: boolean) => void;
   onErrorClick: (error: MonacoMessage) => void;
+  onQuickFixClick: (error: MonacoMessage) => void;
   isSpaceReduced?: boolean;
   dataErrorsControl?: DataErrorsControl;
 }) {
@@ -184,11 +212,17 @@ export function ErrorsWarningsFooterPopover({
           isOpen={isPopoverOpen}
           closePopover={closePopover}
           aria-label={i18n.translate('esqlEditor.errorsWarningsPopover.ariaLabel', {
-            defaultMessage: 'Errors and warnings popover',
+            defaultMessage: 'Popover for {type}s',
+            values: { type },
           })}
         >
           {visibleItems.length > 0 && (
-            <ErrorsWarningsContent items={visibleItems} type={type} onErrorClick={onErrorClick} />
+            <ErrorsWarningsContent
+              items={visibleItems}
+              type={type}
+              onErrorClick={onErrorClick}
+              onQuickFixClick={onQuickFixClick}
+            />
           )}
           {dataErrorsControl && (
             <DataErrorsSwitch dataErrorsControl={dataErrorsControl} closePopover={closePopover} />

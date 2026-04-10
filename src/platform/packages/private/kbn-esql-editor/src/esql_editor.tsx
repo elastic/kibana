@@ -835,6 +835,7 @@ const ESQLEditorInternal = function ESQLEditor({
     }) => {
       if (!editorModel.current || editorModel.current.isDisposed()) return;
       monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
+
       const {
         warnings: parserWarnings,
         errors: parserErrors,
@@ -1035,6 +1036,28 @@ const ESQLEditorInternal = function ESQLEditor({
     });
     editorRef.current.revealLine(startLineNumber);
   }, []);
+
+  const onQuickFixClick = useCallback(
+    ({ quickFix }: MonacoMessage) => {
+      try {
+        const editor = editorRef.current;
+        const model = editor?.getModel();
+        if (editor && model && quickFix?.fixQuery) {
+          const currentQuery = model.getValue();
+          const fixed = quickFix.fixQuery(currentQuery);
+          const fullRange = model.getFullModelRange();
+          editor.executeEdits('standaloneQuery', [{ range: fullRange, text: fixed }]);
+        }
+      } catch (error) {
+        core.notifications.toasts.addError(error, {
+          title: i18n.translate('esqlEditor.quickFix.genericError', {
+            defaultMessage: 'Failed to apply quick fix',
+          }),
+        });
+      }
+    },
+    [core.notifications.toasts]
+  );
 
   // Clean up the monaco editor and DOM on unmount
   useEffect(() => {
@@ -1387,6 +1410,7 @@ const ESQLEditorInternal = function ESQLEditor({
         queryStats={queryStats}
         {...editorMessages}
         onErrorClick={onErrorClick}
+        onQuickFixClick={onQuickFixClick}
       />
       {createPortal(
         Object.keys(popoverPosition).length > 0 && (
