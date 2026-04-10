@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FunctionComponent, MouseEventHandler } from 'react';
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import type { FunctionComponent, MouseEventHandler, RefCallback } from 'react';
+import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -29,6 +29,7 @@ interface ToggleProps {
   disabled?: boolean;
   toggleJson: MouseEventHandler;
   fieldType: FieldType;
+  toggleRef: RefCallback<HTMLAnchorElement>;
 }
 
 const FieldToToggle: FunctionComponent<ToggleProps> = ({
@@ -36,23 +37,31 @@ const FieldToToggle: FunctionComponent<ToggleProps> = ({
   disabled,
   toggleJson,
   fieldType,
+  toggleRef,
 }) => {
+  const labelAppend = (
+    <EuiText size="xs">
+      <EuiLink
+        ref={toggleRef}
+        onClick={toggleJson}
+        data-test-subj="toggleTextField"
+        disabled={disabled}
+      >
+        <FormattedMessage
+          id="xpack.ingestPipelines.pipelineEditor.toggleJson.useJsonFormat"
+          defaultMessage="Define as JSON"
+        />
+      </EuiLink>
+    </EuiText>
+  );
+
   if (fieldType === 'text') {
     return (
       <Field
         data-test-subj="textValueField"
         field={field}
         euiFieldProps={{ disabled }}
-        labelAppend={
-          <EuiText size="xs">
-            <EuiLink onClick={toggleJson} data-test-subj="toggleTextField" disabled={disabled}>
-              <FormattedMessage
-                id="xpack.ingestPipelines.pipelineEditor.toggleJson.useJsonFormat"
-                defaultMessage="Define as JSON"
-              />
-            </EuiLink>
-          </EuiText>
-        }
+        labelAppend={labelAppend}
       />
     );
   }
@@ -63,16 +72,7 @@ const FieldToToggle: FunctionComponent<ToggleProps> = ({
         data-test-subj="comboxValueField"
         field={field}
         euiFieldProps={{ disabled }}
-        labelAppend={
-          <EuiText size="xs">
-            <EuiLink onClick={toggleJson} data-test-subj="toggleTextField" disabled={disabled}>
-              <FormattedMessage
-                id="xpack.ingestPipelines.pipelineEditor.toggleJson.useJsonFormat"
-                defaultMessage="Define as JSON"
-              />
-            </EuiLink>
-          </EuiText>
-        }
+        labelAppend={labelAppend}
       />
     );
   }
@@ -86,10 +86,21 @@ export const XJsonToggle: FunctionComponent<Props> = ({
 }) => {
   const { value, setValue } = field;
   const [defineAsJson, setDefineAsJson] = useState<boolean | undefined>(undefined);
+  const toggleLinkRef = useRef<HTMLAnchorElement | null>(null);
+  const pendingFocusRef = useRef(false);
+
+  const toggleRef: RefCallback<HTMLAnchorElement> = useCallback((node) => {
+    toggleLinkRef.current = node;
+    if (pendingFocusRef.current && node) {
+      node.focus();
+      pendingFocusRef.current = false;
+    }
+  }, []);
 
   const toggleJson = useCallback(() => {
     const defaultValue = fieldType === 'text' ? '' : [];
     const newValueIsJson = !defineAsJson;
+    pendingFocusRef.current = true;
     setValue(newValueIsJson ? '{}' : defaultValue);
     setDefineAsJson(newValueIsJson);
     handleIsJson(newValueIsJson);
@@ -126,7 +137,12 @@ export const XJsonToggle: FunctionComponent<Props> = ({
         options: { readOnly: disabled },
         labelAppend: (
           <EuiText size="xs">
-            <EuiLink onClick={toggleJson} data-test-subj="toggleJsonField" disabled={disabled}>
+            <EuiLink
+              ref={toggleRef}
+              onClick={toggleJson}
+              data-test-subj="toggleJsonField"
+              disabled={disabled}
+            >
               <FormattedMessage
                 id="xpack.ingestPipelines.pipelineEditor.toggleJson.useTextFormat"
                 defaultMessage="Define as text"
@@ -141,6 +157,7 @@ export const XJsonToggle: FunctionComponent<Props> = ({
       field={field}
       disabled={disabled}
       toggleJson={toggleJson}
+      toggleRef={toggleRef}
       fieldType={fieldType}
     />
   );

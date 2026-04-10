@@ -80,7 +80,7 @@ const journeyTargetGroups: JourneyTargetGroups = {
     'data_stress_test_lens_esql',
   ],
   ml: ['aiops_log_rate_analysis', 'many_fields_transform', 'tsdb_logs_data_visualizer'],
-  observability: ['apm_service_inventory', 'infra_hosts_view'],
+  observability: ['apm_service_inventory', 'infra_hosts_view_ecs', 'infra_hosts_view_semconv'],
   security: ['cloud_security_dashboard'],
   streams: [
     'streams_listing_page',
