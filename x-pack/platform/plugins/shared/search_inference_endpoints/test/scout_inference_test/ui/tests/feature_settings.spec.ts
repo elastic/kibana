@@ -23,6 +23,21 @@ test.describe(
       await pageObjects.featureSettings.unmockConnectors();
     });
 
+    test('shows empty state when no models are available', async ({ pageObjects }) => {
+      const { featureSettings } = pageObjects;
+      await featureSettings.unmockConnectors();
+      await featureSettings.mockEmptyConnectors();
+      await featureSettings.gotoEmptyState();
+
+      try {
+        await expect(featureSettings.noModelsEmptyPrompt).toBeVisible();
+        await expect(featureSettings.addModelsButton).toBeVisible();
+      } finally {
+        await featureSettings.unmockConnectors();
+        await featureSettings.mockConnectors();
+      }
+    });
+
     test('displays page header', async ({ pageObjects }) => {
       await expect(pageObjects.featureSettings.pageHeader).toBeVisible();
     });

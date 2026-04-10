@@ -132,6 +132,21 @@ export class FeatureSettingsPage {
     return this.resetDefaultsModal.locator('[data-test-subj="confirmModalCancelButton"]');
   }
 
+  // --- Empty State ---
+
+  public get noModelsEmptyPrompt(): Locator {
+    return this.page.testSubj.locator('settings-no-models');
+  }
+
+  public get addModelsButton(): Locator {
+    return this.page.testSubj.locator('settings-no-models-add-models');
+  }
+
+  public async gotoEmptyState() {
+    await this.page.gotoApp('management/modelManagement/model_settings');
+    await expect(this.noModelsEmptyPrompt).toBeVisible();
+  }
+
   // --- Route Mocking ---
 
   public async mockConnectors() {
@@ -151,6 +166,16 @@ export class FeatureSettingsPage {
             },
           ],
         }),
+      });
+    });
+  }
+
+  public async mockEmptyConnectors() {
+    await this.page.route('**/internal/inference/connectors', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ connectors: [] }),
       });
     });
   }
