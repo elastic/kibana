@@ -11,7 +11,6 @@ import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiCallOut,
-  EuiCodeBlock,
   EuiConfirmModal,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -51,7 +50,11 @@ import { InfoPanel } from '../../../../info_panel';
 import { SparkPlot } from '../../../../spark_plot';
 import { SeveritySelector } from '../severity_selector';
 import { SeverityBadge } from '../severity_badge/severity_badge';
-import { OCCURRENCES_COLUMN, THRESHOLD_BREACHES_TOOLTIP_NAME, OPEN_IN_DISCOVER_ACTION_TITLE } from './translations';
+import {
+  OCCURRENCES_COLUMN,
+  THRESHOLD_BREACHES_TOOLTIP_NAME,
+  OPEN_IN_DISCOVER_ACTION_TITLE,
+} from './translations';
 import { AssetImage } from '../../../../asset_image';
 import { QueryTypeBadge } from '../query_type_badge/query_type_badge';
 import { buildDiscoverParams } from '../../utils/discover_helpers';
@@ -238,7 +241,7 @@ export function QueryDetailsFlyout({
             </EuiFlexItem>
             <EuiFlexItem>
               <FlyoutMetadataCard title={TYPE_LABEL}>
-                <EuiBadge color="hollow">{QUERY_TYPE_BADGE_LABEL}</EuiBadge>
+                <EuiBadge color="hollow">{queryType}</EuiBadge>
               </FlyoutMetadataCard>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -455,11 +458,6 @@ const EDIT_QUERY_TITLE = i18n.translate(
 const QUERY_NAME_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.queryNameLabel',
   { defaultMessage: 'Query name' }
-);
-
-const QUERY_PANEL_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.queryLabel',
-  { defaultMessage: 'Query' }
 );
 
 const DESCRIPTION_LABEL = i18n.translate(
