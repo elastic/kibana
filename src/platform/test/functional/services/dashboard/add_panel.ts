@@ -101,9 +101,7 @@ export class DashboardAddPanelService extends FtrService {
   async openAddPanelFlyout() {
     this.log.debug('DashboardAddPanel.openAddPanelFlyout');
     await this.clickTopNavAddMenu();
-
     await this.testSubjects.click('dashboardOpenAddPanelFlyoutButton');
-
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail('dashboardPanelSelectionFlyout');
     });
