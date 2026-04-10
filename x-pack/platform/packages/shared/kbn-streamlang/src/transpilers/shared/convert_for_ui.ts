@@ -6,7 +6,7 @@
  */
 
 import { htmlIdGenerator } from '@elastic/eui';
-import type { StreamlangStepWithUIAttributes } from '../../../types/ui';
+import type { StreamlangStepWithUIAttributes, StreamlangUIBranch } from '../../../types/ui';
 import {
   isConditionBlock,
   type StreamlangDSL,
@@ -21,7 +21,7 @@ export const convertStepsForUI = (dsl: StreamlangDSL): StreamlangStepWithUIAttri
   function unnestSteps(
     steps: StreamlangStep[],
     parentId: string | null = null,
-    branch: 'if' | 'else' = 'if'
+    branch: StreamlangUIBranch = 'if'
   ) {
     for (const step of steps) {
       const stepWithUI = convertStepToUIDefinition(step, { parentId, branch });
@@ -51,7 +51,7 @@ export const convertStepsForUI = (dsl: StreamlangDSL): StreamlangStepWithUIAttri
 
 export const convertStepToUIDefinition = <TStepDefinition extends StreamlangStep>(
   step: TStepDefinition,
-  options: { parentId: StreamlangStepWithUIAttributes['parentId']; branch?: 'if' | 'else' }
+  options: { parentId: StreamlangStepWithUIAttributes['parentId']; branch?: StreamlangUIBranch }
 ): StreamlangStepWithUIAttributes => {
   const id = step.customIdentifier ?? createId();
   const branch = options.branch ?? 'if';
@@ -78,7 +78,7 @@ export const convertStepToUIDefinition = <TStepDefinition extends StreamlangStep
 
 type StreamlangStepWithUIProps = StreamlangStep & {
   parentId: string | null;
-  branch?: 'if' | 'else';
+  branch?: StreamlangUIBranch;
 };
 export const convertUIStepsToDSL = (
   steps: StreamlangStepWithUIAttributes[],

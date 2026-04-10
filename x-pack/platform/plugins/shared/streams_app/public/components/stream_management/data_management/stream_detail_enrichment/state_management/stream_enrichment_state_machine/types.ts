@@ -15,6 +15,7 @@ import type {
   StreamlangDSL,
   StreamlangProcessorDefinition,
   StreamlangStepWithUIAttributes,
+  StreamlangUIBranch,
   StreamlangValidationError,
 } from '@kbn/streamlang';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
@@ -126,7 +127,7 @@ export type StreamEnrichmentEvent =
       step?: StreamlangProcessorDefinition;
       options?: {
         parentId: StreamlangStepWithUIAttributes['parentId'];
-        branch?: 'if' | 'else';
+        branch?: StreamlangUIBranch;
       };
     }
   | {
@@ -138,7 +139,7 @@ export type StreamEnrichmentEvent =
       step?: StreamlangConditionBlock;
       options?: {
         parentId: StreamlangStepWithUIAttributes['parentId'];
-        branch?: 'if' | 'else';
+        branch?: StreamlangUIBranch;
       };
     }
   | { type: 'step.reorder'; stepId: string; direction: 'up' | 'down' }

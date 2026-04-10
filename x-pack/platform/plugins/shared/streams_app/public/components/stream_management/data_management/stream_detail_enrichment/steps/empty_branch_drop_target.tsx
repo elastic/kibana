@@ -9,10 +9,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { useEuiTheme } from '@elastic/eui';
+import type { StreamlangUIBranch } from '@kbn/streamlang';
 
 interface EmptyBranchDropTargetProps {
   parentId: string;
-  branch: 'if' | 'else';
+  branch: StreamlangUIBranch;
   onDrop: (sourceStepId: string, targetStepId: string, operation: 'inside' | 'inside-else') => void;
 }
 

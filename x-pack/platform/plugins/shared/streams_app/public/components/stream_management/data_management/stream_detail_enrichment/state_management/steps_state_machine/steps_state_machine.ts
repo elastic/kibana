@@ -10,6 +10,7 @@ import type {
   StreamlangProcessorDefinition,
   StreamlangStepWithUIAttributes,
   StreamlangConditionBlockWithUIAttributes,
+  StreamlangUIBranch,
 } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
 import type { StepContext, StepEvent, StepInput } from './types';
@@ -76,7 +77,10 @@ export const stepMachine = setup({
       };
     }),
     changeParent: assign(
-      ({ context }, { parentId, branch }: { parentId: string | null; branch?: 'if' | 'else' }) => {
+      (
+        { context },
+        { parentId, branch }: { parentId: string | null; branch?: StreamlangUIBranch }
+      ) => {
         const updatedStep = {
           ...context.step,
           parentId,

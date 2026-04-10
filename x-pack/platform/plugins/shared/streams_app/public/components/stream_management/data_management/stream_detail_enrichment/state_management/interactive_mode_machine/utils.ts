@@ -9,6 +9,7 @@ import {
   isActionBlock,
   isConditionBlock,
   type StreamlangStepWithUIAttributes,
+  type StreamlangUIBranch,
 } from '@kbn/streamlang';
 import type { GrokCollection } from '@kbn/grok-ui';
 import type { DataSourceSimulationMode } from '../data_source_state_machine';
@@ -115,7 +116,7 @@ export function maybeAutoFilterByParentCondition(
   stepRefs: StepActorRef[],
   parentId: string | null | undefined,
   parentRef: InteractiveModeParentRef,
-  branch?: 'if' | 'else'
+  branch?: StreamlangUIBranch
 ): void {
   if (!parentId || branch === 'else') return;
 

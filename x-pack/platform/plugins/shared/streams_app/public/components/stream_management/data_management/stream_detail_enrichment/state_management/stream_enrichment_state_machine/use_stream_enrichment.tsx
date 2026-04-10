@@ -13,6 +13,7 @@ import type {
   StreamlangStepWithUIAttributes,
   StreamlangDSL,
   StreamlangConditionBlock,
+  StreamlangUIBranch,
 } from '@kbn/streamlang';
 import { GrokCollection, GrokCollectionProvider } from '@kbn/grok-ui';
 import type { Streams } from '@kbn/streams-schema';
@@ -57,7 +58,7 @@ export const useStreamEnrichmentEvents = () => {
         step?: StreamlangProcessorDefinition,
         options?: {
           parentId: StreamlangStepWithUIAttributes['parentId'];
-          branch?: 'if' | 'else';
+          branch?: StreamlangUIBranch;
         }
       ) => {
         service.send({ type: 'step.addProcessor', step, options });
@@ -69,7 +70,7 @@ export const useStreamEnrichmentEvents = () => {
         step?: StreamlangConditionBlock,
         options?: {
           parentId: StreamlangStepWithUIAttributes['parentId'];
-          branch?: 'if' | 'else';
+          branch?: StreamlangUIBranch;
         }
       ) => {
         service.send({ type: 'step.addCondition', step, options });

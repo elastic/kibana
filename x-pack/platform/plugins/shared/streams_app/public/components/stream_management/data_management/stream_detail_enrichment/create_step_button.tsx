@@ -17,6 +17,7 @@ import {
 import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { i18n } from '@kbn/i18n';
+import type { StreamlangUIBranch } from '@kbn/streamlang';
 import {
   useInteractiveModeSelector,
   useStreamEnrichmentEvents,
@@ -54,7 +55,7 @@ const createText = i18n.translate(
 
 interface AddStepProps {
   parentId?: string;
-  branch?: 'if' | 'else';
+  branch?: StreamlangUIBranch;
   mode: 'inline' | 'subdued' | 'prominent';
   nestingDisabled?: boolean;
 }

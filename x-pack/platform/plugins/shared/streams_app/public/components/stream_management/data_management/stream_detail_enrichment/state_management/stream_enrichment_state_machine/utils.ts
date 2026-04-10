@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { StreamlangUIBranch } from '@kbn/streamlang';
 import type { FieldDefinition } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
 import { v4 as uuidv4 } from 'uuid';
@@ -173,7 +174,7 @@ function findNewSiblingStepIndex(stepRefs: StepActorRef[], parentId: string): nu
 export function findInsertIndex(
   stepRefs: StepActorRef[],
   parentId: string | null,
-  branch: 'if' | 'else' = 'if'
+  branch: StreamlangUIBranch = 'if'
 ): number {
   // Find the index of the parent step
   const parentIndex = parentId ? stepRefs.findIndex((step) => step.id === parentId) : -1;

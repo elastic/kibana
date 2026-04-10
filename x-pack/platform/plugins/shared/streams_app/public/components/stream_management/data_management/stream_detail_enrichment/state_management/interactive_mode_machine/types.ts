@@ -10,6 +10,7 @@ import type { GrokCollection } from '@kbn/grok-ui';
 import type {
   StreamlangProcessorDefinition,
   StreamlangStepWithUIAttributes,
+  StreamlangUIBranch,
 } from '@kbn/streamlang';
 import type { StreamlangConditionBlock, StreamlangDSL } from '@kbn/streamlang/types/streamlang';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
@@ -116,7 +117,7 @@ export type InteractiveModeEvent =
       processor?: StreamlangProcessorDefinition;
       options?: {
         parentId: StreamlangStepWithUIAttributes['parentId'];
-        branch?: 'if' | 'else';
+        branch?: StreamlangUIBranch;
       };
     }
   | {
@@ -124,7 +125,7 @@ export type InteractiveModeEvent =
       condition?: StreamlangConditionBlock;
       options?: {
         parentId: StreamlangStepWithUIAttributes['parentId'];
-        branch?: 'if' | 'else';
+        branch?: StreamlangUIBranch;
       };
     }
   | { type: 'step.duplicateProcessor'; processorStepId: string }

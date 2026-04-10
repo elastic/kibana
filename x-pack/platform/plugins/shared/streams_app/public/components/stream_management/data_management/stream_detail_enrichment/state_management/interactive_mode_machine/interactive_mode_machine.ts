@@ -6,7 +6,7 @@
  */
 
 import { htmlIdGenerator } from '@elastic/eui';
-import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
+import type { StreamlangStepWithUIAttributes, StreamlangUIBranch } from '@kbn/streamlang';
 import {
   ALWAYS_CONDITION,
   convertStepsForUI,
@@ -85,7 +85,7 @@ export const interactiveModeMachine = setup({
           processor?: StreamlangProcessorDefinition;
           options?: {
             parentId: StreamlangStepWithUIAttributes['parentId'];
-            branch?: 'if' | 'else';
+            branch?: StreamlangUIBranch;
           };
         }
       ) => {
@@ -168,7 +168,7 @@ export const interactiveModeMachine = setup({
           condition?: StreamlangConditionBlock;
           options?: {
             parentId: StreamlangStepWithUIAttributes['parentId'];
-            branch?: 'if' | 'else';
+            branch?: StreamlangUIBranch;
           };
         }
       ) => {
@@ -259,7 +259,7 @@ export const interactiveModeMachine = setup({
 
         // Determine the new parentId and branch for the source step
         let newParentId: string | null;
-        let newBranch: 'if' | 'else';
+        let newBranch: StreamlangUIBranch;
 
         // Nested inside a where block
         if (params.operation === 'inside') {
