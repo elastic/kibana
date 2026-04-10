@@ -34,7 +34,8 @@ export const createInspectActionDescriptor = (
     const overlay = core.overlays.openSystemFlyout(<InspectFlyout searchSession={uiSession} />, {
       id: `inspect-background-search-${uiSession.id}`,
       title: i18n.translate('data.sessions.management.backgroundSearchFlyoutTitle', {
-        defaultMessage: `Inspect ${uiSession.name}`,
+        defaultMessage: 'Inspect {name}',
+        values: { name: uiSession.name },
       }),
       flyoutMenuProps: { hideTitle: false },
       size: 'm',
