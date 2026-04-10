@@ -11,24 +11,29 @@ import { EuiEmptyPrompt, EuiTitle } from '@elastic/eui';
 import { PageTemplate } from './template';
 import { useFlowBreadcrumb } from '../shared/use_flow_breadcrumbs';
 import { SECTIONS, POPULAR_INTEGRATION_TILES } from './ingest_hub/ingest_hub_data';
+import { KubernetesOnboardingPage } from './kubernetes_onboarding_page';
+import { IntegrationHeader } from '../header/integration_header';
 
 const allTiles = [
   ...SECTIONS.flatMap((s) => s.tiles),
   ...POPULAR_INTEGRATION_TILES,
 ];
 
-export const IntegrationDetailPage = () => {
-  const { integration } = useParams<{ integration: string }>();
-
-  const tile = allTiles.find(
-    (t) => t.id === integration || t.id === `popular-${integration}`
-  );
-  const displayName = tile?.name ?? integration ?? '';
-
+const FallbackDetailPage: React.FC<{ displayName: string; logoSrc?: string }> = ({
+  displayName,
+  logoSrc,
+}) => {
   useFlowBreadcrumb({ text: displayName });
-
   return (
-    <PageTemplate>
+    <PageTemplate
+      customHeader={
+        <IntegrationHeader
+          logoSrc={logoSrc}
+          logoAlt={displayName}
+          title={displayName}
+        />
+      }
+    >
       <EuiEmptyPrompt
         title={
           <EuiTitle>
@@ -39,4 +44,19 @@ export const IntegrationDetailPage = () => {
       />
     </PageTemplate>
   );
+};
+
+export const IntegrationDetailPage = () => {
+  const { integration } = useParams<{ integration: string }>();
+
+  if (integration === 'kubernetes') {
+    return <KubernetesOnboardingPage />;
+  }
+
+  const tile = allTiles.find(
+    (t) => t.id === integration || t.id === `popular-${integration}`
+  );
+  const displayName = tile?.name ?? integration ?? '';
+
+  return <FallbackDetailPage displayName={displayName} logoSrc={tile?.logoUrl} />;
 };

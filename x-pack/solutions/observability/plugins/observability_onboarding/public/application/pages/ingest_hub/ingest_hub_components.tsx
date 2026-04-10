@@ -237,6 +237,7 @@ export const CompactIntegrationCard: React.FC<{
         .euiCard__content {
           min-width: 0;
           overflow: hidden;
+          justify-content: flex-start !important;
         }
         .euiCard__main {
           min-width: 0;
@@ -253,6 +254,7 @@ export const CompactIntegrationCard: React.FC<{
           font-family: ${euiTheme.font.family};
           font-weight: ${euiTheme.font.weight.bold};
           color: ${euiTheme.colors.text};
+          margin-block-end: 0 !important;
         }
         .euiCard__title h4 {
           white-space: nowrap;
@@ -261,6 +263,13 @@ export const CompactIntegrationCard: React.FC<{
         }
         .euiCard__description {
           display: none;
+        }
+        .euiCard__children {
+          margin-block-start: 4px !important;
+          padding-block-start: 0 !important;
+        }
+        & [class*='euiCard__description'] {
+          margin-block-start: 4px !important;
         }
       `}
     >
@@ -273,6 +282,7 @@ export const CompactIntegrationCard: React.FC<{
           -webkit-box-orient: vertical;
           overflow: hidden;
           min-height: 2.4em;
+          margin-block-start: 4px !important;
         `}
       >
         {description || '\u00A0'}

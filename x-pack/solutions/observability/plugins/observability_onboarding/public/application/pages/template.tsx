@@ -7,7 +7,7 @@
 
 import { EuiPageTemplate } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Header } from '../header';
 
 interface TemplateProps {
@@ -18,6 +18,18 @@ export const PageTemplate: React.FC<React.PropsWithChildren<TemplateProps>> = ({
   children,
   customHeader,
 }) => {
+  useEffect(() => {
+    // Walk every ancestor of body looking for a scrolled element and reset it
+    const resetAllScrolledElements = (root: Element) => {
+      if (root.scrollTop > 0) root.scrollTop = 0;
+      for (const child of Array.from(root.children)) {
+        resetAllScrolledElements(child);
+      }
+    };
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+    resetAllScrolledElements(document.body);
+  }, []);
+
   return (
     <EuiPageTemplate
       css={css`
@@ -30,7 +42,7 @@ export const PageTemplate: React.FC<React.PropsWithChildren<TemplateProps>> = ({
         restrictWidth
         css={css`
           padding-block-start: 32px;
-          padding-block-end: 96px;
+          padding-block-end: 32px;
         `}
       >
         {children}
