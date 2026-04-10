@@ -475,7 +475,10 @@ describe('parseImportFile', () => {
       // On import both get slug-of-name IDs. originalId must carry the persisted export ID so
       // that the reference rewriter can map it correctly.
       const zip = new JSZip();
-      zip.file('sender-abc.yml', 'name: Sender\nsteps:\n  - type: workflow.execute\n    with:\n      workflow-id: processor-xyz');
+      zip.file(
+        'sender-abc.yml',
+        'name: Sender\nsteps:\n  - type: workflow.execute\n    with:\n      workflow-id: processor-xyz'
+      );
       zip.file('processor-xyz.yml', 'name: Processor\nsteps: []');
       zip.file(
         'manifest.yml',

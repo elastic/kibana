@@ -87,7 +87,9 @@ steps:
     expect(result.stepCount).toBe(1);
     expect(result.valid).toBe(true);
     // No name field → ID falls back to workflow-{uuid}
-    expect(result.id).toMatch(/^workflow-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+    expect(result.id).toMatch(
+      /^workflow-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+    );
   });
 
   it('should return valid: false when YAML parses to a scalar (not an object)', () => {
@@ -95,7 +97,9 @@ steps:
     const result = extractWorkflowPreview(yaml);
 
     expect(result).toEqual({
-      id: expect.stringMatching(/^workflow-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/),
+      id: expect.stringMatching(
+        /^workflow-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+      ),
       name: null,
       description: null,
       triggers: [],
@@ -110,7 +114,9 @@ steps:
     const result = extractWorkflowPreview(yaml);
 
     // No name field → UUID fallback
-    expect(result.id).toMatch(/^workflow-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+    expect(result.id).toMatch(
+      /^workflow-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+    );
     expect(result.name).toBeNull();
     expect(result.description).toBeNull();
     expect(result.triggers).toEqual([]);
