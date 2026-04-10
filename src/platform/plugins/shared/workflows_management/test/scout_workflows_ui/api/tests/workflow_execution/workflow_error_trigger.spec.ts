@@ -106,7 +106,8 @@ async function waitForExecution(
   });
 }
 
-spaceTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/261498
+spaceTest.describe.skip(
   'Workflow error trigger (workflows.failed)',
   { tag: tags.deploymentAgnostic },
   () => {
