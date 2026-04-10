@@ -10,7 +10,7 @@
 import { BehaviorSubject } from 'rxjs';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '@kbn/deeplinks-analytics/constants';
-import type { DashboardReadResponseBody } from '../../server';
+import type { DashboardReadResponseBody, DashboardState } from '../../server';
 import { getAccessControlClient } from '../services/access_control_service';
 import { dashboardClient } from '../dashboard_client';
 
@@ -22,6 +22,17 @@ export function initializeAccessControlManager(
     owner: savedObjectResult?.meta?.owner,
     accessMode: savedObjectResult?.data?.access_control?.access_mode,
   });
+
+  const getState = (): Pick<DashboardState, 'access_control'> => {
+    if (!accessControl$.value.accessMode) {
+      return {};
+    }
+    return {
+      access_control: {
+        access_mode: accessControl$.value.accessMode,
+      },
+    };
+  };
 
   async function changeAccessMode(accessMode: SavedObjectAccessControl['accessMode']) {
     const dashboardId = savedObjectId$?.value;
@@ -52,6 +63,9 @@ export function initializeAccessControlManager(
     api: {
       accessControl$,
       changeAccessMode,
+    },
+    internalApi: {
+      getState,
     },
   };
 }
