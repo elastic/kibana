@@ -16,6 +16,15 @@ import React, { useMemo } from 'react';
 
 const GLOBAL_HEADER_HEIGHT_PX = 48;
 
+const logoSlot = css({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: 'var(--logo-width)',
+  height: GLOBAL_HEADER_HEIGHT_PX,
+  flexShrink: 0,
+});
+
 export interface GlobalHeaderShellProps {
   logo?: ReactNode;
   switcher?: ReactNode;
@@ -23,9 +32,8 @@ export interface GlobalHeaderShellProps {
   actions?: ReactNode;
 }
 
-const useGlobalHeaderStyles = (isNavCollapsed: boolean) => {
+const useGlobalHeaderStyles = () => {
   const { euiTheme } = useEuiTheme();
-  const logoWidth = isNavCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
 
   return useMemo(() => {
     const root = css`
@@ -41,15 +49,6 @@ const useGlobalHeaderStyles = (isNavCollapsed: boolean) => {
       display: flex;
       align-items: center;
       gap: ${euiTheme.size.s};
-      flex-shrink: 0;
-    `;
-
-    const logoSlot = css`
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: ${logoWidth}px;
-      height: ${GLOBAL_HEADER_HEIGHT_PX}px;
       flex-shrink: 0;
     `;
 
@@ -83,19 +82,25 @@ const useGlobalHeaderStyles = (isNavCollapsed: boolean) => {
       gap: ${euiTheme.size.s};
     `;
 
-    return { root, leftGroup, logoSlot, switcherSlot, spacer, rightGroup, searchSlot, actionsSlot };
-  }, [euiTheme, logoWidth]);
+    return { root, leftGroup, switcherSlot, spacer, rightGroup, searchSlot, actionsSlot };
+  }, [euiTheme]);
 };
 
 export const GlobalHeaderShell = React.memo<GlobalHeaderShellProps>(
   ({ logo, switcher, search, actions }) => {
     const { isCollapsed } = useSideNavCollapsed();
-    const styles = useGlobalHeaderStyles(isCollapsed);
+    const styles = useGlobalHeaderStyles();
+    const logoWidth = isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
 
     return (
       <header css={styles.root} data-test-subj="chromeNextGlobalHeader">
         <div css={styles.leftGroup}>
-          <div css={styles.logoSlot}>{logo}</div>
+          <div
+            css={logoSlot}
+            style={{ '--logo-width': `${logoWidth}px` } as React.CSSProperties}
+          >
+            {logo}
+          </div>
           {switcher && (
             <div css={styles.switcherSlot} data-test-subj="chromeNextGlobalHeaderSwitcher">
               {switcher}
