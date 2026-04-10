@@ -8398,6 +8398,86 @@ paths:
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{id}/_update_api_key</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+  /api/alerting/rule/{id}/query_inspector:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{id}/query_inspector</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns the Elasticsearch query that a rule executes, and optionally its response.
+      operationId: get-alerting-rule-id-query-inspector
+      parameters:
+        - description: The identifier for the rule.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - description: The inspection mode. Use "build" to return only the query, or "execute" to run the query and include the response.
+          in: query
+          name: mode
+          required: false
+          schema:
+            default: build
+            enum:
+              - build
+              - execute
+            type: string
+        - description: The start of the time range. When provided with end, the inspector uses this range instead of the current time.
+          in: query
+          name: start
+          required: false
+          schema:
+            type: string
+        - description: The end of the time range. When provided with start, the inspector uses this range instead of the current time.
+          in: query
+          name: end
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  queries:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        index:
+                          type: string
+                        label:
+                          type: string
+                        request:
+                          additionalProperties: {}
+                          type: object
+                        response:
+                          additionalProperties: {}
+                          type: object
+                      required:
+                        - index
+                        - request
+                    type: array
+                required:
+                  - queries
+          description: Indicates a successful call.
+        '400':
+          description: Indicates the rule type is not supported or the request parameters are invalid.
+        '404':
+          description: Indicates a rule with the given ID does not exist.
+      summary: Get the Elasticsearch query for a rule
+      tags:
+        - alerting
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/alerting/rule/{id}/snooze_schedule:
     post:
       description: |-
