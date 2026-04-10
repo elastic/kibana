@@ -7,43 +7,65 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import useUnmount from 'react-use/lib/useUnmount';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import { useAppStateSelector, useCurrentTabSelector } from '../state_management/redux';
 import { useIsEsqlMode } from './use_is_esql_mode';
 
-const DISCOVER_ACTIVE_ESQL_ATTACHMENT_ID = 'discover_active_esql_context';
+const discoverEsqlAttachmentId = (tabId: string) => `discover_esql_query_${tabId}`;
 
 export const useAgentBuilderEsqlAttachment = () => {
-  const { agentBuilder } = useDiscoverServices();
+  const { agentBuilder, chrome } = useDiscoverServices();
   const isEsqlMode = useIsEsqlMode();
   const query = useAppStateSelector((s) => s.query);
+  const tabId = useCurrentTabSelector((t) => t.id);
   const tabLabel = useCurrentTabSelector((t) => t.label);
 
   const esqlQuery = isEsqlMode && isOfAggregateQueryType(query) ? query.esql.trim() : '';
 
-  useEffect(() => {
-    agentBuilder?.setChatConfig({
-      attachments: esqlQuery
-        ? [
-            {
-              id: DISCOVER_ACTIVE_ESQL_ATTACHMENT_ID,
-              type: AttachmentType.esql,
-              data: {
-                query: esqlQuery,
-                ...(tabLabel ? { description: tabLabel } : {}),
-              },
-            },
-          ]
-        : [],
-    });
-  }, [agentBuilder, esqlQuery, tabLabel]);
+  const [isAgentBuilderSidebarOpen, setIsAgentBuilderSidebarOpen] = useState(
+    () => chrome.sidebar.getCurrentAppId() === 'agentBuilder'
+  );
 
   useEffect(() => {
-    return () => {
-      agentBuilder?.clearChatConfig();
-    };
-  }, [agentBuilder]);
+    const sub = chrome.sidebar.getCurrentAppId$().subscribe((appId) => {
+      setIsAgentBuilderSidebarOpen(appId === 'agentBuilder');
+    });
+    return () => sub.unsubscribe();
+  }, [chrome.sidebar]);
+
+  useEffect(() => {
+    if (!agentBuilder) {
+      return;
+    }
+
+    const attachment =
+      esqlQuery !== ''
+        ? {
+            id: discoverEsqlAttachmentId(tabId),
+            type: AttachmentType.esql,
+            data: {
+              query: esqlQuery,
+              ...(tabLabel ? { description: tabLabel } : {}),
+            },
+          }
+        : undefined;
+
+    if (isAgentBuilderSidebarOpen && attachment) {
+      agentBuilder.addAttachment(attachment);
+    } else {
+      agentBuilder.setChatConfig({
+        attachments: attachment ? [attachment] : [],
+      });
+    }
+  }, [agentBuilder, esqlQuery, tabId, tabLabel, isAgentBuilderSidebarOpen]);
+
+  useUnmount(() => {
+    agentBuilder?.setChatConfig({
+      attachments: [],
+    });
+  });
 };
