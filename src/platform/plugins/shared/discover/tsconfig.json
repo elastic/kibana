@@ -142,6 +142,7 @@
     "@kbn/presentation-util-plugin",
     "@kbn/core-saved-objects-common",
     "@kbn/as-code-filters-constants",
+    "@kbn/core-http-server-mocks",
   ],
   "exclude": ["target/**/*"]
 }
