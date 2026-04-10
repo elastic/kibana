@@ -475,7 +475,7 @@ export class UsersGridPage extends Component<Props, State> {
     if (pageIndex > 0) {
       params.set('page', String(pageIndex));
     }
-    if (pageSize !== DEFAULT_PAGE_SIZE) {
+    if (pageSize !== UsersGridPage.DEFAULT_PAGE_SIZE) {
       params.set('perPage', String(pageSize));
     }
     if (filter) {
