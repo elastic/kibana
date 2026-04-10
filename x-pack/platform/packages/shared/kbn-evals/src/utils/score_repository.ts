@@ -223,6 +223,8 @@ function enrichDocument(
 }
 
 export class EvaluationScoreRepository {
+  private localExportTargetReady: Promise<void> | undefined;
+
   constructor(private readonly esClient: EsClient, private readonly log: SomeDevLog) {}
 
   private getErrorStatusCode(error: unknown): number | undefined {
@@ -421,9 +423,14 @@ export class EvaluationScoreRepository {
     }
   }
 
-  private async prepareLocalExportTarget(): Promise<void> {
-    await this.ensureIndexTemplate();
-    await this.ensureDatastream();
+  private prepareLocalExportTarget(): Promise<void> {
+    if (!this.localExportTargetReady) {
+      this.localExportTargetReady = (async () => {
+        await this.ensureIndexTemplate();
+        await this.ensureDatastream();
+      })();
+    }
+    return this.localExportTargetReady;
   }
 
   /**
