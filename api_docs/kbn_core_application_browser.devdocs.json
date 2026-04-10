@@ -1456,14 +1456,6 @@
                 "path": "x-pack/solutions/observability/plugins/infra/public/apps/metrics_app.tsx"
               },
               {
-                "plugin": "observabilityOnboarding",
-                "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/application/shared/header_action_menu.tsx"
-              },
-              {
-                "plugin": "observabilityOnboarding",
-                "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/application/app.tsx"
-              },
-              {
                 "plugin": "synthetics",
                 "path": "x-pack/solutions/observability/plugins/synthetics/public/apps/synthetics/components/common/header/action_menu.tsx"
               },
