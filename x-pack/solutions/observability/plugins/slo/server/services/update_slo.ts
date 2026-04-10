@@ -33,6 +33,14 @@ import { createTempSummaryDocument } from './summary_transform_generator/helpers
 import type { TransformManager } from './transform_manager';
 import { assertExpectedIndicatorSourceIndexPrivileges } from './utils/assert_expected_indicator_source_index_privileges';
 
+const NON_BREAKING_SUMMARY_UPDATE_SCRIPT = `
+  ctx._source.slo.name = params.name;
+  ctx._source.slo.description = params.description;
+  ctx._source.slo.tags = params.tags;
+  ctx._source.slo.updatedAt = params.updatedAt;
+  ctx._source.slo.updatedBy = params.updatedBy;
+`;
+
 export class UpdateSLO {
   constructor(
     private repository: SLODefinitionRepository,
@@ -89,9 +97,9 @@ export class UpdateSLO {
           getSummaryPipelineTemplate(updatedSlo, this.spaceId, this.basePath)
         );
 
-        // Upsert the temp summary doc so that non-breaking field changes (e.g. tags, name)
-        // are immediately visible in the summary index while we wait for the next transform run.
-        await this.createTempSummaryDocument(updatedSlo);
+        // Immediately update the existing summary docs with the non-breaking field changes
+        // (name, description, tags, ...) so they are visible without waiting for the next transform run.
+        await this.updateSummaryDocuments(updatedSlo);
       } catch (err) {
         this.logger.debug(
           `Cannot update the SLO summary pipeline [id: ${updatedSlo.id}, revision: ${updatedSlo.revision}]. ${err}`
@@ -287,6 +295,30 @@ export class UpdateSLO {
         }),
       { logger: this.logger }
     );
+  }
+
+  private async updateSummaryDocuments(slo: SLODefinition): Promise<void> {
+    await this.scopedClusterClient.asCurrentUser.updateByQuery({
+      index: SUMMARY_DESTINATION_INDEX_PATTERN,
+      conflicts: 'proceed',
+      refresh: true,
+      query: {
+        bool: {
+          filter: [{ term: { 'slo.id': slo.id } }, { term: { 'slo.revision': slo.revision } }],
+        },
+      },
+      script: {
+        source: NON_BREAKING_SUMMARY_UPDATE_SCRIPT,
+        lang: 'painless',
+        params: {
+          name: slo.name,
+          description: slo.description,
+          tags: slo.tags,
+          updatedAt: slo.updatedAt,
+          updatedBy: slo.updatedBy ?? '',
+        },
+      },
+    });
   }
 
   private toResponse(slo: SLODefinition): UpdateSLOResponse {
