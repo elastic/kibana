@@ -43,6 +43,7 @@ description: Use when creating, updating, debugging, or reviewing Scout UI tests
 - Register plugin page objects by extending the `pageObjects` fixture in `test/scout*/ui/fixtures/index.ts`.
 - Scout provides EUI component wrappers for stable interactions with common EUI widgets: `EuiComboBoxWrapper`, `EuiDataGridWrapper`, `EuiSelectableWrapper`, `EuiCheckBoxWrapper`, `EuiFieldTextWrapper`, `EuiCodeBlockWrapper`, `EuiSuperSelectWrapper`, `EuiToastWrapper`. Import them from `@kbn/scout` and use them as class members in page objects.
 - **Avoid `.first()`, `.nth()`, `.last()`** — the `playwright/no-nth-methods` lint rule flags these. Instead, use `data-test-subj` attributes or other targeted selectors. If the component lacks a `data-test-subj`, add one rather than disabling the rule.
+- **Do not disable eslint rules** — avoid `eslint-disable` comments in test files. Fix the underlying issue (e.g., use targeted selectors instead of positional ones, add `data-test-subj` to the components) rather than suppressing the lint rule.
 
 ## Parallel UI specifics (spaceTest)
 

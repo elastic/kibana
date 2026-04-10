@@ -11,7 +11,7 @@ import { mockInferenceEndpoints } from '../fixtures/mock_data/inference_endpoint
 
 test.describe(
   'Feature Settings',
-  { tag: ['@local-stateful-classic', '@local-serverless-search'] },
+  { tag: ['@local-stateful-classic', '@local-stateful-search', '@local-serverless-search'] },
   () => {
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await pageObjects.featureSettings.mockConnectors();
