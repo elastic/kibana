@@ -10,7 +10,7 @@ import { LOGS_ECS_STREAM_NAME, LOGS_OTEL_STREAM_NAME } from '@kbn/streams-schema
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
-import { deleteStream, forkStream, indexDocument } from './helpers/requests';
+import { deleteStream, disableStreams, enableStreams, forkStream, indexDocument } from './helpers/requests';
 
 const sortNames = (names: string[]) => [...names].sort();
 
@@ -59,6 +59,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
+      // Prior suites (e.g. basic.ts) call disableStreams in their after hooks; wired roots
+      // are only defined while streams are enabled.
+      await enableStreams(apiClient);
 
       await forkStream(apiClient, LOGS_OTEL_STREAM_NAME, {
         stream: { name: LIST_TYPE_FILTER_WIRED_STREAM },
@@ -86,6 +89,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     after(async () => {
       await deleteStream(apiClient, LIST_TYPE_FILTER_WIRED_STREAM);
+      await disableStreams(apiClient);
     });
 
     it('type=wired returns exactly the hardcoded wired stream name list', async () => {

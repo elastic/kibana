@@ -114,7 +114,12 @@ export const listStreamsRoute = createServerRoute({
   params: z.object({
     query: z
       .object({
-        type: z.enum(['classic', 'wired', 'query']).optional(),
+        type: z
+          .enum(['classic', 'wired', 'query'])
+          .describe(
+            'When set, return only streams of this kind: classic (data streams / ingest definitions), wired (managed routing streams), or query (ES|QL-backed query streams).'
+          )
+          .optional(),
       })
       .optional(),
   }),
