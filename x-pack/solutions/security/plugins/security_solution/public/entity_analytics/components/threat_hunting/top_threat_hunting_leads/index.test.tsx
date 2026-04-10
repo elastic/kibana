@@ -45,6 +45,8 @@ const defaultProps = {
   totalCount: 0,
   isLoading: false,
   isGenerating: false,
+  isScheduled: false,
+  onToggleSchedule: jest.fn(),
   onSeeAll: jest.fn(),
   onLeadClick: jest.fn(),
   onHuntInChat: jest.fn(),
