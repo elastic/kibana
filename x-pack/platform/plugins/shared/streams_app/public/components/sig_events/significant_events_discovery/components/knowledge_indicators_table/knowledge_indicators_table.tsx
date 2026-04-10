@@ -50,6 +50,13 @@ import { KnowledgeIndicatorsTypeFilter } from '../../../stream_detail_significan
 import { KnowledgeIndicatorsStatusFilter } from '../../../stream_detail_significant_events_view/knowledge_indicators_status_filter';
 import { getKnowledgeIndicatorItemId } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_item_id';
 import { getKnowledgeIndicatorStreamName } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_stream_name';
+import {
+  BACKED_STATUS_COLUMN,
+  PROMOTED_BADGE_LABEL,
+  NOT_PROMOTED_BADGE_LABEL,
+  PROMOTED_TOOLTIP_CONTENT,
+  NOT_PROMOTED_TOOLTIP_CONTENT,
+} from '../queries_table/translations';
 import { StreamFilter } from '../stream_filter';
 import {
   getKnowledgeIndicatorTitle,
@@ -382,6 +389,24 @@ export function KnowledgeIndicatorsTable() {
         width: '15%',
         render: (ki: KnowledgeIndicator) => {
           return <EuiBadge color="hollow">{getKnowledgeIndicatorStreamName(ki)}</EuiBadge>;
+        },
+      },
+      {
+        name: BACKED_STATUS_COLUMN,
+        width: '120px',
+        render: (ki: KnowledgeIndicator) => {
+          if (ki.kind !== 'query') return null;
+          return (
+            <EuiToolTip
+              content={ki.rule.backed ? PROMOTED_TOOLTIP_CONTENT : NOT_PROMOTED_TOOLTIP_CONTENT}
+            >
+              <span tabIndex={0}>
+                <EuiBadge color={ki.rule.backed ? 'hollow' : 'warning'}>
+                  {ki.rule.backed ? PROMOTED_BADGE_LABEL : NOT_PROMOTED_BADGE_LABEL}
+                </EuiBadge>
+              </span>
+            </EuiToolTip>
+          );
         },
       },
       {
