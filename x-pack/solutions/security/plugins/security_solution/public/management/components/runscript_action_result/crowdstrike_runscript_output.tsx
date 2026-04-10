@@ -25,18 +25,12 @@ import type {
 } from '../../../../common/endpoint/types';
 
 const ACCORDION_BUTTON_TEXT = Object.freeze({
-  output: i18n.translate(
-    'xpack.securitySolution.crowdstrikeRunscriptAccordion.outputButtonText',
-    {
-      defaultMessage: 'Runscript output',
-    }
-  ),
-  error: i18n.translate(
-    'xpack.securitySolution.crowdstrikeRunscriptAccordion.errorButtonText',
-    {
-      defaultMessage: 'Runscript error',
-    }
-  ),
+  output: i18n.translate('xpack.securitySolution.crowdstrikeRunscriptAccordion.outputButtonText', {
+    defaultMessage: 'Runscript output',
+  }),
+  error: i18n.translate('xpack.securitySolution.crowdstrikeRunscriptAccordion.errorButtonText', {
+    defaultMessage: 'Runscript error',
+  }),
 });
 
 const NO_OUTPUT_MESSAGE = i18n.translate(
@@ -60,13 +54,7 @@ interface CrowdstrikeRunscriptAccordionProps {
 }
 
 const CrowdstrikeRunscriptAccordion = memo<CrowdstrikeRunscriptAccordionProps>(
-  ({
-    content,
-    initialIsOpen = false,
-    textSize = 'xs',
-    type,
-    'data-test-subj': dataTestSubj,
-  }) => {
+  ({ content, initialIsOpen = false, textSize = 'xs', type, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const id = useGeneratedHtmlId({
       prefix: 'crowdstrikeRunscriptAccordion',
