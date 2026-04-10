@@ -46,6 +46,7 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/search-types'
   - '@kbn/es-types'
+  - '@kbn/esql-language'
 tags:
   - shared-browser
   - package

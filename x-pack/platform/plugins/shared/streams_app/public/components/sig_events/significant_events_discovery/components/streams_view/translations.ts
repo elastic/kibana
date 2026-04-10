@@ -14,7 +14,14 @@ export const NAME_COLUMN_HEADER = i18n.translate('xpack.streams.streamsTreeTable
 export const SIGNIFICANT_EVENTS_COLUMN_HEADER = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsTree.significantEventsColumnName',
   {
-    defaultMessage: 'Significant Events',
+    defaultMessage: 'Events',
+  }
+);
+
+export const SIGNIFICANT_EVENTS_COLUMN_TOOLTIP = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsTree.significantEventsColumnTooltip',
+  {
+    defaultMessage: 'Number of results produced by created rules.',
   }
 );
 

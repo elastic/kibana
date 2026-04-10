@@ -26,5 +26,7 @@ export const useFetchRule = (id: string | undefined) => {
         })
       );
     },
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 };
