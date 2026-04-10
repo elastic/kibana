@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSkeletonText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 
@@ -34,7 +34,6 @@ const PacksPageComponent = () => {
     if (isLoadingAssetsStatus) {
       return (
         <div css={fullWidthContentCss}>
-          <EuiSpacer size="l" />
           <EuiSkeletonText lines={10} />
         </div>
       );
@@ -42,7 +41,6 @@ const PacksPageComponent = () => {
 
     return (
       <div css={fullWidthContentCss}>
-        <EuiSpacer size="l" />
         <PacksTable hasAssetsToInstall={!!assetsData?.install?.length} />
       </div>
     );

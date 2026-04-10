@@ -75,11 +75,15 @@ function parseGithubPrLabels(raw: string): string[] {
  */
 const MODEL_GROUP_ALIASES: Record<string, string[]> = {
   'weekly-eis-models': [
-    'eis/anthropic-claude-4.5-sonnet',
+    'eis/anthropic-claude-4.6-sonnet',
     'eis/anthropic-claude-4.6-opus',
     'eis/google-gemini-3.0-flash',
-    'eis/google-gemini-3.0-pro',
+    'eis/google-gemini-3.1-pro',
     'eis/openai-gpt-5.2',
+    'eis/openai-gpt-5.4',
+    'eis/openai-gpt-5.4-pro',
+    'eis/openai-gpt-5.4-mini',
+    'eis/openai-gpt-5.4-nano',
     'eis/openai-gpt-oss-120b',
   ],
 };

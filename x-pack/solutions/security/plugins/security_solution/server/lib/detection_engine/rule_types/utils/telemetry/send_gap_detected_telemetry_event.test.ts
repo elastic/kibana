@@ -7,6 +7,7 @@
 import { coreMock } from '@kbn/core/server/mocks';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import moment from 'moment';
+import { gapReasonType } from '@kbn/alerting-plugin/common';
 import { GAP_DETECTED_EVENT } from '../../../../telemetry/event_based/events';
 
 import { sendGapDetectedTelemetryEvent } from './send_gap_detected_telemetry_event';
@@ -38,6 +39,7 @@ describe('sendGapDetectedTelemetryEvent', () => {
       originalFrom,
       originalTo,
       ruleParams,
+      gapReasonType: gapReasonType.RULE_DID_NOT_RUN,
     });
 
     expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(GAP_DETECTED_EVENT.eventType, {
@@ -47,6 +49,7 @@ describe('sendGapDetectedTelemetryEvent', () => {
       ruleType: 'query',
       ruleSource: 'external',
       isCustomized: true,
+      gapReasonType: gapReasonType.RULE_DID_NOT_RUN,
     });
   });
 
@@ -64,6 +67,7 @@ describe('sendGapDetectedTelemetryEvent', () => {
       originalFrom,
       originalTo,
       ruleParams,
+      gapReasonType: gapReasonType.RULE_DID_NOT_RUN,
     });
 
     expect(mockAnalytics.reportEvent).not.toHaveBeenCalled();

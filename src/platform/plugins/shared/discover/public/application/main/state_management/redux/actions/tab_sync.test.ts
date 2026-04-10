@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
+import type { ProjectRouting } from '@kbn/es-query';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
@@ -108,6 +109,31 @@ describe('tab_sync actions', () => {
   });
 
   describe('state observables subscriptions', () => {
+    it('should skip the initial CPS project routing emission and fetch on later changes', async () => {
+      const { services, tabId, initializeSingleTab } = await setup();
+      const cpsManager = services.cps?.cpsManager!;
+      const projectRouting$ = new BehaviorSubject<ProjectRouting>(undefined);
+      const getProjectRoutingSpy = jest
+        .spyOn(cpsManager, 'getProjectRouting$')
+        .mockReturnValue(projectRouting$);
+      const markNonActiveTabsForRefetchSpy = jest.spyOn(
+        internalStateActions,
+        'markNonActiveTabsForRefetch'
+      );
+      const fetchDataSpy = jest.spyOn(internalStateActions, 'fetchData');
+
+      await initializeSingleTab({ tabId });
+
+      expect(getProjectRoutingSpy).toHaveBeenCalled();
+      expect(markNonActiveTabsForRefetchSpy).not.toHaveBeenCalled();
+
+      fetchDataSpy.mockClear();
+      projectRouting$.next('next-project');
+
+      expect(markNonActiveTabsForRefetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchDataSpy).toHaveBeenCalledWith({ tabId });
+    });
+
     it('should subscribe to createTabPersistableStateObservable for syncing locally persisted tab state', async () => {
       const mockTabState$ = new Subject<
         Pick<TabState, 'appState' | 'globalState' | 'attributes'>

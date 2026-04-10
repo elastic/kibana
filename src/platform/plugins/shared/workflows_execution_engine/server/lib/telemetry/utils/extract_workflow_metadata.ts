@@ -184,7 +184,7 @@ export function extractWorkflowMetadata(
   const hasScheduledTriggersValue = triggers.some((trigger) => trigger?.type === 'scheduled');
   const hasAlertTriggers = triggers.some((trigger) => trigger?.type === 'alert');
 
-  // Count inputs
+  // Workflow definitions from management are normalized to JSON Schema (`properties`).
   const inputCount = Object.keys(workflow.inputs?.properties ?? {}).length;
 
   // Extract settings

@@ -40,8 +40,13 @@ export const TabsView = (props: SingleTabViewProps) => {
   const currentDataView = useCurrentTabRuntimeState((tab) => tab.currentDataView$);
   const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);
 
-  const { shouldCollapseAppMenu, onResize, getAdditionalTabMenuItems, topNavMenuItems } =
-    useAppMenuData({ currentDataView });
+  const {
+    shouldCollapseAppMenu,
+    onResize,
+    getTopTabMenuItems,
+    getAdditionalTabMenuItems,
+    topNavMenuItems,
+  } = useAppMenuData({ currentDataView });
 
   const onEvent: UnifiedTabsProps['onEBTEvent'] = useCallback(
     (event) => {
@@ -92,6 +97,7 @@ export const TabsView = (props: SingleTabViewProps) => {
             onChanged={onChanged}
             onEBTEvent={onEvent}
             onClearRecentlyClosed={onClearRecentlyClosed}
+            getTopTabMenuItems={getTopTabMenuItems}
             getAdditionalTabMenuItems={getAdditionalTabMenuItems}
             appendRight={
               <AppMenuComponent config={topNavMenuItems} isCollapsed={shouldCollapseAppMenu} />

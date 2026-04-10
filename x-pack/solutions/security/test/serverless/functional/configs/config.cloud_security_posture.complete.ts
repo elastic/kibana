@@ -25,7 +25,6 @@ export default createTestConfig({
       { product_line: 'endpoint', product_tier: 'complete' },
       { product_line: 'cloud', product_tier: 'complete' },
     ])}`,
-    `--uiSettings.overrides.securitySolution:enableGraphVisualization=true`,
   ],
   // load specific test files for complete tier
   testFiles: [

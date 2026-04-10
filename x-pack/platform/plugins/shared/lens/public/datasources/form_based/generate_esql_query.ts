@@ -7,9 +7,8 @@
 
 import { esql } from '@elastic/esql';
 import type { IUiSettingsClient } from '@kbn/core/public';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { getCalculateAutoTimeExpression } from '@kbn/data-plugin/common';
-import { convertIntervalToEsInterval } from '@kbn/data-plugin/public';
+import { UI_SETTINGS, convertIntervalToEsInterval } from '@kbn/data-plugin/public';
+import { TIME_SYSTEM_PARAMS } from '@kbn/esql-language';
 import moment from 'moment';
 import { partition } from 'lodash';
 import type {
@@ -20,6 +19,7 @@ import type {
   GenericIndexPatternColumn,
   StaticValueIndexPatternColumn,
 } from '@kbn/lens-common';
+import { calculateAuto } from '@kbn/calculate-auto';
 import { isColumnOfType, isColumnFormatted } from './operations/definitions/helpers';
 import { convertToAbsoluteDateRange } from '../../utils';
 import type { OriginalColumn } from '../../../common/types';
@@ -28,6 +28,12 @@ import { resolveTimeShift } from './time_shift_utils';
 import type { EsqlConversionFailureReason } from './to_esql_failure_reasons';
 import { createEsAggsIdMapEntry } from './create_es_aggs_id_map_entry';
 import { defaultValue as defaultStaticValue } from './operations/definitions/static_value';
+import {
+  AUTO_INTERVAL,
+  AUTO_TARGET_NUMBER_OF_BUCKETS,
+  getTimeZoneAndInterval,
+  hasDateRange,
+} from './date_histogram_esql';
 
 // esAggs column ID manipulation functions
 export const extractAggId = (id: string) => id.split('.')[0].split('-')[2];
@@ -101,6 +107,8 @@ const SINGLE_CHAR_INTERVAL: Record<string, string> = {
   ms: '1ms',
 } as const;
 
+const DEFAULT_DATE_HISTOGRAM_INTERVAL_MS = moment.duration(1, 'h').as('ms');
+
 export function generateEsqlQuery(
   esAggEntries: Array<readonly [string, GenericIndexPatternColumn]>,
   layer: FormBasedLayer,
@@ -131,8 +139,11 @@ export function generateEsqlQuery(
   const queryParts: string[] = [`FROM ${esql.src(indexPattern.title)}`];
 
   if (indexPattern.timeFieldName) {
+    const [ESQL_TIME_RANGE_START, ESQL_TIME_RANGE_END] = TIME_SYSTEM_PARAMS;
     const timeField = `${esql.col(indexPattern.timeFieldName)}`;
-    queryParts.push(`WHERE ${timeField} >= ?_tstart AND ${timeField} <= ?_tend`);
+    queryParts.push(
+      `WHERE ${timeField} >= ${ESQL_TIME_RANGE_START} AND ${timeField} <= ${ESQL_TIME_RANGE_END}`
+    );
   }
 
   const histogramBarsTarget = uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
@@ -262,10 +273,18 @@ export function generateEsqlQuery(
       filterClause = ` WHERE ${cmd}(${esql.str(filteredQueryString)})`;
     }
 
-    // metricESQL is the full expression (template + optional filter); same value is used as map key and in STATS
-    const metricESQL = rawResult.template + filterClause;
+    const fullStatsMetricExpression = rawResult.template + filterClause;
 
-    esAggsIdMap[metricESQL] = createEsAggsIdMapEntry({
+    const statsColumnAlias = columnRoles?.[colId];
+    const statsMetricFragment = statsColumnAlias
+      ? `${statsColumnAlias} = ${fullStatsMetricExpression}`
+      : fullStatsMetricExpression;
+
+    // Key must match the STATS output column name: alias if set, else the bare expression.
+    // Use the same truthy check as statsMetricFragment so empty string roles map to the bare expression.
+    const esAggsIdMapKey = statsColumnAlias ? statsColumnAlias : fullStatsMetricExpression;
+
+    esAggsIdMap[esAggsIdMapKey] = createEsAggsIdMapEntry({
       col,
       colId,
       format,
@@ -275,7 +294,7 @@ export function generateEsqlQuery(
       dateRange,
     });
 
-    return { esql: metricESQL } satisfies EsqlConversionResult;
+    return { esql: statsMetricFragment } satisfies EsqlConversionResult;
   });
 
   // Check for metric conversion errors with a type guard
@@ -311,18 +330,26 @@ export function generateEsqlQuery(
       col.reducedTimeRange &&
       indexPattern.timeFieldName;
 
-    let interval: number | undefined;
+    let intervalInMs: number | undefined;
     if (isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col)) {
-      const dateHistogramColumn = col as DateHistogramIndexPatternColumn;
-      const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
+      const { interval } = getTimeZoneAndInterval(col, indexPattern);
 
-      const cleanInterval = (i: string) => SINGLE_CHAR_INTERVAL[i] ?? i;
-      const kibanaInterval =
-        dateHistogramColumn.params?.interval === 'auto'
-          ? calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }) || '1h'
-          : dateHistogramColumn.params?.interval || '1h';
-      const esInterval = convertIntervalToEsInterval(cleanInterval(kibanaInterval));
-      interval = moment.duration(esInterval.value, esInterval.unit).as('ms');
+      if (interval === AUTO_INTERVAL) {
+        if (hasDateRange(dateRange)) {
+          const { toDate, fromDate } = absDateRange;
+          const absDate = new Date(toDate).getTime() - new Date(fromDate).getTime();
+          const rangeDuration = moment.duration(absDate, 'ms');
+          const intervalDuration = calculateAuto.near(AUTO_TARGET_NUMBER_OF_BUCKETS, rangeDuration);
+          intervalInMs = intervalDuration?.as('ms') ?? DEFAULT_DATE_HISTOGRAM_INTERVAL_MS;
+        } else {
+          // Fall back to default 1h when date range is missing
+          intervalInMs = DEFAULT_DATE_HISTOGRAM_INTERVAL_MS;
+        }
+      } else {
+        const cleanInterval = (i: string) => SINGLE_CHAR_INTERVAL[i] ?? i;
+        const esInterval = convertIntervalToEsInterval(cleanInterval(interval));
+        intervalInMs = moment.duration(esInterval.value, esInterval.unit).as('ms');
+      }
     }
 
     if (isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col)) {
@@ -383,7 +410,7 @@ export function generateEsqlQuery(
       col,
       colId,
       format,
-      interval,
+      interval: intervalInMs,
       layer,
       indexPattern,
       uiSettings,

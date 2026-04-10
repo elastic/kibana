@@ -82,7 +82,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       ? [
           <EuiContextMenuItem
             data-test-subj="PackagePolicyActionsAddAgentItem"
-            icon="plusInCircle"
+            icon="plusCircle"
             onClick={() => {
               setIsActionsMenuOpen(false);
               setIsEnrollmentFlyoutOpen(true);

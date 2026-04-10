@@ -8,7 +8,52 @@
  */
 
 import type { Step, WorkflowYaml } from '../spec/schema';
-import { isForeachStep, isIfStep, isMergeStep, isParallelStep } from '../types/utils';
+import {
+  isForeachStep,
+  isIfStep,
+  isMergeStep,
+  isParallelStep,
+  isSwitchStep,
+  isWhileStep,
+} from '../types/utils';
+
+const getChildStepArrays = (step: Step): ReadonlyArray<WorkflowYaml['steps']> => {
+  if (isForeachStep(step) && Array.isArray(step.steps)) {
+    return [step.steps];
+  }
+  if (isWhileStep(step) && Array.isArray(step.steps)) {
+    return [step.steps];
+  }
+  if (isIfStep(step)) {
+    const arrays: Array<WorkflowYaml['steps']> = [];
+    if (Array.isArray(step.steps)) arrays.push(step.steps);
+    if (Array.isArray(step.else)) arrays.push(step.else);
+    return arrays;
+  }
+  if (isSwitchStep(step)) {
+    const arrays: Array<WorkflowYaml['steps']> = step.cases.map((c) => c.steps);
+    if (Array.isArray(step.default)) arrays.push(step.default);
+    return arrays;
+  }
+  if (isParallelStep(step) && Array.isArray(step.branches)) {
+    return step.branches.map((b) => b.steps);
+  }
+  if (isMergeStep(step) && Array.isArray(step.steps)) {
+    return [step.steps];
+  }
+  return [];
+};
+
+export const collectAllSteps = (steps: WorkflowYaml['steps']): Step[] => {
+  const result: Step[] = [];
+  for (const step of steps) {
+    result.push(step);
+    for (const childSteps of getChildStepArrays(step)) {
+      result.push(...collectAllSteps(childSteps));
+    }
+  }
+  return result;
+};
 
 export function getStepByNameFromNestedSteps(
   steps: WorkflowYaml['steps'],
@@ -18,34 +63,8 @@ export function getStepByNameFromNestedSteps(
     if (step.name === stepName) {
       return step;
     }
-    if (isForeachStep(step) && Array.isArray(step.steps)) {
-      const result = getStepByNameFromNestedSteps(step.steps, stepName);
-      if (result) {
-        return result;
-      }
-    }
-    if (isIfStep(step) && Array.isArray(step.steps)) {
-      const result = getStepByNameFromNestedSteps(step.steps, stepName);
-      if (result) {
-        return result;
-      }
-    }
-    if (isIfStep(step) && Array.isArray(step.else)) {
-      const result = getStepByNameFromNestedSteps(step.else, stepName);
-      if (result) {
-        return result;
-      }
-    }
-    if (isParallelStep(step) && Array.isArray(step.branches)) {
-      for (const branch of step.branches) {
-        const result = getStepByNameFromNestedSteps(branch.steps, stepName);
-        if (result) {
-          return result;
-        }
-      }
-    }
-    if (isMergeStep(step) && Array.isArray(step.steps)) {
-      const result = getStepByNameFromNestedSteps(step.steps, stepName);
+    for (const childSteps of getChildStepArrays(step)) {
+      const result = getStepByNameFromNestedSteps(childSteps, stepName);
       if (result) {
         return result;
       }

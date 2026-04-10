@@ -87,7 +87,7 @@ const InvalidDisplay = ({ value }: { value: string }) => {
       <EuiFlexItem grow={false}>
         <EuiToolTip position="top" content={SCHEMA_NOT_AVAILABLE}>
           <EuiToken
-            iconType="alert"
+            iconType="warning"
             tabIndex={0}
             size="s"
             color="euiColorVis9"

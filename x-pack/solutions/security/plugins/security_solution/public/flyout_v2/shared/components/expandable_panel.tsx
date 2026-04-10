@@ -118,7 +118,7 @@ export const ExpandablePanel: FC<PropsWithChildren<ExpandablePanelPanelProps>> =
         )}
         color="text"
         display="empty"
-        iconType={toggleStatus ? 'arrowDown' : 'arrowRight'}
+        iconType={toggleStatus ? 'chevronSingleDown' : 'chevronSingleRight'}
         onClick={toggleQuery}
         size="xs"
       />

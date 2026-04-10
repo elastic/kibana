@@ -23,7 +23,7 @@ import { createSearchSource } from '../../../state_management/utils/create_searc
 import type { DiscoverAppLocatorParams } from '../../../../../../common/app_locator';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
-import type { TabState } from '../../../state_management/redux/types';
+import type { TabState } from '../../../state_management/redux';
 
 interface BuildShareOptionsParams {
   discoverParams: AppMenuDiscoverParams;
@@ -186,7 +186,7 @@ const getExportItems = (
         defaultMessage: 'CSV',
       }),
       testId: 'exportMenuItem-CSV',
-      iconType: 'tableDensityNormal',
+      iconType: 'table',
       order: 1,
       run: async () => {
         const shareOptions = await buildShareOptions(buildShareOptionsParams);
@@ -257,7 +257,7 @@ export const getShareAppMenuItem = ({
   const menuItems: AppMenuItemType[] = [
     {
       id: AppMenuActionId.share,
-      order: 3,
+      order: 1,
       label: i18n.translate('discover.localMenu.shareTitle', {
         defaultMessage: 'Share',
       }),
@@ -288,7 +288,7 @@ export const getShareAppMenuItem = ({
       label: i18n.translate('discover.localMenu.exportTitle', {
         defaultMessage: 'Export',
       }),
-      iconType: 'exportAction',
+      iconType: 'upload',
       testId: 'exportTopNavButton',
       items: exportItems,
       popoverTestId: 'exportPopoverPanel',

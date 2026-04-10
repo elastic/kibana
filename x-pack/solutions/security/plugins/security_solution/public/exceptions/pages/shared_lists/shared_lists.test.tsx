@@ -19,6 +19,11 @@ import { fireEvent, render, waitFor } from '@testing-library/react';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { initialUserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
 import { useEndpointExceptionsCapability } from '../../hooks/use_endpoint_exceptions_capability';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-exceptions-common/api';
+import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in';
+import type { OptInStatusMetadata } from '../../../../server/endpoint/lib/reference_data';
 
 jest.mock('../../../common/components/user_privileges');
 jest.mock('../../../common/utils/route/mocks');
@@ -50,6 +55,11 @@ jest.mock('../../../detections/containers/detection_engine/lists/use_lists_confi
   useListsConfig: jest.fn().mockReturnValue({ loading: false }),
 }));
 
+jest.mock('@kbn/cps-utils', () => ({
+  useRouteBasedCpsPickerAccess: jest.fn(),
+  ProjectRoutingAccess: { READONLY: 'readonly' },
+}));
+
 jest.mock('../../hooks/use_endpoint_exceptions_capability');
 jest.mock('../../components/create_shared_exception_list', () => ({
   CreateSharedListFlyout: ({ handleCloseFlyout }: { handleCloseFlyout: () => void }) => (
@@ -60,6 +70,14 @@ jest.mock('../../components/create_shared_exception_list', () => ({
     </div>
   ),
 }));
+
+jest.mock('../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+}));
+jest.mock('../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in');
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
+const mockUseGetEndpointExceptionsPerPolicyOptIn =
+  useGetEndpointExceptionsPerPolicyOptIn as jest.Mock;
 
 describe('SharedLists', () => {
   const mockHistory = generateHistoryMock();
@@ -104,6 +122,9 @@ describe('SharedLists', () => {
     });
 
     (useEndpointExceptionsCapability as jest.Mock).mockReturnValue(true);
+
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    mockUseGetEndpointExceptionsPerPolicyOptIn.mockReturnValue({ data: { status: false } });
   });
 
   it('renders empty view if no lists exist', async () => {
@@ -210,6 +231,125 @@ describe('SharedLists', () => {
     });
   });
 
+  describe('when moving Endpoint exceptions to Management', () => {
+    it('should not fetch "endpoint_list" when Endpoint exceptions moved FF is enabled', async () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        ...initialUserPrivilegesState(),
+        rulesPrivileges: {
+          rules: { read: true, edit: true },
+          exceptions: { read: true, edit: true },
+        },
+      });
+
+      render(
+        <TestProviders>
+          <SharedLists />
+        </TestProviders>
+      );
+
+      expect(useExceptionLists).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filterOptions: expect.objectContaining({ types: [ExceptionListTypeEnum.detection] }),
+          hideLists: [],
+        } as Partial<Parameters<typeof useExceptionLists>[0]>)
+      );
+    });
+
+    it('should display dismissible callout when FF is enabled but user has not opted in to per-policy yet', () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockUseGetEndpointExceptionsPerPolicyOptIn.mockReturnValue({
+        data: { status: false } as OptInStatusMetadata,
+      });
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <SharedLists />
+        </TestProviders>
+      );
+
+      const callout = getByTestId('EndpointExceptionsMovedCallout');
+      expect(callout).toBeInTheDocument();
+      expect(callout).toHaveTextContent('Endpoint exceptions have moved.');
+
+      expect(getByTestId('euiDismissCalloutButton')).toBeTruthy();
+    });
+
+    it('should display dismissible callout when FF is enabled and user has opted in to per-policy', () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockUseGetEndpointExceptionsPerPolicyOptIn.mockReturnValue({
+        data: { status: true, reason: 'userOptedIn' } as OptInStatusMetadata,
+      });
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <SharedLists />
+        </TestProviders>
+      );
+
+      const callout = getByTestId('EndpointExceptionsMovedCallout');
+      expect(callout).toBeInTheDocument();
+      expect(callout).toHaveTextContent('Endpoint exceptions have moved.');
+
+      expect(getByTestId('euiDismissCalloutButton')).toBeTruthy();
+    });
+
+    it('should NOT display dismissible callout when FF is enabled on a new deployment', () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockUseGetEndpointExceptionsPerPolicyOptIn.mockReturnValue({
+        data: { status: true, reason: 'newDeployment' } as OptInStatusMetadata,
+      });
+
+      const { queryByTestId } = render(
+        <TestProviders>
+          <SharedLists />
+        </TestProviders>
+      );
+
+      const callout = queryByTestId('EndpointExceptionsMovedCallout');
+      expect(callout).not.toBeInTheDocument();
+    });
+
+    it('should fetch "endpoint_list" but hide other endpoint artifacts when Endpoint exceptions moved FF is disabled', async () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        ...initialUserPrivilegesState(),
+        rulesPrivileges: {
+          rules: { read: true, edit: true },
+          exceptions: { read: true, edit: true },
+        },
+      });
+
+      render(
+        <TestProviders>
+          <SharedLists />
+        </TestProviders>
+      );
+
+      expect(useExceptionLists).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filterOptions: expect.objectContaining({
+            types: [ExceptionListTypeEnum.detection, ExceptionListTypeEnum.endpoint],
+          }),
+          hideLists: ENDPOINT_ARTIFACT_LIST_IDS.filter((id) => id !== 'endpoint_list'),
+        } as Partial<Parameters<typeof useExceptionLists>[0]>)
+      );
+    });
+
+    it('should not display callout when FF is disabled', () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+
+      const { queryByTestId } = render(
+        <TestProviders>
+          <SharedLists />
+        </TestProviders>
+      );
+
+      const callout = queryByTestId('EndpointExceptionsMovedCallout');
+      expect(callout).not.toBeInTheDocument();
+    });
+  });
+
   it('renders the "endpoint_list" overflow card button as enabled when user is restricted to only READ Endpoint Exceptions', async () => {
     (useEndpointExceptionsCapability as jest.Mock).mockReturnValue(false);
 
@@ -219,6 +359,7 @@ describe('SharedLists', () => {
       </TestProviders>
     );
     const allMenuActions = wrapper.getAllByTestId('sharedListOverflowCardButtonIcon');
+    expect(allMenuActions).toHaveLength(2);
     fireEvent.click(allMenuActions[1]);
 
     await waitFor(() => {
@@ -234,6 +375,7 @@ describe('SharedLists', () => {
       </TestProviders>
     );
     const allMenuActions = wrapper.getAllByTestId('sharedListOverflowCardButtonIcon');
+    expect(allMenuActions).toHaveLength(2);
     fireEvent.click(allMenuActions[0]);
 
     await waitFor(() => {
@@ -257,6 +399,7 @@ describe('SharedLists', () => {
       </TestProviders>
     );
     const allMenuActions = wrapper.getAllByTestId('sharedListOverflowCardButtonIcon');
+    expect(allMenuActions).toHaveLength(2);
     expect(allMenuActions[1]).toBeEnabled();
   });
 
@@ -275,6 +418,7 @@ describe('SharedLists', () => {
       </TestProviders>
     );
     const allMenuActions = wrapper.getAllByTestId('sharedListOverflowCardButtonIcon');
+    expect(allMenuActions).toHaveLength(2);
     fireEvent.click(allMenuActions[0]);
 
     await waitFor(() => {

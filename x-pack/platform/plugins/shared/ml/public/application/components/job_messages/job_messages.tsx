@@ -119,7 +119,7 @@ export const JobMessages: FC<JobMessagesProps> = ({
                     aria-label={i18n.translate('xpack.ml.jobMessages.toggleInChartAriaLabel', {
                       defaultMessage: 'Toggle in chart',
                     })}
-                    iconType="visAreaStacked"
+                    iconType="chartAreaStack"
                     onClick={() => actionHandler(message)}
                   />
                 </EuiToolTip>

@@ -7,22 +7,33 @@
 
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
-import { COMMON_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
+import {
+  PUBLIC_HEADERS,
+  INTERNAL_HEADERS,
+  ENTITY_STORE_ROUTES,
+  ENTITY_STORE_TAGS,
+  LATEST_ALIAS,
+} from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import { expectedHostEntities } from '../fixtures/entity_extraction_expected';
+import { clearEntityStoreIndices } from '../fixtures/helpers';
 
-// Failing: See https://github.com/elastic/kibana/issues/256811
-apiTest.describe.skip(
+apiTest.describe(
   'Entity Store Logs Extraction with pagination (max 5 docs per page)',
   { tag: ENTITY_STORE_TAGS },
   () => {
     let defaultHeaders: Record<string, string>;
+    let internalHeaders: Record<string, string>;
 
     apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver, kbnClient }) => {
       const credentials = await samlAuth.asInteractiveUser('admin');
       defaultHeaders = {
         ...credentials.cookieHeader,
-        ...COMMON_HEADERS,
+        ...PUBLIC_HEADERS,
+      };
+      internalHeaders = {
+        ...credentials.cookieHeader,
+        ...INTERNAL_HEADERS,
       };
 
       // enable feature flag
@@ -31,7 +42,7 @@ apiTest.describe.skip(
       });
 
       // Install the entity store
-      const response = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+      const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
         headers: defaultHeaders,
         responseType: 'json',
         body: {
@@ -47,25 +58,26 @@ apiTest.describe.skip(
       );
     });
 
-    apiTest.afterAll(async ({ apiClient }) => {
-      const response = await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+    apiTest.afterAll(async ({ apiClient, esClient }) => {
+      const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
         headers: defaultHeaders,
         responseType: 'json',
         body: {},
       });
       expect(response.statusCode).toBe(200);
+      await clearEntityStoreIndices(esClient);
     });
 
     apiTest(
       'Should extract properly extract host with pagination',
       async ({ apiClient, esClient }) => {
-        const expectedResultCount = 19;
+        const expectedResultCount = 20;
         const expectedPageCount = 4;
 
         const extractionResponse = await apiClient.post(
-          ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('host'),
+          ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('host'),
           {
-            headers: defaultHeaders,
+            headers: internalHeaders,
             responseType: 'json',
             body: {
               fromDateISO: '2026-01-20T11:00:00Z',
@@ -79,7 +91,7 @@ apiTest.describe.skip(
         expect(extractionResponse.body.pages).toBe(expectedPageCount);
 
         const entities = await esClient.search({
-          index: '.entities.v2.latest.security_default',
+          index: LATEST_ALIAS,
           query: {
             bool: {
               filter: {
@@ -92,7 +104,7 @@ apiTest.describe.skip(
         });
 
         expect(entities.hits.hits).toHaveLength(expectedResultCount);
-        // it's deterministic because of the MD5 id
+        // it's deterministic because of the SHA-256 id
         // manually checking object until we have a snapshot matcher
         expect(entities.hits.hits).toMatchObject(expectedHostEntities);
       }

@@ -11,8 +11,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Process, ProcessEvent } from '@kbn/session-view-plugin/common';
 import { useStore } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import type { ResolverCellActionRenderer } from '../../../resolver/types';
-import { OverviewTabWrapper } from '../../document/tabs/overview_tab_wrapper';
+import type { CellActionRenderer } from '../../shared/components/cell_actions';
+import { DocumentFlyoutWrapper } from '../../document/document_flyout_wrapper';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { PREFIX } from '../../../flyout/shared/test_ids';
 import { type CustomProcess } from '../../../flyout/document_details/session_view/context';
@@ -20,6 +20,7 @@ import { AlertsTab } from './alerts_tab';
 import { MetadataTab } from './metadata_tab';
 import { ProcessTab } from './process_tab';
 import { useKibana } from '../../../common/lib/kibana';
+import { useDefaultDocumentFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
 
 export const SESSION_VIEW_DETAILS_TEST_ID = `${PREFIX}SessionViewDetails` as const;
 
@@ -47,11 +48,15 @@ export interface SessionViewDetailsProps {
   /**
    * Renderer used by Session View panels for field cell actions.
    */
-  renderCellActions: ResolverCellActionRenderer;
+  renderCellActions: CellActionRenderer;
   /**
    * Callback function to jump to a specific event in SessionView
    */
   onJumpToEvent: (event: ProcessEvent) => void;
+  /**
+   * Callback invoked after alert mutations to refresh parent flyout content.
+   */
+  onAlertUpdated: () => void;
 }
 
 /**
@@ -66,36 +71,45 @@ export const SessionViewDetails = memo(
     investigatedAlertId,
     renderCellActions,
     onJumpToEvent,
+    onAlertUpdated,
   }: SessionViewDetailsProps) => {
     const { services } = useKibana();
     const { overlays } = services;
     const store = useStore();
     const history = useHistory();
+    const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
     const onShowAlertDetails = useCallback(
       (alertId: string, alertIndex: string) => {
-        overlays?.openSystemFlyout(
+        overlays.openSystemFlyout(
           flyoutProviders({
             services,
             store,
             history,
             children: (
-              <OverviewTabWrapper
+              <DocumentFlyoutWrapper
                 documentId={alertId}
                 indexName={alertIndex}
                 renderCellActions={renderCellActions}
+                onAlertUpdated={onAlertUpdated}
               />
             ),
           }),
           {
-            ownFocus: false,
-            resizable: true,
+            ...defaultFlyoutProperties,
             session: 'inherit',
-            size: 's',
           }
         );
       },
-      [history, overlays, renderCellActions, services, store]
+      [
+        defaultFlyoutProperties,
+        history,
+        onAlertUpdated,
+        overlays,
+        renderCellActions,
+        services,
+        store,
+      ]
     );
 
     const handleJumpToEvent = useCallback(

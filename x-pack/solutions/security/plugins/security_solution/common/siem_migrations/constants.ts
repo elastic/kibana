@@ -7,6 +7,8 @@
 
 export const SIEM_MIGRATIONS_ASSISTANT_USER = 'assistant';
 
+export const SIEM_MIGRATION_INFERENCE_FEATURE_ID = 'siem_migrations';
+
 export const SIEM_MIGRATIONS_PATH = '/internal/siem_migrations' as const;
 
 // TODO: Move `SIEM_RULE_MIGRATIONS_PATH` and composed paths to rules/constants.ts

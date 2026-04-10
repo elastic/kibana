@@ -16,8 +16,8 @@ import {
   WORKFLOW_YAML_ATTACHMENT_TYPE,
   workflowTools,
 } from '../../../common/agent_builder/constants';
+import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
 import type { AgentBuilderPluginSetupContract } from '../../types';
-import type { WorkflowsManagementApi } from '../../workflows_management/workflows_management_api';
 
 const clientDiagnosticSchema = z.object({
   severity: z.enum(['error', 'warning']),
@@ -119,7 +119,7 @@ const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
           value:
             `Current Workflow YAML:\n\n\`\`\`yaml\n${data.yaml}\n\`\`\`` +
             `${validationSection}\n\n` +
-            `Use the workflow edit tools (${workflowTools.insertStep}, ${workflowTools.modifyStep}, ${workflowTools.modifyStepProperty}, ${workflowTools.modifyProperty}, ${workflowTools.deleteStep}, ${workflowTools.replaceYaml}) to modify this workflow.\n` +
+            `Use the workflow edit tools (${workflowTools.insertStep}, ${workflowTools.modifyStep}, ${workflowTools.modifyStepProperty}, ${workflowTools.modifyProperty}, ${workflowTools.deleteStep}, ${workflowTools.setYaml}) to modify this workflow.\n` +
             `When inserting or modifying steps, provide step definitions as structured JSON objects — the tools will generate properly formatted YAML.\n` +
             `Each edit tool emits a diff attachment and updates this YAML attachment for subsequent edits.`,
         };
@@ -129,15 +129,17 @@ const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
   getTools: () => Object.values(workflowTools),
   getAgentDescription: () =>
     `${WORKFLOW_YAML_ATTACHMENT_TYPE} attachments represent the current state of an Elastic Workflow YAML document.\n` +
+    `To create a new workflow from scratch (when no ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment exists), call ${workflowTools.setYaml} with the full YAML — it will create the attachment automatically. Do NOT use attachments.add or attachment_add to create workflow attachments manually.\n` +
     `All workflow authoring tools are already available — do NOT load the workflow-authoring skill via filestore.read.\n` +
     `The workflow YAML and any validation errors are shown in the attachment content — do NOT call attachment_read to re-read them.\n\n` +
     `## Editing Rules\n\n` +
+    `- To create a new workflow, use ${workflowTools.setYaml} with the complete YAML. It creates the attachment automatically — do NOT call attachments.add or attachment_add.\n` +
     `- Use edit tools to propose changes. NEVER paste full YAML into your response text.\n` +
     `- Each edit tool returns diffAttachmentId, attachmentId, and attachmentVersion\n` +
     `- Render the diff with <render_attachment id="{diffAttachmentId}"/>\n` +
     `- Render the updated workflow with <render_attachment id="{attachmentId}" version="{attachmentVersion}"/> — the version attribute is required so the UI shows the latest content\n` +
     `- Edit tools auto-validate the result and return a \`validation\` field — no need to call ${workflowTools.validateWorkflow} separately after edits.\n` +
-    `- Prefer surgical edits (${workflowTools.modifyStep}, ${workflowTools.modifyStepProperty}) over ${workflowTools.replaceYaml}\n` +
+    `- Prefer surgical edits (${workflowTools.modifyStep}, ${workflowTools.modifyStepProperty}) over ${workflowTools.setYaml}\n` +
     `- **ALWAYS call ${workflowTools.getStepDefinitions} to verify the exact step type ID before changing a step's type or inserting a new step.** Step types have specific IDs (e.g. \`kibana.createCase\`, not \`kibana\`).\n` +
     `- Use ${workflowTools.getExamples} to find working workflow patterns\n\n` +
     `## Rendering\n\n` +
@@ -164,12 +166,16 @@ const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
     `\`condition\` is a config param specific to the \`if\` step type (alongside \`steps\`/\`else\`).\n\n` +
     `## Common Fixes\n\n` +
     `- Liquid expressions must be quoted in YAML: \`"{{ steps.name.output.field }}"\`\n` +
+    `- Step outputs are accessed via \`steps.<name>.output\` — NEVER \`steps.<name>.with.*\` or \`steps.<name>.<input_param>\`. A step's input parameters (\`with\` block) are NOT accessible as variables; only \`output\` is. Use \`${workflowTools.getStepDefinitions}\` with \`includeOutputSummary\` to learn what a step's output contains.\n` +
+    `- NEVER reference \`triggers.event\`, \`trigger.event\`, or \`triggers.event.*\` — use \`event\` directly (e.g. \`{{ event.alerts }}\`, \`{{ event.rule.name }}\`). The \`triggers\` block configures trigger types, not runtime data.\n` +
+    `- For alert triggers: \`event.alerts\` is an array, \`event.rule\` has \`id\`/\`name\`/\`tags\`, \`event.spaceId\` is the space\n` +
     `- ES|QL params must be an array of positional values (\`?\` placeholder), not a named map\n` +
     `- All workflows need \`version: '1'\` at the root\n` +
     `- Each step needs a unique \`name\` and valid \`type\`\n` +
     `- Step input parameters go in the \`with\` block\n` +
     `- Config params are step-level fields outside \`with\` (e.g. \`condition\`/\`steps\`/\`else\` for the \`if\` step type, \`foreach\`/\`steps\` for \`foreach\`)\n` +
-    `- Connector-based steps require a \`connector-id\` field`,
+    `- Connector-based steps require a \`connector-id\` field\n` +
+    `- When fixing an error, scan the entire YAML for other occurrences of the same mistake and fix them all`,
 });
 
 export function registerWorkflowYamlAttachment(

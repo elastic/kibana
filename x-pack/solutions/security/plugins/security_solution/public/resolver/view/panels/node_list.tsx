@@ -12,6 +12,7 @@ import React, { memo, useCallback, useContext, useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBadge, EuiButtonEmpty, EuiInMemoryTable, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { CellActionRenderer } from '../../../flyout_v2/shared/components/cell_actions';
 import { SideEffectContext } from '../side_effect_context';
 import {
   StyledAnalyzedEvent,
@@ -29,7 +30,6 @@ import { useColors } from '../use_colors';
 import { useFormattedDate } from './use_formatted_date';
 import { userSelectedResolverNode } from '../../store/actions';
 import type { State } from '../../../common/store/types';
-import type { ResolverCellActionRenderer } from '../../types';
 
 interface ProcessTableView {
   name?: string;
@@ -41,7 +41,7 @@ interface ProcessTableView {
  * The "default" view for the panel: A list of all the processes currently in the graph.
  */
 export const NodeList = memo(
-  ({ id, renderCellActions }: { id: string; renderCellActions: ResolverCellActionRenderer }) => {
+  ({ id, renderCellActions }: { id: string; renderCellActions: CellActionRenderer }) => {
     const columns = useMemo<Array<EuiBasicTableColumn<ProcessTableView>>>(
       () => [
         {
@@ -229,7 +229,7 @@ const NodeDetailTimestamp = memo(
   }: {
     eventDate: string | number | undefined;
     id: string;
-    renderCellActions: ResolverCellActionRenderer;
+    renderCellActions: CellActionRenderer;
   }) => {
     const formattedDate = useFormattedDate(eventDate);
 
