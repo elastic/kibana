@@ -42,7 +42,7 @@ description: Use when creating, updating, debugging, or reviewing Scout UI tests
 - Don't make API calls from page objects (use `apiServices`/`kbnClient` in hooks instead).
 - Register plugin page objects by extending the `pageObjects` fixture in `test/scout*/ui/fixtures/index.ts`.
 - Scout provides EUI component wrappers for stable interactions with common EUI widgets: `EuiComboBoxWrapper`, `EuiDataGridWrapper`, `EuiSelectableWrapper`, `EuiCheckBoxWrapper`, `EuiFieldTextWrapper`, `EuiCodeBlockWrapper`, `EuiSuperSelectWrapper`, `EuiToastWrapper`. Import them from `@kbn/scout` and use them as class members in page objects.
-- **Avoid `.first()`, `.nth()`, `.last()`** — the `playwright/no-nth-methods` lint rule flags these. Instead, use `data-test-subj` attributes, `getByRole('option', { name })`, or other targeted selectors. If the production component lacks a `data-test-subj`, add one rather than disabling the rule.
+- **Avoid `.first()`, `.nth()`, `.last()`** — the `playwright/no-nth-methods` lint rule flags these. Instead, use `data-test-subj` attributes or other targeted selectors. If the component lacks a `data-test-subj`, add one rather than disabling the rule.
 
 ## Parallel UI specifics (spaceTest)
 
