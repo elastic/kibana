@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ApiPrivileges } from '@kbn/core-security-server';
 import { i18n } from '@kbn/i18n';
+import type { InferenceConnector } from '@kbn/inference-common';
 import {
   INFERENCE_SETTINGS_SO_TYPE,
   INFERENCE_SETTINGS_ID,
@@ -18,7 +19,6 @@ import {
 import type { InferenceSettingsAttributes, InferenceSettingsResponse } from '../../common/types';
 import { APIRoutes } from '../../common/types';
 import { inferenceSettingsSchemaV1 } from '../saved_objects/schema/v1';
-import { fetchInferenceEndpoints } from '../lib/fetch_inference_endpoints';
 import type { InferenceFeatureRegistry } from '../inference_feature_registry';
 import { resolveFeatureEndpointIds } from '../inference_endpoints';
 import { errorHandler } from '../utils/error_handler';
@@ -29,10 +29,9 @@ const EMPTY_SETTINGS: InferenceSettingsResponse = {
   data: { features: [] },
 };
 
-const findInvalidEndpoints = (
+const resolveAllEndpointIds = (
   settings: InferenceSettingsAttributes,
   featureRegistry: InferenceFeatureRegistry,
-  existingEndpointIds: Set<string>,
   logger: Logger
 ): string[] => {
   const soFeaturesMap = new Map(settings.features.map((f) => [f.feature_id, f]));
@@ -44,17 +43,34 @@ const findInvalidEndpoints = (
       (f) => resolveFeatureEndpointIds(featureRegistry, soFeaturesMap, f.featureId, logger).ids
     );
 
-  return [...new Set(resolvedEndpointIds)].filter((id) => !existingEndpointIds.has(id));
+  return [...new Set(resolvedEndpointIds)];
+};
+
+const findInvalidEndpoints = async (
+  ids: string[],
+  checkConnector: (id: string) => Promise<InferenceConnector>
+): Promise<string[]> => {
+  const invalid: string[] = [];
+  for (const id of ids) {
+    try {
+      await checkConnector(id);
+    } catch {
+      invalid.push(id);
+    }
+  }
+  return invalid;
 };
 
 export const defineInferenceSettingsRoutes = ({
   logger,
   router,
   featureRegistry,
+  getConnectorById,
 }: {
   logger: Logger;
   router: IRouter;
   featureRegistry: InferenceFeatureRegistry;
+  getConnectorById: (id: string, request: KibanaRequest) => Promise<InferenceConnector>;
 }) => {
   router.versioned
     .get({
@@ -76,12 +92,11 @@ export const defineInferenceSettingsRoutes = ({
         validate: {},
         version: ROUTE_VERSIONS.v1,
       },
-      errorHandler(logger)(async (context, _request, response) => {
+      errorHandler(logger)(async (context, request, response) => {
         const coreContext = await context.core;
         const soClient = coreContext.savedObjects.getClient({
           includedHiddenTypes: [INFERENCE_SETTINGS_SO_TYPE],
         });
-        const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
         let settingsBody: InferenceSettingsResponse;
         try {
@@ -124,13 +139,9 @@ export const defineInferenceSettingsRoutes = ({
 
         if (settingsBody.data.features.length > 0) {
           try {
-            const { inferenceEndpoints } = await fetchInferenceEndpoints(esClient);
-            const existingIds = new Set(inferenceEndpoints.map((ep) => ep.inference_id));
-            invalidEndpoints = findInvalidEndpoints(
-              settingsBody.data,
-              featureRegistry,
-              existingIds,
-              logger
+            const ids = resolveAllEndpointIds(settingsBody.data, featureRegistry, logger);
+            invalidEndpoints = await findInvalidEndpoints(ids, (id) =>
+              getConnectorById(id, request)
             );
           } catch (e) {
             logger.warn(`Failed to validate inference endpoints: ${e.message}`);

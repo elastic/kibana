@@ -26,23 +26,14 @@ const mockFeatureRegistry = {
 describe('Inference Settings API', () => {
   const mockLogger = loggingSystemMock.createLogger().get();
   let mockRouter: MockRouter;
+  let getConnectorById: jest.Mock;
   const mockSOClient = {
     create: jest.fn(),
     get: jest.fn(),
   };
-  const mockESClient = {
-    inference: {
-      get: jest.fn().mockResolvedValue({ endpoints: [] }),
-    },
-  };
   const mockCore = {
     savedObjects: {
       getClient: jest.fn().mockReturnValue(mockSOClient),
-    },
-    elasticsearch: {
-      client: {
-        asCurrentUser: mockESClient,
-      },
     },
   };
 
@@ -50,6 +41,7 @@ describe('Inference Settings API', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    getConnectorById = jest.fn().mockRejectedValue(new Error('Not found'));
 
     context = {
       core: Promise.resolve(mockCore),
@@ -68,6 +60,7 @@ describe('Inference Settings API', () => {
         logger: mockLogger,
         router: mockRouter.router,
         featureRegistry: mockFeatureRegistry as any,
+        getConnectorById,
       });
     });
 
@@ -254,6 +247,7 @@ describe('Inference Settings API', () => {
         logger: mockLogger,
         router: mockRouter.router,
         featureRegistry: mockFeatureRegistry as any,
+        getConnectorById,
       });
     });
 
