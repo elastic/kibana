@@ -12,7 +12,7 @@ export const AgentBuilderPanelContainer = ({ euiTheme }: UseEuiTheme) => css`
   border-top: ${euiTheme.border.thin};
   border-left: none;
 
-  ${euiTheme.breakpoint.m} {
+  @media (max-width: ${euiTheme.breakpoint.m}px) {
     border-top: none;
     border-left: ${euiTheme.border.thin};
   }
