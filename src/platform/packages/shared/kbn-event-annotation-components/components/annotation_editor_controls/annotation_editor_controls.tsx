@@ -17,6 +17,7 @@ import {
   EuiButtonGroup,
   EuiSpacer,
   euiPaletteColorBlind,
+  useEuiTheme,
 } from '@elastic/eui';
 import {
   IconSelectSetting,
@@ -39,11 +40,13 @@ import type {
   PointInTimeEventAnnotationConfig,
   QueryPointEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
+import {
+  getDefaultAnnotationColor,
+  getDefaultAnnotationRangeColor,
+} from '@kbn/event-annotation-common';
 import { isQueryAnnotationConfig, isRangeAnnotationConfig } from '../..';
 import {
-  defaultAnnotationColor,
   defaultAnnotationLabel,
-  defaultAnnotationRangeColor,
   defaultRangeAnnotationLabel,
   toLineAnnotationColor,
 } from './helpers';
@@ -75,9 +78,14 @@ const AnnotationEditorControls = ({
   appName,
 }: Props) => {
   const { hasFieldData } = useExistingFieldsReader();
+  const { colorMode } = useEuiTheme();
 
   const isQueryBased = isQueryAnnotationConfig(currentAnnotation);
   const isRange = isRangeAnnotationConfig(currentAnnotation);
+  const isDarkMode = colorMode === 'DARK';
+  const defaultColor = isRange
+    ? getDefaultAnnotationRangeColor(isDarkMode)
+    : getDefaultAnnotationColor(isDarkMode);
 
   const [queryInputShouldOpen, setQueryInputShouldOpen] = React.useState(false);
   useEffect(() => {
@@ -337,7 +345,7 @@ const AnnotationEditorControls = ({
         <ColorPicker
           overwriteColor={currentAnnotation.color}
           isClearable={false}
-          defaultColor={isRange ? defaultAnnotationRangeColor : defaultAnnotationColor}
+          defaultColor={defaultColor}
           showAlpha={isRange}
           setConfig={update}
           disableHelpTooltip

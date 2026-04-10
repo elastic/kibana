@@ -12,6 +12,10 @@ import type { XYDataLayerConfig } from './types';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { KbnPalette } from '@kbn/palettes';
 import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
+import {
+  getDefaultAnnotationColor,
+  getDefaultAnnotationRangeColor,
+} from '@kbn/event-annotation-common';
 
 describe('color_assignment', () => {
   const layers: XYDataLayerConfig[] = [
@@ -317,6 +321,65 @@ describe('color_assignment', () => {
       expect(paletteService.get).toHaveBeenCalledWith('eui_amsterdam_color_blind');
       expect(paletteService.get).toHaveBeenCalledWith('default');
       expect(defaultGetCategoricalColor).toHaveBeenCalled();
+    });
+  });
+
+  describe('annotation layer defaults', () => {
+    it('should resolve the point annotation fallback color for the dark theme', () => {
+      const assigned = getAssignedColorConfig(
+        {
+          layerId: 'annotation_layer',
+          layerType: LayerTypes.ANNOTATIONS,
+          indexPatternId: '1',
+          annotations: [
+            {
+              id: 'point_annotation',
+              type: 'manual',
+              label: 'Event',
+              key: {
+                type: 'point_in_time',
+                timestamp: '2022-03-18T08:25:17.140Z',
+              },
+            },
+          ],
+        } as never,
+        'point_annotation',
+        {} as never,
+        { datasourceLayers: {} } as never,
+        {} as never,
+        true
+      );
+
+      expect(assigned.color).toEqual(getDefaultAnnotationColor(true));
+    });
+
+    it('should resolve the range annotation fallback color for the light theme', () => {
+      const assigned = getAssignedColorConfig(
+        {
+          layerId: 'annotation_layer',
+          layerType: LayerTypes.ANNOTATIONS,
+          indexPatternId: '1',
+          annotations: [
+            {
+              id: 'range_annotation',
+              type: 'manual',
+              label: 'Event range',
+              key: {
+                type: 'range',
+                timestamp: '2022-03-18T08:25:17.140Z',
+                endTimestamp: '2022-03-31T08:25:17.140Z',
+              },
+            },
+          ],
+        } as never,
+        'range_annotation',
+        {} as never,
+        { datasourceLayers: {} } as never,
+        {} as never,
+        false
+      );
+
+      expect(assigned.color).toEqual(getDefaultAnnotationRangeColor(false));
     });
   });
 });

@@ -41,7 +41,7 @@ exports[`XYChart component annotations should render basic line annotation 1`] =
       "line": Object {
         "dash": undefined,
         "opacity": 1,
-        "stroke": "#BC1E70",
+        "stroke": "#2B394F",
         "strokeWidth": 1,
       },
     }
@@ -85,7 +85,7 @@ Array [
     outsideDimension={14}
     style={
       Object {
-        "fill": "#F04E981A",
+        "fill": "#2B394F1A",
         "opacity": 1,
       }
     }
@@ -166,7 +166,7 @@ exports[`XYChart component annotations should render grouped line annotations wi
     <Marker
       config={
         Object {
-          "color": "#BC1E70",
+          "color": "#2B394F",
           "customTooltip": [Function],
           "icon": "2",
           "id": "event1",
@@ -192,7 +192,7 @@ exports[`XYChart component annotations should render grouped line annotations wi
       "line": Object {
         "dash": undefined,
         "opacity": 1,
-        "stroke": "#BC1E70",
+        "stroke": "#2B394F",
         "strokeWidth": 1,
       },
     }
@@ -221,7 +221,7 @@ exports[`XYChart component annotations should render simplified annotations when
       "line": Object {
         "dash": undefined,
         "opacity": 1,
-        "stroke": "#BC1E70",
+        "stroke": "#2B394F",
         "strokeWidth": 1,
       },
     }
@@ -265,7 +265,7 @@ Array [
     outsideDimension={2}
     style={
       Object {
-        "fill": "#F04E981A",
+        "fill": "#2B394F1A",
         "opacity": 1,
       }
     }

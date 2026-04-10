@@ -10,8 +10,8 @@ import type { PaletteRegistry } from '@kbn/coloring';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { euiLightVars } from '@kbn/ui-theme';
 import {
-  defaultAnnotationColor,
-  defaultAnnotationRangeColor,
+  getDefaultAnnotationColor,
+  getDefaultAnnotationRangeColor,
   isRangeAnnotationConfig,
 } from '@kbn/event-annotation-common';
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
@@ -126,7 +126,8 @@ export function getAssignedColorConfig(
   accessor: string,
   colorAssignments: ColorAssignments,
   frame: Pick<FramePublicAPI, 'datasourceLayers'>,
-  paletteService: PaletteRegistry
+  paletteService: PaletteRegistry,
+  isDarkMode = false
 ): AccessorConfig {
   if (isReferenceLayer(layer)) {
     return getSingleColorConfig(accessor);
@@ -137,8 +138,8 @@ export function getAssignedColorConfig(
       columnId: accessor,
       triggerIconType: annotation?.isHidden ? 'invisible' : 'color',
       color: isRangeAnnotationConfig(annotation)
-        ? defaultAnnotationRangeColor
-        : defaultAnnotationColor,
+        ? getDefaultAnnotationRangeColor(isDarkMode)
+        : getDefaultAnnotationColor(isDarkMode),
     };
   }
   const layerContainsSplits =
@@ -182,13 +183,14 @@ export function getAccessorColorConfigs(
   colorAssignments: ColorAssignments,
   frame: Pick<FramePublicAPI, 'datasourceLayers'>,
   layer: XYLayerConfig,
-  paletteService: PaletteRegistry
+  paletteService: PaletteRegistry,
+  isDarkMode = false
 ): AccessorConfig[] {
   if (isReferenceLayer(layer)) {
     return getReferenceLineAccessorColorConfig(layer);
   }
   if (isAnnotationsLayer(layer)) {
-    return getAnnotationsAccessorColorConfig(layer);
+    return getAnnotationsAccessorColorConfig(layer, isDarkMode);
   }
   const layerContainsSplits = !layer.collapseFn && (layer.splitAccessors ?? []).length > 0;
   return layer.accessors.map((accessor) => {
@@ -203,6 +205,13 @@ export function getAccessorColorConfigs(
         color: currentYConfig.color,
       };
     }
-    return getAssignedColorConfig(layer, accessor, colorAssignments, frame, paletteService);
+    return getAssignedColorConfig(
+      layer,
+      accessor,
+      colorAssignments,
+      frame,
+      paletteService,
+      isDarkMode
+    );
   });
 }

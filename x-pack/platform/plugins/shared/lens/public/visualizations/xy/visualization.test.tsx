@@ -2714,7 +2714,7 @@ describe('xy_visualization', () => {
         });
         expect(config.groups[0].accessors).toEqual([
           {
-            color: '#BC1E70',
+            color: '#2B394F',
             columnId: 'an1',
             customIcon: IconCircle,
             triggerIconType: 'custom',

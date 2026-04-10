@@ -20,6 +20,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import type {
   EventAnnotationOutput,
@@ -28,7 +29,10 @@ import type {
   PointEventAnnotationRow,
 } from '@kbn/event-annotation-plugin/common';
 import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
-import { defaultAnnotationColor, defaultAnnotationRangeColor } from '@kbn/event-annotation-common';
+import {
+  getDefaultAnnotationColor,
+  getDefaultAnnotationRangeColor,
+} from '@kbn/event-annotation-common';
 import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -183,13 +187,14 @@ function getCommonProperty<T, K extends keyof ManualPointEventAnnotationArgs>(
   return fallbackValue;
 }
 
-const getCommonStyles = (configArr: ManualPointEventAnnotationArgs[]) => {
+const getCommonStyles = (configArr: ManualPointEventAnnotationArgs[], defaultColor: string) => {
   return {
-    color: getCommonProperty<ManualPointEventAnnotationArgs['color'], 'color'>(
-      configArr,
-      'color',
-      defaultAnnotationColor
-    ),
+    color:
+      getCommonProperty<ManualPointEventAnnotationArgs['color'], 'color'>(
+        configArr,
+        'color',
+        defaultColor
+      ) ?? defaultColor,
     lineWidth: getCommonProperty(configArr, 'lineWidth', 1),
     lineStyle: getCommonProperty(configArr, 'lineStyle', 'solid'),
     textVisibility: getCommonProperty(configArr, 'textVisibility', false),
@@ -212,7 +217,8 @@ export const getAnnotationsGroupedByInterval = (
   configs: EventAnnotationOutput[] | undefined,
   columns: DatatableColumn[] | undefined,
   formatFactory: FormatFactory,
-  timeFormat: string
+  timeFormat: string,
+  defaultColor: string
 ) => {
   const visibleGroupedConfigs = annotations.reduce<Record<string, PointEventAnnotationRow[]>>(
     (acc, current) => {
@@ -245,7 +251,7 @@ export const getAnnotationsGroupedByInterval = (
       isGrouped: false,
     };
     if (rowsPerBucket.length > 1) {
-      const commonStyles = getCommonStyles(rowsPerBucket);
+      const commonStyles = getCommonStyles(rowsPerBucket, defaultColor);
       return {
         ...mergedAnnotation,
         ...commonStyles,
@@ -272,6 +278,11 @@ export const Annotations = ({
   isBarChart,
   outsideDimension,
 }: AnnotationsProps) => {
+  const { colorMode } = useEuiTheme();
+  const isDarkMode = colorMode === 'DARK';
+  const defaultAnnotationColor = getDefaultAnnotationColor(isDarkMode);
+  const defaultAnnotationRangeColor = getDefaultAnnotationRangeColor(isDarkMode);
+
   return (
     <>
       {groupedLineAnnotations.map((annotation) => {
@@ -357,7 +368,7 @@ export const Annotations = ({
                 <div css={styles.tooltipRow}>
                   <EuiFlexGroup gutterSize="xs">
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type="stopFill" color={color} />
+                      <EuiIcon type="stopFill" color={color} aria-hidden={true} />
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiTitle size="xxxs">

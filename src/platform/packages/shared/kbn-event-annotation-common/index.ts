@@ -29,7 +29,11 @@ export const EVENT_ANNOTATION_GROUP_TYPE = 'event-annotation-group';
 
 export {
   defaultAnnotationColor,
+  darkModeDefaultAnnotationColor,
   defaultAnnotationRangeColor,
+  darkModeDefaultAnnotationRangeColor,
+  getDefaultAnnotationColor,
+  getDefaultAnnotationRangeColor,
   defaultAnnotationLabel,
   defaultRangeAnnotationLabel,
   getDefaultManualAnnotation,

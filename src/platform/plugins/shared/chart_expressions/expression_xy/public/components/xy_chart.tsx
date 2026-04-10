@@ -47,6 +47,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EmptyPlaceholder, LegendToggle } from '@kbn/charts-plugin/public';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import type { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common';
+import { getDefaultAnnotationColor } from '@kbn/event-annotation-common';
 import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import type { ChartSizeSpec } from '@kbn/chart-expressions-common';
@@ -453,7 +454,8 @@ export function XYChart({
     annotations?.layers.flatMap((l) => l.annotations),
     annotations?.datatable.columns,
     formatFactory,
-    timeFormat
+    timeFormat,
+    getDefaultAnnotationColor(darkMode)
   );
 
   const visualConfigs = [

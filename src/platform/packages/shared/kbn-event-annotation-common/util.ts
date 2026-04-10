@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { euiLightVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import type {
   EventAnnotationConfig,
@@ -16,9 +15,16 @@ import type {
   QueryPointEventAnnotationConfig,
 } from './types';
 
-export const defaultAnnotationColor = euiLightVars.euiColorAccent;
-// Do not compute it live as dependencies will add tens of Kbs to the plugin
-export const defaultAnnotationRangeColor = `#F04E981A`; // defaultAnnotationColor with opacity 0.1
+export const defaultAnnotationColor = '#2B394F';
+export const darkModeDefaultAnnotationColor = '#FFFFFF';
+export const defaultAnnotationRangeColor = '#2B394F1A';
+export const darkModeDefaultAnnotationRangeColor = '#FFFFFF1A';
+
+export const getDefaultAnnotationColor = (isDarkMode = false) =>
+  isDarkMode ? darkModeDefaultAnnotationColor : defaultAnnotationColor;
+
+export const getDefaultAnnotationRangeColor = (isDarkMode = false) =>
+  isDarkMode ? darkModeDefaultAnnotationRangeColor : defaultAnnotationRangeColor;
 
 export const isRangeAnnotationConfig = (
   annotation?: EventAnnotationConfig
