@@ -24,6 +24,14 @@ describe('FigmaConnector', () => {
     jest.clearAllMocks();
   });
 
+  it('should define all actions as tools for agent exposure', () => {
+    expect(FigmaConnector.actions.getFile.isTool).toBe(true);
+    expect(FigmaConnector.actions.renderNodes.isTool).toBe(true);
+    expect(FigmaConnector.actions.listProjectFiles.isTool).toBe(true);
+    expect(FigmaConnector.actions.listTeamProjects.isTool).toBe(true);
+    expect(FigmaConnector.actions.whoAmI.isTool).toBe(true);
+  });
+
   describe('auth', () => {
     it('supports api_key_header auth', () => {
       const types = (FigmaConnector.auth?.types as Array<string | { type: string }>).map((t) =>

@@ -28,6 +28,15 @@ describe('SalesforceConnector', () => {
     jest.clearAllMocks();
   });
 
+  it('should define all actions as tools for agent exposure', () => {
+    expect(SalesforceConnector.actions.query.isTool).toBe(true);
+    expect(SalesforceConnector.actions.get_record.isTool).toBe(true);
+    expect(SalesforceConnector.actions.list_records.isTool).toBe(true);
+    expect(SalesforceConnector.actions.search.isTool).toBe(true);
+    expect(SalesforceConnector.actions.describe.isTool).toBe(true);
+    expect(SalesforceConnector.actions.download_file.isTool).toBe(true);
+  });
+
   describe('auth', () => {
     it('supports oauth_client_credentials auth', () => {
       const types = (SalesforceConnector.auth?.types as Array<string | { type: string }>).map((t) =>
