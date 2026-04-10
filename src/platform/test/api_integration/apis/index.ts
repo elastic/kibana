@@ -19,7 +19,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./data_views'));
     loadTestFile(require.resolve('./event_annotations'));
     loadTestFile(require.resolve('./kql_telemetry'));
-    loadTestFile(require.resolve('./saved_objects_management'));
     loadTestFile(require.resolve('./saved_objects'));
     loadTestFile(require.resolve('./saved_queries'));
     loadTestFile(require.resolve('./scripts'));
