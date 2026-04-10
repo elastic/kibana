@@ -15,6 +15,7 @@ import type {
   AnnotationState,
   AnnotationUpdatesService,
 } from '../../../services/annotations_service';
+import type { CustomRuleEditorSource } from '../../../../../common/constants/usage_collection';
 
 interface Props {
   selectedJob: CombinedJob;
@@ -50,6 +51,7 @@ interface TimeseriesChartProps {
   zoomFromFocusLoaded: object;
   zoomToFocusLoaded: object;
   tooltipService: object;
+  telemetrySource: CustomRuleEditorSource;
 }
 
 interface TimeseriesChartIntProps {
