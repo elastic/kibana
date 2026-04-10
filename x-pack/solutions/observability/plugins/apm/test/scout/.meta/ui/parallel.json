@@ -1,5 +1,5 @@
 {
-  "sha1": "3797607b3176c61949af1201fd749e42c3c827e1",
+  "sha1": "68bf0dcbadaba3f2e03fcf91eba592de79fe9317",
   "tests": [
     {
       "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
@@ -1081,7 +1081,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
-        "line": 42,
+        "line": 44,
         "column": 9
       }
     },
@@ -1097,7 +1097,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
-        "line": 70,
+        "line": 72,
         "column": 9
       }
     },
@@ -1113,7 +1113,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
-        "line": 92,
+        "line": 96,
         "column": 9
       }
     },
@@ -1129,7 +1129,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
-        "line": 113,
+        "line": 119,
         "column": 9
       }
     },
@@ -1145,7 +1145,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
-        "line": 141,
+        "line": 156,
         "column": 9
       }
     },
@@ -1529,7 +1529,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_transaction_details.spec.ts",
-        "line": 103,
+        "line": 106,
         "column": 9
       }
     },
@@ -1545,7 +1545,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_transaction_details.spec.ts",
-        "line": 131,
+        "line": 134,
         "column": 9
       }
     },
@@ -1561,7 +1561,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_transaction_details.spec.ts",
-        "line": 153,
+        "line": 156,
         "column": 9
       }
     },
@@ -2127,7 +2127,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_stacktrace.spec.ts",
-        "line": 50,
+        "line": 53,
         "column": 9
       }
     },
