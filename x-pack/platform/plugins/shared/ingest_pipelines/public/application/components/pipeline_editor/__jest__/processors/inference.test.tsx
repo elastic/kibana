@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { fireEvent, screen, waitFor, within } from '@testing-library/react';
-import { getProcessorValue, renderProcessorEditor, setupEnvironment } from './processor.helpers';
+import { act } from 'react-dom/test-utils';
+import type { SetupResult } from './processor.helpers';
+import { setup, getProcessorValue, setupEnvironment } from './processor.helpers';
 
 const INFERENCE_TYPE = 'inference';
 
 describe('Processor: Inference', () => {
   let onUpdate: jest.Mock;
+  let testBed: SetupResult;
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
 
-  const getToggleInput = () => screen.getByTestId('toggleInferenceInputMappingMode');
+  beforeAll(() => {
+    jest.useFakeTimers({ legacyFakeTimers: true });
+    // disable all react-beautiful-dnd development warnings
+    (window as any)['__@hello-pangea/dnd-disable-dev-warnings'] = true;
+  });
 
-  const expectToggleOn = () => {
-    expect(getToggleInput()).toHaveAttribute('aria-checked', 'true');
-  };
-
-  const expectToggleOff = () => {
-    expect(getToggleInput()).toHaveAttribute('aria-checked', 'false');
-  };
-
-  const switchToTargetFieldAndFieldMapMode = () => {
-    fireEvent.click(screen.getByTestId('toggleInferenceInputMappingMode'));
-  };
+  afterAll(() => {
+    jest.useRealTimers();
+    // enable all react-beautiful-dnd development warnings
+    (window as any)['__@hello-pangea/dnd-disable-dev-warnings'] = false;
+  });
 
   describe('add inference processor', () => {
     beforeEach(async () => {
@@ -34,127 +34,181 @@ describe('Processor: Inference', () => {
       ({ httpSetup } = setupEnvironment());
       onUpdate = jest.fn();
 
-      renderProcessorEditor(httpSetup, {
-        value: {
-          processors: [],
-        },
-        onFlyoutOpen: jest.fn(),
-        onUpdate,
+      await act(async () => {
+        testBed = await setup(httpSetup, {
+          value: {
+            processors: [],
+          },
+          onFlyoutOpen: jest.fn(),
+          onUpdate,
+        });
       });
 
-      fireEvent.click(screen.getByTestId('addProcessorButton'));
-      fireEvent.change(within(screen.getByTestId('processorTypeSelector')).getByTestId('input'), {
-        target: { value: INFERENCE_TYPE },
-      });
+      const { component, actions } = testBed;
+      component.update();
 
-      await screen.findByTestId('addProcessorForm');
+      // Open flyout to add new processor
+      actions.addProcessor();
+      // Add type (the other fields are not visible until a type is selected)
+      await actions.addProcessorType(INFERENCE_TYPE);
     });
 
     test('prevents form submission if required fields are not provided', async () => {
+      const {
+        actions: { saveNewProcessor },
+        form,
+      } = testBed;
+
       // Click submit button with only the type defined
+      await saveNewProcessor();
+
       // Expect form error as "field" is a required parameter
-      fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
-      expect(
-        await screen.findByText('A deployment, an inference, or a model ID value is required.')
-      ).toBeInTheDocument();
+      expect(form.getErrorsMessages()).toEqual([
+        'A deployment, an inference, or a model ID value is required.',
+      ]);
     });
 
     test('accepts inference config and field maps that contains escaped characters', async () => {
-      switchToTargetFieldAndFieldMapMode();
-      fireEvent.change(within(screen.getByTestId('inferenceModelId')).getByTestId('input'), {
-        target: { value: 'test_inference_processor' },
-      });
-      fireEvent.change(screen.getByTestId('inferenceConfig'), {
-        target: { value: '{"inf_conf_1":"""aaa"bbb""", "inf_conf_2": "aaa(bbb"}' },
-      });
-      fireEvent.change(screen.getByTestId('fieldMap'), {
-        target: { value: '{"field_map_1":"""aaa"bbb""", "field_map_2": "aaa(bbb"}' },
-      });
+      const {
+        actions: { saveNewProcessor },
+        find,
+        form,
+        component,
+      } = testBed;
 
-      // Save the field
-      fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
-      await waitFor(() => expect(onUpdate).toHaveBeenCalled());
+      // Switch to target field & field map mode
+      act(() => {
+        find('toggleInferenceInputMappingMode').simulate('click');
+      });
+      component.update();
 
-      const processors = getProcessorValue(onUpdate);
+      form.setInputValue('inferenceModelId.input', 'test_inference_processor');
+
+      await act(async () => {
+        find('inferenceConfig').simulate('change', {
+          jsonContent: '{"inf_conf_1":"""aaa"bbb""", "inf_conf_2": "aaa(bbb"}',
+        });
+        jest.advanceTimersByTime(0);
+      });
+      component.update();
+
+      await act(async () => {
+        find('fieldMap').simulate('change', {
+          jsonContent: '{"field_map_1":"""aaa"bbb""", "field_map_2": "aaa(bbb"}',
+        });
+        jest.advanceTimersByTime(0);
+      });
+      component.update();
+
+      await saveNewProcessor();
+
+      const processors = getProcessorValue(onUpdate, INFERENCE_TYPE);
 
       expect(processors[0][INFERENCE_TYPE]).toEqual({
         model_id: 'test_inference_processor',
-
-        inference_config: { inf_conf_1: 'aaa"bbb', inf_conf_2: 'aaa(bbb' },
-
-        field_map: { field_map_1: 'aaa"bbb', field_map_2: 'aaa(bbb' },
+        // eslint-disable-next-line prettier/prettier
+        inference_config: { inf_conf_1: 'aaa\"bbb', inf_conf_2: 'aaa(bbb' },
+        // eslint-disable-next-line prettier/prettier
+        field_map: { field_map_1: 'aaa\"bbb', field_map_2: 'aaa(bbb' },
       });
     });
 
     test('accepts input_output and strips field_map and target_field', async () => {
-      fireEvent.change(within(screen.getByTestId('inferenceModelId')).getByTestId('input'), {
-        target: { value: 'test_inference_processor' },
-      });
+      const {
+        actions: { saveNewProcessor },
+        find,
+        form,
+        component,
+      } = testBed;
 
-      fireEvent.change(screen.getByTestId('inputOutput'), {
-        target: {
-          value:
+      form.setInputValue('inferenceModelId.input', 'test_inference_processor');
+
+      await act(async () => {
+        find('inputOutput').simulate('change', {
+          jsonContent:
             '[{"input_field":"content","output_field":"content_embedding","notes":"""aaa"bbb"""}]',
-        },
+        });
+        jest.advanceTimersByTime(0);
       });
+      component.update();
 
-      // Save the field
-      fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
-      await waitFor(() => expect(onUpdate).toHaveBeenCalled());
+      await saveNewProcessor();
 
-      const processors = getProcessorValue(onUpdate);
+      const processors = getProcessorValue(onUpdate, INFERENCE_TYPE);
 
       expect(processors[0][INFERENCE_TYPE]).toEqual({
         model_id: 'test_inference_processor',
         input_output: [
-          { input_field: 'content', output_field: 'content_embedding', notes: 'aaa"bbb' },
+          // eslint-disable-next-line prettier/prettier
+          { input_field: 'content', output_field: 'content_embedding', notes: 'aaa\"bbb' },
         ],
       });
     });
 
     test('rejects input_output when it is not a JSON array', async () => {
-      fireEvent.change(within(screen.getByTestId('inferenceModelId')).getByTestId('input'), {
-        target: { value: 'test_inference_processor' },
-      });
+      const { find, form, component } = testBed;
 
-      fireEvent.change(screen.getByTestId('inputOutput'), {
-        target: {
-          value:
+      form.setInputValue('inferenceModelId.input', 'test_inference_processor');
+
+      await act(async () => {
+        find('inputOutput').simulate('change', {
+          jsonContent:
             '{"input_field":"content","output_field":"content_embedding","notes":"""aaa"bbb"""}',
-        },
+        });
+        jest.advanceTimersByTime(0);
       });
+      component.update();
 
-      // Save the field
-      fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
-      expect(await screen.findByText('Input/output must be a JSON array.')).toBeInTheDocument();
+      await act(async () => {
+        find('addProcessorForm.submitButton').simulate('click');
+        jest.runAllTimers();
+      });
+      component.update();
+
+      expect(form.getErrorsMessages()).toEqual(['Input/output must be a JSON array.']);
     });
 
     test('keeps input/output and target field + field map mutually exclusive when switching modes', async () => {
-      fireEvent.change(within(screen.getByTestId('inferenceModelId')).getByTestId('input'), {
-        target: { value: 'test_inference_processor' },
+      const {
+        actions: { saveNewProcessor },
+        find,
+        form,
+        component,
+      } = testBed;
+
+      form.setInputValue('inferenceModelId.input', 'test_inference_processor');
+
+      // Switch to target field & field map mode
+      act(() => {
+        find('toggleInferenceInputMappingMode').simulate('click');
       });
+      component.update();
 
-      // Switch to target field & field map mode (toggle on)
-      fireEvent.click(getToggleInput());
+      form.setInputValue('targetField.input', 'ml.inference.my_tag');
 
-      fireEvent.change(within(screen.getByTestId('targetField')).getByTestId('input'), {
-        target: { value: 'ml.inference.my_tag' },
+      await act(async () => {
+        find('fieldMap').simulate('change', { jsonContent: '{"field_map_1":"value_1"}' });
+        jest.advanceTimersByTime(0);
       });
+      component.update();
 
-      fireEvent.change(screen.getByTestId('fieldMap'), {
-        target: { value: '{"field_map_1":"value_1"}' },
+      // Switch back to input/output mode
+      act(() => {
+        find('toggleInferenceInputMappingMode').simulate('click');
       });
+      component.update();
 
-      // Switch to input/output mode (toggle off) and set input_output
-      fireEvent.click(getToggleInput());
-      fireEvent.change(screen.getByTestId('inputOutput'), {
-        target: { value: '[{"input_field":"content","output_field":"content_embedding"}]' },
+      await act(async () => {
+        find('inputOutput').simulate('change', {
+          jsonContent: '[{"input_field":"content","output_field":"content_embedding"}]',
+        });
+        jest.advanceTimersByTime(0);
       });
+      component.update();
 
-      fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
-      await waitFor(() => expect(onUpdate).toHaveBeenCalled());
+      await saveNewProcessor();
 
-      const processors = getProcessorValue(onUpdate);
+      const processors = getProcessorValue(onUpdate, INFERENCE_TYPE);
 
       expect(processors[0][INFERENCE_TYPE]).toEqual({
         model_id: 'test_inference_processor',
@@ -163,50 +217,68 @@ describe('Processor: Inference', () => {
     });
 
     test('clears target_field when switching back to input/output mode', async () => {
-      fireEvent.change(within(screen.getByTestId('inferenceModelId')).getByTestId('input'), {
-        target: { value: 'test_inference_processor' },
-      });
+      const { find, form, component } = testBed;
 
-      // Switch to target field & field map mode (toggle on)
-      fireEvent.click(getToggleInput());
-      fireEvent.change(within(screen.getByTestId('targetField')).getByTestId('input'), {
-        target: { value: 'ml.inference.my_tag' },
-      });
+      form.setInputValue('inferenceModelId.input', 'test_inference_processor');
 
-      // Switch back to input/output mode (toggle off) => should clear target_field
-      fireEvent.click(getToggleInput());
+      // Switch to target field & field map mode
+      act(() => {
+        find('toggleInferenceInputMappingMode').simulate('click');
+      });
+      component.update();
+
+      form.setInputValue('targetField.input', 'ml.inference.my_tag');
+
+      // Switch back to input/output mode => should clear target_field
+      act(() => {
+        find('toggleInferenceInputMappingMode').simulate('click');
+      });
+      component.update();
 
       // Switch again to field map mode and verify the input is empty (cleared)
-      fireEvent.click(getToggleInput());
-      expect(within(screen.getByTestId('targetField')).getByTestId('input')).toHaveValue('');
+      act(() => {
+        find('toggleInferenceInputMappingMode').simulate('click');
+      });
+      component.update();
+
+      expect(find('targetField.input').props().value).toBe('');
     });
 
     test('strips input_output when switching to target_field + field_map mode', async () => {
-      fireEvent.change(within(screen.getByTestId('inferenceModelId')).getByTestId('input'), {
-        target: { value: 'test_inference_processor' },
+      const {
+        actions: { saveNewProcessor },
+        find,
+        form,
+        component,
+      } = testBed;
+
+      form.setInputValue('inferenceModelId.input', 'test_inference_processor');
+
+      await act(async () => {
+        find('inputOutput').simulate('change', {
+          jsonContent: '[{"input_field":"content","output_field":"content_embedding"}]',
+        });
+        jest.advanceTimersByTime(0);
       });
+      component.update();
 
-      fireEvent.change(screen.getByTestId('inputOutput'), {
-        target: {
-          value: '[{"input_field":"content","output_field":"content_embedding"}]',
-        },
+      // Switch to target field & field map mode — should clear input_output
+      act(() => {
+        find('toggleInferenceInputMappingMode').simulate('click');
       });
+      component.update();
 
-      // Switch to target field & field map mode (toggle on). Should clear input_output.
-      fireEvent.click(getToggleInput());
+      form.setInputValue('targetField.input', 'ml.inference.my_tag');
 
-      fireEvent.change(within(screen.getByTestId('targetField')).getByTestId('input'), {
-        target: { value: 'ml.inference.my_tag' },
+      await act(async () => {
+        find('fieldMap').simulate('change', { jsonContent: '{"field_map_1":"value_1"}' });
+        jest.advanceTimersByTime(0);
       });
+      component.update();
 
-      fireEvent.change(screen.getByTestId('fieldMap'), {
-        target: { value: '{"field_map_1":"value_1"}' },
-      });
+      await saveNewProcessor();
 
-      fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
-      await waitFor(() => expect(onUpdate).toHaveBeenCalled());
-
-      const processors = getProcessorValue(onUpdate);
+      const processors = getProcessorValue(onUpdate, INFERENCE_TYPE);
 
       expect(processors[0][INFERENCE_TYPE]).toEqual({
         model_id: 'test_inference_processor',
@@ -224,146 +296,170 @@ describe('Processor: Inference', () => {
     });
 
     test('defaults to input/output mode for a saved processor with neither input_output nor target_field/field_map', async () => {
-      renderProcessorEditor(httpSetup, {
-        value: {
-          processors: [
-            {
-              [INFERENCE_TYPE]: {
-                model_id: 'saved_processor_no_mapping',
-              },
-            },
-          ],
-        },
-        onFlyoutOpen: jest.fn(),
-        onUpdate,
+      await act(async () => {
+        testBed = await setup(httpSetup, {
+          value: {
+            processors: [{ [INFERENCE_TYPE]: { model_id: 'saved_processor_no_mapping' } }],
+          },
+          onFlyoutOpen: jest.fn(),
+          onUpdate,
+        });
       });
+      const { component, find } = testBed;
+      component.update();
 
-      fireEvent.click(within(screen.getByTestId('processors>0')).getByTestId('manageItemButton'));
-      expect(await screen.findByTestId('editProcessorForm')).toBeInTheDocument();
+      await act(async () => {
+        find('processors>0.manageItemButton').simulate('click');
+      });
+      component.update();
 
-      expectToggleOff();
-      expect(screen.getByTestId('inputOutput')).toBeVisible();
-      expect(screen.queryByTestId('targetField')).toBeNull();
-      expect(screen.queryByTestId('fieldMap')).toBeNull();
+      expect(find('toggleInferenceInputMappingMode').prop('aria-checked')).toBe(false);
+      expect(find('inputOutput').exists()).toBe(true);
+      expect(find('targetField').exists()).toBe(false);
+      expect(find('fieldMap').exists()).toBe(false);
     });
 
     test('defaults to target_field + field_map mode for a saved processor with target_field/field_map', async () => {
-      renderProcessorEditor(httpSetup, {
-        value: {
-          processors: [
-            {
-              [INFERENCE_TYPE]: {
-                model_id: 'saved_processor_field_map_mode',
-                target_field: 'ml.inference.my_tag',
-                field_map: {
-                  source: 'some_field',
+      await act(async () => {
+        testBed = await setup(httpSetup, {
+          value: {
+            processors: [
+              {
+                [INFERENCE_TYPE]: {
+                  model_id: 'saved_processor_field_map_mode',
+                  target_field: 'ml.inference.my_tag',
+                  field_map: { source: 'some_field' },
                 },
               },
-            },
-          ],
-        },
-        onFlyoutOpen: jest.fn(),
-        onUpdate,
+            ],
+          },
+          onFlyoutOpen: jest.fn(),
+          onUpdate,
+        });
       });
+      const { component, find } = testBed;
+      component.update();
 
-      fireEvent.click(within(screen.getByTestId('processors>0')).getByTestId('manageItemButton'));
-      expect(await screen.findByTestId('editProcessorForm')).toBeInTheDocument();
+      await act(async () => {
+        find('processors>0.manageItemButton').simulate('click');
+      });
+      component.update();
 
-      await waitFor(() => expectToggleOn());
-      expect(screen.getByTestId('targetField')).toBeVisible();
-      expect(screen.getByTestId('fieldMap')).toBeVisible();
-      expect(screen.queryByTestId('inputOutput')).toBeNull();
+      expect(find('toggleInferenceInputMappingMode').prop('aria-checked')).toBe(true);
+      expect(find('targetField').exists()).toBe(true);
+      expect(find('fieldMap').exists()).toBe(true);
+      expect(find('inputOutput').exists()).toBe(false);
     });
 
     test('defaults to input/output mode for a saved processor with input_output', async () => {
-      renderProcessorEditor(httpSetup, {
-        value: {
-          processors: [
-            {
-              [INFERENCE_TYPE]: {
-                model_id: 'saved_processor_input_output_mode',
-                input_output: [{ input_field: 'content', output_field: 'content_embedding' }],
+      await act(async () => {
+        testBed = await setup(httpSetup, {
+          value: {
+            processors: [
+              {
+                [INFERENCE_TYPE]: {
+                  model_id: 'saved_processor_input_output_mode',
+                  input_output: [{ input_field: 'content', output_field: 'content_embedding' }],
+                },
               },
-            },
-          ],
-        },
-        onFlyoutOpen: jest.fn(),
-        onUpdate,
+            ],
+          },
+          onFlyoutOpen: jest.fn(),
+          onUpdate,
+        });
       });
+      const { component, find } = testBed;
+      component.update();
 
-      fireEvent.click(within(screen.getByTestId('processors>0')).getByTestId('manageItemButton'));
-      expect(await screen.findByTestId('editProcessorForm')).toBeInTheDocument();
+      await act(async () => {
+        find('processors>0.manageItemButton').simulate('click');
+      });
+      component.update();
 
-      expectToggleOff();
-      expect(screen.getByTestId('inputOutput')).toBeVisible();
-      expect(screen.queryByTestId('targetField')).toBeNull();
-      expect(screen.queryByTestId('fieldMap')).toBeNull();
+      expect(find('toggleInferenceInputMappingMode').prop('aria-checked')).toBe(false);
+      expect(find('inputOutput').exists()).toBe(true);
+      expect(find('targetField').exists()).toBe(false);
+      expect(find('fieldMap').exists()).toBe(false);
     });
 
     test('shows field_map mode but blocks saving when field_map is an array string', async () => {
-      renderProcessorEditor(httpSetup, {
-        value: {
-          processors: [
-            {
-              [INFERENCE_TYPE]: {
-                model_id: 'saved_processor_field_map_array_string',
-                field_map: '[]',
+      await act(async () => {
+        testBed = await setup(httpSetup, {
+          value: {
+            processors: [
+              {
+                [INFERENCE_TYPE]: {
+                  model_id: 'saved_processor_field_map_array_string',
+                  field_map: '[]',
+                },
               },
-            },
-          ],
-        },
-        onFlyoutOpen: jest.fn(),
-        onUpdate,
+            ],
+          },
+          onFlyoutOpen: jest.fn(),
+          onUpdate,
+        });
       });
+      const { component, find, form } = testBed;
+      component.update();
 
-      fireEvent.click(within(screen.getByTestId('processors>0')).getByTestId('manageItemButton'));
-      expect(await screen.findByTestId('editProcessorForm')).toBeInTheDocument();
+      await act(async () => {
+        find('processors>0.manageItemButton').simulate('click');
+      });
+      component.update();
 
-      await waitFor(() => expectToggleOn());
-      expect(screen.getByTestId('fieldMap')).toBeVisible();
-      expect(screen.queryByTestId('inputOutput')).toBeNull();
+      expect(find('toggleInferenceInputMappingMode').prop('aria-checked')).toBe(true);
+      expect(find('fieldMap').exists()).toBe(true);
+      expect(find('inputOutput').exists()).toBe(false);
 
-      const processorsBefore = getProcessorValue(onUpdate);
+      await act(async () => {
+        find('editProcessorForm.submitButton').simulate('click');
+        jest.runAllTimers();
+      });
+      component.update();
 
-      fireEvent.click(within(screen.getByTestId('editProcessorForm')).getByTestId('submitButton'));
-      expect(await screen.findByText('Field map must be a JSON object.')).toBeInTheDocument();
-
-      const processorsAfter = getProcessorValue(onUpdate);
-      expect(processorsAfter).toEqual(processorsBefore);
+      expect(form.getErrorsMessages()).toEqual(['Field map must be a JSON object.']);
     });
 
     test('sanitizes a saved processor that has both input_output and target_field/field_map', async () => {
-      renderProcessorEditor(httpSetup, {
-        value: {
-          processors: [
-            {
-              [INFERENCE_TYPE]: {
-                model_id: 'saved_processor_both_configs',
-                // Both configured (backend rejects this)
-                input_output: [{ input_field: 'content', output_field: 'content_embedding' }],
-                target_field: 'ml.inference.my_tag',
-                field_map: { source: 'some_field' },
+      await act(async () => {
+        testBed = await setup(httpSetup, {
+          value: {
+            processors: [
+              {
+                [INFERENCE_TYPE]: {
+                  model_id: 'saved_processor_both_configs',
+                  input_output: [{ input_field: 'content', output_field: 'content_embedding' }],
+                  target_field: 'ml.inference.my_tag',
+                  field_map: { source: 'some_field' },
+                },
               },
-            },
-          ],
-        },
-        onFlyoutOpen: jest.fn(),
-        onUpdate,
+            ],
+          },
+          onFlyoutOpen: jest.fn(),
+          onUpdate,
+        });
       });
+      const { component, find } = testBed;
+      component.update();
 
-      fireEvent.click(within(screen.getByTestId('processors>0')).getByTestId('manageItemButton'));
-      expect(await screen.findByTestId('editProcessorForm')).toBeInTheDocument();
+      await act(async () => {
+        find('processors>0.manageItemButton').simulate('click');
+      });
+      component.update();
 
-      // Prefer field_map mode when target_field/field_map exist.
-      await waitFor(() => expectToggleOn());
-      expect(screen.getByTestId('targetField')).toBeVisible();
-      expect(screen.getByTestId('fieldMap')).toBeVisible();
-      expect(screen.queryByTestId('inputOutput')).toBeNull();
+      // Prefer field_map mode when target_field/field_map exist
+      expect(find('toggleInferenceInputMappingMode').prop('aria-checked')).toBe(true);
+      expect(find('targetField').exists()).toBe(true);
+      expect(find('fieldMap').exists()).toBe(true);
+      expect(find('inputOutput').exists()).toBe(false);
 
-      fireEvent.click(within(screen.getByTestId('editProcessorForm')).getByTestId('submitButton'));
-      await waitFor(() => expect(onUpdate).toHaveBeenCalled());
+      await act(async () => {
+        find('editProcessorForm.submitButton').simulate('click');
+        jest.advanceTimersByTime(0);
+      });
+      component.update();
 
-      const processors = getProcessorValue(onUpdate);
+      const processors = getProcessorValue(onUpdate, INFERENCE_TYPE);
       expect(processors[0][INFERENCE_TYPE]).toMatchObject({
         model_id: 'saved_processor_both_configs',
         target_field: 'ml.inference.my_tag',
