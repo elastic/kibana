@@ -65,12 +65,19 @@ const transactionFieldNames = [
 ];
 
 export interface AboutProps
-  extends Pick<DocViewRenderProps, 'filter' | 'onAddColumn' | 'onRemoveColumn'> {
+  extends Pick<DocViewRenderProps, 'filter' | 'onAddColumn' | 'onRemoveColumn' | 'columns'> {
   hit: DataTableRecord;
   dataView: DocViewRenderProps['dataView'];
 }
 
-export const About = ({ hit, dataView, filter, onAddColumn, onRemoveColumn }: AboutProps) => {
+export const About = ({
+  hit,
+  dataView,
+  filter,
+  onAddColumn,
+  onRemoveColumn,
+  columns,
+}: AboutProps) => {
   const isSpan = !isTransaction(hit);
   const flattenedHit = getFlattenedTraceDocumentOverview(hit);
   const traceRootSpan = useFetchTraceRootSpanContext();
@@ -112,6 +119,7 @@ export const About = ({ hit, dataView, filter, onAddColumn, onRemoveColumn }: Ab
         filter={filter}
         onAddColumn={onAddColumn}
         onRemoveColumn={onRemoveColumn}
+        columns={columns}
       />
     </EuiPanel>
   );
