@@ -9,16 +9,19 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CasesPublicSetup } from '@kbn/cases-plugin/public';
+import {
+  AIOPS_CHANGE_POINT_CHART_ATTACHMENT_TYPE,
+  AIOPS_LOG_RATE_ANALYSIS_ATTACHMENT_TYPE,
+  AIOPS_PATTERN_ANALYSIS_ATTACHMENT_TYPE,
+} from '@kbn/cases-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
-import { CASES_ATTACHMENT_CHANGE_POINT_CHART } from '@kbn/aiops-change-point-detection/constants';
-import { CASES_ATTACHMENT_LOG_PATTERN } from '@kbn/aiops-log-pattern-analysis/constants';
-import { CASES_ATTACHMENT_LOG_RATE_ANALYSIS } from '@kbn/aiops-log-rate-analysis/constants';
 import {
   getChangePointDetectionComponent,
   getLogRateAnalysisEmbeddableWrapperComponent,
   getPatternAnalysisComponent,
 } from '../shared_components';
 import type { AiopsPluginStartDeps } from '../types';
+import { casesSchemaValidator } from '../../common/utils';
 
 export function registerCases(
   cases: CasesPublicSetup,
@@ -27,8 +30,8 @@ export function registerCases(
 ) {
   const ChangePointDetectionComponent = getChangePointDetectionComponent(coreStart, pluginStart);
 
-  cases.attachmentFramework.registerPersistableState({
-    id: CASES_ATTACHMENT_CHANGE_POINT_CHART,
+  cases.attachmentFramework.registerUnified({
+    id: AIOPS_CHANGE_POINT_CHART_ATTACHMENT_TYPE,
     icon: 'machineLearningApp',
     displayName: i18n.translate('xpack.aiops.changePointDetection.cases.attachmentName', {
       defaultMessage: 'Change point chart',
@@ -57,12 +60,13 @@ export function registerCases(
         />
       ),
     }),
+    schemaValidator: casesSchemaValidator,
   });
 
   const LogPatternAttachmentComponent = getPatternAnalysisComponent(coreStart, pluginStart);
 
-  cases.attachmentFramework.registerPersistableState({
-    id: CASES_ATTACHMENT_LOG_PATTERN,
+  cases.attachmentFramework.registerUnified({
+    id: AIOPS_PATTERN_ANALYSIS_ATTACHMENT_TYPE,
     icon: 'machineLearningApp',
     displayName: i18n.translate('xpack.aiops.logPatternAnalysis.cases.attachmentName', {
       defaultMessage: 'Log pattern analysis',
@@ -89,6 +93,7 @@ export function registerCases(
         />
       ),
     }),
+    schemaValidator: casesSchemaValidator,
   });
 
   const LogRateAnalysisEmbeddableWrapperComponent = getLogRateAnalysisEmbeddableWrapperComponent(
@@ -96,8 +101,8 @@ export function registerCases(
     pluginStart
   );
 
-  cases.attachmentFramework.registerPersistableState({
-    id: CASES_ATTACHMENT_LOG_RATE_ANALYSIS,
+  cases.attachmentFramework.registerUnified({
+    id: AIOPS_LOG_RATE_ANALYSIS_ATTACHMENT_TYPE,
     icon: 'machineLearningApp',
     displayName: i18n.translate('xpack.aiops.logRateAnalysis.cases.attachmentName', {
       defaultMessage: 'Log rate analysis',
@@ -129,5 +134,6 @@ export function registerCases(
         />
       ),
     }),
+    schemaValidator: casesSchemaValidator,
   });
 }

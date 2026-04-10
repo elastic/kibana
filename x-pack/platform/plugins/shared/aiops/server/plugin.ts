@@ -31,7 +31,7 @@ import type {
 import { defineRoute as defineLogRateAnalysisFieldCandidatesRoute } from './routes/log_rate_analysis_field_candidates/define_route';
 import { defineRoute as defineLogRateAnalysisRoute } from './routes/log_rate_analysis/define_route';
 import { defineRoute as defineCategorizationFieldValidationRoute } from './routes/categorization_field_validation/define_route';
-import { registerCasesPersistableState } from './register_cases';
+import { registerCaseAttachments } from './register_cases';
 import type { ConfigSchema } from './config_schema';
 import { setupCapabilities } from './lib/capabilities';
 import { transformIn as changePointTransformIn } from '../common/embeddables/change_point_chart/transform_in';
@@ -70,7 +70,7 @@ export class AiopsPlugin
       aiopsLicense.isActivePlatinumLicense = isActiveLicense('platinum', license);
 
       if (aiopsLicense.isActivePlatinumLicense) {
-        registerCasesPersistableState(plugins.cases, this.logger);
+        registerCaseAttachments(plugins.cases, this.logger);
       }
     });
 
