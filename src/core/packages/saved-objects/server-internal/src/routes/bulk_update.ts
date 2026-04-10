@@ -60,11 +60,13 @@ export const registerBulkUpdateRoute = (
                   name: schema.string(),
                   type: schema.string(),
                   id: schema.string(),
-                })
+                }),
+                { maxSize: 1000 }
               )
             ),
             namespace: schema.maybe(schema.string({ minLength: 1 })),
-          })
+          }),
+          { maxSize: 10_000 }
         ),
       },
     },

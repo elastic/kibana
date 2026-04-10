@@ -66,10 +66,13 @@ export const registerCreateRoute = (
                 name: schema.string(),
                 type: schema.string(),
                 id: schema.string(),
-              })
+              }),
+              { maxSize: 1000 }
             )
           ),
-          initialNamespaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+          initialNamespaces: schema.maybe(
+            schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 })
+          ),
         }),
       },
     },

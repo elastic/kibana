@@ -128,11 +128,18 @@ export const UIAM_CONTAINERS = [
       '/opt/jboss/container/java/run/run-java-with-custom-ca.sh',
 
       '--env',
+      'uiam.apikey.convert.validation.endpoint.enabled=false',
+      '--env',
       'quarkus.tls.https.key-store.pem.0.cert=/tmp/server.crt',
       '--env',
       'quarkus.tls.https.key-store.pem.0.key=/tmp/server.key',
       '--env',
       'quarkus.tls.https.trust-store.pem.certs=/tmp/ca.crt',
+
+      '--env',
+      'quarkus.tls.esclient.key-store.pem.0.cert=/tmp/server.crt',
+      '--env',
+      'quarkus.tls.esclient.key-store.pem.0.key=/tmp/server.key',
 
       '--env',
       'quarkus.http.ssl.certificate.key-store-provider=JKS',
@@ -146,6 +153,8 @@ export const UIAM_CONTAINERS = [
       `quarkus.log.category."org".level=${env.UIAM_LOGGING_LEVEL}`,
       '--env',
       `quarkus.log.category."co.elastic.cloud.uiam".level=${env.UIAM_APP_LOGGING_LEVEL}`,
+      '--env',
+      `quarkus.log.category."co.elastic.cloud.uiam.app.authentication.ClientCertificateExtractor".level=${env.UIAM_LOGGING_LEVEL}`,
       '--env',
       'quarkus.log.console.json.enabled=false',
       '--env',

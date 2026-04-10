@@ -16,9 +16,10 @@ import {
   sourceExists,
   buildSourcesDefinitions,
   getLookupJoinSource,
+  getIndexSourcesFromQuery,
 } from './sources';
-import { EsqlQuery, synth } from '../../../composer';
-import { Walker, type ESQLAstJoinCommand } from '../../../..';
+import { EsqlQuery, synth, Walker } from '@elastic/esql';
+import type { ESQLAstJoinCommand } from '@elastic/esql/types';
 
 describe('specialIndicesToSuggestions()', () => {
   test('converts join indices to suggestions', () => {
@@ -169,12 +170,23 @@ describe('buildSourcesDefinitions with timeseries', () => {
 
     // Timeseries suggestion should have TS prefix and range replacement
     expect(timeseriesSuggestion?.text).toBe('TS my_timeseries_index');
+    expect(timeseriesSuggestion?.filterText).toBe('FROM my_timeseries_index');
     expect(timeseriesSuggestion?.rangeToReplace).toBeDefined();
     expect(timeseriesSuggestion?.rangeToReplace?.start).toBe(0); // FROM starts at position 0
 
     // Regular suggestion should not have TS prefix or range replacement
     expect(regularSuggestion?.text).toBe('regular_index');
     expect(regularSuggestion?.rangeToReplace).toBeUndefined();
+  });
+});
+
+describe('getIndexSourcesFromQuery', () => {
+  it('returns multiple index names from a comma-separated FROM clause', () => {
+    expect(getIndexSourcesFromQuery('FROM stream-a, stream-b')).toEqual(['stream-a', 'stream-b']);
+  });
+
+  it('returns an empty array when the query has no FROM command', () => {
+    expect(getIndexSourcesFromQuery('ROW x = 1')).toEqual([]);
   });
 });
 

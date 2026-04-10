@@ -29,6 +29,7 @@ describe('convertSecurityApi', () => {
           uiam: {
             grant: jest.fn(),
             invalidate: jest.fn(),
+            convert: jest.fn(),
           },
         },
       },

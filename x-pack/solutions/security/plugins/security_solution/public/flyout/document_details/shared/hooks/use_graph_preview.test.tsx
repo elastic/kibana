@@ -13,23 +13,38 @@ import type { GetFieldsData } from './use_get_fields_data';
 import { mockFieldData } from '../mocks/mock_get_fields_data';
 import { mockDataFormattedForFieldBrowser } from '../mocks/mock_data_formatted_for_field_browser';
 import { useHasGraphVisualizationLicense } from '../../../../common/hooks/use_has_graph_visualization_license';
+import {
+  GRAPH_ACTOR_EUID_SOURCE_FIELDS,
+  GRAPH_TARGET_EUID_SOURCE_FIELDS,
+} from '@kbn/cloud-security-posture-common/constants';
 
 jest.mock('../../../../common/hooks/use_has_graph_visualization_license');
 const mockUseHasGraphVisualizationLicense = useHasGraphVisualizationLicense as jest.Mock;
 
-jest.mock('@kbn/kibana-react-plugin/public');
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-const mockUseUiSetting = useUiSetting$ as jest.Mock;
+jest.mock('../../../shared/hooks/use_should_show_graph');
+import { useShouldShowGraph } from '../../../shared/hooks/use_should_show_graph';
+const mockUseShouldShowGraph = useShouldShowGraph as jest.Mock;
 
+// All EUID source fields (must explicitly handle to avoid mockFieldData bleed-through)
+const ALL_EUID_SOURCE_FIELDS: readonly string[] = [
+  ...GRAPH_ACTOR_EUID_SOURCE_FIELDS,
+  ...GRAPH_TARGET_EUID_SOURCE_FIELDS,
+];
+
+// Mock uses EUID source fields (user.id as actor, entity.target.id as target)
+// Explicitly returns undefined for all other EUID source fields to prevent mockFieldData bleed-through
 const alertMockGetFieldsData: GetFieldsData = (field: string) => {
   if (field === 'kibana.alert.uuid') {
     return 'alertId';
   } else if (field === 'kibana.alert.original_event.id') {
     return 'eventId';
-  } else if (field === 'user.entity.id') {
+  } else if (field === 'user.id') {
     return 'userActorId';
   } else if (field === 'entity.target.id') {
     return 'entityTargetId';
+  } else if (ALL_EUID_SOURCE_FIELDS.includes(field)) {
+    // Explicitly return undefined for all other EUID source fields
+    return undefined;
   }
 
   return mockFieldData[field];
@@ -37,6 +52,8 @@ const alertMockGetFieldsData: GetFieldsData = (field: string) => {
 
 const alertMockDataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;
 
+// Mock uses EUID source fields (user.id as actor, entity.target.id as target)
+// Explicitly returns undefined for all other EUID source fields to prevent mockFieldData bleed-through
 const eventMockGetFieldsData: GetFieldsData = (field: string) => {
   if (field === 'kibana.alert.uuid') {
     return;
@@ -44,10 +61,12 @@ const eventMockGetFieldsData: GetFieldsData = (field: string) => {
     return;
   } else if (field === 'event.id') {
     return 'eventId';
-  } else if (field === 'user.entity.id') {
+  } else if (field === 'user.id') {
     return 'userActorId';
   } else if (field === 'entity.target.id') {
     return 'entityTargetId';
+  } else if (ALL_EUID_SOURCE_FIELDS.includes(field)) {
+    return undefined;
   }
 
   return mockFieldData[field];
@@ -60,20 +79,29 @@ describe('useGraphPreview', () => {
     jest.clearAllMocks();
     // Default mock: graph visualization feature is available
     mockUseHasGraphVisualizationLicense.mockReturnValue(true);
-    // Default mock: UI setting is enabled
-    mockUseUiSetting.mockReturnValue([true, jest.fn()]);
+    // Default mock: graph should be shown (license + entity store available)
+    mockUseShouldShowGraph.mockReturnValue(true);
   });
 
   it(`should return false when missing actor and target`, () => {
     const getFieldsData: GetFieldsData = (field: string) => {
+      // Return undefined for all EUID source fields (actor and target)
       if (
-        field === 'user.entity.id' ||
-        field === 'host.entity.id' ||
-        field === 'service.entity.id' ||
+        field === 'user.email' ||
+        field === 'user.id' ||
+        field === 'user.name' ||
+        field === 'host.id' ||
+        field === 'host.name' ||
+        field === 'host.hostname' ||
+        field === 'service.name' ||
         field === 'entity.id' ||
-        field === 'user.target.entity.id' ||
-        field === 'host.target.entity.id' ||
-        field === 'service.target.entity.id' ||
+        field === 'user.target.email' ||
+        field === 'user.target.id' ||
+        field === 'user.target.name' ||
+        field === 'host.target.id' ||
+        field === 'host.target.name' ||
+        field === 'host.target.hostname' ||
+        field === 'service.target.name' ||
         field === 'entity.target.id'
       ) {
         return;
@@ -96,6 +124,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: false,
+      hasGraphData: false,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: [],
@@ -118,6 +147,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: false,
+      hasGraphData: false,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: ['userActorId'],
@@ -129,10 +159,15 @@ describe('useGraphPreview', () => {
 
   it(`should return false when missing actor (target exists)`, () => {
     const getFieldsData: GetFieldsData = (field: string) => {
+      // Return undefined for all actor EUID source fields
       if (
-        field === 'user.entity.id' ||
-        field === 'host.entity.id' ||
-        field === 'service.entity.id' ||
+        field === 'user.email' ||
+        field === 'user.id' ||
+        field === 'user.name' ||
+        field === 'host.id' ||
+        field === 'host.name' ||
+        field === 'host.hostname' ||
+        field === 'service.name' ||
         field === 'entity.id'
       ) {
         return;
@@ -155,6 +190,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: false,
+      hasGraphData: false,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: [],
@@ -166,10 +202,15 @@ describe('useGraphPreview', () => {
 
   it(`should return false when missing target (actor exists)`, () => {
     const getFieldsData: GetFieldsData = (field: string) => {
+      // Return undefined for all target EUID source fields
       if (
-        field === 'user.target.entity.id' ||
-        field === 'host.target.entity.id' ||
-        field === 'service.target.entity.id' ||
+        field === 'user.target.email' ||
+        field === 'user.target.id' ||
+        field === 'user.target.name' ||
+        field === 'host.target.id' ||
+        field === 'host.target.name' ||
+        field === 'host.target.hostname' ||
+        field === 'service.target.name' ||
         field === 'entity.target.id'
       ) {
         return;
@@ -192,6 +233,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: false,
+      hasGraphData: false,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: ['userActorId'],
@@ -225,6 +267,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: false,
+      hasGraphData: false,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: [],
       actorIds: ['userActorId'],
@@ -258,6 +301,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: false,
+      hasGraphData: false,
       timestamp: null,
       eventIds: ['eventId'],
       actorIds: ['userActorId'],
@@ -283,6 +327,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: true,
+      hasGraphData: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: ['userActorId'],
@@ -300,10 +345,12 @@ describe('useGraphPreview', () => {
         return;
       } else if (field === 'event.id') {
         return ['id1', 'id2'];
-      } else if (field === 'user.entity.id') {
+      } else if (field === 'user.id') {
         return ['userActorId1', 'userActorId2'];
       } else if (field === 'entity.target.id') {
         return ['entityTargetId1', 'entityTargetId2'];
+      } else if (ALL_EUID_SOURCE_FIELDS.includes(field)) {
+        return undefined;
       }
 
       return mockFieldData[field];
@@ -324,6 +371,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: true,
+      hasGraphData: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['id1', 'id2'],
       actorIds: ['userActorId1', 'userActorId2'],
@@ -349,6 +397,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: true,
+      hasGraphData: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: ['userActorId'],
@@ -364,10 +413,12 @@ describe('useGraphPreview', () => {
         return 'alertId';
       } else if (field === 'kibana.alert.original_event.id') {
         return ['id1', 'id2'];
-      } else if (field === 'user.entity.id') {
+      } else if (field === 'user.id') {
         return ['userActorId1', 'userActorId2'];
       } else if (field === 'entity.target.id') {
         return ['entityTargetId1', 'entityTargetId2'];
+      } else if (ALL_EUID_SOURCE_FIELDS.includes(field)) {
+        return undefined;
       }
 
       return mockFieldData[field];
@@ -388,6 +439,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: true,
+      hasGraphData: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['id1', 'id2'],
       actorIds: ['userActorId1', 'userActorId2'],
@@ -397,16 +449,18 @@ describe('useGraphPreview', () => {
     });
   });
 
-  it(`should return true when alert has graph preview with new ECS schema user.entity.id`, () => {
+  it(`should return true when alert has graph preview with user EUID source fields (user.name)`, () => {
     const getFieldsData: GetFieldsData = (field: string) => {
       if (field === 'kibana.alert.uuid') {
         return 'alertId';
       } else if (field === 'kibana.alert.original_event.id') {
         return 'eventId';
-      } else if (field === 'user.entity.id') {
+      } else if (field === 'user.name') {
         return 'userActorId';
-      } else if (field === 'service.target.entity.id') {
+      } else if (field === 'service.target.name') {
         return 'serviceTargetId';
+      } else if (ALL_EUID_SOURCE_FIELDS.includes(field)) {
+        return undefined;
       }
 
       return mockFieldData[field];
@@ -427,6 +481,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: true,
+      hasGraphData: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: ['userActorId'],
@@ -436,16 +491,18 @@ describe('useGraphPreview', () => {
     });
   });
 
-  it(`should return true when alert has graph preview with new ECS schema host.entity.id`, () => {
+  it(`should return true when alert has graph preview with host EUID source fields (host.id)`, () => {
     const getFieldsData: GetFieldsData = (field: string) => {
       if (field === 'kibana.alert.uuid') {
         return 'alertId';
       } else if (field === 'kibana.alert.original_event.id') {
         return 'eventId';
-      } else if (field === 'host.entity.id') {
+      } else if (field === 'host.id') {
         return 'hostActorId';
       } else if (field === 'entity.target.id') {
         return 'entityTargetId';
+      } else if (ALL_EUID_SOURCE_FIELDS.includes(field)) {
+        return undefined;
       }
 
       return mockFieldData[field];
@@ -466,6 +523,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: true,
+      hasGraphData: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: ['hostActorId'],
@@ -475,16 +533,18 @@ describe('useGraphPreview', () => {
     });
   });
 
-  it(`should return true when alert has graph preview with new ECS schema service.entity.id`, () => {
+  it(`should return true when alert has graph preview with service EUID source fields (service.name)`, () => {
     const getFieldsData: GetFieldsData = (field: string) => {
       if (field === 'kibana.alert.uuid') {
         return 'alertId';
       } else if (field === 'kibana.alert.original_event.id') {
         return 'eventId';
-      } else if (field === 'service.entity.id') {
+      } else if (field === 'service.name') {
         return 'serviceActorId';
-      } else if (field === 'user.target.entity.id') {
+      } else if (field === 'user.target.id') {
         return 'userTargetId';
+      } else if (ALL_EUID_SOURCE_FIELDS.includes(field)) {
+        return undefined;
       }
 
       return mockFieldData[field];
@@ -505,6 +565,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: true,
+      hasGraphData: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: ['serviceActorId'],
@@ -514,7 +575,7 @@ describe('useGraphPreview', () => {
     });
   });
 
-  it(`should return true when alert has graph preview with new ECS schema entity.id`, () => {
+  it(`should return true when alert has graph preview with generic EUID source fields (entity.id)`, () => {
     const getFieldsData: GetFieldsData = (field: string) => {
       if (field === 'kibana.alert.uuid') {
         return 'alertId';
@@ -522,8 +583,10 @@ describe('useGraphPreview', () => {
         return 'eventId';
       } else if (field === 'entity.id') {
         return 'entityActorId';
-      } else if (field === 'host.target.entity.id') {
+      } else if (field === 'host.target.id') {
         return 'hostTargetId';
+      } else if (ALL_EUID_SOURCE_FIELDS.includes(field)) {
+        return undefined;
       }
 
       return mockFieldData[field];
@@ -544,6 +607,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: true,
+      hasGraphData: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: ['entityActorId'],
@@ -554,7 +618,7 @@ describe('useGraphPreview', () => {
   });
 
   it('should return false when all conditions are met but env does not have required license', () => {
-    mockUseHasGraphVisualizationLicense.mockReturnValue(false);
+    mockUseShouldShowGraph.mockReturnValue(false);
 
     const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
       initialProps: {
@@ -572,6 +636,7 @@ describe('useGraphPreview', () => {
     expect(hookResult.result.current.shouldShowGraph).toBe(false);
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: false,
+      hasGraphData: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: ['userActorId'],
@@ -581,8 +646,8 @@ describe('useGraphPreview', () => {
     });
   });
 
-  it('should return false for shouldShowGraph when UI setting is disabled', () => {
-    mockUseUiSetting.mockReturnValue([false, jest.fn()]);
+  it('should return false for shouldShowGraph when entity store is not available', () => {
+    mockUseShouldShowGraph.mockReturnValue(false);
 
     const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
       initialProps: {

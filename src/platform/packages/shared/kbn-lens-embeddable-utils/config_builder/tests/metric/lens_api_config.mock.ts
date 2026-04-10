@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type { MetricState } from '../../schema';
+import type { MetricStateNoESQL } from '../../schema/charts/metric';
+import { DEFAULT_PRIMARY_VALUE_ALIGNMENT } from '../../transforms/charts/metric/defaults';
 
 export const breakdownMetricAPIAttributes = {
   type: 'metric',
   title: 'Metric - Breakdown',
   description: 'Metric with breakdown',
-  dataset: { type: 'dataView', id: 'testId' },
+  data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'testId' },
   metrics: [
     {
       type: 'primary',
@@ -22,7 +25,7 @@ export const breakdownMetricAPIAttributes = {
       color: {
         type: 'dynamic',
         range: 'absolute',
-        steps: [{ type: 'from', from: 0, color: 'red' }],
+        steps: [{ lt: 0, color: 'red' }],
       },
     },
     {
@@ -34,15 +37,15 @@ export const breakdownMetricAPIAttributes = {
   breakdown_by: {
     operation: 'terms',
     fields: ['extension.keyword'],
-    size: 5,
+    limit: 5,
   },
-} as MetricState;
+} as MetricStateNoESQL;
 
 export const complexMetricAPIAttributes = {
   type: 'metric',
   title: 'Metric - Complex case',
   description: 'Metric with background chart and breakdown',
-  dataset: { type: 'dataView', id: 'testId' },
+  data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'testId' },
   metrics: [
     {
       type: 'primary',
@@ -51,7 +54,7 @@ export const complexMetricAPIAttributes = {
       color: {
         type: 'dynamic',
         range: 'absolute',
-        steps: [{ type: 'from', from: 0, color: 'red' }],
+        steps: [{ lt: 0, color: 'red' }],
       },
       background_chart: {
         type: 'bar',
@@ -77,7 +80,13 @@ export const complexMetricAPIAttributes = {
   breakdown_by: {
     operation: 'terms',
     fields: ['extension.keyword'],
-    size: 5,
+    limit: 5,
+  },
+  styling: {
+    primary: {
+      position: 'top',
+      value: { alignment: DEFAULT_PRIMARY_VALUE_ALIGNMENT },
+    },
   },
 } as MetricState;
 
@@ -85,7 +94,7 @@ export const simpleMetricAPIAttributes = {
   type: 'metric',
   title: 'Simple Metric',
   description: 'A simple metric visualization',
-  dataset: { type: 'dataView', id: 'testId' },
+  data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'testId' },
   metrics: [
     {
       type: 'primary',
@@ -100,28 +109,25 @@ export const complexESQLMetricAPIAttributes = {
   type: 'metric',
   title: 'Metric - ESQL Complex case',
   description: 'ESQL Metric with background chart and breakdown',
-  dataset: { type: 'esql', query: 'FROM logs | STATS ...' },
+  data_source: { type: 'esql', query: 'FROM logs | STATS ...' },
   metrics: [
     {
       type: 'primary',
-      operation: 'value',
       column: 'count',
       color: {
         type: 'dynamic',
         range: 'absolute',
-        steps: [{ type: 'from', from: 0, color: 'red' }],
+        steps: [{ lt: 0, color: 'red' }],
       },
       background_chart: {
         type: 'bar',
         max_value: {
-          operation: 'value',
           column: 'bytes',
         },
       },
     },
     {
       type: 'secondary',
-      operation: 'value',
       column: 'bytes',
       compare: {
         to: 'baseline',
@@ -132,7 +138,6 @@ export const complexESQLMetricAPIAttributes = {
     },
   ],
   breakdown_by: {
-    operation: 'value',
     column: 'extension.keyword',
   },
 } as MetricState;
@@ -141,7 +146,7 @@ export const metricAPIWithTermsRankedBySecondary = {
   type: 'metric',
   title: 'Metric - Breakdown ranked by secondary',
   description: 'Metric with breakdown ranked by secondary metric',
-  dataset: { type: 'dataView', id: 'testId' },
+  data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'testId' },
   ignore_global_filters: false,
   sampling: 1,
   metrics: [
@@ -152,7 +157,7 @@ export const metricAPIWithTermsRankedBySecondary = {
       color: {
         type: 'dynamic',
         range: 'absolute',
-        steps: [{ type: 'from', from: 0, color: 'red' }],
+        steps: [{ lt: 0, color: 'red' }],
       },
     },
     {
@@ -164,10 +169,10 @@ export const metricAPIWithTermsRankedBySecondary = {
   breakdown_by: {
     operation: 'terms',
     fields: ['extension.keyword'],
-    size: 5,
+    limit: 5,
     rank_by: {
-      type: 'column',
-      metric: 1,
+      type: 'metric',
+      metric_index: 1,
       direction: 'desc',
     },
   },

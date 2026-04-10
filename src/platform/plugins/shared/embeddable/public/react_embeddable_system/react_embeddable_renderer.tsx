@@ -136,6 +136,7 @@ export const EmbeddableRenderer = <
           if (apiIsPresentationContainer(parentApi)) {
             errorApi.parentApi = parentApi;
           }
+          onApiAvailable?.(errorApi);
           return React.forwardRef<Api>((_, ref) => {
             // expose the dummy error api into the imperative handle
             useImperativeHandle(ref, () => errorApi, []);

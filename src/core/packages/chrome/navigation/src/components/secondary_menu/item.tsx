@@ -64,7 +64,7 @@ export const SecondaryMenuItemComponent = ({
   const iconSide = iconType ? 'left' : 'right';
   const iconProps = {
     iconSide: iconSide as 'left' | 'right',
-    iconType: isExternal ? 'popout' : iconType,
+    iconType: isExternal ? 'external' : iconType,
     ...(isExternal && { target: '_blank' }),
   };
 

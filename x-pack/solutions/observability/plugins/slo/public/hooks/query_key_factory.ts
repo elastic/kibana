@@ -33,6 +33,13 @@ interface SLOOverviewFilter {
   lastRefresh?: number;
 }
 
+interface SloTemplateListFilter {
+  search?: string;
+  tags?: string[];
+  page: number;
+  perPage: number;
+}
+
 export const sloKeys = {
   all: ['slo'] as const,
   lists: () => [...sloKeys.all, 'list'] as const,
@@ -42,6 +49,9 @@ export const sloKeys = {
   overview: (filters: SLOOverviewFilter) => ['overview', filters] as const,
   templates: () => [...sloKeys.all, 'templates'] as const,
   template: (templateId: string) => [...sloKeys.templates(), templateId] as const,
+  templatesList: (filters: SloTemplateListFilter) =>
+    [...sloKeys.templates(), 'list', filters] as const,
+  templateTags: () => [...sloKeys.templates(), 'tags'] as const,
   details: () => [...sloKeys.all, 'details'] as const,
   detail: (sloId: string, instanceId: string | undefined, remoteName: string | undefined) =>
     [...sloKeys.details(), { sloId, instanceId, remoteName }] as const,
@@ -96,6 +106,26 @@ export const sloKeys = {
     remoteName?: string;
   }) => [...sloKeys.all, 'instances', params] as const,
   bulkDeleteStatus: (taskId: string) => [...sloKeys.all, 'bulkDeleteStatus', taskId] as const,
+  allHealthScans: () => [...sloKeys.all, 'healthScans'] as const,
+  healthScans: (size?: number) => [...sloKeys.allHealthScans(), { size }] as const,
+  allHealthScanResults: () => [...sloKeys.all, 'healthScanResults'] as const,
+  healthScanResults: ({
+    scanId,
+    size,
+    searchAfter,
+    problematic,
+    allSpaces,
+  }: {
+    scanId: string;
+    size?: number;
+    searchAfter?: string;
+    problematic?: boolean;
+    allSpaces?: boolean;
+  }) =>
+    [
+      ...sloKeys.allHealthScanResults(),
+      { scanId, size, searchAfter, problematic, allSpaces },
+    ] as const,
 };
 
 export type SloKeys = typeof sloKeys;

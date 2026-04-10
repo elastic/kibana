@@ -23,14 +23,6 @@ interface StreamsStateErrorProps {
   status_code: number;
 }
 
-interface StreamsSystemIdentificationIdentifiedProps {
-  count: number;
-  input_tokens_used: number;
-  output_tokens_used: number;
-  stream_name: string;
-  stream_type: StreamType;
-}
-
 interface StreamsDescriptionGeneratedProps {
   input_tokens_used: number;
   output_tokens_used: number;
@@ -39,7 +31,6 @@ interface StreamsDescriptionGeneratedProps {
 }
 interface StreamsSignificantEventsQueriesGeneratedProps {
   count: number;
-  systems_count: number;
   input_tokens_used: number;
   output_tokens_used: number;
   stream_name: string;
@@ -61,12 +52,34 @@ interface StreamsProcessingPipelineSuggestedProps {
   stream_type: StreamType;
 }
 
+interface StreamsFeaturesIdentifiedProps {
+  run_id: string;
+  iteration: number;
+  docs_count: number;
+  features_new: number;
+  features_updated: number;
+  total_filters: number;
+  filters_capped: boolean;
+  has_filtered_documents: boolean;
+  input_tokens_used: number;
+  output_tokens_used: number;
+  total_tokens_used: number;
+  cached_tokens_used: number;
+  duration_ms: number;
+  excluded_features_count: number;
+  llm_ignored_count: number;
+  code_ignored_count: number;
+  stream_name: string;
+  stream_type: StreamType;
+  state: 'success' | 'failure' | 'canceled';
+}
+
 export {
   type StreamEndpointLatencyProps,
   type StreamsStateErrorProps,
-  type StreamsSystemIdentificationIdentifiedProps,
   type StreamsDescriptionGeneratedProps,
   type StreamsSignificantEventsQueriesGeneratedProps,
   type StreamsInsightsGeneratedProps,
   type StreamsProcessingPipelineSuggestedProps,
+  type StreamsFeaturesIdentifiedProps,
 };

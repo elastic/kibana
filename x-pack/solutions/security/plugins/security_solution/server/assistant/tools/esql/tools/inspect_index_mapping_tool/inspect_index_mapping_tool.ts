@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { tool } from '@langchain/core/tools';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import {
   getNestedValue,

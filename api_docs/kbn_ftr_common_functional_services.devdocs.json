@@ -1337,9 +1337,9 @@
           },
           ") => ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/kbn-client",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnKbnClientPluginApi",
             "section": "def-common.KbnClient",
             "text": "KbnClient"
           }
@@ -1526,7 +1526,7 @@
         "label": "CookieCredentials",
         "description": [],
         "path": "src/platform/packages/shared/kbn-ftr-common-functional-services/services/saml_auth/saml_auth_provider.ts",
-        "lineNumber": 24,
+        "lineNumber": 26,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1539,7 +1539,7 @@
             "label": "Cookie",
             "description": [],
             "path": "src/platform/packages/shared/kbn-ftr-common-functional-services/services/saml_auth/saml_auth_provider.ts",
-            "lineNumber": 25,
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1555,7 +1555,7 @@
               "[header: string]:  string"
             ],
             "path": "src/platform/packages/shared/kbn-ftr-common-functional-services/services/saml_auth/saml_auth_provider.ts",
-            "lineNumber": 28,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1571,7 +1571,7 @@
         "label": "KibanaRoleDescriptors",
         "description": [],
         "path": "src/platform/packages/shared/kbn-ftr-common-functional-services/services/saml_auth/saml_auth_provider.ts",
-        "lineNumber": 31,
+        "lineNumber": 33,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1587,7 +1587,7 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-ftr-common-functional-services/services/saml_auth/saml_auth_provider.ts",
-            "lineNumber": 32,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1603,7 +1603,7 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-ftr-common-functional-services/services/saml_auth/saml_auth_provider.ts",
-            "lineNumber": 33,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1619,7 +1619,7 @@
         "label": "RoleCredentials",
         "description": [],
         "path": "src/platform/packages/shared/kbn-ftr-common-functional-services/services/saml_auth/saml_auth_provider.ts",
-        "lineNumber": 19,
+        "lineNumber": 21,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1635,7 +1635,7 @@
               "{ id: string; name: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-ftr-common-functional-services/services/saml_auth/saml_auth_provider.ts",
-            "lineNumber": 20,
+            "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1651,7 +1651,7 @@
               "{ Authorization: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-ftr-common-functional-services/services/saml_auth/saml_auth_provider.ts",
-            "lineNumber": 21,
+            "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1894,9 +1894,9 @@
           },
           ") => ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/kbn-client",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnKbnClientPluginApi",
             "section": "def-common.KbnClient",
             "text": "KbnClient"
           },
@@ -1990,17 +1990,17 @@
           },
           ") => { getInteractiveUserSessionCookieWithRoleScope(role: string, options?: ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/test-saml-auth",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnTestSamlAuthPluginApi",
             "section": "def-common.GetCookieOptions",
             "text": "GetCookieOptions"
           },
           " | undefined): Promise<string>; getM2MApiCookieCredentialsWithRoleScope(role: string, options?: ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/test-saml-auth",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnTestSamlAuthPluginApi",
             "section": "def-common.GetCookieOptions",
             "text": "GetCookieOptions"
           },
@@ -2014,9 +2014,9 @@
           },
           ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/test-saml-auth",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnTestSamlAuthPluginApi",
             "section": "def-common.GetCookieOptions",
             "text": "GetCookieOptions"
           },
@@ -2146,9 +2146,9 @@
           },
           ") => ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/kbn-client",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnKbnClientPluginApi",
             "section": "def-common.KbnClient",
             "text": "KbnClient"
           },
@@ -2242,17 +2242,17 @@
           },
           ") => { getInteractiveUserSessionCookieWithRoleScope(role: string, options?: ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/test-saml-auth",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnTestSamlAuthPluginApi",
             "section": "def-common.GetCookieOptions",
             "text": "GetCookieOptions"
           },
           " | undefined): Promise<string>; getM2MApiCookieCredentialsWithRoleScope(role: string, options?: ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/test-saml-auth",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnTestSamlAuthPluginApi",
             "section": "def-common.GetCookieOptions",
             "text": "GetCookieOptions"
           },
@@ -2266,9 +2266,9 @@
           },
           ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/test-saml-auth",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnTestSamlAuthPluginApi",
             "section": "def-common.GetCookieOptions",
             "text": "GetCookieOptions"
           },
@@ -2413,9 +2413,9 @@
         "description": [],
         "signature": [
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/kbn-client",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnKbnClientPluginApi",
             "section": "def-common.KbnClient",
             "text": "KbnClient"
           }
@@ -2437,17 +2437,17 @@
         "signature": [
           "{ getInteractiveUserSessionCookieWithRoleScope(role: string, options?: ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/test-saml-auth",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnTestSamlAuthPluginApi",
             "section": "def-common.GetCookieOptions",
             "text": "GetCookieOptions"
           },
           " | undefined): Promise<string>; getM2MApiCookieCredentialsWithRoleScope(role: string, options?: ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/test-saml-auth",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnTestSamlAuthPluginApi",
             "section": "def-common.GetCookieOptions",
             "text": "GetCookieOptions"
           },
@@ -2461,9 +2461,9 @@
           },
           ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/test-saml-auth",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnTestSamlAuthPluginApi",
             "section": "def-common.GetCookieOptions",
             "text": "GetCookieOptions"
           },
@@ -2631,9 +2631,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -2727,17 +2727,17 @@
                   },
                   ") => { getInteractiveUserSessionCookieWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
                   " | undefined): Promise<string>; getM2MApiCookieCredentialsWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -2751,9 +2751,9 @@
                   },
                   ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -2883,9 +2883,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -2979,17 +2979,17 @@
                   },
                   ") => { getInteractiveUserSessionCookieWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
                   " | undefined): Promise<string>; getM2MApiCookieCredentialsWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -3003,9 +3003,9 @@
                   },
                   ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -3143,9 +3143,9 @@
               },
               ") => ",
               {
-                "pluginId": "@kbn/test",
+                "pluginId": "@kbn/kbn-client",
                 "scope": "common",
-                "docId": "kibKbnTestPluginApi",
+                "docId": "kibKbnKbnClientPluginApi",
                 "section": "def-common.KbnClient",
                 "text": "KbnClient"
               }
@@ -3192,9 +3192,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -3288,17 +3288,17 @@
                   },
                   ") => { getInteractiveUserSessionCookieWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
                   " | undefined): Promise<string>; getM2MApiCookieCredentialsWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -3312,9 +3312,9 @@
                   },
                   ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -3444,9 +3444,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -3540,17 +3540,17 @@
                   },
                   ") => { getInteractiveUserSessionCookieWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
                   " | undefined): Promise<string>; getM2MApiCookieCredentialsWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -3564,9 +3564,9 @@
                   },
                   ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -3753,9 +3753,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -3849,17 +3849,17 @@
                   },
                   ") => { getInteractiveUserSessionCookieWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
                   " | undefined): Promise<string>; getM2MApiCookieCredentialsWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -3873,9 +3873,9 @@
                   },
                   ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -4005,9 +4005,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -4101,17 +4101,17 @@
                   },
                   ") => { getInteractiveUserSessionCookieWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
                   " | undefined): Promise<string>; getM2MApiCookieCredentialsWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -4125,9 +4125,9 @@
                   },
                   ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -4353,9 +4353,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -4449,17 +4449,17 @@
                   },
                   ") => { getInteractiveUserSessionCookieWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
                   " | undefined): Promise<string>; getM2MApiCookieCredentialsWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -4473,9 +4473,9 @@
                   },
                   ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -4605,9 +4605,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -4701,17 +4701,17 @@
                   },
                   ") => { getInteractiveUserSessionCookieWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
                   " | undefined): Promise<string>; getM2MApiCookieCredentialsWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -4725,9 +4725,9 @@
                   },
                   ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -4930,9 +4930,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -5026,17 +5026,17 @@
                   },
                   ") => { getInteractiveUserSessionCookieWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
                   " | undefined): Promise<string>; getM2MApiCookieCredentialsWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -5050,9 +5050,9 @@
                   },
                   ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -5182,9 +5182,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -5278,17 +5278,17 @@
                   },
                   ") => { getInteractiveUserSessionCookieWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
                   " | undefined): Promise<string>; getM2MApiCookieCredentialsWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -5302,9 +5302,9 @@
                   },
                   ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -5511,17 +5511,17 @@
               },
               ") => { getInteractiveUserSessionCookieWithRoleScope(role: string, options?: ",
               {
-                "pluginId": "@kbn/test",
+                "pluginId": "@kbn/test-saml-auth",
                 "scope": "common",
-                "docId": "kibKbnTestPluginApi",
+                "docId": "kibKbnTestSamlAuthPluginApi",
                 "section": "def-common.GetCookieOptions",
                 "text": "GetCookieOptions"
               },
               " | undefined): Promise<string>; getM2MApiCookieCredentialsWithRoleScope(role: string, options?: ",
               {
-                "pluginId": "@kbn/test",
+                "pluginId": "@kbn/test-saml-auth",
                 "scope": "common",
-                "docId": "kibKbnTestPluginApi",
+                "docId": "kibKbnTestSamlAuthPluginApi",
                 "section": "def-common.GetCookieOptions",
                 "text": "GetCookieOptions"
               },
@@ -5535,9 +5535,9 @@
               },
               ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
               {
-                "pluginId": "@kbn/test",
+                "pluginId": "@kbn/test-saml-auth",
                 "scope": "common",
-                "docId": "kibKbnTestPluginApi",
+                "docId": "kibKbnTestSamlAuthPluginApi",
                 "section": "def-common.GetCookieOptions",
                 "text": "GetCookieOptions"
               },
@@ -5643,9 +5643,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -5739,17 +5739,17 @@
                   },
                   ") => { getInteractiveUserSessionCookieWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
                   " | undefined): Promise<string>; getM2MApiCookieCredentialsWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -5763,9 +5763,9 @@
                   },
                   ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -5895,9 +5895,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -5991,17 +5991,17 @@
                   },
                   ") => { getInteractiveUserSessionCookieWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
                   " | undefined): Promise<string>; getM2MApiCookieCredentialsWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -6015,9 +6015,9 @@
                   },
                   ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -6130,7 +6130,7 @@
                   ">; }>, ProvidedTypeMap<{}>>"
                 ],
                 "path": "src/platform/packages/shared/kbn-ftr-common-functional-services/services/saml_auth/saml_auth_provider.ts",
-                "lineNumber": 44,
+                "lineNumber": 46,
                 "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false
@@ -6198,9 +6198,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -6294,17 +6294,17 @@
                   },
                   ") => { getInteractiveUserSessionCookieWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
                   " | undefined): Promise<string>; getM2MApiCookieCredentialsWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -6318,9 +6318,9 @@
                   },
                   ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -6450,9 +6450,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -6546,17 +6546,17 @@
                   },
                   ") => { getInteractiveUserSessionCookieWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
                   " | undefined): Promise<string>; getM2MApiCookieCredentialsWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -6570,9 +6570,9 @@
                   },
                   ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -6753,9 +6753,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -6849,17 +6849,17 @@
                   },
                   ") => { getInteractiveUserSessionCookieWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
                   " | undefined): Promise<string>; getM2MApiCookieCredentialsWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -6873,9 +6873,9 @@
                   },
                   ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -7005,9 +7005,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -7101,17 +7101,17 @@
                   },
                   ") => { getInteractiveUserSessionCookieWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
                   " | undefined): Promise<string>; getM2MApiCookieCredentialsWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -7125,9 +7125,9 @@
                   },
                   ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -7311,9 +7311,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -7407,17 +7407,17 @@
                   },
                   ") => { getInteractiveUserSessionCookieWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
                   " | undefined): Promise<string>; getM2MApiCookieCredentialsWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -7431,9 +7431,9 @@
                   },
                   ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -7563,9 +7563,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -7659,17 +7659,17 @@
                   },
                   ") => { getInteractiveUserSessionCookieWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
                   " | undefined): Promise<string>; getM2MApiCookieCredentialsWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -7683,9 +7683,9 @@
                   },
                   ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -7873,9 +7873,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -7969,17 +7969,17 @@
                   },
                   ") => { getInteractiveUserSessionCookieWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
                   " | undefined): Promise<string>; getM2MApiCookieCredentialsWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -7993,9 +7993,9 @@
                   },
                   ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -8125,9 +8125,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -8221,17 +8221,17 @@
                   },
                   ") => { getInteractiveUserSessionCookieWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
                   " | undefined): Promise<string>; getM2MApiCookieCredentialsWithRoleScope(role: string, options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
@@ -8245,9 +8245,9 @@
                   },
                   ">; getM2MApiCookieCredentialsWithCustomRoleScope(options?: ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },

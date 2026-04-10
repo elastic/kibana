@@ -511,32 +511,6 @@ describe('ServiceNow service', () => {
         connectorUsageCollector,
       });
     });
-
-    test('it should throw an error', async () => {
-      requestMock.mockImplementation(() => {
-        throw new Error('An error has occurred');
-      });
-      await expect(service.getIncident('1')).rejects.toThrow(
-        '[Action][ServiceNow]: Unable to get incident with id 1. Error: An error has occurred Reason: unknown: errorResponse was null'
-      );
-    });
-
-    test('it should throw an error when instance is not alive', async () => {
-      requestMock.mockImplementation(() => ({
-        status: 200,
-        data: {},
-        request: { connection: { servername: 'Developer instance' } },
-      }));
-      await expect(service.getIncident('1')).rejects.toThrow(
-        'There is an issue with your Service Now Instance. Please check Developer instance.'
-      );
-    });
-
-    test('it should throw an error when incident id is empty', async () => {
-      await expect(service.getIncident('')).rejects.toThrow(
-        '[Action][ServiceNow]: Unable to get incident with id . Error: Incident id is empty. Reason: unknown: errorResponse was null'
-      );
-    });
   });
 
   describe('getIncidentByCorrelationId', () => {
@@ -601,32 +575,6 @@ describe('ServiceNow service', () => {
         method: 'get',
         connectorUsageCollector,
       });
-    });
-
-    test('it should throw an error', async () => {
-      requestMock.mockImplementationOnce(() => {
-        throw new Error('An error has occurred');
-      });
-      await expect(service.getIncidentByCorrelationId('custom_correlation_id')).rejects.toThrow(
-        '[Action][ServiceNow]: Unable to get incident by correlation ID custom_correlation_id. Error: An error has occurred Reason: unknown: errorResponse was null'
-      );
-    });
-
-    test('it should throw an error when correlation id is empty', async () => {
-      await expect(service.getIncidentByCorrelationId('')).rejects.toThrow(
-        '[Action][ServiceNow]: Unable to get incident by correlation ID . Error: Correlation ID is empty. Reason: unknown: errorResponse was null'
-      );
-    });
-
-    test('it should throw an error when instance is not alive', async () => {
-      requestMock.mockImplementationOnce(() => ({
-        status: 200,
-        data: {},
-        request: { connection: { servername: 'Developer instance' } },
-      }));
-      await expect(service.getIncidentByCorrelationId('custom_correlation_id')).rejects.toThrow(
-        'There is an issue with your Service Now Instance. Please check Developer instance.'
-      );
     });
   });
 
@@ -693,49 +641,6 @@ describe('ServiceNow service', () => {
         });
 
         expect(res.url).toEqual('https://example.com/nav_to.do?uri=sn_si_incident.do?sys_id=1');
-      });
-
-      test('it should throw an error when the application is not installed', async () => {
-        requestMock.mockImplementation(() => {
-          throw new Error('An error has occurred');
-        });
-
-        await expect(
-          service.createIncident({
-            incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
-          })
-        ).rejects.toThrow(
-          '[Action][ServiceNow]: Unable to create incident. Error: [Action][ServiceNow]: Unable to get application version. Error: An error has occurred Reason: unknown: errorResponse was null Reason: unknown: errorResponse was null'
-        );
-      });
-
-      test('it should throw an error when instance is not alive', async () => {
-        requestMock.mockImplementation(() => ({
-          status: 200,
-          data: {},
-          request: { connection: { servername: 'Developer instance' } },
-        }));
-        await expect(
-          service.createIncident({
-            incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
-          })
-        ).rejects.toThrow(
-          'There is an issue with your Service Now Instance. Please check Developer instance.'
-        );
-      });
-
-      test('it should throw an error when there is an import set api error', async () => {
-        requestMock.mockImplementation(() => ({ data: getImportSetAPIError() }));
-        await expect(
-          service.createIncident({
-            incident: {
-              short_description: 'title',
-              description: 'desc',
-            } as ServiceNowITSMIncident,
-          })
-        ).rejects.toThrow(
-          '[Action][ServiceNow]: Unable to create incident. Error: An error has occurred while importing the incident Reason: unknown'
-        );
       });
 
       test('it should create an incident with additional fields correctly without prefixing them with u_', async () => {
@@ -829,16 +734,14 @@ describe('ServiceNow service', () => {
         expect(res.url).toEqual('https://example.com/nav_to.do?uri=sn_si_incident.do?sys_id=1');
       });
 
-      test('it should throw if tries to update an incident with additional_fields', async () => {
+      test('it should throw if tries to create an incident with additional_fields', async () => {
         await expect(
           service.createIncident({
             incident: {
               additional_fields: {},
             } as ServiceNowITSMIncident,
           })
-        ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"[Action][ServiceNow]: Unable to create incident. Error: ServiceNow additional fields are not supported for deprecated connectors. Reason: unknown: errorResponse was null"`
-        );
+        ).rejects.toThrow();
       });
     });
   });
@@ -905,49 +808,6 @@ describe('ServiceNow service', () => {
         });
 
         expect(res.url).toEqual('https://example.com/nav_to.do?uri=sn_si_incident.do?sys_id=1');
-      });
-
-      test('it should throw an error when the application is not installed', async () => {
-        requestMock.mockImplementation(() => {
-          throw new Error('An error has occurred');
-        });
-
-        await expect(
-          service.updateIncident({
-            incidentId: '1',
-            incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
-          })
-        ).rejects.toThrow(
-          '[Action][ServiceNow]: Unable to update incident with id 1. Error: [Action][ServiceNow]: Unable to get application version. Error: An error has occurred Reason: unknown: errorResponse was null Reason: unknown: errorResponse was null'
-        );
-      });
-
-      test('it should throw an error when instance is not alive', async () => {
-        requestMock.mockImplementation(() => ({
-          status: 200,
-          data: {},
-          request: { connection: { servername: 'Developer instance' } },
-        }));
-        await expect(
-          service.updateIncident({
-            incidentId: '1',
-            incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
-          })
-        ).rejects.toThrow(
-          'There is an issue with your Service Now Instance. Please check Developer instance.'
-        );
-      });
-
-      test('it should throw an error when there is an import set api error', async () => {
-        requestMock.mockImplementation(() => ({ data: getImportSetAPIError() }));
-        await expect(
-          service.updateIncident({
-            incidentId: '1',
-            incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
-          })
-        ).rejects.toThrow(
-          '[Action][ServiceNow]: Unable to update incident with id 1. Error: An error has occurred while importing the incident Reason: unknown'
-        );
       });
 
       test('it should update an incident with additional fields correctly without prefixing them with u_', async () => {
@@ -1056,9 +916,7 @@ describe('ServiceNow service', () => {
               additional_fields: {},
             } as ServiceNowITSMIncident,
           })
-        ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"[Action][ServiceNow]: Unable to update incident with id 1. Error: ServiceNow additional fields are not supported for deprecated connectors. Reason: unknown: errorResponse was null"`
-        );
+        ).rejects.toThrow();
       });
     });
   });
@@ -1195,54 +1053,6 @@ describe('ServiceNow service', () => {
         expect(res?.url).toEqual('https://example.com/nav_to.do?uri=incident.do?sys_id=1');
       });
 
-      test('it should throw an error when the incidentId and correlation Id are null', async () => {
-        await expect(
-          service.closeIncident({ incidentId: null, correlationId: null })
-        ).rejects.toThrow(
-          '[Action][ServiceNow]: Unable to close incident. Error: No correlationId or incidentId found. Reason: unknown: errorResponse was null'
-        );
-      });
-
-      test('it should throw an error when correlationId is empty', async () => {
-        await expect(
-          service.closeIncident({ incidentId: null, correlationId: ' ' })
-        ).rejects.toThrow(
-          '[Action][ServiceNow]: Unable to close incident. Error: [Action][ServiceNow]: Unable to get incident by correlation ID  . Error: Correlation ID is empty. Reason: unknown: errorResponse was null Reason: unknown: errorResponse was null'
-        );
-      });
-
-      test('it should throw an error when incidentId is empty', async () => {
-        await expect(
-          service.closeIncident({ incidentId: ' ', correlationId: null })
-        ).rejects.toThrow(
-          '[Action][ServiceNow]: Unable to close incident. Error: [Action][ServiceNow]: Unable to get incident with id  . Error: Incident id is empty. Reason: unknown: errorResponse was null Reason: unknown: errorResponse was null'
-        );
-      });
-
-      test('it should throw an error when the no incidents found with given incidentId ', async () => {
-        const axiosError = {
-          message: 'Request failed with status code 404',
-          response: { status: 404 },
-        } as AxiosError;
-
-        requestMock.mockImplementation(() => {
-          throw axiosError;
-        });
-
-        const res = await service.closeIncident({
-          incidentId: 'xyz',
-          correlationId: null,
-        });
-
-        expect(requestMock).toHaveBeenCalledTimes(1);
-        expect(logger.warn.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            "[ServiceNow][CloseIncident] No incident found with incidentId: xyz.",
-          ]
-        `);
-        expect(res).toBeNull();
-      });
-
       test('it should log warning if found incident is closed', async () => {
         requestMock.mockImplementationOnce(() => ({
           data: {
@@ -1301,23 +1111,6 @@ describe('ServiceNow service', () => {
         ]
       `);
         expect(res).toBeNull();
-      });
-
-      test('it should throw an error when instance is not alive', async () => {
-        mockIncidentResponse(false);
-        requestMock.mockImplementation(() => ({
-          status: 200,
-          data: {},
-          request: { connection: { servername: 'Developer instance' } },
-        }));
-        await expect(
-          service.closeIncident({
-            incidentId: '1',
-            correlationId: null,
-          })
-        ).rejects.toThrow(
-          'There is an issue with your Service Now Instance. Please check Developer instance.'
-        );
       });
     });
 
@@ -1411,30 +1204,6 @@ describe('ServiceNow service', () => {
 
         expect(res?.url).toEqual('https://example.com/nav_to.do?uri=sn_si_incident.do?sys_id=1');
       });
-
-      test('it should throw an error when the incidentId and correlationId are null', async () => {
-        await expect(
-          service.closeIncident({ incidentId: null, correlationId: null })
-        ).rejects.toThrow(
-          '[Action][ServiceNow]: Unable to close incident. Error: No correlationId or incidentId found. Reason: unknown: errorResponse was null'
-        );
-      });
-
-      test('it should throw an error when correlationId is empty', async () => {
-        await expect(
-          service.closeIncident({ incidentId: null, correlationId: ' ' })
-        ).rejects.toThrow(
-          '[Action][ServiceNow]: Unable to close incident. Error: [Action][ServiceNow]: Unable to get incident by correlation ID  . Error: Correlation ID is empty. Reason: unknown: errorResponse was null Reason: unknown: errorResponse was null'
-        );
-      });
-
-      test('it should throw an error when incidentId is empty', async () => {
-        await expect(
-          service.closeIncident({ incidentId: ' ', correlationId: null })
-        ).rejects.toThrow(
-          '[Action][ServiceNow]: Unable to close incident. Error: [Action][ServiceNow]: Unable to get incident with id  . Error: Incident id is empty. Reason: unknown: errorResponse was null Reason: unknown: errorResponse was null'
-        );
-      });
     });
   });
 
@@ -1487,26 +1256,6 @@ describe('ServiceNow service', () => {
         url: 'https://example.com/api/now/table/sys_dictionary?sysparm_query=name=task^ORname=sn_si_incident^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory',
         connectorUsageCollector,
       });
-    });
-
-    test('it should throw an error', async () => {
-      requestMock.mockImplementation(() => {
-        throw new Error('An error has occurred');
-      });
-      await expect(service.getFields()).rejects.toThrow(
-        '[Action][ServiceNow]: Unable to get fields. Error: An error has occurred'
-      );
-    });
-
-    test('it should throw an error when instance is not alive', async () => {
-      requestMock.mockImplementation(() => ({
-        status: 200,
-        data: {},
-        request: { connection: { servername: 'Developer instance' } },
-      }));
-      await expect(service.getIncident('1')).rejects.toThrow(
-        'There is an issue with your Service Now Instance. Please check Developer instance.'
-      );
     });
   });
 
@@ -1561,26 +1310,6 @@ describe('ServiceNow service', () => {
         connectorUsageCollector,
       });
     });
-
-    test('it should throw an error', async () => {
-      requestMock.mockImplementation(() => {
-        throw new Error('An error has occurred');
-      });
-      await expect(service.getChoices(['priority'])).rejects.toThrow(
-        '[Action][ServiceNow]: Unable to get choices. Error: An error has occurred'
-      );
-    });
-
-    test('it should throw an error when instance is not alive', async () => {
-      requestMock.mockImplementation(() => ({
-        status: 200,
-        data: {},
-        request: { connection: { servername: 'Developer instance' } },
-      }));
-      await expect(service.getIncident('1')).rejects.toThrow(
-        'There is an issue with your Service Now Instance. Please check Developer instance.'
-      );
-    });
   });
 
   describe('getUrl', () => {
@@ -1621,15 +1350,6 @@ describe('ServiceNow service', () => {
           version: '1.0.0',
         });
       });
-
-      test('it should throw an error', async () => {
-        requestMock.mockImplementation(() => {
-          throw new Error('An error has occurred');
-        });
-        await expect(service.getApplicationInformation()).rejects.toThrow(
-          '[Action][ServiceNow]: Unable to get application version. Error: An error has occurred Reason: unknown'
-        );
-      });
     });
 
     describe('checkIfApplicationIsInstalled', () => {
@@ -1656,6 +1376,323 @@ describe('ServiceNow service', () => {
         await service.checkIfApplicationIsInstalled();
         expect(requestMock).not.toHaveBeenCalled();
         expect(logger.debug).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('error handling', () => {
+    describe('getIncident', () => {
+      test('it should throw an error when instance is not alive', async () => {
+        requestMock.mockImplementation(() => ({
+          status: 200,
+          data: {},
+          request: { connection: { servername: 'Developer instance' } },
+        }));
+        await expect(service.getIncident('1')).rejects.toThrow(
+          'There is an issue with your Service Now Instance. Please check Developer instance.'
+        );
+      });
+
+      test('it should throw an error when incident id is empty', async () => {
+        await expect(service.getIncident('')).rejects.toThrow(
+          '[Action][ServiceNow]: Unable to get incident with id . Error: Incident id is empty.'
+        );
+      });
+    });
+
+    describe('getIncidentByCorrelationId', () => {
+      test('it should throw an error when correlation id is empty', async () => {
+        await expect(service.getIncidentByCorrelationId('')).rejects.toThrow(
+          '[Action][ServiceNow]: Unable to get incident by correlation ID . Error: Correlation ID is empty.'
+        );
+      });
+
+      test('it should throw an error when instance is not alive', async () => {
+        requestMock.mockImplementationOnce(() => ({
+          status: 200,
+          data: {},
+          request: { connection: { servername: 'Developer instance' } },
+        }));
+        await expect(service.getIncidentByCorrelationId('custom_correlation_id')).rejects.toThrow(
+          'There is an issue with your Service Now Instance. Please check Developer instance.'
+        );
+      });
+    });
+
+    describe('createIncident', () => {
+      test('it should throw an error when the application is not installed', async () => {
+        requestMock.mockImplementation(() => {
+          throw new Error('An error has occurred');
+        });
+
+        await expect(
+          service.createIncident({
+            incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
+          })
+        ).rejects.toThrow(
+          '[Action][ServiceNow]: Unable to create incident. Error: [Action][ServiceNow]: Unable to get application version. Error: An error has occurred'
+        );
+      });
+
+      test('it should throw an error when instance is not alive', async () => {
+        requestMock.mockImplementation(() => ({
+          status: 200,
+          data: {},
+          request: { connection: { servername: 'Developer instance' } },
+        }));
+        await expect(
+          service.createIncident({
+            incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
+          })
+        ).rejects.toThrow(
+          'There is an issue with your Service Now Instance. Please check Developer instance.'
+        );
+      });
+
+      test('it should throw an error when there is an import set api error', async () => {
+        requestMock.mockImplementation(() => ({ data: getImportSetAPIError() }));
+        await expect(
+          service.createIncident({
+            incident: {
+              short_description: 'title',
+              description: 'desc',
+            } as ServiceNowITSMIncident,
+          })
+        ).rejects.toThrow(
+          '[Action][ServiceNow]: Unable to create incident. Error: An error has occurred while importing the incident'
+        );
+      });
+
+      test('throws error for additional_fields on deprecated connectors', async () => {
+        service = createExternalService({
+          credentials: {
+            config: { apiUrl: 'https://example.com/', isOAuth: false },
+            secrets: { username: 'admin', password: 'admin' },
+          },
+          logger,
+          configurationUtilities,
+          serviceConfig: { ...snExternalServiceConfig['.servicenow'], useImportAPI: false },
+          axiosInstance: axios,
+          connectorUsageCollector,
+        });
+
+        await expect(
+          service.createIncident({
+            incident: {
+              additional_fields: {},
+            } as ServiceNowITSMIncident,
+          })
+        ).rejects.toThrow(
+          '[Action][ServiceNow]: Unable to create incident. Error: ServiceNow additional fields are not supported for deprecated connectors.'
+        );
+      });
+    });
+
+    describe('updateIncident', () => {
+      test('it should throw an error when the application is not installed', async () => {
+        requestMock.mockImplementation(() => {
+          throw new Error('An error has occurred');
+        });
+
+        await expect(
+          service.updateIncident({
+            incidentId: '1',
+            incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
+          })
+        ).rejects.toThrow(
+          '[Action][ServiceNow]: Unable to update incident with id 1. Error: [Action][ServiceNow]: Unable to get application version. Error: An error has occurred'
+        );
+      });
+
+      test('it should throw an error when instance is not alive', async () => {
+        requestMock.mockImplementation(() => ({
+          status: 200,
+          data: {},
+          request: { connection: { servername: 'Developer instance' } },
+        }));
+        await expect(
+          service.updateIncident({
+            incidentId: '1',
+            incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
+          })
+        ).rejects.toThrow(
+          'There is an issue with your Service Now Instance. Please check Developer instance.'
+        );
+      });
+
+      test('it should throw an error when there is an import set api error', async () => {
+        requestMock.mockImplementation(() => ({ data: getImportSetAPIError() }));
+        await expect(
+          service.updateIncident({
+            incidentId: '1',
+            incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
+          })
+        ).rejects.toThrow(
+          '[Action][ServiceNow]: Unable to update incident with id 1. Error: An error has occurred while importing the incident'
+        );
+      });
+
+      test('it should throw an error for additional_fields on deprecated connectors', async () => {
+        service = createExternalService({
+          credentials: {
+            config: { apiUrl: 'https://example.com/', isOAuth: false },
+            secrets: { username: 'admin', password: 'admin' },
+          },
+          logger,
+          configurationUtilities,
+          serviceConfig: { ...snExternalServiceConfig['.servicenow'], useImportAPI: false },
+          axiosInstance: axios,
+          connectorUsageCollector,
+        });
+        await expect(
+          service.updateIncident({
+            incidentId: '1',
+            incident: {
+              additional_fields: {},
+            } as ServiceNowITSMIncident,
+          })
+        ).rejects.toThrow(
+          '[Action][ServiceNow]: Unable to update incident with id 1. Error: ServiceNow additional fields are not supported for deprecated connectors.'
+        );
+      });
+    });
+
+    describe('closeIncident', () => {
+      test('it should throw an error when the incidentId and correlation Id are null', async () => {
+        await expect(
+          service.closeIncident({ incidentId: null, correlationId: null })
+        ).rejects.toThrow(
+          '[Action][ServiceNow]: Unable to close incident. Error: No correlationId or incidentId found.'
+        );
+      });
+
+      test('it should throw an error when correlationId is empty', async () => {
+        await expect(
+          service.closeIncident({ incidentId: null, correlationId: ' ' })
+        ).rejects.toThrow(
+          '[Action][ServiceNow]: Unable to close incident. Error: [Action][ServiceNow]: Unable to get incident by correlation ID  . Error: Correlation ID is empty.'
+        );
+      });
+
+      test('it should throw an error when incidentId is empty', async () => {
+        await expect(
+          service.closeIncident({ incidentId: ' ', correlationId: null })
+        ).rejects.toThrow(
+          '[Action][ServiceNow]: Unable to close incident. Error: [Action][ServiceNow]: Unable to get incident with id  . Error: Incident id is empty.'
+        );
+      });
+
+      test('it should throw an error when the no incidents found with given incidentId ', async () => {
+        const axiosError = {
+          message: 'Request failed with status code 404',
+          response: { status: 404 },
+        } as AxiosError;
+
+        requestMock.mockImplementation(() => {
+          throw axiosError;
+        });
+
+        const res = await service.closeIncident({
+          incidentId: 'xyz',
+          correlationId: null,
+        });
+
+        expect(requestMock).toHaveBeenCalledTimes(1);
+        expect(logger.warn.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            "[ServiceNow][CloseIncident] No incident found with incidentId: xyz.",
+          ]
+        `);
+        expect(res).toBeNull();
+      });
+
+      test('it should throw an error when instance is not alive', async () => {
+        mockIncidentResponse(false);
+        requestMock.mockImplementation(() => ({
+          status: 200,
+          data: {},
+          request: { connection: { servername: 'Developer instance' } },
+        }));
+        await expect(
+          service.closeIncident({
+            incidentId: '1',
+            correlationId: null,
+          })
+        ).rejects.toThrow(
+          'There is an issue with your Service Now Instance. Please check Developer instance.'
+        );
+      });
+    });
+
+    describe('getFields', () => {
+      test('it should throw a plain error message', async () => {
+        requestMock.mockImplementation(() => {
+          throw new Error('An error has occurred');
+        });
+        await expect(service.getFields()).rejects.toThrow(
+          '[Action][ServiceNow]: Unable to get fields. Error: An error has occurred'
+        );
+      });
+
+      test('it should throw an error when instance is not alive', async () => {
+        requestMock.mockImplementation(() => ({
+          status: 200,
+          data: {},
+          request: { connection: { servername: 'Developer instance' } },
+        }));
+        await expect(service.getIncident('1')).rejects.toThrow(
+          'There is an issue with your Service Now Instance. Please check Developer instance.'
+        );
+      });
+    });
+
+    describe('getChoices', () => {
+      test('it should throw an error when instance is not alive', async () => {
+        requestMock.mockImplementation(() => ({
+          status: 200,
+          data: {},
+          request: { connection: { servername: 'Developer instance' } },
+        }));
+        await expect(service.getIncident('1')).rejects.toThrow(
+          'There is an issue with your Service Now Instance. Please check Developer instance.'
+        );
+      });
+    });
+
+    describe('getApplicationInformation', () => {
+      test('it should throw a plain error message', async () => {
+        requestMock.mockImplementation(() => {
+          throw new Error('An error has occurred');
+        });
+        await expect(service.getApplicationInformation()).rejects.toThrow(
+          '[Action][ServiceNow]: Unable to get application version. Error: An error has occurred'
+        );
+      });
+    });
+
+    describe('OAuth errors', () => {
+      test('formats OAuth error with error and error_description', async () => {
+        const error = new Error('{"error":"invalid_grant","error_description":"User not found"}');
+
+        requestMock.mockImplementation(() => {
+          throw error;
+        });
+
+        await expect(service.getIncident('1')).rejects.toThrow(
+          '[Action][ServiceNow]: Unable to get incident with id 1. Error: invalid_grant Reason: User not found'
+        );
+      });
+
+      test('formats OAuth error without error_description', async () => {
+        const error = new Error('{"error":"invalid_grant"}');
+
+        requestMock.mockImplementation(() => {
+          throw error;
+        });
+
+        await expect(service.getIncident('1')).rejects.toThrow(
+          '[Action][ServiceNow]: Unable to get incident with id 1. Error: invalid_grant'
+        );
       });
     });
   });

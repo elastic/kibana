@@ -8,6 +8,7 @@
  */
 
 import type React from 'react';
+import type { ReactNode } from 'react';
 import type { EuiButtonEmptyProps } from '@elastic/eui';
 
 /** @public */
@@ -26,9 +27,17 @@ export interface ChromeHelpExtension {
    */
   links?: ChromeHelpExtensionMenuLink[];
   /**
-   * Custom content to occur below the list of links
+   * Custom content to render below the list of links. Receives menu actions and returns a ReactNode.
+   *
+   * @example
+   * ```tsx
+   * core.chrome.setHelpExtension({
+   *   appName: 'My App',
+   *   content: ({ hideHelpMenu }) => <MyHelpComponent onClose={hideHelpMenu} />,
+   * });
+   * ```
    */
-  content?: (element: HTMLDivElement, menuActions: ChromeHelpMenuActions) => () => void;
+  content?: (menuActions: ChromeHelpMenuActions) => ReactNode;
 }
 
 /** @public */

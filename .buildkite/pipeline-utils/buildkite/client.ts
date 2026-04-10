@@ -10,7 +10,7 @@
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 import type { ExecSyncOptions } from 'child_process';
-import { execSync } from 'child_process';
+import { execFileSync, execSync } from 'child_process';
 
 import { dump } from 'js-yaml';
 
@@ -64,7 +64,6 @@ export interface BuildkiteCommandStep {
   agents: BuildkiteAgentQueue | BuildkiteAgentTargetingRule;
   timeout_in_minutes?: number;
   key?: string;
-  cancel_on_build_failing?: boolean;
   depends_on?: string | string[];
   retry?: {
     automatic: Array<{
@@ -368,8 +367,27 @@ export class BuildkiteClient {
     return (await this.http.post(url, options)).data;
   };
 
+  cancelStep = (stepIdOrKey: string): void => {
+    execFileSync('buildkite-agent', ['step', 'cancel', '--step', stepIdOrKey], {
+      stdio: ['pipe', 'inherit', 'inherit'],
+    });
+  };
+
+  getMetadataKeys = (): string[] => {
+    const stdout = execFileSync('buildkite-agent', ['meta-data', 'keys'], {
+      stdio: ['pipe', 'pipe', 'inherit'],
+    });
+
+    const output = stdout?.toString().trim() ?? '';
+    if (!output) {
+      return [];
+    }
+
+    return output.split('\n').filter(Boolean);
+  };
+
   setMetadata = (key: string, value: string) => {
-    this.exec(`buildkite-agent meta-data set '${key}'`, {
+    execFileSync('buildkite-agent', ['meta-data', 'set', key], {
       input: value,
       stdio: ['pipe', 'inherit', 'inherit'],
     });
@@ -377,7 +395,7 @@ export class BuildkiteClient {
 
   getMetadata(key: string, defaultValue: string | null = null): string | null {
     try {
-      const stdout = this.exec(`buildkite-agent meta-data get '${key}'`, {
+      const stdout = execFileSync('buildkite-agent', ['meta-data', 'get', key], {
         stdio: ['pipe'],
       });
       return stdout?.toString().trim() || defaultValue;

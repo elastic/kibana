@@ -82,7 +82,11 @@ describe('GET /internal/spaces/{spaceId}/content_summary', () => {
       basePath: httpService.basePath,
     });
 
-    const clientServiceStart = clientService.start(coreStart, featuresPluginMock.createStart());
+    const clientServiceStart = clientService.start(
+      coreStart,
+      featuresPluginMock.createStart(),
+      undefined
+    );
 
     const spacesServiceStart = service.start({
       basePath: coreStart.http.basePath,

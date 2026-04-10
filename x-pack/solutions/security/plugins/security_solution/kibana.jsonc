@@ -17,6 +17,7 @@
     "requiredPlugins": [
       "actions",
       "alerting",
+      "anonymization",
       "cases",
       "cloud",
       "cloudDefend",
@@ -28,6 +29,7 @@
       "ecsDataQualityDashboard",
       "elasticAssistant",
       "embeddable",
+      "entityStore",
       "eventLog",
       "features",
       "fieldFormats",
@@ -65,7 +67,6 @@
       "telemetry",
       "elasticAssistantSharedState",
       "share",
-      "entityStore"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
@@ -83,7 +84,9 @@
       "automaticImport",
       "serverless",
       "agentBuilder",
-      "llmTasks"
+      "llmTasks",
+      "cps",
+      "searchInferenceEndpoints"
     ],
     "requiredBundles": [
       "esUiShared",

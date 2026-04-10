@@ -9,11 +9,14 @@
 import { expectSuggestions, getFieldNamesByType } from '../../../__tests__/commands/autocomplete';
 import { indexes, integrations, mockContext } from '../../../__tests__/commands/context_fixtures';
 import { METADATA_FIELDS } from '../options/metadata';
-import { getRecommendedQueriesTemplates } from '../options/recommended_queries';
+import {
+  getRecommendedQueriesTemplates,
+  getRecommendedQueriesTemplatesFromExtensions,
+} from '../options/recommended_queries';
 import type { ICommandCallbacks } from '../types';
 import { autocomplete } from './autocomplete';
 import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
-import { Parser } from '../../../parser';
+import { Parser } from '@elastic/esql';
 
 const metadataFields = [...METADATA_FIELDS].sort();
 
@@ -94,8 +97,8 @@ describe('FROM Autocomplete', () => {
     });
 
     test('suggests visible indices on space', async () => {
-      await fromExpectSuggestions('from /', [...visibleIndices, '(FROM $0)'], mockCallbacks);
-      await fromExpectSuggestions('FROM /', [...visibleIndices, '(FROM $0)'], mockCallbacks);
+      await fromExpectSuggestions('from /', [...visibleIndices, 'from /(FROM $0)'], mockCallbacks);
+      await fromExpectSuggestions('FROM /', [...visibleIndices, 'FROM /(FROM $0)'], mockCallbacks);
       await fromExpectSuggestions('from /index', visibleIndices, mockCallbacks);
     });
 
@@ -104,13 +107,17 @@ describe('FROM Autocomplete', () => {
     });
 
     test('does create suggestions after a closed quote', async () => {
-      await fromExpectSuggestions('FROM "lolz", ', [...visibleIndices, '(FROM $0)'], mockCallbacks);
+      await fromExpectSuggestions(
+        'FROM "lolz", ',
+        [...visibleIndices, 'FROM "lolz", (FROM $0)'],
+        mockCallbacks
+      );
     });
 
     test('doesnt suggest indices twice', async () => {
       await fromExpectSuggestions(
         'from index, ',
-        [...visibleIndices.filter((i) => i !== 'index'), '(FROM $0)'],
+        [...visibleIndices.filter((i) => i !== 'index'), 'from index, (FROM $0)'],
         mockCallbacks
       );
     });
@@ -140,8 +147,16 @@ describe('FROM Autocomplete', () => {
       const expectedSuggestions = visibleDataSources.map((source) => source.name);
       mockContext.sources = visibleDataSources;
 
-      await fromExpectSuggestions('from ', [...expectedSuggestions, '(FROM $0)'], mockCallbacks);
-      await fromExpectSuggestions('FROM ', [...expectedSuggestions, '(FROM $0)'], mockCallbacks);
+      await fromExpectSuggestions(
+        'from ',
+        [...expectedSuggestions, 'from (FROM $0)'],
+        mockCallbacks
+      );
+      await fromExpectSuggestions(
+        'FROM ',
+        [...expectedSuggestions, 'FROM (FROM $0)'],
+        mockCallbacks
+      );
       await fromExpectSuggestions(
         'FROM a,/',
         expectedSuggestions.filter((i) => i !== 'a'),
@@ -149,7 +164,7 @@ describe('FROM Autocomplete', () => {
       );
       await fromExpectSuggestions(
         'from a, /',
-        [...expectedSuggestions.filter((i) => i !== 'a'), '(FROM $0)'],
+        [...expectedSuggestions.filter((i) => i !== 'a'), 'from a, /(FROM $0)'],
         mockCallbacks
       );
       await fromExpectSuggestions('from *,/', expectedSuggestions, mockCallbacks);
@@ -167,7 +182,7 @@ describe('FROM Autocomplete', () => {
       const expectedFromViews = ['my_saved_view', 'my-view'];
       await fromExpectSuggestions(
         'from ',
-        [...expectedFromSources, ...expectedFromViews, '(FROM $0)'],
+        [...expectedFromSources, ...expectedFromViews, 'from (FROM $0)'],
         mockCallbacks,
         contextWithViews
       );
@@ -269,13 +284,13 @@ describe('FROM Autocomplete', () => {
     ].sort();
 
     test('suggests subquery on space after FROM', async () => {
-      await fromExpectSuggestions('from /', [...visibleIndices, '(FROM $0)'], mockCallbacks);
+      await fromExpectSuggestions('from /', [...visibleIndices, 'from /(FROM $0)'], mockCallbacks);
     });
 
     test('suggests subquery after comma', async () => {
       await fromExpectSuggestions(
         'from index, /',
-        [...visibleIndices.filter((i) => i !== 'index'), '(FROM $0)'],
+        [...visibleIndices.filter((i) => i !== 'index'), 'from index, /(FROM $0)'],
         mockCallbacks
       );
     });
@@ -320,6 +335,77 @@ describe('FROM Autocomplete', () => {
         contextWithSubquery,
         offset
       );
+    });
+  });
+
+  describe('standalone (isStandalone) queries', () => {
+    const standaloneExtensions = {
+      recommendedQueries: [
+        {
+          name: 'Search all metrics',
+          query: 'TS metrics-*',
+          description: 'Searches all available metrics',
+          isStandalone: true,
+        },
+        {
+          name: 'Logs Count by Host',
+          query: 'from logs* | STATS count(*) by host',
+        },
+      ],
+      recommendedFields: [],
+    };
+
+    const contextWithStandalone = {
+      ...mockContext,
+      editorExtensions: standaloneExtensions,
+    };
+
+    const extensionSuggestions = getRecommendedQueriesTemplatesFromExtensions(
+      standaloneExtensions.recommendedQueries
+    );
+
+    test('standalone suggestion appears after space alongside other suggestions', async () => {
+      const recommendedQueries = getRecommendedQueriesTemplates({
+        fromCommand: '',
+        timeField: '@timestamp',
+        categorizationField: 'keywordField',
+      });
+      const expected = [
+        'METADATA ',
+        ',',
+        '| ',
+        ...recommendedQueries.map((query) => query.queryString),
+        ...extensionSuggestions.map((s) => s.text),
+      ].sort();
+
+      await fromExpectSuggestions('from index ', expected, mockCallbacks, contextWithStandalone);
+    });
+
+    test('standalone suggestion has empty text, no rangeToReplace, and a command with queryText', async () => {
+      const standaloneSuggestion = extensionSuggestions.find(
+        (s) => s.label === 'Search all metrics'
+      );
+
+      expect(standaloneSuggestion).toBeDefined();
+      expect(standaloneSuggestion!.text).toBe('');
+      expect(standaloneSuggestion!.rangeToReplace).toBeUndefined();
+      expect(standaloneSuggestion!.command).toEqual({
+        id: 'esql.recommendedQuery.accept',
+        title: 'Accept recommended query',
+        arguments: [
+          {
+            queryLabel: 'Search all metrics',
+            queryText: 'TS metrics-*',
+          },
+        ],
+      });
+    });
+
+    test('non-standalone extension suggestions have non-empty text', async () => {
+      const regularSuggestion = extensionSuggestions.find((s) => s.label === 'Logs Count by Host');
+
+      expect(regularSuggestion).toBeDefined();
+      expect(regularSuggestion!.text).not.toBe('');
     });
   });
 });

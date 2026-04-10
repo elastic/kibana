@@ -20,6 +20,15 @@ export async function handleExecutionDelay(
 ) {
   const workflowExecution = params.workflowRuntime.getWorkflowExecution();
 
+  if (stepExecutionRuntime.stepExecution?.status === ExecutionStatus.WAITING_FOR_INPUT) {
+    // Propagate WAITING_FOR_INPUT to the workflow level so the execution loop exits.
+    // Resumption is triggered externally by the resume API; no task is scheduled here.
+    params.workflowExecutionState.updateWorkflowExecution({
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+    });
+    return;
+  }
+
   if (
     !stepExecutionRuntime.stepExecution ||
     stepExecutionRuntime.stepExecution.status !== ExecutionStatus.WAITING
@@ -45,7 +54,12 @@ export async function handleExecutionDelay(
       await abortableTimeout(timeout, stepExecutionRuntime.abortController.signal);
     } catch (error) {
       if (error instanceof TimeoutAbortedError) {
-        // Execution was aborted, exit early
+        // Delay was interrupted (e.g. by a timeout or cancellation).
+        // Reset status to RUNNING so the execution loop can continue
+        // after error handling (e.g. on-failure continue).
+        params.workflowExecutionState.updateWorkflowExecution({
+          status: ExecutionStatus.RUNNING,
+        });
         return;
       }
 

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { AppMountParameters, IBasePath, ApplicationStart } from '@kbn/core/public';
 
 const FooApp = ({
@@ -62,14 +62,9 @@ export const renderApp = (
   { appId, basePath, targetAppId, application }: AppOptions,
   { element }: AppMountParameters
 ) => {
-  ReactDOM.render(
-    <FooApp
-      appId={appId}
-      targetAppId={targetAppId}
-      basePath={basePath}
-      application={application}
-    />,
-    element
+  const root = createRoot(element);
+  root.render(
+    <FooApp appId={appId} targetAppId={targetAppId} basePath={basePath} application={application} />
   );
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

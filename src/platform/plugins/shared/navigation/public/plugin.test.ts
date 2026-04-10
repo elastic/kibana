@@ -57,17 +57,24 @@ const setup = ({
 };
 
 describe('Navigation Plugin', () => {
-  it('should change the active solution navigation', async () => {
+  it('should init navigation when active space and definition are both available', async () => {
     const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
 
     spaces.getActiveSpace$ = jest
       .fn()
       .mockReturnValue(of({ solution: 'es' } as Pick<Space, 'solution'>));
 
-    plugin.start(coreStart, { unifiedSearch, cloud, spaces });
+    const navigationTree$ = of({ body: [] });
+    const { addSolutionNavigation } = plugin.start(coreStart, { unifiedSearch, cloud, spaces });
     await new Promise((resolve) => setTimeout(resolve));
 
-    expect(coreStart.chrome.project.changeActiveSolutionNavigation).toHaveBeenCalledWith('es');
+    addSolutionNavigation({
+      id: 'es' as const,
+      title: 'Elasticsearch',
+      navigationTree$,
+    });
+
+    expect(coreStart.chrome.project.initNavigation).toHaveBeenCalledWith('es', navigationTree$);
   });
 
   it('should not load the active space on non authenticated pages', async () => {
@@ -96,7 +103,7 @@ describe('Navigation Plugin', () => {
   });
 
   describe('addSolutionNavigation()', () => {
-    it('should update the solution navigation definitions', async () => {
+    it('should not init navigation until active space is set', async () => {
       const { plugin, coreStart, unifiedSearch, spaces } = setup();
 
       const { addSolutionNavigation } = plugin.start(coreStart, {
@@ -105,20 +112,37 @@ describe('Navigation Plugin', () => {
       });
       await new Promise((resolve) => setTimeout(resolve));
 
-      const definition = {
+      addSolutionNavigation({
         id: 'es' as const,
         title: 'Elasticsearch',
         navigationTree$: of({ body: [] }),
-      };
-      addSolutionNavigation(definition);
+      });
 
+      expect(coreStart.chrome.project.initNavigation).not.toHaveBeenCalled();
+    });
+
+    it('should init navigation when definition arrives after active space', async () => {
+      const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
+
+      spaces.getActiveSpace$ = jest
+        .fn()
+        .mockReturnValue(of({ solution: 'oblt' } as Pick<Space, 'solution'>));
+
+      const navigationTree$ = of({ body: [] });
+      const { addSolutionNavigation } = plugin.start(coreStart, {
+        unifiedSearch,
+        cloud,
+        spaces,
+      });
       await new Promise((resolve) => setTimeout(resolve));
 
-      expect(coreStart.chrome.project.updateSolutionNavigations).toHaveBeenCalledWith({
-        es: {
-          ...definition,
-        },
+      addSolutionNavigation({
+        id: 'oblt' as const,
+        title: 'Observability',
+        navigationTree$,
       });
+
+      expect(coreStart.chrome.project.initNavigation).toHaveBeenCalledWith('oblt', navigationTree$);
     });
   });
 

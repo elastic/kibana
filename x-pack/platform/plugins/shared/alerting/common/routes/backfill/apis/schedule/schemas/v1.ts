@@ -4,10 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import path from 'path';
 import { schema } from '@kbn/config-schema';
 import { validateBackfillSchedule } from '../../../../..';
 import { MAX_SCHEDULE_BACKFILL_BULK_SIZE } from '../../../../../constants';
 import { backfillResponseSchemaV1, errorResponseSchemaV1 } from '../../../response';
+
+export const scheduleBackfillExamples = () =>
+  path.join(__dirname, 'examples_schedule_backfill.yaml');
 
 export const scheduleBodySchema = schema.arrayOf(
   schema.object(

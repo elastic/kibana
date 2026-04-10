@@ -25,8 +25,7 @@ export default function bulkMuteUnmuteTests({ getService }: FtrProviderContext) 
   const supertest = getService('supertest');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
-  // Failing: See https://github.com/elastic/kibana/issues/246730
-  describe.skip('bulkMuteUnmute', () => {
+  describe('bulkMuteUnmute', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     const createRule = async (): Promise<string> => {
@@ -98,7 +97,7 @@ export default function bulkMuteUnmuteTests({ getService }: FtrProviderContext) 
       await esTestIndexTool.setup();
     });
 
-    afterEach(async () => {
+    after(async () => {
       await es.deleteByQuery({
         index: alertAsDataIndex,
         query: { match_all: {} },
@@ -106,9 +105,6 @@ export default function bulkMuteUnmuteTests({ getService }: FtrProviderContext) 
         ignore_unavailable: true,
       });
       await objectRemover.removeAll();
-    });
-
-    after(async () => {
       await esTestIndexTool.destroy();
     });
 

@@ -9,8 +9,10 @@ import Path from 'path';
 import yargs from 'yargs';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { DocumentationProduct } from '@kbn/product-doc-common';
-import type { TaskConfig } from './types';
+import type { TaskConfig, OpenAPITaskConfig } from './types';
 import { buildArtifacts } from './build_artifacts';
+import { buildOpenAPIArtifacts } from './build_openapi_artifacts';
+import { DEFAULT_ELSER } from './tasks/create_index';
 
 function options(y: yargs.Argv) {
   return y
@@ -23,7 +25,12 @@ function options(y: yargs.Argv) {
     .option('stackVersion', {
       describe: 'The stack version to generate documentation for',
       string: true,
-      default: '8.16', // TODO: master is on 9.0 now, not sure we can default to version in package.json?
+      default: 'latest',
+    })
+    .option('sourceClusterApiKey', {
+      describe: 'The source cluster API key',
+      string: true,
+      default: process.env.KIBANA_SOURCE_CLUSTER_API_KEY,
     })
     .option('targetFolder', {
       describe: 'The folder to generate the artifacts in',
@@ -44,14 +51,18 @@ function options(y: yargs.Argv) {
     .option('sourceClusterUsername', {
       describe: 'The source cluster username',
       string: true,
-      demandOption: true,
       default: process.env.KIBANA_SOURCE_CLUSTER_USERNAME,
     })
     .option('sourceClusterPassword', {
       describe: 'The source cluster password',
       string: true,
-      demandOption: true,
       default: process.env.KIBANA_SOURCE_CLUSTER_PASSWORD,
+    })
+    .option('sourceClusterIndex', {
+      describe: 'The source cluster index',
+      string: true,
+      demandOption: true,
+      default: process.env.KIBANA_SOURCE_INDEX,
     })
     .option('embeddingClusterUrl', {
       describe: 'The embedding cluster url',
@@ -78,6 +89,49 @@ function options(y: yargs.Argv) {
     .locale('en');
 }
 
+function openApiOptions(y: yargs.Argv) {
+  return y
+    .option('stackVersion', {
+      describe: 'The stack version to generate documentation for',
+      string: true,
+      default: 'latest',
+    })
+    .option('targetFolder', {
+      describe: 'The folder to generate the artifacts in',
+      string: true,
+      default: Path.join(REPO_ROOT, 'build', 'kb-artifacts'),
+    })
+    .option('buildFolder', {
+      describe: 'The folder to use for temporary files',
+      string: true,
+      default: Path.join(REPO_ROOT, 'build', 'temp-kb-artifacts'),
+    })
+    .option('embeddingClusterUrl', {
+      describe: 'The embedding cluster url',
+      string: true,
+      demandOption: true,
+      default: process.env.KIBANA_EMBEDDING_CLUSTER_URL,
+    })
+    .option('embeddingClusterUsername', {
+      describe: 'The embedding cluster username',
+      string: true,
+      demandOption: true,
+      default: process.env.KIBANA_EMBEDDING_CLUSTER_USERNAME,
+    })
+    .option('embeddingClusterPassword', {
+      describe: 'The embedding cluster password',
+      string: true,
+      demandOption: true,
+      default: process.env.KIBANA_EMBEDDING_CLUSTER_PASSWORD,
+    })
+    .option('inferenceId', {
+      describe: 'The inference id to use for the artifacts',
+      string: true,
+      default: DEFAULT_ELSER,
+    })
+    .locale('en');
+}
+
 export function runScript() {
   yargs(process.argv.slice(2))
     .command('*', 'Build knowledge base artifacts', options, async (argv) => {
@@ -90,6 +144,8 @@ export function runScript() {
         sourceClusterUrl: argv.sourceClusterUrl!,
         sourceClusterUsername: argv.sourceClusterUsername!,
         sourceClusterPassword: argv.sourceClusterPassword!,
+        sourceClusterApiKey: argv.sourceClusterApiKey!,
+        sourceClusterIndex: argv.sourceClusterIndex!,
         embeddingClusterUrl: argv.embeddingClusterUrl!,
         embeddingClusterUsername: argv.embeddingClusterUsername!,
         embeddingClusterPassword: argv.embeddingClusterPassword!,
@@ -97,6 +153,19 @@ export function runScript() {
       };
 
       return buildArtifacts(taskConfig);
+    })
+    .command('openapi', 'Build OpenAPI artifacts', openApiOptions, async (argv) => {
+      const taskConfig: OpenAPITaskConfig = {
+        stackVersion: argv.stackVersion,
+        buildFolder: argv.buildFolder,
+        targetFolder: argv.targetFolder,
+        embeddingClusterUrl: argv.embeddingClusterUrl!,
+        embeddingClusterUsername: argv.embeddingClusterUsername!,
+        embeddingClusterPassword: argv.embeddingClusterPassword!,
+        inferenceId: argv.inferenceId!,
+      };
+
+      return buildOpenAPIArtifacts(taskConfig);
     })
     .parse();
 }

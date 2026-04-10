@@ -27,6 +27,7 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
       &,
       .euiPopover,
       .euiFormControlLayoutDelimited {
+        box-shadow: none !important; // removes border around append
         width: 100%;
         height: 100%;
       }
@@ -53,6 +54,7 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
         // Removes the border that appears on hover
         &:hover {
           z-index: 1 !important;
+          box-shadow: none !important;
 
           .euiFormControlLayout__childrenWrapper {
             outline: none !important;
@@ -123,11 +125,11 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
     // Inputs
     fieldNumbers: {
       rangeSliderFieldNumber: css`
-        font-weight: ${euiTheme.font.weight.medium};
+        padding-block: 0px !important;
+        font-weight: ${euiTheme.font.weight.regular};
 
         &:placeholder-shown,
         &::placeholder {
-          font-weight: ${euiTheme.font.weight.regular};
           color: ${euiTheme.colors.textSubdued};
         }
       `,

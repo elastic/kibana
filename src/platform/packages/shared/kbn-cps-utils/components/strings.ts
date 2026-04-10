@@ -59,10 +59,15 @@ export const strings = {
     }),
   getProjectPickerReadonlyCallout: () =>
     i18n.translate('cpsUtils.projectPicker.readonlyCallout', {
-      defaultMessage: 'This page inherits its CPS scope from the space settings.',
+      defaultMessage:
+        'Your default CPS scope controls which linked projects are searched. You can adjust it for your space, or override it for individual queries.',
     }),
   getProjectPickerReadonlyLensCallout: () =>
     i18n.translate('cpsUtils.projectPicker.readonlyLensCallout', {
       defaultMessage: 'Please adjust project scope for each layer in the Lens editor.',
+    }),
+  getProjectPickerFetchError: () =>
+    i18n.translate('cpsUtils.projectPicker.fetchError', {
+      defaultMessage: 'Failed to load projects. Try refreshing the page.',
     }),
 };

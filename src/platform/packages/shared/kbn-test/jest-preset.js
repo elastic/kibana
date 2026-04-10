@@ -96,6 +96,7 @@ module.exports = {
   snapshotSerializers: [
     '<rootDir>/src/platform/packages/shared/react/kibana_mount/test_helpers/react_mount_serializer.ts',
     'enzyme-to-json/serializer',
+    '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/enzyme_emotion_serializer.js',
     '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/emotion.js',
   ],
 
@@ -116,7 +117,7 @@ module.exports = {
   transform: {
     '^.+\\.(js|tsx?)$':
       '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/babel/index.js',
-    '^.+\\.(txt|html)?$':
+    '^.+\\.(txt|html|yaml|yml)?$':
       '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/raw.js',
     '^.+\\.peggy?$': '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/peggy.js',
     '^.+\\.text?$':
@@ -127,7 +128,7 @@ module.exports = {
   transformIgnorePatterns: [
     // ignore all node_modules except monaco-editor, monaco-yaml, monaco-promql which requires babel transforms to handle dynamic import()
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
-    '[/\\\\]node_modules(?![\\/\\\\](byte-size|monaco-editor|monaco-yaml|monaco-promql|monaco-languageserver-types|monaco-marker-data-provider|monaco-worker-manager|vscode-languageserver-types|d3-interpolate|d3-color|langchain|langsmith|@cfworker|gpt-tokenizer|flat|@langchain|eventsource-parser|fast-check|@fast-check/jest|@assemblyscript|quickselect|rbush|zod/v4|vega-interpreter|vega-util|vega-tooltip|@modelcontextprotocol|pkce-challenge))[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](byte-size|monaco-editor|monaco-yaml|monaco-promql|monaco-languageserver-types|monaco-marker-data-provider|monaco-worker-manager|vscode-languageserver-types|d3-interpolate|d3-color|date-fns|react-day-picker|langchain|langsmith|@cfworker|gpt-tokenizer|flat|@langchain|eventsource-parser|fast-check|@fast-check/jest|@assemblyscript|quickselect|rbush|zod/v4|vega-interpreter|vega-util|vega-tooltip|@modelcontextprotocol|pkce-challenge|ansi-styles))[/\\\\].+\\.js$',
     'packages/kbn-pm/dist/index.js',
     '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|@langchain|zod/v4))/dist/[/\\\\].+\\.js$',
     '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|@langchain|zod/v4))/dist/util/[/\\\\].+\\.js$',

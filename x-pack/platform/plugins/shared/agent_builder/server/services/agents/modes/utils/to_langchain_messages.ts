@@ -10,10 +10,15 @@ import { AIMessage, ToolMessage } from '@langchain/core/messages';
 import type {
   AssistantResponse,
   ConversationRoundStep,
+  ReasoningStep,
   ToolCallStep,
   ToolCallWithResult,
 } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus, isToolCallStep } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStatus,
+  isReasoningStep,
+  isToolCallStep,
+} from '@kbn/agent-builder-common';
 import {
   createAIMessage,
   createUserMessage,
@@ -21,8 +26,10 @@ import {
 } from '@kbn/agent-builder-genai-utils/langchain';
 import { generateXmlTree, type XmlNode } from '@kbn/agent-builder-genai-utils/tools/utils';
 import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
+import type { CompactionSummary } from '@kbn/agent-builder-common';
 import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
 import type { ToolCallResultTransformer } from './create_result_transformer';
+import { serializeCompactionSummary } from './conversation_compactor';
 
 export interface ConversationToLangchainOptions {
   conversation: ProcessedConversation;
@@ -36,6 +43,12 @@ export interface ConversationToLangchainOptions {
    * When true, tool call steps will be ignored.
    */
   ignoreSteps?: boolean;
+  /**
+   * Optional compaction summary to inject before the remaining rounds.
+   * When provided, the summary is serialized and prepended as a
+   * user/assistant message pair representing the compacted history.
+   */
+  compactionSummary?: CompactionSummary;
 }
 
 /**
@@ -48,6 +61,7 @@ export const convertPreviousRounds = async ({
   conversation,
   resultTransformer,
   ignoreSteps = false,
+  compactionSummary,
 }: ConversationToLangchainOptions): Promise<BaseMessage[]> => {
   const messages: BaseMessage[] = [];
 
@@ -60,6 +74,13 @@ export const convertPreviousRounds = async ({
   if (lastRound && lastRound.status === ConversationRoundStatus.awaitingPrompt) {
     rounds = rounds.slice(0, rounds.length - 1);
     input = lastRound.input;
+  }
+
+  // Inject compaction summary as a user/assistant exchange before remaining rounds
+  if (compactionSummary) {
+    const summaryText = serializeCompactionSummary(compactionSummary.structured_data);
+    messages.push(createUserMessage('[Previous conversation context was compacted]'));
+    messages.push(createAIMessage(summaryText));
   }
 
   for (const round of rounds) {
@@ -86,8 +107,11 @@ export const roundToLangchain = async (
   // steps
   if (!ignoreSteps) {
     const groups = groupToolCallSteps(round.steps);
+    const reasoningSteps = round.steps.filter(isReasoningStep);
     for (const group of groups) {
-      messages.push(...(await createGroupedToolCallMessages(group, { resultTransformer })));
+      messages.push(
+        ...(await createGroupedToolCallMessages(group, { resultTransformer, reasoningSteps }))
+      );
     }
   }
 
@@ -144,10 +168,12 @@ export const groupToolCallSteps = (steps: ConversationRoundStep[]): ToolCallStep
 
   for (const step of steps) {
     if (!isToolCallStep(step)) {
-      if (currentGroup.length > 0) {
+      // Only break the group if there's no active group_id.
+      // Non-tool-call steps (e.g. reasoning) can appear between parallel
+      // tool calls that share the same group_id and must not split them.
+      if (currentGroup.length > 0 && !currentGroupId) {
         groups.push(currentGroup);
         currentGroup = [];
-        currentGroupId = undefined;
       }
       continue;
     }
@@ -179,16 +205,33 @@ export const groupToolCallSteps = (steps: ConversationRoundStep[]): ToolCallStep
  */
 const createGroupedToolCallMessages = async (
   toolCalls: ToolCallWithResult[],
-  { resultTransformer }: { resultTransformer?: ToolCallResultTransformer } = {}
+  {
+    resultTransformer,
+    reasoningSteps = [],
+  }: { resultTransformer?: ToolCallResultTransformer; reasoningSteps?: ReasoningStep[] } = {}
 ): Promise<BaseMessage[]> => {
+  const groupId = toolCalls[0]?.tool_call_group_id;
+  const groupReasoning = groupId
+    ? reasoningSteps
+        .filter((s) => s.tool_call_group_id === groupId && !s.tool_call_id)
+        .map((s) => s.reasoning)
+        .join('\n')
+    : '';
+
   const aiMessage = new AIMessage({
-    content: '',
-    tool_calls: toolCalls.map((toolCall) => ({
-      id: toolCall.tool_call_id,
-      name: sanitizeToolId(toolCall.tool_id),
-      args: toolCall.params,
-      type: 'tool_call' as const,
-    })),
+    content: groupReasoning,
+    tool_calls: toolCalls.map((toolCall) => {
+      const stepReasoning = reasoningSteps
+        .filter((s) => s.tool_call_id === toolCall.tool_call_id)
+        .map((s) => s.reasoning)
+        .join('\n');
+      return {
+        id: toolCall.tool_call_id,
+        name: sanitizeToolId(toolCall.tool_id),
+        args: stepReasoning ? { _reasoning: stepReasoning, ...toolCall.params } : toolCall.params,
+        type: 'tool_call' as const,
+      };
+    }),
   });
 
   const toolMessages: ToolMessage[] = [];

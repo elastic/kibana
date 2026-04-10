@@ -8,10 +8,17 @@
 import type { FileEntry } from '@kbn/agent-builder-server/runner/filestore';
 import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
-import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
+import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { SkillFileEntry, SkillReferencedContentFileEntry } from './types';
 
-export const getSkillEntryPath = ({ skill }: { skill: SkillDefinition }): string => {
+/**
+ * Get the VFS entry path for a skill.
+ */
+export const getSkillEntryPath = ({
+  skill,
+}: {
+  skill: Pick<InternalSkillDefinition, 'basePath' | 'name'>;
+}): string => {
   return `${skill.basePath}/${skill.name}/SKILL.md`;
 };
 
@@ -19,13 +26,17 @@ export const getSkillReferencedContentEntryPath = ({
   skill,
   referencedContent,
 }: {
-  skill: SkillDefinition;
-  referencedContent: NonNullable<SkillDefinition['referencedContent']>[number];
+  skill: Pick<InternalSkillDefinition, 'basePath' | 'name'>;
+  referencedContent: { relativePath: string; name: string };
 }): string => {
   return `${skill.basePath}/${skill.name}/${referencedContent.relativePath}/${referencedContent.name}.md`;
 };
 
-export const getSkillPlainText = ({ skill }: { skill: SkillDefinition }): string => {
+export const getSkillPlainText = ({
+  skill,
+}: {
+  skill: Pick<InternalSkillDefinition, 'name' | 'description' | 'content'>;
+}): string => {
   return `---
 name: ${skill.name}
 description: ${skill.description}
@@ -34,8 +45,11 @@ description: ${skill.description}
 ${skill.content}`;
 };
 
+/**
+ * Creates VFS file entries for a skill that has a basePath.
+ */
 export const createSkillEntries = (
-  skill: SkillDefinition
+  skill: InternalSkillDefinition
 ): (SkillFileEntry | SkillReferencedContentFileEntry)[] => {
   const stringifiedContent = getSkillPlainText({ skill });
 

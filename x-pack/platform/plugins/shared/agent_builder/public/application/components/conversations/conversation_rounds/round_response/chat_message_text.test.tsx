@@ -23,6 +23,7 @@ import { VisualizeESQL } from '../../../tools/esql/visualize_esql';
 import type { AgentBuilderStartDependencies } from '../../../../../types';
 import { setWith } from '@kbn/safer-lodash-set';
 import { ChartType } from '@kbn/visualization-utils';
+import dedent from 'dedent';
 
 jest.mock('../../../tools/esql/visualize_esql', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -125,9 +126,11 @@ describe('chat_message_text', () => {
         deleteConversation: jest.fn(),
         renameConversation: jest.fn(),
         setTimeToFirstToken: jest.fn(),
-        setPendingPrompt: jest.fn(),
-        clearPendingPrompt: jest.fn(),
+        addPendingPrompt: jest.fn(),
+        clearPendingPrompts: jest.fn(),
         clearLastRoundResponse: jest.fn(),
+        addCompactionStep: jest.fn(),
+        setCompactionStepComplete: jest.fn(),
       },
     });
   });
@@ -413,6 +416,53 @@ Area Chart
       expect(callArgs).toContainEqual(expect.objectContaining({ preferredChartType: 'Line' }));
       expect(callArgs).toContainEqual(expect.objectContaining({ preferredChartType: 'Bar' }));
       expect(callArgs).toContainEqual(expect.objectContaining({ preferredChartType: 'Area' }));
+    });
+
+    describe('Tabular data', () => {
+      const content = dedent`
+        | Column 1 | Column 2 |
+        | -------- | -------: |
+        | Lorem    | ipsum    |
+      `;
+
+      it('uses scrollable EuiTable to render Markdown tables', () => {
+        render(<ChatMessageText content={content} steps={[]} />);
+
+        const table = screen.getByRole('table');
+        expect(table).toBeInTheDocument();
+
+        // This class is part of the stable API
+        expect(table).toHaveClass('euiTable');
+
+        // Confirms that the table is indeed scrollable without relying on EUI internals
+        expect(table.parentElement).toHaveStyleRule('overflow-inline', 'auto');
+      });
+
+      it('applies min and max width to all cells', () => {
+        render(<ChatMessageText content={content} steps={[]} />);
+
+        const check = (cells: HTMLElement[]) => {
+          for (const cell of cells) {
+            expect(cell).toHaveStyle({
+              'min-width': '10em',
+              'max-width': '30em',
+            });
+          }
+        };
+
+        check(screen.getAllByRole('cell')); // Body cells (<td>)
+        check(screen.getAllByRole('columnheader')); // Header cells (<th>)
+      });
+
+      it('passes parsed column settings to cells', () => {
+        render(<ChatMessageText content={content} steps={[]} />);
+
+        // Column 2 has a right alignment configured, which needs to be passed
+        // to all cells within that column. This ensures the {...rest} props
+        // are correctly passed down in the customized `th` and `td` render functions.
+        expect(screen.getByText('Column 2').closest('th')).toHaveStyle('text-align: right');
+        expect(screen.getByText('ipsum').closest('td')).toHaveStyle('text-align: right');
+      });
     });
   });
 });

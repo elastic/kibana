@@ -72,6 +72,18 @@ export function validateDownloadSource(downloadSource: DownloadSourceWithNullabl
   if (hasPassword && !hasUsername) {
     throw Boom.badRequest('Username and password must be provided together');
   }
+
+  // Disallow "Authorization" custom header when credentials (username/password or api_key) are configured,
+  // as the credentials would overwrite the header value.
+  const hasCredentials = Boolean(hasUsernameOrPassword || hasApiKey);
+  const hasAuthorizationHeader = downloadSource.auth?.headers?.some(
+    (header) => header.key.toLowerCase() === 'authorization'
+  );
+  if (hasCredentials && hasAuthorizationHeader) {
+    throw Boom.badRequest(
+      'Cannot use "Authorization" custom header when username/password or api_key authentication is configured'
+    );
+  }
 }
 
 export const getDownloadSourcesHandler: RequestHandler = async (context, request, response) => {

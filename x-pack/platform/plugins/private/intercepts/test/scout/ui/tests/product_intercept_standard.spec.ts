@@ -39,7 +39,7 @@ test.describe('Standard Product intercept', { tag: '@local-stateful-classic' }, 
 
     // Loop through survey responses
     do {
-      // Randomly select one of the NPS buttons (1-4)
+      // Randomly select one of the NPS buttons (1-5)
       await pageObjects.intercepts.clickRandomNpsButton();
       // The progression button is only visible at the start and completion of the survey
       progressionButtonVisible = await pageObjects.intercepts.isProgressionButtonVisible();
@@ -50,6 +50,43 @@ test.describe('Standard Product intercept', { tag: '@local-stateful-classic' }, 
 
     const interceptText = await pageObjects.intercepts.getInterceptText(TRIGGER_DEF_ID);
     expect(interceptText).toMatch(/Thanks for the feedback!/);
+  });
+
+  test('survey link on the completion step includes CSAT responses as URL params', async ({
+    page,
+    pageObjects,
+    browserAuth,
+  }) => {
+    await browserAuth.loginAsViewer();
+    await page.gotoApp('home');
+
+    await pageObjects.intercepts.setInterceptTimer(
+      TRIGGER_DEF_ID,
+      CONFIGURED_STANDARD_INTERCEPT_INTERVAL
+    );
+
+    await page.reload();
+    await pageObjects.intercepts.waitForInterceptDisplayed(TRIGGER_DEF_ID);
+
+    await test.step('advance past the start step', async () => {
+      await pageObjects.intercepts.clickProgressionButton();
+    });
+
+    await test.step('submit satisfaction score', async () => {
+      await pageObjects.intercepts.clickNpsButton(3);
+    });
+
+    await test.step('submit ease score', async () => {
+      await pageObjects.intercepts.clickNpsButton(4);
+    });
+
+    await test.step('verify CSAT values are embedded in survey link', async () => {
+      const href = await pageObjects.intercepts.getSurveyLinkHref();
+      const surveyParams = new URL(href).searchParams;
+
+      expect(surveyParams.get('satisfaction')).toBe('3');
+      expect(surveyParams.get('ease')).toBe('4');
+    });
   });
 
   test('page transitions - transitions from one tab to another and back again will cause the intercept to be displayed if the intercept interval has elapsed on transitioning', async ({

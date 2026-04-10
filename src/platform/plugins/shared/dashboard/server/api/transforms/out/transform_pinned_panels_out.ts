@@ -13,6 +13,7 @@ import type {
   LegacyStoredPinnedControlState,
 } from '@kbn/controls-schemas';
 import { flow } from 'lodash';
+import { transformType } from '@kbn/embeddable-plugin/server';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import type { DashboardState } from '../../types';
 
@@ -77,7 +78,7 @@ export function transformPinnedPanelsOut(
     }
     return controls;
   }
-  return;
+  return [];
 }
 
 /**
@@ -105,8 +106,8 @@ export function transformPinnedPanelProperties(
     .sort(({ order: orderA = 0 }, { order: orderB = 0 }) => orderA - orderB)
     .map(({ id, type, grow, width, ...rest }) => {
       return {
-        uid: id,
-        type,
+        id,
+        type: transformType(type),
         ...(grow !== undefined && { grow }),
         ...(width !== undefined && { width }),
         config: 'explicitInput' in rest ? rest.explicitInput : rest.config,
@@ -129,7 +130,7 @@ function injectPinnedPanelReferences(
       try {
         transformedControls.push({
           ...rest,
-          config: transforms.transformOut(config, [], containerReferences, control.uid),
+          config: transforms.transformOut(config, [], containerReferences, control.id),
         } as DashboardControlsState[number]);
       } catch (transformOutError) {
         // do not prevent read on transformOutError

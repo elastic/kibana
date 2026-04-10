@@ -53,7 +53,7 @@ export const DeleteConversationModal: React.FC<DeleteConversationModalProps> = (
       title={
         <FormattedMessage
           id="xpack.agentBuilder.conversationTitle.deleteConversationModal.title"
-          defaultMessage="Delete conversation"
+          defaultMessage="Delete this chat"
         />
       }
       titleProps={{ id: confirmModalTitleId }}

@@ -14,11 +14,62 @@ The main use cases are **refining stream entities** (splitting and routing data)
 |------|-------------|
 | **Wired stream** | Opinionated, managed, hierarchical stream for logs. Tree structure (e.g. `logs.otel`, `logs.otel.nginx`). Underlying ES objects are fully managed. |
 | **Classic stream** | Compatibility layer for existing data streams. Flat structure, partially managed. Often created by Integrations/Fleet. |
-| **Query stream** | Virtual, read-only, defined by ES\|QL. No stored data; resolves on read. |
+| **Query stream** | Virtual, read-only, defined by ES\|QL. No stored data; resolves on read. Isolated from parent views via the `$.` prefix (see below). |
 
 ### Wired Stream Hierarchy
 
 Wired streams form a tree. Two root streams exist: `logs.otel` (OTel-normalized) and `logs.ecs` (no transformation). Data enters a root, gets processed, and routing rules may send it to child streams. Mappings are inherited down the tree and must be additive (children cannot change field types defined by parents).
+
+### Query Streams and the `$.` Prefix
+
+Query streams are virtual, read-only streams backed by ES|QL views. They let users define aggregations, transformations, or filtered projections of existing stream data without storing anything — the query runs on read.
+
+#### How they work
+
+When a query stream named `cars.electric` is created, the system creates an ES|QL view named `$.cars.electric` via the Elasticsearch `PUT /_query/view` API. The `$.` prefix (defined as `ESQL_VIEW_PREFIX` in `@kbn/streams-schema`) is central to how query streams are stored and queried.
+
+#### Why the `$.` prefix matters
+
+The prefix serves two purposes:
+
+1. **Avoids name shadowing.** Without the prefix, an ES|QL view named `cars.electric` would shadow the `cars.electric` data stream. The `$.` namespace keeps them separate.
+
+2. **Isolates query streams from parent views.** Ingest streams query their data using patterns like `FROM cars, cars.*`. Because query stream views live in the `$.` namespace, the wildcard `cars.*` never matches `$.cars.electric`. This means:
+   - Aggregated or transformed columns (e.g. `error_count`, `doubled`) defined by query streams do not leak into parent stream schemas
+   - Users querying a parent ingest stream see only ingest data, not derived query stream results
+   - The isolation works at any nesting depth — `$.cars.electric.fast` is equally invisible to `FROM cars, cars.*`
+
+#### How to query a query stream
+
+Query streams must be queried directly by their `$.`-prefixed view name:
+
+```
+FROM $.cars.electric
+```
+
+The Discover integration handles this automatically — `getDiscoverEsqlQuery()` returns `FROM ${definition.query.view}` for query streams, which is the prefixed name.
+
+#### Key implementation files
+
+| File | Role |
+|------|------|
+| `@kbn/streams-schema/.../query/view_name.ts` | `ESQL_VIEW_PREFIX`, `getEsqlViewName()`, `getStreamNameFromViewName()` |
+| `@kbn/streams-schema/.../helpers/hierarchy_helpers.ts` | `getIndexPatternsForStream()` — returns `[name, name.*]` for ingest streams (no `$.`) |
+| `@kbn/streams-schema/.../helpers/get_discover_esql_query.ts` | Returns `FROM $.name` for query streams, `FROM name, name.*` for ingest |
+| `streams/server/.../esql_views/manage_esql_views.ts` | Creates/reads/deletes ES|QL views via `/_query/view` |
+| `streams/server/.../state_management/streams/query_stream.ts` | Uses `getEsqlViewName()` when building create/update/delete actions |
+
+#### Known limitation: wildcard queries over ES|QL views
+
+Querying query streams with wildcard patterns like `FROM $.parent.*` is **unreliable** and should not be used. Manual testing revealed that Elasticsearch produces false "circular view reference" errors even when no actual cycles exist in the view graph. Key findings:
+
+- `FROM $.parent.*` may succeed or fail unpredictably depending on the **global view graph state** — the full set of ES|QL views defined in the cluster, not just those matching the wildcard
+- Adding or removing an unrelated view elsewhere in the system can cause a previously working wildcard query to start failing, or vice versa
+- The error message (`circular view reference`) is misleading — it does not indicate an actual circular dependency
+- Elasticsearch's `Regex.simpleMatch()` matches across dots, so `*` is multi-segment (e.g., `$.parent.*` matches `$.parent.child.grandchild`)
+- The behavior appears tied to view resolution order, which is non-deterministic from the user's perspective
+
+This is an Elasticsearch-level limitation, not a Kibana bug. The `$.` prefix isolation ensures that **ingest stream** wildcard patterns (`FROM parent, parent.*`) work reliably because they never enter the `$.` namespace. But querying across query stream views with wildcards should be avoided until Elasticsearch resolves the underlying view resolution issue.
 
 ### Draft Mode
 
@@ -90,6 +141,8 @@ The full route repository is assembled in `server/routes/index.ts` by spreading 
 | `GET /api/streams/{name}/_ingest` | Get ingest settings for an ingest stream |
 | `PUT /api/streams/{name}/_ingest` | Update ingest settings (processing, lifecycle, fields, routing) |
 | `GET /api/streams/{name}/_doc_counts` | Get document counts per stream |
+| `GET /api/streams/{name}/_query` | Get a query stream definition |
+| `PUT /api/streams/{name}/_query` | Create or update a query stream (creates `$.`-prefixed ES\|QL view) |
 | `GET/PUT/DELETE /api/streams/{name}/queries/*` | Manage significant event queries |
 | `GET/POST /api/queries/*` | Query management |
 | `GET/PUT /api/content/*` | Content pack import/export |
@@ -477,6 +530,7 @@ These rules are enforced by the system and must be preserved in any change:
 - **Routing is owned by the parent**: routing conditions for child streams are stored in the parent stream's definition
 - **Routing happens after processing**: all processing steps execute before routing decisions
 - **Root streams are read-only** except for routing decisions
+- **Query streams are isolated from parent views**: the `$.` prefix on ES|QL view names ensures that `FROM parent, parent.*` never includes query stream data. Users must query them directly via `FROM $.name`
 - **Draft mode is query-time only**: draft processing uses ES|QL views, not ingest pipelines
 - **Classic streams are partially managed**: their underlying ES objects can be changed directly by users
 - **Stream definitions are the source of truth**: all wired stream ES objects must be reconstructible from `.kibana_streams`

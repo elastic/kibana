@@ -65,7 +65,7 @@ export interface NavigationProps {
    * The collapsed state's source of truth lives in chrome_service.tsx as a BehaviorSubject
    * that is persisted to localStorage. External consumers rely on this state.
    */
-  onToggleCollapsed: (isCollapsed: boolean) => void;
+  onToggleCollapsed?: (isCollapsed: boolean) => void;
   /**
    * (optional) Content to display inside the side panel footer.
    */
@@ -87,8 +87,8 @@ export const Navigation = ({
   sidePanelFooter,
   ...rest
 }: NavigationProps) => {
-  const isMobile = useIsWithinBreakpoints(['xs', 's']);
-  const isCollapsed = isMobile || isCollapsedProp;
+  const forcedCollapsed = useIsWithinBreakpoints(['xs', 's']);
+  const isCollapsed = forcedCollapsed || isCollapsedProp;
   const popoverItemPrefix = `${NAVIGATION_SELECTOR_PREFIX}-popoverItem`;
   const popoverFooterItemPrefix = `${NAVIGATION_SELECTOR_PREFIX}-popoverFooterItem`;
   const sidePanelItemPrefix = `${NAVIGATION_SELECTOR_PREFIX}-sidePanelItem`;
@@ -118,10 +118,11 @@ export const Navigation = ({
 
   useLayoutWidth({ isCollapsed, isSidePanelOpen, setWidth });
 
-  // Create the collapse button if a toggle callback is provided
-  const collapseButton = onToggleCollapsed ? (
-    <SideNavCollapseButton isCollapsed={isCollapsed} toggle={onToggleCollapsed} />
-  ) : null;
+  // Create the collapse button if a toggle callback is provided or if the navigation is not forced to be collapsed (e.g. on mobile)
+  const collapseButton =
+    onToggleCollapsed && !forcedCollapsed ? (
+      <SideNavCollapseButton isCollapsed={isCollapsed} toggle={onToggleCollapsed} />
+    ) : null;
 
   return (
     <div

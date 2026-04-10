@@ -18,6 +18,7 @@ import type {
 
 type GetExecutionEvents = IRuleExecutionLogForRoutes['getExecutionEvents'];
 type GetExecutionResults = IRuleExecutionLogForRoutes['getExecutionResults'];
+type GetUnifiedExecutionResults = IRuleExecutionLogForRoutes['getUnifiedExecutionResults'];
 
 const ruleExecutionLogForRoutesMock = {
   create: (): jest.Mocked<IRuleExecutionLogForRoutes> => ({
@@ -28,6 +29,10 @@ const ruleExecutionLogForRoutesMock = {
     getExecutionResults: jest
       .fn<ReturnType<GetExecutionResults>, Parameters<GetExecutionResults>>()
       .mockResolvedValue(getRuleExecutionResultsResponseMock.getSomeResponse()),
+
+    getUnifiedExecutionResults: jest
+      .fn<ReturnType<GetUnifiedExecutionResults>, Parameters<GetUnifiedExecutionResults>>()
+      .mockResolvedValue({ data: [], total: 0, page: 1, per_page: 20 }),
   }),
 };
 
@@ -51,7 +56,11 @@ const ruleExecutionLogForExecutorsMock = {
     warn: jest.fn(),
     error: jest.fn(),
 
-    logStatusChange: jest.fn(),
+    logMetric: jest.fn(),
+    logMetrics: jest.fn(),
+
+    closed: jest.fn(),
+    close: jest.fn(),
   }),
 };
 

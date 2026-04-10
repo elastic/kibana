@@ -17,6 +17,7 @@ import { internalStateActions } from '../redux';
 import { getValidViewMode } from '../../utils/get_valid_view_mode';
 
 const ESQL_MAX_NUM_OF_COLUMNS = 50;
+const ESQL_TABLE_VIEW_COLUMN_THRESHOLD = 5;
 
 /*
  * Takes care of ES|QL state transformations when a new result is returned
@@ -72,7 +73,7 @@ export const buildEsqlFetchSubscribe = ({
       return;
     }
 
-    // We need to reset the default profile state on index pattern changes
+    // We need to mark profile state fields to reset on index pattern changes
     // when loading starts to ensure the correct pre fetch state is available
     // before data fetching is triggered
     if (next.fetchStatus === FetchStatus.LOADING) {
@@ -89,16 +90,11 @@ export const buildEsqlFetchSubscribe = ({
           getIndexPatternFromESQLQuery(appStateQuery.esql) !==
           getIndexPatternFromESQLQuery(prevEsqlData.query);
 
-        // Reset all default profile state when index pattern changes
+        // Mark all profile state fields to reset when the index pattern changes
         if (indexPatternChanged) {
           internalState.dispatch(
-            injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
-              resetDefaultProfileState: {
-                columns: true,
-                rowHeight: true,
-                breakdownField: true,
-                hideChart: true,
-              },
+            injectCurrentTab(internalStateActions.setProfileStateFieldsToReset)({
+              fieldsToReset: 'all',
             })
           );
         }
@@ -123,7 +119,10 @@ export const buildEsqlFetchSubscribe = ({
     if (next.result?.length) {
       nextAllColumns = Object.keys(next.result[0].raw);
 
-      if (hasTransformationalCommand(nextQuery.esql)) {
+      if (
+        hasTransformationalCommand(nextQuery.esql) ||
+        nextAllColumns.length <= ESQL_TABLE_VIEW_COLUMN_THRESHOLD
+      ) {
         nextDefaultColumns = nextAllColumns.slice(0, ESQL_MAX_NUM_OF_COLUMNS);
       } else {
         nextDefaultColumns = [];
@@ -155,16 +154,11 @@ export const buildEsqlFetchSubscribe = ({
     const changeViewMode = viewMode !== getValidViewMode({ viewMode, isEsqlMode: true });
 
     // If the index pattern hasn't changed, but the available columns have changed
-    // due to transformational commands, reset the associated default profile state
+    // due to transformational commands, mark the associated profile state fields to reset
     if (!indexPatternChanged && allColumnsChanged) {
       internalState.dispatch(
-        injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
-          resetDefaultProfileState: {
-            columns: true,
-            rowHeight: false,
-            breakdownField: false,
-            hideChart: false,
-          },
+        injectCurrentTab(internalStateActions.setProfileStateFieldsToReset)({
+          fieldsToReset: ['columns'],
         })
       );
     }

@@ -25,6 +25,8 @@ const recoverableErrorCodes = [
 
 /** Matches "Status code: xxx" in connector error messages */
 const CONNECTOR_STATUS_CODE_REGEXP = /Status code: ([0-9]{3})/i;
+/** Matches "status [xxx]" in ES inference API error messages */
+const INFERENCE_STATUS_CODE_REGEXP = /status \[([0-9]{3})\]/i;
 
 /**
  * Parses connector error messages and returns the HTTP status code when present
@@ -34,7 +36,8 @@ const parseConnectorStatusCode = (message: string): number | null => {
   if (!message.includes('Error calling connector:')) {
     return null;
   }
-  const match = CONNECTOR_STATUS_CODE_REGEXP.exec(message);
+  const match =
+    CONNECTOR_STATUS_CODE_REGEXP.exec(message) ?? INFERENCE_STATUS_CODE_REGEXP.exec(message);
   if (!match) {
     return null;
   }

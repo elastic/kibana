@@ -23,6 +23,7 @@ import {
   EuiText,
   htmlIdGenerator,
   useEuiTheme,
+  euiFontSizeFromScale,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getESQLSources } from '@kbn/esql-utils';
@@ -32,7 +33,7 @@ import { generateIndexPatterns } from './utils';
 
 const POPOVER_WIDTH = 350;
 
-const sourcesDropdownCss = css`
+const sourcesDropdownBaseCss = css`
   box-shadow: none;
   &:focus,
           &: focus-within,
@@ -67,6 +68,16 @@ export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDrop
   const kibana = useKibana<ESQLEditorDeps>();
   const { core } = kibana.services;
   const getLicense = kibana.services?.esql?.getLicense;
+
+  const sourcesDropdownCss = useMemo(
+    () => [
+      sourcesDropdownBaseCss,
+      css`
+        font-size: ${euiFontSizeFromScale('xs', euiTheme.euiTheme)} !important;
+      `,
+    ],
+    [euiTheme.euiTheme]
+  );
 
   useEffect(() => {
     if (fetchedSources.length > 0 || isFetchingSources.current) {

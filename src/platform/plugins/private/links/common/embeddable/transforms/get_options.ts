@@ -45,7 +45,19 @@ export function getOptions(type: LinkType, options: LinkOptions) {
 
   const urlOptions = options as Required<ExternalLink>['options'];
   return {
-    ...(typeof urlOptions.openInNewTab === 'boolean' && { openInNewTab: urlOptions.openInNewTab }),
-    ...(typeof urlOptions.encodeUrl === 'boolean' && { encodeUrl: urlOptions.encodeUrl }),
+    ...(typeof urlOptions?.open_in_new_tab === 'boolean' && {
+      open_in_new_tab: urlOptions.open_in_new_tab,
+    }),
+    // <9.4 stored as openInNewTab
+    ...(typeof (urlOptions as { openInNewTab?: boolean })?.openInNewTab === 'boolean' && {
+      open_in_new_tab: (urlOptions as { openInNewTab?: boolean }).openInNewTab,
+    }),
+    ...(typeof urlOptions?.encode_url === 'boolean' && {
+      encode_url: urlOptions.encode_url,
+    }),
+    // <9.4 stored as encodeUrl
+    ...(typeof (urlOptions as { encodeUrl?: boolean })?.encodeUrl === 'boolean' && {
+      encode_url: (urlOptions as { encodeUrl?: boolean }).encodeUrl,
+    }),
   };
 }

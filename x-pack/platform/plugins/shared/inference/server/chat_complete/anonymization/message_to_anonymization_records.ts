@@ -7,16 +7,7 @@
 
 import type { Message } from '@kbn/inference-common';
 import { getAnonymizableMessageParts } from './get_anonymizable_message_parts';
-import type { AnonymizationRecord } from './types';
-
-/**
- * Escape a single JSON Pointer token per RFC-6901:
- *  - "~" -> "~0"
- *  - "/" -> "~1"
- */
-function escapePointerToken(token: string): string {
-  return token.replace(/~/g, '~0').replace(/\//g, '~1');
-}
+import { escapePointerToken, type AnonymizationRecord } from './types';
 
 /**
  * Recursively walk a value and collect only string leaves as path-value tuples.

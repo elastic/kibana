@@ -105,7 +105,7 @@ export function PopoverContent({
   onOpenDiagnostic,
 }: PopoverContentProps) {
   const { core } = useApmPluginContext();
-  const isDiagnosticModeEnabled = core.uiSettings.get(enableDiagnosticMode);
+  const isDiagnosticModeEnabled = core?.uiSettings?.get(enableDiagnosticMode);
 
   const selection = selectedEdge ?? selectedNode;
   if (selection == null) {

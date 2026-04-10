@@ -24,7 +24,7 @@ exports[`Search should render normally 1`] = `
               <span
                 aria-hidden="true"
                 class="euiFormControlLayoutCustomIcon__icon"
-                data-euiicon-type="search"
+                data-euiicon-type="magnify"
               />
             </span>
           </div>
@@ -69,7 +69,7 @@ exports[`Search should render normally 1`] = `
                 </span>
                 <span
                   color="inherit"
-                  data-euiicon-type="arrowDown"
+                  data-euiicon-type="chevronSingleDown"
                 />
               </span>
             </button>

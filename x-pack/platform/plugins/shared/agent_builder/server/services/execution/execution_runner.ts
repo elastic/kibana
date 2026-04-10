@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { merge, of, filter, EMPTY } from 'rxjs';
+import { merge, of, filter, tap, EMPTY } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -38,6 +38,7 @@ import {
 import { createConversationIdSetEvent } from './utils/events';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { withConverseSpan } from '../../tracing';
+import type { MeteringService } from '../metering';
 import type { AgentExecution, SerializedExecutionError } from './types';
 import type { AgentExecutionClient } from './persistence';
 
@@ -56,6 +57,7 @@ export interface AgentExecutionDeps {
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
   spaces?: SpacesPluginStart;
+  meteringService: MeteringService;
   trackingService?: TrackingService;
   analyticsService?: AnalyticsService;
 }
@@ -92,7 +94,7 @@ export const handleAgentExecution = async ({
     action,
   } = execution.agentParams;
 
-  const { logger, runAgent, trackingService, analyticsService } = deps;
+  const { logger, runAgent, trackingService, analyticsService, meteringService } = deps;
 
   // Resolve scoped services
   const { conversationClient, chatModel, selectedConnectorId } = await resolveServices({
@@ -119,6 +121,7 @@ export const handleAgentExecution = async ({
   // Execute agent
   const agentEvents$ = executeAgent$({
     agentId,
+    executionId: execution.executionId,
     request,
     nextInput,
     capabilities,
@@ -160,6 +163,47 @@ export const handleAgentExecution = async ({
   return withConverseSpan({ agentId, conversationId: effectiveConversationId }, () =>
     merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
       handleCancellation(abortSignal),
+      tap((event) => {
+        try {
+          if (isRoundCompleteEvent(event)) {
+            const isReplacingRound = action === 'regenerate' || event.data?.resumed === true;
+            const currentRoundCount = isReplacingRound
+              ? conversation.rounds.length
+              : (conversation.rounds?.length ?? 0) + 1;
+
+            // metering
+            meteringService
+              .reportExecution({
+                conversationId: effectiveConversationId,
+                executionId: execution.executionId,
+                roundCount: currentRoundCount,
+                agentId,
+                round: event.data.round,
+                modelProvider,
+              })
+              .catch((err) => {
+                logger.warn(`Failed to report execution metering: ${err}`);
+              });
+
+            // snapshot telemetry tracking
+            if (effectiveConversationId) {
+              trackingService?.trackConversationRound(effectiveConversationId, currentRoundCount);
+            }
+
+            // EBT tracking
+            analyticsService?.reportRoundComplete({
+              conversationId: effectiveConversationId,
+              executionId: execution.executionId,
+              roundCount: currentRoundCount,
+              agentId,
+              round: event.data.round,
+              modelProvider,
+            });
+          }
+        } catch (error) {
+          logger.error(`Failed to report round complete telemetry: ${error}`);
+        }
+      }),
       convertErrors({
         agentId,
         logger,
@@ -167,6 +211,7 @@ export const handleAgentExecution = async ({
         trackingService,
         modelProvider,
         conversationId: effectiveConversationId,
+        executionId: execution.executionId,
       })
     )
   );

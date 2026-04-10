@@ -70,7 +70,7 @@ export const ChartsGrid = ({
       `}
     >
       <div
-        data-test-subj="metricsGridWrapper"
+        data-test-subj={`metricsGridWrapper${isFullscreen ? '-fullScreen' : ''}`}
         className={cx('metricsGridWrapper', {
           [METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS]: isFullscreen,
         })}

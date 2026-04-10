@@ -102,6 +102,7 @@ export interface EmbeddableConversationSidebarProps {
   onRegisterCallbacks?: (callbacks: {
     updateProps: (props: EmbeddableConversationProps) => void;
     resetBrowserApiTools: () => void;
+    addAttachment: (attachment: AttachmentInput) => void;
   }) => void;
 }
 

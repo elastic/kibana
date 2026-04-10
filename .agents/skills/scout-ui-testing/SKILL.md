@@ -95,6 +95,7 @@ test('creates and verifies a dashboard', async ({ pageObjects, page }) => {
 
 - Don’t use `page.waitForTimeout`. Wait on a page-ready signal (loading indicator hidden, container visible, `expect.poll` on element counts).
 - If selectors aren’t stable, add `data-test-subj` (Scout uses it as the `testIdAttribute`).
+- Some locators are restricted by `@kbn/eslint/scout_no_locators` (e.g. `globalLoadingIndicator`). Don’t use them in tests or page objects for app loading state management; rely on Playwright auto-waiting and page-ready signals instead.
 
 ## A11y checks (optional, high value)
 
@@ -104,12 +105,11 @@ test('creates and verifies a dashboard', async ({ pageObjects, page }) => {
 ## Run / debug quickly
 
 - Use either `--config` or `--testFiles` (they are mutually exclusive).
-- Run by config: `node scripts/scout.js run-tests --stateful --config <module-root>/test/scout*/ui/playwright.config.ts` (or `.../ui/parallel.playwright.config.ts` for parallel UI)
-- Run by file/dir (Scout derives the right `playwright.config.ts` vs `parallel.playwright.config.ts`): `node scripts/scout.js run-tests --stateful --testFiles <module-root>/test/scout*/ui/tests/my.spec.ts`
-- For faster iteration, start servers once in another terminal: `node scripts/scout.js start-server --stateful [--config-dir <configSet>]`, then run Playwright directly: `npx playwright test --config <...> --project local --grep <tag> --headed`.
-- `--config-dir` notes:
-- `run-tests` auto-detects the custom config dir from `.../test/scout_<name>/...` paths (override with `--config-dir <name>` if needed).
-- `start-server` has no Playwright config to inspect, so pass `--config-dir <name>` when your tests require a custom server config.
+- Run by config: `node scripts/scout.js run-tests --arch stateful --domain classic --config <module-root>/test/scout*/ui/playwright.config.ts` (or `.../ui/parallel.playwright.config.ts` for parallel UI)
+- Run by file/dir (Scout derives the right `playwright.config.ts` vs `parallel.playwright.config.ts`): `node scripts/scout.js run-tests --arch stateful --domain classic --testFiles <module-root>/test/scout*/ui/tests/my.spec.ts`
+- For faster iteration, start servers once in another terminal: `node scripts/scout.js start-server --arch stateful --domain classic [--serverConfigSet <configSet>]`, then run Playwright directly: `npx playwright test --config <...> --project local --grep <tag> --headed`.
+- `run-tests` auto-detects custom config sets from `.../test/scout_<name>/...` paths.
+- `start-server` has no Playwright config to inspect, so pass `--serverConfigSet <name>` when your tests require a custom config set.
 - Debug: `SCOUT_LOG_LEVEL=debug`, or `npx playwright test --config <...> --project local --ui`
 
 ## CI enablement

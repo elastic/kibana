@@ -28,6 +28,7 @@ import {
   BehaviorSubject,
   debounceTime,
   distinctUntilChanged,
+  filter,
   map,
   merge,
   pipe,
@@ -41,7 +42,12 @@ import { getExpressionRendererParams } from './expressions/expression_params';
 import { getMergedSearchContext } from './expressions/merged_search_context';
 import { getLogError } from './expressions/telemetry';
 import { getUsedDataViews } from './expressions/update_data_views';
-import { getParentContext, getRenderMode } from './helper';
+import {
+  getParentContext,
+  getRenderMode,
+  hasAnnotationGroupReference,
+  updateAttributesWithAnnotation,
+} from './helper';
 import { addLog } from './logger';
 import { apiHasLensComponentCallbacks, apiHasUserMessages } from './type_guards';
 import type { LensEmbeddableStartServices } from './types';
@@ -55,7 +61,7 @@ const blockingMessageDisplayLocations: UserMessagesDisplayLocationId[] = [
 export type ReloadReason =
   | 'ESQLvariables'
   | 'attributes'
-  | 'savedObjectId'
+  | 'refId'
   | 'overrides'
   | 'disableTriggers'
   | 'viewMode'
@@ -176,7 +182,7 @@ export function loadEmbeddableData(
           id: uuid || 'new',
           description: lastState.attributes.title || lastState.title || '',
           url: `${services.coreStart.application.getUrlForApp('lens')}${getEditPath(
-            lastState.savedObjectId
+            lastState.ref_id
           )}`,
         };
 
@@ -302,7 +308,7 @@ export function loadEmbeddableData(
     ),
     api.savedObjectId$.pipe(
       waitUntilChanged(),
-      map(() => 'savedObjectId' as ReloadReason)
+      map(() => 'refId' as ReloadReason)
     ),
     internalApi.overrides$.pipe(
       waitUntilChanged(),
@@ -327,6 +333,23 @@ export function loadEmbeddableData(
         reload('viewMode');
       }
     }),
+    // When a library annotation group is updated, fetch the latest data and push it
+    // into attributes$ so the chart re-renders.
+    services.eventAnnotationService.annotationGroupUpdated$
+      .pipe(filter((updatedGroupId) => hasAnnotationGroupReference(getState(), updatedGroupId)))
+      .subscribe(async (updatedGroupId) => {
+        try {
+          const libraryGroup = await services.eventAnnotationService.loadAnnotationGroup(
+            updatedGroupId
+          );
+          const updated = updateAttributesWithAnnotation(getState(), updatedGroupId, libraryGroup);
+          if (updated) {
+            internalApi.updateAttributes(updated.attributes);
+          }
+        } catch (err) {
+          addLog(`Failed to fetch annotation group ${updatedGroupId}: ${err}`);
+        }
+      }),
   ];
   // There are few key moments when errors are checked and displayed:
   // * at setup time (here) before the first expression evaluation

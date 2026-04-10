@@ -14,8 +14,8 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
-import { ArrayFromString } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { ArrayFromString } from '@kbn/zod-helpers/v4';
 
 import { SortOrder } from '../../model/sorting.gen';
 import { GapFillStatus } from '../../model/rule_schema/common_attributes.gen';
@@ -88,6 +88,10 @@ Filters the returned results according to the value of the specified field, usin
    * Gap fill statuses
    */
   gap_fill_statuses: ArrayFromString(GapFillStatus).optional(),
+  /**
+   * Gap auto fill scheduler ID used to determine gap fill status for rules
+   */
+  gap_auto_fill_scheduler_id: z.string().optional(),
 });
 export type FindRulesRequestQueryInput = z.input<typeof FindRulesRequestQuery>;
 

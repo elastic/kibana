@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstCommand } from '../../../types';
+import type { ESQLAstCommand } from '@elastic/esql/types';
 import { esqlCommandRegistry } from '../../registry';
 
 let _sourceCommandNames: Set<string> | undefined;

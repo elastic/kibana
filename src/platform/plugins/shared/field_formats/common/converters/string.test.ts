@@ -140,4 +140,11 @@ describe('String Format', () => {
       )
     ).toBe('<mark class="ffSearch__highlight">&lt;img /&gt;</mark>');
   });
+
+  test('escapes HTML characters without highlights', () => {
+    const string = new StringFormat();
+    expect(string.convert('<script>alert("test")</script>', HTML_CONTEXT_TYPE)).toBe(
+      '&lt;script&gt;alert(&quot;test&quot;)&lt;/script&gt;'
+    );
+  });
 });

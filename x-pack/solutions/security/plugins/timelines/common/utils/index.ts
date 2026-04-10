@@ -6,4 +6,5 @@
  */
 
 export { getDataFromFieldsHits, isGeoField } from './field_formatters';
+export { getTimelineFieldsDataFromHit } from './get_timeline_fields_data_from_hit';
 export { toArray, toObjectArrayOfStrings } from './to_array';

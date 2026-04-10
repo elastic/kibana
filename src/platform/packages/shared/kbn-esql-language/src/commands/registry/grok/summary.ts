@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLCommand } from '../../../types';
+import type { ESQLCommand } from '@elastic/esql/types';
+import { walk } from '@elastic/esql';
 import type { ESQLCommandSummary } from '../types';
-import { walk } from '../../../ast/walker';
 import { unquoteTemplate, extractSemanticsFromGrok } from './utils';
 
 export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary => {

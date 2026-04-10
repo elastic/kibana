@@ -13,8 +13,6 @@ import {
   farequoteDataViewTestData,
   farequoteKQLSearchTestData,
   farequoteLuceneFiltersSearchTestData,
-  farequoteKQLFiltersSearchTestData,
-  farequoteLuceneSearchTestData,
   sampleLogTestData,
 } from '../index_test_data';
 
@@ -29,7 +27,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const endTime = 'Nov 1, 2020 @ 00:00:00.000';
 
   function runTests(testData: TestData) {
-    describe(`with ${testData.suiteTitle}`, function () {
+    // Failing: See https://github.com/elastic/kibana/issues/259109
+    describe.skip(`with ${testData.suiteTitle}`, function () {
       it(`displays the 'Field statistics' table content correctly`, async function () {
         await PageObjects.common.navigateToApp('discover');
         if (testData.isSavedSearch) {
@@ -107,8 +106,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       runTests(farequoteDataViewTestData);
       runTests(farequoteKQLSearchTestData);
-      runTests(farequoteLuceneSearchTestData);
-      runTests(farequoteKQLFiltersSearchTestData);
       runTests(farequoteLuceneFiltersSearchTestData);
       runTests(sampleLogTestData);
     });

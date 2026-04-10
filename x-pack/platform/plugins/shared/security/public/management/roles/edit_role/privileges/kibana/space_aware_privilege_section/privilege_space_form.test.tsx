@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { EuiThemeProvider } from '@elastic/eui';
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
 
 import { I18nProvider } from '@kbn/i18n-react';
@@ -17,6 +16,7 @@ import {
 } from '@kbn/security-role-management-model/src/__fixtures__';
 import { getDisplayedFeaturePrivileges } from '@kbn/security-ui-components/src/kibana_privilege_table/__fixtures__';
 import type { Space } from '@kbn/spaces-plugin/public';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
 import { PrivilegeSpaceForm } from './privilege_space_form';
 import type { Role } from '../../../../../../../common';
@@ -48,13 +48,20 @@ const displaySpaces: Space[] = [
 ];
 
 const renderComponent = (props: React.ComponentProps<typeof PrivilegeSpaceForm>) => {
-  return render(
-    <I18nProvider>
-      <EuiThemeProvider>
-        <PrivilegeSpaceForm {...props} />
-      </EuiThemeProvider>
-    </I18nProvider>
-  );
+  return renderWithKibanaRenderContext(<PrivilegeSpaceForm {...props} />);
+};
+
+const getSelectedBasePrivilege = (): string | null => {
+  const baseGroup = screen.queryByTestId('basePrivilegeButtonGroup');
+  const selected = baseGroup?.querySelector('[aria-pressed="true"]');
+  return selected?.getAttribute('data-test-subj') ?? null;
+};
+
+const areFeatureControlsDisabled = (): boolean => {
+  const controls = screen.queryAllByTestId('primaryFeaturePrivilegeControl');
+  if (controls.length === 0) return false;
+  const btn = controls[0].querySelector('button') as HTMLButtonElement | null;
+  return btn?.disabled ?? false;
 };
 
 const getSelectedBasePrivilege = (container: HTMLElement): string | null => {
@@ -75,7 +82,7 @@ describe('PrivilegeSpaceForm', () => {
     const role = createRole();
     const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
 
-    const { container } = renderComponent({
+    renderComponent({
       role,
       spaces: displaySpaces,
       kibanaPrivileges,
@@ -85,7 +92,7 @@ describe('PrivilegeSpaceForm', () => {
       onCancel: jest.fn(),
     });
 
-    expect(container.querySelector('[data-test-subj="basePrivilegeButtonGroup"]')).toBeNull();
+    expect(screen.queryByTestId('basePrivilegeButtonGroup')).toBeNull();
   });
 
   it('renders when a base privilege is selected', () => {
@@ -108,8 +115,8 @@ describe('PrivilegeSpaceForm', () => {
       onCancel: jest.fn(),
     });
 
-    expect(getSelectedBasePrivilege(container)).toEqual('basePrivilege_all');
-    expect(areFeatureControlsDisabled(container)).toEqual(true);
+    expect(getSelectedBasePrivilege()).toEqual('basePrivilege_all');
+    expect(areFeatureControlsDisabled()).toEqual(true);
     expect(getDisplayedFeaturePrivileges(container)).toMatchInlineSnapshot(`
       Object {
         "excluded_from_base": Object {
@@ -143,9 +150,7 @@ describe('PrivilegeSpaceForm', () => {
       }
     `);
 
-    expect(
-      container.querySelector('[data-test-subj="spaceFormGlobalPermissionsSupersedeWarning"]')
-    ).toBeNull();
+    expect(screen.queryByTestId('spaceFormGlobalPermissionsSupersedeWarning')).toBeNull();
   });
 
   it('renders when a feature privileges are selected', () => {
@@ -170,8 +175,8 @@ describe('PrivilegeSpaceForm', () => {
       onCancel: jest.fn(),
     });
 
-    expect(getSelectedBasePrivilege(container)).toEqual('basePrivilege_custom');
-    expect(areFeatureControlsDisabled(container)).toEqual(false);
+    expect(getSelectedBasePrivilege()).toEqual('basePrivilege_custom');
+    expect(areFeatureControlsDisabled()).toEqual(false);
     expect(getDisplayedFeaturePrivileges(container)).toMatchInlineSnapshot(`
       Object {
         "excluded_from_base": Object {
@@ -204,9 +209,7 @@ describe('PrivilegeSpaceForm', () => {
       }
     `);
 
-    expect(
-      container.querySelector('[data-test-subj="spaceFormGlobalPermissionsSupersedeWarning"]')
-    ).toBeNull();
+    expect(screen.queryByTestId('spaceFormGlobalPermissionsSupersedeWarning')).toBeNull();
   });
 
   it('renders a warning when space privileges are less permissive than configured global privileges', () => {
@@ -238,8 +241,8 @@ describe('PrivilegeSpaceForm', () => {
       onCancel: jest.fn(),
     });
 
-    expect(getSelectedBasePrivilege(container)).toEqual('basePrivilege_custom');
-    expect(areFeatureControlsDisabled(container)).toEqual(false);
+    expect(getSelectedBasePrivilege()).toEqual('basePrivilege_custom');
+    expect(areFeatureControlsDisabled()).toEqual(false);
     expect(getDisplayedFeaturePrivileges(container)).toMatchInlineSnapshot(`
       Object {
         "excluded_from_base": Object {
@@ -272,10 +275,8 @@ describe('PrivilegeSpaceForm', () => {
       }
     `);
 
-    expect(
-      container.querySelector('[data-test-subj="spaceFormGlobalPermissionsSupersedeWarning"]')
-    ).not.toBeNull();
-    expect(container.querySelector('[data-test-subj="globalPrivilegeWarning"]')).toBeNull();
+    expect(screen.queryByTestId('spaceFormGlobalPermissionsSupersedeWarning')).toBeInTheDocument();
+    expect(screen.queryByTestId('globalPrivilegeWarning')).toBeNull();
   });
 
   it('allows all feature privileges to be changed via "change read"', () => {
@@ -299,7 +300,7 @@ describe('PrivilegeSpaceForm', () => {
 
     const onChange = jest.fn();
 
-    const { container } = renderComponent({
+    renderComponent({
       role,
       spaces: displaySpaces,
       kibanaPrivileges,
@@ -309,9 +310,9 @@ describe('PrivilegeSpaceForm', () => {
       onCancel: jest.fn(),
     });
 
-    fireEvent.click(container.querySelector('[data-test-subj="changeAllPrivilegesButton"]')!);
-    fireEvent.click(document.querySelector('[data-test-subj="changeAllPrivileges-read"]')!);
-    fireEvent.click(container.querySelector('[data-test-subj="createSpacePrivilegeButton"]')!);
+    fireEvent.click(screen.getByTestId('changeAllPrivilegesButton'));
+    fireEvent.click(screen.getByTestId('changeAllPrivileges-read'));
+    fireEvent.click(screen.getByTestId('createSpacePrivilegeButton'));
 
     expect(onChange).toHaveBeenCalledWith(
       createRole([
@@ -353,7 +354,7 @@ describe('PrivilegeSpaceForm', () => {
       allowSubFeaturePrivileges: true,
     });
 
-    const { container } = renderComponent({
+    renderComponent({
       role,
       spaces: displaySpaces,
       kibanaPrivileges,
@@ -363,9 +364,7 @@ describe('PrivilegeSpaceForm', () => {
       onCancel: jest.fn(),
     });
 
-    expect(
-      container.querySelector('[data-test-subj="customizeSubFeaturePrivileges"]')
-    ).not.toBeNull();
+    expect(screen.queryAllByTestId('customizeSubFeaturePrivileges').length).toBeGreaterThan(0);
   });
 
   describe('Feature with a disabled `read` privilege', () => {
@@ -399,7 +398,7 @@ describe('PrivilegeSpaceForm', () => {
       onChange.mockReset();
     });
     it('still allow other features privileges to be changed via "change read"', () => {
-      const { container } = renderComponent({
+      renderComponent({
         role,
         spaces: displaySpaces,
         kibanaPrivileges,
@@ -409,9 +408,9 @@ describe('PrivilegeSpaceForm', () => {
         onCancel: jest.fn(),
       });
 
-      fireEvent.click(container.querySelector('[data-test-subj="changeAllPrivilegesButton"]')!);
-      fireEvent.click(document.querySelector('[data-test-subj="changeAllPrivileges-read"]')!);
-      fireEvent.click(container.querySelector('[data-test-subj="createSpacePrivilegeButton"]')!);
+      fireEvent.click(screen.getByTestId('changeAllPrivilegesButton'));
+      fireEvent.click(screen.getByTestId('changeAllPrivileges-read'));
+      fireEvent.click(screen.getByTestId('createSpacePrivilegeButton'));
 
       expect(Object.keys(onChange.mock.calls[0][0].kibana[0].feature)).not.toContain(
         'no_sub_features_disabled_read'
@@ -443,7 +442,7 @@ describe('PrivilegeSpaceForm', () => {
     });
 
     it('still allow all privileges to be changed via "change all"', () => {
-      const { container } = renderComponent({
+      renderComponent({
         role,
         spaces: displaySpaces,
         kibanaPrivileges,
@@ -453,9 +452,9 @@ describe('PrivilegeSpaceForm', () => {
         onCancel: jest.fn(),
       });
 
-      fireEvent.click(container.querySelector('[data-test-subj="changeAllPrivilegesButton"]')!);
-      fireEvent.click(document.querySelector('[data-test-subj="changeAllPrivileges-all"]')!);
-      fireEvent.click(container.querySelector('[data-test-subj="createSpacePrivilegeButton"]')!);
+      fireEvent.click(screen.getByTestId('changeAllPrivilegesButton'));
+      fireEvent.click(screen.getByTestId('changeAllPrivileges-all'));
+      fireEvent.click(screen.getByTestId('createSpacePrivilegeButton'));
 
       expect(onChange).toHaveBeenCalledWith(
         createRole([
@@ -518,7 +517,7 @@ describe('PrivilegeSpaceForm', () => {
     });
 
     it('still allow all features privileges to be changed via "change read" in foo space', () => {
-      const { container } = renderComponent({
+      renderComponent({
         role,
         spaces: displaySpaces,
         kibanaPrivileges,
@@ -528,9 +527,9 @@ describe('PrivilegeSpaceForm', () => {
         onCancel: jest.fn(),
       });
 
-      fireEvent.click(container.querySelector('[data-test-subj="changeAllPrivilegesButton"]')!);
-      fireEvent.click(document.querySelector('[data-test-subj="changeAllPrivileges-read"]')!);
-      fireEvent.click(container.querySelector('[data-test-subj="createSpacePrivilegeButton"]')!);
+      fireEvent.click(screen.getByTestId('changeAllPrivilegesButton'));
+      fireEvent.click(screen.getByTestId('changeAllPrivileges-read'));
+      fireEvent.click(screen.getByTestId('createSpacePrivilegeButton'));
 
       expect(onChange).toHaveBeenCalledWith(
         createRole([
@@ -560,7 +559,7 @@ describe('PrivilegeSpaceForm', () => {
     });
 
     it('still allow other features privileges to be changed via "change all" in foo space', () => {
-      const { container } = renderComponent({
+      renderComponent({
         role,
         spaces: displaySpaces,
         kibanaPrivileges,
@@ -570,9 +569,9 @@ describe('PrivilegeSpaceForm', () => {
         onCancel: jest.fn(),
       });
 
-      fireEvent.click(container.querySelector('[data-test-subj="changeAllPrivilegesButton"]')!);
-      fireEvent.click(document.querySelector('[data-test-subj="changeAllPrivileges-all"]')!);
-      fireEvent.click(container.querySelector('[data-test-subj="createSpacePrivilegeButton"]')!);
+      fireEvent.click(screen.getByTestId('changeAllPrivilegesButton'));
+      fireEvent.click(screen.getByTestId('changeAllPrivileges-all'));
+      fireEvent.click(screen.getByTestId('createSpacePrivilegeButton'));
 
       expect(Object.keys(onChange.mock.calls[0][0].kibana[0].feature)).not.toContain(
         'no_sub_features_require_all_space'
@@ -619,7 +618,7 @@ describe('PrivilegeSpaceForm', () => {
           spaces: ['bar'],
         },
       ]);
-      const { container } = renderComponent({
+      renderComponent({
         role: roleAllSpace,
         spaces: displaySpaces,
         kibanaPrivileges,
@@ -629,9 +628,9 @@ describe('PrivilegeSpaceForm', () => {
         onCancel: jest.fn(),
       });
 
-      fireEvent.click(container.querySelector('[data-test-subj="changeAllPrivilegesButton"]')!);
-      fireEvent.click(document.querySelector('[data-test-subj="changeAllPrivileges-all"]')!);
-      fireEvent.click(container.querySelector('[data-test-subj="createSpacePrivilegeButton"]')!);
+      fireEvent.click(screen.getByTestId('changeAllPrivilegesButton'));
+      fireEvent.click(screen.getByTestId('changeAllPrivileges-all'));
+      fireEvent.click(screen.getByTestId('createSpacePrivilegeButton'));
 
       expect(onChange).toHaveBeenCalledWith(
         createRole([

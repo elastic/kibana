@@ -7,24 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import path from 'path';
-import { pickScoutTestGroupRunOrder, getKibanaDir } from '#pipeline-utils';
+import { scoutTestDistributionStrategies } from '#pipeline-utils';
 
 (async () => {
-  try {
-    const scoutConfigsPath = path.resolve(
-      getKibanaDir(),
-      '.scout',
-      'test_configs',
-      'scout_playwright_configs.json'
+  const pickedStrategyName: string = process.env.SCOUT_TEST_DISTRIBUTION_STRATEGY || 'configs';
+
+  if (!(pickedStrategyName in scoutTestDistributionStrategies)) {
+    const validStrategyNames = Object.keys(scoutTestDistributionStrategies);
+    throw new Error(
+      `Unknown Scout test distribution strategy: '${pickedStrategyName}'` +
+        `\nExpected one of: ${validStrategyNames.join(', ')}`
     );
-    await pickScoutTestGroupRunOrder(scoutConfigsPath);
-  } catch (ex) {
-    console.error('Scout test grouping error: ', ex.message);
-    if (ex.response) {
-      console.error('HTTP Error Response Status', ex.response.status);
-      console.error('HTTP Error Response Body', ex.response.data);
-    }
-    process.exit(1);
   }
+
+  await scoutTestDistributionStrategies[pickedStrategyName]();
 })();

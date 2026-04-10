@@ -64,6 +64,14 @@ export function getInitialAppState({
     mergedState.hideChart = undefined;
   }
 
+  if (typeof mergedState.hideTable !== 'boolean') {
+    mergedState.hideTable = undefined;
+  }
+
+  if (mergedState.hideChart && mergedState.hideTable) {
+    mergedState.hideTable = false;
+  }
+
   // Don't allow URL state to overwrite the data source if there's an ES|QL query
   if (isOfAggregateQueryType(mergedState.query) && !isEsqlSource(mergedState.dataSource)) {
     mergedState.dataSource = createEsqlDataSource();
@@ -119,7 +127,7 @@ function getDefaultQuery({
   const canUseEsql = services.uiSettings.get(ENABLE_ESQL) && dataView instanceof DataView;
   const isEsqlDefault = services.discoverFeatureFlags.getIsEsqlDefault();
   if (canUseEsql && (queryMode === 'esql' || isEsqlDefault))
-    return { esql: defaultProfileEsqlQuery?.query ?? getInitialESQLQuery(dataView, true) };
+    return { esql: defaultProfileEsqlQuery?.query ?? getInitialESQLQuery(dataView) };
 
   // Lastly, fall back to classic if we can't use anything else
   return services.data.query.queryString.getDefaultQuery();
@@ -195,6 +203,9 @@ function getDefaultAppState({
   }
   if (persistedTab?.hideChart !== undefined) {
     defaultState.hideChart = persistedTab.hideChart;
+  }
+  if (persistedTab?.hideTable !== undefined) {
+    defaultState.hideTable = persistedTab.hideTable;
   }
   if (persistedTab?.rowHeight !== undefined) {
     defaultState.rowHeight = persistedTab.rowHeight;

@@ -8,8 +8,14 @@
  */
 import type { ColumnState } from '@kbn/lens-common';
 import type { DatatableState } from '../../../../schema';
-import { fromColorMappingAPIToLensState, fromColorByValueAPIToLensState } from '../../../coloring';
-import { getAccessorName, isColorByValueColor, isColorMappingColor } from '../helpers';
+import {
+  fromColorMappingAPIToLensState,
+  fromColorByValueAPIToLensState,
+  isColorMappingColor,
+  isColorByValueColor,
+  isLegacyColorPalette,
+} from '../../../coloring';
+import { getAccessorName, applyColorToToColorMode } from '../helpers';
 import {
   METRIC_ACCESSOR_PREFIX,
   ROW_ACCESSOR_PREFIX,
@@ -22,10 +28,14 @@ function buildColorProps(
     | NonNullable<DatatableState['rows']>[number]
 ): Partial<Pick<ColumnState, 'palette' | 'colorMapping' | 'colorMode'>> {
   if (!config.apply_color_to) return {};
-  const colorMode = config.apply_color_to === 'value' ? 'text' : 'cell';
+  const colorMode = applyColorToToColorMode(config.apply_color_to);
 
   if (isColorMappingColor(config.color)) {
-    return { colorMode, colorMapping: fromColorMappingAPIToLensState(config.color) };
+    const color = fromColorMappingAPIToLensState(config.color);
+    if (isLegacyColorPalette(color)) {
+      return { colorMode, palette: color.palette };
+    }
+    return { colorMode, colorMapping: color?.colorMapping };
   }
 
   if (isColorByValueColor(config.color)) {

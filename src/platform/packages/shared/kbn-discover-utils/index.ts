@@ -16,6 +16,7 @@ export {
   DOC_HIDE_TIME_COLUMN_SETTING,
   FIELDS_LIMIT_SETTING,
   HIDE_ANNOUNCEMENTS,
+  IS_ESQL_DEFAULT_FEATURE_FLAG_KEY,
   MAX_DOC_FIELDS_DISPLAYED,
   MODIFY_COLUMNS_ON_SWITCH,
   ROW_HEIGHT_OPTION,
@@ -26,6 +27,7 @@ export {
   SHOW_FIELD_STATISTICS,
   SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
+  DataGridDensity,
   IgnoredReason,
   buildDataTableRecord,
   buildDataTableRecordList,
@@ -64,6 +66,7 @@ export {
   dismissAllFlyoutsExceptFor,
   dismissFlyouts,
   prepareDataViewForEditing,
+  getEsqlDataView,
   LogLevelBadge,
   getDefaultSort,
   getSort,
@@ -72,6 +75,7 @@ export {
   getEsQuerySort,
   getTieBreakerFieldName,
   escapeAndPreserveHighlightTags,
+  getHighlightedFieldValue,
   severityOrder,
 } from './src';
 

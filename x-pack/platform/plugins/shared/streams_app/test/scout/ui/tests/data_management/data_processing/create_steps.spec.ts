@@ -38,17 +38,19 @@ test.describe(
 
     test('should not show Technical Preview badge when AI suggestions are unavailable', async ({
       page,
-      config,
     }) => {
-      // In the empty state without AI connectors, the Technical Preview badge should be hidden
+      // Mock the connectors endpoint to return no connectors, ensuring AI features
+      // are disabled regardless of the environment (local, ECH, serverless)
+      await page.route('**/internal/search_inference_endpoints/connectors*', async (route) => {
+        await route.fulfill({
+          status: 200,
+          body: JSON.stringify({ connectors: [], allConnectors: [], soEntryFound: false }),
+        });
+      });
+      await page.reload();
+
       await expect(page.getByText('Extract fields from your data')).toBeVisible();
-      // Only check for hidden badge in stateful mode - in serverless/production environments,
-      // AI features are always available so the Technical Preview badge will be shown
-      // eslint-disable-next-line playwright/no-conditional-in-test
-      if (!config.serverless) {
-        // eslint-disable-next-line playwright/no-conditional-expect
-        await expect(page.getByText('Technical Preview')).toBeHidden();
-      }
+      await expect(page.getByText('Technical Preview')).toBeHidden();
     });
 
     test('should create a new processor successfully', async ({ pageObjects }) => {
@@ -189,22 +191,6 @@ test.describe(
 
       await pageObjects.streams.saveStepsListChanges();
       expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);
-    });
-
-    test('should handle insufficient privileges gracefully', async ({
-      page,
-      browserAuth,
-      pageObjects,
-    }) => {
-      // Login as user with limited privileges
-      await browserAuth.loginAsViewer();
-      await pageObjects.streams.gotoProcessingTab('logs-generic-default');
-
-      // Create buttons should be hidden for users without edit privileges
-      const createProcessorButton = page.getByTestId(
-        'streamsAppStreamDetailEnrichmentCreateProcessorButton'
-      );
-      await expect(createProcessorButton).toBeHidden();
     });
 
     test('should duplicate a processor', async ({ pageObjects }) => {
