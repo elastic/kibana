@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { upperFirst } from 'lodash';
 import React from 'react';
-import { getConfidenceColor } from '../../stream_detail_systems/stream_features/use_stream_features_table';
+import { getConfidenceColor } from '../utils/get_confidence_color';
 import { FlyoutMetadataCard } from '../../../flyout_components/flyout_metadata_card';
 import { FlyoutToolbarHeader } from '../../../flyout_components/flyout_toolbar_header';
 import { SeverityBadge } from '../severity_badge/severity_badge';

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export {
-  KnowledgeIndicatorActionsCell,
-  KI_ROW_ACTION_MUTATION_KEY,
-} from './knowledge_indicator_actions_cell';
+export const getConfidenceColor = (confidence: number): string => {
+  if (confidence >= 70) return 'success';
+  if (confidence >= 40) return 'warning';
+  return 'danger';
+};

@@ -8,9 +8,8 @@
 import { EuiFilterButton, EuiFilterGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
-import { isComputedFeature } from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
-import { getKnowledgeIndicatorStreamName } from '../utils/get_knowledge_indicator_stream_name';
+import { matchesKnowledgeIndicatorFilters } from '../utils/matches_knowledge_indicator_filters';
 
 interface KnowledgeIndicatorStatusFilterProps {
   knowledgeIndicators: KnowledgeIndicator[];
@@ -32,43 +31,20 @@ export function KnowledgeIndicatorsStatusFilter({
   onStatusFilterChange,
 }: KnowledgeIndicatorStatusFilterProps) {
   const statusFilterCounts = useMemo(() => {
-    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
-
     return knowledgeIndicators.reduce(
-      (accumulator, knowledgeIndicator) => {
-        const type =
-          knowledgeIndicator.kind === 'feature' ? knowledgeIndicator.feature.type : 'query';
-        const matchesType = selectedTypes.length === 0 || selectedTypes.includes(type);
+      (accumulator, ki) => {
+        const matchesOtherFilters = matchesKnowledgeIndicatorFilters(ki, {
+          selectedTypes,
+          selectedStreams,
+          hideComputedTypes,
+          searchTerm,
+        });
 
-        if (!matchesType) {
+        if (!matchesOtherFilters) {
           return accumulator;
         }
 
-        if (
-          selectedStreams.length > 0 &&
-          !selectedStreams.includes(getKnowledgeIndicatorStreamName(knowledgeIndicator))
-        ) {
-          return accumulator;
-        }
-
-        if (
-          hideComputedTypes &&
-          knowledgeIndicator.kind === 'feature' &&
-          isComputedFeature(knowledgeIndicator.feature)
-        ) {
-          return accumulator;
-        }
-
-        const title =
-          knowledgeIndicator.kind === 'feature'
-            ? (knowledgeIndicator.feature.title ?? '').toLowerCase()
-            : (knowledgeIndicator.query.title ?? '').toLowerCase();
-
-        if (normalizedSearchTerm && !title.includes(normalizedSearchTerm)) {
-          return accumulator;
-        }
-
-        if (knowledgeIndicator.kind === 'feature' && knowledgeIndicator.feature.excluded_at) {
+        if (ki.kind === 'feature' && ki.feature.excluded_at) {
           accumulator.excluded += 1;
         } else {
           accumulator.active += 1;

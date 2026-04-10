@@ -10,6 +10,7 @@ import {
   EuiBadge,
   EuiFilterButton,
   EuiFilterGroup,
+  EuiPanel,
   EuiPopover,
   EuiSelectable,
   useGeneratedHtmlId,
@@ -17,9 +18,9 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
-import { isComputedFeature } from '@kbn/streams-schema';
 import React, { useMemo, useState } from 'react';
 import { getKnowledgeIndicatorStreamName } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_stream_name';
+import { matchesKnowledgeIndicatorFilters } from '../../../stream_detail_significant_events_view/utils/matches_knowledge_indicator_filters';
 
 interface DiscoveryStreamFilterProps {
   knowledgeIndicators: KnowledgeIndicator[];
@@ -51,43 +52,33 @@ export function DiscoveryStreamFilter({
     const streams = new Set<string>();
 
     knowledgeIndicators.forEach((ki) => {
+      if (
+        !matchesKnowledgeIndicatorFilters(ki, {
+          statusFilter,
+          selectedTypes,
+          hideComputedTypes,
+        })
+      ) {
+        return;
+      }
       streams.add(getKnowledgeIndicatorStreamName(ki));
     });
 
     return Array.from(streams).sort((left, right) => left.localeCompare(right));
-  }, [knowledgeIndicators]);
+  }, [knowledgeIndicators, statusFilter, selectedTypes, hideComputedTypes]);
 
   const streamCounts = useMemo(() => {
-    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
     const counts: Record<string, number> = {};
 
     knowledgeIndicators.forEach((ki) => {
-      const matchesStatusFilter =
-        statusFilter === 'active'
-          ? ki.kind === 'query' || !ki.feature.excluded_at
-          : ki.kind === 'feature' && Boolean(ki.feature.excluded_at);
-
-      if (!matchesStatusFilter) {
-        return;
-      }
-
-      const type = ki.kind === 'feature' ? ki.feature.type : 'query';
-      const matchesType = selectedTypes.length === 0 || selectedTypes.includes(type);
-
-      if (!matchesType) {
-        return;
-      }
-
-      if (hideComputedTypes && ki.kind === 'feature' && isComputedFeature(ki.feature)) {
-        return;
-      }
-
-      const title =
-        ki.kind === 'feature'
-          ? (ki.feature.title ?? '').toLowerCase()
-          : (ki.query.title ?? '').toLowerCase();
-
-      if (normalizedSearchTerm && !title.includes(normalizedSearchTerm)) {
+      if (
+        !matchesKnowledgeIndicatorFilters(ki, {
+          statusFilter,
+          selectedTypes,
+          hideComputedTypes,
+          searchTerm,
+        })
+      ) {
         return;
       }
 
@@ -98,21 +89,21 @@ export function DiscoveryStreamFilter({
     return counts;
   }, [knowledgeIndicators, searchTerm, statusFilter, selectedTypes, hideComputedTypes]);
 
-  const options = useMemo<EuiSelectableOption[]>(
-    () => [
+  const options = useMemo<EuiSelectableOption[]>(() => {
+    const selectedSet = new Set(selectedStreams);
+    return [
       {
         label: STREAM_FILTER_GROUP_LABEL,
         isGroupLabel: true,
       },
       ...availableStreams.map((stream) => ({
         key: stream,
-        checked: selectedStreams.includes(stream) ? ('on' as const) : undefined,
+        checked: selectedSet.has(stream) ? ('on' as const) : undefined,
         label: stream,
         append: <EuiBadge>{streamCounts[stream] ?? 0}</EuiBadge>,
       })),
-    ],
-    [availableStreams, selectedStreams, streamCounts]
-  );
+    ];
+  }, [availableStreams, selectedStreams, streamCounts]);
 
   return (
     <EuiFilterGroup>
@@ -148,13 +139,16 @@ export function DiscoveryStreamFilter({
           }}
         >
           {(list) => (
-            <div
+            <EuiPanel
+              hasShadow={false}
+              hasBorder={false}
+              paddingSize="none"
               css={css`
                 min-width: 260px;
               `}
             >
               {list}
-            </div>
+            </EuiPanel>
           )}
         </EuiSelectable>
       </EuiPopover>

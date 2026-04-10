@@ -44,16 +44,13 @@ export function useDiscoveryKnowledgeIndicatorsBulkDelete({
 
       const queries = knowledgeIndicators.filter((ki) => ki.kind === 'query');
 
-      const requests: Array<Promise<BulkOperationResult | void>> = [];
+      const featuresPromise = features.length > 0 ? deleteFeaturesInBulk(features) : undefined;
 
-      if (features.length > 0) {
-        requests.push(deleteFeaturesInBulk(features));
-      }
-
+      const queryPromises: Array<Promise<void>> = [];
       if (queries.length > 0) {
         const queriesByStream = groupBy(queries, 'stream_name');
         for (const [streamName, streamQueries] of Object.entries(queriesByStream)) {
-          requests.push(
+          queryPromises.push(
             deleteQueriesInBulk({
               queryIds: streamQueries.map((q) => q.query.id),
               streamName,
@@ -62,15 +59,29 @@ export function useDiscoveryKnowledgeIndicatorsBulkDelete({
         }
       }
 
-      const results = await Promise.allSettled(requests);
+      const [featuresSettled, querySettled] = await Promise.all([
+        featuresPromise
+          ? featuresPromise
+              .then(
+                (value): PromiseSettledResult<BulkOperationResult> => ({
+                  status: 'fulfilled',
+                  value,
+                })
+              )
+              .catch(
+                (reason): PromiseSettledResult<BulkOperationResult> => ({
+                  status: 'rejected',
+                  reason,
+                })
+              )
+          : undefined,
+        Promise.allSettled(queryPromises),
+      ]);
 
-      const hasRejected = results.some((r) => r.status === 'rejected');
-      const featuresResult = features.length > 0 ? results[0] : undefined;
+      const hasRejected =
+        featuresSettled?.status === 'rejected' || querySettled.some((r) => r.status === 'rejected');
       const hasPartialFeatureFailure =
-        featuresResult?.status === 'fulfilled' &&
-        featuresResult.value &&
-        'failedCount' in featuresResult.value &&
-        featuresResult.value.failedCount > 0;
+        featuresSettled?.status === 'fulfilled' && featuresSettled.value.failedCount > 0;
 
       if (hasRejected) {
         throw new Error(BULK_DELETE_REJECTED_ERROR_MESSAGE);
@@ -92,7 +103,7 @@ export function useDiscoveryKnowledgeIndicatorsBulkDelete({
     onSettled: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
-        queryClient.invalidateQueries({ queryKey: ['features', 'all'] }),
+        queryClient.invalidateQueries({ queryKey: ['features'], exact: false }),
       ]);
     },
   });

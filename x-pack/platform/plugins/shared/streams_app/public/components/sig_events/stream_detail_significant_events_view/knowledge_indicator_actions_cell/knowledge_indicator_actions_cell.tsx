@@ -17,17 +17,14 @@ import { useQueriesApi } from '../../../../hooks/sig_events/use_queries_api';
 import { useStreamFeaturesApi } from '../../../../hooks/sig_events/use_stream_features_api';
 import { getKnowledgeIndicatorStreamName } from '../utils/get_knowledge_indicator_stream_name';
 
+export const KI_ROW_ACTION_MUTATION_KEY = ['ki-row-action'];
+
 interface Props {
   knowledgeIndicator: KnowledgeIndicator;
   onDeleteRequest: (knowledgeIndicator: KnowledgeIndicator) => void;
-  onActionStateChange?: (inProgress: boolean) => void;
 }
 
-export function KnowledgeIndicatorActionsCell({
-  knowledgeIndicator,
-  onDeleteRequest,
-  onActionStateChange,
-}: Props) {
+export function KnowledgeIndicatorActionsCell({ knowledgeIndicator, onDeleteRequest }: Props) {
   const streamName = getKnowledgeIndicatorStreamName(knowledgeIndicator);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
   const [isActionInProgress, setIsActionInProgress] = useState(false);
@@ -50,6 +47,7 @@ export function KnowledgeIndicatorActionsCell({
   }, [streamName, queryClient]);
 
   const excludeAction = useMutation<void, Error, string>({
+    mutationKey: KI_ROW_ACTION_MUTATION_KEY,
     mutationFn: async (featureUuid) => {
       await excludeFeaturesInBulk([featureUuid]);
     },
@@ -63,6 +61,7 @@ export function KnowledgeIndicatorActionsCell({
   });
 
   const restoreAction = useMutation<void, Error, string>({
+    mutationKey: KI_ROW_ACTION_MUTATION_KEY,
     mutationFn: async (featureUuid) => {
       await restoreFeaturesInBulk([featureUuid]);
     },
@@ -76,6 +75,7 @@ export function KnowledgeIndicatorActionsCell({
   });
 
   const promoteAction = useMutation<void, Error, string>({
+    mutationKey: KI_ROW_ACTION_MUTATION_KEY,
     mutationFn: async (queryId) => {
       await promote({ queryIds: [queryId] });
     },
@@ -88,20 +88,15 @@ export function KnowledgeIndicatorActionsCell({
     },
   });
 
-  const withActionLoading = useCallback(
-    (run: () => void) => {
-      setIsActionInProgress(true);
-      onActionStateChange?.(true);
-      setIsActionsMenuOpen(false);
-      run();
-    },
-    [onActionStateChange]
-  );
+  const withActionLoading = useCallback((run: () => void) => {
+    setIsActionInProgress(true);
+    setIsActionsMenuOpen(false);
+    run();
+  }, []);
 
   const clearActionLoading = useCallback(() => {
     setIsActionInProgress(false);
-    onActionStateChange?.(false);
-  }, [onActionStateChange]);
+  }, []);
 
   const featureActionItems = useMemo(() => {
     if (knowledgeIndicator.kind !== 'feature') {

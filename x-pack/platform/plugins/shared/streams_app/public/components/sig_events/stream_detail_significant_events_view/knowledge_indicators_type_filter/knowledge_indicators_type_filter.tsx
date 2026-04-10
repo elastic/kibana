@@ -10,6 +10,7 @@ import {
   EuiBadge,
   EuiFilterButton,
   EuiFilterGroup,
+  EuiPanel,
   EuiPopover,
   EuiSelectable,
   useGeneratedHtmlId,
@@ -17,10 +18,9 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
-import { isComputedFeature } from '@kbn/streams-schema';
 import { upperFirst } from 'lodash';
-import React, { useCallback, useMemo, useState } from 'react';
-import { getKnowledgeIndicatorStreamName } from '../utils/get_knowledge_indicator_stream_name';
+import React, { useMemo, useState } from 'react';
+import { matchesKnowledgeIndicatorFilters } from '../utils/matches_knowledge_indicator_filters';
 
 interface KnowledgeIndicatorTypeFilterProps {
   knowledgeIndicators: KnowledgeIndicator[];
@@ -48,82 +48,50 @@ export function KnowledgeIndicatorsTypeFilter({
 
   const hasActiveFilters = selectedTypes.length > 0;
 
-  const matchesStreamFilter = useCallback(
-    (knowledgeIndicator: KnowledgeIndicator) => {
-      if (selectedStreams.length === 0) {
-        return true;
-      }
-      return selectedStreams.includes(getKnowledgeIndicatorStreamName(knowledgeIndicator));
-    },
-    [selectedStreams]
-  );
-
   const availableTypes = useMemo(() => {
     const types = new Set<string>();
 
-    knowledgeIndicators.forEach((knowledgeIndicator) => {
+    knowledgeIndicators.forEach((ki) => {
       if (
-        hideComputedTypes &&
-        knowledgeIndicator.kind === 'feature' &&
-        isComputedFeature(knowledgeIndicator.feature)
+        !matchesKnowledgeIndicatorFilters(ki, {
+          statusFilter,
+          selectedStreams,
+          hideComputedTypes,
+        })
       ) {
         return;
       }
-      if (!matchesStreamFilter(knowledgeIndicator)) {
-        return;
-      }
-      if (knowledgeIndicator.kind === 'feature') {
-        types.add(knowledgeIndicator.feature.type);
+      if (ki.kind === 'feature') {
+        types.add(ki.feature.type);
       } else {
         types.add('query');
       }
     });
 
     return Array.from(types).sort((left, right) => left.localeCompare(right));
-  }, [knowledgeIndicators, hideComputedTypes, matchesStreamFilter]);
+  }, [knowledgeIndicators, statusFilter, hideComputedTypes, selectedStreams]);
 
   const typeCounts = useMemo(() => {
-    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
     const counts: Record<string, number> = {};
 
-    knowledgeIndicators.forEach((knowledgeIndicator) => {
+    knowledgeIndicators.forEach((ki) => {
       if (
-        hideComputedTypes &&
-        knowledgeIndicator.kind === 'feature' &&
-        isComputedFeature(knowledgeIndicator.feature)
+        !matchesKnowledgeIndicatorFilters(ki, {
+          statusFilter,
+          selectedStreams,
+          hideComputedTypes,
+          searchTerm,
+        })
       ) {
         return;
       }
 
-      if (!matchesStreamFilter(knowledgeIndicator)) {
-        return;
-      }
-
-      const matchesStatusFilter =
-        statusFilter === 'active'
-          ? knowledgeIndicator.kind === 'query' || !knowledgeIndicator.feature.excluded_at
-          : knowledgeIndicator.kind === 'feature' &&
-            Boolean(knowledgeIndicator.feature.excluded_at);
-
-      if (!matchesStatusFilter) {
-        return;
-      }
-
-      const type =
-        knowledgeIndicator.kind === 'feature' ? knowledgeIndicator.feature.type : 'query';
-
-      const title =
-        knowledgeIndicator.kind === 'feature'
-          ? (knowledgeIndicator.feature.title ?? '').toLowerCase()
-          : (knowledgeIndicator.query.title ?? '').toLowerCase();
-
-      if (!normalizedSearchTerm || title.includes(normalizedSearchTerm)) {
-        counts[type] = (counts[type] ?? 0) + 1;
-      }
+      const type = ki.kind === 'feature' ? ki.feature.type : 'query';
+      counts[type] = (counts[type] ?? 0) + 1;
     });
 
     return counts;
-  }, [knowledgeIndicators, searchTerm, statusFilter, hideComputedTypes, matchesStreamFilter]);
+  }, [knowledgeIndicators, searchTerm, statusFilter, hideComputedTypes, selectedStreams]);
 
   const options = useMemo<EuiSelectableOption[]>(
     () => [
@@ -175,13 +143,16 @@ export function KnowledgeIndicatorsTypeFilter({
           }}
         >
           {(list) => (
-            <div
+            <EuiPanel
+              hasShadow={false}
+              hasBorder={false}
+              paddingSize="none"
               css={css`
                 min-width: 260px;
               `}
             >
               {list}
-            </div>
+            </EuiPanel>
           )}
         </EuiSelectable>
       </EuiPopover>

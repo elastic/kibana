@@ -25,11 +25,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/react-hooks';
+import { useIsMutating } from '@kbn/react-query';
 import { COMPUTED_FEATURE_TYPES, isComputedFeature } from '@kbn/streams-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { useFetchDiscoveryKnowledgeIndicators } from '../../../../../hooks/sig_events/use_fetch_discovery_knowledge_indicators';
 import { useDiscoveryFeaturesApi } from '../../../../../hooks/sig_events/use_discovery_features_api';
 import { useDiscoveryKnowledgeIndicatorsBulkDelete } from '../../../../../hooks/sig_events/use_discovery_knowledge_indicators_bulk_delete';
@@ -39,15 +39,52 @@ import { AssetImage } from '../../../../asset_image';
 import { LoadingPanel } from '../../../../loading_panel';
 import { SparkPlot } from '../../../../spark_plot';
 import { TableTitle } from '../../../stream_detail_systems/table_title';
-import { getConfidenceColor } from '../../../stream_detail_systems/stream_features/use_stream_features_table';
-import { KnowledgeIndicatorActionsCell } from '../../../stream_detail_significant_events_view/knowledge_indicator_actions_cell';
+import { getConfidenceColor } from '../../../stream_detail_significant_events_view/utils/get_confidence_color';
+import {
+  KnowledgeIndicatorActionsCell,
+  KI_ROW_ACTION_MUTATION_KEY,
+} from '../../../stream_detail_significant_events_view/knowledge_indicator_actions_cell';
 import { KnowledgeIndicatorDetailsFlyout } from '../../../stream_detail_significant_events_view/knowledge_indicator_details_flyout';
 import { DeleteTableItemsModal } from '../../../stream_detail_significant_events_view/delete_table_items_modal';
 import { KnowledgeIndicatorsTypeFilter } from '../../../stream_detail_significant_events_view/knowledge_indicators_type_filter';
 import { KnowledgeIndicatorsStatusFilter } from '../../../stream_detail_significant_events_view/knowledge_indicators_status_filter';
 import { getKnowledgeIndicatorItemId } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_item_id';
 import { getKnowledgeIndicatorStreamName } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_stream_name';
+import { matchesKnowledgeIndicatorFilters } from '../../../stream_detail_significant_events_view/utils/matches_knowledge_indicator_filters';
 import { DiscoveryStreamFilter } from '../discovery_stream_filter';
+import {
+  TITLE_COLUMN_LABEL,
+  EVENTS_COLUMN_LABEL,
+  TYPE_COLUMN_LABEL,
+  QUERY_TYPE_LABEL,
+  CONFIDENCE_COLUMN_LABEL,
+  STREAM_COLUMN_LABEL,
+  ACTIONS_COLUMN_LABEL,
+  VIEW_DETAILS_ARIA_LABEL,
+  MINIMIZE_DETAILS_ARIA_LABEL,
+  OCCURRENCES_TOOLTIP_NAME,
+  TABLE_CAPTION,
+  TABLE_LABEL,
+  NO_ITEMS_MESSAGE,
+  SEARCH_PLACEHOLDER,
+  SEARCH_ARIA_LABEL,
+  SHOW_COMPUTED_LABEL,
+  CLEAR_SELECTION_LABEL,
+  DELETE_SELECTED_LABEL,
+  EXCLUDE_SELECTED_LABEL,
+  RESTORE_SELECTED_LABEL,
+  EMPTY_STATE_TITLE,
+  EMPTY_STATE_DESCRIPTION,
+  EMPTY_STATE_GO_TO_STREAMS,
+  CANNOT_EXCLUDE_SELECTION_TOOLTIP,
+  BULK_EXCLUDE_SUCCESS_TOAST_TITLE,
+  BULK_EXCLUDE_PARTIAL_TOAST_TITLE,
+  BULK_EXCLUDE_ERROR_TOAST_TITLE,
+  BULK_RESTORE_SUCCESS_TOAST_TITLE,
+  BULK_RESTORE_PARTIAL_TOAST_TITLE,
+  BULK_RESTORE_ERROR_TOAST_TITLE,
+  DELETE_MODAL_TITLE,
+} from './translations';
 
 const SEARCH_DEBOUNCE_MS = 300;
 const COMPUTED_FEATURE_TYPES_SET = new Set<string>(COMPUTED_FEATURE_TYPES);
@@ -96,51 +133,65 @@ export function DiscoveryKnowledgeIndicatorsTable() {
   );
 
   const [isBulkOperationInProgress, setIsBulkOperationInProgress] = useState(false);
+  const isRowActionInProgress = useIsMutating({ mutationKey: KI_ROW_ACTION_MUTATION_KEY }) > 0;
 
   const selectedKnowledgeIndicatorId = selectedKnowledgeIndicator
     ? getKnowledgeIndicatorItemId(selectedKnowledgeIndicator)
     : undefined;
 
-  const filteredKnowledgeIndicators = useMemo(() => {
-    const normalizedSearchTerm = debouncedSearchTerm.trim().toLowerCase();
-
-    const filtered = knowledgeIndicators.filter((ki) => {
-      const matchesStatusFilter =
-        statusFilter === 'active'
-          ? ki.kind === 'query' || !ki.feature.excluded_at
-          : ki.kind === 'feature' && Boolean(ki.feature.excluded_at);
-
-      if (!matchesStatusFilter) {
-        return false;
-      }
-
-      const type = ki.kind === 'feature' ? ki.feature.type : 'query';
-      if (selectedTypes.length > 0 && !selectedTypes.includes(type)) {
-        return false;
-      }
-
-      if (
-        selectedStreams.length > 0 &&
-        !selectedStreams.includes(getKnowledgeIndicatorStreamName(ki))
-      ) {
-        return false;
-      }
-
-      if (hideComputedTypes && ki.kind === 'feature' && isComputedFeature(ki.feature)) {
-        return false;
-      }
-
-      if (!normalizedSearchTerm) {
-        return true;
-      }
-
-      const title =
-        ki.kind === 'feature'
-          ? (ki.feature.title ?? '').toLowerCase()
-          : (ki.query.title ?? '').toLowerCase();
-
-      return title.includes(normalizedSearchTerm);
+  useEffect(() => {
+    setSelectedKnowledgeIndicator((current) => {
+      if (!current) return current;
+      const currentId = getKnowledgeIndicatorItemId(current);
+      const stillExists = knowledgeIndicators.some(
+        (ki) => getKnowledgeIndicatorItemId(ki) === currentId
+      );
+      return stillExists ? current : null;
     });
+
+    const availableTypes = new Set<string>();
+    const availableStreams = new Set<string>();
+    for (const ki of knowledgeIndicators) {
+      if (
+        matchesKnowledgeIndicatorFilters(ki, {
+          statusFilter,
+          selectedStreams,
+          hideComputedTypes,
+        })
+      ) {
+        availableTypes.add(ki.kind === 'feature' ? ki.feature.type : 'query');
+      }
+      if (
+        matchesKnowledgeIndicatorFilters(ki, {
+          statusFilter,
+          selectedTypes,
+          hideComputedTypes,
+        })
+      ) {
+        availableStreams.add(getKnowledgeIndicatorStreamName(ki));
+      }
+    }
+
+    setSelectedTypes((current) => {
+      const pruned = current.filter((t) => availableTypes.has(t));
+      return pruned.length === current.length ? current : pruned;
+    });
+    setSelectedStreams((current) => {
+      const pruned = current.filter((s) => availableStreams.has(s));
+      return pruned.length === current.length ? current : pruned;
+    });
+  }, [knowledgeIndicators, statusFilter, selectedTypes, selectedStreams, hideComputedTypes]);
+
+  const filteredKnowledgeIndicators = useMemo(() => {
+    const filtered = knowledgeIndicators.filter((ki) =>
+      matchesKnowledgeIndicatorFilters(ki, {
+        statusFilter,
+        selectedTypes,
+        selectedStreams,
+        hideComputedTypes,
+        searchTerm: debouncedSearchTerm,
+      })
+    );
 
     return filtered.sort((a, b) =>
       getKnowledgeIndicatorTitle(a)
@@ -156,23 +207,59 @@ export function DiscoveryKnowledgeIndicatorsTable() {
     hideComputedTypes,
   ]);
 
-  useEffect(() => {
+  const resetPagination = useCallback(() => {
     setPagination((current) => {
       if (current.pageIndex === 0) return current;
       return { ...current, pageIndex: 0 };
     });
-  }, [debouncedSearchTerm, statusFilter, selectedTypes, selectedStreams, hideComputedTypes]);
+  }, []);
 
-  useEffect(() => {
-    setSelectedKnowledgeIndicator((current) => {
-      if (!current) return current;
-      const currentId = getKnowledgeIndicatorItemId(current);
-      const stillExists = knowledgeIndicators.some(
-        (ki) => getKnowledgeIndicatorItemId(ki) === currentId
-      );
-      return stillExists ? current : null;
-    });
-  }, [knowledgeIndicators]);
+  const handleStatusFilterChange = useCallback(
+    (filter: 'active' | 'excluded') => {
+      setStatusFilter(filter);
+      setSelectedKnowledgeIndicators([]);
+      resetPagination();
+    },
+    [resetPagination]
+  );
+
+  const handleSelectedTypesChange = useCallback(
+    (types: string[]) => {
+      setSelectedTypes(types);
+      resetPagination();
+    },
+    [resetPagination]
+  );
+
+  const handleSelectedStreamsChange = useCallback(
+    (streams: string[]) => {
+      setSelectedStreams(streams);
+      resetPagination();
+    },
+    [resetPagination]
+  );
+
+  const handleComputedToggleChange = useCallback(
+    (checked: boolean) => {
+      const shouldHide = !checked;
+      setHideComputedTypes(shouldHide);
+      if (shouldHide) {
+        setSelectedTypes((current) =>
+          current.filter((type) => !COMPUTED_FEATURE_TYPES_SET.has(type))
+        );
+      }
+      resetPagination();
+    },
+    [resetPagination]
+  );
+
+  const handleSearchChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setTableSearchValue(event.target.value);
+      resetPagination();
+    },
+    [resetPagination]
+  );
 
   const toggleSelectedKnowledgeIndicator = useCallback((ki: KnowledgeIndicator) => {
     setSelectedKnowledgeIndicator((current) => {
@@ -242,16 +329,6 @@ export function DiscoveryKnowledgeIndicatorsTable() {
     [executeBulkFeatureOperation, restoreFeaturesInBulk]
   );
 
-  const [isRowActionInProgress, setIsRowActionInProgress] = useState(false);
-
-  // Single-row actions (exclude/restore) invalidate query caches, which refetches data and may
-  // unmount the KnowledgeIndicatorActionsCell mid-operation. When that happens, the mutation
-  // observer's onSettled callback never fires, leaving isRowActionInProgress stuck at true.
-  // Resetting on data change guarantees cleanup after every successful refetch.
-  useEffect(() => {
-    setIsRowActionInProgress(false);
-  }, [knowledgeIndicators]);
-
   const isOperationInProgress = isDeleting || isBulkOperationInProgress || isRowActionInProgress;
   const selectionContainsQueries = selectedKnowledgeIndicators.some((ki) => ki.kind === 'query');
   const selectionContainsComputed = selectedKnowledgeIndicators.some(
@@ -266,11 +343,7 @@ export function DiscoveryKnowledgeIndicatorsTable() {
       {
         name: TITLE_COLUMN_LABEL,
         render: (ki: KnowledgeIndicator) => {
-          const title =
-            ki.kind === 'feature'
-              ? ki.feature.title ?? ki.feature.id
-              : ki.query.title ?? ki.query.id;
-
+          const title = getKnowledgeIndicatorTitle(ki);
           const isExpanded = selectedKnowledgeIndicatorId === getKnowledgeIndicatorItemId(ki);
 
           return (
@@ -361,7 +434,6 @@ export function DiscoveryKnowledgeIndicatorsTable() {
           <KnowledgeIndicatorActionsCell
             knowledgeIndicator={ki}
             onDeleteRequest={(item) => setKnowledgeIndicatorsToDelete([item])}
-            onActionStateChange={setIsRowActionInProgress}
           />
         ),
       },
@@ -373,7 +445,7 @@ export function DiscoveryKnowledgeIndicatorsTable() {
     return <LoadingPanel size="l" />;
   }
 
-  if (!isLoading && isEmpty) {
+  if (isEmpty) {
     return (
       <EuiEmptyPrompt
         aria-live="polite"
@@ -405,7 +477,7 @@ export function DiscoveryKnowledgeIndicatorsTable() {
           <EuiFieldSearch
             fullWidth
             value={tableSearchValue}
-            onChange={(event) => setTableSearchValue(event.target.value)}
+            onChange={handleSearchChange}
             placeholder={SEARCH_PLACEHOLDER}
             aria-label={SEARCH_ARIA_LABEL}
           />
@@ -418,7 +490,7 @@ export function DiscoveryKnowledgeIndicatorsTable() {
             selectedStreams={selectedStreams}
             hideComputedTypes={hideComputedTypes}
             statusFilter={statusFilter}
-            onStatusFilterChange={setStatusFilter}
+            onStatusFilterChange={handleStatusFilterChange}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -427,7 +499,7 @@ export function DiscoveryKnowledgeIndicatorsTable() {
             searchTerm={debouncedSearchTerm}
             statusFilter={statusFilter}
             selectedTypes={selectedTypes}
-            onSelectedTypesChange={setSelectedTypes}
+            onSelectedTypesChange={handleSelectedTypesChange}
             hideComputedTypes={hideComputedTypes}
             selectedStreams={selectedStreams}
           />
@@ -440,22 +512,14 @@ export function DiscoveryKnowledgeIndicatorsTable() {
             selectedTypes={selectedTypes}
             hideComputedTypes={hideComputedTypes}
             selectedStreams={selectedStreams}
-            onSelectedStreamsChange={setSelectedStreams}
+            onSelectedStreamsChange={handleSelectedStreamsChange}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSwitch
             label={SHOW_COMPUTED_LABEL}
             checked={!hideComputedTypes}
-            onChange={(e) => {
-              const shouldHide = !e.target.checked;
-              setHideComputedTypes(shouldHide);
-              if (shouldHide) {
-                setSelectedTypes((current) =>
-                  current.filter((type) => !COMPUTED_FEATURE_TYPES_SET.has(type))
-                );
-              }
-            }}
+            onChange={(e) => handleComputedToggleChange(e.target.checked)}
             compressed
           />
         </EuiFlexItem>
@@ -581,7 +645,7 @@ export function DiscoveryKnowledgeIndicatorsTable() {
 }
 
 function BulkExcludeButton({
-  isLoading,
+  isLoading: loading,
   isDisabled,
   showTooltip,
   onClick,
@@ -597,8 +661,9 @@ function BulkExcludeButton({
       color="warning"
       size="xs"
       aria-label={EXCLUDE_SELECTED_LABEL}
-      isLoading={isLoading}
+      isLoading={loading}
       isDisabled={isDisabled}
+      hasAriaDisabled={showTooltip}
       onClick={onClick}
     >
       {EXCLUDE_SELECTED_LABEL}
@@ -611,164 +676,3 @@ function BulkExcludeButton({
 
   return button;
 }
-
-const TITLE_COLUMN_LABEL = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.columns.titleLabel',
-  { defaultMessage: 'Knowledge Indicator' }
-);
-
-const EVENTS_COLUMN_LABEL = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.columns.eventsLabel',
-  { defaultMessage: 'Events' }
-);
-
-const TYPE_COLUMN_LABEL = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.columns.typeLabel',
-  { defaultMessage: 'Type' }
-);
-
-const QUERY_TYPE_LABEL = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.columns.queryTypeLabel',
-  { defaultMessage: 'Query' }
-);
-
-const CONFIDENCE_COLUMN_LABEL = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.columns.confidenceLabel',
-  { defaultMessage: 'Confidence' }
-);
-
-const STREAM_COLUMN_LABEL = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.columns.streamLabel',
-  { defaultMessage: 'Stream' }
-);
-
-const ACTIONS_COLUMN_LABEL = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.columns.actionsLabel',
-  { defaultMessage: 'Actions' }
-);
-
-const VIEW_DETAILS_ARIA_LABEL = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.viewDetailsAriaLabel',
-  { defaultMessage: 'View details' }
-);
-
-const MINIMIZE_DETAILS_ARIA_LABEL = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.minimizeDetailsAriaLabel',
-  { defaultMessage: 'Collapse details' }
-);
-
-const OCCURRENCES_TOOLTIP_NAME = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.occurrencesTooltipName',
-  { defaultMessage: 'Detected event occurrences' }
-);
-
-const TABLE_CAPTION = i18n.translate('xpack.streams.discoveryKnowledgeIndicators.tableCaption', {
-  defaultMessage: 'Knowledge Indicators table',
-});
-
-const TABLE_LABEL = i18n.translate('xpack.streams.discoveryKnowledgeIndicators.tableLabel', {
-  defaultMessage: 'Knowledge indicators',
-});
-
-const NO_ITEMS_MESSAGE = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.noItemsMessage',
-  { defaultMessage: 'No knowledge indicators found' }
-);
-
-const SEARCH_PLACEHOLDER = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.searchPlaceholder',
-  { defaultMessage: 'Search knowledge indicators' }
-);
-
-const SEARCH_ARIA_LABEL = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.searchAriaLabel',
-  { defaultMessage: 'Search knowledge indicators' }
-);
-
-const SHOW_COMPUTED_LABEL = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.showComputedLabel',
-  { defaultMessage: 'Show computed features' }
-);
-
-const CLEAR_SELECTION_LABEL = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.clearSelectionLabel',
-  { defaultMessage: 'Clear selection' }
-);
-
-const DELETE_SELECTED_LABEL = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.deleteSelectedLabel',
-  { defaultMessage: 'Delete selected' }
-);
-
-const EXCLUDE_SELECTED_LABEL = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.excludeSelectedLabel',
-  { defaultMessage: 'Exclude selected' }
-);
-
-const RESTORE_SELECTED_LABEL = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.restoreSelectedLabel',
-  { defaultMessage: 'Restore selected' }
-);
-
-const EMPTY_STATE_TITLE = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.emptyState.title',
-  { defaultMessage: 'Knowledge indicators' }
-);
-
-const EMPTY_STATE_DESCRIPTION = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.emptyState.description',
-  {
-    defaultMessage:
-      'Facts about your stream automatically extracted from log data to power rule generation. To generate knowledge indicators, go to Streams tab and start onboarding.',
-  }
-);
-
-const EMPTY_STATE_GO_TO_STREAMS = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.emptyState.goToStreamsButton',
-  { defaultMessage: 'Go to Streams tab' }
-);
-
-const CANNOT_EXCLUDE_SELECTION_TOOLTIP = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.cannotExcludeSelectionTooltip',
-  {
-    defaultMessage:
-      'Queries and computed features cannot be excluded. Deselect them to enable this action.',
-  }
-);
-
-const BULK_EXCLUDE_SUCCESS_TOAST_TITLE = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.bulkExcludeSuccessToastTitle',
-  { defaultMessage: 'Knowledge indicators excluded' }
-);
-
-const BULK_EXCLUDE_PARTIAL_TOAST_TITLE = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.bulkExcludePartialToastTitle',
-  { defaultMessage: 'Some knowledge indicators could not be excluded' }
-);
-
-const BULK_EXCLUDE_ERROR_TOAST_TITLE = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.bulkExcludeErrorToastTitle',
-  { defaultMessage: 'Failed to exclude knowledge indicators' }
-);
-
-const BULK_RESTORE_SUCCESS_TOAST_TITLE = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.bulkRestoreSuccessToastTitle',
-  { defaultMessage: 'Knowledge indicators restored' }
-);
-
-const BULK_RESTORE_PARTIAL_TOAST_TITLE = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.bulkRestorePartialToastTitle',
-  { defaultMessage: 'Some knowledge indicators could not be restored' }
-);
-
-const BULK_RESTORE_ERROR_TOAST_TITLE = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.bulkRestoreErrorToastTitle',
-  { defaultMessage: 'Failed to restore knowledge indicators' }
-);
-
-const DELETE_MODAL_TITLE = (count: number) =>
-  i18n.translate('xpack.streams.discoveryKnowledgeIndicators.deleteModalTitle', {
-    defaultMessage:
-      'Are you sure you want to delete {count, plural, one {this knowledge indicator} other {these knowledge indicators}}?',
-    values: { count },
-  });
