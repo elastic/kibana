@@ -127,7 +127,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
           label: index,
           // Prevent NVDA from reading the label twice: EUI sets title={label} on the
           // list item, which screen readers announce in addition to the accessible name.
-          ,
+          title: '',
           checked:
             isAllIndicesAndDataStreams ||
             // If indices is a string, we default to custom input mode, so we mark individual indices
