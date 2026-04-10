@@ -58,9 +58,7 @@ export function RulesTable({
   });
 
   const filteredRules = useMemo(() => {
-    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
-
-    if (!normalizedSearchTerm) {
+    if (!searchTerm) {
       return rules;
     }
 
@@ -70,7 +68,7 @@ export function RulesTable({
       }
 
       const title = (rule.query.title ?? '').toLowerCase();
-      return title.includes(normalizedSearchTerm);
+      return title.includes(searchTerm);
     });
   }, [rules, searchTerm]);
 

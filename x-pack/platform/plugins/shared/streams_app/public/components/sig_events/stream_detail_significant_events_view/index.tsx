@@ -59,7 +59,9 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   } = useKibana();
   const queryClient = useQueryClient();
   const [tableSearchValue, setTableSearchValue] = useState('');
-  const debouncedTableSearchValue = useDebouncedValue(tableSearchValue, SEARCH_DEBOUNCE_MS);
+  const debouncedTableSearchValue = useDebouncedValue(tableSearchValue, SEARCH_DEBOUNCE_MS)
+    .trim()
+    .toLowerCase();
   const [knowledgeIndicatorStatusFilter, setKnowledgeIndicatorStatusFilter] = useState<
     'active' | 'excluded'
   >('active');

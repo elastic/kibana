@@ -70,8 +70,6 @@ export function KnowledgeIndicatorsTable({
   });
 
   const filteredKnowledgeIndicators = useMemo(() => {
-    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
-
     return knowledgeIndicators.filter((knowledgeIndicator) => {
       const matchesStatusFilter =
         statusFilter === 'active'
@@ -91,17 +89,15 @@ export function KnowledgeIndicatorsTable({
         return false;
       }
 
-      if (!normalizedSearchTerm) {
+      if (!searchTerm) {
         return true;
       }
 
       if (knowledgeIndicator.kind === 'feature') {
-        return (knowledgeIndicator.feature.title ?? '')
-          .toLowerCase()
-          .includes(normalizedSearchTerm);
+        return (knowledgeIndicator.feature.title ?? '').toLowerCase().includes(searchTerm);
       }
 
-      return (knowledgeIndicator.query.title ?? '').toLowerCase().includes(normalizedSearchTerm);
+      return (knowledgeIndicator.query.title ?? '').toLowerCase().includes(searchTerm);
     });
   }, [knowledgeIndicators, searchTerm, selectedTypes, statusFilter]);
 

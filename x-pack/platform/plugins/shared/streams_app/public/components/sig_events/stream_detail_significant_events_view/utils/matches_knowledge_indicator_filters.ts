@@ -17,52 +17,36 @@ export interface KnowledgeIndicatorFilterCriteria {
   searchTerm?: string;
 }
 
+const isActive = (ki: KnowledgeIndicator): boolean =>
+  ki.kind === 'query' || !ki.feature.excluded_at;
+
 export const matchesKnowledgeIndicatorFilters = (
   ki: KnowledgeIndicator,
   criteria: KnowledgeIndicatorFilterCriteria
 ): boolean => {
   const { statusFilter, selectedTypes, selectedStreams, hideComputedTypes, searchTerm } = criteria;
 
-  if (statusFilter !== undefined) {
-    const matchesStatus =
-      statusFilter === 'active'
-        ? ki.kind === 'query' || !ki.feature.excluded_at
-        : ki.kind === 'feature' && Boolean(ki.feature.excluded_at);
+  if (statusFilter === 'active' && !isActive(ki)) return false;
+  if (statusFilter === 'excluded' && isActive(ki)) return false;
 
-    if (!matchesStatus) {
-      return false;
-    }
-  }
-
-  if (selectedTypes !== undefined && selectedTypes.length > 0) {
+  if (selectedTypes?.length) {
     const type = ki.kind === 'feature' ? ki.feature.type : 'query';
-    if (!selectedTypes.includes(type)) {
-      return false;
-    }
+    if (!selectedTypes.includes(type)) return false;
   }
 
-  if (selectedStreams !== undefined && selectedStreams.length > 0) {
-    if (!selectedStreams.includes(getKnowledgeIndicatorStreamName(ki))) {
-      return false;
-    }
+  if (selectedStreams?.length) {
+    if (!selectedStreams.includes(getKnowledgeIndicatorStreamName(ki))) return false;
   }
 
-  if (hideComputedTypes && ki.kind === 'feature' && isComputedFeature(ki.feature)) {
-    return false;
-  }
+  if (hideComputedTypes && ki.kind === 'feature' && isComputedFeature(ki.feature)) return false;
 
-  if (searchTerm !== undefined) {
-    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
-    if (normalizedSearchTerm) {
-      const title =
-        ki.kind === 'feature'
-          ? (ki.feature.title ?? '').toLowerCase()
-          : (ki.query.title ?? '').toLowerCase();
+  if (searchTerm) {
+    const title =
+      ki.kind === 'feature'
+        ? (ki.feature.title ?? '').toLowerCase()
+        : (ki.query.title ?? '').toLowerCase();
 
-      if (!title.includes(normalizedSearchTerm)) {
-        return false;
-      }
-    }
+    if (!title.includes(searchTerm)) return false;
   }
 
   return true;

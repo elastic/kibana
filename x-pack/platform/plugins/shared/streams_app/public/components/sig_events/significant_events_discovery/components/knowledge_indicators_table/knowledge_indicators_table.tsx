@@ -29,7 +29,7 @@ import { useDebouncedValue } from '@kbn/react-hooks';
 import { useIsMutating } from '@kbn/react-query';
 import { COMPUTED_FEATURE_TYPES, isComputedFeature } from '@kbn/streams-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useFetchKnowledgeIndicators } from '../../../../../hooks/sig_events/use_fetch_knowledge_indicators';
 import { useDiscoveryFeaturesApi } from '../../../../../hooks/sig_events/use_discovery_features_api';
 import { useKnowledgeIndicatorsBulkDelete } from '../../../../../hooks/sig_events/use_knowledge_indicators_bulk_delete';
@@ -50,8 +50,11 @@ import { KnowledgeIndicatorsTypeFilter } from '../../../stream_detail_significan
 import { KnowledgeIndicatorsStatusFilter } from '../../../stream_detail_significant_events_view/knowledge_indicators_status_filter';
 import { getKnowledgeIndicatorItemId } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_item_id';
 import { getKnowledgeIndicatorStreamName } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_stream_name';
-import { matchesKnowledgeIndicatorFilters } from '../../../stream_detail_significant_events_view/utils/matches_knowledge_indicator_filters';
 import { StreamFilter } from '../stream_filter';
+import {
+  getKnowledgeIndicatorTitle,
+  useKnowledgeIndicatorsStateSync,
+} from './use_knowledge_indicators_state_sync';
 import {
   TITLE_COLUMN_LABEL,
   EVENTS_COLUMN_LABEL,
@@ -89,9 +92,9 @@ import {
 const SEARCH_DEBOUNCE_MS = 300;
 const COMPUTED_FEATURE_TYPES_SET = new Set<string>(COMPUTED_FEATURE_TYPES);
 const EMPTY_ANNOTATIONS: never[] = [];
-
-const getKnowledgeIndicatorTitle = (ki: KnowledgeIndicator): string =>
-  ki.kind === 'feature' ? ki.feature.title ?? ki.feature.id : ki.query.title ?? ki.query.id;
+const capitalizeStyle = css`
+  text-transform: capitalize;
+`;
 
 export function KnowledgeIndicatorsTable() {
   const router = useStreamsAppRouter();
@@ -107,7 +110,9 @@ export function KnowledgeIndicatorsTable() {
   const { excludeFeaturesInBulk, restoreFeaturesInBulk } = useDiscoveryFeaturesApi();
 
   const [tableSearchValue, setTableSearchValue] = useState('');
-  const debouncedSearchTerm = useDebouncedValue(tableSearchValue, SEARCH_DEBOUNCE_MS);
+  const debouncedSearchTerm = useDebouncedValue(tableSearchValue, SEARCH_DEBOUNCE_MS)
+    .trim()
+    .toLowerCase();
   const [statusFilter, setStatusFilter] = useState<'active' | 'excluded'>('active');
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedStreams, setSelectedStreams] = useState<string[]>([]);
@@ -127,7 +132,7 @@ export function KnowledgeIndicatorsTable() {
     onSuccess: () => {
       setSelectedKnowledgeIndicators([]);
       setKnowledgeIndicatorsToDelete([]);
-      setSelectedKnowledgeIndicator(null);
+      closeFlyout();
     },
   });
 
@@ -138,76 +143,18 @@ export function KnowledgeIndicatorsTable() {
     ? getKnowledgeIndicatorItemId(selectedKnowledgeIndicator)
     : undefined;
 
-  useEffect(() => {
-    const validIds = new Set(knowledgeIndicators.map(getKnowledgeIndicatorItemId));
-
-    setSelectedKnowledgeIndicator((current) => {
-      if (!current) return current;
-      return validIds.has(getKnowledgeIndicatorItemId(current)) ? current : null;
-    });
-
-    setSelectedKnowledgeIndicators((current) => {
-      const pruned = current.filter((ki) => validIds.has(getKnowledgeIndicatorItemId(ki)));
-      return pruned.length === current.length ? current : pruned;
-    });
-
-    const availableTypes = new Set<string>();
-    const availableStreams = new Set<string>();
-    for (const ki of knowledgeIndicators) {
-      if (
-        matchesKnowledgeIndicatorFilters(ki, {
-          statusFilter,
-          selectedStreams,
-          hideComputedTypes,
-        })
-      ) {
-        availableTypes.add(ki.kind === 'feature' ? ki.feature.type : 'query');
-      }
-      if (
-        matchesKnowledgeIndicatorFilters(ki, {
-          statusFilter,
-          selectedTypes,
-          hideComputedTypes,
-        })
-      ) {
-        availableStreams.add(getKnowledgeIndicatorStreamName(ki));
-      }
-    }
-
-    setSelectedTypes((current) => {
-      const pruned = current.filter((t) => availableTypes.has(t));
-      return pruned.length === current.length ? current : pruned;
-    });
-    setSelectedStreams((current) => {
-      const pruned = current.filter((s) => availableStreams.has(s));
-      return pruned.length === current.length ? current : pruned;
-    });
-  }, [knowledgeIndicators, statusFilter, selectedTypes, selectedStreams, hideComputedTypes]);
-
-  const filteredKnowledgeIndicators = useMemo(() => {
-    const filtered = knowledgeIndicators.filter((ki) =>
-      matchesKnowledgeIndicatorFilters(ki, {
-        statusFilter,
-        selectedTypes,
-        selectedStreams,
-        hideComputedTypes,
-        searchTerm: debouncedSearchTerm,
-      })
-    );
-
-    return filtered.sort((a, b) =>
-      getKnowledgeIndicatorTitle(a)
-        .toLowerCase()
-        .localeCompare(getKnowledgeIndicatorTitle(b).toLowerCase())
-    );
-  }, [
+  const filteredKnowledgeIndicators = useKnowledgeIndicatorsStateSync({
     knowledgeIndicators,
-    debouncedSearchTerm,
     statusFilter,
     selectedTypes,
     selectedStreams,
     hideComputedTypes,
-  ]);
+    debouncedSearchTerm,
+    setSelectedKnowledgeIndicator,
+    setSelectedKnowledgeIndicators,
+    setSelectedTypes,
+    setSelectedStreams,
+  });
 
   const resetPagination = useCallback(() => {
     setPagination((current) => {
@@ -263,6 +210,10 @@ export function KnowledgeIndicatorsTable() {
     [resetPagination]
   );
 
+  const closeFlyout = useCallback(() => {
+    setSelectedKnowledgeIndicator(null);
+  }, []);
+
   const toggleSelectedKnowledgeIndicator = useCallback((ki: KnowledgeIndicator) => {
     setSelectedKnowledgeIndicator((current) => {
       if (!current) return ki;
@@ -276,12 +227,17 @@ export function KnowledgeIndicatorsTable() {
   }, []);
 
   const executeBulkFeatureOperation = useCallback(
-    async (
-      operation: typeof excludeFeaturesInBulk,
-      successTitle: string,
-      partialTitle: string,
-      errorTitle: string
-    ) => {
+    async ({
+      operation,
+      successTitle,
+      partialTitle,
+      errorTitle,
+    }: {
+      operation: typeof excludeFeaturesInBulk;
+      successTitle: string;
+      partialTitle: string;
+      errorTitle: string;
+    }) => {
       const features = selectedKnowledgeIndicators
         .filter((ki) => ki.kind === 'feature')
         .map((ki) => ki.feature);
@@ -297,7 +253,7 @@ export function KnowledgeIndicatorsTable() {
           toasts.addWarning({ title: partialTitle });
         }
         setSelectedKnowledgeIndicators([]);
-        setSelectedKnowledgeIndicator(null);
+        closeFlyout();
       } catch (error) {
         toasts.addError(error instanceof Error ? error : new Error(String(error)), {
           title: errorTitle,
@@ -307,39 +263,43 @@ export function KnowledgeIndicatorsTable() {
         refetch();
       }
     },
-    [selectedKnowledgeIndicators, toasts, refetch]
+    [closeFlyout, selectedKnowledgeIndicators, toasts, refetch]
   );
 
   const handleBulkExclude = useCallback(
     () =>
-      executeBulkFeatureOperation(
-        excludeFeaturesInBulk,
-        BULK_EXCLUDE_SUCCESS_TOAST_TITLE,
-        BULK_EXCLUDE_PARTIAL_TOAST_TITLE,
-        BULK_EXCLUDE_ERROR_TOAST_TITLE
-      ),
+      executeBulkFeatureOperation({
+        operation: excludeFeaturesInBulk,
+        successTitle: BULK_EXCLUDE_SUCCESS_TOAST_TITLE,
+        partialTitle: BULK_EXCLUDE_PARTIAL_TOAST_TITLE,
+        errorTitle: BULK_EXCLUDE_ERROR_TOAST_TITLE,
+      }),
     [executeBulkFeatureOperation, excludeFeaturesInBulk]
   );
 
   const handleBulkRestore = useCallback(
     () =>
-      executeBulkFeatureOperation(
-        restoreFeaturesInBulk,
-        BULK_RESTORE_SUCCESS_TOAST_TITLE,
-        BULK_RESTORE_PARTIAL_TOAST_TITLE,
-        BULK_RESTORE_ERROR_TOAST_TITLE
-      ),
+      executeBulkFeatureOperation({
+        operation: restoreFeaturesInBulk,
+        successTitle: BULK_RESTORE_SUCCESS_TOAST_TITLE,
+        partialTitle: BULK_RESTORE_PARTIAL_TOAST_TITLE,
+        errorTitle: BULK_RESTORE_ERROR_TOAST_TITLE,
+      }),
     [executeBulkFeatureOperation, restoreFeaturesInBulk]
   );
 
   const isOperationInProgress = isDeleting || isBulkOperationInProgress || isRowActionInProgress;
-  const selectionContainsQueries = selectedKnowledgeIndicators.some((ki) => ki.kind === 'query');
-  const selectionContainsComputed = selectedKnowledgeIndicators.some(
-    (ki) => ki.kind === 'feature' && isComputedFeature(ki.feature)
-  );
-  const selectionContainsNonExcludable = selectionContainsQueries || selectionContainsComputed;
-  const isSelectionActionsDisabled =
-    selectedKnowledgeIndicators.length === 0 || isOperationInProgress;
+
+  const { selectionContainsNonExcludable, isSelectionActionsDisabled } = useMemo(() => {
+    const containsQueries = selectedKnowledgeIndicators.some((ki) => ki.kind === 'query');
+    const containsComputed = selectedKnowledgeIndicators.some(
+      (ki) => ki.kind === 'feature' && isComputedFeature(ki.feature)
+    );
+    return {
+      selectionContainsNonExcludable: containsQueries || containsComputed,
+      isSelectionActionsDisabled: selectedKnowledgeIndicators.length === 0 || isOperationInProgress,
+    };
+  }, [selectedKnowledgeIndicators, isOperationInProgress]);
 
   const columns = useMemo<Array<EuiBasicTableColumn<KnowledgeIndicator>>>(
     () => [
@@ -397,12 +357,7 @@ export function KnowledgeIndicatorsTable() {
         render: (ki: KnowledgeIndicator) => {
           if (ki.kind === 'feature') {
             return (
-              <EuiBadge
-                color="hollow"
-                css={css`
-                  text-transform: capitalize;
-                `}
-              >
+              <EuiBadge color="hollow" css={capitalizeStyle}>
                 {ki.feature.type}
               </EuiBadge>
             );
@@ -437,12 +392,17 @@ export function KnowledgeIndicatorsTable() {
           <KnowledgeIndicatorActionsCell
             knowledgeIndicator={ki}
             onDeleteRequest={(item) => setKnowledgeIndicatorsToDelete([item])}
-            onActionComplete={() => setSelectedKnowledgeIndicator(null)}
+            onActionComplete={closeFlyout}
           />
         ),
       },
     ],
-    [occurrencesByQueryId, selectedKnowledgeIndicatorId, toggleSelectedKnowledgeIndicator]
+    [
+      closeFlyout,
+      occurrencesByQueryId,
+      selectedKnowledgeIndicatorId,
+      toggleSelectedKnowledgeIndicator,
+    ]
   );
 
   if (isLoading) {
@@ -630,7 +590,7 @@ export function KnowledgeIndicatorsTable() {
         <KnowledgeIndicatorDetailsFlyout
           knowledgeIndicator={selectedKnowledgeIndicator}
           occurrencesByQueryId={occurrencesByQueryId}
-          onClose={() => setSelectedKnowledgeIndicator(null)}
+          onClose={closeFlyout}
         />
       ) : null}
       {knowledgeIndicatorsToDelete.length > 0 ? (

@@ -18,9 +18,14 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
+import useToggle from 'react-use/lib/useToggle';
 import { getKnowledgeIndicatorStreamName } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_stream_name';
 import { matchesKnowledgeIndicatorFilters } from '../../../stream_detail_significant_events_view/utils/matches_knowledge_indicator_filters';
+
+const popoverPanelStyle = css`
+  min-width: 260px;
+`;
 
 interface StreamFilterProps {
   knowledgeIndicators: KnowledgeIndicator[];
@@ -41,52 +46,40 @@ export function StreamFilter({
   selectedStreams,
   onSelectedStreamsChange,
 }: StreamFilterProps) {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isPopoverOpen, togglePopover] = useToggle(false);
   const popoverId = useGeneratedHtmlId({
     prefix: 'streamFilterPopover',
   });
 
   const hasActiveFilters = selectedStreams.length > 0;
 
-  const availableStreams = useMemo(() => {
+  const { availableStreams, streamCounts } = useMemo(() => {
     const streams = new Set<string>();
-
-    knowledgeIndicators.forEach((ki) => {
-      if (
-        !matchesKnowledgeIndicatorFilters(ki, {
-          statusFilter,
-          selectedTypes,
-          hideComputedTypes,
-        })
-      ) {
-        return;
-      }
-      streams.add(getKnowledgeIndicatorStreamName(ki));
-    });
-
-    return Array.from(streams).sort((left, right) => left.localeCompare(right));
-  }, [knowledgeIndicators, statusFilter, selectedTypes, hideComputedTypes]);
-
-  const streamCounts = useMemo(() => {
     const counts: Record<string, number> = {};
 
-    knowledgeIndicators.forEach((ki) => {
+    for (const ki of knowledgeIndicators) {
       if (
         !matchesKnowledgeIndicatorFilters(ki, {
           statusFilter,
           selectedTypes,
           hideComputedTypes,
-          searchTerm,
         })
       ) {
-        return;
+        continue;
       }
 
       const streamName = getKnowledgeIndicatorStreamName(ki);
-      counts[streamName] = (counts[streamName] ?? 0) + 1;
-    });
+      streams.add(streamName);
 
-    return counts;
+      if (!searchTerm || matchesKnowledgeIndicatorFilters(ki, { searchTerm })) {
+        counts[streamName] = (counts[streamName] ?? 0) + 1;
+      }
+    }
+
+    return {
+      availableStreams: Array.from(streams).sort((left, right) => left.localeCompare(right)),
+      streamCounts: counts,
+    };
   }, [knowledgeIndicators, searchTerm, statusFilter, selectedTypes, hideComputedTypes]);
 
   const options = useMemo<EuiSelectableOption[]>(() => {
@@ -118,13 +111,13 @@ export function StreamFilter({
             hasActiveFilters={hasActiveFilters}
             numFilters={availableStreams.length}
             numActiveFilters={selectedStreams.length}
-            onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
+            onClick={togglePopover}
           >
             {STREAM_FILTER_LABEL}
           </EuiFilterButton>
         }
         isOpen={isPopoverOpen}
-        closePopover={() => setIsPopoverOpen(false)}
+        closePopover={() => togglePopover(false)}
         panelPaddingSize="none"
       >
         <EuiSelectable
@@ -143,9 +136,7 @@ export function StreamFilter({
               hasShadow={false}
               hasBorder={false}
               paddingSize="none"
-              css={css`
-                min-width: 260px;
-              `}
+              css={popoverPanelStyle}
             >
               {list}
             </EuiPanel>
