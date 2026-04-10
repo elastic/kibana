@@ -9,11 +9,21 @@
 
 import type { SavedObjectsReference } from './services';
 
+/**
+ * Tags can be provided as either:
+ * - `string[]` — plain tag IDs (used by Content List and other ID-based systems)
+ * - `SavedObjectsReference[]` — full reference objects (used by legacy TableListView)
+ *
+ * The content editor normalizes both formats to `string[]` internally for form state
+ * and `onSave` callbacks.
+ */
+export type ItemTags = string[] | SavedObjectsReference[];
+
 export interface Item {
   id: string;
   title: string;
   description?: string;
-  tags: SavedObjectsReference[];
+  tags: ItemTags;
 
   createdAt?: string;
   createdBy?: string;

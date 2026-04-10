@@ -72,11 +72,17 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
   const form = useMetadataForm({ item, customValidators });
 
   const hasNoChanges = () => {
-    const itemTags = item.tags.map((obj) => obj.id).sort();
+    // Normalize item tags to plain IDs for comparison.
+    // Tags may be string[] (plain IDs) or SavedObjectsReference[] (objects with .id).
+    const itemTags = item.tags
+      ? item.tags.map((tag) => (typeof tag === 'string' ? tag : tag.id)).sort()
+      : [];
     const formTags = form.tags.value.slice().sort();
 
     const compareTags = (arr1: string[], arr2: string[]) => {
-      if (arr1.length !== arr2.length) return false;
+      if (arr1.length !== arr2.length) {
+        return false;
+      }
       return arr1.every((tag: string, index) => tag === arr2[index]);
     };
 

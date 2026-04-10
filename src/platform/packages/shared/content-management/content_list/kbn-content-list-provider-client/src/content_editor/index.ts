@@ -7,16 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Declarative components.
-export { Action, EditAction, DeleteAction, InspectAction, action } from './part';
-
-// Types.
-export type {
-  ActionProps,
-  ActionNamespace,
-  EditActionProps,
-  DeleteActionProps,
-  InspectActionProps,
-  ActionOutput,
-  ActionBuilderContext,
-} from './types';
+export type { ContentEditorConfig } from './types';
+export { useContentEditorInspect } from './use_content_editor_inspect';

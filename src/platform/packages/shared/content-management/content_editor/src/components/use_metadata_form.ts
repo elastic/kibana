@@ -10,7 +10,7 @@
 import { useState, useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import type { Item } from '../types';
+import type { Item, ItemTags } from '../types';
 
 export interface Field<TValueType = unknown> {
   value: TValueType;
@@ -96,6 +96,20 @@ const executeValidation = async <TField extends keyof Fields>(
   return results;
 };
 
+/**
+ * Normalize tags to plain string IDs.
+ * Accepts either `string[]` (plain IDs) or `SavedObjectsReference[]` (objects with `.id`).
+ */
+const normalizeTagIds = (tags: ItemTags | undefined): string[] => {
+  if (!tags || tags.length === 0) {
+    return [];
+  }
+  if (typeof tags[0] === 'string') {
+    return tags as string[];
+  }
+  return (tags as Array<{ id: string }>).map(({ id }) => id);
+};
+
 export const useMetadataForm = ({
   item,
   customValidators,
@@ -111,7 +125,7 @@ export const useMetadataForm = ({
       isChangingValue: false,
     },
     tags: {
-      value: item.tags ? item.tags.map(({ id }) => id) : [],
+      value: normalizeTagIds(item.tags),
       isChangingValue: false,
     },
   });

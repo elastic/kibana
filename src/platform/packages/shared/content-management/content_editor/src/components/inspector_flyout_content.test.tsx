@@ -230,6 +230,30 @@ describe('<ContentEditorFlyoutContent />', () => {
       );
     });
 
+    test('should render tags in read-only mode when item.tags is string[]', async () => {
+      const stringTagItem: ContentEditorFlyoutContentProps['item'] = {
+        id: '456',
+        title: 'String Tags Item',
+        description: 'Item with plain string tag IDs',
+        tags: ['tag-1', 'tag-2'],
+      };
+
+      await act(async () => {
+        testBed = await setup({ item: stringTagItem });
+      });
+
+      const { exists, component } = testBed!;
+
+      // TagList should be rendered in read-only mode
+      expect(exists('tagList')).toBe(true);
+
+      // The mock TagList renders tag.name for each reference.
+      // string[] tags are converted to SavedObjectsReference[] with name: 'tag-ref-{id}'.
+      const tagListHtml = component.find('[data-test-subj="tagList"]').text();
+      expect(tagListHtml).toContain('tag-ref-tag-1');
+      expect(tagListHtml).toContain('tag-ref-tag-2');
+    });
+
     test('should update the tag selection', async () => {
       const onSave = jest.fn();
 
