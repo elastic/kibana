@@ -25,11 +25,11 @@ Ask these routing questions first:
 1. "Are you already generating embeddings?" → Yes → \`dense_vector\` path. Briefly offer \`semantic_text\` as a simpler alternative.
 2. "What version of Elasticsearch?" → Below 8.15 → \`semantic_text\` unavailable, use \`dense_vector\`.
 
-| Option                           | When to Use                                                      |
-| -------------------------------- | ---------------------------------------------------------------- |
-| **Built-in via EIS**             | Default for Cloud (Serverless or ECH) on 8.15+. No ML node cost. |
-| **Third-party (OpenAI, Cohere)** | Existing model contract or specific model requirement.           |
-| **Self-hosted**                  | Custom fine-tuned models deployed on ML nodes.                   |
+| Option                           | When to Use                                                                                                                      |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| **Built-in via EIS**             | Default for Cloud (Serverless or ECH) on 8.15+. No ML node cost. Jina v3 is the current default dense model for \`semantic_text\`. |
+| **Third-party (OpenAI, Cohere)** | Existing model contract or specific model requirement.                                                                           |
+| **Self-hosted**                  | Custom fine-tuned models deployed on ML nodes.                                                                                   |
 
 ## Decision: Vector Field Type
 
@@ -40,9 +40,9 @@ Ask these routing questions first:
 
 ### \`semantic_text\` Mapping (Default)
 
-Minimal — works out of the box on Serverless:
+Minimal — works out of the box on Serverless (uses the platform default model, currently Jina):
 
-\`\`\`
+\`\`\`json
 PUT /my-index
 {
   "mappings": {
@@ -57,7 +57,7 @@ PUT /my-index
 
 With a specific inference endpoint:
 
-\`\`\`
+\`\`\`json
 PUT /my-index
 {
   "mappings": {
@@ -73,7 +73,7 @@ PUT /my-index
 
 ### \`dense_vector\` Mapping
 
-\`\`\`
+\`\`\`json
 PUT /my-index
 {
   "mappings": {
@@ -91,7 +91,9 @@ PUT /my-index
 }
 \`\`\`
 
-Set \`dims\` to match the embedding model output (OpenAI text-embedding-3-small = 1536, E5-small = 384).
+Set \`dims\` to match the embedding model output (OpenAI text-embedding-3-small = 1536, Jina v3 = 1024, E5-small = 384).
+
+> **Before generating inference endpoint config, check [EIS docs](https://www.elastic.co/docs/explore-analyze/elastic-inference/eis) for current model IDs.** Jina v3 is the current default dense model for \`semantic_text\`; Jina v5-small is available for cost-sensitive workloads. Model IDs change regularly.
 
 ## Decision: Search Type
 
@@ -103,7 +105,7 @@ Set \`dims\` to match the embedding model output (OpenAI text-embedding-3-small 
 
 ### Semantic Search (\`semantic_text\`)
 
-\`\`\`
+\`\`\`json
 POST /my-index/_search
 {
   "retriever": {
@@ -121,7 +123,7 @@ POST /my-index/_search
 
 ### Pure kNN (\`dense_vector\`)
 
-\`\`\`
+\`\`\`json
 POST /my-index/_search
 {
   "retriever": {
@@ -137,7 +139,7 @@ POST /my-index/_search
 
 ### Hybrid Search with RRF
 
-\`\`\`
+\`\`\`json
 POST /my-index/_search
 {
   "retriever": {
@@ -175,7 +177,7 @@ Add \`filter\` clauses to both retrievers for filtered hybrid search.
 
 Start without reranking. Add \`text_similarity_reranker\` if relevance isn't good enough after tuning:
 
-\`\`\`
+\`\`\`json
 POST /my-index/_search
 {
   "retriever": {
@@ -190,7 +192,7 @@ POST /my-index/_search
 }
 \`\`\`
 
-Check [reranker docs](https://www.elastic.co/docs/solutions/search/ranking/semantic-reranking) for current inference endpoint setup.
+EIS provides managed rerankers (currently Jina Reranker v2 and v3). Check [reranker docs](https://www.elastic.co/docs/solutions/search/ranking/semantic-reranking) for current setup.
 
 ## Production Optimization
 
