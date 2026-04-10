@@ -29,7 +29,7 @@ import { ESQL_QUERY_RESULTS_ATTACHMENT_TYPE } from '../../../../../common/agent_
 
 const SESSION_TAG = 'discover';
 const MAX_SAMPLE_ROWS = 15;
-const MAX_COLUMNS = 30;
+const MAX_COLUMNS = 100;
 const MAX_VALUE_LENGTH = 100;
 
 const updateQuerySchema = z.object({
@@ -40,7 +40,7 @@ const updateQuerySchema = z.object({
     .describe('For non-ES|QL tabs, the query language to use if it should change.'),
 });
 
-const toDiscoverQuery = (
+export const toDiscoverQuery = (
   currentQuery: AggregateQuery | Query | undefined,
   nextQuery: string,
   nextLanguage?: 'kuery' | 'lucene'
@@ -66,7 +66,7 @@ const getQueryText = (query: AggregateQuery | Query | undefined): string => {
   return String(query.query);
 };
 
-const buildScreenContext = (
+export const buildScreenContext = (
   dataViewTitle: string,
   query: AggregateQuery | Query | undefined,
   columns: string[] | undefined,
@@ -94,7 +94,7 @@ const buildScreenContext = (
   },
 });
 
-const buildEsqlResultsAttachment = (
+export const buildEsqlResultsAttachment = (
   esqlQuery: string,
   esqlQueryColumns: Array<{ name: string; meta?: { type?: string } }>,
   result: Array<{ flattened: Record<string, unknown> }>,

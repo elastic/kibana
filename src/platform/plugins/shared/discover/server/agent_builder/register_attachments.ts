@@ -67,7 +67,7 @@ const createEsqlQueryResultsAttachmentType = (): AttachmentTypeDefinition => {
       platformCoreTools.createVisualization,
     ],
     getAgentDescription: () => {
-      return `This attachment contains ES|QL query results from Kibana Discover: the query text, column metadata, a small sample of rows for schema understanding, the total result count, and the time range. Use the sample rows only to understand the data schema — run executeEsql for actual analysis.`;
+      return `This attachment contains ES|QL query results from Kibana Discover: the query text, column metadata, a small sample of rows for schema understanding, the total result count, and the time range. Use the sample rows only to understand the data schema — run executeEsql for actual analysis. Note: columns may be truncated if the query returns many fields. Use getIndexMapping to discover all available fields.`;
     },
   };
 };
