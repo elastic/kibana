@@ -60,7 +60,7 @@ type FormType = 'simple' | 'steps';
 
 interface LiveQueryFormProps {
   defaultValue?: DefaultLiveQueryFormFields;
-  onSuccess?: () => void;
+  onSuccess?: (actionId: string) => void;
   queryField?: boolean;
   ecsMappingField?: boolean;
   formType?: FormType;

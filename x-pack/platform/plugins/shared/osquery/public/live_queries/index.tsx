@@ -20,7 +20,7 @@ interface LiveQueryProps {
   agentIds?: string[];
   alertIds?: string[];
   agentPolicyIds?: string[];
-  onSuccess?: () => void;
+  onSuccess?: (actionId: string) => void;
   query?: string;
   timeout?: number;
   savedQueryId?: string;
