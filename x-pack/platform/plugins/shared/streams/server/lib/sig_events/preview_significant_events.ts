@@ -48,14 +48,20 @@ function msToEsqlBucketSize(ms: number): string {
 }
 
 function stripLimitCommand(esql: string): string {
-  const { root } = Parser.parse(esql);
-  const commandsWithoutLimit = root.commands.filter(
-    (cmd) => !('name' in cmd && cmd.name === 'limit')
-  );
-  if (commandsWithoutLimit.length === root.commands.length) return esql;
-  return BasicPrettyPrinter.print(
-    Builder.expression.query(commandsWithoutLimit as ESQLCommand[])
-  );
+  let result: string;
+  try {
+    const { root } = Parser.parse(esql);
+    const commandsWithoutLimit = root.commands.filter(
+      (cmd) => !('name' in cmd && cmd.name === 'limit')
+    );
+    if (commandsWithoutLimit.length === root.commands.length) return esql;
+    result = BasicPrettyPrinter.print(
+      Builder.expression.query(commandsWithoutLimit as ESQLCommand[])
+    );
+  } catch {
+    result = esql.replace(/\|\s*LIMIT\s+\d+/gi, '');
+  }
+  return result.replace(/\s*\|\s*$/, '').trim();
 }
 
 /**
