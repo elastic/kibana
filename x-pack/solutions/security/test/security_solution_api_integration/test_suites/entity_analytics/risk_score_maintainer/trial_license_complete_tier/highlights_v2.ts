@@ -67,6 +67,11 @@ export default ({ getService }: FtrProviderContext): void => {
     before(async () => {
       await kibanaServer.uiSettings.update({ 'securitySolution:defaultAnomalyScore': 1 });
 
+      // Ensure clean state: previous tests may have left a plain index or stale data stream
+      // with the same name, which would cause createDataStream to fail with a name conflict.
+      await entityStoreUtils.cleanEngines();
+      await cleanUpRiskScoreMaintainer({ es, log });
+
       await entityStoreUtils.installEntityStoreV2({
         entityTypes: ['host', 'user'],
         waitForEntities: false,
@@ -306,7 +311,7 @@ export default ({ getService }: FtrProviderContext): void => {
     after(async () => {
       await entityStoreUtils.cleanEngines();
       await cleanUpRiskScoreMaintainer({ es, log });
-      await deleteAllDocuments(es, VULNERABILITIES_LATEST_INDEX);
+      await deleteAllDocuments(es, VULNERABILITIES_LATEST_INDEX).catch(() => {});
       await es.indices
         .deleteIndexTemplate({ name: VULNERABILITIES_INDEX_TEMPLATE_NAME })
         .catch(() => {});
