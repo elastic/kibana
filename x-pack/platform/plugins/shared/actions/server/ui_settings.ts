@@ -9,8 +9,15 @@ import { schema } from '@kbn/config-schema';
 import type { UiSettingsServiceSetup } from '@kbn/core-ui-settings-server';
 import { i18n } from '@kbn/i18n';
 import { EARS_OAUTH_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import type { ActionsConfig } from './config';
 
-export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServiceSetup }) => {
+export const registerUISettings = ({
+  uiSettings,
+  config,
+}: {
+  uiSettings: UiSettingsServiceSetup;
+  config: ActionsConfig;
+}) => {
   uiSettings.register({
     [EARS_OAUTH_ENABLED_SETTING_ID]: {
       name: i18n.translate('xpack.actions.uiSettings.earsOAuthEnabled.name', {
@@ -21,7 +28,7 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
           'Enables the EARS OAuth flow as an authentication option in connectors (e.g. Google Drive).',
       }),
       schema: schema.boolean(),
-      value: false,
+      value: config.ears?.enabled ?? false,
       // only allow it to be set via kibana.yml
       readonly: true,
       readonlyMode: 'strict',

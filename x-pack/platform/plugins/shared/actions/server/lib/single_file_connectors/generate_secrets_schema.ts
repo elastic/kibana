@@ -32,42 +32,33 @@ export const generateSecretsSchema = (
 ): ValidatorType<ActionTypeSecrets> => {
   const settings = configUtils.getWebhookSettings();
   const isPfxEnabled = settings.ssl.pfx.enabled;
+  // Always include EARS in the static schema so it parses correctly.
+  // The actual gating happens in the customValidator at request time,
+  // which rejects EARS auth when the feature is not enabled.
+  const schema = generateSecretsSchemaFromSpec(authSpec, { isPfxEnabled, isEarsEnabled: true });
 
   const allowedHostsFieldsByAuthType = buildAllowedHostsFieldsByAuthType(authSpec);
 
   return {
-    // Always include EARS in the static schema so it parses correctly.
-    // The actual gating happens in the customValidator at request time,
-    // which rejects EARS auth when the feature is not enabled.
-    schema: generateSecretsSchemaFromSpec(authSpec, {
-      isPfxEnabled,
-      isEarsEnabled: false,
-    }),
-    customValidator: async (
-      value: ActionTypeSecrets,
-      validatorServices: ValidatorServices
-    ): Promise<void> => {
-      const secretsRecord = value as Record<string, unknown>;
+    schema,
+    customValidator: (
+      secrets: ActionTypeSecrets,
+      { configurationUtilities }: ValidatorServices
+    ): void => {
+      const secretsRecord = secrets as Record<string, unknown>;
       const authType = secretsRecord.authType;
       if (typeof authType !== 'string') return;
 
-      if (
-        authType === 'ears' &&
-        (!validatorServices.getIsEarsEnabled || !(await validatorServices.getIsEarsEnabled()))
-      ) {
+      if (authType === 'ears' && !configurationUtilities.isEarsEnabled()) {
         throw new Error(
-          'EARS OAuth authentication is not enabled. Enable it via the actions:earsOAuthEnabled setting.'
+          'EARS OAuth authentication is not enabled. Enable it via xpack.actions.ears.enabled in kibana.yml.'
         );
       }
 
       const allowedHostsFields = allowedHostsFieldsByAuthType.get(authType);
       if (!allowedHostsFields) return;
 
-      validateAllowedHostsKeys(
-        secretsRecord,
-        allowedHostsFields,
-        validatorServices.configurationUtilities
-      );
+      validateAllowedHostsKeys(secretsRecord, allowedHostsFields, configurationUtilities);
     },
   };
 };

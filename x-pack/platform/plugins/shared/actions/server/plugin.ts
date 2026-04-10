@@ -288,7 +288,7 @@ export class ActionsPlugin
       );
     }
 
-    registerUISettings({ uiSettings: core.uiSettings });
+    registerUISettings({ uiSettings: core.uiSettings, config: this.actionsConfig });
 
     plugins.features.registerKibanaFeature(ACTIONS_FEATURE);
 

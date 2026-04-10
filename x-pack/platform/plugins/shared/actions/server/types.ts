@@ -134,7 +134,6 @@ export interface ValidatorType<T> {
 
 export interface ValidatorServices {
   configurationUtilities: ActionsConfigurationUtilities;
-  getIsEarsEnabled?: () => Promise<boolean>;
 }
 
 export interface ActionValidationService {
