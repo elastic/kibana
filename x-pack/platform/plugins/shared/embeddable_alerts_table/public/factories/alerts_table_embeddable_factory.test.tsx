@@ -17,6 +17,7 @@ import { getAlertsTableEmbeddableFactory } from './alerts_table_embeddable_facto
 import { PERSISTED_TABLE_CONFIG_KEY_PREFIX } from '../constants';
 import type { InternalRuleType } from '@kbn/response-ops-rules-apis/apis/get_internal_rule_types';
 import { getInternalRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_internal_rule_types';
+import { getMockinitializeStateApi } from '@kbn/embeddable-plugin/public/mocks';
 
 const core = coreMock.createStart();
 const mockPresentationContainer = getMockPresentationContainer();
@@ -45,6 +46,7 @@ describe('getEmbeddableAlertsTableFactory', () => {
   );
   const embeddableParams: Parameters<typeof factory.buildEmbeddable>[0] = {
     initializeDrilldownsManager: jest.fn(),
+    initializeStateApi: getMockinitializeStateApi(factory),
     initialState: {
       time_range: {
         from: '2025-01-01T00:00:00.000Z',
