@@ -157,7 +157,7 @@ export default function (providerContext: FtrProviderContext) {
               'otlpreceiver-otelcol': {
                 enabled: true,
                 streams: {
-                  'generic.otel': { enabled: true, vars: {} },
+                  'test_otel_dynamic.otlpreceiver': { enabled: true, vars: {} },
                 },
               },
             },
@@ -209,7 +209,7 @@ export default function (providerContext: FtrProviderContext) {
               'otlpreceiver-otelcol': {
                 enabled: true,
                 streams: {
-                  'generic.otel': {
+                  'test_otel_dynamic.otlpreceiver': {
                     enabled: true,
                     vars: { 'data_stream.dataset': 'custom.dataset' },
                   },
