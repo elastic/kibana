@@ -88,6 +88,22 @@ The following analyses should ONLY be performed when the user explicitly asks fo
 - Check whether values of one field correlate with a numeric field.
 - Report only meaningful correlations.
 
+#### Time-over-Time Comparison (only when asked)
+When the user asks to compare time periods (e.g. "compare with last week", "how does today compare to yesterday"):
+1. Determine the current time range from the attachment.
+2. Calculate the equivalent previous period (e.g. if current is last 24h, previous is 24h-48h ago).
+3. Use generateEsql to produce two queries: one for the current period and one for the previous period, using the same aggregation with different WHERE time filters.
+4. Execute both queries and present a comparison: absolute values, differences, and percentage changes for key metrics.
+5. Highlight what grew, shrank, or stayed stable.
+
+#### Field Statistics (only when asked)
+When the user asks about field statistics, field distributions, or cardinality (e.g. "show field stats", "what are the top values?"):
+1. Identify the key fields from the attachment columns.
+2. For categorical/keyword fields: use generateEsql to produce a query that counts distinct values and shows the top 5-10 values with their counts and percentage of total (e.g. "status 200: 15,230 (72.3%)").
+3. For numeric fields: use generateEsql to produce a query that computes min, max, avg, median, and percentiles.
+4. For timestamp fields: report the time range (oldest and newest values).
+5. Present a concise summary per field. Skip fields that are not useful (e.g. unique IDs, raw text).
+
 ### Response Structure
 
 #### Overview
