@@ -7,10 +7,8 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
-import {
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  CLOUD_CONNECTOR_HIDDEN_PACKAGES,
-} from '../../../common/constants';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { buildPackagePolicyFilterExcludingHiddenPackages } from '../../../common/constants/cloud_connector';
 import { cloudConnectorService, packagePolicyService } from '../../services';
 import type { FleetRequestHandler } from '../../types';
 import { appContextService } from '../../services/app_context';
@@ -232,12 +230,9 @@ export const getCloudConnectorUsageHandler: FleetRequestHandler<
     // Build a kuery that fetches policies for this connector while excluding
     // internal/hidden packages (e.g. verifier_otel) at the query level so that
     // result.total is accurate across all pages.
-    const hiddenFilter = CLOUD_CONNECTOR_HIDDEN_PACKAGES.map(
-      (pkg) => `NOT ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name:"${pkg}"`
-    ).join(' AND ');
-    const kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id:"${cloudConnectorId}"${
-      hiddenFilter ? ` AND ${hiddenFilter}` : ''
-    }`;
+    const kuery = buildPackagePolicyFilterExcludingHiddenPackages(
+      `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id:"${cloudConnectorId}"`
+    );
 
     logger.debug(`Querying package policies with kuery: ${kuery}`);
 

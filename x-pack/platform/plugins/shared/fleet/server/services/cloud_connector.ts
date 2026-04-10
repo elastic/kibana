@@ -33,7 +33,9 @@ import {
   SERVICE_ACCOUNT_VAR_NAME,
   AUDIENCE_VAR_NAME,
   GCP_CREDENTIALS_CLOUD_CONNECTOR_ID,
-  CLOUD_CONNECTOR_HIDDEN_PACKAGES,
+  buildPackagePolicyFilterExcludingHiddenPackages,
+  CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE,
+  CLOUD_CONNECTOR_PACKAGE_POLICY_FIND_PER_PAGE,
 } from '../../common/constants/cloud_connector';
 
 import {
@@ -94,8 +96,8 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
 
   /**
    * Queries package policies to get a map of cloud connector IDs to their
-   * user-visible package policy counts. Fetches the saved objects list and
-   * filters out hidden internal packages (e.g. verifier_otel) in memory.
+   * user-visible package policy counts. Hidden internal packages (e.g. verifier_otel)
+   * are excluded in the saved-objects filter; only connector id fields are requested.
    */
   private async getPackagePolicyCountsMap(
     soClient: SavedObjectsClientContract
@@ -103,26 +105,38 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     const logger = this.getLogger('getPackagePolicyCountsMap');
 
     try {
-      const hiddenSet = new Set(CLOUD_CONNECTOR_HIDDEN_PACKAGES);
-
-      const result = await soClient.find<{
-        cloud_connector_id?: string;
-        package?: { name?: string };
-      }>({
-        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-        filter: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id:*`,
-        perPage: SO_SEARCH_LIMIT,
-      });
+      const filter = buildPackagePolicyFilterExcludingHiddenPackages(
+        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id:*`
+      );
 
       const countMap = new Map<string, number>();
+      let page = 1;
 
-      for (const so of result.saved_objects) {
-        if (so.id.includes(':')) continue;
-        const connectorId = so.attributes.cloud_connector_id;
-        const pkgName = so.attributes.package?.name;
-        if (!connectorId) continue;
-        if (pkgName && hiddenSet.has(pkgName)) continue;
-        countMap.set(connectorId, (countMap.get(connectorId) || 0) + 1);
+      for (;;) {
+        const result = await soClient.find<{
+          cloud_connector_id?: string;
+        }>({
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          filter,
+          page,
+          perPage: CLOUD_CONNECTOR_PACKAGE_POLICY_FIND_PER_PAGE,
+          fields: ['cloud_connector_id'],
+        });
+
+        for (const so of result.saved_objects) {
+          if (so.id.includes(':')) continue;
+          const connectorId = so.attributes.cloud_connector_id;
+          if (!connectorId) continue;
+          countMap.set(connectorId, (countMap.get(connectorId) || 0) + 1);
+        }
+
+        if (
+          result.saved_objects.length < CLOUD_CONNECTOR_PACKAGE_POLICY_FIND_PER_PAGE ||
+          page * CLOUD_CONNECTOR_PACKAGE_POLICY_FIND_PER_PAGE >= result.total
+        ) {
+          break;
+        }
+        page += 1;
       }
 
       return countMap;
@@ -145,21 +159,39 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     const logger = this.getLogger('getPackagePolicyCount');
 
     try {
-      const result = await soClient.find<{
-        cloud_connector_id?: string;
-        package?: { name?: string };
-      }>({
-        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-        filter: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id:"${cloudConnectorId}"`,
-        perPage: SO_SEARCH_LIMIT,
-      });
+      const filter = buildPackagePolicyFilterExcludingHiddenPackages(
+        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id:"${cloudConnectorId}"`
+      );
 
-      const hiddenSet = new Set(CLOUD_CONNECTOR_HIDDEN_PACKAGES);
-      return result.saved_objects.filter((so) => {
-        if (so.id.includes(':')) return false;
-        const pkgName = so.attributes.package?.name;
-        return !pkgName || !hiddenSet.has(pkgName);
-      }).length;
+      let count = 0;
+      let page = 1;
+
+      for (;;) {
+        const result = await soClient.find<{
+          cloud_connector_id?: string;
+        }>({
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          filter,
+          page,
+          perPage: CLOUD_CONNECTOR_PACKAGE_POLICY_FIND_PER_PAGE,
+          fields: ['cloud_connector_id'],
+        });
+
+        for (const so of result.saved_objects) {
+          if (so.id.includes(':')) continue;
+          count += 1;
+        }
+
+        if (
+          result.saved_objects.length < CLOUD_CONNECTOR_PACKAGE_POLICY_FIND_PER_PAGE ||
+          page * CLOUD_CONNECTOR_PACKAGE_POLICY_FIND_PER_PAGE >= result.total
+        ) {
+          break;
+        }
+        page += 1;
+      }
+
+      return count;
     } catch (error) {
       logger.error(
         `Failed to get package policy count for connector ${cloudConnectorId}: ${error.message}`
@@ -296,7 +328,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       const findOptions: any = {
         type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
         page: options?.page || 1,
-        perPage: options?.perPage || 20,
+        perPage: options?.perPage || CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE,
         sortField: 'created_at',
         sortOrder: 'desc',
       };

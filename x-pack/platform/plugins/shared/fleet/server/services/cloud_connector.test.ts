@@ -16,6 +16,11 @@ import {
   SINGLE_ACCOUNT,
   ORGANIZATION_ACCOUNT,
 } from '../../common/constants';
+import {
+  buildPackagePolicyFilterExcludingHiddenPackages,
+  CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE,
+  CLOUD_CONNECTOR_PACKAGE_POLICY_FIND_PER_PAGE,
+} from '../../common/constants/cloud_connector';
 
 import { createSavedObjectClientMock } from '../mocks';
 import type {
@@ -545,7 +550,7 @@ describe('CloudConnectorService', () => {
       ],
       total: 1,
       page: 1,
-      per_page: 20,
+      per_page: CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE,
     };
 
     // Mock package policies returned by find (getPackagePolicyCountsMap counts saved_objects in memory)
@@ -561,7 +566,7 @@ describe('CloudConnectorService', () => {
       ],
       total: 1,
       page: 1,
-      per_page: 10000,
+      per_page: CLOUD_CONNECTOR_PACKAGE_POLICY_FIND_PER_PAGE,
     };
 
     it('should get cloud connectors list successfully with computed packagePolicyCount', async () => {
@@ -579,10 +584,23 @@ describe('CloudConnectorService', () => {
       expect(mockSoClient.find).toHaveBeenCalledWith({
         type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
         page: 1,
-        perPage: 20,
+        perPage: CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE,
         sortField: 'created_at',
         sortOrder: 'desc',
       });
+
+      expect(mockSoClient.find).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          filter: buildPackagePolicyFilterExcludingHiddenPackages(
+            `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id:*`
+          ),
+          page: 1,
+          perPage: CLOUD_CONNECTOR_PACKAGE_POLICY_FIND_PER_PAGE,
+          fields: ['cloud_connector_id'],
+        })
+      );
 
       expect(result).toEqual([
         {
@@ -675,7 +693,7 @@ describe('CloudConnectorService', () => {
         ],
         total: 2,
         page: 1,
-        per_page: 20,
+        per_page: CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE,
       };
 
       mockSoClient.find.mockResolvedValue(mockConnectorsWithFields);
@@ -685,7 +703,7 @@ describe('CloudConnectorService', () => {
       expect(mockSoClient.find).toHaveBeenCalledWith({
         type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
         page: 1,
-        perPage: 20,
+        perPage: CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE,
         sortField: 'created_at',
         sortOrder: 'desc',
         fields: ['name'],
