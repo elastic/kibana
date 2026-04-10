@@ -56,7 +56,6 @@ export function AttacksGroupTakeActionItems({
   const {
     services: { evals },
   } = useKibana();
-  const openAddToDatasetFlyout = evals?.openAddToDatasetFlyout;
   const invalidateAttackDiscoveriesCache = useInvalidateFindAttackDiscoveries();
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuery(), []);
   const globalQueries = useDeepEqualSelector(getGlobalQuerySelector);
@@ -154,10 +153,13 @@ export function AttacksGroupTakeActionItems({
     telemetrySource,
   });
 
-  const onAddToDataset = useCallback(() => {
-    closePopover?.();
-    openAddToDatasetFlyout?.({
+  const addToDatasetAction = useMemo(() => {
+    if (!evals?.getAddToDatasetAction) return null;
+
+    return evals.getAddToDatasetAction({
+      label: ADD_TO_DATASET,
       title: ADD_TO_DATASET,
+      onBeforeOpen: closePopover,
       initialExample: {
         input: {
           attackDiscovery: {
@@ -178,21 +180,21 @@ export function AttacksGroupTakeActionItems({
         },
       },
     });
-  }, [closePopover, openAddToDatasetFlyout, attack]);
+  }, [attack, closePopover, evals]);
 
   const datasetItems = useMemo(
     () =>
-      openAddToDatasetFlyout != null
+      addToDatasetAction != null
         ? [
             {
               'data-test-subj': 'addToDataset',
               key: 'addToDataset',
-              name: ADD_TO_DATASET,
-              onClick: onAddToDataset,
+              name: addToDatasetAction.label,
+              onClick: addToDatasetAction.onClick,
             },
           ]
         : [],
-    [openAddToDatasetFlyout, onAddToDataset]
+    [addToDatasetAction]
   );
 
   const defaultPanel: EuiContextMenuPanelDescriptor = useMemo(

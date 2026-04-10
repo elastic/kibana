@@ -37,13 +37,6 @@ const viewTraceButtonLabel = i18n.translate('xpack.agentBuilder.conversation.vie
   defaultMessage: 'View Trace',
 });
 
-const addToDatasetButtonLabel = i18n.translate(
-  'xpack.agentBuilder.conversation.addToDatasetButton',
-  {
-    defaultMessage: 'Add to dataset',
-  }
-);
-
 const closePanelLabel = i18n.translate('xpack.agentBuilder.conversation.closePanel', {
   defaultMessage: 'Close panel',
 });
@@ -70,18 +63,33 @@ export const RoundThinkingPanel = ({
   const [showFlyout, setShowFlyout] = useState(false);
   const [showTraceFlyout, setShowTraceFlyout] = useState(false);
 
-  const TraceWaterfallComponent = services.plugins.evals?.TraceWaterfall;
-  const openAddToDatasetFlyout = services.plugins.evals?.openAddToDatasetFlyout;
-  const isExperimentalEnabled = useExperimentalFeatures();
-
   const traceId = useMemo(() => {
     const id = rawRound.trace_id;
     if (!id) return undefined;
     return Array.isArray(id) ? id[0] : id;
   }, [rawRound.trace_id]);
 
+  const TraceWaterfallComponent = services.plugins.evals?.TraceWaterfall;
+  const addToDatasetAction = services.plugins.evals?.getAddToDatasetAction
+    ? services.plugins.evals.getAddToDatasetAction({
+        initialExample: {
+          input: {
+            round: rawRound,
+          },
+          output: {
+            steps,
+          },
+          metadata: {
+            source: 'agent_builder',
+            trace_id: traceId ?? null,
+          },
+        },
+      })
+    : null;
+  const isExperimentalEnabled = useExperimentalFeatures();
+
   const showTraceButton = isExperimentalEnabled && !!TraceWaterfallComponent && !!traceId;
-  const showAddToDatasetButton = isExperimentalEnabled && !!openAddToDatasetFlyout;
+  const showAddToDatasetButton = isExperimentalEnabled && addToDatasetAction != null;
 
   const shadowStyles = useEuiShadow('l');
   const containerStyles = css`
@@ -94,24 +102,6 @@ export const RoundThinkingPanel = ({
 
   const toggleFlyout = () => {
     setShowFlyout(!showFlyout);
-  };
-
-  const onAddToDataset = () => {
-    openAddToDatasetFlyout?.({
-      title: addToDatasetButtonLabel,
-      initialExample: {
-        input: {
-          round: rawRound,
-        },
-        output: {
-          steps,
-        },
-        metadata: {
-          source: 'agent_builder',
-          trace_id: traceId ?? null,
-        },
-      },
-    });
   };
 
   return (
@@ -158,12 +148,12 @@ export const RoundThinkingPanel = ({
                 {showAddToDatasetButton && (
                   <EuiFlexItem grow={false}>
                     <EuiButton
-                      iconType="beaker"
+                      iconType={addToDatasetAction?.iconType}
                       color="text"
                       iconSide="left"
-                      onClick={onAddToDataset}
+                      onClick={addToDatasetAction?.onClick}
                     >
-                      {addToDatasetButtonLabel}
+                      {addToDatasetAction?.label}
                     </EuiButton>
                   </EuiFlexItem>
                 )}

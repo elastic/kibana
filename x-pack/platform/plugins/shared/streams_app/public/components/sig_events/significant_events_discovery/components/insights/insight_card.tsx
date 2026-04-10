@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { MouseEvent } from 'react';
 import React from 'react';
 import {
   EuiAccordion,
@@ -50,10 +49,6 @@ const addToDatasetAriaLabel = i18n.translate('xpack.streams.insights.addToDatase
   defaultMessage: 'Add insight to dataset',
 });
 
-const addToDatasetTitle = i18n.translate('xpack.streams.insights.addToDatasetTitle', {
-  defaultMessage: 'Add to dataset',
-});
-
 interface InsightCardProps {
   insight: Insight;
   index: number;
@@ -63,7 +58,25 @@ export function InsightCard({ insight, index }: InsightCardProps) {
   const [isOpen, toggleIsOpen] = useToggle(index === 0);
   const accordionId = useGeneratedHtmlId({ prefix: 'insightAccordion' });
   const { dependencies } = useKibana();
-  const openAddToDatasetFlyout = dependencies.start.evals?.openAddToDatasetFlyout;
+  const addToDatasetAction =
+    dependencies.start.evals?.getAddToDatasetAction != null
+      ? dependencies.start.evals.getAddToDatasetAction({
+          ariaLabel: addToDatasetAriaLabel,
+          stopPropagation: true,
+          initialExample: {
+            input: { insight },
+            output: {
+              title: insight.title,
+              description: insight.description,
+              impact: insight.impact,
+              recommendations: insight.recommendations,
+            },
+            metadata: {
+              source: 'streams_app',
+            },
+          },
+        })
+      : null;
 
   return (
     <EuiPanel hasBorder paddingSize="m">
@@ -73,29 +86,12 @@ export function InsightCard({ insight, index }: InsightCardProps) {
         forceState={isOpen ? 'open' : 'closed'}
         onToggle={toggleIsOpen}
         extraAction={
-          openAddToDatasetFlyout ? (
+          addToDatasetAction ? (
             <EuiButtonIcon
-              aria-label={addToDatasetAriaLabel}
-              iconType="beaker"
+              aria-label={addToDatasetAction.ariaLabel}
+              iconType={addToDatasetAction.iconType}
               color="text"
-              onClick={(e: MouseEvent) => {
-                e.stopPropagation();
-                openAddToDatasetFlyout({
-                  title: addToDatasetTitle,
-                  initialExample: {
-                    input: { insight },
-                    output: {
-                      title: insight.title,
-                      description: insight.description,
-                      impact: insight.impact,
-                      recommendations: insight.recommendations,
-                    },
-                    metadata: {
-                      source: 'streams_app',
-                    },
-                  },
-                });
-              }}
+              onClick={addToDatasetAction.onClick}
               data-test-subj="streamsInsightAddToDatasetButton"
             />
           ) : null

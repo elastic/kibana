@@ -11,6 +11,8 @@ import React, { Suspense } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import type {
+  AddToDatasetAction,
+  AddToDatasetActionConfig,
   AddToDatasetFlyoutOpenOptions,
   EvalsPublicSetup,
   EvalsPublicStart,
@@ -19,6 +21,10 @@ import type {
 } from './types';
 
 const MANAGEMENT_KEYWORDS = ['evals', 'evaluations', 'ai', 'llm', 'trace', 'tracing'] as const;
+
+const DEFAULT_ADD_TO_DATASET_LABEL = i18n.translate('xpack.evals.addToDatasetAction.label', {
+  defaultMessage: 'Add to dataset',
+});
 
 export class EvalsPublicPlugin
   implements
@@ -84,7 +90,29 @@ export class EvalsPublicPlugin
       })();
     };
 
-    return { TraceWaterfall, openAddToDatasetFlyout };
+    const getAddToDatasetAction = (config: AddToDatasetActionConfig): AddToDatasetAction => {
+      const {
+        label = DEFAULT_ADD_TO_DATASET_LABEL,
+        ariaLabel = label,
+        iconType = 'beaker',
+        stopPropagation = false,
+        onBeforeOpen,
+        ...options
+      } = config;
+
+      return {
+        label,
+        ariaLabel,
+        iconType,
+        onClick: (event) => {
+          if (stopPropagation) event?.stopPropagation?.();
+          onBeforeOpen?.();
+          openAddToDatasetFlyout(options);
+        },
+      };
+    };
+
+    return { TraceWaterfall, openAddToDatasetFlyout, getAddToDatasetAction };
   }
 
   stop() {}

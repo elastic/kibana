@@ -45,10 +45,6 @@ import { InsightBase } from './insight_base';
 import { ActionsMenu } from './actions_menu';
 import { ObservabilityAIAssistantTelemetryEventType } from '../../analytics/telemetry_event_type';
 
-const ADD_TO_DATASET_LABEL = i18n.translate('xpack.observabilityAiAssistant.insight.addToDataset', {
-  defaultMessage: 'Add to dataset',
-});
-
 function getLastMessageOfType(messages: Message[], role: MessageRole) {
   return last(messages.filter((msg) => msg.message.role === role));
 }
@@ -92,7 +88,25 @@ function ChatContent({
     messages.slice(initialMessagesRef.current.length + 1),
     MessageRole.Assistant
   );
-  const openAddToDatasetFlyout = evals?.openAddToDatasetFlyout;
+  const addToDatasetAction =
+    evals?.getAddToDatasetAction && lastAssistantResponse
+      ? evals.getAddToDatasetAction({
+          initialExample: {
+            input: {
+              initialMessages,
+              connectorId,
+              scopes,
+            },
+            output: {
+              content: lastAssistantResponse.message.content,
+            },
+            metadata: {
+              source: 'observability_ai_assistant',
+              timestamp: lastAssistantResponse['@timestamp'],
+            },
+          },
+        })
+      : null;
 
   useEffect(() => {
     next(initialMessagesRef.current);
@@ -147,32 +161,14 @@ function ChatContent({
                   }
                 }}
               />
-              {openAddToDatasetFlyout && lastAssistantResponse ? (
+              {addToDatasetAction ? (
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     size="s"
-                    iconType="beaker"
-                    onClick={() => {
-                      openAddToDatasetFlyout({
-                        title: ADD_TO_DATASET_LABEL,
-                        initialExample: {
-                          input: {
-                            initialMessages,
-                            connectorId,
-                            scopes,
-                          },
-                          output: {
-                            content: lastAssistantResponse.message.content,
-                          },
-                          metadata: {
-                            source: 'observability_ai_assistant',
-                            timestamp: lastAssistantResponse['@timestamp'],
-                          },
-                        },
-                      });
-                    }}
+                    iconType={addToDatasetAction.iconType}
+                    onClick={addToDatasetAction.onClick}
                   >
-                    {ADD_TO_DATASET_LABEL}
+                    {addToDatasetAction.label}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
               ) : null}

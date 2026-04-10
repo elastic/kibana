@@ -144,10 +144,6 @@ export const Conversation: React.FC<{}> = () => {
     padding-bottom: ${euiTheme.size.base};
   `;
 
-  const roundsPaddingStyles = css`
-    padding-top: ${euiTheme.size.xs};
-  `;
-
   if (!hasActiveConversation) {
     return <NewConversationPrompt />;
   }
@@ -173,13 +169,7 @@ export const Conversation: React.FC<{}> = () => {
             ref={scrollContainerRef}
             css={scrollableStyles}
           >
-            <EuiFlexItem
-              css={[
-                conversationElementWidthStyles,
-                conversationElementPaddingStyles,
-                roundsPaddingStyles,
-              ]}
-            >
+            <EuiFlexItem css={[conversationElementWidthStyles, conversationElementPaddingStyles]}>
               <ConversationRounds scrollContainerHeight={scrollContainerHeight} />
             </EuiFlexItem>
           </EuiFlexGroup>

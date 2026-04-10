@@ -64,7 +64,6 @@ const TakeActionComponent: React.FC<Props> = ({
   const {
     services: { cases, evals },
   } = useKibana();
-  const openAddToDatasetFlyout = evals?.openAddToDatasetFlyout;
   const { hasSearchAILakeConfigurations } = useAssistantAvailability();
 
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
@@ -231,10 +230,13 @@ const TakeActionComponent: React.FC<Props> = ({
 
   const isAddToChatDisabled = !hasValidAgentBuilderLicense;
 
-  const onAddToDataset = useCallback(() => {
-    closePopover();
-    openAddToDatasetFlyout?.({
+  const addToDatasetAction = useMemo(() => {
+    if (!evals?.getAddToDatasetAction) return null;
+
+    return evals.getAddToDatasetAction({
+      label: i18n.ADD_TO_DATASET,
       title: i18n.ADD_TO_DATASET,
+      onBeforeOpen: closePopover,
       initialExamples: attackDiscoveries.map((ad, index) => {
         const title =
           ad.title && ad.title.trim().length > 0
@@ -273,7 +275,7 @@ const TakeActionComponent: React.FC<Props> = ({
         };
       }),
     });
-  }, [closePopover, openAddToDatasetFlyout, attackDiscoveries, replacements, attackDiscoveryIds]);
+  }, [attackDiscoveries, attackDiscoveryIds, closePopover, evals, replacements]);
 
   const { items: runWorkflowItems, panels: runWorkflowPanels } =
     useAttackRunWorkflowContextMenuItems({
@@ -392,13 +394,13 @@ const TakeActionComponent: React.FC<Props> = ({
       : [];
 
     const datasetItems =
-      openAddToDatasetFlyout != null
+      addToDatasetAction != null
         ? [
             {
               'data-test-subj': 'addToDataset',
               key: 'addToDataset',
-              name: i18n.ADD_TO_DATASET,
-              onClick: onAddToDataset,
+              name: addToDatasetAction.label,
+              onClick: addToDatasetAction.onClick,
             },
           ]
         : [];
@@ -426,8 +428,7 @@ const TakeActionComponent: React.FC<Props> = ({
     onViewInAiAssistant,
     onUpdateWorkflowStatus,
     runWorkflowItems,
-    openAddToDatasetFlyout,
-    onAddToDataset,
+    addToDatasetAction,
   ]);
 
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(

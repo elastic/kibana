@@ -46,9 +46,46 @@ export interface AddToDatasetFlyoutOpenOptions {
   title?: string;
 }
 
+export interface AddToDatasetActionConfig extends AddToDatasetFlyoutOpenOptions {
+  /**
+   * Text shown for button-style CTAs.
+   *
+   * Defaults to a generic "Add to dataset" label.
+   */
+  label?: string;
+  /**
+   * Accessible label for icon-only CTAs.
+   *
+   * Defaults to `label` (or the default label).
+   */
+  ariaLabel?: string;
+  /**
+   * Icon type for the CTA (defaults to `beaker`).
+   */
+  iconType?: string;
+  /**
+   * Whether to call `event.stopPropagation()` for click events.
+   *
+   * Useful when rendering within clickable containers (e.g. accordions).
+   */
+  stopPropagation?: boolean;
+  /**
+   * Optional callback invoked right before opening the flyout.
+   */
+  onBeforeOpen?: () => void;
+}
+
+export interface AddToDatasetAction {
+  label: string;
+  ariaLabel: string;
+  iconType: string;
+  onClick: (event?: { stopPropagation?: () => void }) => void;
+}
+
 export interface EvalsPublicStart {
   TraceWaterfall: ComponentType<{ traceId: string }>;
   openAddToDatasetFlyout: (options: AddToDatasetFlyoutOpenOptions) => void;
+  getAddToDatasetAction: (config: AddToDatasetActionConfig) => AddToDatasetAction;
 }
 
 export interface EvalsSetupDependencies {
