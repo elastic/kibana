@@ -29,7 +29,8 @@ import { GET_STARTED_URL } from '../../../../urls/navigation';
 import { role } from '../common/role';
 
 // TODO: https://github.com/elastic/kibana/issues/228940 remove @skipInServerlessMKI tag when privileges issue is fixed
-describe(
+// Remove this test file when we remove the old logic and make securityClassicNavUpdate the default experience for everyone.
+describe.skip(
   'Rule Migrations - Translated Rules Page',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {

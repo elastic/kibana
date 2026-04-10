@@ -116,7 +116,7 @@ export const openNavigationPanelFor = (page: string) => {
     case HOSTS:
     case NETWORK:
     case USERS: {
-      panel = EXPLORE_PANEL_BTN;
+      panel = EXPLORE;
       break;
     }
     case RULES:
@@ -128,7 +128,7 @@ export const openNavigationPanelFor = (page: string) => {
     case ENDPOINTS:
     case POLICIES:
     case ARTIFACTS: {
-      panel = SETTINGS_PANEL_BTN;
+      panel = SETTINGS;
       break;
     }
   }
