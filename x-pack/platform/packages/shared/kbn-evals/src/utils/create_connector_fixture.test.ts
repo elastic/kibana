@@ -87,7 +87,7 @@ describe('createConnectorFixture', () => {
     delete process.env.KBN_EVALS_SKIP_CONNECTOR_SETUP;
   });
 
-  it('deletes existing connector before creating a new one', async () => {
+  it('creates the connector without deleting first', async () => {
     await createConnectorFixture({
       predefinedConnector,
       fetch: mockFetch,
@@ -101,14 +101,8 @@ describe('createConnectorFixture', () => {
       method: 'GET',
     });
 
-    // Second call: DELETE (setup cleanup)
+    // Second call: POST (create)
     expect(mockFetch).toHaveBeenNthCalledWith(2, {
-      path: `/api/actions/connector/${expectedUuid}`,
-      method: 'DELETE',
-    });
-
-    // Third call: POST (create)
-    expect(mockFetch).toHaveBeenNthCalledWith(3, {
       path: `/api/actions/connector/${expectedUuid}`,
       method: 'POST',
       body: JSON.stringify({
@@ -150,7 +144,7 @@ describe('createConnectorFixture', () => {
     });
   });
 
-  it('deletes the connector on teardown after use()', async () => {
+  it('does not delete the connector on teardown (shared across parallel workers)', async () => {
     const callOrder: string[] = [];
 
     mockFetch.mockImplementation(async ({ method }: { method: string }) => {
@@ -168,24 +162,23 @@ describe('createConnectorFixture', () => {
       use: mockUse,
     });
 
-    // Order: GET (preconfigured check), DELETE (cleanup), POST (create), use(), DELETE (teardown)
-    expect(callOrder).toEqual(['GET', 'DELETE', 'POST', 'use', 'DELETE']);
+    // Order: GET (preconfigured check), POST (create), use() — no teardown DELETE
+    expect(callOrder).toEqual(['GET', 'POST', 'use']);
   });
 
-  it('swallows 404 errors on delete', async () => {
-    const axiosError = new AxiosError('Not Found', '404', undefined, undefined, {
-      status: 404,
+  it('handles 409 conflict on create when another worker already created the connector', async () => {
+    const conflictError = new AxiosError('Conflict', '409', undefined, undefined, {
+      status: 409,
       data: {},
       headers: {},
-      statusText: 'Not Found',
+      statusText: 'Conflict',
       config: {} as any,
     });
 
-    // First call (preconfigured check) succeeds, second call (setup delete) rejects with 404, rest succeed
+    // First call (preconfigured check) returns not preconfigured, second call (POST) returns 409
     mockFetch
       .mockResolvedValueOnce({ is_preconfigured: false })
-      .mockRejectedValueOnce(axiosError)
-      .mockResolvedValue(undefined);
+      .mockRejectedValueOnce(conflictError);
 
     await expect(
       createConnectorFixture({
@@ -196,11 +189,14 @@ describe('createConnectorFixture', () => {
       })
     ).resolves.toBeUndefined();
 
-    // Should still proceed to POST and use()
-    expect(mockUse).toHaveBeenCalled();
+    // Should still proceed to use()
+    expect(mockUse).toHaveBeenCalledWith({
+      ...predefinedConnector,
+      id: expectedUuid,
+    });
   });
 
-  it('throws non-404 errors on delete', async () => {
+  it('throws non-409 errors on create', async () => {
     const serverError = new AxiosError('Internal Server Error', '500', undefined, undefined, {
       status: 500,
       data: {},
@@ -209,7 +205,7 @@ describe('createConnectorFixture', () => {
       config: {} as any,
     });
 
-    // First call (preconfigured check) succeeds, second call (setup delete) fails hard
+    // First call (preconfigured check) succeeds, second call (POST) fails hard
     mockFetch.mockResolvedValueOnce({ is_preconfigured: false }).mockRejectedValueOnce(serverError);
 
     await expect(
