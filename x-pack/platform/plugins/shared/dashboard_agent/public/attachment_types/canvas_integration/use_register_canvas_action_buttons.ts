@@ -8,7 +8,7 @@
 import { useEffect } from 'react';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
-import type { DashboardState } from '@kbn/dashboard-plugin/common';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { i18n } from '@kbn/i18n';
 import useLatest from 'react-use/lib/useLatest';
@@ -22,13 +22,11 @@ interface UseRegisterCanvasActionButtonsParams {
   dashboardApi: DashboardApi | undefined;
   registerActionButtons: (buttons: ActionButton[]) => void;
   updateOrigin: (origin: string) => Promise<unknown>;
-  timeRange: { from: string; to: string };
-  dashboardState: Pick<DashboardState, 'title' | 'description' | 'panels' | 'time_range'>;
-  attachmentOrigin: string | undefined;
+  dashboardLocatorParams: DashboardLocatorParams;
+  getExistingDashboardId: () => string | undefined;
   isSidebar: boolean;
   closeCanvas: () => void;
   openSidebarConversation?: () => void;
-  savedObjectStatus: SavedObjectStatus;
 }
 
 export const useRegisterCanvasActionButtons = ({
@@ -37,17 +35,13 @@ export const useRegisterCanvasActionButtons = ({
   updateOrigin,
   closeCanvas,
   openSidebarConversation,
-  timeRange,
-  dashboardState,
-  attachmentOrigin,
+  dashboardLocatorParams,
+  getExistingDashboardId,
   isSidebar,
-  savedObjectStatus,
 }: UseRegisterCanvasActionButtonsParams) => {
-  const timeRangeRef = useLatest(timeRange);
-  const attachmentOriginRef = useLatest(attachmentOrigin);
-  const dashboardStateRef = useLatest(dashboardState);
+  const dashboardLocatorParamsRef = useLatest(dashboardLocatorParams);
+  const getExistingDashboardIdRef = useLatest(getExistingDashboardId);
   const openSidebarConversationRef = useLatest(openSidebarConversation);
-  const savedObjectStatusRef = useLatest(savedObjectStatus);
 
   useEffect(() => {
     if (!dashboardApi) {
@@ -65,15 +59,10 @@ export const useRegisterCanvasActionButtons = ({
         }),
         type: ActionButtonType.PRIMARY,
         handler: async () => {
-          const existingAttachmentOrigin =
-            savedObjectStatusRef.current.status === 'resolved' &&
-            savedObjectStatusRef.current.exists
-              ? attachmentOriginRef.current
-              : undefined;
+          const existingAttachmentOrigin = getExistingDashboardIdRef.current();
           await locator.navigate({
-            ...dashboardStateRef.current,
+            ...dashboardLocatorParamsRef.current,
             dashboardId: existingAttachmentOrigin,
-            time_range: timeRangeRef.current,
             viewMode: 'edit',
           });
           closeCanvas();
@@ -90,10 +79,7 @@ export const useRegisterCanvasActionButtons = ({
       icon: 'save',
       type: ActionButtonType.PRIMARY,
       handler: async () => {
-        const existingAttachmentOrigin =
-          savedObjectStatusRef.current.status === 'resolved' && savedObjectStatusRef.current.exists
-            ? attachmentOriginRef.current
-            : undefined;
+        const existingAttachmentOrigin = getExistingDashboardIdRef.current();
         if (existingAttachmentOrigin) {
           await dashboardApi.runQuickSave();
           await updateOrigin(existingAttachmentOrigin);
@@ -112,10 +98,8 @@ export const useRegisterCanvasActionButtons = ({
     updateOrigin,
     closeCanvas,
     openSidebarConversationRef,
-    timeRangeRef,
-    attachmentOriginRef,
-    dashboardStateRef,
-    savedObjectStatusRef,
+    dashboardLocatorParamsRef,
+    getExistingDashboardIdRef,
     isSidebar,
   ]);
 };

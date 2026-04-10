@@ -9,6 +9,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import type { DashboardApi, DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { DashboardSaveEvent } from '@kbn/dashboard-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
@@ -17,6 +18,11 @@ import type { ChatEvent, RoundCompleteEvent, ConversationRound } from '@kbn/agen
 import { ChatEventType } from '@kbn/agent-builder-common';
 import { ATTACHMENT_REF_OPERATION } from '@kbn/agent-builder-common/attachments';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import {
+  clearUnifiedSearchPersistedState,
+  getPersistedState,
+  setPersistedState,
+} from './canvas_integration/use_dashboard_preview_unified_search';
 import { registerDashboardAttachmentUiDefinition } from '.';
 
 jest.mock('@kbn/dashboard-plugin/public', () => ({
@@ -175,6 +181,14 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       findDashboardsService,
     } as unknown as DashboardStart;
 
+    const data: DataPublicPluginStart = {
+      query: {
+        filterManager: {
+          setFilters: jest.fn(),
+        },
+      },
+    } as unknown as DataPublicPluginStart;
+
     const unifiedSearch: UnifiedSearchPublicPluginStart = {
       ui: { SearchBar: jest.fn() },
     } as unknown as UnifiedSearchPublicPluginStart;
@@ -182,6 +196,8 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     return {
       agentBuilder,
       addAttachment: mockAddAttachment,
+      data,
+      filterManager: data.query.filterManager,
       dashboardPlugin,
       unifiedSearch,
       dashboardLocator: undefined,
@@ -195,6 +211,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    clearUnifiedSearchPersistedState('attachment-1');
     deps = createMockDeps();
     unregister = registerDashboardAttachmentUiDefinition(deps);
     uiDefinition = deps.addAttachmentType.mock.calls[0][1];
@@ -215,6 +232,45 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         getActionButtons: expect.any(Function),
       })
     );
+  });
+
+  it('persists canvas unified search state per attachment across render calls', () => {
+    const attachment: DashboardAttachment = {
+      id: 'attachment-1',
+      type: DASHBOARD_ATTACHMENT_TYPE,
+      data: { title: 'Test Dashboard', description: '', panels: [] },
+    };
+
+    setPersistedState(attachment.id, {
+      filters: [{ meta: { key: 'host.name' } }],
+      query: { query: 'host.name: "web-01"', language: 'kuery' },
+      timeRange: { from: 'now-1h', to: 'now' },
+    });
+
+    expect(getPersistedState(attachment.id)).toEqual({
+      filters: [{ meta: { key: 'host.name' } }],
+      query: { query: 'host.name: "web-01"', language: 'kuery' },
+      timeRange: { from: 'now-1h', to: 'now' },
+    });
+  });
+
+  it('clears persisted canvas unified search state when attachment unmounts', () => {
+    const { getAttachment } = createMockAttachment('attachment-1');
+
+    setPersistedState('attachment-1', {
+      filters: [{ meta: { key: 'host.name' } }],
+      query: { query: 'host.name: "web-01"', language: 'kuery' },
+      timeRange: { from: 'now-1h', to: 'now' },
+    });
+
+    const cleanup = uiDefinition.onAttachmentMount!({
+      getAttachment,
+      updateOrigin,
+    });
+
+    cleanup?.();
+
+    expect(getPersistedState('attachment-1')).toBeUndefined();
   });
 
   describe('onAttachmentMount - origin sync', () => {
