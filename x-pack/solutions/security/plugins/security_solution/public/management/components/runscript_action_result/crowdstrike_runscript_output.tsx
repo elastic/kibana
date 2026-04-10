@@ -15,8 +15,8 @@ import {
   type EuiTextProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import type {
   ActionDetails,
@@ -46,7 +46,7 @@ const NO_OUTPUT_MESSAGE = i18n.translate(
   }
 );
 
-const StyledEuiText = euiStyled(EuiText)`
+const styledTextCss = css`
   white-space: pre-wrap;
   line-break: anywhere;
 `;
@@ -90,9 +90,9 @@ const CrowdstrikeRunscriptAccordion = memo<CrowdstrikeRunscriptAccordionProps>(
         paddingSize="s"
         data-test-subj={dataTestSubj}
       >
-        <StyledEuiText size={textSize}>
+        <EuiText size={textSize} css={styledTextCss}>
           <p>{content}</p>
-        </StyledEuiText>
+        </EuiText>
       </EuiAccordion>
     );
   }

@@ -48,7 +48,7 @@ export interface RunscriptActionResultProps {
 export const RunscriptActionResult = memo<RunscriptActionResultProps>(
   ({ action, agentId = action.agents[0], 'data-test-subj': dataTestSubj, textSize = 's' }) => {
     const { canWriteExecuteOperations } = useUserPrivileges().endpointPrivileges;
-    const showFile = useMemo(() => action.agentType !== 'crowdstrike', [action.agentType]);
+    const showFile = action.agentType !== 'crowdstrike';
     const executionOutput = useMemo(() => {
       if (action.agentType === 'microsoft_defender_endpoint') {
         return (
