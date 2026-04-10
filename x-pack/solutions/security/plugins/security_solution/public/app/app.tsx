@@ -135,7 +135,7 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
     }
 
     return () => {
-      if (services.agentBuilder?.clearChatConfig) {
+      if (services.agentBuilder?.clearChatConfig && !isSidebarOpen) {
         services.agentBuilder.clearChatConfig();
       }
     };
