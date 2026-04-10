@@ -35,6 +35,9 @@ jest.mock('../../../../common', () => ({
     isLoading: false,
   })),
   generateId: jest.fn(() => 'mock-id'),
+  normalizeTitleName: jest.fn((v: string) => v.toLowerCase().replace(/\s+/g, '_')),
+  isValidNameFormat: jest.fn((v: string) => /^[a-zA-Z0-9_ ]+$/.test(v.trim())),
+  startsWithLetter: jest.fn((v: string) => /^[a-zA-Z]/.test(v.trim())),
   useKibana: jest.fn(() => ({
     services: {
       http: {},
