@@ -7,27 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { pick } from 'lodash';
 import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { pick } from 'lodash';
-
 import { ESQL_CONTROL } from '@kbn/controls-constants';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import { apiHasPinnedPanels } from '@kbn/presentation-publishing';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import {
+  apiPublishesESQLVariables,
+  isStaticESQLControl,
+  type QueryESQLControl,
+  type StaticESQLControl,
+} from '@kbn/esql-types';
+import { apiHasPinnedPanels, type StateComparators } from '@kbn/presentation-publishing';
 import { uiActionsService } from '../../services/kibana_services';
+import { defaultControlLabelComparators, initializeLabelManager } from '../control_labels';
 import { OptionsListControl } from '../data_controls/options_list_control/components/options_list_control';
 import { OptionsListControlContext } from '../data_controls/options_list_control/options_list_context_provider';
-import { initializeESQLControlManager, selectionComparators } from './esql_control_manager';
-import type { ESQLControlApi, ESQLOptionsListComponentApi } from './types';
 import { VariableControlsStrings } from './constants';
-import { initializeLabelManager, defaultControlLabelComparators } from '../control_labels';
+import { getSelectionComparators, initializeESQLControlManager } from './esql_control_manager';
+import type {
+  ESQLControlApi,
+  ESQLOptionsListComponentApi,
+  ESQLOptionsListRuntimeState,
+} from './types';
 
-export const getESQLControlFactory = (): EmbeddableFactory<
-  OptionsListESQLControlState,
-  ESQLControlApi
+export const getESQLControlFactory = <
+  State extends OptionsListESQLControlState = OptionsListESQLControlState
+>(): EmbeddableFactory<
+  State extends { control_type: 'STATIC_VALUES' } ? StaticESQLControl : QueryESQLControl,
+  ESQLControlApi<State>
 > => {
   return {
     type: ESQL_CONTROL,
@@ -53,22 +62,26 @@ export const getESQLControlFactory = (): EmbeddableFactory<
         anyStateChange$: selections.anyStateChange$,
         getComparators: () => {
           return {
-            ...selectionComparators,
+            ...getSelectionComparators(state.control_type),
             ...defaultControlLabelComparators,
             display_settings: 'skip',
-          };
+          } as StateComparators<typeof initialState>;
         },
-        serializeState: () => ({
-          ...selections.getLatestState(),
-          ...labelManager.getLatestState(),
-        }),
+        serializeState: () =>
+          ({
+            ...selections.getLatestState(),
+            ...labelManager.getLatestState(),
+          } as typeof initialState),
         applySerializedState: (nextState) => {
-          selections.reinitializeState(nextState);
+          selections.reinitializeState({
+            available_options: [],
+            ...nextState,
+          } as ESQLOptionsListRuntimeState);
           labelManager.reinitializeState(nextState);
         },
       });
 
-      const api: ESQLControlApi = finalizeApi({
+      const api = finalizeApi({
         ...containerStateApi,
         ...selections.api,
         ...labelManager.api,
@@ -94,13 +107,13 @@ export const getESQLControlFactory = (): EmbeddableFactory<
           const variablesInParent = apiPublishesESQLVariables(api.parentApi)
             ? api.parentApi.esqlVariables$.value
             : [];
-          const onSaveControl = async (updatedState: OptionsListESQLControlState) => {
+          const onSaveControl = async (updatedState: ESQLOptionsListRuntimeState) => {
             selections.reinitializeState(updatedState);
             labelManager.reinitializeState(updatedState);
           };
           try {
             await uiActionsService.executeTriggerActions('ESQL_CONTROL_TRIGGER', {
-              queryString: nextState.esql_query,
+              queryString: isStaticESQLControl(nextState) ? '' : nextState.esql_query,
               variableType: nextState.variable_type,
               controlType: nextState.control_type,
               esqlVariables: variablesInParent,
@@ -123,10 +136,11 @@ export const getESQLControlFactory = (): EmbeddableFactory<
         setDataLoading,
 
         makeSelection(key?: string) {
-          const singleSelect = selections.api.singleSelect$.value ?? true;
-          if (singleSelect && key) {
+          if (!key) return;
+          const singleSelect = selections.api.singleSelect$.value;
+          if (singleSelect) {
             selections.internalApi.setSelectedOptions([key]);
-          } else if (key) {
+          } else {
             // Get current selection state, not initial state
             const current = componentApi.selectedOptions$.value || [];
             const isSelected = current.includes(key);

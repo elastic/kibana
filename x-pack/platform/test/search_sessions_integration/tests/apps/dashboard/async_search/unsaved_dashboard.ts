@@ -16,20 +16,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const monacoEditor = getService('monacoEditor');
 
-  const { common, home, timePicker, header, discover, dashboard, searchSessionsManagement } =
-    getPageObjects([
-      'common',
-      'timePicker',
-      'header',
-      'home',
-      'discover',
-      'dashboard',
-      'dashboardControls',
-      'searchSessionsManagement',
-    ]);
+  const {
+    appMenu,
+    common,
+    home,
+    timePicker,
+    header,
+    discover,
+    dashboard,
+    searchSessionsManagement,
+  } = getPageObjects([
+    'appMenu',
+    'common',
+    'timePicker',
+    'header',
+    'home',
+    'discover',
+    'dashboard',
+    'dashboardControls',
+    'searchSessionsManagement',
+  ]);
 
   async function addFromLibrary() {
-    await testSubjects.click('dashboardAddTopNavButton');
+    await appMenu.clickMenuItem('dashboardAddTopNavButton');
     await testSubjects.click('dashboardAddFromLibraryButton');
     await testSubjects.setValue('savedObjectFinderSearchInput', 'Unsaved dashboard slow query');
     await testSubjects.click('savedObjectTitleUnsaved-dashboard-slow-query');

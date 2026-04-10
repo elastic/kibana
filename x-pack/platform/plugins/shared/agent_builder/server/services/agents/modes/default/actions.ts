@@ -7,7 +7,7 @@
 
 import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
-import type { ToolCall } from '@kbn/agent-builder-genai-utils/langchain';
+import type { ToolCallWithReasoning } from '@kbn/agent-builder-genai-utils/langchain';
 
 export enum AgentActionType {
   Error = 'error',
@@ -34,7 +34,7 @@ export interface AgentErrorAction {
 
 export interface ToolCallAction {
   type: AgentActionType.ToolCall;
-  tool_calls: ToolCall[];
+  tool_calls: ToolCallWithReasoning[];
   message?: string;
 }
 
@@ -43,10 +43,14 @@ export interface ExecuteToolAction {
   tool_results: ToolCallResult[];
 }
 
-export interface ToolPromptAction {
-  type: AgentActionType.ToolPrompt;
+export interface ToolPromptEntry {
   tool_call_id: string;
   prompt: PromptRequest;
+}
+
+export interface ToolPromptAction {
+  type: AgentActionType.ToolPrompt;
+  prompts: ToolPromptEntry[];
 }
 
 export interface HandoverAction {
@@ -121,7 +125,10 @@ export function errorAction(error: AgentBuilderAgentExecutionError): AgentErrorA
   };
 }
 
-export function toolCallAction(toolCalls: ToolCall[], message?: string): ToolCallAction {
+export function toolCallAction(
+  toolCalls: ToolCallWithReasoning[],
+  message?: string
+): ToolCallAction {
   return {
     type: AgentActionType.ToolCall,
     tool_calls: toolCalls,
@@ -136,11 +143,10 @@ export function executeToolAction(toolResults: ToolCallResult[]): ExecuteToolAct
   };
 }
 
-export function toolPromptAction(toolCallId: string, prompt: PromptRequest): ToolPromptAction {
+export function toolPromptAction(prompts: ToolPromptEntry[]): ToolPromptAction {
   return {
     type: AgentActionType.ToolPrompt,
-    tool_call_id: toolCallId,
-    prompt,
+    prompts,
   };
 }
 

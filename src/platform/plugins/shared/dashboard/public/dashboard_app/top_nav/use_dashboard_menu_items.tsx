@@ -18,7 +18,6 @@ import type {
   AppMenuConfig,
   AppMenuItemType,
   AppMenuPrimaryActionItem,
-  AppMenuSecondaryActionItem,
 } from '@kbn/core-chrome-app-menu-components';
 import { useDashboardExportItems } from './share/use_dashboard_export_items';
 import { getAccessControlClient } from '../../services/access_control_service';
@@ -176,7 +175,7 @@ export const useDashboardMenuItems = ({
     ShowShareModal({
       dashboardTitle,
       savedObjectId: lastSavedId,
-      isDirty: Boolean(hasUnsavedChanges),
+      isDirty: Boolean(hasUnsavedChanges) && viewMode === 'edit',
       canSave: (canManageAccessControl || isInEditAccessMode) && Boolean(hasUnsavedChanges),
       accessControl,
       createdBy: dashboardApi.createdBy,
@@ -197,6 +196,7 @@ export const useDashboardMenuItems = ({
     dashboardApi.createdBy,
     accessControlClient,
     dashboardApi.isManaged,
+    viewMode,
   ]);
 
   const getEditTooltip = useCallback(() => {
@@ -222,7 +222,7 @@ export const useDashboardMenuItems = ({
       label: topNavStrings.resetChanges.label,
       id: 'reset',
       testId: 'dashboardDiscardChangesMenuItem',
-      iconType: 'editorUndo',
+      iconType: 'undo',
       disableButton:
         isResetting ||
         !hasUnsavedChanges ||
@@ -250,7 +250,7 @@ export const useDashboardMenuItems = ({
     const exportMenuItem: AppMenuItemType =
       exportItems.length === 1
         ? {
-            order: 3,
+            order: viewMode === 'edit' ? 4 : 2,
             label: topNavStrings.export.label,
             id: 'export',
             iconType: 'exportAction',
@@ -259,7 +259,7 @@ export const useDashboardMenuItems = ({
             run: (params) => exportItems[0].run?.(params),
           }
         : {
-            order: 3,
+            order: viewMode === 'edit' ? 4 : 2,
             label: topNavStrings.export.label,
             id: 'export',
             iconType: 'exportAction',
@@ -272,52 +272,8 @@ export const useDashboardMenuItems = ({
 
     return {
       // Regular menu items
-      fullScreen: {
-        order: 1,
-        label: topNavStrings.fullScreen.label,
-        id: 'full-screen',
-        testId: 'dashboardFullScreenMode',
-        iconType: 'fullScreen',
-        run: () => dashboardApi.setFullScreenMode(true),
-        disableButton: disableTopNav,
-      } as AppMenuItemType,
-
-      duplicate: {
-        order: 2,
-        disableButton: disableTopNav,
-        id: 'interactive-save',
-        testId: 'dashboardInteractiveSaveMenuItem',
-        iconType: 'copy',
-        run: dashboardInteractiveSave,
-        label: topNavStrings.viewModeInteractiveSave.label,
-      } as AppMenuItemType,
-
-      switchToViewMode: {
-        order: 1,
-        iconType: 'exit', // use 'logOut' when added to EUI
-        label: topNavStrings.switchToViewMode.label,
-        id: 'cancel',
-        disableButton: disableTopNav || !lastSavedId || isResetting,
-        isLoading: isResetting,
-        testId: 'dashboardViewOnlyMode',
-        run: () => resetChanges(true),
-      } as AppMenuItemType,
-
-      backgroundSearch: {
-        order: 6,
-        label: topNavStrings.backgroundSearch.label,
-        id: 'backgroundSearch',
-        iconType: 'backgroundTask',
-        testId: 'openBackgroundSearchFlyoutButton',
-        run: () =>
-          dataService.search.showSearchSessionsFlyout({
-            appId: appId!,
-            trackingProps: { openedFrom: 'background search button' },
-          }),
-      } as AppMenuItemType,
-
       share: {
-        order: 4,
+        order: viewMode === 'edit' ? 3 : 1,
         label: topNavStrings.share.label,
         tooltipContent: getShareTooltip(),
         tooltipTitle: topNavStrings.share.tooltipTitle,
@@ -329,6 +285,62 @@ export const useDashboardMenuItems = ({
       } as AppMenuItemType,
 
       export: exportMenuItem,
+
+      duplicate: {
+        order: 3,
+        disableButton: disableTopNav,
+        id: 'interactive-save',
+        testId: 'dashboardInteractiveSaveMenuItem',
+        iconType: 'copy',
+        run: dashboardInteractiveSave,
+        label: topNavStrings.viewModeInteractiveSave.label,
+      } as AppMenuItemType,
+
+      backgroundSearch: {
+        order: viewMode === 'edit' ? 6 : 5,
+        label: topNavStrings.backgroundSearch.label,
+        id: 'backgroundSearch',
+        iconType: 'backgroundTask',
+        testId: 'openBackgroundSearchFlyoutButton',
+        run: () =>
+          dataService.search.showSearchSessionsFlyout({
+            appId: appId!,
+            trackingProps: { openedFrom: 'background search button' },
+          }),
+      } as AppMenuItemType,
+
+      fullScreen: {
+        order: 6,
+        label: topNavStrings.fullScreen.label,
+        id: 'full-screen',
+        testId: 'dashboardFullScreenMode',
+        iconType: 'fullScreen',
+        run: () => dashboardApi.setFullScreenMode(true),
+        disableButton: disableTopNav,
+      } as AppMenuItemType,
+
+      switchToViewMode: {
+        order: 1,
+        iconType: 'logOut', // use 'logOut' when added to EUI
+        label: topNavStrings.switchToViewMode.label,
+        id: 'cancel',
+        disableButton: disableTopNav || !lastSavedId || isResetting,
+        isLoading: isResetting,
+        testId: 'dashboardViewOnlyMode',
+        run: () => resetChanges(true),
+      } as AppMenuItemType,
+
+      add: {
+        label: topNavStrings.add.label,
+        id: 'add',
+        iconType: 'plus',
+        testId: 'dashboardAddTopNavButton',
+        htmlId: 'dashboardAddTopNavButton',
+        disableButton: disableTopNav,
+        popoverWidth: 200,
+        items: addMenuItems,
+        order: 2,
+      } as AppMenuItemType,
 
       settings: {
         order: 5,
@@ -342,19 +354,6 @@ export const useDashboardMenuItems = ({
       } as AppMenuItemType,
 
       // Action items
-      add: {
-        label: topNavStrings.add.label,
-        id: 'add',
-        iconType: 'plusInCircle',
-        color: 'success',
-        testId: 'dashboardAddTopNavButton',
-        htmlId: 'dashboardAddTopNavButton',
-        disableButton: disableTopNav,
-        minWidth: false,
-        popoverWidth: 200,
-        items: addMenuItems,
-      } as AppMenuSecondaryActionItem,
-
       edit: {
         label: topNavStrings.edit.label,
         id: 'edit',
@@ -394,7 +393,7 @@ export const useDashboardMenuItems = ({
           ],
           isMainButtonLoading: isSaveInProgress,
           secondaryButtonAriaLabel: topNavStrings.saveMenu.label,
-          secondaryButtonIcon: 'arrowDown',
+          secondaryButtonIcon: 'chevronSingleDown',
           secondaryButtonFill: true,
           isSecondaryButtonDisabled: isSaveInProgress,
           notifcationIndicatorTooltipContent: topNavStrings.unsavedChangesTooltip,
@@ -432,6 +431,7 @@ export const useDashboardMenuItems = ({
     addMenuItems,
     resetChangesMenuItem,
     exportItems,
+    viewMode,
   ]);
 
   /**
@@ -495,7 +495,11 @@ export const useDashboardMenuItems = ({
   const editModeTopNavConfig = useMemo(() => {
     const { storeSearchSession } = getDashboardCapabilities();
 
-    const items: AppMenuItemType[] = [menuItems.switchToViewMode, menuItems.settings];
+    const items: AppMenuItemType[] = [
+      menuItems.add,
+      menuItems.switchToViewMode,
+      menuItems.settings,
+    ];
 
     if (shareService) {
       items.push(menuItems.share);
@@ -515,7 +519,6 @@ export const useDashboardMenuItems = ({
 
     const editModeConfig: AppMenuConfig = {
       items,
-      secondaryActionItem: menuItems.add,
       primaryActionItem: menuItems.save,
     };
 
@@ -526,9 +529,9 @@ export const useDashboardMenuItems = ({
     menuItems.share,
     menuItems.settings,
     menuItems.backgroundSearch,
-    menuItems.add,
     menuItems.save,
     menuItems.labs,
+    menuItems.add,
     hasExportMenuItems,
     isLabsEnabled,
   ]);

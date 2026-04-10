@@ -6,6 +6,7 @@
  */
 
 import type { StartServicesAccessor } from '@kbn/core/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { openLazyFlyout } from '@kbn/presentation-util';
 
@@ -36,7 +37,8 @@ import { EmbeddableSingleMetricViewerUserInput } from './single_metric_viewer_se
 import type { SingleMetricViewerEmbeddableState } from './types';
 
 export const getSingleMetricViewerEmbeddableFactory = (
-  getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
+  getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>,
+  usageCollection?: UsageCollectionSetup
 ) => {
   const factory: EmbeddableFactory<
     SingleMetricViewerEmbeddableState,

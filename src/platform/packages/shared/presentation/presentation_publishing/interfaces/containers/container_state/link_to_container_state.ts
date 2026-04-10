@@ -9,7 +9,7 @@
 
 import { combineLatestWith, debounceTime, map, of } from 'rxjs';
 import { type StateComparators, areComparatorsEqual } from '../../../state_manager';
-import type { StateManager, StateManagerInitializer } from '../../../state_manager/types';
+import type { StateManager } from '../../../state_manager/types';
 import type { HasParentApi } from '../../has_parent_api';
 import type { HasSerializableState } from '../../has_serializable_state';
 import type { HasUniqueId } from '../../has_uuid';
@@ -22,7 +22,7 @@ const UNSAVED_CHANGES_DEBOUNCE = 100;
 
 export interface ContainerStateManagerInitializer<StateType extends object>
   extends HasSerializableState<StateType> {
-  defaultState?: StateManagerInitializer<StateType>['defaultState'];
+  defaultState?: Partial<StateType>;
   anyStateChange$: StateManager<StateType>['anyStateChange$'];
   getComparators: () => StateComparators<StateType>;
 }

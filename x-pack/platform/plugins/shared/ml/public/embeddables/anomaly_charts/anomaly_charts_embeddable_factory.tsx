@@ -26,6 +26,7 @@ import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import type { AnomalyChartsEmbeddableApi, AnomalyChartsEmbeddableState } from '..';
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '..';
@@ -40,7 +41,8 @@ import { buildDataViewPublishingApi } from '../common/build_data_view_publishing
 import { EmbeddableAnomalyChartsUserInput } from './anomaly_charts_setup_flyout';
 
 export const getAnomalyChartsReactEmbeddableFactory = (
-  getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
+  getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>,
+  usageCollection?: UsageCollectionSetup
 ) => {
   const factory: EmbeddableFactory<AnomalyChartsEmbeddableState, AnomalyChartsEmbeddableApi> = {
     type: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
@@ -57,7 +59,8 @@ export const getAnomalyChartsReactEmbeddableFactory = (
       const [coreStartServices, pluginsStartServices] = await getStartServices();
       const anomalyChartsDependencies = await getAnomalyChartsServiceDependencies(
         coreStartServices,
-        pluginsStartServices
+        pluginsStartServices,
+        usageCollection
       );
 
       const [, , mlServices] = anomalyChartsDependencies;
