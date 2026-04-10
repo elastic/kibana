@@ -17,7 +17,9 @@ Apply this guide when the developer signals:
 - **"Answer from my docs"** — don't hallucinate, cite sources
 - **"RAG pipeline"** — they already know the pattern and want Elasticsearch as the retriever
 
-Do **not** use this guide when: the developer only needs search results (not generated answers) — point them to keyword, semantic, or hybrid search instead.
+Do **not** use this guide when: the developer only needs search results (not generated answers) — point them to keyword-search or vector-hybrid-search instead.
+
+**Verify models before recommending:** Check the latest Elastic docs before recommending embedding models or LLMs. Elastic offers managed models via EIS (Elastic Inference Service) — the developer may not need an external API key. Jina v3 is the current default embedding model for `semantic_text` on EIS; Jina v5-small is available for cost-sensitive workloads. EIS also provides managed rerankers (Jina Reranker v2/v3). Check <https://www.elastic.co/docs/explore-analyze/elastic-inference/eis> for current models.
 
 ## 2. Architecture
 
@@ -44,14 +46,15 @@ User Question
 
 Chunking strategy depends on document structure. Ask the developer about their content.
 
-| Strategy | When to Use | Chunk Size |
-|----------|-------------|------------|
-| **Fixed-size** | Uniform text, no clear sections | 500-1000 tokens |
-| **Paragraph-based** | Well-structured docs with natural breaks | 1 paragraph per chunk |
-| **Section-based** | Documents with headers (H1/H2/H3) | 1 section per chunk |
-| **Recursive** | Mixed content, need flexibility | LangChain's `RecursiveCharacterTextSplitter` |
+| Strategy            | When to Use                              | Chunk Size                                   |
+| ------------------- | ---------------------------------------- | -------------------------------------------- |
+| **Fixed-size**      | Uniform text, no clear sections          | 500-1000 tokens                              |
+| **Paragraph-based** | Well-structured docs with natural breaks | 1 paragraph per chunk                        |
+| **Section-based**   | Documents with headers (H1/H2/H3)        | 1 section per chunk                          |
+| **Recursive**       | Mixed content, need flexibility          | LangChain's `RecursiveCharacterTextSplitter` |
 
 **Important considerations:**
+
 - **Overlap** — Add 50-200 token overlap between chunks so context isn't lost at boundaries
 - **Metadata** — Preserve source document title, URL, section header, page number with each chunk
 - **Parent document** — Store the parent doc ID so you can retrieve surrounding context if needed
@@ -366,24 +369,24 @@ def chat():
 
 ## 10. Relevance Tuning for RAG
 
-| Lever | Effect |
-|-------|--------|
-| **Chunk size** | Smaller = more precise retrieval, less context per chunk. Larger = more context but noisier. |
-| **k (num results)** | More chunks = more context for the LLM but risks dilution. Start with 3-5. |
-| **Hybrid retrieval** | Adds keyword matching; helps when questions contain specific terms or identifiers. |
-| **Reranking** | Retrieve 20, rerank to top 5 with a cross-encoder for best precision. |
-| **Metadata filtering** | Scope retrieval to relevant sources, time ranges, or categories. |
+| Lever                  | Effect                                                                                       |
+| ---------------------- | -------------------------------------------------------------------------------------------- |
+| **Chunk size**         | Smaller = more precise retrieval, less context per chunk. Larger = more context but noisier. |
+| **k (num results)**    | More chunks = more context for the LLM but risks dilution. Start with 3-5.                   |
+| **Hybrid retrieval**   | Adds keyword matching; helps when questions contain specific terms or identifiers.           |
+| **Reranking**          | Retrieve 20, rerank to top 5 with a cross-encoder for best precision.                        |
+| **Metadata filtering** | Scope retrieval to relevant sources, time ranges, or categories.                             |
 
 ## 11. Common Follow-Ups
 
-| Question | Answer |
-|----------|--------|
-| "The chatbot hallucinates" | Strengthen the system prompt ("only use provided context"), reduce temperature, add "I don't know" instructions. |
-| "Answers are too vague" | Reduce chunk size for more precise passages; increase k for more context. |
-| "How do I cite sources?" | Include source metadata in retrieval, reference in prompt with numbered citations. |
-| "How do I handle long documents?" | Chunk with overlap; consider hierarchical retrieval (retrieve chunk, then fetch parent section). |
-| "How do I update the knowledge base?" | Re-chunk and re-index changed documents. Use `parent_doc_id` to delete old chunks before re-indexing. |
-| "Which LLM should I use?" | GPT-4o-mini for cost efficiency, GPT-4o or Claude for quality. Any OpenAI-compatible API works. |
+| Question                              | Answer                                                                                                           |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| "The chatbot hallucinates"            | Strengthen the system prompt ("only use provided context"), reduce temperature, add "I don't know" instructions. |
+| "Answers are too vague"               | Reduce chunk size for more precise passages; increase k for more context.                                        |
+| "How do I cite sources?"              | Include source metadata in retrieval, reference in prompt with numbered citations.                               |
+| "How do I handle long documents?"     | Chunk with overlap; consider hierarchical retrieval (retrieve chunk, then fetch parent section).                 |
+| "How do I update the knowledge base?" | Re-chunk and re-index changed documents. Use `parent_doc_id` to delete old chunks before re-indexing.            |
+| "Which LLM should I use?"             | GPT-4o-mini for cost efficiency, GPT-4o or Claude for quality. Any OpenAI-compatible API works.                  |
 
 ## 12. When to Upgrade
 
