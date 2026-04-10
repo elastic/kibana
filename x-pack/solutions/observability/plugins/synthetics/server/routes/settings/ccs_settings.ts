@@ -32,7 +32,7 @@ export const createGetCCSSettingsRoute: SyntheticsRestApiRouteFactory<
 
 const CCSSettingsSchema = schema.object({
   useAllRemoteClusters: schema.boolean(),
-  selectedRemoteClusters: schema.arrayOf(schema.string()),
+  selectedRemoteClusters: schema.arrayOf(schema.string(), { maxSize: 100 }),
   remoteKibanaUrls: schema.recordOf(schema.string(), schema.string()),
 });
 
