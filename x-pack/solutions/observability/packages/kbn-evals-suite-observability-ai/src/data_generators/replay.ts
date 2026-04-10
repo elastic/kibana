@@ -13,23 +13,30 @@ import type { GcsConfig } from '../scenarios/types';
 const TEMP_INDEX_PREFIX = 'snapshot-loader-temp-';
 
 async function deleteStaleTemporaryIndices(esClient: Client, log: ToolingLog): Promise<void> {
+  let staleIndices: string[];
   try {
     const resolved = await esClient.indices.resolveIndex({
       name: `${TEMP_INDEX_PREFIX}*`,
     });
-    const staleIndices = resolved.indices.map((entry) => entry.name);
-    if (staleIndices.length > 0) {
-      log.warning(
-        `Found ${staleIndices.length} stale temporary indices from a previous run; deleting`
-      );
-      await esClient.indices.delete({
-        index: staleIndices.join(','),
-        ignore_unavailable: true,
-      });
-      log.info(`Deleted ${staleIndices.length} stale temporary indices`);
-    }
+    staleIndices = resolved.indices.map((entry) => entry.name);
   } catch {
     log.debug('No stale temporary indices to clean up');
+    return;
+  }
+
+  if (staleIndices.length === 0) {
+    return;
+  }
+
+  log.warning(`Found ${staleIndices.length} stale temporary indices from a previous run; deleting`);
+  try {
+    await esClient.indices.delete({
+      index: staleIndices.join(','),
+      ignore_unavailable: true,
+    });
+    log.info(`Deleted ${staleIndices.length} stale temporary indices`);
+  } catch (error) {
+    log.error(`Failed to delete stale temporary indices: ${(error as Error).message}`);
   }
 }
 
