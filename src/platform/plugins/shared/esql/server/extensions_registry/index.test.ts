@@ -685,7 +685,7 @@ describe('ESQLExtensionsRegistry', () => {
   });
 
   describe('isStandalone flag', () => {
-    it('should not return standalone queries when the source command does not match', () => {
+    it('should return standalone queries even when the source command does not match', () => {
       availableDatasources = {
         indices: [{ name: 'logs-2023' }, { name: 'metrics-*' }],
         data_streams: [],
@@ -709,7 +709,7 @@ describe('ESQLExtensionsRegistry', () => {
         availableDatasources,
         'oblt'
       );
-      expect(logsResult).toEqual([dynamicQuery]);
+      expect(logsResult).toEqual([dynamicQuery, staticQuery]);
     });
 
     it('should not return standalone queries for a different solution ID', () => {

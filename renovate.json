@@ -571,7 +571,6 @@
         "joi-to-json",
         "@apidevtools/json-schema-ref-parser",
         "@fast-check/jest",
-        "load-json-file",
         "mock-fs",
         "node-fetch",
         "react-intl",
@@ -1100,6 +1099,15 @@
         "vscode-languageserver-textdocument",
         "yaml-language-server"
       ],
+      "reviewers": ["team:workflows-eng"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:One Workflow", "backport:all-open", "release_note:skip"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "jszip",
+      "matchDepNames": ["jszip"],
       "reviewers": ["team:workflows-eng"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:One Workflow", "backport:all-open", "release_note:skip"],
@@ -2241,7 +2249,7 @@
     {
       "groupName": "Cytoscape",
       "matchDepNames": ["cytoscape", "cytoscape-dagre"],
-      "reviewers": ["team:obs-presentation-team"],
+      "reviewers": ["team:ml-ui"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:all-open"],
       "minimumReleaseAge": "14 days",
@@ -2270,6 +2278,7 @@
       "matchDepNames": [
         "langchain",
         "@langchain/aws",
+        "@langchain/classic",
         "@langchain/core",
         "@langchain/google-common",
         "@langchain/google-genai",
@@ -2438,7 +2447,9 @@
         "@grpc/grpc-js",
         "@elastic/opentelemetry-node",
         "@opentelemetry/api",
+        "@opentelemetry/api-logs",
         "@opentelemetry/context-async-hooks",
+        "@opentelemetry/exporter-logs-otlp-http",
         "@opentelemetry/exporter-metrics-otlp-http",
         "@opentelemetry/exporter-metrics-otlp-grpc",
         "@opentelemetry/exporter-metrics-otlp-proto",
@@ -2447,10 +2458,10 @@
         "@opentelemetry/exporter-trace-otlp-http",
         "@opentelemetry/exporter-trace-otlp-proto",
         "@opentelemetry/instrumentation",
-        "@opentelemetry/instrumentation-hapi",
         "@opentelemetry/instrumentation-http",
         "@opentelemetry/instrumentation-undici",
         "@opentelemetry/otlp-exporter-base",
+        "@opentelemetry/sdk-logs",
         "@opentelemetry/semantic-conventions"
       ],
       "reviewers": [
@@ -2677,6 +2688,59 @@
       "reviewers": ["team:streams-program"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:streams-program", "release_note:skip", "backport:all-open"],
+      "enabled": true,
+      "minimumReleaseAge": "14 days"
+    },
+    {
+      "groupName": "@swc/core",
+      "matchDepNames": ["@swc/core"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "lightningcss",
+      "matchDepNames": ["lightningcss"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "tar-fs",
+      "matchDepNames": ["tar-fs"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "browserslist",
+      "matchDepNames": ["browserslist"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "alerting v2 dependencies",
+      "matchDepNames": [
+        "apache-arrow"
+      ],
+      "reviewers": [
+        "team:response-ops"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:ResponseOps"
+      ],
       "enabled": true,
       "minimumReleaseAge": "14 days"
     },

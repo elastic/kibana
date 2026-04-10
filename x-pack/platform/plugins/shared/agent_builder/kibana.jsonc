@@ -35,13 +35,16 @@
       "workflowsExtensions",
     ],
     "requiredBundles": [
-      "kibanaReact"
+      "kibanaReact",
+      "usageCollection"
     ],
     "optionalPlugins": [
       "cloud",
       "evals",
       "licenseManagement",
+      "security",
       "workflowsManagement",
+      "searchInferenceEndpoints",
       "usageCollection",
       "usageApi",
       "home",

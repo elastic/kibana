@@ -213,7 +213,7 @@ describe('<TemplateCreate />', () => {
         );
 
         const availableTemplatesList = new EuiListTestHarness('componentTemplatesList');
-        availableTemplatesList.clickAction('test_component_template_1', 'action-plusInCircle');
+        availableTemplatesList.clickAction('test_component_template_1', 'action-plusCircle');
 
         await waitFor(() => {
           expect(screen.queryByTestId('emptyPrompt')).not.toBeInTheDocument();
@@ -229,7 +229,7 @@ describe('<TemplateCreate />', () => {
 
         // Unselect the component
         const selectedTemplatesList = new EuiListTestHarness('componentTemplatesSelection');
-        selectedTemplatesList.clickAction('test_component_template_1', 'action-minusInCircle');
+        selectedTemplatesList.clickAction('test_component_template_1', 'action-minusCircle');
 
         await waitFor(() => {
           expect(screen.getByTestId('emptyPrompt')).toBeInTheDocument();

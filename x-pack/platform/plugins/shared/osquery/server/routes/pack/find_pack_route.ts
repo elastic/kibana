@@ -74,7 +74,7 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           sortOrder: request.query.sortOrder ?? 'desc',
           ...(request.query.search && {
             search: request.query.search,
-            searchFields: ['name'],
+            searchFields: ['name', 'description'],
           }),
           ...(filters.length && { filter: filters.join(' AND ') }),
         });
@@ -84,6 +84,10 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             filter(pack.references, ['type', LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE]),
             'id'
           );
+          const osqueryPackAssetReference = !!filter(pack.references, [
+            'type',
+            'osquery-pack-asset',
+          ]).length;
 
           const { attributes } = pack;
 
@@ -101,6 +105,7 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             updated_by_profile_uid: attributes.updated_by_profile_uid,
             saved_object_id: pack.id,
             policy_ids: policyIds,
+            read_only: attributes.version !== undefined && osqueryPackAssetReference,
           };
         });
 

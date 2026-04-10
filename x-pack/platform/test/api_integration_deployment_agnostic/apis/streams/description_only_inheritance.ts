@@ -59,6 +59,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await putStream(apiClient, childName, {
         ...emptyAssets,
         stream: {
+          type: 'wired',
           description: childDescription,
           ingest: {
             ...childIngest,
@@ -101,6 +102,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await putStream(apiClient, parentName, {
         ...emptyAssets,
         stream: {
+          type: 'wired',
           description: parentDescription,
           ingest: {
             ...parentIngest,

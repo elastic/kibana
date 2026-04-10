@@ -1,6 +1,174 @@
 {
-  "sha1": "cbe4b2e918093c2040f6d789ee082a8d5d447eb5",
+  "sha1": "633c03d5fa8b3e5e14e57cb797978afa595fa72f",
   "tests": [
+    {
+      "id": "b2eaaaa0cf33c26-d5cddc6b883a994",
+      "title": "Workflows Import/Export API should bulk create a single workflow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
+        "line": 38,
+        "column": 10
+      }
+    },
+    {
+      "id": "b2eaaaa0cf33c26-bac81496a83c3c2",
+      "title": "Workflows Import/Export API should bulk create multiple workflows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
+        "line": 53,
+        "column": 10
+      }
+    },
+    {
+      "id": "b2eaaaa0cf33c26-c2d7d16a55f13e8",
+      "title": "Workflows Import/Export API should detect conflicts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
+        "line": 72,
+        "column": 10
+      }
+    },
+    {
+      "id": "b2eaaaa0cf33c26-cf0fe557870d52d",
+      "title": "Workflows Import/Export API should overwrite existing workflow via bulk create",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
+        "line": 94,
+        "column": 10
+      }
+    },
+    {
+      "id": "b2eaaaa0cf33c26-983ffa0afc2cdb0",
+      "title": "Workflows Import/Export API should export workflows as JSON with entries and manifest",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
+        "line": 120,
+        "column": 10
+      }
+    },
+    {
+      "id": "b2eaaaa0cf33c26-19dac064bd6210e",
+      "title": "Workflows Import/Export API should return 404 when exporting non-existent workflows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
+        "line": 148,
+        "column": 10
+      }
+    },
+    {
+      "id": "b2eaaaa0cf33c26-59e24ea00904554",
+      "title": "Workflows Import/Export API should round-trip: export then re-import produces equivalent workflows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
+        "line": 161,
+        "column": 10
+      }
+    },
+    {
+      "id": "b2eaaaa0cf33c26-c00b07d98d39b91",
+      "title": "Workflows Import/Export API should return 400 when export ids array is empty",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
+        "line": 202,
+        "column": 10
+      }
+    },
+    {
+      "id": "b2eaaaa0cf33c26-43507cae012329c",
+      "title": "Workflows Import/Export API should return 400 when mget ids array is empty",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
+        "line": 215,
+        "column": 10
+      }
+    },
+    {
+      "id": "b2eaaaa0cf33c26-111d9ee48eabb99",
+      "title": "Workflows Import/Export API should handle partial failures in bulk_create (one valid, one invalid)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
+        "line": 228,
+        "column": 10
+      }
+    },
+    {
+      "id": "b2eaaaa0cf33c26-f69ce4769b2968b",
+      "title": "Workflows Import/Export API should bulk create with explicit custom IDs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
+        "line": 249,
+        "column": 10
+      }
+    },
+    {
+      "id": "b2eaaaa0cf33c26-89f4db35755a8cf",
+      "title": "Workflows Import/Export API should export manifest with correct version and count",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
+        "line": 267,
+        "column": 10
+      }
+    },
     {
       "id": "fedda44db506679-b402fd1accda876",
       "title": "Workflow execution concurrency control cancel-in-progress strategy cancels previous executions and completes the latest",
@@ -75,7 +243,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/scheduled_workflow.spec.ts",
-        "line": 71,
+        "line": 65,
         "column": 12
       }
     },
@@ -101,13 +269,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/scheduled_workflow.spec.ts",
-        "line": 105,
+        "line": 110,
         "column": 12
       }
     },
     {
-      "id": "337190238aab48d-8ab74f66c94ddfa",
-      "title": "Scheduled workflow execution scheduled executions do not overlap when a previous run is still in progress",
+      "id": "337190238aab48d-2ebbbceb81e94d9",
+      "title": "Scheduled workflow execution scheduled executions do not overlap",
       "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
@@ -127,7 +295,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/scheduled_workflow.spec.ts",
-        "line": 132,
+        "line": 138,
         "column": 12
       }
     },
@@ -206,6 +374,136 @@
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/workflow_composition.spec.ts",
         "line": 208,
+        "column": 12
+      }
+    },
+    {
+      "id": "5c91fe961842041-6824e65248ebe46",
+      "title": "Workflow error trigger (workflows.failed) when a workflow fails, a workflow subscribed to workflows.failed runs and receives the event",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/workflow_error_trigger.spec.ts",
+        "line": 145,
+        "column": 14
+      }
+    },
+    {
+      "id": "5c91fe961842041-71ac8908c1a2400",
+      "title": "Workflow error trigger (workflows.failed) filter by workflow name: handler runs when name matches condition",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/workflow_error_trigger.spec.ts",
+        "line": 177,
+        "column": 14
+      }
+    },
+    {
+      "id": "5c91fe961842041-0bf21c42a062476",
+      "title": "Workflow error trigger (workflows.failed) filter by workflow name: handler does not run when name does not match",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/workflow_error_trigger.spec.ts",
+        "line": 195,
+        "column": 14
+      }
+    },
+    {
+      "id": "5c91fe961842041-73f60649b75b068",
+      "title": "Workflow error trigger (workflows.failed) filter by failed step: handler runs when event.error.stepId matches condition",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/workflow_error_trigger.spec.ts",
+        "line": 227,
+        "column": 14
+      }
+    },
+    {
+      "id": "c74c765cb818461-e8ac210a9d9227d",
+      "title": "Scheduled workflow save and update updating a scheduled workflow with a changed interval succeeds",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/scheduled_workflow_save_update.spec.ts",
+        "line": 46,
         "column": 12
       }
     }

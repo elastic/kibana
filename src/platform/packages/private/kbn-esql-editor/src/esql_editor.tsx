@@ -20,6 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { isEqual, memoize } from 'lodash';
+import { EMPTY } from 'rxjs';
 import { Global, css } from '@emotion/react';
 import {
   getIndexPatternFromESQLQuery,
@@ -28,6 +29,7 @@ import {
   getJoinIndices,
   fixESQLQueryWithVariables,
   prettifyQuery,
+  getProjectRoutingFromEsqlQuery,
 } from '@kbn/esql-utils';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
@@ -77,6 +79,8 @@ import {
   filterDuplicatedWarnings,
   filterOutWarningsOverlappingWithErrors,
   getEditorOverwrites,
+  shouldAutoTriggerSuggestions,
+  trackSuggestionPopupState,
   getToggleCommentLines,
   onKeyDownResizeHandler,
   onMouseDownResizeHandler,
@@ -120,7 +124,6 @@ const sharedEsqlSuggestionProvider = ESQLLang.getSuggestionProvider?.({
   getModelDependencies: (model) => esqlDepsByModelUri.get(model.uri.toString()),
 });
 
-// for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
 const DATEPICKER_WIDTH = 373;
 
@@ -158,6 +161,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const editorModelUriRef = useRef<string | undefined>(undefined);
   const containerRef = useRef<HTMLElement>(null);
   const suppressSuggestionsRef = useRef(false);
+  const isSuggestionPopupOpenRef = useRef(false);
 
   const editorCommandDisposables = useRef(
     new WeakMap<monaco.editor.IStandaloneCodeEditor, monaco.IDisposable[]>()
@@ -173,6 +177,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const {
     application,
     core,
+    cps,
     fieldsMetadata,
     uiSettings,
     uiActions,
@@ -192,6 +197,7 @@ const ESQLEditorInternal = function ESQLEditor({
     [core.http, core.userProfile, usageCollection]
   );
 
+  const pickerProjectRouting = useObservable(cps?.cpsManager?.getProjectRouting$() ?? EMPTY);
   const activeSolutionNavId = useObservable(core.chrome.getActiveSolutionNavId$());
   const activeSolutionId: ESQLRegistrySolutionId =
     (activeSolutionNavId as ESQLRegistrySolutionId) ?? ESQL_CLASSIC_SOLUTION_ID;
@@ -471,7 +477,7 @@ const ESQLEditorInternal = function ESQLEditor({
     const { current: editor } = editorRef;
     const { current: model } = editorModel;
 
-    if (!editor || !model) {
+    if (!editor || !model || isSuggestionPopupOpenRef.current || !editor.hasTextFocus()) {
       return;
     }
 
@@ -482,10 +488,9 @@ const ESQLEditorInternal = function ESQLEditor({
 
     const { lineNumber, column } = position;
     const lineContent = model.getLineContent(lineNumber);
-    const spaceHasBeenTyped = column > 1 && lineContent[column - 2] === ' ';
-    const inlineCastHasBeenTyped = lineContent.substring(0, column - 1).endsWith('::');
+    const lineContentBeforeCursor = lineContent.substring(0, column - 1);
 
-    if (spaceHasBeenTyped || inlineCastHasBeenTyped) {
+    if (shouldAutoTriggerSuggestions(lineContentBeforeCursor)) {
       triggerSuggestions();
     }
   }, [triggerSuggestions]);
@@ -601,16 +606,22 @@ const ESQLEditorInternal = function ESQLEditor({
     return { cache: fn.cache, memoizedFieldsFromESQL: fn };
   }, []);
 
+  // `SET project_routing` in the query takes precedence over the project picker selection.
+  const setProjectRouting = useMemo(() => getProjectRoutingFromEsqlQuery(code), [code]);
+  const effectiveProjectRouting = setProjectRouting ?? pickerProjectRouting;
+
   const { cache: dataSourcesCache, memoizedSources } = useMemo(() => {
+    // Keying on effectiveProjectRouting ensures a fresh cache (and therefore a fresh fetch)
+    // whenever either the SET statement or the picker selection changes.
     const fn = memoize(
       (...args: [CoreStart, (() => Promise<ILicense | undefined>) | undefined]) => ({
         timestamp: Date.now(),
-        result: getESQLSources(...args),
+        result: getESQLSources(...args, undefined, effectiveProjectRouting),
       })
     );
 
     return { cache: fn.cache, memoizedSources: fn };
-  }, []);
+  }, [effectiveProjectRouting]);
 
   const { cache: historyStarredItemsCache, memoizedHistoryStarredItems } = useMemo(() => {
     const fn = memoize(
@@ -718,15 +729,14 @@ const ESQLEditorInternal = function ESQLEditor({
     isDataSourceBrowserOpen,
     setIsDataSourceBrowserOpen,
     browserPopoverPosition: dataSourceBrowserPosition,
-    allSources,
-    isLoadingSources,
+    preloadedSources,
+    isTimeseries,
     selectedSources,
     openIndicesBrowser,
     handleDataSourceBrowserSelect,
   } = useDataSourceBrowser({
     editorRef,
     editorModel,
-    esqlCallbacks,
     telemetryService,
   });
 
@@ -741,19 +751,14 @@ const ESQLEditorInternal = function ESQLEditor({
     isFieldsBrowserOpen,
     setIsFieldsBrowserOpen,
     browserPopoverPosition: fieldsBrowserPosition,
-    allFields,
-    recommendedFields,
-    isLoadingFields,
+    preloadedFields,
+    indexPattern: fieldsBrowserIndexPattern,
+    fullQuery,
     openFieldsBrowser,
     handleFieldsBrowserSelect,
   } = useFieldsBrowser({
     editorRef,
     editorModel,
-    http: core.http,
-    search: data.search.search,
-    getTimeRange: () => data.query.timefilter.timefilter.getTime(),
-    signal: abortControllerRef.current.signal,
-    activeSolutionId,
     telemetryService,
   });
 
@@ -907,6 +912,28 @@ const ESQLEditorInternal = function ESQLEditor({
     [dataSourcesCache, getJoinIndicesCallback, onQueryUpdate, queryValidation]
   );
 
+  // Re-validate when the project picker selection changes. useObservable causes a re-render
+  // (and therefore a memoizedSources cache miss) automatically; this effect handles the
+  // explicit re-validation trigger.
+  //
+  // queryValidationRef keeps the latest queryValidation without being listed as an effect
+  // dependency: including queryValidation directly would cause the effect to fire on every
+  // code edit (queryValidation's identity changes whenever `code` changes), doubling the
+  // validation work and causing performance test timeouts.
+  const queryValidationRef = useRef(queryValidation);
+  useEffect(() => {
+    queryValidationRef.current = queryValidation;
+  }, [queryValidation]);
+
+  const isFirstPickerRenderRef = useRef(true);
+  useEffect(() => {
+    if (isFirstPickerRenderRef.current) {
+      isFirstPickerRenderRef.current = false;
+      return;
+    }
+    queryValidationRef.current({ active: true });
+  }, [pickerProjectRouting]);
+
   // Refresh the fields cache when a new field has been added to the lookup index
   const onNewFieldsAddedToLookupIndex = useCallback(async () => {
     esqlFieldsCache.clear?.();
@@ -982,6 +1009,8 @@ const ESQLEditorInternal = function ESQLEditor({
   const inlineCompletionsProvider = useMemo(() => {
     return ESQLLang.getInlineCompletionsProvider?.(esqlCallbacks);
   }, [esqlCallbacks]);
+
+  const documentHighlightProvider = useMemo(() => ESQLLang.getDocumentHighlightProvider?.(), []);
 
   const codeEditorHoverProvider = useMemo(
     () => ({
@@ -1182,6 +1211,7 @@ const ESQLEditorInternal = function ESQLEditor({
                 hoverProvider={codeEditorHoverProvider}
                 signatureProvider={signatureProvider}
                 inlineCompletionsProvider={inlineCompletionsProvider}
+                documentHighlightProvider={documentHighlightProvider}
                 onChange={onQueryUpdate}
                 editorDidMount={async (editor) => {
                   // Track editor init time once per mount
@@ -1256,6 +1286,8 @@ const ESQLEditorInternal = function ESQLEditor({
 
                     isFirstFocusRef.current = false;
                   });
+
+                  trackSuggestionPopupState(editor, isSuggestionPopupOpenRef);
 
                   // on CMD/CTRL + / comment out the entire line
                   editor.addCommand(
@@ -1432,8 +1464,8 @@ const ESQLEditorInternal = function ESQLEditor({
         createPortal(
           <DataSourceBrowser
             isOpen={isDataSourceBrowserOpen}
-            isLoading={isLoadingSources}
-            allSources={allSources}
+            isTimeseries={isTimeseries}
+            preloadedSources={preloadedSources}
             selectedSources={selectedSources}
             position={dataSourceBrowserPosition}
             onSelect={handleDataSourceBrowserSelect}
@@ -1449,9 +1481,10 @@ const ESQLEditorInternal = function ESQLEditor({
         createPortal(
           <FieldsBrowser
             isOpen={isFieldsBrowserOpen}
-            isLoading={isLoadingFields}
-            allFields={allFields}
-            recommendedFields={recommendedFields}
+            preloadedFields={preloadedFields}
+            indexPattern={fieldsBrowserIndexPattern}
+            fullQuery={fullQuery}
+            activeSolutionId={activeSolutionId ?? undefined}
             position={fieldsBrowserPosition}
             onSelect={handleFieldsBrowserSelect}
             onClose={() => setIsFieldsBrowserOpen(false)}

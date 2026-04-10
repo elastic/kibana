@@ -14,7 +14,11 @@ import { apiCanPinPanels } from '@kbn/presentation-publishing';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
-import { ACTION_CREATE_TIME_SLIDER, TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
+import {
+  ACTION_CREATE_TIME_SLIDER,
+  DEFAULT_TIME_SLIDER_STATE,
+  TIME_SLIDER_CONTROL,
+} from '@kbn/controls-constants';
 
 interface SupportsTimeSliderControl {
   hasTimeSliderControl: () => boolean;
@@ -31,7 +35,7 @@ const compatibilityCheck = (api: unknown | null) =>
 export const createTimeSliderAction = (): ActionDefinition<EmbeddableApiContext> => ({
   id: ACTION_CREATE_TIME_SLIDER,
   order: 0,
-  getIconType: () => 'controlsHorizontal',
+  getIconType: () => 'controls',
   couldBecomeCompatible: ({ embeddable }) => apiCanPinPanels(embeddable),
   getCompatibilityChangesSubject: ({ embeddable }) =>
     apiSupportsTimeSliderControl(embeddable) ? embeddable.layoutChanged$ : undefined,
@@ -41,6 +45,7 @@ export const createTimeSliderAction = (): ActionDefinition<EmbeddableApiContext>
     await embeddable.addPinnedPanel({
       panelType: TIME_SLIDER_CONTROL,
       serializedState: {
+        ...DEFAULT_TIME_SLIDER_STATE,
         grow: true,
         width: 'large',
       },

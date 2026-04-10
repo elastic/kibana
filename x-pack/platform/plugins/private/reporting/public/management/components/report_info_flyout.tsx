@@ -72,7 +72,7 @@ export const ReportInfoFlyout: FunctionComponent<Props> = ({ config, onClose, jo
   const actionsButton = (
     <EuiButton
       data-test-subj="reportInfoFlyoutActionsButton"
-      iconType="arrowUp"
+      iconType="chevronSingleUp"
       onClick={() => setIsActionsPopoverOpen((isOpen) => !isOpen)}
     >
       {i18n.translate('xpack.reporting.reportInfoFlyout.actionsButtonLabel', {
@@ -100,7 +100,7 @@ export const ReportInfoFlyout: FunctionComponent<Props> = ({ config, onClose, jo
       data-test-subj="reportInfoFlyoutOpenInKibanaButton"
       disabled={!job.canLinkToKibanaApp}
       key="openInKibanaApp"
-      icon="popout"
+      icon="external"
       onClick={() => {
         window.open(apiClient.getKibanaAppHref(job), '_blank');
         window.focus();

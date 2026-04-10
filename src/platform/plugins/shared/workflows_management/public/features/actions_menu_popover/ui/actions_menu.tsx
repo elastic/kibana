@@ -146,7 +146,8 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleChange = (_: Array<ActionOptionData>, __: any, selectedOption: ActionOptionData) => {
     if (isActionGroup(selectedOption)) {
-      setCurrentPath([...currentPath, selectedOption.id]);
+      const nextPath = selectedOption.pathIds ?? [...currentPath, selectedOption.id];
+      setCurrentPath([...nextPath]);
       setSearchTerm('');
       setOptions(selectedOption.options);
     } else {
@@ -168,6 +169,41 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
     setOptions(nextOptions);
   };
 
+  /** Lower rank = higher priority in search results (see getActionMatchRank). */
+  const MAX_ACTION_MATCH_RANK = 5;
+
+  const getActionMatchRank = (option: ActionOptionData, normalizedTerm: string): number => {
+    if (!normalizedTerm) {
+      return 0;
+    }
+    const id = option.id.toLowerCase();
+    const label = option.label.toLowerCase();
+    const description = option.description?.toLowerCase() ?? '';
+
+    if (id === normalizedTerm) {
+      return 0;
+    }
+    if (label === normalizedTerm) {
+      return 1;
+    }
+    if (description === normalizedTerm) {
+      return 2;
+    }
+    if (id.includes(normalizedTerm)) {
+      return 3;
+    }
+    if (label.includes(normalizedTerm)) {
+      return 4;
+    }
+    if (description.includes(normalizedTerm)) {
+      return 5;
+    }
+    return MAX_ACTION_MATCH_RANK + 1;
+  };
+
+  const isActionSearchMatch = (option: ActionOptionData, normalizedTerm: string) =>
+    getActionMatchRank(option, normalizedTerm) <= MAX_ACTION_MATCH_RANK;
+
   const optionMatcher = ({
     option,
     searchValue,
@@ -177,20 +213,27 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
     searchValue: string;
     normalizedSearchValue: string;
   }) => {
-    return (
-      option.id.toLowerCase().includes(normalizedSearchValue) ||
-      option.label.toLowerCase().includes(normalizedSearchValue) ||
-      !!option.description?.toLowerCase().includes(normalizedSearchValue)
-    );
+    const term = searchValue.trim().toLowerCase() || normalizedSearchValue;
+    return isActionSearchMatch(option, term);
   };
 
   const handleSearchChange = (searchValue: string) => {
     setSearchTerm(searchValue);
     if (searchValue.length > 0) {
       const term = searchValue.trim().toLowerCase();
-      const matches = flatOptions.filter((option) =>
-        optionMatcher({ option, searchValue, normalizedSearchValue: term })
-      );
+      if (term.length === 0) {
+        setOptions(flatOptions);
+        return;
+      }
+      const matches = flatOptions
+        .filter((option) => isActionSearchMatch(option, term))
+        .sort((a, b) => {
+          const rankDiff = getActionMatchRank(a, term) - getActionMatchRank(b, term);
+          if (rankDiff !== 0) {
+            return rankDiff;
+          }
+          return a.label.localeCompare(b.label);
+        });
       setOptions(matches);
     } else {
       setOptions(defaultOptions);
@@ -233,7 +276,7 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
                 ) : (
                   <EuiButtonEmpty
                     onClick={handleBack}
-                    iconType="arrowLeft"
+                    iconType="chevronSingleLeft"
                     size="xs"
                     aria-label={i18n.translate('workflows.actionsMenu.back', {
                       defaultMessage: 'Back',

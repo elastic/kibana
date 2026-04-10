@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { EuiIcon, useResizeObserver, EuiPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import type { ErrorRendererConfig } from '../types';
@@ -52,9 +53,15 @@ function ErrorComponent({ onLoaded, parentNode, error }: ErrorComponentProps) {
               width: buttonSize,
             }}
             type="warning"
+            aria-label={i18n.translate('xpack.canvas.errorComponent.errorIconAriaLabel', {
+              defaultMessage: 'View error details',
+            })}
           />
         }
         isOpen={isPopoverOpen}
+        aria-label={i18n.translate('xpack.canvas.errorComponent.errorDetailsPopoverAriaLabel', {
+          defaultMessage: 'Error details',
+        })}
       >
         <Error payload={{ error }} onClose={closePopover} />
       </EuiPopover>

@@ -9,16 +9,25 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
+import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
+import { alertFlyoutHistoryKey } from '../constants/flyout_history';
+import { defaultToolsFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
+import { EventKind } from '../constants/event_kinds';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { useKibana } from '../../../common/lib/kibana';
+import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { useExpandSection } from '../../shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../shared/components/expandable_section';
 import { PREFIX } from '../../../flyout/shared/test_ids';
 import { InvestigationGuide } from './investigation_guide';
-import { InvestigationGuide as InvestigationGuideToolsFlyout } from '../../investigation_guide/investigation_guide';
+import { InvestigationGuide as InvestigationGuideToolsFlyout } from '../../investigation_guide';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
+import { HighlightedFields } from './highlighted_fields';
+import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
+import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 
 export const INVESTIGATION_SECTION_TEST_ID = `${PREFIX}InvestigationSection` as const;
 
@@ -36,64 +45,94 @@ export interface InvestigationSectionProps {
    * Document to display in the overview tab
    */
   hit: DataTableRecord;
+  /**
+   * Render function for cell actions. The caller decides what to inject
+   * (real security cell actions in Security Solution, no-op in Discover).
+   */
+  renderCellActions: CellActionRenderer;
 }
 
 /**
  * Second section of the overview tab in details flyout.
  * It contains investigation guide (alerts only) and highlighted fields.
  */
-export const InvestigationSection = memo(({ hit }: InvestigationSectionProps) => {
-  const { services } = useKibana();
-  const { overlays } = services;
-  const store = useStore();
-  const history = useHistory();
+export const InvestigationSection = memo(
+  ({ hit, renderCellActions }: InvestigationSectionProps) => {
+    const { services } = useKibana();
+    const { overlays } = services;
+    const store = useStore();
+    const history = useHistory();
+    const isInSecurityApp = useIsInSecurityApp();
+    const historyKey = isInSecurityApp ? alertFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
-  const isAlert = useMemo(() => {
-    const eventKind = getFieldValue(hit, 'event.kind') as string;
-    return eventKind === 'signal';
-  }, [hit]);
-
-  const expanded = useExpandSection({
-    storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
-    title: LOCAL_STORAGE_SECTION_KEY,
-    defaultValue: true,
-  });
-
-  const onShowInvestigationGuide = useCallback(() => {
-    overlays.openSystemFlyout(
-      flyoutProviders({
-        services,
-        store,
-        history,
-        children: <InvestigationGuideToolsFlyout hit={hit} />,
-      }),
-      {
-        ownFocus: false,
-        resizable: true,
-        size: 'm',
-        type: 'overlay',
-      }
+    const isAlert = useMemo(
+      () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+      [hit]
     );
-  }, [history, hit, overlays, services, store]);
+    const ruleId = useMemo(
+      () =>
+        (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal
+          ? (getFieldValue(hit, 'kibana.alert.rule.uuid') as string)
+          : (getFieldValue(hit, 'signal.rule.id') as string),
+      [hit]
+    );
+    const { rule } = useRuleWithFallback(ruleId);
+    const investigationFields = useMemo(
+      () => rule?.investigation_fields?.field_names ?? [],
+      [rule?.investigation_fields?.field_names]
+    );
+    const ancestorsIndexName = useMemo(
+      () => (getFieldValue(hit, 'signal.ancestors.index') as string) ?? '',
+      [hit]
+    );
 
-  return (
-    <ExpandableSection
-      data-test-subj={INVESTIGATION_SECTION_TEST_ID}
-      expanded={expanded}
-      gutterSize="s"
-      localStorageKey={FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS}
-      sectionId={LOCAL_STORAGE_SECTION_KEY}
-      title={INVESTIGATION_SECTION_TITLE}
-    >
-      {isAlert ? (
-        <InvestigationGuide
+    const expanded = useExpandSection({
+      storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
+      title: LOCAL_STORAGE_SECTION_KEY,
+      defaultValue: true,
+    });
+
+    const onShowInvestigationGuide = useCallback(() => {
+      overlays.openSystemFlyout(
+        flyoutProviders({
+          services,
+          store,
+          history,
+          children: <InvestigationGuideToolsFlyout hit={hit} />,
+        }),
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: 'start',
+        }
+      );
+    }, [history, historyKey, hit, overlays, services, store]);
+
+    return (
+      <ExpandableSection
+        data-test-subj={INVESTIGATION_SECTION_TEST_ID}
+        expanded={expanded}
+        gutterSize="s"
+        localStorageKey={FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS}
+        sectionId={LOCAL_STORAGE_SECTION_KEY}
+        title={INVESTIGATION_SECTION_TITLE}
+      >
+        {isAlert ? (
+          <InvestigationGuide
+            hit={hit}
+            isAvailable={true}
+            onShowInvestigationGuide={onShowInvestigationGuide}
+          />
+        ) : null}
+        <HighlightedFields
           hit={hit}
-          isAvailable={true}
-          onShowInvestigationGuide={onShowInvestigationGuide}
+          investigationFields={investigationFields}
+          ancestorsIndexName={ancestorsIndexName}
+          renderCellActions={renderCellActions}
         />
-      ) : null}
-    </ExpandableSection>
-  );
-});
+      </ExpandableSection>
+    );
+  }
+);
 
 InvestigationSection.displayName = 'InvestigationSection';

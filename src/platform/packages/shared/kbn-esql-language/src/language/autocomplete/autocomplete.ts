@@ -33,10 +33,11 @@ import { getFromCommandHelper } from '../shared/resources_helpers';
 import { getCommandContext } from './get_command_context';
 import { mapRecommendedQueriesFromExtensions } from './recommended_queries_helpers';
 import { getQueryForFields } from '../shared/get_query_for_fields';
-import type { GetColumnMapFn } from '../shared/columns_retrieval_helpers';
+import type { ColumnsMap, GetColumnMapFn } from '../shared/columns_retrieval_helpers';
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
 import { isTimeseriesSourceCommand } from '../../commands/definitions/utils/timeseries_check';
+import { attachReplacementRanges } from './utils/prefix_range';
 
 function isSourceCommandSuggestion({ label }: { label: string }) {
   const sourceCommands = esqlCommandRegistry
@@ -179,11 +180,15 @@ export async function suggest(
 
       const sourceCommandsSuggestions = suggestions.filter(isSourceCommandSuggestion);
       const headerCommandsSuggestions = suggestions.filter(isHeaderCommandSuggestion);
-      return [
-        ...headerCommandsSuggestions,
-        ...sourceCommandsSuggestions,
-        ...recommendedQueriesSuggestions,
-      ];
+
+      return orderingEngine.sort(
+        [
+          ...headerCommandsSuggestions,
+          ...sourceCommandsSuggestions,
+          ...recommendedQueriesSuggestions,
+        ],
+        { command: '' }
+      );
     }
 
     return suggestions.filter(
@@ -212,18 +217,30 @@ export async function suggest(
   }
 
   if (astContext.type === 'expression') {
+    let columnMapPromise: Promise<ColumnsMap> | undefined;
+    const getColumnMapOnce = () => {
+      if (!columnMapPromise) {
+        columnMapPromise = getColumnMap();
+      }
+
+      return columnMapPromise;
+    };
+
     const commands = [...(root.header ?? []), ...root.commands];
     const commandsSpecificSuggestions = await getSuggestionsWithinCommandExpression(
       fullText,
       commands,
       astContext,
       getColumnsByType,
-      getColumnMap,
+      getColumnMapOnce,
       resourceRetriever,
       offset,
       hasMinimumLicenseRequired
     );
-    return commandsSpecificSuggestions;
+
+    return attachReplacementRanges(innerText, commandsSpecificSuggestions, {
+      columns: await getColumnMapOnce(),
+    });
   }
   return [];
 }

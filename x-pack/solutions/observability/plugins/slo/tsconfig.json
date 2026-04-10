@@ -7,6 +7,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "test/scout*/**/*",
     "../../../../typings/**/*"
   ],
   "exclude": ["target/**/*"],
@@ -37,6 +38,7 @@
     "@kbn/ui-actions-plugin",
     "@kbn/serverless",
     "@kbn/data-views-plugin",
+    "@kbn/data-forge",
     "@kbn/rule-registry-plugin",
     "@kbn/licensing-plugin",
     "@kbn/utility-types",
@@ -99,6 +101,7 @@
     "@kbn/security-plugin-types-public",
     "@kbn/response-ops-rule-params",
     "@kbn/core-test-helpers-kbn-server",
+    "@kbn/scout-oblt",
     "@kbn/security-plugin",
     "@kbn/response-ops-rule-form",
     "@kbn/server-route-repository-utils",

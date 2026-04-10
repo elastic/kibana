@@ -248,6 +248,10 @@ export const ConnectorRulesList = (props: ConnectorRulesListProps) => {
       <EuiFlexItem>
         <EuiBasicTable
           data-test-subj="connectorRulesList"
+          tableCaption={i18n.translate(
+            'xpack.triggersActionsUI.sections.connectorRulesList.tableCaption',
+            { defaultMessage: 'Connector rules' }
+          )}
           loading={isLoading}
           items={rulesState.data}
           columns={columns}

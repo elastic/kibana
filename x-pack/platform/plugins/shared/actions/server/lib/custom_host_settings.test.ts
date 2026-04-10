@@ -80,6 +80,14 @@ describe('custom_host_settings', () => {
       microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
       microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
       microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
+      auth: {
+        oauth_authorization_code: {
+          rate_limits: {
+            authorize: { lookbackWindow: '1h', limit: 100 },
+            callback: { lookbackWindow: '1h', limit: 100 },
+          },
+        },
+      },
     };
 
     test('ensure it copies over the config parts that it does not touch', () => {

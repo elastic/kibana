@@ -9,7 +9,6 @@
 
 import {
   LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS,
-  LENS_METRIC_STATE_DEFAULTS,
   type FormBasedPersistedState,
   type MetricVisualizationState,
   type PersistedIndexPatternLayer,
@@ -20,10 +19,19 @@ import type { SavedObjectReference } from '@kbn/core/types';
 import type { KbnPaletteId } from '@kbn/palettes';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { DeepWriteable, LensAttributes } from '../../types';
+import {
+  DEFAULT_PRIMARY_POSITION,
+  DEFAULT_PRIMARY_LABELS_ALIGNMENT,
+  DEFAULT_PRIMARY_VALUE_ALIGNMENT,
+  DEFAULT_PRIMARY_ICON_ALIGNMENT,
+  DEFAULT_SECONDARY_LABEL_VISIBLE,
+  DEFAULT_SECONDARY_LABEL_PLACEMENT,
+  DEFAULT_SECONDARY_VALUE_ALIGNMENT,
+} from './metric/defaults';
 import { DEFAULT_LAYER_ID } from '../../constants';
 import {
   addLayerColumn,
-  buildDatasetState,
+  buildDataSourceState,
   buildDatasourceStates,
   buildReferences,
   generateApiLayer,
@@ -41,6 +49,7 @@ import { generateLayer } from '../utils';
 import type {
   MetricStateESQL,
   MetricStateNoESQL,
+  MetricStyling,
   PrimaryMetricType,
   SecondaryMetricType,
 } from '../../schema/charts/metric';
@@ -50,6 +59,8 @@ import {
   getMetricAccessor,
   getDatasourceLayers,
   getLensStateLayer,
+  getReversibleMappings,
+  stripUndefined,
 } from './utils';
 import {
   fromColorByValueAPIToLensState,
@@ -62,13 +73,35 @@ import { isAPIColumnOfBucketType, isAPIColumnOfMetricType } from '../columns/uti
 
 type MetricApiCompareType = Extract<Required<SecondaryMetricType>, { compare: any }>['compare'];
 
-type WritableMetricStateWithoutDataset = DeepWriteable<Omit<MetricState, 'dataset'>>;
+type WritableMetricStateWithoutDataset = DeepWriteable<Omit<MetricState, 'data_source'>>;
 
 const ACCESSOR = 'metric_accessor';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
 const TRENDLINE_LAYER_ID = 'layer_0_trendline';
 export const LENS_METRIC_COMPARE_TO_PALETTE_DEFAULT: KbnPaletteId = 'compare_to';
 const LENS_METRIC_COMPARE_TO_REVERSED = false;
+
+type MetricIconName = NonNullable<NonNullable<MetricStyling['primary']>['icon']>['name'];
+
+const iconCompat = getReversibleMappings<MetricIconName, string>([
+  ['alert', 'alert'],
+  ['asterisk', 'asterisk'],
+  ['bell', 'bell'],
+  ['bolt', 'bolt'],
+  ['bug', 'bug'],
+  ['compute', 'compute'],
+  ['editor_comment', 'editorComment'],
+  ['flag', 'flag'],
+  ['globe', 'globe'],
+  ['heart', 'heart'],
+  ['map_marker', 'mapMarker'],
+  ['pin', 'pin'],
+  ['sort_down', 'sortDown'],
+  ['sort_up', 'sortUp'],
+  ['star_empty', 'starEmpty'],
+  ['tag', 'tag'],
+  ['temperature', 'temperature'],
+]);
 
 function getAccessorName(type: 'metric' | 'max' | 'breakdown' | 'secondary') {
   return `${ACCESSOR}_${type}`;
@@ -111,6 +144,89 @@ function isPrimaryMetric(metric: MetricState['metrics'][number]): metric is Prim
   return metric.type === 'primary';
 }
 
+function convertStylingToStateFormat(
+  styling: MetricStyling | undefined,
+  hasSecondary: boolean
+): Partial<MetricVisualizationState> {
+  if (!styling) {
+    return {};
+  }
+  const primaryStyling = styling.primary;
+  const secondaryStyling = styling.secondary;
+
+  if (!primaryStyling && !secondaryStyling) {
+    return {};
+  }
+
+  return stripUndefined({
+    valueFontMode:
+      primaryStyling?.value?.sizing != null
+        ? primaryStyling.value.sizing === 'fill'
+          ? 'fit'
+          : 'default'
+        : undefined,
+    titlesTextAlign: primaryStyling?.labels?.alignment,
+    primaryAlign: primaryStyling?.value?.alignment,
+    primaryPosition: primaryStyling?.position,
+    icon: iconCompat.toState(primaryStyling?.icon?.name),
+    iconAlign: primaryStyling?.icon?.alignment,
+    ...(hasSecondary
+      ? stripUndefined({
+          secondaryLabel: secondaryStyling?.label?.visible === false ? '' : undefined,
+          secondaryLabelPosition: secondaryStyling?.label?.placement,
+          secondaryAlign: secondaryStyling?.value?.alignment,
+        })
+      : {}),
+  });
+}
+
+function convertStylingToAPIFormat(
+  visualization: MetricVisualizationState,
+  hasSecondary: boolean
+): MetricStyling {
+  return stripUndefined({
+    primary: stripUndefined({
+      position: visualization.primaryPosition ?? DEFAULT_PRIMARY_POSITION,
+      labels: {
+        alignment: visualization.titlesTextAlign ?? DEFAULT_PRIMARY_LABELS_ALIGNMENT,
+      },
+      value: {
+        sizing: visualization.valueFontMode === 'fit' ? 'fill' : 'auto',
+        alignment:
+          visualization.primaryAlign ??
+          visualization.valuesTextAlign ??
+          DEFAULT_PRIMARY_VALUE_ALIGNMENT,
+      },
+      icon: visualization.icon
+        ? {
+            name: iconCompat.toAPI(visualization.icon),
+            alignment: visualization.iconAlign ?? DEFAULT_PRIMARY_ICON_ALIGNMENT,
+          }
+        : undefined,
+    }),
+    secondary: hasSecondary
+      ? {
+          ...(visualization.secondaryLabel === '' || visualization.secondaryPrefix === ''
+            ? {
+                label: {
+                  visible: false,
+                },
+              }
+            : {
+                label: {
+                  visible: DEFAULT_SECONDARY_LABEL_VISIBLE,
+                  placement:
+                    visualization.secondaryLabelPosition ?? DEFAULT_SECONDARY_LABEL_PLACEMENT,
+                },
+              }),
+          value: {
+            alignment: visualization.secondaryAlign ?? DEFAULT_SECONDARY_VALUE_ALIGNMENT,
+          },
+        }
+      : undefined,
+  });
+}
+
 function buildVisualizationState(config: MetricState): MetricVisualizationState {
   const layer = config;
 
@@ -135,35 +251,12 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
       ? { palette: fromColorByValueAPIToLensState(primaryMetric.color) }
       : {}),
     ...(primaryMetric.apply_color_to ? { applyColorTo: primaryMetric.apply_color_to } : {}),
-    subtitle: primaryMetric.sub_label ?? '',
+    subtitle: primaryMetric.subtitle ?? '',
     showBar: false,
-    valueFontMode: primaryMetric.fit ? 'fit' : 'default',
-    ...(primaryMetric.alignments
-      ? {
-          primaryAlign: primaryMetric.alignments.value,
-          titlesTextAlign: primaryMetric.alignments.labels,
-        }
-      : {}),
-    ...(primaryMetric.position ? { primaryPosition: primaryMetric.position } : {}),
-    ...(primaryMetric.title_weight ? { titleWeight: primaryMetric.title_weight } : {}),
-    ...(primaryMetric.icon
-      ? {
-          icon: primaryMetric.icon.name,
-          iconAlign: primaryMetric.icon.align,
-        }
-      : {}),
+    ...convertStylingToStateFormat(layer.styling, !!secondaryMetric),
     ...(secondaryMetric
       ? {
           secondaryMetricAccessor: getAccessorName('secondary'),
-          ...('prefix' in secondaryMetric && secondaryMetric.prefix
-            ? { secondaryLabel: secondaryMetric.prefix }
-            : {}),
-          ...('label_position' in secondaryMetric && secondaryMetric.label_position
-            ? { secondaryLabelPosition: secondaryMetric.label_position }
-            : {}),
-          secondaryAlign:
-            ('alignments' in secondaryMetric && secondaryMetric.alignments?.value) ||
-            ('alignments' in primaryMetric ? primaryMetric.alignments?.value : undefined),
           ...('compare' in secondaryMetric && secondaryMetric.compare
             ? fromCompareAPIToLensState(secondaryMetric.compare)
             : {}),
@@ -183,8 +276,8 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
       ? {
           maxAccessor: getAccessorName('max'),
           showBar: true,
-          ...(primaryMetric.background_chart.direction != null
-            ? { progressDirection: primaryMetric.background_chart.direction }
+          ...(primaryMetric.background_chart.orientation != null
+            ? { progressDirection: primaryMetric.background_chart.orientation }
             : {}),
         }
       : {}),
@@ -304,7 +397,7 @@ function buildFromFormBasedLayer(
             type: 'bar',
             max_value: maxValue,
             ...(visualization.progressDirection
-              ? { direction: visualization.progressDirection }
+              ? { orientation: visualization.progressDirection }
               : {}),
           },
         }
@@ -368,7 +461,7 @@ function enrichConfigurationWithVisualizationProperties(
   }
   if (primaryMetric) {
     if (visualization.subtitle) {
-      primaryMetric.sub_label = visualization.subtitle;
+      primaryMetric.subtitle = visualization.subtitle;
     }
 
     if (visualization.trendlineLayerType) {
@@ -389,37 +482,6 @@ function enrichConfigurationWithVisualizationProperties(
     if (visualization.applyColorTo) {
       primaryMetric.apply_color_to = visualization.applyColorTo;
     }
-
-    if (visualization.icon) {
-      primaryMetric.icon = {
-        name: visualization.icon,
-        align: visualization.iconAlign ?? LENS_METRIC_STATE_DEFAULTS.iconAlign,
-      };
-    }
-
-    if (
-      visualization.primaryAlign ||
-      visualization.valuesTextAlign ||
-      visualization.titlesTextAlign
-    ) {
-      primaryMetric.alignments = {
-        value:
-          visualization.primaryAlign ??
-          visualization.valuesTextAlign ??
-          LENS_METRIC_STATE_DEFAULTS.primaryAlign,
-        labels: visualization.titlesTextAlign ?? LENS_METRIC_STATE_DEFAULTS.titlesTextAlign,
-      };
-    }
-
-    primaryMetric.fit = visualization.valueFontMode === 'fit';
-
-    if (visualization.primaryPosition) {
-      primaryMetric.position = visualization.primaryPosition;
-    }
-
-    if (visualization.titleWeight) {
-      primaryMetric.title_weight = visualization.titleWeight;
-    }
   }
 
   if (secondaryMetric) {
@@ -427,12 +489,9 @@ function enrichConfigurationWithVisualizationProperties(
       secondaryMetric.compare = fromCompareLensStateToAPI(visualization.secondaryTrend);
     }
 
-    if (visualization.secondaryLabel || visualization.secondaryPrefix) {
-      secondaryMetric.prefix = visualization.secondaryLabel ?? visualization.secondaryPrefix;
-    }
-
-    if (visualization.secondaryLabelPosition) {
-      secondaryMetric.label_position = visualization.secondaryLabelPosition;
+    const secondaryLabelOverride = visualization.secondaryLabel ?? visualization.secondaryPrefix;
+    if (secondaryLabelOverride && secondaryLabelOverride.length > 0) {
+      secondaryMetric.label = secondaryLabelOverride;
     }
 
     if (visualization.secondaryTrend?.type === 'static' && visualization.secondaryTrend?.color) {
@@ -441,13 +500,9 @@ function enrichConfigurationWithVisualizationProperties(
         color: visualization.secondaryTrend.color,
       };
     }
-
-    if (visualization.secondaryAlign) {
-      secondaryMetric.alignments = {
-        value: visualization.secondaryAlign,
-      };
-    }
   }
+
+  state.styling = convertStylingToAPIFormat(visualization, !!secondaryMetric);
 
   if (state.breakdown_by) {
     if (visualization.maxCols) {
@@ -473,14 +528,20 @@ function reverseBuildVisualizationState(
     throw new Error('Metric accessor is missing in the visualization state');
   }
 
-  const dataset = buildDatasetState(layer, layerId, adHocDataViews, references, adhocReferences);
+  const dataSource = buildDataSourceState(
+    layer,
+    layerId,
+    adHocDataViews,
+    references,
+    adhocReferences
+  );
 
-  if (!dataset || dataset.type == null) {
-    throw new Error('Unsupported dataset type');
+  if (!dataSource || dataSource.type == null) {
+    throw new Error('Unsupported DataSource type');
   }
 
   return {
-    dataset: dataset satisfies MetricState['dataset'],
+    data_source: dataSource satisfies MetricState['data_source'],
     ...(isTextBasedLayer(layer)
       ? buildFromTextBasedLayer(layer, metricAccessor, visualization)
       : buildFromFormBasedLayer(layer, metricAccessor, visualization)),
@@ -567,20 +628,14 @@ function getValueColumns(layer: MetricStateESQL) {
   }
   return [
     ...(layer.breakdown_by
-      ? [getValueColumn(getAccessorName('breakdown'), layer.breakdown_by.column)]
+      ? [getValueColumn(getAccessorName('breakdown'), layer.breakdown_by)]
       : []),
-    getValueColumn(getAccessorName('metric'), primaryMetric.column, 'number'),
+    getValueColumn(getAccessorName('metric'), primaryMetric, 'number'),
     ...(primaryMetric.background_chart?.type === 'bar'
-      ? [
-          getValueColumn(
-            getAccessorName('max'),
-            primaryMetric.background_chart.max_value.column,
-            'number'
-          ),
-        ]
+      ? [getValueColumn(getAccessorName('max'), primaryMetric.background_chart.max_value, 'number')]
       : []),
     ...(secondaryMetric
-      ? [getValueColumn(getAccessorName('secondary'), secondaryMetric.column, 'number')]
+      ? [getValueColumn(getAccessorName('secondary'), secondaryMetric, 'number')]
       : []),
   ];
 }

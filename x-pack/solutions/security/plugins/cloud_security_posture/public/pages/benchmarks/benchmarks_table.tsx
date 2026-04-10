@@ -172,7 +172,7 @@ const getBenchmarkTableColumns = (
           <EuiButtonEmpty
             data-test-subj={EMPTY_EVALUATION_TEST_SUBJECT}
             href={integrationLink}
-            iconType="plusInCircle"
+            iconType="plusCircle"
             flush="left"
           >
             {i18n.translate('xpack.csp.benchmarks.benchmarksTable.addIntegrationTitle', {

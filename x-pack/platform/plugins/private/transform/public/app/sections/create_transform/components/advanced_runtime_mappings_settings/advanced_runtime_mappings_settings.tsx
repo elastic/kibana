@@ -133,11 +133,12 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) =
                     <EuiCopy
                       beforeMessage={COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS}
                       textToCopy={advancedRuntimeMappingsConfig ?? ''}
+                      tooltipProps={{ disableScreenReaderOutput: true }}
                     >
                       {(copy: () => void) => (
                         <EuiButtonIcon
                           onClick={copy}
-                          iconType="copyClipboard"
+                          iconType="copy"
                           aria-label={COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS}
                         />
                       )}

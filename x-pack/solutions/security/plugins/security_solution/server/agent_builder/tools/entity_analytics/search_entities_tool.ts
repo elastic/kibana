@@ -12,7 +12,8 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import {
   getHistorySnapshotIndexPattern,
-  getLatestEntitiesIndexName,
+  getEntitiesAlias,
+  ENTITY_LATEST,
 } from '@kbn/entity-store/server';
 import type { Logger } from '@kbn/logging';
 import {
@@ -23,6 +24,7 @@ import type { ExperimentalFeatures } from '../../../../common';
 import { AssetCriticalityLevel } from '../../../../common/api/entity_analytics/asset_criticality/common.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
+import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../lib/telemetry/event_based/events';
 import { securityTool } from '../constants';
 
 const ENTITY_STORE_KEEP_FIELDS = [
@@ -395,7 +397,7 @@ export const searchEntitiesTool = (
             const esClient = coreStart.elasticsearch.client.asInternalUser;
 
             const indexExists = await esClient.indices.exists({
-              index: getLatestEntitiesIndexName(spaceId),
+              index: getEntitiesAlias(ENTITY_LATEST, spaceId),
             });
 
             if (!indexExists) {
@@ -422,15 +424,20 @@ export const searchEntitiesTool = (
         `${SECURITY_SEARCH_ENTITIES_TOOL_ID} tool called with parameters ${JSON.stringify(params)}`
       );
 
+      let success = false;
+      let entitiesReturned = 0;
+      let errorMessage: string | undefined;
+
       try {
         const client = esClient.asCurrentUser;
-        const entityIndex = getLatestEntitiesIndexName(spaceId);
+        const entityIndex = getEntitiesAlias(ENTITY_LATEST, spaceId);
         const entitySnapshotIndex = getHistorySnapshotIndexPattern(spaceId);
         const query = buildQuery(entityIndex, entitySnapshotIndex, params);
 
         const { columns, values } = await executeEsql({ query, esClient: client });
 
         if (values.length === 0) {
+          success = true;
           return {
             results: [
               {
@@ -444,6 +451,8 @@ export const searchEntitiesTool = (
           };
         }
 
+        success = true;
+        entitiesReturned = values.length;
         return {
           results: values.map((_, rowIdx) => ({
             tool_result_id: getToolResultId(),
@@ -452,7 +461,7 @@ export const searchEntitiesTool = (
           })),
         };
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        errorMessage = error instanceof Error ? error.message : 'Unknown error';
         return {
           results: [
             {
@@ -462,6 +471,16 @@ export const searchEntitiesTool = (
             },
           ],
         };
+      } finally {
+        const [coreStart] = await core.getStartServices();
+        coreStart.analytics.reportEvent(ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType, {
+          toolId: SECURITY_SEARCH_ENTITIES_TOOL_ID,
+          entityTypes: params.entityTypes ?? [],
+          spaceId,
+          success,
+          entitiesReturned,
+          errorMessage,
+        });
       }
     },
   };

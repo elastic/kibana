@@ -65,7 +65,25 @@ export const getDeleteActionDisabledMessage = ({
 }) => {
   const isBulkAction = items.length > 1;
 
-  if (items.some(isManagedTransform) || items.some(isDeletionProtectedTransform)) {
+  if (items.some(isDeletionProtectedTransform)) {
+    return isBulkAction
+      ? i18n.translate(
+          'xpack.transform.transformList.deleteDeletionProtectedBulkActionDisabledToolTipContent',
+          {
+            defaultMessage:
+              'One or more selected transforms are deletion protected and cannot be deleted directly. To remove them, delete the Kibana resources (e.g. SLO) that created those transforms.',
+          }
+        )
+      : i18n.translate(
+          'xpack.transform.transformList.deleteDeletionProtectedActionDisabledToolTipContent',
+          {
+            defaultMessage:
+              'This transform is deletion protected and cannot be deleted directly. To remove it, delete the Kibana resource (e.g. SLO) that created this transform.',
+          }
+        );
+  }
+
+  if (items.some(isManagedTransform)) {
     return isBulkAction
       ? i18n.translate(
           'xpack.transform.transformList.deleteManagedBulkActionDisabledToolTipContent',

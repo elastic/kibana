@@ -11,6 +11,7 @@ import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type { AuthenticationProviderOptions } from './base';
 import { BaseAuthenticationProvider } from './base';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../../errors';
+import type { SessionValue } from '../../session_management';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -141,19 +142,19 @@ export class AnonymousAuthenticationProvider extends BaseAuthenticationProvider 
   /**
    * Performs initial login request.
    * @param request Request instance.
-   * @param state Optional state value previously stored by the provider.
+   * @param session Optional session object associated with the provider.
    */
-  public async login(request: KibanaRequest, state?: unknown) {
+  public async login(request: KibanaRequest, session?: SessionValue | null) {
     this.logger.debug('Trying to perform a login.');
-    return this.authenticateViaAuthorizationHeader(request, state);
+    return this.authenticateViaAuthorizationHeader(request, session);
   }
 
   /**
    * Performs request authentication.
    * @param request Request instance.
-   * @param state Optional state value previously stored by the provider.
+   * @param session Optional session object associated with the provider.
    */
-  public async authenticate(request: KibanaRequest, state?: unknown) {
+  public async authenticate(request: KibanaRequest, session?: SessionValue | null) {
     this.logger.debug(
       `Trying to authenticate user request to ${request.url.pathname}${request.url.search}.`
     );
@@ -163,8 +164,8 @@ export class AnonymousAuthenticationProvider extends BaseAuthenticationProvider 
       return AuthenticationResult.notHandled();
     }
 
-    if (state || canStartNewSession(request)) {
-      return this.authenticateViaAuthorizationHeader(request, state);
+    if (session || canStartNewSession(request)) {
+      return this.authenticateViaAuthorizationHeader(request, session);
     }
 
     return AuthenticationResult.notHandled();
@@ -173,16 +174,16 @@ export class AnonymousAuthenticationProvider extends BaseAuthenticationProvider 
   /**
    * Redirects user to the logged out page.
    * @param request Request instance.
-   * @param state Optional state value previously stored by the provider.
+   * @param [session] Optional session object associated with the provider.
    */
-  public async logout(request: KibanaRequest, state?: unknown) {
+  public async logout(request: KibanaRequest, session?: SessionValue | null) {
     this.logger.debug(
       `Logout is initiated by request to ${request.url.pathname}${request.url.search}.`
     );
 
-    // Having a `null` state means that provider was specifically called to do a logout, but when
+    // Having a `null` session means that provider was specifically called to do a logout, but when
     // session isn't defined then provider is just being probed whether or not it can perform logout.
-    if (state === undefined) {
+    if (session === undefined) {
       return DeauthenticationResult.notHandled();
     }
 
@@ -200,19 +201,25 @@ export class AnonymousAuthenticationProvider extends BaseAuthenticationProvider 
   /**
    * Tries to authenticate user request via configured credentials encoded into `Authorization` header.
    * @param request Request instance.
-   * @param state State value previously stored by the provider.
+   * @param session Session previously stored by the provider.
    */
-  private async authenticateViaAuthorizationHeader(request: KibanaRequest, state?: unknown) {
+  private async authenticateViaAuthorizationHeader(
+    request: KibanaRequest,
+    session?: SessionValue | null
+  ) {
     const authHeaders = this.httpAuthorizationHeader
       ? { authorization: this.httpAuthorizationHeader.toString() }
       : ({} as Record<string, string>);
     try {
-      const user = await this.getUser(request, authHeaders);
+      const user = await this.getUser(request, authHeaders, session ?? undefined);
       this.logger.debug(
         `Request to ${request.url.pathname}${request.url.search} has been authenticated.`
       );
       // Create session only if it doesn't exist yet, otherwise keep it unchanged.
-      return AuthenticationResult.succeeded(user, { authHeaders, state: state ? undefined : {} });
+      return AuthenticationResult.succeeded(user, {
+        authHeaders,
+        state: session ? undefined : {},
+      });
     } catch (err) {
       const errorMessage = getDetailedErrorMessage(err);
       if (getErrorStatusCode(err) === 401) {

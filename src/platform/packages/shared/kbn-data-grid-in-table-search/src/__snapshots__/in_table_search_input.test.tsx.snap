@@ -59,7 +59,7 @@ exports[`InTableSearchInput renders input 1`] = `
               aria-hidden="true"
               class="euiButtonIcon__icon"
               color="inherit"
-              data-euiicon-type="arrowUp"
+              data-euiicon-type="chevronSingleUp"
             />
           </button>
         </div>
@@ -76,7 +76,7 @@ exports[`InTableSearchInput renders input 1`] = `
               aria-hidden="true"
               class="euiButtonIcon__icon"
               color="inherit"
-              data-euiicon-type="arrowDown"
+              data-euiicon-type="chevronSingleDown"
             />
           </button>
         </div>
@@ -155,7 +155,7 @@ exports[`InTableSearchInput renders input when loading 1`] = `
               aria-hidden="true"
               class="euiButtonIcon__icon"
               color="inherit"
-              data-euiicon-type="arrowUp"
+              data-euiicon-type="chevronSingleUp"
             />
           </button>
         </div>
@@ -173,7 +173,7 @@ exports[`InTableSearchInput renders input when loading 1`] = `
               aria-hidden="true"
               class="euiButtonIcon__icon"
               color="inherit"
-              data-euiicon-type="arrowDown"
+              data-euiicon-type="chevronSingleDown"
             />
           </button>
         </div>

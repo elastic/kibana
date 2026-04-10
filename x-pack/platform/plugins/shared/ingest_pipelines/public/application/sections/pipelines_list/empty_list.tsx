@@ -74,7 +74,7 @@ export const EmptyList: FunctionComponent = () => {
             <EuiButton
               fill
               iconSide="right"
-              iconType="arrowDown"
+              iconType="chevronSingleDown"
               data-test-subj="emptyStateCreatePipelineDropdown"
               key="emptyStateCreatePipelineDropdown"
               onClick={() => setShowPopover((previousBool) => !previousBool)}

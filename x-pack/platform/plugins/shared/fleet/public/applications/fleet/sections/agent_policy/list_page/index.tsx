@@ -265,7 +265,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
     () => (
       <EuiButton
         fill
-        iconType="plusInCircle"
+        iconType="plusCircle"
         isDisabled={!hasFleetAllAgentPoliciesPrivileges}
         onClick={() => setIsCreateAgentPolicyFlyoutOpen(true)}
         data-test-subj="createAgentPolicyButton"
@@ -283,7 +283,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
     () => (
       <EuiButton
         fill
-        iconType="plusInCircle"
+        iconType="plusCircle"
         isDisabled={!hasFleetAllAgentPoliciesPrivileges}
         onClick={() => setIsCreateAgentPolicyFlyoutOpen(true)}
         data-test-subj="emptyPromptCreateAgentPolicyButton"

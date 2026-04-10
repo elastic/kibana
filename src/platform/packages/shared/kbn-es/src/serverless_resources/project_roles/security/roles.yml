@@ -41,6 +41,7 @@ viewer:
         - '.entities.v1.latest.security_*'
         - '.entities.v1.updates.security_*'
         - '.entities.v1.history.*.security_*'
+        - '.entities.v2.latest.security_*'
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
       privileges:
@@ -123,6 +124,7 @@ editor:
         - '.entities.v1.updates.security_*'
         - '.entities.v1.history.*.security_*'
         - '.entities.v1.reset*'
+        - '.entities.v2.latest.security_*'
       privileges:
         - 'read'
         - 'write'

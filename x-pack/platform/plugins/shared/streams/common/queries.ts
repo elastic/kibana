@@ -5,22 +5,15 @@
  * 2.0.
  */
 
-import type { StreamQuery } from '@kbn/streams-schema';
+import type { QueryLink } from '@kbn/streams-schema';
+
+export type { QueryLink };
 
 export const QUERY_STATUSES = ['active', 'draft'] as const;
 export type QueryStatus = (typeof QUERY_STATUSES)[number];
 
-export interface QueryLink {
-  'asset.uuid': string;
-  'asset.type': 'query';
-  'asset.id': string;
-  query: StreamQuery;
-  stream_name: string;
-  /** Whether a Kibana rule exists for this query. */
-  rule_backed: boolean;
-  /** The deterministic ID of the Kibana rule associated with this query. */
-  rule_id: string;
-}
+export const SEARCH_MODES = ['keyword', 'semantic', 'hybrid'] as const;
+export type SearchMode = (typeof SEARCH_MODES)[number];
 
 export type QueryLinkRequest = Omit<QueryLink, 'asset.uuid' | 'stream_name'>;
 

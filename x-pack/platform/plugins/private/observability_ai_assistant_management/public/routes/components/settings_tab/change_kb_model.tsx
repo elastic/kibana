@@ -216,7 +216,7 @@ export function ChangeKbModel({
             }
           )}
           color="danger"
-          iconType="alert"
+          iconType="warning"
         >
           <p>{error.message}</p>
         </EuiCallOut>

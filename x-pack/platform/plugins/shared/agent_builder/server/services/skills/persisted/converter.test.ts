@@ -98,4 +98,18 @@ describe('convertPersistedSkill', () => {
 
     expect(result.referencedContent).toBeUndefined();
   });
+
+  it('always sets experimental to false', () => {
+    const skill = createMockPersistedSkill();
+    const result = convertPersistedSkill(skill);
+
+    expect(result.experimental).toBe(false);
+  });
+
+  it('sets experimental to false even for plugin-managed skills', () => {
+    const skill = createMockPersistedSkill({ plugin_id: 'my-plugin' });
+    const result = convertPersistedSkill(skill);
+
+    expect(result.experimental).toBe(false);
+  });
 });

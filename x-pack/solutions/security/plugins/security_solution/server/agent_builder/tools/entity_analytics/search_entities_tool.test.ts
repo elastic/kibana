@@ -8,6 +8,7 @@
 import { ToolResultType, type ErrorResult, type EsqlResults } from '@kbn/agent-builder-common';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
+import type { coreMock } from '@kbn/core/server/mocks';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import {
   createToolAvailabilityContext,
@@ -16,7 +17,8 @@ import {
   setupMockCoreStartServices,
 } from '../../__mocks__/test_helpers';
 import type { ExperimentalFeatures } from '../../../../common';
-import { searchEntitiesTool } from './search_entities_tool';
+import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../lib/telemetry/event_based/events';
+import { searchEntitiesTool, SECURITY_SEARCH_ENTITIES_TOOL_ID } from './search_entities_tool';
 
 jest.mock('../../utils/get_agent_builder_resource_availability', () => ({
   getAgentBuilderResourceAvailability: jest.fn(),
@@ -46,10 +48,11 @@ const mockSingleEntityResponse = () =>
 describe('searchEntitiesTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
   const tool = searchEntitiesTool(mockCore, mockLogger, mockExperimentalFeatures);
+  let mockCoreStart: ReturnType<typeof coreMock.createStart>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    setupMockCoreStartServices(mockCore, mockEsClient);
+    mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient);
     mockGetAgentBuilderResourceAvailability.mockResolvedValue({
       status: 'available',
     });
@@ -230,7 +233,7 @@ describe('searchEntitiesTool', () => {
 
       expect(result.status).toBe('available');
       expect(mockEsClient.asInternalUser.indices.exists).toHaveBeenCalledWith({
-        index: '.entities.v2.latest.security_default',
+        index: 'entities-latest-default',
       });
     });
 
@@ -268,7 +271,7 @@ describe('searchEntitiesTool', () => {
 
       expect(executeEsql).toHaveBeenCalledTimes(1);
       const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
-      expect(query).toContain('FROM .entities.v2.latest.security_default');
+      expect(query).toContain('FROM entities-latest-default');
       expect(query).toContain(EXPECTED_KEEP_CLAUSE);
       expect(query).toContain(EXPECTED_SORT_CLAUSE);
       expect(query).toContain('LIMIT 10');
@@ -496,6 +499,88 @@ describe('searchEntitiesTool', () => {
       );
     });
 
+    describe('telemetry', () => {
+      it('reports success=true and entitiesReturned=N when entities are found', async () => {
+        (executeEsql as jest.Mock).mockResolvedValueOnce({
+          columns: [{ name: 'entity.id', type: 'keyword' }],
+          values: [['host:server1'], ['user:alice'], ['host:server2']],
+        });
+
+        await tool.handler(
+          { entityTypes: ['host', 'user'] },
+          createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+        );
+
+        expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+          ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+          {
+            toolId: SECURITY_SEARCH_ENTITIES_TOOL_ID,
+            entityTypes: ['host', 'user'],
+            spaceId: 'default',
+            success: true,
+            entitiesReturned: 3,
+            errorMessage: undefined,
+          }
+        );
+      });
+
+      it('reports success=true and entitiesReturned=0 when no entities are found', async () => {
+        (executeEsql as jest.Mock).mockResolvedValueOnce({
+          columns: [{ name: 'entity.id', type: 'keyword' }],
+          values: [],
+        });
+
+        await tool.handler(
+          { entityTypes: ['host'] },
+          createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+        );
+
+        expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+          ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+          {
+            toolId: SECURITY_SEARCH_ENTITIES_TOOL_ID,
+            entityTypes: ['host'],
+            spaceId: 'default',
+            success: true,
+            entitiesReturned: 0,
+            errorMessage: undefined,
+          }
+        );
+      });
+
+      it('reports success=false and errorMessage when the query throws', async () => {
+        (executeEsql as jest.Mock).mockRejectedValueOnce(new Error('ES|QL failure'));
+
+        await tool.handler(
+          { entityTypes: ['user'] },
+          createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+        );
+
+        expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+          ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+          {
+            toolId: SECURITY_SEARCH_ENTITIES_TOOL_ID,
+            entityTypes: ['user'],
+            spaceId: 'default',
+            success: false,
+            entitiesReturned: 0,
+            errorMessage: 'ES|QL failure',
+          }
+        );
+      });
+
+      it('reports entityTypes=[] when no entityTypes filter is provided', async () => {
+        mockSingleEntityResponse();
+
+        await tool.handler({}, createToolHandlerContext(mockRequest, mockEsClient, mockLogger));
+
+        expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+          ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+          expect.objectContaining({ entityTypes: [] })
+        );
+      });
+    });
+
     it('builds risk score change query when riskScoreChangeInterval is provided', async () => {
       mockSingleEntityResponse();
 
@@ -507,7 +592,7 @@ describe('searchEntitiesTool', () => {
       const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
 
       // FROM includes both entity index and snapshot index
-      expect(query).toContain('.entities.v2.latest.security_default');
+      expect(query).toContain('entities-latest-default');
       expect(query).toContain('.entities.v2.history.security_default*');
 
       // Risk score IS NOT NULL and timestamp range filters
@@ -565,7 +650,7 @@ describe('searchEntitiesTool', () => {
       );
 
       const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
-      expect(query).toContain('FROM .entities.v2.latest.security_default');
+      expect(query).toContain('FROM entities-latest-default');
       expect(query).toContain('WHERE entity.EngineMetadata.Type IN ("host")');
       expect(query).toContain('WHERE entity.risk.calculated_score_norm >= 80');
       expect(query).toContain('WHERE entity.risk.calculated_level IN ("High", "Critical")');

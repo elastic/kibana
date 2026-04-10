@@ -60,7 +60,7 @@ export const PopoverActionsMenu = ({
           defaultMessage: 'More actions',
         })}
         color="text"
-        iconType="boxesHorizontal"
+        iconType="boxesVertical"
         onClick={onPopoverClick}
       />
     </EuiToolTip>

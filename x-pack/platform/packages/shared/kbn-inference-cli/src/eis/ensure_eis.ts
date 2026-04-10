@@ -22,6 +22,12 @@ interface ElasticsearchConnection {
   ssl: boolean;
 }
 
+const EIS_QA_URL = 'https://inference.eu-west-1.aws.svc.qa.elastic.cloud';
+const EIS_URL_FLAG = `-E xpack.inference.elastic.url=${EIS_QA_URL}`;
+
+const createBasicAuthHeader = (credentials: ElasticsearchCredentials): string =>
+  Buffer.from(`${credentials.username}:${credentials.password}`).toString('base64');
+
 function httpRequest(
   url: string,
   options: http.RequestOptions | https.RequestOptions,
@@ -59,13 +65,12 @@ async function testCredentials(
   log: ToolingLog
 ): Promise<boolean> {
   try {
-    const auth = Buffer.from(`${credentials.username}:${credentials.password}`).toString('base64');
     const { statusCode } = await httpRequest(
       baseUrl,
       {
         method: 'GET',
         headers: {
-          Authorization: `Basic ${auth}`,
+          Authorization: `Basic ${createBasicAuthHeader(credentials)}`,
         },
         rejectUnauthorized: false,
       },
@@ -85,10 +90,13 @@ async function testCredentials(
 }
 
 async function getES(log: ToolingLog) {
-  log.debug('Determining Elasticsearch connection');
+  const rawHost = process.env.ES_HOST || 'localhost';
+  const port = process.env.ES_PORT || '9200';
 
-  const localhost = 'localhost:9200';
-  const protocols = ['https', 'http'];
+  const protocolMatch = rawHost.match(/^(https?):\/\/(.+)$/);
+  const protocols = protocolMatch ? [protocolMatch[1]] : ['https', 'http'];
+  const hostname = protocolMatch ? protocolMatch[2] : rawHost;
+  const esAddress = `${hostname}:${port}`;
 
   const envUsername = process.env.ES_USERNAME || process.env.ELASTICSEARCH_USERNAME;
   const envPassword = process.env.ES_PASSWORD || process.env.ELASTICSEARCH_PASSWORD;
@@ -113,7 +121,7 @@ async function getES(log: ToolingLog) {
   );
 
   for (const protocol of protocols) {
-    const baseUrl = `${protocol}://${localhost}`;
+    const baseUrl = `${protocol}://${esAddress}`;
 
     for (const credentials of credentialsToTry) {
       const isSsl = protocol === 'https';
@@ -123,8 +131,10 @@ async function getES(log: ToolingLog) {
         const isValid = await testCredentials(baseUrl, credentials, isSsl, log);
 
         if (isValid) {
-          log.debug(
-            `Authorized with ${credentials.type} credentials ${credentials.username} (${protocol})`
+          log.info(
+            `Connected to Elasticsearch at ${chalk.cyan(baseUrl)} (${
+              credentials.type
+            } credentials: ${credentials.username})`
           );
 
           return {
@@ -142,27 +152,86 @@ async function getES(log: ToolingLog) {
   }
 
   throw new Error(
-    'Could not authenticate to Elasticsearch. Please set ES_USERNAME and ES_PASSWORD environment variables or ensure Elasticsearch is running with default credentials (elastic:changeme or elastic_serverless:changeme)'
+    [
+      `Could not connect to Elasticsearch at ${esAddress}.`,
+      '',
+      `Make sure Elasticsearch is running with the EIS URL flag:`,
+      '',
+      `  ${chalk.cyan(EIS_URL_FLAG)}`,
+      '',
+      'If using custom credentials, set ES_USERNAME and ES_PASSWORD environment variables.',
+    ].join('\n')
   );
 }
 
-async function getEisApiKey(log: ToolingLog): Promise<string> {
-  log.debug('Fetching EIS API key from vault');
-
+async function getEisApiKeyFromVault(vaultAddress: string): Promise<string> {
   const secretPath = 'secret/kibana-issues/dev/inference/kibana-eis-ccm';
-  const vaultAddress = process.env.VAULT_ADDR || 'https://secrets.elastic.co:8200';
 
+  let stdout: string;
+  let stderr: string;
   try {
-    const { stdout: apiKey } = await execa.command(`vault read -field key ${secretPath}`, {
+    ({ stdout, stderr } = await execa('vault', ['read', '-field', 'key', secretPath], {
       env: { VAULT_ADDR: vaultAddress },
-    });
-
-    return apiKey.trim();
+    }));
   } catch (error) {
-    throw new Error(
-      'Failed to read EIS API key from vault. Please ensure you are logged in to vault (vault login --method oidc) and connected to VPN if needed. See https://docs.elastic.dev/vault',
-      { cause: error }
+    const vaultStderr = error.stderr?.trim();
+    const parts = [
+      'Failed to read EIS API key from vault.',
+      ...(vaultStderr ? [`Vault output: ${vaultStderr}`] : []),
+      '',
+      'Make sure you are logged in:',
+      '',
+      `  ${chalk.cyan(`VAULT_ADDR=${vaultAddress} vault login --method oidc`)}`,
+      '',
+      'See https://docs.elastic.dev/vault for setup instructions.',
+    ];
+    throw new Error(parts.join('\n'), { cause: error });
+  }
+
+  const apiKey = stdout.trim();
+  if (!apiKey) {
+    const parts = ['Vault returned an empty API key.'];
+    const vaultOutput = stderr.trim();
+    if (vaultOutput) {
+      parts.push(`Vault output: ${vaultOutput}`);
+    }
+    throw new Error(parts.join(' '));
+  }
+
+  return apiKey;
+}
+
+async function getEisEndpoint(
+  es: ElasticsearchConnection,
+  log: ToolingLog
+): Promise<string | undefined> {
+  try {
+    const { statusCode, data } = await httpRequest(
+      `${es.baseUrl}/_cluster/settings?include_defaults=true&flat_settings=true`,
+      {
+        method: 'GET',
+        headers: { Authorization: `Basic ${createBasicAuthHeader(es.credentials)}` },
+        rejectUnauthorized: false,
+      },
+      undefined,
+      es.ssl
     );
+
+    if (statusCode !== 200) {
+      log.warning(`Failed to get cluster settings: HTTP ${statusCode}`);
+      return undefined;
+    }
+
+    const settings = JSON.parse(data);
+    return (
+      settings.persistent?.['xpack.inference.elastic.url'] ||
+      settings.transient?.['xpack.inference.elastic.url'] ||
+      settings.defaults?.['xpack.inference.elastic.url'] ||
+      undefined
+    );
+  } catch (error) {
+    log.warning(`Error fetching cluster settings: ${error.message}`);
+    return undefined;
   }
 }
 
@@ -176,14 +245,11 @@ async function setCcmApiKey(
   const maxRetries = 3;
   const retryDelayMs = 2000;
   const esUrl = `${es.baseUrl}/_inference/_ccm`;
+  const auth = createBasicAuthHeader(es.credentials);
+  const body = JSON.stringify({ api_key: apiKey });
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      const auth = Buffer.from(`${es.credentials.username}:${es.credentials.password}`).toString(
-        'base64'
-      );
-      const body = JSON.stringify({ api_key: apiKey });
-
       const { statusCode } = await httpRequest(
         esUrl,
         {
@@ -204,15 +270,28 @@ async function setCcmApiKey(
         return;
       }
 
+      if (statusCode === 401 || statusCode === 403) {
+        throw new Error(
+          [
+            `HTTP ${statusCode} — Elasticsearch rejected the CCM request.`,
+            '',
+            'Make sure Elasticsearch was started with the EIS URL flag:',
+            '',
+            `  ${chalk.cyan(EIS_URL_FLAG)}`,
+          ].join('\n')
+        );
+      }
+
       throw new Error(`HTTP ${statusCode}`);
     } catch (error) {
-      if (attempt < maxRetries) {
+      if (
+        attempt < maxRetries &&
+        !(error instanceof Error && /HTTP (401|403)/.test(error.message))
+      ) {
         log.debug(`Attempt ${attempt} failed, retrying in ${retryDelayMs}ms...`);
         await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
       } else {
-        throw new Error(`Failed to set CCM API key after ${maxRetries} attempts`, {
-          cause: error,
-        });
+        throw new Error(`Failed to set CCM API key.`, { cause: error });
       }
     }
   }
@@ -220,21 +299,39 @@ async function setCcmApiKey(
 
 export async function ensureEis({ log }: { log: ToolingLog }) {
   log.info('Setting up Cloud Connected Mode for EIS');
-  // Get Elasticsearch connection info
+
+  // Step 1: Connect to Elasticsearch and log what we're using
   const es = await getES(log);
 
-  // Get EIS API key from vault
-  const apiKey = await getEisApiKey(log);
+  // Step 2: Check if the EIS endpoint is configured
+  const eisEndpoint = await getEisEndpoint(es, log);
+  if (eisEndpoint) {
+    log.info(`EIS endpoint: ${chalk.cyan(eisEndpoint)}`);
+  } else {
+    log.warning(
+      `Could not detect xpack.inference.elastic.url — make sure Elasticsearch was started with ${chalk.cyan(
+        '-E xpack.inference.elastic.url=...'
+      )}`
+    );
+  }
 
-  // Set CCM API key in Elasticsearch
+  // Step 3: Resolve the CCM API key
+  const envApiKey = process.env.KIBANA_EIS_CCM_API_KEY?.trim();
+  let apiKey: string;
+
+  if (envApiKey) {
+    log.info('Using CCM API key from KIBANA_EIS_CCM_API_KEY environment variable');
+    apiKey = envApiKey;
+  } else {
+    const vaultAddress = process.env.VAULT_ADDR || 'https://secrets.elastic.co:8200';
+    log.info('Fetching CCM API key from vault...');
+    apiKey = await getEisApiKeyFromVault(vaultAddress);
+  }
+
+  // Step 4: Set the CCM API key in Elasticsearch
   await setCcmApiKey(apiKey, es, log);
 
   log.write('');
   log.write(`${chalk.green('✔')} EIS API key successfully set in Cloud Connected Mode`);
-  log.write('');
-  const eisUrlFlag = chalk.cyan(
-    '-E xpack.inference.elastic.url=https://inference.eu-west-1.aws.svc.qa.elastic.cloud'
-  );
-  log.write(`${chalk.yellow('⚠')} Remember: Elasticsearch must be started with ${eisUrlFlag}`);
   log.write('');
 }

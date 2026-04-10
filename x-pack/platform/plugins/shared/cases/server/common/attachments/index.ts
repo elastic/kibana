@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { AttachmentType } from '../../../common/types/domain';
+import { toUnifiedAttachmentType } from '../../../common/utils/attachments';
 import {
   COMMENT_ATTACHMENT_TYPE,
-  VALID_ATTACHMENT_TYPES,
-  LEGACY_TO_UNIFIED_MAP,
+  SECURITY_EVENT_ATTACHMENT_TYPE,
 } from '../../../common/constants/attachments';
 import type {
   AttachmentPersistedAttributes,
@@ -17,26 +16,13 @@ import type {
 } from '../types/attachments_v2';
 import { passThroughTransformer, type AttachmentTypeTransformer } from './base';
 import { commentAttachmentTransformer } from './comment';
+import { eventAttachmentTransformer } from './event';
 
 export { getCommentContentFromUnifiedPayload, commentAttachmentTransformer } from './comment';
 export {
   getAttachmentSavedObjectType,
   resolveAttachmentSavedObjectType,
 } from './saved_object_type';
-
-/**
- * Converts a legacy attachment type to its unified type.
- */
-export function toUnifiedAttachmentType(type: string): string {
-  if (!VALID_ATTACHMENT_TYPES.has(type)) {
-    throw new Error(`Invalid attachment type: ${type}`);
-  }
-  const unified = LEGACY_TO_UNIFIED_MAP[type];
-  if (unified) {
-    return unified;
-  }
-  return type;
-}
 
 /**
  * Returns the attachment type string from attributes (unified or legacy shape).
@@ -47,14 +33,11 @@ export function getAttachmentTypeFromAttributes(attributes: unknown): string {
   if (attributes === null || typeof attributes !== 'object') {
     throw new Error('Invalid attributes: expected non-null object');
   }
-  const attrs = attributes as Record<string, unknown>;
-  if (typeof attrs.type === 'string') {
-    return attrs.type;
+  const { type } = attributes as Record<string, unknown>;
+  if (typeof type !== 'string') {
+    throw new Error('Invalid attributes: missing attachment type');
   }
-  if ('comment' in attrs) {
-    return AttachmentType.user;
-  }
-  return COMMENT_ATTACHMENT_TYPE;
+  return type;
 }
 
 /**
@@ -64,12 +47,16 @@ export function getAttachmentTypeFromAttributes(attributes: unknown): string {
  * pass-through transformer (identity for old <-> new schema).
  */
 export function getAttachmentTypeTransformers(
-  type: string
+  type: string,
+  owner: string
 ): AttachmentTypeTransformer<AttachmentPersistedAttributes, UnifiedAttachmentAttributes> {
-  const normalizedType = toUnifiedAttachmentType(type);
+  const normalizedType = toUnifiedAttachmentType(type, owner);
 
-  if (normalizedType === 'comment') {
+  if (normalizedType === COMMENT_ATTACHMENT_TYPE || normalizedType === 'comment') {
     return commentAttachmentTransformer;
+  }
+  if (normalizedType === SECURITY_EVENT_ATTACHMENT_TYPE) {
+    return eventAttachmentTransformer;
   }
   return passThroughTransformer;
 }

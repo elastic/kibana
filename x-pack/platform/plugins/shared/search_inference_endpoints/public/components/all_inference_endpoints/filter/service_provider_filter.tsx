@@ -6,11 +6,12 @@
  */
 
 import React, { useMemo } from 'react';
+import { EuiFilterGroup } from '@elastic/eui';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
 import type { FilterOptions } from '../../../types';
-import type { MultiSelectFilterOption } from './multi_select_filter';
-import { MultiSelectFilter } from './multi_select_filter';
+import type { MultiSelectFilterOption } from '../../filter/multi_select_filter';
+import { MultiSelectFilter } from '../../filter/multi_select_filter';
 import * as i18n from './translations';
 
 interface Props {
@@ -41,13 +42,16 @@ export const ServiceProviderFilter: React.FC<Props> = ({
   }, [uniqueProviders]);
 
   return (
-    <MultiSelectFilter
-      buttonLabel={i18n.SERVICE_PROVIDER}
-      onChange={onSystemFilterChange}
-      options={filteredOptions}
-      renderOption={(option) => option.label}
-      selectedOptionKeys={optionKeys}
-      dataTestSubj="service-field-endpoints"
-    />
+    <EuiFilterGroup>
+      <MultiSelectFilter
+        buttonLabel={i18n.SERVICE_PROVIDER}
+        ariaLabel={i18n.SERVICE_PROVIDER_ARIA_LABEL}
+        onChange={onSystemFilterChange}
+        options={filteredOptions}
+        renderOption={(option) => option.label}
+        selectedOptionKeys={optionKeys}
+        dataTestSubj="service-field-endpoints"
+      />
+    </EuiFilterGroup>
   );
 };

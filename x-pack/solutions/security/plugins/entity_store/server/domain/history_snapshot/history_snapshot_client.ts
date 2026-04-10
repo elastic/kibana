@@ -10,7 +10,7 @@ import moment from 'moment';
 import type { EntityStoreGlobalState } from '../saved_objects';
 import type { EntityStoreGlobalStateClient } from '../saved_objects';
 import { createIndex, reindex, updateByQueryWithScript } from '../../infra/elasticsearch';
-import { getLatestEntitiesIndexName } from '../asset_manager/latest_index';
+import { getEntitiesAlias, ENTITY_LATEST } from '../../../common/domain/entity_index';
 import { getErrorMessage } from '../../../common';
 import { getHistorySnapshotIndexName } from '../asset_manager/history_snapshot_index';
 import { HISTORY_SNAPSHOT_RESET_SCRIPT } from './constants';
@@ -65,7 +65,7 @@ export class HistorySnapshotClient {
 
     const timestampNow = moment.utc().toISOString();
     const snapshotDate = moment.utc().toDate();
-    const latestIndex = getLatestEntitiesIndexName(this.namespace);
+    const latestIndex = getEntitiesAlias(ENTITY_LATEST, this.namespace);
     const historySnapshotIndex = getHistorySnapshotIndexName(this.namespace, snapshotDate);
 
     try {

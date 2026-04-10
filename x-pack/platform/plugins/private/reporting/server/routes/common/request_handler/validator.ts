@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment-timezone';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { load } from 'cheerio';
 import type { BaseParams } from '@kbn/reporting-common/types';
 
@@ -118,7 +118,7 @@ export const pagingStrategySchema = z.enum(['pit', 'scroll']);
 const locatorObjectSchema = z.object({
   id: z.string().max(1024).optional(),
   version: z.string().max(32).optional(),
-  params: z.record(z.any()).optional(),
+  params: z.record(z.any(), z.any()).optional(),
 });
 
 const locatorParamsSchema = z.array(locatorObjectSchema).max(100).or(locatorObjectSchema);

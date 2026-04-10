@@ -116,8 +116,8 @@ export function ExploratoryView({
                       data-test-subj="o11yExploratoryViewButton"
                       size="xs"
                       {...(hiddenPanel === 'chartPanel'
-                        ? { iconType: 'arrowRight' }
-                        : { iconType: 'arrowDown' })}
+                        ? { iconType: 'chevronSingleRight' }
+                        : { iconType: 'chevronSingleDown' })}
                       onClick={() => onChange('chartPanel')}
                     >
                       {hiddenPanel === 'chartPanel' ? SHOW_CHART_LABEL : HIDE_CHART_LABEL}
@@ -160,7 +160,7 @@ export function ExploratoryView({
           }}
         </ResizableContainer>
         {hiddenPanel === 'seriesPanel' && (
-          <ShowPreview onClick={() => onChange('seriesPanel')} iconType="arrowUp">
+          <ShowPreview onClick={() => onChange('seriesPanel')} iconType="chevronSingleUp">
             {PREVIEW_LABEL}
           </ShowPreview>
         )}

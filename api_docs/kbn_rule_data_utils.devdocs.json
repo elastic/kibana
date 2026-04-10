@@ -2744,7 +2744,7 @@
         "label": "rulesAppDetailsRoute",
         "description": [],
         "signature": [
-          "\"/:ruleId\""
+          "\"/rule/:ruleId\""
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/routes/stack_rule_paths.ts",
         "lineNumber": 14,

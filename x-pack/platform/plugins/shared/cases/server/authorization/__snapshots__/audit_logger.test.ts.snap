@@ -1,6 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "assignCase" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "assignCase" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -26,7 +28,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "assignCase" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "assignCase" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -46,7 +50,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "assignCase" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "assignCase" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "cases_assign",
@@ -68,7 +74,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "assignCase" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "assignCase" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "cases_assign",
@@ -84,7 +92,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "bulkCreateAttachments" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "bulkCreateAttachments" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -110,7 +120,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "bulkCreateAttachments" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "bulkCreateAttachments" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -130,7 +142,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "bulkCreateAttachments" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "bulkCreateAttachments" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_comment_bulk_create",
@@ -152,7 +166,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "bulkCreateAttachments" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "bulkCreateAttachments" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_comment_bulk_create",
@@ -168,7 +184,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "bulkGetAttachments" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "bulkGetAttachments" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -194,7 +212,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "bulkGetAttachments" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "bulkGetAttachments" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -214,7 +234,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "bulkGetAttachments" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "bulkGetAttachments" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_comment_bulk_get",
@@ -236,7 +258,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "bulkGetAttachments" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "bulkGetAttachments" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_comment_bulk_get",
@@ -252,7 +276,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "bulkGetCases" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "bulkGetCases" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -278,7 +304,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "bulkGetCases" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "bulkGetCases" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -298,7 +326,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "bulkGetCases" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "bulkGetCases" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_bulk_get",
@@ -320,7 +350,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "bulkGetCases" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "bulkGetCases" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_bulk_get",
@@ -336,7 +368,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "createCase" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "createCase" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -362,7 +396,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "createCase" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "createCase" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -382,7 +418,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "createCase" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "createCase" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_create",
@@ -404,7 +442,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "createCase" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "createCase" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_create",
@@ -420,7 +460,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "createComment" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "createComment" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -446,7 +488,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "createComment" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "createComment" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -466,7 +510,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "createComment" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "createComment" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_comment_create",
@@ -488,7 +534,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "createComment" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "createComment" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_comment_create",
@@ -504,7 +552,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "createConfiguration" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "createConfiguration" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -530,7 +580,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "createConfiguration" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "createConfiguration" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -550,7 +602,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "createConfiguration" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "createConfiguration" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_configuration_create",
@@ -572,7 +626,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "createConfiguration" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "createConfiguration" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_configuration_create",
@@ -588,7 +644,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "deleteAllComments" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "deleteAllComments" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -614,7 +672,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "deleteAllComments" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "deleteAllComments" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -634,7 +694,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "deleteAllComments" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "deleteAllComments" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_comment_delete_all",
@@ -656,7 +718,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "deleteAllComments" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "deleteAllComments" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_comment_delete_all",
@@ -672,7 +736,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "deleteCase" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "deleteCase" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -698,7 +764,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "deleteCase" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "deleteCase" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -718,7 +786,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "deleteCase" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "deleteCase" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_delete",
@@ -740,7 +810,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "deleteCase" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "deleteCase" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_delete",
@@ -756,7 +828,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "deleteComment" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "deleteComment" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -782,7 +856,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "deleteComment" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "deleteComment" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -802,7 +878,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "deleteComment" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "deleteComment" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_comment_delete",
@@ -824,7 +902,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "deleteComment" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "deleteComment" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_comment_delete",
@@ -840,7 +920,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "findCases" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "findCases" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -866,7 +948,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "findCases" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "findCases" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -886,7 +970,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "findCases" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "findCases" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_find",
@@ -908,7 +994,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "findCases" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "findCases" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_find",
@@ -924,7 +1012,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "findComments" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "findComments" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -950,7 +1040,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "findComments" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "findComments" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -970,7 +1062,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "findComments" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "findComments" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_comment_find",
@@ -992,7 +1086,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "findComments" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "findComments" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_comment_find",
@@ -1008,7 +1104,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "findConfigurations" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "findConfigurations" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -1034,7 +1132,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "findConfigurations" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "findConfigurations" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -1054,7 +1154,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "findConfigurations" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "findConfigurations" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_configuration_find",
@@ -1076,7 +1178,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "findConfigurations" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "findConfigurations" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_configuration_find",
@@ -1092,7 +1196,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "findUserActions" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "findUserActions" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -1118,7 +1224,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "findUserActions" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "findUserActions" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -1138,7 +1246,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "findUserActions" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "findUserActions" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_user_actions_find",
@@ -1160,7 +1270,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "findUserActions" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "findUserActions" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_user_actions_find",
@@ -1176,7 +1288,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getAlertsAttachedToCase" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getAlertsAttachedToCase" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -1202,7 +1316,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getAlertsAttachedToCase" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getAlertsAttachedToCase" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -1222,7 +1338,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getAlertsAttachedToCase" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getAlertsAttachedToCase" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_comment_alerts_attach_to_case",
@@ -1244,7 +1362,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getAlertsAttachedToCase" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getAlertsAttachedToCase" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_comment_alerts_attach_to_case",
@@ -1260,7 +1380,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getAllComments" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getAllComments" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -1286,7 +1408,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getAllComments" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getAllComments" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -1306,7 +1430,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getAllComments" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getAllComments" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_comment_get_all",
@@ -1328,7 +1454,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getAllComments" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getAllComments" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_comment_get_all",
@@ -1344,7 +1472,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getAttachmentMetrics" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getAttachmentMetrics" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -1370,7 +1500,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getAttachmentMetrics" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getAttachmentMetrics" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -1390,7 +1522,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getAttachmentMetrics" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getAttachmentMetrics" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_comment_get_metrics",
@@ -1412,7 +1546,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getAttachmentMetrics" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getAttachmentMetrics" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_comment_get_metrics",
@@ -1428,7 +1564,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getCase" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getCase" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -1454,7 +1592,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getCase" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getCase" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -1474,7 +1614,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getCase" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getCase" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_get",
@@ -1496,7 +1638,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getCase" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getCase" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_get",
@@ -1512,7 +1656,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getCaseIDsByAlertID" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getCaseIDsByAlertID" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -1538,7 +1684,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getCaseIDsByAlertID" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getCaseIDsByAlertID" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -1558,7 +1706,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getCaseIDsByAlertID" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getCaseIDsByAlertID" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_ids_by_alert_id_get",
@@ -1580,7 +1730,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getCaseIDsByAlertID" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getCaseIDsByAlertID" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_ids_by_alert_id_get",
@@ -1596,7 +1748,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getCaseMetrics" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getCaseMetrics" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -1622,7 +1776,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getCaseMetrics" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getCaseMetrics" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -1642,7 +1798,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getCaseMetrics" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getCaseMetrics" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_get_metrics",
@@ -1664,7 +1822,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getCaseMetrics" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getCaseMetrics" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_get_metrics",
@@ -1680,7 +1840,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getCaseStatuses" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getCaseStatuses" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -1706,7 +1868,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getCaseStatuses" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getCaseStatuses" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -1726,7 +1890,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getCaseStatuses" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getCaseStatuses" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_find_statuses",
@@ -1748,7 +1914,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getCaseStatuses" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getCaseStatuses" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_find_statuses",
@@ -1764,7 +1932,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getCasesMetrics" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getCasesMetrics" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -1790,7 +1960,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getCasesMetrics" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getCasesMetrics" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -1810,7 +1982,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getCasesMetrics" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getCasesMetrics" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "cases_get_metrics",
@@ -1832,7 +2006,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getCasesMetrics" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getCasesMetrics" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "cases_get_metrics",
@@ -1848,7 +2024,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getCategories" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getCategories" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -1874,7 +2052,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getCategories" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getCategories" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -1894,7 +2074,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getCategories" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getCategories" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_categories_get",
@@ -1916,7 +2098,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getCategories" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getCategories" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_categories_get",
@@ -1932,7 +2116,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getComment" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getComment" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -1958,7 +2144,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getComment" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getComment" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -1978,7 +2166,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getComment" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getComment" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_comment_get",
@@ -2000,7 +2190,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getComment" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getComment" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_comment_get",
@@ -2016,7 +2208,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getConnectors" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getConnectors" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -2042,7 +2236,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getConnectors" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getConnectors" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -2062,7 +2258,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getConnectors" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getConnectors" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_connectors_get",
@@ -2084,7 +2282,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getConnectors" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getConnectors" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_connectors_get",
@@ -2100,7 +2300,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getReporters" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getReporters" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -2126,7 +2328,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getReporters" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getReporters" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -2146,7 +2350,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getReporters" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getReporters" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_reporters_get",
@@ -2168,7 +2374,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getReporters" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getReporters" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_reporters_get",
@@ -2184,7 +2392,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getTags" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getTags" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -2210,7 +2420,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getTags" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getTags" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -2230,7 +2442,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getTags" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getTags" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_tags_get",
@@ -2252,7 +2466,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getTags" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getTags" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_tags_get",
@@ -2268,7 +2484,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getUserActionMetrics" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getUserActionMetrics" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -2294,7 +2512,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getUserActionMetrics" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getUserActionMetrics" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -2314,7 +2534,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getUserActionMetrics" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getUserActionMetrics" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_user_action_get_metrics",
@@ -2336,7 +2558,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getUserActionMetrics" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getUserActionMetrics" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_user_action_get_metrics",
@@ -2352,7 +2576,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getUserActionUsers" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getUserActionUsers" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -2378,7 +2604,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getUserActionUsers" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getUserActionUsers" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -2398,7 +2626,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getUserActionUsers" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getUserActionUsers" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_user_action_get_users",
@@ -2420,7 +2650,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getUserActionUsers" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getUserActionUsers" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_user_action_get_users",
@@ -2436,7 +2668,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getUserActions" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getUserActions" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -2462,7 +2696,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getUserActions" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getUserActions" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -2482,7 +2718,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getUserActions" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getUserActions" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_user_actions_get",
@@ -2504,7 +2742,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "getUserActions" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "getUserActions" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_user_actions_get",
@@ -2520,7 +2760,101 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "pushCase" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "manageTemplate" with an error and entity 1`
+] = `
+Object {
+  "error": Object {
+    "code": "Error",
+    "message": "an error",
+  },
+  "event": Object {
+    "action": "case_template_manage",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "failure",
+    "type": Array [
+      "change",
+    ],
+  },
+  "kibana": Object {
+    "saved_object": Object {
+      "id": "1",
+      "type": "cases-templates",
+    },
+  },
+  "message": "Failed attempt to update cases-templates [id=1] as owner \\"awesome\\"",
+}
+`;
+
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "manageTemplate" with an error but no entity 1`
+] = `
+Object {
+  "error": Object {
+    "code": "Error",
+    "message": "an error",
+  },
+  "event": Object {
+    "action": "case_template_manage",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "failure",
+    "type": Array [
+      "change",
+    ],
+  },
+  "message": "Failed attempt to update a case templates as any owners",
+}
+`;
+
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "manageTemplate" without an error but with an entity 1`
+] = `
+Object {
+  "event": Object {
+    "action": "case_template_manage",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "unknown",
+    "type": Array [
+      "change",
+    ],
+  },
+  "kibana": Object {
+    "saved_object": Object {
+      "id": "5",
+      "type": "cases-templates",
+    },
+  },
+  "message": "User is updating cases-templates [id=5] as owner \\"super\\"",
+}
+`;
+
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "manageTemplate" without an error or entity 1`
+] = `
+Object {
+  "event": Object {
+    "action": "case_template_manage",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "unknown",
+    "type": Array [
+      "change",
+    ],
+  },
+  "message": "User is updating a case templates as any owners",
+}
+`;
+
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "pushCase" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -2546,7 +2880,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "pushCase" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "pushCase" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -2566,7 +2902,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "pushCase" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "pushCase" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_push",
@@ -2588,7 +2926,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "pushCase" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "pushCase" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_push",
@@ -2604,7 +2944,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "reopenCase" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "reopenCase" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -2630,7 +2972,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "reopenCase" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "reopenCase" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -2650,7 +2994,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "reopenCase" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "reopenCase" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_reopen",
@@ -2672,7 +3018,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "reopenCase" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "reopenCase" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_reopen",
@@ -2688,7 +3036,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "resolveCase" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "resolveCase" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -2714,7 +3064,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "resolveCase" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "resolveCase" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -2734,7 +3086,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "resolveCase" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "resolveCase" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_resolve",
@@ -2756,7 +3110,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "resolveCase" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "resolveCase" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_resolve",
@@ -2772,7 +3128,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "updateCase" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "updateCase" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -2798,7 +3156,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "updateCase" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "updateCase" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -2818,7 +3178,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "updateCase" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "updateCase" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_update",
@@ -2840,7 +3202,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "updateCase" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "updateCase" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_update",
@@ -2856,7 +3220,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "updateComment" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "updateComment" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -2882,7 +3248,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "updateComment" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "updateComment" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -2902,7 +3270,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "updateComment" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "updateComment" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_comment_update",
@@ -2924,7 +3294,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "updateComment" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "updateComment" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_comment_update",
@@ -2940,7 +3312,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "updateConfiguration" with an error and entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "updateConfiguration" with an error and entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -2966,7 +3340,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "updateConfiguration" with an error but no entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "updateConfiguration" with an error but no entity 1`
+] = `
 Object {
   "error": Object {
     "code": "Error",
@@ -2986,7 +3362,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "updateConfiguration" without an error but with an entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "updateConfiguration" without an error but with an entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_configuration_update",
@@ -3008,7 +3386,9 @@ Object {
 }
 `;
 
-exports[`audit_logger log function event structure creates the correct audit event for operation: "updateConfiguration" without an error or entity 1`] = `
+exports[
+  `audit_logger log function event structure creates the correct audit event for operation: "updateConfiguration" without an error or entity 1`
+] = `
 Object {
   "event": Object {
     "action": "case_configuration_update",

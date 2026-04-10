@@ -15,7 +15,7 @@ import type {
 } from '@kbn/actions-plugin/server/types';
 import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { api } from './api';
 import { ExecutorParamsSchema, WorkflowsRuleActionParamsSchema } from './schema';
 import {
@@ -25,6 +25,7 @@ import {
 } from './service';
 import * as i18n from './translations';
 import type {
+  AlertStates,
   ExecutorParams,
   ExecutorSubActionRunParams,
   WorkflowsActionParamsType,
@@ -41,6 +42,7 @@ export interface WorkflowsRuleActionParams {
   subActionParams: {
     workflowId: string;
     summaryMode?: boolean;
+    alertStates?: AlertStates;
   };
   [key: string]: unknown;
 }
@@ -155,6 +157,20 @@ export async function executor(
   return { status: 'ok', data, actionId };
 }
 
+const DEFAULT_ALERT_STATES: AlertStates = {
+  new: true,
+  ongoing: false,
+  recovered: false,
+};
+
+export function resolveAlertStates(alertStates?: Partial<AlertStates>): AlertStates {
+  return {
+    new: alertStates?.new ?? DEFAULT_ALERT_STATES.new,
+    ongoing: alertStates?.ongoing ?? DEFAULT_ALERT_STATES.ongoing,
+    recovered: alertStates?.recovered ?? DEFAULT_ALERT_STATES.recovered,
+  };
+}
+
 // Connector adapter for system action
 export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
   WorkflowsRuleActionParams,
@@ -177,9 +193,23 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
           );
         }
 
-        // Build alert event using shared utility function
+        const resolvedStates = resolveAlertStates(subActionParams.alertStates);
+
+        const emptyAlertGroup = {
+          count: 0,
+          data: [],
+          alert_count: { active: 0, recovered: 0, ignored: 0 },
+        };
+
+        const filteredAlerts = {
+          ...alerts,
+          new: resolvedStates.new ? alerts.new : emptyAlertGroup,
+          ongoing: resolvedStates.ongoing ? alerts.ongoing : emptyAlertGroup,
+          recovered: resolvedStates.recovered ? alerts.recovered : emptyAlertGroup,
+        };
+
         const alertEvent = buildAlertEvent({
-          alerts,
+          alerts: filteredAlerts,
           rule,
           ruleUrl,
           spaceId,
@@ -192,6 +222,7 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
             inputs: { event: alertEvent },
             spaceId,
             summaryMode,
+            alertStates: resolvedStates,
           },
         };
       } catch (error) {
@@ -201,6 +232,7 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
             workflowId: params?.subActionParams?.workflowId || 'unknown',
             spaceId,
             summaryMode: params?.subActionParams?.summaryMode ?? true,
+            alertStates: resolveAlertStates(params?.subActionParams?.alertStates),
           },
         };
       }

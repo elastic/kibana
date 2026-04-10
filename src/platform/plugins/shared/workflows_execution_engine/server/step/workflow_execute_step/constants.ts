@@ -34,9 +34,3 @@ export function getNextPollInterval(pollCount: number): string {
   );
   return `${nextInterval}s`;
 }
-
-/**
- * Maximum depth of nested workflow execution (workflow calling workflow).
- * Prevents infinite recursion and unbounded Task Manager usage.
- */
-export const MAX_WORKFLOW_DEPTH = 10;

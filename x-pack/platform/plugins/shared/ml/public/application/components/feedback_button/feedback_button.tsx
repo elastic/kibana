@@ -105,7 +105,7 @@ export const FeedBackButton: FC<Props> = ({ jobIds }) => {
       aria-label={FEEDBACK_BUTTON_DEFAULT_TEXT}
       href={href}
       size="s"
-      iconType={'popout'}
+      iconType="external"
       iconSide="right"
       target="_blank"
       data-test-subj={'mlFeatureFeedbackButton'}

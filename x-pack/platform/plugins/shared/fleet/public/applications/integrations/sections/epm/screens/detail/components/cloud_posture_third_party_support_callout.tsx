@@ -30,7 +30,7 @@ export const CloudPostureThirdPartySupportCallout = ({
     <>
       <EuiCallOut
         onDismiss={() => setUserHasDismissedWizCallout(true)}
-        iconType="cheer"
+        iconType="popper"
         title={i18n.translate('xpack.fleet.epm.wizIntegration.newFeaturesCallout', {
           defaultMessage:
             'New! Starting from version 2.0, ingest vulnerability and misconfiguration findings from Wiz into Elastic. Leverage out-of-the-box contextual investigation and threat-hunting workflows.',

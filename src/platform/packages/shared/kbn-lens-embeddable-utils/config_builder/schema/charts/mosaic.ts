@@ -9,9 +9,9 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { esqlColumnOperationWithLabelAndFormatSchema, esqlColumnSchema } from '../metric_ops';
+import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema } from '../color';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import {
   collapseBySchema,
   dslOnlyPanelInfoSchema,
@@ -19,12 +19,14 @@ import {
   legendTruncateAfterLinesSchema,
   sharedPanelInfoSchema,
 } from '../shared';
-import { legendNestedSchema, legendVisibleSchema, valueDisplaySchema } from './partition_shared';
+import { legendNestedSchema, valueDisplaySchema } from './partition_shared';
 import {
   legendSizeSchema,
+  legendVisibilitySchemaWithAuto,
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
+import { objectUnion } from './utils/object_union';
 import { groupIsNotCollapsed } from '../../utils';
 
 const mosaicStateSharedSchema = {
@@ -33,7 +35,7 @@ const mosaicStateSharedSchema = {
       {
         nested: legendNestedSchema,
         truncate_after_lines: legendTruncateAfterLinesSchema,
-        visible: legendVisibleSchema,
+        visibility: legendVisibilitySchemaWithAuto,
         size: legendSizeSchema,
       },
       {
@@ -45,7 +47,7 @@ const mosaicStateSharedSchema = {
       }
     )
   ),
-  value_display: valueDisplaySchema,
+  values: valueDisplaySchema,
 };
 
 const partitionStatePrimaryMetricOptionsSchema = {};
@@ -96,22 +98,15 @@ export const mosaicStateSchemaNoESQL = schema.object(
     type: schema.literal('mosaic'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetSchema,
+    ...dataSourceSchema,
     ...dslOnlyPanelInfoSchema,
     ...mosaicStateSharedSchema,
     ...dslOnlyPanelInfoSchema,
     /**
      * Primary value configuration, must define operation. Supports field-based operations (count, unique count, metrics, sum, last value, percentile, percentile ranks), reference-based operations (differences, moving average, cumulative sum, counter rate), and formula-like operations (static value, formula).
      */
-    metrics: schema.arrayOf(
-      mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
-        partitionStatePrimaryMetricOptionsSchema
-      ),
-      {
-        minSize: 1,
-        maxSize: 1,
-        meta: { description: 'Array of metric configurations (only 1 allowed)' },
-      }
+    metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
+      partitionStatePrimaryMetricOptionsSchema
     ),
     group_by: schema.maybe(
       schema.arrayOf(
@@ -155,39 +150,29 @@ export const mosaicStateSchemaESQL = schema.object(
     type: schema.literal('mosaic'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
+    ...dataSourceEsqlTableSchema,
     ...mosaicStateSharedSchema,
     /**
      * Primary value configuration, must define operation. In ES|QL mode, uses column-based configuration.
      */
-    metrics: schema.arrayOf(
-      esqlColumnOperationWithLabelAndFormatSchema.extends(
-        partitionStatePrimaryMetricOptionsSchema,
-        {
-          meta: {
-            description:
-              'Metric configuration for ES|QL mode, combining generic options, primary metric options, and column selection',
-          },
-        }
-      ),
-      {
-        minSize: 1,
-        maxSize: 1,
-        meta: { description: 'Array of metric configurations (only 1 allowed)' },
-      }
-    ),
+    metric: esqlColumnWithFormatSchema.extends(partitionStatePrimaryMetricOptionsSchema, {
+      meta: {
+        description:
+          'Metric configuration for ES|QL mode, combining generic options, primary metric options, and column selection',
+      },
+    }),
     /**
      * Configure how to break down the metric (e.g. show one metric per term). In ES|QL mode, uses column-based configuration.
      */
     group_by: schema.maybe(
-      schema.arrayOf(esqlColumnSchema.extends(partitionStateBreakdownByOptionsSchema), {
+      schema.arrayOf(esqlColumnWithFormatSchema.extends(partitionStateBreakdownByOptionsSchema), {
         minSize: 1,
         maxSize: 100,
         meta: { description: 'Array of breakdown dimensions (minimum 1)' },
       })
     ),
     group_breakdown_by: schema.maybe(
-      schema.arrayOf(esqlColumnSchema.extends(partitionStateBreakdownByOptionsSchema), {
+      schema.arrayOf(esqlColumnWithFormatSchema.extends(partitionStateBreakdownByOptionsSchema), {
         minSize: 1,
         maxSize: 100,
         meta: { description: 'Array of group breakdown dimensions (minimum 1)' },
@@ -205,7 +190,7 @@ export const mosaicStateSchemaESQL = schema.object(
   }
 );
 
-export const mosaicStateSchema = schema.oneOf([mosaicStateSchemaNoESQL, mosaicStateSchemaESQL], {
+export const mosaicStateSchema = objectUnion([mosaicStateSchemaNoESQL, mosaicStateSchemaESQL], {
   meta: {
     id: 'mosaicChart',
     title: 'Mosaic Chart',
