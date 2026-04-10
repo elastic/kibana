@@ -8,14 +8,13 @@
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiButton,
   EuiButtonIcon,
   EuiContextMenu,
-  EuiIcon,
   EuiPopover,
   EuiPopoverFooter,
   EuiToolTip,
 } from '@elastic/eui';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import {
   navigateToSettingsManagementApp,
   useAgentBuilderOptIn,
@@ -41,12 +40,12 @@ export function ChatActionsMenu({
   connectors,
   disabled,
   isConversationApp,
-  navigateToConnectorsManagementApp,
+  navigateToModelManagementApp,
 }: {
   connectors: UseGenAIConnectorsResult;
   disabled: boolean;
   isConversationApp: boolean;
-  navigateToConnectorsManagementApp: (application: ApplicationStart) => void;
+  navigateToModelManagementApp: (application: ApplicationStart) => void;
 }) {
   const { application, http, triggersActionsUi, docLinks } = useKibana().services;
   const knowledgeBase = useKnowledgeBase();
@@ -125,7 +124,7 @@ export function ChatActionsMenu({
       name: (
         <div className="eui-textTruncate">
           {i18n.translate('xpack.aiAssistant.chatHeader.actions.connector', {
-            defaultMessage: 'Connector',
+            defaultMessage: 'Model',
           })}{' '}
           <strong>
             {
@@ -147,21 +146,21 @@ export function ChatActionsMenu({
           {
             renderItem: () => (
               <EuiPopoverFooter paddingSize="s">
-                <EuiButton
+                <AiButton
                   fullWidth
                   size="s"
-                  color="accent"
+                  variant="base"
+                  iconType="productAgent"
                   style={{ marginInlineStart: 'auto' }}
                   onClick={() => {
                     toggleActionsMenu();
                     openAgentBuilderConfirmationModal();
                   }}
                 >
-                  <EuiIcon type="productAgent" size="m" />
                   {i18n.translate('xpack.aiAssistant.chatHeader.actions.agentBuilderOptInButton', {
                     defaultMessage: 'Try AI Agent',
                   })}
-                </EuiButton>
+                </AiButton>
               </EuiPopoverFooter>
             ),
           },
@@ -213,7 +212,7 @@ export function ChatActionsMenu({
                 id: 1,
                 width: 256,
                 title: i18n.translate('xpack.aiAssistant.chatHeader.actions.connector', {
-                  defaultMessage: 'Connector',
+                  defaultMessage: 'Model',
                 }),
                 content: (
                   <ConnectorSelectable
@@ -231,7 +230,7 @@ export function ChatActionsMenu({
                     }}
                     onManageConnectorsClick={() => {
                       toggleActionsMenu();
-                      navigateToConnectorsManagementApp(application!);
+                      navigateToModelManagementApp(application!);
                     }}
                   />
                 ),
