@@ -47,7 +47,7 @@ export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
         isLoading={isLoading}
         isEmpty={!skill}
         title={skill?.name ?? skillId}
-        showAutoIcon={isAutoIncluded}
+        isReadOnly={skill?.readonly ?? false}
         headerContent={
           <>
             <EuiText
