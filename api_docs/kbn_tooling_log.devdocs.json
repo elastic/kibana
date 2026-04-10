@@ -1020,6 +1020,43 @@
     "functions": [
       {
         "parentPluginId": "@kbn/tooling-log",
+        "id": "def-common.getLogLevelFlagHelpItems",
+        "type": "Function",
+        "tags": [],
+        "label": "getLogLevelFlagHelpItems",
+        "description": [],
+        "signature": [
+          "(defaultLogLevel: string) => { flag: string; description: string; }[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.getLogLevelFlagHelpItems.$1",
+            "type": "string",
+            "tags": [],
+            "label": "defaultLogLevel",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/tooling-log",
         "id": "def-common.getLogLevelFlagsHelp",
         "type": "Function",
         "tags": [],
@@ -1029,7 +1066,7 @@
           "(defaultLogLevel: string) => string"
         ],
         "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
-        "lineNumber": 52,
+        "lineNumber": 46,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1045,7 +1082,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
-            "lineNumber": 52,
+            "lineNumber": 46,
             "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
@@ -1066,7 +1103,7 @@
           "(name: \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\") => { name: \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\"; flags: { info: boolean; error: boolean; success: boolean; warning: boolean; debug: boolean; verbose: boolean; silent: boolean; }; }"
         ],
         "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
-        "lineNumber": 60,
+        "lineNumber": 55,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1082,7 +1119,7 @@
               "\"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\""
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
-            "lineNumber": 60,
+            "lineNumber": 55,
             "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
@@ -1514,7 +1551,7 @@
         "label": "LOG_LEVEL_FLAGS",
         "description": [],
         "signature": [
-          "{ name: \"info\" | \"debug\" | \"verbose\" | \"silent\" | \"quiet\"; help: string; }[]"
+          "{ name: \"info\" | \"debug\" | \"verbose\" | \"silent\" | \"quiet\"; flag: string; description: string; }[]"
         ],
         "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
         "lineNumber": 26,
@@ -1551,7 +1588,7 @@
           "{ name: \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\"; flags: { info: boolean; error: boolean; success: boolean; warning: boolean; debug: boolean; verbose: boolean; silent: boolean; }; }"
         ],
         "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
-        "lineNumber": 58,
+        "lineNumber": 53,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

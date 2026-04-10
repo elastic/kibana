@@ -14,16 +14,50 @@ import { isCiEnvironment } from './utils';
 // each sample represents a meaningful slice of elapsed time.
 const EXTRACT_RENDER_INTERVAL_MS = 250;
 
+// How often to emit a plain-text progress line in non-TTY environments.
+const LOG_PROGRESS_INTERVAL_MS = 5_000;
+
+/**
+ * Returns true when stdout is an interactive terminal that can render progress
+ * bars. False when stdout is piped (e.g. agents, CI redirects) — in that case
+ * the caller should emit plain log lines instead.
+ *
+ * Note: this is process.stdout.isTTY, not process.env.isTTY.
+ */
+function isInteractiveTty(): boolean {
+  return Boolean(process.stdout.isTTY);
+}
+
 /**
  * Creates a cli-progress bar for the extraction phase.
  * Returns an `update(n)` function to call with the running entry count and a
  * `stop()` to call on completion. Both are no-ops on CI.
+ *
+ * In non-TTY environments (e.g. agents), emits periodic log lines via `logInfo`
+ * instead of rendering a progress bar.
  */
 export const createExtractionProgressBar = (
-  total: number
+  total: number,
+  logInfo?: (msg: string) => void
 ): { update: (extracted: number) => void; stop: () => void } => {
-  if (isCiEnvironment() || total === 0) {
+  if (total === 0) {
     return { update: () => {}, stop: () => {} };
+  }
+
+  if (!isInteractiveTty() || isCiEnvironment()) {
+    let lastLogTime = Date.now();
+
+    return {
+      update: (extracted: number) => {
+        const now = Date.now();
+        if (logInfo && now - lastLogTime >= LOG_PROGRESS_INTERVAL_MS) {
+          lastLogTime = now;
+          const pct = Math.round((extracted / total) * 100);
+          logInfo(`[Cache] Extracting: ${extracted} / ${total} files (${pct}%)`);
+        }
+      },
+      stop: () => {},
+    };
   }
 
   const bar = new SingleBar({
@@ -59,12 +93,33 @@ export const createExtractionProgressBar = (
 /**
  * Creates a cli-progress bar for the per-project selective restore phase.
  * Increments by one project at a time. No-op on CI.
+ *
+ * In non-TTY environments (e.g. agents), emits periodic log lines via `logInfo`
+ * instead of rendering a progress bar.
  */
 export const createProjectRestoreProgressBar = (
-  total: number
+  total: number,
+  logInfo?: (msg: string) => void
 ): { increment: () => void; stop: () => void } => {
-  if (isCiEnvironment() || total === 0) {
+  if (total === 0) {
     return { increment: () => {}, stop: () => {} };
+  }
+
+  if (!isInteractiveTty() || isCiEnvironment()) {
+    let count = 0;
+    let lastLogTime = Date.now();
+
+    return {
+      increment: () => {
+        count++;
+        const now = Date.now();
+        if (logInfo && now - lastLogTime >= LOG_PROGRESS_INTERVAL_MS) {
+          lastLogTime = now;
+          logInfo(`[Cache] Restoring projects: ${count} / ${total}`);
+        }
+      },
+      stop: () => {},
+    };
   }
 
   const bar = new SingleBar({
@@ -94,31 +149,69 @@ export function formatBytes(bytes: number): string {
  * Creates a passthrough Transform stream that tracks bytes received and drives
  * a `cli-progress` bar. On CI the bar is suppressed; `stop()` is always safe
  * to call regardless.
+ *
+ * In non-TTY environments (e.g. agents), emits periodic log lines via `logInfo`
+ * instead of rendering a progress bar.
  */
 export const createDownloadProgressBar = (
-  contentLength: number | undefined
+  contentLength: number | undefined,
+  logInfo?: (msg: string) => void
 ): { meter: Transform; stop: () => void } => {
   const total = contentLength ?? 0;
-  const showBar = !isCiEnvironment();
 
-  let bar: SingleBar | undefined;
+  if (!isInteractiveTty() || isCiEnvironment()) {
+    // Non-TTY or CI: emit periodic log lines rather than an in-place bar.
+    let bytesReceived = 0;
+    let lastLogTime = Date.now();
+    let lastLogBytes = 0;
 
-  if (showBar) {
-    // When content-length is known show a proper progress bar with percentage.
-    // When unknown (e.g. selective restore streamed on-the-fly) show only
-    // bytes-received and speed so the display is never falsely at 100%.
-    const format = total
-      ? ' Downloading [{bar}] {percentage}% | {received}/{size} | {speed}/s'
-      : ' Downloading {received} | {speed}/s';
+    const meter = new Transform({
+      transform(chunk, _encoding, callback) {
+        bytesReceived += chunk.length;
 
-    bar = new SingleBar({ barsize: 30, format, hideCursor: true, clearOnComplete: true });
+        if (logInfo) {
+          const now = Date.now();
+          const elapsedMs = now - lastLogTime;
 
-    bar.start(total || 1, 0, {
-      received: formatBytes(0),
-      size: total ? formatBytes(total) : '?',
-      speed: '?',
+          if (elapsedMs >= LOG_PROGRESS_INTERVAL_MS) {
+            const speed =
+              elapsedMs > 0 ? Math.round(((bytesReceived - lastLogBytes) / elapsedMs) * 1000) : 0;
+            lastLogTime = now;
+            lastLogBytes = bytesReceived;
+
+            const received = formatBytes(bytesReceived);
+            const speedStr = speed > 0 ? ` at ${formatBytes(speed)}/s` : '';
+            const progress = total
+              ? `${received} / ${formatBytes(total)} (${Math.round(
+                  (bytesReceived / total) * 100
+                )}%)`
+              : received;
+
+            logInfo(`[Cache] Downloading: ${progress}${speedStr}`);
+          }
+        }
+
+        callback(null, chunk);
+      },
     });
+
+    return { meter, stop: () => {} };
   }
+
+  // When content-length is known show a proper progress bar with percentage.
+  // When unknown (e.g. selective restore streamed on-the-fly) show only
+  // bytes-received and speed so the display is never falsely at 100%.
+  const format = total
+    ? ' Downloading [{bar}] {percentage}% | {received}/{size} | {speed}/s'
+    : ' Downloading {received} | {speed}/s';
+
+  const bar = new SingleBar({ barsize: 30, format, hideCursor: true, clearOnComplete: true });
+
+  bar.start(total || 1, 0, {
+    received: formatBytes(0),
+    size: total ? formatBytes(total) : '?',
+    speed: '?',
+  });
 
   let bytesReceived = 0;
   let lastUpdate = Date.now();
@@ -128,30 +221,28 @@ export const createDownloadProgressBar = (
     transform(chunk, _encoding, callback) {
       bytesReceived += chunk.length;
 
-      if (bar) {
-        const now = Date.now();
-        const elapsed = now - lastUpdate;
+      const now = Date.now();
+      const elapsed = now - lastUpdate;
 
-        if (elapsed >= SPEED_WINDOW_MS) {
-          const speed = Math.round(((bytesReceived - lastBytes) / elapsed) * 1000);
-          lastUpdate = now;
-          lastBytes = bytesReceived;
+      if (elapsed >= SPEED_WINDOW_MS) {
+        const speed = Math.round(((bytesReceived - lastBytes) / elapsed) * 1000);
+        lastUpdate = now;
+        lastBytes = bytesReceived;
 
-          // When total is unknown keep position at 0 — only the payload
-          // tokens (received, speed) carry meaningful information.
-          bar.update(total ? bytesReceived : 0, {
-            received: formatBytes(bytesReceived),
-            size: total ? formatBytes(total) : '?',
-            speed: formatBytes(speed),
-          });
-        }
+        // When total is unknown keep position at 0 — only the payload
+        // tokens (received, speed) carry meaningful information.
+        bar.update(total ? bytesReceived : 0, {
+          received: formatBytes(bytesReceived),
+          size: total ? formatBytes(total) : '?',
+          speed: formatBytes(speed),
+        });
       }
 
       callback(null, chunk);
     },
   });
 
-  const stop = () => bar?.stop();
+  const stop = () => bar.stop();
 
   return { meter, stop };
 };
