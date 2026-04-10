@@ -6,7 +6,14 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiListGroup, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiListGroup,
+  EuiListGroupItem,
+  EuiPopover,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { css } from '@emotion/react';
@@ -21,6 +28,10 @@ export interface AlertEpisodeActionsProps {
   groupHash?: string;
   episodeAction?: EpisodeActionState;
   groupAction?: AlertEpisodeGroupAction;
+  /**
+   * When set, "Open in Discover" appears in the more-actions menu (the rule query must exist).
+   */
+  openInDiscoverHref?: string;
   /**
    * When set, "View details" is an anchor link (pass a base-path-prefixed app URL from the embedding plugin).
    */
@@ -48,6 +59,7 @@ export function AlertEpisodeActions({
   episodeAction,
   groupAction,
   http,
+  openInDiscoverHref,
   viewDetailsHref,
   buttonsOutlined = true,
 }: AlertEpisodeActionsProps) {
@@ -122,6 +134,18 @@ export function AlertEpisodeActions({
               groupHash={groupHash}
               http={http}
             />
+            {openInDiscoverHref && (
+              <EuiListGroupItem
+                label={i18n.translate('xpack.alertingV2.episodesUi.actions.openInDiscover', {
+                  defaultMessage: 'Open in Discover',
+                })}
+                size="s"
+                iconType="discoverApp"
+                href={openInDiscoverHref}
+                onClick={() => setIsMoreOpen(false)}
+                data-test-subj="alertingEpisodeOpenInDiscoverButton"
+              />
+            )}
           </EuiListGroup>
         </EuiPopover>
       </EuiFlexItem>

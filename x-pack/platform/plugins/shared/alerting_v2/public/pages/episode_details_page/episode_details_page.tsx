@@ -56,6 +56,7 @@ import { CenterJustifiedSpinner } from '../../components/center_justified_spinne
 import { paths } from '../../constants';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
 
 const EpisodeLifecycleHeatmap = React.lazy(() =>
   import('./components/episode_lifecycle_heatmap').then((module) => ({
@@ -197,12 +198,27 @@ export function EpisodeDetailsPage() {
   const triggeredAt = useMemo(() => getTriggeredTimestamp(eventRows), [eventRows]);
   const durationMs = useMemo(() => getEpisodeDurationMs(eventRows), [eventRows]);
 
+  const episodeIsoTimestamp = triggeredAt ?? eventRows[0]?.['@timestamp'];
+
   const runbookArtifact = useMemo(
     () => rule?.artifacts?.find((artifact) => artifact.type === 'runbook'),
     [rule?.artifacts]
   );
 
   const ruleOverviewEsql = useMemo(() => (rule ? formatRuleEvaluationEsql(rule) : ''), [rule]);
+
+  const openInDiscoverHref = useMemo(() => {
+    if (!rule) {
+      return undefined;
+    }
+    return getDiscoverHrefForRuleAndEpisodeTimestamp({
+      share: services.share,
+      application: services.application,
+      uiSettings: services.uiSettings,
+      ruleEsql: rule.evaluation?.query?.base,
+      episodeIsoTimestamp,
+    });
+  }, [episodeIsoTimestamp, rule, services.application, services.share, services.uiSettings]);
 
   const ruleKindLabel =
     rule?.kind === 'signal'
@@ -551,6 +567,7 @@ export function EpisodeDetailsPage() {
                 episodeAction={episodeAction}
                 groupAction={groupAction}
                 http={http}
+                openInDiscoverHref={openInDiscoverHref}
                 buttonsOutlined={false}
               />,
             ]}
