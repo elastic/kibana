@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ResilientParamsFields from './resilient_params';
 import { useGetIncidentTypes } from './use_get_incident_types';
@@ -105,7 +105,7 @@ describe('ResilientParamsFields renders', () => {
   test('it disabled the fields when loading issue types', () => {
     useGetIncidentTypesMock.mockReturnValue({ ...useGetIncidentTypesResponse, isLoading: true });
     render(<ResilientParamsFields {...defaultProps} />);
-    const comboBoxInput = screen.getByTestId('incidentTypeComboBox').querySelector('input');
+    const comboBoxInput = within(screen.getByTestId('incidentTypeComboBox')).getByRole('combobox');
     expect(comboBoxInput).toBeDisabled();
   });
 
@@ -188,7 +188,7 @@ describe('ResilientParamsFields renders', () => {
 
     test('incidentTypeComboBox creation triggers editAction', async () => {
       render(<ResilientParamsFields {...defaultProps} />);
-      const input = screen.getByTestId('incidentTypeComboBox').querySelector('input')!;
+      const input = within(screen.getByTestId('incidentTypeComboBox')).getByRole('combobox');
       await userEvent.click(input);
       await userEvent.type(input, 'Malware');
       const option = await screen.findByText('Malware');
@@ -211,7 +211,7 @@ describe('ResilientParamsFields renders', () => {
         },
       };
       render(<ResilientParamsFields {...newProps} />);
-      const input = screen.getByTestId('incidentTypeComboBox').querySelector('input')!;
+      const input = within(screen.getByTestId('incidentTypeComboBox')).getByRole('combobox');
       // Trigger blur without selection to verify empty incidentTypes
       await userEvent.click(input);
       await userEvent.tab();

@@ -29,26 +29,26 @@ describe('RuleTagBadge', () => {
   });
 
   it('can open and close the popover', async () => {
-    const { rerender, baseElement } = render(
+    const { rerender } = render(
       <RuleTagBadge isOpen={false} tags={tags} onClick={onClickMock} onClose={onCloseMock} />
     );
 
-    expect(baseElement.querySelector('[data-test-subj="ruleTagBadgeItem-a"]')).toBe(null);
-    expect(baseElement.querySelector('[data-test-subj="ruleTagBadgeItem-b"]')).toBe(null);
-    expect(baseElement.querySelector('[data-test-subj="ruleTagBadgeItem-c"]')).toBe(null);
+    expect(screen.queryByTestId('ruleTagBadgeItem-a')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ruleTagBadgeItem-b')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ruleTagBadgeItem-c')).not.toBeInTheDocument();
 
-    await userEvent.click(baseElement.querySelector('[data-test-subj="ruleTagBadge"]')!);
+    await userEvent.click(screen.getByTestId('ruleTagBadge'));
     expect(onClickMock).toHaveBeenCalledTimes(1);
 
     rerender(
       <RuleTagBadge isOpen={true} tags={tags} onClick={onClickMock} onClose={onCloseMock} />
     );
 
-    expect(baseElement.querySelector('[data-test-subj="ruleTagBadgeItem-a"]')).toBeTruthy();
-    expect(baseElement.querySelector('[data-test-subj="ruleTagBadgeItem-b"]')).toBeTruthy();
-    expect(baseElement.querySelector('[data-test-subj="ruleTagBadgeItem-c"]')).toBeTruthy();
+    expect(screen.getByTestId('ruleTagBadgeItem-a')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleTagBadgeItem-b')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleTagBadgeItem-c')).toBeInTheDocument();
 
-    await userEvent.click(baseElement.querySelector('[data-test-subj="ruleTagBadge"]')!);
+    await userEvent.click(screen.getByTestId('ruleTagBadge'));
     expect(onClickMock).toHaveBeenCalledTimes(2);
   });
 

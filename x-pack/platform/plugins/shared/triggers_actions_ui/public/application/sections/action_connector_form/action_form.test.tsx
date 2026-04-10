@@ -619,7 +619,7 @@ describe('action_form', () => {
       // Confirm the selected connector is test3 (Preconfigured Only), not test4
       expect(within(combobox).getByRole('combobox')).toHaveValue('Preconfigured Only');
       expect(
-        document.querySelector('[data-test-subj="dropdown-connector-test4"]')
+        screen.queryByTestId('dropdown-connector-test4')
       ).not.toBeInTheDocument();
     });
 

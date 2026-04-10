@@ -209,9 +209,9 @@ describe('TinesParamsFields renders', () => {
         within(screen.getByTestId('tines-storySelector')).getByTestId('comboBoxToggleListButton')
       );
       // Select the story option
-      const storyOption = screen
-        .getByTestId(/tines-storySelector-optionsList/)
-        .querySelectorAll('button')[0];
+      const storyOption = within(
+        screen.getByTestId(/tines-storySelector-optionsList/)
+      ).getAllByRole('option')[0];
       await userEvent.click(storyOption);
 
       expect(
@@ -251,7 +251,7 @@ describe('TinesParamsFields renders', () => {
         within(screen.getByTestId('tines-storySelector')).getByTestId('comboBoxToggleListButton')
       );
       await userEvent.click(
-        screen.getByTestId(/tines-storySelector-optionsList/).querySelectorAll('button')[0]
+        within(screen.getByTestId(/tines-storySelector-optionsList/)).getAllByRole('option')[0]
       );
 
       expect(mockEditAction).toHaveBeenCalledWith(
@@ -265,7 +265,7 @@ describe('TinesParamsFields renders', () => {
         within(screen.getByTestId('tines-webhookSelector')).getByTestId('comboBoxToggleListButton')
       );
       await userEvent.click(
-        screen.getByTestId(/tines-webhookSelector-optionsList/).querySelectorAll('button')[0]
+        within(screen.getByTestId(/tines-webhookSelector-optionsList/)).getAllByRole('option')[0]
       );
 
       expect(mockEditAction).toHaveBeenCalledWith('subActionParams', { webhook }, index);
