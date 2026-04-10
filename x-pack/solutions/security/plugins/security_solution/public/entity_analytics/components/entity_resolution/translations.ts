@@ -94,7 +94,22 @@ export const ADD_ENTITY_BUTTON = i18n.translate(
 
 export const ENTITY_RESOLVED_TOAST = i18n.translate(
   'xpack.securitySolution.entityResolution.entityResolved',
-  { defaultMessage: 'Entity resolved' }
+  { defaultMessage: 'Entity was resolved' }
+);
+
+export const ENTITY_RESOLVED_TOAST_TEXT = i18n.translate(
+  'xpack.securitySolution.entityResolution.entityResolvedText',
+  { defaultMessage: 'Resolution group risk score will be recalculated within 1 hour.' }
+);
+
+export const RESOLUTION_GROUP_CREATED_TOAST = i18n.translate(
+  'xpack.securitySolution.entityResolution.groupCreated',
+  { defaultMessage: 'Resolution group was created' }
+);
+
+export const RESOLUTION_GROUP_CREATED_TOAST_TEXT = i18n.translate(
+  'xpack.securitySolution.entityResolution.groupCreatedText',
+  { defaultMessage: 'Resolution group risk score will be calculated within 1 hour.' }
 );
 
 export const ENTITY_REMOVED_TOAST = i18n.translate(

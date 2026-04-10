@@ -30,6 +30,8 @@ import {
   RESOLUTION_ERROR_TITLE,
   ENTITY_HAS_ALIASES_ERROR,
   GROUP_RISK_SCORE_LABEL,
+  RESOLUTION_GROUP_CREATED_TOAST,
+  RESOLUTION_GROUP_CREATED_TOAST_TEXT,
 } from './translations';
 import { RESOLUTION_GROUP_TAB_CONTENT_TEST_ID } from './test_ids';
 import { RiskScoreCell } from '../home/entities_table/risk_score_cell';
@@ -45,6 +47,12 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId
   const { openFlyout } = useExpandableFlyoutApi();
   const { data: group, isLoading, isFetching, isError } = useResolutionGroup(entityId);
   const linkEntities = useLinkEntities();
+  const createGroup = useLinkEntities({
+    successToast: {
+      title: RESOLUTION_GROUP_CREATED_TOAST,
+      text: RESOLUTION_GROUP_CREATED_TOAST_TEXT,
+    },
+  });
   const unlinkEntities = useUnlinkEntities();
 
   const [modalState, setModalState] = useState<{
@@ -142,7 +150,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId
 
   const handleConfirmResolution = useCallback(
     (targetId: string, aliasId: string) => {
-      linkEntities.mutate(
+      createGroup.mutate(
         { target_id: targetId, entity_ids: [aliasId] },
         {
           onSuccess: () => {
@@ -151,7 +159,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId
         }
       );
     },
-    [linkEntities]
+    [createGroup]
   );
 
   const handleCancelModal = useCallback(() => {
@@ -218,7 +226,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId
           newEntity={modalState.newEntity}
           onConfirm={handleConfirmResolution}
           onCancel={handleCancelModal}
-          isLoading={linkEntities.isLoading}
+          isLoading={createGroup.isLoading}
         />
       )}
     </>
