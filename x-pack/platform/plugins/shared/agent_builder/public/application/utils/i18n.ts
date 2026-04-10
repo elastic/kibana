@@ -13,6 +13,11 @@ export const labels = {
       defaultMessage: 'Optional',
     }),
   },
+  customizeLandingEmptyState: {
+    learnMore: i18n.translate('xpack.agentBuilder.customizeLandingEmptyState.learnMore', {
+      defaultMessage: 'Learn more',
+    }),
+  },
   conversations: {
     title: i18n.translate('xpack.agentBuilder.conversations.title', {
       defaultMessage: 'Agent Chat',
