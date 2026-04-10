@@ -64,7 +64,10 @@ const getChartDebugState = async (page: ScoutPage, panelIndex: number) => {
   return debugState ? (JSON.parse(debugState) as DebugState) : null;
 };
 
+const DEBUG_SCREENSHOT_DIR = '.scout/test-artifacts';
+
 const createBaseXYCharts = async (
+  page: ScoutPage,
   pageObjects: PageObjects,
   filterBar: PageObjects['filterBar']
 ) => {
@@ -78,9 +81,12 @@ const createBaseXYCharts = async (
     },
   });
   await pageObjects.lens.saveAndReturn();
+  await page.screenshot({ path: `${DEBUG_SCREENSHOT_DIR}/debug-after-save-and-return.png` });
   await pageObjects.dashboard.waitForPanelsToLoad(1);
   await pageObjects.dashboard.waitForRenderComplete();
+  await page.screenshot({ path: `${DEBUG_SCREENSHOT_DIR}/debug-after-render-complete.png` });
 
+  await page.screenshot({ path: `${DEBUG_SCREENSHOT_DIR}/debug-before-second-panel.png` });
   await pageObjects.dashboard.openNewLensPanel();
   await pageObjects.lens.configureXYDimensions({
     y: { operation: 'count' },
@@ -121,7 +127,7 @@ spaceTest.describe('Sync colors', { tag: tags.deploymentAgnostic }, () => {
     'should sync colors on dashboard for legacy default palette',
     async ({ page, pageObjects, pageObjects: { filterBar } }) => {
       await spaceTest.step('create xy charts with legacy palette', async () => {
-        await createBaseXYCharts(pageObjects, filterBar);
+        await createBaseXYCharts(page, pageObjects, filterBar);
       });
 
       await spaceTest.step('enable sync colors and compare mappings', async () => {
@@ -171,7 +177,7 @@ spaceTest.describe('Sync colors', { tag: tags.deploymentAgnostic }, () => {
 
   spaceTest('should be possible to disable color sync', async ({ page, pageObjects }) => {
     await spaceTest.step('create xy charts with legacy palette', async () => {
-      await createBaseXYCharts(pageObjects, pageObjects.filterBar);
+      await createBaseXYCharts(page, pageObjects, pageObjects.filterBar);
     });
 
     await spaceTest.step('disable sync colors', async () => {
