@@ -130,6 +130,12 @@ export class ImportResolver {
       return true;
     }
 
+    // @cypress/grep v5 uses package.json "exports" which Resolve.sync doesn't support.
+    // These imports only run in Cypress's Node.js context, not in Kibana's webpack build.
+    if (req === '@cypress/grep' || req.startsWith('@cypress/grep/')) {
+      return true;
+    }
+
     return false;
   }
 
@@ -145,6 +151,12 @@ export class ImportResolver {
     if (req.startsWith('@modelcontextprotocol/sdk')) {
       const relPath = req.split('@modelcontextprotocol/sdk')[1];
       return Path.resolve(REPO_ROOT, `node_modules/@modelcontextprotocol/sdk/dist/esm/${relPath}`);
+    }
+
+    // We need this "hack" because our current import-resolver doesn't support "exports" in package.json.
+    if (req.startsWith('@langchain/langgraph/')) {
+      const subPath = req.slice('@langchain/langgraph/'.length);
+      return Path.resolve(REPO_ROOT, `node_modules/@langchain/langgraph/dist/${subPath}/index.js`);
     }
 
     // We need this "hack" because our current import-resolver doesn't support "exports" in package.json.

@@ -145,6 +145,7 @@ enabled:
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group3/config.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group4/config.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group5/config.ts
+  - x-pack/platform/test/alerting_api_integration/security_and_spaces/group17/config.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group3/config_with_schedule_circuit_breaker.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group2/config_non_dedicated_task_runner.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group4/config_non_dedicated_task_runner.ts
@@ -291,12 +292,14 @@ enabled:
   - x-pack/platform/test/security_api_integration/http_no_auth_providers.config.ts
   - x-pack/platform/test/security_api_integration/kerberos_anonymous_access.config.ts
   - x-pack/platform/test/security_api_integration/kerberos.config.ts
+  - x-pack/platform/test/security_api_integration/kerberos.http2.config.ts
   - x-pack/platform/test/security_api_integration/login_selector.config.ts
   - x-pack/platform/test/security_api_integration/oidc_implicit_flow.config.ts
   - x-pack/platform/test/security_api_integration/oidc.config.ts
   - x-pack/platform/test/security_api_integration/oidc.http2.config.ts
   - x-pack/platform/test/security_api_integration/oidc_multiple_realms.config.ts
   - x-pack/platform/test/security_api_integration/pki.config.ts
+  - x-pack/platform/test/security_api_integration/pki.http2.config.ts
   - x-pack/platform/test/security_api_integration/saml.config.ts
   - x-pack/platform/test/security_api_integration/saml.http2.config.ts
   - x-pack/platform/test/security_api_integration/saml_cloud.config.ts

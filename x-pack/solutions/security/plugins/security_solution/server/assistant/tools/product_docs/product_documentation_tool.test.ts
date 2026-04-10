@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RetrievalQAChain } from 'langchain/chains';
+import type { RetrievalQAChain } from '@langchain/classic/chains';
 import type { DynamicStructuredTool, DynamicTool } from '@langchain/core/tools';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
