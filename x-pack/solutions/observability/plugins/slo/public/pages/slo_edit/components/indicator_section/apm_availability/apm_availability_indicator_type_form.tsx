@@ -24,7 +24,9 @@ import { getGroupByCardinalityFilters } from '../apm_common/get_group_by_cardina
 
 export function ApmAvailabilityIndicatorTypeForm() {
   const { watch } = useFormContext<CreateSLOForm<APMTransactionErrorRateIndicator>>();
-  const { data: apmIndex } = useFetchApmIndex();
+  const {
+    data: { metric: apmIndex },
+  } = useFetchApmIndex();
   const dataViewId = watch(DATA_VIEW_FIELD);
 
   const [
