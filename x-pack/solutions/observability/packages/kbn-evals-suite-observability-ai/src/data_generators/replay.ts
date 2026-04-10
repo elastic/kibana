@@ -6,11 +6,14 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { createGcsRepository, replaySnapshot, type LoadResult } from '@kbn/es-snapshot-loader';
+import {
+  createGcsRepository,
+  replaySnapshot,
+  TEMP_INDEX_PREFIX,
+  type LoadResult,
+} from '@kbn/es-snapshot-loader';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { GcsConfig } from '../scenarios/types';
-
-const TEMP_INDEX_PREFIX = 'snapshot-loader-temp-';
 
 async function deleteStaleTemporaryIndices(esClient: Client, log: ToolingLog): Promise<void> {
   let staleIndices: string[];
