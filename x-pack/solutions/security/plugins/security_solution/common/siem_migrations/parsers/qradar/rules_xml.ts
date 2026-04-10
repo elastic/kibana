@@ -13,8 +13,7 @@ import type { QradarRule, ResourceDetailType, ResourceTypeMap } from './types';
 // Matches double-encoded entities (e.g. &amp;quot;) first, then single-encoded.
 // Longer patterns must come first so the regex engine prefers them over the
 // shorter &amp; match, decoding both layers in a single atomic pass.
-const ENTITY_PATTERN =
-  /&amp;(?:lt|gt|amp|quot|apos|#39);|&(?:lt|gt|amp|quot|apos|#39);/g;
+const ENTITY_PATTERN = /&amp;(?:lt|gt|amp|quot|apos|#39);|&(?:lt|gt|amp|quot|apos|#39);/g;
 const ENTITY_MAP: Record<string, string> = {
   '&amp;lt;': '<',
   '&amp;gt;': '>',
