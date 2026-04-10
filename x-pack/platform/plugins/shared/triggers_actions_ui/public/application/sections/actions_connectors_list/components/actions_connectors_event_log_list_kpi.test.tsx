@@ -53,16 +53,14 @@ describe('actions_connectors_event_log_list_kpi', () => {
       />
     );
 
+    const successOutcome = screen.getByTestId('connectorEventLogKpi-successOutcome');
+    const warningOutcome = screen.getByTestId('connectorEventLogKpi-warningOutcome');
+    const failureOutcome = screen.getByTestId('connectorEventLogKpi-failureOutcome');
+
     // Initially shows placeholder values
-    expect(
-      within(screen.getByTestId('connectorEventLogKpi-successOutcome')).getByText('--')
-    ).toBeInTheDocument();
-    expect(
-      within(screen.getByTestId('connectorEventLogKpi-warningOutcome')).getByText('--')
-    ).toBeInTheDocument();
-    expect(
-      within(screen.getByTestId('connectorEventLogKpi-failureOutcome')).getByText('--')
-    ).toBeInTheDocument();
+    expect(within(successOutcome).getByText('--')).toBeInTheDocument();
+    expect(within(warningOutcome).getByText('--')).toBeInTheDocument();
+    expect(within(failureOutcome).getByText('--')).toBeInTheDocument();
 
     // Wait for the load to resolve
     await waitFor(() => {
@@ -76,22 +74,10 @@ describe('actions_connectors_event_log_list_kpi', () => {
 
     // After load, shows actual values
     await waitFor(() => {
-      expect(
-        within(screen.getByTestId('connectorEventLogKpi-successOutcome')).getByText(
-          `${mockKpiResponse.success}`
-        )
-      ).toBeInTheDocument();
+      expect(within(successOutcome).getByText(`${mockKpiResponse.success}`)).toBeInTheDocument();
     });
-    expect(
-      within(screen.getByTestId('connectorEventLogKpi-warningOutcome')).getByText(
-        `${mockKpiResponse.warning}`
-      )
-    ).toBeInTheDocument();
-    expect(
-      within(screen.getByTestId('connectorEventLogKpi-failureOutcome')).getByText(
-        `${mockKpiResponse.failure}`
-      )
-    ).toBeInTheDocument();
+    expect(within(warningOutcome).getByText(`${mockKpiResponse.warning}`)).toBeInTheDocument();
+    expect(within(failureOutcome).getByText(`${mockKpiResponse.failure}`)).toBeInTheDocument();
   });
 
   it('calls KPI API with filters', async () => {

@@ -38,10 +38,9 @@ describe('SlackActionFields renders', () => {
       </ConnectorFormTestProvider>
     );
 
-    expect(screen.getByTestId('slackWebhookUrlInput')).toBeInTheDocument();
-    expect((screen.getByTestId('slackWebhookUrlInput') as HTMLInputElement).value).toBe(
-      'http://test.com'
-    );
+    const slackWebhookUrlInput = screen.getByTestId('slackWebhookUrlInput') as HTMLInputElement;
+    expect(slackWebhookUrlInput).toBeInTheDocument();
+    expect(slackWebhookUrlInput.value).toBe('http://test.com');
   });
 
   describe('Validation', () => {
@@ -115,8 +114,9 @@ describe('SlackActionFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await userEvent.clear(screen.getByTestId('slackWebhookUrlInput'));
-      await userEvent.type(screen.getByTestId('slackWebhookUrlInput'), 'no-valid', {
+      const slackWebhookUrlInput = screen.getByTestId('slackWebhookUrlInput');
+      await userEvent.clear(slackWebhookUrlInput);
+      await userEvent.type(slackWebhookUrlInput, 'no-valid', {
         delay: 10,
       });
 

@@ -45,12 +45,12 @@ describe('PagerDutyParamsFields renders', () => {
         ]}
       />
     );
-    expect(screen.getByTestId('severitySelect')).toBeInTheDocument();
-    expect((screen.getByTestId('severitySelect') as HTMLSelectElement).value).toStrictEqual(
-      'critical'
-    );
-    expect(screen.getByTestId('dedupKeyInput')).toBeInTheDocument();
-    expect((screen.getByTestId('dedupKeyInput') as HTMLInputElement).value).toStrictEqual('test');
+    const severitySelect = screen.getByTestId('severitySelect') as HTMLSelectElement;
+    const dedupKeyInput = screen.getByTestId('dedupKeyInput') as HTMLInputElement;
+    expect(severitySelect).toBeInTheDocument();
+    expect(severitySelect.value).toStrictEqual('critical');
+    expect(dedupKeyInput).toBeInTheDocument();
+    expect(dedupKeyInput.value).toStrictEqual('test');
     expect(screen.getByTestId('eventActionSelect')).toBeInTheDocument();
     expect(screen.getByTestId('timestampInput')).toBeInTheDocument();
     expect(screen.getByTestId('componentInput')).toBeInTheDocument();
@@ -74,8 +74,9 @@ describe('PagerDutyParamsFields renders', () => {
         index={0}
       />
     );
-    expect(screen.getByTestId('eventActionSelect')).toBeInTheDocument();
-    expect((screen.getByTestId('eventActionSelect') as HTMLSelectElement).value).toStrictEqual('');
+    const eventActionSelect = screen.getByTestId('eventActionSelect') as HTMLSelectElement;
+    expect(eventActionSelect).toBeInTheDocument();
+    expect(eventActionSelect.value).toStrictEqual('');
   });
 
   test('params select fields do not auto set values severitySelect', () => {
@@ -92,8 +93,9 @@ describe('PagerDutyParamsFields renders', () => {
         index={0}
       />
     );
-    expect(screen.getByTestId('severitySelect')).toBeInTheDocument();
-    expect((screen.getByTestId('severitySelect') as HTMLSelectElement).value).toStrictEqual('');
+    const severitySelect = screen.getByTestId('severitySelect') as HTMLSelectElement;
+    expect(severitySelect).toBeInTheDocument();
+    expect(severitySelect.value).toStrictEqual('');
   });
 
   test('only eventActionSelect is available as a payload params for PagerDuty Resolve event', () => {
@@ -110,12 +112,12 @@ describe('PagerDutyParamsFields renders', () => {
         index={0}
       />
     );
-    expect(screen.getByTestId('dedupKeyInput')).toBeInTheDocument();
-    expect((screen.getByTestId('dedupKeyInput') as HTMLInputElement).value).toStrictEqual('test');
-    expect(screen.getByTestId('eventActionSelect')).toBeInTheDocument();
-    expect((screen.getByTestId('eventActionSelect') as HTMLSelectElement).value).toStrictEqual(
-      'resolve'
-    );
+    const dedupKeyInput = screen.getByTestId('dedupKeyInput') as HTMLInputElement;
+    const eventActionSelect = screen.getByTestId('eventActionSelect') as HTMLSelectElement;
+    expect(dedupKeyInput).toBeInTheDocument();
+    expect(dedupKeyInput.value).toStrictEqual('test');
+    expect(eventActionSelect).toBeInTheDocument();
+    expect(eventActionSelect.value).toStrictEqual('resolve');
     expect(screen.queryByTestId('timestampInput')).not.toBeInTheDocument();
     expect(screen.queryByTestId('componentInput')).not.toBeInTheDocument();
     expect(screen.queryByTestId('groupInput')).not.toBeInTheDocument();

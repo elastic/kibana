@@ -23,25 +23,20 @@ describe('RulesListAutoRefresh', () => {
       <RulesListAutoRefresh lastUpdate={moment('1990-01-01').format()} onRefresh={onRefresh} />
     );
 
-    expect(screen.getByTestId('rulesListAutoRefresh-lastUpdateText').textContent).toEqual(
-      'Updated a few seconds ago'
-    );
+    const lastUpdateText = screen.getByTestId('rulesListAutoRefresh-lastUpdateText');
+    expect(lastUpdateText.textContent).toEqual('Updated a few seconds ago');
 
     await act(async () => {
       jest.advanceTimersByTime(1 * 60 * 1000);
     });
 
-    expect(screen.getByTestId('rulesListAutoRefresh-lastUpdateText').textContent).toEqual(
-      'Updated a minute ago'
-    );
+    expect(lastUpdateText.textContent).toEqual('Updated a minute ago');
 
     await act(async () => {
       jest.advanceTimersByTime(1 * 60 * 1000);
     });
 
-    expect(screen.getByTestId('rulesListAutoRefresh-lastUpdateText').textContent).toEqual(
-      'Updated 2 minutes ago'
-    );
+    expect(lastUpdateText.textContent).toEqual('Updated 2 minutes ago');
 
     await act(async () => {
       jest.runOnlyPendingTimers();

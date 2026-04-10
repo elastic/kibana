@@ -29,10 +29,9 @@ describe('ServerLogParamsFields renders', () => {
       />
     );
     expect(editAction).not.toHaveBeenCalled();
-    expect(screen.getByTestId('loggingLevelSelect')).toBeInTheDocument();
-    expect((screen.getByTestId('loggingLevelSelect') as HTMLSelectElement).value).toStrictEqual(
-      'trace'
-    );
+    const loggingLevelSelect = screen.getByTestId('loggingLevelSelect') as HTMLSelectElement;
+    expect(loggingLevelSelect).toBeInTheDocument();
+    expect(loggingLevelSelect.value).toStrictEqual('trace');
     expect(screen.getByTestId('messageTextArea')).toBeInTheDocument();
   });
 

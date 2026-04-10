@@ -144,11 +144,12 @@ describe.skip('UpdateConnector renders', () => {
     const urlInput = screen.getByTestId('credentialsApiUrlFromInput');
     const usernameInput = screen.getByTestId('connector-servicenow-username-form-input');
     const passwordInput = screen.getByTestId('connector-servicenow-password-form-input');
+    const submitButton = screen.getByTestId('snUpdateInstallationSubmit');
 
     await userEvent.type(urlInput, 'https://example.com', { delay: 100 });
     await userEvent.type(usernameInput, 'user', { delay: 100 });
     await userEvent.type(passwordInput, 'pass', { delay: 100 });
-    await userEvent.click(screen.getByTestId('snUpdateInstallationSubmit'));
+    await userEvent.click(submitButton);
 
     // Wait for click event to be processed
     await waitFor(() => expect(onConfirm).toHaveBeenCalled(), { timeout: 3000 });
@@ -176,8 +177,9 @@ describe.skip('UpdateConnector renders', () => {
   it('should show error message if present', () => {
     const updateErrorMessage = 'some application error';
     renderUpdateConnector({ updateErrorMessage });
+    const applicationCallout = screen.getByTestId('snApplicationCallout');
 
-    expect(screen.getByTestId('snApplicationCallout')).toBeInTheDocument();
-    expect(screen.getByTestId('snApplicationCallout').textContent).toContain(updateErrorMessage);
+    expect(applicationCallout).toBeInTheDocument();
+    expect(applicationCallout.textContent).toContain(updateErrorMessage);
   });
 });

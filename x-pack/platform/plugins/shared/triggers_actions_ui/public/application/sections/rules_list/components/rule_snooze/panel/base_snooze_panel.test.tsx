@@ -106,8 +106,9 @@ describe('BaseSnoozePanel', () => {
     expect(screen.getByTestId('snoozePanel')).toBeInTheDocument();
     expect(screen.queryByTestId('ruleAddSchedule')).not.toBeInTheDocument();
     expect(screen.getByTestId('ruleRemoveAllSchedules')).toBeInTheDocument();
-    expect(screen.getByTestId('ruleSchedulesListAddButton')).toBeInTheDocument();
-    expect(screen.getByTestId('ruleSchedulesListAddButton')).not.toBeDisabled();
+    const ruleSchedulesListAddButton = screen.getByTestId('ruleSchedulesListAddButton');
+    expect(ruleSchedulesListAddButton).toBeInTheDocument();
+    expect(ruleSchedulesListAddButton).not.toBeDisabled();
 
     // The schedules list should contain 2 child items
     expect(screen.getByTestId('ruleSchedulesList').children.length).toEqual(2);
@@ -169,7 +170,8 @@ describe('BaseSnoozePanel', () => {
       />
     );
 
-    expect(screen.getByTestId('ruleSchedulesListAddButton')).toBeInTheDocument();
-    expect(screen.getByTestId('ruleSchedulesListAddButton')).toBeDisabled();
+    const ruleSchedulesListAddButton = screen.getByTestId('ruleSchedulesListAddButton');
+    expect(ruleSchedulesListAddButton).toBeInTheDocument();
+    expect(ruleSchedulesListAddButton).toBeDisabled();
   });
 });

@@ -325,9 +325,10 @@ describe('rule_details', () => {
         },
       });
       renderPage(rule);
-      expect(screen.getByTestId('ruleErrorBanner')).toBeInTheDocument();
-      expect(screen.getByTestId('ruleErrorBanner').textContent).toContain('Cannot run rule');
-      expect(screen.getByTestId('ruleErrorBanner').textContent).toContain('test');
+      const ruleErrorBanner = screen.getByTestId('ruleErrorBanner');
+      expect(ruleErrorBanner).toBeInTheDocument();
+      expect(ruleErrorBanner.textContent).toContain('Cannot run rule');
+      expect(ruleErrorBanner.textContent).toContain('test');
     });
 
     it('renders the rule warning banner with warning message, when rule status is a warning', () => {
@@ -343,8 +344,9 @@ describe('rule_details', () => {
         },
       });
       renderPage(rule);
-      expect(screen.getByTestId('ruleWarningBanner')).toBeInTheDocument();
-      expect(screen.getByTestId('ruleWarningBanner').textContent).toContain('warning message');
+      const ruleWarningBanner = screen.getByTestId('ruleWarningBanner');
+      expect(ruleWarningBanner).toBeInTheDocument();
+      expect(ruleWarningBanner.textContent).toContain('warning message');
     });
 
     it('displays a toast message when interval is less than configured minimum', async () => {

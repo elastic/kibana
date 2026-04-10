@@ -27,7 +27,8 @@ describe('SentinelOneParamsFields renders', () => {
         messageVariables={[]}
       />
     );
-    expect(screen.getByTestId('actionTypeSelect')).toBeInTheDocument();
-    expect(screen.getByTestId('actionTypeSelect')).toBeDisabled();
+    const actionTypeSelect = screen.getByTestId('actionTypeSelect');
+    expect(actionTypeSelect).toBeInTheDocument();
+    expect(actionTypeSelect).toBeDisabled();
   });
 });

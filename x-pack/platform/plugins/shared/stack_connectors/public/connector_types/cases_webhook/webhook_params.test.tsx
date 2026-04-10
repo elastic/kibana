@@ -54,10 +54,11 @@ describe('WebhookParamsFields renders', () => {
     expect(screen.getByTestId('titleInput')).toBeInTheDocument();
     expect(screen.getByTestId('descriptionTextArea')).toBeInTheDocument();
     expect(screen.getByTestId('tagsComboBox')).toBeInTheDocument();
-    expect(screen.getByTestId('commentsTextArea')).toBeInTheDocument();
+    const commentsTextArea = screen.getByTestId('commentsTextArea') as HTMLTextAreaElement;
+    expect(commentsTextArea).toBeInTheDocument();
     expect(screen.getByTestId('case-severity-selection')).toBeInTheDocument();
     expect(screen.getByTestId('case-status-filter')).toBeInTheDocument();
-    expect((screen.getByTestId('commentsTextArea') as HTMLTextAreaElement).disabled).toEqual(false);
+    expect(commentsTextArea.disabled).toEqual(false);
   });
 
   test('comments field is disabled when comment data is missing', () => {

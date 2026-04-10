@@ -53,10 +53,9 @@ describe('PagerDutyActionConnectorFields renders', () => {
       </ConnectorFormTestProvider>
     );
 
-    expect(screen.getByTestId('pagerdutyApiUrlInput')).toBeInTheDocument();
-    expect((screen.getByTestId('pagerdutyApiUrlInput') as HTMLInputElement).value).toBe(
-      'http://test.com'
-    );
+    const pagerdutyApiUrlInput = screen.getByTestId('pagerdutyApiUrlInput') as HTMLInputElement;
+    expect(pagerdutyApiUrlInput).toBeInTheDocument();
+    expect(pagerdutyApiUrlInput.value).toBe('http://test.com');
     expect(screen.getByTestId('pagerdutyRoutingKeyInput')).toBeInTheDocument();
   });
 

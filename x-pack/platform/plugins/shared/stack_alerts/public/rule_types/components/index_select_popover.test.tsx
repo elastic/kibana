@@ -122,11 +122,12 @@ describe('IndexSelectPopover', () => {
       </I18nProvider>
     );
 
-    expect(screen.getByTestId('selectIndexExpression')).toBeInTheDocument();
+    const selectIndexExpression = screen.getByTestId('selectIndexExpression');
+    expect(selectIndexExpression).toBeInTheDocument();
     expect(screen.queryByTestId('thresholdIndexesComboBox')).not.toBeInTheDocument();
     expect(screen.queryByTestId('thresholdAlertTimeFieldSelect')).not.toBeInTheDocument();
 
-    await userEvent.click(screen.getByTestId('selectIndexExpression'));
+    await userEvent.click(selectIndexExpression);
 
     await screen.findByTestId('thresholdIndexesComboBox');
     expect(screen.getByTestId('thresholdAlertTimeFieldSelect')).toBeInTheDocument();
@@ -139,20 +140,19 @@ describe('IndexSelectPopover', () => {
       </I18nProvider>
     );
 
-    expect(screen.getByTestId('selectIndexExpression')).toBeInTheDocument();
-    await userEvent.click(screen.getByTestId('selectIndexExpression'));
+    const selectIndexExpression = screen.getByTestId('selectIndexExpression');
+    expect(selectIndexExpression).toBeInTheDocument();
+    await userEvent.click(selectIndexExpression);
 
     await screen.findByTestId('thresholdIndexesComboBox');
 
-    const searchInput = screen.getByTestId('comboBoxSearchInput');
+    const searchInput = screen.getByTestId('comboBoxSearchInput') as HTMLInputElement;
     expect((searchInput as HTMLInputElement).value).toEqual('');
 
     await userEvent.type(searchInput, 'indexPattern1');
 
     await waitFor(() => {
-      expect((screen.getByTestId('comboBoxSearchInput') as HTMLInputElement).value).toEqual(
-        'indexPattern1'
-      );
+      expect(searchInput.value).toEqual('indexPattern1');
     });
 
     // Options should be loaded - click first available option in the combobox options list
@@ -186,9 +186,10 @@ describe('IndexSelectPopover', () => {
         <IndexSelectPopover {...indexSelectProps} />
       </I18nProvider>
     );
-    expect(screen.getByTestId('selectIndexExpression').textContent).toEqual(`index ${index}`);
+    const selectIndexExpression = screen.getByTestId('selectIndexExpression');
+    expect(selectIndexExpression.textContent).toEqual(`index ${index}`);
 
-    await userEvent.click(screen.getByTestId('selectIndexExpression'));
+    await userEvent.click(selectIndexExpression);
 
     await screen.findByTestId('thresholdAlertTimeFieldSelect');
 

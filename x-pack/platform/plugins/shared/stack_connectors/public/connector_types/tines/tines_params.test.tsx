@@ -81,21 +81,15 @@ describe('TinesParamsFields renders', () => {
 
       expect(screen.queryByTestId('tines-bodyJsonEditor')).not.toBeInTheDocument();
 
-      expect(screen.getByTestId('tines-storySelector')).toBeInTheDocument();
+      const tinesStorySelector = screen.getByTestId('tines-storySelector');
+      const tinesWebhookSelector = screen.getByTestId('tines-webhookSelector');
+      expect(tinesStorySelector).toBeInTheDocument();
       expect(
-        (
-          within(screen.getByTestId('tines-storySelector')).getByRole(
-            'combobox'
-          ) as HTMLInputElement
-        ).placeholder
+        (within(tinesStorySelector).getByRole('combobox') as HTMLInputElement).placeholder
       ).toBe('Select a Tines story');
-      expect(screen.getByTestId('tines-webhookSelector')).toBeInTheDocument();
+      expect(tinesWebhookSelector).toBeInTheDocument();
       expect(
-        (
-          within(screen.getByTestId('tines-webhookSelector')).getByRole(
-            'combobox'
-          ) as HTMLInputElement
-        ).placeholder
+        (within(tinesWebhookSelector).getByRole('combobox') as HTMLInputElement).placeholder
       ).toBe('Select a story first');
       expect(screen.queryByTestId('tines-fallbackCallout')).not.toBeInTheDocument();
       expect(screen.queryByTestId('tines-webhookUrlInput')).not.toBeInTheDocument();
@@ -117,21 +111,15 @@ describe('TinesParamsFields renders', () => {
       expect(screen.getByTestId('tines-bodyJsonEditor')).toBeInTheDocument();
       expect(screen.getByTestId('bodyAddVariableButton')).toBeDisabled();
 
-      expect(screen.getByTestId('tines-storySelector')).toBeInTheDocument();
+      const tinesStorySelector = screen.getByTestId('tines-storySelector');
+      const tinesWebhookSelector = screen.getByTestId('tines-webhookSelector');
+      expect(tinesStorySelector).toBeInTheDocument();
       expect(
-        (
-          within(screen.getByTestId('tines-storySelector')).getByRole(
-            'combobox'
-          ) as HTMLInputElement
-        ).placeholder
+        (within(tinesStorySelector).getByRole('combobox') as HTMLInputElement).placeholder
       ).toBe('Select a Tines story');
-      expect(screen.getByTestId('tines-webhookSelector')).toBeInTheDocument();
+      expect(tinesWebhookSelector).toBeInTheDocument();
       expect(
-        (
-          within(screen.getByTestId('tines-webhookSelector')).getByRole(
-            'combobox'
-          ) as HTMLInputElement
-        ).placeholder
+        (within(tinesWebhookSelector).getByRole('combobox') as HTMLInputElement).placeholder
       ).toBe('Select a story first');
 
       expect(mockEditAction).toHaveBeenCalledWith('subAction', 'test', index);

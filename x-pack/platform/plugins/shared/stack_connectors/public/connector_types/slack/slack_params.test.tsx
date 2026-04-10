@@ -24,10 +24,9 @@ describe('SlackParamsFields renders', () => {
         index={0}
       />
     );
-    expect(screen.getByTestId('messageTextArea')).toBeInTheDocument();
-    expect((screen.getByTestId('messageTextArea') as HTMLTextAreaElement).value).toStrictEqual(
-      'test message'
-    );
+    const messageTextArea = screen.getByTestId('messageTextArea') as HTMLTextAreaElement;
+    expect(messageTextArea).toBeInTheDocument();
+    expect(messageTextArea.value).toStrictEqual('test message');
   });
 
   test('when useDefaultMessage is set to true and the default message changes, the underlying message is replaced with the default message', () => {

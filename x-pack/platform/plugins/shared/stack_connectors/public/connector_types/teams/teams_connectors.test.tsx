@@ -37,10 +37,9 @@ describe('TeamsActionFields renders', () => {
       </ConnectorFormTestProvider>
     );
 
-    expect(screen.getByTestId('teamsWebhookUrlInput')).toBeInTheDocument();
-    expect((screen.getByTestId('teamsWebhookUrlInput') as HTMLInputElement).value).toBe(
-      'https://test.com'
-    );
+    const teamsWebhookUrlInput = screen.getByTestId('teamsWebhookUrlInput') as HTMLInputElement;
+    expect(teamsWebhookUrlInput).toBeInTheDocument();
+    expect(teamsWebhookUrlInput.value).toBe('https://test.com');
   });
 
   describe('Validation', () => {
@@ -114,8 +113,9 @@ describe('TeamsActionFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await userEvent.clear(screen.getByTestId('teamsWebhookUrlInput'));
-      await userEvent.type(screen.getByTestId('teamsWebhookUrlInput'), 'no - valid', {
+      const teamsWebhookUrlInput = screen.getByTestId('teamsWebhookUrlInput');
+      await userEvent.clear(teamsWebhookUrlInput);
+      await userEvent.type(teamsWebhookUrlInput, 'no - valid', {
         delay: 10,
       });
 

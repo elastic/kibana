@@ -71,14 +71,13 @@ describe('JsonEditorWithMessageVariables', () => {
 
   test('renders correct value when the input value prop updates', () => {
     const { rerender } = render(<JsonEditorWithMessageVariables {...props} />);
+    const fooJsonEditor = screen.getByTestId('fooJsonEditor');
 
-    expect(screen.getByTestId('fooJsonEditor').getAttribute('data-currentvalue')).toEqual('');
+    expect(fooJsonEditor.getAttribute('data-currentvalue')).toEqual('');
 
     const inputTargetValue = '{"new": "value"}';
     rerender(<JsonEditorWithMessageVariables {...props} inputTargetValue={inputTargetValue} />);
 
-    expect(screen.getByTestId('fooJsonEditor').getAttribute('data-currentvalue')).toEqual(
-      inputTargetValue
-    );
+    expect(fooJsonEditor.getAttribute('data-currentvalue')).toEqual(inputTargetValue);
   });
 });
