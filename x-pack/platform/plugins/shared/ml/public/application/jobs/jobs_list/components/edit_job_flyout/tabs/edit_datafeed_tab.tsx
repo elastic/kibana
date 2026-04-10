@@ -104,8 +104,7 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
     [cpsManager]
   );
 
-  const defaultProjectRouting = cpsManager?.getDefaultProjectRouting();
-  const projects = useFetchProjects(fetchProjects, datafeedProjectRouting ?? defaultProjectRouting);
+  const projects = useFetchProjects(fetchProjects, datafeedProjectRouting);
 
   const onProjectRoutingChange = useCallback(
     (projectRouting: ProjectRouting) => {
@@ -191,7 +190,7 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
             disabled={datafeedRunning}
           />
         </EuiFormRow>
-        {totalProjectCount > 1 && defaultProjectRouting && projects ? (
+        {totalProjectCount > 1 && projects ? (
           <EuiFormRow
             label={
               <FormattedMessage
@@ -209,7 +208,7 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
                   />
                 ) : (
                   <ProjectPicker
-                    projectRouting={defaultProjectRouting}
+                    projectRouting={datafeedProjectRouting}
                     onProjectRoutingChange={onProjectRoutingChange}
                     projects={projects}
                     totalProjectCount={totalProjectCount}
