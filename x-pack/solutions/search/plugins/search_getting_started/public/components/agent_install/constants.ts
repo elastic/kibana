@@ -12,5 +12,4 @@ export const INSTALL_LINES_CLI = [
   '```sh\nnpx skills add elastic/agent-skills --skill elasticsearch-onboarding -y\n```',
 ];
 
-export const AGENT_ONBOARDING_MESSAGE =
-  'Help me get started with Elasticsearch. Use the elasticsearch-onboarding skill to guide the conversation.';
+export const AGENT_ONBOARDING_MESSAGE = '/elasticsearch-onboarding';
