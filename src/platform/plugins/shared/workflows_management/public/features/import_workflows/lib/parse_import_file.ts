@@ -12,7 +12,7 @@ import YAML from 'yaml';
 import { MAX_WORKFLOW_YAML_LENGTH } from '@kbn/workflows';
 import {
   detectFileFormat,
-  isValidWorkflowId,
+  isUnsafeWorkflowId,
   MAX_AGGREGATE_IMPORT_BYTES,
   MAX_IMPORT_WORKFLOWS,
   WorkflowExportManifestSchema,
@@ -27,8 +27,13 @@ export interface ClientPreflightResult {
   workflows: WorkflowPreview[];
   /** Workflow IDs extracted from the file, used for server-side conflict checks */
   workflowIds: string[];
-  /** Raw workflow payloads (id + YAML string) ready to send to the bulk create API */
-  rawWorkflows: Array<{ id: string; yaml: string }>;
+  /** Raw workflow payloads ready to send to the bulk create API.
+   * `id` is the desired import ID (slug of the workflow name or a UUID fallback).
+   * `originalId` is the persisted export ID taken from the ZIP entry filename; it
+   * is the value embedded in cross-workflow `workflow-id` references inside the
+   * YAML and must be used as the key when building the reference-rewrite mapping.
+   * For single-YAML imports (no ZIP) `originalId` equals `id`. */
+  rawWorkflows: Array<{ id: string; originalId: string; yaml: string }>;
 }
 
 async function parseZipFile(buffer: ArrayBuffer): Promise<ClientPreflightResult> {
@@ -49,7 +54,7 @@ async function parseZipFile(buffer: ArrayBuffer): Promise<ClientPreflightResult>
 
   const workflows: WorkflowPreview[] = [];
   const workflowIds: string[] = [];
-  const rawWorkflows: Array<{ id: string; yaml: string }> = [];
+  const rawWorkflows: Array<{ id: string; originalId: string; yaml: string }> = [];
   const parseErrors: string[] = [];
   let totalBytes = 0;
 
@@ -78,9 +83,12 @@ async function parseZipFile(buffer: ArrayBuffer): Promise<ClientPreflightResult>
     }
 
     const ext = name.endsWith('.yaml') ? '.yaml' : '.yml';
-    const id = name.slice(0, -ext.length);
+    // originalId is the persisted export ID (ZIP entry filename stem). It is
+    // the value embedded in cross-workflow `workflow-id` references in the YAML
+    // and must be preserved for the reference-rewrite mapping at import time.
+    const originalId = name.slice(0, -ext.length);
 
-    if (!isValidWorkflowId(id)) {
+    if (isUnsafeWorkflowId(originalId)) {
       parseErrors.push(
         `Entry [${name}] has an invalid workflow ID: must match [a-z0-9-] and be 3-255 characters`
       );
@@ -116,7 +124,7 @@ async function parseZipFile(buffer: ArrayBuffer): Promise<ClientPreflightResult>
     const preview = extractWorkflowPreview(yaml);
     workflows.push(preview);
     workflowIds.push(preview.id);
-    rawWorkflows.push({ id: preview.id, yaml });
+    rawWorkflows.push({ id: preview.id, originalId, yaml });
   }
 
   if (manifestParsed.data.exportedCount !== workflows.length) {
@@ -150,7 +158,7 @@ function parseYamlFile(content: string, filename: string): ClientPreflightResult
     parseErrors: [],
     workflows: [preview],
     workflowIds: [preview.id],
-    rawWorkflows: [{ id: preview.id, yaml: content }],
+    rawWorkflows: [{ id: preview.id, originalId: preview.id, yaml: content }],
   };
 }
 

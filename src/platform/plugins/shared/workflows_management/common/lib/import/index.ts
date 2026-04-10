@@ -25,13 +25,18 @@ export const isDynamicWorkflowReference = (value: string): boolean => value.incl
 
 const UNSAFE_IDS = new Set(['__proto__', 'constructor', 'prototype']);
 
+/** Returns true if the ID is a known prototype-pollution key and must never be used. */
+export function isUnsafeWorkflowId(id: string): boolean {
+  return UNSAFE_IDS.has(id);
+}
+
 /**
  * Validates that a workflow ID only contains safe characters and is within
  * a reasonable length. Rejects empty strings, IDs starting with special
  * characters, and known prototype-pollution keys.
  */
 export function isValidWorkflowId(id: string): boolean {
-  return !UNSAFE_IDS.has(id) && WORKFLOW_ID_PATTERN.test(id);
+  return !isUnsafeWorkflowId(id) && WORKFLOW_ID_PATTERN.test(id);
 }
 
 // ZIP magic bytes: PK (0x50 0x4B)

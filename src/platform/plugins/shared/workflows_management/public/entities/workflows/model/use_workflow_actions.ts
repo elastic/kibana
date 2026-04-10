@@ -47,7 +47,7 @@ export interface PreflightImportResult {
   conflicts: Array<{ id: string; existingName: string }>;
   parseErrors: string[];
   workflows: WorkflowPreview[];
-  rawWorkflows: Array<{ id: string; yaml: string }>;
+  rawWorkflows: Array<{ id: string; originalId: string; yaml: string }>;
 }
 
 export interface ImportWorkflowsResult {
@@ -56,7 +56,7 @@ export interface ImportWorkflowsResult {
 }
 
 export interface ImportWorkflowsParams {
-  workflows: Array<{ id: string; yaml: string }>;
+  workflows: Array<{ id: string; originalId: string; yaml: string }>;
   overwrite?: boolean;
   generateNewIds?: boolean;
   conflictIds: Array<{ id: string; existingName: string }>;
@@ -384,7 +384,13 @@ export function useWorkflowActions() {
   >({
     mutationKey: ['POST', 'workflows', '_bulk_create'],
     mutationFn: ({ workflows, overwrite, generateNewIds, conflictIds }) => {
-      let processedWorkflows = workflows;
+      // Build base mapping from the original (export) persisted ID to the
+      // desired import ID (slug-of-name or UUID fallback). This is always
+      // needed because cross-workflow `workflow-id` references in the YAML
+      // were written using the persisted export ID, not the slug-of-name.
+      const baseIdMapping = new Map<string, string>(workflows.map((w) => [w.originalId, w.id]));
+
+      let processedWorkflows: Array<{ id: string; yaml: string }>;
 
       if (generateNewIds) {
         const conflictIdMapping = new Set(conflictIds.map((c) => c.id));
@@ -394,20 +400,30 @@ export function useWorkflowActions() {
           let counter = 0;
           // add a numeric postfix to avoid collisions with existing workflows or other workflows in the same import batch
           while (conflictIdMapping.has(id)) {
-            id = `${id}-${++counter}`;
+            id = `${w.id}-${++counter}`;
           }
-          idMapping.set(w.id, id);
+          // register the resolved ID so the next workflow in the batch cannot collide with it
+          conflictIdMapping.add(id);
+          idMapping.set(w.originalId, id);
         }
         processedWorkflows = workflows.map((w) => {
-          const newId = idMapping.get(w.id);
+          const newId = idMapping.get(w.originalId);
           if (!newId) {
-            throw new Error(`Missing ID mapping for workflow ${w.id}`);
+            throw new Error(`Missing ID mapping for workflow ${w.originalId}`);
           }
           return {
             id: newId,
             yaml: rewriteWorkflowReferences(w.yaml, idMapping),
           };
         });
+      } else {
+        // Even without generateNewIds we must rewrite references: the YAML body
+        // still contains the original persisted export IDs, which differ from
+        // the slug-of-name IDs that will be used on import.
+        processedWorkflows = workflows.map((w) => ({
+          id: w.id,
+          yaml: rewriteWorkflowReferences(w.yaml, baseIdMapping),
+        }));
       }
 
       return api.bulkCreateWorkflows({ workflows: processedWorkflows, overwrite });
