@@ -138,16 +138,9 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
   };
 };
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertestWithoutAuth');
-  const esArchiver = getService('esArchiver');
-  const es = getService('es');
-
-  const { addTests, createTestDefinitions, expectSavedObjectForbidden } = importTestSuiteFactory(
-    es,
-    esArchiver,
-    supertest
-  );
+export default function (context: FtrProviderContext) {
+  const { addTests, createTestDefinitions, expectSavedObjectForbidden } =
+    importTestSuiteFactory(context);
   const createTests = (overwrite: boolean, createNewCopies: boolean, spaceId: string) => {
     const singleRequest = true;
 

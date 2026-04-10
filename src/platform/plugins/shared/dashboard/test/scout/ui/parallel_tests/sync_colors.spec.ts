@@ -107,7 +107,6 @@ spaceTest.describe('Sync colors', { tag: tags.deploymentAgnostic }, () => {
     await page.addInitScript(() => {
       window._echDebugStateFlag = true;
     });
-    await pageObjects.dashboard.goto();
     await pageObjects.dashboard.openNewDashboard();
   });
 
