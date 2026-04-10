@@ -59,4 +59,19 @@ describe('CustomizeLandingEmptyState', () => {
 
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
+
+  it('renders footer content when provided', () => {
+    renderWithIntl(
+      <CustomizeLandingEmptyState
+        dataTestSubj="withFooter"
+        illustrationSrc="https://example.com/illustration.svg"
+        title="Title"
+        description="Body text."
+        learnMoreHref="https://example.com/docs"
+        footer={<span data-test-subj="emptyStateFooterContent">Footer note</span>}
+      />
+    );
+
+    expect(screen.getByTestId('emptyStateFooterContent')).toHaveTextContent('Footer note');
+  });
 });

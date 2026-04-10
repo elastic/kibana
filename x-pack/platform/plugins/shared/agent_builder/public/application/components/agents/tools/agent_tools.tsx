@@ -258,7 +258,7 @@ export const AgentTools: React.FC = () => {
   const toolsEmptyDescription = isExperimentalFeaturesEnabled ? (
     <FormattedMessage
       id="xpack.agentBuilder.agentTools.customizeEmptyStateDescription"
-      defaultMessage="Tools are functions and integrations your agent can call while responding. Combine them with {skills}, or install {plugins} for packaged capability sets."
+      defaultMessage="Tools are actions your agent can take, like searching data, running queries, or calling external APIs. For task-specific instructions, use {skills}. For bundled capabilities, use {plugins}."
       values={{
         skills: (
           <EuiLink
@@ -281,7 +281,7 @@ export const AgentTools: React.FC = () => {
   ) : (
     <FormattedMessage
       id="xpack.agentBuilder.agentTools.customizeEmptyStateDescriptionNoExperimental"
-      defaultMessage="Tools are functions and integrations your agent can call while responding. Define reusable behavior in {skills} and attach tools here."
+      defaultMessage="Tools are actions your agent can take, like searching data, running queries, or calling external APIs. For task-specific instructions, use {skills}."
       values={{
         skills: (
           <EuiLink
@@ -293,6 +293,19 @@ export const AgentTools: React.FC = () => {
         ),
       }}
     />
+  );
+
+  const toolsEmptyStateFooter = (
+    <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type="info" color="subdued" aria-hidden={true} />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText size="xs" color="subdued">
+          {labels.agentTools.emptyStateFooter}
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 
   const isLoading = agentLoading || toolsLoading;
@@ -361,6 +374,8 @@ export const AgentTools: React.FC = () => {
             title={labels.agentTools.emptyStateTitle}
             description={toolsEmptyDescription}
             learnMoreHref={docLinksService.tools}
+            learnMoreLabel={labels.agentTools.emptyStateLearnMore}
+            footer={toolsEmptyStateFooter}
             primaryAction={
               canEditAgent ? (
                 <EuiButton
@@ -370,7 +385,7 @@ export const AgentTools: React.FC = () => {
                   iconSide="left"
                   onClick={openLibrary}
                 >
-                  {labels.agentTools.addToolButton}
+                  {labels.agentTools.emptyStateAddButton}
                 </EuiButton>
               ) : undefined
             }
@@ -382,54 +397,54 @@ export const AgentTools: React.FC = () => {
           />
         </EuiFlexGroup>
       ) : (
-      <EuiFlexGroup gutterSize="none" responsive={false} css={styles.body}>
-        <EuiFlexItem grow={false} css={styles.searchColumn}>
-          <div css={styles.searchInputWrapper}>
-            <EuiFieldSearch
-              placeholder={labels.agentTools.searchActiveToolsPlaceholder}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              incremental
-              fullWidth
-            />
-          </div>
+        <EuiFlexGroup gutterSize="none" responsive={false} css={styles.body}>
+          <EuiFlexItem grow={false} css={styles.searchColumn}>
+            <div css={styles.searchInputWrapper}>
+              <EuiFieldSearch
+                placeholder={labels.agentTools.searchActiveToolsPlaceholder}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                incremental
+                fullWidth
+              />
+            </div>
 
-          <div css={styles.scrollableList}>
-            <ActiveToolsList
-              filteredActiveTools={filteredActiveTools}
-              searchQuery={searchQuery}
-              selectedToolId={selectedToolId}
-              enableElasticCapabilities={enableElasticCapabilities}
-              defaultToolIdSet={defaultToolIdSet}
-              isRemoving={updateToolsMutation.isLoading}
-              onSelect={setSelectedToolId}
-              onRemove={handleRemoveTool}
-              canEditAgent={canEditAgent}
-            />
-          </div>
-        </EuiFlexItem>
+            <div css={styles.scrollableList}>
+              <ActiveToolsList
+                filteredActiveTools={filteredActiveTools}
+                searchQuery={searchQuery}
+                selectedToolId={selectedToolId}
+                enableElasticCapabilities={enableElasticCapabilities}
+                defaultToolIdSet={defaultToolIdSet}
+                isRemoving={updateToolsMutation.isLoading}
+                onSelect={setSelectedToolId}
+                onRemove={handleRemoveTool}
+                canEditAgent={canEditAgent}
+              />
+            </div>
+          </EuiFlexItem>
 
-        <EuiFlexItem css={styles.detailPanelWrapper}>
-          {selectedToolId ? (
-            <ToolDetailPanel
-              toolId={selectedToolId}
-              onRemove={handleRemoveSelectedTool}
-              isAutoIncluded={enableElasticCapabilities && defaultToolIdSet.has(selectedToolId)}
-              canEditAgent={canEditAgent}
-            />
-          ) : (
-            <EuiFlexGroup
-              justifyContent="center"
-              alignItems="center"
-              css={styles.noSelectionPlaceholder}
-            >
-              <EuiText size="s" color="subdued">
-                {labels.agentTools.noToolSelectedMessage}
-              </EuiText>
-            </EuiFlexGroup>
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          <EuiFlexItem css={styles.detailPanelWrapper}>
+            {selectedToolId ? (
+              <ToolDetailPanel
+                toolId={selectedToolId}
+                onRemove={handleRemoveSelectedTool}
+                isAutoIncluded={enableElasticCapabilities && defaultToolIdSet.has(selectedToolId)}
+                canEditAgent={canEditAgent}
+              />
+            ) : (
+              <EuiFlexGroup
+                justifyContent="center"
+                alignItems="center"
+                css={styles.noSelectionPlaceholder}
+              >
+                <EuiText size="s" color="subdued">
+                  {labels.agentTools.noToolSelectedMessage}
+                </EuiText>
+              </EuiFlexGroup>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       )}
 
       {isLibraryOpen && (

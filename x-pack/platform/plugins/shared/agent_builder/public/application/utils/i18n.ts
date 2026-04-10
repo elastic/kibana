@@ -986,7 +986,16 @@ export const labels = {
       defaultMessage: 'Manage all skills',
     }),
     emptyStateTitle: i18n.translate('xpack.agentBuilder.agentSkills.emptyStateTitle', {
-      defaultMessage: 'Add skills to this agent',
+      defaultMessage: 'No skills added yet',
+    }),
+    emptyStateLearnMore: i18n.translate('xpack.agentBuilder.agentSkills.emptyStateLearnMore', {
+      defaultMessage: 'Learn more about skills',
+    }),
+    emptyStateAddButton: i18n.translate('xpack.agentBuilder.agentSkills.emptyStateAddButton', {
+      defaultMessage: 'Add skills',
+    }),
+    emptyStateFooter: i18n.translate('xpack.agentBuilder.agentSkills.emptyStateFooter', {
+      defaultMessage: 'Skills are free - no additional credits used. Remove anytime.',
     }),
   },
   agentPlugins: {
@@ -1198,7 +1207,16 @@ export const labels = {
       defaultMessage: 'Manage all plugins',
     }),
     emptyStateTitle: i18n.translate('xpack.agentBuilder.agentPlugins.emptyStateTitle', {
-      defaultMessage: 'Add plugins to this agent',
+      defaultMessage: 'No plugins added yet',
+    }),
+    emptyStateLearnMore: i18n.translate('xpack.agentBuilder.agentPlugins.emptyStateLearnMore', {
+      defaultMessage: 'Learn more about plugins',
+    }),
+    emptyStateAddButton: i18n.translate('xpack.agentBuilder.agentPlugins.emptyStateAddButton', {
+      defaultMessage: 'Add plugins',
+    }),
+    emptyStateFooter: i18n.translate('xpack.agentBuilder.agentPlugins.emptyStateFooter', {
+      defaultMessage: 'Plugins are free - no additional credits used. Remove anytime.',
     }),
   },
   agentTools: {
@@ -1368,7 +1386,16 @@ export const labels = {
       defaultMessage: 'Manage all tools',
     }),
     emptyStateTitle: i18n.translate('xpack.agentBuilder.agentTools.emptyStateTitle', {
-      defaultMessage: 'Add tools to this agent',
+      defaultMessage: 'No tools added yet',
+    }),
+    emptyStateLearnMore: i18n.translate('xpack.agentBuilder.agentTools.emptyStateLearnMore', {
+      defaultMessage: 'Learn more about tools',
+    }),
+    emptyStateAddButton: i18n.translate('xpack.agentBuilder.agentTools.emptyStateAddButton', {
+      defaultMessage: 'Add tools',
+    }),
+    emptyStateFooter: i18n.translate('xpack.agentBuilder.agentTools.emptyStateFooter', {
+      defaultMessage: 'Tools are free - no additional credits used. Remove anytime.',
     }),
   },
   plugins: {

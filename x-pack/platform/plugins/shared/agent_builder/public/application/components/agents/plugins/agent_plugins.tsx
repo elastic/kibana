@@ -237,7 +237,7 @@ export const AgentPlugins: React.FC = () => {
   const pluginsEmptyDescription = isExperimentalFeaturesEnabled ? (
     <FormattedMessage
       id="xpack.agentBuilder.agentPlugins.customizeEmptyStateDescription"
-      defaultMessage="Plugins bundle related skills so you can extend your agent in one step. Start from {skills} or add {tools} for individual functions."
+      defaultMessage="Each plugin adds a bundle of related skills to your agent in a single install. For individual capabilities, use {skills}. For callable functions and integrations, use {tools}."
       values={{
         skills: (
           <EuiLink
@@ -260,7 +260,7 @@ export const AgentPlugins: React.FC = () => {
   ) : (
     <FormattedMessage
       id="xpack.agentBuilder.agentPlugins.customizeEmptyStateDescriptionNoExperimental"
-      defaultMessage="Plugins bundle related skills so you can extend your agent in one step. Pair them with {skills} you author or import."
+      defaultMessage="Each plugin adds a bundle of related skills to your agent in a single install. For individual capabilities, use {skills}."
       values={{
         skills: (
           <EuiLink
@@ -272,6 +272,19 @@ export const AgentPlugins: React.FC = () => {
         ),
       }}
     />
+  );
+
+  const pluginsEmptyStateFooter = (
+    <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type="info" color="subdued" aria-hidden={true} />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText size="xs" color="subdued">
+          {labels.agentPlugins.emptyStateFooter}
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 
   const isLoading = agentLoading || pluginsLoading;
@@ -359,10 +372,12 @@ export const AgentPlugins: React.FC = () => {
             title={labels.agentPlugins.emptyStateTitle}
             description={pluginsEmptyDescription}
             learnMoreHref={docLinksService.agentBuilderAgents}
+            learnMoreLabel={labels.agentPlugins.emptyStateLearnMore}
+            footer={pluginsEmptyStateFooter}
             primaryAction={
               canEditAgent ? (
                 <EuiPopover
-                  aria-label={labels.agentPlugins.installPluginButton}
+                  aria-label={labels.agentPlugins.emptyStateAddButton}
                   button={
                     <EuiButton
                       data-test-subj="agentPluginsCustomizeEmptyStateInstallButton"
@@ -371,7 +386,7 @@ export const AgentPlugins: React.FC = () => {
                       iconSide="left"
                       onClick={() => setIsEmptyInstallMenuOpen((prev) => !prev)}
                     >
-                      {labels.agentPlugins.installPluginButton}
+                      {labels.agentPlugins.emptyStateAddButton}
                     </EuiButton>
                   }
                   isOpen={isEmptyInstallMenuOpen}

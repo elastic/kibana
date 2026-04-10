@@ -222,7 +222,7 @@ export const AgentSkills: React.FC = () => {
   const skillsEmptyDescription = isExperimentalFeaturesEnabled ? (
     <FormattedMessage
       id="xpack.agentBuilder.agentSkills.customizeEmptyStateDescription"
-      defaultMessage="Skills combine prompts and tools into reusable capabilities. For packaged capabilities, try {plugins}. To expose callable functions, configure {tools}."
+      defaultMessage="Skills tell your agent how to approach specific tasks, like following a runbook or structuring a report. For bundled capabilities, use {plugins}. For callable functions and integrations, use {tools}."
       values={{
         plugins: (
           <EuiLink
@@ -245,7 +245,7 @@ export const AgentSkills: React.FC = () => {
   ) : (
     <FormattedMessage
       id="xpack.agentBuilder.agentSkills.customizeEmptyStateDescriptionNoExperimental"
-      defaultMessage="Skills combine prompts and tools into reusable capabilities. Configure {tools} so your agent can call functions and integrations."
+      defaultMessage="Skills tell your agent how to approach specific tasks, like following a runbook or structuring a report. Attach {tools} so your agent can call functions and integrations."
       values={{
         tools: (
           <EuiLink
@@ -257,6 +257,19 @@ export const AgentSkills: React.FC = () => {
         ),
       }}
     />
+  );
+
+  const skillsEmptyStateFooter = (
+    <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type="info" color="subdued" aria-hidden={true} />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText size="xs" color="subdued">
+          {labels.agentSkills.emptyStateFooter}
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 
   const isLoading = agentLoading || skillsLoading;
@@ -362,6 +375,8 @@ export const AgentSkills: React.FC = () => {
             title={labels.agentSkills.emptyStateTitle}
             description={skillsEmptyDescription}
             learnMoreHref={docLinksService.agentBuilderAgents}
+            learnMoreLabel={labels.agentSkills.emptyStateLearnMore}
+            footer={skillsEmptyStateFooter}
             primaryAction={
               canEditAgent ? (
                 <EuiButton
@@ -371,7 +386,7 @@ export const AgentSkills: React.FC = () => {
                   iconSide="left"
                   onClick={openLibrary}
                 >
-                  {labels.agentSkills.addSkillButton}
+                  {labels.agentSkills.emptyStateAddButton}
                 </EuiButton>
               ) : undefined
             }
@@ -383,69 +398,69 @@ export const AgentSkills: React.FC = () => {
           />
         </EuiFlexGroup>
       ) : (
-      <EuiFlexGroup gutterSize="none" responsive={false} css={styles.body}>
-        <EuiFlexItem grow={false} css={styles.searchColumn}>
-          <div css={styles.searchInputWrapper}>
-            <EuiFieldSearch
-              placeholder={labels.agentSkills.searchActiveSkillsPlaceholder}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              incremental
-              fullWidth
-            />
-          </div>
+        <EuiFlexGroup gutterSize="none" responsive={false} css={styles.body}>
+          <EuiFlexItem grow={false} css={styles.searchColumn}>
+            <div css={styles.searchInputWrapper}>
+              <EuiFieldSearch
+                placeholder={labels.agentSkills.searchActiveSkillsPlaceholder}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                incremental
+                fullWidth
+              />
+            </div>
 
-          <div css={styles.scrollableList}>
-            {filteredActiveSkills.length === 0 ? (
-              <EuiText size="s" color="subdued" textAlign="center">
-                <p>
-                  {searchQuery.trim()
-                    ? labels.agentSkills.noActiveSkillsMatchMessage
-                    : labels.agentSkills.noActiveSkillsMessage}
-                </p>
-              </EuiText>
+            <div css={styles.scrollableList}>
+              {filteredActiveSkills.length === 0 ? (
+                <EuiText size="s" color="subdued" textAlign="center">
+                  <p>
+                    {searchQuery.trim()
+                      ? labels.agentSkills.noActiveSkillsMatchMessage
+                      : labels.agentSkills.noActiveSkillsMessage}
+                  </p>
+                </EuiText>
+              ) : (
+                filteredActiveSkills.map((skill) => (
+                  <ActiveSkillRow
+                    key={skill.id}
+                    skill={skill}
+                    isSelected={selectedSkillId === skill.id}
+                    onSelect={(s) => setSelectedSkillId(s.id)}
+                    onRemove={handleRemoveSkill}
+                    isRemoving={mutatingSkillId === skill.id}
+                    isAutoIncluded={enableElasticCapabilities && skill.readonly}
+                    canEditAgent={canEditAgent}
+                  />
+                ))
+              )}
+            </div>
+          </EuiFlexItem>
+
+          <EuiFlexItem css={styles.detailPanelWrapper}>
+            {selectedSkillId ? (
+              <SkillDetailPanel
+                skillId={selectedSkillId}
+                onEdit={() => setEditingSkillId(selectedSkillId)}
+                onRemove={handleRemoveSelectedSkill}
+                isAutoIncluded={
+                  enableElasticCapabilities &&
+                  (activeSkills.find((s) => s.id === selectedSkillId)?.readonly ?? false)
+                }
+                canEditAgent={canEditAgent}
+              />
             ) : (
-              filteredActiveSkills.map((skill) => (
-                <ActiveSkillRow
-                  key={skill.id}
-                  skill={skill}
-                  isSelected={selectedSkillId === skill.id}
-                  onSelect={(s) => setSelectedSkillId(s.id)}
-                  onRemove={handleRemoveSkill}
-                  isRemoving={mutatingSkillId === skill.id}
-                  isAutoIncluded={enableElasticCapabilities && skill.readonly}
-                  canEditAgent={canEditAgent}
-                />
-              ))
+              <EuiFlexGroup
+                justifyContent="center"
+                alignItems="center"
+                css={styles.noSelectionPlaceholder}
+              >
+                <EuiText size="s" color="subdued">
+                  {labels.agentSkills.noSkillSelectedMessage}
+                </EuiText>
+              </EuiFlexGroup>
             )}
-          </div>
-        </EuiFlexItem>
-
-        <EuiFlexItem css={styles.detailPanelWrapper}>
-          {selectedSkillId ? (
-            <SkillDetailPanel
-              skillId={selectedSkillId}
-              onEdit={() => setEditingSkillId(selectedSkillId)}
-              onRemove={handleRemoveSelectedSkill}
-              isAutoIncluded={
-                enableElasticCapabilities &&
-                (activeSkills.find((s) => s.id === selectedSkillId)?.readonly ?? false)
-              }
-              canEditAgent={canEditAgent}
-            />
-          ) : (
-            <EuiFlexGroup
-              justifyContent="center"
-              alignItems="center"
-              css={styles.noSelectionPlaceholder}
-            >
-              <EuiText size="s" color="subdued">
-                {labels.agentSkills.noSkillSelectedMessage}
-              </EuiText>
-            </EuiFlexGroup>
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       )}
 
       {isLibraryOpen && (
