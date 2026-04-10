@@ -171,8 +171,7 @@ export default function endpointExceptionsPerPolicyOptInTests({ getService }: Ft
               await deleteEndpointExceptionsPerPolicyOptInSO(kibanaServer);
               // the Endpoint exceptions list as this is the base for deciding the default opt-in status
               await endpointArtifactTestResources.deleteList(
-                ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
-                superuser
+                ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
               );
 
               const response = await superuser

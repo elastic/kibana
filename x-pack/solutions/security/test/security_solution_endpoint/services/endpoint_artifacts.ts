@@ -78,7 +78,7 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
      * @param listId
      * @param supertest
      */
-    async deleteList(listId: string, supertest: TestAgent = this.supertest): Promise<void> {
+    async deleteList(listId: string): Promise<void> {
       const allExceptionListObjects = await kibanaServer.savedObjects.find({
         type: 'exception-list-agnostic',
       });
