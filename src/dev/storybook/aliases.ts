@@ -43,7 +43,6 @@ export const storybookAliases = {
   failure_store_modal: 'x-pack/platform/packages/shared/kbn-failure-store-modal/.storybook',
   fleet: 'x-pack/platform/plugins/shared/fleet/.storybook',
   grouping: 'src/platform/packages/shared/kbn-grouping/.storybook',
-  home: 'src/platform/plugins/shared/home/.storybook',
   index_management: 'x-pack/platform/plugins/shared/index_management/.storybook',
   infra: 'x-pack/solutions/observability/plugins/infra/.storybook',
   ingest_pipelines: 'x-pack/platform/packages/shared/ingest-pipelines/.storybook',
