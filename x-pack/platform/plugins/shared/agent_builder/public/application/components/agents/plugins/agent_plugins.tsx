@@ -312,7 +312,6 @@ export const AgentPlugins: React.FC = () => {
           allPlugins={allPlugins}
           activePluginIdSet={libraryActivePluginIdSet}
           onTogglePlugin={handleTogglePlugin}
-          mutatingPluginId={null}
         />
       )}
 
