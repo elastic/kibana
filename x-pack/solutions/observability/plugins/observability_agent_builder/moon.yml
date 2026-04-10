@@ -62,6 +62,7 @@ dependsOn:
   - '@kbn/apm-types-shared'
   - '@kbn/observability-utils-server'
   - '@kbn/calculate-auto'
+  - '@kbn/search-inference-endpoints'
 tags:
   - plugin
   - prod
