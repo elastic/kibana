@@ -13,7 +13,10 @@
 import type { FetcherConfigSchema } from '@kbn/workflows';
 import { buildKibanaRequest } from '@kbn/workflows';
 import type { KibanaGraphNode } from '@kbn/workflows/graph/types';
-import { getOutboundEventChainHeaders } from '@kbn/workflows-extensions/server';
+import {
+  getOutboundEventChainHeaders,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/workflows-extensions/server';
 import type { z } from '@kbn/zod/v4';
 import { ResponseSizeLimitError } from './errors';
 import type { BaseStep, RunStepResult } from './node_implementation';
@@ -241,8 +244,15 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     // step (kibana.request) sends a new HTTP request; the route handler receives a new request object
     // with no Symbol. Inject these headers so the server can restore context (depth + sourceExecutionId)
     // and enforce the event-chain depth cap when that handler calls emitEvent.
+    // X_ELASTIC_INTERNAL_ORIGIN_REQUEST sets isInternalApiRequest on the receiving KibanaRequest so
+    // getEventChainContext will parse the event-chain headers. Note: this header can be set by any
+    // HTTP caller, so it gates naive spoofing but is not a hard trust boundary.
     const fakeRequest = this.stepExecutionRuntime.contextManager.getFakeRequest();
-    const outboundHeaders = { ...headers, ...getOutboundEventChainHeaders(fakeRequest) };
+    const outboundHeaders = {
+      ...headers,
+      [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'Kibana',
+      ...getOutboundEventChainHeaders(fakeRequest),
+    };
 
     // Build full URL with query parameters
     let fullUrl = `${kibanaUrl}${path}`;

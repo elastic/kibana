@@ -574,6 +574,7 @@ export function EpisodeDetailsPage() {
                 groupAction={groupAction}
                 http={http}
                 openInDiscoverHref={openInDiscoverHref}
+                expressions={expressions}
                 buttonsOutlined={false}
               />,
             ]}

@@ -330,6 +330,7 @@ export const AlertEpisodesListPage = () => {
                         groupAction={groupActionsMap?.get(groupHash)}
                         http={services.http}
                         openInDiscoverHref={discoverHref}
+                        expressions={services.expressions}
                         viewDetailsHref={
                           episodeId
                             ? services.http.basePath.prepend(paths.alertEpisodeDetails(episodeId))
