@@ -62756,7 +62756,8 @@ paths:
                     properties:
                       id:
                         maxLength: 255
-                        pattern: ^workflow-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$
+                        minLength: 3
+                        pattern: ^[a-zA-Z0-9]([a-zA-Z0-9_-]*[a-zA-Z0-9])?$
                         type: string
                       yaml:
                         maxLength: 1048576
@@ -64011,7 +64012,8 @@ paths:
               properties:
                 id:
                   maxLength: 255
-                  pattern: ^workflow-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$
+                  minLength: 3
+                  pattern: ^[a-zA-Z0-9]([a-zA-Z0-9_-]*[a-zA-Z0-9])?$
                   type: string
                 yaml:
                   maxLength: 1048576
