@@ -88,7 +88,6 @@ const getAllIntegrationsRoute = (
           const automaticImportResponse = buildAutomaticImportResponse(response);
           return automaticImportResponse.error({
             statusCode: 500,
-            body: err,
           });
         }
       })
@@ -131,7 +130,7 @@ const getIntegrationByIdRoute = (
           const statusCode = SavedObjectsErrorHelpers.isNotFoundError(err) ? 404 : 500;
           return automaticImportResponse.error({
             statusCode,
-            body: err,
+            body: statusCode === 404 ? 'Integration not found' : undefined,
           });
         }
       })
@@ -179,6 +178,7 @@ const createIntegrationRoute = (
             title,
             logo,
             description,
+            connectorId,
           };
 
           await automaticImportService.createUpdateIntegration({
@@ -218,7 +218,6 @@ const createIntegrationRoute = (
           const automaticImportResponse = buildAutomaticImportResponse(response);
           return automaticImportResponse.error({
             statusCode: 500,
-            body: err,
           });
         }
       })
@@ -268,9 +267,16 @@ const approveIntegrationRoute = (
             const integration = await automaticImportService.getIntegrationById(integrationId);
             const dataStreams = await automaticImportService.getAllDataStreams(integrationId);
 
+            const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+            const rawSessionId = request.headers['x-session-id'];
+            const sessionId =
+              typeof rawSessionId === 'string' && UUID_RE.test(rawSessionId)
+                ? rawSessionId
+                : 'unknown';
+
             dataStreams.forEach((ds) => {
               reportTelemetryEvent(AutomaticImportTelemetryEventType.IntegrationInstalled, {
-                sessionId: request.headers['x-session-id'] || 'unknown',
+                sessionId,
                 integrationName: integration.title,
                 version,
                 dataStreamCount: dataStreams.length,
@@ -285,11 +291,20 @@ const approveIntegrationRoute = (
         } catch (err) {
           logger.error(`approveIntegrationRoute: Caught error: ${err}`);
           const automaticImportResponse = buildAutomaticImportResponse(response);
-          const statusCode = SavedObjectsErrorHelpers.isNotFoundError(err) ? 404 : 500;
-          return automaticImportResponse.error({
-            statusCode,
-            body: err,
-          });
+          if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+            return automaticImportResponse.error({
+              statusCode: 404,
+              body: 'Integration not found',
+            });
+          }
+          const rawMessage = err instanceof Error ? err.message : String(err);
+          if (rawMessage.includes('no data streams')) {
+            return automaticImportResponse.error({
+              statusCode: 400,
+              body: 'Cannot approve integration with no data streams',
+            });
+          }
+          return automaticImportResponse.error({ statusCode: 500 });
         }
       })
     );
@@ -342,7 +357,7 @@ const deleteIntegrationRoute = (
           const statusCode = SavedObjectsErrorHelpers.isNotFoundError(err) ? 404 : 500;
           return automaticImportResponse.error({
             statusCode,
-            body: err,
+            body: statusCode === 404 ? 'Integration not found' : undefined,
           });
         }
       })
@@ -394,7 +409,7 @@ const downloadIntegrationRoute = (
           const statusCode = SavedObjectsErrorHelpers.isNotFoundError(err) ? 404 : 500;
           return automaticImportResponse.error({
             statusCode,
-            body: err,
+            body: statusCode === 404 ? 'Integration not found' : undefined,
           });
         }
       })

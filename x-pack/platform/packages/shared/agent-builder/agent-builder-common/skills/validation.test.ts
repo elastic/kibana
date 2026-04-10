@@ -11,6 +11,7 @@ import {
   skillUpdateRequestSchema,
   skillIdMaxLength,
   maxToolsPerSkill,
+  maxReferencedContentItems,
 } from './validation';
 
 describe('validateSkillId', () => {
@@ -124,7 +125,27 @@ describe('skillCreateRequestSchema', () => {
     expect(() =>
       skillCreateRequestSchema.parse({
         ...validRequest,
-        referenced_content: [{ name: 'ref-1', relativePath: '.', content: 'Some content' }],
+        referenced_content: [{ name: 'ref-1', relativePath: './', content: 'Some content' }],
+      })
+    ).not.toThrow();
+  });
+
+  it('should accept referenced_content with spaced file names and nested paths', () => {
+    expect(() =>
+      skillCreateRequestSchema.parse({
+        ...validRequest,
+        referenced_content: [
+          { name: 'My Notes', relativePath: './templates/extras', content: 'hello' },
+        ],
+      })
+    ).not.toThrow();
+  });
+
+  it('should accept referenced_content with empty file content', () => {
+    expect(() =>
+      skillCreateRequestSchema.parse({
+        ...validRequest,
+        referenced_content: [{ name: 'empty-body', relativePath: './', content: '' }],
       })
     ).not.toThrow();
   });
@@ -133,12 +154,12 @@ describe('skillCreateRequestSchema', () => {
     expect(() =>
       skillCreateRequestSchema.parse({
         ...validRequest,
-        referenced_content: [{ name: 'Invalid Name', relativePath: '.', content: 'Some content' }],
+        referenced_content: [{ name: '/bad', relativePath: './', content: 'Some content' }],
       })
     ).toThrow();
   });
 
-  it('should reject referenced_content with invalid relativePath', () => {
+  it('should reject referenced_content with relativePath not starting with ./', () => {
     expect(() =>
       skillCreateRequestSchema.parse({
         ...validRequest,
@@ -149,11 +170,46 @@ describe('skillCreateRequestSchema', () => {
     ).toThrow();
   });
 
-  it('should reject referenced_content with empty content', () => {
+  it('should reject referenced_content with path traversal', () => {
     expect(() =>
       skillCreateRequestSchema.parse({
         ...validRequest,
-        referenced_content: [{ name: 'valid-name', relativePath: '.', content: '' }],
+        referenced_content: [{ name: 'x', relativePath: './foo/../bar', content: 'Some content' }],
+      })
+    ).toThrow();
+  });
+
+  it('should reject duplicate referenced paths after normalization', () => {
+    expect(() =>
+      skillCreateRequestSchema.parse({
+        ...validRequest,
+        referenced_content: [
+          { name: 'dup', relativePath: './templates', content: 'a' },
+          { name: 'dup', relativePath: './templates/', content: 'b' },
+        ],
+      })
+    ).toThrow();
+  });
+
+  it('should reject reserved SKILL file at skill root', () => {
+    expect(() =>
+      skillCreateRequestSchema.parse({
+        ...validRequest,
+        referenced_content: [{ name: 'Skill', relativePath: './', content: 'x' }],
+      })
+    ).toThrow();
+  });
+
+  it('should reject more than maxReferencedContentItems referenced files', () => {
+    const referencedContent = Array.from({ length: maxReferencedContentItems + 1 }, (_, i) => ({
+      name: `f${i}`,
+      relativePath: './',
+      content: 'x',
+    }));
+    expect(() =>
+      skillCreateRequestSchema.parse({
+        ...validRequest,
+        referenced_content: referencedContent,
       })
     ).toThrow();
   });
@@ -181,11 +237,19 @@ describe('skillUpdateRequestSchema', () => {
     expect(() => skillUpdateRequestSchema.parse({ tool_ids: tooManyTools })).toThrow();
   });
 
-  it('should reject referenced_content with invalid items', () => {
+  it('should reject referenced_content with invalid path protocol', () => {
     expect(() =>
       skillUpdateRequestSchema.parse({
-        referenced_content: [{ name: 'Invalid Name', relativePath: '.', content: 'test' }],
+        referenced_content: [{ name: 'ok', relativePath: '.', content: 'test' }],
       })
     ).toThrow();
+  });
+
+  it('should accept valid referenced_content on update', () => {
+    expect(() =>
+      skillUpdateRequestSchema.parse({
+        referenced_content: [{ name: 'Extra', relativePath: './docs', content: '' }],
+      })
+    ).not.toThrow();
   });
 });
