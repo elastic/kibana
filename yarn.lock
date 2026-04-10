@@ -5467,14 +5467,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-data-streams-server-internal@link:src/core/packages/data-streams/server-internal":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-data-streams-server-mocks@link:src/core/packages/data-streams/server-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-data-streams-server@link:src/core/packages/data-streams/server":
   version "0.0.0"
   uid ""

@@ -7,8 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_node',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/src/core/packages/data-streams/server-mocks'],
+import { lazyObject } from '@kbn/lazy-object';
+
+import type { DataStreamsStart, DataStreamsSetup } from './src/contracts';
+
+export const dataStreamServiceMock = {
+  createSetupContract: (): jest.Mocked<DataStreamsSetup> =>
+    lazyObject({
+      registerDataStream: jest.fn(),
+    }),
+
+  createStartContract: (): jest.Mocked<DataStreamsStart> =>
+    lazyObject({
+      initializeClient: jest.fn(),
+    }),
 };

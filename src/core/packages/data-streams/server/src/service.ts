@@ -12,20 +12,17 @@ import {
   type AnyIDataStreamClient,
   type IDataStreamClient,
   type AnyDataStreamDefinition,
+  type BaseSearchRuntimeMappings,
   DataStreamClient,
 } from '@kbn/data-streams';
 import type { InternalElasticsearchServiceStart } from '@kbn/core-elasticsearch-server-internal';
-
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
-import type {
-  BaseSearchRuntimeMappings,
-  DataStreamsSetup,
-  DataStreamsStart,
-} from '@kbn/core-data-streams-server';
 import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { firstValueFrom } from 'rxjs';
+
+import type { DataStreamsSetup, DataStreamsStart } from './contracts';
 import { DataStreamsConfig, config, type DataStreamsConfigType } from './config';
 
 interface StartDeps {

@@ -39,7 +39,7 @@ import { StatusService } from '@kbn/core-status-server-internal';
 import { UiSettingsService } from '@kbn/core-ui-settings-server-internal';
 import { CustomBrandingService } from '@kbn/core-custom-branding-server-internal';
 import { UserSettingsService } from '@kbn/core-user-settings-server-internal';
-import { DataStreamsService } from '@kbn/core-data-streams-server-internal';
+import { DataStreamsService } from '@kbn/core-data-streams-server/internal';
 import {
   CoreRouteHandlerContext,
   PrebootCoreRouteHandlerContext,

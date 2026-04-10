@@ -25,7 +25,7 @@ import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 import { pricingServiceMock } from '@kbn/core-pricing-server-mocks';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
-import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
+import { dataStreamServiceMock } from '@kbn/core-data-streams-server/mocks';
 import { lazyObject } from '@kbn/lazy-object';
 
 export function createInternalCoreStartMock() {

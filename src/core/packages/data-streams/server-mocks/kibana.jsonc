@@ -1,7 +1,0 @@
-{
-  "type": "shared-server",
-  "id": "@kbn/core-data-streams-server-mocks",
-  "owner": "@elastic/kibana-core",
-  "group": "platform",
-  "visibility": "private"
-}
