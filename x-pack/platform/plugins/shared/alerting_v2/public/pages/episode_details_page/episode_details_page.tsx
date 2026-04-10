@@ -213,12 +213,18 @@ export function EpisodeDetailsPage() {
     }
     return getDiscoverHrefForRuleAndEpisodeTimestamp({
       share: services.share,
-      application: services.application,
+      capabilities: services.application.capabilities,
       uiSettings: services.uiSettings,
       ruleEsql: rule.evaluation?.query?.base,
       episodeIsoTimestamp,
     });
-  }, [episodeIsoTimestamp, rule, services.application, services.share, services.uiSettings]);
+  }, [
+    episodeIsoTimestamp,
+    rule,
+    services.application.capabilities,
+    services.share,
+    services.uiSettings,
+  ]);
 
   const ruleKindLabel =
     rule?.kind === 'signal'

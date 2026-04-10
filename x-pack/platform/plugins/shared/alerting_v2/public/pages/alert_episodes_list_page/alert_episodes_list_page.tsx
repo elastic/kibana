@@ -316,7 +316,7 @@ export const AlertEpisodesListPage = () => {
                     const ruleId = props.row.flattened['rule.id'] as string;
                     const discoverHref = getDiscoverHrefForRuleAndEpisodeTimestamp({
                       share: services.share,
-                      application: services.application,
+                      capabilities: services.application.capabilities,
                       uiSettings: services.uiSettings,
                       ruleEsql: rulesCache[ruleId]?.evaluation?.query?.base,
                       episodeIsoTimestamp: props.row.flattened['@timestamp'] as string,

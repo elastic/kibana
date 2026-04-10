@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ApplicationStart } from '@kbn/core/public';
-import type { IUiSettingsClient } from '@kbn/core/public';
+import type { Capabilities, IUiSettingsClient } from '@kbn/core/public';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { TimeRange } from '@kbn/es-query';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
@@ -34,13 +33,13 @@ export function getDiscoverTimeRangeAroundTimestamp(
 
 export function getDiscoverHrefForRuleQuery({
   share,
-  application,
+  capabilities,
   uiSettings,
   timeRange,
   ruleEsql,
 }: {
   share: SharePluginStart;
-  application: ApplicationStart;
+  capabilities: Capabilities;
   uiSettings: IUiSettingsClient;
   timeRange: TimeRange;
   ruleEsql: string | undefined;
@@ -52,7 +51,7 @@ export function getDiscoverHrefForRuleQuery({
   if (!uiSettings.get(ENABLE_ESQL)) {
     return undefined;
   }
-  if (!application.capabilities.discover_v2?.show) {
+  if (!capabilities.discover_v2?.show) {
     return undefined;
   }
   const locator = share.url.locators.get(DISCOVER_APP_LOCATOR);
@@ -70,13 +69,13 @@ export function getDiscoverHrefForRuleQuery({
  */
 export function getDiscoverHrefForRuleAndEpisodeTimestamp({
   share,
-  application,
+  capabilities,
   uiSettings,
   ruleEsql,
   episodeIsoTimestamp,
 }: {
   share: SharePluginStart;
-  application: ApplicationStart;
+  capabilities: Capabilities;
   uiSettings: IUiSettingsClient;
   ruleEsql: string | undefined;
   episodeIsoTimestamp: string | undefined;
@@ -87,7 +86,7 @@ export function getDiscoverHrefForRuleAndEpisodeTimestamp({
   }
   return getDiscoverHrefForRuleQuery({
     share,
-    application,
+    capabilities,
     uiSettings,
     timeRange,
     ruleEsql,
