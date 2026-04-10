@@ -83,7 +83,9 @@ export const optionsListESQLControlSchema = schema.discriminatedUnion('control_t
     {
       ...baseEsqlControl,
       control_type: schema.literal('STATIC_VALUES'),
-      available_options: schema.arrayOf(schema.string(), { maxSize: MAX_OPTIONS_LIST_REQUEST_SIZE }),
+      available_options: schema.arrayOf(schema.string(), {
+        maxSize: MAX_OPTIONS_LIST_REQUEST_SIZE,
+      }),
     },
     { meta: { id: 'dashboard-esql-control-static-values' } }
   ),
