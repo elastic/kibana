@@ -13,7 +13,7 @@ export class FeatureSettingsPage {
 
   public async goto() {
     await this.page.gotoApp('management/modelManagement/model_settings');
-    await expect(this.page.testSubj.locator('modelSettingsPage')).toBeVisible();
+    await expect(this.page.testSubj.locator('modelSettingsPageHeader')).toBeVisible();
   }
 
   // --- Header ---
@@ -133,6 +133,20 @@ export class FeatureSettingsPage {
   }
 
   // --- Route Mocking ---
+
+  public async mockConnectors() {
+    await this.page.route('**/internal/inference/connectors', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ connectors: [{ connectorId: 'mock-connector' }] }),
+      });
+    });
+  }
+
+  public async unmockConnectors() {
+    await this.page.unroute('**/internal/inference/connectors');
+  }
 
   public async mockInferenceEndpoints(endpoints: unknown[]) {
     await this.page.route('**/internal/inference_endpoints/endpoints', async (route) => {

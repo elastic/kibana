@@ -16,7 +16,12 @@ test.describe(
   () => {
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsPrivilegedUser();
+      await pageObjects.featureSettings.mockConnectors();
       await pageObjects.featureSettings.goto();
+    });
+
+    test.afterEach(async ({ pageObjects }) => {
+      await pageObjects.featureSettings.unmockConnectors();
     });
 
     test('displays page header', async ({ pageObjects }) => {
