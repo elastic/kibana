@@ -63,7 +63,6 @@ const createMockGenAiConnectors = (
   selectConnector: jest.fn(),
   reloadConnectors: jest.fn(),
   isConnectorSelectionRestricted: false,
-  defaultConnector: undefined,
   ...overrides,
 });
 
