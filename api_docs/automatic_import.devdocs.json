@@ -1468,7 +1468,7 @@
           "{ integrationId: string; title: string; totalDataStreamCount: number; successfulDataStreamCount: number; createdBy: string; status: any; logo?: string | undefined; version?: string | undefined; createdByProfileUid?: string | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
-        "lineNumber": 207,
+        "lineNumber": 211,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2027,7 +2027,7 @@
         "label": "GetAutoImportIntegrationResponse",
         "description": [],
         "signature": [
-          "{ integrationResponse: { integrationId: string; title: string; description: string; dataStreams: { dataStreamId: string; title: string; description: string; inputTypes: { name: any; }[]; status: any; }[]; status: any; logo?: string | undefined; version?: string | undefined; createdBy?: string | undefined; createdByProfileUid?: string | undefined; }; }"
+          "{ integrationResponse: { integrationId: string; title: string; description: string; dataStreams: { dataStreamId: string; title: string; description: string; inputTypes: { name: any; }[]; status: any; }[]; status: any; logo?: string | undefined; version?: string | undefined; connectorId?: string | undefined; createdBy?: string | undefined; createdByProfileUid?: string | undefined; }; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
         "lineNumber": 162,
@@ -2084,7 +2084,7 @@
           "\nThe integration response object with its settings."
         ],
         "signature": [
-          "{ integrationId: string; title: string; description: string; dataStreams: { dataStreamId: string; title: string; description: string; inputTypes: { name: any; }[]; status: any; }[]; status: any; logo?: string | undefined; version?: string | undefined; createdBy?: string | undefined; createdByProfileUid?: string | undefined; }"
+          "{ integrationId: string; title: string; description: string; dataStreams: { dataStreamId: string; title: string; description: string; inputTypes: { name: any; }[]; status: any; }[]; status: any; logo?: string | undefined; version?: string | undefined; connectorId?: string | undefined; createdBy?: string | undefined; createdByProfileUid?: string | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
         "lineNumber": 164,
@@ -2106,7 +2106,7 @@
           "{ projectName: string; apiKey: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
-        "lineNumber": 250,
+        "lineNumber": 254,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2481,7 +2481,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
-        "lineNumber": 211,
+        "lineNumber": 215,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2890,6 +2890,10 @@
           "ZodOptional",
           "<",
           "ZodString",
+          ">; connectorId: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
           ">; createdBy: ",
           "ZodOptional",
           "<",
@@ -3022,6 +3026,10 @@
           "ZodOptional",
           "<",
           "ZodString",
+          ">; connectorId: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
           ">; createdBy: ",
           "ZodOptional",
           "<",
@@ -3077,7 +3085,7 @@
           "$strict>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
-        "lineNumber": 254,
+        "lineNumber": 258,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
