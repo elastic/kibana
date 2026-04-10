@@ -20,11 +20,11 @@ import type { SavedObjectReference } from '@kbn/core/server';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 import { getValueColumn } from '../../columns/esql_column';
 import { toLensStateFilterLanguage } from '../../columns/filter';
-import {
-  type DataLayerType,
-  type ReferenceLineLayerType,
-  type AnnotationLayerByValueType,
-  type XYState,
+import type {
+  DataLayerType,
+  ReferenceLineLayerType,
+  AnnotationLayerByValueType,
+  XYState,
 } from '../../../schema/charts/xy';
 import { addLayerColumn, generateLayer } from '../../utils';
 import {
