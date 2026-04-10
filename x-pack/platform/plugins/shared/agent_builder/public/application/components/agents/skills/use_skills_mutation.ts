@@ -11,6 +11,7 @@ import type {
   PublicSkillDefinition,
   PublicSkillSummary,
 } from '@kbn/agent-builder-common';
+import { useCallback, useMemo } from 'react';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { queryKeys } from '../../../query_keys';
 import { labels } from '../../../utils/i18n';
@@ -64,31 +65,42 @@ export const useSkillsMutation = ({ agent }: { agent: AgentDefinition | null }) 
     },
   });
 
-  const handleAddSkill = (
-    skill: PublicSkillSummary | PublicSkillDefinition,
-    { onSuccess }: { onSuccess?: (skillId: string) => void } = {}
-  ) => {
-    const currentIds = agentSkillIds ?? allSkills.map((s) => s.id);
-    if (currentIds.includes(skill.id)) return;
-    const newIds = [...currentIds, skill.id];
+  const handleAddSkill = useCallback(
+    (
+      skill: PublicSkillSummary | PublicSkillDefinition,
+      { onSuccess }: { onSuccess?: (skillId: string) => void } = {}
+    ) => {
+      const currentIds = agentSkillIds ?? allSkills.map((s) => s.id);
+      if (currentIds.includes(skill.id)) return;
+      const newIds = [...currentIds, skill.id];
 
-    updateSkillsMutation.mutate(newIds, {
-      onSuccess: () => {
-        onSuccess?.(skill.id);
-        addSuccessToast({ title: labels.agentSkills.addSkillSuccessToast(skill.name) });
-      },
-    });
-  };
+      updateSkillsMutation.mutate(newIds, {
+        onSuccess: () => {
+          onSuccess?.(skill.id);
+          addSuccessToast({ title: labels.agentSkills.addSkillSuccessToast(skill.name) });
+        },
+      });
+    },
+    [agentSkillIds, allSkills, updateSkillsMutation, addSuccessToast]
+  );
 
-  const handleRemoveSkill = (skill: PublicSkillSummary) => {
-    const currentIds = agentSkillIds ?? allSkills.map((s) => s.id);
-    const newIds = currentIds.filter((id) => id !== skill.id);
-    updateSkillsMutation.mutate(newIds, {
-      onSuccess: () => {
-        addSuccessToast({ title: labels.agentSkills.removeSkillSuccessToast(skill.name) });
-      },
-    });
-  };
+  const handleRemoveSkill = useCallback(
+    (skill: PublicSkillSummary) => {
+      const currentIds = agentSkillIds ?? allSkills.map((s) => s.id);
+      const newIds = currentIds.filter((id) => id !== skill.id);
+      updateSkillsMutation.mutate(newIds, {
+        onSuccess: () => {
+          addSuccessToast({ title: labels.agentSkills.removeSkillSuccessToast(skill.name) });
+        },
+      });
+    },
+    [agentSkillIds, allSkills, updateSkillsMutation, addSuccessToast]
+  );
 
-  return { handleAddSkill, handleRemoveSkill };
+  const handlers = useMemo(
+    () => ({ handleAddSkill, handleRemoveSkill }),
+    [handleAddSkill, handleRemoveSkill]
+  );
+
+  return handlers;
 };
