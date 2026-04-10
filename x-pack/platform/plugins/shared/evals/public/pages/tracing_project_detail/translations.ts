@@ -109,3 +109,17 @@ export const formatTokens = (tokens: number): string => {
   if (tokens >= 1_000) return `${(tokens / 1_000).toFixed(1)}K`;
   return String(tokens);
 };
+
+export const LOAD_ERROR_TITLE = i18n.translate('xpack.evals.tracing.projectDetail.loadErrorTitle', {
+  defaultMessage: 'Unable to load traces',
+});
+
+export const getLoadErrorBody = (errorMessage: string) =>
+  i18n.translate('xpack.evals.tracing.projectDetail.loadErrorBody', {
+    defaultMessage: 'An error occurred while loading traces: {errorMessage}',
+    values: { errorMessage },
+  });
+
+export const RETRY_BUTTON = i18n.translate('xpack.evals.tracing.projectDetail.retryButton', {
+  defaultMessage: 'Retry',
+});
