@@ -20,6 +20,13 @@ import {
 import { css } from '@emotion/react';
 import { labels } from '../../../utils/i18n';
 
+const EMPTY_STATE_PANEL_MAX_WIDTH_PX = 805;
+
+const ILLUSTRATION_WELL_WIDTH_PX = 215;
+const ILLUSTRATION_WELL_HEIGHT_PX = 252;
+
+const ILLUSTRATION_IMAGE_SIZE_PX = 96;
+
 export interface CustomizeLandingEmptyStateProps {
   illustrationSrc: string;
   title: React.ReactNode;
@@ -52,6 +59,7 @@ export const CustomizeLandingEmptyState: React.FC<CustomizeLandingEmptyStateProp
     width: 100%;
     min-height: var(--kbn-application--content-height, 100vh);
     padding-block: ${euiTheme.size.xl};
+    padding-inline: ${euiTheme.size.l};
   `;
 
   const responsiveStack = css`
@@ -65,21 +73,21 @@ export const CustomizeLandingEmptyState: React.FC<CustomizeLandingEmptyStateProp
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 215px;
-    height: 252px;
+    width: ${ILLUSTRATION_WELL_WIDTH_PX}px;
+    height: ${ILLUSTRATION_WELL_HEIGHT_PX}px;
     flex-shrink: 0;
     background-color: ${euiTheme.colors.backgroundBaseSubdued};
     border-radius: ${euiTheme.border.radius.medium};
 
     @media (max-width: ${euiTheme.breakpoint.m - 1}px) {
       width: 100%;
-      max-width: 215px;
+      max-width: ${ILLUSTRATION_WELL_WIDTH_PX}px;
       margin-inline: auto;
     }
   `;
 
   const panelCss = css`
-    max-width: 805px;
+    max-width: ${EMPTY_STATE_PANEL_MAX_WIDTH_PX}px;
     width: 100%;
   `;
 
@@ -162,7 +170,7 @@ export const CustomizeLandingEmptyState: React.FC<CustomizeLandingEmptyStateProp
                   data-test-subj={`${dataTestSubj}Illustration`}
                   src={illustrationSrc}
                   alt=""
-                  size={96}
+                  size={ILLUSTRATION_IMAGE_SIZE_PX}
                 />
               </div>
             </EuiFlexItem>
