@@ -32,9 +32,9 @@ jest.mock('@kbn/rspack-optimizer', () => {
 
 jest.mock('@kbn/optimizer');
 const realOptimizer = jest.requireActual('@kbn/optimizer');
-const { RspackOptimizer: RspackOptimizerMock } = jest.requireMock(
-  '@kbn/rspack-optimizer'
-) as { RspackOptimizer: jest.Mock };
+const { RspackOptimizer: RspackOptimizerMock } = jest.requireMock('@kbn/rspack-optimizer') as {
+  RspackOptimizer: jest.Mock;
+};
 
 const { runOptimizer, OptimizerConfig, logOptimizerState, logOptimizerProgress } =
   jest.requireMock('@kbn/optimizer');
@@ -57,13 +57,13 @@ const mockOptimizerUpdate = (phase: OptimizerUpdate['state']['phase']) => {
   };
 };
 
-type RspackMockInstance = {
+interface RspackMockInstance {
   opts: unknown;
   _phase$: Rx.Subject<OptimizerPhase>;
   getPhase$: jest.Mock;
   run: jest.Mock;
   stop: jest.Mock;
-};
+}
 
 function flushPromises(): Promise<void> {
   return new Promise((resolve) => setImmediate(resolve));

@@ -9,7 +9,7 @@
 
 import { EventEmitter } from 'events';
 import { firstValueFrom } from 'rxjs';
-import { filter, take } from 'rxjs/operators';
+import { filter, take } from 'rxjs';
 import type { ChildProcess } from 'child_process';
 import { fork } from 'child_process';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -55,7 +55,9 @@ describe('RspackOptimizer', () => {
     jest.restoreAllMocks();
   });
 
-  function createOptimizer(overrides: Partial<ConstructorParameters<typeof RspackOptimizer>[0]> = {}) {
+  function createOptimizer(
+    overrides: Partial<ConstructorParameters<typeof RspackOptimizer>[0]> = {}
+  ) {
     return new RspackOptimizer({
       repoRoot,
       log: createMockLog(),
@@ -103,7 +105,9 @@ describe('RspackOptimizer', () => {
     child.emit('message', { type: 'done', success: true, summary: 'built' });
 
     await expect(runPromise).resolves.toBeUndefined();
-    expect(log.success).toHaveBeenCalledWith(expect.stringContaining('RSPack build completed — built'));
+    expect(log.success).toHaveBeenCalledWith(
+      expect.stringContaining('RSPack build completed — built')
+    );
   });
 
   it('non-watch compile failure: done with success=false still resolves run() and emits issue phase', async () => {

@@ -126,138 +126,130 @@ describe('rspack compile integration', () => {
       Fs.rmSync(tmpDir, { recursive: true, force: true });
     });
 
-    it(
-      'compiles a minimal fixture plugin and emits output bundle',
-      async () => {
-        const { pluginDir, pluginId } = createFixturePlugin(tmpDir);
-        const outputDir = Path.join(tmpDir, 'output');
+    it('compiles a minimal fixture plugin and emits output bundle', async () => {
+      const { pluginDir, pluginId } = createFixturePlugin(tmpDir);
+      const outputDir = Path.join(tmpDir, 'output');
 
-        const options: ExternalPluginConfigOptions = {
-          repoRoot: REPO_ROOT,
-          pluginDir,
-          pluginId,
-          outputDir,
-          dist: false,
-          watch: false,
-          cache: false,
-        };
+      const options: ExternalPluginConfigOptions = {
+        repoRoot: REPO_ROOT,
+        pluginDir,
+        pluginId,
+        outputDir,
+        dist: false,
+        watch: false,
+        cache: false,
+      };
 
-        const config = await createExternalPluginConfig(options);
+      const config = await createExternalPluginConfig(options);
 
-        expect(config.name).toBe(`plugin-${pluginId}`);
-        expect(config.entry).toBeDefined();
+      expect(config.name).toBe(`plugin-${pluginId}`);
+      expect(config.entry).toBeDefined();
 
-        const stats = await new Promise<any>((resolve, reject) => {
-          const compiler = rspack(config);
-          compiler.run((err, s) => {
-            compiler.close(() => {
-              if (err) return reject(err);
-              resolve(s);
-            });
+      const stats = await new Promise<any>((resolve, reject) => {
+        const compiler = rspack(config);
+        compiler.run((err, s) => {
+          compiler.close(() => {
+            if (err) return reject(err);
+            resolve(s);
           });
         });
+      });
 
-        expect(stats).toBeDefined();
-        expect(stats.hasErrors()).toBe(false);
+      expect(stats).toBeDefined();
+      expect(stats.hasErrors()).toBe(false);
 
-        const outputFiles = Fs.readdirSync(outputDir).filter(
-          (f) => !f.startsWith('.') && f.endsWith('.js')
-        );
-        expect(outputFiles.length).toBeGreaterThanOrEqual(1);
+      const outputFiles = Fs.readdirSync(outputDir).filter(
+        (f) => !f.startsWith('.') && f.endsWith('.js')
+      );
+      expect(outputFiles.length).toBeGreaterThanOrEqual(1);
 
-        const mainBundle = outputFiles.find((f) => f.includes(pluginId));
-        expect(mainBundle).toBeDefined();
+      const mainBundle = outputFiles.find((f) => f.includes(pluginId));
+      expect(mainBundle).toBeDefined();
 
-        const bundleContent = Fs.readFileSync(Path.join(outputDir, mainBundle!), 'utf-8');
-        expect(bundleContent.length).toBeGreaterThan(0);
+      const bundleContent = Fs.readFileSync(Path.join(outputDir, mainBundle!), 'utf-8');
+      expect(bundleContent.length).toBeGreaterThan(0);
 
-        // Verify plugin exports are preserved (regression guard for export preservation).
-        // All named exports must survive bundling because external plugins consume them
-        // at runtime via __kbnBundles__.get().
-        expect(bundleContent).toContain('__kbnBundles__');
-        expect(bundleContent).toContain(`plugin/${pluginId}`);
-        expect(bundleContent).toMatch(/plugin/);
-        expect(bundleContent).toMatch(/MY_CONSTANT/);
-        expect(bundleContent).toMatch(/SomeComponent/);
-      },
-      120_000
-    );
+      // Verify plugin exports are preserved (regression guard for export preservation).
+      // All named exports must survive bundling because external plugins consume them
+      // at runtime via __kbnBundles__.get().
+      expect(bundleContent).toContain('__kbnBundles__');
+      expect(bundleContent).toContain(`plugin/${pluginId}`);
+      expect(bundleContent).toMatch(/plugin/);
+      expect(bundleContent).toMatch(/MY_CONSTANT/);
+      expect(bundleContent).toMatch(/SomeComponent/);
+    }, 120_000);
 
-    it(
-      'compiles a fixture plugin in production mode with minification',
-      async () => {
-        const { pluginDir, pluginId } = createFixturePlugin(tmpDir);
-        const outputDir = Path.join(tmpDir, 'output-dist');
+    it('compiles a fixture plugin in production mode with minification', async () => {
+      const { pluginDir, pluginId } = createFixturePlugin(tmpDir);
+      const outputDir = Path.join(tmpDir, 'output-dist');
 
-        const config = await createExternalPluginConfig({
-          repoRoot: REPO_ROOT,
-          pluginDir,
-          pluginId,
-          outputDir,
-          dist: true,
-          watch: false,
-          cache: false,
-        });
+      const config = await createExternalPluginConfig({
+        repoRoot: REPO_ROOT,
+        pluginDir,
+        pluginId,
+        outputDir,
+        dist: true,
+        watch: false,
+        cache: false,
+      });
 
-        expect(config.mode).toBe('production');
+      expect(config.mode).toBe('production');
 
-        const stats = await new Promise<any>((resolve, reject) => {
-          const compiler = rspack(config);
-          compiler.run((err, s) => {
-            compiler.close(() => {
-              if (err) return reject(err);
-              resolve(s);
-            });
+      const stats = await new Promise<any>((resolve, reject) => {
+        const compiler = rspack(config);
+        compiler.run((err, s) => {
+          compiler.close(() => {
+            if (err) return reject(err);
+            resolve(s);
           });
         });
+      });
 
-        expect(stats).toBeDefined();
-        expect(stats.hasErrors()).toBe(false);
+      expect(stats).toBeDefined();
+      expect(stats.hasErrors()).toBe(false);
 
-        const mainBundle = Fs.readdirSync(outputDir).find(
-          (f) => f.includes(pluginId) && f.endsWith('.js')
-        );
-        expect(mainBundle).toBeDefined();
+      const mainBundle = Fs.readdirSync(outputDir).find(
+        (f) => f.includes(pluginId) && f.endsWith('.js')
+      );
+      expect(mainBundle).toBeDefined();
 
-        const devConfig = await createExternalPluginConfig({
-          repoRoot: REPO_ROOT,
-          pluginDir,
-          pluginId,
-          outputDir: Path.join(tmpDir, 'output-dev'),
-          dist: false,
-          watch: false,
-          cache: false,
-        });
+      const devConfig = await createExternalPluginConfig({
+        repoRoot: REPO_ROOT,
+        pluginDir,
+        pluginId,
+        outputDir: Path.join(tmpDir, 'output-dev'),
+        dist: false,
+        watch: false,
+        cache: false,
+      });
 
-        const devStats = await new Promise<any>((resolve, reject) => {
-          const compiler = rspack(devConfig);
-          compiler.run((err, s) => {
-            compiler.close(() => {
-              if (err) return reject(err);
-              resolve(s);
-            });
+      const devStats = await new Promise<any>((resolve, reject) => {
+        const compiler = rspack(devConfig);
+        compiler.run((err, s) => {
+          compiler.close(() => {
+            if (err) return reject(err);
+            resolve(s);
           });
         });
+      });
 
-        expect(devStats.hasErrors()).toBe(false);
+      expect(devStats.hasErrors()).toBe(false);
 
-        // Verify export names survive minification -- they appear as string keys
-        // in Rspack's __webpack_exports__ define call (e.g. b.d(D, { MY_CONSTANT: ... }))
-        const distContent = Fs.readFileSync(Path.join(outputDir, mainBundle!), 'utf-8');
-        expect(distContent).toContain('__kbnBundles__');
-        expect(distContent).toMatch(/plugin/);
-        expect(distContent).toMatch(/MY_CONSTANT/);
-        expect(distContent).toMatch(/SomeComponent/);
+      // Verify export names survive minification -- they appear as string keys
+      // in Rspack's __webpack_exports__ define call (e.g. b.d(D, { MY_CONSTANT: ... }))
+      const distContent = Fs.readFileSync(Path.join(outputDir, mainBundle!), 'utf-8');
+      expect(distContent).toContain('__kbnBundles__');
+      expect(distContent).toMatch(/plugin/);
+      expect(distContent).toMatch(/MY_CONSTANT/);
+      expect(distContent).toMatch(/SomeComponent/);
 
-        const distSize = Fs.statSync(Path.join(outputDir, mainBundle!)).size;
-        const devBundle = Fs.readdirSync(Path.join(tmpDir, 'output-dev')).find(
-          (f) => f.includes(pluginId) && f.endsWith('.js')
-        );
-        const devSize = Fs.statSync(Path.join(tmpDir, 'output-dev', devBundle!)).size;
+      const distSize = Fs.statSync(Path.join(outputDir, mainBundle!)).size;
+      const devBundle = Fs.readdirSync(Path.join(tmpDir, 'output-dev')).find(
+        (f) => f.includes(pluginId) && f.endsWith('.js')
+      );
+      const devSize = Fs.statSync(Path.join(tmpDir, 'output-dev', devBundle!)).size;
 
-        expect(distSize).toBeLessThan(devSize);
-      },
-      120_000
-    );
+      expect(distSize).toBeLessThan(devSize);
+    }, 120_000);
   });
 });

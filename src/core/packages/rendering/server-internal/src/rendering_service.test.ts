@@ -713,10 +713,10 @@ describe('RenderingService', () => {
   });
 
   describe('rspack mode metadata', () => {
-    let service: RenderingService;
+    let rspackService: RenderingService;
 
     beforeEach(() => {
-      service = new RenderingService(mockRenderingServiceParams);
+      rspackService = new RenderingService(mockRenderingServiceParams);
     });
 
     afterEach(() => {
@@ -726,8 +726,8 @@ describe('RenderingService', () => {
     it('includes font preload links and font-display:swap when rspack mode is enabled', async () => {
       isRspackModeEnabledMock.mockReturnValue(true);
 
-      const { render } = await service.setup(mockRenderingSetupDeps);
-      service.start(mockRenderingStartDeps);
+      const { render } = await rspackService.setup(mockRenderingSetupDeps);
+      rspackService.start(mockRenderingStartDeps);
 
       const uiSettings = {
         client: uiSettingsServiceMock.createClient(),
@@ -752,8 +752,8 @@ describe('RenderingService', () => {
     it('does not include font preload links when rspack mode is disabled', async () => {
       isRspackModeEnabledMock.mockReturnValue(false);
 
-      const { render } = await service.setup(mockRenderingSetupDeps);
-      service.start(mockRenderingStartDeps);
+      const { render } = await rspackService.setup(mockRenderingSetupDeps);
+      rspackService.start(mockRenderingStartDeps);
 
       const uiSettings = {
         client: uiSettingsServiceMock.createClient(),

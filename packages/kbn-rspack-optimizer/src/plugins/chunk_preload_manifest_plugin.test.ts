@@ -23,7 +23,7 @@ const createMockCompiler = (opts: {
   entrypoints?: Map<string, { childrenIterable: Array<{ chunks: typeof opts.chunks }> }>;
 }) => {
   let processAssetsFn: () => void;
-  let emittedAssets: Array<{ name: string; source: string }> = [];
+  const emittedAssets: Array<{ name: string; source: string }> = [];
 
   const compilation = {
     hooks: {

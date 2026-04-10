@@ -380,66 +380,70 @@ tsTester.run('@kbn/imports/no_undeclared_plugin_target', NoUndeclaredPluginTarge
 /**
  * Additional tests for import form coverage and edge cases.
  */
-tsTester.run('@kbn/imports/no_undeclared_plugin_target (import forms)', NoUndeclaredPluginTargetRule, {
-  valid: [
-    // export * from valid declared target
-    {
-      filename: 'production_code.ts',
-      code: `export * from '@kbn/discover-plugin/public';`,
-    },
-    // export { x } from valid declared target
-    {
-      filename: 'production_code.ts',
-      code: `export { foo } from '@kbn/discover-plugin/common';`,
-    },
-    // dynamic import() valid target
-    {
-      filename: 'production_code.ts',
-      code: `const mod = import('@kbn/discover-plugin/public');`,
-    },
-    // require() valid target
-    {
-      filename: 'production_code.ts',
-      code: `const mod = require('@kbn/discover-plugin/common');`,
-    },
-    // require.resolve() undeclared target — still validated, but of valid target
-    {
-      filename: 'production_code.ts',
-      code: `const p = require.resolve('@kbn/discover-plugin/public');`,
-    },
-    // Mixed type/value import: isTypeOnlyImport returns true when ANY specifier is type-only
-    // (import declaration level importKind='type' or specifier-level importKind='type')
-    // Current behavior: declaration-level importKind='type' skips; individual specifier type doesn't skip unless ALL are type
-    {
-      filename: 'production_code.ts',
-      code: `import type { Foo } from '@kbn/discover-plugin/server';`,
-    },
-    // Dynamic import() with template literal containing expression -> req is null, silently skipped
-    {
-      filename: 'production_code.ts',
-      code: 'const mod = import(`@kbn/foo/${expr}`);',
-    },
-    // Missing manifest: unknown package returns undefined from getPkgManifest -> silently skipped
-    {
-      filename: 'production_code.ts',
-      code: `import { Foo } from '@kbn/unknown-package/server';`,
-    },
-  ],
-  invalid: [
-    // require.resolve() of undeclared target
-    {
-      filename: 'production_code.ts',
-      code: `const p = require.resolve('@kbn/discover-plugin/server');`,
-      errors: [
-        {
-          messageId: 'INVALID_TARGET',
-          data: {
-            request: '@kbn/discover-plugin/server',
-            pluginId: 'discover',
-            targets: 'public, common',
+tsTester.run(
+  '@kbn/imports/no_undeclared_plugin_target (import forms)',
+  NoUndeclaredPluginTargetRule,
+  {
+    valid: [
+      // export * from valid declared target
+      {
+        filename: 'production_code.ts',
+        code: `export * from '@kbn/discover-plugin/public';`,
+      },
+      // export { x } from valid declared target
+      {
+        filename: 'production_code.ts',
+        code: `export { foo } from '@kbn/discover-plugin/common';`,
+      },
+      // dynamic import() valid target
+      {
+        filename: 'production_code.ts',
+        code: `const mod = import('@kbn/discover-plugin/public');`,
+      },
+      // require() valid target
+      {
+        filename: 'production_code.ts',
+        code: `const mod = require('@kbn/discover-plugin/common');`,
+      },
+      // require.resolve() undeclared target — still validated, but of valid target
+      {
+        filename: 'production_code.ts',
+        code: `const p = require.resolve('@kbn/discover-plugin/public');`,
+      },
+      // Mixed type/value import: isTypeOnlyImport returns true when ANY specifier is type-only
+      // (import declaration level importKind='type' or specifier-level importKind='type')
+      // Current behavior: declaration-level importKind='type' skips; individual specifier type doesn't skip unless ALL are type
+      {
+        filename: 'production_code.ts',
+        code: `import type { Foo } from '@kbn/discover-plugin/server';`,
+      },
+      // Dynamic import() with template literal containing expression -> req is null, silently skipped
+      {
+        filename: 'production_code.ts',
+        code: 'const mod = import(`@kbn/foo/${expr}`);',
+      },
+      // Missing manifest: unknown package returns undefined from getPkgManifest -> silently skipped
+      {
+        filename: 'production_code.ts',
+        code: `import { Foo } from '@kbn/unknown-package/server';`,
+      },
+    ],
+    invalid: [
+      // require.resolve() of undeclared target
+      {
+        filename: 'production_code.ts',
+        code: `const p = require.resolve('@kbn/discover-plugin/server');`,
+        errors: [
+          {
+            messageId: 'INVALID_TARGET',
+            data: {
+              request: '@kbn/discover-plugin/server',
+              pluginId: 'discover',
+              targets: 'public, common',
+            },
           },
-        },
-      ],
-    },
-  ],
-});
+        ],
+      },
+    ],
+  }
+);

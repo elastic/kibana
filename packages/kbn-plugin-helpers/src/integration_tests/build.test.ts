@@ -133,14 +133,10 @@ describe('scripts/generate_plugin', () => {
    * and the KBN_USE_RSPACK env gate should be removed from cli.ts.
    */
   it('builds a generated plugin with rspack when KBN_USE_RSPACK is set', async () => {
-    await execa(
-      process.execPath,
-      ['scripts/generate_plugin', '-y', '--name', 'fooTestPlugin'],
-      {
-        cwd: REPO_ROOT,
-        all: true,
-      }
-    );
+    await execa(process.execPath, ['scripts/generate_plugin', '-y', '--name', 'fooTestPlugin'], {
+      cwd: REPO_ROOT,
+      all: true,
+    });
 
     const filterLogs = (logs: string | undefined) => {
       return logs

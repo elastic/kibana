@@ -38,9 +38,7 @@ describe('getRspackDependencyPaths', () => {
   const bundlePaths = new Map<string, PluginInfo>();
 
   it('returns shared deps before chunk paths before kibana.bundle.js', () => {
-    const paths = getRspackDependencyPaths('/bundles', bundlePaths, [], [
-      '/bundles/chunk-abc.js',
-    ]);
+    const paths = getRspackDependencyPaths('/bundles', bundlePaths, [], ['/bundles/chunk-abc.js']);
 
     expect(paths).toEqual([
       '/bundles/kbn-ui-shared-deps-npm/kbn-ui-shared-deps-npm.dll.js',

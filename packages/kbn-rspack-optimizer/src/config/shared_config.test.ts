@@ -281,8 +281,8 @@ describe('shared_config', () => {
     it('should pass non-default themeTags and bundleId to theme_loader options', () => {
       const themeTags: ThemeTag[] = ['borealisdark', 'borealislight'];
       const bundleId = 'custom-bundle';
-      const rules = getSharedModuleRules(REPO_ROOT, false, themeTags, bundleId);
-      const scssRule = rules.find((r) => r.test?.toString() === '/\\.scss$/');
+      const customRules = getSharedModuleRules(REPO_ROOT, false, themeTags, bundleId);
+      const scssRule = customRules.find((r) => r.test?.toString() === '/\\.scss$/');
       expect(scssRule?.oneOf).toBeDefined();
 
       const themeLoaderEntry = (scssRule!.oneOf as any[]).find((entry) => {
@@ -296,8 +296,8 @@ describe('shared_config', () => {
 
     it('should build per-theme resourceQuery rules for non-default themeTags order', () => {
       const themeTags: ThemeTag[] = ['borealisdark', 'borealislight'];
-      const rules = getSharedModuleRules(REPO_ROOT, false, themeTags, 'custom-bundle');
-      const scssRule = rules.find((r) => r.test?.toString() === '/\\.scss$/');
+      const customRules = getSharedModuleRules(REPO_ROOT, false, themeTags, 'custom-bundle');
+      const scssRule = customRules.find((r) => r.test?.toString() === '/\\.scss$/');
       const oneOf = scssRule?.oneOf as any[];
 
       const themeQueryRules = oneOf!.filter((entry) => entry.resourceQuery !== undefined);
