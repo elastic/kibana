@@ -92,7 +92,7 @@ describe('groupPanelRenderer', () => {
       const { getByText } = render(<>{element}</>);
 
       expect(getByText('james-hue')).toBeInTheDocument();
-      expect(getByText('Entity id: user:james@example.com')).toBeInTheDocument();
+      expect(getByText('Entity ID: user:james@example.com')).toBeInTheDocument();
     });
 
     it('does not render entity id subtitle when falling back to entity id as name', () => {
@@ -109,7 +109,7 @@ describe('groupPanelRenderer', () => {
       const { getByText, queryByText } = render(<>{element}</>);
 
       expect(getByText('fallback-entity-id')).toBeInTheDocument();
-      expect(queryByText(/Entity id:/)).not.toBeInTheDocument();
+      expect(queryByText(/Entity ID:/)).not.toBeInTheDocument();
     });
 
     it('falls back to bucket key when resolutionEntityName has no buckets', () => {

@@ -198,7 +198,7 @@ describe('ResolutionGroupTable', () => {
     );
 
     expect(getByText('Entity name')).toBeInTheDocument();
-    expect(getByText('Entity id')).toBeInTheDocument();
+    expect(getByText('Entity ID')).toBeInTheDocument();
     expect(getByText('Data source')).toBeInTheDocument();
     expect(getByText('Risk score')).toBeInTheDocument();
   });

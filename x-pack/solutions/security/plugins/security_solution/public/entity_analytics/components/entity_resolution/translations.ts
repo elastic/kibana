@@ -34,7 +34,7 @@ export const ENTITY_NAME_COLUMN = i18n.translate(
 
 export const ENTITY_ID_COLUMN = i18n.translate(
   'xpack.securitySolution.entityResolution.columns.entityId',
-  { defaultMessage: 'Entity id' }
+  { defaultMessage: 'Entity ID' }
 );
 
 export const SOURCE_COLUMN = i18n.translate(
