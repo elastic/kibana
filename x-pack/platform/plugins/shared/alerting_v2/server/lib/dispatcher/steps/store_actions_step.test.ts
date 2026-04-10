@@ -23,6 +23,8 @@ const createMockStorageService = (): jest.Mocked<StorageServiceContract> => ({
   bulkIndexDocs: jest.fn().mockResolvedValue(undefined),
 });
 
+const createRules = (...ids: string[]) => new Map(ids.map((id) => [id, createRule({ id })]));
+
 describe('StoreActionsStep', () => {
   const mockDate = new Date('2026-01-22T08:00:00.000Z');
 
@@ -95,7 +97,7 @@ describe('StoreActionsStep', () => {
       suppressed: [{ ...episode, reason: 'user acknowledged' }],
       throttled: [],
       dispatch: [],
-      rules: new Map([['rule-1', createRule({ id: 'rule-1' })]]),
+      rules: createRules('rule-1'),
     });
 
     const result = await step.execute(state);
@@ -140,7 +142,7 @@ describe('StoreActionsStep', () => {
       suppressed: [],
       throttled: [group],
       dispatch: [],
-      rules: new Map([['rule-1', createRule({ id: 'rule-1' })]]),
+      rules: createRules('rule-1'),
     });
 
     const result = await step.execute(state);
@@ -185,7 +187,7 @@ describe('StoreActionsStep', () => {
       suppressed: [],
       throttled: [],
       dispatch: [group],
-      rules: new Map([['rule-1', createRule({ id: 'rule-1' })]]),
+      rules: createRules('rule-1'),
     });
 
     const result = await step.execute(state);
@@ -242,7 +244,7 @@ describe('StoreActionsStep', () => {
       policies: new Map([
         ['policy-1', createNotificationPolicy({ id: 'policy-1', throttle: { interval: '1h' } })],
       ]),
-      rules: new Map([['rule-1', createRule({ id: 'rule-1' })]]),
+      rules: createRules('rule-1'),
     });
 
     const result = await step.execute(state);
@@ -293,7 +295,7 @@ describe('StoreActionsStep', () => {
           }),
         ],
       ]),
-      rules: new Map([['rule-1', createRule({ id: 'rule-1' })]]),
+      rules: createRules('rule-1'),
     });
 
     const result = await step.execute(state);
@@ -354,11 +356,7 @@ describe('StoreActionsStep', () => {
           createNotificationPolicy({ id: 'dispatch-policy', throttle: { interval: '1h' } }),
         ],
       ]),
-      rules: new Map([
-        ['rule-suppressed', createRule({ id: 'rule-suppressed' })],
-        ['rule-throttled', createRule({ id: 'rule-throttled' })],
-        ['rule-dispatch', createRule({ id: 'rule-dispatch' })],
-      ]),
+      rules: createRules('rule-suppressed', 'rule-throttled', 'rule-dispatch'),
     });
 
     const result = await step.execute(state);
@@ -435,7 +433,7 @@ describe('StoreActionsStep', () => {
       suppressed: [],
       throttled: [],
       dispatch: [],
-      rules: new Map([['rule-unmatched', createRule({ id: 'rule-unmatched' })]]),
+      rules: createRules('rule-unmatched'),
     });
 
     const result = await step.execute(state);
@@ -481,10 +479,7 @@ describe('StoreActionsStep', () => {
       suppressed: [],
       throttled: [],
       dispatch: [],
-      rules: new Map([
-        ['rule-1', createRule({ id: 'rule-1' })],
-        ['rule-2', createRule({ id: 'rule-2' })],
-      ]),
+      rules: createRules('rule-1', 'rule-2'),
     });
 
     const result = await step.execute(state);
@@ -540,11 +535,7 @@ describe('StoreActionsStep', () => {
       suppressed: [],
       throttled: [throttledGroup],
       dispatch: [dispatchGroup],
-      rules: new Map([
-        ['rule-dispatch', createRule({ id: 'rule-dispatch' })],
-        ['rule-throttled', createRule({ id: 'rule-throttled' })],
-        ['rule-unmatched', createRule({ id: 'rule-unmatched' })],
-      ]),
+      rules: createRules('rule-dispatch', 'rule-throttled', 'rule-unmatched'),
     });
 
     const result = await step.execute(state);
@@ -603,7 +594,7 @@ describe('StoreActionsStep', () => {
 
     const state = createDispatcherPipelineState({
       dispatch: [group],
-      rules: new Map([['rule-1', createRule({ id: 'rule-1' })]]),
+      rules: createRules('rule-1'),
     });
 
     const result = await step.execute(state);
@@ -619,5 +610,105 @@ describe('StoreActionsStep', () => {
     expect(callArgs.docs[1].group_hash).toBe('hash-2');
     expect(callArgs.docs[2].action_type).toBe('notified');
     expect(callArgs.docs[2].group_hash).toBe('hash-1');
+  });
+
+  describe('space_id resolution', () => {
+    it('uses the space_id from the rules map for each episode', async () => {
+      const mockService = createMockStorageService();
+      const step = new StoreActionsStep(mockService);
+
+      const episode = createAlertEpisode({
+        rule_id: 'rule-in-custom-space',
+        group_hash: 'hash-1',
+        last_event_timestamp: '2026-01-22T07:00:00.000Z',
+      });
+
+      const state = createDispatcherPipelineState({
+        suppressed: [{ ...episode, reason: 'suppressed' }],
+        rules: new Map([
+          ['rule-in-custom-space', createRule({ id: 'rule-in-custom-space', spaceId: 'custom' })],
+        ]),
+      });
+
+      await step.execute(state);
+
+      const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
+      expect(callArgs.docs[0].space_id).toBe('custom');
+    });
+
+    it('defaults space_id to "default" when rule is not found in the rules map', async () => {
+      const mockService = createMockStorageService();
+      const step = new StoreActionsStep(mockService);
+
+      const episode = createAlertEpisode({
+        rule_id: 'unknown-rule',
+        group_hash: 'hash-1',
+        last_event_timestamp: '2026-01-22T07:00:00.000Z',
+      });
+
+      const state = createDispatcherPipelineState({
+        suppressed: [{ ...episode, reason: 'suppressed' }],
+        rules: createRules('other-rule'),
+      });
+
+      await step.execute(state);
+
+      const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
+      expect(callArgs.docs[0].space_id).toBe('default');
+    });
+
+    it('defaults space_id to "default" when rules map is undefined', async () => {
+      const mockService = createMockStorageService();
+      const step = new StoreActionsStep(mockService);
+
+      const episode = createAlertEpisode({
+        rule_id: 'rule-1',
+        group_hash: 'hash-1',
+        last_event_timestamp: '2026-01-22T07:00:00.000Z',
+      });
+
+      const state = createDispatcherPipelineState({
+        suppressed: [{ ...episode, reason: 'suppressed' }],
+      });
+
+      await step.execute(state);
+
+      const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
+      expect(callArgs.docs[0].space_id).toBe('default');
+    });
+
+    it('resolves different space_id for episodes from rules in different spaces', async () => {
+      const mockService = createMockStorageService();
+      const step = new StoreActionsStep(mockService);
+
+      const episode1 = createAlertEpisode({
+        rule_id: 'rule-space-a',
+        group_hash: 'hash-1',
+        last_event_timestamp: '2026-01-22T07:00:00.000Z',
+      });
+
+      const episode2 = createAlertEpisode({
+        rule_id: 'rule-space-b',
+        group_hash: 'hash-2',
+        last_event_timestamp: '2026-01-22T07:05:00.000Z',
+      });
+
+      const state = createDispatcherPipelineState({
+        suppressed: [
+          { ...episode1, reason: 'suppressed' },
+          { ...episode2, reason: 'suppressed' },
+        ],
+        rules: new Map([
+          ['rule-space-a', createRule({ id: 'rule-space-a', spaceId: 'space-a' })],
+          ['rule-space-b', createRule({ id: 'rule-space-b', spaceId: 'space-b' })],
+        ]),
+      });
+
+      await step.execute(state);
+
+      const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
+      expect(callArgs.docs[0].space_id).toBe('space-a');
+      expect(callArgs.docs[1].space_id).toBe('space-b');
+    });
   });
 });

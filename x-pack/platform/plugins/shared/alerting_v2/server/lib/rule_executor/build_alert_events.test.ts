@@ -75,6 +75,21 @@ describe('createAlertEventsBatchBuilder', () => {
     // Different grouping should produce different group_hash
     expect(doc1.group_hash).not.toEqual(doc2.group_hash);
   });
+
+  it('sets space_id on breached alert events from the provided spaceId', () => {
+    const buildBatch = createAlertEventsBatchBuilder({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      spaceId: 'custom-space',
+      ruleAttributes: { grouping: { fields: ['host.name'] } },
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+    });
+
+    const docs = buildBatch([{ 'host.name': 'host-a' }]);
+
+    expect(docs).toHaveLength(1);
+    expect(docs[0].space_id).toBe('custom-space');
+  });
 });
 
 describe('buildRecoveryAlertEvents', () => {
@@ -150,6 +165,20 @@ describe('buildRecoveryAlertEvents', () => {
     });
 
     expect(events).toEqual([]);
+  });
+
+  it('sets space_id on recovered alert events from the provided spaceId', () => {
+    const events = buildRecoveryAlertEvents({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      spaceId: 'custom-space',
+      activeGroupHashes: [{ group_hash: 'hash-a' }],
+      breachedGroupHashes: new Set(),
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+    });
+
+    expect(events).toHaveLength(1);
+    expect(events[0].space_id).toBe('custom-space');
   });
 });
 
@@ -283,5 +312,34 @@ describe('buildQueryRecoveryAlertEvents', () => {
     expect(events).toHaveLength(1);
     expect(events[0].group_hash).toBe(activeGroupHash);
     expect(events[0].data).toEqual({ 'host.name': 'host-a', msg: 'recovered-1' });
+  });
+
+  it('sets space_id on query-recovered alert events from the provided spaceId', () => {
+    const esqlResponse: EsqlQueryResponse = {
+      columns: [{ name: 'host.name', type: 'keyword' }],
+      values: [['host-a']],
+    };
+
+    const breachedEvents = buildAlertEventsFromEsqlResponse({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      spaceId: 'custom-space',
+      ruleAttributes: { grouping: { fields: ['host.name'] } },
+      esqlResponse,
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+    });
+
+    const events = buildQueryRecoveryAlertEvents({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      spaceId: 'custom-space',
+      ruleAttributes: { grouping: { fields: ['host.name'] } },
+      activeGroupHashes: [{ group_hash: breachedEvents[0].group_hash }],
+      esqlResponse,
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+    });
+
+    expect(events).toHaveLength(1);
+    expect(events[0].space_id).toBe('custom-space');
   });
 });
