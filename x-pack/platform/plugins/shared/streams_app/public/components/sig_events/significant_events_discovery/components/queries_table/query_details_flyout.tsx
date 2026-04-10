@@ -11,6 +11,7 @@ import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiCallOut,
+  EuiCodeBlock,
   EuiConfirmModal,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -287,11 +288,7 @@ export function QueryDetailsFlyout({
               </EuiFlexItem>
               <EuiFlexItem>
                 <InfoPanel
-                  title={
-                    queryType === QUERY_TYPE_STATS
-                      ? THRESHOLD_BREACHES_TOOLTIP_NAME
-                      : OCCURRENCES_COLUMN
-                  }
+                  title={QUERY_PANEL_TITLE}
                   headerRightContent={
                     discoverLocator ? (
                       <EuiButtonEmpty
@@ -305,6 +302,19 @@ export function QueryDetailsFlyout({
                         {OPEN_IN_DISCOVER_ACTION_TITLE}
                       </EuiButtonEmpty>
                     ) : undefined
+                  }
+                >
+                  <EuiCodeBlock language="esql" isCopyable paddingSize="m">
+                    {getQueryInputValue(item) || DEFAULT_QUERY_PLACEHOLDER}
+                  </EuiCodeBlock>
+                </InfoPanel>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <InfoPanel
+                  title={
+                    queryType === QUERY_TYPE_STATS
+                      ? THRESHOLD_BREACHES_TOOLTIP_NAME
+                      : OCCURRENCES_COLUMN
                   }
                 >
                   {hasDetectedOccurrences ? (
@@ -458,6 +468,11 @@ const EDIT_QUERY_TITLE = i18n.translate(
 const QUERY_NAME_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.queryNameLabel',
   { defaultMessage: 'Query name' }
+);
+
+const QUERY_PANEL_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.queryLabel',
+  { defaultMessage: 'Query' }
 );
 
 const DESCRIPTION_LABEL = i18n.translate(
