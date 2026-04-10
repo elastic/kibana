@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { coreLifecycleMock } from '@kbn/core-lifecycle-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
@@ -38,6 +39,7 @@ export const createStartServicesMock = () => ({
   triggersActionsUi: triggersActionsUiMock.createStart(),
   workflowsExtensions: workflowsExtensionsMock.createStart(),
   licensing: licensingMock.createStart(),
+  cloud: cloudMock.createStart(),
   workflowsManagement: {
     telemetry: {
       reportEvent: jest.fn(),

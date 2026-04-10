@@ -8,46 +8,23 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { of } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
 import { WorkflowsAvailabilityWrapper } from './workflows_availability_wrapper';
-import type { AvailabilityStatus } from '../../common/lib/availability/availability_service';
+import { createStartServicesMock } from '../../mocks';
 
-const availabilityStatus$ = new BehaviorSubject<AvailabilityStatus>({ isAvailable: true });
-
-const mockGetAvailabilityStatus$ = jest.fn(() => availabilityStatus$.asObservable());
-const mockGetAvailabilityStatus = jest.fn(() => availabilityStatus$.getValue());
-const mockNavigateToApp = jest.fn();
-const mockGetUrlForApp = jest.fn((appId: string) => `/app/${appId}`);
-const mockGetPrivilegedUrls = jest.fn(
-  (): Promise<{ billingUrl: undefined | string }> => Promise.resolve({ billingUrl: undefined })
-);
-
+const mockUseKibanaServices = createStartServicesMock();
 jest.mock('../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      application: {
-        navigateToApp: mockNavigateToApp,
-        getUrlForApp: mockGetUrlForApp,
-      },
-      cloud: {
-        getPrivilegedUrls: mockGetPrivilegedUrls,
-      },
-      workflowsManagement: {
-        availability: {
-          getAvailabilityStatus$: mockGetAvailabilityStatus$,
-          getAvailabilityStatus: mockGetAvailabilityStatus,
-        },
-      },
-    },
-  }),
+  useKibana: () => ({ services: mockUseKibanaServices }),
 }));
-
 jest.mock('../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs', () => ({
   useWorkflowsBreadcrumbs: jest.fn(),
 }));
+
+// Mock helper
+const mockAvailabilityService = mockUseKibanaServices.workflowsManagement.availability;
 
 const renderWithProviders = (ui: React.ReactElement) =>
   render(
@@ -59,8 +36,7 @@ const renderWithProviders = (ui: React.ReactElement) =>
 describe('WorkflowsAvailabilityWrapper', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    availabilityStatus$.next({ isAvailable: true });
-    mockGetAvailabilityStatus.mockImplementation(() => availabilityStatus$.getValue());
+    mockAvailabilityService.getAvailabilityStatus$.mockReturnValue(of({ isAvailable: true }));
   });
 
   it('should render children when workflows are available', () => {
@@ -76,7 +52,9 @@ describe('WorkflowsAvailabilityWrapper', () => {
 
   describe('when unavailable due to license', () => {
     beforeEach(() => {
-      availabilityStatus$.next({ isAvailable: false, unavailabilityReason: 'license' });
+      mockAvailabilityService.getAvailabilityStatus$.mockReturnValue(
+        of({ isAvailable: false, unavailabilityReason: 'license' })
+      );
     });
 
     it('should render access denied with license upgrade title and description', () => {
@@ -119,11 +97,13 @@ describe('WorkflowsAvailabilityWrapper', () => {
 
   describe('when unavailable due to serverless tier', () => {
     beforeEach(() => {
-      availabilityStatus$.next({
-        isAvailable: false,
-        unavailabilityReason: 'serverless_tier',
-        requiredProducts: ['Security Complete'],
-      });
+      mockAvailabilityService.getAvailabilityStatus$.mockReturnValue(
+        of({
+          isAvailable: false,
+          unavailabilityReason: 'serverless_tier',
+          requiredProducts: ['Security Complete'],
+        })
+      );
     });
 
     it('should render access denied with serverless tier title and description', () => {
@@ -154,7 +134,9 @@ describe('WorkflowsAvailabilityWrapper', () => {
     });
 
     it('should show contact admin text when billing URL is not available', () => {
-      mockGetPrivilegedUrls.mockResolvedValue({ billingUrl: undefined });
+      mockUseKibanaServices.cloud.getPrivilegedUrls.mockResolvedValue({
+        billingUrl: undefined,
+      });
 
       renderWithProviders(
         <WorkflowsAvailabilityWrapper>
@@ -168,7 +150,7 @@ describe('WorkflowsAvailabilityWrapper', () => {
     });
 
     it('should show manage subscription button when billing URL is available', async () => {
-      mockGetPrivilegedUrls.mockResolvedValue({
+      mockUseKibanaServices.cloud.getPrivilegedUrls.mockResolvedValue({
         billingUrl: 'https://cloud.elastic.co/billing',
       });
 
@@ -178,7 +160,7 @@ describe('WorkflowsAvailabilityWrapper', () => {
         </WorkflowsAvailabilityWrapper>
       );
 
-      expect(await screen.findByText('Manage subscription')).toBeInTheDocument();
+      waitFor(() => expect(screen.getByText('Manage subscription')).toBeInTheDocument());
     });
   });
 });

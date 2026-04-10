@@ -9,15 +9,21 @@
 
 import { of } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { AvailabilityService } from './availability_service';
+import type { AvailabilityService, AvailabilityStatus } from './availability_service';
+
+const defaultAvailabilityStatus: AvailabilityStatus = { isAvailable: true };
+
+// Outside of the mock, so we replicate reference stability of the original service implementation
+const mockIsAvailable$ = of(true);
+const mockAvailabilityStatus$ = of(defaultAvailabilityStatus);
 
 export const createAvailabilityServiceMock = (): jest.Mocked<AvailabilityService> => {
   const mock: jest.Mocked<PublicMethodsOf<AvailabilityService>> = {
     setLicense$: jest.fn(),
     setUnavailableInServerlessTier: jest.fn(),
-    getAvailabilityStatus$: jest.fn(() => of({ isAvailable: true })),
-    getIsAvailable$: jest.fn(() => of(true)),
-    getAvailabilityStatus: jest.fn(() => ({ isAvailable: true })),
+    getAvailabilityStatus$: jest.fn(() => mockAvailabilityStatus$),
+    getIsAvailable$: jest.fn(() => mockIsAvailable$),
+    getAvailabilityStatus: jest.fn(() => defaultAvailabilityStatus),
     stop: jest.fn(),
   };
   return mock as jest.Mocked<AvailabilityService>;
