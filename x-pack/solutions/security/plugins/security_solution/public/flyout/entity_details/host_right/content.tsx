@@ -71,7 +71,10 @@ export const HostPanelContent = ({
   return (
     <>
       {!skipRiskAndCriticality && isEntityDetailsHighlightsAIEnabled && (
-        <EntityHighlightsAccordion entityIdentifier={hostName} entityType={EntityType.host} />
+        <EntityHighlightsAccordion
+          entityIdentifier={entityRecord ? entityRecord.entity.id : hostName}
+          entityType={EntityType.host}
+        />
       )}
       {!skipRiskAndCriticality &&
         riskScoreState.hasEngineBeenInstalled &&

@@ -16,5 +16,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./resolution_scoring'));
     loadTestFile(require.resolve('./preview_api'));
     loadTestFile(require.resolve('./asset_criticality_csv_upload_v2'));
+    loadTestFile(require.resolve('./highlights_v2'));
   });
 }
