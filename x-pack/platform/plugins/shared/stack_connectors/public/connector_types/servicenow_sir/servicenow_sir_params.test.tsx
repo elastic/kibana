@@ -253,10 +253,12 @@ describe('ServiceNowSIRParamsFields renders', () => {
     });
 
     const categorySelect = screen.getByTestId('categorySelect');
-    const options = within(categorySelect).getAllByRole('option').map((opt) => ({
-      value: (opt as HTMLOptionElement).value,
-      text: opt.textContent,
-    }));
+    const options = within(categorySelect)
+      .getAllByRole('option')
+      .map((opt) => ({
+        value: (opt as HTMLOptionElement).value,
+        text: opt.textContent,
+      }));
     expect(options).toEqual([
       { value: 'Priviledge Escalation', text: 'Priviledge Escalation' },
       {
@@ -279,10 +281,12 @@ describe('ServiceNowSIRParamsFields renders', () => {
     });
 
     const subcategorySelect = screen.getByTestId('subcategorySelect');
-    const options = within(subcategorySelect).getAllByRole('option').map((opt) => ({
-      value: (opt as HTMLOptionElement).value,
-      text: opt.textContent,
-    }));
+    const options = within(subcategorySelect)
+      .getAllByRole('option')
+      .map((opt) => ({
+        value: (opt as HTMLOptionElement).value,
+        text: opt.textContent,
+      }));
     expect(options).toEqual([
       {
         text: 'Inbound or outbound',
@@ -310,10 +314,12 @@ describe('ServiceNowSIRParamsFields renders', () => {
     });
 
     const prioritySelect = screen.getByTestId('prioritySelect');
-    const options = within(prioritySelect).getAllByRole('option').map((opt) => ({
-      value: (opt as HTMLOptionElement).value,
-      text: opt.textContent,
-    }));
+    const options = within(prioritySelect)
+      .getAllByRole('option')
+      .map((opt) => ({
+        value: (opt as HTMLOptionElement).value,
+        text: opt.textContent,
+      }));
     expect(options).toEqual([
       {
         text: '1 - Critical',
