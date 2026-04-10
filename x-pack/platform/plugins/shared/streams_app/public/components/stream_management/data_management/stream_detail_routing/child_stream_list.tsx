@@ -172,7 +172,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
     isLoadingSuggestions,
     suggestions,
     suggestionReason,
-    refinementHistory,
+    hasRefined,
     resetForm,
     previewSuggestion,
     acceptSuggestion,
@@ -255,7 +255,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
         end: timeState.end,
         userPrompt,
         existingPartitions: suggestions ?? undefined,
-        refinementHistory: refinementHistory.length > 0 ? refinementHistory : undefined,
+        isRefinement: !!userPrompt && hasRefined,
       });
     },
     [
@@ -264,7 +264,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
       timeState.start,
       timeState.end,
       suggestions,
-      refinementHistory,
+      hasRefined,
     ]
   );
 

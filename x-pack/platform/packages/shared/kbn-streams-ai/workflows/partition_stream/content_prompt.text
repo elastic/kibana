@@ -9,15 +9,17 @@ User guidance:
 {{{user_prompt}}}
 {{/user_prompt}}
 {{#existing_partitions}}
+{{#is_refinement}}
 
-Current partitions (for context only — see system instructions for when to keep or discard these):
+Current partitions (the user's accepted baseline — preserve unless they explicitly ask to start over):
 {{{existing_partitions}}}
-{{/existing_partitions}}
-{{#refinement_history}}
+{{/is_refinement}}
+{{^is_refinement}}
 
-Refinement history (previous user prompts, oldest first):
-{{{refinement_history}}}
-{{/refinement_history}}
+Previously suggested partitions (REJECTED — discard these entirely, pick ONE different field, create one partition per value with a simple eq condition, and name each partition after the matched value):
+{{{existing_partitions}}}
+{{/is_refinement}}
+{{/existing_partitions}}
 
 Initial clustering:
 {{{initial_clustering}}}

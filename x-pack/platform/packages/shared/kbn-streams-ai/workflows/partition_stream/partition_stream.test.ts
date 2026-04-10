@@ -676,7 +676,7 @@ describe('partitionStream', () => {
       expect(result.partitions[0].name).toBe('logs.test.valid-name');
     });
 
-    it('should format refinementHistory as a numbered list in prompt input', async () => {
+    it('should include is_refinement in prompt input when isRefinement is true', async () => {
       const definition = createMockDefinition();
 
       mockClusterLogs.mockResolvedValueOnce([
@@ -707,7 +707,7 @@ describe('partitionStream', () => {
       await partitionStream({
         ...defaultParams,
         definition,
-        refinementHistory: ['Partition by service name', 'Also add host.name'],
+        isRefinement: true,
       });
 
       const callInput = (
@@ -715,13 +715,10 @@ describe('partitionStream', () => {
           typeof executeAsReasoningAgent
         >[0]
       ).input;
-      expect(callInput).toHaveProperty(
-        'refinement_history',
-        '1. "Partition by service name"\n2. "Also add host.name"'
-      );
+      expect(callInput).toHaveProperty('is_refinement', 'true');
     });
 
-    it('should not include refinement_history in input when array is empty', async () => {
+    it('should not include is_refinement in prompt input when isRefinement is false', async () => {
       const definition = createMockDefinition();
 
       mockClusterLogs.mockResolvedValueOnce([
@@ -752,7 +749,7 @@ describe('partitionStream', () => {
       await partitionStream({
         ...defaultParams,
         definition,
-        refinementHistory: [],
+        isRefinement: false,
       });
 
       const callInput = (
@@ -760,7 +757,7 @@ describe('partitionStream', () => {
           typeof executeAsReasoningAgent
         >[0]
       ).input;
-      expect(callInput).not.toHaveProperty('refinement_history');
+      expect(callInput).not.toHaveProperty('is_refinement');
     });
 
     it('should pass excludeConditions to partition_logs tool callback', async () => {
