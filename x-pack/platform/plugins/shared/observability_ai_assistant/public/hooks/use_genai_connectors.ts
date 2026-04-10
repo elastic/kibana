@@ -95,12 +95,12 @@ export function useGenAIConnectorsWithoutContext(): UseGenAIConnectorsResult {
   }, [connectors, setLastUsedConnector]);
 
   const selectedConnector = useMemo(() => {
-    if (isConnectorSelectionRestricted) {
-      return defaultConnectorId;
-    }
-
     const hasConnector = (id: string | undefined) =>
       id && connectors?.some((c) => c.connectorId === id);
+
+    if (isConnectorSelectionRestricted) {
+      return hasConnector(defaultConnectorId) ? defaultConnectorId : undefined;
+    }
 
     if (hasConnector(lastUsedConnector)) {
       return lastUsedConnector;

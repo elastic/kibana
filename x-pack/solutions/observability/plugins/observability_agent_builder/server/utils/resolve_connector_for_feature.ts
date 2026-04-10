@@ -30,6 +30,6 @@ export async function resolveConnectorForFeature({
   }
 
   throw new Error(
-    `No connector configured for feature "${featureId}". Configure one in Model Settings.`
+    `No connector configured for feature "${featureId}". Configure one in Stack Management > Feature Settings.`
   );
 }

@@ -17,12 +17,12 @@ const selectableAriaLabel = i18n.translate(
 const addConnectorAriaLabel = i18n.translate(
   'xpack.aiAssistant.connectorSelector.addConnectorAriaLabel',
   {
-    defaultMessage: 'Add Connector',
+    defaultMessage: 'Add Model',
   }
 );
 
 const addConnectorLabel = i18n.translate('xpack.aiAssistant.connectorSelector.addConnectorLabel', {
-  defaultMessage: 'Add Connector',
+  defaultMessage: 'Add Model',
 });
 
 const manageConnectorAriaLabel = i18n.translate(
