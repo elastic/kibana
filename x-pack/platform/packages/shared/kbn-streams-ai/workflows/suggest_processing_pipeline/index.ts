@@ -48,6 +48,7 @@ export async function suggestProcessingPipeline({
   esClient,
   initialDatasetAnalysisJson,
   mappedFields: mappedFieldsOverride,
+  upstreamSeedParsingContextMarkdown,
 }: {
   definition: Streams.ingest.all.Definition;
   inferenceClient: BoundInferenceClient;
@@ -62,6 +63,11 @@ export async function suggestProcessingPipeline({
   initialDatasetAnalysisJson: string;
   /** When set, avoids an extra field_caps call (callers already fetched for the overview). */
   mappedFieldsOverride?: Record<string, string>;
+  /**
+   * When the caller runs an upstream grok/dissect seed step, pass a formatted description so the model
+   * knows parsing already happened. Omit or leave empty when the full processor schema is used.
+   */
+  upstreamSeedParsingContextMarkdown?: string;
 }): Promise<SuggestProcessingPipelineResult> {
   const effectiveMaxSteps = maxSteps ?? 10;
 
@@ -89,6 +95,7 @@ export async function suggestProcessingPipeline({
     severity_field: isOtel ? OTEL_SEVERITY_FIELD : ECS_SEVERITY_FIELD,
     pipeline_schema: JSON.stringify(getPipelineDefinitionJsonSchema(agentPipelineSchema)),
     initial_dataset_analysis: initialDatasetAnalysisJson,
+    upstream_extraction_context: upstreamSeedParsingContextMarkdown ?? '',
   };
 
   // Invoke the reasoning agent to suggest the ingest pipeline
@@ -234,6 +241,7 @@ export {
   postParsePipelineDefinitionSchema,
 } from './schema';
 export { mergeSeedParsingProcessorIntoSuggestedPipeline } from './merge_seed_parsing_into_suggested_pipeline';
+export { formatUpstreamSeedParsingContextForPromptMarkdown } from './upstream_seed_parsing_prompt';
 
 /**
  * Builds a JSON-serializable overview of sample document structure (fields, example values, schema hints)

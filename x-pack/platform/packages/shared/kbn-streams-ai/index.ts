@@ -11,6 +11,7 @@ export {
   suggestProcessingPipeline,
   mergeSeedParsingProcessorIntoSuggestedPipeline,
   buildDocumentStructureOverviewForPipelinePrompt,
+  formatUpstreamSeedParsingContextForPromptMarkdown,
   fetchMappedFieldsForStreamProcessingSuggestions,
   getPipelineDefinitionJsonSchema,
   pipelineDefinitionSchema,

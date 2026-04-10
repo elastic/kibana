@@ -127,6 +127,49 @@ describe('suggestProcessingPipeline workflow', () => {
     expect(simulatePipeline).not.toHaveBeenCalled();
   });
 
+  it('passes upstream extraction context to the reasoning agent when provided', async () => {
+    const simulatePipeline = jest
+      .fn()
+      .mockImplementation(() => Promise.resolve(createSuccessfulSimulation()));
+
+    mockExecuteAsReasoningAgent.mockResolvedValue({
+      content: '',
+      toolCalls: [
+        {
+          toolCallId: 'c1',
+          function: {
+            name: 'commit_pipeline',
+            arguments: { pipeline: { steps: [] } },
+          },
+        },
+      ],
+      input: [{ role: MessageRole.Assistant, content: '' }],
+    });
+
+    await suggestProcessingPipeline({
+      definition: createIngestDefinition(),
+      inferenceClient: mockInferenceClient,
+      agentPipelineSchema: postParsePipelineDefinitionSchema,
+      maxSteps: 2,
+      signal: new AbortController().signal,
+      simulatePipeline,
+      documents: [{ message: 'hello' }],
+      fieldsMetadataClient: mockFieldsMetadataClient,
+      esClient: mockEsClient,
+      initialDatasetAnalysisJson: STUB_INITIAL_DATASET_JSON,
+      mappedFieldsOverride: {},
+      upstreamSeedParsingContextMarkdown: 'UPSTREAM_MARKDOWN_BLOCK',
+    });
+
+    expect(mockExecuteAsReasoningAgent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        input: expect.objectContaining({
+          upstream_extraction_context: 'UPSTREAM_MARKDOWN_BLOCK',
+        }),
+      })
+    );
+  });
+
   it('returns only agent-committed steps (orchestrator merges seed parsing separately)', async () => {
     const simulatePipeline = jest
       .fn()

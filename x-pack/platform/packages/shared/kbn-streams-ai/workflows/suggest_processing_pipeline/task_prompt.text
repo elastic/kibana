@@ -1,40 +1,6 @@
-Analyze this data stream and determine if an ingest pipeline is needed. Use an **iterative eval/dev loop**: decide, design (if needed), simulate, fix errors, repeat.
+Follow the **system prompt** (rules, workflow, tools, pipeline schema).
 
-## Your Workflow
-
-1. **Review** the stream context, **sample document structure** below, target schema, and processor schema (system prompt) to form a hypothesis about needed transformations
-2. **Decide** if processing is actually needed:
-   - If data already has proper `@timestamp`, `{{{severity_field}}}`, `{{{content_field}}}`, etc. → **commit an empty pipeline** `{ "steps": [] }`
-   - If there's no `event.original` or raw text to parse → **commit an empty pipeline**
-   - If `{{{content_field}}}` is a simple message (not a structured log line) → **do NOT parse it** (when parsing processors are part of your schema)
-   - Only design processors if the data actually needs transformation
-   - **Never create no-op grok/dissect patterns** that extract a field's entire content unchanged (e.g., `%{{{content_field}}}` from `{{{content_field}}}`) — only applies when those processor types appear in the pipeline schema
-   - Note: `date` processors to reformat timestamps or `convert` processors to change types ARE valid transformations
-3. **Design** a pipeline using **only** the processor types allowed by the pipeline schema (system prompt)
-4. **Call `simulate_pipeline`** — inspect **metrics** (fields, parse rate, samples) and **errors** from the response to refine your approach
-5. **Read the errors** carefully and fix the issues
-6. **Repeat** steps 4-5 until simulation passes
-7. **Call `commit_pipeline`** when done - this can be `{ "steps": [] }` if no processing is needed
-
-**Not all data needs processing.** If the data is already well-structured with schema-compliant fields, commit an empty pipeline. Don't add unnecessary processors.
-
-**Expect multiple iterations.** The first attempt rarely works perfectly. Read error messages - they tell you exactly what to fix.
-
-**Less is more.** When fixing errors, simplify rather than add complexity. Remove problematic processors instead of adding workarounds. Prioritize reliable handling of common cases over rare edge cases.
-
-## Tools
-
-- **`simulate_pipeline(pipeline)`** — Runs your pipeline against sample documents. Returns validation errors and **simulation metrics** (use these to understand current field layout and success rates).
-- **`commit_pipeline(message)`** — Finalize when simulation passes or when you commit an empty pipeline.
-
-**Target Schema:** {{{fields_schema}}}
-- ECS: `log.level`, `service.name`, `host.name`, `@timestamp`
-- OTel: `severity_text`, `resource.attributes.*`, `body.text`, `attributes.*`
-
-**Required:**
-- Valid `@timestamp` on ≥99% of documents
-- Correct field types per schema
-- `on_failure` handlers for error resilience
+**Target schema:** {{{fields_schema}}}
 
 ---
 
@@ -44,12 +10,20 @@ Analyze this data stream and determine if an ingest pipeline is needed. Use an *
 
 ---
 
+{{#upstream_extraction_context}}
+## Upstream extraction (already applied)
+
+{{{upstream_extraction_context}}}
+
+---
+{{/upstream_extraction_context}}
+
 ## Sample document structure
 
-Describes the **current** sample documents: which fields appear, example values, ECS/OTel field metadata, and index mapping types from field caps. This is **only** a static view of the samples—not the result of running a pipeline. Always use `simulate_pipeline` to validate a proposed pipeline.
+JSON overview of fields, sample values, and mapping/schema hints for the **same documents** used in **`simulate_pipeline`**. Not the result of your proposed pipeline—validate with **`simulate_pipeline`**.
 
 {{{initial_dataset_analysis}}}
 
 ---
 
-Start your eval/dev loop: call `simulate_pipeline` with your first attempt when you are ready to validate, then iterate based on metrics and errors.
+Begin with **`simulate_pipeline`** when you have a first candidate; iterate from metrics and errors.

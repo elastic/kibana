@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import {
   buildDocumentStructureOverviewForPipelinePrompt,
+  formatUpstreamSeedParsingContextForPromptMarkdown,
   fetchMappedFieldsForStreamProcessingSuggestions,
   mergeSeedParsingProcessorIntoSuggestedPipeline,
   pipelineDefinitionSchema,
@@ -288,6 +289,9 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           fieldsMetadataClient,
           initialDatasetAnalysisJson,
           mappedFieldsOverride: mappedFields,
+          upstreamSeedParsingContextMarkdown: effectiveParsingProcessor
+            ? formatUpstreamSeedParsingContextForPromptMarkdown(effectiveParsingProcessor)
+            : undefined,
           simulatePipeline: (pipeline: StreamlangDSL) =>
             simulateProcessing({
               params: {
