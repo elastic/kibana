@@ -64,6 +64,7 @@ export const Overview = forwardRef<OverviewApi, OverviewProps>(
       filter,
       onAddColumn,
       onRemoveColumn,
+      columns,
       indexes,
       showWaterfall = true,
       dataView,
@@ -132,6 +133,7 @@ export const Overview = forwardRef<OverviewApi, OverviewProps>(
                 filter={filter}
                 onAddColumn={onAddColumn}
                 onRemoveColumn={onRemoveColumn}
+                columns={columns}
               />
               <EuiSpacer size="m" />
               <SimilarSpans

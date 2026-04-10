@@ -23,4 +23,5 @@ export const queryKeys = {
   episodeEvents: (episodeId: string) => [...queryKeys.all, 'episode-events', episodeId] as const,
   relatedEpisodes: (ruleId: string, excludeEpisodeId: string, pageSize: number) =>
     [...queryKeys.all, 'related-episodes', ruleId, excludeEpisodeId, pageSize] as const,
+  alertActionTagSuggestions: () => [...queryKeys.all, 'alert-action-tag-suggestions'] as const,
 };
