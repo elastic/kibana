@@ -411,7 +411,7 @@ describe('KibanaEvalsClient', () => {
         expect.objectContaining({
           exampleIndex: 0,
           repetition: 0,
-          output: { v: 1 },
+          output: { value: 1 },
         })
       );
       expect(event.evaluationRun).toEqual(
