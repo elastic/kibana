@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { EntityType } from '@kbn/entity-store/public';
 import { API_VERSIONS } from '../../../../common/entity_analytics/constants';
@@ -171,14 +171,20 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId
               <h3>{RESOLUTION_GROUP_LINK_TITLE}</h3>
             </EuiTitle>
           </EuiFlexItem>
-          {hasGroup && resolutionRiskScore != null && (
+          {hasGroup && (
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs">{GROUP_RISK_SCORE_LABEL}</EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <RiskScoreCell riskScore={resolutionRiskScore} />
+                  {resolutionRiskScore != null ? (
+                    <RiskScoreCell riskScore={resolutionRiskScore} />
+                  ) : (
+                    <EuiBadge>
+                      <EuiText size="xs">{'N/A'}</EuiText>
+                    </EuiBadge>
+                  )}
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
