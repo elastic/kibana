@@ -77,7 +77,17 @@ export type EsqlFieldType = (typeof esqlFieldTypes)[number];
  *  Partial fields metadata client, used to avoid circular dependency with @kbn/monaco
  **/
 export interface PartialFieldsMetadataClient {
-  find: ({ fieldNames, attributes }: { fieldNames?: string[]; attributes: string[] }) => Promise<{
+  find: ({
+    fieldNames,
+    attributes,
+    streamNames,
+    source,
+  }: {
+    fieldNames?: string[];
+    attributes: string[];
+    streamNames?: string[];
+    source?: string[];
+  }) => Promise<{
     fields: Record<
       string,
       {
@@ -85,6 +95,10 @@ export interface PartialFieldsMetadataClient {
         source: string;
         description?: string;
       }
+    >;
+    streamFields: Record<
+      string,
+      Record<string, { type: string; source: string; description?: string }>
     >;
   }>;
 }
