@@ -438,7 +438,7 @@ export function SettingsTab() {
           <EuiCallOut
             size="s"
             color="primary"
-            iconType="iInCircle"
+            iconType="advancedSettingsApp"
             title={i18n.translate('xpack.streams.significantEventsDiscovery.settings.tuningInfo', {
               defaultMessage:
                 'These settings control how features are discovered and queries are searched. Changes take effect on the next run.',
