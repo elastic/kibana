@@ -17,6 +17,7 @@ const AppMenuComponent = lazy(async () => {
   return { default: Component };
 });
 
+/** Fallback chain: AppMenuConfig -> legacy HeaderActionMenu -> nothing. */
 export const AppMenu = React.memo(() => {
   const appMenuConfig = useAppHeaderMenu();
   const hasLegacyActionMenu = useHasLegacyActionMenu();

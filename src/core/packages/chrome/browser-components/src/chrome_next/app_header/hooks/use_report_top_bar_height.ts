@@ -10,6 +10,12 @@
 import { useCallback, useRef, useEffect } from 'react';
 import { useLayoutUpdate } from '@kbn/core-chrome-layout-components';
 
+/**
+ * Measures the height of the application top bar via ResizeObserver and
+ * reports it to the layout system through `useLayoutUpdate`.
+ * Returns a ref callback to attach to the top bar root element.
+ * Reports `0` when the element is removed or on unmount.
+ */
 export const useReportTopBarHeight = (): ((node: HTMLElement | null) => void) => {
   const updateLayout = useLayoutUpdate();
   const observerRef = useRef<ResizeObserver | null>(null);

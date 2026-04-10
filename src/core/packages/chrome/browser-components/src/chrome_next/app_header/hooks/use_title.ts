@@ -10,6 +10,9 @@
 import { useNextHeader, useProjectBreadcrumbs } from '../../../shared/chrome_hooks';
 import { getBreadcrumbPlainText } from '../../../shared/breadcrumb_utils';
 
+/**
+ * Resolution: explicit `config.title` -> last project breadcrumb text -> `undefined`.
+ */
 export function useTitle(): string | undefined {
   const config = useNextHeader();
   const breadcrumbs = useProjectBreadcrumbs();

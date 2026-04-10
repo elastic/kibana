@@ -13,9 +13,15 @@ import { getBreadcrumbPlainText } from '../../../shared/breadcrumb_utils';
 
 export interface BackNavigation {
   backHref: string;
+  /** Plain-text title of the destination crumb (for `aria-label` on the back control). */
   backDestinationLabel?: string;
 }
 
+/**
+ * Resolution: explicit `chrome.next.header` `back.href` (and optional `back.label`) -> else the
+ * last non-last project breadcrumb with a truthy `href` (scanning right to left). Returns
+ * `undefined` if neither applies.
+ */
 export function useBackButton(): BackNavigation | undefined {
   const config = useNextHeader();
   const breadcrumbs = useProjectBreadcrumbs();

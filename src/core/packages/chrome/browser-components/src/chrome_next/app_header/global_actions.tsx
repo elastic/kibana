@@ -38,6 +38,11 @@ const useGlobalActionsStyles = () => {
   }, [euiTheme]);
 };
 
+/**
+ * Fixed-order global object actions (editTitle, share, favorite) next to the title.
+ * Only renders actions the page opts into via `chrome.next.header.set({ globalActions })`.
+ * Favorite is a `ReactNode` slot so plugins own full behavior (clients, context, React Query).
+ */
 export const GlobalActions = React.memo(() => {
   const config = useNextHeader();
   const styles = useGlobalActionsStyles();

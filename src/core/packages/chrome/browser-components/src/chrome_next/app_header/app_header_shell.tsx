@@ -13,6 +13,7 @@ import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 import { useReportTopBarHeight } from './hooks';
 
+/** Minimum row height; aligns with project layout `applicationTopBarHeight`. */
 const APPLICATION_TOP_BAR_HEIGHT_PX = 48;
 
 export interface AppHeaderShellProps {
