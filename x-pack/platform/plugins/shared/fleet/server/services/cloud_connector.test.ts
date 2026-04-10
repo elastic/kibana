@@ -19,7 +19,7 @@ import {
 import {
   buildPackagePolicyFilterExcludingHiddenPackages,
   CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE,
-  CLOUD_CONNECTOR_PACKAGE_POLICY_FIND_PER_PAGE,
+  CLOUD_CONNECTOR_PACKAGE_POLICY_COUNTS_AGG_TERMS_SIZE,
 } from '../../common/constants/cloud_connector';
 
 import { createSavedObjectClientMock } from '../mocks';
@@ -553,20 +553,17 @@ describe('CloudConnectorService', () => {
       per_page: CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE,
     };
 
-    // Mock package policies returned by find (getPackagePolicyCountsMap counts saved_objects in memory)
+    // Mock package policy aggregation (getPackagePolicyCountsMap uses terms agg on cloud_connector_id)
     const mockPackagePolicies = {
-      saved_objects: [
-        {
-          id: 'pp-1',
-          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-          score: 1,
-          references: [],
-          attributes: { cloud_connector_id: 'cloud-connector-1' },
-        },
-      ],
+      saved_objects: [],
       total: 1,
       page: 1,
-      per_page: CLOUD_CONNECTOR_PACKAGE_POLICY_FIND_PER_PAGE,
+      per_page: 0,
+      aggregations: {
+        count_by_cloud_connector: {
+          buckets: [{ key: 'cloud-connector-1', doc_count: 1 }],
+        },
+      },
     };
 
     it('should get cloud connectors list successfully with computed packagePolicyCount', async () => {
@@ -596,9 +593,15 @@ describe('CloudConnectorService', () => {
           filter: buildPackagePolicyFilterExcludingHiddenPackages(
             `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id:*`
           ),
-          page: 1,
-          perPage: CLOUD_CONNECTOR_PACKAGE_POLICY_FIND_PER_PAGE,
-          fields: ['cloud_connector_id'],
+          perPage: 0,
+          aggs: {
+            count_by_cloud_connector: {
+              terms: {
+                field: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id`,
+                size: CLOUD_CONNECTOR_PACKAGE_POLICY_COUNTS_AGG_TERMS_SIZE,
+              },
+            },
+          },
         })
       );
 

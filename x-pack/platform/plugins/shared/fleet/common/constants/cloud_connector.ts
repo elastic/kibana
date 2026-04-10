@@ -55,20 +55,19 @@ export const CLOUD_CONNECTOR_HIDDEN_PACKAGES: readonly string[] = [VERIFIER_PKG_
 export const CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE = 20;
 
 /**
- * Page size when scanning package policies for connector counts.
- * Keeps each saved-objects find response small; callers paginate until all rows are read.
- */
-export const CLOUD_CONNECTOR_PACKAGE_POLICY_FIND_PER_PAGE = 20;
-
-/**
- * Appends NOT package.name filters for {@link CLOUD_CONNECTOR_HIDDEN_PACKAGES} to a
- * package-policy Kuery fragment (same pattern as usage routes).
+ * Appends NOT package.name filters for {@link CLOUD_CONNECTOR_HIDDEN_PACKAGES} and
+ * `latest_revision:true` to a package-policy Kuery fragment (same pattern as usage routes;
+ * latest revision excludes rollback snapshot rows such as `:prev`).
  */
 export function buildPackagePolicyFilterExcludingHiddenPackages(baseFilter: string): string {
   const hiddenFilter = CLOUD_CONNECTOR_HIDDEN_PACKAGES.map(
     (pkg) => `NOT ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name:"${pkg}"`
   ).join(' AND ');
-  return hiddenFilter ? `${baseFilter} AND ${hiddenFilter}` : baseFilter;
+  const latestRevision = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:true`;
+  if (hiddenFilter) {
+    return `${baseFilter} AND ${hiddenFilter} AND ${latestRevision}`;
+  }
+  return `${baseFilter} AND ${latestRevision}`;
 }
 
 // Account type variable names for different cloud providers
