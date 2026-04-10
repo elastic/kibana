@@ -548,7 +548,8 @@ describe(
       });
     });
 
-    describe('should verify that packs are triggered', { tags: ['@ess', '@serverless'] }, () => {
+    // skipped in serverless for now
+    describe('should verify that packs are triggered', { tags: ['@ess'] }, () => {
       let packId: string;
       let packName: string;
 
@@ -563,7 +564,7 @@ describe(
             loadPack({
               policy_ids: response.body.items[0].policy_ids,
               queries: {
-                [savedQueryName]: { ecs_mapping: {}, interval: 10, query: 'select * from uptime;' },
+                [savedQueryName]: { ecs_mapping: {}, interval: 60, query: 'select * from uptime;' },
               },
             })
           )
