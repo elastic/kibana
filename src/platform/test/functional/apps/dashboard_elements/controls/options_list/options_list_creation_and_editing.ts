@@ -29,17 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();
-      await dashboard.saveDashboard('Test Options List Control Creation', {
-        saveAsNew: true,
-        exitFromEditMode: false,
-        storeTimeWithDashboard: true,
-      });
       await dashboard.ensureDashboardIsInEditMode();
-    });
-
-    after(async () => {
-      await dashboardControls.deleteAllPinnedControls();
-      await dashboard.clickQuickSave();
     });
 
     describe('Options List Control Editor selects relevant data views', () => {
@@ -83,7 +73,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           fieldName: 'machine.os.raw',
         });
         expect(await dashboardControls.getControlsCount()).to.be(1);
-        await dashboard.clearUnsavedChanges();
       });
 
       it('can make selections', async () => {
@@ -107,7 +96,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // data views should be properly propagated from the control group to the dashboard
         expect(await filterBar.getIndexPatterns()).to.be('logstash-*,animals-*');
-        await dashboard.clearUnsavedChanges();
       });
 
       it('can change the data view and field of an existing options list and clears selections', async () => {
@@ -149,8 +137,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const selectionString = await dashboardControls.optionsListGetSelectionsString(secondId);
         expect(selectionString).to.be('hiss');
-
-        await dashboard.clearUnsavedChanges();
       });
 
       it('can change an existing control to a number field', async () => {
@@ -169,7 +155,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await dashboardControls.removeExistingControl(firstId);
         expect(await dashboardControls.getControlsCount()).to.be(1);
-        await dashboard.clearUnsavedChanges();
       });
 
       it('cannot create options list for scripted field', async () => {
