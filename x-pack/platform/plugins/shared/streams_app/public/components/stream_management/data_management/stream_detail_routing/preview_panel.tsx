@@ -72,7 +72,7 @@ export function PreviewPanel() {
       snapshot.matches({ ready: { ingestMode: 'editingSuggestedRule' } })
   );
 
-  const maxNestingLevel = getSegments(definition.stream.name).length >= MAX_NESTING_LEVEL;
+  const isAtMaxNestingLevel = getSegments(definition.stream.name).length >= MAX_NESTING_LEVEL;
 
   const documents = selectPreviewDocuments(samplesSnapshot.context);
   const hasDocuments = !isEmpty(documents);
@@ -92,7 +92,7 @@ export function PreviewPanel() {
   } else if (isQueryModeIdle) {
     content = <QueryModeIdlePanel />;
   } else if (isIngestModeIdle) {
-    content = <SamplePreviewPanel enableActions={canCreateRoutingRules && !maxNestingLevel} />;
+    content = <SamplePreviewPanel enableActions={canCreateRoutingRules && !isAtMaxNestingLevel} />;
   } else if (isEditingOrReordering) {
     content = <EditingPanel />;
   } else if (isCreatingOrReviewingOrEditingSuggestion) {
@@ -180,7 +180,7 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
   const [viewMode, setViewMode] = useState<PreviewTableMode>('summary');
   const { fieldTypes, dataView: streamDataView } = useStreamDataViewFieldTypes(streamName);
 
-  const { documentsError, approximateMatchingPercentage } = samplesSnapshot.context;
+  const { documentsError, approximateMatchRatio } = samplesSnapshot.context;
   const documents = selectPreviewDocuments(samplesSnapshot.context);
 
   const condition = processCondition(samplesSnapshot.context.condition);
@@ -309,7 +309,7 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
           <EuiFlexItem grow={false}>
             <DocumentMatchFilterControls
               onFilterChange={setDocumentMatchFilter}
-              matchedDocumentPercentage={approximateMatchingPercentage}
+              matchedDocumentRatio={approximateMatchRatio}
               isDisabled={!!documentsError || !condition || (condition && !isProcessedCondition)}
             />
           </EuiFlexItem>
