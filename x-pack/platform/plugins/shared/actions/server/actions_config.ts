@@ -75,8 +75,8 @@ export interface ActionsConfigurationUtilities {
   getAwsSesConfig: () => AwsSesConfig;
   getEnabledEmailServices: () => string[];
   getMaxEmailBodyLength: () => number;
-  getEarsUrl(): string | undefined;
-  isEarsEnabled(): boolean;
+  getEarsUrl: () => string | undefined;
+  isEarsEnabled: () => boolean;
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
