@@ -370,9 +370,6 @@
       "groupingMode": {
         "type": "keyword"
       },
-      "tags": {
-        "type": "keyword"
-      },
       "name": {
         "fields": {
           "keyword": {
@@ -384,6 +381,9 @@
       },
       "snoozedUntil": {
         "type": "date"
+      },
+      "tags": {
+        "type": "keyword"
       },
       "throttle": {
         "properties": {
@@ -1348,9 +1348,6 @@
       "integration_id": {
         "type": "keyword"
       },
-      "title": {
-        "type": "text"
-      },
       "job_info": {
         "properties": {
           "job_id": {
@@ -1370,6 +1367,9 @@
       },
       "result": {
         "properties": {}
+      },
+      "title": {
+        "type": "text"
       }
     }
   },
@@ -2843,6 +2843,9 @@
       "name": {
         "type": "keyword"
       },
+      "otel_exporter_config_yaml": {
+        "type": "text"
+      },
       "output_id": {
         "index": false,
         "type": "keyword"
@@ -3129,6 +3132,9 @@
   "integration-config": {
     "dynamic": false,
     "properties": {
+      "connector_id": {
+        "type": "keyword"
+      },
       "created_by": {
         "type": "keyword"
       },

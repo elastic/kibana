@@ -18,11 +18,13 @@ import {
 } from '@kbn/data-plugin/common';
 import { fromStoredFilters, toStoredFilters } from '@kbn/as-code-filters-transforms';
 import { fromStoredDataView, toStoredDataView } from '@kbn/as-code-data-views-transforms';
+import { toAsCodeQuery, toStoredQuery } from '@kbn/as-code-shared-transforms';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { DataGridDensity } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import {
   isDiscoverSessionEmbeddableByReferenceState,
+  isDiscoverSessionEsqlTab,
   isSearchEmbeddableByValueState,
 } from './type_guards';
 import type {
@@ -210,7 +212,7 @@ export function fromStoredTab(
         ...apiTab,
         ...(sampleSize && { sample_size: sampleSize }),
         ...(rowsPerPage && { rows_per_page: rowsPerPage }),
-        query,
+        ...(query && { query: toAsCodeQuery(query) }),
         filters: fromStoredFilters(filter) ?? [],
         data_source: fromStoredDataView(index),
         view_mode: viewMode ?? VIEW_MODE.DOCUMENT_LEVEL,
@@ -222,8 +224,9 @@ export function toStoredTab(apiTab: DiscoverSessionTab): {
   references: SavedObjectReference[];
 } {
   const { sort, column_order: columnOrder, column_settings: columnSettings } = apiTab;
+  const storedQuery = isDiscoverSessionEsqlTab(apiTab) ? apiTab.query : toStoredQuery(apiTab.query);
   const searchSourceValues: SerializedSearchSourceFields = {
-    query: apiTab.query,
+    ...(storedQuery && { query: storedQuery }),
     ...('filters' in apiTab && { filter: toStoredFilters(apiTab.filters) }),
     ...('data_source' in apiTab && { index: toStoredDataView(apiTab.data_source) }),
   };
