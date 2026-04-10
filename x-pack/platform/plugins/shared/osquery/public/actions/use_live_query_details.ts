@@ -13,7 +13,6 @@ import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
-import { getPollingInterval } from '../common/get_polling_interval';
 
 interface UseLiveQueryDetails {
   actionId?: string;
@@ -68,7 +67,7 @@ export const useLiveQueryDetails = ({
     () => http.get(`/api/osquery/live_queries/${actionId}`, { version: API_VERSIONS.public.v1 }),
     {
       enabled: !skip && !!actionId,
-      refetchInterval: isLive ? (data) => getPollingInterval(data?.['@timestamp']) : false,
+      refetchInterval: isLive ? 5000 : false,
       onSuccess: () => setErrorToast(),
       onError: (error) =>
         setErrorToast(error, {
