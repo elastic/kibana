@@ -6,14 +6,12 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
-import { nextTick } from '@kbn/test-jest-helpers';
 
 import { LoginForm, PageMode } from './login_form';
 import { MessageType } from '../../../components';
@@ -173,13 +171,9 @@ describe('LoginForm', () => {
     fireEvent.change(document.querySelector('input[name="password"]')!, {
       target: { value: 'password' },
     });
-    await userEvent.click(screen.getByTestId('loginSubmit'));
+    fireEvent.click(screen.getByTestId('loginSubmit'));
 
-    await act(async () => {
-      await nextTick();
-    });
-
-    expect(screen.getByTestId('loginErrorMessage')).toHaveTextContent(
+    expect(await screen.findByTestId('loginErrorMessage')).toHaveTextContent(
       'Username or password is incorrect. Please try again.'
     );
   });
@@ -214,13 +208,9 @@ describe('LoginForm', () => {
     fireEvent.change(document.querySelector('input[name="password"]')!, {
       target: { value: 'password' },
     });
-    await userEvent.click(screen.getByTestId('loginSubmit'));
+    fireEvent.click(screen.getByTestId('loginSubmit'));
 
-    await act(async () => {
-      await nextTick();
-    });
-
-    expect(screen.getByTestId('loginErrorMessage')).toHaveTextContent(
+    expect(await screen.findByTestId('loginErrorMessage')).toHaveTextContent(
       `We couldn't log you in. Please try again.`
     );
   });
@@ -258,11 +248,9 @@ describe('LoginForm', () => {
     fireEvent.change(document.querySelector('input[name="password"]')!, {
       target: { value: 'password1' },
     });
-    await userEvent.click(screen.getByTestId('loginSubmit'));
+    fireEvent.click(screen.getByTestId('loginSubmit'));
 
-    await act(async () => {
-      await nextTick();
-    });
+    await waitFor(() => expect(window.location.href).toBe('/some-base-path/app/home#/?_g=()'));
 
     expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
     expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
@@ -276,7 +264,6 @@ describe('LoginForm', () => {
       }),
     });
 
-    expect(window.location.href).toBe('/some-base-path/app/home#/?_g=()');
     expect(screen.queryByTestId('loginErrorMessage')).not.toBeInTheDocument();
   });
 
@@ -304,12 +291,12 @@ describe('LoginForm', () => {
     expectPageMode(PageMode.Form);
     expect(screen.queryByTestId('loginBackToSelector')).not.toBeInTheDocument();
 
-    await userEvent.click(screen.getByTestId('loginHelpLink'));
+    fireEvent.click(screen.getByTestId('loginHelpLink'));
     expectPageMode(PageMode.LoginHelp);
 
     expect(screen.getByTestId('loginHelp')).toMatchSnapshot('Login Help');
 
-    await userEvent.click(screen.getByTestId('loginBackToLoginLink'));
+    fireEvent.click(screen.getByTestId('loginBackToLoginLink'));
     expectPageMode(PageMode.Form);
     expect(screen.queryByTestId('loginBackToSelector')).not.toBeInTheDocument();
   });
@@ -623,18 +610,17 @@ describe('LoginForm', () => {
 
       expectPageMode(PageMode.Selector);
 
-      await userEvent.click(screen.getByTestId('loginCard-saml/saml1'));
+      fireEvent.click(screen.getByTestId('loginCard-saml/saml1'));
 
-      await act(async () => {
-        await nextTick();
-      });
+      await waitFor(() =>
+        expect(window.location.href).toBe('https://external-idp/login?optional-arg=2#optional-hash')
+      );
 
       expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
       expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
         body: JSON.stringify({ providerType: 'saml', providerName: 'saml1', currentURL }),
       });
 
-      expect(window.location.href).toBe('https://external-idp/login?optional-arg=2#optional-hash');
       expect(screen.queryByTestId('loginErrorMessage')).not.toBeInTheDocument();
       expect(coreStartMock.notifications.toasts.addError).not.toHaveBeenCalled();
     });
@@ -670,11 +656,14 @@ describe('LoginForm', () => {
 
       expectPageMode(PageMode.Selector);
 
-      await userEvent.click(screen.getByTestId('loginCard-saml/saml1'));
+      fireEvent.click(screen.getByTestId('loginCard-saml/saml1'));
 
-      await act(async () => {
-        await nextTick();
-      });
+      await waitFor(() =>
+        expect(coreStartMock.notifications.toasts.addError).toHaveBeenCalledWith(failureReason, {
+          title: 'Could not perform login.',
+          toastMessage: 'Oh no!',
+        })
+      );
 
       expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
       expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
@@ -682,10 +671,6 @@ describe('LoginForm', () => {
       });
 
       expect(window.location.href).toBe(currentURL);
-      expect(coreStartMock.notifications.toasts.addError).toHaveBeenCalledWith(failureReason, {
-        title: 'Could not perform login.',
-        toastMessage: 'Oh no!',
-      });
     });
 
     it('shows error with message in the `body`', async () => {
@@ -721,11 +706,14 @@ describe('LoginForm', () => {
 
       expectPageMode(PageMode.Selector);
 
-      await userEvent.click(screen.getByTestId('loginCard-saml/saml1'));
+      fireEvent.click(screen.getByTestId('loginCard-saml/saml1'));
 
-      await act(async () => {
-        await nextTick();
-      });
+      await waitFor(() =>
+        expect(coreStartMock.notifications.toasts.addError).toHaveBeenCalledWith(
+          new Error('Oh no! But with much more details!'),
+          { title: 'Could not perform login.', toastMessage: 'Oh no!' }
+        )
+      );
 
       expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
       expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
@@ -733,10 +721,6 @@ describe('LoginForm', () => {
       });
 
       expect(window.location.href).toBe(currentURL);
-      expect(coreStartMock.notifications.toasts.addError).toHaveBeenCalledWith(
-        new Error('Oh no! But with much more details!'),
-        { title: 'Could not perform login.', toastMessage: 'Oh no!' }
-      );
     });
 
     it('properly switches to login form', async () => {
@@ -767,7 +751,7 @@ describe('LoginForm', () => {
 
       expectPageMode(PageMode.Selector);
 
-      await userEvent.click(screen.getByTestId('loginCard-basic/basic'));
+      fireEvent.click(screen.getByTestId('loginCard-basic/basic'));
       expectPageMode(PageMode.Form);
 
       expect(coreStartMock.http.post).not.toHaveBeenCalled();
@@ -799,12 +783,12 @@ describe('LoginForm', () => {
 
       expectPageMode(PageMode.Selector);
 
-      await userEvent.click(screen.getByTestId('loginHelpLink'));
+      fireEvent.click(screen.getByTestId('loginHelpLink'));
       expectPageMode(PageMode.LoginHelp);
 
       expect(screen.getByTestId('loginHelp')).toMatchSnapshot('Login Help');
 
-      await userEvent.click(screen.getByTestId('loginBackToLoginLink'));
+      fireEvent.click(screen.getByTestId('loginBackToLoginLink'));
       expectPageMode(PageMode.Selector);
 
       expect(coreStartMock.http.post).not.toHaveBeenCalled();
@@ -835,18 +819,18 @@ describe('LoginForm', () => {
 
       expectPageMode(PageMode.Selector);
 
-      await userEvent.click(screen.getByTestId('loginCard-basic/basic'));
+      fireEvent.click(screen.getByTestId('loginCard-basic/basic'));
       expectPageMode(PageMode.Form);
 
-      await userEvent.click(screen.getByTestId('loginHelpLink'));
+      fireEvent.click(screen.getByTestId('loginHelpLink'));
       expectPageMode(PageMode.LoginHelp);
 
       expect(screen.getByTestId('loginHelp')).toMatchSnapshot('Login Help');
 
-      await userEvent.click(screen.getByTestId('loginBackToLoginLink'));
+      fireEvent.click(screen.getByTestId('loginBackToLoginLink'));
       expectPageMode(PageMode.Form);
 
-      await userEvent.click(screen.getByTestId('loginBackToSelector'));
+      fireEvent.click(screen.getByTestId('loginBackToSelector'));
       expectPageMode(PageMode.Selector);
 
       expect(coreStartMock.http.post).not.toHaveBeenCalled();
@@ -916,16 +900,15 @@ describe('LoginForm', () => {
 
       expectAutoLoginOverlay();
 
-      await act(async () => {
-        await nextTick();
-      });
+      await waitFor(() =>
+        expect(window.location.href).toBe('https://external-idp/login?optional-arg=2#optional-hash')
+      );
 
       expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
       expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
         body: JSON.stringify({ providerType: 'saml', providerName: 'saml1', currentURL }),
       });
 
-      expect(window.location.href).toBe('https://external-idp/login?optional-arg=2#optional-hash');
       expect(screen.queryByTestId('loginErrorMessage')).not.toBeInTheDocument();
       expect(coreStartMock.notifications.toasts.addError).not.toHaveBeenCalled();
     });
@@ -963,16 +946,15 @@ describe('LoginForm', () => {
 
       expectAutoLoginOverlay();
 
-      await act(async () => {
-        await nextTick();
-      });
+      await waitFor(() =>
+        expect(window.location.href).toBe('https://external-idp/login?optional-arg=2#optional-hash')
+      );
 
       expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
       expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
         body: JSON.stringify({ providerType: 'saml', providerName: 'saml1', currentURL }),
       });
 
-      expect(window.location.href).toBe('https://external-idp/login?optional-arg=2#optional-hash');
       expect(screen.queryByTestId('loginErrorMessage')).not.toBeInTheDocument();
       expect(coreStartMock.notifications.toasts.addError).not.toHaveBeenCalled();
     });
@@ -1010,9 +992,12 @@ describe('LoginForm', () => {
 
       expectAutoLoginOverlay();
 
-      await act(async () => {
-        await nextTick();
-      });
+      await waitFor(() =>
+        expect(coreStartMock.notifications.toasts.addError).toHaveBeenCalledWith(failureReason, {
+          title: 'Could not perform login.',
+          toastMessage: 'Oh no!',
+        })
+      );
 
       expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
       expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
@@ -1020,10 +1005,6 @@ describe('LoginForm', () => {
       });
 
       expect(window.location.href).toBe(currentURL);
-      expect(coreStartMock.notifications.toasts.addError).toHaveBeenCalledWith(failureReason, {
-        title: 'Could not perform login.',
-        toastMessage: 'Oh no!',
-      });
 
       expectPageMode(PageMode.Selector);
       expect(screen.getByTestId('loginHelpLink')).toHaveTextContent('Need help?');

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 
 import type { BuildFlavor } from '@kbn/config';
@@ -25,8 +24,6 @@ import { createRawKibanaPrivileges } from '@kbn/security-role-management-model/s
 import type { Space } from '@kbn/spaces-plugin/public';
 import { spacesManagerMock } from '@kbn/spaces-plugin/public/spaces_manager/mocks';
 import { getUiApi } from '@kbn/spaces-plugin/public/ui_api';
-import { nextTick } from '@kbn/test-jest-helpers';
-
 import { EditRolePage } from './edit_role_page';
 import type { Role } from '../../../../common';
 import { licenseMock } from '../../../../common/licensing/index.mock';
@@ -956,7 +953,7 @@ describe('<EditRolePage />', () => {
       const saveButton = screen.getByTestId('roleFormSaveButton');
 
       fireEvent.change(nameInput, { target: { value: 'system_indices_superuser' } });
-      await userEvent.click(saveButton);
+      fireEvent.click(saveButton);
 
       await waitForRender();
 
@@ -1049,7 +1046,7 @@ describe('<EditRolePage />', () => {
       const saveButton = screen.getByTestId('roleFormSaveButton');
 
       fireEvent.change(nameInput, { target: { value: 'system_indices_superuser' } });
-      await userEvent.click(saveButton);
+      fireEvent.click(saveButton);
 
       await waitForRender();
 
@@ -1064,7 +1061,5 @@ describe('<EditRolePage />', () => {
 });
 
 async function waitForRender() {
-  await act(async () => {
-    await nextTick();
-  });
+  await waitFor(() => {});
 }

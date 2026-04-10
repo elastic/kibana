@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { act, render } from '@testing-library/react';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { I18nProvider } from '@kbn/i18n-react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import type { RoleKibanaPrivilege } from '@kbn/security-plugin-types-common';
 import {
   createKibanaPrivileges,
@@ -114,17 +113,8 @@ const expectNoPrivileges = (displayedPrivileges: any, expectSubFeatures: boolean
   });
 };
 
-const setup = async (props: PrivilegeSummaryTableProps) => {
-  let container!: HTMLElement;
-  await act(async () => {
-    const result = render(
-      <I18nProvider>
-        <PrivilegeSummaryTable {...props} />
-      </I18nProvider>
-    );
-    container = result.container;
-  });
-
+const setup = (props: PrivilegeSummaryTableProps) => {
+  const { container } = renderWithI18n(<PrivilegeSummaryTable {...props} />);
   return container;
 };
 
@@ -146,7 +136,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const container = await setup({
+        const container = setup({
           spaces,
           kibanaPrivileges,
           role,
@@ -174,7 +164,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const container = await setup({
+        const container = setup({
           spaces,
           kibanaPrivileges,
           role,
@@ -202,7 +192,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const container = await setup({
+        const container = setup({
           spaces,
           kibanaPrivileges,
           role,
@@ -228,7 +218,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const container = await setup({
+        const container = setup({
           spaces,
           kibanaPrivileges,
           role,
@@ -308,7 +298,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const container = await setup({
+        const container = setup({
           spaces,
           kibanaPrivileges,
           role,
@@ -386,7 +376,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const container = await setup({
+        const container = setup({
           spaces,
           kibanaPrivileges,
           role,
@@ -466,7 +456,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const container = await setup({
+        const container = setup({
           spaces,
           kibanaPrivileges,
           role,
@@ -549,7 +539,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const container = await setup({
+        const container = setup({
           spaces,
           kibanaPrivileges,
           role,
@@ -673,7 +663,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const container = await setup({
+        const container = setup({
           spaces,
           kibanaPrivileges,
           role,
@@ -797,7 +787,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const container = await setup({
+        const container = setup({
           spaces,
           kibanaPrivileges,
           role,
@@ -923,7 +913,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const container = await setup({
+        const container = setup({
           spaces,
           kibanaPrivileges,
           role,
@@ -1049,7 +1039,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const container = await setup({
+        const container = setup({
           spaces: [
             {
               id: ALL_SPACES_ID,
@@ -1187,7 +1177,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const container = await setup({
+        const container = setup({
           spaces,
           kibanaPrivileges,
           role,
@@ -1345,7 +1335,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const container = await setup({
+        const container = setup({
           spaces,
           kibanaPrivileges,
           role,
@@ -1398,7 +1388,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const container = await setup({
+        const container = setup({
           spaces: [
             {
               id: ALL_SPACES_ID,
@@ -1470,7 +1460,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const container = await setup({
+        const container = setup({
           spaces: [
             {
               id: ALL_SPACES_ID,
@@ -1526,7 +1516,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const container = await setup({
+        const container = setup({
           spaces: [
             {
               id: ALL_SPACES_ID,
@@ -1596,7 +1586,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const container = await setup({
+        const container = setup({
           spaces: [
             {
               id: ALL_SPACES_ID,
@@ -1649,7 +1639,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const container = await setup({
+        const container = setup({
           spaces: [
             {
               id: ALL_SPACES_ID,

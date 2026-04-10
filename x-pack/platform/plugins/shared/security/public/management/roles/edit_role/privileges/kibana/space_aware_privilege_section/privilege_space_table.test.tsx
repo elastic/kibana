@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
 
 import { KibanaFeature } from '@kbn/features-plugin/public';
-import { I18nProvider } from '@kbn/i18n-react';
 import type { Role, RoleKibanaPrivilege } from '@kbn/security-plugin-types-common';
 import { createKibanaPrivileges } from '@kbn/security-role-management-model/src/__fixtures__';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { PrivilegeFormCalculator } from '@kbn/security-ui-components';
 
 import { PrivilegeSpaceTable } from './privilege_space_table';
@@ -191,11 +190,7 @@ const getTableFromContainer = (container: HTMLElement): TableRow[] => {
 describe('only global', () => {
   it('base all', () => {
     const props = buildProps([{ spaces: ['*'], base: ['all'], feature: {} }]);
-    const { container } = render(
-      <I18nProvider>
-        <PrivilegeSpaceTable {...props} />
-      </I18nProvider>
-    );
+    const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
     const actualTable = getTableFromContainer(container);
     expect(actualTable).toEqual([
       { spaces: ['*'], privileges: { summary: 'All', overridden: false } },
@@ -204,11 +199,7 @@ describe('only global', () => {
 
   it('base *', () => {
     const props = buildProps([{ spaces: ['*'], base: ['*'], feature: {} }]);
-    const { container } = render(
-      <I18nProvider>
-        <PrivilegeSpaceTable {...props} />
-      </I18nProvider>
-    );
+    const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
     const actualTable = getTableFromContainer(container);
     expect(actualTable).toEqual([
       { spaces: ['*'], privileges: { summary: '*', overridden: false } },
@@ -217,11 +208,7 @@ describe('only global', () => {
 
   it('base read', () => {
     const props = buildProps([{ spaces: ['*'], base: ['read'], feature: {} }]);
-    const { container } = render(
-      <I18nProvider>
-        <PrivilegeSpaceTable {...props} />
-      </I18nProvider>
-    );
+    const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
     const actualTable = getTableFromContainer(container);
     expect(actualTable).toEqual([
       { spaces: ['*'], privileges: { summary: 'Read', overridden: false } },
@@ -230,11 +217,7 @@ describe('only global', () => {
 
   it('normal feature privilege all', () => {
     const props = buildProps([{ spaces: ['*'], base: [], feature: { normal: ['all'] } }]);
-    const { container } = render(
-      <I18nProvider>
-        <PrivilegeSpaceTable {...props} />
-      </I18nProvider>
-    );
+    const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
     const actualTable = getTableFromContainer(container);
     expect(actualTable).toEqual([
       { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -243,11 +226,7 @@ describe('only global', () => {
 
   it('normal feature privilege read', () => {
     const props = buildProps([{ spaces: ['*'], base: [], feature: { normal: ['read'] } }]);
-    const { container } = render(
-      <I18nProvider>
-        <PrivilegeSpaceTable {...props} />
-      </I18nProvider>
-    );
+    const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
     const actualTable = getTableFromContainer(container);
     expect(actualTable).toEqual([
       { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -258,11 +237,7 @@ describe('only global', () => {
     const props = buildProps([
       { spaces: ['*'], base: [], feature: { normal_with_sub: ['minimal_all'] } },
     ]);
-    const { container } = render(
-      <I18nProvider>
-        <PrivilegeSpaceTable {...props} />
-      </I18nProvider>
-    );
+    const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
     const actualTable = getTableFromContainer(container);
     expect(actualTable).toEqual([
       { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -273,11 +248,7 @@ describe('only global', () => {
     const props = buildProps([
       { spaces: ['*'], base: [], feature: { normal_with_sub: ['minimal_all', 'normal_sub_read'] } },
     ]);
-    const { container } = render(
-      <I18nProvider>
-        <PrivilegeSpaceTable {...props} />
-      </I18nProvider>
-    );
+    const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
     const actualTable = getTableFromContainer(container);
     expect(actualTable).toEqual([
       { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -288,11 +259,7 @@ describe('only global', () => {
     const props = buildProps([
       { spaces: ['*'], base: [], feature: { bothPrivilegesExcludedFromBase: ['read'] } },
     ]);
-    const { container } = render(
-      <I18nProvider>
-        <PrivilegeSpaceTable {...props} />
-      </I18nProvider>
-    );
+    const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
     const actualTable = getTableFromContainer(container);
     expect(actualTable).toEqual([
       { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -303,11 +270,7 @@ describe('only global', () => {
     const props = buildProps([
       { spaces: ['*'], base: [], feature: { bothPrivilegesExcludedFromBase: ['read'] } },
     ]);
-    const { container } = render(
-      <I18nProvider>
-        <PrivilegeSpaceTable {...props} />
-      </I18nProvider>
-    );
+    const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
     const actualTable = getTableFromContainer(container);
     expect(actualTable).toEqual([
       { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -318,11 +281,7 @@ describe('only global', () => {
     const props = buildProps([
       { spaces: ['*'], base: [], feature: { allPrivilegeExcludedFromBase: ['read'] } },
     ]);
-    const { container } = render(
-      <I18nProvider>
-        <PrivilegeSpaceTable {...props} />
-      </I18nProvider>
-    );
+    const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
     const actualTable = getTableFromContainer(container);
     expect(actualTable).toEqual([
       { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -333,11 +292,7 @@ describe('only global', () => {
     const props = buildProps([
       { spaces: ['*'], base: [], feature: { allPrivilegeExcludedFromBase: ['read'] } },
     ]);
-    const { container } = render(
-      <I18nProvider>
-        <PrivilegeSpaceTable {...props} />
-      </I18nProvider>
-    );
+    const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
     const actualTable = getTableFromContainer(container);
     expect(actualTable).toEqual([
       { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -348,11 +303,7 @@ describe('only global', () => {
 describe('only default and marketing space', () => {
   it('base all', () => {
     const props = buildProps([{ spaces: ['default', 'marketing'], base: ['all'], feature: {} }]);
-    const { container } = render(
-      <I18nProvider>
-        <PrivilegeSpaceTable {...props} />
-      </I18nProvider>
-    );
+    const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
     const actualTable = getTableFromContainer(container);
     expect(actualTable).toEqual([
       { spaces: ['Default', 'Marketing'], privileges: { summary: 'All', overridden: false } },
@@ -361,11 +312,7 @@ describe('only default and marketing space', () => {
 
   it('base read', () => {
     const props = buildProps([{ spaces: ['default', 'marketing'], base: ['read'], feature: {} }]);
-    const { container } = render(
-      <I18nProvider>
-        <PrivilegeSpaceTable {...props} />
-      </I18nProvider>
-    );
+    const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
     const actualTable = getTableFromContainer(container);
     expect(actualTable).toEqual([
       { spaces: ['Default', 'Marketing'], privileges: { summary: 'Read', overridden: false } },
@@ -376,11 +323,7 @@ describe('only default and marketing space', () => {
     const props = buildProps([
       { spaces: ['default', 'marketing'], base: [], feature: { normal: ['all'] } },
     ]);
-    const { container } = render(
-      <I18nProvider>
-        <PrivilegeSpaceTable {...props} />
-      </I18nProvider>
-    );
+    const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
     const actualTable = getTableFromContainer(container);
     expect(actualTable).toEqual([
       { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
@@ -391,11 +334,7 @@ describe('only default and marketing space', () => {
     const props = buildProps([
       { spaces: ['default', 'marketing'], base: [], feature: { normal: ['read'] } },
     ]);
-    const { container } = render(
-      <I18nProvider>
-        <PrivilegeSpaceTable {...props} />
-      </I18nProvider>
-    );
+    const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
     const actualTable = getTableFromContainer(container);
     expect(actualTable).toEqual([
       { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
@@ -406,11 +345,7 @@ describe('only default and marketing space', () => {
     const props = buildProps([
       { spaces: ['default', 'marketing'], base: [], feature: { normal_with_sub: ['minimal_all'] } },
     ]);
-    const { container } = render(
-      <I18nProvider>
-        <PrivilegeSpaceTable {...props} />
-      </I18nProvider>
-    );
+    const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
     const actualTable = getTableFromContainer(container);
     expect(actualTable).toEqual([
       { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
@@ -425,11 +360,7 @@ describe('only default and marketing space', () => {
         feature: { normal_with_sub: ['minimal_all', 'normal_sub_read'] },
       },
     ]);
-    const { container } = render(
-      <I18nProvider>
-        <PrivilegeSpaceTable {...props} />
-      </I18nProvider>
-    );
+    const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
     const actualTable = getTableFromContainer(container);
     expect(actualTable).toEqual([
       { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
@@ -444,11 +375,7 @@ describe('only default and marketing space', () => {
         feature: { bothPrivilegesExcludedFromBase: ['all'] },
       },
     ]);
-    const { container } = render(
-      <I18nProvider>
-        <PrivilegeSpaceTable {...props} />
-      </I18nProvider>
-    );
+    const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
     const actualTable = getTableFromContainer(container);
     expect(actualTable).toEqual([
       { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
@@ -463,11 +390,7 @@ describe('only default and marketing space', () => {
         feature: { bothPrivilegesExcludedFromBase: ['read'] },
       },
     ]);
-    const { container } = render(
-      <I18nProvider>
-        <PrivilegeSpaceTable {...props} />
-      </I18nProvider>
-    );
+    const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
     const actualTable = getTableFromContainer(container);
     expect(actualTable).toEqual([
       { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
@@ -482,11 +405,7 @@ describe('only default and marketing space', () => {
         feature: { allPrivilegeExcludedFromBase: ['all'] },
       },
     ]);
-    const { container } = render(
-      <I18nProvider>
-        <PrivilegeSpaceTable {...props} />
-      </I18nProvider>
-    );
+    const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
     const actualTable = getTableFromContainer(container);
     expect(actualTable).toEqual([
       { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
@@ -501,11 +420,7 @@ describe('only default and marketing space', () => {
         feature: { allPrivilegeExcludedFromBase: ['read'] },
       },
     ]);
-    const { container } = render(
-      <I18nProvider>
-        <PrivilegeSpaceTable {...props} />
-      </I18nProvider>
-    );
+    const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
     const actualTable = getTableFromContainer(container);
     expect(actualTable).toEqual([
       { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
@@ -520,11 +435,7 @@ describe('global base all', () => {
         { spaces: ['*'], base: ['all'], feature: {} },
         { spaces: ['default', 'marketing'], base: ['all'], feature: {} },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'All', overridden: false } },
@@ -537,11 +448,7 @@ describe('global base all', () => {
         { spaces: ['*'], base: ['all'], feature: {} },
         { spaces: ['default', 'marketing'], base: ['read'], feature: {} },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'All', overridden: false } },
@@ -554,11 +461,7 @@ describe('global base all', () => {
         { spaces: ['*'], base: ['all'], feature: {} },
         { spaces: ['default', 'marketing'], base: [], feature: { normal: ['all'] } },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'All', overridden: false } },
@@ -571,11 +474,7 @@ describe('global base all', () => {
         { spaces: ['*'], base: ['all'], feature: {} },
         { spaces: ['default', 'marketing'], base: [], feature: { normal: ['read'] } },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'All', overridden: false } },
@@ -592,11 +491,7 @@ describe('global base all', () => {
           feature: { normal_with_sub: ['minimal_all'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'All', overridden: false } },
@@ -613,11 +508,7 @@ describe('global base all', () => {
           feature: { normal_with_sub: ['minimal_all', 'normal_sub_read'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'All', overridden: false } },
@@ -634,11 +525,7 @@ describe('global base all', () => {
           feature: { bothPrivilegesExcludedFromBase: ['all'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'All', overridden: false } },
@@ -655,11 +542,7 @@ describe('global base all', () => {
           feature: { bothPrivilegesExcludedFromBase: ['read'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'All', overridden: false } },
@@ -676,11 +559,7 @@ describe('global base all', () => {
           feature: { allPrivilegeExcludedFromBase: ['all'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'All', overridden: false } },
@@ -697,11 +576,7 @@ describe('global base all', () => {
           feature: { allPrivilegeExcludedFromBase: ['read'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'All', overridden: false } },
@@ -718,11 +593,7 @@ describe('global base read', () => {
         { spaces: ['*'], base: ['read'], feature: {} },
         { spaces: ['default', 'marketing'], base: ['all'], feature: {} },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Read', overridden: false } },
@@ -735,11 +606,7 @@ describe('global base read', () => {
         { spaces: ['*'], base: ['read'], feature: {} },
         { spaces: ['default', 'marketing'], base: ['read'], feature: {} },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Read', overridden: false } },
@@ -752,11 +619,7 @@ describe('global base read', () => {
         { spaces: ['*'], base: ['read'], feature: {} },
         { spaces: ['default', 'marketing'], base: [], feature: { normal: ['all'] } },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Read', overridden: false } },
@@ -769,11 +632,7 @@ describe('global base read', () => {
         { spaces: ['*'], base: ['read'], feature: {} },
         { spaces: ['default', 'marketing'], base: [], feature: { normal: ['read'] } },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Read', overridden: false } },
@@ -790,11 +649,7 @@ describe('global base read', () => {
           feature: { normal_with_sub: ['minimal_read'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Read', overridden: false } },
@@ -811,11 +666,7 @@ describe('global base read', () => {
           feature: { normal_with_sub: ['minimal_read', 'normal_sub_read'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Read', overridden: false } },
@@ -832,11 +683,7 @@ describe('global base read', () => {
           feature: { bothPrivilegesExcludedFromBase: ['all'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Read', overridden: false } },
@@ -853,11 +700,7 @@ describe('global base read', () => {
           feature: { bothPrivilegesExcludedFromBase: ['read'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Read', overridden: false } },
@@ -874,11 +717,7 @@ describe('global base read', () => {
           feature: { allPrivilegeExcludedFromBase: ['all'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Read', overridden: false } },
@@ -895,11 +734,7 @@ describe('global base read', () => {
           feature: { allPrivilegeExcludedFromBase: ['read'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Read', overridden: false } },
@@ -915,11 +750,7 @@ describe('global and reserved', () => {
       { spaces: ['*'], base: ['all'], feature: {} },
       { spaces: ['*'], base: [], feature: {}, _reserved: ['foo'] },
     ]);
-    const { container } = render(
-      <I18nProvider>
-        <PrivilegeSpaceTable {...props} />
-      </I18nProvider>
-    );
+    const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
     const actualTable = getTableFromContainer(container);
     expect(actualTable).toEqual([
       { spaces: ['*'], privileges: { summary: 'Foo', overridden: false } },
@@ -935,11 +766,7 @@ describe('global normal feature privilege all', () => {
         { spaces: ['*'], base: [], feature: { normal: ['all'] } },
         { spaces: ['default', 'marketing'], base: ['all'], feature: {} },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -952,11 +779,7 @@ describe('global normal feature privilege all', () => {
         { spaces: ['*'], base: [], feature: { normal: ['all'] } },
         { spaces: ['default', 'marketing'], base: ['read'], feature: {} },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -969,11 +792,7 @@ describe('global normal feature privilege all', () => {
         { spaces: ['*'], base: [], feature: { normal: ['all'] } },
         { spaces: ['default', 'marketing'], base: [], feature: { normal: ['all'] } },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -986,11 +805,7 @@ describe('global normal feature privilege all', () => {
         { spaces: ['*'], base: [], feature: { normal: ['all'] } },
         { spaces: ['default', 'marketing'], base: [], feature: { normal: ['read'] } },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1007,11 +822,7 @@ describe('global normal feature privilege all', () => {
           feature: { bothPrivilegesExcludedFromBase: ['all'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1028,11 +839,7 @@ describe('global normal feature privilege all', () => {
           feature: { bothPrivilegesExcludedFromBase: ['read'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1049,11 +856,7 @@ describe('global normal feature privilege all', () => {
           feature: { allPrivilegeExcludedFromBase: ['all'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1070,11 +873,7 @@ describe('global normal feature privilege all', () => {
           feature: { allPrivilegeExcludedFromBase: ['read'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1091,11 +890,7 @@ describe('global normal feature privilege read', () => {
         { spaces: ['*'], base: [], feature: { normal: ['read'] } },
         { spaces: ['default', 'marketing'], base: ['all'], feature: {} },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1108,11 +903,7 @@ describe('global normal feature privilege read', () => {
         { spaces: ['*'], base: [], feature: { normal: ['read'] } },
         { spaces: ['default', 'marketing'], base: ['read'], feature: {} },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1125,11 +916,7 @@ describe('global normal feature privilege read', () => {
         { spaces: ['*'], base: [], feature: { normal: ['read'] } },
         { spaces: ['default', 'marketing'], base: [], feature: { normal: ['all'] } },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1142,11 +929,7 @@ describe('global normal feature privilege read', () => {
         { spaces: ['*'], base: [], feature: { normal: ['read'] } },
         { spaces: ['default', 'marketing'], base: [], feature: { normal: ['read'] } },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1163,11 +946,7 @@ describe('global normal feature privilege read', () => {
           feature: { bothPrivilegesExcludedFromBase: ['all'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1184,11 +963,7 @@ describe('global normal feature privilege read', () => {
           feature: { bothPrivilegesExcludedFromBase: ['read'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1205,11 +980,7 @@ describe('global normal feature privilege read', () => {
           feature: { allPrivilegeExcludedFromBase: ['all'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1226,11 +997,7 @@ describe('global normal feature privilege read', () => {
           feature: { allPrivilegeExcludedFromBase: ['read'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1247,11 +1014,7 @@ describe('global bothPrivilegesExcludedFromBase feature privilege all', () => {
         { spaces: ['*'], base: [], feature: { bothPrivilegesExcludedFromBase: ['all'] } },
         { spaces: ['default', 'marketing'], base: ['all'], feature: {} },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1264,11 +1027,7 @@ describe('global bothPrivilegesExcludedFromBase feature privilege all', () => {
         { spaces: ['*'], base: [], feature: { bothPrivilegesExcludedFromBase: ['all'] } },
         { spaces: ['default', 'marketing'], base: ['read'], feature: {} },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1281,11 +1040,7 @@ describe('global bothPrivilegesExcludedFromBase feature privilege all', () => {
         { spaces: ['*'], base: [], feature: { bothPrivilegesExcludedFromBase: ['all'] } },
         { spaces: ['default', 'marketing'], base: [], feature: { normal: ['all'] } },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1298,11 +1053,7 @@ describe('global bothPrivilegesExcludedFromBase feature privilege all', () => {
         { spaces: ['*'], base: [], feature: { bothPrivilegesExcludedFromBase: ['all'] } },
         { spaces: ['default', 'marketing'], base: [], feature: { normal: ['read'] } },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1319,11 +1070,7 @@ describe('global bothPrivilegesExcludedFromBase feature privilege all', () => {
           feature: { bothPrivilegesExcludedFromBase: ['all'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1340,11 +1087,7 @@ describe('global bothPrivilegesExcludedFromBase feature privilege all', () => {
           feature: { bothPrivilegesExcludedFromBase: ['read'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1361,11 +1104,7 @@ describe('global bothPrivilegesExcludedFromBase feature privilege all', () => {
           feature: { allPrivilegeExcludedFromBase: ['all'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1382,11 +1121,7 @@ describe('global bothPrivilegesExcludedFromBase feature privilege all', () => {
           feature: { allPrivilegeExcludedFromBase: ['read'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1403,11 +1138,7 @@ describe('global bothPrivilegesExcludedFromBase feature privilege read', () => {
         { spaces: ['*'], base: [], feature: { bothPrivilegesExcludedFromBase: ['read'] } },
         { spaces: ['default', 'marketing'], base: ['all'], feature: {} },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1420,11 +1151,7 @@ describe('global bothPrivilegesExcludedFromBase feature privilege read', () => {
         { spaces: ['*'], base: [], feature: { bothPrivilegesExcludedFromBase: ['read'] } },
         { spaces: ['default', 'marketing'], base: ['read'], feature: {} },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1437,11 +1164,7 @@ describe('global bothPrivilegesExcludedFromBase feature privilege read', () => {
         { spaces: ['*'], base: [], feature: { bothPrivilegesExcludedFromBase: ['read'] } },
         { spaces: ['default', 'marketing'], base: [], feature: { normal: ['all'] } },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1454,11 +1177,7 @@ describe('global bothPrivilegesExcludedFromBase feature privilege read', () => {
         { spaces: ['*'], base: [], feature: { bothPrivilegesExcludedFromBase: ['read'] } },
         { spaces: ['default', 'marketing'], base: [], feature: { normal: ['read'] } },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1475,11 +1194,7 @@ describe('global bothPrivilegesExcludedFromBase feature privilege read', () => {
           feature: { bothPrivilegesExcludedFromBase: ['all'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1496,11 +1211,7 @@ describe('global bothPrivilegesExcludedFromBase feature privilege read', () => {
           feature: { bothPrivilegesExcludedFromBase: ['read'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1517,11 +1228,7 @@ describe('global bothPrivilegesExcludedFromBase feature privilege read', () => {
           feature: { allPrivilegeExcludedFromBase: ['all'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1538,11 +1245,7 @@ describe('global bothPrivilegesExcludedFromBase feature privilege read', () => {
           feature: { allPrivilegeExcludedFromBase: ['read'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1559,11 +1262,7 @@ describe('global allPrivilegeExcludedFromBase feature privilege all', () => {
         { spaces: ['*'], base: [], feature: { allPrivilegeExcludedFromBase: ['all'] } },
         { spaces: ['default', 'marketing'], base: ['all'], feature: {} },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1576,11 +1275,7 @@ describe('global allPrivilegeExcludedFromBase feature privilege all', () => {
         { spaces: ['*'], base: [], feature: { allPrivilegeExcludedFromBase: ['all'] } },
         { spaces: ['default', 'marketing'], base: ['read'], feature: {} },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1593,11 +1288,7 @@ describe('global allPrivilegeExcludedFromBase feature privilege all', () => {
         { spaces: ['*'], base: [], feature: { allPrivilegeExcludedFromBase: ['all'] } },
         { spaces: ['default', 'marketing'], base: [], feature: { normal: ['all'] } },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1610,11 +1301,7 @@ describe('global allPrivilegeExcludedFromBase feature privilege all', () => {
         { spaces: ['*'], base: [], feature: { allPrivilegeExcludedFromBase: ['all'] } },
         { spaces: ['default', 'marketing'], base: [], feature: { normal: ['read'] } },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1631,11 +1318,7 @@ describe('global allPrivilegeExcludedFromBase feature privilege all', () => {
           feature: { bothPrivilegesExcludedFromBase: ['all'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1652,11 +1335,7 @@ describe('global allPrivilegeExcludedFromBase feature privilege all', () => {
           feature: { bothPrivilegesExcludedFromBase: ['read'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1673,11 +1352,7 @@ describe('global allPrivilegeExcludedFromBase feature privilege all', () => {
           feature: { allPrivilegeExcludedFromBase: ['all'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1694,11 +1369,7 @@ describe('global allPrivilegeExcludedFromBase feature privilege all', () => {
           feature: { allPrivilegeExcludedFromBase: ['read'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1715,11 +1386,7 @@ describe('global allPrivilegeExcludedFromBase feature privilege read', () => {
         { spaces: ['*'], base: [], feature: { allPrivilegeExcludedFromBase: ['read'] } },
         { spaces: ['default', 'marketing'], base: ['all'], feature: {} },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1732,11 +1399,7 @@ describe('global allPrivilegeExcludedFromBase feature privilege read', () => {
         { spaces: ['*'], base: [], feature: { allPrivilegeExcludedFromBase: ['read'] } },
         { spaces: ['default', 'marketing'], base: ['read'], feature: {} },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1749,11 +1412,7 @@ describe('global allPrivilegeExcludedFromBase feature privilege read', () => {
         { spaces: ['*'], base: [], feature: { allPrivilegeExcludedFromBase: ['read'] } },
         { spaces: ['default', 'marketing'], base: [], feature: { normal: ['all'] } },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1766,11 +1425,7 @@ describe('global allPrivilegeExcludedFromBase feature privilege read', () => {
         { spaces: ['*'], base: [], feature: { allPrivilegeExcludedFromBase: ['read'] } },
         { spaces: ['default', 'marketing'], base: [], feature: { normal: ['read'] } },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1787,11 +1442,7 @@ describe('global allPrivilegeExcludedFromBase feature privilege read', () => {
           feature: { bothPrivilegesExcludedFromBase: ['all'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1808,11 +1459,7 @@ describe('global allPrivilegeExcludedFromBase feature privilege read', () => {
           feature: { bothPrivilegesExcludedFromBase: ['read'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
 
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
@@ -1830,11 +1477,7 @@ describe('global allPrivilegeExcludedFromBase feature privilege read', () => {
           feature: { allPrivilegeExcludedFromBase: ['all'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
@@ -1851,11 +1494,7 @@ describe('global allPrivilegeExcludedFromBase feature privilege read', () => {
           feature: { allPrivilegeExcludedFromBase: ['read'] },
         },
       ]);
-      const { container } = render(
-        <I18nProvider>
-          <PrivilegeSpaceTable {...props} />
-        </I18nProvider>
-      );
+      const { container } = renderWithI18n(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromContainer(container);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
