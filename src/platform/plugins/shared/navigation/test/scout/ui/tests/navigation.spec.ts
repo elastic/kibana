@@ -11,8 +11,7 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 import { test } from '../fixtures';
 
-// Failing: See https://github.com/elastic/kibana/issues/259488
-test.describe.skip('navigation', { tag: tags.serverless.security.complete }, () => {
+test.describe('navigation', { tag: tags.serverless.security.complete }, () => {
   test('has security serverless side nav', async ({ pageObjects, browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
     await pageObjects.navigation.goToSecurity();

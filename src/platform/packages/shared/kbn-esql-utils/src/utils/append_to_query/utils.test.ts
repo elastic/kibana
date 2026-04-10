@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Parser, Walker } from '@elastic/esql';
+import type { ESQLFunction } from '@elastic/esql/types';
 import { appendToESQLQuery, escapeStringValue } from './utils';
+import { extractMvContainsFunctionDetails } from './utils';
 
 describe('appendToESQLQuery', () => {
   it('append the text on a new line after the query', () => {
@@ -53,5 +56,65 @@ describe('escapeStringValue', () => {
 
   it('handles all special characters combined', () => {
     expect(escapeStringValue('a\\b"c\nd\re\tf')).toBe('"a\\\\b\\"c\\nd\\re\\tf"');
+  });
+});
+
+describe('extractMvContainsFunctionDetails', () => {
+  const getMvContainsFunction = (query: string): ESQLFunction => {
+    const { root } = Parser.parse(query);
+    const lastCommand = root.commands[root.commands.length - 1];
+
+    return Walker.findAll(
+      lastCommand,
+      (node) => node.type === 'function' && node.name === 'mv_contains'
+    )[0] as ESQLFunction;
+  };
+
+  it('extracts values from MV_CONTAINS lists with inline casts', () => {
+    expect(
+      extractMvContainsFunctionDetails(
+        getMvContainsFunction(
+          'from logstash-* | WHERE MV_CONTAINS(`tags.keyword`, ["info", "success"]::keyword)'
+        )
+      )
+    ).toEqual({
+      columnName: 'tags.keyword',
+      literalValues: ['info', 'success'],
+    });
+  });
+
+  it('extracts values from MV_CONTAINS lists without inline casts', () => {
+    expect(
+      extractMvContainsFunctionDetails(
+        getMvContainsFunction('from logstash-* | WHERE MV_CONTAINS(`bytes`, [1, 2])')
+      )
+    ).toEqual({
+      columnName: 'bytes',
+      literalValues: [1, 2],
+    });
+  });
+
+  it('extracts scalar values from MV_CONTAINS without inline casts', () => {
+    expect(
+      extractMvContainsFunctionDetails(
+        getMvContainsFunction('from logstash-* | WHERE MV_CONTAINS(`tags.keyword`, "info")')
+      )
+    ).toEqual({
+      columnName: 'tags.keyword',
+      literalValues: ['info'],
+    });
+  });
+
+  it('extracts scalar values from MV_CONTAINS with inline casts', () => {
+    expect(
+      extractMvContainsFunctionDetails(
+        getMvContainsFunction(
+          'from logstash-* | WHERE MV_CONTAINS(`tags.keyword`, "info"::keyword)'
+        )
+      )
+    ).toEqual({
+      columnName: 'tags.keyword',
+      literalValues: ['info'],
+    });
   });
 });

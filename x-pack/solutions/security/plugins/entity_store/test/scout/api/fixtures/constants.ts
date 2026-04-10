@@ -6,6 +6,15 @@
  */
 
 import { tags } from '@kbn/scout-security';
+import {
+  ENTITY_LATEST,
+  ENTITY_UPDATES,
+  ENTITY_HISTORY,
+  getEntitiesAlias,
+  getLatestEntitiesIndexName,
+  getEntityIndexPattern,
+  ENTITY_SCHEMA_VERSION_V2,
+} from '../../../../common/domain/entity_index';
 
 const BASE_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
@@ -63,6 +72,15 @@ export const ENTITY_STORE_ROUTES = {
 
 export const ENTITY_STORE_TAGS = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
-export const UPDATES_INDEX = '.entities.v2.updates.security_default';
-export const LATEST_INDEX = '.entities.v2.latest.security_default';
-export const HISTORY_INDEX_PATTERN = '.entities.v2.history.security_default*';
+export const UPDATES_INDEX = getEntityIndexPattern({
+  schemaVersion: ENTITY_SCHEMA_VERSION_V2,
+  dataset: ENTITY_UPDATES,
+  namespace: 'default',
+});
+export const LATEST_ALIAS = getEntitiesAlias(ENTITY_LATEST, 'default');
+export const LATEST_INDEX = getLatestEntitiesIndexName('default');
+export const HISTORY_INDEX_PATTERN = `${getEntityIndexPattern({
+  schemaVersion: ENTITY_SCHEMA_VERSION_V2,
+  dataset: ENTITY_HISTORY,
+  namespace: 'default',
+})}*`;

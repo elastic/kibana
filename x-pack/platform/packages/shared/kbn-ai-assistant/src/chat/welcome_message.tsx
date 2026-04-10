@@ -58,7 +58,7 @@ export function WelcomeMessage({
       setConnectorFlyoutOpen(true);
     } else {
       application?.navigateToApp('management', {
-        path: '/insightsAndAlerting/triggersActionsConnectors/connectors',
+        path: '/modelManagement/model_settings',
       });
     }
   };

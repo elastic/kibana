@@ -248,11 +248,23 @@ describe('<PipelinesList />', () => {
         httpRequestsMockHelpers.setLoadPipelineResponse(pipelineName, pipeline1);
         await renderPipelinesList(httpSetup, '', { expectedTestId: 'pipelinesTable' });
 
+        const getCallsBeforeOpenFlyout = httpSetup.get.mock.calls.length;
         fireEvent.click(
           within(getPipelineRowByName(pipelineName)).getByTestId('pipelineDetailsLink')
         );
+
+        // Wait for the pipeline load request to be issued and resolved to avoid
+        // racing the flyout rendering against useRequest's async state updates.
+        const pipelinePath = `${API_BASE_PATH}/${encodeURIComponent(pipelineName)}`;
+        await waitFor(() =>
+          expect(httpSetup.get.mock.calls.length).toBeGreaterThan(getCallsBeforeOpenFlyout)
+        );
+        await waitFor(() =>
+          expect(httpSetup.get).toHaveBeenCalledWith(pipelinePath, expect.any(Object))
+        );
+
         expect(screen.getByTestId('pipelinesTable')).toBeInTheDocument();
-        expect(screen.getByTestId('pipelineDetails')).toBeInTheDocument();
+        await screen.findByTestId('pipelineDetails');
         expect(await screen.findByTestId('detailsPanelTitle')).toHaveTextContent(pipelineName);
       });
 
@@ -368,8 +380,8 @@ describe('<PipelinesList />', () => {
           });
 
           expect(screen.getByTestId('pipelinesTable')).toBeInTheDocument();
-          expect(screen.getByTestId('pipelineDetails')).toBeInTheDocument();
-          expect(screen.getByTestId('pipelineTreePanel')).toBeInTheDocument();
+          expect(await screen.findByTestId('pipelineDetails')).toBeInTheDocument();
+          expect(await screen.findByTestId('pipelineTreePanel')).toBeInTheDocument();
         });
       });
     });
