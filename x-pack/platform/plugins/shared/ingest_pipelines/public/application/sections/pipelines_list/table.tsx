@@ -237,16 +237,16 @@ export const PipelineTable: FunctionComponent<Props> = ({
     </EuiFilterButton>
   );
 
-  const tableCaption = i18n.translate('xpack.ingestPipelines.list.table.tableCaption', {
-    defaultMessage: 'List of ingest pipelines',
-  });
-
   const tableProps: EuiInMemoryTableProps<Pipeline> = {
     itemId: 'name',
     'data-test-subj': 'pipelinesTable',
     sorting,
     selection: {
       onSelectionChange: setSelection,
+      selectableMessage: () =>
+        i18n.translate('xpack.ingestPipelines.list.table.selection.selectRowAriaLabel', {
+          defaultMessage: 'Select this row',
+        }),
     },
     rowProps: () => ({
       'data-test-subj': 'pipelineTableRow',
@@ -307,7 +307,9 @@ export const PipelineTable: FunctionComponent<Props> = ({
                   id="popoverID"
                   aria-label={i18n.translate(
                     'xpack.ingestPipelines.list.table.filtersPopoverAriaLabel',
-                    { defaultMessage: 'Filters' }
+                    {
+                      defaultMessage: 'Pipeline filters',
+                    }
                   )}
                   button={button}
                   isOpen={isPopoverOpen}
@@ -446,5 +448,5 @@ export const PipelineTable: FunctionComponent<Props> = ({
     loading: isLoading,
   };
 
-  return <EuiInMemoryTable tableCaption={tableCaption} {...tableProps} />;
+  return <EuiInMemoryTable {...tableProps} tableCaption={tableProps.tableCaption} />;
 };

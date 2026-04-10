@@ -45,7 +45,7 @@ export const ToolDetailPanel: React.FC<ToolDetailPanelProps> = ({
       isLoading={isLoading}
       isEmpty={!tool}
       title={tool?.id ?? toolId}
-      showAutoIcon={isAutoIncluded}
+      isReadOnly={isReadOnly}
       headerContent={
         <EuiText
           size="xs"
