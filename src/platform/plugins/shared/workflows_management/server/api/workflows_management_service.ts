@@ -1808,7 +1808,7 @@ export class WorkflowsService {
   private validateWorkflowId(id: string): void {
     if (!WORKFLOW_ID_PATTERN.test(id)) {
       throw new WorkflowValidationError(
-        `Invalid workflow ID format. Expected format: workflow-{uuid}, received: ${id}`
+        `Invalid workflow ID format. Expected format: lowercase alphanumeric characters with optional hyphens in the middle, received: ${id}`
       );
     }
   }
