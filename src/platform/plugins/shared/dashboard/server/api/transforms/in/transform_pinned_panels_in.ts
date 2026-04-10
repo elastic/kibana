@@ -56,6 +56,11 @@ export function transformPinnedPanelsIn(pinnedPanels?: PinnedPanelsState): {
                 dataViewRefName: `${id}:${transformedState.dataViewRefName}`,
               },
             };
+          } else {
+            transformedControlState = {
+              ...transformedControlState,
+              config: transformedState,
+            };
           }
         } catch (e) {
           panelErrors.push(
