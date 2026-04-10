@@ -70,13 +70,14 @@ export function extractWorkflowPreview(yaml: string): WorkflowPreview {
 
   const json = result.json;
   const name = typeof json.name === 'string' ? json.name : null;
+  const nameForId = json.name != null && typeof json.name !== 'object' ? String(json.name) : null;
   const description = typeof json.description === 'string' ? json.description : null;
   const triggers = extractTriggers(json.triggers);
   const inputCount = countInputs(json.inputs);
   const stepCount = Array.isArray(json.steps) ? json.steps.length : 0;
 
   return {
-    id: generatePreviewId(name),
+    id: generatePreviewId(nameForId),
     name,
     description,
     triggers,

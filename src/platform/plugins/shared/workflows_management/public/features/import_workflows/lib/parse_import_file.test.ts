@@ -10,6 +10,7 @@
 import JSZip from 'jszip';
 import YAML from 'yaml';
 import { parseImportFile } from './parse_import_file';
+import { MAX_AGGREGATE_IMPORT_BYTES } from '../../../../common/lib/import';
 
 jest.mock('../../../../common/lib/yaml/parse_workflow_yaml_to_json_without_validation', () => ({
   parseYamlToJSONWithoutValidation: (yamlString: string) => {
@@ -75,6 +76,74 @@ describe('parseImportFile', () => {
     it('should throw for whitespace-only files', async () => {
       const file = createFile('   \n  ', 'blank.yml');
       await expect(parseImportFile(file)).rejects.toThrow('empty');
+    });
+
+    it('should fall back to workflow-{uuid} ID when name field is absent', async () => {
+      const yaml = 'steps:\n  - type: console';
+      const file = createFile(yaml, 'no-name.yml');
+      const result = await parseImportFile(file);
+
+      const uuidPattern = /^workflow-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+      expect(result.workflows[0].id).toMatch(uuidPattern);
+      expect(result.workflowIds[0]).toMatch(uuidPattern);
+      expect(result.rawWorkflows[0].id).toBe(result.workflows[0].id);
+      expect(result.workflows[0].name).toBeNull();
+    });
+
+    it('should not fall back when name is a number', async () => {
+      const yaml = 'name: 123\nsteps: []';
+      const file = createFile(yaml, 'numeric-name.yml');
+      const result = await parseImportFile(file);
+
+      expect(result.workflows[0].id).toBe('123');
+      expect(result.workflows[0].name).toBeNull();
+      expect(result.workflows[0].valid).toBe(true);
+    });
+
+    it('should slugify special characters in name', async () => {
+      const yaml = 'name: "Hello, World! (2024)"\nsteps: []';
+      const file = createFile(yaml, 'special-chars.yml');
+      const result = await parseImportFile(file);
+
+      expect(result.workflows[0].id).toBe('hello-world-2024');
+      expect(result.workflowIds[0]).toBe('hello-world-2024');
+      expect(result.rawWorkflows[0].id).toBe('hello-world-2024');
+    });
+
+    it('should strip diacritics from name when generating ID', async () => {
+      const yaml = 'name: "Café Résumé"\nsteps: []';
+      const file = createFile(yaml, 'diacritics.yml');
+      const result = await parseImportFile(file);
+
+      expect(result.workflows[0].id).toBe('cafe-resume');
+    });
+
+    it('should convert underscores in name to hyphens in ID', async () => {
+      const yaml = 'name: "my_workflow"\nsteps: []';
+      const file = createFile(yaml, 'underscores.yml');
+      const result = await parseImportFile(file);
+
+      expect(result.workflows[0].id).toBe('my-workflow');
+    });
+
+    it('should trim leading and trailing whitespace from name when generating ID', async () => {
+      const yaml = 'name: "  My Workflow  "\nsteps: []';
+      const file = createFile(yaml, 'whitespace-name.yml');
+      const result = await parseImportFile(file);
+
+      expect(result.workflows[0].id).toBe('my-workflow');
+    });
+
+    it('should fall back to workflow-{uuid} and valid: false when YAML parses to a scalar', async () => {
+      const yaml = 'just a string';
+      const file = createFile(yaml, 'scalar.yml');
+      const result = await parseImportFile(file);
+
+      expect(result.workflows[0].id).toMatch(/^workflow-[0-9a-f-]{36}$/);
+      expect(result.workflows[0].valid).toBe(false);
+      expect(result.workflows[0].name).toBeNull();
+      expect(result.parseErrors).toHaveLength(0);
+      expect(result.workflowIds[0]).toBe(result.workflows[0].id);
     });
   });
 
@@ -280,6 +349,90 @@ describe('parseImportFile', () => {
       expect(result.workflows).toHaveLength(0);
       expect(result.parseErrors.some((e) => e.includes('maximum YAML length'))).toBe(true);
     });
+
+    it('should use the name-derived ID from YAML content, not from the ZIP filename', async () => {
+      const zip = new JSZip();
+      zip.file('w-1.yml', 'name: "Hello, World! (2024)"\nsteps: []');
+      zip.file(
+        'manifest.yml',
+        YAML.stringify({
+          exportedCount: 1,
+          exportedAt: '2026-01-01T00:00:00Z',
+          version: '1',
+        })
+      );
+      const buffer = await zip.generateAsync({ type: 'arraybuffer' });
+      const file = createFile(buffer, 'name-vs-filename.zip');
+      const result = await parseImportFile(file);
+
+      expect(result.workflowIds).toEqual(['hello-world-2024']);
+      expect(result.rawWorkflows[0].id).toBe('hello-world-2024');
+      expect(result.workflows[0].id).toBe('hello-world-2024');
+      expect(result.parseErrors).toHaveLength(0);
+    });
+
+    it('should fall back to workflow-{uuid} ID when ZIP entry YAML has no name field', async () => {
+      const zip = new JSZip();
+      zip.file('w-1.yml', 'steps:\n  - type: console');
+      zip.file(
+        'manifest.yml',
+        YAML.stringify({
+          exportedCount: 1,
+          exportedAt: '2026-01-01T00:00:00Z',
+          version: '1',
+        })
+      );
+      const buffer = await zip.generateAsync({ type: 'arraybuffer' });
+      const file = createFile(buffer, 'no-name.zip');
+      const result = await parseImportFile(file);
+
+      const uuidPattern = /^workflow-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+      expect(result.workflowIds[0]).toMatch(uuidPattern);
+      expect(result.rawWorkflows[0].id).toBe(result.workflowIds[0]);
+      expect(result.workflows[0].id).toBe(result.workflowIds[0]);
+      expect(result.parseErrors).toHaveLength(0);
+    });
+
+    it('should slugify a numeric name field to its string form for the ID', async () => {
+      const zip = new JSZip();
+      zip.file('w-1.yml', 'name: 42\nsteps: []');
+      zip.file(
+        'manifest.yml',
+        YAML.stringify({
+          exportedCount: 1,
+          exportedAt: '2026-01-01T00:00:00Z',
+          version: '1',
+        })
+      );
+      const buffer = await zip.generateAsync({ type: 'arraybuffer' });
+      const file = createFile(buffer, 'numeric-name.zip');
+      const result = await parseImportFile(file);
+
+      expect(result.workflows[0].id).toBe('42');
+      expect(result.workflows[0].name).toBeNull();
+      expect(result.workflows[0].valid).toBe(true);
+    });
+
+    it('should admit a ZIP entry with scalar YAML content and mark it valid: false', async () => {
+      const zip = new JSZip();
+      zip.file('w-1.yml', 'just a string');
+      zip.file(
+        'manifest.yml',
+        YAML.stringify({
+          exportedCount: 1,
+          exportedAt: '2026-01-01T00:00:00Z',
+          version: '1',
+        })
+      );
+      const buffer = await zip.generateAsync({ type: 'arraybuffer' });
+      const file = createFile(buffer, 'scalar-content.zip');
+      const result = await parseImportFile(file);
+
+      expect(result.totalWorkflows).toBe(1);
+      expect(result.workflows[0].valid).toBe(false);
+      expect(result.workflows[0].id).toMatch(/^workflow-[0-9a-f-]{36}$/);
+      expect(result.parseErrors).toHaveLength(0);
+    });
   });
 
   describe('YAML files - limits', () => {
@@ -288,6 +441,36 @@ describe('parseImportFile', () => {
       const file = createFile(longYaml, 'huge.yml');
 
       await expect(parseImportFile(file)).rejects.toThrow('maximum YAML length');
+    });
+  });
+
+  describe('ZIP files - limits', () => {
+    it('should throw when total decompressed bytes exceed MAX_AGGREGATE_IMPORT_BYTES', async () => {
+      const zip = new JSZip();
+      zip.file('w-1.yml', 'name: First\nsteps: []');
+      zip.file('w-2.yml', 'name: Second\nsteps: []');
+      zip.file(
+        'manifest.yml',
+        YAML.stringify({
+          exportedCount: 2,
+          exportedAt: '2026-01-01T00:00:00Z',
+          version: '1',
+        })
+      );
+      const buffer = await zip.generateAsync({ type: 'arraybuffer' });
+      const file = createFile(buffer, 'oversized.zip');
+
+      // Make every encode() call report MAX_AGGREGATE_IMPORT_BYTES bytes so the
+      // aggregate limit is exceeded after the very first workflow entry is read.
+      const encodeSpy = jest
+        .spyOn(TextEncoder.prototype, 'encode')
+        .mockReturnValue(new Uint8Array(MAX_AGGREGATE_IMPORT_BYTES + 1));
+
+      try {
+        await expect(parseImportFile(file)).rejects.toThrow('total decompressed size limit');
+      } finally {
+        encodeSpy.mockRestore();
+      }
     });
   });
 });
