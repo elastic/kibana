@@ -17,7 +17,6 @@ import React, {
 } from 'react';
 import { createHtmlPortalNode, type HtmlPortalNode, InPortal } from 'react-reverse-portal';
 import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogram';
 import { useChartStyles } from '@kbn/unified-histogram/components/chart/hooks/use_chart_styles';
 import { useServicesBootstrap } from '@kbn/unified-histogram/hooks/use_services_bootstrap';
@@ -38,7 +37,6 @@ import {
   useCurrentTabAction,
   internalStateActions,
   useRuntimeStateManager,
-  useCurrentTabDataStateContainer,
 } from '../../state_management/redux';
 import { ScopedServicesProvider } from '../../../../components/scoped_services_provider';
 import { useUnifiedHistogramRuntimeState } from './use_unified_histogram_runtime_state';
@@ -293,16 +291,6 @@ const CustomChartSectionWrapper = ({
     !!layoutProps.chart && !layoutProps.chart.hidden
   );
 
-  const dataStateContainer = useCurrentTabDataStateContainer();
-  const metricsRequestAdapter = useMemo(() => new RequestAdapter(), []);
-
-  useEffect(() => {
-    dataStateContainer.inspectorAdapters.lensRequests = metricsRequestAdapter;
-    return () => {
-      dataStateContainer.inspectorAdapters.lensRequests = undefined;
-    };
-  }, [dataStateContainer, metricsRequestAdapter]);
-
   if (!fetchParams || !hasValidFetchParams) {
     return null;
   }
@@ -323,7 +311,7 @@ const CustomChartSectionWrapper = ({
         fetchParams,
         isComponentVisible,
         ...unifiedHistogramProps,
-        metricsRequestAdapter,
+        setLensRequestAdapter: api.setLensRequestAdapter,
         initialState: metricsGridState,
         onInitialStateChange,
       })}

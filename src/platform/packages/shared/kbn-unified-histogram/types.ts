@@ -323,8 +323,9 @@ export interface ChartSectionProps {
    */
   isComponentVisible: boolean;
   /**
-   * Optional request adapter for recording metrics-specific requests (e.g. METRICS_INFO)
-   * in the Inspector. When provided, the metrics experience will log its requests on this adapter.
+   * Optional callback for registering a request adapter for custom chart section requests
+   * in the Inspector. When called, the adapter will be synced to
+   * inspectorAdapters.lensRequests via the unified histogram state service.
    */
-  metricsRequestAdapter?: RequestAdapter;
+  setLensRequestAdapter?: (adapter: RequestAdapter | undefined) => void;
 }

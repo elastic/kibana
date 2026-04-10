@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { keys } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { useFetchMetricsData } from './hooks/use_fetch_metrics_data';
 import { METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ } from '../../../common/constants';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
@@ -34,10 +35,19 @@ export const MetricsExperienceGrid = ({
   fetch$: discoverFetch$,
   fetchParams,
   isComponentVisible,
-  metricsRequestAdapter,
+  setLensRequestAdapter,
   breakdownField,
   onBreakdownFieldChange,
 }: UnifiedMetricsGridProps) => {
+  const metricsRequestAdapter = useMemo(() => new RequestAdapter(), []);
+
+  useEffect(() => {
+    setLensRequestAdapter?.(metricsRequestAdapter);
+    return () => {
+      setLensRequestAdapter?.(undefined);
+    };
+  }, [setLensRequestAdapter, metricsRequestAdapter]);
+
   const {
     searchTerm,
     isFullscreen,
