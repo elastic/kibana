@@ -401,11 +401,6 @@ const GENERAL_INFORMATION_TITLE = i18n.translate(
   { defaultMessage: 'General information' }
 );
 
-const QUERY_PANEL_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.queryPanelTitle',
-  { defaultMessage: 'Query' }
-);
-
 const TYPE_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.typeLabel',
   { defaultMessage: 'Type' }
@@ -424,6 +419,11 @@ const EDIT_QUERY_TITLE = i18n.translate(
 const QUERY_NAME_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.queryNameLabel',
   { defaultMessage: 'Query name' }
+);
+
+const QUERY_PANEL_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.queryLabel',
+  { defaultMessage: 'Query' }
 );
 
 const DESCRIPTION_LABEL = i18n.translate(
