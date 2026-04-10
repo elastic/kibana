@@ -1,9 +1,9 @@
 {
-  "sha1": "685d39866da03dd28596bb7875a05377064adaf7",
+  "sha1": "747194f2a1a747fdd9f049c2d3257a24286b0855",
   "tests": [
     {
-      "id": "98600d12651f127-aa69b48f5334963",
-      "title": "Ingest ES data needed for Dashboard tests",
+      "id": "3b22d421111c31e-2feeac49d7dbb52",
+      "title": "_bulk_delete should return 200 for an existing object",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -22,15 +22,15 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 19,
-        "column": 16
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/bulk_delete.spec.ts",
+        "line": 28,
+        "column": 10
       }
     },
     {
-      "id": "a2a2e384bed311a-d7e5f697c676699",
-      "title": "Flights dashboard (sample data) loads dashboard and renders panels",
-      "expectedStatus": "skipped",
+      "id": "3b22d421111c31e-24ca46f1887583b",
+      "title": "_bulk_delete should return error for invalid object type",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -48,14 +48,274 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/async_dashboard.spec.ts",
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/bulk_delete.spec.ts",
+        "line": 45,
+        "column": 10
+      }
+    },
+    {
+      "id": "3b22d421111c31e-27ee612c86fbf15",
+      "title": "_bulk_delete should return mix of successes and errors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/bulk_delete.spec.ts",
+        "line": 66,
+        "column": 10
+      }
+    },
+    {
+      "id": "751b5963e350818-9e45d23b5ff0b9a",
+      "title": "_bulk_get should return 200 for object that exists and inject metadata",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/bulk_get.spec.ts",
+        "line": 32,
+        "column": 10
+      }
+    },
+    {
+      "id": "751b5963e350818-ec1a4dd9e85e7b9",
+      "title": "_bulk_get should return error for invalid object type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/bulk_get.spec.ts",
+        "line": 49,
+        "column": 10
+      }
+    },
+    {
+      "id": "751b5963e350818-62e2d3c1ae2b846",
+      "title": "_bulk_get should return mix of successes and errors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/bulk_get.spec.ts",
+        "line": 69,
+        "column": 10
+      }
+    },
+    {
+      "id": "5bec177f17d58cd-0d606faad23cd5d",
+      "title": "find - basic should return 200 with individual responses",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/find_basic.spec.ts",
+        "line": 30,
+        "column": 10
+      }
+    },
+    {
+      "id": "5bec177f17d58cd-5a8b087c6e3a0be",
+      "title": "find - basic unknown type - should return 200 with empty response",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/find_basic.spec.ts",
+        "line": 41,
+        "column": 10
+      }
+    },
+    {
+      "id": "5bec177f17d58cd-a5d369a78ad62c7",
+      "title": "find - basic page beyond total - should return 200 with empty response",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/find_basic.spec.ts",
+        "line": 55,
+        "column": 10
+      }
+    },
+    {
+      "id": "5bec177f17d58cd-322c0ede85c7109",
+      "title": "find - basic unknown search field - should return 400 when using searchFields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/find_basic.spec.ts",
+        "line": 70,
+        "column": 10
+      }
+    },
+    {
+      "id": "551927aad7626ba-b7908d12e46c9e9",
+      "title": "find - meta attributes injected properly should inject meta attributes for searches",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/find_meta.spec.ts",
+        "line": 33,
+        "column": 12
+      }
+    },
+    {
+      "id": "551927aad7626ba-979951c32470752",
+      "title": "find - meta attributes injected properly should inject meta attributes for dashboards",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/find_meta.spec.ts",
         "line": 52,
         "column": 12
       }
     },
     {
-      "id": "06bf75f847c06fd-29dd141c91144c1",
-      "title": "Lens by-value panels (dashboard) by-value panel retains count after edit",
+      "id": "551927aad7626ba-e6aef85faf08a43",
+      "title": "find - meta attributes injected properly should inject meta attributes for visualizations",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -74,14 +334,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_lens_by_value.spec.ts",
-        "line": 54,
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/find_meta.spec.ts",
+        "line": 71,
         "column": 12
       }
     },
     {
-      "id": "06bf75f847c06fd-a06210ad88f44ab",
-      "title": "Lens by-value panels (dashboard) edits to a by value lens panel are properly applied",
+      "id": "551927aad7626ba-c4b8c7617e931a4",
+      "title": "find - meta attributes injected properly should inject meta attributes for index patterns",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -100,14 +360,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_lens_by_value.spec.ts",
-        "line": 73,
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/find_meta.spec.ts",
+        "line": 93,
         "column": 12
       }
     },
     {
-      "id": "06bf75f847c06fd-61bb8aad783a689",
-      "title": "Lens by-value panels (dashboard) saving to library keeps panel count",
+      "id": "79add2b57a1662d-b301c922f79301d",
+      "title": "find - hasReference and hasReferenceOperator search for a reference",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -126,14 +386,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_lens_by_value.spec.ts",
-        "line": 92,
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/find_references.spec.ts",
+        "line": 35,
         "column": 12
       }
     },
     {
-      "id": "06bf75f847c06fd-b8a246034ea68f7",
-      "title": "Lens by-value panels (dashboard) opening Lens directly drops dashboard link",
+      "id": "79add2b57a1662d-ccdb7dbb4d96103",
+      "title": "find - hasReference and hasReferenceOperator search for multiple references with OR operator",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -152,14 +412,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_lens_by_value.spec.ts",
-        "line": 112,
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/find_references.spec.ts",
+        "line": 48,
         "column": 12
       }
     },
     {
-      "id": "9ed65ec90a7d211-a5d01350b77ca9e",
-      "title": "Maps by-value panels (dashboard) adds a map by value",
+      "id": "79add2b57a1662d-218a756230b329d",
+      "title": "find - hasReference and hasReferenceOperator search for multiple references with AND operator",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -178,14 +438,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_maps_by_value.spec.ts",
-        "line": 76,
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/find_references.spec.ts",
+        "line": 66,
         "column": 12
       }
     },
     {
-      "id": "9ed65ec90a7d211-03fc78daf2673a6",
-      "title": "Maps by-value panels (dashboard) editing a by-value map updates the panel",
+      "id": "757130fb62e8321-121144d36542943",
+      "title": "find - sortField and sortOrder sort objects by \"type\" in \"asc\" order",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -204,14 +464,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_maps_by_value.spec.ts",
-        "line": 86,
-        "column": 12
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/find_sort.spec.ts",
+        "line": 32,
+        "column": 10
       }
     },
     {
-      "id": "9ed65ec90a7d211-50efc6a8a2fa67c",
-      "title": "Maps by-value panels (dashboard) saving to library updates the panel",
+      "id": "757130fb62e8321-b0b90d2bce34be3",
+      "title": "find - sortField and sortOrder sort objects by \"type\" in \"desc\" order - may not sort correctly in serverless",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -230,14 +490,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_maps_by_value.spec.ts",
-        "line": 102,
-        "column": 12
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/find_sort.spec.ts",
+        "line": 44,
+        "column": 10
       }
     },
     {
-      "id": "9ed65ec90a7d211-2e5eaa4cc92bc41",
-      "title": "Maps by-value panels (dashboard) saving to library without return does not update panel",
+      "id": "e54c32f27b0ac3b-bb7bc6e24e159f0",
+      "title": "relationships - filter based on savedObjectTypes search",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -256,48 +516,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_maps_by_value.spec.ts",
-        "line": 117,
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/relationships_filter.spec.ts",
+        "line": 33,
         "column": 12
       }
     },
     {
-      "id": "423881a4b2073fc-96f9b7edc4e596f",
-      "title": "Dashboard panel listing (includes observability group) renders panel groups and panel count",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_panel_listing_obs_group.spec.ts",
-        "line": 45,
-        "column": 14
-      }
-    },
-    {
-      "id": "1ce2a7a22b5143b-7e437a63d08c8ab",
-      "title": "Dashboard panel listing renders panel groups and panel count",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_panel_listing.spec.ts",
-        "line": 50,
-        "column": 14
-      }
-    },
-    {
-      "id": "579fb4d652e44e3-9c99619b0d1abfb",
-      "title": "Saved search panels (dashboard) cloning saved search creates by-value panel",
+      "id": "e54c32f27b0ac3b-10a48465dba0328",
+      "title": "relationships - filter based on savedObjectTypes dashboard",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -316,14 +542,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_search_by_value.spec.ts",
-        "line": 55,
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/relationships_filter.spec.ts",
+        "line": 70,
         "column": 12
       }
     },
     {
-      "id": "579fb4d652e44e3-fee0d5ad4c6ff35",
-      "title": "Saved search panels (dashboard) unlinking saved search makes it by value",
+      "id": "e54c32f27b0ac3b-a4c0c8e3140ca05",
+      "title": "relationships - filter based on savedObjectTypes visualization",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -342,84 +568,222 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_search_by_value.spec.ts",
-        "line": 69,
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/relationships_filter.spec.ts",
+        "line": 107,
         "column": 12
       }
     },
     {
-      "id": "5e76aeeb49b5555-a908f3956402041",
-      "title": "Controls migration smoke (8.0.0) imports and renders controls without regressions",
+      "id": "e54c32f27b0ac3b-2a93e4d52e2c490",
+      "title": "relationships - filter based on savedObjectTypes index-pattern",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/migration_smoke_tests/controls_migration_smoke.spec.ts",
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/relationships_filter.spec.ts",
+        "line": 132,
+        "column": 12
+      }
+    },
+    {
+      "id": "b4c811bc4b5149a-cd083e4479f4cd3",
+      "title": "relationships - invalid references should return the invalid relations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/relationships_invalid.spec.ts",
+        "line": 30,
+        "column": 10
+      }
+    },
+    {
+      "id": "262a704c049cb45-35b249488aae7db",
+      "title": "relationships - should return 404 a search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/relationships_not_found.spec.ts",
+        "line": 32,
+        "column": 10
+      }
+    },
+    {
+      "id": "262a704c049cb45-3f03868ef6003a0",
+      "title": "relationships - should return 404 a dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/relationships_not_found.spec.ts",
+        "line": 39,
+        "column": 10
+      }
+    },
+    {
+      "id": "262a704c049cb45-81fd3a2a564d72b",
+      "title": "relationships - should return 404 a visualization",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/relationships_not_found.spec.ts",
+        "line": 46,
+        "column": 10
+      }
+    },
+    {
+      "id": "262a704c049cb45-f8ada5a25cd653b",
+      "title": "relationships - should return 404 an index pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/relationships_not_found.spec.ts",
+        "line": 53,
+        "column": 10
+      }
+    },
+    {
+      "id": "63ef5f3040ee111-0639842773b2bc6",
+      "title": "relationships - validate response schema search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/relationships_schema.spec.ts",
+        "line": 66,
+        "column": 12
+      }
+    },
+    {
+      "id": "63ef5f3040ee111-fd6a3dd823b4470",
+      "title": "relationships - validate response schema dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/relationships_schema.spec.ts",
         "line": 74,
         "column": 12
       }
     },
     {
-      "id": "6fbda44a8475b5e-586724ffdbd7874",
-      "title": "Lens migration smoke (7.12.1) imports and renders Lens panels without regressions",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/migration_smoke_tests/lens_migration_smoke.spec.ts",
-        "line": 62,
-        "column": 12
-      }
-    },
-    {
-      "id": "113a8b79dff09fd-ff4a41e8adc5adf",
-      "title": "TSVB migration smoke (7.12.1) imports and renders TSVB panels without regressions",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/migration_smoke_tests/tsvb_migration_smoke_7_12_1.spec.ts",
-        "line": 60,
-        "column": 12
-      }
-    },
-    {
-      "id": "c01713ab1acee60-2cac93c3f207981",
-      "title": "TSVB migration smoke (7.13.3) imports and renders TSVB panels without regressions",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/migration_smoke_tests/tsvb_migration_smoke_7_13_3.spec.ts",
-        "line": 46,
-        "column": 12
-      }
-    },
-    {
-      "id": "3733bb317aa8327-215da8ad4735c34",
-      "title": "Visualize migration smoke (7.12.1) imports and renders Visualize panels without regressions",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/migration_smoke_tests/visualize_migration_smoke.spec.ts",
-        "line": 60,
-        "column": 12
-      }
-    },
-    {
-      "id": "dc58c3699c68178-9b969790e5f1dd8",
-      "title": "Panel time range (dashboard) by value: can add a custom time range to a panel",
+      "id": "63ef5f3040ee111-06d38c515a56190",
+      "title": "relationships - validate response schema visualization",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -438,14 +802,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/panel_time_range.spec.ts",
-        "line": 63,
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/relationships_schema.spec.ts",
+        "line": 83,
         "column": 12
       }
     },
     {
-      "id": "dc58c3699c68178-1268bc6ee7a07b1",
-      "title": "Panel time range (dashboard) by value: can remove a custom time range from a panel",
+      "id": "63ef5f3040ee111-f4c8c0f043c2c5f",
+      "title": "relationships - validate response schema index-pattern",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -464,14 +828,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/panel_time_range.spec.ts",
-        "line": 81,
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/relationships_schema.spec.ts",
+        "line": 92,
         "column": 12
       }
     },
     {
-      "id": "dc58c3699c68178-5b6ec5ddd6d0ac7",
-      "title": "Panel time range (dashboard) by reference: can add a custom time range to panel",
+      "id": "63ef5f3040ee111-d2612b2094573ba",
+      "title": "relationships - validate response schema invalid-refs",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -490,14 +854,92 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/panel_time_range.spec.ts",
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/relationships_schema.spec.ts",
+        "line": 101,
+        "column": 12
+      }
+    },
+    {
+      "id": "3501e968cd0a04e-3592d73c7269788",
+      "title": "relationships - should work for searches",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/relationships_work.spec.ts",
+        "line": 30,
+        "column": 10
+      }
+    },
+    {
+      "id": "3501e968cd0a04e-420eb7395bd06da",
+      "title": "relationships - should work for dashboards",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/relationships_work.spec.ts",
+        "line": 66,
+        "column": 10
+      }
+    },
+    {
+      "id": "3501e968cd0a04e-e519f41bd558c13",
+      "title": "relationships - should work for visualizations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/relationships_work.spec.ts",
         "line": 103,
-        "column": 12
+        "column": 10
       }
     },
     {
-      "id": "dc58c3699c68178-f53aa418128fa70",
-      "title": "Panel time range (dashboard) by reference: can remove a custom time range from a panel",
+      "id": "3501e968cd0a04e-9f2f6c28426dd64",
+      "title": "relationships - should work for index patterns",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -516,14 +958,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/panel_time_range.spec.ts",
-        "line": 124,
-        "column": 12
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/relationships_work.spec.ts",
+        "line": 140,
+        "column": 10
       }
     },
     {
-      "id": "74a2a4f5727399f-4dd8937b0da504b",
-      "title": "Panel titles (dashboard) new panel by value has empty title",
+      "id": "dd3da5a71054091-0599930ce1c8cd0",
+      "title": "scroll_count - more than 10k objects returns the correct count for each included types",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -542,14 +984,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/panel_titles.spec.ts",
-        "line": 63,
-        "column": 12
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/scroll_count_large.spec.ts",
+        "line": 71,
+        "column": 10
       }
     },
     {
-      "id": "74a2a4f5727399f-21cdff835c8a860",
-      "title": "Panel titles (dashboard) blank title clears unsaved changes",
+      "id": "b74d2d5f2768f58-ddd5bdaeb73a537",
+      "title": "scroll_count - less than 10k objects returns the count for each included types",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -568,14 +1010,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/panel_titles.spec.ts",
-        "line": 73,
-        "column": 12
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/scroll_count_small.spec.ts",
+        "line": 31,
+        "column": 10
       }
     },
     {
-      "id": "74a2a4f5727399f-ca931d3c7c4f48e",
-      "title": "Panel titles (dashboard) custom title causes unsaved changes and saving clears it",
+      "id": "b74d2d5f2768f58-3c375df4ac0b560",
+      "title": "scroll_count - less than 10k objects only returns count for types to include",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -594,14 +1036,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/panel_titles.spec.ts",
-        "line": 91,
-        "column": 12
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/scroll_count_small.spec.ts",
+        "line": 46,
+        "column": 10
       }
     },
     {
-      "id": "74a2a4f5727399f-97729258b599910",
-      "title": "Panel titles (dashboard) reset title is hidden on a by value panel",
+      "id": "b74d2d5f2768f58-f74e30009cd578e",
+      "title": "scroll_count - less than 10k objects filters on title when searchString is provided",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -620,14 +1062,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/panel_titles.spec.ts",
-        "line": 110,
-        "column": 12
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/scroll_count_small.spec.ts",
+        "line": 59,
+        "column": 10
       }
     },
     {
-      "id": "74a2a4f5727399f-be806467b22fc37",
-      "title": "Panel titles (dashboard) reset description is hidden on a by value panel",
+      "id": "b74d2d5f2768f58-e660ed0f52ccee2",
+      "title": "scroll_count - less than 10k objects includes all requested types even when none match the search",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -646,217 +1088,9 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/panel_titles.spec.ts",
-        "line": 128,
-        "column": 12
-      }
-    },
-    {
-      "id": "74a2a4f5727399f-0a4eb6428a8d3bb",
-      "title": "Panel titles (dashboard) linking a by value panel with a custom title to the library overwrites the custom title",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/panel_titles.spec.ts",
-        "line": 146,
-        "column": 12
-      }
-    },
-    {
-      "id": "74a2a4f5727399f-bd1434a42a62627",
-      "title": "Panel titles (dashboard) resetting title on a by reference panel uses the library title",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/panel_titles.spec.ts",
-        "line": 173,
-        "column": 12
-      }
-    },
-    {
-      "id": "74a2a4f5727399f-e1680a6d04a4152",
-      "title": "Panel titles (dashboard) resetting description on a by reference panel uses the library description",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/panel_titles.spec.ts",
-        "line": 199,
-        "column": 12
-      }
-    },
-    {
-      "id": "74a2a4f5727399f-0a634bf3341e737",
-      "title": "Panel titles (dashboard) unlinking a by reference panel with a custom title keeps the title",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/panel_titles.spec.ts",
-        "line": 235,
-        "column": 12
-      }
-    },
-    {
-      "id": "74a2a4f5727399f-c907615b4f85d41",
-      "title": "Panel titles (dashboard) linking a by value panel with a blank title sets the panel title to the library title",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/panel_titles.spec.ts",
-        "line": 256,
-        "column": 12
-      }
-    },
-    {
-      "id": "74a2a4f5727399f-d4544b18261c5ab",
-      "title": "Panel titles (dashboard) unlinking a by reference panel without a custom title keeps the library title",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/panel_titles.spec.ts",
-        "line": 282,
-        "column": 12
-      }
-    },
-    {
-      "id": "e5a1770f89d440f-d7d72061010584f",
-      "title": "Sync colors should sync colors on dashboard for legacy default palette",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/sync_colors.spec.ts",
-        "line": 119,
-        "column": 13
-      }
-    },
-    {
-      "id": "e5a1770f89d440f-79598c1004258c5",
-      "title": "Sync colors should be possible to disable color sync",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/sync_colors.spec.ts",
-        "line": 171,
-        "column": 12
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/scroll_count_small.spec.ts",
+        "line": 74,
+        "column": 10
       }
     }
   ]
