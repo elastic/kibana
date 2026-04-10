@@ -170,12 +170,9 @@ const STREAM_FILTER_POPOVER_ARIA_LABEL = i18n.translate(
   }
 );
 
-const STREAM_FILTER_LABEL = i18n.translate(
-  'xpack.streams.knowledgeIndicators.streamFilterLabel',
-  {
-    defaultMessage: 'Stream',
-  }
-);
+const STREAM_FILTER_LABEL = i18n.translate('xpack.streams.knowledgeIndicators.streamFilterLabel', {
+  defaultMessage: 'Stream',
+});
 
 const STREAM_FILTER_SELECTABLE_ARIA_LABEL = i18n.translate(
   'xpack.streams.knowledgeIndicators.streamFilterSelectableAriaLabel',

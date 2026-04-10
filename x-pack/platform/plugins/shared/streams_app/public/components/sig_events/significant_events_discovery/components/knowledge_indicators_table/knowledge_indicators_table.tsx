@@ -123,15 +123,13 @@ export function KnowledgeIndicatorsTable() {
   >([]);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 25 });
 
-  const { deleteKnowledgeIndicatorsInBulk, isDeleting } = useKnowledgeIndicatorsBulkDelete(
-    {
-      onSuccess: () => {
-        setSelectedKnowledgeIndicators([]);
-        setKnowledgeIndicatorsToDelete([]);
-        setSelectedKnowledgeIndicator(null);
-      },
-    }
-  );
+  const { deleteKnowledgeIndicatorsInBulk, isDeleting } = useKnowledgeIndicatorsBulkDelete({
+    onSuccess: () => {
+      setSelectedKnowledgeIndicators([]);
+      setKnowledgeIndicatorsToDelete([]);
+      setSelectedKnowledgeIndicator(null);
+    },
+  });
 
   const [isBulkOperationInProgress, setIsBulkOperationInProgress] = useState(false);
   const isRowActionInProgress = useIsMutating({ mutationKey: KI_ROW_ACTION_MUTATION_KEY }) > 0;
@@ -141,13 +139,16 @@ export function KnowledgeIndicatorsTable() {
     : undefined;
 
   useEffect(() => {
+    const validIds = new Set(knowledgeIndicators.map(getKnowledgeIndicatorItemId));
+
     setSelectedKnowledgeIndicator((current) => {
       if (!current) return current;
-      const currentId = getKnowledgeIndicatorItemId(current);
-      const stillExists = knowledgeIndicators.some(
-        (ki) => getKnowledgeIndicatorItemId(ki) === currentId
-      );
-      return stillExists ? current : null;
+      return validIds.has(getKnowledgeIndicatorItemId(current)) ? current : null;
+    });
+
+    setSelectedKnowledgeIndicators((current) => {
+      const pruned = current.filter((ki) => validIds.has(getKnowledgeIndicatorItemId(ki)));
+      return pruned.length === current.length ? current : pruned;
     });
 
     const availableTypes = new Set<string>();

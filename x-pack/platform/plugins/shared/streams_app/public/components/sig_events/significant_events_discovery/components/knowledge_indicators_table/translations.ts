@@ -57,19 +57,17 @@ export const OCCURRENCES_TOOLTIP_NAME = i18n.translate(
   { defaultMessage: 'Detected event occurrences' }
 );
 
-export const TABLE_CAPTION = i18n.translate(
-  'xpack.streams.knowledgeIndicators.tableCaption',
-  { defaultMessage: 'Knowledge Indicators table' }
-);
+export const TABLE_CAPTION = i18n.translate('xpack.streams.knowledgeIndicators.tableCaption', {
+  defaultMessage: 'Knowledge Indicators table',
+});
 
 export const TABLE_LABEL = i18n.translate('xpack.streams.knowledgeIndicators.tableLabel', {
   defaultMessage: 'Knowledge indicators',
 });
 
-export const NO_ITEMS_MESSAGE = i18n.translate(
-  'xpack.streams.knowledgeIndicators.noItemsMessage',
-  { defaultMessage: 'No knowledge indicators found' }
-);
+export const NO_ITEMS_MESSAGE = i18n.translate('xpack.streams.knowledgeIndicators.noItemsMessage', {
+  defaultMessage: 'No knowledge indicators found',
+});
 
 export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.streams.knowledgeIndicators.searchPlaceholder',
