@@ -14,7 +14,7 @@ import {
   listChangedFiles,
   touchedCriticalFiles,
   CRITICAL_FILES_SCOUT,
-} from '#pipeline-utils/affected-packages';
+} from '#pipeline-utils/affected-packages/index';
 
 const mergeBase = process.env.AFFECTED_MERGE_BASE;
 const outPath = process.env.AFFECTED_MODULES_FILE;
