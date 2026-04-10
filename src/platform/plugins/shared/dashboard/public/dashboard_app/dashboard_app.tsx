@@ -80,8 +80,8 @@ export function DashboardApp({
 
   useEffect(() => {
     let canceled = false;
-    // show dashboard when there is an incoming embeddable
-    if (incomingEmbeddables) {
+    // show dashboard when id provide or there is an incoming embeddable
+    if (savedDashboardId || incomingEmbeddables?.length) {
       return;
     }
 
@@ -98,7 +98,7 @@ export function DashboardApp({
     return () => {
       canceled = true;
     };
-  }, [incomingEmbeddables]);
+  }, [incomingEmbeddables, savedDashboardId]);
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>(undefined);
   const [dashboardInternalApi, setDashboardInternalApi] = useState<
     DashboardInternalApi | undefined
