@@ -9,6 +9,7 @@ import React from 'react';
 import SwimlaneActionConnectorFields from './swimlane_connectors';
 import { useGetApplication } from './use_get_application';
 import { applicationFields, mappings } from './mocks';
+import { SwimlaneConnectorType } from './types';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { waitFor, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -212,7 +213,7 @@ describe('SwimlaneActionConnectorFields renders', () => {
       config: {
         apiUrl: 'http://test.com',
         appId: '1234567asbd32',
-        connectorType: 'all',
+        connectorType,
         mappings,
       },
       secrets: {
@@ -221,6 +222,27 @@ describe('SwimlaneActionConnectorFields renders', () => {
       id: 'swimlane',
       isDeprecated: false,
     });
+
+    const getMappingsForConnectorType = (connectorType: string) => {
+      switch (connectorType) {
+        case SwimlaneConnectorType.Cases:
+          return {
+            caseIdConfig: mappings.caseIdConfig,
+            caseNameConfig: mappings.caseNameConfig,
+            commentsConfig: mappings.commentsConfig,
+            descriptionConfig: mappings.descriptionConfig,
+          };
+        case SwimlaneConnectorType.Alerts:
+          return {
+            alertIdConfig: mappings.alertIdConfig,
+            commentsConfig: mappings.commentsConfig,
+            ruleNameConfig: mappings.ruleNameConfig,
+            severityConfig: mappings.severityConfig,
+          };
+        default:
+          return mappings;
+      }
+    };
 
     const getConnectorWithEmptyMappings = (connectorType: string = 'all') => {
       const actionConnector = getConnector(connectorType);
@@ -244,6 +266,13 @@ describe('SwimlaneActionConnectorFields renders', () => {
       'connector validation succeeds when connector config is valid for connectorType=%p',
       async (connectorType) => {
         const connector = getConnector(connectorType);
+        const expectedConnector = {
+          ...connector,
+          config: {
+            ...connector.config,
+            mappings: getMappingsForConnectorType(connectorType),
+          },
+        };
         render(
           <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
             <SwimlaneActionConnectorFields
@@ -257,7 +286,7 @@ describe('SwimlaneActionConnectorFields renders', () => {
         await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
         await waitFor(() => {
-          expect(onSubmit).toHaveBeenCalledWith({ data: { ...connector }, isValid: true });
+          expect(onSubmit).toHaveBeenCalledWith({ data: expectedConnector, isValid: true });
         });
       }
     );

@@ -14,15 +14,33 @@ import { RuleNotifyWhen } from '@kbn/alerting-types';
 import { DEFAULT_FREQUENCY } from '../constants';
 
 describe('ruleActionsNotifyWhen', () => {
+  const getThrottleProps = (frequency?: RuleAction['frequency']) => {
+    const throttle = frequency?.throttle;
+
+    if (!throttle) {
+      return {
+        throttle: null,
+        throttleUnit: 'm',
+      };
+    }
+
+    return {
+      throttle: parseInt(throttle, 10),
+      throttleUnit: throttle.replace(/^\d+/, ''),
+    };
+  };
+
   function setup(
     frequency: RuleAction['frequency'] = DEFAULT_FREQUENCY,
     hasAlertsMappings: boolean = true
   ) {
+    const { throttle, throttleUnit } = getThrottleProps(frequency);
+
     return renderWithKibanaRenderContext(
       <RuleActionsNotifyWhen
         frequency={frequency}
-        throttle={frequency.throttle ? Number(frequency.throttle[0]) : null}
-        throttleUnit={frequency.throttle ? frequency.throttle[1] : 'm'}
+        throttle={throttle}
+        throttleUnit={throttleUnit}
         onChange={jest.fn()}
         onUseDefaultMessage={jest.fn()}
         hasAlertsMappings={hasAlertsMappings}
@@ -44,11 +62,12 @@ describe('ruleActionsNotifyWhen', () => {
     expectDefaultFrequency();
 
     // Re-render with DEFAULT_FREQUENCY again
+    const defaultThrottleProps = getThrottleProps(DEFAULT_FREQUENCY);
     rerender(
       <RuleActionsNotifyWhen
         frequency={DEFAULT_FREQUENCY}
-        throttle={DEFAULT_FREQUENCY.throttle ? Number(DEFAULT_FREQUENCY.throttle[0]) : null}
-        throttleUnit={DEFAULT_FREQUENCY.throttle ? DEFAULT_FREQUENCY.throttle[1] : 'm'}
+        throttle={defaultThrottleProps.throttle}
+        throttleUnit={defaultThrottleProps.throttleUnit}
         onChange={jest.fn()}
         onUseDefaultMessage={jest.fn()}
         hasAlertsMappings
@@ -62,12 +81,13 @@ describe('ruleActionsNotifyWhen', () => {
       throttle: '5h',
       notifyWhen: RuleNotifyWhen.THROTTLE,
     };
+    const throttleProps = getThrottleProps(throttleFrequency);
 
     rerender(
       <RuleActionsNotifyWhen
         frequency={throttleFrequency}
-        throttle={Number(throttleFrequency.throttle[0])}
-        throttleUnit={throttleFrequency.throttle[1]}
+        throttle={throttleProps.throttle}
+        throttleUnit={throttleProps.throttleUnit}
         onChange={jest.fn()}
         onUseDefaultMessage={jest.fn()}
         hasAlertsMappings
