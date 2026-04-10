@@ -120,31 +120,10 @@ import type { EsqlLanguageDeps } from './types';
 const esqlDepsByModelUri = new Map<string, EsqlLanguageDeps>();
 
 // Single shared provider per language; resolves callbacks per Monaco model.
-// Wrapped to suppress completions when the target editor lacks focus — prevents
-// phantom autocomplete in push-flyout editors that momentarily receive DOM focus.
-const rawEsqlSuggestionProvider = ESQLLang.getSuggestionProvider?.({
+const sharedEsqlSuggestionProvider = ESQLLang.getSuggestionProvider?.({
   getModelDependencies: (model) => esqlDepsByModelUri.get(model.uri.toString()),
 });
 
-const sharedEsqlSuggestionProvider = rawEsqlSuggestionProvider
-  ? {
-      ...rawEsqlSuggestionProvider,
-      provideCompletionItems(
-        ...args: Parameters<NonNullable<typeof rawEsqlSuggestionProvider>['provideCompletionItems']>
-      ) {
-        const [model] = args;
-        const hasFocus = monaco.editor
-          .getEditors()
-          .some((e) => e.getModel() === model && e.hasTextFocus());
-        if (!hasFocus) {
-          return { suggestions: [] };
-        }
-        return rawEsqlSuggestionProvider!.provideCompletionItems(...args);
-      },
-    }
-  : undefined;
-
-// for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
 const DATEPICKER_WIDTH = 373;
 

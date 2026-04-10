@@ -70,18 +70,30 @@ export const runTypeCheckContractCli = () => {
       flags: {
         string: ['project', ...VALIDATION_RUN_STRING_FLAGS],
         boolean: ['clean-cache', 'cleanup', 'extended-diagnostics', 'with-archive'],
-        help: `
-        --project [path]        Path to a tsconfig.json file for direct-target execution
-${VALIDATION_RUN_HELP}
-        --help                  Show this message
-        --clean-cache           Delete any existing TypeScript caches before running type check
-        --cleanup               Pass to avoid leaving temporary tsconfig files on disk. Leaving these
-                                  files in place makes subsequent executions faster because ts can
-                                  identify that none of the imports have changed (it uses creation/update
-                                  times) but cleaning them prevents leaving garbage around the repo.
-        --extended-diagnostics  Turn on extended diagnostics in the TypeScript compiler
-        --with-archive          Restore cached artifacts before running and archive results afterwards
-      `,
+        help: [
+          {
+            flag: '--project [path]',
+            description: 'Path to a tsconfig.json file for direct-target execution',
+          },
+          ...VALIDATION_RUN_HELP,
+          {
+            flag: '--clean-cache',
+            description: 'Delete any existing TypeScript caches before running type check',
+          },
+          {
+            flag: '--cleanup',
+            description:
+              'Pass to avoid leaving temporary tsconfig files on disk. Leaving these\nfiles in place makes subsequent executions faster because ts can\nidentify that none of the imports have changed (it uses creation/update\ntimes) but cleaning them prevents leaving garbage around the repo.',
+          },
+          {
+            flag: '--extended-diagnostics',
+            description: 'Turn on extended diagnostics in the TypeScript compiler',
+          },
+          {
+            flag: '--with-archive',
+            description: 'Restore cached artifacts before running and archive results afterwards',
+          },
+        ],
       },
     }
   );
