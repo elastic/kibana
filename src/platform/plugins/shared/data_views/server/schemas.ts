@@ -15,24 +15,32 @@ import {
 } from '../common/constants';
 import type { RuntimeType } from '../common';
 
-export const serializedFieldFormatSchema = schema.object({
-  id: schema.maybe(
-    schema.string({
-      meta: {
-        description:
-          'The unique identifier for the field format, such as `number`, `bytes`, or `percent`.',
-      },
-    })
-  ),
-  params: schema.maybe(
-    schema.any({
-      meta: {
-        description:
-          'Configuration parameters for the field format. The available options depend on the format type.',
-      },
-    })
-  ),
-});
+export const serializedFieldFormatSchema = schema.object(
+  {
+    id: schema.maybe(
+      schema.string({
+        meta: {
+          description:
+            'The unique identifier for the field format, such as `number`, `bytes`, or `percent`.',
+        },
+      })
+    ),
+    params: schema.maybe(
+      schema.any({
+        meta: {
+          description:
+            'Configuration parameters for the field format. The available options depend on the format type.',
+        },
+      })
+    ),
+  },
+  {
+    meta: {
+      id: 'serialized_field_format',
+      description: 'Custom formatter to apply when displaying the field value.',
+    },
+  }
+);
 
 export const runtimeFieldNonCompositeFieldsSpecTypeSchema = schema.oneOf(
   PRIMITIVE_RUNTIME_FIELD_TYPES.map((runtimeFieldType) => schema.literal(runtimeFieldType)) as [
@@ -136,15 +144,15 @@ const compositeRuntimeFieldSchemaUpdate = schema.object({
   ...compositeRuntimeFieldSchemaShared,
 });
 
-export const runtimeFieldSchema = schema.oneOf([
-  primitiveRuntimeFieldSchema,
-  compositeRuntimeFieldSchema,
-]);
+export const runtimeFieldSchema = schema.oneOf(
+  [primitiveRuntimeFieldSchema, compositeRuntimeFieldSchema],
+  { meta: { id: 'runtime_field' } }
+);
 
-export const runtimeFieldSchemaUpdate = schema.oneOf([
-  primitiveRuntimeFieldSchemaUpdate,
-  compositeRuntimeFieldSchemaUpdate,
-]);
+export const runtimeFieldSchemaUpdate = schema.oneOf(
+  [primitiveRuntimeFieldSchemaUpdate, compositeRuntimeFieldSchemaUpdate],
+  { meta: { id: 'runtime_field_update' } }
+);
 
 export const fieldSpecSchemaFields = {
   name: schema.string({
@@ -250,4 +258,5 @@ export const fieldSpecSchema = schema.object(fieldSpecSchemaFields, {
   // Because `fields` have a bunch of calculated fields
   // this allows to retrieve an index pattern and then to re-create by using the retrieved payload
   unknowns: 'ignore',
+  meta: { id: 'field_spec' },
 });
