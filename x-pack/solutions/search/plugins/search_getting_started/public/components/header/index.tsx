@@ -46,24 +46,25 @@ export const SearchGettingStartedHeader: React.FC = () => {
               <span><EuiBadge color="primary" fill>TRIAL</EuiBadge></span>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="chevronSingleDown" iconSide="right" color="primary" size="xs">Usage limits</EuiButtonEmpty>
+              <EuiButtonEmpty color="primary" size="xs">Elastic Cloud</EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiSpacer size="xl" />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="l">
             <h1>
               {i18n.translate('xpack.search.gettingStarted.page.title', {
-                defaultMessage: 'Start building with Elasticsearch.',
+                defaultMessage: 'Get started with Elasticsearch.',
               })}
             </h1>
           </EuiTitle>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="s" />
           <EuiText grow={false} color="subdued" size="m">
             <p>
               {i18n.translate('xpack.search.gettingStarted.page.description', {
                 defaultMessage:
-                  'Connect your deployment and start building AI-powered search for products, docs, chatbots, recommenders, and more.',
+                  'Connect your deployment and start building modern search for products, docs, chatbots, recommenders, and more.',
               })}
             </p>
           </EuiText>

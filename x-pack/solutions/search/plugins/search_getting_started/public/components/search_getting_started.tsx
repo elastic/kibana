@@ -68,11 +68,10 @@ export const SearchGettingStartedPage: React.FC = () => {
                 }}>View sample data</EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
-
           </EuiPanel>
         </EuiPanel>
       </EuiPageTemplate.Section>
-
+      <EuiSpacer size="xl" />
       <EuiPageTemplate.Section data-test-subj="gettingStartedConsoleTutorials" paddingSize="xl">
         <ConsoleTutorialsGroup />
       </EuiPageTemplate.Section>

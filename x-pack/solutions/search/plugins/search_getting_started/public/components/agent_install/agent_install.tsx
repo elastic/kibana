@@ -27,9 +27,41 @@ import cursorIcon from '../../assets/cursor.svg';
 import vsCodeIcon from '../../assets/visual-studio-code.svg';
 
 import { useKibana } from '../../hooks/use_kibana';
-import { SearchGettingStartedSectionHeading } from '../section_heading';
 import { PromptModal } from './prompt_modal';
 import { buildPrompt } from './util';
+
+const AgentInstallPanel: React.FC<{
+  icon: string;
+  title: string;
+  description: string;
+  children: React.ReactNode;
+}> = ({ icon, title, description, children }) => {
+  return (
+    <EuiFlexGroup gutterSize="s" alignItems="flexStart" direction="column">
+      <EuiFlexItem grow={false}>
+        <EuiPanel color="subdued" paddingSize="s" grow={false}>
+          <EuiIcon
+            color="subdued"
+            size="m"
+            type={icon}
+          />
+        </EuiPanel>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <EuiTitle size="xs"><h5>{title}</h5></EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiText size="s" color="subdued">
+          <p>{description}</p>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}><EuiSpacer size="s" /></EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        {children}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 export const AgentInstallSection = () => {
   const { euiTheme } = useEuiTheme();
@@ -62,109 +94,90 @@ export const AgentInstallSection = () => {
         <EuiFlexGroup gutterSize="m" alignItems="stretch" direction="row">
           <EuiFlexItem>
             <EuiPanel color="transparent" paddingSize="l">
-              <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiIcon
-                    color="subdued"
-                    size="m"
-                    title={i18n.translate('xpack.gettingStarted.agentInstall.anthropicIcon.title', {
-                      defaultMessage: 'Anthropic Claude Code logo',
-                    })}
-                    type={anthropicIcon}
-                  />
-                </EuiFlexItem>
+              <AgentInstallPanel icon="commandLine" title={i18n.translate('xpack.gettingStarted.agentInstall.title', {
+                defaultMessage: 'Build in your IDE',
+              })} description={i18n.translate('xpack.gettingStarted.agentInstall.description', {
+                defaultMessage: 'Code with context using Elastic-certified skills.',
+              })}>
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
 
-                <EuiFlexItem grow={false}>
-                  <EuiIcon
-                    color="subdued"
-                    size="m"
-                    title={i18n.translate('xpack.gettingStarted.agentInstall.cursorIcon.title', {
-                      defaultMessage: 'Cursor AI logo',
-                    })}
-                    type={cursorIcon}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon
-                    color="subdued"
-                    size="m"
-                    title={i18n.translate('xpack.gettingStarted.agentInstall.vsCodeIcon.title', {
-                      defaultMessage: 'Visual Studio Code logo',
-                    })}
-                    type={vsCodeIcon}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="m" />
-              <EuiTitle size="xs"><h5>{i18n.translate('xpack.gettingStarted.agentInstall.title', {
-                defaultMessage: 'Install Elastic Agent skills',
-              })}</h5></EuiTitle>
-              <EuiSpacer size="s" />
-              <EuiText size="s" color="subdued">
-                <p>{i18n.translate('xpack.gettingStarted.agentInstall.description', {
-                  defaultMessage: 'Get started in your code prompt of choice with our curated agent skills.',
-                })}</p>
-              </EuiText>
+                      onClick={handleOpenInClaudeCli}
+                      data-test-subj="agentInstallLaunchBtn"
+                      color="primary"
+                      fill
+                    >
+                      {i18n.translate('xpack.gettingStarted.agentInstall.userLLM.cta', {
+                        defaultMessage: 'Copy prompt',
+                      })}
+                    </EuiButton></EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon
+                          color="subdued"
+                          size="m"
+                          title={i18n.translate('xpack.gettingStarted.agentInstall.anthropicIcon.title', {
+                            defaultMessage: 'Anthropic Claude Code logo',
+                          })}
+                          type={anthropicIcon}
+                        />
+                      </EuiFlexItem>
 
-              <EuiSpacer size="l" />
-              <EuiButton
-                iconSide="left"
-                iconType="code"
-                onClick={handleOpenInClaudeCli}
-                data-test-subj="agentInstallLaunchBtn"
-                color="primary"
-                fill
-              >
-                {i18n.translate('xpack.gettingStarted.agentInstall.userLLM.cta', {
-                  defaultMessage: 'Install Elastic skills',
-                })}
-              </EuiButton>
-
-
-
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon
+                          color="subdued"
+                          size="m"
+                          title={i18n.translate('xpack.gettingStarted.agentInstall.cursorIcon.title', {
+                            defaultMessage: 'Cursor AI logo',
+                          })}
+                          type={cursorIcon}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon
+                          color="subdued"
+                          size="m"
+                          title={i18n.translate('xpack.gettingStarted.agentInstall.vsCodeIcon.title', {
+                            defaultMessage: 'Visual Studio Code logo',
+                          })}
+                          type={vsCodeIcon}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </AgentInstallPanel>
             </EuiPanel>
           </EuiFlexItem>
-
-          {services.agentBuilder ? (
-
-            <EuiFlexItem css={css`border-left: ${euiTheme.border.thin};`}>
-              <EuiPanel color="transparent" paddingSize="l">
-                <EuiIcon
-                  color="subdued"
-                  size="m"
-                  type="sparkles"
-                />
-                <EuiSpacer size="m" />
-                <EuiTitle size="xs"><h5>{i18n.translate('xpack.gettingStarted.agentInstall.title', {
-                  defaultMessage: 'Elasticsearch Agent',
-                })}</h5></EuiTitle>
-                <EuiSpacer size="s" />
-                <EuiText size="s" color="subdued">
-                  <p>{i18n.translate('xpack.gettingStarted.agentInstall.description', {
-                    defaultMessage: 'Skip the setup and start learning and interacting with Elasticsearch right away.',
-                  })}</p>
-                </EuiText>
-
-                <EuiSpacer size="l" />
-
-                <AiButton
-                  iconType="productAgent"
-                  variant="outlined"
-                  onClick={handleOpenInAgentBuilder}
-                  data-test-subj="agentInstallOpenInAgentBuilder"
-                >
-                  {i18n.translate('xpack.gettingStarted.agentInstall.elasticAgent.cta', {
-                    defaultMessage: 'Open Elastic Agent',
-                  })}
-                </AiButton>
-
-              </EuiPanel>
-            </EuiFlexItem>
-
-          ) : null}
+          {
+            services.agentBuilder ? (
+              <EuiFlexItem css={css`border-left: ${euiTheme.border.thin};`}>
+                <EuiPanel color="transparent" paddingSize="l">
+                  <AgentInstallPanel
+                    icon="productAgent"
+                    title={i18n.translate('xpack.gettingStarted.agentInstall.title', {
+                      defaultMessage: 'Build with the Elasticsearch Agent',
+                    })}
+                    description={i18n.translate('xpack.gettingStarted.agentInstall.description', {
+                      defaultMessage: 'Chat directly with our built-in agentic assistant.',
+                    })}>
+                    <AiButton
+                      variant="outlined"
+                      onClick={handleOpenInAgentBuilder}
+                      data-test-subj="agentInstallOpenInAgentBuilder"
+                    >
+                      {i18n.translate('xpack.gettingStarted.agentInstall.elasticAgent.cta', {
+                        defaultMessage: 'Open Elastic Agent',
+                      })}
+                    </AiButton>
+                  </AgentInstallPanel>
+                </EuiPanel>
+              </EuiFlexItem>
+            ) : null}
         </EuiFlexGroup>
       </EuiPanel>
-
       {isPromptModalOpen && <PromptModal prompt={modalPrompt} onClose={closePromptModal} />
       }
     </>
