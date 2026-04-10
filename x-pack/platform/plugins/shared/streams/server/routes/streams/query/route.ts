@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { badData, badRequest } from '@hapi/boom';
-import { Streams, getEsqlViewName } from '@kbn/streams-schema';
+import { Streams, getEsqlViewName, getParentId } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-settings-ids';
 import { DefinitionNotFoundError } from '../../../lib/streams/errors/definition_not_found_error';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
@@ -156,6 +156,13 @@ const upsertQueryStreamRoute = createServerRoute({
       definition = await streamsClient.getStream(name);
     } catch (error) {
       if (error instanceof DefinitionNotFoundError) {
+        // Ensure the parent stream is registered in .streams index.
+        // Classic streams (plain data streams) may not have a stored definition yet.
+        const parentId = getParentId(name);
+        if (parentId) {
+          await streamsClient.ensureStream(parentId);
+        }
+
         // Create new query stream - the state management will handle view creation
         return await streamsClient.createQueryStream({
           name,

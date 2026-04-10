@@ -57,7 +57,6 @@ import { useLicense } from '../hooks/use_license';
 import { PromptEditor } from '../prompt_editor/prompt_editor';
 import { useKibana } from '../hooks/use_kibana';
 import { ChatBanner } from './chat_banner';
-import { DefaultExperienceCallout } from './default_experience_callout';
 import { useConversationContextMenu, useScopes } from '../hooks';
 
 const fullHeightClassName = css`
@@ -733,9 +732,6 @@ export function ChatBody({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiHorizontalRule margin="none" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <DefaultExperienceCallout isConversationApp={!showLinkToConversationsApp} />
       </EuiFlexItem>
       {footer}
     </EuiFlexGroup>
