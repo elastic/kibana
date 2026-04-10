@@ -1108,8 +1108,14 @@ export const labels = {
         values: { source },
       }),
     pluginDetailIdLabel: i18n.translate('xpack.agentBuilder.agentPlugins.pluginDetailIdLabel', {
-      defaultMessage: 'ID',
+      defaultMessage: 'Plugin ID',
     }),
+    pluginDetailIdCopyLabel: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.pluginDetailIdCopyLabel',
+      {
+        defaultMessage: 'Copy plugin ID',
+      }
+    ),
     pluginDetailNameLabel: i18n.translate('xpack.agentBuilder.agentPlugins.pluginDetailNameLabel', {
       defaultMessage: 'Name',
     }),
@@ -1122,7 +1128,7 @@ export const labels = {
     pluginDetailSkillsLabel: i18n.translate(
       'xpack.agentBuilder.agentPlugins.pluginDetailSkillsLabel',
       {
-        defaultMessage: 'Skills',
+        defaultMessage: 'Skills included',
       }
     ),
     pluginDetailAuthorLabel: i18n.translate(
