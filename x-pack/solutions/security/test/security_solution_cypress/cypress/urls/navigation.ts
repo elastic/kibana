@@ -19,6 +19,8 @@ export const POLICIES_URL = '/app/security/administration/policy';
 /** Any artifact tab lives under this path prefix (trusted apps, event filters, blocklist, etc.) */
 export const ADMINISTRATION_URL_PREFIX = '/app/security/administration';
 export const TRUSTED_APPS_URL = '/app/security/administration/trusted_apps';
+export const TRUSTED_DEVICES_URL = '/app/security/administration/trusted_devices';
+export const ENDPOINT_EXCEPTIONS_URL = '/app/security/administration/endpoint_exceptions';
 export const EVENT_FILTERS_URL = '/app/security/administration/event_filters';
 export const BLOCKLIST_URL = '/app/security/administration/blocklist';
 export const HOST_ISOLATION_EXCEPTIONS_URL = `app/security/administration/host_isolation_exceptions`;

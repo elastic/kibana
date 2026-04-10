@@ -40,6 +40,8 @@ describe('useGetEndpointExceptionsPerPolicyOptIn()', () => {
   });
 
   it('should not call the API when the experimental feature is disabled', () => {
+    testContext.setExperimentalFlag({ endpointExceptionsMovedUnderManagement: false });
+
     const { result } = testContext.renderHook(() => useGetEndpointExceptionsPerPolicyOptIn());
 
     expect(result.current.data).toBeUndefined();
