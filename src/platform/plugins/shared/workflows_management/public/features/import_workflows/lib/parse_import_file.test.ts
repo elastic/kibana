@@ -57,12 +57,12 @@ describe('parseImportFile', () => {
       expect(result.format).toBe('yaml');
       expect(result.totalWorkflows).toBe(1);
       expect(result.workflows).toHaveLength(1);
-      expect(result.workflows[0].id).toMatch(/^workflow-[0-9a-f-]+$/);
+      expect(result.workflows[0].id).toBe('test-workflow');
       expect(result.workflows[0].name).toBe('Test Workflow');
       expect(result.workflowIds).toHaveLength(1);
-      expect(result.workflowIds[0]).toMatch(/^workflow-[0-9a-f-]+$/);
+      expect(result.workflowIds[0]).toBe('test-workflow');
       expect(result.rawWorkflows).toHaveLength(1);
-      expect(result.rawWorkflows[0].id).toMatch(/^workflow-[0-9a-f-]+$/);
+      expect(result.rawWorkflows[0].id).toBe('test-workflow');
       expect(result.rawWorkflows[0].yaml).toBe(yaml);
       expect(result.parseErrors).toHaveLength(0);
     });
@@ -89,16 +89,16 @@ describe('parseImportFile', () => {
       expect(result.format).toBe('zip');
       expect(result.totalWorkflows).toBe(2);
       expect(result.workflows).toHaveLength(2);
-      expect(result.workflowIds).toEqual(['w-1', 'w-2']);
+      expect(result.workflowIds).toEqual(['one', 'two']);
       expect(result.rawWorkflows).toEqual([
-        { id: 'w-1', yaml: 'name: One\nsteps: []' },
-        { id: 'w-2', yaml: 'name: Two\nsteps: []' },
+        { id: 'one', yaml: 'name: One\nsteps: []' },
+        { id: 'two', yaml: 'name: Two\nsteps: []' },
       ]);
       expect(result.parseErrors).toHaveLength(0);
     });
 
     it('should throw when manifest is missing', async () => {
-      const file = await createZipFile([{ id: 'w-1', yaml: 'name: Test' }], false);
+      const file = await createZipFile([{ id: 'one', yaml: 'name: Test' }], false);
       await expect(parseImportFile(file)).rejects.toThrow('manifest');
     });
 
@@ -185,9 +185,9 @@ describe('parseImportFile', () => {
       ).toBe(true);
     });
 
-    it('should correctly derive ID from .yaml extension', async () => {
+    it('should correctly derive ID from name field', async () => {
       const zip = new JSZip();
-      zip.file('my-workflow.yaml', 'name: YAML Extension');
+      zip.file('my-workflow.yaml', 'name: My workflow');
       zip.file(
         'manifest.yml',
         YAML.stringify({
