@@ -145,7 +145,7 @@ export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn
     box: {
       'data-test-subj': 'infraAssetDetailsMetadataSearchBarInput',
       incremental: true,
-      placeholder: SEARCH_PLACEHOLDER,
+      placeholder: 'SEARCH_PLACEHOLDER',
     },
     query: metadataSearch,
   };
