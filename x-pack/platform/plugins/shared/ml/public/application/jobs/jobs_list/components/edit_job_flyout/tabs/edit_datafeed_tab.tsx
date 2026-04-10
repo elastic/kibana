@@ -25,6 +25,7 @@ import { parseInterval } from '@kbn/ml-parse-interval';
 import type { ProjectRouting } from '@kbn/es-query';
 import { ProjectPicker, useFetchProjects } from '@kbn/cps-utils';
 
+import { DisabledProjectPicker } from '@kbn/cps-utils/components/project_picker';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { calculateDatafeedFrequencyDefaultSeconds } from '../../../../../../../common/util/job_utils';
 import { getNewJobDefaults } from '../../../../../services/ml_server_info';
@@ -103,7 +104,8 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
     [cpsManager]
   );
 
-  const projects = useFetchProjects(fetchProjects, datafeedProjectRouting);
+  const defaultProjectRouting = cpsManager?.getDefaultProjectRouting();
+  const projects = useFetchProjects(fetchProjects, datafeedProjectRouting ?? defaultProjectRouting);
 
   const onProjectRoutingChange = useCallback(
     (projectRouting: ProjectRouting) => {
@@ -189,7 +191,7 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
             disabled={datafeedRunning}
           />
         </EuiFormRow>
-        {totalProjectCount > 1 && (
+        {totalProjectCount > 1 && defaultProjectRouting && projects ? (
           <EuiFormRow
             label={
               <FormattedMessage
@@ -200,13 +202,20 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
           >
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
-                <ProjectPicker
-                  projectRouting={datafeedProjectRouting}
-                  onProjectRoutingChange={onProjectRoutingChange}
-                  projects={projects}
-                  totalProjectCount={totalProjectCount}
-                  isReadonly={datafeedRunning}
-                />
+                {datafeedRunning ? (
+                  <DisabledProjectPicker
+                    totalProjectCount={totalProjectCount}
+                    displayTooltip={false}
+                  />
+                ) : (
+                  <ProjectPicker
+                    projectRouting={defaultProjectRouting}
+                    onProjectRoutingChange={onProjectRoutingChange}
+                    projects={projects}
+                    totalProjectCount={totalProjectCount}
+                    isReadonly={datafeedRunning}
+                  />
+                )}
               </EuiFlexItem>
               {datafeedProjectRouting && (
                 <EuiFlexItem grow={false}>
@@ -217,7 +226,7 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
               )}
             </EuiFlexGroup>
           </EuiFormRow>
-        )}
+        ) : null}
       </EuiForm>
     </>
   );

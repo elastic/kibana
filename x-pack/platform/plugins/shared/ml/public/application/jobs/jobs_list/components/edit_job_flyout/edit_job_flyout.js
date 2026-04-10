@@ -10,7 +10,8 @@ import React, { Component } from 'react';
 import { cloneDeep, isEqual, pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { withKibana, context } from '@kbn/kibana-react-plugin/public';
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -43,6 +44,7 @@ import { createJobActionFocusRestoration } from '../../../../util/create_focus_r
 const { collapseLiteralStrings } = XJson;
 
 export class EditJobFlyoutUI extends Component {
+  static contextType = context;
   _initialJobFormState = null;
 
   constructor(props, constructorContext) {
@@ -188,6 +190,8 @@ export class EditJobFlyoutUI extends Component {
     this.extractInitialJobFormState(job, hasDatafeed);
     const datafeedRunning = hasDatafeed && job.datafeed_config.state !== DATAFEED_STATE.STOPPED;
     const jobClosed = job.state === JOB_STATE.CLOSED;
+    const cps = this.context.services.cps;
+    const defaultProjectRouting = cps?.cpsManager?.getDefaultProjectRouting();
 
     this.setState({
       job,
@@ -197,6 +201,9 @@ export class EditJobFlyoutUI extends Component {
       jobModelMemoryLimitValidationError: '',
       jobGroupsValidationError: '',
       ...cloneDeep(this._initialJobFormState),
+      ...(datafeedRunning === false && !this.state.datafeedProjectRouting && defaultProjectRouting
+        ? { datafeedProjectRouting: defaultProjectRouting }
+        : {}),
     });
   }
 
