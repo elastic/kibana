@@ -71,9 +71,6 @@ export class GenAiSettingsPlugin
       },
     });
 
-    // Default to disabled until license and capability checks run in start()
-    this.registeredApp.disable();
-
     return {};
   }
 
