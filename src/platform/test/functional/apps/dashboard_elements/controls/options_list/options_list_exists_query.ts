@@ -15,6 +15,7 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pieChart = getService('pieChart');
   const esArchiver = getService('esArchiver');
+  const elasticChart = getService('elasticChart');
 
   const { dashboardControls, dashboard } = getPageObjects(['dashboardControls', 'dashboard']);
 
@@ -26,6 +27,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/es_archiver/dashboard_elements/controls/test_exists'
       );
       await dashboard.loadDashboardInEditMode('Test Options List Control');
+      await elasticChart.setNewChartUiDebugFlag();
+
       await dashboardControls.createControl({
         controlType: OPTIONS_LIST_CONTROL,
         dataViewTitle: 'animals-*',

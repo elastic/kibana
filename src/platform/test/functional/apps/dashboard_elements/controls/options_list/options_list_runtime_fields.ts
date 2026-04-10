@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pieChart = getService('pieChart');
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
+  const elasticChart = getService('elasticChart');
 
   const { dashboardControls, dashboard } = getPageObjects(['dashboardControls', 'dashboard']);
 
@@ -29,6 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await browser.refresh();
       await dashboard.loadDashboardInEditMode('Test Options List on Runtime Field');
+      await elasticChart.setNewChartUiDebugFlag();
     });
 
     const FIELD_VALUES = {
