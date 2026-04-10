@@ -354,6 +354,7 @@ describe('EditPipelineFlyout', () => {
       mockUIState.selectedPipelineTab = 'pipeline';
       render(<EditPipelineFlyout {...defaultProps} />);
 
+      await userEvent.click(screen.getByTestId('code-editor-change'));
       const saveButton = screen.getByTestId('editPipelineFlyoutSaveButton');
       await userEvent.click(saveButton);
 
