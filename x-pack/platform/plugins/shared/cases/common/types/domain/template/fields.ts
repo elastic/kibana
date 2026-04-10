@@ -165,7 +165,7 @@ export const CheckboxGroupFieldSchema = BaseFieldSchema.extend({
     .superRefine((meta, ctx) => {
       if (meta.default === undefined) return;
       const invalidValues = (meta.default as string[]).filter(
-        (v) => !(meta.options as string[]).includes(v)
+        (v) => v !== '' && !(meta.options as string[]).includes(v)
       );
       if (invalidValues.length > 0) {
         ctx.addIssue({
@@ -191,6 +191,7 @@ export const RadioGroupFieldSchema = BaseFieldSchema.extend({
     .superRefine((meta, ctx) => {
       if (
         meta.default !== undefined &&
+        meta.default !== '' &&
         !(meta.options as string[]).includes(meta.default as string)
       ) {
         ctx.addIssue({
