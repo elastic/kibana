@@ -60,6 +60,7 @@ import { registerStreamsAgentBuilder } from './agent_builder/register';
 import { registerSignificantEventsInferenceFeatures } from './register_significant_events_inference_features';
 import { registerSuggestionsInferenceFeatures } from './register_suggestions_inference_features';
 import { PatternExtractionService } from './lib/pattern_extraction/pattern_extraction_service';
+import { registerFieldsMetadataExtractors } from './register_fields_metadata_extractors';
 import { createStreamsSettingsStorageClient } from './lib/streams/storage/streams_settings_storage_client';
 import {
   createContinuousKiExtractionWorkflowService,
@@ -439,6 +440,11 @@ export class StreamsPlugin
       .catch((error) => {
         this.logger.error(`Error preconfiguring streams: ${error}`);
       });
+
+    registerFieldsMetadataExtractors({
+      fieldsMetadata: plugins.fieldsMetadata,
+      logger: this.logger,
+    });
 
     return {};
   }
