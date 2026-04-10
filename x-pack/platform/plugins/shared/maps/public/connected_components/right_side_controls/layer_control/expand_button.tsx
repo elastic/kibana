@@ -34,7 +34,7 @@ export function ExpandButton({ hasErrorsOrWarnings, isLoading, onClick }: Props)
           <EuiLoadingSpinner />
         </div>
       ) : (
-        <EuiIcon type={hasErrorsOrWarnings ? 'warning' : 'menuLeft'} />
+        <EuiIcon type={hasErrorsOrWarnings ? 'warning' : 'menuLeft'} aria-hidden={true} />
       )}
     </EuiButtonEmpty>
   );
