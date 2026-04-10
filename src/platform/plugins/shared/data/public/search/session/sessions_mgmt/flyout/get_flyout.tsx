@@ -86,7 +86,7 @@ export function openSearchSessionsFlyout({
         session: 'start',
         type: 'overlay',
         ownFocus: true,
-        outsideClickCloses: false,
+        outsideClickCloses: true,
         ['aria-labelledby']: flyoutId,
         onClose: closeFlyout,
       }
