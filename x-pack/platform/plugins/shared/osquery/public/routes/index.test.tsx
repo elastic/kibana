@@ -14,7 +14,10 @@ import { EuiProvider } from '@elastic/eui';
 
 import { OsqueryAppRoutes } from '.';
 import { ExperimentalFeaturesProvider } from '../common/experimental_features_context';
-import { allowedExperimentalValues } from '../../common/experimental_features';
+import {
+  allowedExperimentalValues,
+  type ExperimentalFeatures,
+} from '../../common/experimental_features';
 
 jest.mock('../common/lib/kibana', () => ({
   useKibana: () => ({
@@ -71,7 +74,7 @@ const createTestQueryClient = () =>
 
 const renderWithRouter = (
   path: string,
-  experimentalFeatures: Partial<typeof allowedExperimentalValues> = {}
+  experimentalFeatures: Partial<ExperimentalFeatures> = {}
 ) => {
   const features = { ...allowedExperimentalValues, ...experimentalFeatures };
 

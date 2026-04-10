@@ -130,11 +130,13 @@ const createTestQueryClient = () =>
     },
   });
 
+const DEFAULT_INITIAL_ENTRIES = ['/'];
+
 export const TestProvidersWithServices: React.FC<{
   children: React.ReactNode;
   services?: ReturnType<typeof createMockKibanaServices>;
   initialEntries?: string[];
-}> = ({ children, services, initialEntries = ['/'] }) => {
+}> = ({ children, services, initialEntries = DEFAULT_INITIAL_ENTRIES }) => {
   const kibanaServices = services ?? createMockKibanaServices();
 
   return (

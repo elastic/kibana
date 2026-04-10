@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 const mockAddError = jest.fn();
@@ -35,9 +35,11 @@ const createWrapper = () => {
     defaultOptions: { queries: { retry: false, cacheTime: 0 } },
   });
 
-  return ({ children }: { children: React.ReactNode }) => (
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
+
+  return Wrapper;
 };
 
 describe('useCreateLiveQuery', () => {
@@ -54,7 +56,7 @@ describe('useCreateLiveQuery', () => {
     };
     mockPost.mockRejectedValueOnce(forbiddenError);
 
-    const { result, waitFor } = renderHook(() => useCreateLiveQuery({ onSuccess: jest.fn() }), {
+    const { result } = renderHook(() => useCreateLiveQuery({ onSuccess: jest.fn() }), {
       wrapper: createWrapper(),
     });
 
@@ -70,7 +72,9 @@ describe('useCreateLiveQuery', () => {
       });
     });
 
-    await waitFor(() => result.current.isError);
+    await waitFor(() => {
+      expect(result.current.isError).toBe(true);
+    });
 
     expect(mockAddError).toHaveBeenCalledWith(
       forbiddenError,
@@ -88,7 +92,7 @@ describe('useCreateLiveQuery', () => {
     };
     mockPost.mockResolvedValueOnce(mockResponse);
 
-    const { result, waitFor } = renderHook(() => useCreateLiveQuery({ onSuccess }), {
+    const { result } = renderHook(() => useCreateLiveQuery({ onSuccess }), {
       wrapper: createWrapper(),
     });
 
@@ -104,7 +108,9 @@ describe('useCreateLiveQuery', () => {
       });
     });
 
-    await waitFor(() => result.current.isSuccess);
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
 
     expect(onSuccess).toHaveBeenCalled();
   });

@@ -31,6 +31,12 @@ apiTest.describe(
       liveQueryActionId = createResponse.body.data.action_id;
     });
 
+    apiTest.afterAll(async ({ apiServices }) => {
+      if (liveQueryActionId) {
+        await apiServices.osquery.liveQueries.deleteAll([liveQueryActionId]);
+      }
+    });
+
     apiTest('returns 200 with expected response shape', async ({ apiClient }) => {
       const response = await apiClient.get(
         `${testData.API_PATHS.OSQUERY_LIVE_QUERIES}/${liveQueryActionId}`,
@@ -42,11 +48,9 @@ apiTest.describe(
 
       expect(response).toHaveStatusCode(200);
       expect(response.body.data).toBeDefined();
-      expect(response.body.data).toMatchObject({
-        action_id: liveQueryActionId,
-        agents: expect.any(Array),
-        queries: expect.any(Array),
-      });
+      expect(response.body.data.action_id).toBe(liveQueryActionId);
+      expect(Array.isArray(response.body.data.agents)).toBe(true);
+      expect(Array.isArray(response.body.data.queries)).toBe(true);
     });
 
     apiTest('returns 404 for non-existent query', async ({ apiClient }) => {
