@@ -247,7 +247,9 @@ export const EditPipelineFlyout = ({
               iconType="save"
               onClick={handleSave}
               isLoading={updateDataStreamPipelineMutation.isLoading}
-              isDisabled={selectedPipelineTab !== 'pipeline' || !pipelineText.trim()}
+              isDisabled={
+                selectedPipelineTab !== 'pipeline' || !pipelineText.trim() || !hasUnsavedChanges
+              }
               data-test-subj="editPipelineFlyoutSaveButton"
             >
               {i18n.EDIT_PIPELINE_FLYOUT.saveButton}

@@ -550,6 +550,7 @@ src/platform/packages/shared/kbn-esql-resource-browser/.storybook @elastic/kiban
 src/platform/packages/shared/kbn-esql-types @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-utils @elastic/kibana-esql
 src/platform/packages/shared/kbn-eval-kql @elastic/workflows-eng
+src/platform/packages/shared/kbn-evals-suite-workflows @elastic/workflows-eng
 src/platform/packages/shared/kbn-event-annotation-common @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-event-annotation-components @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-expect @elastic/kibana-operations @elastic/appex-qa
@@ -1837,8 +1838,9 @@ x-pack/platform/plugins/shared/streams/server/routes/internal/sig_events @elasti
 /src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/ @elastic/obs-exploration-team
 /src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/ @elastic/obs-exploration-team
 /src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/global.setup.ts @elastic/obs-exploration-team
-
-# obs-onboarding-team
+/x-pack/performance/journeys_e2e/metrics_* @elastic/obs-exploration-team
+/x-pack/performance/utils/metrics_experience_setup.ts @elastic/obs-exploration-team
+ # obs-onboarding-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/dataset_quality @elastic/obs-onboarding-team
 /x-pack/solutions/observability/test/serverless/functional/configs/config.* @elastic/obs-onboarding-team
 /x-pack/solutions/observability/test/serverless/functional/test_suites/navigation.ts @elastic/obs-presentation-team
@@ -2785,10 +2787,10 @@ x-pack/solutions/security/test/serverless/functional/configs/config.context_awar
 /x-pack/solutions/security/plugins/security_solution/public/flyout/attack_details @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/flyout/shared @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/flyout/rule_details @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/investigation_guide @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/shared @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/flyout_v2 @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/notes @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/onboarding @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/one_discover @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/overview @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/resolver @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/sourcerer @elastic/security-threat-hunting-investigations
