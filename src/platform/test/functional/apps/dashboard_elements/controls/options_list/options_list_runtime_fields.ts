@@ -16,6 +16,7 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pieChart = getService('pieChart');
   const kibanaServer = getService('kibanaServer');
+  const browser = getService('browser');
 
   const { dashboardControls, dashboard } = getPageObjects(['dashboardControls', 'dashboard']);
 
@@ -26,6 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/options_list_runtime_fields'
       );
+      await browser.refresh();
       await dashboard.loadDashboardInEditMode('Test Options List on Runtime Field');
     });
 
