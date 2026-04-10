@@ -9,7 +9,7 @@ import type { FunctionComponent } from 'react';
 import React, { useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiEmptyPrompt, EuiSpacer, EuiLink } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import { useKibana } from '../../../../shared_imports';
 import { usePipelineProcessorsContext } from '../context';
 import { AddProcessorButton } from './add_processor_button';
@@ -56,23 +56,19 @@ export const ProcessorsEmptyPrompt: FunctionComponent<Props> = ({ onLoadJson }) 
           />
         </p>
       }
-      actions={
-        <>
-          <AddProcessorButton
-            ref={buttonRef}
-            onClick={() => {
-              onTreeAction({
-                type: 'addProcessor',
-                payload: { target: ['processors'], buttonRef },
-              });
-            }}
-          />
-
-          <EuiSpacer size="m" />
-
-          <LoadFromJsonButton onDone={onLoadJson} />
-        </>
-      }
+      actions={[
+        <AddProcessorButton
+          key="addProcessor"
+          ref={buttonRef}
+          onClick={() => {
+            onTreeAction({
+              type: 'addProcessor',
+              payload: { target: ['processors'], buttonRef },
+            });
+          }}
+        />,
+        <LoadFromJsonButton key="loadFromJson" onDone={onLoadJson} />,
+      ]}
     />
   );
 };
