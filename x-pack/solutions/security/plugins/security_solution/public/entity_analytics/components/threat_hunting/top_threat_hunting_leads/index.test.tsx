@@ -124,20 +124,67 @@ describe('TopThreatHuntingLeads', () => {
     expect(onSeeAll).toHaveBeenCalledTimes(1);
   });
 
-  it('"Generate" button calls onGenerate with loading state when isGenerating', () => {
+  it('shows "Generate" button when no leads exist and calls onGenerate', () => {
     const onGenerate = jest.fn();
 
-    const { rerender } = render(
-      <TopThreatHuntingLeads {...defaultProps} onGenerate={onGenerate} />
-    );
-
-    fireEvent.click(screen.getByTestId('generateLeadsButton'));
-    expect(onGenerate).toHaveBeenCalledTimes(1);
-
-    rerender(<TopThreatHuntingLeads {...defaultProps} onGenerate={onGenerate} isGenerating />);
+    render(<TopThreatHuntingLeads {...defaultProps} onGenerate={onGenerate} />);
 
     const generateButton = screen.getByTestId('generateLeadsButton');
-    expect(generateButton).toHaveTextContent('Generating...');
+    expect(generateButton).toBeInTheDocument();
+    expect(screen.queryByTestId('refreshLeadsButton')).not.toBeInTheDocument();
+
+    fireEvent.click(generateButton);
+    expect(onGenerate).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps "Generate" button when generation produced no leads', () => {
+    render(<TopThreatHuntingLeads {...defaultProps} hasGenerated />);
+
+    expect(screen.getByTestId('generateLeadsButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('refreshLeadsButton')).not.toBeInTheDocument();
+  });
+
+  it('shows refresh icon instead of "Generate" button when leads exist', () => {
+    const onGenerate = jest.fn();
+    const lead = createMockLead();
+
+    render(
+      <TopThreatHuntingLeads
+        {...defaultProps}
+        leads={[lead]}
+        totalCount={1}
+        hasGenerated
+        onGenerate={onGenerate}
+      />
+    );
+
+    expect(screen.queryByTestId('generateLeadsButton')).not.toBeInTheDocument();
+    const refreshButton = screen.getByTestId('refreshLeadsButton');
+    expect(refreshButton).toBeInTheDocument();
+
+    fireEvent.click(refreshButton);
+    expect(onGenerate).toHaveBeenCalledTimes(1);
+  });
+
+  it('displays generated timestamp when leads exist and lastRunTimestamp is provided', () => {
+    const lead = createMockLead();
+
+    render(
+      <TopThreatHuntingLeads
+        {...defaultProps}
+        leads={[lead]}
+        totalCount={1}
+        lastRunTimestamp="2026-03-13T14:30:00.000Z"
+      />
+    );
+
+    expect(screen.getByTestId('leadsGeneratedTimestamp')).toBeInTheDocument();
+  });
+
+  it('does not display timestamp when no leads exist', () => {
+    render(<TopThreatHuntingLeads {...defaultProps} lastRunTimestamp="2026-03-13T14:30:00.000Z" />);
+
+    expect(screen.queryByTestId('leadsGeneratedTimestamp')).not.toBeInTheDocument();
   });
 
   it('lead card click calls onLeadClick', () => {

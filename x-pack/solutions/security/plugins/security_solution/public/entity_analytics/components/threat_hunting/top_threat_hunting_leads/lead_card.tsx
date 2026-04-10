@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiPanel,
   EuiText,
   EuiTextTruncate,
@@ -21,15 +20,13 @@ import type { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { HuntingLead } from './types';
 import { VIEW_LEAD_DETAILS } from './translations';
-import { getEntityIcon } from './utils';
-
-const MAX_VISIBLE_TAGS = 3;
+import { MAX_VISIBLE_TAGS } from './utils';
+import { renderTextWithEntities, TagsPopover } from './shared_lead_components';
 
 const getCardStyles = (euiTheme: EuiThemeComputed) => css`
   position: relative;
   cursor: pointer;
-  min-width: 260px;
-  max-width: 360px;
+  height: 100%;
   transition: transform ${euiTheme.animation.normal} ease,
     box-shadow ${euiTheme.animation.normal} ease;
   &:hover {
@@ -60,7 +57,10 @@ export const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick, onInfoClick }
     },
     [onInfoClick, lead]
   );
-
+  const renderedByline = useMemo(
+    () => renderTextWithEntities(lead.byline, lead.entities),
+    [lead.byline, lead.entities]
+  );
   return (
     <EuiPanel
       hasBorder
@@ -94,41 +94,21 @@ export const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick, onInfoClick }
 
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
-            <EuiTextTruncate text={lead.byline} />
+            {renderedByline}
           </EuiText>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
-            {lead.entities.map((entity) => (
-              <EuiFlexItem grow={false} key={`${entity.type}-${entity.name}`}>
-                <EuiBadge color="hollow">
-                  <EuiFlexGroup
-                    alignItems="center"
-                    gutterSize="xs"
-                    responsive={false}
-                    component="span"
-                  >
-                    <EuiIcon type={getEntityIcon(entity.type)} size="s" aria-hidden={true} />
-                    <span>{entity.name}</span>
-                  </EuiFlexGroup>
-                </EuiBadge>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
         </EuiFlexItem>
 
         {lead.tags.length > 0 && (
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
+            <EuiFlexGroup gutterSize="xs" responsive={false} wrap alignItems="center">
               {lead.tags.slice(0, MAX_VISIBLE_TAGS).map((tag) => (
                 <EuiFlexItem grow={false} key={tag}>
-                  <EuiBadge color="default">{tag}</EuiBadge>
+                  <EuiBadge color="hollow">{tag}</EuiBadge>
                 </EuiFlexItem>
               ))}
               {lead.tags.length > MAX_VISIBLE_TAGS && (
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color="default">{`+${lead.tags.length - MAX_VISIBLE_TAGS}`}</EuiBadge>
+                  <TagsPopover tags={lead.tags} />
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>

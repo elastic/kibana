@@ -52,6 +52,7 @@ export const useHuntingLeads = (isEnabled: boolean = true) => {
     queryKey: [HUNTING_LEADS_QUERY_KEY],
     queryFn: ({ signal }) => fetchLeads({ signal, ...FETCH_LEADS_PARAMS }),
     enabled: isEnabled,
+    onError: (error: Error) => addError(error, { title: i18n.FETCH_LEADS_ERROR }),
   });
 
   const { mutate: generate, isLoading: isGenerating } = useMutation({
@@ -81,6 +82,7 @@ export const useHuntingLeads = (isEnabled: boolean = true) => {
     queryKey: [LEAD_SCHEDULE_QUERY_KEY],
     queryFn: ({ signal }) => fetchLeadGenerationStatus({ signal }),
     enabled: isEnabled,
+    onError: (error: Error) => addError(error, { title: i18n.FETCH_STATUS_ERROR }),
   });
 
   const { mutate: toggleSchedule } = useMutation({
@@ -97,6 +99,7 @@ export const useHuntingLeads = (isEnabled: boolean = true) => {
     isLoading,
     isGenerating,
     hasGenerated: hasEverGenerated,
+    lastRunTimestamp: statusData?.lastRun ?? null,
     generate,
     refetch,
     isScheduled: statusData?.isEnabled ?? false,
