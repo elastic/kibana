@@ -21,7 +21,6 @@
     ],
     "optionalPlugins": [
       "cloud"
-    ],
-    "extraPublicDirs": ["common"]
+    ]
   }
 }

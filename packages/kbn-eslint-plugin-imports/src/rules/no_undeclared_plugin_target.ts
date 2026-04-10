@@ -149,6 +149,16 @@ export const NoUndeclaredPluginTargetRule: Rule.RuleModule = {
       if (manifest.plugin.browser === false) return;
 
       const targets = ['public', ...(manifest.plugin.extraPublicDirs ?? [])];
+
+      // When the importing file lives in common/ code, implicitly allow the
+      // remote plugin's common/ directory — common-to-common imports resolve
+      // via normal module resolution and are not routed through __kbnBundles__.
+      // Only public/ (browser package) code requires the target plugin to
+      // declare "common" in extraPublicDirs.
+      if (self.type === 'common package' && !targets.includes('common')) {
+        targets.push('common');
+      }
+
       const targetMatches = targets.some(
         (t) => parsed.target === t || parsed.target.startsWith(t + '/')
       );
