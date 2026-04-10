@@ -24,7 +24,7 @@ export type AvailabilityStatus =
   | {
       isAvailable: false;
       unavailabilityReason: 'serverless_tier';
-      requiredProducts: string[];
+      requiredProducts: ServerlessTierRequiredProducts;
     };
 
 export type ServerlessTierAvailability =
@@ -33,7 +33,7 @@ export type ServerlessTierAvailability =
     }
   | {
       isValid: false;
-      requiredProducts: string[];
+      requiredProducts: ServerlessTierRequiredProducts;
     };
 
 export class AvailabilityService {

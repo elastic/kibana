@@ -160,7 +160,7 @@ describe('WorkflowsAvailabilityWrapper', () => {
         </WorkflowsAvailabilityWrapper>
       );
 
-      waitFor(() => expect(screen.getByText('Manage subscription')).toBeInTheDocument());
+      await waitFor(() => expect(screen.getByText('Manage subscription')).toBeInTheDocument());
     });
   });
 });
