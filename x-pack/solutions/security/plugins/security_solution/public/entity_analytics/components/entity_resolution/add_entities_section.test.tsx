@@ -99,7 +99,7 @@ describe('AddEntitiesSection', () => {
   });
 
   it('shows "Showing X-Y of N entities" text', () => {
-    const { getByTestId, getByText } = render(
+    const { getByTestId } = render(
       <TestProviders>
         <AddEntitiesSection {...defaultProps} />
       </TestProviders>

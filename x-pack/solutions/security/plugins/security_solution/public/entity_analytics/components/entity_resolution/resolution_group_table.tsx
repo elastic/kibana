@@ -212,7 +212,6 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
     currentEntityId,
   ]);
 
-
   if (isLoading) {
     return <EuiLoadingSpinner size="m" />;
   }

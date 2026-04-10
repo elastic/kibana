@@ -226,10 +226,12 @@ export const AddEntitiesSection: React.FC<AddEntitiesSectionProps> = ({
             <EuiText size="xs" data-test-subj={ADD_ENTITIES_SHOWING_TEST_ID}>
               {SHOWING_ENTITIES_PREFIX}{' '}
               <strong>
-                {from}-{to}
+                {from}
+                {'-'}
+                {to}
               </strong>{' '}
-              {SHOWING_ENTITIES_OF}{' '}
-              <strong>{total.toLocaleString()}</strong> {SHOWING_ENTITIES_SUFFIX}
+              {SHOWING_ENTITIES_OF} <strong>{total.toLocaleString()}</strong>{' '}
+              {SHOWING_ENTITIES_SUFFIX}
             </EuiText>
             <EuiSpacer size="s" />
           </>
