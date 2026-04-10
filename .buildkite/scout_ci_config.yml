@@ -3,18 +3,22 @@ plugins:
   enabled:
     - advanced_settings
     - alerting
+    - alerting_v2
     - apm
+    - automatic_import
     - banners
     - cloud_security_posture
     - console
     - custom_branding
     - dashboard
+    - dashboard_markdown
     - data_views
     - discover
     - discover_enhanced
     - entity_store
     - exploratory_view
     - fleet
+    - flyoutSystemExamples
     - gen_ai_settings
     - global_search
     - index_management
@@ -25,8 +29,10 @@ plugins:
     - navigation
     - observability
     - observability_onboarding
+    - osquery
     - painless_lab
     - profiling
+    - saved_objects_management
     - search_getting_started
     - search_homepage
     - security

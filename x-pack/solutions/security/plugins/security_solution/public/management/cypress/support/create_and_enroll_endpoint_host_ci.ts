@@ -91,8 +91,12 @@ export const createAndEnrollEndpointHostCI = async ({
     log.warning(
       `There is no agent installer for ${agentFileName} present on disk, trying to download it now.`
     );
-    const { url: agentUrl } = await getAgentDownloadUrl(agentVersion, useClosestVersionMatch, log);
-    agentDownload = await downloadAndStoreAgent(agentUrl, agentFileName);
+    const { url: agentUrl, shaUrl } = await getAgentDownloadUrl(
+      agentVersion,
+      useClosestVersionMatch,
+      log
+    );
+    agentDownload = await downloadAndStoreAgent(agentUrl, agentFileName, shaUrl);
   }
 
   const hostVm = await createVm({

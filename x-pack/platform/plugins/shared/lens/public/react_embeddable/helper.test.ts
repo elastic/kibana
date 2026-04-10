@@ -20,7 +20,7 @@ import type {
   StructuredDatasourceStates,
   XYByReferenceAnnotationLayerConfig,
   XYDataLayerConfig,
-  XYState,
+  XYVisualizationState,
 } from '@kbn/lens-common';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 
@@ -43,7 +43,7 @@ describe('Embeddable helpers', () => {
 
     it('should wrap Lens doc/attributes into component state shape', async () => {
       const services = getServices();
-      const runtimeState = await deserializeState(services, defaultDoc);
+      const runtimeState = await deserializeState(services, { attributes: defaultDoc });
       expect(runtimeState).toEqual(
         expect.objectContaining({
           attributes: { ...defaultDoc, references: defaultDoc.references },
@@ -54,7 +54,7 @@ describe('Embeddable helpers', () => {
     it('load a by-ref doc from the attribute service', async () => {
       const services = getServices();
       await deserializeState(services, {
-        savedObjectId: '123',
+        ref_id: '123',
       });
 
       expect(services.attributeService.loadFromLibrary).toHaveBeenCalledWith('123');
@@ -66,7 +66,7 @@ describe('Embeddable helpers', () => {
         .fn()
         .mockRejectedValueOnce(new Error('not found'));
       const runtimeState = await deserializeState(services, {
-        savedObjectId: '123',
+        ref_id: '123',
       });
       // check the visualizationType set to null for empty state
       expect(runtimeState.attributes.visualizationType).toBeNull();
@@ -157,12 +157,12 @@ describe('Embeddable helpers', () => {
       };
     }
 
-    function makeVizState(layers: XYState['layers']): XYState {
+    function makeVizState(layers: XYVisualizationState['layers']): XYVisualizationState {
       return {
         preferredSeriesType: 'bar_stacked',
         legend: { isVisible: true, position: 'right' },
         layers,
-      } as XYState;
+      } as XYVisualizationState;
     }
 
     beforeEach(() => {
@@ -233,7 +233,8 @@ describe('Embeddable helpers', () => {
         mockEventAnnotationService
       );
 
-      const updatedLayer = (result as XYState).layers[0] as XYByReferenceAnnotationLayerConfig;
+      const updatedLayer = (result as XYVisualizationState)
+        .layers[0] as XYByReferenceAnnotationLayerConfig;
       expect(updatedLayer.__lastSaved.annotations).toEqual(byRefLayer.annotations);
     });
 

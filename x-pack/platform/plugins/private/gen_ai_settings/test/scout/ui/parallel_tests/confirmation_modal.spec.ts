@@ -15,7 +15,7 @@ spaceTest.describe(
   'GenAI Settings - Confirmation Modal',
   {
     tag: [
-      ...tags.stateful.classic,
+      '@local-stateful-classic',
       ...tags.serverless.observability.complete,
       ...tags.serverless.security.complete,
     ],

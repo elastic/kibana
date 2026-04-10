@@ -25,11 +25,12 @@ const _allowedExperimentalValues = {
   enableEsqlViewInstall: false,
   enableSloTemplates: true,
   newBrowseIntegrationUx: true, // When enabled integrations, browse integrations page will use the new UX.
-  enableVersionSpecificPolicies: false, // When enabled, version specific policies will be created when packages use agent version conditions
+  enableVersionSpecificPolicies: true, // When enabled, version specific policies will be created when packages use agent version conditions
   enableVarGroups: false, // When enabled, var_groups from the package spec drive conditional variable visibility and input filtering.
   enableIntegrationInactivityAlerting: true, // When enabled, an inactivity monitoring alerting rule template is created on fresh integration package install.
   enableSimplifiedAgentlessUX: true, // When enabled, the agentless deployment mode will be simplified for single input/datastreams integrations.
-  enableOpAMP: false, // When enabled, OpAMP features will be available in the API and UI.
+  enableOpAMP: true, // When enabled, OpAMP features will be available in the API and UI.
+  enableOTelVerifier: false, // When enabled, OTel-based cloud connector permission verification is active.
   enableResolveDependencies: false, // When enabled, the resolve dependencies step will be available during package installation.
 };
 

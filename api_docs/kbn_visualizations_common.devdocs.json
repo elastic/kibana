@@ -974,7 +974,7 @@
         "label": "VISUALIZE_EMBEDDABLE_TYPE",
         "description": [],
         "signature": [
-          "\"visualization\""
+          "\"legacy_vis\""
         ],
         "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
         "lineNumber": 13,
@@ -1024,7 +1024,9 @@
         "label": "visContainerStyle",
         "description": [],
         "signature": [
-          "SerializedStyles"
+          "{ name: string; styles: string; next?: ",
+          "SerializedStyles",
+          " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-visualizations-common/vis.styles.ts",
         "lineNumber": 29,

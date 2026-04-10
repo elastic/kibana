@@ -66,6 +66,7 @@ export function getActionOptions(
       description: t.description ?? t.id,
       iconType: (t.icon != null ? t.icon : 'bolt') as IconType,
       iconColor: euiTheme.colors.vis.euiColorVis6,
+      stability: 'tech_preview',
     }));
   const triggersGroup: ActionOptionData = {
     iconType: 'bolt',
@@ -80,7 +81,19 @@ export function getActionOptions(
     options: [...builtInTriggerOptions, ...registeredTriggerOptions],
   };
 
-  const kibanaGroup: ActionOptionData = {
+  const kibanaCasesGroup: ActionGroup = {
+    iconType: 'briefcase',
+    id: 'kibana.cases',
+    label: i18n.translate('workflows.actionsMenu.kibanaCases', {
+      defaultMessage: 'Cases',
+    }),
+    description: i18n.translate('workflows.actionsMenu.kibanaCasesDescription', {
+      defaultMessage: 'Create and manage cases from your workflow',
+    }),
+    options: [],
+  };
+
+  const kibanaGroup: ActionGroup = {
     iconType: 'logoKibana',
     id: 'kibana',
     label: i18n.translate('workflows.actionsMenu.kibana', {
@@ -90,6 +103,7 @@ export function getActionOptions(
       defaultMessage: 'Work with Kibana data and features directly from your workflow',
     }),
     options: [],
+    nestedGroups: [kibanaCasesGroup],
   };
   const externalGroup: ActionOptionData = {
     iconType: 'plugs',
@@ -203,6 +217,17 @@ export function getActionOptions(
         iconType: 'clock',
         iconColor: euiTheme.colors.vis.euiColorVis0,
       },
+      {
+        id: 'waitForInput',
+        label: i18n.translate('workflows.actionsMenu.waitForInput', {
+          defaultMessage: 'Wait For Input',
+        }),
+        description: i18n.translate('workflows.actionsMenu.waitForInputDescription', {
+          defaultMessage: 'Pause execution until external input is provided (human-in-the-loop)',
+        }),
+        iconType: 'user',
+        iconColor: euiTheme.colors.vis.euiColorVis0,
+      },
       ...(['workflow.execute', 'workflow.executeAsync'] as const)
         .map((stepId) => getBuiltInStepDefinition(stepId))
         .filter((def): def is NonNullable<typeof def> => def !== undefined)
@@ -233,6 +258,7 @@ export function getActionOptions(
     [StepCategory.External]: externalGroup,
     [StepCategory.Ai]: aiGroup,
     [StepCategory.Kibana]: kibanaGroup,
+    [StepCategory.KibanaCases]: kibanaCasesGroup,
     [StepCategory.Data]: dataTransformationGroup,
     [StepCategory.FlowControl]: flowControlGroup,
   };
@@ -308,7 +334,17 @@ export function getActionOptions(
     }
   }
 
-  return [
+  for (const group of Object.values(stepGroups)) {
+    if (group.nestedGroups) {
+      for (const nestedGroup of group.nestedGroups) {
+        if (nestedGroup.options.length > 0) {
+          group.options.unshift(nestedGroup);
+        }
+      }
+    }
+  }
+
+  const topLevelOptions: ActionOptionData[] = [
     triggersGroup,
     elasticSearchGroup,
     kibanaGroup,
@@ -317,6 +353,24 @@ export function getActionOptions(
     externalGroup,
     flowControlGroup,
   ];
+  assignActionPathIds(topLevelOptions);
+  return topLevelOptions;
+}
+
+/**
+ * Sets `pathIds` on every nested group so navigation works when a group is chosen from search
+ * (full ancestor chain, not only the clicked row's id).
+ */
+function assignActionPathIds(
+  options: ActionOptionData[],
+  parentPath: readonly string[] = []
+): void {
+  for (const opt of options) {
+    if ('options' in opt) {
+      opt.pathIds = [...parentPath, opt.id];
+      assignActionPathIds(opt.options, opt.pathIds);
+    }
+  }
 }
 
 export function flattenOptions(options: ActionOptionData[]): ActionOptionData[] {

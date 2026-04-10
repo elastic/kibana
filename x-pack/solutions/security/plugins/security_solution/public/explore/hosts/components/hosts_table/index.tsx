@@ -51,7 +51,7 @@ interface HostsTableProps {
 }
 
 export type HostsTableColumns = [
-  Columns<HostEcs['name']>,
+  Columns<HostEcs['name'], HostsEdges>,
   Columns<HostItem['lastSeen']>,
   Columns<OsEcs['name']>,
   Columns<OsEcs['version']>,

@@ -75,7 +75,7 @@ export const OpenInDiscoverButtons: FC<{ openInDiscover: OpenInDiscover; showTex
             data-test-subj="aiopsLogPatternAnalysisOpenInDiscoverIncludeButton"
             size="s"
             onClick={() => openFunction(QUERY_MODE.INCLUDE, true)}
-            iconType="plusInCircle"
+            iconType="plusCircle"
             iconSide="left"
           >
             {labels.multiSelect.in}
@@ -88,7 +88,7 @@ export const OpenInDiscoverButtons: FC<{ openInDiscover: OpenInDiscover; showTex
             data-test-subj="aiopsLogPatternAnalysisOpenInDiscoverExcludeButton"
             size="s"
             onClick={() => openFunction(QUERY_MODE.EXCLUDE, true)}
-            iconType="minusInCircle"
+            iconType="minusCircle"
             iconSide="left"
           >
             {labels.multiSelect.out}

@@ -504,7 +504,7 @@ paths:
                   anomaly_threshold: 50
                   id: 60b13926-289b-41b1-a537-197ef1fa5059
                   machine_learning_job_id:
-                    - auth_high_count_logon_events
+                    - auth_high_count_logon_events_ea
             schema:
               $ref: '#/components/schemas/RulePatchProps'
         description: |
@@ -656,8 +656,8 @@ paths:
 
         Additionally, you can set up notifications for when rules create alerts.
         The notifications use the [Alerting and Actions
-        framework](https://www.elastic.co/guide/en/kibana/current/alerting-getting-started.html).
-        Each action type requires a connector. Connectors store the information
+        framework](https://www.elastic.co/docs/explore-analyze/alerting). Each
+        action type requires a connector. Connectors store the information
         required to send notifications via external systems. The following
         connector types are supported for rule notifications:
 
@@ -686,7 +686,7 @@ paths:
 
         To retrieve connector IDs, which are required to configure rule
         notifications, call the [Find objects
-        API](https://www.elastic.co/guide/en/kibana/current/saved-objects-api-find.html)
+        API](https://www.elastic.co/docs/api/doc/kibana/operation/operation-findsavedobjects)
         with `"type": "action"` in the request payload.
 
 
@@ -698,7 +698,7 @@ paths:
         API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-alerting)
 
         * [Alerting and Actions
-        framework](https://www.elastic.co/guide/en/kibana/current/alerting-getting-started.html)
+        framework](https://www.elastic.co/docs/explore-analyze/alerting)
 
         * [Connectors
         API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-connectors)
@@ -1542,7 +1542,7 @@ paths:
                   description: New description of ml rule
                   id: 60b13926-289b-41b1-a537-197ef1fa5059
                   machine_learning_job_id:
-                    - auth_high_count_logon_events
+                    - auth_high_count_logon_events_ea
                   name: New name of ml rule
                   risk_score: 21
                   severity: low
@@ -2192,12 +2192,12 @@ paths:
                             interval: 15m
                             license: Elastic License v2
                             machine_learning_job_id:
-                              - packetbeat_dns_tunneling
+                              - packetbeat_dns_tunneling_ea
                             max_signals: 100
                             name: DNS Tunneling [Duplicate]
                             references:
                               - >-
-                                https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html
+                                https://www.elastic.co/docs/reference/machine-learning/ootb-ml-jobs-siem
                             related_integrations: []
                             required_fields: []
                             risk_score: 21
@@ -2860,7 +2860,7 @@ paths:
 
 
         > You can use Kibana’s [Saved
-        Objects](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html)
+        Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects)
         UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs
         (experimental) to
         [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault)
@@ -2871,7 +2871,7 @@ paths:
 
         > Similarly, any value lists used for rule exceptions are not included
         in rule exports or imports. Use the [Manage value
-        lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#manage-value-lists)
+        lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists)
         UI (Rules → Detection rules (SIEM) → Manage value lists) to export and
         import value lists separately.
       operationId: ExportRules
@@ -3045,6 +3045,14 @@ paths:
             items:
               $ref: '#/components/schemas/GapFillStatus'
             type: array
+        - description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
+            rules
+          in: query
+          name: gap_auto_fill_scheduler_id
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           content:
@@ -3195,7 +3203,7 @@ paths:
         you need All privileges for the Actions and Connectors feature. To
         import rules without actions, you don’t need Actions and Connectors
         privileges. Refer to [Enable and access
-        detections](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html#enable-detections-ui)
+        detections](https://www.elastic.co/docs/solutions/security/detect-and-alert/detections-privileges)
         for more information.
 
 
@@ -3208,7 +3216,7 @@ paths:
 
 
         > You can use Kibana’s [Saved
-        Objects](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html)
+        Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects)
         UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs
         (experimental) to
         [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault)
@@ -3219,7 +3227,7 @@ paths:
 
         > Similarly, any value lists used for rule exceptions are not included
         in rule exports or imports. Use the [Manage value
-        lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#manage-value-lists)
+        lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists)
         UI (Rules → Detection rules (SIEM) → Manage value lists) to export and
         import value lists separately.
       operationId: ImportRules
@@ -4505,7 +4513,7 @@ components:
         rules are used as a foundation for other rules that do generate alerts.
 
         For more information, refer to [About building block
-        rules](https://www.elastic.co/guide/en/security/current/building-block-rule.html).
+        rules](https://www.elastic.co/docs/solutions/security/detect-and-alert/about-building-block-rules).
       type: string
     BulkActionEditPayload:
       anyOf:
@@ -4757,6 +4765,7 @@ components:
         - THRESHOLD_RULE_TYPE_IN_SUPPRESSION
         - UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD
         - RULE_FILL_GAPS_DISABLED_RULE
+        - USER_INSUFFICIENT_RULE_PRIVILEGES
       type: string
     BulkActionSkipResult:
       type: object
@@ -4778,6 +4787,11 @@ components:
         action:
           enum:
             - delete
+          type: string
+        gap_auto_fill_scheduler_id:
+          description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
+            rules
           type: string
         gap_fill_statuses:
           description: >-
@@ -4813,6 +4827,11 @@ components:
         action:
           enum:
             - disable
+          type: string
+        gap_auto_fill_scheduler_id:
+          description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
+            rules
           type: string
         gap_fill_statuses:
           description: >-
@@ -4862,6 +4881,11 @@ components:
           required:
             - include_exceptions
             - include_expired_exceptions
+        gap_auto_fill_scheduler_id:
+          description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
+            rules
+          type: string
         gap_fill_statuses:
           description: >-
             Gap fill statuses to filter rules with gaps by status (used together
@@ -4977,6 +5001,11 @@ components:
             $ref: '#/components/schemas/BulkActionEditPayload'
           minItems: 1
           type: array
+        gap_auto_fill_scheduler_id:
+          description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
+            rules
+          type: string
         gap_fill_statuses:
           description: >-
             Gap fill statuses to filter rules with gaps by status (used together
@@ -5017,6 +5046,11 @@ components:
           enum:
             - enable
           type: string
+        gap_auto_fill_scheduler_id:
+          description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
+            rules
+          type: string
         gap_fill_statuses:
           description: >-
             Gap fill statuses to filter rules with gaps by status (used together
@@ -5053,6 +5087,11 @@ components:
         action:
           enum:
             - export
+          type: string
+        gap_auto_fill_scheduler_id:
+          description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
+            rules
           type: string
         gap_fill_statuses:
           description: >-
@@ -5108,6 +5147,11 @@ components:
           required:
             - start_date
             - end_date
+        gap_auto_fill_scheduler_id:
+          description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
+            rules
+          type: string
         gap_fill_statuses:
           description: >-
             Gap fill statuses to filter rules with gaps by status (used together
@@ -5143,6 +5187,11 @@ components:
         action:
           enum:
             - run
+          type: string
+        gap_auto_fill_scheduler_id:
+          description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
+            rules
           type: string
         gap_fill_statuses:
           description: >-
@@ -6411,6 +6460,7 @@ components:
         - unfilled
         - in_progress
         - filled
+        - error
       type: string
     HistoryWindowStart:
       description: >-
@@ -7031,13 +7081,13 @@ components:
       description: >
         Maximum number of alerts the rule can create during a single run (the
         rule’s Max alerts per run [advanced
-        setting](https://www.elastic.co/guide/en/security/current/rules-ui-create.html#rule-ui-advanced-params)
+        setting](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-detection-rule#rule-ui-advanced-params)
         value).
 
         > info
 
         > This setting can be superseded by the [Kibana configuration
-        setting](https://www.elastic.co/guide/en/kibana/current/alert-action-settings-kb.html#alert-settings)
+        setting](https://www.elastic.co/docs/reference/kibana/configuration-reference/alerting-settings)
         `xpack.alerting.rules.run.alerts.max`, which determines the maximum
         alerts generated by any rule in the Kibana alerting framework. For
         example, if `xpack.alerting.rules.run.alerts.max` is set to 1000, the
@@ -8545,6 +8595,11 @@ components:
         - name
         - type
     ResponseAction:
+      discriminator:
+        mapping:
+          .endpoint: '#/components/schemas/EndpointResponseAction'
+          .osquery: '#/components/schemas/OsqueryResponseAction'
+        propertyName: action_type_id
       oneOf:
         - $ref: '#/components/schemas/OsqueryResponseAction'
         - $ref: '#/components/schemas/EndpointResponseAction'
@@ -8774,6 +8829,15 @@ components:
         - $ref: '#/components/schemas/NewTermsRuleCreateProps'
         - $ref: '#/components/schemas/EsqlRuleCreateProps'
       discriminator:
+        mapping:
+          eql: '#/components/schemas/EqlRuleCreateProps'
+          esql: '#/components/schemas/EsqlRuleCreateProps'
+          machine_learning: '#/components/schemas/MachineLearningRuleCreateProps'
+          new_terms: '#/components/schemas/NewTermsRuleCreateProps'
+          query: '#/components/schemas/QueryRuleCreateProps'
+          saved_query: '#/components/schemas/SavedQueryRuleCreateProps'
+          threat_match: '#/components/schemas/ThreatMatchRuleCreateProps'
+          threshold: '#/components/schemas/ThresholdRuleCreateProps'
         propertyName: type
     RuleDescription:
       description: The rule’s description.
@@ -8792,7 +8856,7 @@ components:
     RuleExceptionList:
       description: >
         Array of [exception
-        containers](https://www.elastic.co/guide/en/security/current/exceptions-api-overview.html),
+        containers](https://www.elastic.co/docs/solutions/security/detect-and-alert/detection-rule-concepts),
         which define exceptions that prevent the rule from generating alerts
         even when its other criteria are met.
       type: object
@@ -8847,6 +8911,20 @@ components:
           required:
             - gte
             - lte
+        gap_reason:
+          description: Detected reason for the execution gap
+          type: object
+          properties:
+            type:
+              description: >-
+                The type of reason for the gap (rule_disabled or
+                rule_did_not_run)
+              enum:
+                - rule_disabled
+                - rule_did_not_run
+              type: string
+          required:
+            - type
         total_enrichment_duration_ms:
           description: >-
             Total time spent enriching documents during current rule execution
@@ -9055,15 +9133,15 @@ components:
         - timeframeEnd
     RuleQuery:
       description: >
-        [Query](https://www.elastic.co/guide/en/kibana/8.17/search.html) used by
-        the rule to create alerts.
+        [Query](https://www.elastic.co/docs/explore-analyze/query-filter) used
+        by the rule to create alerts.
 
 
         - For indicator match rules, only the query’s results are used to
         determine whether an alert is generated.
 
         - ES|QL rules have additional query requirements. Refer to [Create
-        ES|QL](https://www.elastic.co/guide/en/security/current/rules-ui-create.html#create-esql-rule)
+        ES|QL](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-detection-rule#create-esql-rule)
         rules for more information.
       type: string
     RuleReferenceArray:
@@ -9084,6 +9162,15 @@ components:
         - $ref: '#/components/schemas/NewTermsRule'
         - $ref: '#/components/schemas/EsqlRule'
       discriminator:
+        mapping:
+          eql: '#/components/schemas/EqlRule'
+          esql: '#/components/schemas/EsqlRule'
+          machine_learning: '#/components/schemas/MachineLearningRule'
+          new_terms: '#/components/schemas/NewTermsRule'
+          query: '#/components/schemas/QueryRule'
+          saved_query: '#/components/schemas/SavedQueryRule'
+          threat_match: '#/components/schemas/ThreatMatchRule'
+          threshold: '#/components/schemas/ThresholdRule'
         propertyName: type
     RuleRevision:
       description: >
@@ -9141,6 +9228,15 @@ components:
         - $ref: '#/components/schemas/NewTermsRuleUpdateProps'
         - $ref: '#/components/schemas/EsqlRuleUpdateProps'
       discriminator:
+        mapping:
+          eql: '#/components/schemas/EqlRuleUpdateProps'
+          esql: '#/components/schemas/EsqlRuleUpdateProps'
+          machine_learning: '#/components/schemas/MachineLearningRuleUpdateProps'
+          new_terms: '#/components/schemas/NewTermsRuleUpdateProps'
+          query: '#/components/schemas/QueryRuleUpdateProps'
+          saved_query: '#/components/schemas/SavedQueryRuleUpdateProps'
+          threat_match: '#/components/schemas/ThreatMatchRuleUpdateProps'
+          threshold: '#/components/schemas/ThresholdRuleUpdateProps'
         propertyName: type
     RuleVersion:
       description: >
@@ -9214,7 +9310,7 @@ components:
     SavedQueryId:
       description: >-
         Kibana [saved
-        search](https://www.elastic.co/guide/en/kibana/current/save-open-search.html)
+        search](https://www.elastic.co/docs/explore-analyze/discover/search-sessions)
         used by the rule to create alerts.
       type: string
     SavedQueryRule:

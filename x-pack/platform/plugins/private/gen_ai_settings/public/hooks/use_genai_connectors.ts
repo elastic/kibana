@@ -6,11 +6,11 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import type { FindActionResult } from '@kbn/actions-plugin/server';
+import type { InferenceConnector } from '@kbn/inference-common';
 import { useKibana } from './use_kibana';
 
 export interface UseGenAiConnectorsResult {
-  connectors?: FindActionResult[];
+  connectors?: InferenceConnector[];
   loading: boolean;
   error?: Error;
   reload: () => void;
@@ -21,7 +21,7 @@ export function useGenAiConnectors(): UseGenAiConnectorsResult {
     services: { genAiSettingsApi },
   } = useKibana();
 
-  const [connectors, setConnectors] = useState<FindActionResult[] | undefined>(undefined);
+  const [connectors, setConnectors] = useState<InferenceConnector[] | undefined>(undefined);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | undefined>(undefined);
 

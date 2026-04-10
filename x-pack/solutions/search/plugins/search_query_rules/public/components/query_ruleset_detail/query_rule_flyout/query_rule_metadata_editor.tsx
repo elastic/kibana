@@ -261,6 +261,7 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                   error={error?.values ? error.values.message : undefined}
                 >
                   <EuiComboBox
+                    isCaseSensitive
                     isInvalid={!!error?.values}
                     isDisabled={criteria.type === 'always'}
                     data-test-subj="searchQueryRulesQueryRuleMetadataEditorValues"
@@ -303,7 +304,7 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             data-test-subj="searchQueryRulesQueryRuleMetadataEditorDeleteButton"
-            iconType="minusInCircle"
+            iconType="minusCircle"
             color="danger"
             onClick={onRemove}
             aria-label={i18n.translate(

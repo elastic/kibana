@@ -15,9 +15,9 @@
         "description": [],
         "signature": [
           "SettersOf",
-          "<Omit<Readonly<{ title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>, \"title\">> & ",
+          "<Omit<Readonly<{ title?: string | undefined; } & { field_name: string; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; }>, \"title\">> & ",
           "SubjectsOf",
-          "<Omit<Readonly<{ title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>, \"title\">> & Partial<",
+          "<Omit<Readonly<{ title?: string | undefined; } & { field_name: string; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; }>, \"title\">> & Partial<",
           "HasCustomPrepend",
           "> & ",
           {
@@ -149,7 +149,7 @@
             "section": "def-public.DefaultEmbeddableApi",
             "text": "DefaultEmbeddableApi"
           },
-          "<Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; available_options?: string[] | undefined; } & { selected_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; control_type: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>> & ",
+          "<State extends { control_type: \"STATIC_VALUES\"; } ? Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"STATIC_VALUES\"; available_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; }> : Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"VALUES_FROM_QUERY\"; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; }>> & ",
           {
             "pluginId": "@kbn/esql-types",
             "scope": "common",
@@ -172,10 +172,43 @@
             "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-common.PublishesDataLoading",
             "text": "PublishesDataLoading"
-          }
+          },
+          " & ",
+          "SettersOf",
+          "<ControlTitleState> & ",
+          "SubjectsOf",
+          "<ControlTitleState> & ",
+          "SettersOf",
+          "<ControlTitleState> & ",
+          "SubjectsOf",
+          "<ControlTitleState> & { defaultTitle$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<string | undefined>; hideTitle$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<boolean | undefined>; label$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<string>; }"
         ],
         "path": "src/platform/plugins/shared/controls/public/controls/esql_control/types.ts",
-        "lineNumber": 16,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -196,19 +229,11 @@
             "section": "def-public.DefaultEmbeddableApi",
             "text": "DefaultEmbeddableApi"
           },
-          "<",
-          {
-            "pluginId": "@kbn/controls-schemas",
-            "scope": "server",
-            "docId": "kibKbnControlsSchemasPluginApi",
-            "section": "def-server.OptionsListControlState",
-            "text": "OptionsListControlState"
-          },
-          "> & ",
+          "<Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { sort: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }>; field_name: string; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; exclude: boolean; exists_selected: boolean; run_past_timeout: boolean; search_technique: \"prefix\" | \"wildcard\" | \"exact\"; selected_options: (string | number)[]; single_select: boolean; }>> & ",
           "SettersOf",
-          "<Omit<Readonly<{ title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>, \"title\">> & ",
+          "<Omit<Readonly<{ title?: string | undefined; } & { field_name: string; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; }>, \"title\">> & ",
           "SubjectsOf",
-          "<Omit<Readonly<{ title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>, \"title\">> & Partial<",
+          "<Omit<Readonly<{ title?: string | undefined; } & { field_name: string; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; }>, \"title\">> & Partial<",
           "HasCustomPrepend",
           "> & ",
           {
@@ -316,7 +341,7 @@
             "section": "def-common.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string>; } & { setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; } & { setSelectedOptions: (options: (string | number)[] | undefined) => void; clearSelections: () => void; hasSelections$: ",
+          "<string>; } & { setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; } & { setSelectedOptions: (options: (string | number)[]) => void; clearSelections: () => void; hasSelections$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -348,11 +373,11 @@
             "section": "def-public.DefaultEmbeddableApi",
             "text": "DefaultEmbeddableApi"
           },
-          "<Readonly<{ value?: string[] | undefined; title?: string | undefined; step?: number | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>> & ",
+          "<Readonly<{ value?: string[] | undefined; title?: string | undefined; } & { field_name: string; step: number; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; }>> & ",
           "SettersOf",
-          "<Omit<Readonly<{ title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>, \"title\">> & ",
+          "<Omit<Readonly<{ title?: string | undefined; } & { field_name: string; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; }>, \"title\">> & ",
           "SubjectsOf",
-          "<Omit<Readonly<{ title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>, \"title\">> & Partial<",
+          "<Omit<Readonly<{ title?: string | undefined; } & { field_name: string; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; }>, \"title\">> & Partial<",
           "HasCustomPrepend",
           "> & ",
           {
@@ -492,7 +517,7 @@
             "section": "def-public.DefaultEmbeddableApi",
             "text": "DefaultEmbeddableApi"
           },
-          "<Readonly<{ start_percentage_of_time_range?: number | undefined; end_percentage_of_time_range?: number | undefined; is_anchored?: boolean | undefined; } & {}>> & Pick<",
+          "<Readonly<{} & { start_percentage_of_time_range: number; end_percentage_of_time_range: number; is_anchored: boolean; }>> & Pick<",
           "SettersOf",
           "<ControlTitleState> & ",
           "SubjectsOf",

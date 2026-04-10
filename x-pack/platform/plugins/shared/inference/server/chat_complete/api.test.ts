@@ -447,6 +447,64 @@ describe('createChatCompleteApi', () => {
     });
   });
 
+  describe('stack connector resolving to inference endpoint', () => {
+    const mockEndpointExecutor = { invoke: jest.fn() };
+
+    beforeEach(() => {
+      const endpointConnector = createInferenceConnectorMock({
+        connectorId: '.my-inference-endpoint',
+        isInferenceEndpoint: true,
+      });
+      const executor = createInferenceExecutorMock({ connector: endpointConnector });
+      getInferenceExecutorMock.mockResolvedValue(executor);
+
+      resolveInferenceEndpointMock.mockResolvedValue({
+        inferenceId: '.my-inference-endpoint',
+        provider: 'openai',
+        modelId: 'gpt-4o',
+        taskType: 'chat_completion',
+      });
+      createInferenceEndpointExecutorMock.mockReturnValue(mockEndpointExecutor);
+      inferenceEndpointAdapterMock.chatComplete.mockReturnValue(of(chunkEvent('endpoint-chunk')));
+    });
+
+    it('routes to the inference endpoint adapter when getInferenceExecutor returns an inference endpoint connector', async () => {
+      await chatComplete({
+        connectorId: 'stack-connector-id',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
+      });
+
+      expect(getInferenceExecutorMock).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorId: 'stack-connector-id' })
+      );
+      expect(resolveInferenceEndpointMock).toHaveBeenCalledWith({
+        inferenceId: '.my-inference-endpoint',
+        esClient: mockEsClient,
+      });
+      expect(createInferenceEndpointExecutorMock).toHaveBeenCalledWith({
+        inferenceId: '.my-inference-endpoint',
+        esClient: mockEsClient,
+      });
+      expect(inferenceEndpointAdapterMock.chatComplete).toHaveBeenCalledTimes(1);
+      expect(getInferenceAdapterMock).not.toHaveBeenCalled();
+    });
+
+    it('returns the correct response in non-stream mode', async () => {
+      const response = await chatComplete({
+        connectorId: 'stack-connector-id',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
+      });
+
+      expect(response).toEqual({
+        content: 'endpoint-chunk',
+        metadata: undefined,
+        toolCalls: [],
+      });
+    });
+  });
+
   describe('inference endpoint path (via connectorId resolution)', () => {
     const mockEndpointExecutor = { invoke: jest.fn() };
 

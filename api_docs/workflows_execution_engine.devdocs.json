@@ -1165,11 +1165,28 @@
       "label": "WorkflowsExecutionEnginePluginSetup",
       "description": [],
       "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
-      "lineNumber": 38,
+      "lineNumber": 34,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "workflowsExecutionEngine",
+          "id": "def-server.WorkflowsExecutionEnginePluginSetup.Unnamed",
+          "type": "IndexSignature",
+          "tags": [],
+          "label": "[key: string]: unknown",
+          "description": [],
+          "signature": [
+            "[key: string]:  unknown"
+          ],
+          "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+          "lineNumber": 36,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -1181,7 +1198,7 @@
       "label": "WorkflowsExecutionEnginePluginStart",
       "description": [],
       "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
-      "lineNumber": 39,
+      "lineNumber": 38,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -1202,14 +1219,14 @@
               "section": "def-common.WorkflowExecutionEngineModel",
               "text": "WorkflowExecutionEngineModel"
             },
-            ", context: Record<string, any>, request: ",
+            ", context: Record<string, unknown>, request: ",
             "KibanaRequest",
             "<unknown, unknown, unknown, any>) => Promise<",
             "ExecuteWorkflowResponse",
             ">"
           ],
           "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
-          "lineNumber": 40,
+          "lineNumber": 39,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -1232,7 +1249,7 @@
                 }
               ],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
-              "lineNumber": 66,
+              "lineNumber": 68,
               "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
@@ -1245,10 +1262,10 @@
               "label": "context",
               "description": [],
               "signature": [
-                "{ [x: string]: any; }"
+                "{ [x: string]: unknown; }"
               ],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
-              "lineNumber": 67,
+              "lineNumber": 69,
               "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
@@ -1265,7 +1282,7 @@
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
-              "lineNumber": 68,
+              "lineNumber": 70,
               "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
@@ -1288,14 +1305,14 @@
               "section": "def-common.WorkflowExecutionEngineModel",
               "text": "WorkflowExecutionEngineModel"
             },
-            ", stepId: string, contextOverride: Record<string, any>, request: ",
+            ", stepId: string, executionContext: Record<string, unknown> | undefined, contextOverride: Record<string, unknown>, request: ",
             "KibanaRequest",
             "<unknown, unknown, unknown, any>) => Promise<",
             "ExecuteWorkflowStepResponse",
             ">"
           ],
           "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
-          "lineNumber": 41,
+          "lineNumber": 40,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -1318,7 +1335,7 @@
                 }
               ],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
-              "lineNumber": 72,
+              "lineNumber": 74,
               "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
@@ -1331,7 +1348,7 @@
               "label": "stepId",
               "description": [],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
-              "lineNumber": 73,
+              "lineNumber": 75,
               "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
@@ -1341,13 +1358,13 @@
               "id": "def-server.WorkflowsExecutionEnginePluginStart.executeWorkflowStep.$3",
               "type": "Object",
               "tags": [],
-              "label": "contextOverride",
+              "label": "executionContext",
               "description": [],
               "signature": [
-                "{ [x: string]: any; }"
+                "Record<string, unknown> | undefined"
               ],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
-              "lineNumber": 74,
+              "lineNumber": 76,
               "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
@@ -1357,6 +1374,22 @@
               "id": "def-server.WorkflowsExecutionEnginePluginStart.executeWorkflowStep.$4",
               "type": "Object",
               "tags": [],
+              "label": "contextOverride",
+              "description": [],
+              "signature": [
+                "{ [x: string]: unknown; }"
+              ],
+              "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+              "lineNumber": 77,
+              "columnNumber": 3,
+              "deprecated": false,
+              "trackAdoption": false
+            },
+            {
+              "parentPluginId": "workflowsExecutionEngine",
+              "id": "def-server.WorkflowsExecutionEnginePluginStart.executeWorkflowStep.$5",
+              "type": "Object",
+              "tags": [],
               "label": "request",
               "description": [],
               "signature": [
@@ -1364,7 +1397,7 @@
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
-              "lineNumber": 75,
+              "lineNumber": 78,
               "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
@@ -1382,7 +1415,7 @@
             "(workflowExecutionId: string, spaceId: string) => Promise<void>"
           ],
           "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
-          "lineNumber": 42,
+          "lineNumber": 41,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -1396,7 +1429,7 @@
               "label": "workflowExecutionId",
               "description": [],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
-              "lineNumber": 79,
+              "lineNumber": 82,
               "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
@@ -1409,8 +1442,43 @@
               "label": "spaceId",
               "description": [],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
-              "lineNumber": 80,
+              "lineNumber": 83,
               "columnNumber": 3,
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "workflowsExecutionEngine",
+          "id": "def-server.WorkflowsExecutionEnginePluginStart.cancelAllActiveWorkflowExecutions",
+          "type": "Function",
+          "tags": [],
+          "label": "cancelAllActiveWorkflowExecutions",
+          "description": [],
+          "signature": [
+            "(params: { spaceId: string; workflowId: string; }) => Promise<void>"
+          ],
+          "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+          "lineNumber": 42,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "workflowsExecutionEngine",
+              "id": "def-server.WorkflowsExecutionEnginePluginStart.cancelAllActiveWorkflowExecutions.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "params",
+              "description": [],
+              "signature": [
+                "{ spaceId: string; workflowId: string; }"
+              ],
+              "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+              "lineNumber": 86,
+              "columnNumber": 50,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -1443,7 +1511,7 @@
               "label": "executionId",
               "description": [],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
-              "lineNumber": 84,
+              "lineNumber": 92,
               "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
@@ -1456,7 +1524,7 @@
               "label": "spaceId",
               "description": [],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
-              "lineNumber": 85,
+              "lineNumber": 93,
               "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
@@ -1472,7 +1540,7 @@
                 "{ [x: string]: unknown; }"
               ],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
-              "lineNumber": 86,
+              "lineNumber": 94,
               "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
@@ -1489,7 +1557,7 @@
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
-              "lineNumber": 87,
+              "lineNumber": 95,
               "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
@@ -1534,7 +1602,7 @@
               "section": "def-common.WorkflowExecutionEngineModel",
               "text": "WorkflowExecutionEngineModel"
             },
-            ", context: Record<string, any>, request: ",
+            ", context: Record<string, unknown>, request: ",
             "KibanaRequest",
             "<unknown, unknown, unknown, any>) => Promise<",
             "ExecuteWorkflowResponse",
@@ -1564,7 +1632,7 @@
                 }
               ],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
-              "lineNumber": 91,
+              "lineNumber": 99,
               "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
@@ -1577,10 +1645,10 @@
               "label": "context",
               "description": [],
               "signature": [
-                "{ [x: string]: any; }"
+                "{ [x: string]: unknown; }"
               ],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
-              "lineNumber": 92,
+              "lineNumber": 100,
               "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
@@ -1597,7 +1665,7 @@
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
-              "lineNumber": 93,
+              "lineNumber": 101,
               "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
@@ -1634,6 +1702,42 @@
           ],
           "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
           "lineNumber": 47,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "workflowsExecutionEngine",
+          "id": "def-server.WorkflowsExecutionEnginePluginStart.getMaxEventChainDepth",
+          "type": "Function",
+          "tags": [],
+          "label": "getMaxEventChainDepth",
+          "description": [],
+          "signature": [
+            "() => number"
+          ],
+          "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+          "lineNumber": 48,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "workflowsExecutionEngine",
+          "id": "def-server.WorkflowsExecutionEnginePluginStart.getMaxWorkflowDepth",
+          "type": "Function",
+          "tags": [],
+          "label": "getMaxWorkflowDepth",
+          "description": [],
+          "signature": [
+            "() => number"
+          ],
+          "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+          "lineNumber": 49,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,

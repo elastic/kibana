@@ -70,8 +70,15 @@ describe('resolveMatchingWorkflowSubscriptions', () => {
     );
 
     expect(getWorkflowsSubscribedToTrigger).toHaveBeenCalledWith('cases.updated', 'default');
-    expect(result).toHaveLength(1);
-    expect(result[0].id).toBe('wf-1');
+    expect(result.workflows).toHaveLength(1);
+    expect(result.workflows[0].id).toBe('wf-1');
+    expect(result.stats).toEqual({
+      subscribedCount: 2,
+      disabledCount: 0,
+      kqlFalseCount: 1,
+      kqlErrorCount: 0,
+      matchedCount: 1,
+    });
   });
 
   it('should return empty array when getWorkflowsSubscribedToTrigger returns empty', async () => {
@@ -87,7 +94,14 @@ describe('resolveMatchingWorkflowSubscriptions', () => {
       { api, logger: mockLogger }
     );
 
-    expect(result).toEqual([]);
+    expect(result.workflows).toEqual([]);
+    expect(result.stats).toEqual({
+      subscribedCount: 0,
+      disabledCount: 0,
+      kqlFalseCount: 0,
+      kqlErrorCount: 0,
+      matchedCount: 0,
+    });
   });
 
   it('should return all workflows when none have a condition', async () => {
@@ -109,8 +123,10 @@ describe('resolveMatchingWorkflowSubscriptions', () => {
       { api, logger: mockLogger }
     );
 
-    expect(result).toHaveLength(2);
-    expect(result.map((w) => w.id)).toEqual(['wf-1', 'wf-2']);
+    expect(result.workflows).toHaveLength(2);
+    expect(result.workflows.map((w) => w.id)).toEqual(['wf-1', 'wf-2']);
+    expect(result.stats.matchedCount).toBe(2);
+    expect(result.stats.subscribedCount).toBe(2);
   });
 
   it('should call getWorkflowsSubscribedToTrigger with the given spaceId', async () => {
@@ -162,8 +178,15 @@ describe('resolveMatchingWorkflowSubscriptions', () => {
       { api, logger: mockLogger }
     );
 
-    expect(result).toHaveLength(1);
-    expect(result[0].id).toBe('wf-enabled');
-    expect(result[0].enabled).toBe(true);
+    expect(result.workflows).toHaveLength(1);
+    expect(result.workflows[0].id).toBe('wf-enabled');
+    expect(result.workflows[0].enabled).toBe(true);
+    expect(result.stats).toEqual({
+      subscribedCount: 2,
+      disabledCount: 1,
+      kqlFalseCount: 0,
+      kqlErrorCount: 0,
+      matchedCount: 1,
+    });
   });
 });

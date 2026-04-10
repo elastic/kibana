@@ -17,6 +17,7 @@ import { PageScope } from '../../constants';
 import { selectDataViewAsync } from '../actions';
 import { createDefaultDataView } from '../../utils/create_default_data_view';
 import { createExploreDataView } from '../../utils/create_explore_data_view';
+import { getSelectedDataViewStorageKey } from './storage_keys';
 import type { DataViewSpec } from '../types';
 
 /**
@@ -58,14 +59,12 @@ export const createInitListener = (
     ) => {
       try {
         const logger = dependencies.logger;
+        const spaceId = (await dependencies.spaces.getActiveSpace()).id;
+
         // Initialize default data views first
         const { defaultDataView, alertDataView, attackDataView } = await createDefaultDataView({
-          dataViewService: dependencies.dataViews,
-          uiSettings: dependencies.uiSettings,
-          spaces: dependencies.spaces,
           application: dependencies.application,
           http: dependencies.http,
-          enableAlertsAndAttacksAlignment,
         });
 
         logger.debug(`Default data views created:
@@ -165,7 +164,7 @@ export const createInitListener = (
               );
             }
             const storedDataViewId = dependencies.storage.get(
-              `securitySolution.dataViewManager.selectedDataView.${scope}`
+              getSelectedDataViewStorageKey(spaceId, scope)
             ) as string | null | undefined;
             const state = listenerApi.getState();
             if (

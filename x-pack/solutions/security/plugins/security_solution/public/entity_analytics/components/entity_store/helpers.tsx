@@ -14,17 +14,15 @@ import {
   RISK_SCORE_INDEX_PATTERN,
 } from '../../../../common/constants';
 import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
+import {
+  getEntityType as getEntityTypeFromCommon,
+  sanitizeEntityRecordForUpsert as sanitizeEntityRecordForUpsertFromCommon,
+} from '../../../../common/entity_analytics/entity_store/sanitize_entity_record_for_upsert';
 
-export const getEntityType = (record: Entity): EntityType => {
-  // Looking at `entity.type` to keep backward compatibility
-  const entityType = record.entity.EngineMetadata?.Type || record.entity.type;
+export const getEntityType = getEntityTypeFromCommon;
 
-  if (!entityType || !Object.values(EntityType).includes(entityType as EntityType)) {
-    throw new Error(`Unexpected entity: ${JSON.stringify(record)}`);
-  }
-
-  return EntityType[entityType as keyof typeof EntityType];
-};
+export const sanitizeEntityRecordForUpsert = (record: Entity): Entity =>
+  sanitizeEntityRecordForUpsertFromCommon(record);
 
 export const EntityIconByType: Record<EntityType, IconType> = {
   [EntityType.user]: 'user',
@@ -46,7 +44,7 @@ export const sourceFieldToText = (source: string) => {
   if (source.match(`^${ASSET_CRITICALITY_INDEX_PATTERN}`)) {
     return (
       <FormattedMessage
-        id="xpack.securitySolution.entityAnalytics.entityStore.helpers.sourceField.criticalityDescription"
+        id="xpack.securitySolution.entityAnalytics.entityStore.helpers.sourceField.assetCriticalityDescription"
         defaultMessage="Asset Criticality"
       />
     );

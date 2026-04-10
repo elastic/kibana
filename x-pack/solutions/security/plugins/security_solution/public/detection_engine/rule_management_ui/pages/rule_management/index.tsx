@@ -30,6 +30,7 @@ import { AllRules } from '../../components/rules_table';
 import { RulesTableContextProvider } from '../../components/rules_table/rules_table/rules_table_context';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { RuleUpdateCallouts } from '../../components/rule_update_callouts/rule_update_callouts';
+import { useDeprecatedRulesTableCallout } from '../../../rule_management/components/rule_deprecation';
 import { RuleImportModal } from '../../components/rule_import_modal/rule_import_modal';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { CreateRuleMenu } from '../../components/create_rule_menu';
@@ -40,13 +41,15 @@ import {
 } from '../../../rule_gaps/context/gap_auto_fill_scheduler_context';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
+import { CpsMlRuleCallout } from '../../components/cps_ml_rule_callout/callout';
 
 const RulesPageContent = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
   const [isValueListFlyoutVisible, showValueListFlyout, hideValueListFlyout] = useBoolState();
   const [isRuleSettingsModalOpen, openRuleSettingsModal, closeRuleSettingsModal] = useBoolState();
   const kibanaServices = useKibana().services;
-  const { navigateToApp } = kibanaServices.application;
+  const { application } = kibanaServices;
+  const { navigateToApp } = application;
 
   const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
     useUserData();
@@ -54,7 +57,6 @@ const RulesPageContent = () => {
   const {
     loading: listsConfigLoading,
     canWriteIndex: canWriteListsIndex,
-    canCreateIndex: canCreateListsIndex,
     needsConfiguration: needsListsConfiguration,
     needsIndex: needsListsIndex,
   } = useListsConfig();
@@ -64,6 +66,7 @@ const RulesPageContent = () => {
   const aiRuleCreationEnabled = useIsExperimentalFeatureEnabled('aiRuleCreationEnabled');
   const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
   const isAiRuleCreationAvailable = aiRuleCreationEnabled && isAgentBuilderEnabled;
+  const deprecatedRulesCallout = useDeprecatedRulesTableCallout();
 
   if (
     redirectToDetections(
@@ -79,19 +82,14 @@ const RulesPageContent = () => {
     });
     return null;
   }
-
-  // - if lists data stream does not exist and user doesn't have enough privileges to create it,
-  // lists button should be disabled
-  // - if data stream exists and user doesn't have enough privileges to create it,
-  // user still can import value lists, so button should not be disabled if user has enough other privileges
-  const cantCreateNonExistentListIndex = needsListsIndex && !canCreateListsIndex;
   const isImportValueListDisabled =
-    cantCreateNonExistentListIndex || !canWriteListsIndex || !canEditRules || loading;
+    needsListsIndex || !canWriteListsIndex || !canEditRules || loading;
 
   return (
     <>
       <NeedAdminForUpdateRulesCallOut />
       <MissingDetectionsPrivilegesCallOut />
+      <CpsMlRuleCallout />
       <MlJobCompatibilityCallout />
       <ValueListsFlyout showFlyout={isValueListFlyoutVisible} onClose={hideValueListFlyout} />
       <RuleImportModal
@@ -116,19 +114,13 @@ const RulesPageContent = () => {
                 <AddElasticRulesButton isDisabled={!canReadRules || loading} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  position="top"
-                  content={
-                    cantCreateNonExistentListIndex
-                      ? i18n.UPLOAD_VALUE_LISTS_PRIVILEGES_TOOLTIP
-                      : i18n.UPLOAD_VALUE_LISTS_TOOLTIP
-                  }
-                >
+                <EuiToolTip position="top" content={i18n.UPLOAD_VALUE_LISTS_TOOLTIP}>
                   <EuiButtonEmpty
                     data-test-subj="open-value-lists-modal-button"
-                    iconType="importAction"
+                    iconType="download"
                     isDisabled={isImportValueListDisabled}
                     onClick={showValueListFlyout}
+                    aria-label={`${i18n.IMPORT_VALUE_LISTS}: ${i18n.UPLOAD_VALUE_LISTS_TOOLTIP}`}
                   >
                     {i18n.IMPORT_VALUE_LISTS}
                   </EuiButtonEmpty>
@@ -137,7 +129,7 @@ const RulesPageContent = () => {
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   data-test-subj="rules-import-modal-button"
-                  iconType="importAction"
+                  iconType="download"
                   isDisabled={!canEditRules || loading}
                   onClick={showImportModal}
                 >
@@ -151,7 +143,7 @@ const RulesPageContent = () => {
                   <SecuritySolutionLinkButton
                     data-test-subj="create-new-rule"
                     fill
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     isDisabled={!canEditRules || loading}
                     deepLinkId={SecurityPageName.rulesCreate}
                   >
@@ -166,6 +158,7 @@ const RulesPageContent = () => {
           )}
           <RuleUpdateCallouts shouldShowUpdateRulesCallout={canEditRules} />
           <EuiSpacer size="s" />
+          {deprecatedRulesCallout}
           <MaintenanceWindowCallout
             kibanaServices={kibanaServices}
             categories={[DEFAULT_APP_CATEGORIES.security.id]}

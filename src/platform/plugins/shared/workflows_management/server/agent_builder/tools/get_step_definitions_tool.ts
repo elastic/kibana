@@ -8,6 +8,7 @@
  */
 
 import { ToolType } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { BaseStepDefinition, ConnectorContractUnion, StepParamSummary } from '@kbn/workflows';
 import {
   buildBuiltInStepSchema,
@@ -18,7 +19,6 @@ import {
   StepCategories,
   StepCategory,
 } from '@kbn/workflows';
-import { WORKFLOWS_AI_AGENT_SETTING_ID } from '@kbn/workflows/common/constants';
 import { z } from '@kbn/zod/v4';
 import { workflowTools } from '../../../common/agent_builder/constants';
 import {
@@ -26,8 +26,8 @@ import {
   getAllConnectors,
   getCachedAllConnectorsMap,
 } from '../../../common/schema';
+import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
 import type { AgentBuilderPluginSetupContract } from '../../types';
-import type { WorkflowsManagementApi } from '../../workflows_management/workflows_management_api';
 
 interface StepDefinitionForAgent {
   id: string;
@@ -49,9 +49,9 @@ export async function resolveConnectors(
   spaceId: string,
   request: unknown
 ): Promise<{ all: ConnectorContractUnion[]; byType: Map<string, ConnectorContractUnion> }> {
-  const { connectorsByType } = await api.getAvailableConnectors(spaceId, request as never);
+  const { connectorTypes } = await api.getAvailableConnectors(spaceId, request as never);
   const enabledConnectorTypes = Object.fromEntries(
-    Object.entries(connectorsByType).filter(([, info]) => info.enabled !== false)
+    Object.entries(connectorTypes).filter(([, info]) => info.enabled !== false)
   );
   addDynamicConnectorsToCache(enabledConnectorTypes);
   return {
@@ -61,7 +61,8 @@ export async function resolveConnectors(
 }
 
 function categorizeConnectorType(type: string): StepCategory {
-  if (type.startsWith('kibana.') || type.startsWith('cases.')) return StepCategory.Kibana;
+  if (type.startsWith('kibana.')) return StepCategory.Kibana;
+  if (type.startsWith('cases.')) return StepCategory.KibanaCases;
   if (type.startsWith('elasticsearch.')) return StepCategory.Elasticsearch;
   if (type.startsWith('ai.')) return StepCategory.Ai;
   if (type.startsWith('data.')) return StepCategory.Data;
@@ -180,7 +181,9 @@ Set includeFullSchema=true to get the full JSON Schema for step input params (us
     tags: ['workflows', 'yaml', 'steps'],
     availability: {
       handler: async ({ uiSettings }) => {
-        const isEnabled = await uiSettings.get<boolean>(WORKFLOWS_AI_AGENT_SETTING_ID);
+        const isEnabled = await uiSettings.get<boolean>(
+          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+        );
         return isEnabled
           ? { status: 'available' }
           : { status: 'unavailable', reason: 'AI workflow authoring is disabled' };

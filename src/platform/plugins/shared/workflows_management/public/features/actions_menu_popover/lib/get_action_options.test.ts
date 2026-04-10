@@ -15,6 +15,7 @@ import { z } from '@kbn/zod/v4';
 import { flattenOptions, getActionOptions } from './get_action_options';
 import { getAllConnectors } from '../../../../common/schema';
 import { getStepIconType } from '../../../shared/ui/step_icons/get_step_icon_type';
+import { triggerSchemas } from '../../../trigger_schemas';
 import type { ActionOptionData } from '../types';
 import { isActionGroup, isActionOption } from '../types';
 
@@ -88,19 +89,44 @@ describe('getActionOptions', () => {
     }
   });
 
+  it('should set stability tech_preview for registered event-driven trigger options', () => {
+    (triggerSchemas.getTriggerDefinitions as jest.Mock).mockReturnValueOnce([
+      {
+        id: 'cases.updated',
+        title: 'Case updated',
+        description: 'When a case is created or updated.',
+      },
+    ]);
+
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+    const triggersGroup = result.find((group) => group.id === 'triggers');
+
+    expect(triggersGroup).toBeDefined();
+    if (triggersGroup && isActionGroup(triggersGroup)) {
+      const builtInCount = 3;
+      expect(triggersGroup.options).toHaveLength(builtInCount + 1);
+      const casesOption = triggersGroup.options.find((opt) => opt.id === 'cases.updated');
+      expect(casesOption).toBeDefined();
+      if (casesOption && isActionOption(casesOption)) {
+        expect(casesOption.stability).toBe('tech_preview');
+      }
+    }
+  });
+
   it('should include flow control options', () => {
     const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
     const flowControlGroup = result.find((group) => group.id === 'flowControl');
 
     expect(flowControlGroup).toBeDefined();
     if (flowControlGroup && 'options' in flowControlGroup) {
-      expect(flowControlGroup.options).toHaveLength(7);
+      expect(flowControlGroup.options).toHaveLength(8);
       expect(flowControlGroup.options.map((opt) => opt.id)).toEqual([
         'if',
         'switch',
         'foreach',
         'while',
         'wait',
+        'waitForInput',
         'workflow.execute',
         'workflow.executeAsync',
       ]);
@@ -138,6 +164,126 @@ describe('getActionOptions', () => {
       if (isActionOption(option)) {
         expect(option.iconType).toBe('customIcon');
       }
+    }
+  });
+
+  it('should not show Cases nested group when no cases steps are registered', () => {
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+    const kibanaGroup = result.find((group) => group.id === 'kibana');
+
+    expect(kibanaGroup).toBeDefined();
+    if (kibanaGroup && isActionGroup(kibanaGroup)) {
+      expect(kibanaGroup.options).toHaveLength(0);
+      expect(kibanaGroup.options.find((opt) => opt.id === 'kibana.cases')).toBeUndefined();
+    }
+  });
+
+  it('should place KibanaCases steps in nested Cases group under Kibana', () => {
+    const mockConnector = {
+      type: 'cases.createCase',
+      description: 'Create case',
+    };
+
+    const mockStepDefinition = {
+      id: 'cases.createCase',
+      label: 'Create case',
+      description: 'Create a case',
+      icon: 'casesApp',
+      category: StepCategory.KibanaCases,
+      inputSchema: z.object({}),
+      outputSchema: z.object({}),
+    };
+
+    (getAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+    mockWorkflowsExtensions.getStepDefinition.mockReturnValue(mockStepDefinition as any);
+
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+    const kibanaGroup = result.find((group) => group.id === 'kibana');
+
+    expect(kibanaGroup).toBeDefined();
+    if (kibanaGroup && isActionGroup(kibanaGroup)) {
+      expect(kibanaGroup.options).toHaveLength(1);
+      const casesNested = kibanaGroup.options[0];
+      expect(casesNested.id).toBe('kibana.cases');
+      if (isActionGroup(casesNested)) {
+        expect(casesNested.options).toHaveLength(1);
+        expect(casesNested.options[0].id).toBe('cases.createCase');
+      }
+    }
+  });
+
+  it('should set pathIds on groups for navigation from search', () => {
+    const mockConnector = {
+      type: 'cases.createCase',
+      description: 'Create case',
+    };
+
+    const mockStepDefinition = {
+      id: 'cases.createCase',
+      label: 'Create case',
+      description: 'Create a case',
+      icon: 'casesApp',
+      category: StepCategory.KibanaCases,
+      inputSchema: z.object({}),
+      outputSchema: z.object({}),
+    };
+
+    (getAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+    mockWorkflowsExtensions.getStepDefinition.mockReturnValue(mockStepDefinition as any);
+
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+    const kibanaGroup = result.find((group) => group.id === 'kibana');
+
+    expect(kibanaGroup).toBeDefined();
+    if (kibanaGroup && isActionGroup(kibanaGroup)) {
+      expect(kibanaGroup.pathIds).toEqual(['kibana']);
+      const casesNested = kibanaGroup.options.find((opt) => opt.id === 'kibana.cases');
+      expect(casesNested).toBeDefined();
+      if (casesNested && isActionGroup(casesNested)) {
+        expect(casesNested.pathIds).toEqual(['kibana', 'kibana.cases']);
+      }
+    }
+  });
+
+  it('should list nested Cases group before other Kibana options when both are present', () => {
+    const mockConnectors = [
+      {
+        type: 'kibana.saved_object',
+        description: 'Saved Object',
+        summary: 'Kibana Summary',
+      },
+      {
+        type: 'cases.createCase',
+        description: 'Create case',
+      },
+    ];
+
+    const mockCasesStepDefinition = {
+      id: 'cases.createCase',
+      label: 'Create case',
+      description: 'Create a case',
+      icon: 'casesApp',
+      category: StepCategory.KibanaCases,
+      inputSchema: z.object({}),
+      outputSchema: z.object({}),
+    };
+
+    (getAllConnectors as jest.Mock).mockReturnValue(mockConnectors);
+    mockWorkflowsExtensions.getStepDefinition.mockImplementation((type: string) => {
+      if (type === 'cases.createCase') {
+        return mockCasesStepDefinition as any;
+      }
+      return undefined;
+    });
+
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+    const kibanaGroup = result.find((group) => group.id === 'kibana');
+
+    expect(kibanaGroup).toBeDefined();
+    if (kibanaGroup && isActionGroup(kibanaGroup)) {
+      expect(kibanaGroup.options).toHaveLength(2);
+      expect(kibanaGroup.options[0].id).toBe('kibana.cases');
+      expect(kibanaGroup.options[1].id).toBe('kibana.saved_object');
     }
   });
 

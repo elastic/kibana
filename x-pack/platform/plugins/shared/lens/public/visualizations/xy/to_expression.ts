@@ -40,11 +40,9 @@ import {
 } from '@kbn/expression-xy-plugin/public';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import type { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
-import { KbnPalette } from '@kbn/palettes';
-import type { KbnPaletteId } from '@kbn/palettes';
 import type { OperationMetadata, DatasourcePublicAPI, DatasourceLayers } from '@kbn/lens-common';
 import type {
-  XYState,
+  XYVisualizationState,
   YConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
@@ -52,9 +50,9 @@ import type {
   AxisConfig,
   ValidXYDataLayerConfig,
   XYLayerConfig,
-  SeriesType as LensSeriesType,
 } from './types';
-import { getColumnToLabelMap, isLineSeries } from './state_helpers';
+import { getColumnToLabelMap } from './state_helpers';
+import { getDefaultPalette } from './default_palette';
 import { defaultReferenceLineColor } from './color_assignment';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import {
@@ -74,7 +72,7 @@ import { hasIcon } from './xy_config_panel/shared/marker_decoration_settings';
 
 type XYLayerConfigWithSimpleView = XYLayerConfig & { simpleView?: boolean };
 type XYAnnotationLayerConfigWithSimpleView = XYAnnotationLayerConfig & { simpleView?: boolean };
-type State = Omit<XYState, 'layers'> & { layers: XYLayerConfigWithSimpleView[] };
+type State = Omit<XYVisualizationState, 'layers'> & { layers: XYLayerConfigWithSimpleView[] };
 
 export const getSortedAccessors = (
   datasource: DatasourcePublicAPI | undefined,
@@ -314,7 +312,6 @@ export const buildXYExpression = (
         ? Math.min(5, state.legend.floatingColumns)
         : [],
     maxLines: state.legend.maxLines,
-    listLayoutMaxWidth: state.legend.listLayoutMaxWidth,
     legendStats: state.legend.legendStats,
     title: state.legend.title,
     isTitleVisible: state.legend.isTitleVisible,
@@ -458,17 +455,6 @@ const annotationLayerToExpression = (
   );
   return buildExpression([extendedAnnotationLayerFn]).toAst();
 };
-
-/**
- * Returns the default palette for a given series type.
- * Line charts use a line-optimized palette for better contrast between overlapping series.
- */
-function getDefaultPalette(seriesType: LensSeriesType): KbnPaletteId {
-  if (isLineSeries(seriesType)) {
-    return KbnPalette.ElasticLineOptimized;
-  }
-  return KbnPalette.Default;
-}
 
 const dataLayerToExpression = (
   layer: ValidXYDataLayerConfig,

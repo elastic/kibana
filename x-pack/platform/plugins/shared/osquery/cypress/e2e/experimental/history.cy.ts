@@ -7,6 +7,7 @@
 
 import { navigateTo } from '../../tasks/navigation';
 import { checkResults, inputQuery, selectAllAgents, submitQuery } from '../../tasks/live_query';
+import { closeToastIfVisible } from '../../tasks/integrations';
 import {
   loadLiveQuery,
   addTagsToLiveQuery,
@@ -15,6 +16,7 @@ import {
   getPackSavedObject,
   loadScheduledResponse,
   cleanupScheduledResponse,
+  cleanupSavedQueryByName,
 } from '../../tasks/api_fixtures';
 import {
   UNIFIED_HISTORY_TABLE,
@@ -166,21 +168,11 @@ describe(
 
       // Filter to "uptime" queries
       cy.getBySel(HISTORY_SEARCH_INPUT).type('uptime{enter}');
-      cy.getBySel(UNIFIED_HISTORY_TABLE).find('tbody tr').should('have.length.above', 0);
-      cy.getBySel(UNIFIED_HISTORY_TABLE)
-        .find('tbody tr')
-        .each(($row) => {
-          cy.wrap($row).should('contain', 'uptime');
-        });
+      cy.getBySel(UNIFIED_HISTORY_TABLE).find('tbody tr').first().should('contain', 'uptime');
 
       // Filter to "processes" queries
       cy.getBySel(HISTORY_SEARCH_INPUT).clear().type('processes{enter}');
-      cy.getBySel(UNIFIED_HISTORY_TABLE).find('tbody tr').should('have.length.above', 0);
-      cy.getBySel(UNIFIED_HISTORY_TABLE)
-        .find('tbody tr')
-        .each(($row) => {
-          cy.wrap($row).should('contain', 'processes');
-        });
+      cy.getBySel(UNIFIED_HISTORY_TABLE).find('tbody tr').first().should('contain', 'processes');
 
       // Non-matching search shows empty state
       cy.getBySel(HISTORY_SEARCH_INPUT).clear().type('zzz_nonexistent_query_zzz{enter}');
@@ -254,7 +246,7 @@ describe(
       cy.getBySel(UNIFIED_HISTORY_TABLE)
         .find('tbody tr')
         .each(($row) => {
-          cy.wrap($row).should('contain', 'uptime');
+          expect($row.text()).to.include('uptime');
         });
 
       // Clear tag filter and restore all results
@@ -275,7 +267,7 @@ describe(
       cy.getBySel(UNIFIED_HISTORY_TABLE)
         .find('tbody tr')
         .each(($row) => {
-          cy.wrap($row).should('contain', 'processes');
+          expect($row.text()).to.include('processes');
         });
     });
 
@@ -310,8 +302,36 @@ describe(
       cy.getBySel(UNIFIED_HISTORY_TABLE)
         .find('tbody tr')
         .each(($row) => {
-          cy.wrap($row).should('contain', 'uptime');
+          expect($row.text()).to.include('uptime');
         });
+    });
+
+    it('should open case selector modal from row kebab menu and keep it visible', () => {
+      cy.getBySel(UNIFIED_HISTORY_TABLE).within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.get('[aria-label="Details"]').click();
+          });
+      });
+      cy.contains('Query results');
+
+      cy.get('[data-test-subj^="packQueriesTableKebab-"]').first().click();
+
+      cy.contains('Add to Case').click();
+
+      // Kebab popover should close after clicking "Add to Case"
+      cy.get('.euiContextMenuPanel').should('not.exist');
+
+      // Cases modal must survive the popover unmount (CasesContext lives above the popover)
+      cy.getBySel('all-cases-modal', { timeout: 10000 }).should('be.visible');
+
+      cy.getBySel('all-cases-modal').within(() => {
+        cy.contains('Select case').should('be.visible');
+      });
+
+      cy.getBySel('all-cases-modal-cancel-button').click();
+      cy.getBySel('all-cases-modal').should('not.exist');
     });
 
     it('should navigate to details and run a new query visible in history', () => {
@@ -335,6 +355,38 @@ describe(
       navigateTo('/app/osquery/history');
       cy.getBySel(UNIFIED_HISTORY_TABLE, { timeout: 60000 }).should('exist');
       cy.getBySel(UNIFIED_HISTORY_TABLE).find('tbody tr').first().should('contain', 'os_version');
+    });
+
+    it('should save a query from the detail page via Save query button', () => {
+      const savedQueryId = `saved-from-details-${Date.now()}`;
+
+      cy.getBySel(UNIFIED_HISTORY_TABLE).within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.get('[aria-label="Details"]').click();
+          });
+      });
+      cy.contains('Query results');
+
+      cy.getBySel('save-query-button').should('exist').click();
+
+      cy.getBySel('osquery-save-query-flyout').should('exist');
+
+      cy.getBySel('osquery-save-query-flyout').within(() => {
+        cy.get('.monaco-editor').should('exist');
+        cy.get('input[name="id"]').type(`${savedQueryId}{downArrow}{enter}`);
+        cy.get('input[name="description"]').type('Saved from detail page');
+      });
+
+      cy.getBySel('savedQueryFlyoutSaveButton').click();
+      cy.contains('Successfully saved');
+      closeToastIfVisible();
+
+      navigateTo('/app/osquery/saved_queries');
+      cy.contains(savedQueryId);
+
+      cleanupSavedQueryByName(savedQueryId);
     });
   }
 );

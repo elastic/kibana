@@ -42,6 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.goToTimeRange();
       await lens.switchToVisualization('lnsDatatable');
       await lens.save('New Table', true, false, false, 'new');
+      await dashboard.waitForRenderComplete();
 
       await checkTableSorting();
     });

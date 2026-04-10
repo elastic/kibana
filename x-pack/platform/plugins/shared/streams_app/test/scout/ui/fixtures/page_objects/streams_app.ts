@@ -16,13 +16,14 @@ import {
   KibanaCodeEditorWrapper,
 } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import type { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
+import type { FieldTypeOption } from '../../../../../public/components/stream_management/data_management/schema_editor/constants';
 
 export class StreamsApp {
   public readonly processorFieldComboBox;
   public readonly conditionEditorFieldComboBox;
   public readonly conditionEditorValueComboBox;
   public readonly processorTypeComboBox;
+  public readonly dateProcessorFormatsComboBox;
   public readonly fieldTypeSuperSelect;
   public readonly previewDataGrid;
   public readonly schemaDataGrid;
@@ -60,6 +61,10 @@ export class StreamsApp {
       this.page,
       'streamsAppProcessorTypeSelector'
     );
+    this.dateProcessorFormatsComboBox = new EuiComboBoxWrapper(
+      this.page,
+      'streamsAppDateProcessorFormatsComboBox'
+    );
     this.fieldTypeSuperSelect = new EuiSuperSelectWrapper(
       this.page,
       'streamsAppFieldFormTypeSelect'
@@ -85,7 +90,7 @@ export class StreamsApp {
     );
     this.queryStreamCreatedSuccessToast = this.page.getByText('Query stream created successfully');
     this.childQueryStreamCreatedSuccessToast = this.page.getByText('Query stream created');
-    this.queryStreamUpdatedSuccessToast = this.page.getByText('Query stream updated successfully');
+    this.queryStreamUpdatedSuccessToast = this.page.getByText('Query stream updated');
     this.queryStreamDetailsQueryViewerCodeBlock = this.page.getByTestId(
       'queryStreamDetailsQueryViewerCodeBlock'
     );
@@ -118,6 +123,10 @@ export class StreamsApp {
 
   async gotoDataQualityTab(streamName: string) {
     await this.gotoStreamManagementTab(streamName, 'dataQuality');
+  }
+
+  async gotoOverviewTab(streamName: string) {
+    await this.gotoStreamManagementTab(streamName, 'overview');
   }
 
   async gotoProcessingTab(streamName: string) {
@@ -738,7 +747,7 @@ export class StreamsApp {
   }
 
   async fillDateProcessorFormatInput(value: string) {
-    await this.page.getByPlaceholder('Type and then hit "Enter"').fill(value);
+    await this.dateProcessorFormatsComboBox.setCustomMultiOption(value);
   }
 
   async fillDateProcessorTargetFieldInput(value: string) {
@@ -1307,7 +1316,7 @@ export class StreamsApp {
   }
 
   async clickQueryStreamFormCreateButton() {
-    await this.page.getByTestId('streamsAppQueryStreamFormCreateButton').click();
+    await this.page.getByTestId('streamsAppQueryStreamFormSaveButton').click();
   }
 
   async clickQueryStreamLink(streamName: string) {
@@ -1332,5 +1341,17 @@ export class StreamsApp {
 
   async clickDeleteQueryStreamModalDeleteButton() {
     await this.page.getByTestId('streamsAppDeleteStreamModalDeleteButton').click();
+  }
+
+  async clickQueryStreamEditButton(streamName: string) {
+    await this.page.getByTestId(`streamsAppQueryStreamEditButton-${streamName}`).click();
+  }
+
+  async clickQueryStreamFormSaveButton() {
+    await this.page.getByTestId('streamsAppQueryStreamFormSaveButton').click();
+  }
+
+  async clickQueryStreamFormDeleteButton() {
+    await this.page.getByTestId('streamsAppQueryStreamFormDeleteButton').click();
   }
 }

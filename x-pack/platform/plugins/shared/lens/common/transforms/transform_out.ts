@@ -20,7 +20,7 @@ import type {
   LensByValueTransformOutResult,
   LensTransformOut,
 } from './types';
-import { findLensReference, isByRefLensState } from './utils';
+import { findLensReference } from './utils';
 import { isLensAttributesV0, isLensAttributesV1 } from '../content_management/utils';
 import { stripInheritedContext } from './helpers';
 
@@ -40,18 +40,18 @@ export const getTransformOut = (
       stripInheritedContext
     );
 
-    const state = transformsFlow(storedState);
+    const { attributes, ...state } = transformsFlow(storedState);
 
     const savedObjectRef = findLensReference(panelReferences);
 
-    if (savedObjectRef && isByRefLensState(state)) {
+    if (savedObjectRef) {
       return {
         ...state,
-        savedObjectId: savedObjectRef.id,
+        ref_id: savedObjectRef.id,
       } satisfies LensByRefTransformOutResult;
     }
 
-    const migratedAttributes = migrateAttributes(state.attributes);
+    const migratedAttributes = migrateAttributes(attributes);
     const injectedState = injectLensReferences(
       {
         ...state,
@@ -77,7 +77,7 @@ export const getTransformOut = (
 
     return {
       ...state,
-      attributes: apiConfig,
+      ...apiConfig,
     } satisfies LensByValueTransformOutResult;
   };
 };

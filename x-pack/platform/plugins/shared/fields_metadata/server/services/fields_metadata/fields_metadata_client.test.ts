@@ -6,12 +6,18 @@
  */
 import type { TEcsFields, TMetadataFields, TOtelFields } from '../../../common';
 import { loggerMock } from '@kbn/logging-mocks';
-import { FieldsMetadataClient } from './fields_metadata_client';
+import {
+  FieldsMetadataClient,
+  ecsFlatNameToRootFieldsetName,
+  isDirectChildFieldName,
+} from './fields_metadata_client';
 import { EcsFieldsRepository } from './repositories/ecs_fields_repository';
 import { IntegrationFieldsRepository } from './repositories/integration_fields_repository';
 import { MetadataFieldsRepository } from './repositories/metadata_fields_repository';
 import { OtelFieldsRepository } from './repositories/otel_fields_repository';
 import { FieldMetadata } from '../../../common/fields_metadata/models/field_metadata';
+import { FieldsMetadataDictionary } from '../../../common/fields_metadata/models/fields_metadata_dictionary';
+import { StreamsFieldsRepository } from './repositories/streams_fields_repository';
 
 const ecsFields = {
   '@timestamp': {
@@ -38,7 +44,49 @@ const ecsFields = {
     short: 'Short name or login of the user.',
     type: 'keyword',
   },
-} as TEcsFields;
+  'event.category': {
+    dashed_name: 'event-category',
+    description: 'Event category.',
+    flat_name: 'event.category',
+    level: 'core',
+    name: 'category',
+    normalize: [],
+    short: 'Event category.',
+    type: 'keyword',
+    allowed_values: [
+      {
+        name: 'process',
+        description: 'Process activity.',
+        expected_event_types: ['start', 'end', 'info'],
+      },
+      {
+        name: 'network',
+        description: 'Network activity.',
+        expected_event_types: ['connection', 'protocol'],
+      },
+    ],
+  },
+  'host.name': {
+    dashed_name: 'host-name',
+    description: 'Host name.',
+    flat_name: 'host.name',
+    level: 'core',
+    name: 'name',
+    normalize: [],
+    short: 'Host name.',
+    type: 'keyword',
+  },
+  'host.name.grandchild': {
+    dashed_name: 'host-name-grandchild',
+    description: 'Nested under host.name.',
+    flat_name: 'host.name.grandchild',
+    level: 'extended',
+    name: 'grandchild',
+    normalize: [],
+    short: 'Grandchild.',
+    type: 'keyword',
+  },
+} as unknown as TEcsFields;
 
 const metadataFields = {
   _index: {
@@ -135,6 +183,9 @@ describe('FieldsMetadataClient class', () => {
   const otelFieldsRepository = OtelFieldsRepository.create({
     otelFields: otelFields as TOtelFields,
   });
+  const streamsFieldsRepository = StreamsFieldsRepository.create({
+    streamsFieldsExtractor: jest.fn(),
+  });
   const integrationFieldsExtractor = jest.fn();
   const integrationListExtractor = jest.fn();
   integrationFieldsExtractor.mockImplementation(() => Promise.resolve(integrationFields));
@@ -169,6 +220,7 @@ describe('FieldsMetadataClient class', () => {
       integrationFieldsRepository,
       metadataFieldsRepository,
       otelFieldsRepository,
+      streamsFieldsRepository,
     });
   });
 
@@ -255,6 +307,7 @@ describe('FieldsMetadataClient class', () => {
         integrationFieldsRepository,
         metadataFieldsRepository,
         otelFieldsRepository,
+        streamsFieldsRepository,
       });
 
       const fieldInstance = await clientWithouthPrivileges.getByName('mysql.slowlog.filesort');
@@ -328,6 +381,149 @@ describe('FieldsMetadataClient class', () => {
 
       expect(Object.hasOwn(fields, '@timestamp')).toBeTruthy();
       expect(Object.hasOwn(fields, '_index')).toBeFalsy();
+    });
+  });
+
+  describe('#getFieldChildren', () => {
+    it('returns a FieldsMetadataDictionary instance', async () => {
+      const dict = await fieldsMetadataClient.getFieldChildren('host', { source: ['ecs'] });
+
+      expect(dict).toBeInstanceOf(FieldsMetadataDictionary);
+      expect(typeof dict.getFields).toBe('function');
+      expect(typeof dict.toPlain).toBe('function');
+    });
+
+    it('returns only immediate children, not deeper descendants', async () => {
+      const dict = await fieldsMetadataClient.getFieldChildren('host', { source: ['ecs'] });
+      const keys = Object.keys(dict.getFields()).sort();
+
+      expect(keys).toEqual(['host.name']);
+      expect(keys).not.toContain('host.name.grandchild');
+    });
+
+    it('returns the direct child under a nested parent', async () => {
+      const dict = await fieldsMetadataClient.getFieldChildren('host.name', { source: ['ecs'] });
+      const keys = Object.keys(dict.getFields());
+
+      expect(keys).toEqual(['host.name.grandchild']);
+    });
+
+    it('returns an empty dictionary when there are no direct children', async () => {
+      const dict = await fieldsMetadataClient.getFieldChildren('host.name.grandchild', {
+        source: ['ecs'],
+      });
+
+      expect(Object.keys(dict.getFields())).toEqual([]);
+    });
+
+    it('respects the source filter like find()', async () => {
+      const ecsOnly = await fieldsMetadataClient.getFieldChildren('host', { source: ['ecs'] });
+      expect(Object.keys(ecsOnly.getFields())).toContain('host.name');
+
+      const metadataOnly = await fieldsMetadataClient.getFieldChildren('host', {
+        source: ['metadata'],
+      });
+      expect(Object.keys(metadataOnly.getFields())).toEqual([]);
+    });
+
+    it('uses the default source filter (all sources) when params are omitted', async () => {
+      const dict = await fieldsMetadataClient.getFieldChildren('host');
+      const keys = Object.keys(dict.getFields()).sort();
+
+      expect(keys).toEqual(['host.name']);
+    });
+  });
+
+  describe('#getECSFieldsets', () => {
+    it('returns sorted unique ECS root field set names from static ECS fields only', async () => {
+      const fieldsets = await fieldsMetadataClient.getECSFieldsets();
+
+      expect(fieldsets).toEqual(['base', 'event', 'host', 'user']);
+    });
+
+    it('does not include OTel or metadata field sets', async () => {
+      const fieldsets = await fieldsMetadataClient.getECSFieldsets();
+
+      expect(fieldsets).not.toContain('otel');
+      expect(fieldsets).not.toContain('metadata');
+      expect(fieldsets).not.toContain('_index');
+    });
+  });
+
+  describe('#matchesAnyTypeForEventCategory', () => {
+    it('returns true when an expected type is listed for one of the categories', async () => {
+      await expect(
+        fieldsMetadataClient.matchesAnyTypeForEventCategory(['process'], ['start'])
+      ).resolves.toBe(true);
+    });
+
+    it('returns true when any category–type pair matches (disjunction across categories and types)', async () => {
+      await expect(
+        fieldsMetadataClient.matchesAnyTypeForEventCategory(['process', 'network'], ['protocol'])
+      ).resolves.toBe(true);
+    });
+
+    it('returns false when the expected type is not allowed for the given category', async () => {
+      await expect(
+        fieldsMetadataClient.matchesAnyTypeForEventCategory(['process'], ['connection'])
+      ).resolves.toBe(false);
+    });
+
+    it('returns false when the category is not a known allowed value', async () => {
+      await expect(
+        fieldsMetadataClient.matchesAnyTypeForEventCategory(['registry'], ['start'])
+      ).resolves.toBe(false);
+    });
+
+    it('returns false when event.category has no allowed_values metadata', async () => {
+      const ecsWithoutAllowedValues = EcsFieldsRepository.create({
+        ecsFields: {
+          'event.category': {
+            dashed_name: 'event-category',
+            description: 'Event category.',
+            flat_name: 'event.category',
+            level: 'core',
+            name: 'category',
+            normalize: [],
+            short: 'Event category.',
+            type: 'keyword',
+          },
+        } as unknown as TEcsFields,
+      });
+      const client = FieldsMetadataClient.create({
+        capabilities: { fleet: { read: true }, fleetv2: { read: true } },
+        logger,
+        ecsFieldsRepository: ecsWithoutAllowedValues,
+        integrationFieldsRepository,
+        metadataFieldsRepository,
+        otelFieldsRepository,
+        streamsFieldsRepository,
+      });
+
+      await expect(client.matchesAnyTypeForEventCategory(['process'], ['start'])).resolves.toBe(
+        false
+      );
+    });
+
+    it('returns false when event.category is not present in ECS', async () => {
+      const ecsOnlyTimestamp = EcsFieldsRepository.create({
+        ecsFields: {
+          '@timestamp': ecsFields['@timestamp'],
+        } as unknown as TEcsFields,
+      });
+      const client = FieldsMetadataClient.create({
+        capabilities: { fleet: { read: true }, fleetv2: { read: true } },
+        logger,
+        ecsFieldsRepository: ecsOnlyTimestamp,
+        integrationFieldsRepository,
+        metadataFieldsRepository,
+        otelFieldsRepository,
+        streamsFieldsRepository,
+      });
+
+      await expect(client.matchesAnyTypeForEventCategory(['process'], ['start'])).resolves.toBe(
+        false
+      );
     });
   });
 
@@ -482,6 +678,37 @@ describe('FieldsMetadataClient class', () => {
       // Verify it's a proper FieldMetadata instance
       expect(typeof field.toPlain).toBe('function');
     });
+  });
+});
+
+describe('ecsFlatNameToRootFieldsetName', () => {
+  it('maps root-level ECS fields to base', () => {
+    expect(ecsFlatNameToRootFieldsetName('@timestamp')).toBe('base');
+    expect(ecsFlatNameToRootFieldsetName('labels')).toBe('base');
+    expect(ecsFlatNameToRootFieldsetName('message')).toBe('base');
+  });
+
+  it('maps dotted flat names to the first segment', () => {
+    expect(ecsFlatNameToRootFieldsetName('host.name')).toBe('host');
+    expect(ecsFlatNameToRootFieldsetName('client.as.number')).toBe('client');
+    expect(ecsFlatNameToRootFieldsetName('event.category')).toBe('event');
+  });
+});
+
+describe('isDirectChildFieldName', () => {
+  it('returns true when there is exactly one segment after the parent prefix', () => {
+    expect(isDirectChildFieldName('host', 'host.name')).toBe(true);
+    expect(isDirectChildFieldName('host.name', 'host.name.grandchild')).toBe(true);
+  });
+
+  it('returns false for deeper descendants', () => {
+    expect(isDirectChildFieldName('host', 'host.name.grandchild')).toBe(false);
+  });
+
+  it('returns false for the parent field itself or unrelated keys', () => {
+    expect(isDirectChildFieldName('host', 'host')).toBe(false);
+    expect(isDirectChildFieldName('host', 'hostname')).toBe(false);
+    expect(isDirectChildFieldName('host', 'other.host.name')).toBe(false);
   });
 });
 

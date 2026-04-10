@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ChatCompleteOptions, AnonymizationRule, Model } from '@kbn/inference-common';
 import {
@@ -22,6 +21,7 @@ import { defer, forkJoin, from, identity, share, switchMap, catchError, throwErr
 import { withChatCompleteSpan } from '@kbn/inference-tracing';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { omit } from 'lodash';
+import type { ActionsClientProvider } from '../types';
 import type {
   InferenceAdapterChatCompleteOptions,
   InferenceConnectorAdapterChatCompleteEvent,
@@ -50,7 +50,7 @@ import { prepareAnonymization } from './prepare_anonymization';
 interface CreateChatCompleteApiOptions {
   request: KibanaRequest;
   namespace: string;
-  actions: ActionsPluginStart;
+  actions: ActionsClientProvider;
   logger: Logger;
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
   regexWorker: RegexWorkerService;
@@ -280,7 +280,7 @@ function resolveAndCreatePipeline({
   connectorId: string;
   endpointIdCache: InferenceEndpointIdCache;
   request: KibanaRequest;
-  actions: ActionsPluginStart;
+  actions: ActionsClientProvider;
   esClient: ElasticsearchClient;
   logger: Logger;
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
@@ -293,6 +293,8 @@ function resolveAndCreatePipeline({
 }) {
   return from(endpointIdCache.has(connectorId)).pipe(
     switchMap((isInferenceEndpoint) => {
+      let resolvedAsInferenceEndpoint = isInferenceEndpoint;
+
       const resolve: () => Promise<ResolvedPipelineContext> = isInferenceEndpoint
         ? async () => {
             const endpointMeta = await resolveInferenceEndpoint({
@@ -328,6 +330,35 @@ function resolveAndCreatePipeline({
               logger,
             });
             const connector = executor.getConnector();
+
+            if (connector.isInferenceEndpoint) {
+              resolvedAsInferenceEndpoint = true;
+              const inferenceId = connector.connectorId;
+              const endpointMeta = await resolveInferenceEndpoint({
+                inferenceId,
+                esClient,
+              });
+              const endpointExecutor = createInferenceEndpointExecutor({
+                inferenceId,
+                esClient,
+              });
+
+              return {
+                callbackContext: {
+                  model: endpointMeta.modelId ? { id: endpointMeta.modelId } : undefined,
+                },
+                getSpanModel: (modelName) =>
+                  endpointMeta.provider
+                    ? ({
+                        id: modelName ?? endpointMeta.modelId,
+                        provider: endpointMeta.provider,
+                      } as SpanModel)
+                    : undefined,
+                chatComplete: (options) =>
+                  inferenceEndpointAdapter.chatComplete({ ...options, executor: endpointExecutor }),
+              };
+            }
+
             const connectorType = connector.type;
             const inferenceAdapter = getInferenceAdapter(connectorType);
 
@@ -369,7 +400,7 @@ function resolveAndCreatePipeline({
       }).pipe(
         catchError((error) => {
           if (error?.meta?.status === 404 || error?.statusCode === 404) {
-            if (isInferenceEndpoint) {
+            if (resolvedAsInferenceEndpoint) {
               endpointIdCache.invalidate();
               return throwError(() => error);
             }

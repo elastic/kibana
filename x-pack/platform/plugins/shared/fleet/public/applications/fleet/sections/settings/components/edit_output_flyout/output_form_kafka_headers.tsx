@@ -193,7 +193,7 @@ export const OutputFormKafkaHeaders: React.FunctionComponent<{ inputs: OutputFor
         disabled={addKeyValuePairButtonDisabled}
         size="xs"
         flush="left"
-        iconType="plusInCircle"
+        iconType="plusCircle"
         onClick={addKeyValuePair}
       >
         <FormattedMessage id="xpack.fleet.kafkaHeadersInput.addRow" defaultMessage="Add header" />
