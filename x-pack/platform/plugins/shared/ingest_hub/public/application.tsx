@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment, useCallback, useMemo } from 'react';
-import type { ScopedHistory } from '@kbn/core/public';
+import type { CoreStart, ScopedHistory } from '@kbn/core/public';
 import { EuiEmptyPrompt, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Router } from '@kbn/shared-ux-router';
@@ -32,14 +32,14 @@ const groupByCategory = (flows: IngestFlow[]): Map<string, IngestFlow[]> => {
 };
 
 export const IngestHubApp: React.FC<IngestHubAppProps> = ({ ingestFlows$, history }) => {
-  const { services } = useKibana();
+  const { services } = useKibana<CoreStart>();
   const ingestFlows = useObservable(ingestFlows$, []);
 
   const categorizedFlows = useMemo(() => groupByCategory(ingestFlows), [ingestFlows]);
 
   const handleFlowClick = useCallback(
     (appId: string, path: string) => {
-      services.application?.navigateToApp(appId, { path });
+      services.application.navigateToApp(appId, { path });
     },
     [services.application]
   );

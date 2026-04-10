@@ -32,6 +32,8 @@ const IngestHubApp = dynamic(() =>
   import('./application').then((mod) => ({ default: mod.IngestHubApp }))
 );
 
+const ALLOWED_SPACE_SOLUTIONS = new Set(['classic', 'oblt']);
+
 const createNavigationAvailable$ = (
   coreStart: CoreStart,
   deps: IngestHubStartDependencies,
@@ -50,10 +52,7 @@ const createNavigationAvailable$ = (
       if (!deps.spaces?.getActiveSpace) return of(true);
 
       return from(deps.spaces.getActiveSpace()).pipe(
-        map((space) => {
-          const solution = space?.solution;
-          return !solution || solution === 'classic' || solution === 'oblt';
-        }),
+        map((space) => ALLOWED_SPACE_SOLUTIONS.has(space.solution ?? '')),
         catchError(() => of(true))
       );
     })
@@ -118,7 +117,13 @@ export class IngestHubPlugin
     const isServerless = this.context.env.packageInfo.buildFlavor === 'serverless';
     return {
       registerIngestFlow: (flow: IngestFlow) => {
-        this.ingestFlows$.next([...this.ingestFlows$.value, flow]);
+        const existing = this.ingestFlows$.value;
+        if (existing.some((f) => f.id === flow.id)) {
+          // eslint-disable-next-line no-console
+          console.warn(`[IngestHub] Duplicate flow id "${flow.id}" — skipping registration.`);
+          return;
+        }
+        this.ingestFlows$.next([...existing, flow]);
       },
       navigationAvailable$: createNavigationAvailable$(coreStart, deps, isServerless),
     };

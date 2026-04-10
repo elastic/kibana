@@ -33,6 +33,7 @@ import type {
 import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
 import type { IngestHubStart } from '@kbn/ingest-hub-plugin/public';
 import type { ObservabilityOnboardingConfig } from '../server';
+import { registerIngestFlows } from './ingest_hub/register_ingest_flows';
 import { PLUGIN_ID } from '../common';
 import { ObservabilityOnboardingLocatorDefinition } from './locators/onboarding_locator/locator_definition';
 import type { ObservabilityOnboardingPluginLocators } from './locators';
@@ -144,9 +145,8 @@ export class ObservabilityOnboardingPlugin
       getLocator: () => this.locators?.onboarding,
     };
   }
-  public async start(core: CoreStart, plugins: ObservabilityOnboardingPluginStartDeps) {
+  public start(_core: CoreStart, plugins: ObservabilityOnboardingPluginStartDeps) {
     if (plugins.ingestHub) {
-      const { registerIngestFlows } = await import('./ingest_hub/register_ingest_flows');
       registerIngestFlows(plugins);
     }
     return {
