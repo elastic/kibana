@@ -86,12 +86,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           panelNavLinkId: 'ml:singleMetricViewer',
         });
 
-        // Supplied configurations is under Management -> Anomaly Detection Jobs -> Click button mlSuppliedConfigurationsButton
-        await solutionNavigation.sidenav.clickLink({ navId: 'stack_management' });
-        await solutionNavigation.sidenav.expectLinkActive({ navId: 'stack_management' });
         await solutionNavigation.sidenav.clickPanelLink('management:anomaly_detection');
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          text: 'Anomaly Detection Jobs',
+          text: 'Manage jobs',
         });
         await testSubjects.click('mlSuppliedConfigurationsButton');
         await testSubjects.existOrFail('mlPageSuppliedConfigurations');

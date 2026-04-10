@@ -7,17 +7,22 @@
 
 import type { ReactElement, ReactNode } from 'react';
 import React, { memo } from 'react';
+import type { EuiFlexGroupProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 
 export interface AlertHeaderBlockProps {
   /**
-   * React component to render as the title
-   */
-  title: ReactElement;
-  /**
    * React component to render as the value
    */
   children: ReactNode;
+  /**
+   * data-test-subj to use for the title
+   */
+  ['data-test-subj']?: string;
+  /**
+   * Gutter size (vertical) between title and content
+   */
+  gutterSize?: EuiFlexGroupProps['gutterSize'];
   /**
    * If true, adds a slight 1px border on all edges.
    * False by default.
@@ -25,9 +30,9 @@ export interface AlertHeaderBlockProps {
    */
   hasBorder?: boolean;
   /**
-   * data-test-subj to use for the title
+   * React component to render as the title
    */
-  ['data-test-subj']?: string;
+  title: ReactElement;
 }
 
 /**
@@ -35,13 +40,19 @@ export interface AlertHeaderBlockProps {
  */
 export const AlertHeaderBlock = memo(
   ({
-    title,
     children,
+    gutterSize = 's',
     hasBorder = false,
+    title,
     'data-test-subj': dataTestSubj,
   }: AlertHeaderBlockProps) => (
     <EuiPanel hasShadow={false} hasBorder={hasBorder} paddingSize="s">
-      <EuiFlexGroup direction="column" gutterSize="xs" responsive={false} alignItems="flexStart">
+      <EuiFlexGroup
+        direction="column"
+        gutterSize={gutterSize}
+        responsive={false}
+        alignItems="flexStart"
+      >
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs" data-test-subj={dataTestSubj}>
             <h3>{title}</h3>
