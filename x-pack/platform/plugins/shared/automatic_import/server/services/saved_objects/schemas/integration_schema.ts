@@ -101,3 +101,7 @@ export const integrationSchemaV2 = schema.object({
   ),
   changelog: schema.maybe(schema.arrayOf(changelogEntrySchema, { maxSize: 1000 })),
 });
+
+export const integrationSchemaV3 = integrationSchemaV2.extends({
+  connector_id: schema.maybe(schema.string()),
+});
