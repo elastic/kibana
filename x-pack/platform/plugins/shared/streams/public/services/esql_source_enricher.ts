@@ -9,7 +9,6 @@ import type { ApplicationStart } from '@kbn/core/public';
 import type { ESQLSourceResult } from '@kbn/esql-types';
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
-import { Streams } from '@kbn/streams-schema';
 import type { StreamsRepositoryClient } from '../api';
 
 /**
@@ -35,6 +34,8 @@ export function createStreamsSourceEnricher(
 
       // Build a lookup map by stream name for O(1) matching
       const streamsByName = new Map(streams.map((stream) => [stream.name, stream]));
+
+      const { Streams } = await import('@kbn/streams-schema');
 
       return sources.map((source) => {
         const stream = streamsByName.get(source.name);
