@@ -18,7 +18,7 @@ import { useParams } from 'react-router-dom';
 import { useUIState } from '../../contexts';
 import { CreateDataStreamFlyout } from './create_data_stream_flyout';
 import * as i18n from './translations';
-import { useGetIntegrationById } from '../../../../common';
+import { useGetIntegrationById, isValidNameFormat, startsWithLetter } from '../../../../common';
 import { DataStreamsTable } from './data_streams_table/data_steams_table';
 import { EditPipelineFlyout } from './edit_pipeline_flyout';
 import { useTelemetry } from '../../../telemetry_context';
@@ -46,7 +46,13 @@ export const DataStreams = React.memo<{ integrationId?: string }>(() => {
     if (!isCreateIntegrationPage) {
       return true;
     }
-    return Boolean(formData?.title?.trim()) && Boolean(formData?.description?.trim());
+    const title = formData?.title?.trim() ?? '';
+    return (
+      Boolean(title) &&
+      Boolean(formData?.description?.trim()) &&
+      isValidNameFormat(title) &&
+      startsWithLetter(title)
+    );
   }, [formData?.description, formData?.title, isCreateIntegrationPage]);
 
   const handleOpenCreateDataStreamFlyout = useCallback(() => {
