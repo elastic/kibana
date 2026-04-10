@@ -235,7 +235,7 @@ export function storedPackagePoliciesToAgentPermissions(
                     // For traces allow to send span event to logs-generic.otel-{namespace}
                     dataStreams_.push({
                       type: 'logs',
-                      dataset: 'generic.otel',
+                      dataset: 'generic',
                       elasticsearch: {
                         dynamic_namespace: stream.data_stream.elasticsearch?.dynamic_namespace,
                       },

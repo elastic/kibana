@@ -9,11 +9,12 @@
  * Integration tests for OTel routing behaviour in Fleet-generated agent policies.
  *
  * These tests cover the acceptance criteria from elastic/ingest-dev#7132:
- * - Packages with dynamic_signal_types: true (OTLP, Kafka-style) must NOT set
- *   data_stream.dataset in routing transforms — routing is deferred to the ES exporter
- *   (scope.name, explicit data_stream.* attrs, or generic.otel default).
+ * - Packages with dynamic_signal_types: true (OTLP-style) emit routing transforms
+ *   that set `data_stream.dataset` from the package default (e.g. `generic`) unless
+ *   the user overrides the `data_stream.dataset` stream var (see "custom dataset var").
  * - Receiver-specific packages (e.g. mysql_input_otel) without dynamic_signal_types
- *   must still set data_stream.dataset in routing transforms.
+ *   set `data_stream.dataset` in routing transforms from the stream definition.
+ * Further routing inside the Elasticsearch exporter at runtime is out of scope here.
  *
  * Dataset override via stream var `data_stream.dataset` (package-spec / ingest parity):
  * - Dynamic OTLP-style package: see "custom dataset var" test below.
@@ -176,10 +177,8 @@ export default function (providerContext: FtrProviderContext) {
           // Must set signal type, dataset, and namespace in routing transforms.
           expect(statements.some((s) => s.includes('data_stream.type'))).to.be(true);
           expect(statements.some((s) => s.includes('data_stream.namespace'))).to.be(true);
-          // dataset is now set from the package manifest default (generic.otel).
-          expect(statements.some((s) => s === expectedDatasetOttlStatement('generic.otel'))).to.be(
-            true
-          );
+          // dataset is now set from the package manifest default (generic).
+          expect(statements.some((s) => s === expectedDatasetOttlStatement('generic'))).to.be(true);
         }
       } finally {
         await deleteAgentPolicy(agentPolicyId);
