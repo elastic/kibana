@@ -346,6 +346,26 @@ describe('FieldsMetadataClient class', () => {
       expect(Object.hasOwn(onePasswordField, 'short')).toBeTruthy();
     });
 
+    it('should resolve a field using only the heuristic dataset when the heuristic is correct', async () => {
+      // "system.process.cpu.total.pct" belongs to dataset "system.process",
+      // which matches the 2-segment heuristic. The repository should fetch
+      // only that dataset and NOT fall back to loading all datasets.
+      const fieldInstance = await fieldsMetadataClient.getByName(
+        'system.process.cpu.total.pct'
+      );
+
+      expectToBeDefined(fieldInstance);
+      expect(fieldInstance).toBeInstanceOf(FieldMetadata);
+      expect(fieldInstance.toPlain().description).toBe(
+        'The percentage of CPU time spent by the process.'
+      );
+      // The extractor should be called exactly once — for the heuristic dataset only.
+      expect(integrationFieldsExtractor).toHaveBeenCalledTimes(1);
+      expect(integrationFieldsExtractor).toHaveBeenCalledWith(
+        expect.objectContaining({ integration: 'system', dataset: 'system.process' })
+      );
+    });
+
     it('should resolve a field whose dataset cannot be correctly inferred from the field name by loading all datasets', async () => {
       // "system.process.summary.total" belongs to dataset "system.process_summary",
       // but the 2-segment heuristic would infer "system.process". When the caller
