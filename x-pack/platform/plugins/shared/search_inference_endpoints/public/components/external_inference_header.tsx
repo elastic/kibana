@@ -8,7 +8,6 @@
 import { EuiPageTemplate, EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EXTERNAL_INFERENCE_TITLE } from '../../common/constants';
 import { docLinks } from '../../common/doc_links';
 
 interface ExternalInferenceHeaderProps {
@@ -21,7 +20,9 @@ export const ExternalInferenceHeader: React.FC<ExternalInferenceHeaderProps> = (
   return (
     <EuiPageTemplate.Header
       data-test-subj="externalInferenceHeader"
-      pageTitle={EXTERNAL_INFERENCE_TITLE}
+      pageTitle={i18n.translate('xpack.searchInferenceEndpoints.externalInferenceTitle', {
+        defaultMessage: 'External Inference',
+      })}
       description={i18n.translate(
         'xpack.searchInferenceEndpoints.allInferenceEndpoints.description',
         {

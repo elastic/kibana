@@ -20,12 +20,6 @@ import { getModelId } from './get_model_id';
 import { KNOWN_MODEL_GROUPS, ELASTIC_GROUP_ID } from './known_models';
 
 export const UNKNOWN_MODEL_ID_FALLBACK = 'unknown_model';
-const UNKNOWN_MODEL_LABEL_FALLBACK = i18n.translate(
-  'xpack.searchInferenceEndpoints.groupBy.unknownModel',
-  {
-    defaultMessage: 'Unknown Model',
-  }
-);
 
 export const GroupByModelReducer = (
   acc: Record<string, GroupedInferenceEndpointsData>,
@@ -65,7 +59,12 @@ export const GroupByModelReducer = (
   } else {
     acc[modelId] = {
       groupId: modelId,
-      groupLabel: modelId === UNKNOWN_MODEL_ID_FALLBACK ? UNKNOWN_MODEL_LABEL_FALLBACK : modelId,
+      groupLabel:
+        modelId === UNKNOWN_MODEL_ID_FALLBACK
+          ? i18n.translate('xpack.searchInferenceEndpoints.groupBy.unknownModel', {
+              defaultMessage: 'Unknown Model',
+            })
+          : modelId,
       endpoints: [endpoint],
     };
   }

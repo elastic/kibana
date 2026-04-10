@@ -8,7 +8,6 @@
 import { EuiPageTemplate, EuiButton, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { PLUGIN_TITLE } from '../../common/constants';
 import { docLinks } from '../../common/doc_links';
 import { useKibana } from '../hooks/use_kibana';
 
@@ -25,7 +24,9 @@ export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> =
   return (
     <EuiPageTemplate.Header
       data-test-subj="allInferenceEndpointsPage"
-      pageTitle={PLUGIN_TITLE}
+      pageTitle={i18n.translate('xpack.searchInferenceEndpoints.inferenceEndpointsTitle', {
+        defaultMessage: 'Inference endpoints',
+      })}
       description={i18n.translate(
         'xpack.searchInferenceEndpoints.allInferenceEndpoints.description',
         {
