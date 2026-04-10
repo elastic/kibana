@@ -23,6 +23,7 @@ import { ENTRA_TAB_TEST_ID, OKTA_TAB_TEST_ID } from './test_ids';
 import { AssetDocumentTab } from './tabs/asset_document';
 import { DocumentDetailsProvider } from '../../document_details/shared/context';
 import { EntityType } from '../../../../common/entity_analytics/types';
+import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_entity_resolution_license';
 import type { LeftPanelTabsType } from '../shared/components/left_panel/left_panel_header';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import type { IdentityFields } from '../../document_details/shared/utils';
@@ -38,8 +39,10 @@ export const useTabs = (
   identityFields?: IdentityFields,
   entityId?: string,
   entityStoreEntityId?: string
-): LeftPanelTabsType =>
-  useMemo(() => {
+): LeftPanelTabsType => {
+  const hasEntityResolutionLicense = useHasEntityResolutionLicense();
+
+  return useMemo(() => {
     const tabs: LeftPanelTabsType = [];
 
     const entraManagedUser = managedUser[ManagedUserDatasetKey.ENTRA];
@@ -78,14 +81,17 @@ export const useTabs = (
 
     if (entityStoreEntityId) {
       tabs.push(getGraphViewTab({ entityId: entityStoreEntityId, scopeId }));
-      tabs.push(
-        getResolutionGroupTab({ entityId: entityStoreEntityId, entityType: EntityType.user })
-      );
+      if (hasEntityResolutionLicense) {
+        tabs.push(
+          getResolutionGroupTab({ entityId: entityStoreEntityId, entityType: EntityType.user })
+        );
+      }
     }
 
     return tabs;
   }, [
     entityId,
+    hasEntityResolutionLicense,
     hasMisconfigurationFindings,
     hasNonClosedAlerts,
     identityFields,
@@ -95,6 +101,7 @@ export const useTabs = (
     scopeId,
     entityStoreEntityId,
   ]);
+};
 
 const getOktaTab = (oktaManagedUser: ManagedUserHit) => ({
   id: EntityDetailsLeftPanelTab.OKTA,
