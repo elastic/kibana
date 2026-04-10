@@ -69,8 +69,14 @@ export default ({ getService }: FtrProviderContext): void => {
 
       // Ensure clean state: previous tests may have left a plain index or stale data stream
       // with the same name, which would cause createDataStream to fail with a name conflict.
+      // cleanUpRiskScoreMaintainer uses deleteDataStream which only removes actual data streams —
+      // if a stray task manager run wrote to the index after the template was deleted, ES
+      // auto-creates it as a plain index. We explicitly delete that too.
       await entityStoreUtils.cleanEngines();
       await cleanUpRiskScoreMaintainer({ es, log });
+      await es.indices
+        .delete({ index: RISK_SCORE_DATA_STREAM, ignore_unavailable: true })
+        .catch(() => {});
 
       await entityStoreUtils.installEntityStoreV2({
         entityTypes: ['host', 'user'],
