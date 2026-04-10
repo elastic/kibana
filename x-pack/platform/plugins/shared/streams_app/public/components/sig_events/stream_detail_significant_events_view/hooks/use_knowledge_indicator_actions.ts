@@ -13,6 +13,8 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { useQueriesApi } from '../../../../hooks/sig_events/use_queries_api';
 import { useStreamFeaturesApi } from '../../../../hooks/sig_events/use_stream_features_api';
 
+export const KI_ROW_ACTION_MUTATION_KEY = ['ki-row-action'];
+
 interface UseKnowledgeIndicatorActionsParams {
   streamName: string;
   onSuccess?: () => void;
@@ -35,10 +37,12 @@ export function useKnowledgeIndicatorActions({
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
       queryClient.invalidateQueries({ queryKey: ['features', streamName] }),
+      queryClient.invalidateQueries({ queryKey: ['features', 'all'] }),
     ]);
   }, [streamName, queryClient]);
 
   const excludeAction = useMutation<void, Error, string>({
+    mutationKey: KI_ROW_ACTION_MUTATION_KEY,
     mutationFn: async (featureUuid) => {
       await excludeFeaturesInBulk([featureUuid]);
     },
@@ -53,6 +57,7 @@ export function useKnowledgeIndicatorActions({
   });
 
   const restoreAction = useMutation<void, Error, string>({
+    mutationKey: KI_ROW_ACTION_MUTATION_KEY,
     mutationFn: async (featureUuid) => {
       await restoreFeaturesInBulk([featureUuid]);
     },
@@ -67,6 +72,7 @@ export function useKnowledgeIndicatorActions({
   });
 
   const promoteAction = useMutation<void, Error, string>({
+    mutationKey: KI_ROW_ACTION_MUTATION_KEY,
     mutationFn: async (queryId) => {
       await promote({ queryIds: [queryId] });
     },

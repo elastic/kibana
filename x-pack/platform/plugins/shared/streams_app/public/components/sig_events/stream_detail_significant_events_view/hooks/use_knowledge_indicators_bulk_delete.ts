@@ -69,6 +69,7 @@ export function useKnowledgeIndicatorsBulkDelete({
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
         queryClient.invalidateQueries({ queryKey: ['features', streamName] }),
+        queryClient.invalidateQueries({ queryKey: ['features', 'all'] }),
       ]);
     },
   });

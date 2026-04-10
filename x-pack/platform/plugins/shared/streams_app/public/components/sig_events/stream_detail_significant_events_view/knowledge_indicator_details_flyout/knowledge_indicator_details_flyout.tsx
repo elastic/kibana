@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
+import { isComputedFeature } from '@kbn/streams-schema';
 import { upperFirst } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { getConfidenceColor } from '../utils/get_confidence_color';
@@ -86,51 +87,63 @@ export function KnowledgeIndicatorDetailsFlyout({
     }
   }, [knowledgeIndicator, demoteRules, deleteKnowledgeIndicatorsInBulk]);
 
-  const featureActionItems = useMemo(
-    () =>
-      knowledgeIndicator.kind === 'feature'
-        ? [
-            knowledgeIndicator.feature.excluded_at ? (
-              <EuiContextMenuItem
-                key="feature-restore"
-                icon="eye"
-                disabled={isMutating}
-                onClick={() => {
-                  setIsActionsMenuOpen(false);
-                  restoreFeature(knowledgeIndicator.feature.uuid);
-                }}
-              >
-                {RESTORE_LABEL}
-              </EuiContextMenuItem>
-            ) : (
-              <EuiContextMenuItem
-                key="feature-exclude"
-                icon="eyeClosed"
-                disabled={isMutating}
-                onClick={() => {
-                  setIsActionsMenuOpen(false);
-                  excludeFeature(knowledgeIndicator.feature.uuid);
-                }}
-              >
-                {EXCLUDE_LABEL}
-              </EuiContextMenuItem>
-            ),
-            <EuiContextMenuItem
-              key="feature-delete"
-              icon="trash"
-              color="danger"
-              disabled={isMutating}
-              onClick={() => {
-                setIsActionsMenuOpen(false);
-                setShowDeleteModal(true);
-              }}
-            >
-              {DELETE_LABEL}
-            </EuiContextMenuItem>,
-          ]
-        : [],
-    [excludeFeature, isMutating, knowledgeIndicator, restoreFeature]
-  );
+  const featureActionItems = useMemo(() => {
+    if (knowledgeIndicator.kind !== 'feature') {
+      return [];
+    }
+
+    const items: React.ReactElement[] = [];
+    const computed = isComputedFeature(knowledgeIndicator.feature);
+
+    if (!computed) {
+      if (knowledgeIndicator.feature.excluded_at) {
+        items.push(
+          <EuiContextMenuItem
+            key="feature-restore"
+            icon="eye"
+            disabled={isMutating}
+            onClick={() => {
+              setIsActionsMenuOpen(false);
+              restoreFeature(knowledgeIndicator.feature.uuid);
+            }}
+          >
+            {RESTORE_LABEL}
+          </EuiContextMenuItem>
+        );
+      } else {
+        items.push(
+          <EuiContextMenuItem
+            key="feature-exclude"
+            icon="eyeClosed"
+            disabled={isMutating}
+            onClick={() => {
+              setIsActionsMenuOpen(false);
+              excludeFeature(knowledgeIndicator.feature.uuid);
+            }}
+          >
+            {EXCLUDE_LABEL}
+          </EuiContextMenuItem>
+        );
+      }
+    }
+
+    items.push(
+      <EuiContextMenuItem
+        key="feature-delete"
+        icon="trash"
+        color="danger"
+        disabled={isMutating}
+        onClick={() => {
+          setIsActionsMenuOpen(false);
+          setShowDeleteModal(true);
+        }}
+      >
+        {DELETE_LABEL}
+      </EuiContextMenuItem>
+    );
+
+    return items;
+  }, [excludeFeature, isMutating, knowledgeIndicator, restoreFeature]);
 
   const queryActionItems = useMemo(
     () =>
