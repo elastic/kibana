@@ -1573,6 +1573,7 @@ export default ({ getService }: FtrProviderContext) => {
             has_response_actions: false,
             has_response_actions_endpoint: false,
             has_response_actions_osquery: false,
+            ai_created: false,
           });
         });
       });
