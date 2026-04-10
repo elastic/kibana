@@ -14,6 +14,8 @@ import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { isTestUser, SyntheticsEsClient } from './lib';
 import { SYNTHETICS_INDEX_PATTERN } from '../common/constants';
 import { checkIndicesReadPrivileges } from './synthetics_service/authentication/check_has_privilege';
+import { DefaultSyntheticsCCSSettingsRepository } from './services/synthetics_ccs_settings_repository';
+import { getSyntheticsIndices } from './services/get_synthetics_indices';
 import type { SyntheticsRouteWrapper } from './routes/types';
 
 export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
@@ -46,6 +48,20 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
       // specifically needed for the synthetics service api key generation
       server.authSavedObjectsClient = savedObjectsClient;
 
+      let heartbeatIndices = SYNTHETICS_INDEX_PATTERN;
+      if (!server.isElasticsearchServerless && server.config.experimental?.ccs?.enabled) {
+        try {
+          const ccsSettingsRepository = new DefaultSyntheticsCCSSettingsRepository(
+            savedObjectsClient
+          );
+          const ccsSettings = await ccsSettingsRepository.get();
+          const { indices } = await getSyntheticsIndices(esClient.asCurrentUser, ccsSettings);
+          heartbeatIndices = indices;
+        } catch (e) {
+          server.logger.warn(`Failed to resolve CCS indices, falling back to local: ${e.message}`);
+        }
+      }
+
       const syntheticsEsClient = new SyntheticsEsClient(
         savedObjectsClient,
         esClient.asCurrentUser,
@@ -53,7 +69,7 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
           request,
           uiSettings,
           isDev: Boolean(server.isDev) && !isTestUser(server),
-          heartbeatIndices: SYNTHETICS_INDEX_PATTERN,
+          heartbeatIndices,
         }
       );
 

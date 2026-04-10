@@ -69,4 +69,6 @@ export enum SYNTHETICS_API_URLS {
 
   INSPECT_STATUS_RULE = '/internal/synthetics/inspect_status_rule',
   INSPECT_TLS_RULE = '/internal/synthetics/inspect_tls_rule',
+
+  CCS_SETTINGS = '/internal/synthetics/ccs_settings',
 }
