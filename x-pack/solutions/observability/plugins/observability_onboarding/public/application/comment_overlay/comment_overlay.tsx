@@ -7,21 +7,28 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import ReactDOM from 'react-dom';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiComment,
   EuiCommentList,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiPopover,
   EuiSpacer,
   EuiText,
   EuiTextArea,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+
+const SO_TYPE = 'observability-onboarding-ui-comment';
+const IDENTITY_KEY = 'kibana_ui_commenter_name';
 
 interface Reply {
   id: string;
@@ -31,7 +38,7 @@ interface Reply {
 }
 
 interface Comment {
-  id: string;
+  id: string; // saved object id
   clientX: number;
   clientY: number;
   text: string;
@@ -39,28 +46,50 @@ interface Comment {
   createdAt: string;
   resolved: boolean;
   replies: Reply[];
+  pathname: string;
 }
 
-const STORAGE_KEY = 'kibana_ui_comments_v1';
+interface SavedObjectAttributes {
+  clientX: number;
+  clientY: number;
+  text: string;
+  author: string;
+  createdAt: string;
+  resolved: boolean;
+  replies: Reply[];
+  pathname: string;
+}
+
+interface HttpService {
+  get: <T>(path: string, options?: { query?: Record<string, unknown> }) => Promise<T>;
+  post: <T>(path: string, options?: { body?: string }) => Promise<T>;
+  put: <T>(path: string, options?: { body?: string }) => Promise<T>;
+  delete: <T>(path: string) => Promise<T>;
+}
 
 const generateId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
-const loadComments = (): Comment[] => {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]');
-  } catch {
-    return [];
-  }
-};
-
-const persistComments = (comments: Comment[]) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(comments));
-};
+const soToComment = (so: { id: string; attributes: SavedObjectAttributes }): Comment => ({
+  id: so.id,
+  ...so.attributes,
+  replies: so.attributes.replies ?? [],
+});
 
 export const CommentOverlay: React.FC = () => {
   const { euiTheme } = useEuiTheme();
+  const { services } = useKibana<{ http: HttpService }>();
+
+  const [currentUser, setCurrentUser] = useState<string | null>(
+    () => localStorage.getItem(IDENTITY_KEY)
+  );
+  const [nameInput, setNameInput] = useState('');
+  const [showIdentityPrompt, setShowIdentityPrompt] = useState(false);
+  const pendingActivation = useRef(false);
+
   const [isCommentMode, setIsCommentMode] = useState(false);
-  const [comments, setComments] = useState<Comment[]>(loadComments);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [pendingPos, setPendingPos] = useState<{ x: number; y: number } | null>(null);
   const [newText, setNewText] = useState('');
   const [openPinId, setOpenPinId] = useState<string | null>(null);
@@ -68,14 +97,38 @@ export const CommentOverlay: React.FC = () => {
   const [showResolved, setShowResolved] = useState(false);
   const keysHeld = useRef(new Set<string>());
 
+  // Load all comments from saved objects on mount
+  useEffect(() => {
+    setLoading(true);
+    services.http
+      .get<{ saved_objects: Array<{ id: string; attributes: SavedObjectAttributes }> }>(
+        `/api/saved_objects/_find`,
+        { query: { type: SO_TYPE, per_page: 500 } }
+      )
+      .then(({ saved_objects }) => {
+        setComments(saved_objects.map(soToComment));
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [services.http]);
+
+  const activateCommentMode = useCallback(() => {
+    if (!currentUser) {
+      pendingActivation.current = true;
+      setShowIdentityPrompt(true);
+    } else {
+      setIsCommentMode((prev) => !prev);
+      setPendingPos(null);
+    }
+  }, [currentUser]);
+
   // Keyboard shortcut: Shift + A + C
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       keysHeld.current.add(e.key.toLowerCase());
       if (e.shiftKey && keysHeld.current.has('a') && keysHeld.current.has('c')) {
-        setIsCommentMode((prev) => !prev);
-        setPendingPos(null);
         keysHeld.current.clear();
+        activateCommentMode();
       }
     };
     const onKeyUp = (e: KeyboardEvent) => keysHeld.current.delete(e.key.toLowerCase());
@@ -85,59 +138,105 @@ export const CommentOverlay: React.FC = () => {
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
     };
+  }, [activateCommentMode]);
+
+  const submitIdentity = () => {
+    const name = nameInput.trim();
+    if (!name) return;
+    localStorage.setItem(IDENTITY_KEY, name);
+    setCurrentUser(name);
+    setShowIdentityPrompt(false);
+    setNameInput('');
+    if (pendingActivation.current) {
+      pendingActivation.current = false;
+      setIsCommentMode(true);
+    }
+  };
+
+  const handleOverlayClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if ((e.target as HTMLElement).closest('[data-comment-pin]')) return;
+    setPendingPos({ x: e.clientX, y: e.clientY });
+    setOpenPinId(null);
   }, []);
 
-  useEffect(() => {
-    persistComments(comments);
-  }, [comments]);
-
-  const handleOverlayClick = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if ((e.target as HTMLElement).closest('[data-comment-pin]')) return;
-      setPendingPos({ x: e.clientX, y: e.clientY });
-      setOpenPinId(null);
-    },
-    []
-  );
-
-  const saveComment = () => {
-    if (!pendingPos || !newText.trim()) return;
-    const comment: Comment = {
-      id: generateId(),
+  const saveComment = async () => {
+    if (!pendingPos || !newText.trim() || !currentUser) return;
+    const attributes: SavedObjectAttributes = {
       clientX: pendingPos.x,
       clientY: pendingPos.y,
       text: newText.trim(),
-      author: 'You',
+      author: currentUser,
       createdAt: new Date().toISOString(),
       resolved: false,
       replies: [],
+      pathname: window.location.pathname,
     };
-    setComments((prev) => [...prev, comment]);
-    setPendingPos(null);
-    setNewText('');
-    setIsCommentMode(false);
+    setSaving(true);
+    try {
+      const created = await services.http.post<{ id: string; attributes: SavedObjectAttributes }>(
+        `/api/saved_objects/${SO_TYPE}`,
+        { body: JSON.stringify({ attributes }) }
+      );
+      setComments((prev) => [...prev, soToComment(created)]);
+      setPendingPos(null);
+      setNewText('');
+      setIsCommentMode(false);
+    } catch {
+      // keep pending pos open on failure
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const toggleResolved = (id: string) =>
-    setComments((prev) => prev.map((c) => (c.id === id ? { ...c, resolved: !c.resolved } : c)));
+  const toggleResolved = async (id: string) => {
+    const comment = comments.find((c) => c.id === id);
+    if (!comment) return;
+    const updated = { ...comment, resolved: !comment.resolved };
+    setComments((prev) => prev.map((c) => (c.id === id ? updated : c)));
+    await services.http
+      .put(`/api/saved_objects/${SO_TYPE}/${id}`, {
+        body: JSON.stringify({
+          attributes: { resolved: updated.resolved },
+        }),
+      })
+      .catch(() => {
+        // revert on failure
+        setComments((prev) => prev.map((c) => (c.id === id ? comment : c)));
+      });
+    setOpenPinId(null);
+  };
 
-  const deleteComment = (id: string) => {
+  const deleteComment = async (id: string) => {
     setComments((prev) => prev.filter((c) => c.id !== id));
     if (openPinId === id) setOpenPinId(null);
+    await services.http.delete(`/api/saved_objects/${SO_TYPE}/${id}`).catch(() => {});
   };
 
-  const addReply = (commentId: string) => {
-    if (!replyText.trim()) return;
-    const reply: Reply = {
+  const addReply = async (commentId: string) => {
+    if (!replyText.trim() || !currentUser) return;
+    const comment = comments.find((c) => c.id === commentId);
+    if (!comment) return;
+    const newReply: Reply = {
       id: generateId(),
       text: replyText.trim(),
-      author: 'You',
+      author: currentUser,
       createdAt: new Date().toISOString(),
     };
+    const updatedReplies = [...comment.replies, newReply];
     setComments((prev) =>
-      prev.map((c) => (c.id === commentId ? { ...c, replies: [...c.replies, reply] } : c))
+      prev.map((c) => (c.id === commentId ? { ...c, replies: updatedReplies } : c))
     );
     setReplyText('');
+    await services.http
+      .put(`/api/saved_objects/${SO_TYPE}/${commentId}`, {
+        body: JSON.stringify({ attributes: { replies: updatedReplies } }),
+      })
+      .catch(() => {
+        // revert on failure
+        setComments((prev) =>
+          prev.map((c) => (c.id === commentId ? { ...c, replies: comment.replies } : c))
+        );
+      });
   };
 
   const resolvedCount = comments.filter((c) => c.resolved).length;
@@ -145,6 +244,79 @@ export const CommentOverlay: React.FC = () => {
 
   return ReactDOM.createPortal(
     <>
+      {/* Identity prompt — shown once on first use */}
+      {showIdentityPrompt && (
+        <div
+          css={css`
+            position: fixed;
+            inset: 0;
+            z-index: 10010;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.4);
+          `}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowIdentityPrompt(false);
+              pendingActivation.current = false;
+            }
+          }}
+        >
+          <div
+            css={css`
+              background: ${euiTheme.colors.backgroundBasePlain};
+              border-radius: 10px;
+              padding: 28px 32px;
+              width: 340px;
+              box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            `}
+          >
+            <EuiTitle size="s">
+              <h3>What&apos;s your name?</h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText size="s" color="subdued">
+              <p>Your name will appear on the comments you leave. Only asked once.</p>
+            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiFieldText
+              placeholder="e.g. Sarah"
+              value={nameInput}
+              onChange={(e) => setNameInput(e.target.value)}
+              fullWidth
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') submitIdentity();
+                if (e.key === 'Escape') {
+                  setShowIdentityPrompt(false);
+                  pendingActivation.current = false;
+                }
+              }}
+            />
+            <EuiSpacer size="m" />
+            <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="s"
+                  onClick={() => {
+                    setShowIdentityPrompt(false);
+                    pendingActivation.current = false;
+                  }}
+                >
+                  Cancel
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton size="s" fill onClick={submitIdentity} isDisabled={!nameInput.trim()}>
+                  Continue
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+        </div>
+      )}
+
       {/* Click-capture overlay in comment mode */}
       {isCommentMode && (
         <div
@@ -179,7 +351,9 @@ export const CommentOverlay: React.FC = () => {
             pointer-events: auto;
           `}
         >
-          <span>💬 Click anywhere to add a comment</span>
+          <span>
+            💬 Commenting as <strong>{currentUser}</strong> — click anywhere to add a comment
+          </span>
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -194,7 +368,9 @@ export const CommentOverlay: React.FC = () => {
               padding: 2px 10px;
               cursor: pointer;
               font-size: 12px;
-              &:hover { background: rgba(255, 255, 255, 0.35); }
+              &:hover {
+                background: rgba(255, 255, 255, 0.35);
+              }
             `}
           >
             Cancel
@@ -202,8 +378,22 @@ export const CommentOverlay: React.FC = () => {
         </div>
       )}
 
-      {/* Show/hide resolved toggle — only visible when there are resolved comments */}
-      {resolvedCount > 0 && (
+      {/* Loading indicator */}
+      {loading && (
+        <div
+          css={css`
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10001;
+          `}
+        >
+          <EuiLoadingSpinner size="m" />
+        </div>
+      )}
+
+      {/* Show/hide resolved toggle */}
+      {!loading && resolvedCount > 0 && (
         <div
           css={css`
             position: fixed;
@@ -223,7 +413,9 @@ export const CommentOverlay: React.FC = () => {
               cursor: pointer;
               color: ${euiTheme.colors.textSubdued};
               white-space: nowrap;
-              &:hover { background: ${euiTheme.colors.backgroundBaseSubdued}; }
+              &:hover {
+                background: ${euiTheme.colors.backgroundBaseSubdued};
+              }
             `}
           >
             {showResolved ? 'Hide resolved' : `Show resolved (${resolvedCount})`}
@@ -283,7 +475,13 @@ export const CommentOverlay: React.FC = () => {
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton size="s" fill onClick={saveComment} isDisabled={!newText.trim()}>
+                <EuiButton
+                  size="s"
+                  fill
+                  onClick={saveComment}
+                  isDisabled={!newText.trim()}
+                  isLoading={saving}
+                >
                   Save
                 </EuiButton>
               </EuiFlexItem>
@@ -415,10 +613,7 @@ export const CommentOverlay: React.FC = () => {
                   size="s"
                   iconType={comment.resolved ? 'refresh' : 'checkInCircleFilled'}
                   color={comment.resolved ? 'text' : 'success'}
-                  onClick={() => {
-                    toggleResolved(comment.id);
-                    setOpenPinId(null);
-                  }}
+                  onClick={() => toggleResolved(comment.id)}
                 >
                   {comment.resolved ? 'Reopen' : 'Resolve'}
                 </EuiButtonEmpty>

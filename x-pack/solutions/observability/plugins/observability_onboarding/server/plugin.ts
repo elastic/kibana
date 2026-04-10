@@ -25,6 +25,7 @@ import type {
   ObservabilityOnboardingPluginStartDependencies,
 } from './types';
 import { observabilityOnboardingFlow } from './saved_objects/observability_onboarding_status';
+import { uiComment } from './saved_objects/ui_comment';
 import { EsLegacyConfigService } from './services/es_legacy_config_service';
 import type { ObservabilityOnboardingConfig } from './config';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../common/telemetry_events';
@@ -59,6 +60,7 @@ export class ObservabilityOnboardingPlugin
     this.esLegacyConfigService.setup(core.elasticsearch.legacy.config$);
 
     core.savedObjects.registerType(observabilityOnboardingFlow);
+    core.savedObjects.registerType(uiComment);
 
     const resourcePlugins = mapValues(plugins, (value, key) => {
       return {
