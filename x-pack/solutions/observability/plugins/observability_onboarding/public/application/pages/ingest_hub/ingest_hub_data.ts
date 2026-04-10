@@ -377,6 +377,8 @@ export interface ApiEndpoint {
   id: string;
   name: string;
   description: string;
+  details: string;
+  docsUrl: string;
   logoUrl: string;
   getEndpointUrl: (origin: string) => string;
   keyType: 'api_key' | 'enrollment_token' | 'kibana_note';
@@ -393,7 +395,9 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
   {
     id: 'endpoint-elasticsearch',
     name: 'Elasticsearch',
-    description: 'Primary datastore: index data, search, and generate analytics.',
+    description: 'Index, search, and query data via REST API.',
+    details: 'The Elasticsearch REST API is the primary interface for indexing, searching, and managing data. Use it to ingest documents, run queries, manage indices, and configure your cluster directly.',
+    docsUrl: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/rest-apis.html',
     logoUrl: `${ELASTIC_LOGOS}/elasticsearch/img/logo_elasticsearch.svg`,
     getEndpointUrl: (origin) => `${origin}/elasticsearch`,
     keyType: 'api_key',
@@ -406,7 +410,9 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
   {
     id: 'endpoint-otlp',
     name: 'OpenTelemetry',
-    description: 'Send OpenTelemetry traces, metrics, and logs.',
+    description: 'Send traces, metrics, and logs via the OTel standard.',
+    details: 'Send observability data using the OpenTelemetry Protocol (OTLP). Compatible with any OTel SDK or collector — no vendor lock-in. Ideal for traces, metrics, and logs from modern cloud-native applications.',
+    docsUrl: 'https://www.elastic.co/guide/en/observability/current/opentelemetry.html',
     logoUrl: 'https://opentelemetry.io/img/logos/opentelemetry-logo-nav.png',
     getEndpointUrl: (origin) => `${origin}/otlp`,
     keyType: 'api_key',
@@ -419,7 +425,9 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
   {
     id: 'endpoint-apm',
     name: 'Elastic APM',
-    description: 'Legacy API for datastore: index data, search, and generate analytics.',
+    description: 'Capture traces and errors with APM language agents.',
+    details: 'Elastic APM agents automatically instrument your application code to capture traces, errors, and performance metrics. Supports Node.js, Python, Java, .NET, Go, Ruby, and more.',
+    docsUrl: 'https://www.elastic.co/guide/en/apm/guide/current/index.html',
     logoUrl: `${ELASTIC_LOGOS}/apm/img/logo_apm.svg`,
     getEndpointUrl: (origin) => `${origin}/apm`,
     keyType: 'api_key',
@@ -431,7 +439,9 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
   {
     id: 'endpoint-fleet',
     name: 'Fleet',
-    description: 'Fleet server endpoint: directly ingest endpoint, metric, or log data.',
+    description: 'Enroll and manage Elastic Agents at scale.',
+    details: 'Fleet provides a web-based UI to enroll, manage, and monitor Elastic Agents across your infrastructure. Define agent policies, enable integrations, and monitor agent health from one place.',
+    docsUrl: 'https://www.elastic.co/guide/en/fleet/current/fleet-overview.html',
     logoUrl: `${ELASTIC_LOGOS}/fleet_server/img/logo_fleet_server.svg`,
     getEndpointUrl: (origin) => `${origin}/fleet`,
     keyType: 'enrollment_token',
@@ -445,7 +455,9 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
   {
     id: 'endpoint-cloud-id',
     name: 'Cloud ID',
-    description: "Used for auth with Elastic's CloudID mechanism.",
+    description: 'Connect Beats and Logstash with one encoded string.',
+    details: 'Cloud ID is a single encoded string that simplifies connecting Beats and Logstash to your Elastic Cloud deployment. It encodes your cluster URLs so you only need to provide one value in your configuration.',
+    docsUrl: 'https://www.elastic.co/guide/en/cloud/current/ec-cloud-id.html',
     logoUrl: `${ELASTIC_LOGOS}/elasticsearch/img/logo_elasticsearch.svg`,
     getEndpointUrl: () => 'My_deployment:dXMtd2VzdDIuZ2NwLmVsYXN0aWMuY29tJGM...',
     keyType: 'api_key',
@@ -457,7 +469,9 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
   {
     id: 'endpoint-kibana',
     name: 'Kibana',
-    description: 'Legacy path for ingesting and managing data directly.',
+    description: 'Manage dashboards and saved objects via REST API.',
+    details: 'The Kibana REST API lets you manage saved objects, spaces, dashboards, and alerting rules programmatically. Use it to automate Kibana configuration or integrate with external tools.',
+    docsUrl: 'https://www.elastic.co/guide/en/kibana/current/api.html',
     logoUrl: `${ELASTIC_LOGOS}/kibana/img/logo_kibana.svg`,
     getEndpointUrl: (origin) => origin,
     keyType: 'kibana_note',

@@ -7,7 +7,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { FunctionComponent } from 'react';
-import { EuiAccordion, EuiButton, EuiButtonEmpty, EuiCard, EuiCodeBlock, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiFlyout, EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader, EuiFormRow, EuiIcon, EuiLink, EuiLoadingElastic, EuiPanel, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiAccordion, EuiButton, EuiButtonEmpty, EuiCard, EuiCodeBlock, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiFlyout, EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader, EuiFormRow, EuiHorizontalRule, EuiIcon, EuiLink, EuiLoadingElastic, EuiPanel, EuiSpacer, EuiTab, EuiTabs, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { useSearchParams, useNavigate } from 'react-router-dom-v5-compat';
@@ -65,11 +65,15 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   }, [onPageReady]);
 
   const [isPageLoading, setIsPageLoading] = useState(true);
+  const [showMoreApi, setShowMoreApi] = useState(false);
   const [createdKeys, setCreatedKeys] = useState<Record<string, string>>({});
   const [createKeyFlyout, setCreateKeyFlyout] = useState<{ endpointId: string; keyName: string } | null>(null);
+  const [openAccordionId, setOpenAccordionId] = useState<string | null>(null);
+  const [flyoutTab, setFlyoutTab] = useState<'details' | 'api-key'>('details');
 
   const customCards = useCustomCards(createCollectionCardHandler);
   const searchExcludePackageIdList = isCloud ? ['epr:awsfirehose'] : [];
+
 
   return (
     <>
@@ -93,182 +97,325 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       {!isPageLoading && !integrationSearch && (
         <>
           {/* API ingestion section */}
-          <EuiTitle size="xs" css={css`margin-block-start: 56px;`}>
-            <h3>Send data via API</h3>
+          <div style={{ height: 32 }} />
+          <EuiTitle size="s">
+            <h3>API endpoints</h3>
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
             <p>Direct access to your deployment's endpoints. Create an API key to authenticate.</p>
           </EuiText>
-          <div style={{ height: 16 }} />
-          <div css={css`display: flex; flex-direction: column; gap: 12px;`}>
-            {API_ENDPOINTS.map((endpoint) => {
-              const existingKey = createdKeys[endpoint.id];
-              const isEnrollment = endpoint.keyType === 'enrollment_token';
-              const isKibanaNoteType = endpoint.keyType === 'kibana_note';
-              const endpointUrl = endpoint.getEndpointUrl(window.location.origin);
-              const flyoutEndpointId = isKibanaNoteType ? 'endpoint-elasticsearch' : endpoint.id;
-
-              return (
-                <EuiPanel
-                  key={endpoint.id}
-                  hasBorder
-                  paddingSize="none"
-                  css={css`
-                    border-radius: 8px;
-                    box-shadow: none;
-                    overflow: hidden;
-                  `}
-                >
-                  <EuiAccordion
-                    id={endpoint.id}
-                    arrowDisplay="right"
-                    paddingSize="m"
-                    css={css`
-                      .euiAccordion__triggerWrapper {
-                        padding: 16px;
-                      }
-                      .euiAccordion__childWrapper {
-                        border-top: ${euiTheme.border.thin};
-                        margin-inline: 16px;
-                      }
-                      .euiAccordion__padding--m {
-                        padding-block: 20px;
-                      }
-                    `}
-                    buttonContent={
-                      <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-                        <EuiFlexItem grow={false}>
-                          <CardLogoIcon src={endpoint.logoUrl} alt={endpoint.name} />
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          <EuiText size="s"><strong>{endpoint.name}</strong></EuiText>
-                          <EuiText size="s" color="subdued">{endpoint.description}</EuiText>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    }
-                  >
-                    <EuiFlexGroup gutterSize="m" alignItems="flexEnd" responsive={false}>
-                      {/* Endpoint URL */}
-                      <EuiFlexItem>
-                        <EuiFormRow label={endpoint.keyTypeLabel} fullWidth>
-                          <EuiCodeBlock
-                            language="text"
-                            fontSize="s"
-                            paddingSize="none"
-                            isCopyable
-                            whiteSpace="nowrap"
-                            css={css`
-                              height: 32px;
-                              overflow: hidden;
-                              .euiCodeBlock__pre,
-                              .euiCodeBlock__code {
-                                height: 32px;
-                                padding: 0 8px;
-                                line-height: 32px;
-                                overflow: hidden;
-                              }
-                              .euiCodeBlock__controls {
-                                top: 50%;
-                                transform: translateY(-50%);
-                                height: auto;
-                                display: flex;
-                                align-items: center;
-                              }
-                            `}
-                          >
-                            {endpointUrl}
-                          </EuiCodeBlock>
-                        </EuiFormRow>
-                      </EuiFlexItem>
-
-                      {/* API key / token */}
-                      <EuiFlexItem>
-                        <EuiFormRow
-                          label={isEnrollment ? 'Enrollment token' : 'API Key'}
-                          fullWidth
-                        >
-                          <EuiCodeBlock
-                            language="text"
-                            fontSize="s"
-                            paddingSize="none"
-                            isCopyable={!!existingKey}
-                            whiteSpace="nowrap"
-                            css={css`
-                              height: 32px;
-                              overflow: hidden;
-                              .euiCodeBlock__pre,
-                              .euiCodeBlock__code {
-                                height: 32px;
-                                padding: 0 8px;
-                                line-height: 32px;
-                                overflow: hidden;
-                                color: ${existingKey ? 'inherit' : euiTheme.colors.textSubdued};
-                              }
-                              .euiCodeBlock__controls {
-                                top: 50%;
-                                transform: translateY(-50%);
-                                height: auto;
-                                display: flex;
-                                align-items: center;
-                              }
-                            `}
-                          >
-                            {existingKey ?? 'No key created yet'}
-                          </EuiCodeBlock>
-                        </EuiFormRow>
-                      </EuiFlexItem>
-
-                      {/* Action button */}
-                      <EuiFlexItem grow={false}>
-                        {existingKey ? (
-                          <EuiButton
-                            size="s"
-                            iconType="refresh"
-                            onClick={() => setCreateKeyFlyout({ endpointId: flyoutEndpointId, keyName: '' })}
-                          >
-                            Regenerate
-                          </EuiButton>
-                        ) : (
-                          <EuiButton
-                            size="s"
-                            onClick={() => setCreateKeyFlyout({ endpointId: flyoutEndpointId, keyName: '' })}
-                          >
-                            {isEnrollment ? 'Create enrollment token' : 'Create API key'}
-                          </EuiButton>
-                        )}
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiAccordion>
-                </EuiPanel>
-              );
-            })}
-          </div>{/* end API cards */}
-
-          {/* Integrations section */}
-          <EuiTitle size="xs" css={css`margin-block-start: 56px;`}>
-            <h3>Send data via Integrations</h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued">
-            <p>Install pre-built integrations to collect logs, metrics, and traces from your infrastructure and services — and get assets like dashboards and alerts out of the box.</p>
-          </EuiText>
+          <div style={{ height: 24 }} />
           <div
             css={css`
               background-color: ${euiTheme.colors.backgroundBaseSubdued};
               border-radius: ${euiTheme.border.radius.medium};
               padding: 24px;
-              margin-block-start: 12px;
+            `}
+          >
+          <div css={css`display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;`}>
+            {API_ENDPOINTS.slice(0, 2).map((endpoint) => {
+              const existingKey = createdKeys[endpoint.id];
+              const isKibanaNoteType = endpoint.keyType === 'kibana_note';
+              const flyoutEndpointId = isKibanaNoteType ? 'endpoint-elasticsearch' : endpoint.id;
+              return (
+                <EuiCard
+                  key={endpoint.id}
+                  layout="horizontal"
+                  hasBorder
+                  paddingSize="none"
+                  icon={
+                    <div style={{ position: 'relative', display: 'inline-flex' }}>
+                      <CardLogoIcon src={endpoint.logoUrl} alt={endpoint.name} />
+                      <div
+                        style={{
+                          position: 'absolute',
+                          bottom: -5,
+                          right: -5,
+                          width: 20,
+                          height: 20,
+                          borderRadius: 5,
+                          backgroundColor: euiTheme.colors.backgroundBasePlain,
+                          border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <EuiIcon type="code" size="m" color={euiTheme.colors.textSubdued} />
+                      </div>
+                    </div>
+                  }
+                  title={endpoint.name}
+                  titleElement="h4"
+                  titleSize="xs"
+                  description={endpoint.description}
+                  onClick={() => { setOpenAccordionId(endpoint.id); setFlyoutTab('details'); }}
+                  css={css`
+                    border-radius: 6px;
+                    padding: 16px;
+                    box-shadow: none;
+                    cursor: pointer;
+                    .euiCard__top {
+                      margin-inline-end: 12px;
+                      flex-shrink: 0;
+                      align-self: flex-start;
+                    }
+                    .euiCard__content,
+                    .euiCard__children {
+                      margin-bottom: 0;
+                      padding-bottom: 0;
+                    }
+                    & [class*='euiCard__description'] {
+                      margin-block-start: 4px !important;
+                    }
+                  `}
+                />
+              );
+            })}
+            {showMoreApi && API_ENDPOINTS.slice(2).map((endpoint) => {
+              const existingKey = createdKeys[endpoint.id];
+              const isKibanaNoteType = endpoint.keyType === 'kibana_note';
+              const flyoutEndpointId = isKibanaNoteType ? 'endpoint-elasticsearch' : endpoint.id;
+              return (
+                <EuiCard
+                  key={endpoint.id}
+                  layout="horizontal"
+                  hasBorder
+                  paddingSize="none"
+                  icon={
+                    <div style={{ position: 'relative', display: 'inline-flex' }}>
+                      <CardLogoIcon src={endpoint.logoUrl} alt={endpoint.name} />
+                      <div
+                        style={{
+                          position: 'absolute',
+                          bottom: -5,
+                          right: -5,
+                          width: 20,
+                          height: 20,
+                          borderRadius: 5,
+                          backgroundColor: euiTheme.colors.backgroundBasePlain,
+                          border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <EuiIcon type="code" size="m" color={euiTheme.colors.textSubdued} />
+                      </div>
+                    </div>
+                  }
+                  title={endpoint.name}
+                  titleElement="h4"
+                  titleSize="xs"
+                  description={endpoint.description}
+                  onClick={() => { setOpenAccordionId(endpoint.id); setFlyoutTab('details'); }}
+                  css={css`
+                    border-radius: 6px;
+                    padding: 16px;
+                    box-shadow: none;
+                    cursor: pointer;
+                    .euiCard__top {
+                      margin-inline-end: 12px;
+                      flex-shrink: 0;
+                      align-self: flex-start;
+                    }
+                    .euiCard__content,
+                    .euiCard__children {
+                      margin-bottom: 0;
+                      padding-bottom: 0;
+                    }
+                    & [class*='euiCard__description'] {
+                      margin-block-start: 4px !important;
+                    }
+                  `}
+                />
+              );
+            })}
+          </div>
+          </div>{/* end API subdued background */}
+          <div css={css`position: relative; text-align: center; margin-top: 12px;`}>
+            <EuiHorizontalRule margin="none" css={css`position: absolute; top: 50%; transform: translateY(-50%);`} />
+            <span css={css`
+              position: relative;
+              background-color: ${euiTheme.colors.backgroundBasePlain};
+              padding: 0 8px;
+            `}>
+              <EuiButtonEmpty
+                size="s"
+                iconType={showMoreApi ? 'arrowUp' : 'arrowDown'}
+                iconSide="right"
+                onClick={() => setShowMoreApi((prev) => !prev)}
+              >
+                {showMoreApi ? 'Show less' : 'Show more'}
+              </EuiButtonEmpty>
+            </span>
+          </div>
+
+          {/* API endpoint detail flyout */}
+          {openAccordionId && (() => {
+            const endpoint = API_ENDPOINTS.find((e) => e.id === openAccordionId);
+            if (!endpoint) return null;
+            const existingKey = createdKeys[endpoint.id];
+            const isEnrollment = endpoint.keyType === 'enrollment_token';
+            const isKibanaNoteType = endpoint.keyType === 'kibana_note';
+            const endpointUrl = endpoint.getEndpointUrl(window.location.origin);
+            const flyoutEndpointId = isKibanaNoteType ? 'endpoint-elasticsearch' : endpoint.id;
+            const codeBlockCss = css`
+              height: 32px;
+              overflow: hidden;
+              .euiCodeBlock__pre,
+              .euiCodeBlock__code {
+                height: 32px;
+                padding: 0 8px;
+                line-height: 32px;
+                overflow: hidden;
+              }
+              .euiCodeBlock__controls {
+                top: 50%;
+                transform: translateY(-50%);
+                height: auto;
+                display: flex;
+                align-items: center;
+              }
+            `;
+            return (
+              <EuiFlyout
+                ownFocus
+                onClose={() => setOpenAccordionId(null)}
+                size="m"
+              >
+                <EuiFlyoutHeader>
+                  <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <CardLogoIcon src={endpoint.logoUrl} alt={endpoint.name} />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiTitle size="s"><h2>{endpoint.name}</h2></EuiTitle>
+                      <EuiText size="s" color="subdued"><p>{endpoint.description}</p></EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiSpacer size="m" />
+                  <EuiTabs>
+                    <EuiTab
+                      isSelected={flyoutTab === 'details'}
+                      onClick={() => setFlyoutTab('details')}
+                    >
+                      Details
+                    </EuiTab>
+                    <EuiTab
+                      isSelected={flyoutTab === 'api-key'}
+                      onClick={() => setFlyoutTab('api-key')}
+                    >
+                      {isEnrollment ? 'Enrollment token' : 'API Key'}
+                    </EuiTab>
+                  </EuiTabs>
+                </EuiFlyoutHeader>
+
+                <EuiFlyoutBody>
+                  {flyoutTab === 'details' && (
+                    <>
+                      <EuiText size="s">
+                        <p>{endpoint.details}</p>
+                      </EuiText>
+                      <EuiSpacer size="l" />
+                      <EuiFormRow label="Endpoint" fullWidth>
+                        <EuiCodeBlock
+                          language="text"
+                          fontSize="s"
+                          paddingSize="none"
+                          isCopyable
+                          whiteSpace="nowrap"
+                          css={codeBlockCss}
+                        >
+                          {endpointUrl}
+                        </EuiCodeBlock>
+                      </EuiFormRow>
+                      <EuiSpacer size="l" />
+                      <EuiLink href={endpoint.docsUrl} target="_blank" external>
+                        View documentation
+                      </EuiLink>
+                    </>
+                  )}
+
+                  {flyoutTab === 'api-key' && (
+                    <>
+                      <EuiText size="s" color="subdued">
+                        <p>{endpoint.keyTypeDescription}</p>
+                      </EuiText>
+                      <EuiSpacer size="l" />
+                      <EuiFormRow label={isEnrollment ? 'Enrollment token' : 'API Key'} fullWidth>
+                        <EuiCodeBlock
+                          language="text"
+                          fontSize="s"
+                          paddingSize="none"
+                          isCopyable={!!existingKey}
+                          whiteSpace="nowrap"
+                          css={css`
+                            ${codeBlockCss}
+                            .euiCodeBlock__pre,
+                            .euiCodeBlock__code {
+                              color: ${existingKey ? 'inherit' : euiTheme.colors.textSubdued};
+                            }
+                          `}
+                        >
+                          {existingKey ?? 'No key created yet'}
+                        </EuiCodeBlock>
+                      </EuiFormRow>
+                      <EuiSpacer size="m" />
+                      {existingKey ? (
+                        <EuiFlexGroup gutterSize="s" responsive={false}>
+                          <EuiFlexItem grow={false}>
+                            <EuiButton
+                              size="s"
+                              iconType="refresh"
+                              onClick={() => setCreateKeyFlyout({ endpointId: flyoutEndpointId, keyName: '' })}
+                            >
+                              Regenerate
+                            </EuiButton>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      ) : (
+                        <EuiButton
+                          size="s"
+                          fill
+                          onClick={() => setCreateKeyFlyout({ endpointId: flyoutEndpointId, keyName: '' })}
+                        >
+                          {isEnrollment ? 'Create enrollment token' : 'Create API key'}
+                        </EuiButton>
+                      )}
+                    </>
+                  )}
+                </EuiFlyoutBody>
+              </EuiFlyout>
+            );
+          })()}
+
+          {/* Integrations section */}
+          <div style={{ height: 64 }} />
+          <EuiTitle size="s">
+            <h3>Integrations</h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            <p>Pre-built integrations for your infrastructure and services. Includes dashboards, alerts, and more.</p>
+          </EuiText>
+          <div style={{ height: 24 }} />
+          <div
+            css={css`
+              background-color: ${euiTheme.colors.backgroundBaseSubdued};
+              border-radius: ${euiTheme.border.radius.medium};
+              padding: 24px;
             `}
           >
           {allSections.map((section, index) => (
             <div key={section.title}>
-              <div style={{ height: index === 0 ? 0 : 24 }} />
+              <div style={{ height: index === 0 ? 0 : 40 }} />
               <EuiText
-                size="xs"
-                color="subdued"
+                size="s"
                 css={css`
-                  font-weight: ${euiTheme.font.weight.semiBold};
+                  font-weight: ${euiTheme.font.weight.bold};
+                  color: ${euiTheme.colors.text};
                   margin-bottom: 8px;
                 `}
               >
@@ -291,12 +438,12 @@ export const OnboardingFlowForm: FunctionComponent = () => {
           ))}
 
           {/* Popular integrations row */}
-          <div style={{ height: 24 }} />
+          <div style={{ height: 40 }} />
           <EuiText
-            size="xs"
-            color="subdued"
+            size="s"
             css={css`
-              font-weight: ${euiTheme.font.weight.semiBold};
+              font-weight: ${euiTheme.font.weight.bold};
+              color: ${euiTheme.colors.text};
               margin-bottom: 8px;
             `}
           >
@@ -365,7 +512,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                     { id: 'logstash', name: 'Logstash', url: `${ELASTIC_LOGOS}/logstash/img/logo_logstash.svg` },
                     { id: 'redis', name: 'Redis', url: `${ELASTIC_LOGOS}/redis/img/logo_redis.svg` },
                     { id: 'mysql', name: 'MySQL', url: `${ELASTIC_LOGOS}/mysql/img/logo_mysql.svg` },
-                  ].map((logo, i) => (
+                  ].map((logo, i, arr) => (
                     <div
                       key={logo.id}
                       style={{
@@ -378,6 +525,8 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         marginLeft: i === 0 ? 0 : -10,
+                        zIndex: arr.length - i,
+                        position: 'relative',
                         overflow: 'hidden',
                         flexShrink: 0,
                       }}
@@ -430,7 +579,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
               `}
             />
           </div>
-          </div>{/* end subdued background */}
+          </div>{/* end integrations subdued background */}
         </>
       )}
 
@@ -522,14 +671,18 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       {/* Not ready section — shown once loaded */}
       {!isPageLoading && <div
         css={css`
-          padding-block-start: 56px;
           padding-block-end: 80px;
         `}
       >
-        <EuiTitle size="xs">
+        <div style={{ height: 64 }} />
+        <EuiTitle size="s">
           <h3>Not ready to add data?</h3>
         </EuiTitle>
-        <div style={{ height: 16 }} />
+        <EuiSpacer size="s" />
+        <EuiText size="s" color="subdued">
+          <p>Explore resources to learn more, get help, or try Elastic before connecting your data.</p>
+        </EuiText>
+        <div style={{ height: 24 }} />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
           {[
             {
@@ -565,11 +718,19 @@ export const OnboardingFlowForm: FunctionComponent = () => {
               key={item.id}
               layout="horizontal"
               icon={
-                <EuiIcon
-                  type={item.icon}
-                  size="l"
-                  color={euiTheme.colors.primary}
-                />
+                <div style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 8,
+                  backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+                  border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}>
+                  <EuiIcon type={item.icon} size="m" color={euiTheme.colors.primary} />
+                </div>
               }
               title={item.title}
               titleElement="h4"
@@ -582,11 +743,12 @@ export const OnboardingFlowForm: FunctionComponent = () => {
               css={css`
                 border-radius: 6px;
                 padding: 16px;
+                box-shadow: none;
                 cursor: pointer;
                 .euiCard__top {
-                  margin-block-end: 0 !important;
-                  margin-inline-end: 12px !important;
+                  margin-inline-end: 12px;
                   flex-shrink: 0;
+                  align-self: flex-start;
                 }
                 .euiCard__title {
                   font-family: ${euiTheme.font.family};
@@ -597,6 +759,9 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                 .euiCard__children {
                   margin-bottom: 0;
                   padding-bottom: 0;
+                }
+                & [class*='euiCard__description'] {
+                  margin-block-start: 4px !important;
                 }
               `}
             />
