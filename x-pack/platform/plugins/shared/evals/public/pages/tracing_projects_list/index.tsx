@@ -18,7 +18,7 @@ import {
   EuiPopover,
   EuiSplitButton,
   EuiRefreshInterval,
-  EuiText,
+  EuiButton,
   EuiEmptyPrompt,
   useEuiTheme,
   type EuiBasicTableColumn,
@@ -175,6 +175,7 @@ export const TracingProjectsListPage: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPopover
+            aria-label={i18n.AUTO_REFRESH_ARIA_LABEL}
             button={
               <EuiSplitButton isLoading={isFetching} data-test-subj="tracingProjectsRefresh">
                 <EuiSplitButton.ActionPrimary
@@ -208,14 +209,20 @@ export const TracingProjectsListPage: React.FC = () => {
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       {error ? (
-        <>
-          <EuiText color="danger" size="s">
-            <p>{error instanceof Error ? error.message : String(error)}</p>
-          </EuiText>
-          <EuiSpacer size="m" />
-        </>
-      ) : null}
-      {!isLoading && projects.length === 0 ? (
+        <EuiEmptyPrompt
+          color="danger"
+          iconType="warning"
+          title={<h2>{i18n.LOAD_ERROR_TITLE}</h2>}
+          body={
+            <p>{i18n.getLoadErrorBody(error instanceof Error ? error.message : String(error))}</p>
+          }
+          actions={[
+            <EuiButton onClick={() => refetch()} iconType="refresh">
+              {i18n.RETRY_BUTTON}
+            </EuiButton>,
+          ]}
+        />
+      ) : !isLoading && projects.length === 0 ? (
         <EuiEmptyPrompt
           iconType="editorStrike"
           title={<h3>{i18n.NO_PROJECTS_TITLE}</h3>}

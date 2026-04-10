@@ -22,6 +22,7 @@ import {
   EuiSplitButton,
   EuiRefreshInterval,
   EuiText,
+  EuiButton,
   EuiTitle,
   EuiEmptyPrompt,
   useEuiTheme,
@@ -224,6 +225,7 @@ export const TracingProjectDetailPage: React.FC = () => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiPopover
+                  aria-label={i18n.AUTO_REFRESH_ARIA_LABEL}
                   button={
                     <EuiSplitButton isLoading={isFetching} data-test-subj="projectTracesRefresh">
                       <EuiSplitButton.ActionPrimary
@@ -274,14 +276,20 @@ export const TracingProjectDetailPage: React.FC = () => {
         </EuiFlexGroup>
         <EuiSpacer size="m" />
         {error ? (
-          <>
-            <EuiText color="danger" size="s">
-              <p>{error instanceof Error ? error.message : String(error)}</p>
-            </EuiText>
-            <EuiSpacer size="m" />
-          </>
-        ) : null}
-        {!isLoading && (data?.traces ?? []).length === 0 ? (
+          <EuiEmptyPrompt
+            color="danger"
+            iconType="warning"
+            title={<h2>{i18n.LOAD_ERROR_TITLE}</h2>}
+            body={
+              <p>{i18n.getLoadErrorBody(error instanceof Error ? error.message : String(error))}</p>
+            }
+            actions={[
+              <EuiButton onClick={() => refetch()} iconType="refresh">
+                {i18n.RETRY_BUTTON}
+              </EuiButton>,
+            ]}
+          />
+        ) : !isLoading && (data?.traces ?? []).length === 0 ? (
           <EuiEmptyPrompt
             iconType="editorStrike"
             title={<h3>{i18n.NO_TRACES_TITLE}</h3>}

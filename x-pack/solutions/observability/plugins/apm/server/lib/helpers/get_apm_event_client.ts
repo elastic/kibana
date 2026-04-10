@@ -8,6 +8,7 @@
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { DataTier } from '@kbn/observability-shared-plugin/common';
 import { searchExcludedDataTiers } from '@kbn/observability-plugin/common/ui_settings_keys';
+import { getProjectRoutingFromRequest } from '@kbn/observability-utils-server/es/get_project_routing_from_request';
 import { APMEventClient } from './create_es_client/create_apm_event_client';
 import { withApmSpan } from '../../utils/with_apm_span';
 import type { MinimalAPMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
@@ -38,6 +39,8 @@ export async function getApmEventClient({
       }),
     ]);
 
+    const projectRouting = getProjectRoutingFromRequest(request);
+
     return new APMEventClient({
       esClient: coreContext.elasticsearch.client.asCurrentUser,
       debug: params.query._inspect,
@@ -47,6 +50,7 @@ export async function getApmEventClient({
         includeFrozen: uiSettings.includeFrozen,
         excludedDataTiers: uiSettings.excludedDataTiers,
         inspectableEsQueriesMap,
+        projectRouting,
       },
     });
   });
