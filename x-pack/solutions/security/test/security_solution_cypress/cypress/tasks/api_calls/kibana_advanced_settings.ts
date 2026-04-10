@@ -33,7 +33,14 @@ export const setPreferredChatExperienceToAgent = () => {
 };
 
 export const setPreferredChatExperienceToClassic = () => {
-  setKibanaSetting(AI_CHAT_EXPERIENCE_TYPE, 'classic');
+  // Specs often set classic mode via `ftrConfig.kbnServerArgs` (`--uiSettings.overrides...`).
+  // Re-applying the same value via this API then returns 400; tolerate so local runs still work.
+  rootRequest({
+    method: 'POST',
+    url: 'internal/kibana/settings',
+    body: { changes: { [AI_CHAT_EXPERIENCE_TYPE]: 'classic' } },
+    failOnStatusCode: false,
+  });
 };
 
 export const setExtendedRuleExecutionLoggingMinLevel = (level: string) => {
