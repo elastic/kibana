@@ -359,6 +359,7 @@ export const useTrace = (traceId: string | null) => {
 interface TracingProjectsFilters {
   from?: string;
   to?: string;
+  name?: string;
   page?: number;
   perPage?: number;
 }
@@ -379,6 +380,7 @@ export const useTracingProjects = (
       const query: Record<string, string | number> = {};
       if (filters.from) query.from = filters.from;
       if (filters.to) query.to = filters.to;
+      if (filters.name) query.name = filters.name;
       if (filters.page) query.page = filters.page;
       if (filters.perPage) query.per_page = filters.perPage;
 

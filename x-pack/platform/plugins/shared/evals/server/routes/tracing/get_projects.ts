@@ -37,7 +37,7 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
       },
       async (context, request, response) => {
         try {
-          const { from, to, page, per_page: perPage } = request.query;
+          const { from, to, name: nameFilter, page, per_page: perPage } = request.query;
           const coreContext = await context.core;
           const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
@@ -47,6 +47,13 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
             if (from) range.gte = from;
             if (to) range.lte = to;
             rangeFilter.push({ range: { '@timestamp': range } });
+          }
+
+          if (nameFilter) {
+            const escaped = nameFilter.replace(/[\\\*\?]/g, (ch: string) => `\\${ch}`);
+            rangeFilter.push({
+              wildcard: { name: { value: `*${escaped}*`, case_insensitive: true } },
+            });
           }
 
           const searchResponse = await esClient.search({

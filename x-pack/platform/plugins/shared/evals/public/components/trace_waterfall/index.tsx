@@ -181,12 +181,17 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ traceId, layout 
       };
     }, [data, hideNoise]);
 
+  const isInitialSelectionRef = useRef(true);
   useEffect(() => {
-    if (flatSpans.length > 0 && !selectedSpanId) {
+    isInitialSelectionRef.current = true;
+  }, [traceId]);
+  useEffect(() => {
+    if (isInitialSelectionRef.current && flatSpans.length > 0) {
+      isInitialSelectionRef.current = false;
       setSelectedSpanId(flatSpans[0].span_id);
       setFocusedIndex(0);
     }
-  }, [flatSpans, selectedSpanId]);
+  }, [flatSpans]);
 
   const handleSpanClick = useCallback(
     (spanId: string) => {
@@ -232,7 +237,7 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ traceId, layout 
         color="danger"
         iconType="error"
       >
-        <p>{String(error)}</p>
+        <p>{error instanceof Error ? error.message : String(error)}</p>
       </EuiCallOut>
     );
   }

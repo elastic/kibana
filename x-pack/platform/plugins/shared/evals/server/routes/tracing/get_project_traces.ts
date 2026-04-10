@@ -17,6 +17,8 @@ import {
 import { PLUGIN_ID } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
+const escapeWildcard = (input: string): string => input.replace(/[\\\*\?]/g, (ch) => `\\${ch}`);
+
 interface RootSpanSource {
   trace_id?: string;
   name?: string;
@@ -71,13 +73,14 @@ export const registerGetProjectTracesRoute = ({ router, logger }: RouteDependenc
           }
 
           if (nameFilter) {
+            const escaped = escapeWildcard(nameFilter);
             filters.push({
               bool: {
                 should: [
                   {
                     wildcard: {
                       'attributes.input.value': {
-                        value: `*${nameFilter}*`,
+                        value: `*${escaped}*`,
                         case_insensitive: true,
                       },
                     },
@@ -85,7 +88,7 @@ export const registerGetProjectTracesRoute = ({ router, logger }: RouteDependenc
                   {
                     wildcard: {
                       'attributes.output.value': {
-                        value: `*${nameFilter}*`,
+                        value: `*${escaped}*`,
                         case_insensitive: true,
                       },
                     },
@@ -93,7 +96,7 @@ export const registerGetProjectTracesRoute = ({ router, logger }: RouteDependenc
                   {
                     wildcard: {
                       'attributes.gen_ai.prompt.id': {
-                        value: `*${nameFilter}*`,
+                        value: `*${escaped}*`,
                         case_insensitive: true,
                       },
                     },
