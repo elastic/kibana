@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import { mockInferenceEndpoints } from '../fixtures/mock_data/inference_endpoints';
 
 test.describe(
   'Feature Settings',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: ['@local-stateful-classic', '@local-serverless-search'] },
   () => {
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsPrivilegedUser();

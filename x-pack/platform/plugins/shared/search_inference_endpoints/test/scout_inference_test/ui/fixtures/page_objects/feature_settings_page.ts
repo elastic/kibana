@@ -139,7 +139,18 @@ export class FeatureSettingsPage {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ connectors: [{ connectorId: 'mock-connector' }] }),
+        body: JSON.stringify({
+          connectors: [
+            {
+              connectorId: 'mock-connector',
+              name: 'Mock Connector',
+              type: '.gen-ai',
+              config: {},
+              capabilities: {},
+              isPreconfigured: false,
+            },
+          ],
+        }),
       });
     });
   }
