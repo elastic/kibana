@@ -62,7 +62,6 @@ dependsOn:
   - '@kbn/mcp-client'
   - '@kbn/actions-types'
   - '@kbn/std'
-  - '@kbn/management-settings-ids'
 tags:
   - plugin
   - prod
