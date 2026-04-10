@@ -10,7 +10,13 @@ import { LOGS_ECS_STREAM_NAME, LOGS_OTEL_STREAM_NAME } from '@kbn/streams-schema
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
-import { deleteStream, disableStreams, enableStreams, forkStream, indexDocument } from './helpers/requests';
+import {
+  deleteStream,
+  disableStreams,
+  enableStreams,
+  forkStream,
+  indexDocument,
+} from './helpers/requests';
 
 const sortNames = (names: string[]) => [...names].sort();
 
