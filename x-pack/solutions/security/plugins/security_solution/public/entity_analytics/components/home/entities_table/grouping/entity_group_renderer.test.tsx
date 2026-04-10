@@ -239,7 +239,7 @@ describe('groupStatsRenderer', () => {
       expect(screen.getByText('73.18')).toBeInTheDocument();
     });
 
-    it('risk score badge shows en-dash for null score', () => {
+    it('risk score badge shows N/A for null score', () => {
       const bucket = createMockBucket({
         doc_count: 1,
         resolutionRiskScore: { value: null },
@@ -248,7 +248,7 @@ describe('groupStatsRenderer', () => {
 
       render(<TestProviders>{stats[1].component}</TestProviders>);
 
-      expect(screen.getByText('—')).toBeInTheDocument();
+      expect(screen.getByText('N/A')).toBeInTheDocument();
     });
 
     it('risk score stat is present even when resolutionRiskScore is undefined', () => {
@@ -259,7 +259,7 @@ describe('groupStatsRenderer', () => {
 
       render(<TestProviders>{stats[1].component}</TestProviders>);
 
-      expect(screen.getByText('—')).toBeInTheDocument();
+      expect(screen.getByText('N/A')).toBeInTheDocument();
     });
   });
 
