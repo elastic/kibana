@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ESQLMessage, EditorError } from '@kbn/esql-language/src/commands/definitions/types';
+import type { ESQLMessage, EditorError } from '@kbn/esql-language';
 import { compact } from 'lodash';
 
 export function formatQueryWithErrors(
