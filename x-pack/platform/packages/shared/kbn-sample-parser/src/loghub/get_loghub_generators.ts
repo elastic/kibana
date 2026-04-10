@@ -71,7 +71,8 @@ export async function getLoghubGenerators({
         const share = systemRpm / totalRpm;
         targetRpm = rpm === undefined ? Math.min(100, systemRpm) : share * rpm;
       } else {
-        targetRpm = Math.round(rpm / results.length);
+        // Uniform: never round down below a fair share (e.g. rpm=100 across 6 systems).
+        targetRpm = Math.ceil(rpm / results.length);
       }
 
       return createLoghubGenerator({

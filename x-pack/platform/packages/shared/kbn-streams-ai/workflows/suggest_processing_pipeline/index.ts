@@ -104,6 +104,9 @@ export async function suggestProcessingPipeline({
     prompt: SuggestIngestPipelinePrompt,
     input,
     maxSteps: effectiveMaxSteps,
+    // `low` skips injecting `reason` / `complete` planning tools (only `simulate_pipeline` +
+    // `commit_pipeline` from the prompt). `ReasoningPower` is `'low' | 'medium' | 'high'` only.
+    power: 'low',
     toolCallbacks: {
       simulate_pipeline: async (toolCall) => {
         // 1. Validate the pipeline schema
