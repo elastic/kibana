@@ -7,6 +7,7 @@
 
 import {
   COMMENT_ATTACHMENT_TYPE,
+  SECURITY_EVENT_ATTACHMENT_TYPE,
   PERSISTABLE_ATTACHMENT_TYPES,
 } from '../../../common/constants/attachments';
 import {

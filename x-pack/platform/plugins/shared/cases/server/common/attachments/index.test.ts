@@ -96,7 +96,7 @@ describe('common/attachments', () => {
     });
 
     it('returns configured persistable state transformer for known visualization types', () => {
-      const lensTransformer = getAttachmentTypeTransformers(LENS_ATTACHMENT_TYPE);
+      const lensTransformer = getAttachmentTypeTransformers(LENS_ATTACHMENT_TYPE, owner);
       expect(lensTransformer).not.toBe(commentAttachmentTransformer);
       expect(
         lensTransformer.isLegacyType({

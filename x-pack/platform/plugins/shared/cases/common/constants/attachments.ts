@@ -4,18 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER, GENERAL_CASES_OWNER } from './owners';
+
 // ----------------Unified attachment types-------------------------
 export const COMMENT_ATTACHMENT_TYPE = 'comment';
 export const SECURITY_EVENT_ATTACHMENT_TYPE = 'security.event';
 export const LENS_ATTACHMENT_TYPE = 'lens';
 
-// ----------------Legacy attachment type names-------------------------
-export const LEGACY_ACTIONS_ATTACHMENT_TYPE = 'actions';
-export const LEGACY_ALERT_ATTACHMENT_TYPE = 'alert';
-export const LEGACY_EVENT_ATTACHMENT_TYPE = 'event';
-export const LEGACY_EXTERNAL_REFERENCE_ATTACHMENT_TYPE = 'externalReference';
-export const LEGACY_PERSISTABLE_STATE_ATTACHMENT_TYPE = 'persistableState';
-export const LEGACY_COMMENT_ATTACHMENT_TYPE = 'user';
+// ----------------Legacy attachment types-------------------------
+export const LEGACY_ACTIONS_TYPE = 'actions';
+export const LEGACY_ALERT_TYPE = 'alert';
+export const LEGACY_EVENT_TYPE = 'event';
+export const LEGACY_EXTERNAL_REFERENCE_TYPE = 'externalReference';
+export const LEGACY_PERSISTABLE_STATE_TYPE = 'persistableState';
+export const LEGACY_USER_TYPE = 'user';
 
 export const LEGACY_LENS_ATTACHMENT_TYPE = '.lens';
 
@@ -26,12 +28,6 @@ export const LEGACY_ATTACHMENT_TYPES = new Set([
   LEGACY_EXTERNAL_REFERENCE_TYPE,
   LEGACY_PERSISTABLE_STATE_TYPE,
   LEGACY_USER_TYPE,
-  LEGACY_ACTIONS_ATTACHMENT_TYPE,
-  LEGACY_ALERT_ATTACHMENT_TYPE,
-  LEGACY_EVENT_ATTACHMENT_TYPE,
-  LEGACY_EXTERNAL_REFERENCE_ATTACHMENT_TYPE,
-  LEGACY_PERSISTABLE_STATE_ATTACHMENT_TYPE,
-  LEGACY_COMMENT_ATTACHMENT_TYPE,
 ]);
 
 export const UNIFIED_ATTACHMENT_TYPES = new Set([
@@ -69,11 +65,9 @@ export const UNIFIED_TO_LEGACY_MAP: Record<string, string> = {
  * Attachment type identifiers that are migrated to unified read/write behavior.
  */
 export const MIGRATED_ATTACHMENT_TYPES = new Set<string>([
-  
   COMMENT_ATTACHMENT_TYPE,
   SECURITY_EVENT_ATTACHMENT_TYPE,
   ...PERSISTABLE_ATTACHMENT_TYPES,
-  
 ]);
 
 export const OWNER_TO_PREFIX_MAP: Partial<Record<string, string>> = {
