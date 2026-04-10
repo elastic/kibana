@@ -170,6 +170,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                         total_alerts_created: null,
                         gap_duration_s: null,
                         gap_range: null,
+                        gap_reason: null,
                       },
                     },
                   },
