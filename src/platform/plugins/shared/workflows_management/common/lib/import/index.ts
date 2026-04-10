@@ -54,7 +54,7 @@ export const WORKFLOW_EXPORT_VERSION = '1';
 export { MAX_WORKFLOW_YAML_LENGTH };
 
 export const WorkflowExportEntrySchema = z.object({
-  id: z.string(),
+  id: z.string().min(3).max(255).regex(WORKFLOW_ID_PATTERN),
   yaml: z.string().max(MAX_WORKFLOW_YAML_LENGTH),
 });
 
