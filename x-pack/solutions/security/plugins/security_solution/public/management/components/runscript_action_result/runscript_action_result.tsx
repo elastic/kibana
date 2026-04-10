@@ -17,6 +17,7 @@ import type {
   ResponseActionRunScriptOutputContent,
 } from '../../../../common/endpoint/types';
 import { RunscriptOutput } from './runscript_action_output';
+import { CrowdstrikeRunscriptOutput } from './crowdstrike_runscript_output';
 
 export interface RunscriptActionResultProps {
   action: MaybeImmutable<
@@ -52,6 +53,17 @@ export const RunscriptActionResult = memo<RunscriptActionResultProps>(
       if (action.agentType === 'microsoft_defender_endpoint') {
         return (
           <RunscriptOutput
+            action={action}
+            agentId={agentId}
+            data-test-subj={`${dataTestSubj}-output`}
+            textSize={textSize}
+          />
+        );
+      }
+
+      if (action.agentType === 'crowdstrike') {
+        return (
+          <CrowdstrikeRunscriptOutput
             action={action}
             agentId={agentId}
             data-test-subj={`${dataTestSubj}-output`}
