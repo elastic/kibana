@@ -24,7 +24,7 @@ export const RESOLUTION_GROUP_LINK_TOOLTIP = i18n.translate(
 
 export const RESOLUTION_EMPTY_STATE = i18n.translate(
   'xpack.securitySolution.entityResolution.emptyState',
-  { defaultMessage: 'No entity resolution' }
+  { defaultMessage: 'No resolved entities' }
 );
 
 export const ENTITY_NAME_COLUMN = i18n.translate(

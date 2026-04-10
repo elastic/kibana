@@ -226,10 +226,21 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
   }
 
   if (!hasGroup) {
+    const emptyColumns: Array<EuiBasicTableColumn<TableEntityRow>> = [
+      { name: ENTITY_NAME_COLUMN, render: () => null },
+      { name: ENTITY_ID_COLUMN, render: () => null },
+      { name: SOURCE_COLUMN, render: () => null },
+      { name: RISK_SCORE_COLUMN, width: '100px', render: () => null },
+    ];
+
     return (
-      <EuiText size="xs" color="subdued" data-test-subj={RESOLUTION_EMPTY_STATE_TEST_ID}>
-        {RESOLUTION_EMPTY_STATE}
-      </EuiText>
+      <EuiBasicTable
+        data-test-subj={RESOLUTION_EMPTY_STATE_TEST_ID}
+        items={[]}
+        columns={emptyColumns}
+        noItemsMessage={RESOLUTION_EMPTY_STATE}
+        compressed
+      />
     );
   }
 
