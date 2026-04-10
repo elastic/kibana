@@ -21,7 +21,6 @@ import { buildRouteValidation } from '../../utils/build_validation/route_validat
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { createActionHandler } from '../../handlers';
 import { parser as OsqueryParser } from './osquery_parser';
-import { getUserInfo } from '../../lib/get_user_info';
 import { isOsqueryResponseActionAuthorized } from '../../lib/check_response_action_authz';
 
 export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
