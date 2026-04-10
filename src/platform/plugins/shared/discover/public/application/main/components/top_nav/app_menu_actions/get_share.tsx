@@ -257,7 +257,7 @@ export const getShareAppMenuItem = ({
   const menuItems: AppMenuItemType[] = [
     {
       id: AppMenuActionId.share,
-      order: 3,
+      order: 1,
       label: i18n.translate('discover.localMenu.shareTitle', {
         defaultMessage: 'Share',
       }),
