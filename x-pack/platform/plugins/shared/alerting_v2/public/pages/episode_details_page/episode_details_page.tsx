@@ -551,6 +551,7 @@ export function EpisodeDetailsPage() {
                 episodeAction={episodeAction}
                 groupAction={groupAction}
                 http={http}
+                expressions={expressions}
                 buttonsOutlined={false}
               />,
             ]}
