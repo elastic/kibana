@@ -59,6 +59,7 @@ export const getControlsGroupSchema = () => {
         },
         {
           meta: {
+            id: 'kbn-controls-schemas_controlsGroupSchema_ESQL_CONTROL',
             title: ESQL_CONTROL,
           },
         }
@@ -71,6 +72,7 @@ export const getControlsGroupSchema = () => {
         },
         {
           meta: {
+            id: 'kbn-controls-schemas_controlsGroupSchema_OPTIONS_LIST_CONTROL',
             title: OPTIONS_LIST_CONTROL,
           },
         }
@@ -83,6 +85,7 @@ export const getControlsGroupSchema = () => {
         },
         {
           meta: {
+            id: 'kbn-controls-schemas_controlsGroupSchema_RANGE_SLIDER_CONTROL',
             title: RANGE_SLIDER_CONTROL,
           },
         }
@@ -95,6 +98,7 @@ export const getControlsGroupSchema = () => {
         },
         {
           meta: {
+            id: 'kbn-controls-schemas_controlsGroupSchema_TIME_SLIDER_CONTROL',
             title: TIME_SLIDER_CONTROL,
           },
         }
