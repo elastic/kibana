@@ -59,18 +59,32 @@ export interface EditorHandlers<
   Output extends z.ZodType = z.ZodType,
   Config extends z.ZodObject = z.ZodObject
 > {
-  config?: EditorHandlersConfig<Config>;
-  input?: EditorHandlersInput<Input>;
+  config?: EditorHandlersConfig<Config, Input>;
+  input?: EditorHandlersInput<Input, Config>;
   dynamicSchema?: DynamicSchema<Input, Output, Config>;
 }
 
-export type EditorHandlersConfig<Config extends z.ZodObject = z.ZodObject> = {
-  [K in DotKeysOf<z.infer<Config>>]?: StepPropertyHandler<DotObject<z.infer<Config>>[K]>;
+export type EditorHandlersConfig<
+  Config extends z.ZodObject = z.ZodObject,
+  Input extends z.ZodType = z.ZodType
+> = {
+  [K in DotKeysOf<z.infer<Config>>]?: StepPropertyHandler<
+    DotObject<z.infer<Config>>[K],
+    z.infer<Config>,
+    Input extends z.ZodObject ? z.infer<Input> : Record<string, unknown>
+  >;
 };
 
-export type EditorHandlersInput<Input extends z.ZodType = z.ZodType> = Input extends z.ZodObject
+export type EditorHandlersInput<
+  Input extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject
+> = Input extends z.ZodObject
   ? {
-      [K in DotKeysOf<z.infer<Input>>]?: StepPropertyHandler<DotObject<z.infer<Input>>[K]>;
+      [K in DotKeysOf<z.infer<Input>>]?: StepPropertyHandler<
+        DotObject<z.infer<Input>>[K],
+        z.infer<Config>,
+        z.infer<Input>
+      >;
     }
   : {};
 
