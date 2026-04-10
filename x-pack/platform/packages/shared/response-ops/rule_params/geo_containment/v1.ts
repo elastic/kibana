@@ -8,19 +8,28 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
-export const trackingContainmentRuleParamsSchema = schema.object({
-  index: schema.string({ minLength: 1 }),
-  indexId: schema.string({ minLength: 1 }),
-  geoField: schema.string({ minLength: 1 }),
-  entity: schema.string({ minLength: 1 }),
-  dateField: schema.string({ minLength: 1 }),
-  boundaryType: schema.string({ minLength: 1 }),
-  boundaryIndexTitle: schema.string({ minLength: 1 }),
-  boundaryIndexId: schema.string({ minLength: 1 }),
-  boundaryGeoField: schema.string({ minLength: 1 }),
-  boundaryNameField: schema.maybe(schema.string({ minLength: 1 })),
-  indexQuery: schema.maybe(schema.any({})),
-  boundaryIndexQuery: schema.maybe(schema.any({})),
-});
+export const trackingContainmentRuleParamsSchema = schema.object(
+  {
+    index: schema.string({ minLength: 1 }),
+    indexId: schema.string({ minLength: 1 }),
+    geoField: schema.string({ minLength: 1 }),
+    entity: schema.string({ minLength: 1 }),
+    dateField: schema.string({ minLength: 1 }),
+    boundaryType: schema.string({ minLength: 1 }),
+    boundaryIndexTitle: schema.string({ minLength: 1 }),
+    boundaryIndexId: schema.string({ minLength: 1 }),
+    boundaryGeoField: schema.string({ minLength: 1 }),
+    boundaryNameField: schema.maybe(schema.string({ minLength: 1 })),
+    indexQuery: schema.maybe(schema.any({})),
+    boundaryIndexQuery: schema.maybe(schema.any({})),
+  },
+  {
+    meta: {
+      title: 'Geo Containment Rule Params',
+      description:
+        'The parameters for the geo containment rule. These parameters are appropriate when `rule_type_id` is `.geo-containment`.',
+    },
+  }
+);
 
 export type TrackingContainmentRuleParams = TypeOf<typeof trackingContainmentRuleParamsSchema>;

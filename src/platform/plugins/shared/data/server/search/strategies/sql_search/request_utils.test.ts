@@ -97,7 +97,7 @@ describe('request utils', () => {
   });
 
   describe('getDefaultAsyncGetParams', () => {
-    test('Uses `wait_for_completion_timeout`', async () => {
+    test('Uses `wait_for_completion_timeout` from pollLength', async () => {
       const mockConfig = getMockSearchConfig({
         sessions: {
           defaultExpiration: moment.duration(3, 'd'),
@@ -105,7 +105,7 @@ describe('request utils', () => {
         },
       });
       const params = getDefaultAsyncGetParams(mockConfig, {});
-      expect(params).toHaveProperty('wait_for_completion_timeout');
+      expect(params).toHaveProperty('wait_for_completion_timeout', '2000ms');
     });
 
     test('Uses `keep_alive` if `sessionId` is not provided', async () => {
