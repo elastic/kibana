@@ -67,6 +67,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await dashboard.loadSavedDashboard(dashboardName);
+        await dashboard.waitForRenderComplete();
+        await header.waitUntilLoadingHasFinished();
 
         await retry.try(async () => {
           const time = await timePicker.getTimeConfig();
