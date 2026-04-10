@@ -74,4 +74,23 @@ describe('CustomizeLandingEmptyState', () => {
 
     expect(screen.getByTestId('emptyStateFooterContent')).toHaveTextContent('Footer note');
   });
+
+  it('renders learn more suffix as plain text after the link', () => {
+    renderWithIntl(
+      <CustomizeLandingEmptyState
+        dataTestSubj="suffixTest"
+        illustrationSrc="https://example.com/illustration.svg"
+        title="Title"
+        description="Body."
+        learnMoreHref="https://example.com/docs"
+        learnMoreLabel="Learn more"
+        learnMoreSuffix=" about plugins."
+      />
+    );
+
+    const learnMore = screen.getByTestId('suffixTestLearnMoreLink');
+    expect(learnMore).toHaveAttribute('href', 'https://example.com/docs');
+    expect(learnMore).toHaveTextContent('Learn more');
+    expect(screen.getByText(/about plugins\./)).toBeInTheDocument();
+  });
 });

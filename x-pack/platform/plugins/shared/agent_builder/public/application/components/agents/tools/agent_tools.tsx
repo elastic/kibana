@@ -52,7 +52,7 @@ import { ICON_DIMENSIONS } from '../common/constants';
 import { useListDetailPageStyles } from '../common/styles';
 import { useCanEditAgent } from '../../../hooks/agents/use_can_edit_agent';
 import { CustomizeLandingEmptyState } from '../common/customize_landing_empty_state';
-import toolsIllustration from '../overview/assets/handshake.svg';
+import toolsIllustration from '../overview/assets/wrench_gear.svg';
 
 const ActiveToolsList: React.FC<{
   filteredActiveTools: ToolDefinition[];
@@ -374,7 +374,8 @@ export const AgentTools: React.FC = () => {
             title={labels.agentTools.emptyStateTitle}
             description={toolsEmptyDescription}
             learnMoreHref={docLinksService.tools}
-            learnMoreLabel={labels.agentTools.emptyStateLearnMore}
+            learnMoreLabel={labels.customizeLandingEmptyState.learnMore}
+            learnMoreSuffix={labels.agentTools.emptyStateLearnMoreSuffix}
             footer={toolsEmptyStateFooter}
             primaryAction={
               canEditAgent ? (

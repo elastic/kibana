@@ -375,7 +375,8 @@ export const AgentSkills: React.FC = () => {
             title={labels.agentSkills.emptyStateTitle}
             description={skillsEmptyDescription}
             learnMoreHref={docLinksService.agentBuilderAgents}
-            learnMoreLabel={labels.agentSkills.emptyStateLearnMore}
+            learnMoreLabel={labels.customizeLandingEmptyState.learnMore}
+            learnMoreSuffix={labels.agentSkills.emptyStateLearnMoreSuffix}
             footer={skillsEmptyStateFooter}
             primaryAction={
               canEditAgent ? (

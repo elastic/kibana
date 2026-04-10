@@ -988,9 +988,12 @@ export const labels = {
     emptyStateTitle: i18n.translate('xpack.agentBuilder.agentSkills.emptyStateTitle', {
       defaultMessage: 'No skills added yet',
     }),
-    emptyStateLearnMore: i18n.translate('xpack.agentBuilder.agentSkills.emptyStateLearnMore', {
-      defaultMessage: 'Learn more about skills',
-    }),
+    emptyStateLearnMoreSuffix: i18n.translate(
+      'xpack.agentBuilder.agentSkills.emptyStateLearnMoreSuffix',
+      {
+        defaultMessage: ' about skills.',
+      }
+    ),
     emptyStateAddButton: i18n.translate('xpack.agentBuilder.agentSkills.emptyStateAddButton', {
       defaultMessage: 'Add skills',
     }),
@@ -1209,9 +1212,12 @@ export const labels = {
     emptyStateTitle: i18n.translate('xpack.agentBuilder.agentPlugins.emptyStateTitle', {
       defaultMessage: 'No plugins added yet',
     }),
-    emptyStateLearnMore: i18n.translate('xpack.agentBuilder.agentPlugins.emptyStateLearnMore', {
-      defaultMessage: 'Learn more about plugins',
-    }),
+    emptyStateLearnMoreSuffix: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.emptyStateLearnMoreSuffix',
+      {
+        defaultMessage: ' about plugins.',
+      }
+    ),
     emptyStateAddButton: i18n.translate('xpack.agentBuilder.agentPlugins.emptyStateAddButton', {
       defaultMessage: 'Add plugins',
     }),
@@ -1388,9 +1394,12 @@ export const labels = {
     emptyStateTitle: i18n.translate('xpack.agentBuilder.agentTools.emptyStateTitle', {
       defaultMessage: 'No tools added yet',
     }),
-    emptyStateLearnMore: i18n.translate('xpack.agentBuilder.agentTools.emptyStateLearnMore', {
-      defaultMessage: 'Learn more about tools',
-    }),
+    emptyStateLearnMoreSuffix: i18n.translate(
+      'xpack.agentBuilder.agentTools.emptyStateLearnMoreSuffix',
+      {
+        defaultMessage: ' about tools.',
+      }
+    ),
     emptyStateAddButton: i18n.translate('xpack.agentBuilder.agentTools.emptyStateAddButton', {
       defaultMessage: 'Add tools',
     }),

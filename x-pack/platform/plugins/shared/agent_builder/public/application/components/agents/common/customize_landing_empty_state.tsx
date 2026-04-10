@@ -27,6 +27,7 @@ export interface CustomizeLandingEmptyStateProps {
   description: React.ReactNode;
   learnMoreHref: string;
   learnMoreLabel?: string;
+  learnMoreSuffix?: React.ReactNode;
   primaryAction?: React.ReactNode;
   secondaryAction?: React.ReactNode;
   footer?: React.ReactNode;
@@ -39,6 +40,7 @@ export const CustomizeLandingEmptyState: React.FC<CustomizeLandingEmptyStateProp
   description,
   learnMoreHref,
   learnMoreLabel = labels.customizeLandingEmptyState.learnMore,
+  learnMoreSuffix,
   primaryAction,
   secondaryAction,
   footer,
@@ -124,6 +126,7 @@ export const CustomizeLandingEmptyState: React.FC<CustomizeLandingEmptyStateProp
                 >
                   {learnMoreLabel}
                 </EuiLink>
+                {learnMoreSuffix}
               </div>
             </EuiText>
             {primaryAction || secondaryAction ? (

@@ -11,7 +11,7 @@ import { labels } from '../../../utils/i18n';
 import { CapabilityCard } from './capability_card';
 import skillsImage from './assets/connected-power-plug.svg';
 import pluginsImage from './assets/projects-folder.svg';
-import toolsImage from './assets/handshake.svg';
+import toolsImage from './assets/wrench_gear.svg';
 const { agentOverview: overviewLabels } = labels;
 
 export interface CapabilitiesSectionProps {

@@ -372,7 +372,8 @@ export const AgentPlugins: React.FC = () => {
             title={labels.agentPlugins.emptyStateTitle}
             description={pluginsEmptyDescription}
             learnMoreHref={docLinksService.agentBuilderAgents}
-            learnMoreLabel={labels.agentPlugins.emptyStateLearnMore}
+            learnMoreLabel={labels.customizeLandingEmptyState.learnMore}
+            learnMoreSuffix={labels.agentPlugins.emptyStateLearnMoreSuffix}
             footer={pluginsEmptyStateFooter}
             primaryAction={
               canEditAgent ? (
