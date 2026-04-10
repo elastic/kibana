@@ -78,7 +78,7 @@ export const CustomizeLandingEmptyState: React.FC<CustomizeLandingEmptyStateProp
   `;
 
   const footerRegionCss = css`
-    padding: ${euiTheme.size.m} ${euiTheme.size.l};
+    padding: 24px;
     background-color: ${euiTheme.colors.backgroundBaseSubdued};
     border-radius: 0 0 ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium};
   `;

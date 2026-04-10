@@ -383,7 +383,7 @@ export const AgentSkills: React.FC = () => {
                 <EuiButton
                   data-test-subj="agentSkillsCustomizeEmptyStateAddButton"
                   fill
-                  iconType="plusInCircle"
+                  iconType="plus"
                   iconSide="left"
                   onClick={openLibrary}
                 >

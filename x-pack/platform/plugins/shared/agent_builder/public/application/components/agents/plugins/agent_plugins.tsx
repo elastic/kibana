@@ -383,7 +383,7 @@ export const AgentPlugins: React.FC = () => {
                     <EuiButton
                       data-test-subj="agentPluginsCustomizeEmptyStateInstallButton"
                       fill
-                      iconType="plusInCircle"
+                      iconType="plus"
                       iconSide="left"
                       onClick={() => setIsEmptyInstallMenuOpen((prev) => !prev)}
                     >

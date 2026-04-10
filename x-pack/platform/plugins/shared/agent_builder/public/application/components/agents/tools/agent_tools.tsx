@@ -382,7 +382,7 @@ export const AgentTools: React.FC = () => {
                 <EuiButton
                   data-test-subj="agentToolsCustomizeEmptyStateAddButton"
                   fill
-                  iconType="plusInCircle"
+                  iconType="plus"
                   iconSide="left"
                   onClick={openLibrary}
                 >
