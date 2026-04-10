@@ -14,6 +14,34 @@ import { bulkGet } from './bulk_get';
 describe('bulkGet', () => {
   const caseSO = mockCases[0];
 
+  it('returns updated totalEvents from attachment stats', async () => {
+    const clientArgs = createCasesClientMockArgs();
+    clientArgs.services.caseService.getCases.mockResolvedValue({
+      saved_objects: [caseSO],
+    });
+    clientArgs.authorization.getAndEnsureAuthorizedEntities.mockResolvedValue({
+      authorized: [caseSO],
+      unauthorized: [],
+    });
+    clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+      new Map([
+        [
+          caseSO.id,
+          {
+            alerts: 0,
+            userComments: 1,
+            events: 3,
+          },
+        ],
+      ])
+    );
+
+    const res = await bulkGet({ ids: [caseSO.id] }, clientArgs);
+
+    expect(res.errors).toEqual([]);
+    expect(res.cases[0]).toEqual(expect.objectContaining({ totalEvents: 3, totalComment: 1 }));
+  });
+
   describe('errors', () => {
     const clientArgs = createCasesClientMockArgs();
     clientArgs.authorization.getAndEnsureAuthorizedEntities.mockResolvedValue({
