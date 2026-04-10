@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type MouseEvent } from 'react';
+import React, { useState, type MouseEvent } from 'react';
 import { EuiHeaderLink, EuiHideFor, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { upperFirst } from 'lodash';
 import { css } from '@emotion/react';
@@ -49,11 +49,13 @@ export const AppMenuItem = ({
   const { title, content } = getTooltip({ tooltipContent, tooltipTitle });
   const showTooltip = Boolean(content || title);
   const hasItems = items && items.length > 0;
+  const [anchorDomElement, setAnchorDomElement] = useState<HTMLElement | null>(null);
 
   const handleClick = (event: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
     if (isDisabled(disableButton)) return;
 
     if (hasItems) {
+      setAnchorDomElement(event.currentTarget);
       onPopoverToggle();
       return;
     }
@@ -121,6 +123,7 @@ export const AppMenuItem = ({
       <AppMenuPopover
         items={items}
         anchorElement={button}
+        anchorDomElement={anchorDomElement ?? undefined}
         tooltipContent={content}
         tooltipTitle={title}
         isOpen={isPopoverOpen}

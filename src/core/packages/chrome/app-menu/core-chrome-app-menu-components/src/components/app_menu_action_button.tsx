@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type MouseEvent } from 'react';
+import React, { useState, type MouseEvent } from 'react';
 import { SplitButtonWithNotification } from '@kbn/split-button';
 import { upperFirst } from 'lodash';
 import type { EuiButtonColor } from '@elastic/eui';
@@ -68,6 +68,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
   } = splitButtonProps || ({} as AppMenuSplitButtonProps);
 
   const hasSplitItems = splitButtonItems && splitButtonItems.length > 0;
+  const [anchorDomElement, setAnchorDomElement] = useState<HTMLElement | null>(null);
 
   const handleClick = (event: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
     if (isDisabled(disableButton)) return;
@@ -83,6 +84,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
     if (isDisabled(splitButtonProps?.isSecondaryButtonDisabled)) return;
 
     if (hasSplitItems) {
+      setAnchorDomElement(event.currentTarget);
       onPopoverToggle();
       return;
     }
@@ -189,6 +191,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
         tooltipContent={content}
         tooltipTitle={title}
         anchorElement={button}
+        anchorDomElement={anchorDomElement ?? undefined}
         isOpen={isPopoverOpen}
         popoverWidth={popoverWidth}
         popoverTestId={popoverTestId}

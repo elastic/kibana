@@ -44,6 +44,25 @@ describe('utils', () => {
       expect(document.activeElement).toBe(triggerElement);
     });
 
+    it('focuses the parent element when the trigger has been removed but the parent is still in the DOM', () => {
+      const parentElement = document.createElement('button');
+      document.body.appendChild(parentElement);
+      // triggerElement is NOT appended — simulates a popover item that was unmounted
+      const returnFocus = createReturnFocus(triggerElement, parentElement);
+      returnFocus();
+      expect(document.activeElement).toBe(parentElement);
+      parentElement.remove();
+    });
+
+    it('focuses the overflow button when both trigger and parent element have been removed from the DOM', () => {
+      // neither triggerElement nor parentElement is appended
+      document.body.appendChild(overflowButton);
+      const parentElement = document.createElement('button');
+      const returnFocus = createReturnFocus(triggerElement, parentElement);
+      returnFocus();
+      expect(document.activeElement).toBe(overflowButton);
+    });
+
     it('focuses the overflow button when the trigger element has been removed from the DOM', () => {
       // triggerElement is NOT appended — simulates a popover item that was unmounted
       document.body.appendChild(overflowButton);
