@@ -24,7 +24,11 @@ update_package_json_version() {
 update_initial_app_data() {
   echo --- Bump initial_app_data kibanaVersion
   local target="x-pack/solutions/search/plugins/enterprise_search/common/__mocks__/initial_app_data.ts"
-  sed -i "s/kibanaVersion: '[0-9]\+\.[0-9]\+\.[0-9]\+'/kibanaVersion: '${NEW_VERSION}'/" "$target"
+  if [[ -f "$target" ]]; then
+    sed -i "s/kibanaVersion: '[0-9]\+\.[0-9]\+\.[0-9]\+'/kibanaVersion: '${NEW_VERSION}'/" "$target"
+  else
+    echo "File not found, skipping: $target"
+  fi
 }
 
 update_kibana_migrator_utils() {
@@ -53,10 +57,7 @@ store_old_version
 
 update_package_json_version
 
-# If branch is 8.19, skip updating initial_app_data
-if [[ "$BRANCH" != "8.19" ]]; then
-  update_initial_app_data
-fi
+update_initial_app_data
 
 update_kibana_migrator_utils
 
