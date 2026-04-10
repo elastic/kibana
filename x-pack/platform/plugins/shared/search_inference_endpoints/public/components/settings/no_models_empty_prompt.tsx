@@ -69,12 +69,9 @@ export const NoModelsEmptyPrompt: React.FC = () => {
                   onClick={() => application.navigateToApp(CLOUD_CONNECT_NAV_ID)}
                   data-test-subj="settings-no-models-connect-eis"
                 >
-                  {i18n.translate(
-                    'xpack.searchInferenceEndpoints.settings.noModels.connectEis',
-                    {
-                      defaultMessage: 'Connect Elastic Inference Service',
-                    }
-                  )}
+                  {i18n.translate('xpack.searchInferenceEndpoints.settings.noModels.connectEis', {
+                    defaultMessage: 'Connect Elastic Inference Service',
+                  })}
                 </EuiButton>
               </EuiFlexItem>
             )}
