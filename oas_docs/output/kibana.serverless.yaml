@@ -52391,7 +52391,7 @@ paths:
                   description: No uninstall token was found with the given ID
                   value:
                     error: Not Found
-                    message: Uninstall Token not found with id token-id-1
+                    message: Uninstall Token not found with ID token-id-1
                     statusCode: 404
           description: Not Found
       summary: Get a decrypted uninstall token
