@@ -48,11 +48,19 @@ function extractNextMarker(xml: string): string | undefined {
  * Extracts and throws a meaningful error from Azure Blob Storage API responses.
  * Uses the x-ms-error-code response header when available for a human-readable code.
  */
+const AxiosErrorSchema = z.object({
+  response: z
+    .object({
+      status: z.number().optional(),
+      headers: z.record(z.string()).optional(),
+    })
+    .optional(),
+  message: z.string().optional(),
+});
+
 function createAzureBlobError(error: unknown): Error {
-  const axiosError = error as {
-    response?: { status?: number; headers?: Record<string, string> };
-    message?: string;
-  };
+  const parsed = AxiosErrorSchema.safeParse(error);
+  const axiosError = parsed.success ? parsed.data : {};
   const status = axiosError.response?.status;
   const errorCode = axiosError.response?.headers?.['x-ms-error-code'];
   if (status != null) {
@@ -244,7 +252,7 @@ export const AzureBlob: ConnectorSpec = {
     getBlob: {
       isTool: true,
       description:
-        'Download the full content of a blob from Azure Blob Storage, returned as base64. Always call getBlobProperties first to check contentLength — do not call this if the blob exceeds 131072 bytes (128 KB).',
+        'Download the full content of a blob from Azure Blob Storage, returned as base64. Always call getBlobProperties first to check contentLength — do not call this if the blob exceeds 1048576 bytes (1 MB).',
       input: z.object({
         container: z
           .string()
@@ -278,7 +286,7 @@ export const AzureBlob: ConnectorSpec = {
     getBlobProperties: {
       isTool: true,
       description:
-        'Get metadata for a blob (content type, size, last modified, etag) without downloading its content. Call this before getBlob to check whether the blob is small enough to download (limit: 131072 bytes / 128 KB).',
+        'Get metadata for a blob (content type, size, last modified, etag) without downloading its content. Call this before getBlob to check whether the blob is small enough to download (limit: 1048576 bytes / 1 MB).',
       input: z.object({
         container: z
           .string()
@@ -321,8 +329,8 @@ export const AzureBlob: ConnectorSpec = {
     '',
     '## Retrieving blob content',
     'Always call getBlobProperties before getBlob to check the blob size.',
-    'If contentLength > 131072 bytes (128 KB), do not call getBlob — inform the user the blob is too large to download.',
-    'If contentLength <= 131072 or contentLength is unknown, call getBlob to retrieve the content (returned as base64).',
+    'If contentLength > 1048576 bytes (1 MB), do not call getBlob — inform the user the blob is too large to download.',
+    'If contentLength <= 1048576 or contentLength is unknown, call getBlob to retrieve the content (returned as base64).',
     '',
     '## Pagination',
     'Both listContainers and listBlobs return a nextMarker field when more results exist.',
