@@ -40,7 +40,7 @@ enum FusePosition {
 }
 
 // After `KEY BY field,`, suggest the next KEY BY field.
-const KEY_BY_TRAILING_COMMA_REGEX = /\bkey\s+by(?:\s+\S+,\s*)+$/i;
+const KEY_BY_TRAILING_COMMA_REGEX = /\bkey\s+by(?:\s+\S+,)+\s*$/i;
 
 function getPosition(innerText: string, command: ESQLAstFuseCommand): FusePosition {
   const { scoreBy, keyBy, groupBy, withOption } = extractFuseArgs(command);
