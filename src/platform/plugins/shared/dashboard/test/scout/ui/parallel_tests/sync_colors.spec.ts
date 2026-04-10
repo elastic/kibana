@@ -11,7 +11,6 @@ import type { DebugState } from '@elastic/charts';
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { PageObjects } from '@kbn/scout';
-import type { ScoutPage } from '@kbn/scout';
 import {
   LENS_BASIC_DATA_VIEW,
   LENS_BASIC_KIBANA_ARCHIVE,
@@ -84,7 +83,6 @@ const createBaseXYCharts = async (
   await page.screenshot({ path: `${DEBUG_SCREENSHOT_DIR}/debug-after-save-and-return.png` });
   await pageObjects.dashboard.waitForPanelsToLoad(1);
   await pageObjects.dashboard.waitForRenderComplete();
-  await page.screenshot({ path: `${DEBUG_SCREENSHOT_DIR}/debug-after-render-complete.png` });
 
   await page.screenshot({ path: `${DEBUG_SCREENSHOT_DIR}/debug-before-second-panel.png` });
   await pageObjects.dashboard.openNewLensPanel();
@@ -101,7 +99,6 @@ const createBaseXYCharts = async (
   await pageObjects.dashboard.waitForPanelsToLoad(2);
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/258148
 spaceTest.describe('Sync colors', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
