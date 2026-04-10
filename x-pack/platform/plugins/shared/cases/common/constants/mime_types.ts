@@ -91,12 +91,14 @@ export const textMimeTypes = ['text/plain', 'text/csv', 'text/json', 'applicatio
 
 export const compressionMimeTypes = [
   'application/zip',
+  // Non-standard MIME type for zip files reported by Windows, see:
+  // https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/MIME_types/Common_types
+  'application/x-zip-compressed',
   'application/gzip',
   'application/x-bzip',
   'application/x-bzip2',
   'application/x-7z-compressed',
   'application/x-tar',
-  'application/x-zip-compressed',
 ];
 
 export const pdfMimeTypes = ['application/pdf'];
