@@ -49,6 +49,7 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
       server.authSavedObjectsClient = savedObjectsClient;
 
       let heartbeatIndices = SYNTHETICS_INDEX_PATTERN;
+      let remoteKibanaUrls: Record<string, string> = {};
       if (!server.isElasticsearchServerless && server.config.experimental?.ccs?.enabled) {
         try {
           const ccsSettingsRepository = new DefaultSyntheticsCCSSettingsRepository(
@@ -57,6 +58,7 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
           const ccsSettings = await ccsSettingsRepository.get();
           const { indices } = await getSyntheticsIndices(esClient.asCurrentUser, ccsSettings);
           heartbeatIndices = indices;
+          remoteKibanaUrls = ccsSettings.remoteKibanaUrls;
         } catch (e) {
           server.logger.warn(`Failed to resolve CCS indices, falling back to local: ${e.message}`);
         }
@@ -101,6 +103,7 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
           syntheticsMonitorClient,
           monitorConfigRepository,
           monitorIntegrationHealthApi,
+          remoteKibanaUrls,
         };
 
         const res = await server.fleet.runWithCache(() => syntheticsRoute.handler(data));

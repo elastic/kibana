@@ -105,6 +105,7 @@ export interface RouteContext<
   spaceId: string;
   monitorConfigRepository: MonitorConfigRepository;
   monitorIntegrationHealthApi: MonitorIntegrationHealthApi;
+  remoteKibanaUrls: Record<string, string>;
 }
 
 export type SyntheticsRouteHandler<
