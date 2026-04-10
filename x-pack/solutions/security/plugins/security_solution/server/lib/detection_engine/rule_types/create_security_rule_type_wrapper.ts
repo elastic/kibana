@@ -330,9 +330,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   gapReasonType: gapReason?.type,
                 });
               } catch (error) {
-              // Catching here to prevent telemetry errors from propagating to the Alerting Framework.
-              // The framework would catch the error and mark the rule run as failed.
-              // We don't want the rule to be marked as failed, if only telemetry failed.
+                // Catching here to prevent telemetry errors from propagating to the Alerting Framework.
+                // The framework would catch the error and mark the rule run as failed.
+                // We don't want the rule to be marked as failed, if only telemetry failed.
                 logger.info(`Failed to send gap detected telemetry event: ${error}`);
               }
             }
