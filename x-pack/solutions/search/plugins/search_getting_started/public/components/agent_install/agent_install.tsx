@@ -89,10 +89,10 @@ export const AgentInstallSection = () => {
             <EuiPanel color="transparent" paddingSize="l">
               <AgentInstallPanel
                 icon="commandLine"
-                title={i18n.translate('xpack.gettingStarted.agentInstall.title', {
+                title={i18n.translate('xpack.gettingStarted.agentInstall.ide.title', {
                   defaultMessage: 'Build in your IDE',
                 })}
-                description={i18n.translate('xpack.gettingStarted.agentInstall.description', {
+                description={i18n.translate('xpack.gettingStarted.agentInstall.ide.description', {
                   defaultMessage: 'Code with context using Elastic-certified skills.',
                 })}
               >
@@ -167,19 +167,22 @@ export const AgentInstallSection = () => {
               <EuiPanel color="transparent" paddingSize="l">
                 <AgentInstallPanel
                   icon="productAgent"
-                  title={i18n.translate('xpack.gettingStarted.agentInstall.title', {
+                  title={i18n.translate('xpack.gettingStarted.agentInstall.agentBuilder.title', {
                     defaultMessage: 'Build with the Elasticsearch Agent',
                   })}
-                  description={i18n.translate('xpack.gettingStarted.agentInstall.description', {
-                    defaultMessage: 'Chat directly with our built-in agentic assistant.',
-                  })}
+                  description={i18n.translate(
+                    'xpack.gettingStarted.agentInstall.agentBuilder.description',
+                    {
+                      defaultMessage: 'Chat directly with our built-in agentic assistant.',
+                    }
+                  )}
                 >
                   <AiButton
                     variant="outlined"
                     onClick={handleOpenInAgentBuilder}
                     data-test-subj="agentInstallOpenInAgentBuilder"
                   >
-                    {i18n.translate('xpack.gettingStarted.agentInstall.elasticAgent.cta', {
+                    {i18n.translate('xpack.gettingStarted.agentInstall.agentBuilder.cta', {
                       defaultMessage: 'Open Elastic Agent',
                     })}
                   </AiButton>

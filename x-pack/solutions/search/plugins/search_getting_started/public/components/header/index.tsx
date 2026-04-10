@@ -61,7 +61,7 @@ export const SearchGettingStartedHeader: React.FC = () => {
                   size="xs"
                   href={cloudHomeHref}
                 >
-                  {i18n.translate('xpack.search.gettingStarted.page.trialBadge', {
+                  {i18n.translate('xpack.search.gettingStarted.page.cloudHomeLink', {
                     defaultMessage: 'Elastic Cloud',
                   })}
                 </EuiButtonEmpty>
