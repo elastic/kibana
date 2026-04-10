@@ -8,7 +8,7 @@
 import React from 'react';
 import ExchangeFormFields from './exchange_form';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
@@ -92,9 +92,7 @@ describe('ExchangeFormFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(screen.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
         expect(onSubmit).toBeCalledWith({

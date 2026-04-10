@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
@@ -87,9 +87,7 @@ describe('TorqActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(screen.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
         expect(onSubmit).toBeCalledWith({
@@ -125,9 +123,7 @@ describe('TorqActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(screen.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
         expect(onSubmit).toBeCalledWith({
@@ -166,9 +162,7 @@ describe('TorqActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(screen.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
         expect(onSubmit).toBeCalledWith({
@@ -196,9 +190,7 @@ describe('TorqActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(screen.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
         expect(onSubmit).toBeCalledWith({
@@ -226,9 +218,7 @@ describe('TorqActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(screen.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
         expect(onSubmit).toBeCalledWith({

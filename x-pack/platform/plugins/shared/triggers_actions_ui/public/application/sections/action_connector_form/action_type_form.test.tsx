@@ -566,9 +566,7 @@ describe('action_type_form', () => {
 
     expect(wrapper.getByTestId('mustacheAutocompleteSwitch')).toBeTruthy();
 
-    await act(async () => {
-      wrapper.getByTestId('mustacheAutocompleteSwitch').click();
-    });
+    await userEvent.click(wrapper.getByTestId('mustacheAutocompleteSwitch'));
     expect(setActionParamsProperty).toHaveBeenCalledWith('dedupKey', '', 1);
   });
 

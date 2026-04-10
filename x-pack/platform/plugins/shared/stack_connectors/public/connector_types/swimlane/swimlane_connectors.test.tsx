@@ -10,7 +10,7 @@ import SwimlaneActionConnectorFields from './swimlane_connectors';
 import { useGetApplication } from './use_get_application';
 import { applicationFields, mappings } from './mocks';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { waitFor, render, act, screen } from '@testing-library/react';
+import { waitFor, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
@@ -255,9 +255,7 @@ describe('SwimlaneActionConnectorFields renders', () => {
           </ConnectorFormTestProvider>
         );
 
-        await act(async () => {
-          await userEvent.click(screen.getByTestId('form-test-provide-submit'));
-        });
+        await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
         await waitFor(() => {
           expect(onSubmit).toHaveBeenCalledWith({ data: { ...connector }, isValid: true });
@@ -303,9 +301,7 @@ describe('SwimlaneActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(screen.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
         expect(onSubmit).toHaveBeenCalledWith({
@@ -344,9 +340,7 @@ describe('SwimlaneActionConnectorFields renders', () => {
           </ConnectorFormTestProvider>
         );
 
-        await act(async () => {
-          await userEvent.click(screen.getByTestId('form-test-provide-submit'));
-        });
+        await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
         await waitFor(() => {
           expect(onSubmit).toHaveBeenCalledWith({

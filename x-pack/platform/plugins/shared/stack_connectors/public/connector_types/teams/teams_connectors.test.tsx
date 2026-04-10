@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import TeamsActionFields from './teams_connectors';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
 import userEvent from '@testing-library/user-event';
@@ -71,9 +71,7 @@ describe('TeamsActionFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(screen.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
         expect(onSubmit).toBeCalledWith({

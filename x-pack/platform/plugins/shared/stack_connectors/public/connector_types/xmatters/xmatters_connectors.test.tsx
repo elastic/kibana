@@ -9,7 +9,7 @@ import React from 'react';
 import XmattersActionConnectorFields from './xmatters_connectors';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
 import userEvent from '@testing-library/user-event';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
 
 const mockUseKibanaReturnValue = createStartServicesMock();
@@ -169,9 +169,7 @@ describe('XmattersActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(screen.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
         expect(onSubmit).toBeCalledWith({
@@ -208,9 +206,7 @@ describe('XmattersActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(screen.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
         expect(onSubmit).toBeCalledWith({
