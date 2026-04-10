@@ -22,8 +22,11 @@ import {
 } from '@elastic/eui';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  addGlobalPolicyTag,
+  removeGlobalPolicyTag,
+} from '../../../../../../common/endpoint/service/artifacts/utils';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
-import { GLOBAL_ARTIFACT_TAG } from '../../../../../../common/endpoint/service/artifacts';
 import { prepareToCloseAlerts } from '../../../../../detection_engine/rule_exceptions/components/add_exception_flyout/helpers';
 import { useCloseAlertsFromExceptions } from '../../../../../detection_engine/rule_exceptions/logic/use_close_alerts';
 import { ExceptionItemsFlyoutAlertsActions } from '../../../../../detection_engine/rule_exceptions/components/flyout_components/alerts_actions';
@@ -89,15 +92,19 @@ export const EndpointExceptionsFlyout: React.FC<EndpointExceptionsFlyoutProps> =
 
   useEffect(() => {
     if (!isAlertDataLoading && alertData) {
+      const defaultException = defaultEndpointExceptionItems(
+        ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+        '',
+        alertData
+      )[0] as CreateExceptionListItemSchema;
+
       const initialException = {
-        ...(defaultEndpointExceptionItems(
-          ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
-          '',
-          alertData
-        )[0] as CreateExceptionListItemSchema),
+        ...defaultException,
 
         os_types: retrieveAlertOsTypes(alertData),
-        tags: canManageGlobalArtifacts ? [GLOBAL_ARTIFACT_TAG] : [],
+        tags: canManageGlobalArtifacts
+          ? addGlobalPolicyTag(defaultException.tags ?? [])
+          : removeGlobalPolicyTag(defaultException.tags ?? []),
       };
 
       setException(initialException);
