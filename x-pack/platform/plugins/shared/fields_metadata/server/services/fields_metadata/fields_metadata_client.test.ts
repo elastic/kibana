@@ -350,9 +350,7 @@ describe('FieldsMetadataClient class', () => {
       // "system.process.cpu.total.pct" belongs to dataset "system.process",
       // which matches the 2-segment heuristic. The repository should fetch
       // only that dataset and NOT fall back to loading all datasets.
-      const fieldInstance = await fieldsMetadataClient.getByName(
-        'system.process.cpu.total.pct'
-      );
+      const fieldInstance = await fieldsMetadataClient.getByName('system.process.cpu.total.pct');
 
       expectToBeDefined(fieldInstance);
       expect(fieldInstance).toBeInstanceOf(FieldMetadata);
