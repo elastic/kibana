@@ -7,11 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { InternalSavedObjectsServiceStart } from '@kbn/core-saved-objects-server-internal';
 import type { SavedObjectsServiceSetup } from '@kbn/core-saved-objects-server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import type { InternalSecurityServiceStart } from '@kbn/core-security-server-internal';
 import type {
   UserStorageDefinition,
   UserStorageRegistrations,
@@ -20,13 +24,23 @@ import type {
   UserStorageServiceSetup,
   UserStorageServiceStart,
 } from '@kbn/core-user-storage-server';
-import { userStorageType, userStorageGlobalType } from './saved_objects';
+import {
+  userStorageType,
+  userStorageGlobalType,
+  USER_STORAGE_SO_TYPE,
+  USER_STORAGE_GLOBAL_SO_TYPE,
+} from './saved_objects';
 import { UserStorageClient } from './user_storage_client';
 import { registerRoutes } from './routes';
 
 export interface UserStorageSetupDeps {
   http: InternalHttpServiceSetup;
   savedObjects: SavedObjectsServiceSetup;
+}
+
+export interface UserStorageStartDeps {
+  savedObjects: InternalSavedObjectsServiceStart;
+  security: InternalSecurityServiceStart;
 }
 
 /** @internal */
@@ -67,17 +81,26 @@ export class UserStorageService {
     };
   }
 
-  public start(): UserStorageServiceStart {
+  public start({ savedObjects, security }: UserStorageStartDeps): UserStorageServiceStart {
     this.logger.debug('Starting user storage service');
 
     return {
-      asScopedToClient: ({ savedObjectsClient, profileUid }) =>
-        new UserStorageClient({
+      asScoped: (request: KibanaRequest) => {
+        const profileUid = security.authc.getCurrentUser(request)?.profile_uid;
+        if (!profileUid) return null;
+
+        const savedObjectsClient = savedObjects.getScopedClient(request, {
+          includedHiddenTypes: [USER_STORAGE_SO_TYPE, USER_STORAGE_GLOBAL_SO_TYPE],
+          excludedExtensions: [SECURITY_EXTENSION_ID],
+        });
+
+        return new UserStorageClient({
           savedObjectsClient,
           profileUid,
           definitions: this.definitions,
           logger: this.logger,
-        }),
+        });
+      },
     };
   }
 

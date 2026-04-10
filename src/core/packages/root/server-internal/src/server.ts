@@ -588,7 +588,10 @@ export class Server {
 
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
-    const userStorageStart = this.userStorage.start();
+    const userStorageStart = this.userStorage.start({
+      savedObjects: savedObjectsStart,
+      security: securityStart,
+    });
     const customBrandingStart = this.customBranding.start();
     const metricsStart = await this.metrics.start();
     const httpStart = this.http.getStartContract();

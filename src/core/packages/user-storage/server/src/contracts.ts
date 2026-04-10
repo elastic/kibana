@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UserStorageRegistrations, IUserStorageClient } from '@kbn/core-user-storage-common';
 
 /** @public */
@@ -34,22 +35,19 @@ export interface UserStorageServiceSetup {
 /** @public */
 export interface UserStorageServiceStart {
   /**
-   * Create a scoped client for the given user. Used in route handler contexts
-   * and outside the standard request handler pipeline.
+   * Create a {@link IUserStorageClient} scoped to the authenticated user
+   * behind the given request. Returns `null` when the user has no
+   * `profile_uid` (e.g. anonymous authentication).
    *
    * @example
    * ```ts
    * start(core: CoreStart) {
-   *   const client = core.userStorage.asScopedToClient({
-   *     savedObjectsClient: soClient,
-   *     profileUid: user.profile_uid,
-   *   });
-   *   const layout = await client.get('navigation:layout');
+   *   const client = core.userStorage.asScoped(request);
+   *   if (client) {
+   *     const layout = await client.get('navigation:layout');
+   *   }
    * }
    * ```
    */
-  asScopedToClient(params: {
-    savedObjectsClient: import('@kbn/core-saved-objects-api-server').SavedObjectsClientContract;
-    profileUid: string;
-  }): IUserStorageClient;
+  asScoped(request: KibanaRequest): IUserStorageClient | null;
 }

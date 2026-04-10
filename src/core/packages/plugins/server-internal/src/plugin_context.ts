@@ -433,7 +433,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       initializeClient: (dataStream) => deps.dataStreams.initializeClient(dataStream),
     },
     userStorage: {
-      asScopedToClient: deps.userStorage.asScopedToClient,
+      asScoped: deps.userStorage.asScoped,
     },
   };
 }

@@ -20,6 +20,8 @@
     "@kbn/core-http-request-handler-context-server",
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-saved-objects-server",
+    "@kbn/core-saved-objects-server-internal",
+    "@kbn/core-security-server-internal",
     "@kbn/core-user-storage-common",
     "@kbn/core-user-storage-server",
   ],

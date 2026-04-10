@@ -21,6 +21,6 @@ export const userStorageServiceMock = {
 
   createStartContract: (): jest.Mocked<UserStorageServiceStart> =>
     lazyObject({
-      asScopedToClient: jest.fn(),
+      asScoped: jest.fn(),
     }),
 };

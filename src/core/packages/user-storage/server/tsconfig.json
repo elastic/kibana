@@ -11,8 +11,8 @@
     "**/*.ts"
   ],
   "kbn_references": [
-    "@kbn/core-user-storage-common",
-    "@kbn/core-saved-objects-api-server"
+    "@kbn/core-http-server",
+    "@kbn/core-user-storage-common"
   ],
   "exclude": [
     "target/**/*"
