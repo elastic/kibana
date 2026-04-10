@@ -181,15 +181,6 @@ export const DiscoverAgentBuilderConfig = () => {
     if (!agentBuilder) {
       return;
     }
-    return () => {
-      agentBuilder.clearChatConfig();
-    };
-  }, [agentBuilder]);
-
-  useEffect(() => {
-    if (!agentBuilder) {
-      return;
-    }
 
     const normalizedTimeRange = timeRange ? { from: timeRange.from, to: timeRange.to } : undefined;
 
@@ -203,14 +194,19 @@ export const DiscoverAgentBuilderConfig = () => {
       ),
     ];
 
-    if (hasEsqlResults && documentState.esqlQueryColumns && documentState.result) {
+    if (
+      hasEsqlResults &&
+      documentState.esqlQueryColumns &&
+      documentState.result &&
+      totalHits !== undefined
+    ) {
       const esqlQuery = isOfAggregateQueryType(query) ? query.esql : '';
       attachments.push(
         buildEsqlResultsAttachment(
           esqlQuery,
           documentState.esqlQueryColumns,
           documentState.result,
-          totalHits ?? documentState.result.length,
+          totalHits,
           normalizedTimeRange
         )
       );
@@ -221,6 +217,10 @@ export const DiscoverAgentBuilderConfig = () => {
       attachments,
       browserApiTools,
     });
+
+    return () => {
+      agentBuilder.clearChatConfig();
+    };
   }, [
     agentBuilder,
     browserApiTools,
