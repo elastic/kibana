@@ -2543,19 +2543,7 @@
               "section": "def-common.InferenceConnector",
               "text": "InferenceConnector"
             },
-            ", undefined>; \"GET /internal/streams/connectors\": { endpoint: \"GET /internal/streams/connectors\"; handler: ServerRouteHandler<",
-            "StreamsRouteHandlerResources",
-            ", undefined, { connectors: ",
-            {
-              "pluginId": "@kbn/inference-common",
-              "scope": "common",
-              "docId": "kibKbnInferenceCommonPluginApi",
-              "section": "def-common.InferenceConnector",
-              "text": "InferenceConnector"
-            },
-            "[]; }>; security: ",
-            "RouteSecurity",
-            "; }; \"GET /internal/streams/ingest/processor_suggestions\": ",
+            ", undefined>; \"GET /internal/streams/ingest/processor_suggestions\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -5639,19 +5627,7 @@
             "section": "def-common.InferenceConnector",
             "text": "InferenceConnector"
           },
-          ", undefined>; \"GET /internal/streams/connectors\": { endpoint: \"GET /internal/streams/connectors\"; handler: ServerRouteHandler<",
-          "StreamsRouteHandlerResources",
-          ", undefined, { connectors: ",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.InferenceConnector",
-            "text": "InferenceConnector"
-          },
-          "[]; }>; security: ",
-          "RouteSecurity",
-          "; }; \"GET /internal/streams/ingest/processor_suggestions\": ",
+          ", undefined>; \"GET /internal/streams/ingest/processor_suggestions\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -6572,7 +6548,7 @@
       "label": "StreamsPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/streams/server/plugin.ts",
-      "lineNumber": 70,
+      "lineNumber": 72,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -6588,7 +6564,7 @@
       "label": "StreamsPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/streams/server/plugin.ts",
-      "lineNumber": 72,
+      "lineNumber": 74,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
