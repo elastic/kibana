@@ -79,6 +79,8 @@ export const suggestPartitionsRoute = createServerRoute({
         request,
       });
 
+    const { connector_id: connectorId } = params.body;
+
     const stream = await streamsClient.getStream(params.path.name);
     if (!Streams.WiredStream.Definition.is(stream)) {
       throw new StatusError('Partitioning suggestions are only available for wired streams', 400);
@@ -86,7 +88,7 @@ export const suggestPartitionsRoute = createServerRoute({
 
     const partitionsPromise = partitionStream({
       definition: stream,
-      inferenceClient: inferenceClient.bindTo({ connectorId: params.body.connector_id }),
+      inferenceClient: inferenceClient.bindTo({ connectorId }),
       esClient: scopedClusterClient.asCurrentUser,
       logger,
       start: params.body.start,
