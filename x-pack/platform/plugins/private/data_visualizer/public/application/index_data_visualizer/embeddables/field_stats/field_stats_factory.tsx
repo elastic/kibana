@@ -108,13 +108,7 @@ export const getFieldStatsChartEmbeddableFactory = (
     FieldStatisticsTableEmbeddableApi
   > = {
     type: FIELD_STATS_EMBEDDABLE_TYPE,
-    buildEmbeddable: async ({
-      linkToContainerState,
-      initialState,
-      finalizeApi,
-      parentApi,
-      uuid,
-    }) => {
+    buildEmbeddable: async ({ initializeStateApi, initialState, finalizeApi, parentApi, uuid }) => {
       const [coreStart, pluginStart] = await getStartServices();
 
       const { http, uiSettings, notifications, ...startServices } = coreStart;
@@ -196,7 +190,7 @@ export const getFieldStatsChartEmbeddableFactory = (
 
       const { toasts } = deps.notifications;
 
-      const containerStateApi = linkToContainerState({
+      const stateApi = initializeStateApi({
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           timeRangeManager.anyStateChange$,
@@ -223,7 +217,7 @@ export const getFieldStatsChartEmbeddableFactory = (
         ...timeRangeManager.api,
         ...titleManager.api,
         ...fieldStatsControlsApi,
-        ...containerStateApi,
+        ...stateApi,
         // PublishesDataLoading
         dataLoading$,
         // PublishesBlockingError

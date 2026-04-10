@@ -56,7 +56,7 @@ export const createLensEmbeddableFactory = (
       initializeDrilldownsManager,
       initialState,
       finalizeApi,
-      linkToContainerState,
+      initializeStateApi,
       parentApi,
       uuid,
     }) => {
@@ -139,7 +139,7 @@ export const createLensEmbeddableFactory = (
         };
       }
 
-      const containerStateAPi = linkToContainerState({
+      const stateApi = initializeStateApi({
         anyStateChange$: merge(
           actionsConfig.anyStateChange$,
           dashboardConfig.anyStateChange$,
@@ -190,7 +190,7 @@ export const createLensEmbeddableFactory = (
         // dashboardConfig who owns the savedObjectId after the
         // stateConfig one who owns the inline editing
         {
-          ...containerStateAPi,
+          ...stateApi,
           ...editConfig.api,
           ...inspectorConfig.api,
           ...searchContextConfig.api,

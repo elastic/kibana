@@ -24,7 +24,7 @@ export const getApmAlertingThroughputChartEmbeddableFactory = (deps: EmbeddableD
     DefaultEmbeddableApi<EmbeddableApmAlertingVizProps>
   > = {
     type: APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE,
-    buildEmbeddable: async ({ initialState, finalizeApi, linkToContainerState }) => {
+    buildEmbeddable: async ({ initialState, finalizeApi, initializeStateApi }) => {
       const state = initialState;
       const titleManager = initializeTitleManager(state);
       const serviceName$ = new BehaviorSubject(state.serviceName);
@@ -38,7 +38,7 @@ export const getApmAlertingThroughputChartEmbeddableFactory = (deps: EmbeddableD
       const kuery$ = new BehaviorSubject(state.kuery);
       const filters$ = new BehaviorSubject(state.filters);
 
-      const containerStateApi = linkToContainerState({
+      const stateApi = initializeStateApi({
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           serviceName$,
@@ -95,7 +95,7 @@ export const getApmAlertingThroughputChartEmbeddableFactory = (deps: EmbeddableD
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...containerStateApi,
+        ...stateApi,
       });
 
       return {

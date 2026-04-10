@@ -147,7 +147,7 @@ export async function mockInitializeDrilldownsManager(
   return mockDrilldownsManager();
 }
 
-export const getMockLinkToContainerState = <
+export const getMockinitializeStateApi = <
   SerializedState extends {} = {},
   ApiType extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
 >(
@@ -155,14 +155,14 @@ export const getMockLinkToContainerState = <
 ): jest.Mocked<
   Parameters<
     EmbeddableFactory<SerializedState, ApiType>['buildEmbeddable']
-  >[0]['linkToContainerState']
+  >[0]['initializeStateApi']
 > => {
-  const mockLinkToContainerState: jest.Mocked<
-    Parameters<typeof factory.buildEmbeddable>[0]['linkToContainerState']
+  const mockinitializeStateApi: jest.Mocked<
+    Parameters<typeof factory.buildEmbeddable>[0]['initializeStateApi']
   > = ({ serializeState, applySerializedState }) => ({
     serializeState,
     applySerializedState,
     hasUnsavedChanges$: of(false),
   });
-  return mockLinkToContainerState;
+  return mockinitializeStateApi;
 };

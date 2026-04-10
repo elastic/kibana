@@ -84,7 +84,7 @@ export const getFieldListFactory = (
 ) => {
   const fieldListEmbeddableFactory: EmbeddableFactory<FieldListSerializedState, FieldListApi> = {
     type: FIELD_LIST_ID,
-    buildEmbeddable: async ({ initialState, finalizeApi, linkToContainerState }) => {
+    buildEmbeddable: async ({ initialState, finalizeApi, initializeStateApi }) => {
       const state = await deserializeState(dataViews, initialState);
       const allDataViews = await dataViews.getIdsWithTitle();
       const subscriptions = new Subscription();
@@ -116,7 +116,7 @@ export const getFieldListFactory = (
         };
       }
 
-      const containerStateApi = linkToContainerState({
+      const stateApi = initializeStateApi({
         anyStateChange$: merge(titleManager.anyStateChange$, fieldListStateManager.anyStateChange$),
         getComparators: () => ({
           ...titleComparators,
@@ -135,7 +135,7 @@ export const getFieldListFactory = (
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...containerStateApi,
+        ...stateApi,
       });
 
       return {

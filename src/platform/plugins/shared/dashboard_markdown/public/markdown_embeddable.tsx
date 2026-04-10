@@ -49,7 +49,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
   MarkdownEditorApi
 > = {
   type: MARKDOWN_EMBEDDABLE_TYPE,
-  buildEmbeddable: async ({ initialState, finalizeApi, linkToContainerState, parentApi }) => {
+  buildEmbeddable: async ({ initialState, finalizeApi, initializeStateApi, parentApi }) => {
     const libraryId = (initialState as MarkdownByReferenceState).ref_id;
     const isByReference = libraryId !== undefined;
     const initialLibraryState = isByReference
@@ -106,7 +106,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       }
     };
 
-    const containerStateApi = linkToContainerState({
+    const stateApi = initializeStateApi({
       anyStateChange$: merge(
         titleManager.anyStateChange$,
         content$.pipe(map(() => undefined)),
@@ -137,7 +137,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
     });
 
     const api = finalizeApi({
-      ...containerStateApi,
+      ...stateApi,
       ...titleManager.api,
       defaultTitle$,
       defaultDescription$,

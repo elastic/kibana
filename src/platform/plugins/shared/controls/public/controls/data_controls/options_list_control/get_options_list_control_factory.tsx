@@ -65,13 +65,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
 > => {
   return {
     type: OPTIONS_LIST_CONTROL,
-    buildEmbeddable: async ({
-      linkToContainerState,
-      initialState,
-      finalizeApi,
-      parentApi,
-      uuid,
-    }) => {
+    buildEmbeddable: async ({ initializeStateApi, initialState, finalizeApi, parentApi, uuid }) => {
       const state = initialState;
 
       const editorStateManager = initializeEditorStateManager(state);
@@ -236,7 +230,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           }
         );
 
-      const containerStateApi = linkToContainerState({
+      const stateApi = initializeStateApi({
         anyStateChange$: merge(
           dataControlManager.anyStateChange$,
           selectionsManager.anyStateChange$,
@@ -285,7 +279,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         .subscribe((error) => blockingError$.next(error));
 
       const api = finalizeApi({
-        ...containerStateApi,
+        ...stateApi,
         ...dataControlManager.api,
         blockingError$,
         dataLoading$: temporaryStateManager.api.dataLoading$,

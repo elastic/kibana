@@ -48,7 +48,7 @@ export const LinksContext = createContext<LinksApi | null>(null);
 export const getLinksEmbeddableFactory = () => {
   const linksEmbeddableFactory: EmbeddableFactory<LinksEmbeddableState, LinksApi> = {
     type: LINKS_EMBEDDABLE_TYPE,
-    buildEmbeddable: async ({ initialState, finalizeApi, linkToContainerState, parentApi }) => {
+    buildEmbeddable: async ({ initialState, finalizeApi, initializeStateApi, parentApi }) => {
       const savedObjectId = (initialState as LinksByReferenceState).savedObjectId;
       const intialLinksState = savedObjectId
         ? await loadFromLibrary(savedObjectId)
@@ -85,7 +85,7 @@ export const getLinksEmbeddableFactory = () => {
         };
       }
 
-      const containerStateApi = linkToContainerState({
+      const stateApi = initializeStateApi({
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           layout$.pipe(map(() => undefined)),
@@ -127,7 +127,7 @@ export const getLinksEmbeddableFactory = () => {
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...containerStateApi,
+        ...stateApi,
         blockingError$,
         defaultTitle$,
         defaultDescription$,

@@ -38,7 +38,7 @@ export const getAlertsTableEmbeddableFactory = (
   deps: EmbeddableAlertsTablePublicStartDependencies
 ): EmbeddableFactory<EmbeddableAlertsTableSerializedState, EmbeddableAlertsTableApi> => ({
   type: EMBEDDABLE_ALERTS_TABLE_ID,
-  buildEmbeddable: async ({ initialState, finalizeApi, linkToContainerState, uuid }) => {
+  buildEmbeddable: async ({ initialState, finalizeApi, initializeStateApi, uuid }) => {
     const timeRangeManager = initializeTimeRangeManager(initialState);
     const titleManager = initializeTitleManager(initialState ?? {});
     const queryLoading$ = new BehaviorSubject<boolean | undefined>(true);
@@ -50,7 +50,7 @@ export const getAlertsTableEmbeddableFactory = (
     const initialTableConfig = initialState.tableConfig;
     const tableConfig$ = new BehaviorSubject<EmbeddableAlertsTableConfig>(initialTableConfig);
 
-    const containerStateApi = linkToContainerState({
+    const stateApi = initializeStateApi({
       anyStateChange$: merge(
         timeRangeManager.anyStateChange$,
         titleManager.anyStateChange$,
@@ -84,7 +84,7 @@ export const getAlertsTableEmbeddableFactory = (
     const api = finalizeApi({
       ...timeRangeManager.api,
       ...titleManager.api,
-      ...containerStateApi,
+      ...stateApi,
       dataLoading$: queryLoading$,
       isEditingEnabled: () => {
         // Users cannot edit panels based on a solution they cannot access.

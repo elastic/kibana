@@ -62,7 +62,7 @@ export const visualizeEmbeddableFactory: EmbeddableFactory<VisualizeEmbeddableSt
     type: VISUALIZE_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({
       initializeDrilldownsManager,
-      linkToContainerState,
+      initializeStateApi,
       initialState,
       finalizeApi,
       parentApi,
@@ -191,7 +191,7 @@ export const visualizeEmbeddableFactory: EmbeddableFactory<VisualizeEmbeddableSt
         });
       };
 
-      const unsavedChangesApi = linkToContainerState({
+      const unsavedChangesApi = initializeStateApi({
         anyStateChange$: merge(
           drilldownsManager.anyStateChange$,
           savedObjectId$,

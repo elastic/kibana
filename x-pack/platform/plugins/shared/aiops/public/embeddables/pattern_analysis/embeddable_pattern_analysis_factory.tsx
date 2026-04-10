@@ -37,13 +37,7 @@ export const getPatternAnalysisEmbeddableFactory = (
 ) => {
   const factory: EmbeddableFactory<PatternAnalysisEmbeddableState, PatternAnalysisEmbeddableApi> = {
     type: EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
-    buildEmbeddable: async ({
-      linkToContainerState,
-      initialState,
-      finalizeApi,
-      parentApi,
-      uuid,
-    }) => {
+    buildEmbeddable: async ({ initializeStateApi, initialState, finalizeApi, parentApi, uuid }) => {
       const [coreStart, pluginStart] = await getStartServices();
       const runtimeState = initialState;
       const timeRangeManager = initializeTimeRangeManager(initialState);
@@ -66,7 +60,7 @@ export const getPatternAnalysisEmbeddableFactory = (
 
       const filtersApi = apiPublishesFilters(parentApi) ? parentApi : undefined;
 
-      const containerStateApi = linkToContainerState({
+      const stateApi = initializeStateApi({
         anyStateChange$: merge(
           timeRangeManager.anyStateChange$,
           titleManager.anyStateChange$,
@@ -98,7 +92,7 @@ export const getPatternAnalysisEmbeddableFactory = (
       const api = finalizeApi({
         ...timeRangeManager.api,
         ...titleManager.api,
-        ...containerStateApi,
+        ...stateApi,
         ...patternAnalysisControlsApi,
         getTypeDisplayName: () =>
           i18n.translate('xpack.aiops.patternAnalysis.typeDisplayName', {

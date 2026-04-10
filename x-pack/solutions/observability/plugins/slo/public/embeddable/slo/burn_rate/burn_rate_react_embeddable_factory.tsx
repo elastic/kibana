@@ -43,7 +43,7 @@ export const getBurnRateEmbeddableFactory = ({
     buildEmbeddable: async ({
       initialState,
       finalizeApi,
-      linkToContainerState,
+      initializeStateApi,
       initializeDrilldownsManager,
     }) => {
       const deps = { ...coreStart, ...pluginsStart };
@@ -57,7 +57,7 @@ export const getBurnRateEmbeddableFactory = ({
       const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
       const reload$ = new Subject<boolean>();
 
-      const containerStateApi = linkToContainerState({
+      const stateApi = initializeStateApi({
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           sloBurnRateManager.anyStateChange$,
@@ -84,7 +84,7 @@ export const getBurnRateEmbeddableFactory = ({
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...containerStateApi,
+        ...stateApi,
         ...drilldownsManager.api,
         defaultTitle$,
       });

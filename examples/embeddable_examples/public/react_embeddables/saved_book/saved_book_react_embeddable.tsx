@@ -49,7 +49,7 @@ const bookStateComparators: StateComparators<BookState> = {
 export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
   const savedBookEmbeddableFactory: EmbeddableFactory<BookEmbeddableState, BookApi> = {
     type: BOOK_EMBEDDABLE_TYPE,
-    buildEmbeddable: async ({ initialState, finalizeApi, linkToContainerState }) => {
+    buildEmbeddable: async ({ initialState, finalizeApi, initializeStateApi }) => {
       const titleManager = initializeTitleManager(initialState);
       const savedObjectId = (initialState as BookByReferenceState).savedObjectId;
       const initialBookState = savedObjectId ? await loadBook(savedObjectId) : initialState;
@@ -64,7 +64,7 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
         ...(id ? { savedObjectId: id } : bookStateManager.getLatestState()),
       });
 
-      const containerStateApi = linkToContainerState({
+      const stateApi = initializeStateApi({
         anyStateChange$: merge(titleManager.anyStateChange$, bookStateManager.anyStateChange$),
         getComparators: () => {
           return {
@@ -81,7 +81,7 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
       });
 
       const api = finalizeApi({
-        ...containerStateApi,
+        ...stateApi,
         ...titleManager.api,
         onEdit: async () => {
           openLazyFlyout({

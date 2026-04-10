@@ -27,7 +27,7 @@ export const getImageEmbeddableFactory = () => {
     type: IMAGE_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({
       initializeDrilldownsManager,
-      linkToContainerState,
+      initializeStateApi,
       initialState,
       finalizeApi,
       parentApi,
@@ -41,7 +41,7 @@ export const getImageEmbeddableFactory = () => {
       const imageConfig$ = new BehaviorSubject<ImageConfig>(initialState.image_config);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
 
-      const containerStateApi = linkToContainerState({
+      const stateApi = initializeStateApi({
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           imageConfig$.pipe(map(() => undefined)),
@@ -69,7 +69,7 @@ export const getImageEmbeddableFactory = () => {
       const embeddable = finalizeApi({
         ...titleManager.api,
         ...drilldownsManager.api,
-        ...containerStateApi,
+        ...stateApi,
         dataLoading$,
         supportedTriggers: () => IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS,
 

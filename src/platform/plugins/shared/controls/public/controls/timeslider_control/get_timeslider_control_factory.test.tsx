@@ -21,7 +21,7 @@ import { dataService } from '../../services/kibana_services';
 import { getMockedFinalizeApi } from '../mocks/control_mocks';
 import { getTimesliderControlFactory } from './get_timeslider_control_factory';
 import type { TimeSliderControlApi } from './types';
-import { getMockLinkToContainerState } from '@kbn/embeddable-plugin/public/mocks';
+import { getMockinitializeStateApi } from '@kbn/embeddable-plugin/public/mocks';
 
 const render = (ui: React.ReactElement) => {
   return rtlRender(ui, { wrapper: EuiThemeProvider });
@@ -42,7 +42,7 @@ describe('TimeSliderControlApi', () => {
     dashboardApi
   );
 
-  const mockLinkToContainerState = getMockLinkToContainerState(factory);
+  const mockinitializeStateApi = getMockinitializeStateApi(factory);
 
   dataService.query.timefilter.timefilter.calculateBounds = (timeRange: TimeRange) => {
     const now = new Date();
@@ -63,7 +63,7 @@ describe('TimeSliderControlApi', () => {
     const { api } = await factory.buildEmbeddable({
       initializeDrilldownsManager: jest.fn(),
       initialState: DEFAULT_TIME_SLIDER_STATE,
-      linkToContainerState: mockLinkToContainerState,
+      initializeStateApi: mockinitializeStateApi,
       finalizeApi,
       uuid,
       parentApi: dashboardApi,
@@ -85,7 +85,7 @@ describe('TimeSliderControlApi', () => {
         start_percentage_of_time_range: 0.25,
         end_percentage_of_time_range: 0.5,
       },
-      linkToContainerState: mockLinkToContainerState,
+      initializeStateApi: mockinitializeStateApi,
       finalizeApi,
       uuid,
       parentApi: dashboardApi,
@@ -108,7 +108,7 @@ describe('TimeSliderControlApi', () => {
         start_percentage_of_time_range: 0.25,
         end_percentage_of_time_range: 0.5,
       },
-      linkToContainerState: mockLinkToContainerState,
+      initializeStateApi: mockinitializeStateApi,
       finalizeApi,
       uuid,
       parentApi: dashboardApi,
@@ -139,7 +139,7 @@ describe('TimeSliderControlApi', () => {
         start_percentage_of_time_range: 0.25,
         end_percentage_of_time_range: 0.5,
       },
-      linkToContainerState: mockLinkToContainerState,
+      initializeStateApi: mockinitializeStateApi,
       finalizeApi,
       uuid,
       parentApi: dashboardApi,
@@ -168,7 +168,7 @@ describe('TimeSliderControlApi', () => {
         start_percentage_of_time_range: 0.25,
         end_percentage_of_time_range: 0.5,
       },
-      linkToContainerState: mockLinkToContainerState,
+      initializeStateApi: mockinitializeStateApi,
       finalizeApi,
       uuid,
       parentApi: dashboardApi,
@@ -198,7 +198,7 @@ describe('TimeSliderControlApi', () => {
         start_percentage_of_time_range: 0.25,
         end_percentage_of_time_range: 0.5,
       },
-      linkToContainerState: mockLinkToContainerState,
+      initializeStateApi: mockinitializeStateApi,
       finalizeApi,
       uuid,
       parentApi: dashboardApi,
@@ -227,7 +227,7 @@ describe('TimeSliderControlApi', () => {
         start_percentage_of_time_range: 0.25,
         end_percentage_of_time_range: 0.5,
       },
-      linkToContainerState: mockLinkToContainerState,
+      initializeStateApi: mockinitializeStateApi,
       finalizeApi,
       uuid,
       parentApi: dashboardApi,
@@ -260,7 +260,7 @@ describe('TimeSliderControlApi', () => {
     const { api } = await factory.buildEmbeddable({
       initializeDrilldownsManager: jest.fn(),
       initialState: controlState,
-      linkToContainerState: mockLinkToContainerState,
+      initializeStateApi: mockinitializeStateApi,
       finalizeApi,
       uuid,
       parentApi: dashboardApi,

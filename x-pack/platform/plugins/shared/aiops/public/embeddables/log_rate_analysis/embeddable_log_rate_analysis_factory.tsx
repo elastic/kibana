@@ -41,13 +41,7 @@ export const getLogRateAnalysisEmbeddableFactory = (
 ) => {
   const factory: EmbeddableFactory<LogRateAnalysisEmbeddableState, LogRateAnalysisEmbeddableApi> = {
     type: EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
-    buildEmbeddable: async ({
-      initialState,
-      finalizeApi,
-      linkToContainerState,
-      parentApi,
-      uuid,
-    }) => {
+    buildEmbeddable: async ({ initialState, finalizeApi, initializeStateApi, parentApi, uuid }) => {
       const [coreStart, pluginStart] = await getStartServices();
       const runtimeState = initialState;
       const timeRangeManager = initializeTimeRangeManager(initialState);
@@ -67,7 +61,7 @@ export const getLogRateAnalysisEmbeddableFactory = (
 
       const filtersApi = apiPublishesFilters(parentApi) ? parentApi : undefined;
 
-      const containerStateApi = linkToContainerState({
+      const stateApi = initializeStateApi({
         anyStateChange$: merge(
           timeRangeManager.anyStateChange$,
           titleManager.anyStateChange$,
@@ -93,7 +87,7 @@ export const getLogRateAnalysisEmbeddableFactory = (
       const api = finalizeApi({
         ...timeRangeManager.api,
         ...titleManager.api,
-        ...containerStateApi,
+        ...stateApi,
         ...logRateAnalysisControlsApi,
         getTypeDisplayName: () =>
           i18n.translate('xpack.aiops.logRateAnalysis.typeDisplayName', {

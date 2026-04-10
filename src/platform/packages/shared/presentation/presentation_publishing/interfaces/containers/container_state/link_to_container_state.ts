@@ -27,7 +27,7 @@ export interface ContainerStateManagerInitializer<StateType extends object>
   getComparators: () => StateComparators<StateType>;
 }
 
-export const linkToContainerState = <StateType extends object = object>({
+export const initializeStateApi = <StateType extends object = object>({
   uuid,
   parentApi,
   defaultState,

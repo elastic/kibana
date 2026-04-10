@@ -56,7 +56,7 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi>
   type: MAP_SAVED_OBJECT_TYPE,
   buildEmbeddable: async ({
     initializeDrilldownsManager,
-    linkToContainerState,
+    initializeStateApi,
     initialState,
     finalizeApi,
     parentApi,
@@ -117,7 +117,7 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi>
       return getByValueState(getLatestState(), savedMap.getAttributes());
     }
 
-    const containerStateApi = linkToContainerState({
+    const stateApi = initializeStateApi({
       anyStateChange$: merge(
         drilldownsManager.anyStateChange$,
         crossPanelActions.anyStateChange$,
@@ -155,7 +155,7 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi>
     api = finalizeApi({
       defaultTitle$,
       defaultDescription$,
-      ...containerStateApi,
+      ...stateApi,
       ...timeRangeManager.api,
       ...drilldownsManager.api,
       ...titleManager.api,

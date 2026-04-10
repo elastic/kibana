@@ -87,13 +87,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
 ) => {
   const factory: EmbeddableFactory<AnomalySwimLaneEmbeddableState, AnomalySwimLaneEmbeddableApi> = {
     type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-    buildEmbeddable: async ({
-      linkToContainerState,
-      initialState,
-      finalizeApi,
-      parentApi,
-      uuid,
-    }) => {
+    buildEmbeddable: async ({ initializeStateApi, initialState, finalizeApi, parentApi, uuid }) => {
       if (!apiHasExecutionContext(parentApi)) {
         throw new Error('Parent API does not have execution context');
       }
@@ -125,7 +119,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
       // Helpers for swim lane data fetching
       const chartWidth$ = new BehaviorSubject<number | undefined>(undefined);
 
-      const containerStateApi = linkToContainerState({
+      const stateApi = initializeStateApi({
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           timeRangeManager.anyStateChange$,
@@ -187,7 +181,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
         ...titleManager.api,
         ...timeRangeManager.api,
         ...swimlaneManager.api,
-        ...containerStateApi,
+        ...stateApi,
         query$,
         filters$,
         interval,

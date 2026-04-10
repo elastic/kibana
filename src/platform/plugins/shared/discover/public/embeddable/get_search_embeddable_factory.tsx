@@ -68,7 +68,7 @@ export const getSearchEmbeddableFactory = ({
     type: SEARCH_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({
       initializeDrilldownsManager,
-      linkToContainerState,
+      initializeStateApi,
       initialState,
       finalizeApi,
       parentApi,
@@ -152,7 +152,7 @@ export const getSearchEmbeddableFactory = ({
         searchEmbeddable,
       });
 
-      const containerStateApi = linkToContainerState({
+      const stateApi = initializeStateApi({
         anyStateChange$: merge(
           drilldownsManager.anyStateChange$,
           searchEmbeddable.anyStateChange$,
@@ -211,7 +211,7 @@ export const getSearchEmbeddableFactory = ({
       });
 
       const api: SearchEmbeddableApi = finalizeApi({
-        ...containerStateApi,
+        ...stateApi,
         ...titleManager.api,
         ...searchEmbeddable.api,
         ...timeRangeManager.api,

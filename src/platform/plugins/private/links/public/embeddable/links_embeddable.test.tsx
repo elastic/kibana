@@ -17,7 +17,7 @@ import type { Link } from '../../server';
 import type { LinksApi, ResolvedLink } from '../types';
 import { linksClient } from '../content_management';
 import { getMockLinksParentApi } from '../mocks';
-import { getMockLinkToContainerState } from '@kbn/embeddable-plugin/public/mocks';
+import { getMockinitializeStateApi } from '@kbn/embeddable-plugin/public/mocks';
 
 const getLinks = (): Link[] => [
   {
@@ -117,7 +117,7 @@ async function buildLinksEmbeddable(state: LinksEmbeddableState) {
         type: LINKS_EMBEDDABLE_TYPE,
       } as LinksApi;
     },
-    linkToContainerState: getMockLinkToContainerState(factory),
+    initializeStateApi: getMockinitializeStateApi(factory),
     parentApi,
     uuid,
   });

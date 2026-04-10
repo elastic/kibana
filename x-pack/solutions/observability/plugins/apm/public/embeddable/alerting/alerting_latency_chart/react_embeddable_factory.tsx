@@ -25,7 +25,7 @@ export const getApmAlertingLatencyChartEmbeddableFactory = (deps: EmbeddableDeps
     DefaultEmbeddableApi<EmbeddableApmAlertingLatencyVizProps>
   > = {
     type: APM_ALERTING_LATENCY_CHART_EMBEDDABLE,
-    buildEmbeddable: async ({ initialState, finalizeApi, linkToContainerState }) => {
+    buildEmbeddable: async ({ initialState, finalizeApi, initializeStateApi }) => {
       const state = initialState;
       const titleManager = initializeTitleManager(state);
 
@@ -44,7 +44,7 @@ export const getApmAlertingLatencyChartEmbeddableFactory = (deps: EmbeddableDeps
       const kuery$ = new BehaviorSubject(state.kuery);
       const filters$ = new BehaviorSubject(state.filters);
 
-      const containerStateApi = linkToContainerState({
+      const stateApi = initializeStateApi({
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           serviceName$,
@@ -105,7 +105,7 @@ export const getApmAlertingLatencyChartEmbeddableFactory = (deps: EmbeddableDeps
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...containerStateApi,
+        ...stateApi,
       });
 
       return {

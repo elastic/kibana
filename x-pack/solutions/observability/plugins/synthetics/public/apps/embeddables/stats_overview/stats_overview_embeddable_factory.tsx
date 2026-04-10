@@ -65,7 +65,7 @@ export const getStatsOverviewEmbeddableFactory = (
       initializeDrilldownsManager,
       initialState,
       finalizeApi,
-      linkToContainerState,
+      initializeStateApi,
     }) => {
       const [coreStart, pluginStart] = await getStartServices();
 
@@ -81,7 +81,7 @@ export const getStatsOverviewEmbeddableFactory = (
 
       const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
 
-      const containerStateApi = linkToContainerState({
+      const stateApi = initializeStateApi({
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           filters$,
@@ -110,7 +110,7 @@ export const getStatsOverviewEmbeddableFactory = (
       const api = finalizeApi({
         ...titleManager.api,
         ...drilldownsManager.api,
-        ...containerStateApi,
+        ...stateApi,
         supportedTriggers: () => SYNTHETICS_STATS_SUPPORTED_TRIGGERS,
         defaultTitle$,
         getTypeDisplayName: () =>

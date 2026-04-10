@@ -60,7 +60,7 @@ export const getMonitorsEmbeddableFactory = (
 ) => {
   const factory: EmbeddableFactory<OverviewMonitorsEmbeddableState, StatusOverviewApi> = {
     type: SYNTHETICS_MONITORS_EMBEDDABLE,
-    buildEmbeddable: async ({ initialState, finalizeApi, linkToContainerState }) => {
+    buildEmbeddable: async ({ initialState, finalizeApi, initializeStateApi }) => {
       const [coreStart, pluginStart] = await getStartServices();
 
       const titleManager = initializeTitleManager(initialState);
@@ -73,7 +73,7 @@ export const getMonitorsEmbeddableFactory = (
       });
       const view$ = new BehaviorSubject(initialState.view);
 
-      const containerStateApi = linkToContainerState({
+      const stateApi = initializeStateApi({
         anyStateChange$: merge(titleManager.anyStateChange$, filters$, view$).pipe(
           map(() => undefined)
         ),
@@ -99,7 +99,7 @@ export const getMonitorsEmbeddableFactory = (
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...containerStateApi,
+        ...stateApi,
         defaultTitle$,
         getTypeDisplayName: () =>
           i18n.translate('xpack.synthetics.editSloOverviewEmbeddableTitle.typeDisplayName', {

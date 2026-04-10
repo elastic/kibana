@@ -209,7 +209,7 @@ export {
 
 export { childrenUnsavedChanges$ } from './interfaces/containers/container_state/children_unsaved_changes';
 export {
-  linkToContainerState,
+  initializeStateApi,
   type ContainerStateManagerInitializer,
 } from './interfaces/containers/container_state/link_to_container_state';
 

@@ -53,7 +53,7 @@ export function getAlertsEmbeddableFactory({
     type: SLO_ALERTS_EMBEDDABLE_ID,
     buildEmbeddable: async ({
       initializeDrilldownsManager,
-      linkToContainerState,
+      initializeStateApi,
       initialState,
       finalizeApi,
       parentApi,
@@ -83,7 +83,7 @@ export function getAlertsEmbeddableFactory({
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getAlertsPanelTitle());
       const reload$ = new Subject<FetchContext>();
 
-      const containerStateApi = linkToContainerState({
+      const stateApi = initializeStateApi({
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           drilldownsManager.anyStateChange$,
@@ -107,7 +107,7 @@ export function getAlertsEmbeddableFactory({
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...containerStateApi,
+        ...stateApi,
         ...drilldownsManager.api,
         defaultTitle$,
         supportedTriggers: () => SLO_ALERTS_SUPPORTED_TRIGGERS,

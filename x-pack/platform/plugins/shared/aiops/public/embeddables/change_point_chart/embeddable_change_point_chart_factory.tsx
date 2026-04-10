@@ -42,13 +42,7 @@ export const getChangePointChartEmbeddableFactory = (
 ) => {
   const factory: EmbeddableFactory<ChangePointEmbeddableState, ChangePointEmbeddableApi> = {
     type: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
-    buildEmbeddable: async ({
-      linkToContainerState,
-      initialState,
-      finalizeApi,
-      parentApi,
-      uuid,
-    }) => {
+    buildEmbeddable: async ({ initializeStateApi, initialState, finalizeApi, parentApi, uuid }) => {
       const [coreStart, pluginStart] = await getStartServices();
 
       const timeRangeManager = initializeTimeRangeManager(initialState);
@@ -67,7 +61,7 @@ export const getChangePointChartEmbeddableFactory = (
 
       const filtersApi = apiPublishesFilters(parentApi) ? parentApi : undefined;
 
-      const containerStateApi = linkToContainerState({
+      const stateApi = initializeStateApi({
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           timeRangeManager.anyStateChange$,
@@ -96,7 +90,7 @@ export const getChangePointChartEmbeddableFactory = (
         ...timeRangeManager.api,
         ...titleManager.api,
         ...changePointManager.api,
-        ...containerStateApi,
+        ...stateApi,
         getTypeDisplayName: () =>
           i18n.translate('xpack.aiops.changePointDetection.typeDisplayName', {
             defaultMessage: 'change point charts',

@@ -47,7 +47,7 @@ export const getErrorBudgetEmbeddableFactory = ({
     type: SLO_ERROR_BUDGET_ID,
     buildEmbeddable: async ({
       initializeDrilldownsManager,
-      linkToContainerState,
+      initializeStateApi,
       initialState,
       finalizeApi,
       uuid,
@@ -62,7 +62,7 @@ export const getErrorBudgetEmbeddableFactory = ({
       });
       const reload$ = new Subject<boolean>();
 
-      const containerStateApi = linkToContainerState({
+      const stateApi = initializeStateApi({
         anyStateChange$: merge(
           drilldownsManager.anyStateChange$,
           titleManager.anyStateChange$,
@@ -88,7 +88,7 @@ export const getErrorBudgetEmbeddableFactory = ({
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...containerStateApi,
+        ...stateApi,
         ...drilldownsManager.api,
         defaultTitle$,
         supportedTriggers: () => SLO_ERROR_BUDGET_SUPPORTED_TRIGGERS,

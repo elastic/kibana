@@ -27,7 +27,7 @@ import type { SearchApi, Services, SearchSerializedState } from './types';
 export const getSearchEmbeddableFactory = (services: Services) => {
   const factory: EmbeddableFactory<SearchSerializedState, SearchApi> = {
     type: SEARCH_EMBEDDABLE_TYPE,
-    buildEmbeddable: async ({ initialState, finalizeApi, linkToContainerState }) => {
+    buildEmbeddable: async ({ initialState, finalizeApi, initializeStateApi }) => {
       const timeRangeManager = initializeTimeRangeManager(initialState);
       const defaultDataView = await services.dataViews.getDefaultDataView();
       const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
@@ -52,7 +52,7 @@ export const getSearchEmbeddableFactory = (services: Services) => {
         };
       }
 
-      const containerStateApi = linkToContainerState({
+      const stateApi = initializeStateApi({
         anyStateChange$: timeRangeManager.anyStateChange$,
         getComparators: () => {
           /**
@@ -77,7 +77,7 @@ export const getSearchEmbeddableFactory = (services: Services) => {
         blockingError$,
         dataViews$,
         dataLoading$,
-        ...containerStateApi,
+        ...stateApi,
         ...timeRangeManager.api,
       });
 

@@ -57,7 +57,7 @@ export const getOverviewEmbeddableFactory = ({
     initializeDrilldownsManager,
     initialState,
     finalizeApi,
-    linkToContainerState,
+    initializeStateApi,
   }) => {
     const deps = { ...coreStart, ...pluginsStart };
     const state = initialState;
@@ -87,7 +87,7 @@ export const getOverviewEmbeddableFactory = ({
     const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
     const reload$ = new Subject<boolean>();
 
-    const containerStateApi = linkToContainerState({
+    const stateApi = initializeStateApi({
       anyStateChange$: merge(
         drilldownsManager.anyStateChange$,
         titleManager.anyStateChange$,
@@ -138,7 +138,7 @@ export const getOverviewEmbeddableFactory = ({
     });
 
     const api = finalizeApi({
-      ...containerStateApi,
+      ...stateApi,
       ...titleManager.api,
       ...drilldownsManager.api,
       defaultTitle$,

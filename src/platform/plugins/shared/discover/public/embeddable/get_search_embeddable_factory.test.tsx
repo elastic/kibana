@@ -34,7 +34,7 @@ import type {
 import { SolutionType } from '../context_awareness';
 import {
   mockInitializeDrilldownsManager,
-  getMockLinkToContainerState,
+  getMockinitializeStateApi,
 } from '@kbn/embeddable-plugin/public/mocks';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
@@ -166,7 +166,7 @@ describe('saved search embeddable', () => {
     phase$: new BehaviorSubject<PhaseEvent | undefined>(undefined),
   });
 
-  const mockLinkToContainerState = getMockLinkToContainerState(factory);
+  const mockinitializeStateApi = getMockinitializeStateApi(factory);
 
   const waitOneTick = () => act(() => new Promise((resolve) => setTimeout(resolve, 0)));
 
@@ -176,7 +176,7 @@ describe('saved search embeddable', () => {
       runtimeState = getInitialRuntimeState({ searchMock: search });
       const { Component, api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
-        linkToContainerState: mockLinkToContainerState,
+        initializeStateApi: mockinitializeStateApi,
         initialState: { ref_id: 'id', overrides: {} },
         finalizeApi: finalizeApiMock,
         uuid,
@@ -213,7 +213,7 @@ describe('saved search embeddable', () => {
       const { Component, api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
         initialState: { ref_id: 'id', overrides: {} },
-        linkToContainerState: mockLinkToContainerState,
+        initializeStateApi: mockinitializeStateApi,
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -255,7 +255,7 @@ describe('saved search embeddable', () => {
       const { Component } = await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
         initialState: { savedObjectId: 'id' },
-        linkToContainerState: mockLinkToContainerState,
+        initializeStateApi: mockinitializeStateApi,
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -276,7 +276,7 @@ describe('saved search embeddable', () => {
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
         initialState: { savedObjectId: 'id' },
-        linkToContainerState: mockLinkToContainerState,
+        initializeStateApi: mockinitializeStateApi,
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -298,7 +298,7 @@ describe('saved search embeddable', () => {
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
         initialState: { ref_id: 'id', overrides: {} },
-        linkToContainerState: mockLinkToContainerState,
+        initializeStateApi: mockinitializeStateApi,
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -336,7 +336,7 @@ describe('saved search embeddable', () => {
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
         initialState: byValueInitialState,
-        linkToContainerState: mockLinkToContainerState,
+        initializeStateApi: mockinitializeStateApi,
         finalizeApi: finalizeEditableApiMock,
         uuid,
         parentApi: mockedEditableDashboardApi,
@@ -370,7 +370,7 @@ describe('saved search embeddable', () => {
       const { api, Component } = await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
         initialState: { savedObjectId: 'id' },
-        linkToContainerState: mockLinkToContainerState,
+        initializeStateApi: mockinitializeStateApi,
         finalizeApi: finalizeEditableApiMock,
         uuid,
         parentApi: mockedEditableDashboardApi,
@@ -424,7 +424,7 @@ describe('saved search embeddable', () => {
       const { Component } = await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
         initialState: { savedObjectId: 'id' },
-        linkToContainerState: mockLinkToContainerState,
+        initializeStateApi: mockinitializeStateApi,
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -460,7 +460,7 @@ describe('saved search embeddable', () => {
       await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
         initialState: { ref_id: 'id', overrides: {} },
-        linkToContainerState: mockLinkToContainerState,
+        initializeStateApi: mockinitializeStateApi,
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -486,7 +486,7 @@ describe('saved search embeddable', () => {
       await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
         initialState: { ref_id: 'id', overrides: {} },
-        linkToContainerState: mockLinkToContainerState,
+        initializeStateApi: mockinitializeStateApi,
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -514,7 +514,7 @@ describe('saved search embeddable', () => {
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
         initialState: { ref_id: 'id', overrides: {} },
-        linkToContainerState: mockLinkToContainerState,
+        initializeStateApi: mockinitializeStateApi,
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -548,7 +548,7 @@ describe('saved search embeddable', () => {
       const { Component, api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
         initialState: { ref_id: 'id', overrides: {} },
-        linkToContainerState: mockLinkToContainerState,
+        initializeStateApi: mockinitializeStateApi,
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,

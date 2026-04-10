@@ -45,13 +45,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
     SingleMetricViewerEmbeddableApi
   > = {
     type: ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
-    buildEmbeddable: async ({
-      initialState,
-      finalizeApi,
-      linkToContainerState,
-      uuid,
-      parentApi,
-    }) => {
+    buildEmbeddable: async ({ initialState, finalizeApi, initializeStateApi, uuid, parentApi }) => {
       const services = await getServices(getStartServices);
       const subscriptions = new Subscription();
       const titleManager = initializeTitleManager(initialState);
@@ -65,7 +59,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
-      const containerStateApi = linkToContainerState({
+      const stateApi = initializeStateApi({
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           timeRangeManager.anyStateChange$,
@@ -131,7 +125,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
         ...titleManager.api,
         ...timeRangeManager.api,
         ...singleMetricManager.api,
-        ...containerStateApi,
+        ...stateApi,
         dataLoading$,
         blockingError$,
       });

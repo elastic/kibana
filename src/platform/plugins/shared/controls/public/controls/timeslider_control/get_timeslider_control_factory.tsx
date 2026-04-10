@@ -52,13 +52,7 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
 > => {
   return {
     type: TIME_SLIDER_CONTROL,
-    buildEmbeddable: async ({
-      linkToContainerState,
-      initialState,
-      finalizeApi,
-      parentApi,
-      uuid,
-    }) => {
+    buildEmbeddable: async ({ initializeStateApi, initialState, finalizeApi, parentApi, uuid }) => {
       const state = initialState;
 
       const { timeRangeMeta$, formatDate, cleanupTimeRangeSubscription } =
@@ -228,7 +222,7 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
         })
       );
 
-      const containerStateApi = linkToContainerState({
+      const stateApi = initializeStateApi({
         anyStateChange$: merge(
           timeRangePercentage.anyStateChange$,
           isAnchored$.pipe(map(() => undefined))
@@ -251,7 +245,7 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
       });
 
       const api = finalizeApi({
-        ...containerStateApi,
+        ...stateApi,
         isPinnable: false, // Disable the user-facing unpin action; panel can still be pinned programatically when it's created
         label$: new BehaviorSubject<string>(displayName),
         appliedTimeslice$: timeslice$,

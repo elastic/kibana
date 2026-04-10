@@ -40,13 +40,7 @@ export const getESQLControlFactory = <
 > => {
   return {
     type: ESQL_CONTROL,
-    buildEmbeddable: async ({
-      uuid,
-      parentApi,
-      finalizeApi,
-      initialState,
-      linkToContainerState,
-    }) => {
+    buildEmbeddable: async ({ uuid, parentApi, finalizeApi, initialState, initializeStateApi }) => {
       const state = initialState;
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
@@ -58,7 +52,7 @@ export const getESQLControlFactory = <
         selections.internalApi,
         'variableName'
       );
-      const containerStateApi = linkToContainerState({
+      const stateApi = initializeStateApi({
         anyStateChange$: selections.anyStateChange$,
         getComparators: () => {
           return {
@@ -82,7 +76,7 @@ export const getESQLControlFactory = <
       });
 
       const api = finalizeApi({
-        ...containerStateApi,
+        ...stateApi,
         ...selections.api,
         ...labelManager.api,
         dataLoading$,

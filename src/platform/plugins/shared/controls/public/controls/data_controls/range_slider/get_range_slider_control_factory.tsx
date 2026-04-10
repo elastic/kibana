@@ -41,13 +41,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
 > => {
   return {
     type: RANGE_SLIDER_CONTROL,
-    buildEmbeddable: async ({
-      linkToContainerState,
-      initialState,
-      finalizeApi,
-      parentApi,
-      uuid,
-    }) => {
+    buildEmbeddable: async ({ initializeStateApi, initialState, finalizeApi, parentApi, uuid }) => {
       const state = initialState;
       const loadingMinMax$ = new BehaviorSubject<boolean>(false);
       const loadingHasNoResults$ = new BehaviorSubject<boolean>(false);
@@ -73,7 +67,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
         dataControlManager.internalApi.onSelectionChange
       );
 
-      const containerStateApi = linkToContainerState({
+      const stateApi = initializeStateApi({
         anyStateChange$: merge(
           dataControlManager.anyStateChange$,
           selections.value$,
@@ -99,7 +93,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
       });
 
       const api = finalizeApi({
-        ...containerStateApi,
+        ...stateApi,
         ...dataControlManager.api,
         dataLoading$,
         clearSelections: () => {

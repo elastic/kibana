@@ -10,7 +10,7 @@
 import type { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
 import { PresentationPanel } from '@kbn/presentation-panel-plugin/public';
 import type { HasPanelCapabilities, HasSerializedChildState } from '@kbn/presentation-publishing';
-import { apiIsPresentationContainer, linkToContainerState } from '@kbn/presentation-publishing';
+import { apiIsPresentationContainer, initializeStateApi } from '@kbn/presentation-publishing';
 import React, { useImperativeHandle, useMemo, useRef } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { v4 as generateId } from 'uuid';
@@ -99,7 +99,7 @@ export const EmbeddableRenderer = <
             finalizeApi,
             uuid,
             parentApi,
-            linkToContainerState: (args) => linkToContainerState({ ...args, uuid, parentApi }),
+            initializeStateApi: (args) => initializeStateApi({ ...args, uuid, parentApi }),
             initializeDrilldownsManager: async (
               embeddableUuid: string,
               state: SerializedDrilldowns

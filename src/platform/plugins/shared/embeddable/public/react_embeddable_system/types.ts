@@ -67,7 +67,7 @@ export interface BuildEmbeddableProps<
   /**
    * Initializes and returns all APIs required for the parent to interact with the state of this API.
    */
-  linkToContainerState: (
+  initializeStateApi: (
     args: ContainerStateManagerInitializer<SerializedState>
   ) => PublishesUnsavedChanges & HasSerializableState<SerializedState>;
 
