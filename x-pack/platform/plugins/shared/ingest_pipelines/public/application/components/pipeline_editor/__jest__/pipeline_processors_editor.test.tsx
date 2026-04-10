@@ -172,7 +172,7 @@ describe('Pipeline Editor', () => {
       // keep it after saving, because `target_field` must only be treated as "known" for
       // inference processors.
       onUpdate = jest.fn();
-      rerenderWithProps({
+      testBed = await setup({
         value: {
           processors: [
             {
@@ -187,19 +187,15 @@ describe('Pipeline Editor', () => {
         onFlyoutOpen: jest.fn(),
         onUpdate,
       });
+      const { actions, exists, form } = testBed;
 
-      fireEvent.click(getByTestSubjectSelector('processors>0.manageItemButton'));
-      expect(screen.getByTestId('editProcessorForm')).toBeInTheDocument();
+      actions.openProcessorEditor('processors>0');
+      expect(exists('editProcessorForm')).toBeTruthy();
 
-      const valueInput = getByTestSubjectSelector('editProcessorForm.textValueField.input');
-      fireEvent.change(valueInput, { target: { value: 'updated_value' } });
-      fireEvent.blur(valueInput);
+      form.setInputValue('editProcessorForm.textValueField.input', 'updated_value');
+      jest.advanceTimersByTime(0);
 
-      fireEvent.click(getByTestSubjectSelector('editProcessorForm.submitButton'));
-
-      await waitFor(() => {
-        expect(onUpdate).toHaveBeenCalled();
-      });
+      await actions.submitProcessorForm();
 
       const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
       const { processors } = onUpdateResult.getData();
@@ -218,7 +214,7 @@ describe('Pipeline Editor', () => {
       // "known" to the form, so they must NOT bleed through from unknownOptions into the
       // serialized output (which would double-write or conflict with what the form emits).
       onUpdate = jest.fn();
-      rerenderWithProps({
+      testBed = await setup({
         value: {
           processors: [
             {
@@ -232,15 +228,12 @@ describe('Pipeline Editor', () => {
         onFlyoutOpen: jest.fn(),
         onUpdate,
       });
+      const { actions, exists } = testBed;
 
-      fireEvent.click(getByTestSubjectSelector('processors>0.manageItemButton'));
-      expect(await screen.findByTestId('editProcessorForm')).toBeInTheDocument();
+      actions.openProcessorEditor('processors>0');
+      expect(exists('editProcessorForm')).toBeTruthy();
 
-      fireEvent.click(getByTestSubjectSelector('editProcessorForm.submitButton'));
-
-      await waitFor(() => {
-        expect(onUpdate).toHaveBeenCalled();
-      });
+      await actions.submitProcessorForm();
 
       const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
       const { processors } = onUpdateResult.getData();
