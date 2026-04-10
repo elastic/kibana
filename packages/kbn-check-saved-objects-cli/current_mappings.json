@@ -422,9 +422,6 @@
             "properties": {
               "base": {
                 "type": "text"
-              },
-              "condition": {
-                "type": "text"
               }
             }
           }
@@ -476,9 +473,6 @@
           "query": {
             "properties": {
               "base": {
-                "type": "text"
-              },
-              "condition": {
                 "type": "text"
               }
             }

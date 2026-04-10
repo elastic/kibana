@@ -14,7 +14,8 @@ import {
 } from '@kbn/slo-schema';
 
 export function convertSliApmParamsToApmAppDeeplinkUrl(
-  slo: SLOWithSummaryResponse
+  slo: SLOWithSummaryResponse,
+  timeRangeOverride?: { from: string; to: string }
 ): string | undefined {
   if (
     !apmTransactionDurationIndicatorSchema.is(slo.indicator) &&
@@ -40,7 +41,10 @@ export function convertSliApmParamsToApmAppDeeplinkUrl(
     qs.append('transactionType', transactionType === ALL_VALUE ? '' : transactionType);
   }
 
-  if (duration) {
+  if (timeRangeOverride) {
+    qs.append('rangeFrom', timeRangeOverride.from);
+    qs.append('rangeTo', timeRangeOverride.to);
+  } else if (duration) {
     qs.append('rangeFrom', `now-${duration}`);
     qs.append('rangeTo', 'now');
   }
