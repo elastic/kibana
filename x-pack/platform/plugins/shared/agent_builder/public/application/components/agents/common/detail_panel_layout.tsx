@@ -118,6 +118,7 @@ export const DetailPanelLayout: React.FC<DetailPanelLayoutProps> = ({
             flex: 1;
             min-height: 0;
             overflow-y: auto;
+            padding: ${euiTheme.size.l};
           `}
         >
           {children}
