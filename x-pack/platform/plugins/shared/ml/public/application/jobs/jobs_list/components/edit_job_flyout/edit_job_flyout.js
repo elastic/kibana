@@ -201,7 +201,9 @@ export class EditJobFlyoutUI extends Component {
       jobModelMemoryLimitValidationError: '',
       jobGroupsValidationError: '',
       ...cloneDeep(this._initialJobFormState),
-      ...(datafeedRunning === false && !this.state.datafeedProjectRouting && defaultProjectRouting
+      ...(datafeedRunning === false &&
+      !this._initialJobFormState.datafeedProjectRouting &&
+      defaultProjectRouting
         ? { datafeedProjectRouting: defaultProjectRouting }
         : {}),
     });
