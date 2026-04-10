@@ -19,7 +19,6 @@ import type { FleetRequestHandlerContext } from '@kbn/fleet-plugin/server';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import type { ExceptionListClient, ListsApiRequestHandlerContext } from '@kbn/lists-plugin/server';
 import type { AlertsClient, IRuleDataService } from '@kbn/rule-registry-plugin/server';
-import type { EntityStoreCRUDClient as EntityStoreUpdateClient } from '@kbn/entity-store/server';
 
 import type { Readable } from 'stream';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
@@ -52,7 +51,6 @@ import type { MlAuthz } from './lib/machine_learning/authz';
 import type { SiemMigrationClients } from './lib/siem_migrations/types';
 import type { EntityStoreCrudClient } from './lib/entity_analytics/entity_store/entity_store_crud_client';
 import type { CheckOsqueryResponseActionAuthz } from './endpoint/services/actions/utils/rule_response_actions_validators';
-import type { DetectionRulesAuthz } from '../common/detection_engine/rule_management/authz';
 
 export { AppClient };
 
@@ -75,7 +73,6 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getAuditLogger: () => AuditLogger | undefined;
   getLogger: () => Logger;
   getDataViewsService: () => DataViewsService;
-  getInternalDataViewsService: () => Promise<DataViewsService>;
   getEntityStoreApiKeyManager: () => EntityStoreApiKeyManager;
   getExceptionListClient: () => ExceptionListClient | null;
   getInternalFleetServices: () => EndpointInternalFleetServicesInterface;
@@ -84,7 +81,6 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getAssetCriticalityDataClient: () => AssetCriticalityDataClient;
   getEntityStoreDataClient: () => EntityStoreDataClient;
   getEntityStoreCrudClient: () => EntityStoreCrudClient;
-  getEntityStoreUpdateClient: () => EntityStoreUpdateClient;
   getPrivilegeMonitoringDataClient: () => PrivilegeMonitoringDataClient;
   getMonitoringEntitySourceDataClient: () => MonitoringEntitySourceDataClient;
   getPrivilegedUserMonitoringApiKeyManager: () => PrivilegedUsersApiKeyManager;
@@ -94,7 +90,6 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getAssetInventoryClient: () => AssetInventoryDataClient;
   getProductFeatureService: () => ProductFeaturesService;
   getMlAuthz: () => MlAuthz;
-  getRulesAuthz: () => DetectionRulesAuthz;
 }
 
 export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<{
