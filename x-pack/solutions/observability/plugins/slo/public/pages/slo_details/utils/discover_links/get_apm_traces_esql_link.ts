@@ -15,7 +15,7 @@ import {
   type SLOWithSummaryResponse,
 } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
-import { esql } from '@elastic/esql';
+import { esql, type ComposerQueryTagHole } from '@elastic/esql';
 import {
   EVENT_OUTCOME,
   PROCESSOR_EVENT,
@@ -73,7 +73,6 @@ function buildGroupingsWhereClauses(
 }
 
 type EsqlQueryBuilder = ReturnType<typeof esql.from>;
-type EsqlExpression = ReturnType<typeof esql.exp>;
 
 function buildApmEsqlQuery(
   slo: SLOWithSummaryResponse,
@@ -86,9 +85,9 @@ function buildApmEsqlQuery(
     conditionBad,
   }: {
     preEvalWhere?: (query: EsqlQueryBuilder) => EsqlQueryBuilder;
-    evalGoodCondition: EsqlExpression;
-    conditionGood: EsqlExpression;
-    conditionBad: EsqlExpression;
+    evalGoodCondition: ComposerQueryTagHole;
+    conditionGood: ComposerQueryTagHole;
+    conditionBad: ComposerQueryTagHole;
   }
 ): string {
   let query = esql.from(transactionIndex);
