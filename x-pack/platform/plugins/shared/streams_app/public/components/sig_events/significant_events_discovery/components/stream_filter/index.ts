@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { DiscoveryStreamFilter } from './discovery_stream_filter';
+export { StreamFilter } from './stream_filter';

@@ -30,9 +30,9 @@ import { useIsMutating } from '@kbn/react-query';
 import { COMPUTED_FEATURE_TYPES, isComputedFeature } from '@kbn/streams-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { useFetchDiscoveryKnowledgeIndicators } from '../../../../../hooks/sig_events/use_fetch_discovery_knowledge_indicators';
+import { useFetchKnowledgeIndicators } from '../../../../../hooks/sig_events/use_fetch_knowledge_indicators';
 import { useDiscoveryFeaturesApi } from '../../../../../hooks/sig_events/use_discovery_features_api';
-import { useDiscoveryKnowledgeIndicatorsBulkDelete } from '../../../../../hooks/sig_events/use_discovery_knowledge_indicators_bulk_delete';
+import { useKnowledgeIndicatorsBulkDelete } from '../../../../../hooks/sig_events/use_knowledge_indicators_bulk_delete';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
 import { AssetImage } from '../../../../asset_image';
@@ -51,7 +51,7 @@ import { KnowledgeIndicatorsStatusFilter } from '../../../stream_detail_signific
 import { getKnowledgeIndicatorItemId } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_item_id';
 import { getKnowledgeIndicatorStreamName } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_stream_name';
 import { matchesKnowledgeIndicatorFilters } from '../../../stream_detail_significant_events_view/utils/matches_knowledge_indicator_filters';
-import { DiscoveryStreamFilter } from '../discovery_stream_filter';
+import { StreamFilter } from '../stream_filter';
 import {
   TITLE_COLUMN_LABEL,
   EVENTS_COLUMN_LABEL,
@@ -93,7 +93,7 @@ const EMPTY_ANNOTATIONS: never[] = [];
 const getKnowledgeIndicatorTitle = (ki: KnowledgeIndicator): string =>
   ki.kind === 'feature' ? ki.feature.title ?? ki.feature.id : ki.query.title ?? ki.query.id;
 
-export function DiscoveryKnowledgeIndicatorsTable() {
+export function KnowledgeIndicatorsTable() {
   const router = useStreamsAppRouter();
   const { euiTheme } = useEuiTheme();
   const {
@@ -103,7 +103,7 @@ export function DiscoveryKnowledgeIndicatorsTable() {
   } = useKibana();
 
   const { knowledgeIndicators, occurrencesByQueryId, isLoading, isEmpty, refetch } =
-    useFetchDiscoveryKnowledgeIndicators();
+    useFetchKnowledgeIndicators();
   const { excludeFeaturesInBulk, restoreFeaturesInBulk } = useDiscoveryFeaturesApi();
 
   const [tableSearchValue, setTableSearchValue] = useState('');
@@ -123,7 +123,7 @@ export function DiscoveryKnowledgeIndicatorsTable() {
   >([]);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 25 });
 
-  const { deleteKnowledgeIndicatorsInBulk, isDeleting } = useDiscoveryKnowledgeIndicatorsBulkDelete(
+  const { deleteKnowledgeIndicatorsInBulk, isDeleting } = useKnowledgeIndicatorsBulkDelete(
     {
       onSuccess: () => {
         setSelectedKnowledgeIndicators([]);
@@ -352,7 +352,7 @@ export function DiscoveryKnowledgeIndicatorsTable() {
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
-                  data-test-subj="discoveryKnowledgeIndicatorsDetailsButton"
+                  data-test-subj="knowledgeIndicatorsDetailsButton"
                   iconType={isExpanded ? 'minimize' : 'expand'}
                   aria-label={isExpanded ? MINIMIZE_DETAILS_ARIA_LABEL : VIEW_DETAILS_ARIA_LABEL}
                   onClick={() => toggleSelectedKnowledgeIndicator(ki)}
@@ -378,7 +378,7 @@ export function DiscoveryKnowledgeIndicatorsTable() {
 
           return (
             <SparkPlot
-              id={`discovery-ki-events-${ki.query.id}`}
+              id={`ki-events-${ki.query.id}`}
               name={OCCURRENCES_TOOLTIP_NAME}
               type="bar"
               timeseries={occurrences}
@@ -508,7 +508,7 @@ export function DiscoveryKnowledgeIndicatorsTable() {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <DiscoveryStreamFilter
+          <StreamFilter
             knowledgeIndicators={knowledgeIndicators}
             searchTerm={debouncedSearchTerm}
             statusFilter={statusFilter}

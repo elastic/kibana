@@ -24,7 +24,7 @@ import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { useUnbackedQueriesCount } from '../../../hooks/sig_events/use_unbacked_queries_count';
 import { RedirectTo } from '../../redirect_to';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
-import { DiscoveryKnowledgeIndicatorsTable } from './components/discovery_knowledge_indicators_table';
+import { KnowledgeIndicatorsTable } from './components/knowledge_indicators_table';
 import { QueriesTable } from './components/queries_table/queries_table';
 import { StreamsView } from './components/streams_view/streams_view';
 import { InsightsTab } from './components/insights/tab';
@@ -157,7 +157,7 @@ export function SignificantEventsDiscoveryPage() {
       />
       <StreamsAppPageTemplate.Body grow>
         {tab === 'streams' && <StreamsView refreshUnbackedQueriesCount={refetch} />}
-        {tab === 'knowledge_indicators' && <DiscoveryKnowledgeIndicatorsTable />}
+        {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
         {tab === 'queries' && <QueriesTable />}
         {tab === 'significant_events' && <InsightsTab />}
         {tab === 'settings' && <SettingsTab />}

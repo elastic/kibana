@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { DiscoveryKnowledgeIndicatorsTable } from './discovery_knowledge_indicators_table';
+export { KnowledgeIndicatorsTable } from './knowledge_indicators_table';

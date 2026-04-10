@@ -22,7 +22,7 @@ import React, { useMemo, useState } from 'react';
 import { getKnowledgeIndicatorStreamName } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_stream_name';
 import { matchesKnowledgeIndicatorFilters } from '../../../stream_detail_significant_events_view/utils/matches_knowledge_indicator_filters';
 
-interface DiscoveryStreamFilterProps {
+interface StreamFilterProps {
   knowledgeIndicators: KnowledgeIndicator[];
   searchTerm: string;
   statusFilter: 'active' | 'excluded';
@@ -32,7 +32,7 @@ interface DiscoveryStreamFilterProps {
   onSelectedStreamsChange: (selectedStreams: string[]) => void;
 }
 
-export function DiscoveryStreamFilter({
+export function StreamFilter({
   knowledgeIndicators,
   searchTerm,
   statusFilter,
@@ -40,10 +40,10 @@ export function DiscoveryStreamFilter({
   hideComputedTypes,
   selectedStreams,
   onSelectedStreamsChange,
-}: DiscoveryStreamFilterProps) {
+}: StreamFilterProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const popoverId = useGeneratedHtmlId({
-    prefix: 'discoveryStreamFilterPopover',
+    prefix: 'streamFilterPopover',
   });
 
   const hasActiveFilters = selectedStreams.length > 0;
@@ -157,28 +157,28 @@ export function DiscoveryStreamFilter({
 }
 
 const STREAM_FILTER_GROUP_LABEL = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.streamFilterGroupLabel',
+  'xpack.streams.knowledgeIndicators.streamFilterGroupLabel',
   {
     defaultMessage: 'Filter by stream',
   }
 );
 
 const STREAM_FILTER_POPOVER_ARIA_LABEL = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.streamFilterPopoverLabel',
+  'xpack.streams.knowledgeIndicators.streamFilterPopoverLabel',
   {
     defaultMessage: 'Stream filter',
   }
 );
 
 const STREAM_FILTER_LABEL = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.streamFilterLabel',
+  'xpack.streams.knowledgeIndicators.streamFilterLabel',
   {
     defaultMessage: 'Stream',
   }
 );
 
 const STREAM_FILTER_SELECTABLE_ARIA_LABEL = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.streamFilterSelectableAriaLabel',
+  'xpack.streams.knowledgeIndicators.streamFilterSelectableAriaLabel',
   {
     defaultMessage: 'Filter knowledge indicators by stream',
   }

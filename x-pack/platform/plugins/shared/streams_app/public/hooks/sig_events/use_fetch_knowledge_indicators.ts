@@ -12,7 +12,7 @@ import { useFetchDiscoveryQueries } from './use_fetch_discovery_queries';
 
 const QUERIES_MAX_PER_PAGE = 1000;
 
-export function useFetchDiscoveryKnowledgeIndicators() {
+export function useFetchKnowledgeIndicators() {
   const {
     data: featuresData,
     isLoading: featuresLoading,

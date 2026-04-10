@@ -16,13 +16,13 @@ import { useQueriesApi } from './use_queries_api';
 import type { BulkOperationResult } from './use_discovery_features_api';
 import { useDiscoveryFeaturesApi } from './use_discovery_features_api';
 
-interface UseDiscoveryKnowledgeIndicatorsBulkDeleteParams {
+interface UseKnowledgeIndicatorsBulkDeleteParams {
   onSuccess?: () => void;
 }
 
-export function useDiscoveryKnowledgeIndicatorsBulkDelete({
+export function useKnowledgeIndicatorsBulkDelete({
   onSuccess,
-}: UseDiscoveryKnowledgeIndicatorsBulkDeleteParams = {}) {
+}: UseKnowledgeIndicatorsBulkDeleteParams = {}) {
   const {
     core: {
       notifications: { toasts },
@@ -120,28 +120,28 @@ export function useDiscoveryKnowledgeIndicatorsBulkDelete({
 }
 
 const BULK_DELETE_REJECTED_ERROR_MESSAGE = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.bulkDeleteRejectedErrorMessage',
+  'xpack.streams.knowledgeIndicators.bulkDeleteRejectedErrorMessage',
   {
     defaultMessage: 'Some knowledge indicators could not be deleted',
   }
 );
 
 const BULK_DELETE_ERROR_TOAST_TITLE = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.bulkDeleteErrorToastTitle',
+  'xpack.streams.knowledgeIndicators.bulkDeleteErrorToastTitle',
   {
     defaultMessage: 'Failed to delete selected knowledge indicators',
   }
 );
 
 const BULK_DELETE_PARTIAL_TOAST_TITLE = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.bulkDeletePartialToastTitle',
+  'xpack.streams.knowledgeIndicators.bulkDeletePartialToastTitle',
   {
     defaultMessage: 'Some knowledge indicators could not be deleted',
   }
 );
 
 const BULK_DELETE_SUCCESS_TOAST_TITLE = i18n.translate(
-  'xpack.streams.discoveryKnowledgeIndicators.bulkDeleteSuccessToastTitle',
+  'xpack.streams.knowledgeIndicators.bulkDeleteSuccessToastTitle',
   {
     defaultMessage: 'Knowledge indicators deleted',
   }
