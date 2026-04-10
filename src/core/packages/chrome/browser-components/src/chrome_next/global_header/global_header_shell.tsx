@@ -95,10 +95,7 @@ export const GlobalHeaderShell = React.memo<GlobalHeaderShellProps>(
     return (
       <header css={styles.root} data-test-subj="chromeNextGlobalHeader">
         <div css={styles.leftGroup}>
-          <div
-            css={logoSlot}
-            style={{ '--logo-width': `${logoWidth}px` } as React.CSSProperties}
-          >
+          <div css={logoSlot} style={{ '--logo-width': `${logoWidth}px` } as React.CSSProperties}>
             {logo}
           </div>
           {switcher && (
