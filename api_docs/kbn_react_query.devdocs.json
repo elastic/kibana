@@ -14168,6 +14168,10 @@
                 "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_load_connectors.ts"
               },
               {
+                "plugin": "@kbn/inference-connectors",
+                "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_connector_by_id.ts"
+              },
+              {
                 "plugin": "@kbn/elastic-assistant",
                 "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/capabilities/use_capabilities.tsx"
               },
@@ -14337,10 +14341,6 @@
               },
               {
                 "plugin": "alertingVTwo",
-                "path": "x-pack/platform/plugins/shared/alerting_v2/public/hooks/use_existing_rule.ts"
-              },
-              {
-                "plugin": "alertingVTwo",
                 "path": "x-pack/platform/plugins/shared/alerting_v2/public/hooks/use_fetch_workflow.ts"
               },
               {
@@ -14354,6 +14354,10 @@
               {
                 "plugin": "alertingVTwo",
                 "path": "x-pack/platform/plugins/shared/alerting_v2/public/hooks/use_fetch_notification_policy.ts"
+              },
+              {
+                "plugin": "@kbn/alerting-v2-episodes-ui",
+                "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui/hooks/use_fetch_related_alert_episodes_query.ts"
               },
               {
                 "plugin": "maintenanceWindows",
@@ -14661,19 +14665,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_monitoring/components/execution_events_table/use_execution_events.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_monitoring/components/execution_results_table/use_execution_results.tsx"
+                "path": "x-pack/solutions/security/plugins/security_solution/public/cases/attachments/event/hooks/use_get_events.tsx"
               },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_monitoring/components/execution_results_table/use_read_execution_results.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/cases/components/case_events/use_get_events.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -14766,6 +14762,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/management/services/policies/hooks.test.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/public/features/run_workflow/ui/workflow_execute_modal.tsx"
               },
               {
                 "plugin": "@kbn/alerts-ui-shared",

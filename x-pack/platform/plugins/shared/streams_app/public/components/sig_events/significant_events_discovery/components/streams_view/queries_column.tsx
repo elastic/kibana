@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiText } from '@elastic/eui';
+import { EuiI18nNumber, EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
 import React from 'react';
@@ -32,7 +32,11 @@ export function QueriesColumn({ streamName, streamOnboardingResult }: QueriesCol
         font-family: 'Roboto Mono', monospace;
       `}
     >
-      {significantEventsFetchState.data?.significant_events.length || '—'}
+      {significantEventsFetchState.data?.significant_events.length ? (
+        <EuiI18nNumber value={significantEventsFetchState.data.significant_events.length} />
+      ) : (
+        '—'
+      )}
     </EuiText>
   );
 }
