@@ -30,7 +30,9 @@ import type { CreateSLOForm } from '../types';
  * which was unmounting the components and therefore unregistering the associated values.
  */
 export function useUnregisterFields({ isEditMode }: { isEditMode: boolean }) {
-  const { data: apmIndex } = useFetchApmIndex();
+  const {
+    data: { metric: apmIndex },
+  } = useFetchApmIndex();
   const { watch, unregister, reset, resetField } = useFormContext<CreateSLOForm>();
   const [indicatorTypeState, setIndicatorTypeState] = useState<IndicatorType>(
     watch('indicator.type')
