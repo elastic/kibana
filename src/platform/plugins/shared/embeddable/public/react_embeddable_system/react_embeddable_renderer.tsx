@@ -10,7 +10,7 @@
 import type { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
 import { PresentationPanel } from '@kbn/presentation-panel-plugin/public';
 import type { HasPanelCapabilities, HasSerializedChildState } from '@kbn/presentation-publishing';
-import { apiIsPresentationContainer, initializeStateApi } from '@kbn/presentation-publishing';
+import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import React, { useImperativeHandle, useMemo, useRef } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { v4 as generateId } from 'uuid';
@@ -18,6 +18,7 @@ import type { SerializedDrilldowns } from '../../server';
 import { PhaseTracker } from './phase_tracker';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
 import type { DefaultEmbeddableApi, EmbeddableApiRegistration } from './types';
+import { initializeStateApi } from './initialize_state_api';
 
 /**
  * Renders a component from the React Embeddable registry into a Presentation Panel.

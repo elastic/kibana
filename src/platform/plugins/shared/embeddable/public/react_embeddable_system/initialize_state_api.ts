@@ -7,16 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  apiHasLastSavedChildState,
+  areComparatorsEqual,
+  getTitle,
+  type HasParentApi,
+  type HasSerializableState,
+  type HasUniqueId,
+  type PresentationContainer,
+  type PublishesUnsavedChanges,
+  type StateComparators,
+  type StateManager,
+} from '@kbn/presentation-publishing';
 import { combineLatestWith, debounceTime, map, of } from 'rxjs';
-import { type StateComparators, areComparatorsEqual } from '../../../state_manager';
-import type { StateManager } from '../../../state_manager/types';
-import type { HasParentApi } from '../../has_parent_api';
-import type { HasSerializableState } from '../../has_serializable_state';
-import type { HasUniqueId } from '../../has_uuid';
-import type { PublishesUnsavedChanges } from '../../publishes_unsaved_changes';
-import { getTitle } from '../../titles/publishes_title';
-import { apiHasLastSavedChildState } from '../last_saved_child_state';
-import type { PresentationContainer } from '../presentation_container';
 
 const UNSAVED_CHANGES_DEBOUNCE = 100;
 

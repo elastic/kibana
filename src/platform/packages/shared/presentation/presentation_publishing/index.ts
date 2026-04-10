@@ -13,6 +13,7 @@ export {
   type ComparatorFunction,
   type StateComparators,
   type WithAllKeys,
+  type StateManager,
   runComparator,
   areComparatorsEqual,
   diffComparators,
@@ -208,10 +209,6 @@ export {
 } from './interfaces/containers/child_state';
 
 export { childrenUnsavedChanges$ } from './interfaces/containers/container_state/children_unsaved_changes';
-export {
-  initializeStateApi,
-  type ContainerStateManagerInitializer,
-} from './interfaces/containers/container_state/link_to_container_state';
 
 export {
   apiCanDuplicatePanels,
