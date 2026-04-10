@@ -640,6 +640,131 @@ describe('convertPreviousRounds', () => {
       expect(sequentialAi.tool_calls).toHaveLength(1);
       expect(sequentialAi.tool_calls![0].id).toBe('call-3');
     });
+
+    it('sets group-level reasoning as AIMessage content', async () => {
+      const groupId = 'group-1';
+      const toolCall1 = makeToolCallWithResult('call-1', 'search', { query: 'foo' }, [
+        { tool_result_id: 'r1', type: ToolResultType.other, data: { result: 'a' } },
+      ]);
+
+      const step1: ToolCallStep = { ...makeToolCallStep(toolCall1), tool_call_group_id: groupId };
+      const reasoningStep: ReasoningStep = {
+        type: ConversationRoundStepType.reasoning,
+        reasoning: 'I need to search for foo',
+        tool_call_group_id: groupId,
+      };
+
+      const previousRounds = [
+        createRound({
+          id: 'round-1',
+          input: makeRoundInput('find foo'),
+          steps: [reasoningStep, step1],
+          response: makeAssistantResponse('done!'),
+          started_at: now,
+        }),
+      ];
+      const nextInput = makeRoundInput('next');
+      const result = await convertPreviousRounds({
+        conversation: createConversation({ previousRounds, nextInput }),
+      });
+
+      const aiMsg = result[1] as AIMessage;
+      expect(isAIMessage(aiMsg)).toBe(true);
+      expect(aiMsg.content).toBe('I need to search for foo');
+    });
+
+    it('injects per-tool reasoning as _reasoning in tool call args', async () => {
+      const groupId = 'group-1';
+      const toolCall1 = makeToolCallWithResult('call-1', 'search', { query: 'foo' }, [
+        { tool_result_id: 'r1', type: ToolResultType.other, data: { result: 'a' } },
+      ]);
+
+      const step1: ToolCallStep = { ...makeToolCallStep(toolCall1), tool_call_group_id: groupId };
+      const reasoningStep: ReasoningStep = {
+        type: ConversationRoundStepType.reasoning,
+        reasoning: 'searching for foo specifically',
+        tool_call_id: 'call-1',
+        tool_call_group_id: groupId,
+      };
+
+      const previousRounds = [
+        createRound({
+          id: 'round-1',
+          input: makeRoundInput('find foo'),
+          steps: [reasoningStep, step1],
+          response: makeAssistantResponse('done!'),
+          started_at: now,
+        }),
+      ];
+      const nextInput = makeRoundInput('next');
+      const result = await convertPreviousRounds({
+        conversation: createConversation({ previousRounds, nextInput }),
+      });
+
+      const aiMsg = result[1] as AIMessage;
+      expect(aiMsg.tool_calls![0].args).toEqual({
+        _reasoning: 'searching for foo specifically',
+        query: 'foo',
+      });
+    });
+
+    it('sets both group reasoning and per-tool reasoning', async () => {
+      const groupId = 'group-1';
+      const toolCall1 = makeToolCallWithResult('call-1', 'search', { query: 'foo' }, [
+        { tool_result_id: 'r1', type: ToolResultType.other, data: { result: 'a' } },
+      ]);
+      const toolCall2 = makeToolCallWithResult('call-2', 'lookup', { id: 42 }, [
+        { tool_result_id: 'r2', type: ToolResultType.other, data: { result: 'b' } },
+      ]);
+
+      const step1: ToolCallStep = { ...makeToolCallStep(toolCall1), tool_call_group_id: groupId };
+      const step2: ToolCallStep = { ...makeToolCallStep(toolCall2), tool_call_group_id: groupId };
+
+      const previousRounds = [
+        createRound({
+          id: 'round-1',
+          input: makeRoundInput('find things'),
+          steps: [
+            {
+              type: ConversationRoundStepType.reasoning,
+              reasoning: 'group level thought',
+              tool_call_group_id: groupId,
+            } as ReasoningStep,
+            {
+              type: ConversationRoundStepType.reasoning,
+              reasoning: 'reason for call-1',
+              tool_call_id: 'call-1',
+              tool_call_group_id: groupId,
+            } as ReasoningStep,
+            step1,
+            {
+              type: ConversationRoundStepType.reasoning,
+              reasoning: 'reason for call-2',
+              tool_call_id: 'call-2',
+              tool_call_group_id: groupId,
+            } as ReasoningStep,
+            step2,
+          ],
+          response: makeAssistantResponse('done!'),
+          started_at: now,
+        }),
+      ];
+      const nextInput = makeRoundInput('next');
+      const result = await convertPreviousRounds({
+        conversation: createConversation({ previousRounds, nextInput }),
+      });
+
+      const aiMsg = result[1] as AIMessage;
+      expect(aiMsg.content).toBe('group level thought');
+      expect(aiMsg.tool_calls![0].args).toEqual({
+        _reasoning: 'reason for call-1',
+        query: 'foo',
+      });
+      expect(aiMsg.tool_calls![1].args).toEqual({
+        _reasoning: 'reason for call-2',
+        id: 42,
+      });
+    });
   });
 });
 
@@ -653,9 +778,14 @@ describe('groupToolCallSteps', () => {
     ...(groupId ? { tool_call_group_id: groupId } : {}),
   });
 
-  const makeReasoningStep = (reasoning: string): ReasoningStep => ({
+  const makeReasoningStep = (
+    reasoning: string,
+    { toolCallId, toolCallGroupId }: { toolCallId?: string; toolCallGroupId?: string } = {}
+  ): ReasoningStep => ({
     type: ConversationRoundStepType.reasoning,
     reasoning,
+    ...(toolCallId ? { tool_call_id: toolCallId } : {}),
+    ...(toolCallGroupId ? { tool_call_group_id: toolCallGroupId } : {}),
   });
 
   it('groups steps with the same group id', () => {

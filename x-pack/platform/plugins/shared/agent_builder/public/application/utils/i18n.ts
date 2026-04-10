@@ -12,6 +12,18 @@ export const labels = {
     optional: i18n.translate('xpack.agentBuilder.common.optional', {
       defaultMessage: 'Optional',
     }),
+    markdownViewModeLegend: i18n.translate('xpack.agentBuilder.common.markdownViewModeLegend', {
+      defaultMessage: 'Markdown view mode',
+    }),
+    markdownViewRenderedLabel: i18n.translate(
+      'xpack.agentBuilder.common.markdownViewRenderedLabel',
+      {
+        defaultMessage: 'Rendered',
+      }
+    ),
+    markdownViewRawLabel: i18n.translate('xpack.agentBuilder.common.markdownViewRawLabel', {
+      defaultMessage: 'Raw',
+    }),
   },
   conversations: {
     title: i18n.translate('xpack.agentBuilder.conversations.title', {
@@ -490,6 +502,11 @@ export const labels = {
       ),
     },
   },
+  byAuthor: (author: string) =>
+    i18n.translate('xpack.agentBuilder.byAuthor', {
+      defaultMessage: 'By {author}',
+      values: { author },
+    }),
   skills: {
     title: i18n.translate('xpack.agentBuilder.skills.title', { defaultMessage: 'Skills' }),
     newSkillButton: i18n.translate('xpack.agentBuilder.skills.newSkillButton', {
@@ -525,8 +542,98 @@ export const labels = {
     }),
     toolsLabel: i18n.translate('xpack.agentBuilder.skills.toolsLabel', { defaultMessage: 'Tools' }),
     referencedContentLabel: i18n.translate('xpack.agentBuilder.skills.referencedContentLabel', {
-      defaultMessage: 'Additional files',
+      defaultMessage: 'Files',
     }),
+    referencedFileCard: {
+      skillNamePathPlaceholder: i18n.translate(
+        'xpack.agentBuilder.skills.referencedFileCard.skillNamePathPlaceholder',
+        {
+          defaultMessage: '(skill name)',
+        }
+      ),
+      fileNameLabel: i18n.translate('xpack.agentBuilder.skills.referencedFileCard.fileNameLabel', {
+        defaultMessage: 'File name',
+      }),
+      fileNameHelp: i18n.translate('xpack.agentBuilder.skills.referencedFileCard.fileNameHelp', {
+        defaultMessage: 'Do not include .md — it is added automatically.',
+      }),
+      folderPathLabel: i18n.translate(
+        'xpack.agentBuilder.skills.referencedFileCard.folderPathLabel',
+        {
+          defaultMessage: 'Folder path',
+        }
+      ),
+      folderPathHelp: i18n.translate(
+        'xpack.agentBuilder.skills.referencedFileCard.folderPathHelp',
+        {
+          defaultMessage: 'Start with ./ for the root directory. Example: ./templates',
+        }
+      ),
+      fullPathPreview: (path: string) =>
+        i18n.translate('xpack.agentBuilder.skills.referencedFileCard.fullPathPreview', {
+          defaultMessage: 'Full path preview: {path}',
+          values: { path },
+        }),
+      contentLabel: i18n.translate('xpack.agentBuilder.skills.referencedFileCard.contentLabel', {
+        defaultMessage: 'Content',
+      }),
+      contentAriaLabel: i18n.translate(
+        'xpack.agentBuilder.skills.referencedFileCard.contentAriaLabel',
+        {
+          defaultMessage: 'Referenced file markdown content',
+        }
+      ),
+      estimatedTokens: (count: number) =>
+        i18n.translate('xpack.agentBuilder.skills.referencedFileCard.estimatedTokens', {
+          defaultMessage: 'Estimated tokens: {count}',
+          values: { count },
+        }),
+    },
+    referencedFileSection: {
+      description: i18n.translate('xpack.agentBuilder.skills.referencedFileSection.description', {
+        defaultMessage:
+          'Attach extra markdown files that belong to this skill. Paths are relative to the skill folder.',
+      }),
+      addFileButton: i18n.translate(
+        'xpack.agentBuilder.skills.referencedFileSection.addFileButton',
+        {
+          defaultMessage: 'Add file',
+        }
+      ),
+      filesAddedCount: (current: number, max: number) =>
+        i18n.translate('xpack.agentBuilder.skills.referencedFileSection.filesAddedCount', {
+          defaultMessage: '({current}/{max} files added)',
+          values: { current, max },
+        }),
+      removeFileAriaLabel: i18n.translate(
+        'xpack.agentBuilder.skills.referencedFileSection.removeFileAriaLabel',
+        {
+          defaultMessage: 'Remove this additional file',
+        }
+      ),
+      emptyReadOnly: i18n.translate(
+        'xpack.agentBuilder.skills.referencedFileSection.emptyReadOnly',
+        {
+          defaultMessage: 'This skill has no additional files.',
+        }
+      ),
+      addFileButtonDisabledTooltip: (max: number) =>
+        i18n.translate(
+          'xpack.agentBuilder.skills.referencedFileSection.addFileButtonDisabledTooltip',
+          {
+            defaultMessage: 'You cannot add more than {max} additional files.',
+            values: { max },
+          }
+        ),
+      readOnlyFileAccordionAriaLabel: (path: string) =>
+        i18n.translate(
+          'xpack.agentBuilder.skills.referencedFileSection.readOnlyFileAccordionAriaLabel',
+          {
+            defaultMessage: 'Additional file {path}. Expand to view markdown content.',
+            values: { path },
+          }
+        ),
+    },
     typeLabel: i18n.translate('xpack.agentBuilder.skills.typeLabel', { defaultMessage: 'Type' }),
     saveButtonLabel: i18n.translate('xpack.agentBuilder.skills.saveButtonLabel', {
       defaultMessage: 'Save',
@@ -707,12 +814,6 @@ export const labels = {
         defaultMessage: 'Search available skills',
       }
     ),
-    availableSkillsSummary: (showing: number, total: number) =>
-      i18n.translate('xpack.agentBuilder.agentSkills.availableSkillsSummary', {
-        defaultMessage:
-          'Showing {showing} of {total} {total, plural, one {Available skill} other {Available skills}}',
-        values: { showing, total },
-      }),
     addButtonLabel: i18n.translate('xpack.agentBuilder.agentSkills.addButtonLabel', {
       defaultMessage: 'Add',
     }),
@@ -797,24 +898,6 @@ export const labels = {
       'xpack.agentBuilder.agentSkills.skillDetailInstructionsLabel',
       {
         defaultMessage: 'Instructions',
-      }
-    ),
-    instructionsViewModeLegend: i18n.translate(
-      'xpack.agentBuilder.agentSkills.instructionsViewModeLegend',
-      {
-        defaultMessage: 'Instructions view mode',
-      }
-    ),
-    instructionsViewRenderedLabel: i18n.translate(
-      'xpack.agentBuilder.agentSkills.instructionsViewRenderedLabel',
-      {
-        defaultMessage: 'Rendered',
-      }
-    ),
-    instructionsViewRawLabel: i18n.translate(
-      'xpack.agentBuilder.agentSkills.instructionsViewRawLabel',
-      {
-        defaultMessage: 'Raw',
       }
     ),
     noSkillSelectedMessage: i18n.translate(
@@ -1000,12 +1083,6 @@ export const labels = {
         defaultMessage: 'Search available plugins',
       }
     ),
-    availablePluginsSummary: (showing: number, total: number) =>
-      i18n.translate('xpack.agentBuilder.agentPlugins.availablePluginsSummary', {
-        defaultMessage:
-          'Showing {showing} of {total} {total, plural, one {Available plugin} other {Available plugins}}',
-        values: { showing, total },
-      }),
     noAvailablePluginsMatchMessage: i18n.translate(
       'xpack.agentBuilder.agentPlugins.noAvailablePluginsMatchMessage',
       {
@@ -1024,8 +1101,14 @@ export const labels = {
         values: { source },
       }),
     pluginDetailIdLabel: i18n.translate('xpack.agentBuilder.agentPlugins.pluginDetailIdLabel', {
-      defaultMessage: 'ID',
+      defaultMessage: 'Plugin ID',
     }),
+    pluginDetailIdCopyLabel: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.pluginDetailIdCopyLabel',
+      {
+        defaultMessage: 'Copy plugin ID',
+      }
+    ),
     pluginDetailNameLabel: i18n.translate('xpack.agentBuilder.agentPlugins.pluginDetailNameLabel', {
       defaultMessage: 'Name',
     }),
@@ -1038,7 +1121,7 @@ export const labels = {
     pluginDetailSkillsLabel: i18n.translate(
       'xpack.agentBuilder.agentPlugins.pluginDetailSkillsLabel',
       {
-        defaultMessage: 'Skills',
+        defaultMessage: 'Skills included',
       }
     ),
     pluginDetailAuthorLabel: i18n.translate(
@@ -1051,6 +1134,12 @@ export const labels = {
       'xpack.agentBuilder.agentPlugins.pluginDetailSourceLabel',
       {
         defaultMessage: 'Source',
+      }
+    ),
+    pluginDetailInstructionsLabel: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.pluginDetailInstructionsLabel',
+      {
+        defaultMessage: 'Instructions',
       }
     ),
     installPluginFlyoutTitle: i18n.translate(
@@ -1190,11 +1279,6 @@ export const labels = {
         defaultMessage: 'Search available tools',
       }
     ),
-    availableToolsSummary: (showing: number, total: number) =>
-      i18n.translate('xpack.agentBuilder.agentTools.availableToolsSummary', {
-        defaultMessage: 'Showing {showing} of {total} {total, plural, one {Tool} other {Tools}}',
-        values: { showing, total },
-      }),
     noAvailableToolsMatchMessage: i18n.translate(
       'xpack.agentBuilder.agentTools.noAvailableToolsMatchMessage',
       {

@@ -10,7 +10,13 @@
 import { globalSetupHook } from '@kbn/scout';
 import { getSynthtraceClient } from '@kbn/scout-synthtrace';
 import { createMetricsTestIndexIfNeeded } from '../fixtures/metrics_experience';
-import { TRACES, richTrace, traceCorrelatedLogs, deepTrace } from '../fixtures/traces_experience';
+import {
+  TRACES,
+  richTrace,
+  traceCorrelatedLogs,
+  minimalTraceCorrelatedLogs,
+  deepTrace,
+} from '../fixtures/traces_experience';
 
 globalSetupHook(
   'Setup Discover tests data',
@@ -79,6 +85,15 @@ globalSetupHook(
 
       await logsEsClient.index(logData);
       log.debug('[setup:traces] Correlated log data indexed');
+
+      const minimalLogData = minimalTraceCorrelatedLogs({
+        ...timeRange,
+        traceId: correlationIds.minimalTraceId,
+        transactionId: correlationIds.minimalTransactionId,
+      });
+
+      await logsEsClient.index(minimalLogData);
+      log.debug('[setup:traces] Minimal trace log data indexed');
     }
   }
 );
