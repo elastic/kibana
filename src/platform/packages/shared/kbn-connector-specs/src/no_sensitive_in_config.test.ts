@@ -35,14 +35,15 @@ describe('connector spec config schemas', () => {
         }
       }
 
-      if (violations.length > 0) {
-        throw new Error(
-          `Connector "${spec.metadata.id}" config schema marks field(s) as sensitive or password inputs, but connector configuration is stored unencrypted. ` +
-            `Use auth types and encrypted secrets for credentials. Violations: ${violations.join(
-              '; '
-            )}`
-        );
-      }
+      expect({
+        violations,
+        reason:
+          'Connector configuration is stored unencrypted. Use auth types and encrypted secrets for credentials.',
+      }).toEqual({
+        violations: [],
+        reason:
+          'Connector configuration is stored unencrypted. Use auth types and encrypted secrets for credentials.',
+      });
     }
   );
 });
