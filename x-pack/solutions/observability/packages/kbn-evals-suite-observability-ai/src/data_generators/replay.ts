@@ -22,8 +22,8 @@ async function deleteStaleTemporaryIndices(esClient: Client, log: ToolingLog): P
       name: `${TEMP_INDEX_PREFIX}*`,
     });
     staleIndices = resolved.indices.map((entry) => entry.name);
-  } catch {
-    log.debug('No stale temporary indices to clean up');
+  } catch (error) {
+    log.error(`Failed to resolve stale temporary indices: ${(error as Error).message}`);
     return;
   }
 
