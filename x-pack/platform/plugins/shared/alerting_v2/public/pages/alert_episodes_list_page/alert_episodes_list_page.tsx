@@ -320,6 +320,7 @@ export const AlertEpisodesListPage = () => {
                         episodeAction={episodeActionsMap?.get(episodeId)}
                         groupAction={groupActionsMap?.get(groupHash)}
                         http={services.http}
+                        expressions={services.expressions}
                         viewDetailsHref={
                           episodeId
                             ? services.http.basePath.prepend(paths.alertEpisodeDetails(episodeId))
