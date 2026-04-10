@@ -764,7 +764,7 @@ export class DataViewsService {
 
       // If allowNoIndex, only update field list if field caps finds fields. To support
       // beats creating index pattern and dashboard before docs
-      if (!options.allowNoIndex || (newFields && newFields.length > 5)) {
+      if (!options.allowNoIndex || (newFields && newFields.length > 0)) {
         updatedFieldList = [...newFields, ...scriptedFields];
       } else {
         updatedFieldList = fieldsAsArr;
