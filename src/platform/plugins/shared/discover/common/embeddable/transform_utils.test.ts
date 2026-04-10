@@ -1044,6 +1044,18 @@ describe('search embeddable transform utils', () => {
             negate: false,
           },
         ],
+        non_highlighting_filters: [
+          {
+            type: ASCODE_FILTER_TYPE.CONDITION,
+            condition: {
+              field: 'trace.id',
+              operator: ASCODE_FILTER_OPERATOR.IS,
+              value: 'abc123',
+            },
+            disabled: false,
+            negate: false,
+          },
+        ],
         query: { language: 'kql', expression: '' },
         rows_per_page: 100,
         sample_size: 500,
@@ -1067,39 +1079,10 @@ describe('search embeddable transform utils', () => {
       expect(searchSource.index).toBeUndefined();
       expect(searchSource.query).toEqual({ language: 'kuery', query: '' });
       expect(searchSource.filter).toHaveLength(1);
-      expect(searchSource.nonHighlightingFilters).toBeUndefined();
-    });
-
-    it('serializes non_highlighting_filters into nonHighlightingFilters in searchSourceJSON', () => {
-      const apiTab: DiscoverSessionEmbeddableByValueState['tabs'][0] = {
-        column_order: [],
-        sort: [],
-        view_mode: VIEW_MODE.DOCUMENT_LEVEL,
-        density: DataGridDensity.COMPACT,
-        header_row_height: 3,
-        row_height: 3,
-        query: { language: 'kql', query: '' },
-        filters: [],
-        non_highlighting_filters: [
-          {
-            type: ASCODE_FILTER_TYPE.CONDITION,
-            condition: {
-              field: 'trace.id',
-              operator: ASCODE_FILTER_OPERATOR.IS,
-              value: 'abc123',
-            },
-            disabled: false,
-            negate: false,
-          },
-        ],
-        data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'data-view-1' },
-      };
-      const { state } = toStoredTab(apiTab);
-      const searchSource = JSON.parse(state.kibanaSavedObjectMeta.searchSourceJSON);
       expect(searchSource.nonHighlightingFilters).toHaveLength(1);
     });
 
-    it('round-trips filters and non_highlighting_filters through toStoredTab → fromStoredTab', () => {
+    it('round-trips all fields through toStoredTab → fromStoredTab', () => {
       const references: SavedObjectReference[] = [
         { name: 'kibanaSavedObjectMeta.searchSourceJSON.index', type: 'index-pattern', id: 'dv-1' },
       ];
@@ -1133,6 +1116,12 @@ describe('search embeddable transform utils', () => {
       const { state } = toStoredTab(apiTab);
       const result = fromStoredTab(state, references);
 
+      expect('data_source' in result && result.data_source).toEqual({
+        type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+        ref_id: 'dv-1',
+      });
+      expect('view_mode' in result && result.view_mode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
+      expect('query' in result && result.query).toEqual({ language: 'kql', expression: '' });
       expect('filters' in result && result.filters).toHaveLength(1);
       expect('non_highlighting_filters' in result && result.non_highlighting_filters).toHaveLength(
         1
