@@ -11,6 +11,7 @@ import type { DebugState } from '@elastic/charts';
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { PageObjects } from '@kbn/scout';
+import type { ScoutPage } from '@kbn/scout';
 import {
   LENS_BASIC_DATA_VIEW,
   LENS_BASIC_KIBANA_ARCHIVE,
@@ -78,6 +79,7 @@ const createBaseXYCharts = async (
   });
   await pageObjects.lens.saveAndReturn();
   await pageObjects.dashboard.waitForPanelsToLoad(1);
+  // Ensure the dashboard UI is fully stable before opening the next panel
   await pageObjects.dashboard.waitForRenderComplete();
 
   await pageObjects.dashboard.openNewLensPanel();
