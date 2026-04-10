@@ -96,6 +96,7 @@ export const compressionMimeTypes = [
   'application/x-bzip2',
   'application/x-7z-compressed',
   'application/x-tar',
+  'application/x-zip-compressed',
 ];
 
 export const pdfMimeTypes = ['application/pdf'];
