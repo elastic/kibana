@@ -18,7 +18,14 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { AlertStatus } from '@kbn/rule-data-utils';
-import { ALERT_RULE_UUID, ALERT_STATUS_ACTIVE, ALERT_UUID } from '@kbn/rule-data-utils';
+import {
+  ALERT_EVALUATION_TIME_RANGE,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_UUID,
+  ALERT_STATUS_ACTIVE,
+  ALERT_UUID,
+} from '@kbn/rule-data-utils';
+import { RuleQueryInspector } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { useKibana } from '../../../utils/kibana_react';
 import type { TopAlert } from '../../../typings/alerts';
@@ -85,6 +92,19 @@ export function HeaderActions({
   return (
     <>
       <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
+        {alert?.fields[ALERT_RULE_UUID] && alert?.fields[ALERT_RULE_TYPE_ID] && (
+          <EuiFlexItem grow={false}>
+            <RuleQueryInspector
+              ruleId={alert.fields[ALERT_RULE_UUID]}
+              ruleTypeId={alert.fields[ALERT_RULE_TYPE_ID]}
+              evaluationTimeRange={
+                alert.fields[ALERT_EVALUATION_TIME_RANGE] as
+                  | { gte: string; lte: string }
+                  | undefined
+              }
+            />
+          </EuiFlexItem>
+        )}
         {discoverUrl && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty

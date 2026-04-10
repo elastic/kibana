@@ -31,6 +31,7 @@ import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { PluginSetup as ESQLSetup } from '@kbn/esql/server';
 import { getLogsFeature } from './features/logs_feature';
 import type { ObservabilityConfig } from '.';
@@ -42,6 +43,7 @@ import type {
 } from './lib/annotations/bootstrap_annotations';
 import { bootstrapAnnotations } from './lib/annotations/bootstrap_annotations';
 import { registerRuleTypes } from './lib/rules/register_rule_types';
+import { createCustomThresholdRuleQueryInspectorHandler } from './lib/rules/custom_threshold/rule_query_inspector_handler';
 import { getObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
 import { registerRoutes } from './routes/register_routes';
 import { threshold } from './saved_objects/threshold';
@@ -69,6 +71,7 @@ interface PluginSetup {
 
 interface PluginStart {
   alerting: AlertingServerStart;
+  data: DataPluginStart;
   spaces?: SpacesPluginStart;
   dataViews: DataViewsServerPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
@@ -119,6 +122,20 @@ export class ObservabilityPlugin
       alertsLocator,
       logsLocator,
     });
+
+    plugins.alerting.registerRuleQueryInspector(
+      'observability.rules.custom_threshold',
+      createCustomThresholdRuleQueryInspectorHandler(
+        () =>
+          core
+            .getStartServices()
+            .then(([coreStart, pluginStart]) => [
+              coreStart,
+              { dataViews: pluginStart.dataViews, data: pluginStart.data },
+            ]),
+        { compositeSize: config.customThresholdRule.groupByPageSize }
+      )
+    );
 
     void core.getStartServices().then(([coreStart, pluginStart]) => {
       const isCompleteOverviewEnabled = coreStart.pricing.isFeatureAvailable(

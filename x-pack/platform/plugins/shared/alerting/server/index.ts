@@ -38,6 +38,12 @@ export { DEFAULT_AAD_CONFIG } from './types';
 export { RULE_SAVED_OBJECT_TYPE, API_KEY_PENDING_INVALIDATION_TYPE } from './saved_objects';
 export { RuleNotifyWhen } from '../common';
 export type { AlertingServerSetup, AlertingServerStart } from './plugin';
+export type {
+  RuleQueryInspectorHandler,
+  RuleQueryInspectorResponse,
+  RuleQueryInspectorResult,
+  RuleQueryInspectorTimeRange,
+} from './rule_query_inspector/types';
 export type { FindResult, BulkEditOperation, BulkOperationError } from './rules_client';
 export type { Rule } from './application/rule/types';
 export type { PublicAlert as Alert } from './alert';

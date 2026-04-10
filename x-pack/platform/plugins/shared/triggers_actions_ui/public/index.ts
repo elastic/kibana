@@ -137,4 +137,13 @@ export { validateActionFilterQuery } from './application/lib/value_validators';
 
 export { RULE_PREBUILD_DESCRIPTION_FIELDS } from './application/sections/rule_details/components/rule_detail_description_type';
 
+export {
+  RuleQueryInspector,
+  RuleQueryInspectorFlyout,
+} from './application/components/rule_query_inspector';
+export type {
+  RuleQueryInspectorProps,
+  RuleQueryInspectorFlyoutProps,
+} from './application/components/rule_query_inspector';
+
 export { getIsExperimentalFeatureEnabled } from './common/get_experimental_features';

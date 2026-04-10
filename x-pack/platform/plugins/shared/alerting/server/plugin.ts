@@ -57,6 +57,9 @@ import { ApiKeyType } from './task_runner/types';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
+import { RuleQueryInspectorRegistry } from './rule_query_inspector/registry';
+import type { RuleQueryInspectorHandler } from './rule_query_inspector/types';
+import { ruleQueryInspectorRoute } from './routes/rule/apis/rule_query_inspector/rule_query_inspector_route';
 import {
   RulesSettingsClientFactory,
   RulesSettingsService,
@@ -169,6 +172,7 @@ export interface AlertingServerSetup {
   getConfig: () => AlertingRulesConfig;
   frameworkAlerts: PublicFrameworkAlertsService;
   getDataStreamAdapter: () => DataStreamAdapter;
+  registerRuleQueryInspector: (ruleTypeId: string, handler: RuleQueryInspectorHandler) => void;
 }
 
 export interface AlertingServerStart {
@@ -247,6 +251,7 @@ export class AlertingPlugin {
   private readonly isServerless: boolean;
   private nodeRoles: PluginInitializerContext['node']['roles'];
   private readonly connectorAdapterRegistry = new ConnectorAdapterRegistry();
+  private readonly ruleQueryInspectorRegistry = new RuleQueryInspectorRegistry();
   private readonly disabledRuleTypes: Set<string>;
   private readonly enabledRuleTypes: Set<string> | null = null;
   private getRulesClientWithRequest?: (request: KibanaRequest) => Promise<RulesClientApi>;
@@ -473,6 +478,8 @@ export class AlertingPlugin {
       core,
     });
 
+    ruleQueryInspectorRoute(router, this.licenseState, this.ruleQueryInspectorRegistry);
+
     return {
       registerConnectorAdapter: <
         RuleActionParams extends ConnectorAdapterParams = ConnectorAdapterParams,
@@ -595,6 +602,9 @@ export class AlertingPlugin {
         },
       },
       getDataStreamAdapter: () => this.dataStreamAdapter!,
+      registerRuleQueryInspector: (ruleTypeId: string, handler: RuleQueryInspectorHandler) => {
+        this.ruleQueryInspectorRegistry.register(ruleTypeId, handler);
+      },
     };
   }
 
