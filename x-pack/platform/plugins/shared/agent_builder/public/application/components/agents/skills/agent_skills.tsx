@@ -15,13 +15,17 @@ import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiLoadingSpinner,
   EuiPopover,
   EuiSpacer,
   EuiText,
   EuiIcon,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { PublicSkillDefinition, PublicSkillSummary } from '@kbn/agent-builder-common';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { searchParamNames } from '../../../search_param_names';
@@ -29,6 +33,7 @@ import { useQueryState } from '../../../hooks/use_query_state';
 import { labels } from '../../../utils/i18n';
 import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
+import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { useSkillsService } from '../../../hooks/skills/use_skills';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
@@ -45,12 +50,16 @@ import { ICON_DIMENSIONS } from '../common/constants';
 import { useListDetailPageStyles } from '../common/styles';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { useCanEditAgent } from '../../../hooks/agents/use_can_edit_agent';
+import { CustomizeLandingEmptyState } from '../common/customize_landing_empty_state';
+import skillsIllustration from '../overview/assets/connected-power-plug.svg';
 
 export const AgentSkills: React.FC = () => {
   const { agentId } = useParams<{ agentId: string }>();
+  const { euiTheme } = useEuiTheme();
   const styles = useListDetailPageStyles();
-  const { createAgentBuilderUrl } = useNavigation();
-  const { agentService } = useAgentBuilderServices();
+  const { createAgentBuilderUrl, navigateToAgentBuilderUrl } = useNavigation();
+  const { agentService, docLinksService } = useAgentBuilderServices();
+  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
   const { addSuccessToast, addErrorToast } = useToasts();
   const queryClient = useQueryClient();
 
@@ -208,6 +217,48 @@ export const AgentSkills: React.FC = () => {
     return agentSkillIdSet;
   }, [agentSkillIdSet, allSkills, enableElasticCapabilities, builtinSkillIdSet]);
 
+  const showCustomizeEmptyState = activeSkills.length === 0 && !searchQuery.trim();
+
+  const skillsEmptyDescription = isExperimentalFeaturesEnabled ? (
+    <FormattedMessage
+      id="xpack.agentBuilder.agentSkills.customizeEmptyStateDescription"
+      defaultMessage="Skills combine prompts and tools into reusable capabilities. For packaged capabilities, try {plugins}. To expose callable functions, configure {tools}."
+      values={{
+        plugins: (
+          <EuiLink
+            data-test-subj="agentSkillsCustomizeEmptyStateLinkPlugins"
+            onClick={() => navigateToAgentBuilderUrl(appPaths.agent.plugins({ agentId: agentId! }))}
+          >
+            Plugins
+          </EuiLink>
+        ),
+        tools: (
+          <EuiLink
+            data-test-subj="agentSkillsCustomizeEmptyStateLinkTools"
+            onClick={() => navigateToAgentBuilderUrl(appPaths.agent.tools({ agentId: agentId! }))}
+          >
+            Tools
+          </EuiLink>
+        ),
+      }}
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.agentBuilder.agentSkills.customizeEmptyStateDescriptionNoExperimental"
+      defaultMessage="Skills combine prompts and tools into reusable capabilities. Configure {tools} so your agent can call functions and integrations."
+      values={{
+        tools: (
+          <EuiLink
+            data-test-subj="agentSkillsCustomizeEmptyStateLinkTools"
+            onClick={() => navigateToAgentBuilderUrl(appPaths.agent.tools({ agentId: agentId! }))}
+          >
+            Tools
+          </EuiLink>
+        ),
+      }}
+    />
+  );
+
   const isLoading = agentLoading || skillsLoading;
 
   if (isLoading) {
@@ -295,6 +346,43 @@ export const AgentSkills: React.FC = () => {
         </EuiText>
       </div>
 
+      {showCustomizeEmptyState ? (
+        <EuiFlexGroup
+          justifyContent="center"
+          alignItems="center"
+          css={css`
+            flex: 1;
+            min-height: 280px;
+            padding: ${euiTheme.size.xl} 0;
+          `}
+        >
+          <CustomizeLandingEmptyState
+            dataTestSubj="agentSkillsCustomizeEmptyState"
+            illustrationSrc={skillsIllustration}
+            title={labels.agentSkills.emptyStateTitle}
+            description={skillsEmptyDescription}
+            learnMoreHref={docLinksService.agentBuilderAgents}
+            primaryAction={
+              canEditAgent ? (
+                <EuiButton
+                  data-test-subj="agentSkillsCustomizeEmptyStateAddButton"
+                  fill
+                  iconType="plusInCircle"
+                  iconSide="left"
+                  onClick={openLibrary}
+                >
+                  {labels.agentSkills.addSkillButton}
+                </EuiButton>
+              ) : undefined
+            }
+            secondaryAction={
+              <EuiButtonEmpty href={createAgentBuilderUrl(appPaths.manage.skills)}>
+                {labels.agentSkills.manageAllSkills}
+              </EuiButtonEmpty>
+            }
+          />
+        </EuiFlexGroup>
+      ) : (
       <EuiFlexGroup gutterSize="none" responsive={false} css={styles.body}>
         <EuiFlexItem grow={false} css={styles.searchColumn}>
           <div css={styles.searchInputWrapper}>
@@ -358,6 +446,7 @@ export const AgentSkills: React.FC = () => {
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
+      )}
 
       {isLibraryOpen && (
         <SkillLibraryPanel

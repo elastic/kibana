@@ -11,18 +11,20 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiLoadingSpinner,
   EuiPopover,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { PluginDefinition } from '@kbn/agent-builder-common';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useQueryState } from '../../../hooks/use_query_state';
@@ -30,6 +32,7 @@ import { searchParamNames } from '../../../search_param_names';
 import { labels } from '../../../utils/i18n';
 import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
+import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { usePluginsService } from '../../../hooks/plugins/use_plugins';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
@@ -40,16 +43,21 @@ import { ActiveItemRow } from '../common/active_item_row';
 import { PluginLibraryPanel } from './plugin_library_panel';
 import { PluginDetailPanel } from './plugin_detail_panel';
 import { InstallPluginFlyout } from './install_plugin_flyout';
+import { PluginAddMenuPanel } from './plugin_add_menu_panel';
 import { PageWrapper } from '../common/page_wrapper';
+import { CustomizeLandingEmptyState } from '../common/customize_landing_empty_state';
+import pluginsIllustration from '../overview/assets/projects-folder.svg';
 import { ICON_DIMENSIONS } from '../common/constants';
 import { useListDetailPageStyles } from '../common/styles';
 import { useCanEditAgent } from '../../../hooks/agents/use_can_edit_agent';
 
 export const AgentPlugins: React.FC = () => {
   const { agentId } = useParams<{ agentId: string }>();
+  const { euiTheme } = useEuiTheme();
   const styles = useListDetailPageStyles();
-  const { createAgentBuilderUrl } = useNavigation();
-  const { agentService } = useAgentBuilderServices();
+  const { createAgentBuilderUrl, navigateToAgentBuilderUrl } = useNavigation();
+  const { agentService, docLinksService } = useAgentBuilderServices();
+  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
   const { addSuccessToast, addErrorToast } = useToasts();
   const queryClient = useQueryClient();
 
@@ -60,7 +68,8 @@ export const AgentPlugins: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPluginId, setSelectedPluginId] = useQueryState<string>(searchParamNames.pluginId);
   const pendingSelectPluginIdRef = useRef<string | null>(null);
-  const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
+  const [isHeaderInstallMenuOpen, setIsHeaderInstallMenuOpen] = useState(false);
+  const [isEmptyInstallMenuOpen, setIsEmptyInstallMenuOpen] = useState(false);
   const [mutatingPluginId, setMutatingPluginId] = useState<string | null>(null);
   const {
     isOpen: isLibraryOpen,
@@ -74,12 +83,14 @@ export const AgentPlugins: React.FC = () => {
   } = useFlyoutState();
 
   const handleOpenLibrary = useCallback(() => {
-    setIsAddMenuOpen(false);
+    setIsHeaderInstallMenuOpen(false);
+    setIsEmptyInstallMenuOpen(false);
     openLibrary();
   }, [openLibrary]);
 
   const handleOpenInstallFlyout = useCallback(() => {
-    setIsAddMenuOpen(false);
+    setIsHeaderInstallMenuOpen(false);
+    setIsEmptyInstallMenuOpen(false);
     openInstallFlyout();
   }, [openInstallFlyout]);
 
@@ -221,6 +232,48 @@ export const AgentPlugins: React.FC = () => {
     return agentPluginIdSet;
   }, [agentPluginIdSet, enableElasticCapabilities, builtinPluginIdSet]);
 
+  const showCustomizeEmptyState = activePlugins.length === 0 && !searchQuery.trim();
+
+  const pluginsEmptyDescription = isExperimentalFeaturesEnabled ? (
+    <FormattedMessage
+      id="xpack.agentBuilder.agentPlugins.customizeEmptyStateDescription"
+      defaultMessage="Plugins bundle related skills so you can extend your agent in one step. Start from {skills} or add {tools} for individual functions."
+      values={{
+        skills: (
+          <EuiLink
+            data-test-subj="agentPluginsCustomizeEmptyStateLinkSkills"
+            onClick={() => navigateToAgentBuilderUrl(appPaths.agent.skills({ agentId: agentId! }))}
+          >
+            Skills
+          </EuiLink>
+        ),
+        tools: (
+          <EuiLink
+            data-test-subj="agentPluginsCustomizeEmptyStateLinkTools"
+            onClick={() => navigateToAgentBuilderUrl(appPaths.agent.tools({ agentId: agentId! }))}
+          >
+            Tools
+          </EuiLink>
+        ),
+      }}
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.agentBuilder.agentPlugins.customizeEmptyStateDescriptionNoExperimental"
+      defaultMessage="Plugins bundle related skills so you can extend your agent in one step. Pair them with {skills} you author or import."
+      values={{
+        skills: (
+          <EuiLink
+            data-test-subj="agentPluginsCustomizeEmptyStateLinkSkills"
+            onClick={() => navigateToAgentBuilderUrl(appPaths.agent.skills({ agentId: agentId! }))}
+          >
+            Skills
+          </EuiLink>
+        ),
+      }}
+    />
+  );
+
   const isLoading = agentLoading || pluginsLoading;
 
   if (isLoading) {
@@ -254,44 +307,32 @@ export const AgentPlugins: React.FC = () => {
                   {labels.agentPlugins.manageAllPlugins}
                 </EuiButtonEmpty>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiPopover
-                  aria-label={labels.agentPlugins.installPluginButton}
-                  button={
-                    <EuiButton
-                      fill
-                      iconType="plusInCircle"
-                      iconSide="left"
-                      onClick={() => setIsAddMenuOpen((prev) => !prev)}
-                    >
-                      {labels.agentPlugins.installPluginButton}
-                    </EuiButton>
-                  }
-                  isOpen={isAddMenuOpen}
-                  closePopover={() => setIsAddMenuOpen(false)}
-                  anchorPosition="downLeft"
-                  panelPaddingSize="none"
-                >
-                  <EuiContextMenuPanel
-                    items={[
-                      <EuiContextMenuItem
-                        key="fromUrlOrZip"
-                        icon="link"
-                        onClick={handleOpenInstallFlyout}
+              {canEditAgent ? (
+                <EuiFlexItem grow={false}>
+                  <EuiPopover
+                    aria-label={labels.agentPlugins.installPluginButton}
+                    button={
+                      <EuiButton
+                        fill
+                        iconType="plusInCircle"
+                        iconSide="left"
+                        onClick={() => setIsHeaderInstallMenuOpen((prev) => !prev)}
                       >
-                        {labels.agentPlugins.fromUrlOrZipMenuItem}
-                      </EuiContextMenuItem>,
-                      <EuiContextMenuItem
-                        key="fromLibrary"
-                        icon="importAction"
-                        onClick={handleOpenLibrary}
-                      >
-                        {labels.agentPlugins.fromLibraryMenuItem}
-                      </EuiContextMenuItem>,
-                    ]}
-                  />
-                </EuiPopover>
-              </EuiFlexItem>
+                        {labels.agentPlugins.installPluginButton}
+                      </EuiButton>
+                    }
+                    isOpen={isHeaderInstallMenuOpen}
+                    closePopover={() => setIsHeaderInstallMenuOpen(false)}
+                    anchorPosition="downLeft"
+                    panelPaddingSize="none"
+                  >
+                    <PluginAddMenuPanel
+                      onInstallFromUrlOrZip={handleOpenInstallFlyout}
+                      onAddFromLibrary={handleOpenLibrary}
+                    />
+                  </EuiPopover>
+                </EuiFlexItem>
+              ) : null}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -302,66 +343,121 @@ export const AgentPlugins: React.FC = () => {
         </EuiText>
       </div>
 
-      <EuiFlexGroup gutterSize="none" responsive={false} css={styles.body}>
-        <EuiFlexItem grow={false} css={styles.searchColumn}>
-          <div css={styles.searchInputWrapper}>
-            <EuiFieldSearch
-              placeholder={labels.agentPlugins.searchActivePluginsPlaceholder}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              incremental
-              fullWidth
-            />
-          </div>
-
-          <div css={styles.scrollableList}>
-            {filteredActivePlugins.length === 0 ? (
-              <EuiText size="s" color="subdued" textAlign="center">
-                <p>
-                  {searchQuery.trim()
-                    ? labels.agentPlugins.noActivePluginsMatchMessage
-                    : labels.agentPlugins.noActivePluginsMessage}
-                </p>
-              </EuiText>
-            ) : (
-              filteredActivePlugins.map((plugin) => (
-                <ActiveItemRow
-                  key={plugin.id}
-                  id={plugin.id}
-                  name={plugin.name}
-                  isSelected={selectedPluginId === plugin.id}
-                  onSelect={() => setSelectedPluginId(plugin.id)}
-                  onRemove={() => handleRemovePlugin(plugin)}
-                  isRemoving={updatePluginsMutation.isLoading}
-                  removeAriaLabel={labels.agentPlugins.removePluginAriaLabel}
-                  readOnlyContent={
-                    enableElasticCapabilities && plugin.readonly ? (
-                      <EuiBadge color="hollow">{labels.agentPlugins.autoBadge}</EuiBadge>
-                    ) : undefined
+      {showCustomizeEmptyState ? (
+        <EuiFlexGroup
+          justifyContent="center"
+          alignItems="center"
+          css={css`
+            flex: 1;
+            min-height: 280px;
+            padding: ${euiTheme.size.xl} 0;
+          `}
+        >
+          <CustomizeLandingEmptyState
+            dataTestSubj="agentPluginsCustomizeEmptyState"
+            illustrationSrc={pluginsIllustration}
+            title={labels.agentPlugins.emptyStateTitle}
+            description={pluginsEmptyDescription}
+            learnMoreHref={docLinksService.agentBuilderAgents}
+            primaryAction={
+              canEditAgent ? (
+                <EuiPopover
+                  aria-label={labels.agentPlugins.installPluginButton}
+                  button={
+                    <EuiButton
+                      data-test-subj="agentPluginsCustomizeEmptyStateInstallButton"
+                      fill
+                      iconType="plusInCircle"
+                      iconSide="left"
+                      onClick={() => setIsEmptyInstallMenuOpen((prev) => !prev)}
+                    >
+                      {labels.agentPlugins.installPluginButton}
+                    </EuiButton>
                   }
-                  canEditAgent={canEditAgent}
-                />
-              ))
-            )}
-          </div>
-        </EuiFlexItem>
+                  isOpen={isEmptyInstallMenuOpen}
+                  closePopover={() => setIsEmptyInstallMenuOpen(false)}
+                  anchorPosition="downCenter"
+                  panelPaddingSize="none"
+                >
+                  <PluginAddMenuPanel
+                    onInstallFromUrlOrZip={handleOpenInstallFlyout}
+                    onAddFromLibrary={handleOpenLibrary}
+                  />
+                </EuiPopover>
+              ) : undefined
+            }
+            secondaryAction={
+              <EuiButtonEmpty href={createAgentBuilderUrl(appPaths.manage.plugins)}>
+                {labels.agentPlugins.manageAllPlugins}
+              </EuiButtonEmpty>
+            }
+          />
+        </EuiFlexGroup>
+      ) : (
+        <EuiFlexGroup gutterSize="none" responsive={false} css={styles.body}>
+          <EuiFlexItem grow={false} css={styles.searchColumn}>
+            <div css={styles.searchInputWrapper}>
+              <EuiFieldSearch
+                placeholder={labels.agentPlugins.searchActivePluginsPlaceholder}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                incremental
+                fullWidth
+              />
+            </div>
 
-        <EuiFlexItem css={styles.detailPanelWrapper}>
-          {selectedPluginId ? (
-            <PluginDetailPanel pluginId={selectedPluginId} onRemove={handleRemoveSelectedPlugin} />
-          ) : (
-            <EuiFlexGroup
-              justifyContent="center"
-              alignItems="center"
-              css={styles.noSelectionPlaceholder}
-            >
-              <EuiText size="s" color="subdued">
-                {labels.agentPlugins.noPluginSelectedMessage}
-              </EuiText>
-            </EuiFlexGroup>
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            <div css={styles.scrollableList}>
+              {filteredActivePlugins.length === 0 ? (
+                <EuiText size="s" color="subdued" textAlign="center">
+                  <p>
+                    {searchQuery.trim()
+                      ? labels.agentPlugins.noActivePluginsMatchMessage
+                      : labels.agentPlugins.noActivePluginsMessage}
+                  </p>
+                </EuiText>
+              ) : (
+                filteredActivePlugins.map((plugin) => (
+                  <ActiveItemRow
+                    key={plugin.id}
+                    id={plugin.id}
+                    name={plugin.name}
+                    isSelected={selectedPluginId === plugin.id}
+                    onSelect={() => setSelectedPluginId(plugin.id)}
+                    onRemove={() => handleRemovePlugin(plugin)}
+                    isRemoving={updatePluginsMutation.isLoading}
+                    removeAriaLabel={labels.agentPlugins.removePluginAriaLabel}
+                    readOnlyContent={
+                      enableElasticCapabilities && plugin.readonly ? (
+                        <EuiBadge color="hollow">{labels.agentPlugins.autoBadge}</EuiBadge>
+                      ) : undefined
+                    }
+                    canEditAgent={canEditAgent}
+                  />
+                ))
+              )}
+            </div>
+          </EuiFlexItem>
+
+          <EuiFlexItem css={styles.detailPanelWrapper}>
+            {selectedPluginId ? (
+              <PluginDetailPanel
+                pluginId={selectedPluginId}
+                onRemove={handleRemoveSelectedPlugin}
+              />
+            ) : (
+              <EuiFlexGroup
+                justifyContent="center"
+                alignItems="center"
+                css={styles.noSelectionPlaceholder}
+              >
+                <EuiText size="s" color="subdued">
+                  {labels.agentPlugins.noPluginSelectedMessage}
+                </EuiText>
+              </EuiFlexGroup>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
 
       {isLibraryOpen && (
         <PluginLibraryPanel

@@ -985,6 +985,9 @@ export const labels = {
     manageAllSkills: i18n.translate('xpack.agentBuilder.agentSkills.manageAllSkillsLink', {
       defaultMessage: 'Manage all skills',
     }),
+    emptyStateTitle: i18n.translate('xpack.agentBuilder.agentSkills.emptyStateTitle', {
+      defaultMessage: 'Add skills to this agent',
+    }),
   },
   agentPlugins: {
     pageDescription: i18n.translate('xpack.agentBuilder.agentPlugins.pageDescription', {
@@ -1194,6 +1197,9 @@ export const labels = {
     manageAllPlugins: i18n.translate('xpack.agentBuilder.agentPlugins.manageAllSkillsLink', {
       defaultMessage: 'Manage all plugins',
     }),
+    emptyStateTitle: i18n.translate('xpack.agentBuilder.agentPlugins.emptyStateTitle', {
+      defaultMessage: 'Add plugins to this agent',
+    }),
   },
   agentTools: {
     pageDescription: i18n.translate('xpack.agentBuilder.agentTools.pageDescription', {
@@ -1360,6 +1366,9 @@ export const labels = {
     ),
     manageAllTools: i18n.translate('xpack.agentBuilder.agentTools.manageAllToolsLink', {
       defaultMessage: 'Manage all tools',
+    }),
+    emptyStateTitle: i18n.translate('xpack.agentBuilder.agentTools.emptyStateTitle', {
+      defaultMessage: 'Add tools to this agent',
     }),
   },
   plugins: {
