@@ -14,6 +14,11 @@
  *   (scope.name, explicit data_stream.* attrs, or generic.otel default).
  * - Receiver-specific packages (e.g. mysql_input_otel) without dynamic_signal_types
  *   must still set data_stream.dataset in routing transforms.
+ *
+ * Dataset override via stream var `data_stream.dataset` (package-spec / ingest parity):
+ * - Dynamic OTLP-style package: see "custom dataset var" test below.
+ * - Receiver-specific input package: see "receiver-specific" override test below.
+ * For non-OTel logfile full-policy dataset assertions, see agent_policy_input_logfile_dataset.ts.
  */
 
 import expect from '@kbn/expect';
@@ -48,6 +53,11 @@ function getRoutingProcessors(
   return Object.entries(processors).filter(
     ([key]) => key.endsWith('-routing') && key.includes('otelcol-')
   );
+}
+
+/** Exact OTTL emitted by Fleet for data_stream.dataset (see otel_collector buildDataStreamStatements). */
+function expectedDatasetOttlStatement(dataset: string): string {
+  return `set(attributes["data_stream.dataset"], "${dataset}")`;
 }
 
 export default function (providerContext: FtrProviderContext) {
@@ -167,7 +177,9 @@ export default function (providerContext: FtrProviderContext) {
           expect(statements.some((s) => s.includes('data_stream.type'))).to.be(true);
           expect(statements.some((s) => s.includes('data_stream.namespace'))).to.be(true);
           // dataset is now set from the package manifest default (generic.otel).
-          expect(statements.some((s) => s.includes('"generic.otel"'))).to.be(true);
+          expect(statements.some((s) => s === expectedDatasetOttlStatement('generic.otel'))).to.be(
+            true
+          );
         }
       } finally {
         await deleteAgentPolicy(agentPolicyId);
@@ -214,7 +226,9 @@ export default function (providerContext: FtrProviderContext) {
 
         for (const [, processor] of routingProcessors) {
           const statements = collectStatements(processor);
-          expect(statements.some((s) => s.includes('"custom.dataset"'))).to.be(true);
+          expect(
+            statements.some((s) => s === expectedDatasetOttlStatement('custom.dataset'))
+          ).to.be(true);
         }
       } finally {
         await deleteAgentPolicy(agentPolicyId);
@@ -262,8 +276,61 @@ export default function (providerContext: FtrProviderContext) {
           expect(statements.some((s) => s.includes('data_stream.type'))).to.be(true);
           expect(statements.some((s) => s.includes('data_stream.namespace'))).to.be(true);
           // Receiver-specific packages must retain the policy_template-based dataset.
-          expect(statements.some((s) => s.includes('data_stream.dataset'))).to.be(true);
-          expect(statements.some((s) => s.includes('"mysqld_exporter"'))).to.be(true);
+          expect(
+            statements.some((s) => s === expectedDatasetOttlStatement('mysqld_exporter'))
+          ).to.be(true);
+        }
+      } finally {
+        await deleteAgentPolicy(agentPolicyId);
+      }
+    });
+
+    // -------------------------------------------------------------------------
+    // Test 4: receiver-specific package + explicit data_stream.dataset override
+    //
+    // Same code path as Test 3, but the user-supplied dataset var must appear in OTTL
+    // (mirrors package-spec input OTel override for non-dynamic packages).
+    // -------------------------------------------------------------------------
+    it('sets overridden data_stream.dataset in routing transforms for receiver-specific OTel packages', async () => {
+      const agentPolicyId = await createAgentPolicy();
+      const overrideDataset = 'custom.receiver_dataset';
+
+      try {
+        await supertest
+          .post('/api/fleet/package_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `receiver-custom-dataset-${uuidv4()}`,
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            package: { name: RECEIVER_PKG, version: RECEIVER_PKG_VERSION },
+            inputs: {
+              'mysqld_exporter-otelcol': {
+                enabled: true,
+                streams: {
+                  'test_otel_receiver.mysqld_exporter': {
+                    enabled: true,
+                    vars: { 'data_stream.dataset': overrideDataset },
+                  },
+                },
+              },
+            },
+          })
+          .expect(200);
+
+        const fullPolicy = await getFullAgentPolicy(agentPolicyId);
+        const routingProcessors = getRoutingProcessors(fullPolicy.processors);
+
+        expect(routingProcessors.length).to.be.greaterThan(0);
+
+        for (const [, processor] of routingProcessors) {
+          const statements = collectStatements(processor);
+
+          expect(statements.some((s) => s.includes('data_stream.type'))).to.be(true);
+          expect(statements.some((s) => s.includes('data_stream.namespace'))).to.be(true);
+          expect(statements.some((s) => s === expectedDatasetOttlStatement(overrideDataset))).to.be(
+            true
+          );
         }
       } finally {
         await deleteAgentPolicy(agentPolicyId);
