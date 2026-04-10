@@ -22,6 +22,7 @@ export interface UseDefaultModelSettingsReturn {
   state: DefaultModelSettingsState;
   savedState: DefaultModelSettingsState;
   isDirty: boolean;
+  isValid: boolean;
   setDefaultModelId: (id: string) => void;
   setDisallowOtherModels: (disallow: boolean) => void;
   save: () => Promise<void>;
@@ -68,6 +69,11 @@ export const useDefaultModelSettings = (): UseDefaultModelSettingsReturn => {
     [state, savedState]
   );
 
+  const isValid = useMemo(
+    () => !(state.disallowOtherModels && state.defaultModelId === NO_DEFAULT_MODEL),
+    [state.disallowOtherModels, state.defaultModelId]
+  );
+
   const setDefaultModelId = useCallback(
     (id: string) => setState((prev) => ({ ...prev, defaultModelId: id })),
     []
@@ -108,6 +114,7 @@ export const useDefaultModelSettings = (): UseDefaultModelSettingsReturn => {
     state,
     savedState,
     isDirty,
+    isValid,
     setDefaultModelId,
     setDisallowOtherModels,
     save,

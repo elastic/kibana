@@ -33,6 +33,7 @@ const createMockSettings = (
   state: { defaultModelId: NO_DEFAULT_MODEL, disallowOtherModels: false },
   savedState: { defaultModelId: NO_DEFAULT_MODEL, disallowOtherModels: false },
   isDirty: false,
+  isValid: true,
   setDefaultModelId: jest.fn(),
   setDisallowOtherModels: jest.fn(),
   save: jest.fn().mockResolvedValue(undefined),
@@ -77,6 +78,7 @@ describe('DefaultModelSection', () => {
   it('shows validation error when disallow is checked without a default model', () => {
     const settings = createMockSettings({
       state: { defaultModelId: NO_DEFAULT_MODEL, disallowOtherModels: true },
+      isValid: false,
     });
 
     render(

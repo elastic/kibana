@@ -127,7 +127,7 @@ export const ModelSettings: React.FC = () => {
             fill
             onClick={handleSave}
             isLoading={isSaving}
-            isDisabled={!isDirty}
+            isDisabled={!isDirty || !defaultModelSettings.isValid}
             data-test-subj="save-settings-button"
           >
             {i18n.SETTINGS_SAVE_BUTTON}

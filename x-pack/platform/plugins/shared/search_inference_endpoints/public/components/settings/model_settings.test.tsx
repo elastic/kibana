@@ -72,6 +72,7 @@ const defaultModelSettingsState = {
   state: { defaultModelId: 'NO_DEFAULT_MODEL', disallowOtherModels: false },
   savedState: { defaultModelId: 'NO_DEFAULT_MODEL', disallowOtherModels: false },
   isDirty: false,
+  isValid: true,
   setDefaultModelId: jest.fn(),
   setDisallowOtherModels: jest.fn(),
   save: jest.fn().mockResolvedValue(undefined),
@@ -132,6 +133,40 @@ describe('ModelSettings', () => {
 
   it('save button is enabled when dirty', () => {
     mockUseModelSettingsForm.mockReturnValue({ ...defaultFormState, isDirty: true });
+
+    render(
+      <Wrapper>
+        <ModelSettings />
+      </Wrapper>
+    );
+
+    expect(screen.getByTestId('save-settings-button')).toBeEnabled();
+  });
+
+  it('save button is disabled when dirty but default model settings are invalid', () => {
+    mockUseDefaultModelSettings.mockReturnValue({
+      ...defaultModelSettingsState,
+      isDirty: true,
+      isValid: false,
+      state: { defaultModelId: 'NO_DEFAULT_MODEL', disallowOtherModels: true },
+    });
+
+    render(
+      <Wrapper>
+        <ModelSettings />
+      </Wrapper>
+    );
+
+    expect(screen.getByTestId('save-settings-button')).toBeDisabled();
+  });
+
+  it('save button is enabled when dirty and default model settings are valid', () => {
+    mockUseDefaultModelSettings.mockReturnValue({
+      ...defaultModelSettingsState,
+      isDirty: true,
+      isValid: true,
+      state: { defaultModelId: 'some-model', disallowOtherModels: true },
+    });
 
     render(
       <Wrapper>
