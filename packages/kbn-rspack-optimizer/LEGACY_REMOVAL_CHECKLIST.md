@@ -35,6 +35,9 @@ with `[rspack-transition]` comments for easy discovery via `grep -r 'rspack-tran
 - [ ] `.buildkite/pipeline-utils/pr_labels.ts`: Remove the `ci:build-with-rspack-optimizer` mapping from `LABEL_MAPPING`.
 - [ ] `.buildkite/scripts/steps/checks/bundle_limits.sh`: Remove the legacy `node scripts/build_kibana_platform_plugins --validate-limits` line and the `[rspack-transition]` comment.
 - [ ] `packages/kbn-ci-stats-shipper-cli/ship_ci_stats_cli.ts`: Remove the `[rspack-transition]` conditional in the update command, keep only the rspack command.
+- [ ] `.buildkite/pipelines/pull_request/base.yml`: Remove the `Verify Rspack Optimizer Build` step (no longer needed when Rspack is the only optimizer).
+- [ ] `.buildkite/scripts/steps/verify_rspack_build.sh`: Delete the file.
+- [ ] `.buildkite/scripts/pipelines/pull_request/pipeline.ts`: Remove `verify_rspack_build` from the `cancel_on_gate_failure` registration loop.
 
 ## Dev mode
 
@@ -66,4 +69,4 @@ delete the legacy branch/assertions and keep only the rspack assertions.
 - [ ] `packages/kbn-rspack-optimizer/`: Rename to `packages/kbn-optimizer/` (reclaiming the name from the deleted legacy package). Update all imports and `kibana.jsonc` references.
 - [ ] Delete this `LEGACY_REMOVAL_CHECKLIST.md` file (no longer needed).
 
-## Total: ~22 files with deletions/simplifications, 0 files with structural changes.
+## Total: ~25 files with deletions/simplifications, 0 files with structural changes.
