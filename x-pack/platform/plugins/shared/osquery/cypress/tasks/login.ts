@@ -22,6 +22,14 @@ const createListsIndex = () => {
 // Login as a SOC_MANAGER to properly initialize Security Solution App
 export const initializeDataViews = () => {
   cy.login(ServerlessRoleName.SOC_MANAGER);
+  // Suppress the agent builder announcement modal so it does not block UI interactions.
+  // Called after login so the session cookie is available for the internal API.
+  request({
+    method: 'POST',
+    url: '/internal/kibana/global_settings',
+    body: { changes: { hideAnnouncements: true } },
+    failOnStatusCode: false,
+  });
   createListsIndex();
   cy.visit('/app/security/alerts', {
     onBeforeLoad: (win) => disableNewFeaturesTours(win),
