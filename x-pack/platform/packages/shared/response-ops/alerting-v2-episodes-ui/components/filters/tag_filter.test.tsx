@@ -92,7 +92,9 @@ describe('TagFilter', () => {
       await openPopover();
 
       const props = InlineFilterPopoverSpy.mock.calls[0][0];
-      props.onSelectionChange([]);
+      act(() => {
+        props.onSelectionChange([]);
+      });
 
       expect(onTagsChange).toHaveBeenCalledWith(undefined);
     });
