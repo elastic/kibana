@@ -943,14 +943,14 @@ class PluginWatchPlugin {
         return;
       }
 
-      this.hasInitialDiscovery = true;
-
       try {
         const currentPlugins = await discoverPlugins({
           repoRoot: this.options.repoRoot,
           examples: this.options.examples || false,
           testPlugins: this.options.testPlugins || false,
         });
+
+        this.hasInitialDiscovery = true;
 
         // Collect plugin entries
         const pluginEntries = collectPluginEntries(this.options.repoRoot, currentPlugins);

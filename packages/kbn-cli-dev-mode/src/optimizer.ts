@@ -125,6 +125,10 @@ export class Optimizer {
       // Dynamically import rspack optimizer to avoid loading it when not needed
       import('@kbn/rspack-optimizer')
         .then(async ({ RspackOptimizer }) => {
+          if (subscriber.closed) {
+            return;
+          }
+
           const rspackOptimizer = new RspackOptimizer({
             repoRoot: options.repoRoot,
             watch: options.watch,

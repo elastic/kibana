@@ -247,6 +247,7 @@ describe('rspack compile integration', () => {
       const devBundle = Fs.readdirSync(Path.join(tmpDir, 'output-dev')).find(
         (f) => f.includes(pluginId) && f.endsWith('.js')
       );
+      expect(devBundle).toBeDefined();
       const devSize = Fs.statSync(Path.join(tmpDir, 'output-dev', devBundle!)).size;
 
       expect(distSize).toBeLessThan(devSize);

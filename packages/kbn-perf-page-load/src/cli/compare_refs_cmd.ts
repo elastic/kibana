@@ -71,6 +71,10 @@ const runInWorktree = async (
   Fs.mkdirSync(scoutDir, { recursive: true });
   const resultFile = resolve(scoutDir, `${label}.json`);
 
+  if (Fs.existsSync(resultFile)) {
+    Fs.unlinkSync(resultFile);
+  }
+
   const env: Record<string, string> = {
     ...(process.env as Record<string, string>),
     PERF_LH_RESULT_FILE: resultFile,
@@ -144,7 +148,11 @@ export const compareRefsCmd: Command<{}> = {
     const [ref1, ref2] = positional.map(String);
     const dist = flagsReader.boolean('dist');
     const throttle = flagsReader.string('throttle') ?? 'provided';
-    const threshold = Number(flagsReader.string('threshold') ?? '5');
+    const thresholdStr = flagsReader.string('threshold') ?? '5';
+    const threshold = Number(thresholdStr);
+    if (!Number.isFinite(threshold)) {
+      throw createFailError(`Invalid threshold value: ${thresholdStr}`);
+    }
 
     if (throttle === 'devtools' && !dist) {
       throw createFailError('DevTools throttling requires dist bundles (--dist).');

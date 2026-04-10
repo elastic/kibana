@@ -100,7 +100,7 @@ export const formatComparisonResults = (
 
       const n1 = key === 'performanceScore' ? Math.round((v1 as number) * 100) : (v1 as number);
       const n2 = key === 'performanceScore' ? Math.round((v2 as number) * 100) : (v2 as number);
-      const delta = n1 === 0 ? 0 : ((n2 - n1) / Math.abs(n1)) * 100;
+      const delta = n1 === 0 ? (n2 === 0 ? 0 : 100) : ((n2 - n1) / Math.abs(n1)) * 100;
       const deltaStr = `${delta >= 0 ? '+' : ''}${delta.toFixed(1)}%`;
 
       // For scores, higher is better (regression = decrease). For timings, lower is better (regression = increase).

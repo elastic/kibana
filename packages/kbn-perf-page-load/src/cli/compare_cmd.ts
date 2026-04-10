@@ -37,7 +37,11 @@ export const compareCmd: Command<{}> = {
     }
 
     const [file1Path, file2Path] = positional.map((f) => resolve(REPO_ROOT, String(f)));
-    const threshold = Number(flagsReader.string('threshold') ?? '5');
+    const thresholdStr = flagsReader.string('threshold') ?? '5';
+    const threshold = Number(thresholdStr);
+    if (!Number.isFinite(threshold)) {
+      throw createFailError(`Invalid threshold value: ${thresholdStr}`);
+    }
 
     if (!Fs.existsSync(file1Path)) {
       throw createFailError(`File not found: ${file1Path}`);

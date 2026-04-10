@@ -24,9 +24,10 @@ function init() {
 
   const argv = process.execArgv[idx];
   if (argv.includes('=')) {
-    const [flag, port] = argv.split('=');
+    const [flag, hostPort] = argv.split('=');
     detectedFlag = flag;
-    portCounter = Number.parseInt(port, 10) + 1;
+    const portStr = hostPort.includes(':') ? hostPort.split(':').pop()! : hostPort;
+    portCounter = Number.parseInt(portStr, 10) + 1;
   } else {
     detectedFlag = argv;
     const next = process.execArgv[idx + 1];

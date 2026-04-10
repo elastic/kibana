@@ -180,7 +180,7 @@ function buildFooter(filename: string, nonComponentExports: string[]): string {
         ? __hmr_names.join(', ')
         : __hmr_names.slice(0, 3).join(', ') + ' and ' + (__hmr_names.length - 3) + ' more';
       console.warn(
-        '[@kbn/rspack-optimizer][hmr] ${filename} \\u2192 Fast Refresh. ' +
+        '[@kbn/rspack-optimizer][hmr] ' + ${JSON.stringify(filename)} + ' \\u2192 Fast Refresh. ' +
         'Non-component exports (' + __hmr_display + ') may be stale in importing modules. Refresh if needed.'
       );
     }`;

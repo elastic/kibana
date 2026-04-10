@@ -199,25 +199,26 @@ export class EmitStatsPlugin {
   static writeStatsSync(statsPath: string, jsonStats: Record<string, any>): void {
     const fd = Fs.openSync(statsPath, 'w');
     try {
-      Fs.writeSync(fd, '{\n');
+      Fs.writeSync(fd, '{');
 
       const keys = Object.keys(jsonStats).filter((key) => (jsonStats as any)[key] !== undefined);
 
-      keys.forEach((key, index) => {
+      let first = true;
+      keys.forEach((key) => {
         const value = (jsonStats as any)[key];
-        const isLast = index === keys.length - 1;
 
         try {
           const jsonValue = JSON.stringify(value);
           if (jsonValue !== undefined) {
-            Fs.writeSync(fd, `  "${key}": ${jsonValue}${isLast ? '' : ','}\n`);
+            Fs.writeSync(fd, `${first ? '' : ','}\n  "${key}": ${jsonValue}`);
+            first = false;
           }
         } catch {
           // Skip values that can't be stringified (circular refs, etc.)
         }
       });
 
-      Fs.writeSync(fd, '}\n');
+      Fs.writeSync(fd, '\n}\n');
     } finally {
       Fs.closeSync(fd);
     }
