@@ -36,8 +36,6 @@ export interface InfraConfig {
     // to be removed in https://github.com/elastic/kibana/issues/221904
     profilingEnabled: boolean;
     ruleFormV2Enabled: boolean;
-    // to be removed after cps is fully enabled
-    infraCPSEnabled: boolean;
   };
 }
 

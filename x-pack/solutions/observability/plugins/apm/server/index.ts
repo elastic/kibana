@@ -78,8 +78,6 @@ const configSchema = schema.object({
     // to be removed in https://github.com/elastic/kibana/issues/221904
     profilingIntegrationAvailable: schema.boolean({ defaultValue: false }),
     ruleFormV2Enabled: schema.boolean({ defaultValue: false }),
-    // to be removed after cps is fully enabled
-    apmCPSEnabled: schema.boolean({ defaultValue: true }),
   }),
   serverless: schema.object({
     enabled: offeringBasedSchema({

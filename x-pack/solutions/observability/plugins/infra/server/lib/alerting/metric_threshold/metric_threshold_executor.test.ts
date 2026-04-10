@@ -3525,8 +3525,6 @@ const createMockStaticConfiguration = (sources: any): InfraConfig => ({
     // to be removed in https://github.com/elastic/kibana/issues/221904
     profilingEnabled: false,
     ruleFormV2Enabled: false,
-    // to be removed after cps is fully enabled
-    infraCPSEnabled: false,
   },
   enabled: true,
   sources,

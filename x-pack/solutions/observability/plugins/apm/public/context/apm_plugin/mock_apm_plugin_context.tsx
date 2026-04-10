@@ -167,8 +167,6 @@ const mockConfig: ConfigSchema = {
     // to be removed in https://github.com/elastic/kibana/issues/221904
     profilingIntegrationAvailable: false,
     ruleFormV2Enabled: false,
-    // to be removed after cps is fully enabled
-    apmCPSEnabled: false,
   },
   serverless: { enabled: false },
 };
