@@ -14,6 +14,10 @@ import {
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { firstValueFrom, toArray } from 'rxjs';
 import type { ServiceManager } from '../services';
+import {
+  CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
+  resolveConnectorOrInferenceId,
+} from '../../common/resolve_connector_or_inference_id';
 import { runAgentStepCommonDefinition } from '../../common/step_types/run_agent_step';
 
 /**
@@ -29,7 +33,8 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
 
         const {
           'agent-id': agentId,
-          'connector-id': connectorId,
+          'connector-id': connectorIdRaw,
+          'inference-id': inferenceIdRaw,
           'create-conversation': createConversation,
         } = context.config;
 
@@ -40,7 +45,10 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
         }
 
         const effectiveAgentId = (agentId as string | undefined) || agentBuilderDefaultAgentId;
-        const effectiveConnectorId = connectorId as string | undefined;
+        const effectiveConnectorId = resolveConnectorOrInferenceId(
+          { connectorId: connectorIdRaw, inferenceId: inferenceIdRaw },
+          CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW
+        );
 
         const storeConversation = createConversation || Boolean(conversationId);
 
