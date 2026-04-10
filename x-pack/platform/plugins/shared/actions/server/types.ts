@@ -129,7 +129,7 @@ export type ExecutorType<
 type Validator<T> = Pick<z4.ZodType, 'parse'>;
 export interface ValidatorType<T> {
   schema: Validator<T>;
-  customValidator?: (value: T, validatorServices: ValidatorServices) => void | Promise<void>;
+  customValidator?: (value: T, validatorServices: ValidatorServices) => void;
 }
 
 export interface ValidatorServices {
