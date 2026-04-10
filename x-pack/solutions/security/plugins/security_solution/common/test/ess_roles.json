@@ -49,7 +49,8 @@
         "feature": {
           "ml": ["read"],
           "siemV5": ["read", "endpoint_exceptions_read"],
-          "securitySolutionRulesV2": ["read"],
+          "securitySolutionRulesV4": ["read"],
+          "securitySolutionAlertsV1": ["read"],
           "securitySolutionAssistant": ["none"],
           "securitySolutionAttackDiscovery": ["none"],
           "securitySolutionCasesV2": ["read"],
@@ -101,7 +102,8 @@
         "feature": {
           "ml": ["read"],
           "siemV5": ["all", "global_artifact_management_all", "endpoint_exceptions_all"],
-          "securitySolutionRulesV2": ["all"],
+          "securitySolutionRulesV4": ["all"],
+          "securitySolutionAlertsV1": ["all"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
@@ -153,7 +155,8 @@
         "feature": {
           "ml": ["read"],
           "siemV5": ["all", "global_artifact_management_all", "endpoint_exceptions_all"],
-          "securitySolutionRulesV2": ["all"],
+          "securitySolutionRulesV4": ["all"],
+          "securitySolutionAlertsV1": ["all"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
@@ -177,7 +180,8 @@
       {
         "feature": {
           "siemV5": ["read", "endpoint_exceptions_read"],
-          "securitySolutionRulesV2": ["read"]
+          "securitySolutionRulesV4": ["read"],
+          "securitySolutionAlertsV1": ["read"]
         },
         "spaces": ["*"],
         "base": []
@@ -228,7 +232,8 @@
         "feature": {
           "ml": ["read"],
           "siemV5": ["all", "global_artifact_management_all", "endpoint_exceptions_all"],
-          "securitySolutionRulesV2": ["all"],
+          "securitySolutionRulesV4": ["all"],
+          "securitySolutionAlertsV1": ["all"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
@@ -285,7 +290,8 @@
         "feature": {
           "ml": ["read"],
           "siemV5": ["all", "global_artifact_management_all", "endpoint_exceptions_all"],
-          "securitySolutionRulesV2": ["all"],
+          "securitySolutionRulesV4": ["all"],
+          "securitySolutionAlertsV1": ["all"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],

@@ -47,7 +47,10 @@
           "siemV5": [
             "read"
           ],
-          "securitySolutionRulesV2": [
+          "securitySolutionRulesV4": [
+            "read"
+          ],
+          "securitySolutionAlertsV1": [
             "read"
           ],
           "securitySolutionAssistant": [
@@ -129,7 +132,10 @@
           "siemV5": [
             "read"
           ],
-          "securitySolutionRulesV2": [
+          "securitySolutionRulesV4": [
+            "read"
+          ],
+          "securitySolutionAlertsV1": [
             "read"
           ],
           "securitySolutionAssistant": [
@@ -244,7 +250,10 @@
             "actions_log_management_all",
             "file_operations_all"
           ],
-          "securitySolutionRulesV2": [
+          "securitySolutionRulesV4": [
+            "all"
+          ],
+          "securitySolutionAlertsV1": [
             "all"
           ],
           "securitySolutionCasesV2": [
@@ -358,7 +367,10 @@
             "all",
             "endpoint_exceptions_all"
           ],
-          "securitySolutionRulesV2": [
+          "securitySolutionRulesV4": [
+            "all"
+          ],
+          "securitySolutionAlertsV1": [
             "all"
           ],
           "securitySolutionAssistant": [
@@ -453,7 +465,10 @@
             "all",
             "endpoint_exceptions_all"
           ],
-          "securitySolutionRulesV2": [
+          "securitySolutionRulesV4": [
+            "all"
+          ],
+          "securitySolutionAlertsV1": [
             "all"
           ],
           "securitySolutionAssistant": [
@@ -542,7 +557,10 @@
             "all",
             "endpoint_exceptions_all"
           ],
-          "securitySolutionRulesV2": [
+          "securitySolutionRulesV4": [
+            "all"
+          ],
+          "securitySolutionAlertsV1": [
             "all"
           ],
           "securitySolutionAssistant": [
@@ -646,7 +664,10 @@
             "all",
             "endpoint_exceptions_all"
           ],
-          "securitySolutionRulesV2": [
+          "securitySolutionRulesV4": [
+            "all"
+          ],
+          "securitySolutionAlertsV1": [
             "all"
           ],
           "securitySolutionAssistant": [

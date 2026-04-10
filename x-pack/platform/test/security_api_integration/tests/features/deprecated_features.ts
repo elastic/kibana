@@ -72,6 +72,7 @@ const deprecatedApiActions: Record<string, Set<string>> = {
     'siemV4',
     'securitySolutionRulesV1',
     'securitySolutionRulesV2',
+    'securitySolutionRulesV3',
   ]),
 };
 

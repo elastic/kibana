@@ -47,7 +47,8 @@ viewer:
         - feature_siemV5.read
         - feature_siemV5.endpoint_list_read
         - feature_siemV5.endpoint_exceptions_read
-        - feature_securitySolutionRulesV2.read
+        - feature_securitySolutionRulesV4.read
+        - feature_securitySolutionAlertsV1.read
         - feature_securitySolutionCases.read
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -135,7 +136,8 @@ editor:
         - feature_siemV5.process_operations_all
         - feature_siemV5.actions_log_management_all # Response actions history
         - feature_siemV5.file_operations_all
-        - feature_securitySolutionRulesV2.all
+        - feature_securitySolutionRulesV4.all
+        - feature_securitySolutionAlertsV1.all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -193,7 +195,8 @@ t1_analyst:
         - feature_ml.read
         - feature_siemV5.read
         - feature_siemV5.endpoint_list_read
-        - feature_securitySolutionRulesV2.read
+        - feature_securitySolutionRulesV4.read
+        - feature_securitySolutionAlertsV1.read
         - feature_securitySolutionCases.read
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -254,7 +257,8 @@ t2_analyst:
         - feature_ml.read
         - feature_siemV5.read
         - feature_siemV5.endpoint_list_read
-        - feature_securitySolutionRulesV2.read
+        - feature_securitySolutionRulesV4.read
+        - feature_securitySolutionAlertsV1.read
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -334,7 +338,8 @@ t3_analyst:
         - feature_siemV5.file_operations_all
         - feature_siemV5.scan_operations_all
         - feature_siemV5.workflow_insights_all
-        - feature_securitySolutionRulesV2.all
+        - feature_securitySolutionRulesV4.all
+        - feature_securitySolutionAlertsV1.all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -400,7 +405,8 @@ threat_intelligence_analyst:
         - feature_siemV5.global_artifact_management_all
         - feature_siemV5.blocklist_all
         - feature_siemV5.endpoint_exceptions_all
-        - feature_securitySolutionRulesV2.all
+        - feature_securitySolutionRulesV4.all
+        - feature_securitySolutionAlertsV1.all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -480,7 +486,8 @@ rule_author:
         - feature_siemV5.endpoint_exceptions_all
         - feature_siemV5.actions_log_management_read
         - feature_siemV5.workflow_insights_all
-        - feature_securitySolutionRulesV2.all
+        - feature_securitySolutionRulesV4.all
+        - feature_securitySolutionAlertsV1.all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -566,7 +573,8 @@ soc_manager:
         - feature_siemV5.execute_operations_all
         - feature_siemV5.scan_operations_all
         - feature_siemV5.workflow_insights_all
-        - feature_securitySolutionRulesV2.all
+        - feature_securitySolutionRulesV4.all
+        - feature_securitySolutionAlertsV1.all
         - feature_securitySolutionCases.all
         - feature_observabilityCases.all
         - feature_securitySolutionAssistant.all
@@ -637,7 +645,8 @@ detections_admin:
         - feature_siemV5.all
         - feature_siemV5.global_artifact_management_all
         - feature_siemV5.endpoint_exceptions_all
-        - feature_securitySolutionRulesV2.all
+        - feature_securitySolutionRulesV4.all
+        - feature_securitySolutionAlertsV1.all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -707,7 +716,8 @@ platform_engineer:
         - feature_siemV5.endpoint_exceptions_all
         - feature_siemV5.actions_log_management_read
         - feature_siemV5.workflow_insights_all
-        - feature_securitySolutionRulesV2.all
+        - feature_securitySolutionRulesV4.all
+        - feature_securitySolutionAlertsV1.all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -791,7 +801,8 @@ endpoint_operations_analyst:
         - feature_siemV5.execute_operations_all # Execute
         - feature_siemV5.scan_operations_all
         - feature_siemV5.workflow_insights_all
-        - feature_securitySolutionRulesV2.all
+        - feature_securitySolutionRulesV4.all
+        - feature_securitySolutionAlertsV1.all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -869,7 +880,8 @@ endpoint_policy_manager:
         - feature_siemV5.blocklist_all # Elastic Defend Policy Management
         - feature_siemV5.endpoint_exceptions_all
         - feature_siemV5.workflow_insights_all
-        - feature_securitySolutionRulesV2.all
+        - feature_securitySolutionRulesV4.all
+        - feature_securitySolutionAlertsV1.all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
