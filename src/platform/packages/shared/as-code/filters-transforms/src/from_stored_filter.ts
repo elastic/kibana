@@ -28,9 +28,7 @@ import type {
 import type { Logger } from '@kbn/logging';
 import { FilterStateStore } from '@kbn/es-query-constants';
 import { ASCODE_FILTER_OPERATOR, ASCODE_FILTER_TYPE } from '@kbn/as-code-filters-constants';
-import { migrateFilter } from '@kbn/es-query';
-import { FILTERS } from '@kbn/es-query';
-import type { StoredFilter } from './types';
+import { FILTERS, migrateFilter, type Filter } from '@kbn/es-query';
 import { FilterConversionError } from './errors';
 import {
   hasTermQuery,
@@ -62,8 +60,8 @@ export function fromStoredFilter(storedFilter: unknown, logger?: Logger): AsCode
       );
     }
 
-    // Cast to StoredFilter for type-safe access
-    const filter = storedFilter as StoredFilter;
+    // Cast to Filter for type-safe access
+    const filter = storedFilter as Filter;
 
     // Skip pinned filters (globalState) - these are UI-level state and should not be persisted in AsCodeFilter format
     if (filter.$state?.store === FilterStateStore.GLOBAL_STATE) {
@@ -121,7 +119,7 @@ export function fromStoredFilter(storedFilter: unknown, logger?: Logger): AsCode
  * Extracts field, operator, and value from filter metadata and query structures
  * Used by type-specific converters and as a helper for group conversion
  */
-function convertToSimpleCondition(storedFilter: StoredFilter): AsCodeConditionFilter['condition'] {
+function convertToSimpleCondition(storedFilter: Filter): AsCodeConditionFilter['condition'] {
   const meta = storedFilter.meta || {};
   const query = storedFilter.query || {};
 
@@ -199,7 +197,7 @@ function convertToSimpleCondition(storedFilter: StoredFilter): AsCodeConditionFi
  * Handles combined filters (meta.type='combined') with proper meta.params structure
  * Recursively converts nested filters to preserve group structure
  */
-function convertToFilterGroup(storedFilter: StoredFilter): AsCodeGroupFilter['group'] {
+function convertToFilterGroup(storedFilter: Filter): AsCodeGroupFilter['group'] {
   if (!isCombinedFilter(storedFilter)) {
     throw new FilterConversionError('Combined filter must have valid meta.params array structure');
   }
@@ -209,7 +207,7 @@ function convertToFilterGroup(storedFilter: StoredFilter): AsCodeGroupFilter['gr
   const operator = storedFilter.meta.relation?.toString().toLowerCase() === 'or' ? 'or' : 'and';
 
   // isCombinedFilter already validated params is a non-empty Filter[] array
-  const params = storedFilter.meta.params as StoredFilter[];
+  const params = storedFilter.meta.params as Filter[];
 
   const conditions = params.map((param) => {
     // Each param is itself a complete stored filter
@@ -238,7 +236,7 @@ function convertToFilterGroup(storedFilter: StoredFilter): AsCodeGroupFilter['gr
  * Used when filter cannot be converted to condition or group format
  * Preserves original query structure to prevent data loss
  */
-function convertToRawDSL(storedFilter: StoredFilter): AsCodeDSLFilter['dsl'] {
+function convertToRawDSL(storedFilter: Filter): AsCodeDSLFilter['dsl'] {
   if (!storedFilter.query) {
     throw new FilterConversionError('Cannot convert to DSL: filter has no query property');
   }
@@ -280,7 +278,7 @@ function extractFieldFromQuery(query: unknown): string | null {
  */
 
 function convertCustomFilter(
-  filter: StoredFilter,
+  filter: Filter,
   baseProperties: Partial<AsCodeFilter>
 ): AsCodeDSLFilter {
   const meta = filter.meta;
@@ -295,7 +293,7 @@ function convertCustomFilter(
 }
 
 function convertPhraseFilter(
-  filter: StoredFilter,
+  filter: Filter,
   baseProperties: Partial<AsCodeFilter>
 ): AsCodeConditionFilter | AsCodeDSLFilter {
   // Check if query is compatible with condition conversion
@@ -318,7 +316,7 @@ function convertPhraseFilter(
 }
 
 function convertPhrasesFilter(
-  filter: StoredFilter,
+  filter: Filter,
   baseProperties: Partial<AsCodeFilter>
 ): AsCodeConditionFilter | AsCodeDSLFilter {
   try {
@@ -335,7 +333,7 @@ function convertPhrasesFilter(
 }
 
 function convertRangeFilter(
-  filter: StoredFilter,
+  filter: Filter,
   baseProperties: Partial<AsCodeFilter>
 ): AsCodeConditionFilter | AsCodeDSLFilter {
   // Check if query is compatible with condition conversion
@@ -358,7 +356,7 @@ function convertRangeFilter(
 }
 
 function convertExistsFilter(
-  filter: StoredFilter,
+  filter: Filter,
   baseProperties: Partial<AsCodeFilter>
 ): AsCodeConditionFilter | AsCodeDSLFilter {
   try {
@@ -375,7 +373,7 @@ function convertExistsFilter(
 }
 
 function convertCombinedFilter(
-  filter: StoredFilter,
+  filter: Filter,
   baseProperties: Partial<AsCodeFilter>
 ): AsCodeGroupFilter | AsCodeDSLFilter {
   try {
@@ -396,7 +394,7 @@ function convertCombinedFilter(
  * Similar to DSL but maintains type='spatial' to preserve FILTERS.SPATIAL_FILTER in round-trip
  */
 function convertSpatialFilter(
-  filter: StoredFilter,
+  filter: Filter,
   baseProperties: Partial<AsCodeFilter>
 ): AsCodeSpatialFilter {
   return {
@@ -411,7 +409,7 @@ function convertSpatialFilter(
  * Used for: match_all, query_string, etc.
  */
 function convertToDSLFilter(
-  filter: StoredFilter,
+  filter: Filter,
   baseProperties: Partial<AsCodeFilter>
 ): AsCodeDSLFilter {
   return {
@@ -429,7 +427,7 @@ function convertToDSLFilter(
 /**
  * Extract base properties from stored filter
  */
-function extractBaseProperties(storedFilter: StoredFilter): Partial<AsCodeFilter> {
+function extractBaseProperties(storedFilter: Filter): Partial<AsCodeFilter> {
   const meta = storedFilter.meta;
 
   return {

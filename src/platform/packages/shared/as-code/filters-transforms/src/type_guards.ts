@@ -19,8 +19,7 @@ import type {
   AsCodeSpatialFilter,
 } from '@kbn/as-code-filters-schema';
 import { ASCODE_FILTER_TYPE } from '@kbn/as-code-filters-constants';
-import { FILTERS } from '@kbn/es-query';
-import type { StoredFilter } from './types';
+import { FILTERS, type Filter } from '@kbn/es-query';
 
 /**
  * Type guard for query objects with term property
@@ -69,7 +68,7 @@ export function hasMatchPhraseQuery(
 /**
  * Type guard for phrases filter format
  */
-export function isPhrasesFilter(storedFilter: StoredFilter): boolean {
+export function isPhrasesFilter(storedFilter: Filter): boolean {
   return storedFilter.meta?.type === FILTERS.PHRASES;
 }
 
@@ -77,7 +76,7 @@ export function isPhrasesFilter(storedFilter: StoredFilter): boolean {
  * Type guard for combined filter format
  * Validates that params is a non-empty array of Filter objects (not primitives)
  */
-export function isCombinedFilter(storedFilter: StoredFilter): boolean {
+export function isCombinedFilter(storedFilter: Filter): boolean {
   return (
     storedFilter.meta?.type === 'combined' &&
     Array.isArray(storedFilter.meta.params) &&
