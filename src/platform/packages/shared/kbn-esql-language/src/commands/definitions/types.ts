@@ -308,6 +308,10 @@ export interface ValidationErrors {
     message: string;
     type: { name: string };
   };
+  unknownDataSource: {
+    message: string;
+    type: { name: string };
+  };
   unknownSetting: {
     message: string;
     type: { name: string };

@@ -405,6 +405,9 @@ export const oauthCallbackRoute = (
       },
       options: {
         access: 'public',
+        availability: {
+          since: '9.4.0',
+        },
         summary: i18n.translate('xpack.actions.oauthCallback.routeSummary', {
           defaultMessage: 'Handle OAuth callback',
         }),
@@ -720,6 +723,9 @@ export const oauthCallbackScriptRoute = (router: IRouter<ActionsRequestHandlerCo
       security: DEFAULT_ACTION_ROUTE_SECURITY,
       options: {
         access: 'public',
+        availability: {
+          since: '9.4.0',
+        },
         description: i18n.translate('xpack.actions.oauthCallbackScript.routeDescription', {
           defaultMessage: 'Returns the OAuth callback script',
         }),
