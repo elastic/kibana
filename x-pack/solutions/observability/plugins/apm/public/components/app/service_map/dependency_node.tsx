@@ -14,6 +14,7 @@ type DependencyNodeType = Node<DependencyNodeData, 'dependency'>;
 
 export const DependencyNode = memo(
   ({ data, selected, sourcePosition, targetPosition }: NodeProps<DependencyNodeType>) => {
+    const borderColor = (data as Record<string, unknown>).borderColor as string | undefined;
     return (
       <DiamondNode
         id={data.id}
@@ -25,6 +26,7 @@ export const DependencyNode = memo(
         targetPosition={targetPosition}
         testSubjPrefix="dependency"
         iconAltFallback="dependency"
+        borderColor={borderColor}
       />
     );
   }
