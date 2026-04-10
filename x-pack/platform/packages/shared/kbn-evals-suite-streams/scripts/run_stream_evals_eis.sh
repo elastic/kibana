@@ -13,11 +13,18 @@ Run the Streams eval suite against an EIS-backed connector (Scout + CCM + Playwr
 Prerequisites: vault CLI logged in (OIDC), repo bootstrapped (yarn kbn bootstrap).
 
 Usage:
-  run_stream_evals_eis.sh <evaluation-connector-id> [grep]
+  run_stream_evals_eis.sh <evaluation-connector-id> [--grep <pattern>] [--workers <n>]
 
 Arguments:
   evaluation-connector-id   EIS connector id (e.g. eis-google-gemini-3-1-pro)
-  grep                      Optional Playwright --grep (default: Pipeline suggestion)
+
+Options:
+  --grep <pattern>          Playwright --grep (default: Pipeline suggestion)
+  --workers <n>             Playwright worker count (positive integer; default: 20 or STREAM_EVALS_WORKERS)
+  --help, -h                Show this help
+
+Environment:
+  STREAM_EVALS_WORKERS      Default worker count when --workers is not set (default: 20).
 
 Steps:
   - export KIBANA_EIS_CCM_API_KEY from Vault
@@ -30,12 +37,53 @@ EOF
   exit 1
 }
 
-if [[ $# -lt 1 || $# -gt 2 ]]; then
+if [[ $# -lt 1 ]]; then
   usage
 fi
 
 CONNECTOR_ID="$1"
-GREP_PATTERN="${2:-Pipeline suggestion}"
+shift
+
+GREP_PATTERN="Pipeline suggestion"
+WORKERS_EXPLICIT=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --grep)
+      if [[ $# -lt 2 ]]; then
+        echo "[run_stream_evals_eis] --grep requires a value" >&2
+        exit 1
+      fi
+      GREP_PATTERN="$2"
+      shift 2
+      ;;
+    --workers)
+      if [[ $# -lt 2 ]]; then
+        echo "[run_stream_evals_eis] --workers requires a value" >&2
+        exit 1
+      fi
+      WORKERS_EXPLICIT="$2"
+      shift 2
+      ;;
+    --help|-h)
+      usage
+      ;;
+    *)
+      echo "[run_stream_evals_eis] unknown argument: $1 (use --grep / --workers)" >&2
+      usage
+      ;;
+  esac
+done
+
+if [[ -n "$WORKERS_EXPLICIT" ]]; then
+  if ! [[ "$WORKERS_EXPLICIT" =~ ^[1-9][0-9]*$ ]]; then
+    echo "[run_stream_evals_eis] workers must be a positive integer: $WORKERS_EXPLICIT" >&2
+    exit 1
+  fi
+  export STREAM_EVALS_WORKERS="$WORKERS_EXPLICIT"
+else
+  export STREAM_EVALS_WORKERS="${STREAM_EVALS_WORKERS:-20}"
+fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR" && git rev-parse --show-toplevel)"
@@ -56,7 +104,7 @@ GEN_CONNECTORS="$REPO_ROOT/x-pack/platform/packages/shared/kbn-evals/scripts/ci/
 echo "[run_stream_evals_eis] Generating KIBANA_TESTING_AI_CONNECTORS..."
 export KIBANA_TESTING_AI_CONNECTORS="$(node "$GEN_CONNECTORS")"
 
-echo "[run_stream_evals_eis] Starting evals (connector=$CONNECTOR_ID, grep=$GREP_PATTERN)..."
+echo "[run_stream_evals_eis] Starting evals (connector=$CONNECTOR_ID, grep=$GREP_PATTERN, workers=$STREAM_EVALS_WORKERS)..."
 node scripts/evals start --suite streams \
   --project "$CONNECTOR_ID" \
   --evaluation-connector-id "$CONNECTOR_ID" \
