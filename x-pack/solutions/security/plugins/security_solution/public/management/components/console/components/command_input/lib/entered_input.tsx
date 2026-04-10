@@ -141,17 +141,35 @@ export class EnteredInput {
                 replaceValues[0] = createInputCharacter({
                   value: argNameMatch,
                   renderValue: (
-                    <ArgumentSelectorWrapper
-                      argName={argName}
-                      argIndex={argIndex}
-                      argDefinition={argDef as ArgumentSelectorWrapperProps['argDefinition']}
-                    />
+                    <>
+                      <ArgumentSelectorWrapper
+                        argName={argName}
+                        argIndex={argIndex}
+                        argDefinition={argDef as ArgumentSelectorWrapperProps['argDefinition']}
+                      />
+                      &nbsp;
+                    </>
                   ),
                   isArgSelector: true,
                   argName,
                   argIndex: argIndex++,
                   argState,
                 });
+
+                // We add an empty space after the argument name (if not already there) so that if
+                // the user continues to type in another argument name, after this Argument Selector
+                // is populated on hte input area, that value will not just be appended to this argument
+                // name and make it invalid
+                const nextCharItemValue =
+                  side === 'left'
+                    ? items.at(pos + argChrLength)
+                      ? items.at(pos + argChrLength)?.value
+                      : this.rightOfCursorContent.at(0)?.value
+                    : items.at(pos + argChrLength)?.value;
+
+                if (!nextCharItemValue) {
+                  replaceValues.push(createInputCharacter({ value: ' ' }));
+                }
 
                 items.splice(pos, argChrLength, ...replaceValues);
               }
