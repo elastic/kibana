@@ -24,7 +24,7 @@ describe('createTopNodesQuery', () => {
   describe('ECS schema', () => {
     it('uses the inventory model node filter for ECS', () => {
       const query = createTopNodesQuery(baseOptions, source, 'ecs');
-      const filters = query.query.bool.filter;
+      const filters = query.query.bool.filter as any[];
       const systemFilter = filters.find(
         (f: Record<string, unknown>) =>
           'bool' in f &&
@@ -60,7 +60,7 @@ describe('createTopNodesQuery', () => {
 
     it('defaults to ECS when no schema is provided', () => {
       const query = createTopNodesQuery(baseOptions, source);
-      const filters = query.query.bool.filter;
+      const filters = query.query.bool.filter as any[];
       const systemFilter = filters.find(
         (f: Record<string, unknown>) =>
           'bool' in f &&
@@ -75,7 +75,7 @@ describe('createTopNodesQuery', () => {
   describe('semconv schema', () => {
     it('uses data_stream.dataset filter', () => {
       const query = createTopNodesQuery(baseOptions, source, 'semconv');
-      const filters = query.query.bool.filter;
+      const filters = query.query.bool.filter as any[];
       const datasetFilter = filters.find(
         (f: Record<string, unknown>) =>
           'bool' in f &&
