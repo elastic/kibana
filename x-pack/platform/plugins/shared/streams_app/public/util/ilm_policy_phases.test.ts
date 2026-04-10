@@ -5,96 +5,11 @@
  * 2.0.
  */
 
-import { parseDuration, parseDurationInSeconds, orderIlmPhases, getILMRatios } from './helpers';
 import type { IlmPolicyPhases } from '@kbn/streams-schema';
 
-describe('helpers', () => {
-  describe('parseDuration', () => {
-    it('should parse valid durations correctly', () => {
-      expect(parseDuration('30d')).toEqual({ value: 30, unit: 'd' });
-      expect(parseDuration('24h')).toEqual({ value: 24, unit: 'h' });
-      expect(parseDuration('60m')).toEqual({ value: 60, unit: 'm' });
-      expect(parseDuration('60s')).toEqual({ value: 60, unit: 's' });
-    });
+import { getILMRatios, orderIlmPhases } from './ilm_policy_phases';
 
-    it('should handle single digit durations', () => {
-      expect(parseDuration('1d')).toEqual({ value: 1, unit: 'd' });
-      expect(parseDuration('5h')).toEqual({ value: 5, unit: 'h' });
-      expect(parseDuration('9m')).toEqual({ value: 9, unit: 'm' });
-      expect(parseDuration('3s')).toEqual({ value: 3, unit: 's' });
-    });
-
-    it('should handle large numbers', () => {
-      expect(parseDuration('365d')).toEqual({ value: 365, unit: 'd' });
-      expect(parseDuration('8760h')).toEqual({ value: 8760, unit: 'h' });
-    });
-
-    it('should return undefined for invalid formats', () => {
-      expect(parseDuration('invalid')).toBeUndefined();
-      expect(parseDuration('30x')).toBeUndefined();
-      expect(parseDuration('d30')).toBeUndefined();
-      expect(parseDuration('30')).toBeUndefined();
-      expect(parseDuration('')).toBeUndefined();
-    });
-
-    it('should return undefined for undefined/empty input', () => {
-      expect(parseDuration()).toBeUndefined();
-      expect(parseDuration('')).toBeUndefined();
-    });
-
-    it('should handle zero values', () => {
-      expect(parseDuration('0d')).toEqual({ value: 0, unit: 'd' });
-      expect(parseDuration('0h')).toEqual({ value: 0, unit: 'h' });
-    });
-  });
-
-  describe('parseDurationInSeconds', () => {
-    describe('Valid conversions', () => {
-      it('should convert seconds correctly', () => {
-        expect(parseDurationInSeconds('60s')).toBe(60);
-        expect(parseDurationInSeconds('1s')).toBe(1);
-        expect(parseDurationInSeconds('0s')).toBe(0);
-      });
-
-      it('should convert minutes to seconds', () => {
-        expect(parseDurationInSeconds('1m')).toBe(60);
-        expect(parseDurationInSeconds('5m')).toBe(300);
-        expect(parseDurationInSeconds('60m')).toBe(3600);
-      });
-
-      it('should convert hours to seconds', () => {
-        expect(parseDurationInSeconds('1h')).toBe(3600);
-        expect(parseDurationInSeconds('2h')).toBe(7200);
-        expect(parseDurationInSeconds('24h')).toBe(86400);
-      });
-
-      it('should convert days to seconds', () => {
-        expect(parseDurationInSeconds('1d')).toBe(86400);
-        expect(parseDurationInSeconds('7d')).toBe(604800);
-        expect(parseDurationInSeconds('30d')).toBe(2592000);
-      });
-    });
-
-    describe('Edge cases', () => {
-      it('should return 0 for invalid durations', () => {
-        expect(parseDurationInSeconds('invalid')).toBe(0);
-        expect(parseDurationInSeconds('30x')).toBe(0);
-        expect(parseDurationInSeconds('')).toBe(0);
-        expect(parseDurationInSeconds()).toBe(0);
-      });
-
-      it('should handle zero values', () => {
-        expect(parseDurationInSeconds('0d')).toBe(0);
-        expect(parseDurationInSeconds('0h')).toBe(0);
-        expect(parseDurationInSeconds('0m')).toBe(0);
-        expect(parseDurationInSeconds('0s')).toBe(0);
-      });
-    });
-
-    // The current implementation returns 0 for invalid units (parseDuration returns undefined)
-    // so no explicit throw path is practically reachable with external input. Remove throw test.
-  });
-
+describe('ilm_policy_phases', () => {
   describe('orderIlmPhases', () => {
     it('should order phases correctly when all phases are present', () => {
       const phases: IlmPolicyPhases = {
@@ -204,14 +119,9 @@ describe('helpers', () => {
       const result = getILMRatios({ phases });
 
       expect(result).toHaveLength(4);
-      // Phases order is: hot(0ms), warm(1d), cold(7d), delete(30d)
-      // hot: duration = 1d - 0 = 1d = 86400s, grow = Math.max(2, Math.round((86400/2592000)*10)) = 2 (Math.max with 2)
       expect(result?.[0]).toMatchObject({ name: 'hot', grow: 2 });
-      // warm: duration = 7d - 1d = 6d = 518400s, grow = Math.max(2, Math.round((518400/2592000)*10)) = 2
       expect(result?.[1]).toMatchObject({ name: 'warm', grow: 2 });
-      // cold: duration = 30d - 7d = 23d = 1987200s, grow = Math.max(2, Math.round((1987200/2592000)*10)) = 8
       expect(result?.[2]).toMatchObject({ name: 'cold', grow: 8 });
-      // totalDuration = 30d = 2592000s
       expect(result?.[3]).toMatchObject({ name: 'delete', grow: false });
     });
 
@@ -236,13 +146,8 @@ describe('helpers', () => {
       const result = getILMRatios({ phases });
 
       expect(result).toHaveLength(3);
-      // Phases order is: hot(0ms), warm(0d), cold(0d)
-      // totalDuration = 0 (all phases have 0 min_age)
-      // hot is first, no prevPhase, so grow = 2 (not delete phase)
       expect(result?.[0]).toMatchObject({ name: 'hot', grow: 2 });
-      // warm: duration diff = 0, totalDuration = 0, ternary returns 2
       expect(result?.[1]).toMatchObject({ name: 'warm', grow: 2 });
-      // cold: duration diff = 0, totalDuration = 0, ternary returns 2
       expect(result?.[2]).toMatchObject({ name: 'cold', grow: 2 });
     });
   });
