@@ -47,7 +47,7 @@ export const GmailConnector: ConnectorSpec = {
           meta: {
             authorizationUrl: { hidden: true },
             tokenUrl: { hidden: true },
-            scope: { disabled: true },
+            scope: { hidden: true },
           },
         },
         defaults: {
