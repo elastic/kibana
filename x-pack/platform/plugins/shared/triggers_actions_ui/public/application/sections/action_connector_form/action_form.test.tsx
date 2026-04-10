@@ -618,9 +618,7 @@ describe('action_form', () => {
       );
       // Confirm the selected connector is test3 (Preconfigured Only), not test4
       expect(within(combobox).getByRole('combobox')).toHaveValue('Preconfigured Only');
-      expect(
-        screen.queryByTestId('dropdown-connector-test4')
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('dropdown-connector-test4')).not.toBeInTheDocument();
     });
 
     it('does not render "Add connector" button for preconfigured only action type', async () => {
