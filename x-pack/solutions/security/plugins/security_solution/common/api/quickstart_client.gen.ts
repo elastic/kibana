@@ -71,16 +71,6 @@ import type {
 } from './detection_engine/rule_management/import_rules/import_rules_route.gen';
 import type { ReadTagsResponse } from './detection_engine/rule_management/read_tags/read_tags_route.gen';
 import type {
-  GetRuleExecutionEventsRequestQueryInput,
-  GetRuleExecutionEventsRequestParamsInput,
-  GetRuleExecutionEventsResponse,
-} from './detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_events/get_rule_execution_events_route.gen';
-import type {
-  GetRuleExecutionResultsRequestQueryInput,
-  GetRuleExecutionResultsRequestParamsInput,
-  GetRuleExecutionResultsResponse,
-} from './detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.gen';
-import type {
   ReadRuleExecutionResultsRequestParamsInput,
   ReadRuleExecutionResultsRequestBodyInput,
   ReadRuleExecutionResultsResponse,
@@ -2043,40 +2033,6 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async getRuleExecutionEvents(props: GetRuleExecutionEventsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetRuleExecutionEvents`);
-    return this.kbnClient
-      .request<GetRuleExecutionEventsResponse>({
-        path: replaceParams(
-          '/internal/detection_engine/rules/{ruleId}/execution/events',
-          props.params
-        ),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'PUT',
-
-        query: props.query,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  async getRuleExecutionResults(props: GetRuleExecutionResultsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetRuleExecutionResults`);
-    return this.kbnClient
-      .request<GetRuleExecutionResultsResponse>({
-        path: replaceParams(
-          '/internal/detection_engine/rules/{ruleId}/execution/results',
-          props.params
-        ),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'PUT',
-
-        query: props.query,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
   /**
    * Retrieves the rule migration document stored in the system given the rule migration id
    */
@@ -3858,14 +3814,6 @@ export interface GetPolicyResponseProps {
 }
 export interface GetProtectionUpdatesNoteProps {
   params: GetProtectionUpdatesNoteRequestParamsInput;
-}
-export interface GetRuleExecutionEventsProps {
-  query: GetRuleExecutionEventsRequestQueryInput;
-  params: GetRuleExecutionEventsRequestParamsInput;
-}
-export interface GetRuleExecutionResultsProps {
-  query: GetRuleExecutionResultsRequestQueryInput;
-  params: GetRuleExecutionResultsRequestParamsInput;
 }
 export interface GetRuleMigrationProps {
   params: GetRuleMigrationRequestParamsInput;
