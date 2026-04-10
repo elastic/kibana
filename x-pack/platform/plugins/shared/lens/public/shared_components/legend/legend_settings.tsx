@@ -97,14 +97,6 @@ export interface LegendSettingsProps<LegendStats extends LegendValue = XYLegendV
    */
   onMaxLinesChange?: (value: number) => void;
   /**
-   * Sets the max label width in pixels (list layout only)
-   */
-  maxPixels?: number;
-  /**
-   * Callback on max width in pixels option change
-   */
-  onMaxPixelsChange?: (value: number) => void;
-  /**
    * Defines if the legend items will be truncated or not
    */
   shouldTruncate?: boolean;

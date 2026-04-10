@@ -39,7 +39,6 @@ import { useUpsellingMessage } from '../../common/hooks/use_upselling';
 import { useFetchNotes } from '../../notes/hooks/use_fetch_notes';
 import { DocumentEventTypes } from '../../common/lib/telemetry';
 import { EaseAlertsTable } from '../components/ease/wrapper';
-import { EventsTableForCases } from '../components/case_events/table';
 import { CASES_FEATURES } from '..';
 
 const CaseContainerComponent: React.FC = () => {
@@ -190,7 +189,7 @@ const CaseContainerComponent: React.FC = () => {
               });
             },
           },
-          ...(canReadRules
+          ...(canReadRules && !EASE
             ? {
                 ruleDetailsNavigation: {
                   onClick: onRuleDetailsClick,
@@ -215,7 +214,6 @@ const CaseContainerComponent: React.FC = () => {
           onAlertsTableLoaded,
           permissions: userCasesPermissions,
           renderAlertsTable,
-          renderEventsTable: EventsTableForCases,
         })}
       </CaseDetailsRefreshContext.Provider>
       <SpyRoute pageName={SecurityPageName.case} />
