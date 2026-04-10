@@ -447,7 +447,6 @@ export const getFormStateFromActionStep = (
     step.action === 'sort' ||
     step.action === 'concat' ||
     step.action === 'json_extract' ||
-    step.action === 'network_direction' ||
     step.action === 'enrich' ||
     step.action === 'user_agent'
   ) {

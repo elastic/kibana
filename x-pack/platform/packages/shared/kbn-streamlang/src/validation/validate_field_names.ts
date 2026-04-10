@@ -114,6 +114,12 @@ export function extractAllFieldNames(processor: StreamlangProcessorDefinition): 
     case 'enrich':
       fields.push(processor.to);
       break;
+    case 'user_agent':
+      fields.push(processor.from);
+      if (processor.to) {
+        fields.push(processor.to);
+      }
+      break;
     case 'drop_document':
     case 'manual_ingest_pipeline':
       break;

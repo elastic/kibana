@@ -158,6 +158,10 @@ export function extractModifiedFields(processor: StreamlangProcessorDefinition):
       fields.push(processor.to);
       break;
 
+    case 'user_agent':
+      fields.push(processor.to ?? 'user_agent');
+      break;
+
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
@@ -309,6 +313,10 @@ export function getProcessorOutputType(
     case 'drop_document':
     case 'manual_ingest_pipeline':
       return 'unknown';
+
+    case 'user_agent':
+      return 'unknown';
+
     default: {
       const _exhaustiveCheck: never = processor;
       return _exhaustiveCheck;
@@ -406,6 +414,13 @@ export function getExpectedInputType(
         return ['string'];
       }
       return null;
+
+    case 'user_agent':
+      if (processor.from === fieldName) {
+        return ['string'];
+      }
+      return null;
+
     default: {
       const _exhaustiveCheck: never = processor;
       return _exhaustiveCheck;
@@ -480,6 +495,11 @@ export function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDe
         break;
       case 'enrich':
         fieldsUsed.push(step.to);
+        break;
+      case 'user_agent':
+        if (step.from) {
+          fieldsUsed.push(step.from);
+        }
         break;
       case 'append':
       case 'drop_document':

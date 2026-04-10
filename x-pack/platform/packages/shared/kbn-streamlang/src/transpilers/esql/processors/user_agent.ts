@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { Builder } from '@kbn/esql-language';
-import type { ESQLAstCommand, ESQLAstItem } from '@kbn/esql-language';
-import type { ESQLMapEntry } from '@kbn/esql-language/src/types';
+import { Builder } from '@elastic/esql';
+import type { ESQLAstCommand, ESQLAstItem, ESQLMapEntry } from '@elastic/esql/types';
 import type { UserAgentProcessor, UserAgentProperty } from '../../../../types/processors';
 import { conditionToESQLAst } from '../condition_to_esql';
 import { buildIgnoreMissingFilter, buildWhereCondition } from './common';
@@ -56,7 +55,7 @@ export function convertUserAgentProcessorToESQL(processor: UserAgentProcessor): 
   const commands: ESQLAstCommand[] = [];
 
   // Add missing field filter if needed (ignore_missing = false)
-  const missingFieldFilter = buildIgnoreMissingFilter(from, ignore_missing);
+  const missingFieldFilter = buildIgnoreMissingFilter(ignore_missing, from);
   if (missingFieldFilter) {
     commands.push(missingFieldFilter);
   }

@@ -106,8 +106,7 @@ export type SpecialisedFormState =
   | ConcatFormState
   | JsonExtractFormState
   | NetworkDirectionFormState
-  | EnrichFormState;
-  | ConcatFormState
+  | EnrichFormState
   | UserAgentFormState;
 
 export type ProcessorFormState = SpecialisedFormState | ConfigDrivenProcessorFormState;

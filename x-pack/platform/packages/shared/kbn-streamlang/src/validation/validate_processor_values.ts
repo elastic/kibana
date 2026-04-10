@@ -72,6 +72,8 @@ export function validateProcessorValues(
     case 'enrich':
     case 'manual_ingest_pipeline':
       break;
+    case 'user_agent':
+      break;
     case 'json_extract': {
       for (let i = 0; i < step.extractions.length; i++) {
         const extraction = step.extractions[i];

@@ -93,7 +93,7 @@ const PropertiesField = () => {
     field.onChange(options.map((option) => option.value as UserAgentProperty));
   };
 
-  const selectedOptions = (field.value ?? []).map((value) => ({
+  const selectedOptions = (field.value ?? []).map((value: UserAgentProperty) => ({
     label: value,
     value,
   }));
