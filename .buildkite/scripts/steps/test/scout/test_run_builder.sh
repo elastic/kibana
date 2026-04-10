@@ -56,17 +56,20 @@ else
 
   # PR builds: GITHUB_PR_MERGE_BASE is computed by set_git_merge_base() in util.sh.
   # On-merge builds: falls back to HEAD~1 (parent of the merge commit).
-  AFFECTED_MERGE_BASE="${GITHUB_PR_MERGE_BASE:-HEAD~1}"
+  export AFFECTED_MERGE_BASE="${GITHUB_PR_MERGE_BASE:-HEAD~1}"
 
   mkdir -p .scout
-  AFFECTED_MODULES_FILE=".scout/affected_modules.json"
-  .buildkite/pipeline-utils/affected-packages/list_affected \
-    --strategy git --deep --merge-base "$AFFECTED_MERGE_BASE" --json \
-    > "$AFFECTED_MODULES_FILE"
+  export AFFECTED_MODULES_FILE=".scout/affected_modules.json"
+
+  # Computes affected modules (writes AFFECTED_MODULES_FILE) and checks whether
+  # any critical Scout files were touched.
+  SCOUT_CRITICAL_FILES_TOUCHED=$(ts-node "$(dirname "${0}")/resolve_selective_testing.ts")
 
   echo "--- Discover Playwright Configs and upload to Buildkite artifacts (affected modules detected)"
   SELECTIVE_SCOUT_DISCOVERY_FLAG=()
-  if [[ "${SELECTIVE_TESTING_ENABLED:-}" == "true" ]] && ! is_pr_with_label "scout:run-all-tests"; then
+  if [[ "${SELECTIVE_TESTING_ENABLED:-}" == "true" ]] \
+    && ! is_pr_with_label "scout:run-all-tests" \
+    && [[ "$SCOUT_CRITICAL_FILES_TOUCHED" != "true" ]]; then
     SELECTIVE_SCOUT_DISCOVERY_FLAG=(--selective-testing)
   fi
   node scripts/scout discover-playwright-configs \
