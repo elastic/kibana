@@ -9,9 +9,12 @@ import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
 import { generateHostsData } from '../synthtrace_data/hosts_data';
 
+const TIMEOUT_MS = 60000;
+
+// preferredSchema:ecs — row links default to semconv when null (entry_title.tsx)
+const HOSTS_VIEW_ECS_PATH = `app/metrics/hosts?_a=(dateRange:(from:now-15m,to:now),filters:!(),limit:500,panelFilters:!(),preferredSchema:ecs,query:(language:kuery,query:''))`;
+
 export const journey = new Journey({
-  // Failing: See https://github.com/elastic/kibana/issues/203345
-  skipped: true,
   synthtrace: {
     type: 'infra',
     generator: generateHostsData,
@@ -23,18 +26,18 @@ export const journey = new Journey({
   },
 })
   .step('Navigate to Hosts view and load 500 hosts', async ({ page, kbnUrl, kibanaPage }) => {
-    await page.goto(
-      kbnUrl.get(
-        `app/metrics/hosts?_a=(dateRange:(from:now-15m,to:now),filters:!(),limit:500,panelFilters:!(),query:(language:kuery,query:''))`
-      )
-    );
+    await page.goto(kbnUrl.get(HOSTS_VIEW_ECS_PATH), { timeout: TIMEOUT_MS });
+    await kibanaPage.waitForHeader();
     // wait for table to be loaded
-    await page.waitForSelector(subj('hostsView-table-loaded'));
+    await page.waitForSelector(subj('hostsView-table-loaded'), {
+      state: 'visible',
+      timeout: TIMEOUT_MS,
+    });
     // wait for metric charts to be loaded
     await kibanaPage.waitForCharts({
       parentLocator: subj('hostsViewKPIGrid'),
       count: 5,
-      timeout: 60000,
+      timeout: TIMEOUT_MS,
     });
   })
   .step('Go to single host asset details view', async ({ page, kibanaPage }) => {
@@ -46,6 +49,6 @@ export const journey = new Journey({
     await kibanaPage.waitForCharts({
       parentLocator: subj('infraAssetDetailsKPIGrid'),
       count: 4,
-      timeout: 60000,
+      timeout: TIMEOUT_MS,
     });
   });
