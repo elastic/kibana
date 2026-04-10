@@ -14,9 +14,17 @@ import {
 } from '@kbn/security-solution-plugin/common/test';
 import { setupUsers } from './setup_users';
 import { CLOUD_SERVERLESS, IS_SERVERLESS } from '../env_var_names_constants';
+import { rootRequest } from '../tasks/api_calls/common';
 
 before(() => {
   cy.task('esArchiverLoad', { archiveName: 'auditbeat_single' });
+  // Suppress the agent builder announcement modal so it does not block UI interactions.
+  rootRequest({
+    method: 'POST',
+    url: '/internal/kibana/global_settings',
+    body: { changes: { hideAnnouncements: true } },
+    failOnStatusCode: false,
+  });
 });
 
 if (!Cypress.env(IS_SERVERLESS) && !Cypress.env(CLOUD_SERVERLESS)) {
