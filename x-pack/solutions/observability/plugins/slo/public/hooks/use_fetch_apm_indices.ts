@@ -6,12 +6,12 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-
 import { useKibana } from './use_kibana';
 
 export interface ApmIndicesData {
   metric: string;
   transaction: string;
+  span: string;
 }
 
 export interface UseFetchApmIndices {
@@ -21,7 +21,7 @@ export interface UseFetchApmIndices {
   isError: boolean;
 }
 
-const INITIAL_DATA: ApmIndicesData = { metric: '', transaction: '' };
+const INITIAL_DATA: ApmIndicesData = { metric: '', transaction: '', span: '' };
 
 export function useFetchApmIndices({
   enabled = true,
@@ -33,7 +33,11 @@ export function useFetchApmIndices({
     queryFn: async ({ signal }) => {
       try {
         const response = await apmSourcesAccess.getApmIndices({ signal });
-        return { metric: response.metric ?? '', transaction: response.transaction ?? '' };
+        return {
+          metric: response.metric ?? '',
+          transaction: response.transaction ?? '',
+          span: response.span ?? '',
+        };
       } catch (error) {
         // ignore error
         return INITIAL_DATA;

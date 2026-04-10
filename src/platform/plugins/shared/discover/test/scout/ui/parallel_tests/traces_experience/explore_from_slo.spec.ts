@@ -95,5 +95,24 @@ spaceTest.describe(
         });
       }
     );
+
+    spaceTest(
+      'APM latency SLO - "Traces in Discover" from SLI chart opens traces experience',
+      async ({ page, pageObjects }) => {
+        await spaceTest.step('navigate to SLO History tab with synthtrace time range', async () => {
+          await page.gotoApp(`slo/${sloIds.latency}/history`, {
+            params: SLO_HISTORY_PARAMS,
+          });
+          await expect(page.testSubj.locator('sliChartPanel')).toBeVisible();
+        });
+
+        await spaceTest.step('open SLI chart actions and click "Traces in Discover"', async () => {
+          await page.testSubj.locator('sliChartActionsButton').click();
+          await expect(page.testSubj.locator('sliHistoryChartOpenInDiscoverLink')).toBeVisible();
+          await page.testSubj.locator('sliHistoryChartOpenInDiscoverLink').click();
+          await expectTracesExperienceEnabled(pageObjects);
+        });
+      }
+    );
   }
 );
