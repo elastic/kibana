@@ -13,7 +13,10 @@ import type {
 import type { ProductFeatureKeyType } from '@kbn/security-solution-features/src/types';
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import type { SecurityProductTypes } from '../../common/config';
-import { getEnabledProductFeatures } from '../../common/pli/pli_features';
+import {
+  getEnabledProductFeatures,
+  getRequiredProductTypesForFeature,
+} from '../../common/pli/pli_features';
 import type { Services } from '../common/services';
 import { withServicesProvider } from '../common/services';
 import { upsellingPages, upsellingSections, upsellingMessages } from './upsellings';
@@ -82,7 +85,9 @@ const configurePluginsUpsellings = (
   const { automaticImport, workflowsManagement } = services;
 
   if (workflowsManagement && !enabledPLIsSet.has(ProductFeatureKey.workflows)) {
-    workflowsManagement?.setUnavailableInServerlessTier();
+    workflowsManagement?.setUnavailableInServerlessTier({
+      requiredProducts: getRequiredProductTypesForFeature(ProductFeatureKey.workflows),
+    });
   }
 
   upsellingService.sections$.subscribe((sections) => {

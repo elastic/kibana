@@ -125,8 +125,8 @@ export class WorkflowsPlugin
     });
 
     return {
-      setUnavailableInServerlessTier: () => {
-        this.availabilityService.setUnavailableInServerlessTier();
+      setUnavailableInServerlessTier: (options) => {
+        this.availabilityService.setUnavailableInServerlessTier(options.requiredProducts);
       },
     };
   }

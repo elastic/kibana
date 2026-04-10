@@ -12,16 +12,8 @@ import { css } from '@emotion/react';
 import type { ReactNode } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-
-const LOCK_ASSET_BASE = '/plugins/workflowsManagement/assets';
-
-const useLockIllustrationSrc = (): string => {
-  const { colorMode } = useEuiTheme();
-  const { http } = useKibana().services;
-  const file = colorMode === 'LIGHT' ? 'lock_light.svg' : 'lock_dark.svg';
-  return http?.basePath.prepend(`${LOCK_ASSET_BASE}/${file}`) ?? '';
-};
+import lockDark from '../../assets/lock_dark.svg';
+import lockLight from '../../assets/lock_light.svg';
 
 const useEmptyPromptStyles = () => {
   const { euiTheme } = useEuiTheme();
@@ -42,7 +34,7 @@ export interface AccessDeniedProps {
 }
 
 export const AccessDenied = ({ title, description, footer, actions }: AccessDeniedProps) => {
-  const lockSrc = useLockIllustrationSrc();
+  const { colorMode } = useEuiTheme();
   const emptyPromptStyles = useEmptyPromptStyles();
 
   return (
@@ -64,7 +56,7 @@ export const AccessDenied = ({ title, description, footer, actions }: AccessDeni
           icon={
             <EuiImage
               size="s"
-              src={lockSrc}
+              src={colorMode === 'LIGHT' ? lockLight : lockDark}
               alt={i18n.translate(
                 'platform.plugins.shared.workflows_management.ui.accessDenied.illustrationAlt',
                 { defaultMessage: 'Restricted access' }

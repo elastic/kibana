@@ -7,12 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButton, EuiButtonEmpty, EuiIcon } from '@elastic/eui';
-import React, { type PropsWithChildren, useMemo } from 'react';
+import {
+  EuiBadge,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+} from '@elastic/eui';
+import React, { type PropsWithChildren, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useObservable } from '@kbn/use-observable';
-import type { UnavailabilityReason } from '../../common/lib/availability/availability_service';
+import type { ServerlessTierRequiredProducts } from '../../common/lib/availability/availability_service';
 import { useKibana } from '../../hooks/use_kibana';
 import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { AccessDenied } from '../access_denied/access_denied';
@@ -27,7 +35,11 @@ export const WorkflowsAvailabilityWrapper = React.memo<PropsWithChildren>(({ chi
   const availabilityStatus = useObservable(availability$, availability.getAvailabilityStatus());
 
   if (!availabilityStatus.isAvailable) {
-    return <AvailabilityAccessDenied reason={availabilityStatus.unavailabilityReason} />;
+    if (availabilityStatus.unavailabilityReason === 'license') {
+      return <LicenseAccessDenied />;
+    } else {
+      return <ServerlessTierAccessDenied requiredProducts={availabilityStatus.requiredProducts} />;
+    }
   }
 
   return <>{children}</>;
@@ -35,51 +47,15 @@ export const WorkflowsAvailabilityWrapper = React.memo<PropsWithChildren>(({ chi
 WorkflowsAvailabilityWrapper.displayName = 'WorkflowsAvailabilityWrapper';
 
 /**
- * Component to render the access denied screen when the workflows app is not available
- * @param reason - The reason for the unavailability
- * @returns The access denied component
+ * Component to render the access denied page when the license is not valid (stateful mode)
  */
-const AvailabilityAccessDenied = React.memo<{ reason: UnavailabilityReason }>(({ reason }) => {
+const LicenseAccessDenied = React.memo(() => {
   useWorkflowsBreadcrumbs();
-  const actions = useUnavailabilityActions(reason);
-  return (
-    <AccessDenied
-      title={
-        reason === 'license'
-          ? i18n.translate('platform.plugins.shared.workflows_management.ui.upgradeLicense.title', {
-              defaultMessage: 'Upgrade your license',
-            })
-          : i18n.translate(
-              'platform.plugins.shared.workflows_management.ui.unavailableInServerlessTier.title',
-              { defaultMessage: 'Upgrade your subscription' }
-            )
-      }
-      description={
-        reason === 'license' ? (
-          <FormattedMessage
-            id="platform.plugins.shared.workflows_management.ui.upgradeLicense.description"
-            defaultMessage="You need an Enterprise license to use Workflows."
-          />
-        ) : (
-          <FormattedMessage
-            id="platform.plugins.shared.workflows_management.ui.unavailableInServerlessTier.description"
-            defaultMessage="You need to upgrade the subscription of your serverless project to use Workflows."
-          />
-        )
-      }
-      actions={actions}
-    />
-  );
-});
-AvailabilityAccessDenied.displayName = 'AvailabilityAccessDenied';
-
-const LICENSE_DOCS_LINK = 'https://www.elastic.co/subscriptions';
-
-const useUnavailabilityActions = (reason: UnavailabilityReason): React.ReactNode[] => {
   const { application } = useKibana().services;
-  if (reason === 'license') {
-    return [
-      <EuiButton fill href={LICENSE_DOCS_LINK} target="_blank">
+
+  const actions = useMemo(
+    () => [
+      <EuiButton fill href={'https://www.elastic.co/subscriptions'} target="_blank">
         <FormattedMessage
           id="platform.plugins.shared.workflows_management.ui.upgradeLicense.subscriptionPlansButton"
           defaultMessage="Subscription plans"
@@ -99,9 +75,149 @@ const useUnavailabilityActions = (reason: UnavailabilityReason): React.ReactNode
           defaultMessage="Manage your license"
         />
       </EuiButtonEmpty>,
+    ],
+    [application]
+  );
+
+  return (
+    <AccessDenied
+      title={i18n.translate(
+        'platform.plugins.shared.workflows_management.ui.upgradeLicense.title',
+        { defaultMessage: 'Upgrade your license' }
+      )}
+      description={i18n.translate(
+        'platform.plugins.shared.workflows_management.ui.upgradeLicense.description',
+        { defaultMessage: 'You need to upgrade your license to use Workflows.' }
+      )}
+      actions={actions}
+      footer={<LicenseFooter />}
+    />
+  );
+});
+LicenseAccessDenied.displayName = 'LicenseAccessDenied';
+
+const LicenseFooter = React.memo(() => (
+  <EuiFlexGroup
+    gutterSize="s"
+    wrap
+    direction="column"
+    justifyContent="center"
+    responsive={false}
+    alignItems="center"
+  >
+    <EuiFlexItem>
+      <EuiText color="subdued" textAlign="center" size="xs">
+        <p css={{ marginBlock: 0 }}>
+          <FormattedMessage
+            id="platform.plugins.shared.workflows_management.ui.upgradeLicense.footer"
+            defaultMessage="License required:"
+          />
+        </p>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiBadge color="hollow">
+        <FormattedMessage
+          id="platform.plugins.shared.workflows_management.ui.upgradeLicense.footer.badge"
+          defaultMessage="Enterprise"
+        />
+      </EuiBadge>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+));
+LicenseFooter.displayName = 'LicenseFooter';
+
+/**
+ * Component to render the access denied page when the serverless tier is not valid (serverless mode)
+ */
+const ServerlessTierAccessDenied = React.memo<{
+  requiredProducts: ServerlessTierRequiredProducts;
+}>(({ requiredProducts }) => {
+  useWorkflowsBreadcrumbs();
+
+  const { cloud } = useKibana().services;
+  const [billingUrl, setBillingUrl] = useState<string | undefined>();
+
+  useEffect(() => {
+    cloud?.getPrivilegedUrls().then(({ billingUrl: url }) => setBillingUrl(url));
+  }, [cloud]);
+
+  const actions = useMemo(() => {
+    if (billingUrl) {
+      return [
+        <EuiButton fill href={billingUrl} target="_blank">
+          <FormattedMessage
+            id="platform.plugins.shared.workflows_management.ui.unavailableInServerlessTier.manageSubscriptionButton"
+            defaultMessage="Manage subscription"
+          />
+          <EuiIcon type="popout" aria-hidden={true} />
+        </EuiButton>,
+      ];
+    }
+
+    return [
+      <EuiText color="subdued" textAlign="center" size="s">
+        <FormattedMessage
+          id="platform.plugins.shared.workflows_management.ui.unavailableInServerlessTier.contactAdmin"
+          defaultMessage="Contact your administrator to upgrade your subscription."
+        />
+      </EuiText>,
     ];
-  }
-  return [
-    // TODO: Add actions for unavailable in serverless tier
-  ];
-};
+  }, [billingUrl]);
+
+  return (
+    <AccessDenied
+      title={i18n.translate(
+        'platform.plugins.shared.workflows_management.ui.unavailableInServerlessTier.title',
+        { defaultMessage: 'Upgrade your subscription' }
+      )}
+      description={i18n.translate(
+        'platform.plugins.shared.workflows_management.ui.unavailableInServerlessTier.description',
+        {
+          defaultMessage:
+            'You need to upgrade your serverless project subscription to use Workflows.',
+        }
+      )}
+      actions={actions}
+      footer={<ServerlessTierFooter requiredProducts={requiredProducts} />}
+    />
+  );
+});
+ServerlessTierAccessDenied.displayName = 'ServerlessTierAccessDenied';
+
+const ServerlessTierFooter = React.memo<{
+  requiredProducts: ServerlessTierRequiredProducts;
+}>(({ requiredProducts }) => {
+  return (
+    <EuiFlexGroup
+      gutterSize="s"
+      wrap
+      direction="column"
+      justifyContent="center"
+      responsive={false}
+      alignItems="center"
+    >
+      <EuiFlexItem>
+        <EuiText color="subdued" textAlign="center" size="xs">
+          <p css={{ marginBlock: 0 }}>
+            <FormattedMessage
+              id="platform.plugins.shared.workflows_management.ui.unavailableInServerlessTier.requiredProducts"
+              defaultMessage="To use Workflows, you need to upgrade your subscription to {count, plural, one {the following product tier} other {one of the following products tiers}}:"
+              values={{ count: requiredProducts.length }}
+            />
+          </p>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="s" wrap>
+          {requiredProducts?.map((product) => (
+            <EuiFlexItem key={product} grow={false}>
+              <EuiBadge color="hollow">{product}</EuiBadge>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+});
+ServerlessTierFooter.displayName = 'ServerlessTierFooter';

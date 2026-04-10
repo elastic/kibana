@@ -21,7 +21,7 @@ import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/public/mocks';
-import type { WorkflowsServices } from './types';
+import type { WorkflowsPublicPluginStart, WorkflowsServices } from './types';
 
 export const createStartServicesMock = () => ({
   ...coreLifecycleMock.createCoreStart(),
@@ -64,4 +64,10 @@ export const createUseKibanaMockValue = (services?: StartServicesMock) => {
       openModal: jest.fn(),
     },
   } as unknown as KibanaReactContextValue<WorkflowsServices>;
+};
+
+export const workflowsManagementMocks = {
+  createStart: (): jest.Mocked<WorkflowsPublicPluginStart> => ({
+    setUnavailableInServerlessTier: jest.fn(),
+  }),
 };
