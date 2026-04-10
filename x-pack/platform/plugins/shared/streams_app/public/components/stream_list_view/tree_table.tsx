@@ -452,20 +452,14 @@ export function StreamsTreeTable({
                   >
                     <EuiHighlight search={searchQuery?.text ?? ''}>{item.stream.name}</EuiHighlight>
                   </EuiLink>
+                  {(ROOT_STREAM_NAMES.includes(item.stream.name as RootStreamName) ||
+                    Streams.QueryStream.Definition.is(item.stream)) && <TechnicalPreviewBadge />}
+                  {Streams.QueryStream.Definition.is(item.stream) && <QueryStreamBadge />}
                   {item.stream.name === LOGS_ROOT_STREAM_NAME && (
                     <DeprecatedLogsBadge
                       openFlyout={openFlyout}
                       hasNewStreams={getLegacyLogsStatus(wiredStreamsStatus).hasNewStreams}
                     />
-                  )}
-                  {Streams.QueryStream.Definition.is(item.stream) && (
-                    <>
-                      <TechnicalPreviewBadge />
-                      <QueryStreamBadge />
-                    </>
-                  )}
-                  {ROOT_STREAM_NAMES.includes(item.stream.name as RootStreamName) && (
-                    <TechnicalPreviewBadge />
                   )}
                   {isRoot(item.stream.name) &&
                     item.stream.name !== LOGS_ROOT_STREAM_NAME &&
