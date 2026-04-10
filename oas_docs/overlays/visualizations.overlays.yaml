@@ -82,7 +82,6 @@ actions:
         |------|-------|---------------|
         | `xy` | Bar, line, area (and stacked/percentage variants) | [Bar](https://www.elastic.co/docs/explore-analyze/visualize/charts/bar-charts), [Line](https://www.elastic.co/docs/explore-analyze/visualize/charts/line-charts), [Area](https://www.elastic.co/docs/explore-analyze/visualize/charts/area-charts) |
         | `metric` | Single value metric | [Metric](https://www.elastic.co/docs/explore-analyze/visualize/charts/metric-charts) |
-        | `legacy_metric` | Legacy single value metric | [Metric](https://www.elastic.co/docs/explore-analyze/visualize/charts/metric-charts) |
         | `gauge` | Gauge (bullet, circular) | [Gauge](https://www.elastic.co/docs/explore-analyze/visualize/charts/gauge-charts) |
         | `pie` | Pie or donut (use `donut_hole` to control the hole size) | [Pie](https://www.elastic.co/docs/explore-analyze/visualize/charts/pie-charts) |
         | `data_table` | Data table | [Table](https://www.elastic.co/docs/explore-analyze/visualize/charts/tables) |
