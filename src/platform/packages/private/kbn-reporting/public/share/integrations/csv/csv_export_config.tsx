@@ -85,11 +85,9 @@ export const getShareMenuItems =
     objectType,
     sharingData,
     shareableUrlLocatorParams,
-  }: ShareContext<ReportingCSVSharingData>): ReturnType<ExportShare['config']> extends Promise<
-    infer R
-  >
-    ? R
-    : never => {
+  }: ShareContext<ReportingCSVSharingData>): Awaited<
+    ReturnType<ExportShare<ReportingCSVSharingData>['config']>
+  > => {
     const getSearchModeParams = ({
       forShareUrl,
       useAbsoluteTime,

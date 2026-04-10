@@ -11,7 +11,7 @@ import type * as Rx from 'rxjs';
 
 import type { ApplicationStart, CoreStart } from '@kbn/core/public';
 import type { ILicense } from '@kbn/licensing-types';
-import type { SerializableRecord } from '@kbn/utility-types';
+import type { SharingData } from '@kbn/share-plugin/public';
 
 import type { ReportingAPIClient } from '../../reporting_api_client';
 import type { ClientConfigType } from '../../types';
@@ -42,13 +42,8 @@ export interface ExportPanelShareOpts {
   startServices$: Rx.Observable<StartServices>;
 }
 
-export interface ReportingSharingData {
-  title: string;
+export interface ReportingSharingData extends SharingData {
   reportingDisabled?: boolean;
-  locatorParams: {
-    id: string;
-    params: SerializableRecord;
-  };
 }
 
 export interface JobParamsProviderOptions {

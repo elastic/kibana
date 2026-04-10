@@ -53,7 +53,7 @@ export type ReportingCSVSharingDataLocatorParams = Array<
   LocatorParams<SerializableRecord & { timeRange: TimeRange | undefined }>
 >;
 
-export interface ReportingCSVSharingData extends Exclude<SharingData, 'locatorParams'> {
+export interface ReportingCSVSharingData extends SharingData {
   locatorParams: ReportingCSVSharingDataLocatorParams;
   isTextBased: boolean;
   getSearchSource: (args: {

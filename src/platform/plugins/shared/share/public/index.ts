@@ -32,6 +32,7 @@ export type {
   RegisterShareIntegrationArgs,
   ShareableLocatorParams,
   SharingData,
+  ShareActionConfigArgs,
 } from './types';
 
 export type { RedirectOptions } from '../common/url_service';

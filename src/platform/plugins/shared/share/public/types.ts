@@ -29,7 +29,7 @@ export interface ShareRegistryApiStart {
   getLicense: () => ILicense | undefined;
 }
 
-type ShareActionConfigArgs = ShareContext &
+export type ShareActionConfigArgs<S extends SharingData = SharingData> = ShareContext<S> &
   Pick<ShareRegistryApiStart, 'anonymousAccessServiceProvider' | 'urlService'>;
 
 export type ShareTypes = 'link' | 'embed' | 'legacy' | 'integration';
@@ -62,18 +62,19 @@ export interface ShareMenuProviderLegacy {
 
 type ShareImplementationFactory<
   T extends Omit<ShareTypes, 'legacy'>,
-  C extends Record<string, unknown> = Record<string, unknown>
+  C extends Record<string, unknown> = Record<string, unknown>,
+  S extends SharingData = SharingData
 > = T extends 'integration'
   ? {
       id: string;
       groupId?: string;
       shareType: T;
       /**
-       * callback that yields the share configuration for the share as a promise, enables the possibility to dynamically fetch the share configuration
+       * Callback that yields the configured methods for the current share implementation as a promise, enables the possibility to dynamically fetch the share configuration
        */
-      config: (ctx: ShareActionConfigArgs) => Promise<C>;
+      config: (ctx: ShareActionConfigArgs<S>) => Promise<C>;
       /**
-       * when provided, this method will be used to evaluate if this integration should be available,
+       * When provided, this method will be used to evaluate if this integration should be available,
        * given the current license and capabilities of kibana
        */
       prerequisiteCheck?: (args: {
@@ -84,10 +85,10 @@ type ShareImplementationFactory<
     }
   : {
       shareType: T;
-      config: (ctx: ShareActionConfigArgs) => C | null;
+      config: (ctx: ShareActionConfigArgs<S>) => C | null;
     };
 
-// New type definition to extract the config return type
+// Type definition to resolve the configured share implementation methods from the implementation factory
 type ShareImplementation<T> = Omit<T, 'config'> & {
   config: T extends ShareImplementationFactory<ShareTypes, infer R> ? R : never;
 };
@@ -103,7 +104,7 @@ export type LinkShare = ShareImplementationFactory<
 >;
 
 /**
- * @description implementation definition for creating a share action for sharing embed links
+ * @description Implementation definition for creating a share action for sharing embed links
  */
 export type EmbedShare = ShareImplementationFactory<
   'embed',
@@ -114,14 +115,15 @@ export type EmbedShare = ShareImplementationFactory<
 >;
 
 /**
- * @description skeleton definition for implementing a share action integration
+ * @description Skeleton definition for implementing a share action integration
  */
 export type ShareIntegration<
-  IntegrationParameters extends Record<string, unknown> = Record<string, unknown>
-> = ShareImplementationFactory<'integration', IntegrationParameters>;
+  IntegrationParameters extends Record<string, unknown> = Record<string, unknown>,
+  S extends SharingData = SharingData
+> = ShareImplementationFactory<'integration', IntegrationParameters, S>;
 
 /**
- * @description implementation definition to support legacy share implementation
+ * @description Implementation definition to support legacy share implementation
  */
 export interface ShareLegacy {
   shareType: 'legacy';
@@ -132,7 +134,7 @@ export interface ShareLegacy {
 /**
  * @description Share integration implementation definition for performing exports within kibana
  */
-export interface ExportShare
+export interface ExportShare<S extends SharingData = SharingData>
   extends ShareIntegration<
     {
       /**
@@ -179,7 +181,8 @@ export interface ExportShare
           generateAssetComponent?: never;
           copyAssetURIConfig?: never;
         }
-    )
+    ),
+    S
   > {
   groupId: 'export';
 }
@@ -281,19 +284,32 @@ export interface SharingData<P extends SerializableRecord = SerializableRecord>
 
 export type ShareIntegrationMapKey = `integration-${string}`;
 
-export interface RegisterShareIntegrationArgs<I extends ShareIntegration = ShareIntegration>
-  extends Pick<I, 'id' | 'groupId' | 'prerequisiteCheck'> {
-  getShareIntegrationConfig: I['config'];
-}
+/**
+ * Registration payload for a share integration.
+ * We infer sharing-data `S` from `I` instead of constraining `I extends ShareIntegration` (defaults on
+ * `ShareIntegration` use `SharingData`, and `config`'s `ctx` is contravariant in `S`, so
+ * `ExportShare<ReportingCSVSharingData>` is not assignable to the default `ShareIntegration`).
+ */
+export type RegisterShareIntegrationArgs<I = ShareIntegration> = I extends ShareIntegration<
+  infer P,
+  infer S
+>
+  ? P extends Record<string, unknown>
+    ? S extends SharingData
+      ? Pick<I, 'id' | 'groupId' | 'prerequisiteCheck'> & {
+          getShareIntegrationConfig: (ctx: ShareActionConfigArgs<S>) => ReturnType<I['config']>;
+        }
+      : never
+    : never
+  : never;
 
 export interface ShareRegistryInternalApi {
-  registerShareIntegration<I extends ShareIntegration>(
-    shareObject: string,
-    arg: RegisterShareIntegrationArgs<I>
-  ): void;
-  registerShareIntegration<I extends ShareIntegration>(arg: RegisterShareIntegrationArgs<I>): void;
+  registerShareIntegration<I>(shareObject: string, arg: RegisterShareIntegrationArgs<I>): void;
+  registerShareIntegration<I>(arg: RegisterShareIntegrationArgs<I>): void;
 
-  resolveShareItemsForShareContext(args: ShareContext): Promise<ShareConfigs[]>;
+  resolveShareItemsForShareContext<S extends SharingData = SharingData>(
+    args: ShareContext<S> & { isServerless: boolean }
+  ): Promise<ShareConfigs[]>;
 }
 
 export abstract class ShareRegistryPublicApi {
@@ -314,9 +330,9 @@ export type BrowserUrlService = UrlService<
   BrowserShortUrlClient
 >;
 
-export type ShareableLocatorParams = {
+export type ShareableLocatorParams = SerializableRecord & {
   timeRange: TimeRange | undefined;
-} & Record<string, unknown>;
+};
 
 /**
  * @public
@@ -364,7 +380,7 @@ export interface ShareContext<S extends SharingData = SharingData> {
    */
   shareableUrlForSavedObject?: string;
   shareableUrlLocatorParams?: {
-    locator: LocatorPublic<any>;
+    locator: LocatorPublic<SerializableRecord>;
     params: ShareableLocatorParams;
   };
   sharingData: S;
