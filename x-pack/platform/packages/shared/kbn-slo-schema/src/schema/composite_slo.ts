@@ -56,6 +56,7 @@ const compositeSloMemberSummarySchema = t.intersection([
     normalisedWeight: t.number,
     sliValue: t.number,
     contribution: t.number,
+    status: statusSchema,
   }),
   t.partial({
     instanceId: t.string,

@@ -9,14 +9,21 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiBadge,
+  EuiButtonEmpty,
   EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   type CriteriaWithPagination,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
+  EuiLink,
+  EuiPopover,
   EuiSkeletonText,
   EuiText,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
+import { sloListLocatorID, type SloListLocatorParams } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import type {
@@ -82,12 +89,17 @@ export function CompositeSloTable({
     uiSettings,
     application: { navigateToUrl },
     http: { basePath },
+    share,
   } = useKibana().services;
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
+  const sloListLocator = share?.url?.locators?.get<SloListLocatorParams>(sloListLocatorID);
   const { data: permissions } = usePermissions();
   const hasWritePermissions = permissions?.hasAllWriteRequested === true;
 
   const [expandedRowIds, setExpandedRowIds] = useState<Set<string>>(new Set());
+  const [burnRateWindow, setBurnRateWindow] = useState<'5m' | '1h' | '1d'>('5m');
+  const [isBurnRatePopoverOpen, setIsBurnRatePopoverOpen] = useState(false);
+  const [openMemberHealthPopoverId, setOpenMemberHealthPopoverId] = useState<string | null>(null);
 
   const toggleExpandRow = useCallback((item: CompositeSLOItem) => {
     setExpandedRowIds((prev) => {
@@ -170,6 +182,7 @@ export function CompositeSloTable({
         name: i18n.translate('xpack.slo.compositeSloList.columns.name', {
           defaultMessage: 'Name',
         }),
+        width: '200px',
         truncateText: true,
         sortable: true,
       },
@@ -178,8 +191,9 @@ export function CompositeSloTable({
         name: i18n.translate('xpack.slo.compositeSloList.columns.tags', {
           defaultMessage: 'Tags',
         }),
+        width: '130px',
         render: (tags: string[]) => (
-          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+          <EuiFlexGroup gutterSize="xs" responsive={false} css={{ overflow: 'hidden' }}>
             {tags.map((tag) => (
               <EuiFlexItem grow={false} key={tag}>
                 <EuiBadge color="hollow">{tag}</EuiBadge>
@@ -189,19 +203,82 @@ export function CompositeSloTable({
         ),
       },
       {
-        field: 'members',
-        name: i18n.translate('xpack.slo.compositeSloList.columns.members', {
-          defaultMessage: 'Members',
+        name: i18n.translate('xpack.slo.compositeSloList.columns.memberHealth', {
+          defaultMessage: 'Healthy members',
         }),
-        width: '90px',
-        render: (members: CompositeSLOItem['members']) => members.length,
+        width: '130px',
+        render: (item: CompositeSLOItem) => {
+          const details = detailsById.get(item.id);
+          if (!details) return <EuiSkeletonText lines={1} />;
+          if (details.summary.status === 'NO_DATA') return NOT_AVAILABLE_LABEL;
+
+          const total = details.members.length;
+          const healthyCount = details.members.filter((m) => m.status === 'HEALTHY').length;
+          const allHealthy = healthyCount === total;
+          const isOpen = openMemberHealthPopoverId === item.id;
+
+          const kqlQuery = `slo.id: (${item.members.map((m) => `"${m.sloId}"`).join(' OR ')})`;
+          const href = sloListLocator?.getRedirectUrl({ kqlQuery });
+
+          const label = i18n.translate('xpack.slo.compositeSloList.columns.memberHealthValue', {
+            defaultMessage: '{healthy} of {total}',
+            values: { healthy: healthyCount, total },
+          });
+
+          return (
+            <EuiPopover
+              button={
+                <EuiLink
+                  color={allHealthy ? 'success' : 'danger'}
+                  onClick={() => setOpenMemberHealthPopoverId(isOpen ? null : item.id)}
+                >
+                  {label}
+                </EuiLink>
+              }
+              isOpen={isOpen}
+              closePopover={() => setOpenMemberHealthPopoverId(null)}
+              panelPaddingSize="s"
+              anchorPosition="downLeft"
+            >
+              <EuiFlexGroup direction="column" gutterSize="xs" css={{ minWidth: 240 }}>
+                {details.members.map((m) => {
+                  const statusInfo = displayStatus[m.status];
+                  return (
+                    <EuiFlexItem key={m.id}>
+                      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <EuiBadge color={statusInfo.badgeColor}>
+                            {statusInfo.displayText}
+                          </EuiBadge>
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiText size="s" css={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 180 }}>
+                            {m.name}
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                  );
+                })}
+                <EuiFlexItem>
+                  <EuiHorizontalRule margin="xs" />
+                  <EuiLink href={href}>
+                    {i18n.translate('xpack.slo.compositeSloList.memberHealth.viewMembers', {
+                      defaultMessage: 'View members',
+                    })}
+                  </EuiLink>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPopover>
+          );
+        },
       },
       {
         field: 'objective',
         name: i18n.translate('xpack.slo.compositeSloList.columns.objective', {
           defaultMessage: 'Objective',
         }),
-        width: '100px',
+        width: '90px',
         render: (objective: CompositeSLOItem['objective']) =>
           numeral(objective.target).format('0[.][000]%'),
       },
@@ -210,7 +287,7 @@ export function CompositeSloTable({
         name: i18n.translate('xpack.slo.compositeSloList.columns.sliValue', {
           defaultMessage: 'SLI value',
         }),
-        width: '100px',
+        width: '90px',
         render: (_: unknown, item: CompositeSLOItem) => {
           const details = detailsById.get(item.id);
           if (!details) {
@@ -247,7 +324,7 @@ export function CompositeSloTable({
         name: i18n.translate('xpack.slo.compositeSloList.columns.budgetRemaining', {
           defaultMessage: 'Budget remaining',
         }),
-        width: '140px',
+        width: '130px',
         render: (_: unknown, item: CompositeSLOItem) => {
           const details = detailsById.get(item.id);
           if (!details) {
@@ -256,6 +333,62 @@ export function CompositeSloTable({
           return details.summary.status === 'NO_DATA'
             ? NOT_AVAILABLE_LABEL
             : numeral(details.summary.errorBudget.remaining).format(percentFormat);
+        },
+      },
+      {
+        name: (
+          <EuiPopover
+            button={
+              <EuiButtonEmpty
+                size="xs"
+                iconType="arrowDown"
+                iconSide="right"
+                onClick={() => setIsBurnRatePopoverOpen((open) => !open)}
+                css={{ fontWeight: 700 }}
+              >
+                {i18n.translate('xpack.slo.compositeSloList.columns.burnRate', {
+                  defaultMessage: 'Burn rate',
+                })}{' '}
+                ({burnRateWindow})
+              </EuiButtonEmpty>
+            }
+            isOpen={isBurnRatePopoverOpen}
+            closePopover={() => setIsBurnRatePopoverOpen(false)}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            <EuiContextMenuPanel
+              items={(['5m', '1h', '1d'] as const).map((w) => (
+                <EuiContextMenuItem
+                  key={w}
+                  icon={burnRateWindow === w ? 'check' : 'empty'}
+                  onClick={() => {
+                    setBurnRateWindow(w);
+                    setIsBurnRatePopoverOpen(false);
+                  }}
+                >
+                  {w}
+                </EuiContextMenuItem>
+              ))}
+            />
+          </EuiPopover>
+        ),
+        width: '160px',
+        render: (item: CompositeSLOItem) => {
+          const details = detailsById.get(item.id);
+          if (!details) {
+            return <EuiSkeletonText lines={1} />;
+          }
+          if (details.summary.status === 'NO_DATA') {
+            return NOT_AVAILABLE_LABEL;
+          }
+          const { fiveMinuteBurnRate, oneHourBurnRate, oneDayBurnRate } = details.summary;
+          const windowValue = {
+            '5m': fiveMinuteBurnRate,
+            '1h': oneHourBurnRate,
+            '1d': oneDayBurnRate,
+          }[burnRateWindow];
+          return <EuiText size="s">{`${numeral(windowValue).format('0.[00]')}x`}</EuiText>;
         },
       },
       {
@@ -311,13 +444,17 @@ export function CompositeSloTable({
     ],
     [
       basePath,
+      burnRateWindow,
       detailsById,
       expandedRowIds,
       hasWritePermissions,
       historicalSummaryById,
+      isBurnRatePopoverOpen,
       isHistoricalLoading,
       navigateToUrl,
+      openMemberHealthPopoverId,
       percentFormat,
+      sloListLocator,
       toggleExpandRow,
       onDelete,
     ]
@@ -325,6 +462,7 @@ export function CompositeSloTable({
 
   return (
     <EuiBasicTable
+      css={{ overflowX: 'auto' }}
       data-test-subj="compositeSloList"
       items={results}
       columns={columns}
