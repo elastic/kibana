@@ -67,7 +67,7 @@ export class DatePicker {
     const getLocator = (selector: string) =>
       containerLocator ? containerLocator.locator(selector) : this.page.locator(selector);
 
-    await getTestSubjLocator('superDatePickerToggleQuickMenuButton').waitFor({ state: 'visible' });
+    await getTestSubjLocator('superDatePickerToggleQuickMenuButton').waitFor();
 
     // Close any open suggestion lists that might block the date picker button
     const isSuggestionListVisible = await getLocator('div.kbnTypeahead').isVisible();
@@ -148,7 +148,7 @@ export class DatePicker {
 
   private async ensurePickerVisible(containerLocator?: Locator) {
     const controlButton = this.getTestSubjLocator('dateRangePickerControlButton', containerLocator);
-    await controlButton.waitFor({ state: 'visible' });
+    await controlButton.waitFor();
 
     // Close any open suggestion lists that might block the date picker button
     const getLocator = (selector: string) =>
@@ -172,9 +172,8 @@ export class DatePicker {
 
   private async setDatePart(side: 'Start' | 'End', value: string) {
     // Dialog elements render as a portal at the page root
-    const datePart = this.page.testSubj.locator(`dateRangePicker${side}DatePart`);
-    await datePart.getByRole('button', { name: 'Absolute' }).click();
-    const input = datePart.getByRole('textbox');
+    await this.page.testSubj.locator(`dateRangePicker${side}AbsoluteTab`).click();
+    const input = this.page.testSubj.locator(`dateRangePicker${side}AbsoluteInput`);
     await input.clear();
     await input.fill(value);
   }
