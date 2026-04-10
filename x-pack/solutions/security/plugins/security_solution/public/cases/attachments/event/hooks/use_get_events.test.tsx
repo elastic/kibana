@@ -12,11 +12,11 @@ import { useGetEvents } from './use_get_events';
 
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { searchEvents } from './search_events';
-import { TestProviders } from '../../../common/mock';
-import { useToasts } from '../../../common/lib/kibana';
+import { TestProviders } from '../../../../common/mock';
+import { useToasts } from '../../../../common/lib/kibana';
 
 jest.mock('./search_events');
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../../common/lib/kibana');
 
 const mockDataView = {
   getIndexPattern: jest.fn(() => 'test-index'),

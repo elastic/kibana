@@ -10,7 +10,7 @@ import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { SortColumnTable } from '@kbn/securitysolution-data-table';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { lastValueFrom } from 'rxjs';
-import { KibanaServices } from '../../../common/lib/kibana';
+import { KibanaServices } from '../../../../common/lib/kibana';
 
 export const searchEvents = async (
   signal: AbortSignal | undefined,
