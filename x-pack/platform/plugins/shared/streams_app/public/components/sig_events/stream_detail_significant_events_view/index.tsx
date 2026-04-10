@@ -287,7 +287,6 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
             <EuiSpacer size="m" />
             {isRulesSelected ? (
               <RulesTable
-                definition={definition.stream}
                 rules={ruleKnowledgeIndicators}
                 occurrencesByQueryId={occurrencesByQueryId}
                 searchTerm={debouncedTableSearchValue}
