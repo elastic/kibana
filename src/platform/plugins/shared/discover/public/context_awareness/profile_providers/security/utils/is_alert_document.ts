@@ -18,10 +18,12 @@ import {
 const ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID = 'attack_discovery_ad_hoc_rule_type_id' as const;
 
 /**
- * Returns true if the document is not an alert or an attack (event.kind is not 'signal')
+ * Returns true if the document is not an alert or an attack (event.kind is defined and is not 'signal').
+ * Returns false when event.kind is absent, e.g. documents from complex ESQL queries.
  */
 export const isEventDocument = (record: DataTableRecord): boolean => {
-  return getFieldValue(record, EVENT_KIND) !== 'signal';
+  const eventKind = getFieldValue(record, EVENT_KIND);
+  return Boolean(eventKind) && eventKind !== 'signal';
 };
 
 /**

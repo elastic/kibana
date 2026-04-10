@@ -25,4 +25,5 @@ export const queryKeys = {
     [...queryKeys.all, 'related-episodes', ruleId, excludeEpisodeId, pageSize] as const,
   tagOptions: (timeRange?: { from: string; to: string } | null) =>
     [...queryKeys.all, 'tag-options', timeRange] as const,
+  alertActionTagSuggestions: () => [...queryKeys.all, 'alert-action-tag-suggestions'] as const,
 };
