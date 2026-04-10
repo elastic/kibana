@@ -347,8 +347,8 @@ const A11yGridCell = React.forwardRef(
         tabIndex={isFocused ? 0 : -1}
         onFocus={handleFocusCell}
         css={css`
-          outline: none,
-          cursor: pointer,
+          outline: none;
+          cursor: pointer;
           ${
             isFocused && {
               boxShadow: `0 0 ${euiTheme.focus.width} ${euiTheme.colors.primary}`,
