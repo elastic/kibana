@@ -456,7 +456,7 @@ describe('XY', () => {
                   index_pattern: 'companyIndex',
                   time_field: '@timestamp',
                 },
-                type: 'referenceLines',
+                type: 'reference_lines',
                 ignore_global_filters: false,
                 sampling: 1,
                 thresholds: [
@@ -546,7 +546,7 @@ describe('XY', () => {
       validateAPIConverter(apiXYWithNoYTitleAndInsideLegend, xyStateSchema);
     });
 
-    it('should correctly transform top list layout with pixel truncation', () => {
+    it('should correctly transform top list layout', () => {
       validateAPIConverter(apiXYWithTopListWithTruncationLegend, xyStateSchema);
     });
 

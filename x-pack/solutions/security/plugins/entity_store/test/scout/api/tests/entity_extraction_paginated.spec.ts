@@ -12,6 +12,7 @@ import {
   INTERNAL_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
+  LATEST_ALIAS,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import { expectedHostEntities } from '../fixtures/entity_extraction_expected';
@@ -90,7 +91,7 @@ apiTest.describe(
         expect(extractionResponse.body.pages).toBe(expectedPageCount);
 
         const entities = await esClient.search({
-          index: '.entities.v2.latest.security_default',
+          index: LATEST_ALIAS,
           query: {
             bool: {
               filter: {

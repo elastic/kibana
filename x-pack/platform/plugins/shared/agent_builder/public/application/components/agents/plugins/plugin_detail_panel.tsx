@@ -44,13 +44,15 @@ export const PluginDetailPanel: React.FC<PluginDetailPanelProps> = ({
   const { plugin, isLoading } = usePlugin({ pluginId });
   const [selectedSkillId, setSelectedSkillId] = useState<string | null>(null);
 
+  const isReadOnly = plugin?.readonly;
+
   return (
     <>
       <DetailPanelLayout
         isLoading={isLoading}
         isEmpty={!plugin}
         title={plugin?.name ?? pluginId}
-        showAutoIcon={isAuto}
+        isReadOnly={isReadOnly}
         headerContent={
           <>
             <div

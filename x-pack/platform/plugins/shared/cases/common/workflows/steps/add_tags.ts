@@ -34,7 +34,7 @@ export const addTagsStepCommonDefinition: CommonStepDefinition<
   AddTagsStepOutputSchema
 > = {
   id: AddTagsStepTypeId,
-  category: StepCategory.Kibana,
+  category: StepCategory.KibanaCases,
   label: i18n.ADD_TAG_STEP_LABEL,
   description: i18n.ADD_TAG_STEP_DESCRIPTION,
   documentation: {
