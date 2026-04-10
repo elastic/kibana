@@ -326,11 +326,12 @@ describe('UserPicker', () => {
     });
 
     it('falls back to availableOwners when the context has no owners', () => {
+      useCasesContextMock.mockReturnValue({ owner: [] });
       useAvailableCasesOwnersMock.mockReturnValue(['observability']);
       render(<FormWrapper />);
       const calls = useSuggestUserProfilesMock.mock.calls;
       const lastCall = calls[calls.length - 1][0];
-      expect(lastCall.owners).toBeDefined();
+      expect(lastCall.owners).toEqual(['observability']);
     });
   });
 });

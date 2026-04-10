@@ -16,12 +16,18 @@ export interface SelectedUser {
 
 export type UserProfileOption = EuiComboBoxOptionOption<string> & UserProfileWithAvatar;
 
+const isSelectedUser = (item: unknown): item is SelectedUser =>
+  typeof item === 'object' &&
+  item !== null &&
+  typeof (item as Record<string, unknown>).uid === 'string' &&
+  typeof (item as Record<string, unknown>).name === 'string';
+
 export const toSelectedUsers = (value: unknown): SelectedUser[] => {
-  if (Array.isArray(value)) return value as SelectedUser[];
+  if (Array.isArray(value)) return value.filter(isSelectedUser);
   if (typeof value === 'string' && value !== '') {
     try {
       const parsed = JSON.parse(value);
-      return Array.isArray(parsed) ? parsed : [];
+      return Array.isArray(parsed) ? parsed.filter(isSelectedUser) : [];
     } catch {
       return [];
     }
