@@ -51,6 +51,12 @@ export interface CorrelationsDetailsProps {
    */
   onShowAlert: (id: string, indexName: string) => void;
   /**
+   * Callback to open an attack preview when clicking the expand button in the related attacks table.
+   * When not provided, the expand button column is hidden.
+   * // TODO make required once we have an attack flyout in the new flyout system
+   */
+  onShowAttack?: (id: string, indexName: string) => void;
+  /**
    * Whether to hide the rule preview link in the correlations table.
    * Defaults to true (hidden) for the new tools flyout which has no expandable flyout context.
    */
@@ -71,6 +77,7 @@ export const CorrelationsDetails = memo(
     scopeId,
     isRulePreview,
     onShowAlert,
+    onShowAttack,
     hidePreviewLink = true,
   }: CorrelationsDetailsProps) => {
     const { euiTheme } = useEuiTheme();
@@ -168,7 +175,12 @@ export const CorrelationsDetails = memo(
                 )}
                 {showRelatedAttacks && (
                   <EuiFlexItem>
-                    <RelatedAttacks attackIds={attackIds} scopeId={scopeId} eventId={eventId} />
+                    <RelatedAttacks
+                      attackIds={attackIds}
+                      scopeId={scopeId}
+                      eventId={eventId}
+                      onShowAttack={onShowAttack}
+                    />
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
