@@ -55,14 +55,49 @@ describe('resolveProfileUidForRequest', () => {
     expect(getCurrentUser).not.toHaveBeenCalled();
   });
 
-  it('returns undefined when both sources yield nothing', async () => {
+  it('returns undefined when all sources yield nothing', async () => {
     const getCurrentUser = jest.fn().mockResolvedValue(null);
+    const getCurrentUserProfileIdFromBasicAuth = jest.fn().mockResolvedValue(undefined);
     const uid = await resolveProfileUidForRequest({
       request,
       getCurrentUser,
       getCurrentUserProfileIdFromAPIKey: async () => undefined,
+      getCurrentUserProfileIdFromBasicAuth,
     });
     expect(uid).toBeUndefined();
     expect(getCurrentUser).toHaveBeenCalledWith(request);
+    expect(getCurrentUserProfileIdFromBasicAuth).toHaveBeenCalledWith(request);
+  });
+
+  it('returns Basic-auth profile UID when API key and current user do not provide one', async () => {
+    const getCurrentUser = jest.fn().mockResolvedValue({});
+    const uid = await resolveProfileUidForRequest({
+      request,
+      getCurrentUser,
+      getCurrentUserProfileIdFromAPIKey: async () => undefined,
+      getCurrentUserProfileIdFromBasicAuth: async () => 'from-basic',
+    });
+    expect(uid).toBe('from-basic');
+    expect(getCurrentUser).toHaveBeenCalledWith(request);
+  });
+
+  it('prefers API key profile UID over Basic auth', async () => {
+    const uid = await resolveProfileUidForRequest({
+      request,
+      getCurrentUser: jest.fn().mockResolvedValue({}),
+      getCurrentUserProfileIdFromAPIKey: async () => 'from-api-key',
+      getCurrentUserProfileIdFromBasicAuth: async () => 'from-basic',
+    });
+    expect(uid).toBe('from-api-key');
+  });
+
+  it('prefers currentUser profile_uid over Basic auth', async () => {
+    const uid = await resolveProfileUidForRequest({
+      request,
+      getCurrentUser: jest.fn().mockResolvedValue({ profile_uid: 'from-user' }),
+      getCurrentUserProfileIdFromAPIKey: async () => undefined,
+      getCurrentUserProfileIdFromBasicAuth: async () => 'from-basic',
+    });
+    expect(uid).toBe('from-user');
   });
 });

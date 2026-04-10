@@ -37,6 +37,7 @@ export async function getAuthStatus({
     request: context.request,
     getCurrentUser: context.getCurrentUser,
     getCurrentUserProfileIdFromAPIKey: context.getCurrentUserProfileIdFromAPIKey,
+    getCurrentUserProfileIdFromBasicAuth: context.getCurrentUserProfileIdFromBasicAuth,
   });
 
   const userTokenConnectors = await getUserTokenConnectorsForProfile({

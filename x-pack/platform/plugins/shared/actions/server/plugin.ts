@@ -57,6 +57,7 @@ import { registerActionsUsageCollector } from './usage';
 import type { ILicenseState } from './lib';
 import { ActionExecutor, TaskRunnerFactory, LicenseState, spaceIdToNamespace } from './lib';
 import { getCurrentUserProfileIdFromAPIKey as getCurrentUserProfileIdFromAPIKeyForRequest } from './lib/get_current_user_profile_id_from_api_key';
+import { getCurrentUserProfileIdFromBasicAuth as getCurrentUserProfileIdFromBasicAuthForRequest } from './lib/get_current_user_profile_id_from_basic_auth';
 import type {
   Services,
   ActionType,
@@ -588,6 +589,7 @@ export class ActionsPlugin
         getCurrentUser: async (requestWithAuth: KibanaRequest) =>
           core.security.authc.getCurrentUser(requestWithAuth),
         getCurrentUserProfileIdFromAPIKey,
+        getCurrentUserProfileIdFromBasicAuth,
       });
     };
 
@@ -670,6 +672,9 @@ export class ActionsPlugin
 
     const getCurrentUserProfileIdFromAPIKey = async (request: KibanaRequest) =>
       getCurrentUserProfileIdFromAPIKeyForRequest(request, core.elasticsearch.client, logger);
+
+    const getCurrentUserProfileIdFromBasicAuth = async (request: KibanaRequest) =>
+      getCurrentUserProfileIdFromBasicAuthForRequest(request, core.elasticsearch.client, logger);
 
     actionExecutor!.initialize({
       logger,
@@ -983,6 +988,12 @@ export class ActionsPlugin
               coreStart.security.authc.getCurrentUser(requestWithAuth),
             getCurrentUserProfileIdFromAPIKey: (requestWithAuth: KibanaRequest) =>
               getCurrentUserProfileIdFromAPIKeyForRequest(
+                requestWithAuth,
+                coreStart.elasticsearch.client,
+                logger
+              ),
+            getCurrentUserProfileIdFromBasicAuth: (requestWithAuth: KibanaRequest) =>
+              getCurrentUserProfileIdFromBasicAuthForRequest(
                 requestWithAuth,
                 coreStart.elasticsearch.client,
                 logger

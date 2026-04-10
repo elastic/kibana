@@ -11,15 +11,20 @@ export async function resolveProfileUidForRequest({
   request,
   getCurrentUser,
   getCurrentUserProfileIdFromAPIKey,
+  getCurrentUserProfileIdFromBasicAuth,
 }: {
   request: KibanaRequest;
   getCurrentUser?: (request: KibanaRequest) => Promise<{ profile_uid?: string } | null>;
   getCurrentUserProfileIdFromAPIKey?: (request: KibanaRequest) => Promise<string | undefined>;
+  getCurrentUserProfileIdFromBasicAuth?: (request: KibanaRequest) => Promise<string | undefined>;
 }): Promise<string | undefined> {
   const profileUidFromAPIKey = await getCurrentUserProfileIdFromAPIKey?.(request);
   if (profileUidFromAPIKey) {
     return profileUidFromAPIKey;
   }
   const currentUser = await getCurrentUser?.(request);
-  return currentUser?.profile_uid;
+  if (currentUser?.profile_uid) {
+    return currentUser.profile_uid;
+  }
+  return (await getCurrentUserProfileIdFromBasicAuth?.(request)) ?? undefined;
 }

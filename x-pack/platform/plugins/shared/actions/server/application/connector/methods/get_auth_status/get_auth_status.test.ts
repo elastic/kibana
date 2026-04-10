@@ -14,6 +14,7 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import { actionsAuthorizationMock } from '../../../../authorization/actions_authorization.mock';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { actionExecutorMock } from '../../../../lib/action_executor.mock';
+import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -111,9 +112,11 @@ describe('getAuthStatus()', () => {
   function buildActionsClientWithProfile({
     inMemoryConnectors = [],
     profileUid,
+    getCurrentUserProfileIdFromBasicAuth,
   }: {
     inMemoryConnectors?: InMemoryConnector[];
     profileUid?: string;
+    getCurrentUserProfileIdFromBasicAuth?: (req: KibanaRequest) => Promise<string | undefined>;
   } = {}) {
     return new ActionsClient({
       logger,
@@ -133,6 +136,7 @@ describe('getAuthStatus()', () => {
       isESOCanEncrypt,
       getAxiosInstanceWithAuth,
       getCurrentUser: async () => (profileUid ? { profile_uid: profileUid } : null),
+      getCurrentUserProfileIdFromBasicAuth,
     });
   }
 
@@ -328,5 +332,57 @@ describe('getAuthStatus()', () => {
     const result = await actionsClient.getAuthStatus();
 
     expect(result['connector-per-user']).toEqual({ userAuthStatus: 'not_connected' });
+  });
+
+  test('returns connected for per-user connector when profile UID is resolved from Basic auth', async () => {
+    unsecuredSavedObjectsClient.find
+      .mockResolvedValueOnce({
+        total: 1,
+        per_page: 10000,
+        page: 1,
+        saved_objects: [
+          {
+            id: 'token-1',
+            type: 'user_connector_token',
+            attributes: {
+              profileUid: 'test-profile-uid',
+              connectorId: 'connector-per-user',
+              credentialType: 'oauth',
+              credentials: {},
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        total: 1,
+        per_page: 10000,
+        page: 1,
+        saved_objects: [
+          {
+            id: 'connector-per-user',
+            type: 'action',
+            attributes: {
+              name: 'Per-user connector',
+              actionTypeId: '.test-connector-type',
+              isMissingSecrets: false,
+              config: {},
+              authMode: 'per-user',
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      });
+
+    actionsClient = buildActionsClientWithProfile({
+      getCurrentUserProfileIdFromBasicAuth: async () => 'test-profile-uid',
+    });
+    const result = await actionsClient.getAuthStatus();
+
+    expect(result['connector-per-user']).toEqual({ userAuthStatus: 'connected' });
   });
 });

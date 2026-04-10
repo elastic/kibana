@@ -128,6 +128,7 @@ export interface ConstructorOptions {
   connectorLifecycleListeners?: ConnectorLifecycleListener[];
   getCurrentUser?: (request: KibanaRequest) => Promise<{ profile_uid?: string } | null>;
   getCurrentUserProfileIdFromAPIKey?: (request: KibanaRequest) => Promise<string | undefined>;
+  getCurrentUserProfileIdFromBasicAuth?: (request: KibanaRequest) => Promise<string | undefined>;
 }
 
 export interface ActionsClientContext {
@@ -156,6 +157,7 @@ export interface ActionsClientContext {
   connectorLifecycleListeners?: ConnectorLifecycleListener[];
   getCurrentUser?: (request: KibanaRequest) => Promise<{ profile_uid?: string } | null>;
   getCurrentUserProfileIdFromAPIKey?: (request: KibanaRequest) => Promise<string | undefined>;
+  getCurrentUserProfileIdFromBasicAuth?: (request: KibanaRequest) => Promise<string | undefined>;
 }
 
 const noop = async (_request: KibanaRequest): Promise<string | undefined> => undefined;
@@ -190,6 +192,7 @@ export class ActionsClient {
     connectorLifecycleListeners,
     getCurrentUser,
     getCurrentUserProfileIdFromAPIKey,
+    getCurrentUserProfileIdFromBasicAuth,
   }: ConstructorOptions) {
     this.context = {
       logger,
@@ -215,6 +218,7 @@ export class ActionsClient {
       connectorLifecycleListeners,
       getCurrentUser: getCurrentUser ?? getCurrentUserNoop,
       getCurrentUserProfileIdFromAPIKey: getCurrentUserProfileIdFromAPIKey ?? noop,
+      getCurrentUserProfileIdFromBasicAuth: getCurrentUserProfileIdFromBasicAuth ?? noop,
     };
   }
 
