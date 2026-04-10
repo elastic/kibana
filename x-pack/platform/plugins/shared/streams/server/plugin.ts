@@ -394,10 +394,8 @@ export class StreamsPlugin
               isSecurityEnabled: false,
             });
 
-            await streamsClient.enableStreams({ defer: true });
-
-            await streamsClient.bulkUpsert(
-              this.config.preconfigured.stream_definitions.map(({ name, ...definition }) => ({
+            const streamDefinitions = this.config.preconfigured.stream_definitions.map(
+              ({ name, ...definition }) => ({
                 name,
                 request: Streams.all.UpsertRequest.parse(
                   ROOT_STREAM_NAMES.includes(name)
@@ -416,8 +414,17 @@ export class StreamsPlugin
                       }
                     : definition
                 ),
-              }))
+              })
             );
+
+            if (streamDefinitions.length > 0) {
+              await streamsClient.enableStreams();
+
+              await streamsClient.bulkUpsert(streamDefinitions);
+            } else {
+              await streamsClient.enableStreams({ defer: true });
+            }
+
             this.logger.info('Streams preconfigured successfully');
           }
         }
