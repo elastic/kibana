@@ -299,62 +299,64 @@ export const AgentPlugins: React.FC = () => {
 
   return (
     <PageWrapper>
-      <div css={styles.header}>
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="package" aria-hidden={true} css={ICON_DIMENSIONS} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="l">
-                  <h1>{labels.plugins.title}</h1>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty href={createAgentBuilderUrl(appPaths.manage.plugins)}>
-                  {labels.agentPlugins.manageAllPlugins}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              {canEditAgent ? (
+      {!showCustomizeEmptyState ? (
+        <div css={styles.header}>
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <EuiPopover
-                    aria-label={labels.agentPlugins.installPluginButton}
-                    button={
-                      <EuiButton
-                        fill
-                        iconType="plusInCircle"
-                        iconSide="left"
-                        onClick={() => setIsHeaderInstallMenuOpen((prev) => !prev)}
-                      >
-                        {labels.agentPlugins.installPluginButton}
-                      </EuiButton>
-                    }
-                    isOpen={isHeaderInstallMenuOpen}
-                    closePopover={() => setIsHeaderInstallMenuOpen(false)}
-                    anchorPosition="downLeft"
-                    panelPaddingSize="none"
-                  >
-                    <PluginAddMenuPanel
-                      onInstallFromUrlOrZip={handleOpenInstallFlyout}
-                      onAddFromLibrary={handleOpenLibrary}
-                    />
-                  </EuiPopover>
+                  <EuiIcon type="package" aria-hidden={true} css={ICON_DIMENSIONS} />
                 </EuiFlexItem>
-              ) : null}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="l">
+                    <h1>{labels.plugins.title}</h1>
+                  </EuiTitle>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty href={createAgentBuilderUrl(appPaths.manage.plugins)}>
+                    {labels.agentPlugins.manageAllPlugins}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                {canEditAgent ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiPopover
+                      aria-label={labels.agentPlugins.installPluginButton}
+                      button={
+                        <EuiButton
+                          fill
+                          iconType="plusInCircle"
+                          iconSide="left"
+                          onClick={() => setIsHeaderInstallMenuOpen((prev) => !prev)}
+                        >
+                          {labels.agentPlugins.installPluginButton}
+                        </EuiButton>
+                      }
+                      isOpen={isHeaderInstallMenuOpen}
+                      closePopover={() => setIsHeaderInstallMenuOpen(false)}
+                      anchorPosition="downLeft"
+                      panelPaddingSize="none"
+                    >
+                      <PluginAddMenuPanel
+                        onInstallFromUrlOrZip={handleOpenInstallFlyout}
+                        onAddFromLibrary={handleOpenLibrary}
+                      />
+                    </EuiPopover>
+                  </EuiFlexItem>
+                ) : null}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
-        <EuiSpacer size="s" />
-        <EuiText size="s" color="subdued">
-          {labels.agentPlugins.pageDescription}
-        </EuiText>
-      </div>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            {labels.agentPlugins.pageDescription}
+          </EuiText>
+        </div>
+      ) : null}
 
       {showCustomizeEmptyState ? (
         <EuiFlexGroup

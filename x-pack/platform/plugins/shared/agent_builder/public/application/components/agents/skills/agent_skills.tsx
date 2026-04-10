@@ -284,80 +284,82 @@ export const AgentSkills: React.FC = () => {
 
   return (
     <PageWrapper>
-      <div css={styles.header}>
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="bolt" aria-hidden={true} css={ICON_DIMENSIONS} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="l">
-                  <h1>{labels.skills.title}</h1>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty href={createAgentBuilderUrl(appPaths.manage.skills)}>
-                  {labels.agentSkills.manageAllSkills}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              {canEditAgent && (
+      {!showCustomizeEmptyState ? (
+        <div css={styles.header}>
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <EuiPopover
-                    aria-label={labels.agentSkills.addSkillButton}
-                    button={
-                      <EuiButton
-                        fill
-                        iconType="plusInCircle"
-                        iconSide="left"
-                        onClick={() => setIsAddMenuOpen((prev) => !prev)}
-                      >
-                        {labels.agentSkills.addSkillButton}
-                      </EuiButton>
-                    }
-                    isOpen={isAddMenuOpen}
-                    closePopover={() => setIsAddMenuOpen(false)}
-                    anchorPosition="downLeft"
-                    panelPaddingSize="none"
-                  >
-                    <EuiContextMenuPanel
-                      items={[
-                        <EuiContextMenuItem
-                          key="importFromLibrary"
-                          icon="importAction"
-                          onClick={handleImportFromLibrary}
-                        >
-                          {labels.agentSkills.importFromLibraryMenuItem}
-                        </EuiContextMenuItem>,
-                        ...(manageSkills
-                          ? [
-                              <EuiContextMenuItem
-                                key="createSkill"
-                                icon="pencil"
-                                onClick={handleOpenCreateFlyout}
-                              >
-                                {labels.agentSkills.createSkillMenuItem}
-                              </EuiContextMenuItem>,
-                            ]
-                          : []),
-                      ]}
-                    />
-                  </EuiPopover>
+                  <EuiIcon type="bolt" aria-hidden={true} css={ICON_DIMENSIONS} />
                 </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="l">
+                    <h1>{labels.skills.title}</h1>
+                  </EuiTitle>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty href={createAgentBuilderUrl(appPaths.manage.skills)}>
+                    {labels.agentSkills.manageAllSkills}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                {canEditAgent && (
+                  <EuiFlexItem grow={false}>
+                    <EuiPopover
+                      aria-label={labels.agentSkills.addSkillButton}
+                      button={
+                        <EuiButton
+                          fill
+                          iconType="plusInCircle"
+                          iconSide="left"
+                          onClick={() => setIsAddMenuOpen((prev) => !prev)}
+                        >
+                          {labels.agentSkills.addSkillButton}
+                        </EuiButton>
+                      }
+                      isOpen={isAddMenuOpen}
+                      closePopover={() => setIsAddMenuOpen(false)}
+                      anchorPosition="downLeft"
+                      panelPaddingSize="none"
+                    >
+                      <EuiContextMenuPanel
+                        items={[
+                          <EuiContextMenuItem
+                            key="importFromLibrary"
+                            icon="importAction"
+                            onClick={handleImportFromLibrary}
+                          >
+                            {labels.agentSkills.importFromLibraryMenuItem}
+                          </EuiContextMenuItem>,
+                          ...(manageSkills
+                            ? [
+                                <EuiContextMenuItem
+                                  key="createSkill"
+                                  icon="pencil"
+                                  onClick={handleOpenCreateFlyout}
+                                >
+                                  {labels.agentSkills.createSkillMenuItem}
+                                </EuiContextMenuItem>,
+                              ]
+                            : []),
+                        ]}
+                      />
+                    </EuiPopover>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
-        <EuiSpacer size="s" />
-        <EuiText size="s" color="subdued">
-          {labels.agentSkills.pageDescription}
-        </EuiText>
-      </div>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            {labels.agentSkills.pageDescription}
+          </EuiText>
+        </div>
+      ) : null}
 
       {showCustomizeEmptyState ? (
         <EuiFlexGroup

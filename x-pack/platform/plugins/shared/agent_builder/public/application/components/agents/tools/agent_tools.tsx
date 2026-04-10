@@ -320,43 +320,45 @@ export const AgentTools: React.FC = () => {
 
   return (
     <PageWrapper>
-      <div css={styles.header}>
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="wrench" aria-hidden={true} css={ICON_DIMENSIONS} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="l">
-                  <h1>{labels.tools.title}</h1>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty href={createAgentBuilderUrl(appPaths.manage.tools)}>
-                  {labels.agentTools.manageAllTools}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              {canEditAgent && (
+      {!showCustomizeEmptyState ? (
+        <div css={styles.header}>
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <EuiButton fill iconType="plusInCircle" iconSide="left" onClick={openLibrary}>
-                    {labels.agentTools.addToolButton}
-                  </EuiButton>
+                  <EuiIcon type="wrench" aria-hidden={true} css={ICON_DIMENSIONS} />
                 </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="l">
+                    <h1>{labels.tools.title}</h1>
+                  </EuiTitle>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty href={createAgentBuilderUrl(appPaths.manage.tools)}>
+                    {labels.agentTools.manageAllTools}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                {canEditAgent && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButton fill iconType="plusInCircle" iconSide="left" onClick={openLibrary}>
+                      {labels.agentTools.addToolButton}
+                    </EuiButton>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
-        <EuiSpacer size="s" />
-        <EuiText size="s" color="subdued">
-          {labels.agentTools.pageDescription}
-        </EuiText>
-      </div>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            {labels.agentTools.pageDescription}
+          </EuiText>
+        </div>
+      ) : null}
 
       {showCustomizeEmptyState ? (
         <EuiFlexGroup
