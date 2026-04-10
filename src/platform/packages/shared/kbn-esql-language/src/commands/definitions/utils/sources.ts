@@ -19,7 +19,6 @@ import { EDITOR_MARKER } from '../constants';
 import { metadataSuggestion } from '../../registry/options/metadata';
 import { fuzzySearch } from './shared';
 import { computePrefixRange } from '../../../language/autocomplete/utils/prefix_range';
-import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 
 const removeSourceNameQuotes = (sourceName: string) =>
   sourceName.startsWith('"') && sourceName.endsWith('"') ? sourceName.slice(1, -1) : sourceName;
@@ -95,7 +94,6 @@ export const buildSourcesDefinitions = (
       text,
       asSnippet: isIntegration,
       kind: isIntegration ? 'Class' : 'Issue',
-      ...(isTimeseries && { category: SuggestionCategory.TIMESERIES_SOURCE }),
       detail: isIntegration
         ? i18n.translate('kbn-esql-language.esql.autocomplete.integrationDefinition', {
             defaultMessage: SOURCES_TYPES.INTEGRATION,

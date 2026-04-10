@@ -10,7 +10,6 @@
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import { joinIndices, timeseriesIndices } from '../../../__tests__/commands/context_fixtures';
 import { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from '../../registry/constants';
-import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 
 import {
   specialIndicesToSuggestions,
@@ -183,7 +182,6 @@ describe('buildSourcesDefinitions with timeseries', () => {
         : timeseriesSuggestion?.command;
 
     expect(timeseriesSuggestion?.text).toBe('my_timeseries_index');
-    expect(timeseriesSuggestion?.category).toBe(SuggestionCategory.TIMESERIES_SOURCE);
     expect(timeseriesSuggestion?.filterText).toBeUndefined();
     expect(timeseriesSuggestion?.rangeToReplace).toBeUndefined();
     expect(timeseriesCommand).toEqual({

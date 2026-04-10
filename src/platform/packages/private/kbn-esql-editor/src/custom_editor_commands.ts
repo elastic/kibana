@@ -8,7 +8,7 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from '@kbn/esql-language/src/commands/registry/constants';
+import { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from '@kbn/esql-language';
 import {
   ESQLVariableType,
   QuerySource,

@@ -45,8 +45,6 @@ const CATEGORY_PRIORITIES: Record<SuggestionCategory, number> = {
   [SuggestionCategory.RECOMMENDED_QUERY_WITH_PRIORITY]: 590, // Search query (higher priority)
   [SuggestionCategory.RECOMMENDED_QUERY]: 600,
 
-  [SuggestionCategory.TIMESERIES_SOURCE]: 850,
-
   [SuggestionCategory.UNKNOWN]: 900,
 };
 
