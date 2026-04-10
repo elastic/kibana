@@ -69,6 +69,7 @@ export const useAlertsActions = ({
       onUpdateSuccess: onStatusUpdate,
       onUpdateFailure: onStatusUpdate,
       closePopover,
+      showRunWorkflowActions: false,
     };
   }, [
     alertStatus,
