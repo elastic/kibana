@@ -8,35 +8,37 @@
  */
 
 import { useMemo } from 'react';
-import {
-  ExecutionTrackerProvider,
-  useExecutionTracker as useInternalExecutionTracker,
-  useOptionalExecutionTracker as useInternalOptionalExecutionTracker,
-} from './model/execution_tracker_context';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ExecutionTrackerApi } from './types';
 
-export { ExecutionTrackerProvider };
+interface WorkflowsManagementStart {
+  trackExecutions: ExecutionTrackerApi['trackExecutions'];
+}
 
-export const useExecutionTracker = (): ExecutionTrackerApi => {
-  const ctx = useInternalExecutionTracker();
-  return useMemo(
-    () => ({
-      executions: ctx.executions,
-      trackExecutions: ctx.trackExecutions,
-      dismissExecution: ctx.dismissExecution,
-    }),
-    [ctx.executions, ctx.trackExecutions, ctx.dismissExecution]
-  );
+/**
+ * Returns an execution tracker API backed by the `workflowsManagement` plugin
+ * start contract. Returns `null` if the plugin is not available.
+ */
+export const useOptionalExecutionTracker = (): ExecutionTrackerApi | null => {
+  const { services } = useKibana<{
+    workflowsManagement?: WorkflowsManagementStart;
+  }>();
+  const wm = services.workflowsManagement;
+
+  return useMemo(() => {
+    if (!wm) return null;
+    return {
+      executions: [],
+      trackExecutions: wm.trackExecutions,
+      dismissExecution: () => {},
+    };
+  }, [wm]);
 };
 
-export const useOptionalExecutionTracker = (): ExecutionTrackerApi | null => {
-  const ctx = useInternalOptionalExecutionTracker();
-  return useMemo(() => {
-    if (!ctx) return null;
-    return {
-      executions: ctx.executions,
-      trackExecutions: ctx.trackExecutions,
-      dismissExecution: ctx.dismissExecution,
-    };
-  }, [ctx]);
+export const useExecutionTracker = (): ExecutionTrackerApi => {
+  const api = useOptionalExecutionTracker();
+  if (!api) {
+    throw new Error('useExecutionTracker: workflowsManagement plugin is not available');
+  }
+  return api;
 };

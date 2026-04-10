@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import type {
   AttachmentServiceStartContract,
   EventsServiceStartContract,
@@ -29,6 +30,7 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
+import type { TrackedExecution } from '@kbn/workflows-ui';
 import type { TelemetryServiceClient } from './common/lib/telemetry/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -70,8 +72,29 @@ export interface AgentBuilderPluginStartContract {
   clearChatConfig: () => void;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WorkflowsPublicPluginStart {}
+export interface WorkflowsPublicPluginStart {
+  /**
+   * Track one or more workflow executions. The execution tracker badge in the
+   * Chrome header will display their status and allow opening the detail flyout.
+   */
+  trackExecutions: (
+    entries: Array<{
+      id: string;
+      workflowId?: string;
+      workflowName?: string;
+      inputSummary?: Array<{ label: string; value: string }>;
+    }>
+  ) => void;
+  /**
+   * Register a custom output renderer for the execution tracker flyout.
+   * When an execution completes, matching renderers are used to display
+   * solution-specific output (e.g. a link to a created case).
+   */
+  registerOutputRenderer: (
+    id: string,
+    renderer: (execution: TrackedExecution) => ReactNode | null
+  ) => void;
+}
 
 export interface WorkflowsPublicPluginStartDependencies {
   navigation: NavigationPublicPluginStart;

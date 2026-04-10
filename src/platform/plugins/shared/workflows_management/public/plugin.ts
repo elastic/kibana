@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createElement, lazy, Suspense } from 'react';
 import { filter, first, Subject, type Subscription } from 'rxjs';
 import {
   type AppDeepLinkLocations,
@@ -21,6 +22,7 @@ import {
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
+import { ExecutionTrackerService } from '@kbn/workflows-ui';
 import { TelemetryService } from './common/lib/telemetry/telemetry_service';
 import { triggerSchemas } from './trigger_schemas';
 import type {
@@ -34,6 +36,12 @@ import type {
 } from './types';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { stepSchemas } from '../common/step_schemas';
+
+const LazyExecutionTrackerNavControl = lazy(() =>
+  import('./execution_tracker_nav_control').then(({ ExecutionTrackerNavControl }) => ({
+    default: ExecutionTrackerNavControl,
+  }))
+);
 
 const VisibleIn: AppDeepLinkLocations[] = ['globalSearch', 'home', 'kibanaOverview', 'sideNav'];
 
@@ -50,6 +58,7 @@ export class WorkflowsPlugin
   private telemetryService: TelemetryService;
   private agentBuilderPromise: Promise<AgentBuilderPluginStartContract | undefined> | undefined;
   private settingsSubscription?: Subscription;
+  private executionTrackerService?: ExecutionTrackerService;
 
   constructor() {
     this.appUpdater$ = new Subject<AppUpdater>();
@@ -123,11 +132,28 @@ export class WorkflowsPlugin
 
     this.subscribeToWorkflowsSettingChange(core);
 
-    return {};
+    // Create the execution tracker service and register the nav control
+    this.executionTrackerService = new ExecutionTrackerService(core.http, core.application);
+    const service = this.executionTrackerService;
+
+    core.chrome.navControls.registerRight({
+      order: 999,
+      content: createElement(
+        Suspense,
+        { fallback: null },
+        createElement(LazyExecutionTrackerNavControl, { service })
+      ),
+    });
+
+    return {
+      trackExecutions: service.trackExecutions,
+      registerOutputRenderer: service.registerOutputRenderer,
+    };
   }
 
   public stop() {
     this.settingsSubscription?.unsubscribe();
+    this.executionTrackerService?.destroy();
   }
 
   /**

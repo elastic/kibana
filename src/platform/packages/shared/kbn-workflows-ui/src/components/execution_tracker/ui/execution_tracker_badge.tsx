@@ -7,60 +7,85 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiNotificationBadge, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo, useSyncExternalStore } from 'react';
 import type { FC } from 'react';
-import { BADGE_COMPLETED_LABEL, BADGE_FAILED_LABEL, BADGE_RUNNING_LABEL } from './translations';
-import { useExecutionTracker } from '../model/execution_tracker_context';
+import {
+  BADGE_COMPLETED_LABEL,
+  BADGE_FAILED_LABEL,
+  BADGE_RUNNING_LABEL,
+  EXECUTION_TRACKER_TITLE,
+} from './translations';
+import type { ExecutionTrackerService } from '../execution_tracker_service';
 
-export const ExecutionTrackerBadge: FC = () => {
-  const { counts, isFlyoutOpen, setFlyoutOpen } = useExecutionTracker();
+interface ExecutionTrackerBadgeProps {
+  service: ExecutionTrackerService;
+}
+
+/**
+ * Compact icon button that shows execution counts on hover and opens the
+ * execution tracker flyout on click. Designed to be rendered in the Chrome
+ * header via `chrome.navControls.registerRight()`.
+ */
+export const ExecutionTrackerBadge: FC<ExecutionTrackerBadgeProps> = ({ service }) => {
   const { euiTheme } = useEuiTheme();
 
-  const toggleFlyout = useCallback(() => {
-    setFlyoutOpen(!isFlyoutOpen);
-  }, [isFlyoutOpen, setFlyoutOpen]);
+  const subscribe = useCallback(
+    (cb: () => void) => {
+      const sub = service.state$.subscribe(cb);
+      return () => sub.unsubscribe();
+    },
+    [service]
+  );
+  const getSnapshot = useCallback(() => service.state$.getValue(), [service]);
+  const state = useSyncExternalStore(subscribe, getSnapshot);
 
-  if (counts.total === 0) {
-    return null;
-  }
+  const { counts, isFlyoutOpen } = state;
+
+  const tooltipContent = useMemo(() => {
+    const parts: string[] = [];
+    if (counts.running > 0) {
+      parts.push(BADGE_RUNNING_LABEL(counts.running));
+    }
+    if (counts.completed > 0) {
+      parts.push(BADGE_COMPLETED_LABEL(counts.completed));
+    }
+    if (counts.failed > 0) {
+      parts.push(BADGE_FAILED_LABEL(counts.failed));
+    }
+    return parts.join(', ');
+  }, [counts]);
 
   return (
-    <div
-      css={css`
-        position: fixed;
-        bottom: ${euiTheme.size.l};
-        right: ${euiTheme.size.l};
-        z-index: ${Number(euiTheme.levels.flyout) - 1};
-        cursor: pointer;
-      `}
-      onClick={toggleFlyout}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          toggleFlyout();
-        }
-      }}
-    >
-      <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
-        {counts.running > 0 && (
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="primary">{BADGE_RUNNING_LABEL(counts.running)}</EuiBadge>
-          </EuiFlexItem>
+    <EuiToolTip content={tooltipContent || EXECUTION_TRACKER_TITLE} position="bottom">
+      <span
+        css={css`
+          position: relative;
+          display: inline-flex;
+        `}
+      >
+        <EuiButtonIcon
+          iconType="workflow"
+          aria-label={EXECUTION_TRACKER_TITLE}
+          onClick={service.toggleFlyout}
+          color={isFlyoutOpen ? 'primary' : 'text'}
+          size="s"
+        />
+        {counts.total > 0 && (
+          <EuiNotificationBadge
+            css={css`
+              position: absolute;
+              top: -${euiTheme.size.xs};
+              right: -${euiTheme.size.xs};
+              pointer-events: none;
+            `}
+            color={counts.failed > 0 ? 'accent' : counts.completed > 0 ? 'success' : 'subdued'}
+          >
+            {counts.total}
+          </EuiNotificationBadge>
         )}
-        {counts.completed > 0 && (
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="success">{BADGE_COMPLETED_LABEL(counts.completed)}</EuiBadge>
-          </EuiFlexItem>
-        )}
-        {counts.failed > 0 && (
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="danger">{BADGE_FAILED_LABEL(counts.failed)}</EuiBadge>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </div>
+      </span>
+    </EuiToolTip>
   );
 };

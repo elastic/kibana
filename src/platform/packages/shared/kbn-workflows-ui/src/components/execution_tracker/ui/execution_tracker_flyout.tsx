@@ -16,7 +16,7 @@ import {
   EuiFlyoutHeader,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useSyncExternalStore } from 'react';
 import type { FC } from 'react';
 import { ExecutionTrackerFlyoutRow } from './execution_tracker_flyout_row';
 import {
@@ -24,21 +24,29 @@ import {
   EXECUTION_TRACKER_TITLE,
   NO_ACTIVE_EXECUTIONS_LABEL,
 } from './translations';
-import { useExecutionTracker } from '../model/execution_tracker_context';
+import type { ExecutionTrackerService } from '../execution_tracker_service';
 
-export const ExecutionTrackerFlyout: FC = () => {
-  const {
-    executions,
-    dismissExecution,
-    dismissAllCompleted,
-    setFlyoutOpen,
-    counts,
-    renderOutputContent,
-  } = useExecutionTracker();
+interface ExecutionTrackerFlyoutProps {
+  service: ExecutionTrackerService;
+}
+
+export const ExecutionTrackerFlyout: FC<ExecutionTrackerFlyoutProps> = ({ service }) => {
+  const subscribe = useCallback(
+    (cb: () => void) => {
+      const sub = service.state$.subscribe(cb);
+      return () => sub.unsubscribe();
+    },
+    [service]
+  );
+  const getSnapshot = useCallback(() => service.state$.getValue(), [service]);
+  const state = useSyncExternalStore(subscribe, getSnapshot);
+
+  const { executions, counts } = state;
+  const renderOutputContent = service.getRenderOutputContent();
 
   const closeFlyout = useCallback(() => {
-    setFlyoutOpen(false);
-  }, [setFlyoutOpen]);
+    service.setFlyoutOpen(false);
+  }, [service]);
 
   const sortedExecutions = useMemo(
     () => [...executions].sort((a, b) => b.addedAt - a.addedAt),
@@ -67,9 +75,10 @@ export const ExecutionTrackerFlyout: FC = () => {
             <ExecutionTrackerFlyoutRow
               key={execution.id}
               execution={execution}
-              onDismiss={dismissExecution}
+              onDismiss={service.dismissExecution}
               isLast={index === sortedExecutions.length - 1}
               renderOutputContent={renderOutputContent}
+              application={service.application}
             />
           ))
         )}
@@ -77,7 +86,7 @@ export const ExecutionTrackerFlyout: FC = () => {
 
       {hasTerminal && (
         <EuiFlyoutFooter>
-          <EuiButton size="s" onClick={dismissAllCompleted}>
+          <EuiButton size="s" onClick={service.dismissAllCompleted}>
             {DISMISS_ALL_COMPLETED_LABEL}
           </EuiButton>
         </EuiFlyoutFooter>

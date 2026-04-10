@@ -23,7 +23,6 @@ import {
 import React, { useCallback, useMemo } from 'react';
 import type { FC } from 'react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import {
   DISMISS_LABEL,
@@ -38,6 +37,7 @@ interface ExecutionTrackerFlyoutRowProps {
   onDismiss: (id: string) => void;
   isLast: boolean;
   renderOutputContent?: RenderOutputContent;
+  application: ApplicationStart;
 }
 
 const statusToColor = (status: ExecutionStatus): string => {
@@ -85,8 +85,8 @@ export const ExecutionTrackerFlyoutRow: FC<ExecutionTrackerFlyoutRowProps> = ({
   onDismiss,
   isLast,
   renderOutputContent,
+  application,
 }) => {
-  const { application } = useKibana<{ application: ApplicationStart }>().services;
   const isTerminal = isTerminalStatus(execution.status);
   const color = statusToColor(execution.status);
 

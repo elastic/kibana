@@ -18,7 +18,6 @@ import type { AppMountParameters } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
-import { ExecutionTrackerProvider } from '@kbn/workflows-ui';
 import { EntityStoreEuidApiProvider, useInstallEntityStoreV2 } from '@kbn/entity-store/public';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { THREAT_HUNTING_AGENT_ID, APP_NAME } from '../../common/constants';
@@ -37,7 +36,6 @@ import { DiscoverInTimelineContextProvider } from '../common/components/discover
 import { InitializationProvider } from '../common/components/initialization';
 import { AssistantProvider } from '../assistant/provider';
 import { TrialCompanion } from '../trial_companion/trial_companion';
-import { useExecutionOutputRenderer } from './execution_output_renderers';
 
 interface StartAppComponent {
   children: React.ReactNode;
@@ -54,8 +52,6 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, th
     upselling,
   } = services;
 
-  const renderOutputContent = useExecutionOutputRenderer();
-
   const darkMode = useDarkMode();
 
   return (
@@ -69,22 +65,20 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, th
                   <ManageUserInfo>
                     <NavigationProvider core={services}>
                       <ReactQueryClientProvider>
-                        <ExecutionTrackerProvider renderOutputContent={renderOutputContent}>
-                          <InitializationProvider>
-                            <CellActionsProvider
-                              getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
-                            >
-                              <UpsellingProvider upsellingService={upselling}>
-                                <DiscoverInTimelineContextProvider>
-                                  <PageRouter history={history}>
-                                    <AssistantProvider>{children}</AssistantProvider>
-                                    <TrialCompanion />
-                                  </PageRouter>
-                                </DiscoverInTimelineContextProvider>
-                              </UpsellingProvider>
-                            </CellActionsProvider>
-                          </InitializationProvider>
-                        </ExecutionTrackerProvider>
+                        <InitializationProvider>
+                          <CellActionsProvider
+                            getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
+                          >
+                            <UpsellingProvider upsellingService={upselling}>
+                              <DiscoverInTimelineContextProvider>
+                                <PageRouter history={history}>
+                                  <AssistantProvider>{children}</AssistantProvider>
+                                  <TrialCompanion />
+                                </PageRouter>
+                              </DiscoverInTimelineContextProvider>
+                            </UpsellingProvider>
+                          </CellActionsProvider>
+                        </InitializationProvider>
                       </ReactQueryClientProvider>
                     </NavigationProvider>
                   </ManageUserInfo>

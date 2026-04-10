@@ -7,29 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { InputSummaryEntry, RenderOutputContent, TrackedExecution } from '../types';
-
 export interface ExecutionTrackerCounts {
   running: number;
   completed: number;
   failed: number;
   total: number;
-}
-
-export interface ExecutionTrackerContextValue {
-  executions: TrackedExecution[];
-  trackExecutions: (
-    entries: Array<{
-      id: string;
-      workflowId?: string;
-      workflowName?: string;
-      inputSummary?: InputSummaryEntry[];
-    }>
-  ) => void;
-  dismissExecution: (id: string) => void;
-  dismissAllCompleted: () => void;
-  isFlyoutOpen: boolean;
-  setFlyoutOpen: (open: boolean) => void;
-  counts: ExecutionTrackerCounts;
-  renderOutputContent?: RenderOutputContent;
 }

@@ -8,10 +8,12 @@
  */
 
 export {
-  ExecutionTrackerProvider,
   useExecutionTracker,
   useOptionalExecutionTracker,
 } from './execution_tracker_context';
+export { ExecutionTrackerService } from './execution_tracker_service';
+export { ExecutionTrackerBadge } from './ui/execution_tracker_badge';
+export { ExecutionTrackerFlyout } from './ui/execution_tracker_flyout';
 export type {
   TrackedExecution,
   InputSummaryEntry,

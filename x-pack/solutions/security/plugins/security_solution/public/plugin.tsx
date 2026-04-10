@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { createElement } from 'react';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, combineLatestWith, Subject } from 'rxjs';
 import type * as H from 'history';
@@ -44,7 +44,7 @@ import type {
 } from './types';
 import { ASSISTANT_MANAGEMENT_TITLE, SOLUTION_NAME } from './common/translations';
 
-import { APP_ICON_SOLUTION, APP_ID, APP_PATH, APP_UI_ID } from '../common/constants';
+import { APP_ICON_SOLUTION, APP_ID, APP_PATH, APP_UI_ID, CASES_PATH } from '../common/constants';
 
 import type { AppLinkItems } from './common/links';
 import {
@@ -299,6 +299,21 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         ? ProjectRoutingAccess.EDITABLE
         : ProjectRoutingAccess.DISABLED
     );
+
+    // Register custom output renderer for workflow executions that create cases
+    plugins.workflowsManagement?.registerOutputRenderer('case-link', (execution) => {
+      if (!execution.output?.caseId) return null;
+      const caseHref = core.application.getUrlForApp('securitySolutionUI', {
+        path: `${CASES_PATH}/${String(execution.output.caseId)}`,
+      });
+      return createElement(
+        'a',
+        { href: caseHref, className: 'euiLink' },
+        i18n.translate('xpack.securitySolution.executionTracker.viewCase', {
+          defaultMessage: 'View case',
+        })
+      );
+    });
 
     return this.contract.getStartContract(core);
   }
