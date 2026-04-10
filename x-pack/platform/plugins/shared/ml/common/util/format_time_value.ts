@@ -7,7 +7,7 @@
 
 import moment from 'moment-timezone';
 import type { Moment } from 'moment-timezone';
-import type { MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
+import { ML_JOB_AGGREGATION, type MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 import type { AnomalyDateFunction } from '@kbn/ml-anomaly-utils/types';
 
 const WEEK_DURATION_IN_SECONDS = moment.duration(1, 'week').asSeconds();
@@ -42,13 +42,10 @@ export function formatTimeValue(
 ): TimeValueResult {
   // The anomaly timestamp anchors these cyclical values to a concrete day/week
   // so callers can render them in the intended display timezone.
-  const date =
-    record !== undefined && record.timestamp !== undefined
-      ? new Date(record.timestamp)
-      : new Date();
+  const date = record !== undefined ? new Date(record.timestamp) : new Date();
 
   switch (mlFunction) {
-    case 'time_of_week': {
+    case ML_JOB_AGGREGATION.TIME_OF_WEEK: {
       /**
        * `time_of_week` values are modeled as seconds within a week in UTC.
        * Find the current record's position within the UTC epoch week, subtract it,
@@ -71,7 +68,7 @@ export function formatTimeValue(
       };
     }
 
-    case 'time_of_day': {
+    case ML_JOB_AGGREGATION.TIME_OF_DAY: {
       /**
        * `time_of_day` values are modeled as seconds after UTC midnight.
        * Rebuild the UTC instant for the anomaly's day, then convert it into the
@@ -93,4 +90,7 @@ export function formatTimeValue(
       };
     }
   }
+
+  // TS does not see this switch as exhaustive when matching the enum members here.
+  throw new Error(`Unsupported anomaly date function: ${mlFunction}`);
 }

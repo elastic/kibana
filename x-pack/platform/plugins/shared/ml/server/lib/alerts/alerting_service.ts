@@ -25,6 +25,7 @@ import {
   type MlAnomalyRecordDoc,
   type MlAnomalyResultType,
   ML_ANOMALY_RESULT_TYPE,
+  ML_JOB_AGGREGATION,
 } from '@kbn/ml-anomaly-utils';
 import type { AnomalyDateFunction } from '@kbn/ml-anomaly-utils/types';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
@@ -443,7 +444,10 @@ export function alertingServiceProvider(
   };
 
   const isTimeFunction = (functionName: string): functionName is AnomalyDateFunction => {
-    return functionName === 'time_of_day' || functionName === 'time_of_week';
+    return (
+      functionName === ML_JOB_AGGREGATION.TIME_OF_DAY ||
+      functionName === ML_JOB_AGGREGATION.TIME_OF_WEEK
+    );
   };
 
   const formatAlertTimeValue = (
