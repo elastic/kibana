@@ -53,6 +53,5 @@
     "@kbn/sort-package-json",
     "@kbn/babel-register",
     "@kbn/dev-validation-runner",
-    "@kbn/moon",
   ]
 }
