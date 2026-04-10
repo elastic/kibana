@@ -24,6 +24,8 @@ export default function ({ getPageObjects }: FtrProviderContext) {
     let controlId: string;
 
     before(async () => {
+      await dashboard.loadDashboardInEditMode('Test Options List Control');
+
       await dashboard.ensureDashboardIsInEditMode();
       await dashboardControls.createControl({
         controlType: OPTIONS_LIST_CONTROL,

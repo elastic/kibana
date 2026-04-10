@@ -19,10 +19,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
 
-  const { dashboardControls, dashboard } = getPageObjects(['dashboardControls', 'dashboard']);
+  const { dashboardControls, dashboard, timePicker } = getPageObjects([
+    'dashboardControls',
+    'dashboard',
+    'timePicker',
+  ]);
 
   describe('Dashboard options list creation and editing', () => {
     before(async () => {
+      await dashboard.clickNewDashboard();
+      await timePicker.setDefaultDataRange();
+      await dashboard.saveDashboard('Test Options List Control Creation', {
+        saveAsNew: true,
+        exitFromEditMode: false,
+        storeTimeWithDashboard: true,
+      });
       await dashboard.ensureDashboardIsInEditMode();
     });
 
