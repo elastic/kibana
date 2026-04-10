@@ -89,7 +89,7 @@ export const optionsListESQLControlSchema = schema.discriminatedUnion('control_t
     },
     {
       meta: {
-        id: 'kbn-controls-schemas_optionsListESQLControlSchema_STATIC_VALUES',
+        id: 'kbn-controls-schemas-options-list-esql-control-schema-static-values',
       },
     }
   ),
@@ -101,7 +101,7 @@ export const optionsListESQLControlSchema = schema.discriminatedUnion('control_t
     },
     {
       meta: {
-        id: 'kbn-controls-schemas_optionsListESQLControlSchema_VALUES_FROM_QUERY',
+        id: 'kbn-controls-schemas-options-list-esql-control-schema-values-from-query',
       },
     }
   ),
