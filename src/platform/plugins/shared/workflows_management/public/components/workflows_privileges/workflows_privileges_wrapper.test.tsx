@@ -12,8 +12,8 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
-import { mockWorkflowsManagementCapabilities } from '../../hooks/__mocks__/use_workflows_capabilities';
 import { WorkflowsPrivilegesWrapper } from './workflows_privileges_wrapper';
+import { mockWorkflowsManagementCapabilities } from '../../hooks/__mocks__/use_workflows_capabilities';
 
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
