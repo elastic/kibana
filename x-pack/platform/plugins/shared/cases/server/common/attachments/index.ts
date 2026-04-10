@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { toUnifiedAttachmentType } from '../../../common/utils/attachments';
+import {
+  COMMENT_ATTACHMENT_TYPE,
+  SECURITY_EVENT_ATTACHMENT_TYPE,
+} from '../../../common/constants/attachments';
 import type {
   AttachmentPersistedAttributes,
   UnifiedAttachmentAttributes,
 } from '../types/attachments_v2';
 import { passThroughTransformer, type AttachmentTypeTransformer } from './base';
 import { commentAttachmentTransformer } from './comment';
+import { eventAttachmentTransformer } from './event';
 
 export { getCommentContentFromUnifiedPayload, commentAttachmentTransformer } from './comment';
 export {
@@ -43,12 +47,16 @@ export function getAttachmentTypeFromAttributes(attributes: unknown): string {
  * pass-through transformer (identity for old <-> new schema).
  */
 export function getAttachmentTypeTransformers(
-  type: string
+  type: string,
+  owner: string
 ): AttachmentTypeTransformer<AttachmentPersistedAttributes, UnifiedAttachmentAttributes> {
-  const normalizedType = toUnifiedAttachmentType(type);
+  const normalizedType = toUnifiedAttachmentType(type, owner);
 
-  if (normalizedType === COMMENT_ATTACHMENT_TYPE) {
+  if (normalizedType === COMMENT_ATTACHMENT_TYPE || normalizedType === 'comment') {
     return commentAttachmentTransformer;
+  }
+  if (normalizedType === SECURITY_EVENT_ATTACHMENT_TYPE) {
+    return eventAttachmentTransformer;
   }
   return passThroughTransformer;
 }

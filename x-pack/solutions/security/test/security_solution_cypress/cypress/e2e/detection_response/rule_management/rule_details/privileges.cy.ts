@@ -45,7 +45,7 @@ import {
   goToExceptionsTab,
   goToExecutionLogTab,
   goToRuleEditSettings,
-  waitForExecutionLogTabToBePopulated,
+  waitForExecutionResultsTableToBePopulated,
 } from '../../../../tasks/rule_details';
 import { EDIT_SUBMIT_BUTTON } from '../../../../screens/edit_rule';
 import {
@@ -104,8 +104,8 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
         goToExecutionLogTab();
       });
 
-      it.skip(`should be able to see the execution history`, () => {
-        waitForExecutionLogTabToBePopulated(1);
+      it(`should be able to see the execution history`, () => {
+        waitForExecutionResultsTableToBePopulated();
       });
 
       it('should be able to trigger gap fills', () => {
@@ -155,8 +155,8 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
         goToExecutionLogTab();
       });
 
-      it.skip(`should be able to see the execution history`, () => {
-        waitForExecutionLogTabToBePopulated(1);
+      it(`should be able to see the execution history`, () => {
+        waitForExecutionResultsTableToBePopulated();
       });
 
       it('should not be able to trigger gap fills', () => {
