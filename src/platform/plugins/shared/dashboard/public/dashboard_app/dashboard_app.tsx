@@ -80,7 +80,6 @@ export function DashboardApp({
 
   useEffect(() => {
     let canceled = false;
-    // show dashboard when id provide or there is an incoming embeddable
     if (savedDashboardId || incomingEmbeddables?.length) {
       return;
     }
