@@ -21,6 +21,7 @@ import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/public/mocks';
+import { createAvailabilityServiceMock } from './common/lib/availability/mock';
 import type { WorkflowsPublicPluginStart, WorkflowsServices } from './types';
 
 export const createStartServicesMock = () => ({
@@ -41,6 +42,7 @@ export const createStartServicesMock = () => ({
     telemetry: {
       reportEvent: jest.fn(),
     },
+    availability: createAvailabilityServiceMock(),
   },
 });
 

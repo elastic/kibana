@@ -36,7 +36,7 @@ import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { stepSchemas } from '../common/step_schemas';
 
 const VisibleIn: AppDeepLinkLocations[] = ['globalSearch', 'home', 'kibanaOverview', 'sideNav'];
-const VisibleInNotAvailable: AppDeepLinkLocations[] = ['globalSearch', 'home', 'kibanaOverview'];
+const VisibleInNotAvailable: AppDeepLinkLocations[] = ['globalSearch'];
 export class WorkflowsPlugin
   implements
     Plugin<
@@ -51,6 +51,7 @@ export class WorkflowsPlugin
   private availabilityService: AvailabilityService;
   private agentBuilderPromise: Promise<AgentBuilderPluginStartContract | undefined> | undefined;
   private settingsSubscription?: Subscription;
+  private availabilityStatusSubscription?: Subscription;
 
   constructor() {
     this.appUpdater$ = new Subject<AppUpdater>();
@@ -118,11 +119,13 @@ export class WorkflowsPlugin
 
     // Availability service: set license and subscribe to availability for app visibility changes
     this.availabilityService.setLicense$(plugins.licensing.license$);
-    this.availabilityService.getIsAvailable$().subscribe((isAvailable) => {
-      this.appUpdater$.next(() => ({
-        visibleIn: isAvailable ? VisibleIn : VisibleInNotAvailable,
-      }));
-    });
+    this.availabilityStatusSubscription = this.availabilityService
+      .getIsAvailable$()
+      .subscribe((isAvailable) => {
+        this.appUpdater$.next(() => ({
+          visibleIn: isAvailable ? VisibleIn : VisibleInNotAvailable,
+        }));
+      });
 
     return {
       setUnavailableInServerlessTier: (options) => {
@@ -133,6 +136,7 @@ export class WorkflowsPlugin
 
   public stop() {
     this.settingsSubscription?.unsubscribe();
+    this.availabilityStatusSubscription?.unsubscribe();
     this.availabilityService.stop();
   }
 

@@ -12,8 +12,8 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { AvailabilityStatus } from '../../common/lib/availability/availability_service';
 import { WorkflowsAvailabilityWrapper } from './workflows_availability_wrapper';
+import type { AvailabilityStatus } from '../../common/lib/availability/availability_service';
 
 const availabilityStatus$ = new BehaviorSubject<AvailabilityStatus>({ isAvailable: true });
 
@@ -21,7 +21,9 @@ const mockGetAvailabilityStatus$ = jest.fn(() => availabilityStatus$.asObservabl
 const mockGetAvailabilityStatus = jest.fn(() => availabilityStatus$.getValue());
 const mockNavigateToApp = jest.fn();
 const mockGetUrlForApp = jest.fn((appId: string) => `/app/${appId}`);
-const mockGetPrivilegedUrls = jest.fn(() => Promise.resolve({ billingUrl: undefined }));
+const mockGetPrivilegedUrls = jest.fn(
+  (): Promise<{ billingUrl: undefined | string }> => Promise.resolve({ billingUrl: undefined })
+);
 
 jest.mock('../../hooks/use_kibana', () => ({
   useKibana: () => ({

@@ -13,17 +13,7 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AccessDenied } from './access_denied';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      http: {
-        basePath: {
-          prepend: (path: string) => `/mock-base-path${path}`,
-        },
-      },
-    },
-  }),
-}));
+jest.mock('../../assets/lock_light.svg', () => 'lock_light.svg');
 
 const renderWithProviders = (component: React.ReactElement) =>
   render(
@@ -78,9 +68,6 @@ describe('AccessDenied', () => {
     );
 
     const image = screen.getByRole('img', { name: 'Restricted access' });
-    expect(image).toHaveAttribute(
-      'src',
-      '/mock-base-path/plugins/workflowsManagement/assets/lock_light.svg'
-    );
+    expect(image).toHaveAttribute('src', 'lock_light.svg');
   });
 });
