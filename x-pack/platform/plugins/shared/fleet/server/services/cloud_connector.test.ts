@@ -19,7 +19,6 @@ import {
 import {
   buildPackagePolicyFilterExcludingHiddenPackages,
   CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE,
-  CLOUD_CONNECTOR_PACKAGE_POLICY_COUNTS_AGG_TERMS_SIZE,
 } from '../../common/constants/cloud_connector';
 
 import { createSavedObjectClientMock } from '../mocks';
@@ -598,7 +597,6 @@ describe('CloudConnectorService', () => {
             count_by_cloud_connector: {
               terms: {
                 field: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id`,
-                size: CLOUD_CONNECTOR_PACKAGE_POLICY_COUNTS_AGG_TERMS_SIZE,
               },
             },
           },
