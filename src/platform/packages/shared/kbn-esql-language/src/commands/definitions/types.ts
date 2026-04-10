@@ -497,7 +497,6 @@ export interface ESQLMessage {
   errorType?: 'semantic';
   requiresCallback?: 'getColumnsFor' | 'getSources' | 'getPolicies' | 'getJoinIndices' | string;
   underlinedWarning?: boolean;
-  quickFix?: { title: string; action: () => void };
 }
 
 export interface EditorError {
