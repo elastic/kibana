@@ -78,10 +78,11 @@ describe('useCreateAlertAction', () => {
       actionType: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
     });
 
-    await waitFor(() => expect(invalidateSpy).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(invalidateSpy).toHaveBeenCalledTimes(3));
 
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.actionsAll() });
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.groupActionsAll() });
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.alertActionTagSuggestions() });
   });
 
   it('does not invalidate queries when the request fails', async () => {

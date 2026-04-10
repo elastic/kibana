@@ -36,6 +36,7 @@ import type { MlResultsService } from '../application/services/results_service';
 import type { MlTimeSeriesSearchService } from '../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service';
 import type { TimeSeriesExplorerService } from '../application/util/time_series_explorer_service';
 import type { ToastNotificationService } from '../application/services/toast_notification_service';
+import type { MlPublicUsageCollection } from '../application/services/usage_collection';
 import type {
   AnomalyExplorerChartsEmbeddableType,
   AnomalySwimLaneEmbeddableType,
@@ -213,6 +214,7 @@ export interface AnomalyChartsServices {
   mlFieldFormatService: MlFieldFormatService;
   mlResultsService: MlResultsService;
   mlApi: MlApi;
+  mlUsageCollection: MlPublicUsageCollection;
 }
 
 export interface SingleMetricViewerServices {
@@ -222,6 +224,7 @@ export interface SingleMetricViewerServices {
   mlCapabilities: MlCapabilitiesService;
   mlFieldFormatService: MlFieldFormatService;
   mlResultsService: MlResultsService;
+  mlUsageCollection: MlPublicUsageCollection;
   mlTimeSeriesSearchService?: MlTimeSeriesSearchService;
   mlTimeSeriesExplorerService?: TimeSeriesExplorerService;
   toastNotificationService?: ToastNotificationService;
