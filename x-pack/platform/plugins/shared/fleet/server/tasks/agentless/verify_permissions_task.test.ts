@@ -57,8 +57,6 @@ const mockEsClient = {} as any;
 
 const minutesAgo = (minutes: number) => new Date(Date.now() - minutes * 60 * 1000).toISOString();
 
-const hoursAgo = (hours: number) => new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
-
 const makePackagePolicySO = (
   id: string,
   connectorId: string,
