@@ -58,7 +58,7 @@ export const GoogleCalendar: ConnectorSpec = {
           meta: {
             authorizationUrl: { hidden: true },
             tokenUrl: { hidden: true },
-            scope: { hidden: true },
+            scope: { disabled: true },
           },
         },
         defaults: {
@@ -69,6 +69,9 @@ export const GoogleCalendar: ConnectorSpec = {
       },
       {
         type: 'ears',
+        overrides: {
+          meta: { scope: { disabled: true } },
+        },
         defaults: {
           provider: 'google',
           scope: 'https://www.googleapis.com/auth/calendar.readonly',

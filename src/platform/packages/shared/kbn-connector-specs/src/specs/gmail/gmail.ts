@@ -47,7 +47,7 @@ export const GmailConnector: ConnectorSpec = {
           meta: {
             authorizationUrl: { hidden: true },
             tokenUrl: { hidden: true },
-            scope: { hidden: true },
+            scope: { disabled: true },
           },
         },
         defaults: {
@@ -58,6 +58,9 @@ export const GmailConnector: ConnectorSpec = {
       },
       {
         type: 'ears',
+        overrides: {
+          meta: { scope: { disabled: true } },
+        },
         defaults: {
           provider: 'google',
           scope: 'https://www.googleapis.com/auth/gmail.readonly',

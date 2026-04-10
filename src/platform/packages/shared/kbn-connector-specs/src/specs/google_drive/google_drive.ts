@@ -64,7 +64,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
           meta: {
             authorizationUrl: { hidden: true },
             tokenUrl: { hidden: true },
-            scope: { hidden: true },
+            scope: { disabled: true },
           },
         },
         defaults: {
@@ -76,6 +76,9 @@ export const GoogleDriveConnector: ConnectorSpec = {
       },
       {
         type: 'ears',
+        overrides: {
+          meta: { scope: { disabled: true } },
+        },
         defaults: {
           provider: 'google',
           scope:
