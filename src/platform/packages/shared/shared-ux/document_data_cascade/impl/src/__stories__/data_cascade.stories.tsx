@@ -1139,6 +1139,10 @@ export const CascadeCustomHeaderWithCustomRowActionsImplementation: StoryObj<
           button={customerEmailPopoverRef.current!}
           isOpen={alertsCandidates.length > 0}
           closePopover={() => setAlertsCandidates([])}
+          aria-label={i18n.translate(
+            'sharedUXPackages.data_cascade.stories.sendAlertsPopoverAriaLabel',
+            { defaultMessage: 'Send alerts' }
+          )}
         >
           <EuiText>
             <h3>Create an alert for {alertsCandidates.length} recipients</h3>
