@@ -55,9 +55,10 @@ export const getOverviewEmbeddableFactory = ({
   type: SLO_OVERVIEW_EMBEDDABLE_ID,
   buildEmbeddable: async ({
     initializeDrilldownsManager,
+    initializeStateApi,
     initialState,
     finalizeApi,
-    initializeStateApi,
+    uuid,
   }) => {
     const deps = { ...coreStart, ...pluginsStart };
     const state = initialState;

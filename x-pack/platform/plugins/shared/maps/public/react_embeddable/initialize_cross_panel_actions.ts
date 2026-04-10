@@ -226,9 +226,9 @@ export function initializeCrossPanelActions({
     anyStateChange$: merge(isMovementSynchronized$, isFilterByMapExtent$).pipe(
       map(() => undefined)
     ),
-    reinitializeState: (lastSaved: MapEmbeddableState) => {
-      setIsMovementSynchronized(lastSaved.isMovementSynchronized);
-      setIsFilterByMapExtent(lastSaved.filterByMapExtent);
+    reinitializeState: (nextState?: MapEmbeddableState) => {
+      setIsMovementSynchronized(nextState?.isMovementSynchronized);
+      setIsFilterByMapExtent(nextState?.filterByMapExtent);
     },
     getLatestState: () => {
       return {

@@ -143,6 +143,7 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi>
       },
       applySerializedState: async (nextState) => {
         drilldownsManager.reinitializeState(nextState ?? {});
+        crossPanelActions.reinitializeState(nextState);
         timeRangeManager.reinitializeState(nextState);
         titleManager.reinitializeState(nextState);
 
