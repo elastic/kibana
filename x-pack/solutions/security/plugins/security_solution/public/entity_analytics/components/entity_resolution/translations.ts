@@ -114,7 +114,12 @@ export const RESOLUTION_GROUP_CREATED_TOAST_TEXT = i18n.translate(
 
 export const ENTITY_REMOVED_TOAST = i18n.translate(
   'xpack.securitySolution.entityResolution.entityRemoved',
-  { defaultMessage: 'Entity removed from resolution group' }
+  { defaultMessage: 'Entity was removed from the resolution group' }
+);
+
+export const ENTITY_REMOVED_TOAST_TEXT = i18n.translate(
+  'xpack.securitySolution.entityResolution.entityRemovedText',
+  { defaultMessage: 'Resolution group risk score will be re-calculated within 1 hour.' }
 );
 
 export const CONFIRM_MODAL_TITLE = i18n.translate(
