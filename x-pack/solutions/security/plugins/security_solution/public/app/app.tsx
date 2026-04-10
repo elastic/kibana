@@ -115,9 +115,13 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
 
   useInstallEntityStoreV2(services);
 
-  // Set conversation flyout active config on mount, clear on unmount
+  // Set conversation flyout active config on mount, clear on unmount.
+  // Skip if the sidebar is already open (e.g. navigating from Agent Builder
+  // with an active conversation) to avoid clobbering its props.
   useEffect(() => {
-    if (services.agentBuilder?.setChatConfig) {
+    const isSidebarOpen = services.chrome.sidebar.isOpen();
+
+    if (services.agentBuilder?.setChatConfig && !isSidebarOpen) {
       const skillsEnabled = services.uiSettings.get<boolean>(
         AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
         false
@@ -135,7 +139,7 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
         services.agentBuilder.clearChatConfig();
       }
     };
-  }, [services.agentBuilder, services.uiSettings]);
+  }, [services.agentBuilder, services.chrome.sidebar, services.uiSettings]);
 
   return (
     <KibanaContextProvider
