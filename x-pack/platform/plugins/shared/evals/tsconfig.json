@@ -25,6 +25,7 @@
     "@kbn/code-editor",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-theme",
-    "@kbn/core-saved-objects-api-server-mocks"
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/core-http-browser"
   ]
 }
