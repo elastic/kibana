@@ -53,6 +53,7 @@ interface TableDataStream extends DataStream {
 
 interface Props {
   dataStreams?: DataStream[];
+  isLoading?: boolean;
   reload: UseRequestResponse['resendRequest'];
   history: ScopedHistory;
   includeStats: boolean;
@@ -77,6 +78,7 @@ const useStyles = () => {
 
 export const DataStreamTable: React.FunctionComponent<Props> = ({
   dataStreams,
+  isLoading,
   reload,
   history,
   filters,
@@ -427,10 +429,9 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       {dataStreamsToEditDataRetention && dataStreamsToEditDataRetention.length > 0 ? (
         <EditDataRetentionModal
           onClose={(res) => {
+            setDataStreamsToEditDataRetention([]);
             if (res && res.hasUpdatedDataRetention) {
               reload();
-            } else {
-              setDataStreamsToEditDataRetention([]);
             }
           }}
           dataStreams={dataStreamsToEditDataRetention}
@@ -440,10 +441,9 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       {dataStreamsToDelete && dataStreamsToDelete.length > 0 ? (
         <DeleteDataStreamConfirmationModal
           onClose={(res) => {
+            setDataStreamsToDelete([]);
             if (res && res.hasDeletedDataStreams) {
               reload();
-            } else {
-              setDataStreamsToDelete([]);
             }
           }}
           dataStreams={dataStreamsToDelete}
@@ -457,6 +457,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         sorting={sorting}
         selection={selectionConfig}
         pagination={pagination}
+        loading={isLoading}
         data-test-subj="dataStreamTable"
         tableCaption={i18n.translate('xpack.idxMgmt.dataStreamList.table.caption', {
           defaultMessage: 'Data streams',
