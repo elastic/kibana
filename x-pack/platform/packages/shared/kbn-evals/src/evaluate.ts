@@ -330,7 +330,6 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
           }
         : undefined;
 
-      const incrementalTimestamp = new Date().toISOString();
       const incrementalGitMetadata = getGitMetadata();
       const incrementalHostName = osHostname();
 
@@ -348,7 +347,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
             evaluatorModel,
             runId: currentRunId,
             totalRepetitions: repetitions,
-            timestamp: incrementalTimestamp,
+            timestamp: new Date().toISOString(),
             gitMetadata: incrementalGitMetadata,
             hostName: incrementalHostName,
           });

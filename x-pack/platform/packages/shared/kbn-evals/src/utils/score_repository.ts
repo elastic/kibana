@@ -428,7 +428,10 @@ export class EvaluationScoreRepository {
       this.localExportTargetReady = (async () => {
         await this.ensureIndexTemplate();
         await this.ensureDatastream();
-      })();
+      })().catch((err) => {
+        this.localExportTargetReady = undefined;
+        throw err;
+      });
     }
     return this.localExportTargetReady;
   }
