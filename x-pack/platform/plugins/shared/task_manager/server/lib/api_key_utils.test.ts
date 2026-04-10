@@ -230,7 +230,7 @@ describe('api_key_utils', () => {
       };
 
       coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
-      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValueOnce(mockUser);
+      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
 
       coreStart.security.authc.apiKeys.grantAsInternalUser = jest.fn().mockResolvedValueOnce({
         id: 'apiKeyId',
@@ -260,7 +260,7 @@ describe('api_key_utils', () => {
       };
 
       coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
-      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValueOnce(mockUser);
+      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
 
       coreStart.security.authc.apiKeys.grantAsInternalUser = jest.fn().mockResolvedValueOnce({
         id: 'apiKeyId',

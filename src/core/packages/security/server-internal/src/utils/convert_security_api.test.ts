@@ -42,6 +42,9 @@ describe('convertSecurityApi', () => {
     };
     const output = convertSecurityApi(source);
     expect(output.authc.getCurrentUser).toBe(source.authc.getCurrentUser);
+    expect(output.authc.enrichRequestWithUserProfile).toBe(
+      source.authc.enrichRequestWithUserProfile
+    );
     expect(output.authc.apiKeys).toBe(source.authc.apiKeys);
     expect(output.audit.asScoped).toBe(source.audit.asScoped);
     expect(output.audit.withoutRequest).toBe(source.audit.withoutRequest);

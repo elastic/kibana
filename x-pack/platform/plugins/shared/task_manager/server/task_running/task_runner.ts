@@ -448,6 +448,10 @@ export class TaskManagerRunner implements TaskRunner {
           );
 
           if (fakeRequest && userProfileId && this.enrichFakeRequest) {
+            this.logger.debug(
+              `Enriching fake request with user profile ID "${userProfileId}" for task ${this}`,
+              { tags: ['task:enrichRequest', this.id, this.taskType] }
+            );
             this.enrichFakeRequest(fakeRequest, userProfileId);
           }
 

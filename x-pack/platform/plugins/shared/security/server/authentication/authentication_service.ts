@@ -443,6 +443,7 @@ export class AuthenticationService {
     };
 
     const enrichRequestWithUserProfile = (request: KibanaRequest, userProfileId: string) => {
+      this.logger.debug(`Enriching request with user profile ID "${userProfileId}".`);
       const minimalUser: AuthenticatedUser = {
         username: '',
         roles: [],
