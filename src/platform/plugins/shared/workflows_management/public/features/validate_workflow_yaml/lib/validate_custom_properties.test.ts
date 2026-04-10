@@ -13,12 +13,6 @@ import { z } from '@kbn/zod/v4';
 
 import { validateCustomProperties } from './validate_custom_properties';
 import { stepSchemas } from '../../../../common/step_schemas';
-import {
-  getCachedOption,
-  getCachedSearchOption,
-  getCacheKeyForValue,
-  setCachedOption,
-} from '../../../shared/lib/custom_property_selection_cache';
 import type { CustomPropertyItem } from '../model/types';
 
 // Mock the dependencies
@@ -32,39 +26,16 @@ jest.mock('@kbn/workflows/common/utils/zod/get_schema_at_path', () => ({
   getSchemaAtPath: jest.fn(),
 }));
 
-jest.mock('../../../shared/lib/custom_property_selection_cache', () => ({
-  clearCache: jest.fn(),
-  getCachedOption: jest.fn(),
-  getCachedSearchOption: jest.fn(),
-  getCacheKeyForValue: jest.fn(),
-  setCachedOption: jest.fn(),
-}));
-
 const EMPTY_VALUES: StepSelectionValues = { config: {}, input: {} };
 
 const mockGetAllConnectorsMapCache = stepSchemas.getAllConnectorsMapCache as jest.MockedFunction<
   typeof stepSchemas.getAllConnectorsMapCache
 >;
 const mockGetSchemaAtPath = getSchemaAtPath as jest.MockedFunction<typeof getSchemaAtPath>;
-const mockGetCachedOption = getCachedOption as jest.MockedFunction<typeof getCachedOption>;
-const mockGetCachedSearchOption = getCachedSearchOption as jest.MockedFunction<
-  typeof getCachedSearchOption
->;
-const mockGetCacheKeyForValue = getCacheKeyForValue as jest.MockedFunction<
-  typeof getCacheKeyForValue
->;
-const mockSetCachedOption = setCachedOption as jest.MockedFunction<typeof setCachedOption>;
 
 describe('validateCustomProperties', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // Default mock implementations
-    mockGetCachedOption.mockReturnValue(null);
-    mockGetCachedSearchOption.mockReturnValue(null);
-    mockGetCacheKeyForValue.mockImplementation(
-      (stepType, scope, propertyKey, value) =>
-        `${stepType}:${scope}:${propertyKey}:${String(value)}`
-    );
   });
 
   it('should return error when resolve returns null and getDetails returns error message', async () => {
@@ -208,147 +179,6 @@ describe('validateCustomProperties', () => {
       beforeMessage: '✓ Option 2',
       afterMessage: null,
       hoverMessage: 'Valid',
-    });
-    expect(mockSetCachedOption).toHaveBeenCalledWith('2:input:2:2', resolvedOption);
-  });
-
-  it('should use cached option when available', async () => {
-    const cachedOption = {
-      value: '3',
-      label: 'Cached Option',
-      description: 'Cached Description',
-    };
-    const selectionHandler = {
-      search: jest.fn(),
-      resolve: jest.fn(),
-      getDetails: jest.fn().mockResolvedValue({
-        message: 'Valid',
-      }),
-    };
-
-    mockGetCachedOption.mockReturnValue(cachedOption);
-
-    const mockConnector = {
-      type: '3',
-      configSchema: z.object({ '3': z.string() }),
-    };
-    mockGetAllConnectorsMapCache.mockReturnValue(new Map([['3', mockConnector as any]]));
-    mockGetSchemaAtPath.mockReturnValue({ schema: z.string(), scopedToPath: '3' });
-
-    const customPropertyItems: CustomPropertyItem[] = [
-      {
-        id: '3',
-        startLineNumber: 1,
-        startColumn: 1,
-        endLineNumber: 1,
-        endColumn: 1,
-        yamlPath: ['3'],
-        key: '3',
-        selectionHandler,
-        context: {
-          stepType: '3',
-          scope: 'config',
-          propertyKey: '3',
-          values: EMPTY_VALUES,
-        },
-        propertyValue: '3',
-        propertyKey: '3',
-        stepType: '3',
-        scope: 'config',
-        type: 'custom-property',
-      },
-    ];
-
-    const validationResults = await validateCustomProperties(customPropertyItems);
-
-    expect(selectionHandler.resolve).not.toHaveBeenCalled();
-    expect(selectionHandler.getDetails).toHaveBeenCalledWith(
-      '3',
-      {
-        stepType: '3',
-        scope: 'config',
-        propertyKey: '3',
-        values: EMPTY_VALUES,
-      },
-      cachedOption
-    );
-    expect(validationResults).toHaveLength(1);
-    expect(validationResults[0]).toMatchObject({
-      id: '3',
-      severity: null,
-      message: null,
-      beforeMessage: '✓ Cached Option',
-      afterMessage: null,
-    });
-  });
-
-  it('should use cached search option when available', async () => {
-    const cachedSearchOption = {
-      value: '4',
-      label: 'Search Option',
-      description: 'Search Description',
-    };
-    const selectionHandler = {
-      search: jest.fn(),
-      resolve: jest.fn(),
-      getDetails: jest.fn().mockResolvedValue({
-        message: 'Valid',
-      }),
-    };
-
-    mockGetCachedSearchOption.mockReturnValue(cachedSearchOption);
-
-    const mockConnector = {
-      type: '4',
-      paramsSchema: z.object({ '4': z.string() }),
-    };
-    mockGetAllConnectorsMapCache.mockReturnValue(new Map([['4', mockConnector as any]]));
-    mockGetSchemaAtPath.mockReturnValue({ schema: z.string(), scopedToPath: '4' });
-
-    const customPropertyItems: CustomPropertyItem[] = [
-      {
-        id: '4',
-        startLineNumber: 1,
-        startColumn: 1,
-        endLineNumber: 1,
-        endColumn: 1,
-        yamlPath: ['4'],
-        key: '4',
-        selectionHandler,
-        context: {
-          stepType: '4',
-          scope: 'input',
-          propertyKey: '4',
-          values: EMPTY_VALUES,
-        },
-        propertyValue: '4',
-        propertyKey: '4',
-        stepType: '4',
-        scope: 'input',
-        type: 'custom-property',
-      },
-    ];
-
-    const validationResults = await validateCustomProperties(customPropertyItems);
-
-    expect(selectionHandler.resolve).not.toHaveBeenCalled();
-    expect(selectionHandler.getDetails).toHaveBeenCalledWith(
-      '4',
-      {
-        stepType: '4',
-        scope: 'input',
-        propertyKey: '4',
-        values: EMPTY_VALUES,
-      },
-      cachedSearchOption
-    );
-    expect(validationResults).toHaveLength(1);
-    expect(validationResults[0]).toMatchObject({
-      id: '4',
-      severity: null,
-      message: null,
-      beforeMessage: '✓ Search Option',
-      afterMessage: null,
     });
   });
 

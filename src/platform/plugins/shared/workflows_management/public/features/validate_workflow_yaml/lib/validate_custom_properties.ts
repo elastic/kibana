@@ -11,13 +11,6 @@ import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_p
 import type { z } from '@kbn/zod/v4';
 import { isTemplateReference } from './is_template_reference';
 import { stepSchemas } from '../../../../common/step_schemas';
-import {
-  clearCache,
-  getCachedOption,
-  getCachedSearchOption,
-  getCacheKeyForValue,
-  setCachedOption,
-} from '../../../shared/lib/custom_property_selection_cache';
 import type { CustomPropertyItem, CustomPropertyValidationResult } from '../model/types';
 
 function getPropertySchema(
@@ -60,27 +53,17 @@ function shouldValidateProperty(item: CustomPropertyItem): boolean {
 export async function validateCustomProperties(
   customPropertyItems: CustomPropertyItem[]
 ): Promise<CustomPropertyValidationResult[]> {
-  clearCache();
   const validationResultsPromises: Promise<CustomPropertyValidationResult>[] = [];
   for (const customPropertyItem of customPropertyItems) {
     if (shouldValidateProperty(customPropertyItem)) {
       const { selectionHandler, propertyValue, context } = customPropertyItem;
-      const { stepType, scope, propertyKey } = context;
 
       validationResultsPromises.push(
         (async (): Promise<CustomPropertyValidationResult> => {
-          const cacheKey = getCacheKeyForValue(stepType, scope, propertyKey, propertyValue);
-
-          let resolvedOption = getCachedOption(cacheKey);
-          if (!resolvedOption) {
-            resolvedOption = getCachedSearchOption(stepType, scope, propertyKey, propertyValue);
-          }
-          if (!resolvedOption && propertyValue !== null && propertyValue !== undefined) {
-            resolvedOption = await selectionHandler.resolve(propertyValue, context);
-            if (resolvedOption) {
-              setCachedOption(cacheKey, resolvedOption);
-            }
-          }
+          const resolvedOption =
+            propertyValue !== null && propertyValue !== undefined
+              ? await selectionHandler.resolve(propertyValue, context)
+              : null;
 
           const input = String(propertyValue);
           const details = await selectionHandler.getDetails(input, context, resolvedOption);

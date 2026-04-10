@@ -18,7 +18,6 @@ import {
   buildStepSelectionValues,
   getValueFromValueNode,
 } from '../../../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
-import { cacheSearchOptions } from '../../../../../../shared/lib/custom_property_selection_cache';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
 
 export type GetCustomPropertySuggestionsContext = Pick<
@@ -92,8 +91,6 @@ export async function getCustomPropertySuggestions(
     values: buildStepSelectionValues(focusedStepInfo),
   };
   const options = await propertyHandler.selection.search(input, context);
-
-  cacheSearchOptions(focusedStepInfo.stepType, context.scope, composedKey, options);
 
   return options.map(
     (option): monaco.languages.CompletionItem => ({
