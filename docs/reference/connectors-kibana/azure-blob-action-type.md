@@ -1,5 +1,7 @@
 ---
 navigation_title: "Azure Blob Storage"
+type: reference
+description: "Use the Azure Blob Storage connector to list containers and blobs, retrieve blob content, and get blob properties via the Azure Blob Service REST API."
 applies_to:
   stack: preview 9.4
   serverless: preview
