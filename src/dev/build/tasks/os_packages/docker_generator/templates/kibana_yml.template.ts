@@ -16,15 +16,16 @@ import type { TemplateContext } from '../template_context';
 function generator({ opikApiKey }: TemplateContext) {
   const opikTracingConfig = opikApiKey
     ? `
-telemetry.enabled: true
-telemetry.tracing.enabled: true
-telemetry.tracing.exporters:
-  - http:
-      url: 'https://www.comet.com/opik/api/v1/private/otel/v1/traces'
-      headers:
-        Authorization: '${opikApiKey}'
-        projectName: 'test-project'
-        Comet-Workspace: 'ana-villalba'`
+
+  telemetry.enabled: true
+  telemetry.tracing.enabled: true
+  telemetry.tracing.exporters:
+    - http:
+        url: 'https://www.comet.com/opik/api/v1/private/otel/v1/traces'
+        headers:
+          Authorization: '${opikApiKey}'
+          projectName: 'test-project'
+          Comet-Workspace: 'ana-villalba'`
     : '';
 
   return dedent(`
