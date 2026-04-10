@@ -57,16 +57,22 @@ export const SearchGettingStartedPage: React.FC = () => {
               <EuiFlexItem grow={false}>
                 <EuiText size="s" color="subdued"><p>Start with some sample data:</p></EuiText>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty iconType="upload" color="text" size="s" onClick={() => {
-                  application.navigateToApp('home', { path: '#/tutorial_directory/fileDataViz' });
-                }}>Upload files</EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty iconType="package" color="text" size="s" onClick={() => {
-                  application.navigateToApp('home', { path: '#/tutorial_directory/sampleData' });
-                }}>View sample data</EuiButtonEmpty>
-              </EuiFlexItem>
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <span>
+                    <EuiButtonEmpty iconType="upload" color="text" size="s" onClick={() => {
+                      application.navigateToApp('home', { path: '#/tutorial_directory/fileDataViz' });
+                    }}>Upload files</EuiButtonEmpty>
+                  </span>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <span>
+                    <EuiButtonEmpty iconType="package" color="text" size="s" onClick={() => {
+                      application.navigateToApp('home', { path: '#/tutorial_directory/sampleData' });
+                    }}>View sample data</EuiButtonEmpty>
+                  </span>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexGroup>
           </EuiPanel>
         </EuiPanel>

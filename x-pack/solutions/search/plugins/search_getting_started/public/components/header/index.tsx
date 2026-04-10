@@ -41,6 +41,7 @@ export const SearchGettingStartedHeader: React.FC = () => {
             alignItems="center"
             gutterSize="s"
             css={trialUsageBannerStyles}
+            responsive={false}
           >
             <EuiFlexItem grow={false}>
               <span><EuiBadge color="primary" fill>TRIAL</EuiBadge></span>
