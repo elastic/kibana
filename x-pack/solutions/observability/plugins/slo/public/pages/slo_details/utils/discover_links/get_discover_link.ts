@@ -6,16 +6,20 @@
  */
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
+  ALL_VALUE,
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
   kqlCustomIndicatorSchema,
   kqlWithFiltersSchema,
 } from '@kbn/slo-schema';
+import { esql } from '@elastic/esql';
 import { isEmpty } from 'lodash';
 import { v4 } from 'uuid';
 import { getApmAvailabilityQueries as getApmAvailabilityQueries } from './get_apm_availability_queries';
@@ -236,4 +240,51 @@ export function openInDiscover({
 }) {
   const locatorConfig = createDiscoverLocator({ slo, showBad, showGood, timeRange, uiSettings });
   discover?.locator?.navigate(locatorConfig);
+}
+
+export interface ApmTracesDiscoverParams {
+  index: string;
+  serviceName: string;
+  environment: string;
+  transactionType: string;
+  transactionName: string;
+}
+
+export function getApmTracesDiscoverUrl({
+  params,
+  share,
+  timeRange,
+}: {
+  params: ApmTracesDiscoverParams;
+  share: SharePluginStart;
+  timeRange: { from: string; to: string };
+}): string | undefined {
+  const { index, serviceName, environment, transactionType, transactionName } = params;
+
+  let query = esql.from(index);
+
+  if (serviceName && serviceName !== ALL_VALUE) {
+    query = query.where`${esql.col('service.name')} == ${serviceName}`;
+  }
+
+  if (environment && environment !== ALL_VALUE) {
+    query = query.where`${esql.col('service.environment')} == ${environment}`;
+  }
+
+  if (transactionType && transactionType !== ALL_VALUE) {
+    query = query.where`${esql.col('transaction.type')} == ${transactionType}`;
+  }
+
+  if (transactionName && transactionName !== ALL_VALUE) {
+    query = query.where`${esql.col('transaction.name')} == ${transactionName}`;
+  }
+
+  query = query.sort(['@timestamp', 'DESC']);
+
+  const discoverLocator = share.url.locators.get(DISCOVER_APP_LOCATOR);
+
+  return discoverLocator?.getRedirectUrl({
+    timeRange,
+    query: { esql: query.print() },
+  });
 }
