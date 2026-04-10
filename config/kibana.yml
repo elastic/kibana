@@ -180,3 +180,16 @@
 # Maximum number of documents loaded by each shard to generate autocomplete suggestions.
 # This value must be a whole number greater than zero. Defaults to 100_000
 #unifiedSearch.autocomplete.valueSuggestions.terminateAfter: 100000
+
+elastic.apm.active: false
+elastic.apm.contextPropagationOnly: false
+
+telemetry.enabled: true
+telemetry.tracing.enabled: true
+telemetry.tracing.exporters:
+  - http:                                                                                     
+      url: 'https://www.comet.com/opik/api/v1/private/otel/v1/traces'                         
+      headers:                                                                                
+        Authorization: '{my key}'
+        projectName: 'test-project'                                                           
+        Comet-Workspace: 'ana-villalba'  
