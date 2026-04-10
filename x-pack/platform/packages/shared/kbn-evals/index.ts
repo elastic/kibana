@@ -26,7 +26,7 @@ export * as cli from './src/cli';
 
 export { evaluate } from './src/evaluate';
 export type { DefaultEvaluators, ReportDisplayOptions } from './src/types';
-export type { EvaluationCriterion } from './src/evaluators/criteria';
+export type { EvaluationCriterion, EvaluationCriterionStructured } from './src/evaluators/criteria';
 export { createPlaywrightEvalsConfig } from './src/config/create_playwright_eval_config';
 export type {
   Example,
@@ -121,6 +121,8 @@ export {
   createScopeViolationEvaluator,
 } from './src/evaluators/security';
 export { createSimilarityEvaluator } from './src/evaluators/similarity';
+
+export { deleteConnectorById, getConnectorIdAsUuid } from './src/utils/create_connector_fixture';
 
 // Re-export Scout tags here to avoid requiring a direct dependency on @kbn/scout for modules using @kbn/evals
 export { tags } from '@kbn/scout';
