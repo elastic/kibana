@@ -192,7 +192,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
   const toggleAndApplyFilter = (selectedFilter: SolutionView) => {
     if (selectedFilter === solutionFilter) {
       // If the selected filter is already active, toggle off by clearing filter and resetting providers
-      setUpdatedProviders(providers);
+      setUpdatedProviders(getUpdatedProviders(undefined));
       setSolutionFilter(undefined);
       return;
     }
