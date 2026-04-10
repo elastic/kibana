@@ -22,7 +22,6 @@ interface QueryTemplate {
   label: string;
   description: string;
   queryString: string;
-  sortText?: string;
   category?: SuggestionCategory;
 }
 
@@ -58,7 +57,6 @@ export const getRecommendedQueriesTemplates = ({
         }
       ),
       queryString: `${fromCommand}\n  | WHERE KQL("term") /* Search all fields using KQL – e.g. WHERE KQL("debug") */`,
-      sortText: 'D',
       category: SuggestionCategory.RECOMMENDED_QUERY_WITH_PRIORITY,
     },
     {
@@ -246,7 +244,6 @@ export const getRecommendedQueriesSuggestionsFromStaticTemplates = async (
       text: query.queryString,
       kind: 'Issue',
       detail: query.description,
-      sortText: query?.sortText ?? 'E',
       category: query.category ?? SuggestionCategory.RECOMMENDED_QUERY,
       command: buildRecommendedQueryCommand(query.label),
     };
@@ -267,7 +264,6 @@ const buildExtensionSuggestion = (
     ? { documentation: { value: recommendedQuery.description } }
     : {}),
   kind: 'Issue',
-  sortText: 'D',
   category: SuggestionCategory.RECOMMENDED_QUERY_WITH_PRIORITY,
   ...(command ? { command } : {}),
 });

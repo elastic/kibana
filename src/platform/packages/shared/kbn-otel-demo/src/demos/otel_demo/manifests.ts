@@ -147,10 +147,11 @@ function createCommonManifests(options: ManifestOptions): object[] {
         },
         spec: {
           serviceAccountName: 'otel-collector',
+          ...(options.hostAliases ? { hostAliases: options.hostAliases } : {}),
           containers: [
             {
               name: 'otel-collector',
-              image: 'otel/opentelemetry-collector-contrib:0.115.1',
+              image: options.collectorImage || 'otel/opentelemetry-collector-contrib:0.115.1',
               args: ['--config=/etc/otel-collector-config.yaml'],
               ports: [
                 { containerPort: 4317, name: 'otlp-grpc' },
@@ -419,7 +420,7 @@ export const otelDemoManifests: DemoManifestGenerator = {
           ...finalEnv,
           OTEL_EXPORTER_OTLP_ENDPOINT: `http://otel-collector:${otlpPort}`,
           OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: 'cumulative',
-          OTEL_RESOURCE_ATTRIBUTES: `service.namespace=${demoId}`,
+          OTEL_RESOURCE_ATTRIBUTES: `service.namespace=${demoId},deployment.environment=${demoId},deployment.environment.name=${demoId}`,
           OTEL_SERVICE_NAME: svc.name,
         };
       }

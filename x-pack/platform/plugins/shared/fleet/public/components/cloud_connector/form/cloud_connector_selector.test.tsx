@@ -115,7 +115,7 @@ describe('CloudConnectorSelector', () => {
   it('should render cloud connector selector', () => {
     renderSelector();
 
-    expect(screen.getByText('Cloud Connector Name')).toBeInTheDocument();
+    expect(screen.getByText('Federated Identity Name')).toBeInTheDocument();
   });
 
   it('should display connectors in dropdown', async () => {
