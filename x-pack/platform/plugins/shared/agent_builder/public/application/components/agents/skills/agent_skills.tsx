@@ -99,7 +99,9 @@ export const AgentSkills: React.FC = () => {
   const builtinSkillIdSet = useMemo(() => new Set(builtinSkills.map((s) => s.id)), [builtinSkills]);
 
   const activeSkills = useMemo(() => {
-    if (!agentSkillIdSet) return allSkills;
+    if (!agentSkillIdSet) {
+      return enableElasticCapabilities ? builtinSkills : [];
+    }
     if (enableElasticCapabilities) {
       const explicitSkills = allSkills.filter((s) => agentSkillIdSet.has(s.id));
       const builtinNotExplicit = builtinSkills.filter((s) => !agentSkillIdSet.has(s.id));
@@ -156,7 +158,7 @@ export const AgentSkills: React.FC = () => {
     skill: PublicSkillSummary | PublicSkillDefinition,
     { selectOnSuccess = false }: { selectOnSuccess?: boolean } = {}
   ) => {
-    const currentIds = agentSkillIds ?? allSkills.map((s) => s.id);
+    const currentIds = agentSkillIds ?? [];
     if (currentIds.includes(skill.id)) return;
     const newIds = [...currentIds, skill.id];
     setMutatingSkillId(skill.id);
@@ -172,7 +174,7 @@ export const AgentSkills: React.FC = () => {
   };
 
   const handleRemoveSkill = (skill: PublicSkillSummary) => {
-    const currentIds = agentSkillIds ?? allSkills.map((s) => s.id);
+    const currentIds = agentSkillIds ?? [];
     const newIds = currentIds.filter((id) => id !== skill.id);
     setMutatingSkillId(skill.id);
     updateSkillsMutation.mutate(newIds, {
@@ -203,10 +205,12 @@ export const AgentSkills: React.FC = () => {
   };
 
   const libraryActiveSkillIdSet = useMemo(() => {
-    if (!agentSkillIdSet) return new Set(allSkills.map((s) => s.id));
+    if (!agentSkillIdSet) {
+      return enableElasticCapabilities ? builtinSkillIdSet : new Set<string>();
+    }
     if (enableElasticCapabilities) return new Set([...agentSkillIdSet, ...builtinSkillIdSet]);
     return agentSkillIdSet;
-  }, [agentSkillIdSet, allSkills, enableElasticCapabilities, builtinSkillIdSet]);
+  }, [agentSkillIdSet, enableElasticCapabilities, builtinSkillIdSet]);
 
   const isLoading = agentLoading || skillsLoading;
 
