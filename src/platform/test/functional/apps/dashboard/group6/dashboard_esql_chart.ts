@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
 
   // Failing: See https://github.com/elastic/kibana/issues/258164
-  describe.skip('dashboard add ES|QL chart', function () {
+  describe('dashboard add ES|QL chart', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
