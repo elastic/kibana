@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { PublicSkillSummary } from '@kbn/agent-builder-common';
 import { labels } from '../../../utils/i18n';
 import { appPaths } from '../../../utils/app_paths';
@@ -16,7 +17,17 @@ const libraryLabels: LibraryPanelLabels = {
   title: labels.agentSkills.addSkillFromLibraryTitle,
   manageLibraryLink: labels.agentSkills.manageSkillLibraryLink,
   searchPlaceholder: labels.agentSkills.searchAvailableSkillsPlaceholder,
-  availableSummary: labels.agentSkills.availableSkillsSummary,
+  availableSummary: (showing, total) => (
+    <FormattedMessage
+      id="xpack.agentBuilder.agentSkills.availableSkillsSummary"
+      defaultMessage="Showing <bold>1-{showing}</bold> of {total} <bold>{total, plural, one {Skill} other {Skills}}</bold>"
+      values={{
+        showing,
+        total,
+        bold: (chunks) => <strong>{chunks}</strong>,
+      }}
+    />
+  ),
   noMatchMessage: labels.agentSkills.noAvailableSkillsMatchMessage,
   noItemsMessage: labels.agentSkills.noAvailableSkillsMessage,
   disabledBadgeLabel: labels.agentSkills.autoIncludedBadgeLabel,
@@ -49,6 +60,10 @@ export const SkillLibraryPanel: React.FC<SkillLibraryPanelProps> = ({
     if (!enableElasticCapabilities || !builtinSkillIdSet) return undefined;
     return builtinSkillIdSet;
   }, [enableElasticCapabilities, builtinSkillIdSet]);
+  const readOnlyItemIdSet = useMemo(
+    () => new Set(allSkills.filter((s) => s.readonly).map((s) => s.id)),
+    [allSkills]
+  );
 
   return (
     <LibraryPanel<PublicSkillSummary>
@@ -62,6 +77,7 @@ export const SkillLibraryPanel: React.FC<SkillLibraryPanelProps> = ({
       manageLibraryPath={appPaths.manage.skills}
       getItemName={getSkillName}
       disabledItemIdSet={disabledItemIdSet}
+      readOnlyItemIdSet={readOnlyItemIdSet}
     />
   );
 };
