@@ -73,6 +73,19 @@ export default ({ getService }: FtrProviderContext): void => {
       });
       await waitForMaintainerRun({ retry, routes: maintainerRoutes });
 
+      // Wait for the risk score data stream to be fully created before indexing into it.
+      // The maintainer task completes before createDataStream finishes, so a bulk insert
+      // immediately after waitForMaintainerRun can auto-create a plain index instead of
+      // appending to the data stream, which causes a name conflict on the next run.
+      await retry.waitForWithTimeout('risk score data stream to exist', 30_000, async () => {
+        try {
+          const response = await es.indices.getDataStream({ name: RISK_SCORE_DATA_STREAM });
+          return response.data_streams.length > 0;
+        } catch {
+          return false;
+        }
+      });
+
       // Index host and user entities directly into the entity store latest index
       const entityOperations = [
         {
