@@ -88,6 +88,10 @@ export class UpdateSLO {
         await this.createPipeline(
           getSummaryPipelineTemplate(updatedSlo, this.spaceId, this.basePath)
         );
+
+        // Upsert the temp summary doc so that non-breaking field changes (e.g. tags, name)
+        // are immediately visible in the summary index while we wait for the next transform run.
+        await this.createTempSummaryDocument(updatedSlo);
       } catch (err) {
         this.logger.debug(
           `Cannot update the SLO summary pipeline [id: ${updatedSlo.id}, revision: ${updatedSlo.revision}]. ${err}`
