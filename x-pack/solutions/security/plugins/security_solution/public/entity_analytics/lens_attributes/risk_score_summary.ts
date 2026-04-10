@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import { capitalize } from 'lodash';
 
+import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
 import { SEVERITY_UI_SORT_ORDER, RISK_SCORE_RANGES, RISK_SEVERITY_COLOUR } from '../common/utils';
 import type { EntityType } from '../../../common/entity_analytics/types';
 import type { RiskSeverity } from '../../../common/search_strategy';
@@ -18,7 +19,7 @@ import { EntityTypeToScoreField, RiskScoreFields } from '../../../common/search_
 const ENTITY_STORE_V2_RISK_SCORE_FIELD = 'entity.risk.calculated_score_norm';
 
 const getEntityStoreV2IndexPattern = (spaceId?: string) =>
-  `.entities.v2.latest.security_${spaceId ?? 'default'}`;
+  getEntitiesAlias(ENTITY_LATEST, spaceId ?? 'default');
 
 interface GetRiskScoreSummaryAttributesProps {
   query?: string;

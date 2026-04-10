@@ -3904,6 +3904,10 @@
               },
               {
                 "plugin": "inference",
+                "path": "x-pack/platform/plugins/shared/inference/server/routes/connector_by_id.ts"
+              },
+              {
+                "plugin": "inference",
                 "path": "x-pack/platform/plugins/shared/inference/server/routes/connectors.ts"
               },
               {
@@ -18263,6 +18267,10 @@
               },
               {
                 "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/executions/cancel_workflow_executions.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
                 "path": "src/platform/plugins/shared/workflows_management/server/api/routes/executions/resume_execution.ts"
               },
               {
@@ -18276,6 +18284,10 @@
               {
                 "plugin": "workflowsManagement",
                 "path": "src/platform/plugins/shared/workflows_management/server/api/routes/executions/test_workflow.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/internal/disable_all_workflows.ts"
               },
               {
                 "plugin": "workflowsManagement",
