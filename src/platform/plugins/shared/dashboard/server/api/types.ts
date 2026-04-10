@@ -8,8 +8,6 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { asCodeQuerySchema } from '@kbn/as-code-shared-schemas';
-import type { storedFilterSchema } from '@kbn/es-query-server';
 import type { Writable } from '@kbn/utility-types';
 import type {
   getDashboardStateSchema,
@@ -22,10 +20,6 @@ import type { warningsSchema } from './warnings_schema';
 
 export type Warnings = TypeOf<typeof warningsSchema>;
 
-/** A filter stored in a dashboard. */
-export type DashboardFilter = TypeOf<typeof storedFilterSchema>;
-/** A query in the dashboard API state. */
-export type DashboardQuery = TypeOf<typeof asCodeQuerySchema>;
 /** Display options for a dashboard. */
 export type DashboardOptions = TypeOf<typeof optionsSchema>;
 /** Grid position and size data for a panel. */
