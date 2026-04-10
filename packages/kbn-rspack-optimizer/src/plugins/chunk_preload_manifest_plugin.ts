@@ -10,14 +10,9 @@
 import { rspack, type Compiler, type Chunk } from '@rspack/core';
 
 /**
- * Emits `chunk-manifest.json` with two fields:
+ * Emits `chunk-manifest.json` with a single field:
  *
- * - `sharedChunks`: Named shared chunks (from splitChunks cache groups with a
- *   static `name`). Used by `rendering_service.tsx` for `<link rel="preload">`
- *   in `<head>` — a small set (3-5) that gives the browser a head start on
- *   downloading critical shared code during HTML parsing.
- *
- * - `allChunks`: ALL async chunks (shared + plugin entries + unnamed shared).
+ * - `allChunks`: ALL async chunks (named shared + plugin entries + unnamed).
  *   Used by `bootstrap_renderer.ts` to populate the bootstrap `load()` array,
  *   enabling eager parallel download of every chunk via `<script async=false>`
  *   before `kibana.bundle.js`. Rspack's JSONP mechanism queues module factories
@@ -63,39 +58,35 @@ export class ChunkPreloadManifestPlugin {
             }
           };
 
-          // 1. Collect named shared chunks (for preload)
-          const sharedChunkFiles: string[] = [];
-          const sharedChunks = new Set<Chunk>();
+          // Collect ALL async chunks for the load() array: named shared chunks
+          // first, then remaining entrypoint children (deduplicated).
+          const allChunkFiles: string[] = [];
+          const seen = new Set<Chunk>();
 
           for (const chunk of compilation.chunks) {
             if (isNamedSharedChunk(chunk)) {
-              collectJsFiles(chunk, sharedChunkFiles);
-              sharedChunks.add(chunk);
+              collectJsFiles(chunk, allChunkFiles);
+              seen.add(chunk);
             }
           }
-
-          // 2. Collect ALL async chunks (shared + plugin entries) for the load() array
-          const allChunkFiles: string[] = [...sharedChunkFiles];
 
           const entrypoint = compilation.entrypoints.get('kibana');
           if (entrypoint) {
             for (const childGroup of entrypoint.childrenIterable) {
               for (const chunk of childGroup.chunks) {
-                if (!sharedChunks.has(chunk)) {
+                if (!seen.has(chunk)) {
                   collectJsFiles(chunk, allChunkFiles);
+                  seen.add(chunk);
                 }
               }
             }
           }
 
-          sharedChunkFiles.sort();
           allChunkFiles.sort();
 
           compilation.emitAsset(
             'chunk-manifest.json',
-            new rspack.sources.RawSource(
-              JSON.stringify({ sharedChunks: sharedChunkFiles, allChunks: allChunkFiles })
-            )
+            new rspack.sources.RawSource(JSON.stringify({ allChunks: allChunkFiles }))
           );
         }
       );

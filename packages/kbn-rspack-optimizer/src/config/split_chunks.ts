@@ -123,8 +123,8 @@ export const getSplitChunksCacheGroups = (): CacheGroups => ({
     reuseExistingChunk: true,
   },
 
-  // Shared vendors — all node_modules shared by 3+ chunks,
-  // consolidated into a single 'vendors' chunk with maxSize safety.
+  // Shared vendors -- all node_modules shared by 3+ chunks,
+  // consolidated into a single 'vendors' chunk.
   vendors: {
     test: /[\\/]node_modules[\\/]/,
     name: 'vendors',

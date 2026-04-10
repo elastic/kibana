@@ -79,7 +79,7 @@ describe('ChunkPreloadManifestPlugin', () => {
     runProcessAssets();
 
     const manifest = JSON.parse(getEmittedAssets()[0].source);
-    expect(manifest.sharedChunks).toEqual(['shared.js']);
+    expect(manifest.allChunks).toContain('shared.js');
   });
 
   it('includes all async chunks from kibana entrypoint children in allChunks', () => {
@@ -150,7 +150,7 @@ describe('ChunkPreloadManifestPlugin', () => {
     runProcessAssets();
 
     const manifest = JSON.parse(getEmittedAssets()[0].source);
-    expect(manifest.sharedChunks).toEqual(['bundle.js']);
+    expect(manifest.allChunks).toEqual(['bundle.js']);
   });
 
   it('sorts files alphabetically', () => {
@@ -167,10 +167,10 @@ describe('ChunkPreloadManifestPlugin', () => {
     runProcessAssets();
 
     const manifest = JSON.parse(getEmittedAssets()[0].source);
-    expect(manifest.sharedChunks).toEqual(['a-shared.js', 'z-shared.js']);
+    expect(manifest.allChunks).toEqual(['a-shared.js', 'z-shared.js']);
   });
 
-  it('emits valid JSON with { sharedChunks, allChunks } shape', () => {
+  it('emits valid JSON with { allChunks } shape', () => {
     const chunk = createMockChunk(['test.js'], ['group']);
 
     const { compiler, runProcessAssets, getEmittedAssets } = createMockCompiler({
@@ -186,11 +186,11 @@ describe('ChunkPreloadManifestPlugin', () => {
     expect(emitted).toHaveLength(1);
     expect(emitted[0].name).toBe('chunk-manifest.json');
     const manifest = JSON.parse(emitted[0].source);
-    expect(manifest).toHaveProperty('sharedChunks');
+    expect(manifest).not.toHaveProperty('sharedChunks');
     expect(manifest).toHaveProperty('allChunks');
   });
 
-  it('returns allChunks equal to sharedChunks when there is no kibana entrypoint', () => {
+  it('includes named shared chunks in allChunks when there is no kibana entrypoint', () => {
     const sharedChunk = createMockChunk(['shared.js'], ['vendor']);
 
     const { compiler, runProcessAssets, getEmittedAssets } = createMockCompiler({
@@ -203,6 +203,6 @@ describe('ChunkPreloadManifestPlugin', () => {
     runProcessAssets();
 
     const manifest = JSON.parse(getEmittedAssets()[0].source);
-    expect(manifest.allChunks).toEqual(manifest.sharedChunks);
+    expect(manifest.allChunks).toEqual(['shared.js']);
   });
 });

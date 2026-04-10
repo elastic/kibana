@@ -389,6 +389,12 @@ export function createPluginWrapper(
     throw new Error(`No entry points found for plugin ${pluginId} in targets: [${targets}]`);
   }
 
+  // IMPORTANT: We use `import * as varName` (full namespace import) and pass
+  // `() => varName` to __kbnBundles__.define(). The full namespace reference
+  // is necessary because __kbnBundles__ is a global outside the bundle graph,
+  // and external plugins consume these exports at runtime via
+  // __kbnBundles__.get(). Destructuring would allow the bundler to drop
+  // exports that appear unused in this compilation scope.
   const imports = targetEntries
     .map((t) => `import * as ${t.varName} from ${JSON.stringify(t.entryPath)};`)
     .join('\n');

@@ -48,7 +48,11 @@ function createFixturePlugin(tmpDir: string): { pluginDir: string; pluginId: str
 
   Fs.writeFileSync(
     Path.join(pluginDir, 'public', 'index.ts'),
-    `export const plugin = () => ({ setup: () => {}, start: () => {} });\n`
+    [
+      `export const plugin = () => ({ setup: () => {}, start: () => {} });`,
+      `export const MY_CONSTANT = 42;`,
+      `export const SomeComponent = () => 'hello';`,
+    ].join('\n') + '\n'
   );
 
   return { pluginDir, pluginId };
@@ -166,6 +170,15 @@ describe('rspack compile integration', () => {
 
         const bundleContent = Fs.readFileSync(Path.join(outputDir, mainBundle!), 'utf-8');
         expect(bundleContent.length).toBeGreaterThan(0);
+
+        // Verify plugin exports are preserved (regression guard for export preservation).
+        // All named exports must survive bundling because external plugins consume them
+        // at runtime via __kbnBundles__.get().
+        expect(bundleContent).toContain('__kbnBundles__');
+        expect(bundleContent).toContain(`plugin/${pluginId}`);
+        expect(bundleContent).toMatch(/plugin/);
+        expect(bundleContent).toMatch(/MY_CONSTANT/);
+        expect(bundleContent).toMatch(/SomeComponent/);
       },
       120_000
     );
@@ -227,6 +240,14 @@ describe('rspack compile integration', () => {
         });
 
         expect(devStats.hasErrors()).toBe(false);
+
+        // Verify export names survive minification -- they appear as string keys
+        // in Rspack's __webpack_exports__ define call (e.g. b.d(D, { MY_CONSTANT: ... }))
+        const distContent = Fs.readFileSync(Path.join(outputDir, mainBundle!), 'utf-8');
+        expect(distContent).toContain('__kbnBundles__');
+        expect(distContent).toMatch(/plugin/);
+        expect(distContent).toMatch(/MY_CONSTANT/);
+        expect(distContent).toMatch(/SomeComponent/);
 
         const distSize = Fs.statSync(Path.join(outputDir, mainBundle!)).size;
         const devBundle = Fs.readdirSync(Path.join(tmpDir, 'output-dev')).find(

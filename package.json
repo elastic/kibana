@@ -1834,7 +1834,7 @@
     "@pmmmwh/react-refresh-webpack-plugin": "0.6.1",
     "@redocly/cli": "2.19.2",
     "@rsdoctor/rspack-plugin": "1.5.5",
-    "@rspack/core": "1.7.10",
+    "@rspack/core": "1.7.11",
     "@rspack/plugin-react-refresh": "1.6.1",
     "@statoscope/webpack-plugin": "5.28.2",
     "@storybook/addon-a11y": "8.6.17",

@@ -401,10 +401,11 @@ export async function createSingleCompileConfig(
       // `chunks: 'async'` means splitChunks only operates on async chunks.
       // kibana.bundle.js (the initial chunk) is just the rspack runtime +
       // orchestration shell; core and all plugins are async chunks.
-      // Using 'all' would require bootstrap renderer changes to inject
-      // prerequisite <script> tags -- a future optimization.
+      // `chunks: 'all'` was evaluated and rejected -- it breaks bundle
+      // metrics for core and the synchronous core contracts require a
+      // single contiguous initial script.
       //
-      // `minChunks: 2` ensures only modules shared by 2+ async chunks are
+      // `minChunks: 3` ensures only modules shared by 3+ async chunks are
       // extracted (no single-consumer shared chunks). `enforce` is NOT used
       // so that minChunks is respected -- A/B testing confirmed this has
       // negligible impact on build speed while preventing unnecessary chunk
@@ -515,8 +516,8 @@ export async function createSingleCompileConfig(
       // Elastic License 2.0 banner for x-pack plugin chunks (dist only)
       ...(dist ? [new XPackBannerPlugin(repoRoot, plugins)] : []),
 
-      // Emit chunk-manifest.json with sharedChunks (for <link rel="preload">) and
-      // allChunks (for eager loading via the bootstrap load() array)
+      // Emit chunk-manifest.json with allChunks (for eager loading via the
+      // bootstrap load() array)
       new ChunkPreloadManifestPlugin(),
 
       // Bundle metrics -- collects per-plugin sizes and module counts, emits metrics.json
@@ -788,7 +789,13 @@ if (typeof __kbnBundles__ === 'undefined' || typeof __kbnBundles__.define !== 'f
   throw new Error('__kbnBundles__ is not defined');
 }
 
-// Helper to register a plugin
+// IMPORTANT: registerPlugin receives the FULL module namespace object and
+// passes it to __kbnBundles__.define(), which is a global defined outside
+// this bundle graph. This ensures all plugin exports are preserved even if
+// they appear unused within the unified compilation -- external third-party
+// plugins (built separately) consume these exports at runtime via
+// __kbnBundles__.get(). In-graph cross-plugin imports work via normal
+// module resolution and benefit from tree-shaking as usual.
 function registerPlugin(bundleId, moduleExports) {
   __kbnBundles__.define(bundleId, () => moduleExports, bundleId);
 }

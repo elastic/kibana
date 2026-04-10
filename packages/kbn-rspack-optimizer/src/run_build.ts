@@ -464,7 +464,10 @@ function processStats(
       assets: false,
       modules: false,
     });
-    const lines = warningOutput.split('\n').slice(0, 20);
+    const lines = warningOutput
+      .split('\n')
+      .filter((line) => !line.includes('rspack.persistentCache'))
+      .slice(0, 20);
     if (lines.length > 0) {
       log.warning('Build warnings (first 20):');
       for (const line of lines) {
