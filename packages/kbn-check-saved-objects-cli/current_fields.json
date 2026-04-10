@@ -944,6 +944,7 @@
     "use_space_awareness_migration_status"
   ],
   "integration-config": [
+    "connector_id",
     "created_by",
     "created_by_profile_uid",
     "data_stream_count",

@@ -276,7 +276,8 @@ export class AttachmentService {
       const decodedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(attributes);
       const savedObjectType = getAttachmentSavedObjectType(this.context.config);
       const transformer = getAttachmentTypeTransformers(
-        getAttachmentTypeFromAttributes(decodedAttributes)
+        getAttachmentTypeFromAttributes(decodedAttributes),
+        decodedAttributes.owner
       );
       if (savedObjectType === CASE_ATTACHMENT_SAVED_OBJECT) {
         const unifiedAttributes = transformer.toUnifiedSchema(decodedAttributes);
@@ -348,7 +349,8 @@ export class AttachmentService {
                 attachment.attributes
               );
               const transformer = getAttachmentTypeTransformers(
-                getAttachmentTypeFromAttributes(decodedAttributes)
+                getAttachmentTypeFromAttributes(decodedAttributes),
+                decodedAttributes.owner
               );
               const attributesToWrite = transformer.toUnifiedSchema(decodedAttributes);
 
@@ -371,7 +373,8 @@ export class AttachmentService {
             );
 
             const transformer = getAttachmentTypeTransformers(
-              getAttachmentTypeFromAttributes(decodedAttributes)
+              getAttachmentTypeFromAttributes(decodedAttributes),
+              decodedAttributes.owner
             );
             const attributesToWrite = transformer.toLegacySchema(decodedAttributes);
             const { attributes: extractedAttributes, references: extractedReferences } =
@@ -446,7 +449,8 @@ export class AttachmentService {
       const decodedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(updatedAttributes);
       assertAlertAttachmentHasRuleName(decodedAttributes as Record<string, unknown>);
       const transformer = getAttachmentTypeTransformers(
-        getAttachmentTypeFromAttributes(decodedAttributes)
+        getAttachmentTypeFromAttributes(decodedAttributes),
+        decodedAttributes.owner ?? ''
       );
 
       if (soType === CASE_ATTACHMENT_SAVED_OBJECT) {
@@ -531,7 +535,10 @@ export class AttachmentService {
               );
               const transformer = requestWithoutType
                 ? passThroughTransformer
-                : getAttachmentTypeTransformers(getAttachmentTypeFromAttributes(decodedAttributes));
+                : getAttachmentTypeTransformers(
+                    getAttachmentTypeFromAttributes(decodedAttributes),
+                    decodedAttributes.owner
+                  );
               const unifiedAttributes = transformer.toUnifiedSchema(decodedAttributes);
 
               return {
@@ -555,7 +562,10 @@ export class AttachmentService {
             assertAlertAttachmentHasRuleName(decodedAttributes as Record<string, unknown>);
             const transformer = requestWithoutType
               ? passThroughTransformer
-              : getAttachmentTypeTransformers(getAttachmentTypeFromAttributes(decodedAttributes));
+              : getAttachmentTypeTransformers(
+                  getAttachmentTypeFromAttributes(decodedAttributes),
+                  decodedAttributes.owner ?? ''
+                );
             const legacyAttributes = transformer.toLegacySchema(decodedAttributes);
             const {
               attributes: extractedAttributes,
@@ -624,7 +634,10 @@ export class AttachmentService {
         );
         const transformer = requestWithoutType
           ? passThroughTransformer
-          : getAttachmentTypeTransformers(getAttachmentTypeFromAttributes(decodedAttributes));
+          : getAttachmentTypeTransformers(
+              getAttachmentTypeFromAttributes(decodedAttributes),
+              decodedAttributes.owner ?? ''
+            );
         const legacyAttributes = transformer.toLegacySchema(decodedAttributes);
         const transformedAttachment = injectAttachmentSOAttributesFromRefsForPatch(
           legacyAttributes,
