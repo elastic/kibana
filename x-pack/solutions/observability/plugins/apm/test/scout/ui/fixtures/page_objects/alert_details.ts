@@ -36,8 +36,16 @@ export class AlertDetailsPage {
     await this.getOpenActionsButton(chartTitle).click();
   }
 
+  async getViewInApmHref(): Promise<string | null> {
+    return this.viewInApmAction.getAttribute('href');
+  }
+
   async getTracesInDiscoverHref(): Promise<string | null> {
     return this.tracesInDiscoverAction.getAttribute('href');
+  }
+
+  async clickViewInApm() {
+    await this.viewInApmAction.click();
   }
 
   async clickTracesInDiscover() {

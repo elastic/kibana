@@ -121,7 +121,7 @@ export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAp
                 timeZone={timeZone}
                 latencyAggregationType={latencyAggregationType}
                 comparisonEnabled={false}
-                offset={''}
+                offset=""
                 threshold={thresholdComponent}
               />
               <EuiSpacer size="s" />
@@ -135,7 +135,7 @@ export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAp
                   end={to}
                   comparisonChartTheme={comparisonChartTheme}
                   comparisonEnabled={false}
-                  offset={''}
+                  offset=""
                   timeZone={timeZone}
                 />
                 <FailedTransactionChart

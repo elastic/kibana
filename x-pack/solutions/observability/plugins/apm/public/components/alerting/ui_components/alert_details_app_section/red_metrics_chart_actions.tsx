@@ -25,9 +25,12 @@ const inApmLabel = i18n.translate('xpack.apm.alertDetails.chartActions.inApm', {
   defaultMessage: 'In APM',
 });
 
-const tracesDiscoverLabel = i18n.translate('xpack.apm.alertDetails.chartActions.tracesInDiscover', {
-  defaultMessage: 'Traces in Discover',
-});
+const tracesInDiscoverLabel = i18n.translate(
+  'xpack.apm.alertDetails.chartActions.tracesInDiscover',
+  {
+    defaultMessage: 'Traces in Discover',
+  }
+);
 
 interface RedMetricsChartActionsProps {
   queryParams: Pick<
@@ -115,7 +118,7 @@ export function RedMetricsChartActions({ queryParams, timeRange }: RedMetricsCha
           data-action="openTracesInDiscover"
           data-source="apmAlertDetails"
         >
-          {tracesDiscoverLabel}
+          {tracesInDiscoverLabel}
         </EuiContextMenuItem>
       </EuiContextMenuPanel>
     </EuiPopover>

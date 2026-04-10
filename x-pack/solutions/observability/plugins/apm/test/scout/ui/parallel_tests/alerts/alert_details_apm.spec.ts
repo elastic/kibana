@@ -20,10 +20,10 @@ const ENVIRONMENT = 'production';
 const RULE_NAME = `Latency threshold ${faker.string.uuid()} ${Date.now()}`;
 const RULE_TYPE_ID = 'apm.transaction_duration';
 
-function createAlertDetailsDiscoverTest(alertIndex: string) {
+function createAlertDetailsApmTest(alertIndex: string) {
   return async ({
     page,
-    pageObjects: { alertDetailsPage, discover },
+    pageObjects: { alertDetailsPage },
     apiServices,
     esClient,
   }: ExtendedScoutTestFixtures & ObltWorkerFixtures) => {
@@ -84,33 +84,28 @@ function createAlertDetailsDiscoverTest(alertIndex: string) {
       }).toPass({ timeout: 60_000, intervals: [2_000] });
     });
 
-    await test.step('verify "Traces in Discover" action has a valid redirect href', async () => {
-      await expect(alertDetailsPage.tracesInDiscoverAction).toBeVisible();
+    await test.step('verify "In APM" action has a valid redirect href', async () => {
+      await expect(alertDetailsPage.viewInApmAction).toBeVisible();
 
-      const discoverHref = await alertDetailsPage.getTracesInDiscoverHref();
-      expect(discoverHref).toBeTruthy();
-      expect(discoverHref).toContain('DISCOVER_APP_LOCATOR');
+      const apmHref = await alertDetailsPage.getViewInApmHref();
+      expect(apmHref).toBeTruthy();
+      expect(apmHref).toContain('APM_LOCATOR');
     });
 
-    await test.step('click "Traces in Discover" and verify ESQL query loads', async () => {
-      await alertDetailsPage.clickTracesInDiscover();
+    await test.step('click "In APM" and verify APM service overview loads', async () => {
+      await alertDetailsPage.clickViewInApm();
 
       await expect(async () => {
-        await expect(page.testSubj.locator('dscPage')).toBeVisible();
+        expect(page.url()).toContain(`/apm/services/${SERVICE_NAME}/overview`);
+        await expect(page.testSubj.locator('apmMainTemplateHeaderServiceName')).toHaveText(
+          SERVICE_NAME
+        );
       }).toPass({ timeout: 60_000, intervals: [2_000] });
-
-      // verify the ESQL query is loaded correctly
-      // because we can't test for the table content as we don't have access to mocked traces data
-      const esqlQuery = await discover.getEsqlQueryValue();
-      expect(esqlQuery).toContain(SERVICE_NAME);
-      expect(esqlQuery).toContain(ENVIRONMENT);
-      expect(esqlQuery).toContain(TRANSACTION_TYPE);
-      expect(esqlQuery).toContain('SORT @timestamp DESC');
     });
   };
 }
 
-test.describe('Alert details - Discover journey', () => {
+test.describe('Alert details - APM journey', () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsAdmin();
   });
@@ -120,14 +115,14 @@ test.describe('Alert details - Discover journey', () => {
   });
 
   test(
-    'Stateful - Opens Discover from alert details page',
+    'Stateful - View in APM link from alert details page',
     { tag: tags.stateful.classic },
-    createAlertDetailsDiscoverTest(STATEFUL_APM_ALERTS_INDEX)
+    createAlertDetailsApmTest(STATEFUL_APM_ALERTS_INDEX)
   );
 
   test(
-    'Serverless - Opens Discover from alert details page',
+    'Serverless - View in APM link from alert details page',
     { tag: tags.serverless.observability.complete },
-    createAlertDetailsDiscoverTest(SERVERLESS_APM_ALERTS_INDEX)
+    createAlertDetailsApmTest(SERVERLESS_APM_ALERTS_INDEX)
   );
 });
