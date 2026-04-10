@@ -41,7 +41,7 @@ export async function sanitize(
   return {
     data: {
       ...sanitizedDashboardState,
-      access_control,
+      ...(access_control !== undefined && { access_control }),
     },
     ...(warnings.length ? { warnings } : {}),
   };
