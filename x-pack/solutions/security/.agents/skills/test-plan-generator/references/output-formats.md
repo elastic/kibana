@@ -54,13 +54,16 @@ Before saving the draft to `.agents/tmp/`, review every scenario in the test pla
 
 **Per-section checks (after writing all scenarios in a section):**
 - [ ] Scenarios are coherent as a set — they collectively cover the acceptance criteria for this area
-- [ ] Each required testing type from the coverage guidance in `references/optional-scenarios.md` is represented — at minimum, positive and negative scenarios are present, or there is a documented reason in Known Limitations why a required type does not apply
+- [ ] Each required testing type from the coverage guidance in `references/optional-scenarios.md` is represented — explicitly list which types are present (positive, negative, edge case, state-based, error handling) and which are missing. If a required type is missing, either add a scenario or document the reason in Known Limitations — do not leave required types silently uncovered
 - [ ] No two scenarios test the same thing with different wording
 - [ ] No scenario tests something not described in the issue, sub-issues, linked PRs, or Figma designs
 - [ ] Scenarios are ordered by priority: P0 first, then P1, then P2
 
 **Across the full test plan:**
 - [ ] All acceptance criteria listed in the Acceptance Criteria section are covered by at least one scenario
+- [ ] Walk the **consolidated AC list** (built in Steps 1–2) item by item — every criterion from every sub-issue must map to at least one scenario. If a criterion has no matching scenario, either add one or document it in Known Limitations with a justification
+- [ ] Walk the **PR artifacts inventory** (built in Step 1) item by item — every new API route, service method, UI component, saved object type, and feature flag must be covered by at least one scenario. Missing coverage is a gap
+- [ ] Every claim in Known Limitations about a scenario being included or excluded matches reality — verify the referenced scenario exists by name
 - [ ] No optional section (RBAC, upgrade, CCS, multi-space, multi-tenant) is included without a clear justification from the issue content
 - [ ] Test Execution Notes lists every scenario by name under its priority level — not just generic descriptions
 - [ ] Footer is present at the end of the file with the correct model identifier and today's date

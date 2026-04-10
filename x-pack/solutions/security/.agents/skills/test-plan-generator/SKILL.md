@@ -204,6 +204,8 @@ gh issue view <number> --repo <owner>/<repo> --json number,title,body,comments
 ```
 Fall back to GitHub MCP if unavailable. For each sub-issue: read the full title, body, all comments, all images, and all URLs. Apply the same context-gathering process recursively. Treat sub-issue content as first-class context — as important as the main issue.
 
+For each sub-issue, extract every acceptance criterion — both explicit bullet points and implied requirements — and add them to a **flat acceptance criteria list** keyed by sub-issue number. This list is a critical artifact: it will be used in Step 2 to build the consolidated checklist and in Step 3's self-review to verify complete coverage.
+
 For each sub-issue, check its comments for an existing test plan (body starts with `<!-- test-plan-generated -->`). If found, store as **sub-issue test plan for #<number>**. Collect all of them — they will be used in Step 2 to avoid duplication.
 
 Do not proceed to the pull requests section until all sub-issues have been fully read.
@@ -233,6 +235,8 @@ Fall back to GitHub MCP if unavailable. Apply these limits to the diff:
 | Always skip | Binary files, generated files (`*.snap`, `*.lock`, `*.min.js`), translation files (`i18n`, `*.json`) |
 
 **Build the test coverage catalog.** For each test file found, extract: the test type (unit `*.test.ts`, integration, API integration, or e2e Cypress `*.cy.ts` / Scout), the file path, and the describe blocks and test names. Store this catalog — it will be used in Step 3 to populate automation coverage lines.
+
+**Build a PR artifacts inventory.** While reading each PR's file list and diff, identify every new or substantially modified: API route, service method, UI component/page, saved object type, schema definition, and feature flag. Each distinct artifact is a candidate for at least one test scenario. Store this inventory — it will be used in Step 3's self-review to verify no implemented artifact is left without a corresponding scenario.
 
 **If a PR has no test files**, search the filesystem for existing tests:
 - Look for `*.test.ts` / `*.spec.ts` files adjacent to the modified source files
@@ -271,6 +275,8 @@ Before writing anything, build a mental model of:
 - What the UI looks like (from Figma, if available)
 - What technical constraints or edge cases are mentioned
 - What is explicitly out of scope
+
+**Consolidate the acceptance criteria list.** Merge the flat AC list from Step 1 (sub-issue ACs) with criteria from: the main issue body, PR descriptions, and review comments. Include any criteria discovered only in code (e.g., a new API endpoint not mentioned in any issue). This **consolidated AC list** is the source of truth for the self-review in Step 3 — every item must map to at least one scenario.
 
 **PR content takes priority over issue content.** Issue descriptions reflect original intent and may be outdated. If a PR description, review comment, or code change contradicts or extends what the issue says, base the scenarios on what the PR shows — that is what was actually implemented. Note any meaningful discrepancy in Known Limitations with a `⚠️` flag.
 
