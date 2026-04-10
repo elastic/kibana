@@ -100,7 +100,6 @@ fileGroups:
     - scripts/**/*.json
     - server/**/*
     - test/scout/**/*
-    - public/common/schemas/*/*.json
     - '!target/**/*'
 tasks:
   jest:
