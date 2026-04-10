@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { readFileSync, existsSync, writeFileSync } from 'fs';
+import { readFileSync, existsSync, writeFileSync, readdirSync, statSync } from 'fs';
 import path from 'path';
 
 import { parse } from 'hjson';
@@ -44,6 +44,67 @@ export function sortObjectByKeyPriority(obj: any, keyOrder: string[] = []) {
 
 export function resolveFirstExisting(dir: string, files: string[]) {
   return files.find((f) => existsSync(path.resolve(dir, f)));
+}
+
+/**
+ * Recursively find all matching config files within a directory, stopping at
+ * child project boundaries (directories that contain a kibana.jsonc).
+ *
+ * @param dir - Absolute path to the project source root
+ * @param fileNames - Config file names to search for (e.g. jest.config.js)
+ * @param boundaryFile - File whose presence marks a child project boundary (default: kibana.jsonc)
+ * @returns Relative paths (from dir) of all matching files found
+ */
+export function findAllMatchingConfigs(
+  dir: string,
+  fileNames: string[],
+  boundaryFile = 'kibana.jsonc'
+): string[] {
+  const results: string[] = [];
+
+  const walk = (currentDir: string) => {
+    let entries: string[];
+    try {
+      entries = readdirSync(currentDir);
+    } catch {
+      return;
+    }
+
+    // Check if this subdirectory is a separate project (skip it)
+    if (currentDir !== dir && entries.includes(boundaryFile)) {
+      return;
+    }
+
+    for (const fileName of fileNames) {
+      if (entries.includes(fileName)) {
+        const fullPath = path.join(currentDir, fileName);
+        try {
+          if (statSync(fullPath).isFile()) {
+            results.push(path.relative(dir, fullPath));
+          }
+        } catch {
+          // skip if stat fails
+        }
+      }
+    }
+
+    for (const entry of entries) {
+      if (entry === 'node_modules' || entry === 'target' || entry === '.git') {
+        continue;
+      }
+      const fullPath = path.join(currentDir, entry);
+      try {
+        if (statSync(fullPath).isDirectory()) {
+          walk(fullPath);
+        }
+      } catch {
+        // skip if stat fails
+      }
+    }
+  };
+
+  walk(dir);
+  return results.sort();
 }
 
 export function filterPackages(allPackages: Package[], filter: string[]): Package[] {

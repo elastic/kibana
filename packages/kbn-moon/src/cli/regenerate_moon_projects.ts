@@ -25,9 +25,9 @@ import type { MoonProjectConfig } from './moon_project_type';
 import {
   compactFilePathsToGlobs,
   filterPackages,
+  findAllMatchingConfigs,
   readFile,
   readJsonWithComments,
-  resolveFirstExisting,
   sortObjectByKeyPriority,
   writeYaml,
 } from '../util';
@@ -265,19 +265,19 @@ function applyJestTaskConfig(projectConfig: MoonProjectConfig) {
     return;
   }
 
-  const jestConfigName = resolveFirstExisting(
+  const jestConfigs = findAllMatchingConfigs(
     projectConfig.project.sourceRoot,
     MOON_CONST.JEST_CONFIG_FILES
   );
 
-  if (!jestConfigName) {
+  if (jestConfigs.length === 0) {
     logger.warning(
       `Could not find jest config for ${projectConfig.id} @ ${projectConfig.project.sourceRoot}`
     );
   } else {
     projectConfig.tags = (projectConfig.tags || []).concat([MOON_CONST.TAG_JEST_UNIT]);
 
-    projectConfig.fileGroups = { ...projectConfig.fileGroups, 'jest-config': [jestConfigName] };
+    projectConfig.fileGroups = { ...projectConfig.fileGroups, 'jest-config': jestConfigs };
   }
 }
 

@@ -91,6 +91,21 @@ export async function runJest(configName = 'jest.config.js'): Promise<void> {
     }
   }
 
+  // --projects mode: pass through to Jest directly, just set up shared cache
+  if (parsedArguments.projects) {
+    const cacheDirectory = join(REPO_ROOT, JEST_CACHE_DIR);
+    await fs.mkdir(cacheDirectory, { recursive: true });
+
+    const jestArgv = [
+      ...process.argv.slice(NODE_ARGV_SLICE_INDEX),
+      `--cacheDirectory=${cacheDirectory}`,
+    ];
+
+    log.info('yarn jest', jestArgv.join(' '));
+
+    return run(jestArgv);
+  }
+
   const currentWorkingDirectory: string = process.env.INIT_CWD || process.cwd();
   let testFiles: string[] = [];
   let resolvedConfigPath: string = parsedArguments.config ?? '';
