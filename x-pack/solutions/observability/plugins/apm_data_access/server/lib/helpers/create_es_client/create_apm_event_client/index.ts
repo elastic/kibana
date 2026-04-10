@@ -330,12 +330,17 @@ export class APMEventClient {
     operationName: string,
     params: APMEventTermsEnumRequest
   ): Promise<TermsEnumResponse> {
+    // The terms_enum API does not support project_routing. Return empty
+    // results so callers fall back to a search-based approach that does.
+    if (this.projectRouting) {
+      return { terms: [], _shards: { total: 0, successful: 0, failed: 0 }, complete: false };
+    }
+
     const index = processorEventsToIndex(params.apm.events, this.indices);
 
     const requestParams: Omit<APMEventTermsEnumRequest, 'apm'> & { index: string } = {
       ...omit(params, 'apm'),
       index: index.join(','),
-      ...(this.projectRouting ? { project_routing: this.projectRouting } : {}),
       index_filter: getDataTierFilterCombined({
         filter: params.index_filter,
         excludedDataTiers: this.excludedDataTiers,
