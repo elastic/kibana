@@ -52,6 +52,7 @@ export interface CommonFetchParams {
   scopedProfilesManager: ScopedProfilesManager;
   scopedEbtManager: ScopedDiscoverEBTManager;
   getCurrentTab: () => TabState;
+  executionContext?: KibanaExecutionContext;
 }
 
 /**
@@ -112,6 +113,7 @@ export function fetchAll(
 
     // Start fetching all required requests
     const executionContext = getProfileExecutionContext(scopedProfilesManager);
+    const paramsWithContext = { ...params, executionContext };
     const response = isEsqlQuery
       ? fetchEsql({
           query,
@@ -126,7 +128,7 @@ export function fetchAll(
           searchSessionId: params.searchSessionId,
           executionContext,
         })
-      : fetchDocuments(searchSource, params);
+      : fetchDocuments(searchSource, paramsWithContext);
     const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';
 
     const fetchAllRequestOnlyTracker = scopedEbtManager.trackQueryPerformanceEvent(
