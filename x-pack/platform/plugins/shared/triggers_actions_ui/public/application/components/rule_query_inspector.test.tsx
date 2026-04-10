@@ -174,17 +174,13 @@ describe('RuleQueryInspectorFlyout', () => {
     expect(screen.queryByTestId('ruleQueryInspectorCriterionSelect')).not.toBeInTheDocument();
   });
 
-  it('passes evaluationTimeRange to the API call', async () => {
+  it('passes alert_id to the API call when alertId prop is provided', async () => {
     const mockGet = jest.fn().mockResolvedValue({ queries: [mockResponse.queries[0]] });
     useKibanaMock().services.http.get = mockGet;
 
     render(
       <Wrapper>
-        <RuleQueryInspectorFlyout
-          ruleId="rule-123"
-          onClose={onClose}
-          evaluationTimeRange={{ gte: '2026-01-01T00:00:00Z', lte: '2026-01-01T00:05:00Z' }}
-        />
+        <RuleQueryInspectorFlyout ruleId="rule-123" onClose={onClose} alertId="alert-456" />
       </Wrapper>
     );
 
@@ -193,8 +189,7 @@ describe('RuleQueryInspectorFlyout', () => {
         expect.stringContaining('/query_inspector'),
         expect.objectContaining({
           query: expect.objectContaining({
-            start: '2026-01-01T00:00:00Z',
-            end: '2026-01-01T00:05:00Z',
+            alert_id: 'alert-456',
           }),
         })
       );

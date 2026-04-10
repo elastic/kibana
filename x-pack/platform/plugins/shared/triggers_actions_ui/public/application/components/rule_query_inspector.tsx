@@ -52,13 +52,13 @@ const stringify = (obj: Record<string, unknown> | undefined): string => {
 export interface RuleQueryInspectorFlyoutProps {
   ruleId: string;
   onClose: () => void;
-  evaluationTimeRange?: { gte: string; lte: string };
+  alertId?: string;
 }
 
 export function RuleQueryInspectorFlyout({
   ruleId,
   onClose,
-  evaluationTimeRange,
+  alertId,
 }: RuleQueryInspectorFlyoutProps) {
   const { http } = useKibana().services;
   const [mode, setMode] = useState<'build' | 'execute'>('build');
@@ -66,22 +66,14 @@ export function RuleQueryInspectorFlyout({
   const [selectedCriterion, setSelectedCriterion] = useState(0);
 
   const { data, isLoading, isError, error, refetch } = useQuery({
-    queryKey: [
-      'ruleQueryInspector',
-      ruleId,
-      mode,
-      evaluationTimeRange?.gte,
-      evaluationTimeRange?.lte,
-    ],
+    queryKey: ['ruleQueryInspector', ruleId, mode, alertId],
     queryFn: ({ signal }) =>
       http.get<QueryInspectorResponse>(
         `${BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(ruleId)}/query_inspector`,
         {
           query: {
             mode,
-            ...(evaluationTimeRange
-              ? { start: evaluationTimeRange.gte, end: evaluationTimeRange.lte }
-              : {}),
+            ...(alertId ? { alert_id: alertId } : {}),
           },
           signal,
         }
@@ -225,14 +217,10 @@ const SUPPORTED_RULE_TYPES = new Set([OBSERVABILITY_THRESHOLD_RULE_TYPE_ID]);
 export interface RuleQueryInspectorProps {
   ruleId: string;
   ruleTypeId: string;
-  evaluationTimeRange?: { gte: string; lte: string };
+  alertId?: string;
 }
 
-export function RuleQueryInspector({
-  ruleId,
-  ruleTypeId,
-  evaluationTimeRange,
-}: RuleQueryInspectorProps) {
+export function RuleQueryInspector({ ruleId, ruleTypeId, alertId }: RuleQueryInspectorProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   if (!SUPPORTED_RULE_TYPES.has(ruleTypeId)) {
@@ -254,7 +242,7 @@ export function RuleQueryInspector({
         <RuleQueryInspectorFlyout
           ruleId={ruleId}
           onClose={() => setIsOpen(false)}
-          evaluationTimeRange={evaluationTimeRange}
+          alertId={alertId}
         />
       )}
     </>

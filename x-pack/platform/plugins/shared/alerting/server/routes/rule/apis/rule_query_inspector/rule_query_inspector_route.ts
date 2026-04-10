@@ -65,7 +65,7 @@ export const ruleQueryInspectorRoute = (
         const alertingContext = await context.alerting;
         const rulesClient = await alertingContext.getRulesClient();
         const { id: ruleId }: RuleQueryInspectorRequestParamsV1 = req.params;
-        const { mode }: RuleQueryInspectorRequestQueryV1 = req.query;
+        const { mode, alert_id: alertId }: RuleQueryInspectorRequestQueryV1 = req.query;
 
         const rule = await rulesClient.get({ id: ruleId });
 
@@ -81,15 +81,7 @@ export const ruleQueryInspectorRoute = (
           });
         }
 
-        const { start, end }: RuleQueryInspectorRequestQueryV1 = req.query;
-        if ((start && !end) || (!start && end)) {
-          return res.badRequest({
-            body: { message: 'Both "start" and "end" must be provided together, or both omitted.' },
-          });
-        }
-        const timeRange = start && end ? { gte: start, lte: end } : undefined;
-
-        const result = await handler(req, rule.params as Record<string, unknown>, mode, timeRange);
+        const result = await handler(req, rule.params as Record<string, unknown>, mode, alertId);
         return res.ok({ body: result });
       })
     )

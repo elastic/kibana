@@ -25,19 +25,11 @@ export const ruleQueryInspectorQuerySchema = schema.object({
         'The inspection mode. Use "build" to return only the query, or "execute" to run the query and include the response.',
     },
   }),
-  start: schema.maybe(
+  alert_id: schema.maybe(
     schema.string({
       meta: {
         description:
-          'The start of the time range. When provided with end, the inspector uses this range instead of the current time.',
-      },
-    })
-  ),
-  end: schema.maybe(
-    schema.string({
-      meta: {
-        description:
-          'The end of the time range. When provided with start, the inspector uses this range instead of the current time.',
+          'The alert document ID. When provided, the inspector uses the evaluation time range from the alert instead of the current time.',
       },
     })
   ),

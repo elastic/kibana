@@ -127,12 +127,14 @@ export class ObservabilityPlugin
       'observability.rules.custom_threshold',
       createCustomThresholdRuleQueryInspectorHandler(
         () =>
-          core
-            .getStartServices()
-            .then(([coreStart, pluginStart]) => [
-              coreStart,
-              { dataViews: pluginStart.dataViews, data: pluginStart.data },
-            ]),
+          core.getStartServices().then(([coreStart, pluginStart]) => [
+            coreStart,
+            {
+              dataViews: pluginStart.dataViews,
+              data: pluginStart.data,
+              ruleRegistry: pluginStart.ruleRegistry,
+            },
+          ]),
         { compositeSize: config.customThresholdRule.groupByPageSize }
       )
     );

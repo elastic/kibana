@@ -112,7 +112,7 @@ describe('ruleQueryInspectorRoute', () => {
     });
   });
 
-  it('passes timeRange when query parameters are provided', async () => {
+  it('passes alertId to the handler when alert_id query param is provided', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
     const mockHandler = jest.fn().mockResolvedValue(mockInspectorResponse);
@@ -126,24 +126,17 @@ describe('ruleQueryInspectorRoute', () => {
       { rulesClient },
       {
         params: { id: 'rule-123' },
-        query: {
-          mode: 'execute',
-          start: '2026-01-01T00:00:00.000Z',
-          end: '2026-01-01T00:05:00.000Z',
-        },
+        query: { mode: 'execute', alert_id: 'alert-456' },
       },
       ['ok']
     );
 
     await handler(context, req, res);
 
-    expect(mockHandler).toHaveBeenCalledWith(req, mockRule.params, 'execute', {
-      gte: '2026-01-01T00:00:00.000Z',
-      lte: '2026-01-01T00:05:00.000Z',
-    });
+    expect(mockHandler).toHaveBeenCalledWith(req, mockRule.params, 'execute', 'alert-456');
   });
 
-  it('passes timeRange as undefined when query parameters are absent', async () => {
+  it('passes undefined alertId when alert_id query param is absent', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
     const mockHandler = jest.fn().mockResolvedValue(mockInspectorResponse);
@@ -162,32 +155,5 @@ describe('ruleQueryInspectorRoute', () => {
     await handler(context, req, res);
 
     expect(mockHandler).toHaveBeenCalledWith(req, mockRule.params, 'build', undefined);
-  });
-
-  it('returns badRequest when only start is provided without end', async () => {
-    const licenseState = licenseStateMock.create();
-    const router = httpServiceMock.createRouter();
-    const mockHandler = jest.fn().mockResolvedValue(mockInspectorResponse);
-    const registry = createMockRegistry(mockHandler);
-
-    ruleQueryInspectorRoute(router, licenseState, registry);
-
-    const [, handler] = router.get.mock.calls[0];
-
-    const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
-      {
-        params: { id: 'rule-123' },
-        query: { mode: 'build', start: '2026-01-01T00:00:00.000Z' },
-      },
-      ['badRequest', 'ok']
-    );
-
-    await handler(context, req, res);
-
-    expect(res.badRequest).toHaveBeenCalledWith({
-      body: { message: 'Both "start" and "end" must be provided together, or both omitted.' },
-    });
-    expect(mockHandler).not.toHaveBeenCalled();
   });
 });

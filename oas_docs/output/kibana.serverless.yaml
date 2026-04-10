@@ -8426,15 +8426,9 @@ paths:
               - build
               - execute
             type: string
-        - description: The start of the time range. When provided with end, the inspector uses this range instead of the current time.
+        - description: The alert document ID. When provided, the inspector uses the evaluation time range from the alert instead of the current time.
           in: query
-          name: start
-          required: false
-          schema:
-            type: string
-        - description: The end of the time range. When provided with start, the inspector uses this range instead of the current time.
-          in: query
-          name: end
+          name: alert_id
           required: false
           schema:
             type: string

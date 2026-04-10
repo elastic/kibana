@@ -19,7 +19,6 @@ import {
 } from '@elastic/eui';
 import type { AlertStatus } from '@kbn/rule-data-utils';
 import {
-  ALERT_EVALUATION_TIME_RANGE,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_STATUS_ACTIVE,
@@ -97,11 +96,7 @@ export function HeaderActions({
             <RuleQueryInspector
               ruleId={alert.fields[ALERT_RULE_UUID]}
               ruleTypeId={alert.fields[ALERT_RULE_TYPE_ID]}
-              evaluationTimeRange={
-                alert.fields[ALERT_EVALUATION_TIME_RANGE] as
-                  | { gte: string; lte: string }
-                  | undefined
-              }
+              alertId={alert.fields[ALERT_UUID]}
             />
           </EuiFlexItem>
         )}

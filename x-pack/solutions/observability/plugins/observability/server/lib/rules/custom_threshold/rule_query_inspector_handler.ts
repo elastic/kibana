@@ -8,6 +8,8 @@
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
+import { ALERT_EVALUATION_TIME_RANGE } from '@kbn/rule-data-utils';
 import type {
   RuleQueryInspectorHandler,
   RuleQueryInspectorResponse,
@@ -25,12 +27,38 @@ import { createTimerange } from './lib/create_timerange';
 import { getEsQueryConfig } from '../../../utils/get_es_query_config';
 
 type GetStartServices = () => Promise<
-  [CoreStart, { dataViews: DataViewsServerPluginStart; data: DataPluginStart }]
+  [
+    CoreStart,
+    {
+      dataViews: DataViewsServerPluginStart;
+      data: DataPluginStart;
+      ruleRegistry: RuleRegistryPluginStartContract;
+    }
+  ]
 >;
 
 interface HandlerOptions {
   compositeSize: number;
 }
+
+const getTimeRangeFromAlert = async (
+  ruleRegistry: RuleRegistryPluginStartContract,
+  request: KibanaRequest,
+  alertId: string
+): Promise<RuleQueryInspectorTimeRange | undefined> => {
+  const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
+  const alert = await alertsClient.get({ id: alertId });
+
+  if (!alert) {
+    return undefined;
+  }
+
+  const evalTimeRange = alert[ALERT_EVALUATION_TIME_RANGE] as
+    | { gte: string; lte: string }
+    | undefined;
+
+  return evalTimeRange ? { gte: evalTimeRange.gte, lte: evalTimeRange.lte } : undefined;
+};
 
 export const createCustomThresholdRuleQueryInspectorHandler = (
   getStartServices: GetStartServices,
@@ -40,7 +68,7 @@ export const createCustomThresholdRuleQueryInspectorHandler = (
     request: KibanaRequest,
     ruleParams: Record<string, unknown>,
     mode: 'build' | 'execute',
-    timeRange: RuleQueryInspectorTimeRange | undefined
+    alertId: string | undefined
   ): Promise<RuleQueryInspectorResponse> => {
     const params = ruleParams as unknown as CustomThresholdRuleTypeParams;
     const { criteria, searchConfiguration, groupBy } = params;
@@ -64,6 +92,10 @@ export const createCustomThresholdRuleQueryInspectorHandler = (
 
     const alertOnGroupDisappear =
       params.alertOnGroupDisappear !== false && params.noDataBehavior !== 'recover';
+
+    const timeRange = alertId
+      ? await getTimeRangeFromAlert(pluginStart.ruleRegistry, request, alertId)
+      : undefined;
 
     const queries: RuleQueryInspectorResponse['queries'] = [];
 

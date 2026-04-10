@@ -27,5 +27,5 @@ export type RuleQueryInspectorHandler = (
   request: KibanaRequest,
   ruleParams: Record<string, unknown>,
   mode: 'build' | 'execute',
-  timeRange: RuleQueryInspectorTimeRange | undefined
+  alertId: string | undefined
 ) => Promise<RuleQueryInspectorResponse>;
