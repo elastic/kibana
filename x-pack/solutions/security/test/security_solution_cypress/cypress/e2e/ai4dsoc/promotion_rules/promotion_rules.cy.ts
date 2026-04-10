@@ -14,7 +14,10 @@ import {
   SKIP_AGENT_INSTALLATION_BTN,
   SAVE_AND_CONTINUE_BTN,
 } from '../../../screens/integrations';
-import { RULE_SWITCH, MODAL_CONFIRMATION_CANCEL_BTN } from '../../../screens/alerts_detection_rules';
+import {
+  RULE_SWITCH,
+  MODAL_CONFIRMATION_CANCEL_BTN,
+} from '../../../screens/alerts_detection_rules';
 
 const CROWDSTRIKE_RULE_NAME = 'CrowdStrike External Alerts';
 const CONFIGURATIONS_INTEGRATIONS_URL = '/app/security/configurations/integrations/browse';
@@ -53,8 +56,9 @@ describe('Promotion Rules', { tags: '@serverless' }, () => {
     cy.url().should('include', '/configurations/basic_rules');
 
     // Verify the CrowdStrike promotion rule appears in the table
-    cy.contains(CROWDSTRIKE_RULE_NAME, { timeout: PROMOTION_RULES_BOOTSTRAP_TIMEOUT })
-      .should('be.visible');
+    cy.contains(CROWDSTRIKE_RULE_NAME, { timeout: PROMOTION_RULES_BOOTSTRAP_TIMEOUT }).should(
+      'be.visible'
+    );
 
     // Verify the rule is enabled (the switch toggle should be checked)
     cy.contains(CROWDSTRIKE_RULE_NAME)
