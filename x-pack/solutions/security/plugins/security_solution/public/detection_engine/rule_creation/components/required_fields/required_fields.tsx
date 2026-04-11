@@ -105,6 +105,27 @@ const RequiredFieldsList = ({
 
   const allFieldNames = useMemo(() => Object.keys(typesByFieldName), [typesByFieldName]);
 
+  const esFlattenedFieldNames = useMemo(
+    () =>
+      new Set(
+        Object.entries(typesByFieldName)
+          .filter(([, types]) => types.includes('flattened'))
+          .map(([name]) => name)
+      ),
+    [typesByFieldName]
+  );
+
+  const isSubfieldOfFlattenedField = (fieldName: string): boolean => {
+    const parts = fieldName.split('.');
+    for (let i = parts.length - 1; i > 0; i--) {
+      const parentPath = parts.slice(0, i).join('.');
+      if (esFlattenedFieldNames.has(parentPath)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
   const selectedFieldNames = fieldValue.map(({ name }) => name);
 
   const availableFieldNames = allFieldNames.filter((name) => !selectedFieldNames.includes(name));
@@ -114,7 +135,8 @@ const RequiredFieldsList = ({
       !isIndexPatternLoading &&
       /* Creating a warning only if "name" value is filled in */
       name !== '' &&
-      !allFieldNames.includes(name)
+      !allFieldNames.includes(name) &&
+      !isSubfieldOfFlattenedField(name)
     ) {
       warnings[name] = i18n.FIELD_NAME_NOT_FOUND_WARNING(name);
     }
