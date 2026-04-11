@@ -27,6 +27,13 @@ export const ASSIGNEES_ADD_BUTTON_TEST_ID = `${PREFIX}HeaderAssigneesAddButton` 
 
 /* About */
 
+export const EVENT_CATEGORY_DESCRIPTION_TEST_ID = `${PREFIX}EventCategoryDescription` as const;
+export const EVENT_KIND_DESCRIPTION_TEST_ID = `${PREFIX}EventKindDescription` as const;
+export const EVENT_KIND_DESCRIPTION_TEXT_TEST_ID = `${EVENT_KIND_DESCRIPTION_TEST_ID}Text` as const;
+export const EVENT_KIND_DESCRIPTION_CATEGORIES_TEST_ID =
+  `${EVENT_KIND_DESCRIPTION_TEST_ID}Categories` as const;
+export const EVENT_RENDERER_TEST_ID = `${PREFIX}EventRenderer` as const;
+
 const ALERT_DESCRIPTION_TEST_ID = `${PREFIX}AlertDescription` as const;
 export const ALERT_DESCRIPTION_TITLE_TEST_ID = `${ALERT_DESCRIPTION_TEST_ID}Title` as const;
 export const ALERT_DESCRIPTION_DETAILS_TEST_ID = `${ALERT_DESCRIPTION_TEST_ID}Details` as const;

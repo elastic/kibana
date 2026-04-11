@@ -202,6 +202,7 @@ export interface InvalidateAPIKeyResult {
    */
   error_details?: Array<{
     type?: string;
+    code?: string;
     reason?: string | null;
     caused_by?: {
       type?: string;
