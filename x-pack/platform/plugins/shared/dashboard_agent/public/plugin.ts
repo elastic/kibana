@@ -15,7 +15,8 @@ import type {
   DashboardAgentPluginPublicSetupDependencies,
   DashboardAgentPluginPublicStartDependencies,
 } from './types';
-import { DASHBOARD_ATTACHMENT_TYPE, DashboardAttachment } from '@kbn/dashboard-agent-common';
+import type { DashboardAttachment } from '@kbn/dashboard-agent-common';
+import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 
 export class DashboardAgentPlugin
   implements
