@@ -145,7 +145,11 @@ const isFunctionLike = (doc: ApiDeclaration): boolean => {
  */
 const getTopLevelApiLabels = (pluginApi: PluginApi): Set<string> => {
   return new Set(
-    [...pluginApi.client, ...pluginApi.server, ...pluginApi.common].map(({ label }) => label)
+    [
+      ...Object.values(pluginApi.client),
+      ...Object.values(pluginApi.server),
+      ...Object.values(pluginApi.common),
+    ].map(({ label }) => label)
   );
 };
 

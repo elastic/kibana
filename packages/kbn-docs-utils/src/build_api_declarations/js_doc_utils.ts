@@ -71,6 +71,13 @@ export const getJSDocs = (node: Node): JSDoc[] | undefined => {
     return node.getJsDocs();
   }
 
+  // PropertyAssignment nodes inside object literals are JSDocable but virtually
+  // never carry their own JSDoc — the real block lives on the enclosing
+  // VariableStatement. The 4-parent chain (PropertyAssignment → ObjectLiteral →
+  // VariableDeclaration → VariableDeclarationList → VariableStatement) is exact
+  // for the `export const x = { prop: ... }` shape. A general ancestor-walk loop
+  // would risk matching an unrelated VariableStatement higher up; the fixed chain
+  // is rigid but precise, and the AST shape here is structural to TypeScript.
   if (Node.isPropertyAssignment(node)) {
     if (node.getLeadingCommentRanges().length > 0) {
       return undefined;

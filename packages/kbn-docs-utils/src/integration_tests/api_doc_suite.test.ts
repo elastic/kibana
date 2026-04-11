@@ -862,7 +862,7 @@ describe('validation and stats', () => {
       expect(searchSpecParam!.children!.length).toBe(2); // username and password
     });
 
-    it('flags property-level comments on inline object parameter children', () => {
+    it('flags missing property-level comments on inline object parameter children', () => {
       const grouped = groupPluginApi(doc.client);
       const setup = grouped.setup;
       expect(setup).toBeDefined();
