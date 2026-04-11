@@ -82,7 +82,7 @@ export default ({ getService }: FtrProviderContext): void => {
         entityTypes: ['host', 'user'],
         waitForEntities: false,
       });
-      await waitForMaintainerRun({ retry, routes: maintainerRoutes });
+      await waitForMaintainerRun({ log, retry, routes: maintainerRoutes });
 
       // Wait for the risk score data stream to be fully created before indexing into it.
       // The maintainer task completes before createDataStream finishes, so a bulk insert
