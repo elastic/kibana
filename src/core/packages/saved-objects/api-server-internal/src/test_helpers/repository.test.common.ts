@@ -42,7 +42,7 @@ import {
   encodeHitVersion,
   SavedObjectsSerializer,
   SavedObjectTypeRegistry,
-} from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/base_internal';
 import {
   elasticsearchClientMock,
   type ElasticsearchClientMock,
@@ -54,7 +54,7 @@ import {
   type AuthorizationTypeMap,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
-import type { ISavedObjectTypeRegistryInternal } from '@kbn/core-saved-objects-base-server-internal';
+import type { ISavedObjectTypeRegistryInternal } from '@kbn/core-saved-objects-server/base_internal';
 import { mockGetSearchDsl } from '../lib/repository.test.mock';
 import type { SavedObjectsRepository } from '../lib/repository';
 

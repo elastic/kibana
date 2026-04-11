@@ -15,8 +15,8 @@ import type {
   IndexMapping,
   IndexTypesMap,
   SavedObjectsMigrationConfigType,
-} from '@kbn/core-saved-objects-base-server-internal';
-import { getLatestMappingsVirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/base_internal';
+import { getLatestMappingsVirtualVersionMap } from '@kbn/core-saved-objects-server/base_internal';
 import type { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
 import {
   getOutdatedDocumentsQuery,

@@ -38,7 +38,7 @@ import {
   LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX,
   BULK_RESOLVE_STATS_PREFIX,
 } from './core_usage_stats_client';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-server/utils';
 import { CoreUsageStatsClient } from '.';
 
 describe('CoreUsageStatsClient', () => {

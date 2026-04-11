@@ -18,7 +18,6 @@ import {
   type SavedObjectsFindResult,
   type SavedObjectsResolveResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-base-server-internal';
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import { errorContent, SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type {
@@ -49,12 +48,13 @@ import type {
   SavedObject,
   WithAuditName,
 } from '@kbn/core-saved-objects-server';
+import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-server/base_internal';
 import type {
   AuthorizationResult,
   GetObjectsRequiringPrivilegeCheckResult,
   ObjectRequiringPrivilegeCheckResult,
 } from '@kbn/core-saved-objects-server/src/extensions/security';
-import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-server/utils';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type {
   Actions,

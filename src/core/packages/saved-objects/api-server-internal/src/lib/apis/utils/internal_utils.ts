@@ -18,11 +18,11 @@ import {
   type SavedObjectsRawDocParseOptions,
   type SavedObjectAccessControl,
 } from '@kbn/core-saved-objects-server';
-import { SavedObjectsUtils, ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsUtils, ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-server/utils';
 import {
   decodeRequestVersion,
   encodeHitVersion,
-} from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/base_internal';
 
 export interface GetBulkOperationErrorRawResponse {
   status: number;

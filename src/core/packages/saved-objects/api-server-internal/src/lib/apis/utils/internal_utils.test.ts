@@ -9,9 +9,9 @@
 
 import { omit } from 'lodash';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
-import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
-import { encodeHitVersion } from '@kbn/core-saved-objects-base-server-internal';
-import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
+import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-server/utils';
+import { encodeHitVersion } from '@kbn/core-saved-objects-server/base_internal';
+import { typeRegistryMock } from '@kbn/core-saved-objects-server/mocks';
 import {
   getBulkOperationError,
   getCurrentTime,

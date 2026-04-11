@@ -10,7 +10,7 @@
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Client } from '@elastic/elasticsearch';
 import { createFailError } from '@kbn/dev-cli-errors';
-import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-server/base_internal';
 
 const TEST_INDEX_NAME = '.kibana_mappings_check';
 

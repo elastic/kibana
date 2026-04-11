@@ -19,7 +19,7 @@ import type {
   SavedObject,
   SavedObjectReference,
 } from '@kbn/core-saved-objects-server';
-import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
+import { typeRegistryMock } from '@kbn/core-saved-objects-server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { checkOriginConflicts } from './check_origin_conflicts';
 import type { ImportStateMap } from './types';

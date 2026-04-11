@@ -21,7 +21,7 @@ import type {
 import type { PluginName, PluginOpaqueId, PluginType } from '@kbn/core-base-common';
 import type { NodeInfo } from '@kbn/core-node-server';
 import type { ElasticsearchConfigType } from '@kbn/core-elasticsearch-server-internal';
-import type { SavedObjectsConfigType } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsConfigType } from '@kbn/core-saved-objects-server/base_internal';
 import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
 import type { SharedGlobalConfigKeys } from './shared_global_config';
 type Maybe<T> = T | undefined;

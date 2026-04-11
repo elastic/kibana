@@ -8,7 +8,7 @@
  */
 
 import type { ISavedObjectsSerializer, SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
-import type { IDocumentMigrator } from '@kbn/core-saved-objects-base-server-internal';
+import type { IDocumentMigrator } from '@kbn/core-saved-objects-server/base_internal';
 import type { TransformRawDocs } from '../../types';
 import { migrateRawDocsSafely } from '../../core/migrate_raw_docs';
 

@@ -14,7 +14,7 @@ import type {
   SavedObjectMigrationFn,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-server/utils';
 import type {
   LensDocShape715,
   LensDocShape810,

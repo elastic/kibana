@@ -8,7 +8,7 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import type { IKibanaMigrator } from '@kbn/core-saved-objects-base-server-internal';
+import type { IKibanaMigrator } from '@kbn/core-saved-objects-server/base_internal';
 import { createDocumentMigratorMock } from './migrator.mock';
 
 // mock duplicated from `@kbn/core/saved-objects-migration-server-mocks` to avoid cyclic dependencies

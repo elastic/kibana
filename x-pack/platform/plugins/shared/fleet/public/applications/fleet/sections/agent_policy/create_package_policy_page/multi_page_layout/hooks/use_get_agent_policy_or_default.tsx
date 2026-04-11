@@ -19,7 +19,7 @@ import {
 
 import type { AgentPolicy, EnrollmentAPIKey } from '../../../../../../../types';
 
-// Manual default space ID because importing from `@kbn/core-saved-objects-utils-server` is not allowed here
+// Manual default space ID because importing from `@kbn/core-saved-objects-server/utils` is not allowed here
 const DEFAULT_NAMESPACE_STRING = 'default';
 
 const sendGetAgentPolicy = async (agentPolicyId: string) => {

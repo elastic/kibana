@@ -19,8 +19,8 @@ import type {
   SavedObjectsCollectMultiNamespaceReferencesOptions,
   SavedObjectReferenceWithContext,
 } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
-import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
+import { SavedObjectsSerializer } from '@kbn/core-saved-objects-server/base_internal';
+import { typeRegistryMock } from '@kbn/core-saved-objects-server/mocks';
 import {
   ALIAS_OR_SHARED_ORIGIN_SEARCH_PER_PAGE,
   type CollectMultiNamespaceReferencesParams,

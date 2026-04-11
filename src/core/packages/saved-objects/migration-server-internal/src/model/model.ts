@@ -9,10 +9,11 @@
 
 import * as Either from 'fp-ts/Either';
 import * as Option from 'fp-ts/Option';
-import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
-import { getVirtualVersionsFromMappings } from '@kbn/core-saved-objects-base-server-internal';
-
-import { initialModelVersion } from '@kbn/core-saved-objects-base-server-internal/src/model_version/constants';
+import type { IndexMapping } from '@kbn/core-saved-objects-server/base_internal';
+import {
+  getVirtualVersionsFromMappings,
+  initialModelVersion,
+} from '@kbn/core-saved-objects-server/base_internal';
 import { isTypeof } from '../actions';
 import type { AliasAction } from '../actions';
 import type { AllActionStates, State } from '../state';

@@ -23,7 +23,7 @@ import {
   right,
   isRight,
 } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-server/utils';
 import {
   type SavedObjectsRawDocSource,
   type SavedObject,
@@ -35,7 +35,7 @@ import {
 import {
   LEGACY_URL_ALIAS_TYPE,
   type LegacyUrlAlias,
-} from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/base_internal';
 import {
   CORE_USAGE_STATS_ID,
   CORE_USAGE_STATS_TYPE,

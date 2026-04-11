@@ -25,6 +25,11 @@ dependsOn:
   - '@kbn/core-saved-objects-common'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/core-security-common'
+  - '@kbn/core-base-server-internal'
+  - '@kbn/std'
+  - '@kbn/logging-mocks'
+  - '@kbn/safer-lodash-set'
+  - '@kbn/lazy-object'
 tags:
   - shared-server
   - package

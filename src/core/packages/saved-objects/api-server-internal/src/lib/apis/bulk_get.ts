@@ -20,7 +20,7 @@ import {
   errorContent,
   type SavedObject,
 } from '@kbn/core-saved-objects-server';
-import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-server/utils';
 import {
   isLeft,
   isRight,

@@ -11,7 +11,7 @@ import { join } from 'path';
 import { omit } from 'lodash';
 import { parse } from 'hjson';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import type { MigrationResult } from '@kbn/core-saved-objects-base-server-internal';
+import type { MigrationResult } from '@kbn/core-saved-objects-server/base_internal';
 
 import {
   defaultKibanaIndex,

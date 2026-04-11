@@ -434,8 +434,8 @@ export {
 export {
   SavedObjectsUtils,
   mergeSavedObjectMigrationMaps,
-} from '@kbn/core-saved-objects-utils-server';
-export { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/utils';
+export { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-server/base_internal';
 export type { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
 export { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
 export type {

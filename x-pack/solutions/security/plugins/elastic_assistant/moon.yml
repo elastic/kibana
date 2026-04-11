@@ -34,7 +34,7 @@ dependsOn:
   - '@kbn/elastic-assistant-common'
   - '@kbn/core-http-router-server-mocks'
   - '@kbn/data-stream-adapter'
-  - '@kbn/core-saved-objects-utils-server'
+  - '@kbn/core-saved-objects-server'
   - '@kbn/core-elasticsearch-client-server-mocks'
   - '@kbn/task-manager-plugin'
   - '@kbn/event-log-plugin'

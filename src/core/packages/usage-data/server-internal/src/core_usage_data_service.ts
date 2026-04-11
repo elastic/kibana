@@ -29,7 +29,7 @@ import type { MetricsServiceSetup, OpsMetrics } from '@kbn/core-metrics-server';
 import {
   LEGACY_URL_ALIAS_TYPE,
   type SavedObjectsConfigType,
-} from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/base_internal';
 import type {
   CoreServicesUsageData,
   CoreUsageData,
@@ -45,7 +45,7 @@ import {
   CORE_USAGE_STATS_TYPE,
   type InternalCoreUsageDataSetup,
 } from '@kbn/core-usage-data-base-server-internal';
-import type { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-server/base_internal';
 import {
   MAIN_SAVED_OBJECT_INDEX,
   type SavedObjectsServiceStart,

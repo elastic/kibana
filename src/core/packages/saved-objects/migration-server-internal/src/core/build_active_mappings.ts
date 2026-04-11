@@ -14,7 +14,7 @@ import type {
   IndexMappingMeta,
   IndexMappingSafe,
   SavedObjectsTypeMappingDefinitions,
-} from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/base_internal';
 
 /**
  * Creates an index mapping with the core properties required by saved object

@@ -11,7 +11,7 @@ import { omit } from 'lodash';
 import * as TaskEither from 'fp-ts/TaskEither';
 import { pipe } from 'fp-ts/function';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { IndexMapping, VirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
+import type { IndexMapping, VirtualVersionMap } from '@kbn/core-saved-objects-server/base_internal';
 import { diffMappings } from '../core/diff_mappings';
 import type { RetryableEsClientError } from './catch_retryable_es_client_errors';
 import { updateMappings } from './update_mappings';

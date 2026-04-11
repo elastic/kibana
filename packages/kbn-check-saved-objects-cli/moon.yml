@@ -19,7 +19,6 @@ project:
 dependsOn:
   - '@kbn/some-dev-log'
   - '@kbn/dev-cli-errors'
-  - '@kbn/core-saved-objects-base-server-internal'
   - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/core-plugins-server-internal'
   - '@kbn/core-saved-objects-migration-server-internal'

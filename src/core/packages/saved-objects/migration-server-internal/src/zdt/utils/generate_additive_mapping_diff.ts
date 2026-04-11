@@ -16,8 +16,8 @@ import {
   getVirtualVersionsFromMappingMeta,
   getVirtualVersionMap,
   getModelVersionDelta,
-} from '@kbn/core-saved-objects-base-server-internal';
-import { initialModelVersion } from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/base_internal';
+import { initialModelVersion } from '@kbn/core-saved-objects-server/base_internal';
 import { getUpdatedRootFields } from '../../core/compare_mappings';
 import { getBaseMappings } from '../../core/build_active_mappings';
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IDocumentMigrator } from '@kbn/core-saved-objects-base-server-internal';
+import type { IDocumentMigrator } from '@kbn/core-saved-objects-server/base_internal';
 
 export const createDocumentMigrator = (): jest.Mocked<IDocumentMigrator> => {
   return {

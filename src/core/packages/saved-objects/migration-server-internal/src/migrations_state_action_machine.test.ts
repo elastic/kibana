@@ -11,7 +11,7 @@ import { migrationStateActionMachine } from './migrations_state_action_machine';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { LoggerAdapter } from '@kbn/core-logging-server-internal';
-import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
+import { typeRegistryMock } from '@kbn/core-saved-objects-server/mocks';
 import * as Either from 'fp-ts/Either';
 import * as Option from 'fp-ts/Option';
 import { errors } from '@elastic/elasticsearch';

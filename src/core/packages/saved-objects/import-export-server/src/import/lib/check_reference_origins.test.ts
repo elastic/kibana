@@ -16,7 +16,7 @@ import type {
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { checkReferenceOrigins, type CheckReferenceOriginsParams } from './check_reference_origins';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
+import { typeRegistryMock } from '@kbn/core-saved-objects-server/mocks';
 import type { ImportStateMap } from './types';
 
 const MULTI_NS_TYPE = 'multi';

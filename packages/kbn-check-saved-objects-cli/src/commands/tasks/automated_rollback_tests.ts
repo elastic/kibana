@@ -8,7 +8,7 @@
  */
 
 import type { ListrTask } from 'listr2';
-import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-server/base_internal';
 import type { MigrationAlgorithm, Task, TaskContext } from '../types';
 import { createBaseline } from './create_baseline';
 import { testUpgrade } from './test_upgrade';

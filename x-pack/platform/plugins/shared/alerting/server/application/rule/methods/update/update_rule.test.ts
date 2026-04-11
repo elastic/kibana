@@ -36,8 +36,8 @@ import type { RuleDomain } from '../../types';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
-jest.mock('@kbn/core-saved-objects-utils-server', () => {
-  const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
+jest.mock('@kbn/core-saved-objects-server/utils', () => {
+  const actual = jest.requireActual('@kbn/core-saved-objects-server/utils');
   return {
     ...actual,
     SavedObjectsUtils: {

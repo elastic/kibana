@@ -18,7 +18,7 @@ import type {
   SavedObjectUnsanitizedDoc,
   ISavedObjectsSerializer,
 } from '@kbn/core-saved-objects-server';
-import type { IDocumentMigrator } from '@kbn/core-saved-objects-base-server-internal';
+import type { IDocumentMigrator } from '@kbn/core-saved-objects-server/base_internal';
 import { TransformSavedObjectDocumentError } from '.';
 
 type MigrateAndConvertFn = IDocumentMigrator['migrateAndConvert'];

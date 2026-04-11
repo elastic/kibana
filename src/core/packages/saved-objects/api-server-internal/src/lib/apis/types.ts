@@ -13,7 +13,7 @@ import type {
   SavedObjectsExtensions,
   ISavedObjectsSerializer,
 } from '@kbn/core-saved-objects-server';
-import type { IKibanaMigrator, IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import type { IKibanaMigrator, IndexMapping } from '@kbn/core-saved-objects-server/base_internal';
 import type { RepositoryHelpers } from './helpers';
 import type { RepositoryEsClient } from '../repository_es_client';
 

@@ -24,7 +24,6 @@ dependsOn:
   - '@kbn/core-http-context-server-mocks'
   - '@kbn/core-http-server-mocks'
   - '@kbn/core-saved-objects-api-server-mocks'
-  - '@kbn/core-saved-objects-base-server-mocks'
   - '@kbn/core-saved-objects-server'
   - '@kbn/core-saved-objects-server-mocks'
   - '@kbn/core-ui-settings-server-mocks'

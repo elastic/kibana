@@ -12,7 +12,7 @@ import type {
   ISavedObjectsRepository,
   SavedObjectsIncrementCounterField,
 } from '@kbn/core-saved-objects-api-server';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-server/utils';
 import type { CoreUsageStats, CoreIncrementCounterParams } from '@kbn/core-usage-data-server';
 import {
   type ICoreUsageStatsClient,

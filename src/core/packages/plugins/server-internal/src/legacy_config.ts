@@ -20,7 +20,7 @@ import { config as elasticsearchConfig } from '@kbn/core-elasticsearch-server-in
 import {
   type SavedObjectsConfigType,
   savedObjectsConfig,
-} from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/base_internal';
 import type { SharedGlobalConfig } from '@kbn/core-plugins-server';
 import { SharedGlobalConfigKeys } from '@kbn/core-plugins-server';
 

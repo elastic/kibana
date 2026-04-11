@@ -8,7 +8,7 @@
  */
 
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
-import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-server/base_internal';
 
 export interface CreateIndexMapOptions {
   kibanaIndexName: string;

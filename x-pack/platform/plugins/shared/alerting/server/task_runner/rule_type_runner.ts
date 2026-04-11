@@ -10,7 +10,7 @@ import type {
   AlertInstanceState,
   RuleTaskState,
 } from '@kbn/alerting-state-types';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-server/utils';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';

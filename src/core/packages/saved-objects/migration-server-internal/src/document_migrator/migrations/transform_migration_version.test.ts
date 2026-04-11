@@ -8,7 +8,7 @@
  */
 
 import { unary } from 'lodash';
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-server/utils';
 import { transformMigrationVersion } from './transform_migration_version';
 
 const transform = unary(SavedObjectsUtils.getMigrationFunction(transformMigrationVersion));

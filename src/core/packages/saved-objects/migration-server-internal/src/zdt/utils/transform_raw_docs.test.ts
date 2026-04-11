@@ -8,7 +8,7 @@
  */
 
 import { migrateRawDocsSafelyMock } from './transform_raw_docs.test.mocks';
-import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
+import { serializerMock } from '@kbn/core-saved-objects-server/mocks';
 import { createDocumentMigrator, createSavedObjectRawDoc } from '../test_helpers';
 import { createDocumentTransformFn } from './transform_raw_docs';
 

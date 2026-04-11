@@ -9,7 +9,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createFailError } from '@kbn/dev-cli-errors';
-import type { FieldListMap } from '@kbn/core-saved-objects-base-server-internal';
+import type { FieldListMap } from '@kbn/core-saved-objects-server/base_internal';
 import { REMOVED_TYPES } from '@kbn/core-saved-objects-server-internal';
 import { compareFieldLists, type CompareResult } from './compare_type_field_lists';
 import { readCurrentFields, writeCurrentFields } from './current_fields';

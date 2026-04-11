@@ -18,8 +18,8 @@ import type {
   IDocumentMigrator,
   DocumentMigrateOptions,
   IsDowngradeRequiredOptions,
-} from '@kbn/core-saved-objects-base-server-internal';
-import { modelVersionToVirtualVersion } from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/base_internal';
+import { modelVersionToVirtualVersion } from '@kbn/core-saved-objects-server/base_internal';
 import type { ActiveMigrations } from './types';
 import { maxVersion } from './pipelines/utils';
 import { buildActiveMigrations } from './build_active_migrations';

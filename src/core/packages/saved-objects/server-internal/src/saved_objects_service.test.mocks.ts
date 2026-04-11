@@ -12,7 +12,7 @@ import {
   savedObjectsClientProviderMock,
   savedObjectsRepositoryMock,
 } from '@kbn/core-saved-objects-api-server-mocks';
-import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
+import { typeRegistryMock } from '@kbn/core-saved-objects-server/mocks';
 
 export const migratorInstanceMock = mockKibanaMigrator.create();
 export const KibanaMigratorMock = jest.fn().mockImplementation(() => migratorInstanceMock);
@@ -39,8 +39,8 @@ jest.doMock('@kbn/core-saved-objects-api-server-internal', () => {
 });
 
 export const typeRegistryInstanceMock = typeRegistryMock.create();
-jest.doMock('@kbn/core-saved-objects-base-server-internal', () => {
-  const actual = jest.requireActual('@kbn/core-saved-objects-base-server-internal');
+jest.doMock('@kbn/core-saved-objects-server/base_internal', () => {
+  const actual = jest.requireActual('@kbn/core-saved-objects-server/base_internal');
   return {
     ...actual,
     SavedObjectTypeRegistry: jest.fn().mockImplementation(() => typeRegistryInstanceMock),

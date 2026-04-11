@@ -16,7 +16,7 @@ import type {
 import type { Logger } from '@kbn/logging';
 import type { TaskInstanceWithId } from '@kbn/task-manager-plugin/server/task';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-server/utils';
 import { SAVED_OBJECT_TYPE, TASK_ID } from './constants';
 
 export const durationToSeconds = (duration: Duration) => `${duration.asSeconds()}s`;

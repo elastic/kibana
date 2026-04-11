@@ -15,7 +15,7 @@ import {
   type SavedObject,
   type SavedObjectSanitizedDoc,
 } from '@kbn/core-saved-objects-server';
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-server/utils';
 import {
   type SavedObjectsCreateOptions,
   type SavedObjectsBulkCreateObject,

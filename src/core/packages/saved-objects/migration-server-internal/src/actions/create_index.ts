@@ -15,7 +15,7 @@ import type {
   ElasticsearchClient,
   ElasticsearchCapabilities,
 } from '@kbn/core-elasticsearch-server';
-import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import type { IndexMapping } from '@kbn/core-saved-objects-server/base_internal';
 import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,

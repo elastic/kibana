@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-server/utils';
 
 import { isSpaceAwarenessEnabled } from './helpers';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-server/utils';
 import type { KueryNode } from '@kbn/es-query';
 import { toElasticsearchQuery, toKqlExpression } from '@kbn/es-query';
 

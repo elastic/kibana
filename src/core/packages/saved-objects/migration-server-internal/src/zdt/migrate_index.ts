@@ -15,7 +15,7 @@ import type {
   SavedObjectsMigrationConfigType,
   MigrationResult,
   IDocumentMigrator,
-} from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/base_internal';
 import type {
   ISavedObjectTypeRegistry,
   ISavedObjectsSerializer,

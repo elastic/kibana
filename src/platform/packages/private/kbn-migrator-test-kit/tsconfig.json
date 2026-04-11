@@ -17,7 +17,6 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-saved-objects-server",
     "@kbn/core-elasticsearch-server",
-    "@kbn/core-saved-objects-base-server-internal",
     "@kbn/config",
     "@kbn/config-mocks",
     "@kbn/repo-info",

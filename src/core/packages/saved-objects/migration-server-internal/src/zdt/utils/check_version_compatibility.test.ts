@@ -18,7 +18,7 @@ import type {
   IndexMapping,
   VirtualVersionMap,
   CompareModelVersionResult,
-} from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/base_internal';
 import { checkVersionCompatibility } from './check_version_compatibility';
 import { createType } from '../test_helpers';
 

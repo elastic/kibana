@@ -25,7 +25,7 @@ import {
   type MigrationResult,
   type SavedObjectsMigrationConfigType,
   type SavedObjectsTypeMappingDefinitions,
-} from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/base_internal';
 import Semver, { SemVer } from 'semver';
 import { pick } from 'lodash';
 import type { Histogram } from '@opentelemetry/api';

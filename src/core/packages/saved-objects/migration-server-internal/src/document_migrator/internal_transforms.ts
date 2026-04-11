@@ -13,9 +13,9 @@ import type {
   SavedObjectsType,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
-import { DEFAULT_NAMESPACE_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import type { LegacyUrlAlias } from '@kbn/core-saved-objects-base-server-internal';
-import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-base-server-internal';
+import { DEFAULT_NAMESPACE_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-server/utils';
+import type { LegacyUrlAlias } from '@kbn/core-saved-objects-server/base_internal';
+import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-server/base_internal';
 import type { Logger } from '@kbn/logging';
 import { migrations as coreMigrationsMap } from './migrations';
 import { type Transform, TransformType } from './types';

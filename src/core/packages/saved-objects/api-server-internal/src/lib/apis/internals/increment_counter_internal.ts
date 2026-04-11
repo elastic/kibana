@@ -13,7 +13,7 @@ import {
   type SavedObject,
   type SavedObjectSanitizedDoc,
 } from '@kbn/core-saved-objects-server';
-import { encodeHitVersion } from '@kbn/core-saved-objects-base-server-internal';
+import { encodeHitVersion } from '@kbn/core-saved-objects-server/base_internal';
 import type {
   SavedObjectsIncrementCounterOptions,
   SavedObjectsIncrementCounterField,

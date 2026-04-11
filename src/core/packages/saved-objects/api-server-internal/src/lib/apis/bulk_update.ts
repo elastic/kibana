@@ -22,8 +22,8 @@ import {
   errorContent,
   type SavedObject,
 } from '@kbn/core-saved-objects-server';
-import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import { encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
+import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-server/utils';
+import { encodeVersion } from '@kbn/core-saved-objects-server/base_internal';
 import {
   isLeft,
   isRight,

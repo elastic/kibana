@@ -21,7 +21,7 @@ import type {
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { Alert } from '@kbn/alerts-as-data-utils';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-server/utils';
 import type { DeepPartial } from '@kbn/utility-types';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import { CLUSTER_BLOCK_EXCEPTION } from '../lib/error_with_type';

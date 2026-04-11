@@ -31,8 +31,8 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import type { AuthTypeRegistry } from '../../../../auth_types/auth_type_registry';
 import { authTypeRegistryMock } from '../../../../auth_types/auth_type_registry.mock';
 
-jest.mock('@kbn/core-saved-objects-utils-server', () => {
-  const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
+jest.mock('@kbn/core-saved-objects-server/utils', () => {
+  const actual = jest.requireActual('@kbn/core-saved-objects-server/utils');
   return {
     ...actual,
     SavedObjectsUtils: {

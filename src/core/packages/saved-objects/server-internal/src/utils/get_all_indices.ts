@@ -8,7 +8,7 @@
  */
 
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import type { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-server/base_internal';
 
 export const getAllIndices = ({ registry }: { registry: SavedObjectTypeRegistry }): string[] => {
   return [

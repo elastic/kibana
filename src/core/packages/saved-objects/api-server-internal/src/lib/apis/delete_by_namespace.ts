@@ -14,7 +14,7 @@ import type { SavedObjectsDeleteByNamespaceOptions } from '@kbn/core-saved-objec
 import {
   getRootPropertiesObjects,
   LEGACY_URL_ALIAS_TYPE,
-} from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/base_internal';
 import { getSearchDsl } from '../search';
 import type { ApiExecutionContext } from './types';
 

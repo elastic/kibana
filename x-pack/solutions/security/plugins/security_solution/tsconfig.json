@@ -109,7 +109,6 @@
     "@kbn/event-log-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/cloud-plugin",
-    "@kbn/core-saved-objects-utils-server",
     "@kbn/core-http-router-server-mocks",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/apm-utils",

@@ -7,7 +7,7 @@
 
 import type { AuditLogger, AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-server/utils';
 import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import type { estypes } from '@elastic/elasticsearch';
 import type { IIndexPatternString } from '../types';

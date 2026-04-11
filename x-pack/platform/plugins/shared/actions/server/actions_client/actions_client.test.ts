@@ -55,8 +55,8 @@ import { createMockInMemoryConnector } from '../application/connector/mocks';
 import { authTypeRegistryMock } from '../auth_types/auth_type_registry.mock';
 import type { AuthTypeRegistry } from '../auth_types/auth_type_registry';
 
-jest.mock('@kbn/core-saved-objects-utils-server', () => {
-  const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
+jest.mock('@kbn/core-saved-objects-server/utils', () => {
+  const actual = jest.requireActual('@kbn/core-saved-objects-server/utils');
   return {
     ...actual,
     SavedObjectsUtils: {

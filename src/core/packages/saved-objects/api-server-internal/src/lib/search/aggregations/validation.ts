@@ -11,7 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ObjectType } from '@kbn/config-schema';
 import { isPlainObject, isArray } from 'lodash';
 
-import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import type { IndexMapping } from '@kbn/core-saved-objects-server/base_internal';
 import { getRootFields } from '../../utils';
 import {
   isObjectTypeAttribute,

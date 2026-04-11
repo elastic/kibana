@@ -37,7 +37,6 @@ dependsOn:
   - '@kbn/core-metrics-server-internal'
   - '@kbn/core-capabilities-server-internal'
   - '@kbn/core-saved-objects-server'
-  - '@kbn/core-saved-objects-base-server-internal'
   - '@kbn/core-saved-objects-server-internal'
   - '@kbn/core-i18n-server-internal'
   - '@kbn/core-deprecations-server-internal'

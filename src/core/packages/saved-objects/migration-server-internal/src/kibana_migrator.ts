@@ -33,7 +33,7 @@ import {
   type SavedObjectsMigrationConfigType,
   SavedObjectsSerializer,
   type SavedObjectsTypeMappingDefinitions,
-} from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/base_internal';
 import { createCummulativeLogger } from './create_cummulative_logger';
 import { buildActiveMappings, buildTypesMappings } from './core';
 import { DocumentMigrator } from './document_migrator';

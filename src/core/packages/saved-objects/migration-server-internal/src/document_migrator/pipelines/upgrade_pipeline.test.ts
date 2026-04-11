@@ -9,7 +9,7 @@
 
 import _ from 'lodash';
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
-import { modelVersionToVirtualVersion } from '@kbn/core-saved-objects-base-server-internal';
+import { modelVersionToVirtualVersion } from '@kbn/core-saved-objects-server/base_internal';
 import type { Transform, TypeTransforms, TransformFn } from '../types';
 import { TransformType } from '../types';
 import { DocumentUpgradePipeline } from './upgrade_pipeline';

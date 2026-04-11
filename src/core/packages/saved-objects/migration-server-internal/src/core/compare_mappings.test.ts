@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IndexMappingMeta } from '@kbn/core-saved-objects-base-server-internal';
+import type { IndexMappingMeta } from '@kbn/core-saved-objects-server/base_internal';
 import { getBaseMappings } from './build_active_mappings';
 import { getUpdatedRootFields, getNewAndUpdatedTypes } from './compare_mappings';
 

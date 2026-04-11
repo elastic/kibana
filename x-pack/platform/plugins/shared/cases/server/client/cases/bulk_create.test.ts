@@ -24,8 +24,8 @@ import { CaseSeverity, ConnectorTypes, CustomFieldTypes } from '../../../common/
 
 import type { CaseCustomFields } from '../../../common/types/domain';
 
-jest.mock('@kbn/core-saved-objects-utils-server', () => {
-  const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
+jest.mock('@kbn/core-saved-objects-server/utils', () => {
+  const actual = jest.requireActual('@kbn/core-saved-objects-server/utils');
 
   return {
     ...actual,

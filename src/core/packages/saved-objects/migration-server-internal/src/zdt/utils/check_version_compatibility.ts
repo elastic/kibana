@@ -15,8 +15,8 @@ import {
   type IndexMapping,
   type CompareModelVersionStatus,
   type CompareModelVersionDetails,
-} from '@kbn/core-saved-objects-base-server-internal';
-import { initialModelVersion } from '@kbn/core-saved-objects-base-server-internal/src/model_version/constants';
+  initialModelVersion,
+} from '@kbn/core-saved-objects-server/base_internal';
 import { getUpdatedRootFields } from '../../core/compare_mappings';
 
 interface CheckVersionCompatibilityOpts {

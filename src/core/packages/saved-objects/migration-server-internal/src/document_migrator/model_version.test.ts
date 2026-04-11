@@ -16,7 +16,7 @@ import type {
   SavedObjectModelDataBackfillFn,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
-import { modelVersionToVirtualVersion } from '@kbn/core-saved-objects-base-server-internal';
+import { modelVersionToVirtualVersion } from '@kbn/core-saved-objects-server/base_internal';
 import type { Transform } from './types';
 import { TransformType } from './types';
 import {

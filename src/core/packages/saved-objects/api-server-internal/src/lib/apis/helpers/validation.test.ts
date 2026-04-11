@@ -12,7 +12,7 @@ import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { type SavedObjectSanitizedDoc } from '@kbn/core-saved-objects-server';
 import { ValidationHelper } from './validation';
 import { typedef, typedef1, typedef2 } from './validation_fixtures';
-import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
+import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-server/base_internal';
 
 const defaultVersion = '8.10.0';
 const modelVirtualVersion = '10.1.0';

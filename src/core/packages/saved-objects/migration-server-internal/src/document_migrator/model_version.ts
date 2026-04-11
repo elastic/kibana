@@ -19,7 +19,7 @@ import {
   assertValidModelVersion,
   buildModelVersionTransformFn,
   convertModelVersionBackwardConversionSchema,
-} from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/base_internal';
 import { TransformSavedObjectDocumentError } from '../core';
 import { type Transform, type TransformFn, TransformType, type TypeVersionSchema } from './types';
 

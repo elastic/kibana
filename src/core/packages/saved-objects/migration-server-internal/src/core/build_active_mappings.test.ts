@@ -10,7 +10,7 @@
 import type {
   IndexMappingMeta,
   SavedObjectsTypeMappingDefinitions,
-} from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/base_internal';
 import { buildActiveMappings, getBaseMappings } from './build_active_mappings';
 
 describe('buildActiveMappings', () => {

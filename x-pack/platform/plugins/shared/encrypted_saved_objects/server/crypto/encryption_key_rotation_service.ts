@@ -14,7 +14,7 @@ import type {
   StartServicesAccessor,
 } from '@kbn/core/server';
 import { ENCRYPTION_EXTENSION_ID } from '@kbn/core-saved-objects-server';
-import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
+import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-server/utils';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 

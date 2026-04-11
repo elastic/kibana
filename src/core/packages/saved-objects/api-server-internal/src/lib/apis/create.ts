@@ -13,8 +13,8 @@ import {
   type SavedObject,
   type SavedObjectSanitizedDoc,
 } from '@kbn/core-saved-objects-server';
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import { decodeRequestVersion } from '@kbn/core-saved-objects-base-server-internal';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-server/utils';
+import { decodeRequestVersion } from '@kbn/core-saved-objects-server/base_internal';
 import type {
   SavedObjectAccessControl,
   SavedObjectsCreateOptions,

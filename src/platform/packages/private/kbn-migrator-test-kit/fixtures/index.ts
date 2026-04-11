@@ -13,7 +13,7 @@ import type {
   SavedObjectModelUnsafeTransformFn,
   SavedObjectsType,
 } from '@kbn/core-saved-objects-server';
-import type { IndexTypesMap } from '@kbn/core-saved-objects-base-server-internal';
+import type { IndexTypesMap } from '@kbn/core-saved-objects-server/base_internal';
 import type { ElasticsearchClientWrapperFactory } from '../src/elasticsearch_client_wrapper';
 import {
   currentVersion,

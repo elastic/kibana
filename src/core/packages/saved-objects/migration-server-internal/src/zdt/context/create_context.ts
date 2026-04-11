@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getVirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
+import { getVirtualVersionMap } from '@kbn/core-saved-objects-server/base_internal';
 import type { MigrateIndexOptions } from '../migrate_index';
 import type { MigratorContext } from './types';
 

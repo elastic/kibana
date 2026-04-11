@@ -12,11 +12,11 @@ import {
   type SavedObject,
   type SavedObjectSanitizedDoc,
 } from '@kbn/core-saved-objects-server';
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-server/utils';
 import {
   decodeRequestVersion,
   encodeHitVersion,
-} from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/base_internal';
 import type {
   SavedObjectAccessControl,
   SavedObjectsUpdateOptions,

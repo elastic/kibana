@@ -8,7 +8,7 @@
  */
 
 import type { SavedObjectMigrationMap } from '@kbn/core-saved-objects-server';
-import { mergeSavedObjectMigrations } from '@kbn/core-saved-objects-utils-server';
+import { mergeSavedObjectMigrations } from '@kbn/core-saved-objects-server/utils';
 import { transformMigrationVersion } from './transform_migration_version';
 import { transformSetManagedDefault } from './transform_set_managed_default';
 

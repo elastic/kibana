@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
+import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-server/base_internal';
 import { SavedObjectsRepository } from './repository';
 import { kibanaMigratorMock } from '../mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';

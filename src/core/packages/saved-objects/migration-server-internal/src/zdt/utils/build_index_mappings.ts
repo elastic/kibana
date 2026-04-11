@@ -13,7 +13,7 @@ import {
   type IndexMapping,
   type IndexMappingMeta,
   getVirtualVersionMap,
-} from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/base_internal';
 import { getBaseMappings, buildTypesMappings } from '../../core';
 
 interface BuildIndexMappingsOpts {

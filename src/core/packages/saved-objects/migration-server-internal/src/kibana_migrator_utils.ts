@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IndexTypesMap } from '@kbn/core-saved-objects-base-server-internal';
+import type { IndexTypesMap } from '@kbn/core-saved-objects-server/base_internal';
 import type { IndexMap } from './core';
 import { TypeStatus, type TypeStatusDetails } from './kibana_migrator_constants';
 

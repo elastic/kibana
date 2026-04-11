@@ -7,7 +7,7 @@
 
 import yaml from 'js-yaml';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
+import { serializerMock } from '@kbn/core-saved-objects-server/mocks';
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import type {
   SavedObjectsRawDocSource,

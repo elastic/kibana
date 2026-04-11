@@ -8,7 +8,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { IndexMappingMeta } from '@kbn/core-saved-objects-base-server-internal';
+import type { IndexMappingMeta } from '@kbn/core-saved-objects-server/base_internal';
 import { updateMappings } from '../../actions';
 
 export interface UpdateIndexMetaParams {

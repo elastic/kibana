@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
+import { typeRegistryMock } from '@kbn/core-saved-objects-server/mocks';
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
@@ -16,7 +16,7 @@ import type {
   ISavedObjectsSecurityExtension,
   SavedObjectAccessControl,
 } from '@kbn/core-saved-objects-server';
-import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
+import { SavedObjectsSerializer } from '@kbn/core-saved-objects-server/base_internal';
 import {
   type ChangeAccessControlParams,
   changeObjectAccessControl,

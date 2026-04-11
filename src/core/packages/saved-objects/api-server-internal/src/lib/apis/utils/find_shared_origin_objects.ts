@@ -8,8 +8,8 @@
  */
 
 import * as esKuery from '@kbn/es-query';
-import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
-import { getObjectKey } from '@kbn/core-saved-objects-base-server-internal';
+import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-server/utils';
+import { getObjectKey } from '@kbn/core-saved-objects-server/base_internal';
 import type { SavedObjectsCollectMultiNamespaceReferencesPurpose } from '@kbn/core-saved-objects-api-server/src/apis';
 import {
   KQL_FUNCTION_AND,

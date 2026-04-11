@@ -21,22 +21,15 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/tracing-utils",
-    // add references to other TypeScript projects the plugin depends on
-
-    // requiredPlugins from ./kibana.json
     "@kbn/licensing-plugin",
     "@kbn/data-plugin",
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/files-plugin",
-
-    // optionalPlugins from ./kibana.json
     "@kbn/security-plugin",
     "@kbn/features-plugin",
     "@kbn/cloud-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/home-plugin",
-
-    // requiredBundles from ./kibana.json
     "@kbn/kibana-react-plugin",
     "@kbn/es-ui-shared-plugin",
     "@kbn/logs-shared-plugin",
@@ -46,8 +39,6 @@
     "@kbn/share-plugin",
     "@kbn/i18n-react",
     "@kbn/custom-integrations-plugin",
-
-    // packages
     "@kbn/core-application-common",
     "@kbn/core-capabilities-common",
     "@kbn/i18n",
@@ -92,7 +83,6 @@
     "@kbn/safer-lodash-set",
     "@kbn/shared-ux-file-types",
     "@kbn/core-application-browser",
-    "@kbn/core-saved-objects-base-server-internal",
     "@kbn/core-http-common",
     "@kbn/dashboard-plugin",
     "@kbn/cloud",
@@ -106,7 +96,6 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/fields-metadata-plugin",
     "@kbn/test-jest-helpers",
-    "@kbn/core-saved-objects-utils-server",
     "@kbn/automatic-import-plugin",
     "@kbn/core-security-server-mocks",
     "@kbn/server-http-tools",
@@ -134,6 +123,6 @@
     "@kbn/css-utils",
     "@kbn/rison",
     "@kbn/rule-data-utils",
-    "@kbn/doc-links"
+    "@kbn/doc-links",
   ]
 }

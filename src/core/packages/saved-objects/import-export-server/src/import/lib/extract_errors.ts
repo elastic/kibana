@@ -9,7 +9,7 @@
 
 import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
 import type { CreatedObject, SavedObject } from '@kbn/core-saved-objects-server';
-import type { LegacyUrlAlias } from '@kbn/core-saved-objects-base-server-internal';
+import type { LegacyUrlAlias } from '@kbn/core-saved-objects-server/base_internal';
 
 export function extractErrors(
   // TODO: define saved object type

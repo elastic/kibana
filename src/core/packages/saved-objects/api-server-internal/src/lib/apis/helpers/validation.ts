@@ -13,12 +13,12 @@ import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsTypeValidator,
   modelVersionToVirtualVersion,
-} from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/base_internal';
 import {
   SavedObjectsErrorHelpers,
   type SavedObjectSanitizedDoc,
 } from '@kbn/core-saved-objects-server';
-import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
+import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-server/utils';
 
 export type IValidationHelper = PublicMethodsOf<ValidationHelper>;
 

@@ -14,7 +14,7 @@ import { isPromise } from '@kbn/std';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { nodeServiceMock } from '@kbn/core-node-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { typeRegistryMock as savedObjectsTypeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
+import { typeRegistryMock as savedObjectsTypeRegistryMock } from '@kbn/core-saved-objects-server/mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
@@ -29,7 +29,7 @@ export { configServiceMock, configDeprecationsMock } from '@kbn/config-mocks';
 export { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 export { httpServerMock, sessionStorageMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 export { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-export { typeRegistryMock as savedObjectsTypeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
+export { typeRegistryMock as savedObjectsTypeRegistryMock } from '@kbn/core-saved-objects-server/mocks';
 export { httpResourcesMock } from '@kbn/core-http-resources-server-mocks';
 export { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 export {

@@ -14,8 +14,8 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import {
   SavedObjectTypeRegistry,
   type SavedObjectsMigrationConfigType,
-} from '@kbn/core-saved-objects-base-server-internal';
-import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
+} from '@kbn/core-saved-objects-server/base_internal';
+import { serializerMock } from '@kbn/core-saved-objects-server/mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import type { MigratorContext } from '../context';
 import { createDocumentMigrator } from './document_migrator';

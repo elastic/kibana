@@ -13,11 +13,11 @@ import * as esKuery from '@kbn/es-query';
 import {
   ALL_NAMESPACES_STRING,
   DEFAULT_NAMESPACE_STRING,
-} from '@kbn/core-saved-objects-utils-server';
+} from '@kbn/core-saved-objects-server/utils';
 import {
   SavedObjectTypeRegistry,
   type IndexMapping,
-} from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/base_internal';
 import { getQueryParams } from './query_params';
 import type {
   SavedObjectsType,

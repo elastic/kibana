@@ -9,7 +9,7 @@
 
 import type Hapi from '@hapi/hapi';
 import type { IncomingMessage } from 'http';
-import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-base-server-internal';
+import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-server/base_internal';
 import {
   type ISavedObjectTypeRegistry,
   MAIN_SAVED_OBJECT_INDEX,

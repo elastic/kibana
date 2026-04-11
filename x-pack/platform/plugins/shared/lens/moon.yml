@@ -82,7 +82,6 @@ dependsOn:
   - '@kbn/core-mount-utils-browser'
   - '@kbn/core-notifications-browser'
   - '@kbn/core-notifications-browser-mocks'
-  - '@kbn/core-saved-objects-utils-server'
   - '@kbn/core-lifecycle-browser-mocks'
   - '@kbn/unified-field-list'
   - '@kbn/event-annotation-common'

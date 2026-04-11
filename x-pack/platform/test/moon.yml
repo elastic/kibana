@@ -51,7 +51,6 @@ dependsOn:
   - '@kbn/index-management-plugin'
   - '@kbn/snapshot-restore-plugin'
   - '@kbn/monitoring-plugin'
-  - '@kbn/core-saved-objects-base-server-internal'
   - '@kbn/utils'
   - '@kbn/core'
   - '@kbn/entities-schema'

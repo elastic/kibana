@@ -43,7 +43,7 @@ import {
 } from './mocks';
 import { CaseUserActionService } from '.';
 import { createPersistableStateAttachmentTypeRegistryMock } from '../../attachment_framework/mocks';
-import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
+import { serializerMock } from '@kbn/core-saved-objects-server/mocks';
 import {
   createUserActionFindSO,
   createConnectorUserAction,

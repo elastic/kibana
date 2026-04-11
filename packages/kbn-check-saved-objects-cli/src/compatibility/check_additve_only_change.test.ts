@@ -9,7 +9,7 @@
 
 import { cloneDeep } from 'lodash';
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-server/base_internal';
 import { checkAdditiveOnlyChange } from './check_additive_only_change';
 import { createSomeDevLogMock } from './mocks';
 

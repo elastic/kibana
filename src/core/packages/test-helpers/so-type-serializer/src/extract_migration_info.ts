@@ -17,7 +17,7 @@ import type {
   SavedObjectsModelVersionSchemaDefinitions,
   SavedObjectsType,
 } from '@kbn/core-saved-objects-server';
-import { aggregateMappingAdditions } from '@kbn/core-saved-objects-base-server-internal';
+import { aggregateMappingAdditions } from '@kbn/core-saved-objects-server/base_internal';
 import type { SavedObjectsModelChange } from '@kbn/core-saved-objects-server';
 import { createHash } from 'crypto';
 

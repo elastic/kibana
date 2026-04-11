@@ -8,7 +8,7 @@
  */
 
 import * as Either from 'fp-ts/Either';
-import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import type { IndexMapping } from '@kbn/core-saved-objects-server/base_internal';
 import type { SavedObjectsMappingProperties } from '@kbn/core-saved-objects-server';
 import { checkTargetTypesMappings } from './check_target_mappings';
 import { getBaseMappings } from '../core';

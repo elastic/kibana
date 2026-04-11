@@ -14,7 +14,7 @@ import type {
   IndexMappingMeta,
   VirtualVersionMap,
   IndexMapping,
-} from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/base_internal';
 import { getBaseMappings } from './build_active_mappings';
 
 /**

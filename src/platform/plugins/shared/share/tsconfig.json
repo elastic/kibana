@@ -17,7 +17,7 @@
     "@kbn/i18n-react",
     "@kbn/config-schema",
     "@kbn/core-custom-branding-browser",
-    "@kbn/core-saved-objects-utils-server",
+    "@kbn/core-saved-objects-server",
     "@kbn/react-kibana-context-theme",
     "@kbn/core-analytics-browser",
     "@kbn/shared-ux-error-boundary",
@@ -37,7 +37,7 @@
     "@kbn/core-http-router-server-mocks",
     "@kbn/licensing-types",
     "@kbn/es-query",
-    "@kbn/scout"
+    "@kbn/scout",
   ],
   "exclude": ["target/**/*"]
 }

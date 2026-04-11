@@ -20,7 +20,7 @@ import {
   type SavedObjectsConfigType,
   type SavedObjectsMigrationConfigType,
   type IndexTypesMap,
-} from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/base_internal';
 import { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
 import {
   ElasticsearchConfig,
@@ -33,7 +33,7 @@ import {
   getRequestHandlerFactory,
 } from '@kbn/core-elasticsearch-client-server-internal';
 import { type LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-internal';
-import type { ISavedObjectTypeRegistryInternal } from '@kbn/core-saved-objects-base-server-internal';
+import type { ISavedObjectTypeRegistryInternal } from '@kbn/core-saved-objects-server/base_internal';
 import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
 import type { LoggerFactory } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';

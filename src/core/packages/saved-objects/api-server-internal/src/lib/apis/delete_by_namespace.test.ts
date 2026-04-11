@@ -16,11 +16,11 @@ import {
 } from '../repository.test.mock';
 
 import type { SavedObjectsDeleteByNamespaceOptions } from '@kbn/core-saved-objects-api-server';
-import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
+import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-server/utils';
 import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
-import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsSerializer } from '@kbn/core-saved-objects-server/base_internal';
+import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-server/base_internal';
 import { kibanaMigratorMock } from '../../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 

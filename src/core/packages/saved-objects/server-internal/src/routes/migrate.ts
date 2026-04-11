@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IKibanaMigrator } from '@kbn/core-saved-objects-base-server-internal';
+import type { IKibanaMigrator } from '@kbn/core-saved-objects-server/base_internal';
 import type { InternalSavedObjectRouter } from '../internal_types';
 import { catchAndReturnBoomErrors } from './utils';
 

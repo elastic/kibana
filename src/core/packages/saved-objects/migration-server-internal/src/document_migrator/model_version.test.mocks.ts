@@ -9,8 +9,8 @@
 
 export const convertModelVersionBackwardConversionSchemaMock = jest.fn();
 
-jest.doMock('@kbn/core-saved-objects-base-server-internal', () => {
-  const actual = jest.requireActual('@kbn/core-saved-objects-base-server-internal');
+jest.doMock('@kbn/core-saved-objects-server/base_internal', () => {
+  const actual = jest.requireActual('@kbn/core-saved-objects-server/base_internal');
   return {
     ...actual,
     convertModelVersionBackwardConversionSchema: convertModelVersionBackwardConversionSchemaMock,

@@ -14,7 +14,7 @@ import {
   type AuthorizationTypeMap,
   type SavedObject,
 } from '@kbn/core-saved-objects-server';
-import type { IKibanaMigrator } from '@kbn/core-saved-objects-base-server-internal';
+import type { IKibanaMigrator } from '@kbn/core-saved-objects-server/base_internal';
 import type { IEncryptionHelper } from './encryption';
 
 export type IMigrationHelper = PublicMethodsOf<MigrationHelper>;

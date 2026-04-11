@@ -12,12 +12,12 @@ import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type {
   IKibanaMigrator,
   KibanaMigratorStatus,
-} from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/base_internal';
 import {
   buildActiveMappings,
   buildTypesMappings,
 } from '@kbn/core-saved-objects-migration-server-internal';
-import { createDocumentMigratorMock } from '@kbn/core-saved-objects-base-server-mocks';
+import { createDocumentMigratorMock } from '@kbn/core-saved-objects-server/mocks';
 import { lazyObject } from '@kbn/lazy-object';
 
 const defaultSavedObjectTypes: SavedObjectsType[] = [

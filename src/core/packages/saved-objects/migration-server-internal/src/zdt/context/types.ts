@@ -20,7 +20,7 @@ import type {
   VirtualVersionMap,
   SavedObjectsMigrationConfigType,
   IDocumentMigrator,
-} from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/base_internal';
 import type { DocLinks } from '@kbn/doc-links';
 
 /**

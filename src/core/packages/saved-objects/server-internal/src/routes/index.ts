@@ -12,7 +12,7 @@ import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type {
   SavedObjectConfig,
   IKibanaMigrator,
-} from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/base_internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import type { RouteDeprecationInfo } from '@kbn/core-http-server';

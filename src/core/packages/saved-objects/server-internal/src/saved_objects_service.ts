@@ -48,7 +48,7 @@ import {
   type IKibanaMigrator,
   DEFAULT_INDEX_TYPES_MAP,
   HASH_TO_VERSION_MAP,
-} from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/base_internal';
 import {
   SavedObjectsClient,
   SavedObjectsClientProvider,

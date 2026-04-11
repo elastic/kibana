@@ -71,7 +71,6 @@ dependsOn:
   - '@kbn/management-settings-ids'
   - '@kbn/expandable-flyout'
   - '@kbn/code-editor-mock'
-  - '@kbn/core-saved-objects-utils-server'
   - '@kbn/licensing-types'
   - '@kbn/shared-ux-page-no-data'
   - '@kbn/shared-ux-card-no-data'

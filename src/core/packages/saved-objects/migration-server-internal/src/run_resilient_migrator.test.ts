@@ -13,7 +13,7 @@ import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { MigrationResult } from '@kbn/core-saved-objects-base-server-internal';
+import type { MigrationResult } from '@kbn/core-saved-objects-server/base_internal';
 import { createInitialState } from './initial_state';
 import { waitGroup } from './kibana_migrator_utils';
 import { migrationStateActionMachine } from './migrations_state_action_machine';

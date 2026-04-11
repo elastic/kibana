@@ -9,7 +9,7 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SavedObject, SavedObjectsType } from '@kbn/core-saved-objects-server';
-import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
+import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-server/base_internal';
 import { SavedObjectsExporter } from './saved_objects_exporter';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';

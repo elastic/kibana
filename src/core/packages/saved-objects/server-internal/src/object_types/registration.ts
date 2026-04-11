@@ -11,8 +11,8 @@ import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import {
   LEGACY_URL_ALIAS_TYPE,
   type LegacyUrlAlias,
-} from '@kbn/core-saved-objects-base-server-internal';
-import type { ISavedObjectTypeRegistryInternal } from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/base_internal';
+import type { ISavedObjectTypeRegistryInternal } from '@kbn/core-saved-objects-server/base_internal';
 
 const legacyUrlAliasType: SavedObjectsType = {
   name: LEGACY_URL_ALIAS_TYPE,

@@ -9,7 +9,7 @@
 
 import type { Optional } from 'utility-types';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
+import { typeRegistryMock } from '@kbn/core-saved-objects-server/mocks';
 import { SavedObjectsClientProvider } from './scoped_client_provider';
 import {
   type ISavedObjectTypeRegistry,

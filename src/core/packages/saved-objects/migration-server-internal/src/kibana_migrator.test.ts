@@ -15,7 +15,7 @@ import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import {
   type MigrationResult,
   SavedObjectTypeRegistry,
-} from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/base_internal';
 import { KibanaMigrator, type KibanaMigratorOptions } from './kibana_migrator';
 import { DocumentMigrator } from './document_migrator';
 import { ByteSizeValue } from '@kbn/config-schema';

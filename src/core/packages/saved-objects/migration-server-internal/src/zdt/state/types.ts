@@ -13,7 +13,7 @@ import type {
   SavedObjectsMappingProperties,
   SavedObjectTypeExcludeFromUpgradeFilterHook,
 } from '@kbn/core-saved-objects-server';
-import type { IndexMapping, IndexMappingMeta } from '@kbn/core-saved-objects-base-server-internal';
+import type { IndexMapping, IndexMappingMeta } from '@kbn/core-saved-objects-server/base_internal';
 import type { MigrationLog, Progress, TransformRawDocs } from '../../types';
 import type { ControlState } from '../../state_action_machine';
 import type { BulkOperationBatch } from '../../model/create_batches';

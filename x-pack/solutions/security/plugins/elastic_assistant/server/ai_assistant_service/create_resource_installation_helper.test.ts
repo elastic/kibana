@@ -6,7 +6,7 @@
  */
 
 import { range } from 'lodash';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-server/utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type {
   InitializationPromise,

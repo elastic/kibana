@@ -8,7 +8,7 @@
  */
 
 import { type SavedObjectsType, MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
+import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-server/base_internal';
 import { getAllIndices } from './get_all_indices';
 
 describe('getAllIndices', () => {

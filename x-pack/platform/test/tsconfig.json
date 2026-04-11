@@ -63,7 +63,6 @@
     "@kbn/index-management-plugin",
     "@kbn/snapshot-restore-plugin",
     "@kbn/monitoring-plugin",
-    "@kbn/core-saved-objects-base-server-internal",
     "@kbn/utils",
     "@kbn/core",
     "@kbn/entities-schema",
@@ -183,6 +182,6 @@
     "@kbn/ui-actions-plugin",
     "@kbn/product-doc-common",
     "@kbn/lens-common",
-    "@kbn/alerting-v2-episodes-ui"
+    "@kbn/alerting-v2-episodes-ui",
   ]
 }

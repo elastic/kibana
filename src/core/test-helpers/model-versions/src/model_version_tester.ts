@@ -15,7 +15,7 @@ import type { SavedObjectsType, SavedObject } from '@kbn/core-saved-objects-serv
 import {
   modelVersionToVirtualVersion,
   SavedObjectTypeRegistry,
-} from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/base_internal';
 import { DocumentMigrator } from '@kbn/core-saved-objects-migration-server-internal';
 
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());

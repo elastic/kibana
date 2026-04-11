@@ -72,7 +72,7 @@ import {
   type IndexMapping,
   type IKibanaMigrator,
   type ISavedObjectTypeRegistryInternal,
-} from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/base_internal';
 import { PointInTimeFinder } from './point_in_time_finder';
 import { createRepositoryEsClient, type RepositoryEsClient } from './repository_es_client';
 import type { RepositoryHelpers } from './apis/helpers';

@@ -24,7 +24,7 @@ import {
   savedObjectsRepositoryMock,
   savedObjectsClientMock,
 } from '@kbn/core-saved-objects-api-server-mocks';
-import { typeRegistryMock, serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
+import { typeRegistryMock, serializerMock } from '@kbn/core-saved-objects-server/mocks';
 import {
   savedObjectsExporterMock,
   savedObjectsImporterMock,

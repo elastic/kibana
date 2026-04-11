@@ -22,7 +22,7 @@ import {
   FIND_DEFAULT_PAGE,
   FIND_DEFAULT_PER_PAGE,
   SavedObjectsUtils,
-} from '@kbn/core-saved-objects-utils-server';
+} from '@kbn/core-saved-objects-server/utils';
 import type {
   SavedObjectsFindOptions,
   SavedObjectsFindInternalOptions,

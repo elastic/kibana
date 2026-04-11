@@ -10,7 +10,7 @@
 import { get } from 'lodash';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import { createFailError } from '@kbn/dev-cli-errors';
-import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-server/base_internal';
 
 function isObject(v: unknown): v is object {
   return Object.prototype.toString.call(v) === '[object Object]';

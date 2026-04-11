@@ -10,7 +10,7 @@
 import Boom from '@hapi/boom';
 import type { SortOrder, SortCombinations } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsPitParams } from '@kbn/core-saved-objects-api-server/src/apis';
-import { getProperty, type IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import { getProperty, type IndexMapping } from '@kbn/core-saved-objects-server/base_internal';
 
 const TOP_LEVEL_FIELDS = ['_id', '_score'];
 

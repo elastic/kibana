@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-server/utils';
 import { getIndexTemplateAndPattern } from '../alerts_service/resource_installer_utils';
 import type { RuleTypeRegistry } from '../rule_type_registry';
 

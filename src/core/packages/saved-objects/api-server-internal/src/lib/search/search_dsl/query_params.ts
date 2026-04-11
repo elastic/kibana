@@ -13,8 +13,8 @@ import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import {
   ALL_NAMESPACES_STRING,
   DEFAULT_NAMESPACE_STRING,
-} from '@kbn/core-saved-objects-utils-server';
-import { getProperty, type IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/utils';
+import { getProperty, type IndexMapping } from '@kbn/core-saved-objects-server/base_internal';
 import type { estypes } from '@elastic/elasticsearch';
 import { getReferencesFilter } from './references_filter';
 

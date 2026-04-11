@@ -7,7 +7,7 @@
 
 import type { FieldMap } from '@kbn/data-stream-adapter';
 import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-server/utils';
 import type {
   AuthenticatedUser,
   Logger,

@@ -8,7 +8,7 @@
  */
 
 import Path from 'path';
-import type { FieldListMap } from '@kbn/core-saved-objects-base-server-internal';
+import type { FieldListMap } from '@kbn/core-saved-objects-server/base_internal';
 import { prettyPrintAndSortKeys } from '@kbn/utils';
 import { fileToJson, jsonToFile } from '../util';
 

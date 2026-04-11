@@ -15,7 +15,7 @@ import {
   getRequestDebugMeta,
 } from '@kbn/core-elasticsearch-client-server-internal';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
-import type { MigrationResult } from '@kbn/core-saved-objects-base-server-internal';
+import type { MigrationResult } from '@kbn/core-saved-objects-server/base_internal';
 import { logActionResponse, logStateTransition } from './common/utils/logs';
 import { type Model, type Next, stateActionMachine } from './state_action_machine';
 import type { ReindexSourceToTempTransform, ReindexSourceToTempIndexBulk, State } from './state';

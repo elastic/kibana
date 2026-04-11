@@ -10,7 +10,7 @@
 import Boom from '@hapi/boom';
 import { isSupportedEsServer } from '@kbn/core-elasticsearch-server-internal';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-server/utils';
 import type {
   SavedObjectsOpenPointInTimeOptions,
   SavedObjectsFindInternalOptions,

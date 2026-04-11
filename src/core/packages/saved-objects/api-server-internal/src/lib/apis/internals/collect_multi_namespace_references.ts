@@ -22,8 +22,8 @@ import {
   type ISavedObjectsSerializer,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import { getObjectKey, parseObjectKey } from '@kbn/core-saved-objects-base-server-internal';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-server/utils';
+import { getObjectKey, parseObjectKey } from '@kbn/core-saved-objects-server/base_internal';
 import { findLegacyUrlAliases } from './find_legacy_url_aliases';
 import { getRootFields } from '../../utils';
 import type { CreatePointInTimeFinderFn } from '../../point_in_time_finder';
