@@ -70,7 +70,9 @@ export function getErrorRateChart({
   try {
     const query = createBaseTraceQuery({ indexes, filters, metadataFields });
     query.pipe(
-      `STATS failure = COUNT(*) WHERE TO_STRING(${EVENT_OUTCOME}) == "failure" OR TO_STRING(${STATUS_CODE}) == "Error", all = COUNT(*) BY timestamp = ${createTimeBucketAggregation({})}`
+      `STATS failure = COUNT(*) WHERE TO_STRING(${EVENT_OUTCOME}) == "failure" OR TO_STRING(${STATUS_CODE}) == "Error", all = COUNT(*) BY timestamp = ${createTimeBucketAggregation(
+        {}
+      )}`
     );
     query.pipe('EVAL error_rate = TO_DOUBLE(failure) / all');
     query.pipe('KEEP timestamp, error_rate');
