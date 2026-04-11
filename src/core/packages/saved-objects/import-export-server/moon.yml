@@ -24,7 +24,6 @@ dependsOn:
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/core-saved-objects-server'
   - '@kbn/core-http-server-mocks'
-  - '@kbn/core-saved-objects-api-server-mocks'
   - '@kbn/logging-mocks'
   - '@kbn/core-http-router-server-internal'
   - '@kbn/lazy-object'

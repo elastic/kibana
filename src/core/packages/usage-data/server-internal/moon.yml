@@ -36,7 +36,6 @@ dependsOn:
   - '@kbn/core-metrics-server-mocks'
   - '@kbn/core-saved-objects-server-mocks'
   - '@kbn/core-elasticsearch-server-mocks'
-  - '@kbn/core-saved-objects-api-server-mocks'
 tags:
   - shared-server
   - package

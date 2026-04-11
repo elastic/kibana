@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 
 import { createAppContextStartContractMock } from '../../../../mocks';
 

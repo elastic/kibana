@@ -19,7 +19,7 @@ import {
   httpServerMock,
   savedObjectsServiceMock,
 } from '@kbn/core/server/mocks';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import type { SearchOpts, AggregationOpts } from './task_store';
 import { TaskStore, taskInstanceToAttributes } from './task_store';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';

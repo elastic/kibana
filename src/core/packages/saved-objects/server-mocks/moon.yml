@@ -21,7 +21,6 @@ dependsOn:
   - '@kbn/core-status-common'
   - '@kbn/core-saved-objects-server'
   - '@kbn/core-saved-objects-server-internal'
-  - '@kbn/core-saved-objects-api-server-mocks'
   - '@kbn/core-saved-objects-import-export-server'
   - '@kbn/lazy-object'
 tags:

@@ -8,7 +8,7 @@
     ]
   },
   "include": [
-    "**/*.ts",
+    "**/*.ts"
   ],
   "kbn_references": [
     "@kbn/core-deprecations-server-mocks",
@@ -17,15 +17,14 @@
     "@kbn/core-http-context-server-internal",
     "@kbn/core-http-context-server-mocks",
     "@kbn/core-http-server-mocks",
-    "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-saved-objects-server",
     "@kbn/core-saved-objects-server-mocks",
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/core-http-server-internal",
     "@kbn/core-doc-links-server-mocks",
-    "@kbn/core-user-activity-server-mocks",
+    "@kbn/core-user-activity-server-mocks"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }

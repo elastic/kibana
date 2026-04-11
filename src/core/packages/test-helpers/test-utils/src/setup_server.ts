@@ -12,7 +12,7 @@ import { ContextService } from '@kbn/core-http-context-server-internal';
 import { HttpService } from '@kbn/core-http-server-internal';
 import { createCoreContext } from '@kbn/core-http-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import { typeRegistryMock } from '@kbn/core-saved-objects-server/mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';

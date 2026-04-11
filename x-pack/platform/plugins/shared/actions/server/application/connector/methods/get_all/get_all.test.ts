@@ -13,7 +13,7 @@ import { getOAuthClientCredentialsAccessToken } from '../../../../lib/get_oauth_
 import {
   savedObjectsClientMock,
   savedObjectsRepositoryMock,
-} from '@kbn/core-saved-objects-api-server-mocks';
+} from '@kbn/core-saved-objects-server/mocks';
 import { actionsAuthorizationMock } from '../../../../authorization/actions_authorization.mock';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { actionExecutorMock } from '../../../../lib/action_executor.mock';

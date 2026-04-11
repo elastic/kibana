@@ -192,7 +192,6 @@
     "@kbn/react-kibana-context-render",
     "@kbn/search-types",
     "@kbn/field-utils",
-    "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-analytics-browser",
     "@kbn/automatic-import-plugin",
     "@kbn/config",
@@ -290,6 +289,6 @@
     "@kbn/controls-schemas",
     "@kbn/search-inference-endpoints",
     "@kbn/shared-ux-column-presets",
-    "@kbn/core-overlays-browser",
+    "@kbn/core-overlays-browser"
   ]
 }

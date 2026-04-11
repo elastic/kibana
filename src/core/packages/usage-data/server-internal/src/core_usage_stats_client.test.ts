@@ -9,7 +9,7 @@
 
 import { Subject } from 'rxjs';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
-import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-server/mocks';
 import type {
   BaseIncrementOptions,
   IncrementSavedObjectsImportOptions,

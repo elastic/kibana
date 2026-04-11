@@ -55,7 +55,6 @@
     "@kbn/core-analytics-server",
     "@kbn/llm-tasks-plugin",
     "@kbn/product-doc-base-plugin",
-    "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/security-ai-prompts",
     "@kbn/datemath",
     "@kbn/alerts-as-data-utils",
@@ -105,9 +104,9 @@
     "@kbn/agent-builder-plugin",
     "@kbn/cloud-plugin",
     "@kbn/search-inference-endpoints",
-    "@kbn/controls-constants",
+    "@kbn/controls-constants"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }

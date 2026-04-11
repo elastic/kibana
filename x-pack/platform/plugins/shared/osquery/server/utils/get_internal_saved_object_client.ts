@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core-lifecycle-server';
-import { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
+import { SavedObjectsClient } from '@kbn/core-saved-objects-server/api_internal';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';

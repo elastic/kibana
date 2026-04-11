@@ -17,6 +17,7 @@ project:
   owner: '@elastic/response-ops'
   sourceRoot: x-pack/platform/plugins/shared/stack_connectors
 dependsOn:
+  - '@kbn/core-saved-objects-server'
   - '@kbn/core'
   - '@kbn/actions-plugin'
   - '@kbn/triggers-actions-ui-plugin'
@@ -37,7 +38,6 @@ dependsOn:
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/core-saved-objects-common'
   - '@kbn/core-http-browser-mocks'
-  - '@kbn/core-saved-objects-api-server-mocks'
   - '@kbn/alerting-plugin'
   - '@kbn/securitysolution-ecs'
   - '@kbn/cases-components'

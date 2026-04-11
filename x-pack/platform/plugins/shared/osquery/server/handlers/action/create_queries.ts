@@ -9,7 +9,7 @@ import { isEmpty, isNumber, map, pickBy } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import type { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
+import type { SavedObjectsClient } from '@kbn/core-saved-objects-server/api_internal';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
 import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';

@@ -12,7 +12,7 @@ import {
   mockGetUpgradeableConfig,
 } from './create_or_upgrade_saved_config.test.mock';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';

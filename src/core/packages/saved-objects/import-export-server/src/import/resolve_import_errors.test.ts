@@ -38,7 +38,7 @@ import type {
   SavedObjectReference,
 } from '@kbn/core-saved-objects-server';
 import { typeRegistryMock } from '@kbn/core-saved-objects-server/mocks';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import {
   resolveSavedObjectsImportErrors,
   type ResolveSavedObjectsImportErrorsOptions,

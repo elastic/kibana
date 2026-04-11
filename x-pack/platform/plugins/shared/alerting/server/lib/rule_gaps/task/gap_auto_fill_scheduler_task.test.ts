@@ -8,7 +8,7 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
-import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-server/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { RulesClientContext } from '../../../rules_client/types';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';

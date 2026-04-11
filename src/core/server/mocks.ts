@@ -16,7 +16,7 @@ import { nodeServiceMock } from '@kbn/core-node-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { typeRegistryMock as savedObjectsTypeRegistryMock } from '@kbn/core-saved-objects-server/mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { coreLifecycleMock, coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
@@ -35,7 +35,7 @@ export { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 export {
   savedObjectsClientMock,
   savedObjectsRepositoryMock,
-} from '@kbn/core-saved-objects-api-server-mocks';
+} from '@kbn/core-saved-objects-server/mocks';
 export { migrationMocks } from '@kbn/core-saved-objects-server/mocks';
 export { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 export { metricsServiceMock } from '@kbn/core-metrics-server-mocks';

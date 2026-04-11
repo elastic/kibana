@@ -6,7 +6,7 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import type { NewPackagePolicy, PackagePolicy } from '../../types';

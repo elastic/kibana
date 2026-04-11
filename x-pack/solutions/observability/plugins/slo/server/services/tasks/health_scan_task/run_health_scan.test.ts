@@ -7,7 +7,7 @@
 
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { HEALTH_DATA_STREAM_NAME } from '../../../../common/constants';
 import type { StoredSLODefinition } from '../../../domain/models';

@@ -31,7 +31,6 @@
     "@kbn/es-query",
     "@kbn/core-http-server-mocks",
     "@kbn/encrypted-saved-objects-shared",
-    "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-http-server-utils",
     "@kbn/licensing-plugin",
     "@kbn/rrule",
@@ -46,7 +45,7 @@
     "@kbn/core-execution-context-server",
     "@kbn/core-execution-context-common",
     "@kbn/core-http-server",
-    "@kbn/core-security-server",
+    "@kbn/core-security-server"
   ],
   "exclude": ["target/**/*"]
 }

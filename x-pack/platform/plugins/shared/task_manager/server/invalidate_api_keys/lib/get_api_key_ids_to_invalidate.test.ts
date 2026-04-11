@@ -11,7 +11,7 @@ import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsClientOptions,
 } from '@kbn/encrypted-saved-objects-shared';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 

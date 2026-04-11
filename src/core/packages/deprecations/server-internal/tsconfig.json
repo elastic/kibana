@@ -8,9 +8,10 @@
     ]
   },
   "include": [
-    "**/*.ts",
+    "**/*.ts"
   ],
   "kbn_references": [
+    "@kbn/core-saved-objects-server",
     "@kbn/config-schema",
     "@kbn/utility-types",
     "@kbn/std",
@@ -29,7 +30,6 @@
     "@kbn/core-base-server-mocks",
     "@kbn/core-http-server-mocks",
     "@kbn/config-mocks",
-    "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-http-server",
     "@kbn/core-elasticsearch-client-server-mocks",
@@ -40,9 +40,9 @@
     "@kbn/core-http-router-server-internal",
     "@kbn/core-logging-server-internal",
     "@kbn/core-doc-links-server",
-    "@kbn/core-doc-links-server-mocks",
+    "@kbn/core-doc-links-server-mocks"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }

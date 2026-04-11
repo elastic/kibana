@@ -62,7 +62,6 @@ dependsOn:
   - '@kbn/saved-objects-finder-plugin'
   - '@kbn/ui-actions-plugin'
   - '@kbn/core-lifecycle-browser'
-  - '@kbn/core-saved-objects-api-server-mocks'
   - '@kbn/serverless'
   - '@kbn/core-http-server'
   - '@kbn/alerting-plugin'

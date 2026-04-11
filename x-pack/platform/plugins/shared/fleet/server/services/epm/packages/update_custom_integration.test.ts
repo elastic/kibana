@@ -6,7 +6,7 @@
  */
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
 import { createAppContextStartContractMock } from '../../../mocks';

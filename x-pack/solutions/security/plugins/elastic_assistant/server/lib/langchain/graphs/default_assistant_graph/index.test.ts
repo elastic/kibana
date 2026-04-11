@@ -16,7 +16,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { getPrompt, resolveProviderAndModel } from '@kbn/security-ai-prompts';
 import { getFindAnonymizationFieldsResultWithSingleHit } from '../../../../__mocks__/response';
 import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import type { AssistantTool, AssistantToolParams } from '../../../..';
 import { promptGroupId as toolsGroupId } from '../../../prompt/tool_prompts';
 import { promptDictionary } from '../../../prompt';

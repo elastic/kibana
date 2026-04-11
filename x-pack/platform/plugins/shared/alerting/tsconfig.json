@@ -51,7 +51,6 @@
     "@kbn/core-http-router-server-mocks",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-saved-objects-api-server",
-    "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/core-execution-context-server",
@@ -79,7 +78,7 @@
     "@kbn/core-saved-objects-server-mocks",
     "@kbn/scout",
     "@kbn/encrypted-saved-objects-shared",
-    "@kbn/core-analytics-server-mocks",
+    "@kbn/core-analytics-server-mocks"
   ],
   "exclude": ["target/**/*"]
 }

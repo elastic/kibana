@@ -7,7 +7,7 @@
 
 import type { RulesClientContext } from '../../../../rules_client';
 import { snoozeRule } from './snooze_rule';
-import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-server/mocks';
 import type { SnoozeRuleOptions } from './types';
 
 const loggerErrorMock = jest.fn();

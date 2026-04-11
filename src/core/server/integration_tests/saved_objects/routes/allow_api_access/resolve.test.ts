@@ -12,7 +12,7 @@ import { ContextService } from '@kbn/core-http-context-server-internal';
 import type { HttpService, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import { createCoreContext } from '@kbn/core-http-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
-import type { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import type { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
 import {
   coreUsageStatsClientMock,

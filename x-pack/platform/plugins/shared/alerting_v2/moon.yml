@@ -53,7 +53,6 @@ dependsOn:
   - '@kbn/zod-helpers'
   - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/test'
-  - '@kbn/core-saved-objects-api-server-mocks'
   - '@kbn/apm-utils'
   - '@kbn/default-tracer'
   - '@kbn/core-user-profile-common'

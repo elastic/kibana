@@ -7,7 +7,7 @@
 
 import type { RulesClientContext } from '../../../../rules_client';
 import { muteInstance } from './mute_instance';
-import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-server/mocks';
 
 describe('mute alert instance', () => {
   const loggerErrorMock = jest.fn();

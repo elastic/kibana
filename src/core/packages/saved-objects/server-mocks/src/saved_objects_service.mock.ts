@@ -23,7 +23,7 @@ import type {
 import {
   savedObjectsRepositoryMock,
   savedObjectsClientMock,
-} from '@kbn/core-saved-objects-api-server-mocks';
+} from '@kbn/core-saved-objects-server/mocks';
 import { typeRegistryMock, serializerMock } from '@kbn/core-saved-objects-server/mocks';
 import {
   savedObjectsExporterMock,

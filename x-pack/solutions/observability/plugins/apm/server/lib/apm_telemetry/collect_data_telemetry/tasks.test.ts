@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import { tasks } from './tasks';
 import { SERVICE_NAME, SERVICE_ENVIRONMENT, AT_TIMESTAMP } from '../../../../common/es_fields/apm';

@@ -18,7 +18,6 @@
     "@kbn/config",
     "@kbn/config-mocks",
     "@kbn/repo-info",
-    "@kbn/core-saved-objects-api-server-internal",
     "@kbn/core-elasticsearch-server-internal",
     "@kbn/core-elasticsearch-client-server-internal",
     "@kbn/core-logging-server-internal",

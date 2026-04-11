@@ -56,7 +56,6 @@
     "@kbn/saved-objects-finder-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/core-lifecycle-browser",
-    "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/serverless",
     "@kbn/core-http-server",
     "@kbn/alerting-plugin",
@@ -104,7 +103,7 @@
     "@kbn/resizable-layout",
     "@kbn/css-utils",
     "@kbn/shared-ux-column-presets",
-    "@kbn/core-ui-settings-browser",
+    "@kbn/core-ui-settings-browser"
   ],
   "exclude": ["target/**/*"]
 }

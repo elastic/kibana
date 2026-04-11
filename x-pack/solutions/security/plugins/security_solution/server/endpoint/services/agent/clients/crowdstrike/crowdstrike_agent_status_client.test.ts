@@ -16,7 +16,7 @@ import { AgentStatusClientError } from '../errors';
 import { HostStatus } from '../../../../../../common/endpoint/types';
 import { CrowdstrikeMock } from '../../../actions/clients/crowdstrike/mocks';
 import { responseActionsClientMock } from '../../../actions/clients/mocks';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import type { RawCrowdstrikeInfo } from './types';
 
 jest.mock('../../..', () => ({

@@ -8,7 +8,7 @@
     ]
   },
   "include": [
-    "**/*.ts",
+    "**/*.ts"
   ],
   "kbn_references": [
     "@kbn/ui-shared-deps-npm",
@@ -27,14 +27,12 @@
     "@kbn/config",
     "@kbn/core-base-server-mocks",
     "@kbn/core-http-server-mocks",
-    "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-saved-objects-server-mocks",
     "@kbn/core-logging-server-mocks",
-    "@kbn/core-saved-objects-api-server-internal",
     "@kbn/core-saved-objects-common",
-    "@kbn/utility-types",
+    "@kbn/utility-types"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }

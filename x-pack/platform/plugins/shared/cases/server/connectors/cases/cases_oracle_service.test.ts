@@ -7,7 +7,7 @@
 
 import { createHash } from 'node:crypto';
 import { stableStringify } from '@kbn/std';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { CasesOracleService } from './cases_oracle_service';

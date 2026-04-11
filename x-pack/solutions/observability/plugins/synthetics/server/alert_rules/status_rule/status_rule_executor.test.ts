@@ -6,7 +6,7 @@
  */
 import moment from 'moment';
 import { loggerMock } from '@kbn/logging-mocks';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { getDoesMonitorMeetLocationThreshold, StatusRuleExecutor } from './status_rule_executor';
 import { mockEncryptedSO } from '../../synthetics_service/utils/mocks';

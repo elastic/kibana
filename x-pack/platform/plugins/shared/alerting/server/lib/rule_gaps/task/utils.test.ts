@@ -6,7 +6,7 @@
  */
 
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-server/mocks';
 import { backfillClientMock } from '../../../backfill_client/backfill_client.mock';
 import { rulesClientMock } from '../../../rules_client.mock';
 import type { RulesClientContext } from '../../../rules_client/types';

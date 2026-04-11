@@ -14,7 +14,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   savedObjectsClientMock,
   savedObjectsRepositoryMock,
-} from '@kbn/core-saved-objects-api-server-mocks';
+} from '@kbn/core-saved-objects-server/mocks';
 import { fromKueryExpression } from '@kbn/es-query';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';

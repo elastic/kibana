@@ -17,6 +17,7 @@ project:
   owner: '@elastic/obs-presentation-team'
   sourceRoot: x-pack/solutions/observability/plugins/apm
 dependsOn:
+  - '@kbn/core-saved-objects-server'
   - '@kbn/core'
   - '@kbn/data-plugin'
   - '@kbn/embeddable-plugin'
@@ -68,7 +69,6 @@ dependsOn:
   - '@kbn/apm-data-view'
   - '@kbn/logging'
   - '@kbn/std'
-  - '@kbn/core-saved-objects-api-server-mocks'
   - '@kbn/field-types'
   - '@kbn/babel-register'
   - '@kbn/core-elasticsearch-server'

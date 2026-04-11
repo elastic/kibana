@@ -7,7 +7,7 @@
 
 import type { RulesClientContext } from '../../../../rules_client';
 import { unmuteAll } from './unmute_all';
-import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 

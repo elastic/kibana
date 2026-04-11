@@ -9,7 +9,7 @@ import * as getAllMonitors from '../../saved_objects/synthetics_monitor/process_
 import * as getCerts from '../../queries/get_certs';
 import { getSyntheticsCertsRoute } from './get_certificates';
 import { MonitorConfigRepository } from '../../services/monitor_config_repository';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 
 describe('getSyntheticsCertsRoute', () => {

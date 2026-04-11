@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 
 import { createAppContextStartContractMock } from '../../../mocks';
 import type { PackagePolicyAssetsMap, PackagePolicyInput } from '../../../../common/types';

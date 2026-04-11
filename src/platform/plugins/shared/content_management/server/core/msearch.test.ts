@@ -11,7 +11,7 @@ import { EventBus } from './event_bus';
 import { MSearchService } from './msearch';
 import { ContentRegistry } from './registry';
 import { createMockedStorage } from './mocks';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import type { StorageContext } from '.';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 

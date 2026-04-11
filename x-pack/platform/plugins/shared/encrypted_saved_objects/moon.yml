@@ -22,7 +22,6 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/utility-types'
   - '@kbn/core-saved-objects-server'
-  - '@kbn/core-saved-objects-api-server-mocks'
   - '@kbn/core-security-common'
   - '@kbn/test-jest-helpers'
   - '@kbn/config'

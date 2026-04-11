@@ -7,7 +7,7 @@
 
 import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import {
   elasticsearchServiceMock,

@@ -16,3 +16,7 @@ export {
   createSavedObjectsMigrationLoggerMock,
 } from './src/migration_mocks/migration.mocks';
 export { retryAsync } from './src/migration_mocks/helpers/retry_async';
+export { savedObjectsClientMock } from './src/api_mocks/saved_objects_client.mock';
+export { savedObjectsRepositoryMock } from './src/api_mocks/repository.mock';
+export { savedObjectsClientProviderMock } from './src/api_mocks/scoped_client_provider.mock';
+export { savedObjectsExtensionsMock } from './src/api_mocks/saved_objects_extensions.mock';

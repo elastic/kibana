@@ -21,7 +21,7 @@ import {
   type SavedObjectsMigrationConfigType,
   type IndexTypesMap,
 } from '@kbn/core-saved-objects-server/base_internal';
-import { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
+import { SavedObjectsRepository } from '@kbn/core-saved-objects-server/api_internal';
 import {
   ElasticsearchConfig,
   type ElasticsearchConfigType,

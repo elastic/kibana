@@ -15,7 +15,7 @@ import type {
   SavedObject,
 } from '@kbn/core-saved-objects-server';
 import { applyExportTransformsMock } from './collect_exported_objects.test.mocks';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-server/base_internal';
 import { collectExportedObjects, type ExclusionReason } from './collect_exported_objects';

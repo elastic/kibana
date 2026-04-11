@@ -56,7 +56,6 @@ dependsOn:
   - '@kbn/core-http-router-server-mocks'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/core-saved-objects-api-server'
-  - '@kbn/core-saved-objects-api-server-mocks'
   - '@kbn/core-ui-settings-server-mocks'
   - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/core-execution-context-server'
