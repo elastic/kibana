@@ -102,16 +102,35 @@ apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => 
   });
 
   apiTest('should allow explicit sorting by updated_at', async ({ apiClient }) => {
-    const response = await apiClient.get(buildUrl({ sort_field: 'updated_at', sort_order: 'desc' }), {
-      headers: {
-        ...COMMON_HEADERS,
-        ...viewerCredentials.apiKeyHeader,
-      },
-      responseType: 'json',
-    });
+    const response = await apiClient.get(
+      buildUrl({ sort_field: 'updated_at', sort_order: 'desc' }),
+      {
+        headers: {
+          ...COMMON_HEADERS,
+          ...viewerCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      }
+    );
 
     expect(response).toHaveStatusCode(200);
     expect(response.body.dashboards[0].id).toBe('test-dashboard-00');
+  });
+
+  apiTest('should allow explicit sorting by created_at', async ({ apiClient }) => {
+    const response = await apiClient.get(
+      buildUrl({ sort_field: 'created_at', sort_order: 'desc' }),
+      {
+        headers: {
+          ...COMMON_HEADERS,
+          ...viewerCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      }
+    );
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.dashboards).toHaveLength(20);
   });
 
   apiTest('validation - should reject unsupported sort_field', async ({ apiClient }) => {

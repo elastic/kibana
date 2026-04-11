@@ -71,6 +71,25 @@ describe('dashboard search', () => {
     );
   });
 
+  it('allows explicit sorting by created_at', async () => {
+    const find = jest
+      .fn()
+      .mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 20 });
+    const params: DashboardSearchRequestParams = {
+      sort_field: 'created_at',
+      sort_order: 'desc',
+      per_page: 20,
+    };
+    await search(createRequestContext(find), params);
+
+    expect(find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sortField: 'created_at',
+        sortOrder: 'desc',
+      })
+    );
+  });
+
   it('applies explicit sorting when query is present and sort_field is provided', async () => {
     const find = jest
       .fn()
