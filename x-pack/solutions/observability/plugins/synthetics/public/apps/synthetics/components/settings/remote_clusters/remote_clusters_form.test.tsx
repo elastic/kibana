@@ -52,6 +52,7 @@ describe('<RemoteClustersForm />', () => {
     jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
       data: clusters,
       status: observabilitySharedPublic.FETCH_STATUS.SUCCESS,
+      loading: false,
       refetch: () => {},
     });
     return render(<RemoteClustersForm />);
