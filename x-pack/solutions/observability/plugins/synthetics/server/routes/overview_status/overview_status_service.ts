@@ -6,7 +6,10 @@
  */
 
 import moment from 'moment/moment';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslQueryContainer,
+  SearchRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import { isEmpty } from 'lodash';
 import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_span';
@@ -28,6 +31,16 @@ import {
   getTimespanFilter,
 } from '../../../common/constants/client_defaults';
 import { getRemoteMonitorInfo } from '../../lib/remote_result_utils';
+
+interface RemoteMonitorSource {
+  monitor?: {
+    id?: string;
+    name?: string;
+    type?: string;
+    timespan?: { lt?: string };
+  };
+  tags?: string[];
+}
 
 type LocationStatus = Array<{
   status: string;
@@ -396,22 +409,12 @@ export class OverviewStatusService {
    * for remote cluster detection.
    */
   async getRemoteMonitorDetails(monitorIds: string[]) {
-    interface RemoteMonitorSource {
-      monitor?: {
-        id?: string;
-        name?: string;
-        type?: string;
-        timespan?: { lt?: string };
-      };
-      tags?: string[];
-    }
-
     const range = {
       from: moment().subtract(4, 'hours').subtract(20, 'minutes').toISOString(),
       to: 'now',
     };
 
-    const result = await this.routeContext.syntheticsEsClient.search<RemoteMonitorSource>(
+    const result = await this.routeContext.syntheticsEsClient.search<RemoteMonitorSource, SearchRequest>(
       {
         size: monitorIds.length,
         query: {
