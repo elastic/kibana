@@ -174,8 +174,7 @@ export class SyntheticsPlugin
         startPlugins: clientPluginsStart,
         isDev: this.initContext.env.mode.dev,
         isServerless: this._isServerless,
-        isCCSEnabled:
-          !this._isServerless && (browserConfig.experimental?.ccs?.enabled ?? false),
+        isCCSEnabled: !this._isServerless && (browserConfig.experimental?.ccs?.enabled ?? false),
       });
     });
 
