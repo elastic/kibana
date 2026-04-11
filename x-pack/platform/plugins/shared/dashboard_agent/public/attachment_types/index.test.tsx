@@ -17,7 +17,7 @@ import type { ChatEvent, RoundCompleteEvent, ConversationRound } from '@kbn/agen
 import { ChatEventType } from '@kbn/agent-builder-common';
 import { ATTACHMENT_REF_OPERATION } from '@kbn/agent-builder-common/attachments';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import { registerDashboardAttachmentUiDefinition } from '.';
+import { getDashboardAttachmentUiDefinition } from '.';
 
 jest.mock('@kbn/dashboard-plugin/public', () => ({
   DashboardRenderer: jest.fn(() => null),
@@ -147,11 +147,11 @@ const createMockAttachment = (id: string, origin?: string) => {
   };
 };
 
-describe('registerDashboardAttachmentUiDefinition', () => {
+describe('getDashboardAttachmentUiDefinition', () => {
   let deps: ReturnType<typeof createMockDeps>;
   let uiDefinition: AttachmentUIDefinition<DashboardAttachment>;
-  let unregister: () => void;
   let chat$: Subject<ChatEvent>;
+  let mockDashboardApi: DashboardApi | undefined;
 
   const createMockDeps = () => {
     chat$ = new Subject<ChatEvent>();
@@ -190,32 +190,19 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       updateAttachmentOrigin,
       findDashboardsService,
       chat$,
+      getDashboardApi: () => mockDashboardApi,
     };
   };
 
   beforeEach(async () => {
     jest.clearAllMocks();
+    mockDashboardApi = undefined;
     deps = createMockDeps();
-    unregister = registerDashboardAttachmentUiDefinition(deps);
-    const getDefinition = deps.addAttachmentType.mock.calls[0][1] as () => Promise<
-      AttachmentUIDefinition<DashboardAttachment>
-    >;
-    uiDefinition = await getDefinition();
+    uiDefinition = await getDashboardAttachmentUiDefinition(deps);
   });
 
-  afterEach(() => {
-    unregister();
-  });
-
-  it('registers dashboard attachment type with required methods', async () => {
-    expect(deps.addAttachmentType).toHaveBeenCalledWith(
-      DASHBOARD_ATTACHMENT_TYPE,
-      expect.any(Function)
-    );
-    const def = await (deps.addAttachmentType.mock.calls[0][1] as () => Promise<
-      AttachmentUIDefinition<DashboardAttachment>
-    >)();
-    expect(def).toMatchObject({
+  it('returns attachment type definition with required methods', () => {
+    expect(uiDefinition).toMatchObject({
       getLabel: expect.any(Function),
       getIcon: expect.any(Function),
       onAttachmentMount: expect.any(Function),
@@ -233,6 +220,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         getAttachment,
         updateOrigin,
       });
+      mockDashboardApi = mockApi as unknown as DashboardApi;
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
 
       // First save triggers update
@@ -265,6 +253,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         getAttachment,
         updateOrigin,
       });
+      mockDashboardApi = mockApi as unknown as DashboardApi;
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
       mockApi.emitSave({
         previousDashboardId: 'different-dashboard-id',
@@ -284,17 +273,18 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       deps.findDashboardsService.mockResolvedValue({
         findById: jest.fn().mockResolvedValue({ status: 'error' }),
       });
-      unregister();
-      unregister = registerDashboardAttachmentUiDefinition(deps);
-      const getLatestDefinition = deps.addAttachmentType.mock.calls.at(-1)?.[1] as () => Promise<
-        AttachmentUIDefinition<DashboardAttachment>
-      >;
-      uiDefinition = await getLatestDefinition();
+      // Re-create deps with updated findDashboardsService
+      deps = createMockDeps();
+      deps.findDashboardsService.mockResolvedValue({
+        findById: jest.fn().mockResolvedValue({ status: 'error' }),
+      });
+      uiDefinition = await getDashboardAttachmentUiDefinition(deps);
 
       const cleanup = uiDefinition.onAttachmentMount!({
         getAttachment,
         updateOrigin,
       });
+      mockDashboardApi = mockApi as unknown as DashboardApi;
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
 
       mockApi.emitSave({
@@ -318,6 +308,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         getAttachment,
         updateOrigin,
       });
+      mockDashboardApi = mockApi as unknown as DashboardApi;
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
       cleanup?.();
 
@@ -343,6 +334,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         getAttachment,
         updateOrigin,
       });
+      mockDashboardApi = mockApi as unknown as DashboardApi;
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
 
       // Updated operation triggers state update
@@ -380,6 +372,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         getAttachment,
         updateOrigin,
       });
+      mockDashboardApi = mockApi as unknown as DashboardApi;
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
 
       // Read operation - no update
@@ -424,6 +417,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         getAttachment: getAttachment1,
         updateOrigin,
       });
+      mockDashboardApi = mockApi1 as unknown as DashboardApi;
       deps.dashboardAppClientApi$.next(mockApi1 as unknown as DashboardApi);
 
       chat$.next(
@@ -437,12 +431,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
 
       // Same dashboard - updates
       deps = createMockDeps();
-      unregister();
-      unregister = registerDashboardAttachmentUiDefinition(deps);
-      const getDefinitionAfterReregister = deps.addAttachmentType.mock.calls[0][1] as () => Promise<
-        AttachmentUIDefinition<DashboardAttachment>
-      >;
-      uiDefinition = await getDefinitionAfterReregister();
+      uiDefinition = await getDashboardAttachmentUiDefinition(deps);
 
       const { getAttachment: getAttachment2 } = createMockAttachment(
         'attachment-1',
@@ -454,6 +443,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         getAttachment: getAttachment2,
         updateOrigin,
       });
+      mockDashboardApi = mockApi2 as unknown as DashboardApi;
       deps.dashboardAppClientApi$.next(mockApi2 as unknown as DashboardApi);
 
       chat$.next(
@@ -474,9 +464,11 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         getAttachment,
         updateOrigin,
       });
+      mockDashboardApi = mockApi as unknown as DashboardApi;
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
 
       // API becomes unavailable
+      mockDashboardApi = undefined;
       deps.dashboardAppClientApi$.next(undefined);
       chat$.next(
         createMockRoundCompleteEvent(
@@ -487,6 +479,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       expect(mockApi.setState).not.toHaveBeenCalled();
 
       // After cleanup
+      mockDashboardApi = mockApi as unknown as DashboardApi;
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
       cleanup?.();
       chat$.next(

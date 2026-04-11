@@ -186,7 +186,7 @@ describe('registerAttachmentUiDefinitions', () => {
     expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Transaction');
   });
 
-  it('registers monitor attachment type with correct config', () => {
+  it('registers monitor attachment type with correct config', async () => {
     registerAttachmentUiDefinitions({ attachments: mockAttachments });
 
     const monitorCall = mockAddAttachmentType.mock.calls.find(
@@ -194,7 +194,7 @@ describe('registerAttachmentUiDefinitions', () => {
     );
     expect(monitorCall).toBeDefined();
 
-    const config = monitorCall![1];
+    const config = await monitorCall![1]();
     expect(config.getIcon()).toBe('online');
     expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Monitor');
   });
