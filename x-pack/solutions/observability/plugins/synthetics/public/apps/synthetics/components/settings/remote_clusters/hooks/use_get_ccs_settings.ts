@@ -18,16 +18,18 @@ export const DEFAULT_CCS_SETTINGS: SyntheticsCCSSettings = {
   remoteKibanaUrls: {},
 };
 
+const fetchCCSSettings = async () => {
+  try {
+    return await apiService.get<SyntheticsCCSSettings>(SYNTHETICS_API_URLS.CCS_SETTINGS);
+  } catch (e) {
+    return DEFAULT_CCS_SETTINGS;
+  }
+};
+
 export const useGetCCSSettings = () => {
   const { lastRefresh } = useContext(SyntheticsRefreshContext);
 
-  const { data, error, loading } = useFetcher(async () => {
-    try {
-      return await apiService.get<SyntheticsCCSSettings>(SYNTHETICS_API_URLS.CCS_SETTINGS);
-    } catch (e) {
-      return DEFAULT_CCS_SETTINGS;
-    }
-  }, [lastRefresh]);
+  const { data, error, loading } = useFetcher(fetchCCSSettings, [lastRefresh]);
 
   return {
     data: data ?? DEFAULT_CCS_SETTINGS,
