@@ -8,7 +8,43 @@
 import type { CDPSession } from '@kbn/scout';
 import { test, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import { evaluateDiscoverBundlePluginAssertion } from '../fixtures/discover_bundle_expectations';
 import { testData } from '../fixtures';
+
+/**
+ * Extra bundle labels produced only by the unified RSPack build (split chunks + shell).
+ * [rspack-transition] Remove this allowlist when the legacy webpack optimizer is gone
+ * and tests only target RSPack output — see packages/kbn-rspack-optimizer/LEGACY_REMOVAL_CHECKLIST.md
+ */
+const RSPACK_ONLY_BUNDLE_LABELS: readonly string[] = [
+  'core',
+  'kibana',
+  'shared-core',
+  'shared-misc',
+  'shared-packages',
+  'shared-plugins',
+  'shared-root-packages',
+  'shared-solution-packages',
+  'vendors',
+  'vendors-heavy',
+];
+
+function getExpectedDiscoverPluginIds(projectType: string): string[] {
+  return [
+    'aiops',
+    'discover',
+    'embeddable',
+    'eventAnnotation',
+    'expressionXY',
+    'kbn-ui-shared-deps-npm',
+    'kql',
+    'lens',
+    'maps',
+    'presentationPanel',
+    ...(projectType === 'security' ? ['securitySolution'] : []),
+    'unifiedSearch',
+  ];
+}
 
 test.describe(
   'Discover App - Performance Metrics & Bundle Analysis',
@@ -65,23 +101,15 @@ test.describe(
         stats.bundleCount,
         `Total bundle chunks count loaded on page should not exceed 100`
       ).toBeLessThan(100);
-      expect(
-        stats.plugins.map((p) => p.name),
-        'Unexpected plugins were loaded on page'
-      ).toStrictEqual([
-        'aiops',
-        'discover',
-        'embeddable',
-        'eventAnnotation',
-        'expressionXY',
-        'kbn-ui-shared-deps-npm',
-        'kql',
-        'lens',
-        'maps',
-        'presentationPanel',
-        ...(config.projectType === 'security' ? ['securitySolution'] : []),
-        'unifiedSearch',
-      ]);
+
+      const expectedPlugins = getExpectedDiscoverPluginIds(config.projectType);
+      const loadedPluginNames = stats.plugins.map((p) => p.name).sort((a, b) => a.localeCompare(b));
+      const bundleAssertion = evaluateDiscoverBundlePluginAssertion(
+        loadedPluginNames,
+        expectedPlugins,
+        RSPACK_ONLY_BUNDLE_LABELS
+      );
+      expect(bundleAssertion).toStrictEqual({ ok: true });
       // Validate individual plugin bundle sizes
       expect(
         stats.plugins.find((p) => p.name === 'discover')?.totalSize,

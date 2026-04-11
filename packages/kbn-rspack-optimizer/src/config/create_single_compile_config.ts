@@ -331,8 +331,9 @@ export async function createSingleCompileConfig(
       path: bundlesDir,
       // Single unified bundle (with [name] for runtimeChunk compatibility)
       filename: '[name].bundle.js',
-      // Async chunks: short hash names in production, descriptive names in development
-      chunkFilename: dist ? 'chunks/[contenthash:8].js' : 'chunks/[name].[contenthash:8].js',
+      // Async chunks: include [name] in production so filenames stay attributable (Scout perf,
+      // debugging, cache busting via contenthash). Hash-only names broke bundle label inference.
+      chunkFilename: 'chunks/[name].[contenthash:8].js',
       // Use 'auto' to dynamically resolve publicPath at runtime based on document.currentScript
       publicPath: 'auto',
       clean: !watch,
