@@ -3052,7 +3052,13 @@
           "children": [],
           "returnComment": [
             "The currently selected ",
-            "SearchLanguage"
+            {
+              "pluginId": "pluginA",
+              "scope": "public",
+              "docId": "kibPluginAPluginApi",
+              "section": "def-public.SearchLanguage",
+              "text": "SearchLanguage"
+            }
           ]
         }
       ],

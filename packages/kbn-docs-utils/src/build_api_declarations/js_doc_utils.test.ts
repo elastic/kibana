@@ -9,7 +9,7 @@
 
 import Path from 'path';
 import type { Node } from 'ts-morph';
-import { Project } from 'ts-morph';
+import { Project, SyntaxKind } from 'ts-morph';
 import {
   getJSDocParamComment,
   getJSDocReturnTagComment,
@@ -406,6 +406,93 @@ describe('getJSDocs', () => {
     const jsDocs = getJSDocs(arrowFnVar!);
     expect(jsDocs).toBeDefined();
     expect(jsDocs!.length).toBeGreaterThan(0);
+  });
+
+  it('handles property assignments by inheriting variable statement JSDoc when they have no own comment', () => {
+    const testProject = new Project({
+      useInMemoryFileSystem: true,
+    });
+
+    const testSourceFile = testProject.createSourceFile(
+      'test.ts',
+      `
+      /**
+       * Parent docs.
+       * @param input Parent input.
+       * @returns Parent result.
+       */
+      export const api = {
+        run: (input: string) => input,
+      };
+      `
+    );
+
+    const property = testSourceFile
+      .getVariableDeclarationOrThrow('api')
+      .getInitializerIfKindOrThrow(SyntaxKind.ObjectLiteralExpression)
+      .getPropertyOrThrow('run')
+      .asKindOrThrow(SyntaxKind.PropertyAssignment);
+
+    const jsDocs = getJSDocs(property);
+    expect(jsDocs).toBeDefined();
+    expect(jsDocs!.length).toBeGreaterThan(0);
+  });
+
+  it('does not inherit variable statement JSDoc when property assignment has its own comment', () => {
+    const testProject = new Project({
+      useInMemoryFileSystem: true,
+    });
+
+    const testSourceFile = testProject.createSourceFile(
+      'test.ts',
+      `
+      /**
+       * Parent docs.
+       */
+      export const api = {
+        /** Child docs. */
+        run: (input: string) => input,
+      };
+      `
+    );
+
+    const property = testSourceFile
+      .getVariableDeclarationOrThrow('api')
+      .getInitializerIfKindOrThrow(SyntaxKind.ObjectLiteralExpression)
+      .getPropertyOrThrow('run')
+      .asKindOrThrow(SyntaxKind.PropertyAssignment);
+
+    const jsDocs = getJSDocs(property);
+    expect(jsDocs).toBeUndefined();
+
+    const comments = getCommentsFromNode(property!, pluginContext);
+    expect(comments).toBeDefined();
+    expect(comments![0]).toContain('Child docs');
+  });
+
+  it('does not fall through to line comments for JSDocable nodes without JSDoc', () => {
+    const testProject = new Project({
+      useInMemoryFileSystem: true,
+    });
+
+    const testSourceFile = testProject.createSourceFile(
+      'test.ts',
+      `
+      // stray line comment
+      export function noJsDoc(): string {
+        return 'ok';
+      }
+      `
+    );
+
+    const func = testSourceFile.getFunction('noJsDoc');
+    expect(func).toBeDefined();
+
+    const jsDocs = getJSDocs(func!);
+    expect(jsDocs).toEqual([]);
+
+    const comments = getCommentsFromNode(func!, pluginContext);
+    expect(comments).toEqual([]);
   });
 
   it('handles variable declaration with grandparent JSDoc (line 39 coverage)', () => {

@@ -71,6 +71,17 @@ export const getJSDocs = (node: Node): JSDoc[] | undefined => {
     return node.getJsDocs();
   }
 
+  if (Node.isPropertyAssignment(node)) {
+    if (node.getLeadingCommentRanges().length > 0) {
+      return undefined;
+    }
+
+    const variableStatement = node.getParent()?.getParent()?.getParent()?.getParent();
+    if (Node.isJSDocable(variableStatement)) {
+      return variableStatement.getJsDocs();
+    }
+  }
+
   if (Node.isVariableDeclaration(node)) {
     const grandparent = node.getParent()?.getParent();
 
