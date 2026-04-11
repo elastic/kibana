@@ -26,6 +26,9 @@ dependsOn:
   - '@kbn/core-http-request-handler-context-server'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/core-saved-objects-server'
+  - '@kbn/core-saved-objects-server-internal'
+  - '@kbn/core-security-server'
+  - '@kbn/core-security-server-internal'
   - '@kbn/core-user-storage-common'
   - '@kbn/core-user-storage-server'
 tags:
@@ -39,26 +42,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}
