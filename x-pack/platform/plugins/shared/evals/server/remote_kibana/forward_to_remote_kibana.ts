@@ -20,6 +20,8 @@ export const DESTINATION_QUERY_PARAM = 'destination' as const;
 export const ENCRYPTION_NOT_CONFIGURED_MESSAGE =
   'Encrypted Saved Objects is not configured. Remote forwarding is unavailable.';
 
+const FORWARD_TIMEOUT_MS = 30_000;
+
 const ALLOWED_CLOUD_SUFFIXES = ['.cloud.es.io', '.elastic.cloud'] as const;
 
 /**
@@ -159,6 +161,7 @@ export const forwardToRemoteKibana = async ({
       Authorization: `ApiKey ${remoteConfig.apiKey}`,
     },
     body: body == null || method === 'GET' ? undefined : JSON.stringify(body),
+    timeout: FORWARD_TIMEOUT_MS,
   });
 
   const contentType = res.headers.get('content-type') ?? '';

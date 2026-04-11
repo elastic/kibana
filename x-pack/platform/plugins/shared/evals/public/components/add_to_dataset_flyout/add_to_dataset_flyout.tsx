@@ -789,12 +789,18 @@ export function AddToDatasetFlyout({
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
-        <EuiButtonEmpty onClick={onClose} disabled={isSubmitting}>
-          {CANCEL_BUTTON}
-        </EuiButtonEmpty>
-        <EuiButton onClick={onSubmit} fill isLoading={isSubmitting} disabled={isSubmitting}>
-          {SUBMIT_BUTTON}
-        </EuiButton>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={onClose} disabled={isSubmitting}>
+              {CANCEL_BUTTON}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton onClick={onSubmit} fill isLoading={isSubmitting} disabled={isSubmitting}>
+              {SUBMIT_BUTTON}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutFooter>
     </>
   );

@@ -58,7 +58,7 @@ export class EvalsPlugin
     encryptedSavedObjects.registerType({
       type: EVALS_REMOTE_KIBANA_CONFIG_SAVED_OBJECT_TYPE,
       attributesToEncrypt: new Set(['apiKey']),
-      attributesToIncludeInAAD: new Set(['createdAt']),
+      attributesToIncludeInAAD: new Set(['createdAt', 'url']),
     });
 
     coreSetup.http.registerRouteHandlerContext<EvalsRequestHandlerContext, 'evals'>(

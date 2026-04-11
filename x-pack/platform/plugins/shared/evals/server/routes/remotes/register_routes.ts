@@ -183,10 +183,11 @@ export const registerRemoteConfigsRoutes = ({
 
         try {
           const now = new Date().toISOString();
+          const requiresReEncryption = request.body.apiKey != null || request.body.url != null;
 
-          // If apiKey is being changed, do a full overwrite using decrypted attributes so we never partially update
-          // an encrypted field.
-          if (request.body.apiKey != null) {
+          if (requiresReEncryption) {
+            // `url` is included in AAD, so changing it (or the apiKey) requires a full
+            // decrypt-then-overwrite cycle to keep the authenticated data in sync.
             if (!canEncrypt) {
               return response.customError({
                 statusCode: 501,
@@ -212,7 +213,7 @@ export const registerRemoteConfigsRoutes = ({
                 ? { displayName: request.body.displayName }
                 : {}),
               ...(request.body.url != null ? { url: request.body.url } : {}),
-              apiKey: request.body.apiKey,
+              ...(request.body.apiKey != null ? { apiKey: request.body.apiKey } : {}),
               updatedAt: now,
             };
 
@@ -226,10 +227,9 @@ export const registerRemoteConfigsRoutes = ({
             });
           }
 
-          // No apiKey change: safe partial update of non-encrypted fields.
+          // Only non-AAD fields changed (e.g. displayName): safe partial update.
           const updates: Partial<EvalsRemoteKibanaConfigAttributes> = {
             ...(request.body.displayName != null ? { displayName: request.body.displayName } : {}),
-            ...(request.body.url != null ? { url: request.body.url } : {}),
             updatedAt: now,
           };
 
