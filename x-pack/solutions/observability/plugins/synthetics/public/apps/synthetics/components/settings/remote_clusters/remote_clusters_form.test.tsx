@@ -11,7 +11,10 @@ import { screen, fireEvent } from '@testing-library/react';
 import { RemoteClustersForm } from './remote_clusters_form';
 import { render } from '../../../utils/testing';
 
-jest.mock('@kbn/observability-shared-plugin/public');
+jest.mock('@kbn/observability-shared-plugin/public', () => ({
+  ...jest.requireActual('@kbn/observability-shared-plugin/public'),
+  useFetcher: jest.fn(),
+}));
 
 const mockSaveSettings = jest.fn();
 
