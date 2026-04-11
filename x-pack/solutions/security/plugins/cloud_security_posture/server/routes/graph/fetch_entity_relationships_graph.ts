@@ -350,6 +350,8 @@ export const fetchEntities = async ({
   }
 };
 
+const TYPED_ENTITY_PREFIXES = ['user', 'host', 'service'];
+
 const buildSourceFieldsJson = (fields: EuidSourceFields): string => {
   const properties = Object.keys(fields)
     .map((type) => {
@@ -357,6 +359,16 @@ const buildSourceFieldsJson = (fields: EuidSourceFields): string => {
         return fields.all.map(
           (field) =>
             `CASE(${field} IS NOT NULL, ${concatJsonObjectPropertyEsqlExprSafe(field, field)}, "")`
+        );
+      } else if (type === 'generic') {
+        // Generic entities don't have a type prefix in their EUID,
+        // so use a negative condition to match them
+        const notTypedCondition = TYPED_ENTITY_PREFIXES.map(
+          (p) => `NOT STARTS_WITH(entity.id, "${p}:")`
+        ).join(' AND ');
+        return fields[type as keyof EuidSourceFields].map(
+          (field) => `CASE(${notTypedCondition} AND ${field} IS NOT NULL,
+            ${concatJsonObjectPropertyEsqlExprSafe(field.replace('.target', ''), field)}, "")`
         );
       } else {
         const typeEuidFields = fields[type as keyof EuidSourceFields];
