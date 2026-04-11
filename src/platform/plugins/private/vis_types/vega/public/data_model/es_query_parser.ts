@@ -203,6 +203,8 @@ export class EsQueryParser {
       name: getRequestName(r.dataObject.name, index),
     }));
 
+    // Cast needed: Vega's UrlObject.body.query uses @kbn/es-query Query type,
+    // which is not structurally compatible with estypes.QueryDslQueryContainer.
     const data$ = this._searchAPI.search(esSearches as SearchRequest[]);
 
     const results = await data$.toPromise();

@@ -1180,7 +1180,7 @@ describe('SearchSource', () => {
       searchSource.setField('projectRouting', '_alias:_origin');
       const request = searchSource.getSearchRequestBody();
       // projectRouting is now passed as an option, not in the request body
-      expect(request.project_routing).toBeUndefined();
+      expect('project_routing' in request).toBe(false);
     });
   });
 

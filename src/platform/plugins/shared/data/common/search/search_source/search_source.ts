@@ -623,7 +623,10 @@ export class SearchSource {
     key: K
   ): false | void {
     if (typeof val === 'function') {
-      val = (val as unknown as (searchSource: SearchSource) => SearchSourceFields[K])(this);
+      // filter and aggs fields can be functions (see SearchSourceFields).
+      // Call the function to resolve the value; the function takes no arguments.
+      const fn = val as unknown as () => SearchSourceFields[K];
+      val = fn();
     }
     if (val == null || !key) return;
 
@@ -668,6 +671,8 @@ export class SearchSource {
         return addToBody('fields', val);
       case 'fieldsFromSource':
         // preserves legacy behavior
+        // Cast is needed because TypeScript doesn't narrow the generic K through switch cases.
+        // val is estypes.Fields (string | string[]) which is assignable to SearchFieldValue[].
         const nextFieldsFromSource = (Array.isArray(val) ? val : [val]) as SearchFieldValue[];
         const fields = [...new Set((data.fieldsFromSource || []).concat(nextFieldsFromSource))];
         return addToRoot(key, fields);

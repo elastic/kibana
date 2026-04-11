@@ -37,7 +37,11 @@ export interface SearchRequestBody {
   query?: estypes.QueryDslQueryContainer;
   highlight?: estypes.SearchRequest['highlight'];
   size?: number;
-  [key: string]: unknown;
+  from?: number;
+  version?: boolean;
+  timeout?: string;
+  terminate_after?: number;
+  pit?: estypes.SearchPointInTimeReference;
 }
 
 export interface SearchRequestCore {
