@@ -12238,6 +12238,7 @@
   integrity sha512-9FC/6ho8uFa8fV50+FPy/ngWN53jaUu4GRXlAjcxIRrzhltJnpKkBG2Tp0IDraFJeWrOpk84RJ9EMEEYzaI1Bw==
 
 "@redocly/ajv@^8.11.2", "@redocly/ajv@^8.18.0", "ajv@npm:@redocly/ajv@8.18.0":
+  name ajv
   version "8.18.0"
   resolved "https://registry.yarnpkg.com/@redocly/ajv/-/ajv-8.18.0.tgz#e6c7ba549111838baa950bc31acbc84b06f0239f"
   integrity sha512-F+LMD2IDIXuHxgpLJh3nkLj9+tSaEzoUWd+7fONGq5pe2169FUDjpEkOfEpoGLz1sbZni/69p07OsecNfAOpqA==
@@ -12411,21 +12412,21 @@
     picocolors "^1.1.1"
     source-map "^0.7.6"
 
-"@rsdoctor/client@1.5.5":
-  version "1.5.5"
-  resolved "https://registry.yarnpkg.com/@rsdoctor/client/-/client-1.5.5.tgz#d114b221fa8dc428baa84e689e1038dfc81eb9cb"
-  integrity sha512-27mYT2iJ9dbWfMzdNoY5jETYPY6MwMJJnS4KU4Oito7NuQzs78349DkY+jsivEJTjO9p/XONGFLOSQLEG63zxA==
+"@rsdoctor/client@1.5.7":
+  version "1.5.7"
+  resolved "https://registry.yarnpkg.com/@rsdoctor/client/-/client-1.5.7.tgz#e635c98e03ca0ef424822353f964f80eb18f301f"
+  integrity sha512-BM05qXpFfUBp7CGGtBnIGSZjSUeVa1IVQzHsAhiuYyJOs/WqrXWSaBG5ZN2DOi7roM++jlmQrz4XkVHsq8jyBw==
 
-"@rsdoctor/core@1.5.5":
-  version "1.5.5"
-  resolved "https://registry.yarnpkg.com/@rsdoctor/core/-/core-1.5.5.tgz#df031dc8b220a06b9b891f1f6a2251ea6e6b8f01"
-  integrity sha512-5fK/KCK4p7d1tPRV7B5lzQn334BLeEVFcLWix7a4XpWPGIoX9wxw1r73/FK8j5zaErxHlj1NghuMb15fcDowxw==
+"@rsdoctor/core@1.5.7":
+  version "1.5.7"
+  resolved "https://registry.yarnpkg.com/@rsdoctor/core/-/core-1.5.7.tgz#001227cfafcd4c6fce172ba71e921f593e57da55"
+  integrity sha512-DEnCd/cK2hQGzVhOt9Ui1bvjDsFXX4wy59zymLiowkKFEgC/lh++9+PpaxoouJN1FrQb0jN5mTsxZZigHEoR1g==
   dependencies:
     "@rsbuild/plugin-check-syntax" "1.6.1"
-    "@rsdoctor/graph" "1.5.5"
-    "@rsdoctor/sdk" "1.5.5"
-    "@rsdoctor/types" "1.5.5"
-    "@rsdoctor/utils" "1.5.5"
+    "@rsdoctor/graph" "1.5.7"
+    "@rsdoctor/sdk" "1.5.7"
+    "@rsdoctor/types" "1.5.7"
+    "@rsdoctor/utils" "1.5.7"
     "@rspack/resolver" "0.2.8"
     browserslist-load-config "^1.0.1"
     es-toolkit "^1.45.1"
@@ -12434,59 +12435,59 @@
     semver "^7.7.4"
     source-map "^0.7.6"
 
-"@rsdoctor/graph@1.5.5":
-  version "1.5.5"
-  resolved "https://registry.yarnpkg.com/@rsdoctor/graph/-/graph-1.5.5.tgz#e4d9a12d2e26f950e121bfaf12d8bac9ac53c517"
-  integrity sha512-YILNLmd2DnCFIfh46Rpeor16hPTxP7HuffQkkyBtjaXz9zkdX3fR6zCBnE56rAw/SmGVqRLRt85mbTcEw7dQPQ==
+"@rsdoctor/graph@1.5.7":
+  version "1.5.7"
+  resolved "https://registry.yarnpkg.com/@rsdoctor/graph/-/graph-1.5.7.tgz#f3f59c0ebc7db3a91f5e6b7aee962fb77dc18e42"
+  integrity sha512-f9b17eOCZadGzj/tAnlYh2M/sGO+EYOTirFMnudPmHPu25dgGhkiac4HrCUd7MpNZltszsPnQmbRE93p0C0Mrg==
   dependencies:
-    "@rsdoctor/types" "1.5.5"
-    "@rsdoctor/utils" "1.5.5"
+    "@rsdoctor/types" "1.5.7"
+    "@rsdoctor/utils" "1.5.7"
     es-toolkit "^1.45.1"
     path-browserify "1.0.1"
     source-map "^0.7.6"
 
-"@rsdoctor/rspack-plugin@1.5.5":
-  version "1.5.5"
-  resolved "https://registry.yarnpkg.com/@rsdoctor/rspack-plugin/-/rspack-plugin-1.5.5.tgz#bb84a6f3f70439f107d914d07ab75d82dab80474"
-  integrity sha512-uLUk2TzNF5Y3oqcuK6xw1ExVtidrkPkTMqWm6zLsLkZpVnEJhBD7EXtVwMMltvcAcewpUwsmbUV94O0JdGGmeg==
+"@rsdoctor/rspack-plugin@1.5.7":
+  version "1.5.7"
+  resolved "https://registry.yarnpkg.com/@rsdoctor/rspack-plugin/-/rspack-plugin-1.5.7.tgz#6a59ca81b66fb3e94de895a6cbc75373d44193aa"
+  integrity sha512-GW8gTuQKarE/4J+dOP3EfHdBN0sK6QWX6lWUM/MaT6WCS3aUER9zR1XQf7ed4gf8tH3tAoyDQ3W+Wh9uX2rE8w==
   dependencies:
-    "@rsdoctor/core" "1.5.5"
-    "@rsdoctor/graph" "1.5.5"
-    "@rsdoctor/sdk" "1.5.5"
-    "@rsdoctor/types" "1.5.5"
-    "@rsdoctor/utils" "1.5.5"
+    "@rsdoctor/core" "1.5.7"
+    "@rsdoctor/graph" "1.5.7"
+    "@rsdoctor/sdk" "1.5.7"
+    "@rsdoctor/types" "1.5.7"
+    "@rsdoctor/utils" "1.5.7"
 
-"@rsdoctor/sdk@1.5.5":
-  version "1.5.5"
-  resolved "https://registry.yarnpkg.com/@rsdoctor/sdk/-/sdk-1.5.5.tgz#c9436f1bc1af6bcc634ed67f45ef7de4f78c5487"
-  integrity sha512-2Ee1JcgED/yWvNVb/BFSMm0ywNoNZ2m+UBILXWx2ExNnYgNr4ab+ujK+w2CsDRLA+A6RdOinhPGgeHcatcyIFQ==
+"@rsdoctor/sdk@1.5.7":
+  version "1.5.7"
+  resolved "https://registry.yarnpkg.com/@rsdoctor/sdk/-/sdk-1.5.7.tgz#7b94541a5dc360d4cb38c4252e1aa96a33e99291"
+  integrity sha512-KLNt2U051FN0SaoOraWfZ3Gj7l2BMRcPOFZ3RtyRsxU3WOWtXrwpP2whaJRN9repMe2YdXL9ZXpYr+uOJIZ4hA==
   dependencies:
-    "@rsdoctor/client" "1.5.5"
-    "@rsdoctor/graph" "1.5.5"
-    "@rsdoctor/types" "1.5.5"
-    "@rsdoctor/utils" "1.5.5"
-    launch-editor "^2.13.1"
+    "@rsdoctor/client" "1.5.7"
+    "@rsdoctor/graph" "1.5.7"
+    "@rsdoctor/types" "1.5.7"
+    "@rsdoctor/utils" "1.5.7"
+    launch-editor "^2.13.2"
     safer-buffer "2.1.2"
     socket.io "4.8.1"
     tapable "2.3.0"
 
-"@rsdoctor/types@1.5.5":
-  version "1.5.5"
-  resolved "https://registry.yarnpkg.com/@rsdoctor/types/-/types-1.5.5.tgz#6cef11d247ed40502f7007b6ad6e01b238f787a1"
-  integrity sha512-lrd5LYerL49As79eZ1ljbxUFp2NrY7UhLy8Zl9Kx3Xke04QMurLMS3V8mNWxt+c4eoKK43vjF3RHghkdxmq+sg==
+"@rsdoctor/types@1.5.7":
+  version "1.5.7"
+  resolved "https://registry.yarnpkg.com/@rsdoctor/types/-/types-1.5.7.tgz#1d4a9d3c4b23a466502c3be94817c07cee3638a7"
+  integrity sha512-iacG7yXP2Qmg0jadxYis6Frx09Fn6BGxF8AxFzaWHdOUqsTwqAfPuEkjmLnVeNdzMid+Z7Lw6aX8/sG0p3vtzA==
   dependencies:
     "@types/connect" "3.4.38"
     "@types/estree" "1.0.5"
     "@types/tapable" "2.3.0"
     source-map "^0.7.6"
 
-"@rsdoctor/utils@1.5.5":
-  version "1.5.5"
-  resolved "https://registry.yarnpkg.com/@rsdoctor/utils/-/utils-1.5.5.tgz#0eb1da5139ff85f0b409a5c84f6d8e34dffe0136"
-  integrity sha512-YyB5jJ2vPalb9JpSkMa2TuAXaBRn401m+hKRSz2LqdxOIoK4LMEu32k10TyzprkoS4yKexW+XXiMtio5PhvstA==
+"@rsdoctor/utils@1.5.7":
+  version "1.5.7"
+  resolved "https://registry.yarnpkg.com/@rsdoctor/utils/-/utils-1.5.7.tgz#17b3015e266c67d76e42f3ce8133d04fba0d377a"
+  integrity sha512-uxmEkFFYgu3mbJELI+X9MXGbCSWwdfVWQbdCe9r61mlzTeOttkCbMsipErKc/UTwGYH34ujJhLYLwP2b+DCL2g==
   dependencies:
     "@babel/code-frame" "7.26.2"
-    "@rsdoctor/types" "1.5.5"
+    "@rsdoctor/types" "1.5.7"
     "@types/estree" "1.0.5"
     acorn "^8.10.0"
     acorn-import-attributes "^1.9.5"
@@ -26193,7 +26194,7 @@ language-tags@=1.0.5:
   dependencies:
     language-subtag-registry "~0.3.2"
 
-launch-editor@^2.13.1, launch-editor@^2.6.1:
+launch-editor@^2.13.2, launch-editor@^2.6.1:
   version "2.13.2"
   resolved "https://registry.yarnpkg.com/launch-editor/-/launch-editor-2.13.2.tgz#41d51baaf8afb393224b89bd2bcb4e02f2306405"
   integrity sha512-4VVDnbOpLXy/s8rdRCSXb+zfMeFR0WlJWpET1iA9CQdlZDfwyLjUuGQzXU4VeOoey6AicSAluWan7Etga6Kcmg==
