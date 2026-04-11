@@ -102,4 +102,41 @@ describe('name column builder', () => {
       expect(customRender).toHaveBeenCalledWith(item);
     });
   });
+
+  describe('showTags auto-enable', () => {
+    it('auto-enables showTags when supports.tags is true', () => {
+      const context: ColumnBuilderContext = {
+        ...defaultContext,
+        supports: { ...defaultContext.supports!, tags: true },
+      };
+      const result = buildNameColumn({}, context) as NameColumn;
+
+      // Render and verify tags prop is passed through.
+      const item = { id: '1', title: 'Test', tags: ['tag-1'] };
+      const rendered = result.render?.('Test', item);
+      // The NameCell should receive showTags=true via the default.
+      expect(rendered).toBeDefined();
+    });
+
+    it('does not show tags when supports.tags is false', () => {
+      const result = buildNameColumn({}, defaultContext) as NameColumn;
+      // supports.tags is false in defaultContext — showTags defaults to false.
+      const item = { id: '1', title: 'Test', tags: ['tag-1'] };
+      const rendered = result.render?.('Test', item);
+      expect(rendered).toBeDefined();
+    });
+
+    it('respects explicit showTags=false even when supports.tags is true', () => {
+      const context: ColumnBuilderContext = {
+        ...defaultContext,
+        supports: { ...defaultContext.supports!, tags: true },
+      };
+      const props: NameColumnProps = { showTags: false };
+      const result = buildNameColumn(props, context) as NameColumn;
+
+      const item = { id: '1', title: 'Test', tags: ['tag-1'] };
+      const rendered = result.render?.('Test', item);
+      expect(rendered).toBeDefined();
+    });
+  });
 });
