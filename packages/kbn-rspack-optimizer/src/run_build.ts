@@ -466,7 +466,9 @@ function processStats(
     });
     const lines = warningOutput
       .split('\n')
-      .filter((line) => !line.includes('rspack.persistentCache'))
+      .filter(
+        (line) => !line.includes('rspack.persistentCache') && !line.includes('BuildDependencies')
+      )
       .slice(0, 20);
     if (lines.length > 0) {
       log.warning('Build warnings (first 20):');
