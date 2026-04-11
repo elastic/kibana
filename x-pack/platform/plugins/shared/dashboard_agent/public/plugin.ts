@@ -9,14 +9,14 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { Subscription } from 'rxjs';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
+import type { DashboardAttachment } from '@kbn/dashboard-agent-common';
+import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type {
   DashboardAgentPluginPublicSetup,
   DashboardAgentPluginPublicStart,
   DashboardAgentPluginPublicSetupDependencies,
   DashboardAgentPluginPublicStartDependencies,
 } from './types';
-import type { DashboardAttachment } from '@kbn/dashboard-agent-common';
-import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 
 export class DashboardAgentPlugin
   implements
@@ -43,11 +43,9 @@ export class DashboardAgentPlugin
     _core: CoreStart,
     plugins: DashboardAgentPluginPublicStartDependencies
   ): DashboardAgentPluginPublicStart {
-    this.dashboardAppApiSubscription = plugins.dashboard.dashboardAppClientApi$.subscribe(
-      (api) => {
-        this.dashboardApi = api;
-      }
-    );
+    this.dashboardAppApiSubscription = plugins.dashboard.dashboardAppClientApi$.subscribe((api) => {
+      this.dashboardApi = api;
+    });
 
     plugins.agentBuilder.attachments.addAttachmentType<DashboardAttachment>(
       DASHBOARD_ATTACHMENT_TYPE,
