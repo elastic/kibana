@@ -778,6 +778,32 @@
     "misc": [
       {
         "parentPluginId": "@kbn/unified-doc-viewer",
+        "id": "def-public.DOC_VIEWER_FLYOUT_HISTORY_KEY",
+        "type": "Uncategorized",
+        "tags": [],
+        "label": "DOC_VIEWER_FLYOUT_HISTORY_KEY",
+        "description": [
+          "\nShared EUI flyout history key for the Document Viewer flyout and any nested flyouts\n(e.g. Trace Waterfall). Using the same key groups them into a single back-button\nnavigation history, enabling \"Back\" to return from a nested flyout to the Document Viewer.\n\nThis is used by the unified-doc-viewer and security_solution plugins."
+        ],
+        "signature": [
+          "typeof ",
+          {
+            "pluginId": "@kbn/unified-doc-viewer",
+            "scope": "public",
+            "docId": "kibKbnUnifiedDocViewerPluginApi",
+            "section": "def-public.DOC_VIEWER_FLYOUT_HISTORY_KEY",
+            "text": "DOC_VIEWER_FLYOUT_HISTORY_KEY"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/constants.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-doc-viewer",
         "id": "def-public.DocViewerApi",
         "type": "Type",
         "tags": [],

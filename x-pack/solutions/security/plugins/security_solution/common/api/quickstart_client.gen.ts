@@ -71,16 +71,6 @@ import type {
 } from './detection_engine/rule_management/import_rules/import_rules_route.gen';
 import type { ReadTagsResponse } from './detection_engine/rule_management/read_tags/read_tags_route.gen';
 import type {
-  GetRuleExecutionEventsRequestQueryInput,
-  GetRuleExecutionEventsRequestParamsInput,
-  GetRuleExecutionEventsResponse,
-} from './detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_events/get_rule_execution_events_route.gen';
-import type {
-  GetRuleExecutionResultsRequestQueryInput,
-  GetRuleExecutionResultsRequestParamsInput,
-  GetRuleExecutionResultsResponse,
-} from './detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.gen';
-import type {
   ReadRuleExecutionResultsRequestParamsInput,
   ReadRuleExecutionResultsRequestBodyInput,
   ReadRuleExecutionResultsResponse,
@@ -374,6 +364,10 @@ import type {
   PreviewRiskScoreRequestBodyInput,
   PreviewRiskScoreResponse,
 } from './entity_analytics/risk_engine/preview_route.gen';
+import type {
+  UploadWatchlistCsvRequestParamsInput,
+  UploadWatchlistCsvResponse,
+} from './entity_analytics/watchlists/csv_upload/csv_upload.gen';
 import type {
   CreateWatchlistEntitySourceRequestParamsInput,
   CreateWatchlistEntitySourceRequestBodyInput,
@@ -2039,40 +2033,6 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async getRuleExecutionEvents(props: GetRuleExecutionEventsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetRuleExecutionEvents`);
-    return this.kbnClient
-      .request<GetRuleExecutionEventsResponse>({
-        path: replaceParams(
-          '/internal/detection_engine/rules/{ruleId}/execution/events',
-          props.params
-        ),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'PUT',
-
-        query: props.query,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  async getRuleExecutionResults(props: GetRuleExecutionResultsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetRuleExecutionResults`);
-    return this.kbnClient
-      .request<GetRuleExecutionResultsResponse>({
-        path: replaceParams(
-          '/internal/detection_engine/rules/{ruleId}/execution/results',
-          props.params
-        ),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'PUT',
-
-        query: props.query,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
   /**
    * Retrieves the rule migration document stored in the system given the rule migration id
    */
@@ -3520,6 +3480,33 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+    * Uploads a CSV file to add entities to a watchlist. The CSV must contain a header row
+with a "type" column (user, host, service, or generic) and one or more ECS identity
+fields (e.g. "user.name", "host.hostname") used to match entities in the entity store.
+
+Matched entities are added to the watchlist and their `entity.attributes.watchlists`
+field is updated in the entity store.
+
+Each row will match up to 10,000 entities.
+
+    */
+  async uploadWatchlistCsv(props: UploadWatchlistCsvProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UploadWatchlistCsv`);
+    return this.kbnClient
+      .request<UploadWatchlistCsvResponse>({
+        path: replaceParams(
+          '/api/entity_analytics/watchlists/{watchlist_id}/csv_upload',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.attachment,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Creates or updates resources for an existing SIEM dashboards migration
    */
   async upsertDashboardMigrationResources(props: UpsertDashboardMigrationResourcesProps) {
@@ -3828,14 +3815,6 @@ export interface GetPolicyResponseProps {
 export interface GetProtectionUpdatesNoteProps {
   params: GetProtectionUpdatesNoteRequestParamsInput;
 }
-export interface GetRuleExecutionEventsProps {
-  query: GetRuleExecutionEventsRequestQueryInput;
-  params: GetRuleExecutionEventsRequestParamsInput;
-}
-export interface GetRuleExecutionResultsProps {
-  query: GetRuleExecutionResultsRequestQueryInput;
-  params: GetRuleExecutionResultsRequestParamsInput;
-}
 export interface GetRuleMigrationProps {
   params: GetRuleMigrationRequestParamsInput;
 }
@@ -4063,6 +4042,10 @@ export interface UpdateWorkflowInsightProps {
   body: UpdateWorkflowInsightRequestBodyInput;
 }
 export interface UploadAssetCriticalityRecordsProps {
+  attachment: FormData;
+}
+export interface UploadWatchlistCsvProps {
+  params: UploadWatchlistCsvRequestParamsInput;
   attachment: FormData;
 }
 export interface UpsertDashboardMigrationResourcesProps {
