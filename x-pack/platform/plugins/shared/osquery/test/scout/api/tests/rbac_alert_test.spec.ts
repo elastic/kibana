@@ -59,7 +59,7 @@ apiTest.describe(
 
       // Permission check passes — NOT 403. Without enrolled agents the server may return 500
       // (cannot dispatch), but the RBAC boundary is what we're testing.
-      expect(response.status).not.toBe(403);
+      expect(response.statusCode).not.toBe(403);
     });
 
     apiTest('returns 403 when running a custom query', async ({ apiClient }) => {

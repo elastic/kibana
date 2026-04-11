@@ -12,6 +12,8 @@
     "scripts/**/*.json",
     "server/**/*",
     "test/scout/**/*",
+    "cypress/lib/types.ts",
+    "cypress/lib/kibana_roles/kibana_roles.ts",
     "../../../../../typings/**/*",
     // ECS and Osquery schema files
     "public/common/schemas/*/*.json"

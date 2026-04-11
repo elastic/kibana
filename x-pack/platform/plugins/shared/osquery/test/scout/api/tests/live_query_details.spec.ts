@@ -34,8 +34,8 @@ apiTest.describe(
 
       // Not a client error — the request is valid.
       // Without enrolled agents the server may return 500 (cannot dispatch).
-      expect(response.status).not.toBe(400);
-      expect(response.status).not.toBe(403);
+      expect(response.statusCode).not.toBe(400);
+      expect(response.statusCode).not.toBe(403);
     });
   }
 );
