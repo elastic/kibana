@@ -8,7 +8,7 @@
  */
 
 // This is a packaged standalone version of console that needs to import browser code
-/* eslint-disable @kbn/imports/no_boundary_crossing */
+/* eslint-disable @kbn/imports/no_boundary_crossing, @kbn/imports/no_core_internal_imports */
 
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { noop } from 'lodash';
