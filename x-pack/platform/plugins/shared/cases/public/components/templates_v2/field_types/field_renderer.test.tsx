@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { load as parseYaml } from 'js-yaml';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, renderHook, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { useForm, FormProvider } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/latest';
 import { CASE_EXTENDED_FIELDS } from '../../../../common/constants';
-import { FieldsRenderer } from './field_renderer';
+import { FieldsRenderer, TemplateFieldRenderer } from './field_renderer';
 
 /**
  * Template with a required field whose show_when condition is false by default
@@ -68,6 +68,159 @@ const FormWrapper: React.FC<{
     </FormProvider>
   );
 };
+
+const radioTemplate = `
+name: Test
+fields:
+  - name: environment
+    control: RADIO_GROUP
+    type: keyword
+    label: Environment
+    metadata:
+      options:
+        - development
+        - staging
+        - production
+      default: production
+  - name: affected_components
+    control: CHECKBOX_GROUP
+    type: keyword
+    label: Affected components
+    metadata:
+      options:
+        - api
+        - ui
+        - database
+      default: []
+    display:
+      show_when:
+        field: environment
+        operator: eq
+        value: staging
+`;
+
+const parseParsedTemplate = (yaml: string) => {
+  const result = ParsedTemplateDefinitionSchema.safeParse(parseYaml(yaml));
+  if (!result.success) throw new Error(`Invalid template: ${result.error}`);
+  return result.data;
+};
+
+/**
+ * Hook that exposes the stable-fields stabilization logic from TemplateFieldRenderer
+ * for isolated unit testing.
+ */
+const useStableFields = (fields: ReturnType<typeof parseParsedTemplate>['fields']) => {
+  const fieldsKey = fields.map((f) => JSON.stringify(f)).join('|');
+  const stableFieldsRef = React.useRef(fields);
+  const prevKeyRef = React.useRef(fieldsKey);
+  if (prevKeyRef.current !== fieldsKey) {
+    prevKeyRef.current = fieldsKey;
+    stableFieldsRef.current = fields;
+  }
+  return stableFieldsRef.current;
+};
+
+describe('TemplateFieldRenderer — stable fields reference', () => {
+  it('returns the same reference when re-rendered with a new but identical fields array', () => {
+    const parsedTemplate = parseParsedTemplate(radioTemplate);
+
+    const { result, rerender } = renderHook(({ fields }) => useStableFields(fields), {
+      initialProps: { fields: parsedTemplate.fields },
+    });
+
+    const firstRef = result.current;
+
+    // Re-parse the same YAML — produces a new object/array with identical content
+    const identicalParsedTemplate = parseParsedTemplate(radioTemplate);
+    expect(identicalParsedTemplate.fields).not.toBe(parsedTemplate.fields); // confirm new reference
+
+    rerender({ fields: identicalParsedTemplate.fields });
+
+    // stableFields reference must NOT change — same content, same ref
+    expect(result.current).toBe(firstRef);
+  });
+
+  it('returns a new reference when the field default genuinely changes', () => {
+    const parsedTemplate = parseParsedTemplate(radioTemplate);
+
+    const { result, rerender } = renderHook(({ fields }) => useStableFields(fields), {
+      initialProps: { fields: parsedTemplate.fields },
+    });
+
+    const firstRef = result.current;
+
+    // Change the default from 'production' to 'staging'
+    const updatedTemplate = parseParsedTemplate(
+      radioTemplate.replace('default: production', 'default: staging')
+    );
+
+    rerender({ fields: updatedTemplate.fields });
+
+    // stableFields reference MUST change — content changed
+    expect(result.current).not.toBe(firstRef);
+    expect(result.current).toBe(updatedTemplate.fields);
+  });
+
+  it('returns a new reference when a field is added', () => {
+    const parsedTemplate = parseParsedTemplate(radioTemplate);
+
+    const { result, rerender } = renderHook(({ fields }) => useStableFields(fields), {
+      initialProps: { fields: parsedTemplate.fields },
+    });
+
+    const firstRef = result.current;
+
+    const templateWithExtraField = parseParsedTemplate(
+      `${radioTemplate}
+  - name: extra_field
+    control: INPUT_TEXT
+    type: keyword
+    label: Extra
+`
+    );
+
+    rerender({ fields: templateWithExtraField.fields });
+
+    expect(result.current).not.toBe(firstRef);
+  });
+
+  it('does not call onFieldDefaultChange when TemplateFieldRenderer re-renders with identical field definitions', async () => {
+    const onFieldDefaultChange = jest.fn();
+    const parsedTemplate = parseParsedTemplate(radioTemplate);
+
+    const { rerender } = render(
+      <TemplateFieldRenderer
+        parsedTemplate={parsedTemplate}
+        onFieldDefaultChange={onFieldDefaultChange}
+      />
+    );
+
+    // Let the initial sync and setTimeout(0) settle
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    });
+
+    onFieldDefaultChange.mockClear();
+
+    // Simulate TemplatePreview re-parsing the same YAML — new object, same content
+    const identicalParsedTemplate = parseParsedTemplate(radioTemplate);
+    expect(identicalParsedTemplate.fields).not.toBe(parsedTemplate.fields);
+
+    rerender(
+      <TemplateFieldRenderer
+        parsedTemplate={identicalParsedTemplate}
+        onFieldDefaultChange={onFieldDefaultChange}
+      />
+    );
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    });
+
+    // The YAML-to-form sync effect must NOT fire — stableFields ref is unchanged
+    expect(onFieldDefaultChange).not.toHaveBeenCalled();
+  });
+});
 
 describe('FieldsRenderer — hidden required fields', () => {
   it('does not block form submission when a required field is hidden by show_when', async () => {

@@ -26,6 +26,7 @@ jest.mock('../utils', () => ({
   getTemplateUrlFromPackageInfo: jest.fn(),
   updatePolicyWithInputs: jest.fn(),
   getCloudCredentialVarsConfig: jest.fn().mockReturnValue({}),
+  findVariableDef: jest.fn(),
   gcpField: {
     fields: {
       'gcp.project_id': { label: 'Project ID', type: 'text' },

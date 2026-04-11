@@ -28,6 +28,8 @@ import type {
   FindCasesContainingAllAlertsResponse,
   BulkAddObservablesRequest,
   FindCasesContainingAllDocumentsRequest,
+  UpdateSummary,
+  CasesPatchResponse,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -104,6 +106,7 @@ import {
   decodeCaseUserActionsResponse,
   decodeCaseResolveResponse,
   decodeSingleCaseMetricsResponse,
+  decodeCasesWithUpdateSummaryResponse,
   constructAssigneesFilter,
   constructReportersFilter,
   decodeCaseUserActionStatsResponse,
@@ -116,15 +119,17 @@ import { DEFAULT_FROM_DATE, DEFAULT_TO_DATE } from './constants';
 export const resolveCase = async ({
   caseId,
   signal,
+  mode = 'legacy',
 }: {
   caseId: string;
   signal?: AbortSignal;
+  mode?: 'legacy' | 'unified';
 }): Promise<ResolvedCase> => {
   const response = await KibanaServices.get().http.fetch<CaseResolveResponse>(
     `${getCaseDetailsUrl(caseId)}/resolve`,
     {
       method: 'GET',
-      query: { includeComments: true },
+      query: { includeComments: true, mode },
       signal,
     }
   );
@@ -399,18 +404,22 @@ export const updateCases = async ({
 }: {
   cases: CaseUpdateRequest[];
   signal?: AbortSignal;
-}): Promise<CasesUI> => {
+}): Promise<Array<CaseUI & { updateSummary?: UpdateSummary }>> => {
   if (cases.length === 0) {
     return [];
   }
 
-  const response = await KibanaServices.get().http.fetch<Cases>(CASES_URL, {
+  const response = await KibanaServices.get().http.fetch<CasesPatchResponse>(CASES_URL, {
     method: 'PATCH',
     body: JSON.stringify({ cases }),
     signal,
   });
 
-  return convertCasesToCamelCase(decodeCasesResponse(response));
+  const decodedResponse = decodeCasesWithUpdateSummaryResponse(response);
+  return decodedResponse.map(({ updateSummary, ...theCase }) => ({
+    ...convertCaseToCamelCase(theCase),
+    ...(updateSummary != null ? { updateSummary } : {}),
+  }));
 };
 
 export const replaceCustomField = async ({

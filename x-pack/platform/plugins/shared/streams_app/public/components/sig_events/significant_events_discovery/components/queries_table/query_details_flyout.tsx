@@ -10,6 +10,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCodeBlock,
   EuiConfirmModal,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -26,6 +27,7 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiPopover,
+  EuiSpacer,
   EuiText,
   EuiTextArea,
   EuiTitle,
@@ -33,15 +35,26 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
+import { FlyoutMetadataCard } from '../../../../flyout_components/flyout_metadata_card';
+import { FlyoutToolbarHeader } from '../../../../flyout_components/flyout_toolbar_header';
 import type { SignificantEventItem } from '../../../../../hooks/sig_events/use_fetch_significant_events';
+import { useKibana } from '../../../../../hooks/use_kibana';
+import { useTimefilter } from '../../../../../hooks/use_timefilter';
 import { StreamsESQLEditor } from '../../../../esql_query_editor';
 import { InfoPanel } from '../../../../info_panel';
 import { SparkPlot } from '../../../../spark_plot';
 import { SeveritySelector } from '../severity_selector';
 import { SeverityBadge } from '../severity_badge/severity_badge';
-import { OCCURRENCES_COLUMN, OCCURRENCES_TOOLTIP_NAME } from './translations';
+import { buildDiscoverParams } from '../../utils/discover_helpers';
+import {
+  OCCURRENCES_COLUMN,
+  OCCURRENCES_TOOLTIP_NAME,
+  OPEN_IN_DISCOVER_ACTION_TITLE,
+} from './translations';
 
 interface QueryDetailsFlyoutProps {
   item: SignificantEventItem;
@@ -63,6 +76,13 @@ export function QueryDetailsFlyout({
   onDelete,
 }: QueryDetailsFlyoutProps) {
   const { euiTheme } = useEuiTheme();
+  const {
+    dependencies: {
+      start: { share },
+    },
+  } = useKibana();
+  const { timeState } = useTimefilter();
+  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'queryDetailsFlyoutTitle',
   });
@@ -107,16 +127,10 @@ export function QueryDetailsFlyout({
     setIsEditMode(false);
   };
 
-  const infoListItems = [
+  const generalInfoItems = [
     {
       title: TYPE_LABEL,
       description: <EuiBadge color="hollow">{QUERY_TYPE_BADGE_LABEL}</EuiBadge>,
-    },
-    {
-      title: QUERY_LABEL,
-      description: (
-        <EuiText size="s">{getQueryInputValue(item) || DEFAULT_QUERY_PLACEHOLDER}</EuiText>
-      ),
     },
     {
       title: DESCRIPTION_LABEL,
@@ -140,77 +154,90 @@ export function QueryDetailsFlyout({
         size="40%"
         hideCloseButton
       >
-        <EuiFlyoutHeader hasBorder>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-            <EuiFlexItem>
-              <EuiTitle size="m">
-                <h2 id={flyoutTitleId}>{item.query.title}</h2>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="xs" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiPopover
-                    aria-label={ACTIONS_BUTTON_ARIA_LABEL}
-                    button={
-                      <EuiButtonIcon
-                        data-test-subj="queriesTableQueryDetailsFlyoutActionsButton"
-                        iconType="boxesVertical"
-                        aria-label={ACTIONS_BUTTON_ARIA_LABEL}
-                        onClick={() => {
-                          setIsActionsPopoverOpen((value) => !value);
-                        }}
-                      />
-                    }
-                    isOpen={isActionsPopoverOpen}
-                    closePopover={() => {
+        {/* First header: minimal toolbar with actions and close */}
+        <FlyoutToolbarHeader>
+          <EuiFlexItem grow={false}>
+            <EuiPopover
+              aria-label={ACTIONS_BUTTON_ARIA_LABEL}
+              button={
+                <EuiButtonIcon
+                  data-test-subj="queriesTableQueryDetailsFlyoutActionsButton"
+                  iconType="boxesVertical"
+                  aria-label={ACTIONS_BUTTON_ARIA_LABEL}
+                  onClick={() => setIsActionsPopoverOpen((value) => !value)}
+                />
+              }
+              isOpen={isActionsPopoverOpen}
+              closePopover={() => setIsActionsPopoverOpen(false)}
+              panelPaddingSize="none"
+              anchorPosition="downRight"
+            >
+              <EuiContextMenuPanel
+                size="s"
+                items={[
+                  <EuiContextMenuItem
+                    key="edit"
+                    icon="pencil"
+                    disabled={isEditMode}
+                    onClick={() => {
                       setIsActionsPopoverOpen(false);
+                      setIsEditMode(true);
                     }}
-                    panelPaddingSize="none"
-                    anchorPosition="downRight"
+                    data-test-subj="queriesTableQueryDetailsFlyoutEditAction"
                   >
-                    <EuiContextMenuPanel
-                      size="s"
-                      items={[
-                        <EuiContextMenuItem
-                          key="edit"
-                          icon="pencil"
-                          disabled={isEditMode}
-                          onClick={() => {
-                            setIsActionsPopoverOpen(false);
-                            setIsEditMode(true);
-                          }}
-                          data-test-subj="queriesTableQueryDetailsFlyoutEditAction"
-                        >
-                          {EDIT_ACTION_LABEL}
-                        </EuiContextMenuItem>,
-                        <EuiContextMenuItem
-                          key="delete"
-                          icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
-                          css={css`
-                            color: ${euiTheme.colors.danger};
-                          `}
-                          onClick={() => {
-                            setIsActionsPopoverOpen(false);
-                            setIsDeleteModalVisible(true);
-                          }}
-                          data-test-subj="queriesTableQueryDetailsFlyoutDeleteAction"
-                        >
-                          {DELETE_ACTION_LABEL}
-                        </EuiContextMenuItem>,
-                      ]}
-                    />
-                  </EuiPopover>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    data-test-subj="queriesTableQueryDetailsFlyoutCloseButton"
-                    iconType="cross"
-                    aria-label={CLOSE_BUTTON_ARIA_LABEL}
-                    onClick={onClose}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                    {EDIT_ACTION_LABEL}
+                  </EuiContextMenuItem>,
+                  <EuiContextMenuItem
+                    key="delete"
+                    icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
+                    css={css`
+                      color: ${euiTheme.colors.danger};
+                    `}
+                    onClick={() => {
+                      setIsActionsPopoverOpen(false);
+                      setIsDeleteModalVisible(true);
+                    }}
+                    data-test-subj="queriesTableQueryDetailsFlyoutDeleteAction"
+                  >
+                    {DELETE_ACTION_LABEL}
+                  </EuiContextMenuItem>,
+                ]}
+              />
+            </EuiPopover>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              data-test-subj="queriesTableQueryDetailsFlyoutCloseButton"
+              iconType="cross"
+              aria-label={CLOSE_BUTTON_ARIA_LABEL}
+              onClick={onClose}
+            />
+          </EuiFlexItem>
+        </FlyoutToolbarHeader>
+
+        {/* Second header: title and metadata cards */}
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="s">
+            <h2 id={flyoutTitleId}>{item.query.title}</h2>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+            <EuiFlexItem>
+              <FlyoutMetadataCard title={SEVERITY_DETAILS_LABEL}>
+                <SeverityBadge score={item.query.severity_score} />
+              </FlyoutMetadataCard>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <FlyoutMetadataCard title={TYPE_LABEL}>
+                <EuiBadge color="hollow">{QUERY_TYPE_BADGE_LABEL}</EuiBadge>
+              </FlyoutMetadataCard>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <FlyoutMetadataCard title={STREAM_LABEL}>
+                <EuiBadge color="hollow" iconType="productStreamsClassic" iconSide="left">
+                  {item.stream_name}
+                </EuiBadge>
+              </FlyoutMetadataCard>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
@@ -218,8 +245,8 @@ export function QueryDetailsFlyout({
           {!isEditMode && (
             <EuiFlexGroup direction="column" gutterSize="m">
               <EuiFlexItem>
-                <InfoPanel title={QUERY_INFORMATION_TITLE}>
-                  {infoListItems.map((listItem, index) => (
+                <InfoPanel title={GENERAL_INFORMATION_TITLE}>
+                  {generalInfoItems.map((listItem, index) => (
                     <React.Fragment key={listItem.title}>
                       <EuiDescriptionList
                         type="column"
@@ -227,9 +254,32 @@ export function QueryDetailsFlyout({
                         compressed
                         listItems={[listItem]}
                       />
-                      {index < infoListItems.length - 1 && <EuiHorizontalRule margin="m" />}
+                      {index < generalInfoItems.length - 1 && <EuiHorizontalRule margin="m" />}
                     </React.Fragment>
                   ))}
+                </InfoPanel>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <InfoPanel
+                  title={QUERY_PANEL_TITLE}
+                  headerRightContent={
+                    discoverLocator ? (
+                      <EuiButtonEmpty
+                        size="xs"
+                        iconType="discoverApp"
+                        iconSide="left"
+                        onClick={() =>
+                          discoverLocator.navigate(buildDiscoverParams(item.query, timeState))
+                        }
+                      >
+                        {OPEN_IN_DISCOVER_ACTION_TITLE}
+                      </EuiButtonEmpty>
+                    ) : undefined
+                  }
+                >
+                  <EuiCodeBlock language="esql" isCopyable paddingSize="m">
+                    {getQueryInputValue(item) || DEFAULT_QUERY_PLACEHOLDER}
+                  </EuiCodeBlock>
                 </InfoPanel>
               </EuiFlexItem>
               <EuiFlexItem>
@@ -341,9 +391,14 @@ function getQueryInputValue(item: SignificantEventItem) {
   return item.query.esql?.query ?? '';
 }
 
-const QUERY_INFORMATION_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.queryInformationTitle',
-  { defaultMessage: 'Query information' }
+const STREAM_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.streamLabel',
+  { defaultMessage: 'Stream' }
+);
+
+const GENERAL_INFORMATION_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.generalInformationTitle',
+  { defaultMessage: 'General information' }
 );
 
 const TYPE_LABEL = i18n.translate(
@@ -366,7 +421,7 @@ const QUERY_NAME_LABEL = i18n.translate(
   { defaultMessage: 'Query name' }
 );
 
-const QUERY_LABEL = i18n.translate(
+const QUERY_PANEL_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.queryLabel',
   { defaultMessage: 'Query' }
 );
