@@ -159,8 +159,6 @@ src/core/packages/custom-branding/server @elastic/appex-sharedux
 src/core/packages/custom-branding/server-internal @elastic/appex-sharedux
 src/core/packages/custom-branding/server-mocks @elastic/appex-sharedux
 src/core/packages/data-streams/server @elastic/kibana-core
-src/core/packages/data-streams/server-internal @elastic/kibana-core
-src/core/packages/data-streams/server-mocks @elastic/kibana-core
 src/core/packages/deprecations/browser @elastic/kibana-core
 src/core/packages/deprecations/browser-internal @elastic/kibana-core
 src/core/packages/deprecations/browser-mocks @elastic/kibana-core
