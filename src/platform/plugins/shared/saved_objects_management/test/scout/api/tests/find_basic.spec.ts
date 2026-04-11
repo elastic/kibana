@@ -78,8 +78,7 @@ apiTest.describe('find - basic', { tag: tags.deploymentAgnostic }, () => {
       expect(response.body).toStrictEqual({
         statusCode: 400,
         error: 'Bad Request',
-        message:
-          "[request query.searchFields]: Additional properties are not allowed ('searchFields' was unexpected)",
+        message: '[request query.searchFields]: definition for this key is missing',
       });
     }
   );
