@@ -68,9 +68,7 @@ describe('<RemoteClustersForm />', () => {
     renderWithClusters([]);
 
     expect(screen.getByText(/No remote clusters configured/)).toBeInTheDocument();
-    expect(
-      screen.getByText(/configure remote clusters in Stack Management/)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/configure remote clusters in Stack Management/)).toBeInTheDocument();
   });
 
   it('disables the combo box when "Use all remote clusters" is toggled on', () => {

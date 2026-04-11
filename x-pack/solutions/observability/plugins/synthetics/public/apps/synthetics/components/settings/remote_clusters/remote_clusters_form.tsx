@@ -206,23 +206,14 @@ export const RemoteClustersForm = () => {
 
       {!canEdit && (
         <>
-          <EuiCallOut
-            announceOnMount
-            title={READ_ONLY_MESSAGE}
-            iconType="lock"
-            size="s"
-          />
+          <EuiCallOut announceOnMount title={READ_ONLY_MESSAGE} iconType="lock" size="s" />
           <EuiSpacer size="m" />
         </>
       )}
 
       {hasNoClusters && (
         <>
-          <EuiCallOut
-            title={NO_CLUSTERS_TITLE}
-            iconType="iInCircle"
-            color="warning"
-          >
+          <EuiCallOut title={NO_CLUSTERS_TITLE} iconType="iInCircle" color="warning">
             <p>{NO_CLUSTERS_DESCRIPTION}</p>
           </EuiCallOut>
           <EuiSpacer size="m" />
@@ -329,20 +320,18 @@ const SOURCE_SETTINGS_DESCRIPTION = i18n.translate(
   }
 );
 
-const SELECT_CLUSTERS_TITLE = i18n.translate(
-  'xpack.synthetics.settings.ccs.selectClustersTitle',
-  { defaultMessage: 'Remote clusters' }
-);
+const SELECT_CLUSTERS_TITLE = i18n.translate('xpack.synthetics.settings.ccs.selectClustersTitle', {
+  defaultMessage: 'Remote clusters',
+});
 
 const SELECT_CLUSTERS_DESCRIPTION = i18n.translate(
   'xpack.synthetics.settings.ccs.selectClustersDescription',
   { defaultMessage: 'Select which remote clusters to include in cross-cluster search queries.' }
 );
 
-const SELECT_CLUSTERS_LABEL = i18n.translate(
-  'xpack.synthetics.settings.ccs.selectClustersLabel',
-  { defaultMessage: 'Select remote clusters' }
-);
+const SELECT_CLUSTERS_LABEL = i18n.translate('xpack.synthetics.settings.ccs.selectClustersLabel', {
+  defaultMessage: 'Select remote clusters',
+});
 
 const SELECT_CLUSTERS_PLACEHOLDER = i18n.translate(
   'xpack.synthetics.settings.ccs.selectClustersPlaceholder',
