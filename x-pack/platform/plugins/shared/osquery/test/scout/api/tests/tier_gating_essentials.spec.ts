@@ -11,28 +11,44 @@ import { tags } from '@kbn/scout';
 import { apiTest, testData } from '../fixtures';
 
 /**
- * Tests that Essentials tiers block osquery response actions.
+ * Tests that detection rule creation with osquery response actions succeeds on
+ * Essentials tiers at the API level.
  * Replaces cypress/e2e/tiers/endpoint_essentials.cy.ts and
  * cypress/e2e/tiers/security_essentials.cy.ts (serverless only).
  *
- * The security_essentials config sets both security AND endpoint to essentials,
- * covering both blocked cases.
+ * Note: PLI-based gating for osquery response actions is enforced at the UI
+ * level via the `osqueryAutomatedResponseActions` feature key and upselling
+ * components — not at the API level. The API validates user privileges (PR
+ * #260947) but does not block based on tier. UI-level tier gating is covered
+ * in Phase 2 as Jest component tests for the upselling component.
  */
 
 apiTest.describe(
-  'Osquery tier gating - Essentials tiers block response actions',
+  'Osquery tier gating - Essentials tiers accept rule with response actions at API level',
   {
     tag: [...tags.serverless.security.essentials],
   },
   () => {
     let adminCredentials: RoleSessionCredentials;
+    let ruleId: string;
 
     apiTest.beforeAll(async ({ samlAuth }) => {
       adminCredentials = await samlAuth.asInteractiveUser('admin');
     });
 
+    apiTest.afterAll(async ({ apiClient }) => {
+      if (ruleId) {
+        await apiClient.delete(`${testData.API_PATHS.DETECTION_RULES}?id=${ruleId}`, {
+          headers: {
+            ...testData.COMMON_HEADERS,
+            ...adminCredentials.cookieHeader,
+          },
+        });
+      }
+    });
+
     apiTest(
-      'blocks creating a rule with osquery response action on essentials tier',
+      'allows creating a rule with osquery response action on essentials tier',
       async ({ apiClient }) => {
         const ruleResponse = await apiClient.post(testData.API_PATHS.DETECTION_RULES, {
           headers: {
@@ -53,8 +69,9 @@ apiTest.describe(
           responseType: 'json',
         });
 
-        // Essentials tier should block osquery response actions
-        expect(ruleResponse).toHaveStatusCode(400);
+        // API allows rule creation on all tiers — PLI gating is UI-side only
+        expect(ruleResponse).toHaveStatusCode(200);
+        ruleId = ruleResponse.body.id;
       }
     );
   }

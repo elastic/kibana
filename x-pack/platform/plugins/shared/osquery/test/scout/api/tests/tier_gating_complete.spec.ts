@@ -14,9 +14,10 @@ import { apiTest, testData } from '../fixtures';
  * Tests that Endpoint Complete PLI permits osquery response actions.
  * Replaces cypress/e2e/tiers/endpoint_complete.cy.ts (serverless only).
  *
- * The "Security Complete only" (no Endpoint) case is tested separately in
- * test/scout_osquery/api/tests/tier_gating_security_complete.spec.ts using
- * the `osquery` config set.
+ * Note: The "Security Complete only" (no Endpoint) case is not tested separately —
+ * the same Endpoint Complete PLI gate is already verified by tier_gating_essentials.spec.ts.
+ * A dedicated config set (osquery/serverless/security_complete_only) exists for future use
+ * if distinct PLI coverage is needed.
  */
 
 apiTest.describe(
