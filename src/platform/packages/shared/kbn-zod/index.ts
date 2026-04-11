@@ -7,4 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './v4';
+export * from 'zod/v3';
+export { isZod } from './util';
+export type { ZodEsque } from './types';

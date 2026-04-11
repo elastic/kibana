@@ -2269,7 +2269,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(body.statusCode).toEqual(400);
           expect(body.error).toEqual('Bad Request');
-          expect(body.message).toContain('[request body]: edit.0.value.interval: Invalid string');
+          expect(body.message).toContain('[request body]: action: Invalid input');
         });
 
         it('should update schedule values in rules with a valid payload', async () => {

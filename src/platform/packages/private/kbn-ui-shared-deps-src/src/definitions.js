@@ -70,7 +70,6 @@ const externals = {
   'io-ts/lib/Reporter': '__kbnSharedDeps__.IoTsReporter',
   'io-ts/lib/PathReporter': '__kbnSharedDeps__.IoTsPathReporter',
   'io-ts/lib/ThrowReporter': '__kbnSharedDeps__.IoTsThrowReporter',
-  'zod/v4': '__kbnSharedDeps__.Zod',
   '@reduxjs/toolkit': '__kbnSharedDeps__.ReduxjsToolkit',
   'react-redux': '__kbnSharedDeps__.ReactRedux',
   redux: '__kbnSharedDeps__.Redux',

@@ -43,7 +43,7 @@ describe('generateSchema', () => {
 
     const schemaWithSharedAuth = generateSchema(spec, { authMode: 'shared' });
     const sharedJsonSchema = z4.toJSONSchema(schemaWithSharedAuth) as any;
-    const sharedAuthTypes = (sharedJsonSchema.properties?.secrets?.oneOf || [])
+    const sharedAuthTypes = (sharedJsonSchema.properties?.secrets?.anyOf || [])
       .map((opt: any) => opt.properties?.authType?.const)
       .filter(Boolean);
 
@@ -64,7 +64,7 @@ describe('generateSchema', () => {
 
     const schema = generateSchema(spec);
     const jsonSchema = z4.toJSONSchema(schema) as any;
-    const authTypes = (jsonSchema.properties?.secrets?.oneOf || [])
+    const authTypes = (jsonSchema.properties?.secrets?.anyOf || [])
       .map((opt: any) => opt.properties?.authType?.const)
       .filter(Boolean);
 
@@ -85,7 +85,7 @@ describe('generateSchema', () => {
 
     const schema = generateSchema(spec, { authMode: 'per-user' });
     const jsonSchema = z4.toJSONSchema(schema) as any;
-    const authTypes = (jsonSchema.properties?.secrets?.oneOf || [])
+    const authTypes = (jsonSchema.properties?.secrets?.anyOf || [])
       .map((opt: any) => opt.properties?.authType?.const)
       .filter(Boolean);
 

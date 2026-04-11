@@ -58,11 +58,11 @@ describe('generateSecretsSchemaFromSpec', () => {
       { isPfxEnabled: true, authMode: 'shared' }
     );
     const jsonSchema = z.toJSONSchema(schema) as {
-      oneOf?: Array<{ properties?: { authType?: { const?: string } } }>;
+      anyOf?: Array<{ properties?: { authType?: { const?: string } } }>;
     };
 
-    const oneOfOptions = jsonSchema.oneOf || [];
-    const authTypes = oneOfOptions
+    const anyOfOptions = jsonSchema.anyOf || [];
+    const authTypes = anyOfOptions
       .map((opt) => opt.properties?.authType?.const)
       .filter(Boolean) as string[];
 
@@ -79,11 +79,11 @@ describe('generateSecretsSchemaFromSpec', () => {
       { isPfxEnabled: true, authMode: 'per-user' }
     );
     const jsonSchema = z.toJSONSchema(schema) as {
-      oneOf?: Array<{ properties?: { authType?: { const?: string } } }>;
+      anyOf?: Array<{ properties?: { authType?: { const?: string } } }>;
     };
 
-    const oneOfOptions = jsonSchema.oneOf || [];
-    const authTypes = oneOfOptions
+    const anyOfOptions = jsonSchema.anyOf || [];
+    const authTypes = anyOfOptions
       .map((opt) => opt.properties?.authType?.const)
       .filter(Boolean) as string[];
 
@@ -101,11 +101,11 @@ describe('generateSecretsSchemaFromSpec', () => {
       { isPfxEnabled: true, authMode: 'unknown' as AuthMode }
     );
     const jsonSchema = z.toJSONSchema(schema) as {
-      oneOf?: Array<{ properties?: { authType?: { const?: string } } }>;
+      anyOf?: Array<{ properties?: { authType?: { const?: string } } }>;
     };
 
     // All types are filtered out because none match the unrecognised mode
-    expect(jsonSchema.oneOf).toBeUndefined();
+    expect(jsonSchema.anyOf).toBeUndefined();
   });
 
   test('includes all auth types when authMode is not specified', () => {
@@ -113,11 +113,11 @@ describe('generateSecretsSchemaFromSpec', () => {
       types: ['basic', 'bearer', 'oauth_authorization_code'],
     });
     const jsonSchema = z.toJSONSchema(schema) as {
-      oneOf?: Array<{ properties?: { authType?: { const?: string } } }>;
+      anyOf?: Array<{ properties?: { authType?: { const?: string } } }>;
     };
 
-    const oneOfOptions = jsonSchema.oneOf || [];
-    const authTypes = oneOfOptions
+    const anyOfOptions = jsonSchema.anyOf || [];
+    const authTypes = anyOfOptions
       .map((opt) => opt.properties?.authType?.const)
       .filter(Boolean) as string[];
 

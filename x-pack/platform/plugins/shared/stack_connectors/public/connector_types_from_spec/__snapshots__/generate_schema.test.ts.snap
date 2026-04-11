@@ -19,8 +19,7 @@ Object {
       "type": "object",
     },
     "secrets": Object {
-      "label": "Authentication",
-      "oneOf": Array [
+      "anyOf": Array [
         Object {
           "additionalProperties": false,
           "label": "Basic authentication",
@@ -70,6 +69,7 @@ Object {
           "type": "object",
         },
       ],
+      "label": "Authentication",
     },
   },
   "required": Array [
