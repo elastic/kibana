@@ -118,12 +118,14 @@ export const entityMaintainerRouteHelpersFactory = (
 };
 
 export const waitForMaintainerRun = async ({
+  log,
   retry,
   routes,
   minRuns = 1,
   maintainerId = 'risk-score',
   timeoutMs = 60_000,
 }: {
+  log?: ToolingLog;
   retry: RetryServiceLike;
   routes: Pick<
     ReturnType<typeof entityMaintainerRouteHelpersFactory>,
@@ -143,6 +145,9 @@ export const waitForMaintainerRun = async ({
     );
     baselineRuns = existing?.runs ?? 0;
   } catch {
+    log?.info(
+      `[YING DEBUG] Failed to get baseline runs count for maintainer "${maintainerId}". Maintainer does not exist`
+    );
     // Maintainer may not exist yet
   }
 
@@ -161,10 +166,19 @@ export const waitForMaintainerRun = async ({
       // one finishes.
       if (!manualRunTriggered) {
         try {
+          log?.info(
+            `[YING DEBUG] Attempting to trigger manual run for maintainer "${maintainerId}"`
+          );
           await routes.runMaintainer(maintainerId);
           manualRunTriggered = true;
         } catch (error) {
+          log?.info(
+            `[YING DEBUG] Failed to trigger manual run for maintainer "${maintainerId}": ${error.message}`
+          );
           if (isMaintainerAlreadyRunningError(error)) {
+            log?.info(
+              `[YING DEBUG] Maintainer "${maintainerId}" is already running. Will wait for current run to finish before triggering the required additional run.`
+            );
             if (!alreadyRunningHandled) {
               requiredNewRuns += 1;
               alreadyRunningHandled = true;
@@ -174,6 +188,9 @@ export const waitForMaintainerRun = async ({
       }
 
       const response = await routes.getMaintainers(200, [maintainerId]);
+      log?.info(
+        `[YING DEBUG] Polled maintainer "${maintainerId}": ${JSON.stringify(response.body)}`
+      );
       const maintainer = response.body.maintainers.find(
         (m: { id: string; runs: number }) => m.id === maintainerId
       );
