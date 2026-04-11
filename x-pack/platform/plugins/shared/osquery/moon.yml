@@ -87,7 +87,6 @@ dependsOn:
   - '@kbn/core-chrome-browser'
   - '@kbn/scout'
   - '@kbn/core-http-browser'
-  - '@kbn/osquery-plugin-cypress'
 tags:
   - plugin
   - prod
@@ -106,4 +105,4 @@ fileGroups:
     - '!target/**/*'
   jest-config:
     - jest.config.js
-tasks: {}
+tasks: { }
