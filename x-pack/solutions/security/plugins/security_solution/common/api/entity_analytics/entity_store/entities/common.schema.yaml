@@ -62,6 +62,9 @@ components:
             first_seen:
               type: string
               format: date-time
+            last_seen:
+              type: string
+              format: date-time
             last_activity:
               type: string
               format: date-time
@@ -249,6 +252,33 @@ components:
               type: array
               items:
                 type: string
+            os:
+              type: object
+              additionalProperties: false
+              description: ECS host.os fields materialized on the entity latest index (v2).
+              properties:
+                name:
+                  oneOf:
+                    - type: string
+                    - type: array
+                      items:
+                        type: string
+                type:
+                  oneOf:
+                    - type: string
+                    - type: array
+                      items:
+                        type: string
+                family:
+                  type: string
+                full:
+                  type: string
+                kernel:
+                  type: string
+                platform:
+                  type: string
+                version:
+                  type: string
             risk:
               $ref: '../../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
             entity:

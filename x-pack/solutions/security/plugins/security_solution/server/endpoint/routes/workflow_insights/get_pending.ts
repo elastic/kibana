@@ -40,7 +40,6 @@ export const registerGetPendingRoute = (
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {

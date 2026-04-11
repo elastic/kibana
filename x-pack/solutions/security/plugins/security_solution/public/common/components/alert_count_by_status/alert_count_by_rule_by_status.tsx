@@ -36,6 +36,7 @@ import { useAlertCountByRuleByStatus } from './use_alert_count_by_rule_by_status
 interface EntityFilter {
   field: string;
   value: string;
+  entityType?: string;
 }
 interface AlertCountByStatusProps {
   entityFilter: EntityFilter;
@@ -65,7 +66,7 @@ const StyledEuiPanel = euiStyled(EuiPanel)`
 
 export const AlertCountByRuleByStatus = React.memo(
   ({ entityFilter, signalIndexName, additionalFilters }: AlertCountByStatusProps) => {
-    const { field, value } = entityFilter;
+    const { field, value, entityType } = entityFilter;
 
     const queryId = `${ALERT_COUNT_BY_RULE_BY_STATUS}-by-${field}`;
     const { toggleStatus, setToggleStatus } = useQueryToggle(queryId);
@@ -114,6 +115,7 @@ export const AlertCountByRuleByStatus = React.memo(
       additionalFilters,
       field,
       value,
+      entityType,
       queryId,
       statuses: selectedStatusesByField[field] as Status[],
       skip: !toggleStatus,

@@ -19,9 +19,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DataStreamResponse } from '@kbn/automatic-import-v2-plugin/common';
 
-import type { CreatedIntegrationRow } from './manage_integrations_table';
+import { useStartServices } from '../../../../../hooks';
+
+import type {
+  AIV2Telemetry,
+  CreatedIntegrationRow,
+  DataStreamResultsFlyoutComponent,
+} from './manage_integrations_table';
 import type { ReviewIntegrationDetails } from './review_approve_modal';
 import { ReviewApproveModal } from './review_approve_modal';
 
@@ -34,11 +39,7 @@ export const ManageIntegrationActions: React.FC<{
   showMenuButton?: boolean;
   onEdit: (integrationId: string) => void;
   onDelete: (integrationId: string) => Promise<void>;
-  DataStreamResultsFlyoutComponent?: React.ComponentType<{
-    integrationId: string;
-    dataStream: DataStreamResponse;
-    onClose: () => void;
-  }>;
+  DataStreamResultsFlyoutComponent?: DataStreamResultsFlyoutComponent;
   onFetchReviewDetails: (integrationId: string) => Promise<ReviewIntegrationDetails>;
   onApproveAndDeploy: (
     integrationId: string,
@@ -61,6 +62,7 @@ export const ManageIntegrationActions: React.FC<{
   onInstallToCluster,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { automaticImportVTwo } = useStartServices();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
@@ -102,18 +104,26 @@ export const ManageIntegrationActions: React.FC<{
 
   const handleConfirmDelete = useCallback(async () => {
     setIsDeleting(true);
+    (automaticImportVTwo?.telemetry as AIV2Telemetry)?.reportEvent(
+      'aiv2_integration_delete_confirmed',
+      {}
+    );
     try {
       await onDelete(integration.integrationId);
     } finally {
       setIsDeleting(false);
       setShowDeleteConfirm(false);
     }
-  }, [onDelete, integration.integrationId]);
+  }, [onDelete, integration.integrationId, automaticImportVTwo]);
 
   const openReviewModal = useCallback(() => {
     setIsPopoverOpen(false);
     setShowReviewModal(true);
-  }, []);
+    (automaticImportVTwo?.telemetry as AIV2Telemetry)?.reportEvent(
+      'aiv2_review_approve_menu_clicked',
+      {}
+    );
+  }, [automaticImportVTwo]);
 
   const closeReviewModal = useCallback(() => {
     setShowReviewModal(false);
@@ -170,6 +180,10 @@ export const ManageIntegrationActions: React.FC<{
       )}
       {showMenuButton && (
         <EuiPopover
+          aria-label={i18n.translate(
+            'xpack.fleet.epmList.manageIntegrations.actions.openMenuLabel',
+            { defaultMessage: 'Open actions menu' }
+          )}
           anchorPosition="downRight"
           panelPaddingSize="none"
           button={

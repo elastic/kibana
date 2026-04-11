@@ -10,6 +10,7 @@
 import { z } from '@kbn/zod/v4';
 import { emitEvent } from './emit_event';
 import type { EmitEventDeps } from './emit_event';
+import { setWorkflowEventChainContext } from './event_chain_context';
 import { TriggerRegistry } from './trigger_registry';
 import type { ServerTriggerDefinition } from './types';
 
@@ -103,6 +104,64 @@ describe('emitEvent', () => {
       })
     );
     expect(handler.mock.calls[0][0]).toHaveProperty('timestamp');
+  });
+
+  it('passes eventChainContext undefined when request has no chain context (e.g. direct emit_loop)', async () => {
+    const registry = new TriggerRegistry();
+    registry.register({
+      id: 'cases.updated',
+      eventSchema,
+    } as ServerTriggerDefinition);
+    const handler = jest.fn().mockResolvedValue(undefined);
+    const deps = createDeps({
+      triggerRegistry: registry,
+      triggerEventHandler: handler,
+    });
+    const bareRequest = {} as any;
+
+    await emitEvent(
+      {
+        triggerId: 'cases.updated',
+        spaceId: 'default',
+        payload: { caseId: '123', status: 'open' },
+        request: bareRequest,
+      },
+      deps
+    );
+
+    expect(handler).toHaveBeenCalledTimes(1);
+    expect(handler.mock.calls[0][0].eventChainContext).toBeUndefined();
+  });
+
+  it('passes eventChainContext from request when not provided in params', async () => {
+    const registry = new TriggerRegistry();
+    registry.register({
+      id: 'cases.updated',
+      eventSchema,
+    } as ServerTriggerDefinition);
+    const handler = jest.fn().mockResolvedValue(undefined);
+    const deps = createDeps({
+      triggerRegistry: registry,
+      triggerEventHandler: handler,
+    });
+    const requestWithContext = {} as any;
+    setWorkflowEventChainContext(requestWithContext, { depth: 1, sourceWorkflowId: 'wf-1' });
+
+    await emitEvent(
+      {
+        triggerId: 'cases.updated',
+        spaceId: 'default',
+        payload: { caseId: '123', status: 'open' },
+        request: requestWithContext,
+      },
+      deps
+    );
+
+    expect(handler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventChainContext: { depth: 1, sourceWorkflowId: 'wf-1' },
+      })
+    );
   });
 
   it('throws when no handler is registered', async () => {

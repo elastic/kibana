@@ -14,7 +14,7 @@ import type {
   FormBasedLayer,
   GaugeVisualizationState,
   HeatmapVisualizationState,
-  XYState,
+  XYVisualizationState,
   MetricVisualizationState,
   SharedPartitionLayerState,
   TextBasedLayer,
@@ -158,7 +158,7 @@ type LegendTruncateAfterLines = TypeOf<typeof legendTruncateAfterLinesSchema>;
 
 export function getLegendTruncateAfterLines(
   legend:
-    | Pick<XYState['legend'], 'shouldTruncate' | 'maxLines'>
+    | Pick<XYVisualizationState['legend'], 'shouldTruncate' | 'maxLines'>
     | Pick<HeatmapVisualizationState['legend'], 'shouldTruncate' | 'maxLines'>
     | Pick<SharedPartitionLayerState, 'truncateLegend' | 'legendMaxLines'>
 ): LegendTruncateAfterLines {
@@ -172,4 +172,20 @@ export function getLegendTruncateAfterLines(
       : {};
 
   return shouldTruncate && maxLines > 0 ? maxLines : undefined;
+}
+
+/**
+ * Determines the x-axis scale type based on column metadata type.
+ * Returns 'temporal' for date columns, 'linear' for numeric columns, and 'ordinal' for others.
+ */
+export function getScaleTypeFromColumnType(
+  columnType: string | undefined
+): 'temporal' | 'linear' | 'ordinal' {
+  if (columnType === 'date') {
+    return 'temporal';
+  } else if (columnType === 'number') {
+    return 'linear';
+  } else {
+    return 'ordinal';
+  }
 }

@@ -34,8 +34,9 @@ import {
   horizontalAlignmentSchema,
   verticalAlignmentSchema,
   leftRightAlignmentSchema,
-  beforeAfterAlignmentSchema,
+  placementSchema,
 } from '../alignments';
+import { builderEnums } from '../enums';
 
 const compareToSchemaShared = schema.object(
   {
@@ -55,7 +56,7 @@ const barBackgroundChartSchema = schema.object({
    * - 'vertical': Bar is oriented vertically
    * - 'horizontal': Bar is oriented horizontally
    */
-  direction: schema.maybe(schema.oneOf([schema.literal('vertical'), schema.literal('horizontal')])),
+  orientation: schema.maybe(builderEnums.simpleOrientation()),
 });
 
 export const complementaryVizSchemaNoESQL = schema.oneOf([
@@ -104,39 +105,41 @@ const metricStatePrimaryMetricOptionsSchema = {
    * Sub label
    */
   sub_label: schema.maybe(schema.string({ meta: { description: 'Sub label' } })),
-  /**
-   * Alignments of the labels and values for the primary metric.
-   * For example, align the labels to the left and the values to the right.
-   */
-  alignments: schema.object(
+  labels: schema.object(
     {
       /**
-       * Alignments for labels. Possible values:
+       * Alignment for labels. Possible values:
        * - 'left': Align label to the left
        * - 'center': Align label to the center
        * - 'right': Align label to the right
        */
-      labels: horizontalAlignmentSchema({
-        meta: { description: 'Alignments for labels' },
+      alignment: horizontalAlignmentSchema({
+        meta: { description: 'Alignment for labels' },
         defaultValue: LENS_METRIC_STATE_DEFAULTS.titlesTextAlign,
       }),
+    },
+    {
+      meta: { description: 'Labels configuration' },
+    }
+  ),
+  /**
+   * Values configuration
+   */
+  value: schema.object(
+    {
       /**
-       * Alignments for value. Possible values:
+       * Alignment for values. Possible values:
        * - 'left': Align value to the left
        * - 'center': Align value to the center
        * - 'right': Align value to the right
        */
-      value: horizontalAlignmentSchema({
-        meta: { description: 'Alignments for value' },
+      alignment: horizontalAlignmentSchema({
+        meta: { description: 'Alignment for values' },
         defaultValue: LENS_METRIC_STATE_DEFAULTS.primaryAlign,
       }),
     },
     {
-      defaultValue: {
-        labels: LENS_METRIC_STATE_DEFAULTS.titlesTextAlign,
-        value: LENS_METRIC_STATE_DEFAULTS.primaryAlign,
-      },
-      meta: { id: 'metricPrimaryMetricAlignments', title: 'Primary Metric Alignments' },
+      meta: { description: 'Values configuration' },
     }
   ),
   /**
@@ -158,7 +161,7 @@ const metricStatePrimaryMetricOptionsSchema = {
          * - 'right': Icon is aligned to the right
          * - 'left': Icon is aligned to the left
          */
-        align: leftRightAlignmentSchema({
+        alignment: leftRightAlignmentSchema({
           meta: { description: 'Icon alignment' },
           defaultValue: LENS_METRIC_STATE_DEFAULTS.iconAlign,
         }),
@@ -212,12 +215,12 @@ const metricStateSecondaryMetricOptionsSchema = {
    */
   prefix: schema.maybe(schema.string({ meta: { description: 'Prefix' } })),
   /**
-   * Label position relative to the secondary metric value. Possible values:
+   * Label placement relative to the secondary metric value. Possible values:
    * - 'before': Label appears before the value
    * - 'after': Label appears after the value
    */
-  label_position: beforeAfterAlignmentSchema({
-    meta: { description: 'Label position relative to the secondary metric value' },
+  placement: placementSchema({
+    meta: { description: 'Label placement relative to the secondary metric value' },
     defaultValue: LENS_METRIC_STATE_DEFAULTS.secondaryLabelPosition,
   }),
   /**
@@ -240,24 +243,21 @@ const metricStateSecondaryMetricOptionsSchema = {
       ),
     ])
   ),
-  /**
-   * Alignments for the secondary metric value.
-   */
-  alignments: schema.maybe(
+  value: schema.maybe(
     schema.object(
       {
         /**
-         * Alignment for secondary value. Possible values:
+         * Alignment for secondary values. Possible values:
          * - 'left': Align value to the left
          * - 'center': Align value to the center
          * - 'right': Align value to the right
          */
-        value: horizontalAlignmentSchema({
-          meta: { description: 'Alignment for secondary value' },
+        alignment: horizontalAlignmentSchema({
+          meta: { description: 'Alignment for secondary values' },
           defaultValue: LENS_METRIC_STATE_DEFAULTS.secondaryAlign,
         }),
       },
-      { meta: { id: 'metricSecondaryMetricAlignments' } }
+      { meta: { description: 'Value configuration' } }
     )
   ),
   /**
@@ -323,27 +323,39 @@ const secondaryMetricSchemaNoESQL = mergeAllMetricsWithChartDimensionSchemaWithR
   metricStateSecondaryMetricOptionsSchema
 );
 
-export const metricStateSchemaNoESQL = schema.object({
-  type: schema.literal('metric'),
-  ...sharedPanelInfoSchema,
-  ...dslOnlyPanelInfoSchema,
-  ...layerSettingsSchema,
-  ...datasetSchema,
-  /**
-   * Primary value configuration, must define operation.
-   */
-  metrics: schema.arrayOf(schema.oneOf([primaryMetricSchemaNoESQL, secondaryMetricSchemaNoESQL]), {
-    minSize: 1,
-    maxSize: 2,
-    validate: validateMetrics,
-  }),
-  /**
-   * Configure how to break down the metric (e.g. show one metric per term).
-   */
-  breakdown_by: schema.maybe(
-    mergeAllBucketsWithChartDimensionSchema(metricStateBreakdownByOptionsSchema)
-  ),
-});
+export const metricStateSchemaNoESQL = schema.object(
+  {
+    type: schema.literal('metric'),
+    ...sharedPanelInfoSchema,
+    ...dslOnlyPanelInfoSchema,
+    ...layerSettingsSchema,
+    ...datasetSchema,
+    /**
+     * Primary value configuration, must define operation.
+     */
+    metrics: schema.arrayOf(
+      schema.oneOf([primaryMetricSchemaNoESQL, secondaryMetricSchemaNoESQL]),
+      {
+        minSize: 1,
+        maxSize: 2,
+        validate: validateMetrics,
+      }
+    ),
+    /**
+     * Configure how to break down the metric (e.g. show one metric per term).
+     */
+    breakdown_by: schema.maybe(
+      mergeAllBucketsWithChartDimensionSchema(metricStateBreakdownByOptionsSchema)
+    ),
+  },
+  {
+    meta: {
+      id: 'metricNoESQL',
+      title: 'Metric Chart (DSL)',
+      description: 'Metric chart configuration for standard queries',
+    },
+  }
+);
 
 const primaryMetricESQL = esqlColumnWithFormatSchema
   .extends(metricStatePrimaryMetricOptionsSchema)
@@ -353,26 +365,35 @@ const secondaryMetricESQL = esqlColumnWithFormatSchema.extends(
   metricStateSecondaryMetricOptionsSchema
 );
 
-export const esqlMetricState = schema.object({
-  type: schema.literal('metric'),
-  ...sharedPanelInfoSchema,
-  ...layerSettingsSchema,
-  ...datasetEsqlTableSchema,
-  /**
-   * Primary value configuration, must define operation.
-   */
-  metrics: schema.arrayOf(schema.oneOf([primaryMetricESQL, secondaryMetricESQL]), {
-    minSize: 1,
-    maxSize: 2,
-    validate: validateMetrics,
-  }),
-  /**
-   * Configure how to break down the metric (e.g. show one metric per term).
-   */
-  breakdown_by: schema.maybe(
-    esqlColumnWithFormatSchema.extends(metricStateBreakdownByOptionsSchema)
-  ),
-});
+export const esqlMetricState = schema.object(
+  {
+    type: schema.literal('metric'),
+    ...sharedPanelInfoSchema,
+    ...layerSettingsSchema,
+    ...datasetEsqlTableSchema,
+    /**
+     * Primary value configuration, must define operation.
+     */
+    metrics: schema.arrayOf(schema.oneOf([primaryMetricESQL, secondaryMetricESQL]), {
+      minSize: 1,
+      maxSize: 2,
+      validate: validateMetrics,
+    }),
+    /**
+     * Configure how to break down the metric (e.g. show one metric per term).
+     */
+    breakdown_by: schema.maybe(
+      esqlColumnWithFormatSchema.extends(metricStateBreakdownByOptionsSchema)
+    ),
+  },
+  {
+    meta: {
+      id: 'metricESQL',
+      title: 'Metric Chart (ES|QL)',
+      description: 'Metric chart configuration for ES|QL queries',
+    },
+  }
+);
 
 export const metricStateSchema = schema.oneOf([metricStateSchemaNoESQL, esqlMetricState], {
   meta: { id: 'metricChart', title: 'Metric Chart' },

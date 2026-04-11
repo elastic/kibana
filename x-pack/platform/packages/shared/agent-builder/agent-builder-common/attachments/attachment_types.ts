@@ -17,6 +17,7 @@ export enum AttachmentType {
   text = 'text',
   esql = 'esql',
   visualization = 'visualization',
+  connector = 'connector',
 }
 
 interface AttachmentDataMap {
@@ -24,6 +25,7 @@ interface AttachmentDataMap {
   [AttachmentType.text]: TextAttachmentData;
   [AttachmentType.screenContext]: ScreenContextAttachmentData;
   [AttachmentType.visualization]: VisualizationAttachmentData;
+  [AttachmentType.connector]: ConnectorAttachmentData;
 }
 
 export const esqlAttachmentDataSchema = z.object({
@@ -127,6 +129,51 @@ export interface VisualizationAttachmentData {
   esql: string;
   /** Optional time range for the visualization (e.g., { from: 'now-24h', to: 'now' }) */
   time_range?: { from: string; to: string };
+}
+
+/**
+ * Tag prefix used to associate tools with their parent connector instance.
+ * A tool tagged `connector:<connectorId>` belongs to that connector.
+ */
+export const CONNECTOR_TAG_PREFIX = 'connector:';
+
+export const connectorAttachmentToolSchema = z.object({
+  tool_id: z.string(),
+  description: z.string(),
+  configuration: z.object({
+    workflow_id: z.string(),
+  }),
+});
+
+export const connectorAttachmentDataSchema = z.object({
+  connector_id: z.string(),
+  connector_name: z.string(),
+  connector_type: z.string(),
+  tools: z.array(connectorAttachmentToolSchema),
+});
+
+/**
+ * Data for a connector attachment.
+ */
+export interface ConnectorAttachmentData {
+  /** The saved connector instance ID */
+  connector_id: string;
+  /** Human-readable connector name */
+  connector_name: string;
+  /** Action type ID (e.g., ".slack2", ".mcp") */
+  connector_type: string;
+  /** Workflow tools for this connector instance */
+  tools: Array<{
+    /** Tool ID */
+    tool_id: string;
+    /** Tool description from workflow YAML */
+    description: string;
+    /** Tool configuration */
+    configuration: {
+      /** The workflow ID */
+      workflow_id: string;
+    };
+  }>;
 }
 
 export type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Type];

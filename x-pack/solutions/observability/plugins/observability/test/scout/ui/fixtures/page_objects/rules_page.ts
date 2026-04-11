@@ -24,7 +24,7 @@ export class RulesPage {
    * Navigates to the rules list page (Observability)
    */
   async goto(ruleId: string = '') {
-    await this.page.gotoApp(`observability/alerts/rules/${ruleId}`);
+    await this.page.gotoApp(`rules/${ruleId}`);
     if (!ruleId) {
       await this.page.testSubj.waitForSelector(RULES_SETTINGS_TEST_SUBJECTS.RULE_PAGE_TAB, {
         timeout: BIGGER_TIMEOUT,
@@ -210,7 +210,7 @@ export class RulesPage {
    * Navigates to the logs tab page via URL
    */
   async gotoLogsTab() {
-    await this.page.gotoApp('observability/alerts/rules/logs');
+    await this.page.gotoApp('rules/logs');
     await this.page.testSubj.waitForSelector(LOGS_TAB_TEST_SUBJECTS.EVENT_LOG_TABLE, {
       timeout: BIGGER_TIMEOUT,
     });
@@ -450,11 +450,11 @@ export class RulesPage {
    * Saves the rule by clicking save and confirming
    */
   async saveRule() {
-    // Scroll the save button into view to ensure it's accessible
-    await this.ruleSaveButton.scrollIntoViewIfNeeded();
-
-    // Click the save button
-    await this.ruleSaveButton.click();
+    // The rule preview chart polls continuously, alternating between a loading overlay
+    // (kbnMountWrapper) and a danger toast. Both intercept pointer events on the footer
+    // save button. Using focus + keyboard bypasses pointer-event interception entirely.
+    await this.ruleSaveButton.focus();
+    await this.page.keyboard.press('Enter');
 
     await expect(this.confirmModalButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
     await this.confirmModalButton.click();

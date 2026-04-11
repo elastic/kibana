@@ -30,7 +30,6 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
 import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
 import type { LegendItem } from '../../../../common/components/charts/legend_item';
-import type { EntityFilter } from './use_alerts_by_status';
 import { useAlertsByStatus } from './use_alerts_by_status';
 import {
   ALERTS,
@@ -55,6 +54,7 @@ import { ChartLabel } from './chart_label';
 import { Legend } from '../../../../common/components/charts/legend';
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
+import type { Filter } from '../hooks/use_navigate_to_timeline';
 import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useAlertsByStatusVisualizationData } from './use_alerts_by_status_visualization_data';
@@ -74,9 +74,33 @@ const StyledLegendFlexItem = styled(EuiFlexItem)`
 interface AlertsByStatusProps {
   additionalFilters?: ESBoolQuery[];
   applyGlobalQueriesAndFilters?: boolean;
-  entityFilter?: EntityFilter;
+  identityFields?: Record<string, string>;
+  entityFilter?: Filter;
   signalIndexName: string | null;
 }
+
+/**
+ * Normalizes identityFields or legacy entityFilter into a single Record for queries and UI.
+ * Prefers identityFields when both are provided.
+ */
+const resolveEntityIdentifiers = (
+  identityFields?: Record<string, string> | null,
+  entityFilter?: Filter | null
+): Record<string, string> | undefined => {
+  if (identityFields != null && Object.keys(identityFields).length > 0) {
+    return identityFields;
+  }
+  if (entityFilter != null) {
+    const value =
+      typeof entityFilter.value === 'string'
+        ? entityFilter.value
+        : Array.isArray(entityFilter.value)
+        ? entityFilter.value[0]
+        : '';
+    return { [entityFilter.field]: String(value) };
+  }
+  return undefined;
+};
 
 const getChartConfigs = (euiTheme: EuiThemeComputed) => {
   const palette = getRiskSeverityColors(euiTheme);
@@ -93,18 +117,18 @@ const getChartConfigs = (euiTheme: EuiThemeComputed) => {
   }));
 };
 
-const eventKindSignalFilter: EntityFilter = {
-  field: 'event.kind',
-  value: 'signal',
-};
-
 export const AlertsByStatus = ({
   additionalFilters,
   applyGlobalQueriesAndFilters = true,
   signalIndexName,
+  identityFields,
   entityFilter,
 }: AlertsByStatusProps) => {
   const { euiTheme } = useEuiTheme();
+  const entityIdentifiersResolved = useMemo(
+    () => resolveEntityIdentifiers(identityFields, entityFilter),
+    [identityFields, entityFilter]
+  );
   const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTION_RESPONSE_ALERTS_BY_STATUS_ID);
   const { openTimelineWithFilters } = useNavigateToTimeline();
   const navigateToAlerts = useNavigateToAlertsPageWithFilters();
@@ -123,16 +147,24 @@ export const AlertsByStatus = ({
 
   const detailsButtonOptions = useMemo(
     () => ({
-      name: canAccessTimelines && entityFilter ? INVESTIGATE_IN_TIMELINE : VIEW_ALERTS,
-      href: canAccessTimelines && entityFilter ? undefined : href,
+      name: canAccessTimelines && entityIdentifiersResolved ? INVESTIGATE_IN_TIMELINE : VIEW_ALERTS,
+      href: canAccessTimelines && entityIdentifiersResolved ? undefined : href,
       onClick:
-        canAccessTimelines && entityFilter
+        canAccessTimelines && entityIdentifiersResolved
           ? async () => {
-              await openTimelineWithFilters([[entityFilter, eventKindSignalFilter]]);
+              const entityFilters = Object.entries(entityIdentifiersResolved).map(
+                ([field, value]) => ({
+                  field,
+                  value,
+                })
+              );
+              await openTimelineWithFilters([
+                [...entityFilters, { field: 'event.kind', value: 'signal' }],
+              ]);
             }
           : goToAlerts,
     }),
-    [entityFilter, href, goToAlerts, openTimelineWithFilters, canAccessTimelines]
+    [entityIdentifiersResolved, href, goToAlerts, openTimelineWithFilters, canAccessTimelines]
   );
 
   const {
@@ -141,7 +173,7 @@ export const AlertsByStatus = ({
     updatedAt,
   } = useAlertsByStatus({
     additionalFilters,
-    entityFilter,
+    identityFields: entityIdentifiersResolved ?? identityFields ?? {},
     signalIndexName,
     skip: !toggleStatus,
     queryId: DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,
@@ -167,16 +199,15 @@ export const AlertsByStatus = ({
               },
             ]
           : []),
-        ...(entityFilter
-          ? [
-              {
-                selected_options: [entityFilter.value],
-                field_name: entityFilter.field,
-              },
-            ]
+        ...(entityIdentifiersResolved
+          ? Object.entries(entityIdentifiersResolved).map(([fieldName, value]) => ({
+              selected_options: [value],
+              field_name: fieldName,
+              title: value,
+            }))
           : []),
       ]),
-    [entityFilter, navigateToAlerts]
+    [entityIdentifiersResolved, navigateToAlerts]
   );
 
   const navigateToAlertsWithStatusOpen = useCallback(
@@ -223,7 +254,7 @@ export const AlertsByStatus = ({
           )}
           <HeaderSection
             id={DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}
-            title={entityFilter ? ALERTS_BY_SEVERITY_TEXT : ALERTS_TEXT}
+            title={entityIdentifiersResolved ? ALERTS_BY_SEVERITY_TEXT : ALERTS_TEXT}
             titleSize="m"
             subtitle={<LastUpdatedAt isUpdating={loading} updatedAt={updatedAt} />}
             inspectMultiple
@@ -247,16 +278,15 @@ export const AlertsByStatus = ({
               <EuiFlexGroup justifyContent="center" gutterSize="none">
                 <EuiFlexItem grow={false}>
                   <EuiText className="eui-textCenter" size="s">
-                    {totalAlerts !== 0 ||
-                      (visualizationTotalAlerts !== 0 && (
-                        <>
-                          <b>
-                            <FormattedCount count={totalAlerts} />
-                          </b>
-                          <> </>
-                          <small>{ALERTS(totalAlerts)}</small>
-                        </>
-                      ))}
+                    {(totalAlerts !== 0 || visualizationTotalAlerts !== 0) && (
+                      <>
+                        <b>
+                          <FormattedCount count={totalAlerts} />
+                        </b>
+                        <> </>
+                        <small>{ALERTS(totalAlerts)}</small>
+                      </>
+                    )}
                   </EuiText>
 
                   <EuiSpacer size="l" />

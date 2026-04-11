@@ -19,7 +19,10 @@ import {
 import React, { memo, useCallback, useRef, useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 
+import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { EndpointExceptionsMovedCallout } from '../../../../exceptions/components/endpoint_exceptions_moved_callout';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
   isMlRule,
@@ -121,6 +124,9 @@ const CreateRulePageComponent: React.FC<{
   sendToAgentChat?: boolean; // allows the user to send the rule to the agent chat as an attachment
   backComponent?: React.ReactNode;
 }> = ({ rule, sendToAgentChat, backComponent }) => {
+  const { application, triggersActionsUi, cps } = useKibana().services;
+  const { navigateToApp } = application;
+  useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
   const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
     useUserData();
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
@@ -128,8 +134,6 @@ const CreateRulePageComponent: React.FC<{
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
   const { addSuccess } = useAppToasts();
-  const { navigateToApp } = useKibana().services.application;
-  const { application, triggersActionsUi } = useKibana().services;
   const loading = userInfoLoading || listsConfigLoading;
   const [activeStep, setActiveStep] = useState<RuleStep>(RuleStep.defineRule);
   const getNextStep = (step: RuleStep): RuleStep | undefined =>
@@ -846,6 +850,11 @@ const CreateRulePageComponent: React.FC<{
     []
   );
 
+  // TODO: switch to per-policy use opt-in state in follow-up (https://github.com/elastic/security-team/issues/14870)
+  const isEndpointExceptionsMovedFFEnabled = useIsExperimentalFeatureEnabled(
+    'endpointExceptionsMovedUnderManagement'
+  );
+
   if (
     redirectToDetections(
       isSignalIndexExists,
@@ -879,6 +888,14 @@ const CreateRulePageComponent: React.FC<{
                 <EuiResizablePanel initialSize={70} minSize={'40%'} mode="main">
                   <EuiFlexGroup direction="row" justifyContent="spaceAround">
                     <MaxWidthEuiFlexItem>
+                      {isEndpointExceptionsMovedFFEnabled && (
+                        <EndpointExceptionsMovedCallout
+                          id="ruleCreation"
+                          dismissable
+                          title="cannotBeAddedToRules"
+                        />
+                      )}
+
                       <CustomHeaderPageMemo
                         backOptions={backComponent ? undefined : backOptions}
                         backComponent={backComponent}

@@ -28,8 +28,6 @@ import {
   result,
   loadAlertArchive,
   dataViewRouteHelpersFactory,
-  waitForEnrichPolicyCreated,
-  executeEnrichPolicy,
   installCloudAssetInventoryPackage,
   initEntityEnginesWithRetry,
   waitForEntityDataIndexed,
@@ -1078,7 +1076,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(actorNode).to.have.property('shape', 'rectangle');
         expect(actorNode).to.have.property('color', 'primary');
         expect(actorNode).to.have.property('tag', 'Entities');
-        expect(actorNode).to.have.property('icon', 'magnifyWithExclamation');
+        expect(actorNode).to.have.property('icon', 'magnifyExclamation');
         expect(actorNode.documentsData).to.have.length(2);
         expectExpect(actorNode.documentsData).toContainEqual({
           id: 'actor-mv-1',
@@ -1097,7 +1095,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(targetNode).to.have.property('shape', 'rectangle');
         expect(targetNode).to.have.property('color', 'primary');
         expect(targetNode).to.have.property('tag', 'Entities');
-        expect(targetNode).to.have.property('icon', 'magnifyWithExclamation');
+        expect(targetNode).to.have.property('icon', 'magnifyExclamation');
         expect(targetNode.documentsData).to.have.length(3);
         expectExpect(targetNode.documentsData).toContainEqual({
           id: 'target-mv-1',
@@ -1715,7 +1713,6 @@ export default function (providerContext: FtrProviderContext) {
             expect(response.body).not.to.have.property('messages');
 
             // Find the actor node - it should NOT be enriched since v2 is not in lookup mode
-            // and v1 enrich policy doesn't exist
             const actorNode = response.body.nodes.find(
               (node: EntityNodeDataModel) => node.id === 'admin@example.com'
             ) as EntityNodeDataModel;
@@ -1724,7 +1721,7 @@ export default function (providerContext: FtrProviderContext) {
             // Without enrichment, the label should be the entity ID (not the enriched name)
             expect(actorNode.label).to.equal('admin@example.com');
             // Without enrichment, should have default icon/shape for unknown entity
-            expect(actorNode.icon).to.equal('magnifyWithExclamation');
+            expect(actorNode.icon).to.equal('magnifyExclamation');
             // Entity should indicate it's NOT available in entity store
             expect(actorNode.documentsData).to.have.length(1);
             expectExpect(actorNode.documentsData).toContainEqual(
@@ -1743,7 +1740,7 @@ export default function (providerContext: FtrProviderContext) {
             ) as EntityNodeDataModel;
             expect(targetNode).not.to.be(undefined);
             expect(targetNode.label).to.equal('projects/your-project-id/roles/customRole');
-            expect(targetNode.icon).to.equal('magnifyWithExclamation');
+            expect(targetNode.icon).to.equal('magnifyExclamation');
             expect(targetNode.documentsData).to.have.length(1);
             expectExpect(targetNode.documentsData).toContainEqual(
               expectExpect.objectContaining({
@@ -1760,18 +1757,15 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       describe('Enrich graph with entity metadata', () => {
-        // Entity store is initialized once at the parent level to avoid race conditions
-        // Tests run sequentially: first v1 (ENRICH), then v2 (LOOKUP JOIN)
         // All enrichment tests run in a dedicated space called 'entities-space'
-        const enrichPolicyCreationTimeout = 15000;
+        const enrichmentRetryTimeout = 15000;
         const entitiesSpaceId = 'entities-space';
         let entitiesSpaceDataView: ReturnType<typeof dataViewRouteHelpersFactory>;
 
-        // Shared test suite that registers all test cases - called from both v1 and v2 describe blocks
         // All tests run in the dedicated entities-space
         const runEnrichmentTests = () => {
           it('should contain entity data when asset inventory is enabled', async () => {
-            await retry.tryForTime(enrichPolicyCreationTimeout, async () => {
+            await retry.tryForTime(enrichmentRetryTimeout, async () => {
               const response = await postGraph(
                 supertest,
                 {
@@ -1859,7 +1853,7 @@ export default function (providerContext: FtrProviderContext) {
           });
 
           it('should return enriched data when asset inventory is enabled - multi target', async () => {
-            await retry.tryForTime(enrichPolicyCreationTimeout, async () => {
+            await retry.tryForTime(enrichmentRetryTimeout, async () => {
               const response = await postGraph(
                 supertest,
                 {
@@ -1948,7 +1942,7 @@ export default function (providerContext: FtrProviderContext) {
           });
 
           it('should enrich graph with entity metadata for actor acting on single target', async () => {
-            await retry.tryForTime(enrichPolicyCreationTimeout, async () => {
+            await retry.tryForTime(enrichmentRetryTimeout, async () => {
               const response = await postGraph(
                 supertest,
                 {
@@ -2043,7 +2037,7 @@ export default function (providerContext: FtrProviderContext) {
           });
 
           it('should enrich graph with multiple targets from different fields with mixed grouping', async () => {
-            await retry.tryForTime(enrichPolicyCreationTimeout, async () => {
+            await retry.tryForTime(enrichmentRetryTimeout, async () => {
               const response = await postGraph(
                 supertest,
                 {
@@ -2198,7 +2192,7 @@ export default function (providerContext: FtrProviderContext) {
           });
 
           it('should handle entities with partial data (name only or type/subtype only)', async () => {
-            await retry.tryForTime(enrichPolicyCreationTimeout, async () => {
+            await retry.tryForTime(enrichmentRetryTimeout, async () => {
               const response = await postGraph(
                 supertest,
                 {
@@ -2225,7 +2219,7 @@ export default function (providerContext: FtrProviderContext) {
               // Label should be the entity name since it exists
               expect(actorNode.label).to.equal('partial-user@example.com');
               // Icon and shape should be defaults since type is missing
-              expect(actorNode.icon).to.equal('magnifyWithExclamation');
+              expect(actorNode.icon).to.equal('magnifyExclamation');
               expect(actorNode.shape).to.equal('rectangle');
               expect(actorNode.documentsData).to.have.length(1);
               expectExpect(actorNode.documentsData).toContainEqual(
@@ -2330,29 +2324,6 @@ export default function (providerContext: FtrProviderContext) {
 
           await entitiesSpaceDataView.delete('security-solution');
           await spacesService.delete(entitiesSpaceId);
-        });
-
-        describe('via ENRICH policy (v1)', () => {
-          before(async () => {
-            await esArchiver.load(
-              'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/entity_store'
-            );
-
-            // Wait for entity data to be fully indexed
-            await waitForEntityDataIndexed({
-              es,
-              logger,
-              retry,
-              entitiesIndex: `.entities.v1.latest.security_generic_${entitiesSpaceId}`,
-              expectedCount: 13,
-            });
-
-            // Wait for enrich policy to be created and execute it
-            await waitForEnrichPolicyCreated({ es, retry, logger, spaceId: entitiesSpaceId });
-            await executeEnrichPolicy({ es, retry, logger, spaceId: entitiesSpaceId });
-          });
-
-          runEnrichmentTests();
         });
 
         describe('via LOOKUP JOIN (v2)', () => {

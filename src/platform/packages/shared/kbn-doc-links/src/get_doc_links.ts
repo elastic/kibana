@@ -494,6 +494,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       ruleUiAdvancedParams: `${ELASTIC_DOCS}solutions/security/detect-and-alert/common-rule-settings`,
       thirdPartyLlmProviders: `${ELASTIC_DOCS}solutions/security/ai/set-up-connectors-for-large-language-models-llm`,
       entityAnalytics: {
+        api: isServerless
+          ? `${KIBANA_SERVERLESS_APIS}group/endpoint-security-entity-analytics-api`
+          : `${KIBANA_APIS}group/endpoint-security-entity-analytics-api`,
         riskScorePrerequisites: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/entity-risk-scoring-requirements`,
         entityRiskScoring: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/entity-risk-scoring`,
         assetCriticality: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/asset-criticality`,

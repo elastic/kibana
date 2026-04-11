@@ -460,7 +460,7 @@ paths:
                             threat: []
                             to: 'now'
                             references:
-                              - 'https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html'
+                              - 'https://www.elastic.co/docs/reference/machine-learning/ootb-ml-jobs-siem'
                             version: 6
                             exceptions_list: []
                             immutable: false
@@ -470,7 +470,7 @@ paths:
                             type: 'machine_learning'
                             anomaly_threshold: 50
                             machine_learning_job_id:
-                              - 'packetbeat_dns_tunneling'
+                              - 'packetbeat_dns_tunneling_ea'
                             execution_summary:
                               last_execution:
                                 date: '2022-03-23T16:06:12.787Z'

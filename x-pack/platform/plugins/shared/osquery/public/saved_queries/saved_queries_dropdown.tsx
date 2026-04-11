@@ -11,7 +11,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useWatch, useFormContext } from 'react-hook-form';
 import { QUERIES_DROPDOWN_LABEL, QUERIES_DROPDOWN_SEARCH_FIELD_LABEL } from './constants';
 import { OsquerySchemaLink } from '../components/osquery_schema_link';
-
+import { useOsquerySchema } from '../common/hooks/use_osquery_schema';
 import { useSavedQueries } from './use_saved_queries';
 import type { SavedQuerySO } from '../routes/saved_queries/list';
 
@@ -43,6 +43,7 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
   disabled,
   onChange,
 }) => {
+  const { osqueryVersion } = useOsquerySchema();
   const savedQueryId = useWatch({ name: 'savedQueryId' });
   const context = useFormContext();
   const { errors } = context.formState;
@@ -122,7 +123,7 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
       isInvalid={!!queryFieldError}
       error={queryFieldError as React.ReactNode}
       label={QUERIES_DROPDOWN_SEARCH_FIELD_LABEL}
-      labelAppend={<OsquerySchemaLink />}
+      labelAppend={<OsquerySchemaLink osqueryVersion={osqueryVersion} />}
       fullWidth
     >
       <EuiComboBox

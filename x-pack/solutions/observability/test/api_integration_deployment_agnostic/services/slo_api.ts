@@ -9,15 +9,22 @@ import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import type { StoredSLODefinition } from '@kbn/slo-plugin/server/domain/models/slo';
 import type {
   BulkDeleteInput,
+  CreateCompositeSLOInput,
+  CreateCompositeSLOResponse,
   CreateSLOInput,
+  FindCompositeSLOResponse,
   FindSLODefinitionsResponse,
   FindSLOInstancesResponse,
+  FindSLOTemplateTagsResponse,
   FindSLOTemplatesResponse,
+  GetCompositeSLOResponse,
   GetHealthScanResultsResponse,
   GetSLOTemplateResponse,
   ListHealthScanResponse,
   PostHealthScanResponse,
   SearchSLODefinitionResponse,
+  UpdateCompositeSLOInput,
+  UpdateCompositeSLOResponse,
   UpdateSLOInput,
 } from '@kbn/slo-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
@@ -342,6 +349,103 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
         .expect(expectedStatus);
 
       return body;
+    },
+
+    async findTemplateTags(
+      roleAuthc: RoleCredentials,
+      expectedStatus: number = 200
+    ): Promise<FindSLOTemplateTagsResponse> {
+      const { body } = await supertestWithoutAuth
+        .get(`/api/observability/slo_templates/_tags`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(expectedStatus);
+      return body;
+    },
+
+    async createCompositeSlo(
+      compositeSlo: CreateCompositeSLOInput,
+      roleAuthc: RoleCredentials,
+      expectedStatus: number = 200
+    ): Promise<CreateCompositeSLOResponse> {
+      const { body } = await supertestWithoutAuth
+        .post(`/api/observability/slo_composites`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(compositeSlo)
+        .expect(expectedStatus);
+      return body;
+    },
+
+    async getCompositeSlo(
+      id: string,
+      roleAuthc: RoleCredentials,
+      expectedStatus: number = 200
+    ): Promise<GetCompositeSLOResponse> {
+      const { body } = await supertestWithoutAuth
+        .get(`/api/observability/slo_composites/${id}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(expectedStatus);
+      return body;
+    },
+
+    async findCompositeSlos(
+      roleAuthc: RoleCredentials,
+      params?: Record<string, string>,
+      expectedStatus: number = 200
+    ): Promise<FindCompositeSLOResponse> {
+      const { body } = await supertestWithoutAuth
+        .get(`/api/observability/slo_composites`)
+        .query(params ?? {})
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(expectedStatus);
+      return body;
+    },
+
+    async updateCompositeSlo(
+      {
+        compositeSloId,
+        compositeSlo,
+      }: { compositeSloId: string; compositeSlo: UpdateCompositeSLOInput },
+      roleAuthc: RoleCredentials,
+      expectedStatus: number = 200
+    ): Promise<UpdateCompositeSLOResponse> {
+      const { body } = await supertestWithoutAuth
+        .put(`/api/observability/slo_composites/${compositeSloId}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(compositeSlo)
+        .expect(expectedStatus);
+      return body;
+    },
+
+    async deleteCompositeSlo(id: string, roleAuthc: RoleCredentials, expectedStatus: number = 204) {
+      return await supertestWithoutAuth
+        .delete(`/api/observability/slo_composites/${id}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(expectedStatus);
+    },
+
+    async deleteAllCompositeSlos(roleAuthc: RoleCredentials) {
+      while (true) {
+        const response = await this.findCompositeSlos(roleAuthc, {
+          page: '1',
+          perPage: '100',
+        });
+        if (response.results.length === 0) {
+          break;
+        }
+        for (const { id } of response.results) {
+          await this.deleteCompositeSlo(id, roleAuthc);
+        }
+      }
     },
 
     async getSavedObject(roleAuthc: RoleCredentials, sloId: string): Promise<SavedObjectResponse> {

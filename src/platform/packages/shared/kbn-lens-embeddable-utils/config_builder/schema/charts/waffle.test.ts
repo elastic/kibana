@@ -88,10 +88,11 @@ describe('Waffle Schema', () => {
         legend: {
           values: ['absolute'],
           truncate_after_lines: 2,
-          visible: 'show',
+          visibility: 'visible',
           size: 'medium',
         },
-        value_display: {
+        values: {
+          visible: true,
           mode: 'percentage',
           percent_decimals: 1,
         },
@@ -100,7 +101,7 @@ describe('Waffle Schema', () => {
       const validated = waffleStateSchema.validate(input);
       expect(validated.title).toBe('Sales Waffle');
       expect(validated.legend?.values).toEqual(['absolute']);
-      expect(validated.value_display?.mode).toBe('percentage');
+      expect(validated.values?.mode).toBe('percentage');
     });
 
     it('validates multiple metrics without group_by', () => {

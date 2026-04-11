@@ -8,6 +8,7 @@
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 import type {
   EncryptedSavedObjectsPluginSetup,
@@ -30,7 +31,6 @@ import type { FieldsMetadataServerStart } from '@kbn/fields-metadata-plugin/serv
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { ConsoleStart as ConsoleServerStart } from '@kbn/console-plugin/server';
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server/types';
 import type { StreamsConfig } from '../common/config';
 
 export interface StreamsServer {
@@ -40,6 +40,7 @@ export interface StreamsServer {
   security: SecurityPluginStart;
   actions: ActionsPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  inference: InferenceServerStart;
   isServerless: boolean;
   taskManager: TaskManagerStartContract;
 }
@@ -49,6 +50,7 @@ export interface ElasticsearchAccessorOptions {
 }
 
 export interface StreamsPluginSetupDependencies {
+  agentBuilder?: AgentBuilderPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   taskManager: TaskManagerSetupContract;
   alerting: AlertingServerSetup;
@@ -57,7 +59,6 @@ export interface StreamsPluginSetupDependencies {
   usageCollection: UsageCollectionSetup;
   cloud?: CloudSetup;
   globalSearch?: GlobalSearchPluginSetup;
-  agentBuilder?: AgentBuilderPluginSetup;
 }
 
 export interface StreamsPluginStartDependencies {

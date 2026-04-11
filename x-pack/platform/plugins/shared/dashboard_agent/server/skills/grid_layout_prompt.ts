@@ -49,13 +49,13 @@ Always set \`x\` and \`y\` so panels tile with **no gaps**:
 
 ### Reflow after removals
 
-- There is no move operation. To reposition panels or fix gaps after removals, remove the affected panels and add them again with updated \`grid\` coordinates in the same ordered call.
 - If removing a panel leaves a gap in a row, shift the affected neighboring panels left by re-adding them with updated \`x\` values.
 - If removing a panel leaves later rows with unnecessary empty space above them, re-add the affected panels with updated \`y\` values.
 
 ### Section grid rules
 
 - When using \`add_section\`, each section has its own coordinate space.
+- Panels nested under \`add_section.panels\` use that same section-relative coordinate space.
 - Panel coordinates inside a section are section-relative: each section starts at \`y: 0\`. The same 48-column grid and sizing guidance apply within each section.
 - A section occupies exactly one row (\`h: 1\`) in the outer dashboard grid. When placing widgets after a section, compute the next outer \`y\` as \`section.grid.y + 1\` (not by summing internal panel heights).
 - Internal section panel heights affect layout inside the section only; they do not increase the section's outer-grid height.

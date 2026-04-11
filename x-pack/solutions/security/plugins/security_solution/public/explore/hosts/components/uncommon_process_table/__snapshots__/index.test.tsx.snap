@@ -1,10 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Uncommon Process Table Component rendering it renders the default Uncommon process table 1`] = `
-.c3 {
-  color: #7186A8;
-}
-
 .c1 .siemSubtitle__item {
   color: #98A8C3;
   font-size: 12px;
@@ -24,7 +20,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
   display: block;
 }
 
-.c4 {
+.c3 {
   margin-top: 4px;
 }
 
@@ -40,15 +36,15 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
 }
 
 @media only screen and (min-width:768px) {
-  .c5 .euiButtonIcon:last-child {
+  .c4 .euiButtonIcon:last-child {
     margin-left: 28px;
   }
 
-  .c5 .euiPagination {
+  .c4 .euiPagination {
     position: relative;
   }
 
-  .c5 .euiPagination::before {
+  .c4 .euiPagination::before {
     bottom: 0;
     color: #1D2A3E;
     content: '\\2026';
@@ -104,7 +100,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                         aria-hidden="true"
                         class="euiButtonIcon__icon"
                         color="inherit"
-                        data-euiicon-type="arrowDown"
+                        data-euiicon-type="chevronSingleDown"
                       />
                     </button>
                   </div>
@@ -335,7 +331,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                 class="euiTableCellContent emotion-euiTableCellContent-wrapText"
               >
                 <span
-                  class="c3"
+                  class="css-16x51zl-EmptyWrapper"
                 >
                   —
                 </span>
@@ -349,7 +345,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                 class="euiTableCellContent emotion-euiTableCellContent-wrapText"
               >
                 <span
-                  class="c3"
+                  class="css-16x51zl-EmptyWrapper"
                 >
                   —
                 </span>
@@ -450,7 +446,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                 class="euiTableCellContent emotion-euiTableCellContent-wrapText"
               >
                 <span
-                  class="c3"
+                  class="css-16x51zl-EmptyWrapper"
                 >
                   —
                 </span>
@@ -571,7 +567,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                 class="euiTableCellContent emotion-euiTableCellContent-wrapText"
               >
                 <span
-                  class="c3"
+                  class="css-16x51zl-EmptyWrapper"
                 >
                   —
                 </span>
@@ -642,7 +638,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                 class="euiTableCellContent emotion-euiTableCellContent-wrapText"
               >
                 <span
-                  class="c3"
+                  class="css-16x51zl-EmptyWrapper"
                 >
                   —
                 </span>
@@ -656,7 +652,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                 class="euiTableCellContent emotion-euiTableCellContent-wrapText"
               >
                 <span
-                  class="c3"
+                  class="css-16x51zl-EmptyWrapper"
                 >
                   —
                 </span>
@@ -777,7 +773,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                 class="euiTableCellContent emotion-euiTableCellContent-wrapText"
               >
                 <span
-                  class="c3"
+                  class="css-16x51zl-EmptyWrapper"
                 >
                   —
                 </span>
@@ -811,7 +807,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
     </div>
   </div>
   <div
-    class="euiFlexGroup c4 emotion-euiFlexGroup-m-spaceBetween-center-row"
+    class="euiFlexGroup c3 emotion-euiFlexGroup-m-spaceBetween-center-row"
   >
     <div
       class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -835,14 +831,14 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
             </span>
             <span
               color="inherit"
-              data-euiicon-type="arrowDown"
+              data-euiicon-type="chevronSingleDown"
             />
           </span>
         </button>
       </div>
     </div>
     <div
-      class="euiFlexItem c5 emotion-euiFlexItem-growZero"
+      class="euiFlexItem c4 emotion-euiFlexItem-growZero"
     >
       <nav
         aria-label="Table pagination"

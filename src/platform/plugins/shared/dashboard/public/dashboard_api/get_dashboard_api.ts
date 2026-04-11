@@ -73,7 +73,7 @@ export function getDashboardApi({
     savedObjectId,
     accessControl: {
       accessMode: readResult?.data?.access_control?.access_mode,
-      owner: readResult?.data?.access_control?.owner,
+      owner: readResult?.meta?.owner,
     },
     createdBy: readResult?.meta?.created_by,
     user,

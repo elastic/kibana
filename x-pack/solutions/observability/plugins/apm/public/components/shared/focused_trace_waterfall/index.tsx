@@ -74,7 +74,7 @@ export function FocusedTraceWaterfall({ items, onErrorClick, isEmbeddable }: Pro
       <TraceWaterfall
         traceItems={traceItems}
         showAccordion={false}
-        highlightedTraceId={reparentedItems?.focusedTraceDoc.id}
+        highlightedSpanId={reparentedItems?.focusedTraceDoc.id}
         onErrorClick={onErrorClick}
         isEmbeddable={isEmbeddable}
       />

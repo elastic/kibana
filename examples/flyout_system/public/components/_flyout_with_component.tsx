@@ -63,12 +63,10 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
 
   const handleOpenChildFlyoutA = () => {
     setIsChildFlyoutAOpen(true);
-    setIsChildFlyoutBOpen(false);
   };
 
   const handleOpenChildFlyoutB = () => {
     setIsChildFlyoutBOpen(true);
-    setIsChildFlyoutAOpen(false);
   };
 
   // Callbacks for state synchronization
@@ -81,11 +79,13 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
     console.log('activate child flyout A', title); // eslint-disable-line no-console
   }, [title]);
 
+  const childFlyoutBOnActive = useCallback(() => {
+    console.log('activate child flyout B', title); // eslint-disable-line no-console
+  }, [title]);
+
   const handleCloseFlyout = useCallback(() => {
     console.log('close main flyout', title); // eslint-disable-line no-console
     setIsFlyoutOpen(false);
-    setIsChildFlyoutAOpen(false);
-    setIsChildFlyoutBOpen(false);
 
     // Return focus to main trigger button after closing main flyout
     // TODO: clean this up if EUI adds internal support for returning focus to the trigger element on close
@@ -304,7 +304,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
           hasChildBackground={true}
           maxWidth={childMaxWidth}
           minWidth={FLYOUT_MIN_WIDTH}
-          onActive={childFlyoutAOnActive}
+          onActive={childFlyoutBOnActive}
           onClose={handleCloseChildFlyoutB}
           flyoutMenuProps={{
             title: `${title} - Child B`,

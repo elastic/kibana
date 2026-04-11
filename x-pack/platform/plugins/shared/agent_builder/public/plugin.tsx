@@ -31,6 +31,7 @@ import {
   NavigationService,
   ToolsService,
   SkillsService,
+  SmlService,
   PluginsService,
   EventsService,
   type AgentBuilderInternalService,
@@ -144,6 +145,7 @@ export class AgentBuilderPlugin
     const docLinksService = new DocLinksService(core.docLinks.links);
     const toolsService = new ToolsService({ http });
     const skillsService = new SkillsService({ http });
+    const smlService = new SmlService({ http });
     const pluginsService = new PluginsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
 
@@ -210,6 +212,7 @@ export class AgentBuilderPlugin
       navigationService,
       toolsService,
       skillsService,
+      smlService,
       pluginsService,
       startDependencies,
       accessChecker,

@@ -9,7 +9,14 @@
 
 import type { Row } from '@tanstack/react-table';
 import { debounce } from 'lodash';
-import { useCallback, useLayoutEffect, useImperativeHandle, useMemo, useRef } from 'react';
+import {
+  useCallback,
+  useLayoutEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useEffect,
+} from 'react';
 import {
   useDataCascadeState,
   type GroupNode,
@@ -17,6 +24,10 @@ import {
   type IStoreState,
 } from '../../../store_provider';
 import { calculateActiveStickyIndex, type UseVirtualizerReturnType } from '../virtualizer';
+import type {
+  ChildVirtualizerController,
+  ConnectedChildState,
+} from '../virtualizer/child_virtualizer_controller';
 
 /**
  * Snapshot of data cascade ui state for use with useSyncExternalStore.
@@ -33,6 +44,16 @@ export interface DataCascadeUISnapshot<
   activeStickyIndex: number | null;
   totalRowCount: number;
   totalSize: number;
+  /**
+   * The index of the topmost virtual item that is currently in view,
+   * value is a derivative of the virtualizer's current scroll offset.
+   */
+  scrollAnchorItemIndex: number | null;
+  /**
+   * State of all child virtualizers connected via the controller.
+   * Empty when no children are connected.
+   */
+  connectedChildren: Readonly<Record<string, ConnectedChildState>>;
 }
 
 /**
@@ -50,6 +71,7 @@ export interface DataCascadeUISnapshotStore<G extends GroupNode, L extends LeafN
 export interface UseExposePublicApiOptions<G extends GroupNode> {
   rows: Row<G>[];
   enableStickyGroupHeader: boolean;
+  childController?: ChildVirtualizerController | null;
 }
 
 /**
@@ -73,7 +95,50 @@ const createDefaultUISnapshot = <G extends GroupNode, L extends LeafNode>(): Dat
   totalSize: 0,
   expanded: {},
   rowSelection: {},
+  scrollAnchorItemIndex: null,
+  connectedChildren: {},
 });
+
+/**
+ * Serializable subset of {@link DataCascadeUISnapshot} that a consumer can
+ * persist and pass back as `initialState` to restore the component.
+ */
+export interface DataCascadeRestorableState {
+  expanded?: Record<string, boolean>;
+  rowSelection?: Record<string, boolean>;
+  scrollRect?: { width: number; height: number };
+  scrollAnchorItemIndex?: number | null;
+  connectedChildren?: Record<
+    string,
+    Pick<ConnectedChildState, 'cellId' | 'scrollAnchorItemIndex'> & { isConnected: boolean }
+  >;
+}
+
+/**
+ * Derives a {@link DataCascadeRestorableState} from a live snapshot,
+ * keeping only the fields meaningful for restoration.
+ */
+export const toRestorableState = <G extends GroupNode, L extends LeafNode>(
+  snapshot: DataCascadeUISnapshot<G, L>
+): DataCascadeRestorableState => {
+  const connectedChildren: DataCascadeRestorableState['connectedChildren'] = {};
+
+  for (const [key, child] of Object.entries(snapshot.connectedChildren)) {
+    connectedChildren[key] = {
+      cellId: child.cellId,
+      scrollAnchorItemIndex: child.scrollAnchorItemIndex,
+      isConnected: !child.isDetached,
+    };
+  }
+
+  return {
+    expanded: typeof snapshot.expanded === 'object' ? snapshot.expanded : undefined,
+    rowSelection: snapshot.rowSelection,
+    scrollRect: snapshot.scrollRect,
+    scrollAnchorItemIndex: snapshot.scrollAnchorItemIndex,
+    connectedChildren,
+  };
+};
 
 /**
  * Definition of the public API ref for the data cascade component.
@@ -149,6 +214,7 @@ export function useExposePublicApi<G extends GroupNode, L extends LeafNode>(
   }, []);
 
   const getSnapshot = useCallback((): DataCascadeUISnapshot<G, L> => storeRef.current.snapshot, []);
+
   const getServerSnapshot = useCallback(
     (): DataCascadeUISnapshot<G, L> => storeRef.current.snapshot,
     []
@@ -172,6 +238,22 @@ export function useExposePublicApi<G extends GroupNode, L extends LeafNode>(
       }, 100),
     []
   );
+
+  useEffect(() => () => notifyListeners.cancel(), [notifyListeners]);
+
+  useEffect(() => {
+    const childController = options.childController;
+
+    if (!childController) return;
+
+    return childController.subscribe(() => {
+      storeRef.current.snapshot = {
+        ...storeRef.current.snapshot,
+        connectedChildren: Object.fromEntries(childController.getConnectedChildren()),
+      };
+      storeRef.current.listeners.forEach((listener) => listener());
+    });
+  }, [options.childController]);
 
   /** scans updates from virtualizer instance and updates the store snapshot. */
   const collectVirtualizerStateChanges = useCallback(
@@ -198,6 +280,8 @@ export function useExposePublicApi<G extends GroupNode, L extends LeafNode>(
           activeStickyIndex,
           scrollRect: instance.scrollRect ?? { width: 0, height: 0 },
           totalSize: instance.getTotalSize ? instance.getTotalSize() : 0,
+          scrollAnchorItemIndex:
+            instance.getVirtualItemForOffset(instance.scrollOffset!)?.index ?? null,
         };
 
         notifyListeners();

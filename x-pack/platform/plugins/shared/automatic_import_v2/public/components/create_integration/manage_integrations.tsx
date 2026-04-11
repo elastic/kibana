@@ -62,7 +62,6 @@ ManageIntegrationsError.displayName = 'ManageIntegrationsError';
 
 export const ManageIntegrations = React.memo(() => {
   const { integrations, isLoading, isError, error } = useGetAllIntegrations();
-
   const columns = useMemo<Array<EuiBasicTableColumn<AllIntegrationsResponseIntegration>>>(
     () => [
       {

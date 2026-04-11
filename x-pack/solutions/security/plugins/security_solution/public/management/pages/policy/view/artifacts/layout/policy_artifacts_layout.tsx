@@ -120,7 +120,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
       () => (
         <EuiButton
           fill
-          iconType="plusInCircle"
+          iconType="plusCircle"
           data-test-subj="artifacts-assign-button"
           onClick={handleOnClickAssignButton}
         >

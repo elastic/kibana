@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiPortal,
   EuiPagination,
   EuiHorizontalRule,
@@ -36,13 +37,7 @@ import { UnifiedDocViewer } from '../lazy_doc_viewer';
 import { useFlyoutA11y } from './use_flyout_a11y';
 
 export interface UnifiedDocViewerFlyoutProps
-  extends Pick<
-    DocViewerProps,
-    | 'initialTabId'
-    | 'initialDocViewerState'
-    | 'onInitialDocViewerStateChange'
-    | 'onUpdateSelectedTabId'
-  > {
+  extends Pick<DocViewerProps, 'initialTabId' | 'onUpdateSelectedTabId'> {
   docViewerRef?: DocViewerProps['ref'];
   'data-test-subj'?: string;
   flyoutTitle?: string;
@@ -62,7 +57,10 @@ export interface UnifiedDocViewerFlyoutProps
   hits?: DataTableRecord[];
   dataView: DataView;
   hideFilteringOnComputedColumns?: boolean;
+  initialDocViewerState?: DocViewerProps['initialState'];
+  onInitialDocViewerStateChange?: DocViewerProps['onInitialStateChange'];
   renderCustomHeader?: (props: DocViewRenderProps) => React.ReactElement;
+  renderCustomFooter?: (props: DocViewRenderProps) => React.ReactElement;
   setExpandedDoc: (doc?: DataTableRecord) => void;
   onClose: () => void;
   onAddColumn: (column: string) => void;
@@ -104,6 +102,7 @@ export function UnifiedDocViewerFlyout({
   initialTabId,
   initialDocViewerState,
   renderCustomHeader,
+  renderCustomFooter,
   setExpandedDoc,
   onClose,
   onAddColumn,
@@ -328,12 +327,15 @@ export function UnifiedDocViewerFlyout({
           <UnifiedDocViewer
             ref={docViewerRef}
             initialTabId={initialTabId}
-            initialDocViewerState={initialDocViewerState}
-            onInitialDocViewerStateChange={onInitialDocViewerStateChange}
+            initialState={initialDocViewerState}
+            onInitialStateChange={onInitialDocViewerStateChange}
             onUpdateSelectedTabId={onUpdateSelectedTabId}
             {...docViewRenderProps}
           />
         </EuiFlyoutBody>
+        {renderCustomFooter && (
+          <EuiFlyoutFooter>{renderCustomFooter(docViewRenderProps)}</EuiFlyoutFooter>
+        )}
       </EuiFlyout>
     </EuiPortal>
   );

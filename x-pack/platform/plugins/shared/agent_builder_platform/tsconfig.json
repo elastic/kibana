@@ -3,16 +3,8 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": [
-    "../../../../../typings/**/*",
-    "common/**/*",
-    "public/**/*",
-    "server/**/*"
-  ],
-  "exclude": [
-    "target/**/*",
-    ".storybook/**/*.js"
-  ],
+  "include": ["../../../../../typings/**/*", "common/**/*", "public/**/*", "server/**/*"],
+  "exclude": ["target/**/*", ".storybook/**/*.js"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/logging",
@@ -38,5 +30,7 @@
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/share-plugin",
     "@kbn/core-logging-server-mocks",
+    "@kbn/connector-specs",
+    "@kbn/core-saved-objects-api-server"
   ]
 }

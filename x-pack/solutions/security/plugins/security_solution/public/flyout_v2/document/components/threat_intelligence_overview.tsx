@@ -128,7 +128,7 @@ export const ThreatIntelligenceOverview: FC<ThreatIntelligenceOverviewProps> = (
       header={{
         title: HEADER_TITLE,
         link,
-        iconType: showIcon ? 'arrowStart' : undefined,
+        iconType: showIcon ? 'chevronLimitLeft' : undefined,
         headerContent: (
           <EuiToolTip
             content={

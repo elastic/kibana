@@ -49,8 +49,6 @@ export const leadEntitySchema = z.object({
   name: z.string(),
 });
 
-export type LeadEntity = z.infer<typeof leadEntitySchema>;
-
 // ---------------------------------------------------------------------------
 // Lead
 // ---------------------------------------------------------------------------
@@ -75,51 +73,30 @@ export const leadSchema = z.object({
 export type Lead = z.infer<typeof leadSchema>;
 
 // ---------------------------------------------------------------------------
-// Engine configuration
-// ---------------------------------------------------------------------------
-
-export const leadGenerationEngineConfigSchema = z.object({
-  minObservations: z.number().int().min(0).default(1),
-  maxLeads: z.number().int().min(1).default(10),
-});
-
-export type LeadGenerationEngineConfig = z.infer<typeof leadGenerationEngineConfigSchema>;
-
-// ---------------------------------------------------------------------------
 // API request / response schemas
 // ---------------------------------------------------------------------------
 
 export const generateLeadsRequestSchema = z.object({
   maxLeads: z.number().int().min(1).max(50).optional(),
-  connectorId: z.string().optional(),
 });
 
-export type GenerateLeadsRequest = z.infer<typeof generateLeadsRequestSchema>;
-
 export const findLeadsRequestSchema = z.object({
-  page: z.number().int().min(1).optional().default(1),
-  perPage: z.number().int().min(1).max(100).optional().default(20),
+  page: z.coerce.number().int().min(1).optional().default(1),
+  perPage: z.coerce.number().int().min(1).max(100).optional().default(20),
   sortField: z.enum(['priority', 'timestamp']).optional().default('priority'),
   sortOrder: z.enum(['asc', 'desc']).optional().default('desc'),
   status: LeadStatusEnum.optional(),
 });
 
-export type FindLeadsRequest = z.infer<typeof findLeadsRequestSchema>;
-
-export const findLeadsResponseSchema = z.object({
-  leads: z.array(leadSchema),
-  total: z.number(),
-  page: z.number(),
-  perPage: z.number(),
+export const getLeadByIdRequestSchema = z.object({
+  id: z.string().min(1),
 });
 
-export type FindLeadsResponse = z.infer<typeof findLeadsResponseSchema>;
-
-export const leadGenerationStatusSchema = z.object({
-  isEnabled: z.boolean(),
-  indexExists: z.boolean(),
-  totalLeads: z.number(),
-  lastRun: z.string().datetime().nullable(),
+export const dismissLeadRequestSchema = z.object({
+  id: z.string().min(1),
 });
 
-export type LeadGenerationStatus = z.infer<typeof leadGenerationStatusSchema>;
+export const bulkUpdateLeadsRequestSchema = z.object({
+  ids: z.array(z.string().min(1)).min(1).max(100),
+  status: LeadStatusEnum,
+});

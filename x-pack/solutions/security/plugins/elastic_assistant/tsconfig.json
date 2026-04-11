@@ -103,6 +103,7 @@
     "@kbn/management-settings-ids",
     "@kbn/agent-builder-plugin",
     "@kbn/cloud-plugin",
+    "@kbn/controls-constants",
   ],
   "exclude": [
     "target/**/*",

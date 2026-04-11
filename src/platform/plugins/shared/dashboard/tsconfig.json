@@ -115,6 +115,7 @@
     "@kbn/test-jest-helpers",
     "@kbn/scout",
     "@kbn/cps-utils",
+    "@kbn/as-code-shared-schemas",
   ],
   "exclude": ["target/**/*"]
 }

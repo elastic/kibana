@@ -142,6 +142,7 @@ export const createContextAwarenessMocks = ({
             return prevValue.docViewsRegistry(registry);
           },
           renderHeader: () => <div data-test-subj="customDocViewerHeader">Custom Header</div>,
+          renderFooter: () => <div data-test-subj="customDocViewerFooter">Custom Footer</div>,
         };
       },
     } as DocumentProfileProvider['profile'],

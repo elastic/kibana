@@ -53,7 +53,7 @@ function buildVisualizationState(config: HeatmapState): HeatmapVisualizationStat
   const layer = config;
   const valueAccessor = getAccessorName('value');
   const basePalette = layer.metric.color && fromColorByValueAPIToLensState(layer.metric.color);
-  const xAxisLabelRotation = getRotationFromOrientation(layer.axis?.x?.labels?.orientation);
+  const xAxisLabelRotation = getRotationFromOrientation(layer.axes?.x?.labels?.orientation);
 
   return {
     layerId: DEFAULT_LAYER_ID,
@@ -65,16 +65,16 @@ function buildVisualizationState(config: HeatmapState): HeatmapVisualizationStat
     gridConfig: {
       type: HEATMAP_GRID_NAME,
       isCellLabelVisible: layer.cells?.labels?.visible ?? false,
-      isXAxisLabelVisible: layer.axis?.x?.labels?.visible ?? true,
-      isXAxisTitleVisible: layer.axis?.x?.title?.visible ?? false,
-      isYAxisLabelVisible: layer.axis?.y?.labels?.visible ?? true,
-      isYAxisTitleVisible: layer.axis?.y?.title?.visible ?? false,
+      isXAxisLabelVisible: layer.axes?.x?.labels?.visible ?? true,
+      isXAxisTitleVisible: layer.axes?.x?.title?.visible ?? false,
+      isYAxisLabelVisible: layer.axes?.y?.labels?.visible ?? true,
+      isYAxisTitleVisible: layer.axes?.y?.title?.visible ?? false,
       ...stripUndefined<HeatmapGridConfigResult>({
-        xTitle: layer.axis?.x?.title?.value,
-        yTitle: layer.axis?.y?.title?.value,
+        xTitle: layer.axes?.x?.title?.text,
+        yTitle: layer.axes?.y?.title?.text,
         xAxisLabelRotation,
-        xSortPredicate: layer.axis?.x?.sort,
-        ySortPredicate: layer.axis?.y?.sort,
+        xSortPredicate: layer.axes?.x?.sort,
+        ySortPredicate: layer.axes?.y?.sort,
       }),
     },
     legend: {

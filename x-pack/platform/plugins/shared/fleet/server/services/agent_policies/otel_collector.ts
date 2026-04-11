@@ -23,27 +23,42 @@ import {
 import { FleetError } from '../../errors';
 import { getOutputIdForAgentPolicy } from '../../../common/services/output_helpers';
 import { pkgToPkgKey } from '../epm/registry';
-import { hasDynamicSignalTypes } from '../epm/packages/input_type_packages';
+import { packagePolicyInputAllowsUndefinedDataStreamType } from '../../../common/services';
 
 // Generate OTel Collector policy
 export function generateOtelcolConfig(
   inputs: FullAgentPolicyInput[] | TemplateAgentPolicyInput[],
   dataOutput?: Output,
-  packageInfoCache?: Map<string, PackageInfo>
+  packageInfoCache?: Map<string, PackageInfo>,
+  defaultPackageInfo?: PackageInfo
 ): OTelCollectorConfig {
   const otelConfigs: OTelCollectorConfig[] = inputs
     .filter((input) => input.type === OTEL_COLLECTOR_INPUT_TYPE)
     .flatMap((input) => {
-      // Get package info from input meta if available
-      let packageInfo: PackageInfo | undefined;
+      // Get package info from input meta if available, fall back to defaultPackageInfo
+      // (used for template inputs which have no meta.package)
+      let packageInfo: PackageInfo | undefined = defaultPackageInfo;
 
       if (packageInfoCache && 'meta' in input && (input as FullAgentPolicyInput).meta?.package) {
         const pkgKey = pkgToPkgKey({
           name: (input as FullAgentPolicyInput).meta?.package?.name || '',
           version: (input as FullAgentPolicyInput).meta?.package?.version || '',
         });
-        packageInfo = packageInfoCache.get(pkgKey);
+        packageInfo = packageInfoCache.get(pkgKey) ?? defaultPackageInfo;
       }
+
+      // Check dynamic signal types for this specific input (not the whole package),
+      // using the policy_template from meta to narrow to the exact registry input definition.
+      const policyTemplateName =
+        'meta' in input
+          ? (input as FullAgentPolicyInput).meta?.package?.policy_template
+          : undefined;
+      const inputDynamicSignalTypes = packageInfo
+        ? packagePolicyInputAllowsUndefinedDataStreamType(packageInfo, {
+            type: input.type,
+            policy_template: policyTemplateName,
+          })
+        : false;
 
       const otelInputs: OTelCollectorConfig[] = (input?.streams ?? []).map((stream) => {
         // Avoid dots in keys, as they can create subobjects in agent config.
@@ -67,7 +82,7 @@ export function generateOtelcolConfig(
           stream.data_stream.dataset,
           namespace,
           suffix,
-          packageInfo,
+          inputDynamicSignalTypes,
           signalTypes
         );
 
@@ -221,11 +236,9 @@ function generateOTelAttributesTransform(
   dataset: string,
   namespace: string,
   suffix: string,
-  packageInfo?: PackageInfo,
+  dynamicSignalTypes: boolean,
   signalTypes?: string[]
 ): Record<OTelCollectorComponentID, any> {
-  const dynamicSignalTypes = hasDynamicSignalTypes(packageInfo);
-
   let transformStatements: Record<string, any> = {};
 
   if (dynamicSignalTypes && signalTypes) {

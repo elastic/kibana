@@ -75,7 +75,7 @@ export function useFetchSloList({
           ],
           dataView,
           {
-            ignoreFilterIfFieldNotInIndex: true,
+            ignoreFilterIfFieldNotInIndex: false,
           }
         )
       );

@@ -511,7 +511,10 @@ export class ExecutionPlan {
               query: action.request.query,
             }),
           { logger: this.dependencies.logger }
-        )
+        ),
+      // Sequential to avoid ConcurrentModificationException in Elasticsearch's
+      // PlanTelemetry when multiple PUT view requests arrive in parallel.
+      { sequential: true }
     );
   }
 

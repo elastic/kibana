@@ -9,6 +9,11 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import {
+  AGENT_BUILDER_INFERENCE_FEATURE_ID,
+  AGENT_BUILDER_PARENT_INFERENCE_FEATURE_ID,
+  AGENT_BUILDER_RECOMMENDED_ENDPOINTS,
+} from '@kbn/agent-builder-common/constants';
 import type { AgentBuilderConfig } from './config';
 import { ServiceManager } from './services';
 import type {
@@ -77,6 +82,25 @@ export class AgentBuilderPlugin
       this.logger.warn('Usage collection plugin not available, telemetry disabled');
     }
 
+    if (setupDeps.searchInferenceEndpoints) {
+      setupDeps.searchInferenceEndpoints.features.register({
+        featureId: AGENT_BUILDER_PARENT_INFERENCE_FEATURE_ID,
+        featureName: 'Agent Builder',
+        featureDescription: 'Parent feature for Agent Builder',
+        taskType: 'chat_completion',
+        recommendedEndpoints: AGENT_BUILDER_RECOMMENDED_ENDPOINTS,
+      });
+
+      setupDeps.searchInferenceEndpoints.features.register({
+        parentFeatureId: AGENT_BUILDER_PARENT_INFERENCE_FEATURE_ID,
+        featureId: AGENT_BUILDER_INFERENCE_FEATURE_ID,
+        featureName: 'Agent Builder',
+        featureDescription: 'Agent Builder inference endpoint configuration',
+        taskType: 'chat_completion',
+        recommendedEndpoints: AGENT_BUILDER_RECOMMENDED_ENDPOINTS,
+      });
+    }
+
     // Register server-side EBT events for Agent Builder
     this.analyticsService = new AnalyticsService(
       coreSetup.analytics,
@@ -117,7 +141,7 @@ export class AgentBuilderPlugin
           elasticsearch: coreStart.elasticsearch,
           savedObjects: coreStart.savedObjects,
           uiSettings: coreStart.uiSettings,
-          logger: this.logger.get('services').get('sml'),
+          logger: this.logger.get('services.sml'),
         };
       },
     });
@@ -193,6 +217,7 @@ export class AgentBuilderPlugin
       serviceManager: this.serviceManager,
       workflowsManagement: setupDeps.workflowsManagement,
       logger: this.logger.get('connector-lifecycle'),
+      getStartServices: coreSetup.getStartServices,
     });
 
     setupDeps.actions.registerConnectorLifecycleListener({
@@ -216,6 +241,9 @@ export class AgentBuilderPlugin
       },
       skills: {
         register: serviceSetups.skills.registerSkill.bind(serviceSetups.skills),
+      },
+      plugins: {
+        register: serviceSetups.plugins.register.bind(serviceSetups.plugins),
       },
       sml: {
         registerType: serviceSetups.sml.registerType.bind(serviceSetups.sml),
@@ -245,7 +273,7 @@ export class AgentBuilderPlugin
       analyticsService: this.analyticsService,
     });
 
-    const { tools, agents, skills, runnerFactory, execution } = startServices;
+    const { tools, agents, skills, runnerFactory, execution, plugins } = startServices;
     const runner = runnerFactory.getRunner();
 
     if (this.home) {
@@ -263,7 +291,7 @@ export class AgentBuilderPlugin
     scheduleSmlCrawlerTasks({
       taskManager,
       smlService: startServices.sml,
-      logger: this.logger.get('services').get('sml'),
+      logger: this.logger.get('services.sml'),
     }).catch((error) => {
       this.logger.error(`Failed to schedule SML crawler tasks: ${error.message}`);
     });
@@ -282,6 +310,9 @@ export class AgentBuilderPlugin
       skills: {
         getRegistry: skills.getRegistry.bind(skills),
         register: skills.registerSkill.bind(skills),
+      },
+      plugins: {
+        getRegistry: ({ request }) => plugins.getRegistry({ request }),
       },
       execution: {
         executeAgent: execution.executeAgent.bind(execution),
@@ -303,7 +334,8 @@ export class AgentBuilderPlugin
             spaces: [spaceId],
             esClient: elasticsearch.client.asInternalUser,
             savedObjectsClient: soClient,
-            logger: this.logger.get('services').get('sml'),
+            logger: this.logger.get('services.sml'),
+            request: params.request,
           });
         },
       },

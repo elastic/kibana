@@ -10,27 +10,23 @@
 import React, { useCallback, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
+import { fn } from '@storybook/test';
 
 import {
   DateRangePicker,
   type DateRangePickerProps,
   type DateRangePickerOnChangeProps,
 } from './date_range_picker';
-import type { DateRangePickerSettings } from './types';
-import type { TimeRangeBoundsOption } from './types';
+import type { DateRangePickerSettings, TimeRangeBoundsOption } from './types';
 
 const meta: Meta<DateRangePickerProps> = {
   title: 'Date Time/DateRangePicker',
   component: DateRangePicker,
-  argTypes: {
-    onChange: { action: 'onChange' },
-    onInputChange: { action: 'onInputChange' },
-  },
   args: {
     onChange: action('onChange'),
     onInputChange: action('onInputChange'),
-    settings: { roundRelativeTime: true },
     onSettingsChange: action('onSettingsChange'),
+    settings: { roundRelativeTime: true },
   },
 };
 
@@ -67,6 +63,21 @@ export const Presets: Story = {
     timeZone: 'Europe/Amsterdam',
     onPresetSave: action('onPresetSave'),
     onPresetDelete: action('onPresetDelete'),
+  },
+  render: (args) => <StatefulDateRangePicker {...args} />,
+};
+
+/** `onRefresh` + `settings.autoRefresh`: Settings refresh row, input append when `isEnabled`, timer when unpaused. */
+export const AutoRefresh: Story = {
+  args: {
+    defaultValue: 'last 15 minutes',
+    settings: {
+      roundRelativeTime: true,
+      autoRefresh: { isEnabled: true, isPaused: false, interval: 10_000 },
+    },
+    showTimeWindowButtons: true,
+    timeZone: 'Europe/Amsterdam',
+    onRefresh: fn(),
   },
   render: (args) => <StatefulDateRangePicker {...args} />,
 };

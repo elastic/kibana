@@ -9,10 +9,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchEvents } from './fetch_events_graph';
 import type { Logger } from '@kbn/core/server';
 import type { OriginEventId, EsQuery } from './types';
-import {
-  getEnrichPolicyId,
-  getEntitiesLatestIndexName,
-} from '@kbn/cloud-security-posture-common/utils/helpers';
+import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 
 describe('fetchEvents', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -25,19 +22,6 @@ describe('fetchEvents', () => {
       toRecords: toRecordsMock,
       toArrowTable: jest.fn(),
       toArrowReader: jest.fn(),
-    });
-
-    // Mock the enrich.getPolicy method with default behavior (policy exists)
-    (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest.fn().mockResolvedValue({
-      policies: [
-        {
-          config: {
-            match: {
-              name: getEnrichPolicyId(),
-            },
-          },
-        },
-      ],
     });
 
     logger = {
@@ -189,9 +173,6 @@ describe('fetchEvents', () => {
       expect(query).toContain('targetEntityType');
       expect(query).toContain('targetEntitySubType');
 
-      // Verify ENRICH is NOT used when LOOKUP JOIN is available
-      expect(query).not.toContain('ENRICH');
-
       expect(result).toEqual([{ id: 'dummy' }]);
     });
 
@@ -211,13 +192,6 @@ describe('fetchEvents', () => {
           },
         });
 
-      // Also mock enrich policy to not exist
-      (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest
-        .fn()
-        .mockResolvedValueOnce({
-          policies: [],
-        });
-
       const validIndexPatterns = ['valid_index'];
       const params = {
         esClient,
@@ -239,9 +213,6 @@ describe('fetchEvents', () => {
 
       // Verify LOOKUP JOIN is NOT used
       expect(query).not.toContain('LOOKUP JOIN');
-
-      // Verify ENRICH is also NOT used (no policy exists)
-      expect(query).not.toContain('ENRICH');
 
       // Verify fallback EVALs are present for null values
       expect(query).toMatch(/EVAL\s+actorEntityName\s*=\s*TO_STRING\(null\)/);
@@ -256,13 +227,6 @@ describe('fetchEvents', () => {
         .fn()
         .mockRejectedValueOnce({ statusCode: 404 });
 
-      // Also mock enrich policy to not exist
-      (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest
-        .fn()
-        .mockResolvedValueOnce({
-          policies: [],
-        });
-
       const validIndexPatterns = ['valid_index'];
       const params = {
         esClient,
@@ -284,111 +248,6 @@ describe('fetchEvents', () => {
 
       // Verify LOOKUP JOIN is NOT used
       expect(query).not.toContain('LOOKUP JOIN');
-
-      expect(result).toEqual([{ id: 'dummy' }]);
-    });
-  });
-
-  describe('ENRICH policy integration', () => {
-    beforeEach(() => {
-      // Default: no lookup index available (falls back to ENRICH check)
-      (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
-        .fn()
-        .mockRejectedValue({ statusCode: 404 });
-    });
-
-    it('should include ENRICH clause when policy exists', async () => {
-      // Mock the enrich.getPolicy method to return a policy that exists
-      (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest
-        .fn()
-        .mockResolvedValueOnce({
-          policies: [
-            {
-              config: {
-                match: {
-                  name: getEnrichPolicyId(),
-                },
-              },
-            },
-          ],
-        });
-
-      const validIndexPatterns = ['valid_index'];
-      const params = {
-        esClient,
-        logger,
-        start: 0,
-        end: 1000,
-        originEventIds: [] as OriginEventId[],
-        showUnknownTarget: false,
-        indexPatterns: validIndexPatterns,
-        spaceId: 'default',
-        esQuery: undefined as EsQuery | undefined,
-      };
-
-      const result = await fetchEvents(params);
-
-      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
-      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
-      const query = esqlCallArgs[0].query;
-
-      // Test high-level structure using flexible regex patterns
-      // Note: enrich policy names can contain dots, underscores, and version numbers
-      expect(query).toMatch(/ENRICH\s+[\w.-]+\s+ON\s+actorEntityId/);
-      expect(query).toMatch(/ENRICH\s+[\w.-]+\s+ON\s+targetEntityId/);
-
-      // Verify ENRICH populates expected fields
-      expect(query).toContain('actorEntityName');
-      expect(query).toContain('actorEntityType');
-      expect(query).toContain('actorEntitySubType');
-      expect(query).toContain('targetEntityName');
-      expect(query).toContain('targetEntityType');
-      expect(query).toContain('targetEntitySubType');
-
-      expect(result).toEqual([{ id: 'dummy' }]);
-    });
-
-    it('should not include ENRICH clause when policy does not exist', async () => {
-      (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest
-        .fn()
-        .mockResolvedValueOnce({
-          policies: [],
-        });
-
-      const validIndexPatterns = ['valid_index'];
-      const params = {
-        esClient,
-        logger,
-        start: 0,
-        end: 1000,
-        originEventIds: [] as OriginEventId[],
-        showUnknownTarget: false,
-        indexPatterns: validIndexPatterns,
-        spaceId: 'default',
-        esQuery: undefined as EsQuery | undefined,
-      };
-
-      const result = await fetchEvents(params);
-
-      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
-      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
-      const query = esqlCallArgs[0].query;
-
-      expect(query).not.toContain('ENRICH');
-
-      // Verify fallback EVALs are present for null values
-      expect(query).toMatch(/EVAL\s+actorEntityName\s*=\s*TO_STRING\(null\)/);
-      expect(query).toMatch(/EVAL\s+actorEntityType\s*=\s*TO_STRING\(null\)/);
-      expect(query).toMatch(/EVAL\s+actorEntitySubType\s*=\s*TO_STRING\(null\)/);
-      expect(query).toMatch(/EVAL\s+targetEntityName\s*=\s*TO_STRING\(null\)/);
-      expect(query).toMatch(/EVAL\s+targetEntityType\s*=\s*TO_STRING\(null\)/);
-      expect(query).toMatch(/EVAL\s+targetEntitySubType\s*=\s*TO_STRING\(null\)/);
-
-      // Verify that actorDocData and targetDocData are created with minimal structure (not null)
-      expect(query).toMatch(/EVAL\s+actorDocData\s*=\s*CONCAT\(/);
-      expect(query).toMatch(/EVAL\s+targetDocData\s*=\s*CONCAT\(/);
-      expect(query).toContain('availableInEntityStore');
-      expect(query).toContain('ecsParentField');
 
       expect(result).toEqual([{ id: 'dummy' }]);
     });

@@ -156,6 +156,15 @@ describe('SmlService', () => {
   });
 
   describe('search', () => {
+    const saytBoolPrefixFields = [
+      'title',
+      'title._2gram',
+      'title._3gram',
+      'title._index_prefix',
+      'type.autocomplete',
+      'type.autocomplete._index_prefix',
+    ];
+
     it('calls ES search with correct query, space filter, and _source fields', async () => {
       const service = createSmlService();
       service.setup({ logger });
@@ -169,7 +178,7 @@ describe('SmlService', () => {
       } as any);
 
       await smlService.search({
-        keywords: ['foo', 'bar'],
+        query: 'foo bar',
         size: 10,
         spaceId: 'default',
         esClient,
@@ -186,24 +195,10 @@ describe('SmlService', () => {
         bool: {
           must: [
             {
-              bool: {
-                should: [
-                  {
-                    multi_match: {
-                      query: 'foo',
-                      fields: ['title^2', 'content'],
-                      type: 'best_fields',
-                    },
-                  },
-                  {
-                    multi_match: {
-                      query: 'bar',
-                      fields: ['title^2', 'content'],
-                      type: 'best_fields',
-                    },
-                  },
-                ],
-                minimum_should_match: 1,
+              multi_match: {
+                query: 'foo bar',
+                type: 'bool_prefix',
+                fields: saytBoolPrefixFields,
               },
             },
           ],
@@ -220,7 +215,7 @@ describe('SmlService', () => {
       expect(call._source).toEqual(true);
     });
 
-    it('uses match_all for keywords ["*"]', async () => {
+    it('uses _source excludes when skipContent is true', async () => {
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger });
@@ -230,7 +225,29 @@ describe('SmlService', () => {
       } as any);
 
       await smlService.search({
-        keywords: ['*'],
+        query: 'viz',
+        size: 10,
+        spaceId: 'default',
+        esClient,
+        request,
+        skipContent: true,
+      });
+
+      const call = esClient.search.mock.calls[0]![0]!;
+      expect(call._source).toEqual({ excludes: ['content'] });
+    });
+
+    it('uses match_all for query "*"', async () => {
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      esClient.search.mockResolvedValue({
+        hits: { total: 0, hits: [] },
+      } as any);
+
+      await smlService.search({
+        query: '*',
         size: 5,
         spaceId: 'default',
         esClient,
@@ -243,7 +260,7 @@ describe('SmlService', () => {
       expect(call.query!.bool!.must).toEqual([{ match_all: {} }]);
     });
 
-    it('uses match_all for empty keywords', async () => {
+    it('uses match_all for empty query after trim', async () => {
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger });
@@ -253,7 +270,7 @@ describe('SmlService', () => {
       } as any);
 
       await smlService.search({
-        keywords: [],
+        query: '',
         size: 5,
         spaceId: 'default',
         esClient,
@@ -294,7 +311,7 @@ describe('SmlService', () => {
       } as any);
 
       const result = await smlService.search({
-        keywords: ['viz'],
+        query: 'viz',
         size: 10,
         spaceId: 'default',
         esClient,
@@ -359,7 +376,7 @@ describe('SmlService', () => {
       } as any);
 
       const result = await smlService.search({
-        keywords: ['*'],
+        query: '*',
         size: 10,
         spaceId: 'default',
         esClient,
@@ -378,7 +395,7 @@ describe('SmlService', () => {
       esClient.search.mockRejectedValue(createNotFoundError());
 
       const result = await smlService.search({
-        keywords: ['foo'],
+        query: 'foo',
         size: 10,
         spaceId: 'default',
         esClient,
@@ -401,7 +418,7 @@ describe('SmlService', () => {
 
       await expect(
         smlService.search({
-          keywords: ['foo'],
+          query: 'foo',
           size: 10,
           spaceId: 'default',
           esClient,
@@ -458,7 +475,7 @@ describe('SmlService', () => {
       } as any);
 
       const result = await smlService.search({
-        keywords: ['*'],
+        query: '*',
         size: 10,
         spaceId: 'default',
         esClient,
@@ -513,7 +530,7 @@ describe('SmlService', () => {
       } as any);
 
       const result = await smlService.search({
-        keywords: ['*'],
+        query: '*',
         size: 10,
         spaceId: 'default',
         esClient,
@@ -534,7 +551,7 @@ describe('SmlService', () => {
       } as any);
 
       await smlService.search({
-        keywords: ['*'],
+        query: '*',
         spaceId: 'default',
         esClient,
         request,

@@ -39,9 +39,11 @@ describe('Metric Schema', () => {
             fit: false,
             sub_label: 'Count of records',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-            alignments: {
-              labels: 'left',
-              value: 'right',
+            labels: {
+              alignment: 'left',
+            },
+            value: {
+              alignment: 'right',
             },
           },
         ],
@@ -63,9 +65,10 @@ describe('Metric Schema', () => {
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
             icon: {
               name: 'visMetric',
-              align: 'left',
+              alignment: 'left',
             },
-            alignments: { labels: 'left', value: 'left' },
+            labels: { alignment: 'left' },
+            value: { alignment: 'left' },
           },
         ],
       } satisfies MetricInput;
@@ -86,7 +89,8 @@ describe('Metric Schema', () => {
             operation: 'average',
             field: 'temperature',
             fit: false,
-            alignments: { labels: 'left', value: 'left' },
+            labels: { alignment: 'left' },
+            value: { alignment: 'left' },
             color: {
               type: 'dynamic',
               range: 'absolute',
@@ -112,10 +116,11 @@ describe('Metric Schema', () => {
             operation: 'max',
             field: 'cpu_usage',
             fit: false,
-            alignments: { labels: 'left', value: 'left' },
+            labels: { alignment: 'left' },
+            value: { alignment: 'left' },
             background_chart: {
               type: 'bar',
-              direction: 'horizontal',
+              orientation: 'horizontal',
               max_value: {
                 operation: 'static_value',
                 value: 80,
@@ -147,7 +152,8 @@ describe('Metric Schema', () => {
                 ],
               },
               fit: false,
-              alignments: { labels: 'left', value: 'left' },
+              labels: { alignment: 'left' },
+              value: { alignment: 'left' },
             },
           ],
         } satisfies MetricInput;
@@ -174,7 +180,8 @@ describe('Metric Schema', () => {
                 ],
               },
               fit: false,
-              alignments: { labels: 'left', value: 'left' },
+              labels: { alignment: 'left' },
+              value: { alignment: 'left' },
             },
           ],
           breakdown_by: {
@@ -205,7 +212,8 @@ describe('Metric Schema', () => {
                 ],
               },
               fit: false,
-              alignments: { labels: 'left', value: 'left' },
+              labels: { alignment: 'left' },
+              value: { alignment: 'left' },
               background_chart: {
                 type: 'bar',
                 max_value: { operation: 'static_value', value: 100 },
@@ -229,7 +237,8 @@ describe('Metric Schema', () => {
             operation: 'sum',
             field: 'revenue',
             fit: false,
-            alignments: { labels: 'left', value: 'left' },
+            labels: { alignment: 'left' },
+            value: { alignment: 'left' },
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
           {
@@ -237,7 +246,7 @@ describe('Metric Schema', () => {
             operation: 'sum',
             field: 'cost',
             prefix: '$',
-            label_position: 'before',
+            placement: 'before',
             compare: {
               to: 'primary',
             },
@@ -260,14 +269,15 @@ describe('Metric Schema', () => {
             field: 'revenue',
             fit: false,
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-            alignments: { labels: 'left', value: 'left' },
+            labels: { alignment: 'left' },
+            value: { alignment: 'left' },
           },
           {
             type: 'secondary',
             operation: 'sum',
             field: 'profit',
             prefix: '',
-            label_position: 'before',
+            placement: 'before',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
             color: {
               type: 'static',
@@ -293,7 +303,8 @@ describe('Metric Schema', () => {
             field: 'sales',
             fit: false,
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-            alignments: { labels: 'left', value: 'left' },
+            labels: { alignment: 'left' },
+            value: { alignment: 'left' },
           },
         ],
         breakdown_by: {
@@ -323,7 +334,8 @@ describe('Metric Schema', () => {
             field: 'sales',
             fit: false,
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-            alignments: { labels: 'left', value: 'left' },
+            labels: { alignment: 'left' },
+            value: { alignment: 'left' },
           },
         ],
         breakdown_by: {
@@ -366,9 +378,9 @@ describe('Metric Schema', () => {
             type: 'primary',
             operation: 'count',
             field: 'test_field',
-            alignments: {
+            labels: {
               // @ts-expect-error - invalid alignment value
-              labels: 'invalid',
+              alignment: 'invalid',
             },
           },
         ],
@@ -386,7 +398,8 @@ describe('Metric Schema', () => {
             operation: 'sum',
             field: 'sales',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-            alignments: { labels: 'left', value: 'left' },
+            labels: { alignment: 'left' },
+            value: { alignment: 'left' },
             fit: false,
           },
         ],
@@ -411,7 +424,8 @@ describe('Metric Schema', () => {
             field: 'test_field',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
             fit: false,
-            alignments: { labels: 'left', value: 'left' },
+            labels: { alignment: 'left' },
+            value: { alignment: 'left' },
           },
         ],
       } satisfies MetricInput;
@@ -429,7 +443,8 @@ describe('Metric Schema', () => {
             field: 'test_field',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
             fit: false,
-            alignments: { labels: 'left', value: 'left' },
+            labels: { alignment: 'left' },
+            value: { alignment: 'left' },
           },
           {
             type: 'primary',
@@ -437,7 +452,8 @@ describe('Metric Schema', () => {
             field: 'test_field',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
             fit: false,
-            alignments: { labels: 'left', value: 'left' },
+            labels: { alignment: 'left' },
+            value: { alignment: 'left' },
           },
         ],
       } satisfies MetricInput;
@@ -474,7 +490,7 @@ describe('Metric Schema', () => {
             operation: 'sum',
             field: 'test_field',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-            label_position: 'before',
+            placement: 'before',
           },
         ],
       } satisfies MetricInput;
@@ -497,13 +513,15 @@ describe('Metric Schema', () => {
             sub_label: 'Total Sales',
             fit: false,
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-            alignments: {
-              labels: 'left',
-              value: 'right',
+            labels: {
+              alignment: 'left',
+            },
+            value: {
+              alignment: 'right',
             },
             icon: {
               name: 'visMetric',
-              align: 'right',
+              alignment: 'right',
             },
             color: {
               type: 'dynamic',
@@ -522,7 +540,7 @@ describe('Metric Schema', () => {
             operation: 'sum',
             field: 'profit',
             prefix: '$',
-            label_position: 'before',
+            placement: 'before',
             compare: {
               to: 'primary',
             },
@@ -559,7 +577,8 @@ describe('Metric Schema', () => {
             operation: 'value',
             column: 'unique_count',
             fit: false,
-            alignments: { labels: 'left', value: 'left' },
+            labels: { alignment: 'left' },
+            value: { alignment: 'left' },
           },
         ],
       } satisfies MetricInput;

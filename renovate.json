@@ -2278,6 +2278,7 @@
       "matchDepNames": [
         "langchain",
         "@langchain/aws",
+        "@langchain/classic",
         "@langchain/core",
         "@langchain/google-common",
         "@langchain/google-genai",
@@ -2455,7 +2456,6 @@
         "@opentelemetry/exporter-trace-otlp-http",
         "@opentelemetry/exporter-trace-otlp-proto",
         "@opentelemetry/instrumentation",
-        "@opentelemetry/instrumentation-hapi",
         "@opentelemetry/instrumentation-http",
         "@opentelemetry/instrumentation-undici",
         "@opentelemetry/otlp-exporter-base",
@@ -2723,6 +2723,23 @@
       "labels": ["Team:Operations", "release_note:skip"],
       "minimumReleaseAge": "14 days",
       "enabled": true
+    },
+    {
+      "groupName": "alerting v2 dependencies",
+      "matchDepNames": [
+        "apache-arrow"
+      ],
+      "reviewers": [
+        "team:response-ops"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:ResponseOps"
+      ],
+      "enabled": true,
+      "minimumReleaseAge": "14 days"
     },
     {
       "groupName": "react-day-picker",

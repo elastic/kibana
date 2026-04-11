@@ -43,32 +43,38 @@ const legacyMetricStateMetricOptionsSchema = {
       { meta: { description: 'Font size for the label and value' }, defaultValue: 'm' }
     )
   ),
-  /**
-   * Alignment of the label and value for the legacy metric.
-   * For example, align the label to the bottom and the value to the right.
-   */
-  alignments: schema.maybe(
-    schema.object({
-      /**
-       * Alignment for label. Possible values:
-       * - 'top': Align label to the top of the value (default)
-       * - 'bottom': Align label to the bottom of the value
-       */
-      labels: verticalAlignmentSchema({
-        meta: { description: 'Label alignment' },
-        defaultValue: 'top',
-      }),
-      /**
-       * Alignment for value. Possible values:
-       * - 'left': Align value to the left (default)
-       * - 'center': Align value to the center
-       * - 'right': Align value to the right
-       */
-      value: horizontalAlignmentSchema({
-        meta: { description: 'Value alignment' },
-        defaultValue: 'left',
-      }),
-    })
+  labels: schema.maybe(
+    schema.object(
+      {
+        /**
+         * Alignment for labels. Possible values:
+         * - 'top': Align label to the top of the value (default)
+         * - 'bottom': Align label to the bottom of the value
+         */
+        alignment: verticalAlignmentSchema({
+          meta: { description: 'Label alignment' },
+          defaultValue: 'top',
+        }),
+      },
+      { meta: { description: 'Labels configuration' } }
+    )
+  ),
+  values: schema.maybe(
+    schema.object(
+      {
+        /**
+         * Alignment for values. Possible values:
+         * - 'left': Align value to the left (default)
+         * - 'center': Align value to the center
+         * - 'right': Align value to the right
+         */
+        alignment: horizontalAlignmentSchema({
+          meta: { description: 'Value alignment' },
+          defaultValue: 'left',
+        }),
+      },
+      { meta: { description: 'Values configuration' } }
+    )
   ),
   /**
    * Where to apply the color (background or value)

@@ -193,7 +193,7 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
           }),
           enabled: () => actionsEnabled && canCreateJob && canStartStopDatafeed,
           type: 'icon',
-          icon: 'crosshairs',
+          icon: 'crosshair',
           onClick: checkJobIsClosed,
           'data-test-subj': `mlADModelSnapShotRevertButton`,
         },

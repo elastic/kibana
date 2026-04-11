@@ -10,6 +10,8 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { coreLifecycleMock } from '@kbn/core-lifecycle-browser-mocks';
+import { createMockWorkflowApi } from '@kbn/workflows-ui/mocks';
 import { createWorkflowYamlAttachmentUiDefinition } from './workflow_yaml_attachment_renderer';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '../../../../common/agent_builder/constants';
 
@@ -18,26 +20,24 @@ jest.mock('../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_the
   WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
 }));
 
+const mockWorkflowApi = createMockWorkflowApi();
+jest.mock('@kbn/workflows-ui', () => ({
+  useWorkflowsApi: jest.fn(() => mockWorkflowApi),
+  WorkflowApi: jest.fn().mockImplementation(() => mockWorkflowApi),
+}));
+
 const createMockServices = ({
   currentAppId = 'other',
   currentLocation = '/',
-}: { currentAppId?: string; currentLocation?: string } = {}) => ({
-  http: {
-    post: jest.fn(),
-    put: jest.fn(),
-  } as any,
-  notifications: {
-    toasts: {
-      addSuccess: jest.fn(),
-      addDanger: jest.fn(),
-    },
-  } as any,
-  application: {
-    navigateToApp: jest.fn(),
-    currentAppId$: new BehaviorSubject<string | undefined>(currentAppId),
-    currentLocation$: new BehaviorSubject<string>(currentLocation),
-  } as any,
-});
+}: { currentAppId?: string; currentLocation?: string } = {}) => {
+  const core = coreLifecycleMock.createCoreStart();
+  core.application.currentAppId$ = new BehaviorSubject<string | undefined>(currentAppId);
+  core.application.currentLocation$ = new BehaviorSubject<string>(currentLocation);
+  return {
+    core,
+    telemetry: { reportEvent: jest.fn() },
+  };
+};
 
 const createAttachment = (overrides: Partial<{ workflowId?: string; name?: string }> = {}) => ({
   id: 'att-1',
@@ -174,7 +174,7 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
         const openInEditorButton = buttons.find((b) => b.label === 'Open in editor')!;
         openInEditorButton.handler();
 
-        expect(services.application.navigateToApp).toHaveBeenCalledWith('workflows', {
+        expect(services.core.application.navigateToApp).toHaveBeenCalledWith('workflows', {
           path: 'wf-123',
         });
       });

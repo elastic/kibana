@@ -11,7 +11,10 @@ import { services } from '../../services';
 export default createStatefulFeatureFlagTestConfig<typeof services>({
   services,
   testFiles: [require.resolve('./oblt.index.ts')],
-  kbnServerArgs: ['--xpack.actions.preconfigured'],
+  kbnServerArgs: [
+    '--xpack.actions.preconfigured',
+    '--xpack.slo.experimental.compositeSlo.enabled=true',
+  ],
   junit: {
     reportName: 'Stateful Observability - Deployment-agnostic Feature Flag API Integration Tests',
   },

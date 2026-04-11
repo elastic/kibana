@@ -686,7 +686,7 @@
             "label": "securitySolution",
             "description": [],
             "signature": [
-              "{ readonly aiAssistant: { home: string; knowledgeBaseHome: string; knowledgeBaseIndexEntries: string; }; readonly cloudSecurityPosture: string; readonly installElasticDefend: string; readonly artifactControl: string; readonly avcResults: string; readonly bidirectionalIntegrations: string; readonly thirdPartyLlmProviders: string; readonly trustedApps: string; readonly trustedDevices: string; readonly elasticAiFeatures: string; readonly eventFilters: string; readonly eventMerging: string; readonly blocklist: string; readonly endpointArtifacts: string; readonly policyResponseTroubleshooting: { full_disk_access: string; macos_system_ext: string; linux_deadlock: string; }; readonly packageActionTroubleshooting: { es_connection: string; }; readonly threatIntelInt: string; readonly responseActions: string; readonly configureEndpointIntegrationPolicy: string; readonly exceptions: { value_lists: string; }; readonly privileges: string; readonly manageDetectionRules: string; readonly createDetectionRules: string; readonly updatePrebuiltDetectionRules: string; readonly prebuiltRuleCustomizationPromoBlog: string; readonly resolvePrebuiltRuleConflicts: string; readonly createEsqlRuleType: string; readonly ruleUiAdvancedParams: string; readonly entityAnalytics: { readonly riskScorePrerequisites: string; readonly entityRiskScoring: string; readonly assetCriticality: string; readonly privilegedUserMonitoring: string; readonly mlAnomalyDetection: string; }; readonly detectionEngineOverview: string; readonly signalsMigrationApi: string; readonly siemMigrations: string; readonly llmPerformanceMatrix: string; }"
+              "{ readonly aiAssistant: { home: string; knowledgeBaseHome: string; knowledgeBaseIndexEntries: string; }; readonly cloudSecurityPosture: string; readonly installElasticDefend: string; readonly artifactControl: string; readonly avcResults: string; readonly bidirectionalIntegrations: string; readonly thirdPartyLlmProviders: string; readonly trustedApps: string; readonly trustedDevices: string; readonly elasticAiFeatures: string; readonly eventFilters: string; readonly eventMerging: string; readonly blocklist: string; readonly endpointArtifacts: string; readonly policyResponseTroubleshooting: { full_disk_access: string; macos_system_ext: string; linux_deadlock: string; }; readonly packageActionTroubleshooting: { es_connection: string; }; readonly threatIntelInt: string; readonly responseActions: string; readonly configureEndpointIntegrationPolicy: string; readonly exceptions: { value_lists: string; }; readonly privileges: string; readonly manageDetectionRules: string; readonly createDetectionRules: string; readonly updatePrebuiltDetectionRules: string; readonly prebuiltRuleCustomizationPromoBlog: string; readonly resolvePrebuiltRuleConflicts: string; readonly createEsqlRuleType: string; readonly ruleUiAdvancedParams: string; readonly entityAnalytics: { readonly api: string; readonly riskScorePrerequisites: string; readonly entityRiskScoring: string; readonly assetCriticality: string; readonly privilegedUserMonitoring: string; readonly mlAnomalyDetection: string; }; readonly detectionEngineOverview: string; readonly signalsMigrationApi: string; readonly siemMigrations: string; readonly llmPerformanceMatrix: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "lineNumber": 320,
@@ -705,7 +705,7 @@
               "{ readonly eql: string; readonly kueryQuerySyntax: string; readonly luceneQuery: string; readonly luceneQuerySyntax: string; readonly percolate: string; readonly queryDsl: string; readonly queryESQL: string; readonly queryESQLExamples: string; readonly queryESQLMultiValueControls: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 373,
+            "lineNumber": 374,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -721,7 +721,7 @@
               "{ readonly dateMath: string; readonly dateMathIndexNames: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 384,
+            "lineNumber": 385,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -737,7 +737,7 @@
               "{ [x: string]: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 388,
+            "lineNumber": 389,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -753,7 +753,7 @@
               "{ [x: string]: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 389,
+            "lineNumber": 390,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -769,7 +769,7 @@
               "{ [x: string]: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 390,
+            "lineNumber": 391,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -785,7 +785,7 @@
               "{ [x: string]: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 391,
+            "lineNumber": 392,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -801,7 +801,7 @@
               "{ readonly bulkIndexAlias: string; readonly indexStats: string; readonly byteSizeUnits: string; readonly createAutoFollowPattern: string; readonly createFollower: string; readonly createIndex: string; readonly createSnapshotLifecyclePolicy: string; readonly createRoleMapping: string; readonly createRoleMappingTemplates: string; readonly createRollupJobsRequest: string; readonly createApiKey: string; readonly createApiKeyMetadata: string; readonly createApiKeyRoleDescriptors: string; readonly createCrossClusterApiKey: string; readonly createPipeline: string; readonly createTransformRequest: string; readonly cronExpressions: string; readonly executeWatchActionModes: string; readonly indexExists: string; readonly inferTrainedModel: string; readonly multiSearch: string; readonly openIndex: string; readonly putComponentTemplate: string; readonly painlessExecute: string; readonly painlessExecuteAPIContexts: string; readonly putComponentTemplateMetadata: string; readonly putSnapshotLifecyclePolicy: string; readonly putIndexTemplateV1: string; readonly putWatch: string; readonly restApis: string; readonly searchPreference: string; readonly securityApis: string; readonly simulatePipeline: string; readonly tasks: string; readonly timeUnits: string; readonly updateTransform: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 392,
+            "lineNumber": 393,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -817,7 +817,7 @@
               "{ readonly guide: string; readonly infrastructureThreshold: string; readonly logsThreshold: string; readonly metricsThreshold: string; readonly customThreshold: string; readonly monitorStatus: string; readonly monitorUptime: string; readonly tlsCertificate: string; readonly uptimeDurationAnomaly: string; readonly monitorLogs: string; readonly logsStreams: string; readonly wiredStreams: string; readonly analyzeMetrics: string; readonly monitorUptimeSynthetics: string; readonly userExperience: string; readonly createAlerts: string; readonly syntheticsAlerting: string; readonly syntheticsCommandReference: string; readonly syntheticsProjectMonitors: string; readonly syntheticsMigrateFromIntegration: string; readonly slo: string; readonly sloBurnRateRule: string; readonly aiAssistant: string; readonly elasticManagedLlm: string; readonly elasticManagedLlmUsageCost: string; readonly elasticServerlessSearchManagedLlmUsageCost: string; readonly downsamplingConcepts: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 430,
+            "lineNumber": 431,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -833,7 +833,7 @@
               "{ readonly authorization: string; readonly guide: string; readonly actionTypes: string; readonly apmRulesErrorCount: string; readonly apmRulesTransactionDuration: string; readonly apmRulesTransactionError: string; readonly apmRulesAnomaly: string; readonly emailAction: string; readonly emailActionConfig: string; readonly emailExchangeClientSecretConfig: string; readonly emailExchangeClientIdConfig: string; readonly generalSettings: string; readonly indexAction: string; readonly esQuery: string; readonly indexThreshold: string; readonly maintenanceWindows: string; readonly pagerDutyAction: string; readonly preconfiguredConnectors: string; readonly preconfiguredAlertHistoryConnector: string; readonly serviceNowAction: string; readonly serviceNowSIRAction: string; readonly setupPrerequisites: string; readonly slackAction: string; readonly slackApiAction: string; readonly teamsAction: string; readonly connectors: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 459,
+            "lineNumber": 460,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -849,7 +849,7 @@
               "{ readonly healthMonitoring: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 487,
+            "lineNumber": 488,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -865,7 +865,7 @@
               "{ readonly connectToEms: string; readonly guide: string; readonly importGeospatialPrivileges: string; readonly gdalTutorial: string; readonly termJoinsExample: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 490,
+            "lineNumber": 491,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -881,7 +881,7 @@
               "{ [x: string]: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 497,
+            "lineNumber": 498,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -897,7 +897,7 @@
               "{ readonly cloudMinimumRequirements: string; readonly browserSystemDependencies: string; readonly browserSandboxDependencies: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 498,
+            "lineNumber": 499,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -913,7 +913,7 @@
               "{ readonly apiKeyServiceSettings: string; readonly clusterPrivileges: string; readonly definingRoles: string; readonly elasticsearchSettings: string; readonly elasticsearchEnableSecurity: string; readonly elasticsearchEnableApiKeys: string; readonly indicesPrivileges: string; readonly kibanaTLS: string; readonly kibanaPrivileges: string; readonly mappingRoles: string; readonly mappingRolesFieldRules: string; readonly roles: string; readonly runAsPrivilege: string; readonly enableElasticSearchSecurityFeatures: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 503,
+            "lineNumber": 504,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -929,7 +929,7 @@
               "{ readonly kibanaLegacyUrlAliases: string; readonly kibanaDisableLegacyUrlAliasesApi: string; readonly kibanaManageSpaces: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 519,
+            "lineNumber": 520,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -945,7 +945,7 @@
               "{ [x: string]: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 524,
+            "lineNumber": 525,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -961,7 +961,7 @@
               "{ [x: string]: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 525,
+            "lineNumber": 526,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -977,7 +977,7 @@
               "{ azureRepo: string; gcsRepo: string; hdfsRepo: string; ingestAttachment: string; s3Repo: string; snapshotRestoreRepos: string; mapperSize: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 526,
+            "lineNumber": 527,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -993,7 +993,7 @@
               "{ [x: string]: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 535,
+            "lineNumber": 536,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1009,7 +1009,7 @@
               "{ [x: string]: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 536,
+            "lineNumber": 537,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1025,7 +1025,7 @@
               "{ readonly beatsAgentComparison: string; readonly guide: string; readonly fingerprint: string; readonly fleetServer: string; readonly fleetServerAddFleetServer: string; readonly esSettings: string; readonly settings: string; readonly logstashSettings: string; readonly kafkaSettings: string; readonly kafkaOutputTopicsSettings: string; readonly settingsFleetServerHostSettings: string; readonly settingsFleetServerProxySettings: string; readonly troubleshooting: string; readonly elasticAgent: string; readonly datastreams: string; readonly datastreamsILM: string; readonly datastreamsNamingScheme: string; readonly datastreamsManualRollover: string; readonly datastreamsTSDS: string; readonly datastreamsTSDSMetrics: string; readonly datastreamsDownsampling: string; readonly installElasticAgent: string; readonly installElasticAgentStandalone: string; readonly grantESAccessToStandaloneAgents: string; readonly packageSignatures: string; readonly upgradeElasticAgent: string; readonly learnMoreBlog: string; readonly apiKeysLearnMore: string; readonly onPremRegistry: string; readonly secureLogstash: string; readonly agentPolicy: string; readonly agentlessIntegrations: string; readonly api: string; readonly uninstallAgent: string; readonly installAndUninstallIntegrationAssets: string; readonly elasticAgentInputConfiguration: string; readonly policySecrets: string; readonly remoteESOoutput: string; readonly performancePresets: string; readonly scalingKubernetesResourcesAndLimits: string; readonly roleAndPrivileges: string; readonly proxiesSettings: string; readonly unprivilegedMode: string; readonly httpMonitoring: string; readonly agentLevelLogging: string; readonly remoteESOoutputTroubleshooting: string; readonly agentReleaseProcess: string; readonly fipsIngest: string; readonly edotCollector: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 537,
+            "lineNumber": 538,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1041,7 +1041,7 @@
               "{ upload: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 588,
+            "lineNumber": 589,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1057,7 +1057,7 @@
               "{ readonly guide: string; readonly dataStreams: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 591,
+            "lineNumber": 592,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1073,7 +1073,7 @@
               "{ readonly guide: string; readonly goConnecting: string; readonly goGettingStarted: string; readonly goIndex: string; readonly goOverview: string; readonly javaBasicAuthentication: string; readonly javaIndex: string; readonly javaInstallation: string; readonly javaIntroduction: string; readonly javaRestLow: string; readonly jsAdvancedConfig: string; readonly jsApiReference: string; readonly jsBasicConfig: string; readonly jsClientConnecting: string; readonly jsIntro: string; readonly netGuide: string; readonly netIntroduction: string; readonly netNest: string; readonly netSingleNode: string; readonly phpConfiguration: string; readonly phpConnecting: string; readonly phpGuide: string; readonly phpInstallation: string; readonly phpOverview: string; readonly pythonAuthentication: string; readonly pythonConfig: string; readonly pythonConnecting: string; readonly pythonGuide: string; readonly pythonOverview: string; readonly rubyAuthentication: string; readonly rubyAdvancedConfig: string; readonly rubyBasicConfig: string; readonly rubyExamples: string; readonly rubyOverview: string; readonly rustGuide: string; readonly rustOverview: string; readonly eland: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 595,
+            "lineNumber": 596,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1089,7 +1089,7 @@
               "{ readonly troubleshooting: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 634,
+            "lineNumber": 635,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1105,7 +1105,7 @@
               "{ readonly privacyStatement: string; readonly generalPrivacyStatement: string; readonly termsOfService: string; readonly dataUse: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 637,
+            "lineNumber": 638,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1121,7 +1121,7 @@
               "{ readonly resolveMigrationFailures: string; readonly repeatedTimeoutRequests: string; readonly routingAllocationDisabled: string; readonly clusterShardLimitExceeded: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 643,
+            "lineNumber": 644,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1137,7 +1137,7 @@
               "{ readonly appSearch: string; readonly elasticsearch: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 649,
+            "lineNumber": 650,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1153,7 +1153,7 @@
               "{ readonly clientLib: string; readonly goApiReference: string; readonly goGettingStarted: string; readonly httpApis: string; readonly httpApiReferences: string; readonly jsApiReference: string; readonly jsGettingStarted: string; readonly phpApiReference: string; readonly phpGettingStarted: string; readonly pythonApiReference: string; readonly pythonGettingStarted: string; readonly pythonReferences: string; readonly rubyApiReference: string; readonly rubyGettingStarted: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 653,
+            "lineNumber": 654,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1169,7 +1169,7 @@
               "{ readonly gettingStartedExplore: string; readonly gettingStartedIngest: string; readonly gettingStartedSearch: string; readonly integrations: string; readonly integrationsBeats: string; readonly integrationsConnectorClient: string; readonly integrationsConnectorClientAvailableConnectors: string; readonly integrationsConnectorClientRunFromSource: string; readonly integrationsConnectorClientRunWithDocker: string; readonly integrationsLogstash: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 669,
+            "lineNumber": 670,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1185,7 +1185,7 @@
               "{ readonly apiKeyPrivileges: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 681,
+            "lineNumber": 682,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1201,7 +1201,7 @@
               "{ readonly featureRoles: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 684,
+            "lineNumber": 685,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1217,7 +1217,7 @@
               "{ readonly settings: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 687,
+            "lineNumber": 688,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1233,7 +1233,7 @@
               "{ readonly chatPlayground: string; readonly retrievalOptimize: string; readonly retrieval: string; readonly context: string; readonly hiddenFields: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 690,
+            "lineNumber": 691,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1249,7 +1249,7 @@
               "{ readonly inferenceAPIDocumentation: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 697,
+            "lineNumber": 698,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1265,7 +1265,7 @@
               "{ readonly synonymsAPIDocumentation: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 700,
+            "lineNumber": 701,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1281,7 +1281,7 @@
               "{ readonly queryRulesAPIDocumentation: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 703,
+            "lineNumber": 704,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1297,7 +1297,7 @@
               "{ readonly failureStore: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 706,
+            "lineNumber": 707,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1313,7 +1313,7 @@
               "{ readonly agentBuilder: string; readonly getStarted: string; readonly models: string; readonly chat: string; readonly agentBuilderAgents: string; readonly tools: string; readonly programmaticAccess: string; readonly kibanaApi: string; readonly mcpServer: string; readonly a2aServer: string; readonly limitationsKnownIssues: string; readonly learnMore: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 709,
+            "lineNumber": 710,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1329,7 +1329,7 @@
               "{ readonly componentTemplate: string; readonly indexAlias: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 723,
+            "lineNumber": 724,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1342,7 +1342,7 @@
             "label": "subscriptions",
             "description": [],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 727,
+            "lineNumber": 728,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1358,7 +1358,7 @@
               "{ readonly casesPermissions: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 728,
+            "lineNumber": 729,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

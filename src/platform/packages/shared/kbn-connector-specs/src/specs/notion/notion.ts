@@ -10,6 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import type * as Notion from './types';
+import getDataSourceWorkflow from './workflows/get_data_source.yaml';
+import getPageWorkflow from './workflows/get_page.yaml';
+import queryDataSourceWorkflow from './workflows/query_data_source.yaml';
+import searchWorkflow from './workflows/search.yaml';
 
 export const NotionConnector: ConnectorSpec = {
   metadata: {
@@ -130,4 +134,11 @@ export const NotionConnector: ConnectorSpec = {
       }
     },
   },
+
+  agentBuilderWorkflows: [
+    getDataSourceWorkflow,
+    getPageWorkflow,
+    queryDataSourceWorkflow,
+    searchWorkflow,
+  ],
 };

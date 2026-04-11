@@ -19,6 +19,7 @@ export const forkStreamsRoute = createServerRoute({
     description: 'Forks a wired stream and creates a child stream',
     summary: 'Fork a stream',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
   },
@@ -64,6 +65,7 @@ export const resyncStreamsRoute = createServerRoute({
     description: 'Resyncs all streams, making sure that Elasticsearch assets are up to date',
     summary: 'Resync streams',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
   },

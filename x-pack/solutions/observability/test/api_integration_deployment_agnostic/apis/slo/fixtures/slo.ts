@@ -6,7 +6,7 @@
  */
 
 import type { EsSummaryDocument } from '@kbn/slo-plugin/server/services/summary_transform_generator/helpers/create_temp_summary';
-import type { CreateSLOInput } from '@kbn/slo-schema';
+import type { CreateCompositeSLOInput, CreateSLOInput } from '@kbn/slo-schema';
 
 export const TEST_SPACE_ID = 'default';
 
@@ -33,6 +33,26 @@ export const DEFAULT_SLO: CreateSLOInput = {
   },
   tags: ['test'],
   groupBy: 'tags',
+};
+
+export const DEFAULT_COMPOSITE_SLO: CreateCompositeSLOInput = {
+  name: 'Test Composite SLO for api integration',
+  description: 'Fixture for composite SLO api integration tests',
+  members: [
+    { sloId: 'member-slo-1', weight: 1 },
+    { sloId: 'member-slo-2', weight: 2 },
+    { sloId: 'member-slo-3', weight: 3 },
+  ],
+  compositeMethod: 'weightedAverage',
+  timeWindow: {
+    duration: '7d',
+    type: 'rolling',
+  },
+  budgetingMethod: 'occurrences',
+  objective: {
+    target: 0.99,
+  },
+  tags: ['composite-test'],
 };
 
 export function createDummySummaryDoc(

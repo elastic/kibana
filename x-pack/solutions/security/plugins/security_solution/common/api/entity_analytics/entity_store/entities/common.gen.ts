@@ -55,6 +55,7 @@ export const EntityField = z
     lifecycle: z
       .object({
         first_seen: z.string().datetime().optional(),
+        last_seen: z.string().datetime().optional(),
         last_activity: z.string().datetime().optional(),
       })
       .strict()
@@ -151,6 +152,21 @@ export const HostEntity = z
         type: z.array(z.string()).optional(),
         mac: z.array(z.string()).optional(),
         architecture: z.array(z.string()).optional(),
+        /**
+         * ECS host.os fields materialized on the entity latest index (v2).
+         */
+        os: z
+          .object({
+            name: z.union([z.string(), z.array(z.string())]).optional(),
+            type: z.union([z.string(), z.array(z.string())]).optional(),
+            family: z.string().optional(),
+            full: z.string().optional(),
+            kernel: z.string().optional(),
+            platform: z.string().optional(),
+            version: z.string().optional(),
+          })
+          .strict()
+          .optional(),
         risk: EntityRiskScoreRecord.optional(),
         entity: EntityField.optional(),
       })

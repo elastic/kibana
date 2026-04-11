@@ -79,7 +79,10 @@ export const useBulkAttackWorkflowStatusItems = ({
   );
 
   const { item: alertClosingReasonItem, panels: alertClosingReasonPanels } =
-    useBulkAlertClosingReasonItems({ onSubmitCloseReason });
+    useBulkAlertClosingReasonItems({
+      onSubmitCloseReason,
+      buttonLabel: i18n.CLOSE_ATTACK_BUTTON_MESSAGE,
+    });
 
   const workflowStatusItems: BulkActionsConfig[] = useMemo(() => {
     // Return empty array if user doesn't have required permissions or data is still loading

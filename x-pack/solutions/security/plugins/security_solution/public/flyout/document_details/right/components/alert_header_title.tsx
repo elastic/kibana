@@ -6,27 +6,27 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
+import { buildDataTableRecord, type EsHitRecord, getFieldValue } from '@kbn/discover-utils';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
-import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
+import { ALERT_RULE_UUID, ALERT_WORKFLOW_ASSIGNEE_IDS, TIMESTAMP } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Notes } from './notes';
 import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
 import { DocumentStatus } from './status';
-import { DocumentSeverity } from './severity';
 import { RiskScore } from './risk_score';
 import { useRefetchByScope } from '../hooks/use_refetch_by_scope';
-import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import {
   ALERT_SUMMARY_PANEL_TEST_ID,
   ASSIGNEES_TITLE_TEST_ID,
-  FLYOUT_ALERT_HEADER_TITLE_TEST_ID,
   RISK_SCORE_TITLE_TEST_ID,
 } from './test_ids';
 import { Assignees } from './assignees';
-import { FlyoutTitle } from '../../../shared/components/flyout_title';
-import { getAlertTitle } from '../../shared/utils';
+import { DocumentSeverity } from '../../../../flyout_v2/document/components/severity';
+import { FlyoutTitle } from '../../../../flyout_v2/shared/components/flyout_title';
+import { getDocumentTitle } from '../../../../flyout_v2/document/utils/get_header_title';
+import { HEADER_TITLE_TEST_ID } from '../../../../flyout_v2/document/components/test_ids';
 import { AlertHeaderBlock } from '../../../shared/components/alert_header_block';
 
 // minWidth for each block, allows to switch for a 1 row 4 blocks to 2 rows with 2 block each
@@ -40,17 +40,13 @@ const urlParamOverride = { timeline: { isOpen: false } };
  * Alert details flyout right section header
  */
 export const AlertHeaderTitle = memo(() => {
-  const {
-    dataFormattedForFieldBrowser,
-    eventId,
-    scopeId,
-    isRulePreview,
-    refetchFlyoutData,
-    getFieldsData,
-  } = useDocumentDetailsContext();
-  const { ruleName, timestamp, ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
-  const title = useMemo(() => getAlertTitle({ ruleName }), [ruleName]);
+  const { eventId, scopeId, isRulePreview, refetchFlyoutData, getFieldsData, searchHit } =
+    useDocumentDetailsContext();
+  const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
+  const ruleId = useMemo(() => getFieldValue(hit, ALERT_RULE_UUID) as string, [hit]);
   const href = useRuleDetailsLink({ ruleId: !isRulePreview ? ruleId : null }, urlParamOverride);
+  const title = useMemo(() => getDocumentTitle(hit), [hit]);
+  const timestamp = useMemo(() => getFieldValue(hit, TIMESTAMP) as string, [hit]);
   const ruleTitle = useMemo(
     () =>
       href ? (
@@ -59,15 +55,11 @@ export const AlertHeaderTitle = memo(() => {
             title={title}
             iconType={'warning'}
             isLink
-            data-test-subj={FLYOUT_ALERT_HEADER_TITLE_TEST_ID}
+            data-test-subj={HEADER_TITLE_TEST_ID}
           />
         </EuiLink>
       ) : (
-        <FlyoutTitle
-          title={title}
-          iconType={'warning'}
-          data-test-subj={FLYOUT_ALERT_HEADER_TITLE_TEST_ID}
-        />
+        <FlyoutTitle title={title} iconType={'warning'} data-test-subj={HEADER_TITLE_TEST_ID} />
       ),
     [title, href]
   );
@@ -125,7 +117,7 @@ export const AlertHeaderTitle = memo(() => {
 
   return (
     <>
-      <DocumentSeverity getFieldsData={getFieldsData} />
+      <DocumentSeverity hit={hit} />
       <EuiSpacer size="m" />
       {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
       <EuiSpacer size="xs" />

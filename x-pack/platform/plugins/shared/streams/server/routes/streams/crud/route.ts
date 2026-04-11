@@ -23,6 +23,7 @@ export const readStreamRoute = createServerRoute({
     summary: 'Get a stream',
     description: 'Fetches a stream definition and associated dashboards',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
   },
@@ -66,6 +67,7 @@ export const listStreamsRoute = createServerRoute({
     description: 'Fetches list of all streams',
     summary: 'Get stream list',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
   },
@@ -94,6 +96,7 @@ export const editStreamRoute = createServerRoute({
     description:
       'Creates or updates a stream definition. Classic streams can not be created through this API, only updated',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
   },
@@ -146,6 +149,7 @@ export const deleteStreamRoute = createServerRoute({
     summary: 'Delete a stream',
     description: 'Deletes a stream definition and the underlying data stream',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
   },

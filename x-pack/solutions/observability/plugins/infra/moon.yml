@@ -141,6 +141,7 @@ dependsOn:
   - '@kbn/css-utils'
   - '@kbn/agent-builder-plugin'
   - '@kbn/controls-constants'
+  - '@kbn/es-query-constants'
 tags:
   - plugin
   - prod
@@ -154,26 +155,6 @@ fileGroups:
     - server/**/*
     - types/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

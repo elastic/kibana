@@ -73,6 +73,10 @@ export const calendarTexts = {
   todayButton: i18n.translate('sharedUXPackages.dateRangePicker.calendar.todayButton', {
     defaultMessage: 'Today',
   }),
+  scrollerAriaLabel: i18n.translate('sharedUXPackages.dateRangePicker.calendar.scrollerAriaLabel', {
+    defaultMessage:
+      'Calendar, use arrow keys to navigate days. Press Page Up/Down to navigate months.',
+  }),
 };
 
 export const calendarPanelTexts = {
@@ -224,6 +228,30 @@ export const settingsPanelTexts = {
   heading: i18n.translate('sharedUXPackages.dateRangePicker.settingsPanel.heading', {
     defaultMessage: 'Settings',
   }),
+  autoRefreshLabel: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.autoRefreshLabel',
+    { defaultMessage: 'Refresh every' }
+  ),
+  autoRefreshIntervalCountAriaLabel: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.autoRefreshIntervalCountAriaLabel',
+    { defaultMessage: 'Refresh interval count' }
+  ),
+  autoRefreshIntervalUnitAriaLabel: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.autoRefreshIntervalUnitAriaLabel',
+    { defaultMessage: 'Refresh interval unit' }
+  ),
+  autoRefreshUnitSeconds: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.autoRefreshUnitSeconds',
+    { defaultMessage: 'seconds' }
+  ),
+  autoRefreshUnitMinutes: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.autoRefreshUnitMinutes',
+    { defaultMessage: 'minutes' }
+  ),
+  autoRefreshUnitHours: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.autoRefreshUnitHours',
+    { defaultMessage: 'hours' }
+  ),
   roundRelativeTimeLabel: i18n.translate(
     'sharedUXPackages.dateRangePicker.settingsPanel.roundRelativeTimeLabel',
     { defaultMessage: 'Round relative time ranges' }
@@ -258,6 +286,21 @@ export const settingsPanelTexts = {
         'Don\'t like new time picker UX? Opt out from it in advanced settings under "".',
     }
   ),
+};
+
+export const autoRefreshButtonTexts = {
+  pauseAriaLabel: (timeRemainingLabel: string) =>
+    i18n.translate('sharedUXPackages.dateRangePicker.autoRefreshButton.pauseAriaLabel', {
+      defaultMessage:
+        'Auto-refresh active, next refresh in {timeRemainingLabel}. Activate to pause.',
+      values: { timeRemainingLabel },
+    }),
+  resumeAriaLabel: (intervalCountdownLabel: string) =>
+    i18n.translate('sharedUXPackages.dateRangePicker.autoRefreshButton.resumeAriaLabel', {
+      defaultMessage:
+        'Auto-refresh paused, refresh interval is {intervalCountdownLabel}. Activate to resume.',
+      values: { intervalCountdownLabel },
+    }),
 };
 
 export const mainPanelTexts = {

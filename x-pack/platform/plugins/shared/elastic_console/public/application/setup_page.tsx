@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiCallOut,
@@ -35,65 +35,15 @@ export const SetupPage: React.FC = () => {
   const [setupData, setSetupData] = useState<SetupResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [autoDeliveryStatus, setAutoDeliveryStatus] = useState<'idle' | 'success' | 'failed'>(
-    'idle'
-  );
+  const formRef = useRef<HTMLFormElement>(null);
 
   const handleSetup = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-    setAutoDeliveryStatus('idle');
 
     try {
       const data = await services.http.post<SetupResponse>('/internal/elastic_console/setup');
       setSetupData(data);
-
-      // Attempt auto-delivery to local agent
-      try {
-        await fetch(`${LOCAL_AGENT_URL}/config`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            elasticsearch_url: data.elasticsearchUrl,
-            kibana_url: data.kibanaUrl,
-            api_key: data.apiKeyEncoded,
-            provider: {
-              kibana: {
-                name: 'Kibana LLM Gateway',
-                id: 'kibana',
-                npm: '@ai-sdk/openai-compatible',
-                env: [],
-                models: {
-                  default: {
-                    id: 'default',
-                    name: 'Default Connector',
-                    attachment: false,
-                    reasoning: false,
-                    temperature: true,
-                    tool_call: true,
-                    release_date: '2025-01-01',
-                    cost: { input: 0, output: 0 },
-                    limit: { context: 128000, output: 8192 },
-                  },
-                },
-                options: {
-                  baseURL: `${data.kibanaUrl}/internal/elastic_console/v1`,
-                  apiKey: 'ignored',
-                  headers: {
-                    Authorization: `ApiKey ${data.apiKeyEncoded}`,
-                    'x-elastic-internal-origin': 'kibana',
-                    'kbn-xsrf': 'true',
-                  },
-                },
-              },
-            },
-            model: 'kibana/default',
-          }),
-        });
-        setAutoDeliveryStatus('success');
-      } catch {
-        setAutoDeliveryStatus('failed');
-      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create setup credentials');
     } finally {
@@ -114,9 +64,20 @@ export const SetupPage: React.FC = () => {
 
         <EuiSpacer />
 
-        <EuiButton fill onClick={handleSetup} isLoading={isLoading}>
-          Generate credentials
-        </EuiButton>
+        <EuiFlexGroup gutterSize="m" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiButton fill onClick={handleSetup} isLoading={isLoading}>
+              Generate credentials
+            </EuiButton>
+          </EuiFlexItem>
+          {setupData && (
+            <EuiFlexItem grow={false}>
+              <EuiButton onClick={() => formRef.current?.submit()} iconType="popout">
+                Connect local agent
+              </EuiButton>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
 
         <EuiSpacer />
 
@@ -129,76 +90,94 @@ export const SetupPage: React.FC = () => {
           </>
         )}
 
-        {autoDeliveryStatus === 'success' && (
-          <>
-            <EuiCallOut
-              announceOnMount
-              title="Credentials delivered to local agent"
-              color="success"
-              iconType="check"
-            >
-              <p>
-                The credentials were automatically sent to the local Elastic Console agent at{' '}
-                {LOCAL_AGENT_URL}.
-              </p>
-            </EuiCallOut>
-            <EuiSpacer />
-          </>
-        )}
-
-        {autoDeliveryStatus === 'failed' && setupData && (
-          <>
-            <EuiCallOut
-              announceOnMount
-              title="Could not reach local agent"
-              color="warning"
-              iconType="warning"
-            >
-              <p>No local agent found at {LOCAL_AGENT_URL}. Copy the credentials below manually.</p>
-            </EuiCallOut>
-            <EuiSpacer />
-          </>
-        )}
-
         {setupData && (
-          <EuiFlexGroup direction="column" gutterSize="m">
-            <EuiFlexItem>
-              <EuiFormRow label="Kibana URL" fullWidth>
-                <EuiFieldText value={setupData.kibanaUrl} readOnly fullWidth />
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFormRow label="Elasticsearch URL" fullWidth>
-                <EuiFieldText value={setupData.elasticsearchUrl} readOnly fullWidth />
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFormRow label="API Key (Base64)" fullWidth>
-                <EuiCodeBlock language="text" paddingSize="s" isCopyable>
-                  {setupData.apiKeyEncoded}
-                </EuiCodeBlock>
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiCopy
-                textToCopy={JSON.stringify(
-                  {
-                    kibanaUrl: setupData.kibanaUrl,
-                    elasticsearchUrl: setupData.elasticsearchUrl,
-                    apiKey: setupData.apiKeyEncoded,
+          <>
+            {/* Hidden form for POST-based navigation — keeps credentials out of browser history */}
+            <form
+              ref={formRef}
+              method="POST"
+              action={`${LOCAL_AGENT_URL}/config`}
+              target="_blank"
+              style={{ display: 'none' }}
+            >
+              <input type="hidden" name="elasticsearch_url" value={setupData.elasticsearchUrl} />
+              <input type="hidden" name="kibana_url" value={setupData.kibanaUrl} />
+              <input type="hidden" name="api_key" value={setupData.apiKeyEncoded} />
+              <input
+                type="hidden"
+                name="provider"
+                value={JSON.stringify({
+                  kibana: {
+                    name: 'Kibana LLM Gateway',
+                    id: 'kibana',
+                    npm: '@ai-sdk/openai-compatible',
+                    env: [],
+                    models: {
+                      default: {
+                        id: 'default',
+                        name: 'Default Connector',
+                        attachment: false,
+                        reasoning: false,
+                        temperature: true,
+                        tool_call: true,
+                        release_date: '2025-01-01',
+                        cost: { input: 0, output: 0 },
+                        limit: { context: 128000, output: 8192 },
+                      },
+                    },
+                    options: {
+                      baseURL: `${setupData.kibanaUrl}/internal/elastic_console/v1`,
+                      apiKey: 'ignored',
+                      headers: {
+                        Authorization: `ApiKey ${setupData.apiKeyEncoded}`,
+                        'x-elastic-internal-origin': 'kibana',
+                        'kbn-xsrf': 'true',
+                      },
+                    },
                   },
-                  null,
-                  2
-                )}
-              >
-                {(copy) => (
-                  <EuiButton onClick={copy} iconType="copy">
-                    Copy all as JSON
-                  </EuiButton>
-                )}
-              </EuiCopy>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+                })}
+              />
+              <input type="hidden" name="model" value="kibana/default" />
+            </form>
+            <EuiFlexGroup direction="column" gutterSize="m">
+              <EuiFlexItem>
+                <EuiFormRow label="Kibana URL" fullWidth>
+                  <EuiFieldText value={setupData.kibanaUrl} readOnly fullWidth />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFormRow label="Elasticsearch URL" fullWidth>
+                  <EuiFieldText value={setupData.elasticsearchUrl} readOnly fullWidth />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFormRow label="API Key (Base64)" fullWidth>
+                  <EuiCodeBlock language="text" paddingSize="s" isCopyable>
+                    {setupData.apiKeyEncoded}
+                  </EuiCodeBlock>
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiCopy
+                  textToCopy={JSON.stringify(
+                    {
+                      kibanaUrl: setupData.kibanaUrl,
+                      elasticsearchUrl: setupData.elasticsearchUrl,
+                      apiKey: setupData.apiKeyEncoded,
+                    },
+                    null,
+                    2
+                  )}
+                >
+                  {(copy) => (
+                    <EuiButton onClick={copy} iconType="copy">
+                      Copy all as JSON
+                    </EuiButton>
+                  )}
+                </EuiCopy>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
         )}
       </EuiPageTemplate.Section>
     </EuiPageTemplate>

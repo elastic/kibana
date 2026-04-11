@@ -15,11 +15,13 @@ import {
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
 
+import type { XScaleSchemaType } from '../../../schema/charts/shared';
 import { DEFAULT_LAYER_ID } from '../../../constants';
 import {
   getDatasourceLayers,
   getLegendTruncateAfterLines,
   getSharedChartLensStateToAPI,
+  getScaleTypeFromColumnType,
   stripUndefined,
 } from '../utils';
 import type { HeatmapState } from '../../../schema';
@@ -52,8 +54,9 @@ function getOrientationFromRotation(rotation: number): 'angled' | 'vertical' | '
 }
 
 function getGridConfigProps(
-  gridConfig: HeatmapVisualizationState['gridConfig']
-): HeatmapState['axis'] {
+  gridConfig: HeatmapVisualizationState['gridConfig'],
+  xAxisScale?: XScaleSchemaType
+): HeatmapState['axes'] {
   return {
     x: {
       labels: {
@@ -63,15 +66,16 @@ function getGridConfigProps(
         }),
       },
       title: {
-        value: gridConfig.xTitle,
+        text: gridConfig.xTitle,
         visible: gridConfig.isXAxisTitleVisible,
       },
       ...(gridConfig.xSortPredicate ? { sort: gridConfig.xSortPredicate } : {}),
+      ...(xAxisScale ? { scale: xAxisScale } : {}),
     },
     y: {
       labels: { visible: gridConfig.isYAxisLabelVisible },
       title: {
-        value: gridConfig.yTitle,
+        text: gridConfig.yTitle,
         visible: gridConfig.isYAxisTitleVisible,
       },
       ...(gridConfig.ySortPredicate ? { sort: gridConfig.ySortPredicate } : {}),
@@ -92,11 +96,17 @@ function reverseBuildVisualizationState(
     throw new Error('Value accessor is missing in the visualization state');
   }
 
+  let xAxisScale: XScaleSchemaType | undefined;
+  if (isTextBasedLayer(layer) && visualization.xAccessor) {
+    const xColumn = layer.columns.find((c) => c.columnId === visualization.xAccessor);
+    xAxisScale = getScaleTypeFromColumnType(xColumn?.meta?.type);
+  }
+
   const sharedProps = {
     ...generateApiLayer(layer),
     type: HEATMAP_NAME,
     legend: getLegendProps(visualization.legend),
-    axis: getGridConfigProps(visualization.gridConfig),
+    axes: getGridConfigProps(visualization.gridConfig, xAxisScale),
     cells: {
       labels: { visible: visualization.gridConfig.isCellLabelVisible },
     },

@@ -11,7 +11,6 @@ import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/ut
 import type { EventOutcome, StatusCode, Transaction } from '@kbn/apm-types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import type { APMConfig } from '../..';
 import {
   AGENT_NAME,
   AT_TIMESTAMP,
@@ -126,27 +125,25 @@ export function getErrorsByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
 export async function getUnifiedTraceItems({
   apmEventClient,
   logsClient,
-  maxTraceItemsFromUrlParam,
+  maxTraceItems,
   traceId,
   start,
   end,
-  config,
   serviceName,
 }: {
   apmEventClient: APMEventClient;
   logsClient: LogsClient;
-  maxTraceItemsFromUrlParam?: number;
+  maxTraceItems: number;
   traceId: string;
   start: number;
   end: number;
-  config: APMConfig;
   serviceName?: string;
 }): Promise<{
   traceItems: TraceItem[];
   unifiedTraceErrors: UnifiedTraceErrors;
   agentMarks: Record<string, number>;
+  traceDocsTotal: number;
 }> {
-  const maxTraceItems = maxTraceItemsFromUrlParam ?? config.ui.maxTraceItems;
   const size = Math.min(maxTraceItems, MAX_ITEMS_PER_PAGE);
 
   const unifiedTracePromise = apmEventClient.search(
@@ -282,6 +279,7 @@ export async function getUnifiedTraceItems({
     traceItems,
     unifiedTraceErrors,
     agentMarks,
+    traceDocsTotal: unifiedTraceItems.hits.total?.value ?? 0,
   };
 }
 

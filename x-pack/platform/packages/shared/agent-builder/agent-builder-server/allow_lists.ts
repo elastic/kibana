@@ -44,6 +44,15 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.get_entity`,
   `${internalNamespaces.security}.search_entities`,
 
+  // Streams
+  `${internalNamespaces.streams}.list_streams`,
+  `${internalNamespaces.streams}.get_stream`,
+  `${internalNamespaces.streams}.get_schema`,
+  `${internalNamespaces.streams}.get_data_quality`,
+  `${internalNamespaces.streams}.get_lifecycle_stats`,
+  `${internalNamespaces.streams}.query_documents`,
+  `${internalNamespaces.streams}.get_failed_documents`,
+
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
   `${internalNamespaces.workflows}.get_step_definitions`,
@@ -94,6 +103,9 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   // Platform – Dashboard
   'dashboard-management',
 
+  // Platform – Streams
+  'streams-exploration',
+
   // Platform – Workflows
   'workflow-authoring',
 
@@ -104,11 +116,23 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'alert-analysis',
 
   // O11Y
-  'observability.log-search',
+  'observability.rca',
 ] as const;
 
 export type AgentBuilderBuiltinSkill = (typeof AGENT_BUILDER_BUILTIN_SKILLS)[number];
 
 export const isAllowedBuiltinSkill = (skillId: string) => {
   return (AGENT_BUILDER_BUILTIN_SKILLS as readonly string[]).includes(skillId);
+};
+
+/**
+ * This is a manually maintained list of all built-in plugins registered in Agent Builder.
+ * The intention is to force a code review from the Agent Builder team when any team adds a new plugin.
+ */
+export const AGENT_BUILDER_BUILTIN_PLUGINS = [] as const;
+
+export type AgentBuilderBuiltinPlugin = (typeof AGENT_BUILDER_BUILTIN_PLUGINS)[number];
+
+export const isAllowedBuiltinPlugin = (pluginId: string) => {
+  return (AGENT_BUILDER_BUILTIN_PLUGINS as readonly string[]).includes(pluginId);
 };

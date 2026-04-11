@@ -1730,7 +1730,7 @@
           },
           " extends Omit<",
           "EuiToolTipProps",
-          ", \"title\" | \"content\">"
+          ", \"content\" | \"title\">"
         ],
         "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_tooltip.tsx",
         "lineNumber": 20,

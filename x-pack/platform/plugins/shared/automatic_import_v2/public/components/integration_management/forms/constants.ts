@@ -12,7 +12,7 @@ export const DEFAULT_DATA_STREAM_VALUES = {
   dataStreamTitle: '',
   dataStreamDescription: '',
   dataCollectionMethod: [] as string[],
-  logsSourceOption: 'upload' as const,
+  logsSourceOption: 'file' as const,
   logSample: undefined,
   selectedIndex: '',
 };

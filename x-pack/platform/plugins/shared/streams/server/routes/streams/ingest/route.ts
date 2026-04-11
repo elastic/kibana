@@ -148,6 +148,7 @@ const readIngestRoute = createServerRoute({
     summary: 'Get ingest stream settings',
     description: 'Fetches the ingest settings of an ingest stream definition',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
   },
@@ -187,6 +188,7 @@ const upsertIngestRoute = createServerRoute({
     summary: 'Update ingest stream settings',
     description: 'Upserts the ingest settings of an ingest stream definition',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
   },

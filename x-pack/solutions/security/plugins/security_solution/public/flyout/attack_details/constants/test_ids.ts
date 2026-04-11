@@ -34,9 +34,6 @@ export const INSIGHTS_CORRELATIONS_TEST_ID =
 export const FLYOUT_FOOTER_TAKE_ACTION_BUTTON_TEST_ID =
   `${ATTACK_DETAILS_FLYOUT_PREFIX}-footer-take-action-button` as const;
 export const INSIGHTS_TAB_TEST_ID = `${ATTACK_DETAILS_FLYOUT_PREFIX}-left-insights-tab` as const;
-export const NOTES_TAB_TEST_ID = `${ATTACK_DETAILS_FLYOUT_PREFIX}-left-notes-tab` as const;
-export const NOTES_TAB_CONTENT_TEST_ID =
-  `${ATTACK_DETAILS_FLYOUT_PREFIX}-left-notes-tab-content` as const;
 export const HEADER_NOTES_TITLE_TEST_ID =
   `${ATTACK_DETAILS_FLYOUT_PREFIX}-header-notes-title` as const;
 export const HEADER_NOTES_ADD_NOTE_BUTTON_TEST_ID =

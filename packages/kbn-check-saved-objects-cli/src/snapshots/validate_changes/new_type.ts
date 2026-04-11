@@ -14,7 +14,7 @@ import {
   validateNewModelVersionSchemas,
   validateModelVersionNumbers,
   validateNameTitleFieldTypes,
-  validateNoIndexOrEnabledFalse,
+  validateNoIndexOrEnabledFalseInAllMappings,
   getLatestModelVersion,
   validateInitialModelVersion,
   getFirstModelVersion,
@@ -48,8 +48,8 @@ export function validateChangesNewType({ to, registeredType }: ValidateChangesNe
   // validate that all mapping fields are present in the latest model version schema
   validateAllMappingsInModelVersion(name, to, registeredType);
 
-  // validate that new mappings do not use index: false or enabled: false
-  validateNoIndexOrEnabledFalse(name, to, to.modelVersions);
+  // validate that no mapping field uses index: false or enabled: false
+  validateNoIndexOrEnabledFalseInAllMappings(name, to);
 
   // validate that name and title fields are of type "text"
   validateNameTitleFieldTypes(name, to);

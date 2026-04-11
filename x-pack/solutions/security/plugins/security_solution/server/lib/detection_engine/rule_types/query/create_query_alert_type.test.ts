@@ -19,7 +19,6 @@ import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { docLinksServiceMock } from '@kbn/core/server/mocks';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { hasTimestampFields } from '../utils/utils';
-import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine';
 
 jest.mock('@kbn/data-views-plugin/server', () => ({
   ...jest.requireActual('@kbn/data-views-plugin/server'),
@@ -161,13 +160,10 @@ describe('Custom Query Alerts', () => {
 
     expect((await ruleDataClient.getWriter()).bulk).not.toHaveBeenCalled();
     expect(eventsTelemetry.sendAsync).not.toHaveBeenCalled();
-    expect(mockedStatusLogger.logStatusChange).toHaveBeenCalledWith(
-      expect.objectContaining({
-        newStatus: RuleExecutionStatusEnum['partial failure'],
-        message: expect.stringContaining(
-          'Unable to find matching indices for rule ALERT_RULE_NAME. This warning will persist until one of the following occurs: a matching index is created or the rule is disabled.'
-        ),
-      })
+    expect(mockedStatusLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'Unable to find matching indices for rule ALERT_RULE_NAME. This warning will persist until one of the following occurs: a matching index is created or the rule is disabled.'
+      )
     );
   });
 
@@ -252,16 +248,11 @@ describe('Custom Query Alerts', () => {
 
     expect((await ruleDataClient.getWriter()).bulk).toHaveBeenCalled();
     expect(eventsTelemetry.sendAsync).toHaveBeenCalled();
-    // ensures that the last status written is a warning status
-    // and that status contains the error message
-    expect(mockedStatusLogger.logStatusChange).lastCalledWith(
-      expect.objectContaining({
-        newStatus: RuleExecutionStatusEnum['partial failure'],
-        message:
-          'Timestamp fields check failed to execute Error: hastTimestampFields test error\n' +
-          '\n' +
-          "The rule's max alerts per run setting (10000) is greater than the Kibana alerting limit (1000). The rule will only write a maximum of 1000 alerts per rule run.",
-      })
+    expect(mockedStatusLogger.warn).toHaveBeenCalledWith(
+      'Timestamp fields check failed to execute Error: hastTimestampFields test error'
+    );
+    expect(mockedStatusLogger.warn).toHaveBeenCalledWith(
+      "The rule's max alerts per run setting (10000) is greater than the Kibana alerting limit (1000). The rule will only write a maximum of 1000 alerts per rule run."
     );
   });
 });

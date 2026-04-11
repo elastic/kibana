@@ -6,14 +6,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  RIGHT_ALIGNMENT,
+  type EuiBasicTableColumn,
+} from '@elastic/eui';
 import { isEmpty, merge, orderBy } from 'lodash';
 import type { ReactNode } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ProgressiveLoadingQuality, apmProgressiveLoading } from '@kbn/observability-plugin/common';
+import type { EuiTableRowCellProps, EuiTableActionsColumnType } from '@elastic/eui';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../links/url_helpers';
 import {
@@ -39,13 +46,16 @@ export interface TableOptions<T> {
 // TODO: this should really be imported from EUI
 export interface ITableColumn<T extends object> {
   name: ReactNode;
-  actions?: Array<Record<string, unknown>>;
+  actions?: EuiTableActionsColumnType<T>['actions'];
   field?: string;
   dataType?: string;
   align?: string;
+  className?: string;
   width?: string;
+  minWidth?: string;
+  maxWidth?: string;
   sortable?: boolean;
-  truncateText?: boolean;
+  truncateText?: EuiTableRowCellProps['truncateText'];
   nameTooltip?: EuiBasicTableColumn<T>['nameTooltip'];
   render?: (value: any, item: T) => unknown;
 }
@@ -250,8 +260,9 @@ function UnoptimizedManagedTable<T extends object>(props: {
       name: i18n.translate('xpack.apm.managedTable.actionsColumnName', {
         defaultMessage: 'Actions',
       }),
-      width: '80px',
-      align: 'center',
+      width: '4.5em',
+      minWidth: '4.5em',
+      align: RIGHT_ALIGNMENT,
       render: (item: T) => (
         <ActionsCell
           item={item}
@@ -455,6 +466,8 @@ function UnoptimizedManagedTable<T extends object>(props: {
           onChange={onTableChange}
           tableCaption={props.tableCaption}
           rowProps={props.rowProps}
+          scrollableInline
+          responsiveBreakpoint={false}
           {...(paginationProps ? { pagination: paginationProps } : {})}
         />
       </EuiFlexItem>

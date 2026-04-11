@@ -41,6 +41,8 @@ interface BulkAlertClosingReasonComponentProps {
    * @param reason
    */
   onSubmit(reason?: AlertClosingReason): void;
+  /** Optional label override for the confirm button */
+  buttonLabel?: string;
 }
 
 /**
@@ -49,6 +51,7 @@ interface BulkAlertClosingReasonComponentProps {
  */
 const BulkAlertClosingReasonComponent: React.FC<BulkAlertClosingReasonComponentProps> = ({
   onSubmit,
+  buttonLabel,
 }) => {
   const {
     services: { uiSettings },
@@ -87,7 +90,7 @@ const BulkAlertClosingReasonComponent: React.FC<BulkAlertClosingReasonComponentP
         {(list) => list}
       </EuiSelectable>
       <EuiButton fullWidth size="s" disabled={!selectedOption} onClick={onSubmitHandler}>
-        {i18n.ALERT_CLOSING_REASON_BUTTON_MESSAGE}
+        {buttonLabel ?? i18n.ALERT_CLOSING_REASON_BUTTON_MESSAGE}
       </EuiButton>
     </>
   );

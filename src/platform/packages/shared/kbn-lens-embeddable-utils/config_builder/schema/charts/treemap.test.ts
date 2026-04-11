@@ -88,11 +88,12 @@ describe('Treemap Schema', () => {
         legend: {
           nested: true,
           truncate_after_lines: 3,
-          visible: 'auto',
+          visibility: 'auto',
           size: 'large',
         },
-        label_position: 'visible',
-        value_display: {
+        labels: { visible: true },
+        values: {
+          visible: true,
           mode: 'absolute',
         },
       };
@@ -100,8 +101,9 @@ describe('Treemap Schema', () => {
       const validated = treemapStateSchema.validate(input);
       expect(validated.title).toBe('Sales Treemap');
       expect(validated.legend?.nested).toBe(true);
-      expect(validated.label_position).toBe('visible');
-      expect(validated.value_display?.mode).toBe('absolute');
+      expect(validated.labels?.visible).toBe(true);
+      expect(validated.values?.visible).toBe(true);
+      expect(validated.values?.mode).toBe('absolute');
     });
 
     it('validates configuration with two group_by dimensions', () => {
@@ -239,29 +241,6 @@ describe('Treemap Schema', () => {
           },
         ],
         group_by: [],
-      };
-
-      expect(() => treemapStateSchema.validate(input)).toThrow();
-    });
-
-    it('throws on invalid label position', () => {
-      const input: TreemapStateNoESQL = {
-        ...baseTreemapConfig,
-        metrics: [
-          {
-            operation: 'count',
-            empty_as_null: false,
-          },
-        ],
-        group_by: [
-          {
-            operation: 'terms',
-            fields: ['category'],
-            size: 5,
-          },
-        ],
-        // @ts-expect-error - invalid label position
-        label_position: 'invalid',
       };
 
       expect(() => treemapStateSchema.validate(input)).toThrow();
@@ -661,14 +640,14 @@ describe('Treemap Schema', () => {
         ],
         legend: {
           nested: false,
-          visible: 'show',
+          visibility: 'visible',
         },
-        label_position: 'visible',
+        labels: { visible: true },
       };
 
       const validated = treemapStateSchema.validate(input);
       expect(validated.title).toBe('Sales Treemap');
-      expect(validated.label_position).toBe('visible');
+      expect(validated.labels?.visible).toBe(true);
     });
   });
 });

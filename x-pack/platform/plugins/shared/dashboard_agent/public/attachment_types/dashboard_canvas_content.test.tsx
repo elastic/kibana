@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, act } from '@testing-library/react';
+import { render, act, waitFor } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
@@ -69,7 +69,7 @@ describe('DashboardCanvasContent', () => {
 
   type DashboardCanvasContentProps = React.ComponentProps<typeof DashboardCanvasContent>;
 
-  const renderDashboardCanvasContent = (
+  const renderDashboardCanvasContent = async (
     propsOverride: Partial<DashboardCanvasContentProps> = {}
   ) => {
     const registerActionButtons: jest.MockedFunction<
@@ -96,6 +96,12 @@ describe('DashboardCanvasContent', () => {
     };
 
     const renderResult = render(<DashboardCanvasContent {...props} />);
+
+    // Wait for savedObjectStatus to resolve before DashboardRenderer is rendered
+    await waitFor(() => {
+      expect(DashboardRenderer).toHaveBeenCalled();
+    });
+
     simulateDashboardApiAvailable(mockApi);
 
     return {
@@ -110,15 +116,15 @@ describe('DashboardCanvasContent', () => {
     };
   };
 
-  it('renders the dashboard renderer and search bar', () => {
-    const { queryByTestId } = renderDashboardCanvasContent();
+  it('renders the dashboard renderer and search bar', async () => {
+    const { queryByTestId } = await renderDashboardCanvasContent();
 
     expect(queryByTestId('dashboardRenderer')).toBeInTheDocument();
     expect(queryByTestId('searchBar')).toBeInTheDocument();
   });
 
-  it('registers action buttons when dashboard API becomes available', () => {
-    const { registerActionButtons } = renderDashboardCanvasContent();
+  it('registers action buttons when dashboard API becomes available', async () => {
+    const { registerActionButtons } = await renderDashboardCanvasContent();
 
     expect(registerActionButtons).toHaveBeenCalledWith(
       expect.arrayContaining([
@@ -131,7 +137,7 @@ describe('DashboardCanvasContent', () => {
   describe('Edit in Dashboards button', () => {
     it('should call closeCanvas and openSidebarConversation when isSidebar is false', async () => {
       const { registerActionButtons, closeCanvas, openSidebarConversation, mockApi } =
-        renderDashboardCanvasContent({
+        await renderDashboardCanvasContent({
           isSidebar: false,
         });
 
@@ -149,7 +155,7 @@ describe('DashboardCanvasContent', () => {
 
     it('should call closeCanvas but not openSidebarConversation when isSidebar is true', async () => {
       const { registerActionButtons, closeCanvas, openSidebarConversation, mockApi } =
-        renderDashboardCanvasContent({
+        await renderDashboardCanvasContent({
           isSidebar: true,
         });
 
@@ -166,7 +172,7 @@ describe('DashboardCanvasContent', () => {
     });
 
     it('should navigate with correct dashboard state and time range', async () => {
-      const { registerActionButtons, mockApi } = renderDashboardCanvasContent();
+      const { registerActionButtons, mockApi } = await renderDashboardCanvasContent();
 
       const buttons: ActionButton[] = registerActionButtons.mock.calls.at(-1)?.[0] ?? [];
       const editButton = buttons.find((b) => b.label === 'Edit in Dashboards');
@@ -192,7 +198,7 @@ describe('DashboardCanvasContent', () => {
         origin: 'existing-dashboard-id',
       };
 
-      const { registerActionButtons, mockApi } = renderDashboardCanvasContent({
+      const { registerActionButtons, mockApi } = await renderDashboardCanvasContent({
         attachment: attachmentWithOrigin,
         checkSavedDashboardExist,
       });
@@ -222,7 +228,7 @@ describe('DashboardCanvasContent', () => {
         origin: 'existing-dashboard-id',
       };
 
-      const { registerActionButtons, mockApi } = renderDashboardCanvasContent({
+      const { registerActionButtons, mockApi } = await renderDashboardCanvasContent({
         attachment: attachmentWithOrigin,
         checkSavedDashboardExist,
       });
@@ -239,7 +245,9 @@ describe('DashboardCanvasContent', () => {
 
     it('should run interactive save and update origin for new dashboard', async () => {
       const updateOrigin = jest.fn().mockResolvedValue(undefined);
-      const { registerActionButtons, mockApi } = renderDashboardCanvasContent({ updateOrigin });
+      const { registerActionButtons, mockApi } = await renderDashboardCanvasContent({
+        updateOrigin,
+      });
 
       const buttons: ActionButton[] = registerActionButtons.mock.calls.at(-1)?.[0] ?? [];
       const saveButton = buttons.find((b) => b.label === 'Save');

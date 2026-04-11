@@ -63,7 +63,7 @@ export const DataStream = z.object({
   /**
    * The input types of the data stream
    */
-  inputTypes: z.array(InputType),
+  inputTypes: z.array(InputType).max(100),
 });
 
 /**
@@ -79,7 +79,7 @@ export const Integration = z
     /**
      * The data streams of the integration
      */
-    dataStreams: z.array(DataStream).optional(),
+    dataStreams: z.array(DataStream).max(50).optional(),
     /**
      * The logo of the integration
      */
@@ -154,7 +154,7 @@ export const DataStreamResponse = z.object({
   /**
    * The input types of the data stream
    */
-  inputTypes: z.array(InputType),
+  inputTypes: z.array(InputType).max(100),
   /**
    * The status of the data stream
    */

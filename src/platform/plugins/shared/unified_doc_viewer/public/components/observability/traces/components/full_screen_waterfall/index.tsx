@@ -15,14 +15,18 @@ import {
   EuiTitle,
   useEuiTheme,
   useGeneratedHtmlId,
+  type EuiFlyoutProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { FullTraceWaterfallOnErrorClick } from '@kbn/apm-types';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useDocViewerViewedEvent } from '@kbn/unified-doc-viewer';
+import { css } from '@emotion/react';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import type { TraceOverviewSections } from '../../doc_viewer_overview/overview';
 import { DocumentDetailFlyout, type DocumentType } from './waterfall_flyout/document_detail_flyout';
+import { FlyoutContentId } from '../../common/constants';
 
 export const FULL_TRACE_WATERFALL_RENDER_DELAY_MS = 150;
 
@@ -32,6 +36,8 @@ export interface FullScreenWaterfallProps {
   rangeTo: string;
   dataView: DocViewRenderProps['dataView'];
   serviceName?: string;
+  highlightedSpanId?: string;
+  scrollToHighlightedOnMount?: boolean;
   docId: string | null;
   docIndex?: string;
   activeFlyoutType: DocumentType | null;
@@ -39,8 +45,9 @@ export interface FullScreenWaterfallProps {
   skipOpenAnimation?: boolean;
   onNodeClick: (nodeSpanId: string) => void;
   onErrorClick: FullTraceWaterfallOnErrorClick;
-  onCloseFlyout: () => void;
-  onExitFullScreen: () => void;
+  onCloseFlyout: EuiFlyoutProps['onClose'];
+  onExitFullScreen: EuiFlyoutProps['onClose'];
+  skipNextEventReport?: boolean;
 }
 
 export const FullScreenWaterfall = ({
@@ -49,6 +56,8 @@ export const FullScreenWaterfall = ({
   rangeTo,
   dataView,
   serviceName,
+  highlightedSpanId: initialHighlightedSpanId,
+  scrollToHighlightedOnMount,
   docId,
   docIndex,
   activeFlyoutType,
@@ -58,12 +67,19 @@ export const FullScreenWaterfall = ({
   onErrorClick,
   onCloseFlyout,
   onExitFullScreen,
+  skipNextEventReport,
 }: FullScreenWaterfallProps) => {
-  const { discoverShared } = getUnifiedDocViewerServices();
+  const { analytics, discoverShared } = getUnifiedDocViewerServices();
   const FullTraceWaterfall = discoverShared.features.registry.getById(
     'observability-full-trace-waterfall'
   )?.render;
   const { euiTheme } = useEuiTheme();
+
+  useDocViewerViewedEvent({
+    reportEvent: analytics.reportEvent,
+    contentId: FlyoutContentId.TRACE_TIMELINE,
+    skipNextReport: skipNextEventReport,
+  });
 
   /*
    * Temporary workaround: add a native <style> tag to fix the z-index of EuiDataGrid cell popovers
@@ -130,10 +146,9 @@ export const FullScreenWaterfall = ({
     };
   }, []);
 
-  const [scrollElement, setScrollElement] = useState<HTMLDivElement | null>(null);
-  const scrollContainerRef = useCallback((node: HTMLDivElement | null) => {
-    setScrollElement(node);
-  }, []);
+  const [highlightedSpanId, setHighlightedSpanId] = useState<string | undefined>(
+    initialHighlightedSpanId
+  );
 
   // TODO: Remove this deferred-mount workaround once EUI exposes a prop to
   // disable the flyout open animation at mount time.
@@ -141,10 +156,7 @@ export const FullScreenWaterfall = ({
   const [isWaterfallReady, setIsWaterfallReady] = useState(Boolean(skipOpenAnimation));
 
   useEffect(() => {
-    if (skipOpenAnimation) {
-      setIsWaterfallReady(true);
-      return;
-    }
+    if (skipOpenAnimation) return;
 
     const timerId = window.setTimeout(() => {
       setIsWaterfallReady(true);
@@ -191,17 +203,43 @@ export const FullScreenWaterfall = ({
           <h2 id={traceWaterfallTitleId}>{traceWaterfallTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody scrollContainerRef={scrollContainerRef}>
-        {isWaterfallReady && scrollElement ? (
-          <FullTraceWaterfall
-            traceId={traceId}
-            rangeFrom={rangeFrom}
-            rangeTo={rangeTo}
-            serviceName={serviceName}
-            scrollElement={scrollElement}
-            onNodeClick={onNodeClick}
-            onErrorClick={onErrorClick}
-          />
+      <EuiFlyoutBody
+        css={css`
+          .euiFlyoutBody__overflow,
+          .euiFlyoutBody__overflowContent {
+            height: 100%;
+          }
+          .euiFlyoutBody__overflow {
+            overflow: hidden;
+          }
+        `}
+      >
+        {isWaterfallReady ? (
+          <div
+            css={css`
+              display: flex;
+              flex-direction: column;
+              height: 100%;
+            `}
+          >
+            <FullTraceWaterfall
+              traceId={traceId}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              serviceName={serviceName}
+              highlightedSpanId={highlightedSpanId}
+              scrollToHighlightedOnMount={scrollToHighlightedOnMount}
+              scrollStrategy="parent"
+              onNodeClick={(nodeSpanId) => {
+                setHighlightedSpanId(nodeSpanId);
+                onNodeClick(nodeSpanId);
+              }}
+              onErrorClick={(params) => {
+                setHighlightedSpanId(params.errorCount > 1 ? params.docId : undefined);
+                onErrorClick(params);
+              }}
+            />
+          </div>
         ) : (
           <EuiSkeletonText lines={4} />
         )}
@@ -215,8 +253,12 @@ export const FullScreenWaterfall = ({
           traceId={traceId}
           dataView={dataView}
           dataTestSubj="traceWaterfallDocumentFlyout"
-          onCloseFlyout={onCloseFlyout}
+          onCloseFlyout={(event) => {
+            setHighlightedSpanId(undefined);
+            onCloseFlyout(event);
+          }}
           activeSection={activeSection}
+          skipNextEventReport={skipNextEventReport}
         />
       ) : null}
     </EuiFlyout>

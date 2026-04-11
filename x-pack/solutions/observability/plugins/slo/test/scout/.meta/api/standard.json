@@ -1,5 +1,5 @@
 {
-  "sha1": "0c23ed3dcd08d20ecb539fc8c4e599199963101f",
+  "sha1": "1d3a9a1e57f65de227c6fd5465ac9e767c0e9804",
   "tests": [
     {
       "id": "0982ec90d5f873e-3bdf8373a7bd310",
@@ -158,6 +158,278 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/overview_embeddable.spec.ts",
         "line": 233,
+        "column": 12
+      }
+    },
+    {
+      "id": "da8bac2f86c6227-05cf7b1db990f90",
+      "title": "Bulk Delete SLO successfully processes the list of SLOs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_bulk_delete.spec.ts",
+        "line": 28,
+        "column": 12
+      }
+    },
+    {
+      "id": "da8bac2f86c6227-34c45cc298ad62e",
+      "title": "Bulk Delete SLO returns task not found",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_bulk_delete.spec.ts",
+        "line": 71,
+        "column": 12
+      }
+    },
+    {
+      "id": "ad734e69383b14a-02ea6d842da42ca",
+      "title": "Create SLOs creates a new slo and transforms",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_create.spec.ts",
+        "line": 75,
+        "column": 12
+      }
+    },
+    {
+      "id": "ad734e69383b14a-9a9c4abc81d6f4d",
+      "title": "Create SLOs persists dashboard artifacts and returns them in the definition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_create.spec.ts",
+        "line": 170,
+        "column": 12
+      }
+    },
+    {
+      "id": "ad734e69383b14a-6f786ced52368e6",
+      "title": "Create SLOs creates two SLOs with matching ids across different spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_create.spec.ts",
+        "line": 197,
+        "column": 12
+      }
+    },
+    {
+      "id": "ad734e69383b14a-04ec28a0ac6f015",
+      "title": "Create SLOs creates instanceId for SLOs with multi groupBy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_create.spec.ts",
+        "line": 223,
+        "column": 12
+      }
+    },
+    {
+      "id": "ad734e69383b14a-2b103718bf239aa",
+      "title": "Create SLOs creates instanceId for SLOs with single groupBy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_create.spec.ts",
+        "line": 248,
+        "column": 12
+      }
+    },
+    {
+      "id": "ad734e69383b14a-c57ee55e9cd236c",
+      "title": "Create SLOs creates instanceId for SLOs without groupBy ([])",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_create.spec.ts",
+        "line": 273,
+        "column": 12
+      }
+    },
+    {
+      "id": "ad734e69383b14a-796e0139a736fbf",
+      "title": "Create SLOs creates instanceId for SLOs without groupBy ([\"*\"])",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_create.spec.ts",
+        "line": 298,
+        "column": 12
+      }
+    },
+    {
+      "id": "ad734e69383b14a-d6d0d14d21963ed",
+      "title": "Create SLOs creates instanceId for SLOs without groupBy (\"\")",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_create.spec.ts",
+        "line": 326,
+        "column": 12
+      }
+    },
+    {
+      "id": "f3a6612b176c0e9-2296a970733d3fa",
+      "title": "Delete SLOs deletes SLO and related resources",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_delete.spec.ts",
+        "line": 52,
+        "column": 12
+      }
+    },
+    {
+      "id": "f3a6612b176c0e9-d2f1647dd8265a4",
+      "title": "Delete SLOs deletes custom pipelines when deleting SLO",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_delete.spec.ts",
+        "line": 109,
+        "column": 12
+      }
+    },
+    {
+      "id": "6502773d10cc677-72f54030aa67d48",
+      "title": "Find SLOs using kql query searches SLOs using kqlQuery",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_find.spec.ts",
+        "line": 34,
+        "column": 12
+      }
+    },
+    {
+      "id": "e5910f24c284486-11892293249adb8",
+      "title": "Get SLOs get SLO by id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_get.spec.ts",
+        "line": 24,
+        "column": 12
+      }
+    },
+    {
+      "id": "1d7c60c8ac5b2ab-2f53ca61ac00dcb",
+      "title": "Update SLOs with revision bump updates the definition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_update.spec.ts",
+        "line": 39,
+        "column": 12
+      }
+    },
+    {
+      "id": "1d7c60c8ac5b2ab-ce44d5e9acb96bc",
+      "title": "Update SLOs without revision bump updates the definition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_update.spec.ts",
+        "line": 70,
+        "column": 12
+      }
+    },
+    {
+      "id": "1d7c60c8ac5b2ab-d7e43c6e1a793cc",
+      "title": "Update SLOs without revision bump updates dashboard artifacts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_update.spec.ts",
+        "line": 98,
         "column": 12
       }
     }

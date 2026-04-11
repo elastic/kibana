@@ -320,7 +320,7 @@ interface AssetCriticalitySystemProcessedAssignmentFileEvent {
     endTime: string;
     tookMs: number;
   };
-  result?: BulkUpsertAssetCriticalityRecordsResponse['stats'];
+  result?: BulkUpsertAssetCriticalityRecordsResponse['stats'] & { unmatched?: number };
   status: 'success' | 'partial_success' | 'fail';
 }
 
@@ -344,6 +344,14 @@ export const ASSET_CRITICALITY_SYSTEM_PROCESSED_ASSIGNMENT_FILE_EVENT: EventType
           failed: {
             type: 'long',
             _meta: { description: 'Number of criticality records which had errors' },
+          },
+          unmatched: {
+            type: 'long',
+            _meta: {
+              optional: true,
+              description:
+                'Number of criticality records which did not match any entities to update',
+            },
           },
           total: { type: 'long', _meta: { description: 'Total number of lines in the file' } },
         },
@@ -1734,6 +1742,7 @@ export const GAP_DETECTED_EVENT: EventTypeOpts<{
   ruleType: string;
   ruleSource: string;
   isCustomized: boolean;
+  gapReasonType?: string;
 }> = {
   eventType: 'gap_detected_event',
   schema: {
@@ -1771,6 +1780,13 @@ export const GAP_DETECTED_EVENT: EventTypeOpts<{
       type: 'boolean',
       _meta: {
         description: 'Whether the prebuilt rule is customized',
+      },
+    },
+    gapReasonType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Detected reason for the gap (rule_disabled or rule_did_not_run)',
+        optional: true,
       },
     },
   },

@@ -18,7 +18,6 @@ import {
   BLOCKLIST_PATH,
   ENDPOINT_EXCEPTIONS_PATH,
   ENDPOINTS_PATH,
-  ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
   EVENT_FILTERS_PATH,
   HOST_ISOLATION_EXCEPTIONS_PATH,
@@ -35,8 +34,7 @@ import {
   BLOCKLIST,
   ENDPOINT_EXCEPTIONS,
   ENDPOINTS,
-  ENTITY_ANALYTICS_RISK_SCORE,
-  ENTITY_STORE,
+  ENTITY_ANALYTICS,
   EVENT_FILTERS,
   HOST_ISOLATION_EXCEPTIONS,
   MANAGE,
@@ -59,7 +57,6 @@ import { IconHostIsolationExceptions } from '../common/icons/host_isolation_exce
 import { IconTrustedApplications } from '../common/icons/trusted_applications';
 import { IconEntityAnalytics } from '../common/icons/entity_analytics';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
-import { IconAssetCriticality } from '../common/icons/asset_criticality';
 import { IconTrustedDevices } from '../common/icons/trusted_devices';
 import { IconEndpointExceptions } from '../common/icons/endpoint_exceptions';
 import { IconScriptLibrary } from '../common/icons/script_library';
@@ -69,10 +66,7 @@ const categories = [
     label: i18n.translate('xpack.securitySolution.appLinks.category.entityAnalytics', {
       defaultMessage: 'Entity analytics',
     }),
-    linkIds: [
-      SecurityPageName.entityAnalyticsManagement,
-      SecurityPageName.entityAnalyticsEntityStoreManagement,
-    ],
+    linkIds: [SecurityPageName.entityAnalyticsManagement],
   },
   {
     label: i18n.translate('xpack.securitySolution.appLinks.category.endpoints', {
@@ -221,28 +215,20 @@ export const links: LinkItem = {
     },
     {
       id: SecurityPageName.entityAnalyticsManagement,
-      title: ENTITY_ANALYTICS_RISK_SCORE,
-      description: i18n.translate('xpack.securitySolution.appLinks.entityRiskScoringDescription', {
-        defaultMessage: "Monitor entities' risk scores, and track anomalies.",
-      }),
+      title: ENTITY_ANALYTICS,
+      description: i18n.translate(
+        'xpack.securitySolution.appLinks.entityAnalyticsManagementDescription',
+        {
+          defaultMessage:
+            'Manage entity risk scores, entity store, and asset criticality settings.',
+        }
+      ),
       landingIcon: IconEntityAnalytics,
       path: ENTITY_ANALYTICS_MANAGEMENT_PATH,
       skipUrlState: true,
       hideTimeline: true,
       capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
       licenseType: 'platinum',
-    },
-    {
-      id: SecurityPageName.entityAnalyticsEntityStoreManagement,
-      title: ENTITY_STORE,
-      description: i18n.translate('xpack.securitySolution.appLinks.entityStoreDescription', {
-        defaultMessage: 'Store data for entities observed in events.',
-      }),
-      landingIcon: IconAssetCriticality,
-      path: ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
-      skipUrlState: true,
-      hideTimeline: true,
-      capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
     },
     {
       id: SecurityPageName.responseActionsHistory,

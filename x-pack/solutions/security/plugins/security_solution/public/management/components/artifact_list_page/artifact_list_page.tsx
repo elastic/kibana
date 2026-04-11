@@ -326,7 +326,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
             {allowCardCreateAction && (
               <EuiButton
                 fill
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 isDisabled={isFlyoutOpened}
                 onClick={handleOpenCreateFlyoutClick}
                 data-test-subj={getTestId('pageAddButton')}
@@ -337,19 +337,19 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
 
             {areEndpointExceptionsMovedUnderManagementFFEnabled && (
               <HeaderMenu
-                iconType="boxesHorizontal"
+                iconType="boxesVertical"
                 dataTestSubj={getTestId('exportImportMenu')}
                 actions={[
                   {
                     key: 'ImportButton',
-                    icon: 'importAction',
+                    icon: 'download',
                     label: labels.pageImportButtonTitle,
                     onClick: handleImport,
                     disabled: !allowCardCreateAction,
                   },
                   {
                     key: 'ExportButton',
-                    icon: 'exportAction',
+                    icon: 'upload',
                     label: labels.pageExportButtonTitle,
                     onClick: handleExport,
                   },

@@ -20,10 +20,12 @@ import {
 
 apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
+  let viewerCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
     // returns editor role in most deployment project and deployment types
     editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
+    viewerCredentials = await requestAuth.getApiKeyForViewer();
     await kbnClient.importExport.load(KBN_ARCHIVES.BASIC);
     await kbnClient.importExport.load(KBN_ARCHIVES.TAGS);
   });
@@ -52,7 +54,7 @@ apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => 
 
   apiTest('can create a dashboard with a specific id', async ({ apiClient }) => {
     const title = `foo-${Date.now()}-${Math.random()}`;
-    const id = `bar-${Date.now()}-${Math.random()}`;
+    const id = `bar-${Date.now()}`;
 
     const response = await apiClient.post(`${DASHBOARD_API_PATH}/${id}`, {
       headers: {
@@ -106,6 +108,49 @@ apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => 
     expect(response.body.message).toBe(`A dashboard with ID ${TEST_DASHBOARD_ID} already exists.`);
   });
 
+  apiTest('validation - returns error when id is too long', async ({ apiClient }) => {
+    const id = `this-is-my-test-dashboard-with-specific-identifier-that-is-way-more-than-two-hundred-and-fifty-characters-and-should-fail-validation-because-it-is-much-too-long-and-should-be-two-hundred-and-fifty-characters-or-less-to-be-a-valid-identifier-1234567890_`;
+    const response = await apiClient.post(`${DASHBOARD_API_PATH}/${id}`, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...editorCredentials.apiKeyHeader,
+      },
+      body: {
+        content: '# Test',
+        title: 'Test title',
+      },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.message).toBe(
+      '[request params.id]: value has length [252] but it must have a maximum length of [250].'
+    );
+  });
+
+  apiTest(
+    'validation - returns error when id contains invalid characters',
+    async ({ apiClient }) => {
+      const id = `test-dashboard-with-Specific-id-that.contains&invalid*characters`;
+      const response = await apiClient.post(`${DASHBOARD_API_PATH}/${id}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...editorCredentials.apiKeyHeader,
+        },
+        body: {
+          content: '# Test',
+          title: 'Test title',
+        },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.message).toBe(
+        '[request params.id]: ID must contain only lowercase letters, numbers, hyphens, and underscores.'
+      );
+    }
+  );
+
   apiTest('validation - returns error when title is not provided', async ({ apiClient }) => {
     const response = await apiClient.post(DASHBOARD_API_PATH, {
       headers: {
@@ -140,4 +185,23 @@ apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => 
       '[request body.panels]: expected value of type [array] but got [Object]'
     );
   });
+
+  apiTest(
+    'validation - returns error if user does not have permission to create a dashboard',
+    async ({ apiClient }) => {
+      const response = await apiClient.post(DASHBOARD_API_PATH, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...viewerCredentials.apiKeyHeader,
+        },
+        body: {
+          title: 'foo',
+        },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(403);
+      expect(response.body.message).toBe('Unable to create dashboard');
+    }
+  );
 });

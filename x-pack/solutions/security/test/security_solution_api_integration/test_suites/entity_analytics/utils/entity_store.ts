@@ -35,6 +35,18 @@ export const EntityStoreUtils = (
   log.debug(`EntityStoreUtils namespace: ${namespace}`);
 
   const cleanEngines = async () => {
+    const supertest = getService('supertest');
+    let settingsUrl = '/internal/kibana/settings';
+    if (namespace !== 'default') {
+      settingsUrl = `/s/${namespace}${settingsUrl}`;
+    }
+    await supertest
+      .post(settingsUrl)
+      .set('kbn-xsrf', 'true')
+      .set('x-elastic-internal-origin', 'Kibana')
+      .send({ changes: { 'securitySolution:entityStoreEnableV2': null } })
+      .expect(200);
+
     const { body } = await entityAnalyticsApi.listEntityEngines(namespace).expect(200);
 
     // @ts-expect-error body is any
@@ -172,13 +184,115 @@ export const EntityStoreUtils = (
     await expectEntitiesIndexNotFound(entityType, namespace);
   };
 
+  const searchEntitiesV2 = async (
+    filter: string,
+    opts: { size?: number; source?: string[] } = {}
+  ) => {
+    const supertest = getService('supertest');
+    let url = '/internal/security/entity_store/entities';
+    if (namespace !== 'default') {
+      url = `/s/${namespace}${url}`;
+    }
+    const res = await supertest
+      .get(url)
+      .set('kbn-xsrf', 'true')
+      .set('x-elastic-internal-origin', 'Kibana')
+      .set('elastic-api-version', '2')
+      .query({
+        filter,
+        ...(opts.size !== undefined ? { size: opts.size } : {}),
+        ...(opts.source ? { source: opts.source } : {}),
+      });
+    if (res.status !== 200) {
+      log.error(`Failed to search entities`);
+      log.error(JSON.stringify(res.body));
+    }
+    expect(res.status).to.eql(200);
+    return res;
+  };
+
+  const deleteEntityV2 = async (entityId: string) => {
+    const supertest = getService('supertest');
+    let url = '/internal/security/entity_store/entities/';
+    if (namespace !== 'default') {
+      url = `/s/${namespace}${url}`;
+    }
+    const res = await supertest
+      .delete(url)
+      .set('kbn-xsrf', 'true')
+      .set('x-elastic-internal-origin', 'Kibana')
+      .set('elastic-api-version', '2')
+      .send({ entityId });
+    if (res.status !== 200) {
+      log.error(`Failed to delete entity ${entityId}`);
+      log.error(JSON.stringify(res.body));
+    }
+    expect(res.status).to.eql(200);
+    return res;
+  };
+
+  const enableEntityStoreV2 = async (body: any = { entityTypes: ['user', 'host'] }) => {
+    const supertest = getService('supertest');
+
+    let settingsUrl = '/internal/kibana/settings';
+    if (namespace !== 'default') {
+      settingsUrl = `/s/${namespace}${settingsUrl}`;
+    }
+    await supertest
+      .post(settingsUrl)
+      .set('kbn-xsrf', 'true')
+      .set('x-elastic-internal-origin', 'Kibana')
+      .send({ changes: { 'securitySolution:entityStoreEnableV2': true } })
+      .expect(200);
+
+    let url = '/internal/security/entity_store/install?apiVersion=2';
+    if (namespace !== 'default') {
+      url = `/s/${namespace}${url}`;
+    }
+    const res = await supertest
+      .post(url)
+      .set('kbn-xsrf', 'true')
+      .set('x-elastic-internal-origin', 'Kibana')
+      .send(body);
+    if (res.status !== 201 && res.status !== 200) {
+      log.error(`Failed to install entity store v2`);
+      log.error(JSON.stringify(res.body));
+    }
+    expect([200, 201]).to.contain(res.status);
+
+    return res;
+  };
+
+  const installEntityStoreV2 = async (body: any = { entityTypes: ['user', 'host'] }) => {
+    const supertest = getService('supertest');
+
+    const res = await enableEntityStoreV2(body);
+
+    let maintainersUrl = '/internal/security/entity_store/entity_maintainers/init?apiVersion=2';
+    if (namespace !== 'default') {
+      maintainersUrl = `/s/${namespace}${maintainersUrl}`;
+    }
+
+    await supertest
+      .post(maintainersUrl)
+      .set('kbn-xsrf', 'true')
+      .set('x-elastic-internal-origin', 'Kibana')
+      .send({})
+      .expect(200);
+    return res;
+  };
+
   return {
     cleanEngines,
+    deleteEntityV2,
+    searchEntitiesV2,
     initEntityEngineForEntityTypesAndWait,
     expectTransformStatus,
     expectEngineAssetsExist,
     expectEngineAssetsDoNotExist,
     enableEntityStore,
+    enableEntityStoreV2,
+    installEntityStoreV2,
     waitForEngineStatus,
     initEntityEngineForEntityType,
   };

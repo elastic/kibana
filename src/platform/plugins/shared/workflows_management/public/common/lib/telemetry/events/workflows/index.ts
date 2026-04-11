@@ -8,8 +8,12 @@
  */
 
 import type { RootSchema } from '@kbn/core/public';
+import { workflowAiChatEventNames, workflowAiChatEventSchemas } from './ai_chat';
+import type { WorkflowAiChatEventTypes } from './ai_chat/types';
 import { workflowExecutionEventNames, workflowExecutionEventSchemas } from './execution';
 import type { WorkflowExecutionEventTypes } from './execution/types';
+import { workflowImportExportEventNames, workflowImportExportEventSchemas } from './import_export';
+import type { WorkflowImportExportEventTypes } from './import_export/types';
 import { workflowLifecycleEventNames, workflowLifecycleEventSchemas } from './lifecycle';
 import type { WorkflowLifecycleEventTypes } from './lifecycle/types';
 import type { WorkflowsTelemetryEvent, WorkflowsTelemetryEventsMap } from './types';
@@ -20,13 +24,17 @@ import type { WorkflowValidationEventTypes } from './validation/types';
 
 // Re-export types for convenience
 export type { WorkflowEditorType } from './types';
+export * from './ai_chat/types';
 export * from './execution/types';
+export * from './import_export/types';
 export * from './lifecycle/types';
 export * from './ui/types';
 export * from './validation/types';
 
 export const workflowEventNames = {
+  ...workflowAiChatEventNames,
   ...workflowExecutionEventNames,
+  ...workflowImportExportEventNames,
   ...workflowLifecycleEventNames,
   ...workflowUIEventNames,
   ...workflowValidationEventNames,
@@ -38,7 +46,9 @@ type WorkflowsTelemetryEventSchemas = {
 };
 
 const eventSchemas: WorkflowsTelemetryEventSchemas = {
+  ...workflowAiChatEventSchemas,
   ...workflowExecutionEventSchemas,
+  ...workflowImportExportEventSchemas,
   ...workflowLifecycleEventSchemas,
   ...workflowUIEventSchemas,
   ...workflowValidationEventSchemas,
@@ -47,7 +57,9 @@ const eventSchemas: WorkflowsTelemetryEventSchemas = {
 export const workflowsTelemetryEvents: WorkflowsTelemetryEvent[] = Object.entries(eventSchemas).map(
   ([key, schema]) => ({
     eventType: key as
+      | WorkflowAiChatEventTypes
       | WorkflowExecutionEventTypes
+      | WorkflowImportExportEventTypes
       | WorkflowLifecycleEventTypes
       | WorkflowUIEventTypes
       | WorkflowValidationEventTypes,

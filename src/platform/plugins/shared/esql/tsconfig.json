@@ -47,6 +47,7 @@
     "@kbn/management-settings-ids",
     "@kbn/es-types",
     "@kbn/core-elasticsearch-server",
+    "@kbn/controls-constants",
   ],
   "exclude": [
     "target/**/*",
