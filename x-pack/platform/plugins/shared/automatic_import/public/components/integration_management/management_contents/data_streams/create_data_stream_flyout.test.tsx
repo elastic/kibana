@@ -52,6 +52,7 @@ jest.mock('../../../../common/lib/api', () => ({
       items: [],
     })
   ),
+  getAllIntegrations: jest.fn(() => Promise.resolve([])),
 }));
 
 const mockReportAnalyzeLogsTriggered = jest.fn();
