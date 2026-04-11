@@ -7,12 +7,15 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import type { Subscription } from 'rxjs';
+import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import type {
   DashboardAgentPluginPublicSetup,
   DashboardAgentPluginPublicStart,
   DashboardAgentPluginPublicSetupDependencies,
   DashboardAgentPluginPublicStartDependencies,
 } from './types';
+import { DASHBOARD_ATTACHMENT_TYPE, DashboardAttachment } from '@kbn/dashboard-agent-common';
 
 export class DashboardAgentPlugin
   implements
@@ -23,7 +26,8 @@ export class DashboardAgentPlugin
       DashboardAgentPluginPublicStartDependencies
     >
 {
-  private cleanupAttachmentUi?: () => void;
+  private dashboardAppApiSubscription?: Subscription;
+  private dashboardApi?: DashboardApi;
 
   constructor(_initContext: PluginInitializerContext) {}
 
@@ -38,22 +42,31 @@ export class DashboardAgentPlugin
     _core: CoreStart,
     plugins: DashboardAgentPluginPublicStartDependencies
   ): DashboardAgentPluginPublicStart {
-    // TODO this causes async imports when plugin starts
-    // Please avoid this practice as it hides plugin size but impacts kibana load performance
-    // Please remove async import.
-    import('./attachment_types').then(({ registerDashboardAttachmentUiDefinition }) => {
-      this.cleanupAttachmentUi = registerDashboardAttachmentUiDefinition({
-        agentBuilder: plugins.agentBuilder,
-        dashboardLocator: plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR),
-        unifiedSearch: plugins.unifiedSearch,
-        dashboardPlugin: plugins.dashboard,
-      });
-    });
+    this.dashboardAppApiSubscription = plugins.dashboard.dashboardAppClientApi$.subscribe(
+      (api) => {
+        this.dashboardApi = api;
+      }
+    );
+
+    plugins.agentBuilder.attachments.addAttachmentType<DashboardAttachment>(
+      DASHBOARD_ATTACHMENT_TYPE,
+      async () => {
+        const { getDashboardAttachmentUiDefinition } = await import('./attachment_types');
+        return getDashboardAttachmentUiDefinition({
+          agentBuilder: plugins.agentBuilder,
+          dashboardLocator: plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR),
+          unifiedSearch: plugins.unifiedSearch,
+          dashboardPlugin: plugins.dashboard,
+          getDashboardApi: () => this.dashboardApi,
+        });
+      }
+    );
 
     return {};
   }
 
   public stop() {
-    this.cleanupAttachmentUi?.();
+    this.dashboardAppApiSubscription?.unsubscribe();
+    this.dashboardApi = undefined;
   }
 }
