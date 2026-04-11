@@ -7,7 +7,13 @@
 
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
-import { COMMON_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
+import {
+  PUBLIC_HEADERS,
+  INTERNAL_HEADERS,
+  ENTITY_STORE_ROUTES,
+  ENTITY_STORE_TAGS,
+  LATEST_ALIAS,
+} from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import {
   ENTITY_CONFIDENCE,
@@ -28,12 +34,17 @@ import {
 
 apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
+  let internalHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver, kbnClient }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
-      ...COMMON_HEADERS,
+      ...PUBLIC_HEADERS,
+    };
+    internalHeaders = {
+      ...credentials.cookieHeader,
+      ...INTERNAL_HEADERS,
     };
 
     // enable feature flag
@@ -42,7 +53,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     });
 
     // Install the entity store
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
@@ -55,7 +66,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
   });
 
   apiTest.afterAll(async ({ apiClient, esClient }) => {
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
@@ -68,9 +79,9 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     const expectedResultCount = 20;
 
     const extractionResponse = await apiClient.post(
-      ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('host'),
+      ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('host'),
       {
-        headers: defaultHeaders,
+        headers: internalHeaders,
         responseType: 'json',
         body: {
           fromDateISO: '2026-01-20T11:00:00Z',
@@ -84,7 +95,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     expect(extractionResponse.body.count).toBe(expectedResultCount);
 
     const entities = await esClient.search({
-      index: '.entities.v2.latest.security_default',
+      index: LATEST_ALIAS,
       query: {
         bool: {
           filter: {
@@ -105,9 +116,9 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     const expectedResultCount = 25;
 
     const extractionResponse = await apiClient.post(
-      ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('user'),
+      ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('user'),
       {
-        headers: defaultHeaders,
+        headers: internalHeaders,
         responseType: 'json',
         body: {
           fromDateISO: '2026-01-20T11:00:00Z',
@@ -121,7 +132,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     expect(extractionResponse.body.count).toBe(expectedResultCount);
 
     const entities = await esClient.search({
-      index: '.entities.v2.latest.security_default',
+      index: LATEST_ALIAS,
       query: {
         bool: {
           filter: {
@@ -148,9 +159,9 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
 
   apiTest('Should extract properly extract service', async ({ apiClient, esClient }) => {
     const extractionResponse = await apiClient.post(
-      ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('service'),
+      ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('service'),
       {
-        headers: defaultHeaders,
+        headers: internalHeaders,
         responseType: 'json',
         body: {
           fromDateISO: '2026-01-20T11:00:00Z',
@@ -164,7 +175,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     expect(extractionResponse.body.count).toBe(2);
 
     const entities = await esClient.search({
-      index: '.entities.v2.latest.security_default',
+      index: LATEST_ALIAS,
       query: {
         bool: {
           filter: {
@@ -184,9 +195,9 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
 
   apiTest('Should extract properly extract generic', async ({ apiClient, esClient }) => {
     const extractionResponse = await apiClient.post(
-      ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('generic'),
+      ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('generic'),
       {
-        headers: defaultHeaders,
+        headers: internalHeaders,
         responseType: 'json',
         body: {
           fromDateISO: '2026-01-20T11:00:00Z',
@@ -200,7 +211,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     expect(extractionResponse.body.count).toBe(1);
 
     const entities = await esClient.search({
-      index: '.entities.v2.latest.security_default',
+      index: LATEST_ALIAS,
       query: {
         bool: {
           filter: {
@@ -231,7 +242,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
 
     const firstExtractionResponse = await forceLogExtraction(
       apiClient,
-      defaultHeaders,
+      internalHeaders,
       'user',
       '2026-02-13T10:59:00Z',
       '2026-02-13T11:01:00Z'
@@ -269,7 +280,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
 
     const secondExtractionResponse = await forceLogExtraction(
       apiClient,
-      defaultHeaders,
+      internalHeaders,
       'user',
       '2026-02-13T11:00:00Z',
       '2026-02-13T11:02:00Z'
@@ -343,7 +354,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
 
     const thirdExtractionResponse = await forceLogExtraction(
       apiClient,
-      defaultHeaders,
+      internalHeaders,
       'user',
       '2026-02-13T11:01:00Z',
       '2026-02-13T11:03:00Z'
@@ -380,7 +391,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
 
     const fourthExtractionResponse = await forceLogExtraction(
       apiClient,
-      defaultHeaders,
+      internalHeaders,
       'user',
       '2026-02-13T11:02:00Z',
       '2026-02-13T11:04:00Z'
@@ -434,7 +445,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           name: 'IDP NoLatest',
         },
       });
-      const ext1 = await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
+      const ext1 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
       expect(ext1.statusCode).toBe(200);
       const hit1 = await searchDocById(esClient, 'user:postagg-idp-nolatest@okta');
       expect(hit1.hits.hits).toHaveLength(1);
@@ -457,7 +468,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           name: 'IDP InLatest',
         },
       });
-      await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
+      await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
       await ingestDoc(esClient, {
         '@timestamp': '2026-03-01T10:03:00Z',
         event: { kind: 'asset', module: 'okta' },
@@ -466,7 +477,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           name: 'IDP InLatest Updated',
         },
       });
-      const ext2 = await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
+      const ext2 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
       expect(ext2.statusCode).toBe(200);
       const hit2 = await searchDocById(esClient, 'user:postagg-idp-inlatest@okta');
       expect(hit2.hits.hits).toHaveLength(1);
@@ -490,7 +501,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           name: 'NoPostAggKeep NoLatest',
         },
       });
-      const ext3 = await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
+      const ext3 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
       expect(ext3.statusCode).toBe(200);
       const hit3 = await searchDocById(esClient, 'user:postagg-nopostaggkeep-nolatest@okta');
       expect(hit3.hits.hits).toHaveLength(0);
@@ -504,7 +515,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           name: 'IDP IAM AD InLatest',
         },
       });
-      const ext4 = await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
+      const ext4 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
       expect(ext4.statusCode).toBe(200);
       const hit4 = await searchDocById(
         esClient,
@@ -523,7 +534,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
 
       // 5. Follow-up doc is not asset/iam (no idpPostAggFilter) and has no host.id (no nonIdpPostAggFilter);
       //    row is kept via entity.id after LOOKUP (prior latest from step 4) → still extracted/updated.
-      await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
+      await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
       await ingestDoc(esClient, {
         '@timestamp': '2026-03-01T10:06:00Z',
         event: { kind: 'not-asset-or-iam', module: 'entityanalytics_ad' },
@@ -532,7 +543,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           name: 'IDP IAM AD InLatest Updated',
         },
       });
-      const ext5 = await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
+      const ext5 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
       expect(ext5.statusCode).toBe(200);
       const hit5 = await searchDocById(
         esClient,
@@ -563,7 +574,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         event: { kind: 'asset', module: 'okta' },
         user: { id: 'enrich-idp-user', name: 'Enrich IDP' },
       });
-      const ext1 = await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
+      const ext1 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
       expect(ext1.statusCode).toBe(200);
       expect(ext1.body).toMatchObject({ count: 1 });
 
@@ -574,7 +585,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         user: { name: 'enrich-local-user' },
         host: { id: 'enrich-host-1', name: 'enrich-ws' },
       });
-      const ext2 = await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
+      const ext2 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
       expect(ext2.statusCode).toBe(200);
       expect(ext2.body).toMatchObject({ count: 2 });
 
@@ -598,7 +609,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       });
 
       // 4. Run extraction - should only enrich (update) existing entities, no new creation
-      const ext3 = await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
+      const ext3 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
       expect(ext3.statusCode).toBe(200);
       expect(ext3.body).toMatchObject({ count: 2 });
 
@@ -644,7 +655,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
 
       const extractionResponse = await forceLogExtraction(
         apiClient,
-        defaultHeaders,
+        internalHeaders,
         'user',
         '2026-03-18T09:59:00Z',
         '2026-03-18T10:01:00Z'
@@ -678,7 +689,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
 
       const extractionResponse = await forceLogExtraction(
         apiClient,
-        defaultHeaders,
+        internalHeaders,
         'user',
         '2026-03-18T10:59:00Z',
         '2026-03-18T11:01:00Z'
@@ -743,9 +754,9 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       });
 
       const extractionResponse = await apiClient.post(
-        ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('user'),
+        ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('user'),
         {
-          headers: defaultHeaders,
+          headers: internalHeaders,
           responseType: 'json',
           body: { fromDateISO: from, toDateISO: to },
         }
@@ -820,9 +831,9 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       });
 
       const extractionResponse = await apiClient.post(
-        ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('user'),
+        ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('user'),
         {
-          headers: defaultHeaders,
+          headers: internalHeaders,
           responseType: 'json',
           body: { fromDateISO: from, toDateISO: to },
         }
@@ -909,9 +920,9 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
 
       for (const entityType of ['host', 'user', 'service', 'generic'] as const) {
         const extractionResponse = await apiClient.post(
-          ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION(entityType),
+          ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION(entityType),
           {
-            headers: defaultHeaders,
+            headers: internalHeaders,
             responseType: 'json',
             body: { fromDateISO: from, toDateISO: to },
           }
@@ -1016,7 +1027,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
 
       const extractionResponse = await forceLogExtraction(
         apiClient,
-        defaultHeaders,
+        internalHeaders,
         'user',
         from,
         to
@@ -1041,9 +1052,9 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     'Should store _source as nested objects after ingest pipeline',
     async ({ apiClient, esClient }) => {
       const extractionResponse = await apiClient.post(
-        ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('host'),
+        ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('host'),
         {
-          headers: defaultHeaders,
+          headers: internalHeaders,
           responseType: 'json',
           body: {
             fromDateISO: '2026-01-20T11:00:00Z',
@@ -1055,7 +1066,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       expect(extractionResponse.body.success).toBe(true);
 
       const entities = await esClient.search({
-        index: '.entities.v2.latest.security_default',
+        index: LATEST_ALIAS,
         query: { bool: { filter: { term: { 'entity.EngineMetadata.Type': 'host' } } } },
         size: 5,
       });

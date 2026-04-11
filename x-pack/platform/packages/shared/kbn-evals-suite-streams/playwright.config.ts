@@ -6,7 +6,15 @@
  */
 import Path from 'path';
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
+import { defineConfig } from '@playwright/test';
 
-export default createPlaywrightEvalsConfig({
+const baseConfig = createPlaywrightEvalsConfig({
   testDir: Path.resolve(__dirname, './evals'),
+  runGlobalSetup: true,
+});
+
+export default defineConfig({
+  ...baseConfig,
+  workers: 20,
+  fullyParallel: true,
 });

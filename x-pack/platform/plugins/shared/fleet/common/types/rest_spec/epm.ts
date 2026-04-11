@@ -126,6 +126,10 @@ export interface GetStatsResponse {
   response: PackageUsageStats;
 }
 
+export interface GetDependenciesResponse {
+  items: Array<{ name: string; version: string; title: string }>;
+}
+
 export interface InstallPackageRequest {
   params: {
     pkgName: string;

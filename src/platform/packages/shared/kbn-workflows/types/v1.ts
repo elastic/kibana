@@ -503,12 +503,16 @@ export interface InternalConnectorContract extends BaseConnectorContract {
   };
 }
 
-export interface StepPropertyHandler<T = unknown> {
+export interface StepPropertyHandler<
+  T = unknown,
+  TConfig extends Record<string, unknown> = Record<string, unknown>,
+  TInput extends Record<string, unknown> = Record<string, unknown>
+> {
   /**
    * Entity selection configuration for the property.
    * Provides a unified interface for search, resolution, and decoration of entity references.
    */
-  selection?: PropertySelectionHandler<Exclude<T, undefined>>;
+  selection?: PropertySelectionHandler<Exclude<T, undefined>, TConfig, TInput>;
   /**
    * Connector ID selection configuration for the property.
    * Used to resolve connector IDs for custom steps.
@@ -518,19 +522,29 @@ export interface StepPropertyHandler<T = unknown> {
   connectorIdSelection?: ConnectorIdSelectionHandler;
 }
 
-export interface PropertySelectionHandler<T = unknown> {
+export interface PropertySelectionHandler<
+  T = unknown,
+  TConfig extends Record<string, unknown> = Record<string, unknown>,
+  TInput extends Record<string, unknown> = Record<string, unknown>
+> {
   /**
    * Search for options matching the input query.
    * Used by autocomplete dropdowns when the user types.
    */
-  search: (input: string, context: SelectionContext) => Promise<SelectionOption<T>[]>;
+  search: (
+    input: string,
+    context: SelectionContext<TConfig, TInput>
+  ) => Promise<SelectionOption<T>[]>;
 
   /**
    * Resolve an entity by its value.
    * Used when loading existing values or when a value is pasted.
    * Returns null if the entity is not found.
    */
-  resolve: (value: T, context: SelectionContext) => Promise<SelectionOption<T> | null>;
+  resolve: (
+    value: T,
+    context: SelectionContext<TConfig, TInput>
+  ) => Promise<SelectionOption<T> | null>;
 
   /**
    * Get detailed information for the current value.
@@ -539,7 +553,7 @@ export interface PropertySelectionHandler<T = unknown> {
    */
   getDetails: (
     input: string,
-    context: SelectionContext,
+    context: SelectionContext<TConfig, TInput>,
     option: SelectionOption<T> | null
   ) => Promise<SelectionDetails>;
 }
@@ -567,13 +581,35 @@ export interface SelectionDetails {
   }>;
 }
 
-export interface SelectionContext {
+/**
+ * Structured values of the current step, split by scope.
+ *
+ * Built from scalar leaf properties in the YAML step definition.
+ * Intermediate map nodes that have no scalar value are **not** represented;
+ * a missing key means "not yet defined in the YAML", not "empty object".
+ */
+export interface StepSelectionValues<
+  TConfig extends Record<string, unknown> = Record<string, unknown>,
+  TInput extends Record<string, unknown> = Record<string, unknown>
+> {
+  /** Root-level step properties (everything outside the `with` block). */
+  config: TConfig;
+  /** Properties nested under the `with` block. */
+  input: TInput;
+}
+
+export interface SelectionContext<
+  TConfig extends Record<string, unknown> = Record<string, unknown>,
+  TInput extends Record<string, unknown> = Record<string, unknown>
+> {
   /** The step type ID (e.g., "onechat.runAgent") */
   stepType: string;
   /** The property path ("config" or "input") */
   scope: 'config' | 'input';
   /** The property key (e.g., "agent_id") */
   propertyKey: string;
+  /** Sibling values of the current step, keyed by scope. */
+  values: StepSelectionValues<TConfig, TInput>;
 }
 
 export interface ConnectorIdSelectionHandler {

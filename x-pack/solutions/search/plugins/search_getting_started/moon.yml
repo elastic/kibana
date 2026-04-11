@@ -29,7 +29,6 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/search-shared-ui'
   - '@kbn/search-code-examples'
-  - '@kbn/try-in-console'
   - '@kbn/search-navigation'
   - '@kbn/cloud-plugin'
   - '@kbn/serverless'
@@ -41,11 +40,11 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/doc-links'
   - '@kbn/cloud'
-  - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-plugin'
   - '@kbn/deeplinks-search'
   - '@kbn/scout-search'
   - '@kbn/search-agent'
+  - '@kbn/shared-ux-ai-components'
 tags:
   - plugin
   - prod

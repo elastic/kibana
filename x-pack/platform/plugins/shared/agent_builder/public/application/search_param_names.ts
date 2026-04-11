@@ -8,4 +8,7 @@
 export const searchParamNames = {
   agentId: 'agent_id',
   sourceId: 'source_id',
+  skillId: 'skillId',
+  toolId: 'toolId',
+  pluginId: 'pluginId',
 } as const;
