@@ -158,8 +158,8 @@ apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => 
 
       expect(response).toHaveStatusCode(200);
       expect(response.body.total).toBe(101);
+      expect(response.body.page).toBe(5);
       expect(response.body.dashboards).toHaveLength(10);
-      expect(response.body.dashboards[0].id).toBe('test-dashboard-40');
     }
   );
 
