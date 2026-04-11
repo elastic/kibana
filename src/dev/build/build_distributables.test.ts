@@ -89,6 +89,7 @@ const minimalGenericFoldersOptions: BuildOptions = {
   versionQualifier: undefined,
   targetAllPlatforms: false,
   targetServerlessPlatforms: false,
+  skipServerless: false,
   withExamplePlugins: false,
   withTestPlugins: false,
   eprRegistry: 'snapshot',
