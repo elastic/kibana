@@ -95,6 +95,7 @@
     "@kbn/core-notifications-browser",
     "@kbn/core-chrome-browser",
     "@kbn/scout",
-    "@kbn/core-http-browser"
+    "@kbn/core-http-browser",
+    "@kbn/osquery-plugin-cypress"
   ]
 }
