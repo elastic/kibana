@@ -87,6 +87,7 @@ dependsOn:
   - '@kbn/core-chrome-browser'
   - '@kbn/scout'
   - '@kbn/core-http-browser'
+  - '@kbn/osquery-plugin-cypress'
 tags:
   - plugin
   - prod
