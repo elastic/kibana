@@ -359,7 +359,7 @@ export class OverviewStatusService {
             timestamp: locStatus.timestamp,
             type: hit._source?.monitor?.type ?? 'browser',
             isEnabled: true,
-            schedule: String(hit._source?.monitor?.timespan?.lt ? '' : ''),
+            schedule: '',
             tags: hit._source?.tags ?? [],
             isStatusAlertEnabled: false,
             urls: locStatus.monitorUrl,
