@@ -10,7 +10,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
-import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server/mocks';
 import { createMockedTool, type MockedTool } from '../../test_utils/tools';
 import { createToolRegistry } from './tool_registry';
 import type {

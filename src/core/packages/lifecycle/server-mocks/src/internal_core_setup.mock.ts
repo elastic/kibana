@@ -22,7 +22,7 @@ import { i18nServiceMock } from '@kbn/core-i18n-server-mocks';
 import { loggingServiceMock } from '@kbn/core-logging-server-mocks';
 import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-server-mocks';
-import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server/mocks';
 import { statusServiceMock } from '@kbn/core-status-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';

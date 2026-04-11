@@ -8,7 +8,7 @@
  */
 
 import type { CoreElasticsearchRouteHandlerContext } from '@kbn/core-elasticsearch-server-internal';
-import type { CoreSavedObjectsRouteHandlerContext } from '@kbn/core-saved-objects-server-internal';
+import type { CoreSavedObjectsRouteHandlerContext } from '@kbn/core-saved-objects-server/internal';
 import type {
   DeprecationsRequestHandlerContext,
   DeprecationsClient,

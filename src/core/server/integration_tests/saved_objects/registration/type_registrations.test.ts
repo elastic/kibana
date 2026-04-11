@@ -8,7 +8,7 @@
  */
 
 import { createRoot } from '@kbn/core-test-helpers-kbn-server';
-import { REMOVED_TYPES } from '@kbn/core-saved-objects-server-internal';
+import { REMOVED_TYPES } from '@kbn/core-saved-objects-server/internal';
 
 // Types should NEVER be removed from this array
 const previouslyRegisteredTypes = [

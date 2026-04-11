@@ -9,7 +9,7 @@ import { resolveSelectedConnectorId } from './resolve_selected_connector_id';
 import { type InferenceConnector, InferenceConnectorType } from '@kbn/inference-common';
 import { PREFERRED_DEFAULT_CONNECTOR_ID } from '../../common/constants';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
-import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 import {

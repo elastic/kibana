@@ -30,7 +30,7 @@ import { ElasticsearchService } from '@kbn/core-elasticsearch-server-internal';
 import { MetricsService } from '@kbn/core-metrics-server-internal';
 import { CapabilitiesService } from '@kbn/core-capabilities-server-internal';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
-import { SavedObjectsService } from '@kbn/core-saved-objects-server-internal';
+import { SavedObjectsService } from '@kbn/core-saved-objects-server/internal';
 import { I18nService } from '@kbn/core-i18n-server-internal';
 import { DeprecationsService } from '@kbn/core-deprecations-server-internal';
 import { UserActivityService } from '@kbn/core-user-activity-server-internal';

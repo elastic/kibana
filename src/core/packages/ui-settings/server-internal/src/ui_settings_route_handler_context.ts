@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSavedObjectsRouteHandlerContext } from '@kbn/core-saved-objects-server-internal';
+import type { CoreSavedObjectsRouteHandlerContext } from '@kbn/core-saved-objects-server/internal';
 import type {
   UiSettingsRequestHandlerContext,
   IUiSettingsClient,

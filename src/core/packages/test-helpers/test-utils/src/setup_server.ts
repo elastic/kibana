@@ -14,7 +14,7 @@ import { createCoreContext } from '@kbn/core-http-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import { typeRegistryMock } from '@kbn/core-saved-objects-server/mocks';
-import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';

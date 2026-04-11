@@ -441,7 +441,7 @@ export { SavedObjectsClient } from '@kbn/core-saved-objects-server/api_internal'
 export type {
   SavedObjectsExportError,
   SavedObjectsImportError,
-} from '@kbn/core-saved-objects-import-export-server/internal';
+} from '@kbn/core-saved-objects-server/import_export_internal';
 
 export type {
   UiSettingsParams,

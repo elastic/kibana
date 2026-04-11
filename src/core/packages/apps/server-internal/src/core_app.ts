@@ -40,7 +40,7 @@ import {
   takeUntil,
   timer,
 } from 'rxjs';
-import type { InternalSavedObjectsServiceStart } from '@kbn/core-saved-objects-server-internal';
+import type { InternalSavedObjectsServiceStart } from '@kbn/core-saved-objects-server/internal';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { CoreAppConfig, type CoreAppConfigType, CoreAppPath } from './core_app_config';

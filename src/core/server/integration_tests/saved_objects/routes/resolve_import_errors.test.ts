@@ -21,11 +21,11 @@ import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
 import { setupServer, createExportableType } from '@kbn/core-test-helpers-test-utils';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-server/base_internal';
 import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-server/base_internal';
-import { SavedObjectsImporter } from '@kbn/core-saved-objects-import-export-server/internal';
+import { SavedObjectsImporter } from '@kbn/core-saved-objects-server/import_export_internal';
 import {
   registerResolveImportErrorsRoute,
   type InternalSavedObjectsRequestHandlerContext,
-} from '@kbn/core-saved-objects-server-internal';
+} from '@kbn/core-saved-objects-server/internal';
 
 const allowedTypes = ['index-pattern', 'visualization', 'dashboard'];
 const config = { maxImportPayloadBytes: 26214400, maxImportExportSize: 10000 } as SavedObjectConfig;

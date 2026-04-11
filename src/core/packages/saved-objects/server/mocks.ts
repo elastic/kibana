@@ -20,3 +20,6 @@ export { savedObjectsClientMock } from './src/api_mocks/saved_objects_client.moc
 export { savedObjectsRepositoryMock } from './src/api_mocks/repository.mock';
 export { savedObjectsClientProviderMock } from './src/api_mocks/scoped_client_provider.mock';
 export { savedObjectsExtensionsMock } from './src/api_mocks/saved_objects_extensions.mock';
+export { savedObjectsServiceMock } from './src/server_mocks/saved_objects_service.mock';
+export { savedObjectsImporterMock } from './src/import_export/mocks/saved_objects_importer.mock';
+export { savedObjectsExporterMock } from './src/import_export/mocks/saved_objects_exporter.mock';

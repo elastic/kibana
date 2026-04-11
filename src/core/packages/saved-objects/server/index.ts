@@ -133,6 +133,8 @@ export {
   type BulkResolveError,
 } from './src/saved_objects_error_helpers';
 
+export { REMOVED_TYPES } from './src/server_internal/constants';
+
 export type {
   ModelVersionIdentifier,
   SavedObjectsModelVersion,

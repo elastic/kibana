@@ -18,7 +18,7 @@ import {
 import {
   registerBulkCreateRoute,
   type InternalSavedObjectsRequestHandlerContext,
-} from '@kbn/core-saved-objects-server-internal';
+} from '@kbn/core-saved-objects-server/internal';
 import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
 import { createHiddenTypeVariants, setupServer } from '@kbn/core-test-helpers-test-utils';
 import { loggerMock } from '@kbn/logging-mocks';

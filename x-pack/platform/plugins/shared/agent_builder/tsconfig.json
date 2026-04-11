@@ -51,7 +51,6 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/inference-common",
     "@kbn/core-ui-settings-server-mocks",
-    "@kbn/core-saved-objects-server-mocks",
     "@kbn/core-saved-objects-server",
     "@kbn/management-settings-ids",
     "@kbn/visualization-utils",

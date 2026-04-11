@@ -21,7 +21,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import {
   registerFindRoute,
   type InternalSavedObjectsRequestHandlerContext,
-} from '@kbn/core-saved-objects-server-internal';
+} from '@kbn/core-saved-objects-server/internal';
 import { deprecationMock, setupConfig } from '../routes_test_utils';
 
 const testTypes = [

@@ -143,7 +143,6 @@ dependsOn:
   - '@kbn/remote-clusters-plugin'
   - '@kbn/console-plugin'
   - '@kbn/serverless-common-settings'
-  - '@kbn/core-saved-objects-import-export-server'
   - '@kbn/core-chrome-browser'
   - '@kbn/licensing-types'
   - '@kbn/product-intercept-plugin'

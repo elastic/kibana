@@ -7,7 +7,7 @@
 
 import path from 'path';
 import expect from '@kbn/expect';
-import { byIdAscComparator } from '@kbn/core-saved-objects-import-export-server/src/export/utils';
+import { byIdAscComparator } from '@kbn/core-saved-objects-server/src/import_export/export/utils';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const fixturePaths = {

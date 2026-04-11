@@ -22,7 +22,7 @@ import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { InternalLoggingServiceSetup } from '@kbn/core-logging-server-internal';
 import type { InternalMetricsServiceSetup } from '@kbn/core-metrics-server-internal';
 import type { InternalRenderingServiceSetup } from '@kbn/core-rendering-server-internal';
-import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server-internal';
+import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server/internal';
 import type { InternalStatusServiceSetup } from '@kbn/core-status-server-internal';
 import type { InternalUiSettingsServiceSetup } from '@kbn/core-ui-settings-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';

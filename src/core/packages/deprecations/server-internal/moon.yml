@@ -29,7 +29,6 @@ dependsOn:
   - '@kbn/core-elasticsearch-server'
   - '@kbn/core-elasticsearch-server-internal'
   - '@kbn/core-saved-objects-api-server'
-  - '@kbn/core-saved-objects-server-internal'
   - '@kbn/core-deprecations-common'
   - '@kbn/core-deprecations-server'
   - '@kbn/logging-mocks'

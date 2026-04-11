@@ -33,7 +33,7 @@ import type {
 import type { InternalRateLimiterSetup } from '@kbn/core-http-rate-limiter-server-internal';
 import type { InternalElasticsearchServiceSetup } from '@kbn/core-elasticsearch-server-internal';
 import type { InternalMetricsServiceSetup } from '@kbn/core-metrics-server-internal';
-import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server-internal';
+import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server/internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import { type ServiceStatus, type CoreStatus } from '@kbn/core-status-common';
 import type { ILoggingSystem } from '@kbn/core-logging-server-internal';

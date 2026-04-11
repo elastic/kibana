@@ -31,7 +31,6 @@
     "@kbn/logging-mocks",
     "@kbn/core-security-common",
     "@kbn/storage-adapter",
-    "@kbn/core-saved-objects-server-mocks",
     "@kbn/inference-langchain",
     "@kbn/kibana-react-plugin",
     "@kbn/triggers-actions-ui-plugin",
@@ -60,6 +59,6 @@
     "@kbn/code-editor",
     "@kbn/monaco",
     "@kbn/scout",
-    "@kbn/core-analytics-browser",
+    "@kbn/core-analytics-browser"
   ]
 }

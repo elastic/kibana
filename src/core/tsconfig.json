@@ -2,7 +2,7 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "isolatedModules": true,
+    "isolatedModules": true
   },
   "include": [
     "public/**/*",
@@ -45,7 +45,6 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/core-node-server-mocks",
     "@kbn/core-elasticsearch-server-mocks",
-    "@kbn/core-saved-objects-server-mocks",
     "@kbn/core-deprecations-server-mocks",
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/core-lifecycle-server-mocks",
@@ -76,7 +75,6 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/core-http-router-server-internal",
     "@kbn/logging",
-    "@kbn/core-saved-objects-import-export-server",
     "@kbn/core-metrics-server",
     "@kbn/core-metrics-collectors-server-internal",
     "@kbn/core-status-common",
@@ -90,7 +88,6 @@
     "@kbn/core-lifecycle-server-internal",
     "@kbn/core-ui-settings-server-internal",
     "@kbn/core-usage-data-base-server-internal",
-    "@kbn/core-saved-objects-server-internal",
     "@kbn/core-test-helpers-test-utils",
     "@kbn/utils",
     "@kbn/core-http-context-server-internal",
@@ -167,5 +164,5 @@
   ],
   "exclude": [
     "target/**/*"
-  ],
+  ]
 }

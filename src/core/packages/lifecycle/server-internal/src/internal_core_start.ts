@@ -17,7 +17,7 @@ import type { InternalExecutionContextStart } from '@kbn/core-execution-context-
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type { InternalHttpServiceStart } from '@kbn/core-http-server-internal';
 import type { InternalMetricsServiceStart } from '@kbn/core-metrics-server-internal';
-import type { InternalSavedObjectsServiceStart } from '@kbn/core-saved-objects-server-internal';
+import type { InternalSavedObjectsServiceStart } from '@kbn/core-saved-objects-server/internal';
 import type { InternalUiSettingsServiceStart } from '@kbn/core-ui-settings-server-internal';
 import type { CoreUsageDataStart } from '@kbn/core-usage-data-server';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-server';

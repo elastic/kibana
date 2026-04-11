@@ -18,7 +18,7 @@ import {
 } from '../../../../common/file_kinds_registry';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server/mocks';
 import { SavedObjectsFileMetadataClient } from '../..';
 import { BlobStorageService } from '../../../blob_storage_service';
 import { InternalFileShareService } from '../../../file_share_service';

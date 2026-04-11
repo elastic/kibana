@@ -22,7 +22,7 @@ import {
 import type { SetupDeps } from './ui_settings_service';
 import { UiSettingsService } from './ui_settings_service';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
-import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server/mocks';
 import { uiSettingsType, uiSettingsGlobalType } from './saved_objects';
 import { UiSettingsDefaultsClient } from './clients/ui_settings_defaults_client';
 

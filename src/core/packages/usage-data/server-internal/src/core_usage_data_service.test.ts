@@ -22,7 +22,7 @@ import { config as RawHttpConfig } from '@kbn/core-http-server-internal';
 import { savedObjectsConfig as RawSavedObjectsConfig } from '@kbn/core-saved-objects-server/base_internal';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
-import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server/mocks';
 
 import { CoreUsageDataService } from './core_usage_data_service';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';

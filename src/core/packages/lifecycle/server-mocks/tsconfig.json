@@ -8,7 +8,7 @@
     ]
   },
   "include": [
-    "**/*.ts",
+    "**/*.ts"
   ],
   "kbn_references": [
     "@kbn/utility-types-jest",
@@ -27,7 +27,6 @@
     "@kbn/core-metrics-server-mocks",
     "@kbn/core-preboot-server-mocks",
     "@kbn/core-rendering-server-mocks",
-    "@kbn/core-saved-objects-server-mocks",
     "@kbn/core-status-server-mocks",
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/core-usage-data-server-mocks",
@@ -43,8 +42,9 @@
     "@kbn/core-data-streams-server",
     "@kbn/lazy-object",
     "@kbn/core-user-activity-server-mocks",
+    "@kbn/core-saved-objects-server"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }

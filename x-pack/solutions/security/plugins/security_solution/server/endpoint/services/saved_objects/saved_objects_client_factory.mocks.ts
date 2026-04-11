@@ -9,7 +9,7 @@
 
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { HttpServiceSetup } from '@kbn/core/server';
-import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { SavedObjectsClientFactory } from './saved_objects_client_factory';
 

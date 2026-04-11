@@ -9,7 +9,7 @@
     ]
   },
   "include": [
-    "**/*.ts",
+    "**/*.ts"
   ],
   "kbn_references": [
     "@kbn/config",
@@ -34,11 +34,10 @@
     "@kbn/monaco",
     "@kbn/core-http-server-internal",
     "@kbn/core-http-router-server-internal",
-    "@kbn/core-saved-objects-server-internal",
     "@kbn/core-saved-objects-api-server",
-    "@kbn/core-saved-objects-server",
+    "@kbn/core-saved-objects-server"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }

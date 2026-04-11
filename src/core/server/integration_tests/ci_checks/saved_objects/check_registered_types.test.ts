@@ -15,7 +15,7 @@ import {
   createRootWithCorePlugins,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { SAVED_OBJECT_TYPES_COUNT } from '@kbn/core-saved-objects-server-internal';
+import { SAVED_OBJECT_TYPES_COUNT } from '@kbn/core-saved-objects-server/internal';
 import { sortBy } from 'lodash';
 import { getVirtualVersionMap } from '@kbn/core-saved-objects-server/base_internal';
 

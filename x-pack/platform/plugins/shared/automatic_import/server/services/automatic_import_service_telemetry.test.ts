@@ -8,7 +8,7 @@
 import expect from 'expect';
 import type { ReplaySubject } from 'rxjs';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { createCoreSetupMock } from '@kbn/core-lifecycle-browser-mocks/src/core_setup.mock';
 import { AutomaticImportService } from './automatic_import_service';
