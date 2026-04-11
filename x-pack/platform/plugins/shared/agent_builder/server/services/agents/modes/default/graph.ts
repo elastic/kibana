@@ -147,7 +147,7 @@ export const createAgentGraph = ({
 
     const toolCallMessage = createToolCallMessage(lastAction.tool_calls, lastAction.message);
     const toolNodeResult = await toolNode.invoke([toolCallMessage], {});
-    const actions = processToolNodeResponse(toolNodeResult, { logger });
+    const actions = processToolNodeResponse(toolNodeResult);
 
     return {
       mainActions: actions,
@@ -169,7 +169,7 @@ export const createAgentGraph = ({
     }
     return {
       interrupted: true,
-      prompt: lastAction.prompt,
+      prompts: lastAction.prompts.map((entry) => entry.prompt),
     };
   };
 

@@ -181,12 +181,14 @@ describe('registerDashboardAttachmentUiDefinition', () => {
 
     return {
       agentBuilder,
+      addAttachment: mockAddAttachment,
       dashboardPlugin,
       unifiedSearch,
       dashboardLocator: undefined,
       dashboardAppClientApi$,
       addAttachmentType,
       updateAttachmentOrigin,
+      findDashboardsService,
       chat$,
     };
   };
@@ -216,7 +218,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
   });
 
   describe('onAttachmentMount - origin sync', () => {
-    it('updates origin when new dashboard is saved', () => {
+    it('updates origin when new dashboard is saved', async () => {
       const { getAttachment } = createMockAttachment('attachment-1');
       const mockApi = createMockDashboardApi();
 
@@ -232,6 +234,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         dashboardId: 'new-dashboard-id',
         dashboardState: mockSavedDashboardState,
       });
+      await Promise.resolve();
       expect(updateOrigin).toHaveBeenCalledWith('new-dashboard-id');
 
       // Undefined doesn't trigger
@@ -241,12 +244,13 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         dashboardId: undefined,
         dashboardState: mockSavedDashboardState,
       });
+      await Promise.resolve();
       expect(updateOrigin).not.toHaveBeenCalled();
 
       cleanup?.();
     });
 
-    it('does not update origin when attachment is linked to a different dashboard', () => {
+    it('does not update origin when attachment is linked to a different dashboard', async () => {
       const { getAttachment } = createMockAttachment('attachment-1', 'original-dashboard-id');
       const mockApi = createMockDashboardApi('different-dashboard-id');
 
@@ -260,8 +264,39 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         dashboardId: 'newly-saved-id',
         dashboardState: mockSavedDashboardState,
       });
+      await Promise.resolve();
 
       expect(updateOrigin).not.toHaveBeenCalled();
+      cleanup?.();
+    });
+
+    it('relinks to the current dashboard when the attachment origin points to a deleted dashboard', async () => {
+      const { getAttachment } = createMockAttachment('attachment-1', 'deleted-dashboard-id');
+      const mockApi = createMockDashboardApi('current-dashboard-id');
+
+      deps.findDashboardsService.mockResolvedValue({
+        findById: jest.fn().mockResolvedValue({ status: 'error' }),
+      });
+      unregister();
+      unregister = registerDashboardAttachmentUiDefinition(deps);
+      uiDefinition = deps.addAttachmentType.mock.calls.at(-1)?.[1];
+
+      const cleanup = uiDefinition.onAttachmentMount!({
+        getAttachment,
+        updateOrigin,
+      });
+      deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
+
+      mockApi.emitSave({
+        previousDashboardId: 'current-dashboard-id',
+        dashboardId: 'current-dashboard-id',
+        dashboardState: mockSavedDashboardState,
+      });
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(updateOrigin).toHaveBeenCalledWith('current-dashboard-id');
       cleanup?.();
     });
 

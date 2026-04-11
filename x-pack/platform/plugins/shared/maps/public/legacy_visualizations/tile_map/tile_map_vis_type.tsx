@@ -31,7 +31,7 @@ const LazyTileMapEditor = function (props: VisEditorOptionsProps) {
 export const tileMapVisType = {
   name: TILE_MAP_VIS_TYPE,
   title,
-  icon: 'visMapCoordinate',
+  icon: 'waypoint',
   description: i18n.translate('xpack.maps.tileMap.vis.description', {
     defaultMessage: 'Plot latitude and longitude coordinates on a map',
   }),
