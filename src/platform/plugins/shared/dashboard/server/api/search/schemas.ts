@@ -55,7 +55,7 @@ export const searchRequestParamsSchema = schema.object({
     schema.literal('updated_at', {
       meta: {
         description:
-          'An optional field to sort results by. If not provided and `query` is not specified, results are sorted by `updated_at` descending.',
+          'An optional field to sort results by. When `query` is specified, omitting `sort_field` returns results in relevance order; providing `sort_field` overrides relevance ordering. When `query` is not specified, omitting `sort_field` defaults to `updated_at` descending.',
       },
     })
   ),
@@ -63,7 +63,7 @@ export const searchRequestParamsSchema = schema.object({
     schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
       meta: {
         description:
-          'The sort direction used with `sort_field`. Defaults to `desc` when `sort_field` is provided.',
+          'The sort direction used with `sort_field`. Ignored when `sort_field` is not provided. Defaults to `desc` when `sort_field` is provided.',
       },
     })
   ),
