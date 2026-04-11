@@ -55,7 +55,7 @@ export const TracingProjectsListPage: React.FC = () => {
     {
       page: pageIndex + 1,
       perPage: pageSize,
-      name: debouncedSearch || undefined,
+      name: debouncedSearch.trim() || undefined,
     },
     {
       refetchInterval: isPaused ? false : refreshInterval,

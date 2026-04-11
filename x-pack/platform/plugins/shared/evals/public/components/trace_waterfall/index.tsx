@@ -181,17 +181,14 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ traceId, layout 
       };
     }, [data, hideNoise]);
 
-  const isInitialSelectionRef = useRef(true);
+  const autoSelectedTraceRef = useRef<string | null>(null);
   useEffect(() => {
-    isInitialSelectionRef.current = true;
-  }, [traceId]);
-  useEffect(() => {
-    if (isInitialSelectionRef.current && flatSpans.length > 0) {
-      isInitialSelectionRef.current = false;
+    if (flatSpans.length > 0 && autoSelectedTraceRef.current !== traceId) {
+      autoSelectedTraceRef.current = traceId;
       setSelectedSpanId(flatSpans[0].span_id);
       setFocusedIndex(0);
     }
-  }, [flatSpans]);
+  }, [flatSpans, traceId]);
 
   const handleSpanClick = useCallback(
     (spanId: string) => {
