@@ -35,6 +35,7 @@ dependsOn:
   - '@kbn/otel-demo'
   - '@kbn/ai-tools'
   - '@kbn/std'
+  - '@kbn/streamlang'
 tags:
   - functional-tests
   - package

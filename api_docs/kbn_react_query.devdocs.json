@@ -14673,6 +14673,14 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/endpoint_hosts/view/hooks/insights/use_fetch_pending_scans.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/endpoint_hosts/view/hooks/insights/use_fetch_insights_ab.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/management/services/policies/hooks.ts"
               },
               {

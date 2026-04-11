@@ -37,7 +37,7 @@ import { ConnectorIcon } from './connector_icon';
 const selectableAriaLabel = i18n.translate(
   'xpack.agentBuilder.conversationInput.connectorSelector.selectableAriaLabel',
   {
-    defaultMessage: 'Select a connector',
+    defaultMessage: 'Select a model',
   }
 );
 const defaultConnectorLabel = i18n.translate(
@@ -113,7 +113,7 @@ const DefaultConnectorBadge = () => {
 const manageConnectorsAriaLabel = i18n.translate(
   'xpack.agentBuilder.conversationInput.connectorSelector.manageConnectors.ariaLabel',
   {
-    defaultMessage: 'Manage connectors',
+    defaultMessage: 'Manage models',
   }
 );
 
