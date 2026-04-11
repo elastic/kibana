@@ -113,6 +113,7 @@ export function createChromeApi({ state, services, sidebar }: ChromeApiDeps): In
     },
     getBreadcrumbsAppendExtensions$: () => state.breadcrumbs.appendExtensions.$,
     getBreadcrumbsAppendExtensionsWithBadges$: () => state.breadcrumbs.appendExtensionsWithBadges$,
+    getBreadcrumbsBadges$: () => state.breadcrumbs.badges.$,
     setBreadcrumbsAppendExtension: (extension) => {
       state.breadcrumbs.appendExtensions.addSorted(
         extension,

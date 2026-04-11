@@ -21,6 +21,9 @@ export interface ChromeBadge {
 export type ChromeBreadcrumbsBadge = EuiBadgeProps & {
   badgeText: string;
   toolTipProps?: Partial<EuiToolTipProps>;
+  /**
+   * @deprecated
+   */
   renderCustomBadge?: (props: { badgeText: string }) => ReactElement;
 };
 

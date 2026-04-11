@@ -15,6 +15,7 @@ import type {
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
+  ChromeBreadcrumbsBadge,
   ChromeNext,
   ChromeNextAiButton,
   ChromeNextHeaderConfig,
@@ -62,6 +63,11 @@ export interface InternalChromeStart extends ChromeStart {
    * converted to extensions. Used by chrome layout components.
    */
   getBreadcrumbsAppendExtensionsWithBadges$(): Observable<ChromeBreadcrumbsAppendExtension[]>;
+
+  /**
+   * Get an observable of the current breadcrumbs badges set via setBreadcrumbsBadges().
+   */
+  getBreadcrumbsBadges$(): Observable<ChromeBreadcrumbsBadge[]>;
 
   /** Set global footer. Used by the developer toolbar. */
   setGlobalFooter(node: ReactNode): void;

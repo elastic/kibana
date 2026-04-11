@@ -24,7 +24,7 @@ export interface ChromeNextHeaderConfig {
 
   /**
    * Badges inline next to the title. Chrome shows 1–2 as-is; for 3+, first badge plus "+N" popover
-   * for the rest. Max 200px per badge; `filled` is not exposed. TODO: render in `AppHeader`.
+   * for the rest. Max 200px per badge; `filled` is not exposed.
    */
   badges?: ChromeNextHeaderBadge[];
 
@@ -78,6 +78,9 @@ export interface ChromeNextHeaderBadge {
   /** EUI badge color. `filled` is intentionally excluded. */
   color?: 'hollow' | 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'accent';
   tooltip?: string;
+  onClick?: () => void;
+  onClickAriaLabel?: string;
+  testId?: string;
 }
 
 /**
