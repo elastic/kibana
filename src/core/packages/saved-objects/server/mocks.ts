@@ -10,3 +10,9 @@
 export { typeRegistryMock } from './src/base_mocks/saved_objects_type_registry.mock';
 export { serializerMock } from './src/base_mocks/serializer.mock';
 export { createDocumentMigratorMock } from './src/base_mocks/document_migrator.mock';
+export { mockKibanaMigrator } from './src/migration_mocks/kibana_migrator.mock';
+export {
+  migrationMocks,
+  createSavedObjectsMigrationLoggerMock,
+} from './src/migration_mocks/migration.mocks';
+export { retryAsync } from './src/migration_mocks/helpers/retry_async';

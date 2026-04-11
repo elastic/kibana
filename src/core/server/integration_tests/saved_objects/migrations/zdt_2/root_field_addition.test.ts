@@ -11,10 +11,10 @@ const mockGetBaseMappings = jest.fn();
 
 // No other way to simulate a change in root mappings unfortunately
 jest.mock(
-  '@kbn/core-saved-objects-migration-server-internal/src/core/build_active_mappings',
+  '@kbn/core-saved-objects-server/src/migration_internal/core/build_active_mappings',
   () => {
     const actual = jest.requireActual(
-      '@kbn/core-saved-objects-migration-server-internal/src/core/build_active_mappings'
+      '@kbn/core-saved-objects-server/src/migration_internal/core/build_active_mappings'
     );
     return {
       ...actual,

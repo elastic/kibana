@@ -45,7 +45,7 @@ import {
   type DocumentsTransformSuccess,
   createBulkIndexOperationTuple,
   checkClusterRoutingAllocationEnabled,
-} from '@kbn/core-saved-objects-migration-server-internal';
+} from '@kbn/core-saved-objects-server/migration_internal';
 import { BASELINE_TEST_ARCHIVE_SMALL } from '../../kibana_migrator_archive_utils';
 import { defaultKibanaIndex } from '@kbn/migrator-test-kit';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';

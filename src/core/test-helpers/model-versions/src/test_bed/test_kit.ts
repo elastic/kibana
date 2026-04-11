@@ -14,7 +14,7 @@ import type { BuildFlavor } from '@kbn/config';
 import { ConfigService, Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { KibanaMigrator } from '@kbn/core-saved-objects-migration-server-internal';
+import { KibanaMigrator } from '@kbn/core-saved-objects-server/migration_internal';
 import {
   SavedObjectConfig,
   type SavedObjectsConfigType,

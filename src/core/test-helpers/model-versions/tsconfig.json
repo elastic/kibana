@@ -8,7 +8,7 @@
     ]
   },
   "include": [
-    "**/*.ts",
+    "**/*.ts"
   ],
   "exclude": [
     "target/**/*"
@@ -18,7 +18,6 @@
     "@kbn/config",
     "@kbn/config-mocks",
     "@kbn/repo-info",
-    "@kbn/core-saved-objects-migration-server-internal",
     "@kbn/core-saved-objects-api-server-internal",
     "@kbn/core-elasticsearch-server-internal",
     "@kbn/core-elasticsearch-client-server-internal",
@@ -33,6 +32,6 @@
     "@kbn/core-doc-links-server",
     "@kbn/core-node-server",
     "@kbn/config-schema",
-    "@kbn/logging-mocks",
+    "@kbn/logging-mocks"
   ]
 }

@@ -16,7 +16,7 @@ import {
   modelVersionToVirtualVersion,
   SavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-server/base_internal';
-import { DocumentMigrator } from '@kbn/core-saved-objects-migration-server-internal';
+import { DocumentMigrator } from '@kbn/core-saved-objects-server/migration_internal';
 
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 const currentVersion = env.packageInfo.version;

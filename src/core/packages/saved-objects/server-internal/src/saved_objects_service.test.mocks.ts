@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mockKibanaMigrator } from '@kbn/core-saved-objects-migration-server-mocks';
+import { mockKibanaMigrator } from '@kbn/core-saved-objects-server/mocks';
 import {
   savedObjectsClientProviderMock,
   savedObjectsRepositoryMock,
@@ -16,8 +16,8 @@ import { typeRegistryMock } from '@kbn/core-saved-objects-server/mocks';
 
 export const migratorInstanceMock = mockKibanaMigrator.create();
 export const KibanaMigratorMock = jest.fn().mockImplementation(() => migratorInstanceMock);
-jest.doMock('@kbn/core-saved-objects-migration-server-internal', () => {
-  const actual = jest.requireActual('@kbn/core-saved-objects-migration-server-internal');
+jest.doMock('@kbn/core-saved-objects-server/migration_internal', () => {
+  const actual = jest.requireActual('@kbn/core-saved-objects-server/migration_internal');
   return {
     ...actual,
     KibanaMigrator: KibanaMigratorMock,

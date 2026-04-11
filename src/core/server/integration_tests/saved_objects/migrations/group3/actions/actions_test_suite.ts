@@ -47,7 +47,7 @@ import {
   type DocumentsTransformSuccess,
   createBulkIndexOperationTuple,
   checkClusterRoutingAllocationEnabled,
-} from '@kbn/core-saved-objects-migration-server-internal';
+} from '@kbn/core-saved-objects-server/migration_internal';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
 interface EsServer {

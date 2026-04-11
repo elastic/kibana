@@ -8,7 +8,7 @@
     ]
   },
   "include": [
-    "**/*.ts",
+    "**/*.ts"
   ],
   "kbn_references": [
     "@kbn/config-schema",
@@ -21,12 +21,10 @@
     "@kbn/core-saved-objects-server",
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-saved-objects-api-server-internal",
-    "@kbn/core-saved-objects-migration-server-internal",
     "@kbn/core-saved-objects-import-export-server",
     "@kbn/core-usage-data-base-server-internal",
     "@kbn/core-deprecations-server",
     "@kbn/core-node-server",
-    "@kbn/core-saved-objects-migration-server-mocks",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-base-server-internal",
     "@kbn/core-doc-links-server",
@@ -44,9 +42,9 @@
     "@kbn/utils",
     "@kbn/core-http-router-server-internal",
     "@kbn/logging-mocks",
-    "@kbn/std",
+    "@kbn/std"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }

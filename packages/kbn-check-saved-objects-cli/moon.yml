@@ -21,7 +21,6 @@ dependsOn:
   - '@kbn/dev-cli-errors'
   - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/core-plugins-server-internal'
-  - '@kbn/core-saved-objects-migration-server-internal'
   - '@kbn/dev-cli-runner'
   - '@kbn/test'
   - '@kbn/core-elasticsearch-client-server-mocks'

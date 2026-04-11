@@ -6047,14 +6047,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-migration-server-internal@link:src/core/packages/saved-objects/migration-server-internal":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-saved-objects-migration-server-mocks@link:src/core/packages/saved-objects/migration-server-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-saved-objects-server-internal@link:src/core/packages/saved-objects/server-internal":
   version "0.0.0"
   uid ""

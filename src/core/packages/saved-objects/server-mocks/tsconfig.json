@@ -8,7 +8,7 @@
     ]
   },
   "include": [
-    "**/*.ts",
+    "**/*.ts"
   ],
   "kbn_references": [
     "@kbn/utility-types",
@@ -17,10 +17,9 @@
     "@kbn/core-saved-objects-server-internal",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-saved-objects-import-export-server",
-    "@kbn/core-saved-objects-migration-server-mocks",
-    "@kbn/lazy-object",
+    "@kbn/lazy-object"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }

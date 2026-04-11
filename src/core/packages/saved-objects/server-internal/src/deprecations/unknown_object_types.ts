@@ -15,7 +15,7 @@ import { getIndexForType } from '@kbn/core-saved-objects-server/base_internal';
 import {
   getAggregatedTypesDocuments,
   addExcludedTypesToBoolQuery,
-} from '@kbn/core-saved-objects-migration-server-internal';
+} from '@kbn/core-saved-objects-server/migration_internal';
 
 interface UnknownTypesDeprecationOptions {
   typeRegistry: ISavedObjectTypeRegistry;

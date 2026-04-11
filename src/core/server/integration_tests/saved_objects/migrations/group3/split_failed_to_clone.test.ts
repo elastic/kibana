@@ -10,7 +10,7 @@
 import { join } from 'path';
 import { setTimeout as timer } from 'timers/promises';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import type { CloneIndexParams } from '@kbn/core-saved-objects-migration-server-internal/src/actions';
+import type { CloneIndexParams } from '@kbn/core-saved-objects-server/src/migration_internal/actions';
 
 import {
   clearLog,
@@ -25,10 +25,10 @@ import { getRelocatingMigratorTestKit, kibanaSplitIndex } from '@kbn/migrator-te
 import '../jest_matchers';
 
 // mock clone_index from src/core/packages/saved-objects
-jest.mock('@kbn/core-saved-objects-migration-server-internal/src/actions/clone_index', () => {
+jest.mock('@kbn/core-saved-objects-server/src/migration_internal/actions/clone_index', () => {
   const { setTimeout: actualTimer } = jest.requireActual('timers/promises');
   const realModule = jest.requireActual(
-    '@kbn/core-saved-objects-migration-server-internal/src/actions/clone_index'
+    '@kbn/core-saved-objects-server/src/migration_internal/actions/clone_index'
   );
 
   return {

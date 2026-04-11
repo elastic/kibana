@@ -47,7 +47,7 @@ import {
   elasticsearchClientMock,
   type ElasticsearchClientMock,
 } from '@kbn/core-elasticsearch-client-server-mocks';
-import { DocumentMigrator } from '@kbn/core-saved-objects-migration-server-internal';
+import { DocumentMigrator } from '@kbn/core-saved-objects-server/migration_internal';
 import {
   type AuthorizeAndRedactInternalBulkResolveParams,
   type GetFindRedactTypeMapParams,

@@ -22,7 +22,7 @@ import {
   isClusterShardLimitExceeded,
   createIndex,
   setWriteBlock,
-} from '@kbn/core-saved-objects-migration-server-internal';
+} from '@kbn/core-saved-objects-server/migration_internal';
 
 const { startES } = createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),

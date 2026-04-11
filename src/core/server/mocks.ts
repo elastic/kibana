@@ -36,7 +36,7 @@ export {
   savedObjectsClientMock,
   savedObjectsRepositoryMock,
 } from '@kbn/core-saved-objects-api-server-mocks';
-export { migrationMocks } from '@kbn/core-saved-objects-migration-server-mocks';
+export { migrationMocks } from '@kbn/core-saved-objects-server/mocks';
 export { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 export { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
 export { renderingServiceMock } from '@kbn/core-rendering-server-mocks';

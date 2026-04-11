@@ -53,7 +53,7 @@ import {
   SavedObjectsClient,
   SavedObjectsClientProvider,
 } from '@kbn/core-saved-objects-api-server-internal';
-import { KibanaMigrator } from '@kbn/core-saved-objects-migration-server-internal';
+import { KibanaMigrator } from '@kbn/core-saved-objects-server/migration_internal';
 import { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
 import {
   SavedObjectsExporter,

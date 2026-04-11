@@ -23,7 +23,6 @@ dependsOn:
   - '@kbn/core-saved-objects-server-internal'
   - '@kbn/core-saved-objects-api-server-mocks'
   - '@kbn/core-saved-objects-import-export-server'
-  - '@kbn/core-saved-objects-migration-server-mocks'
   - '@kbn/lazy-object'
 tags:
   - shared-server
