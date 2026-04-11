@@ -396,12 +396,22 @@ export class OverviewStatusService {
    * for remote cluster detection.
    */
   async getRemoteMonitorDetails(monitorIds: string[]) {
+    interface RemoteMonitorSource {
+      monitor?: {
+        id?: string;
+        name?: string;
+        type?: string;
+        timespan?: { lt?: string };
+      };
+      tags?: string[];
+    }
+
     const range = {
       from: moment().subtract(4, 'hours').subtract(20, 'minutes').toISOString(),
       to: 'now',
     };
 
-    const result = await this.routeContext.syntheticsEsClient.search(
+    const result = await this.routeContext.syntheticsEsClient.search<RemoteMonitorSource>(
       {
         size: monitorIds.length,
         query: {
