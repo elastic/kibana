@@ -68,14 +68,29 @@ function collectAdoptionTrackedAPIStats(
   ).length;
 }
 
-function collectStatsForApi(doc: ApiDeclaration, stats: ApiStats, pluginApi: PluginApi): void {
+function collectStatsForApi(
+  doc: ApiDeclaration,
+  stats: ApiStats,
+  pluginApi: PluginApi,
+  insideTypedParam = false
+): void {
   const hasDescription = doc.description !== undefined && doc.description.length > 0;
   const childHasDescription =
     doc.children?.some(
       (child) => child.description !== undefined && child.description.length > 0
     ) ?? false;
   const isParameterNode = doc.id.includes('.$'); // parameters and destructured parameter nodes carry .$ in their id
-  const missingComment = !hasDescription && !(isParameterNode && childHasDescription);
+
+  // A parameter node whose type is a named reference (interface/type alias).
+  // Its property-level documentation lives on the referenced type's own ApiDeclaration.
+  const isTypedParam = isParameterNode && isNamedTypeParam(doc);
+
+  // Suppress missingComments for parameter nodes when the parameter (or an ancestor
+  // parameter) has a named type reference — the documentation is on the interface.
+  const suppressForTypedParam = isTypedParam || (isParameterNode && insideTypedParam);
+
+  const missingComment =
+    !suppressForTypedParam && !hasDescription && !(isParameterNode && childHasDescription);
   // Ignore all stats coming from third party libraries, we can't fix that!
   if (doc.path.includes('node_modules')) {
     return;
@@ -94,7 +109,7 @@ function collectStatsForApi(doc: ApiDeclaration, stats: ApiStats, pluginApi: Plu
   }
   if (doc.children) {
     doc.children.forEach((child) => {
-      collectStatsForApi(child, stats, pluginApi);
+      collectStatsForApi(child, stats, pluginApi, isTypedParam || insideTypedParam);
     });
   }
   if (!doc.references || doc.references.length === 0) {
@@ -123,12 +138,39 @@ const isFunctionLike = (doc: ApiDeclaration): boolean => {
 };
 
 /**
+ * Returns true when a parameter's type is a named reference (interface, object, or type alias)
+ * whose documentation lives on the referenced type's own ApiDeclaration, so the checker
+ * should not require per-property descriptions on the function parameter itself.
+ *
+ * Inline type-literal parameters (e.g. `{ foo: string }`) also resolve to ObjectKind,
+ * so we additionally require the signature to contain at least one Reference link — that
+ * distinguishes a named type reference from an anonymous inline type.
+ */
+const isNamedTypeParam = (param: ApiDeclaration): boolean => {
+  if (param.type === TypeKind.InterfaceKind || param.type === TypeKind.TypeKind) {
+    return true;
+  }
+  if (param.type === TypeKind.ObjectKind) {
+    // Only treat as named if the signature contains a Reference (non-string element),
+    // indicating it points to an externally defined type rather than an inline literal.
+    return (
+      param.signature !== undefined && param.signature.some((part) => typeof part !== 'string')
+    );
+  }
+  return false;
+};
+
+/**
  * Tracks functions where not all parameters have documentation.
  *
  * For function-like declarations, `children` represents the function's parameters.
  * This is distinct from interface/class children which represent properties/methods.
  * Each function-like member within an interface has its own declaration with its own
  * children (parameters), so we don't conflate interface properties with function parameters.
+ *
+ * Parameters whose type is a named reference (interface or type alias) are treated as
+ * documented without requiring their own description — the documentation lives on the
+ * referenced type, which is rendered in its own section.
  */
 const trackParamDocMismatches = (doc: ApiDeclaration, stats: ApiStats): void => {
   if (!isFunctionLike(doc)) {
@@ -138,7 +180,7 @@ const trackParamDocMismatches = (doc: ApiDeclaration, stats: ApiStats): void => 
     return;
   }
   const describedParams = doc.children.filter(
-    (param) => param.description && param.description.length > 0
+    (param) => (param.description && param.description.length > 0) || isNamedTypeParam(param)
   ).length;
   if (describedParams !== doc.children.length) {
     stats.paramDocMismatches.push(doc);
