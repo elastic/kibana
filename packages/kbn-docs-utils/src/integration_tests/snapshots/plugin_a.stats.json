@@ -2,8 +2,8 @@
   "counts": {
     "apiCount": 145,
     "missingExports": 2,
-    "missingComments": 65,
-    "paramDocMismatches": 14,
+    "missingComments": 63,
+    "paramDocMismatches": 13,
     "missingComplexTypeInfo": 15,
     "missingReturns": 24,
     "isAnyType": 1,
@@ -292,14 +292,6 @@
       "columnNumber": 37
     },
     {
-      "id": "def-public.ExampleInterface.fnTypeWithGeneric.$2",
-      "label": "p",
-      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
-      "type": "Object",
-      "lineNumber": 36,
-      "columnNumber": 43
-    },
-    {
       "id": "def-public.IReturnAReactComponent.component",
       "label": "component",
       "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
@@ -418,14 +410,6 @@
       "type": "Type",
       "lineNumber": 21,
       "columnNumber": 1
-    },
-    {
-      "id": "def-public.FnTypeWithGeneric.$2",
-      "label": "p",
-      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
-      "type": "Object",
-      "lineNumber": 36,
-      "columnNumber": 43
     },
     {
       "id": "def-public.IRefANotExportedType",
@@ -612,14 +596,6 @@
       "type": "Function",
       "lineNumber": 29,
       "columnNumber": 3
-    },
-    {
-      "id": "def-public.FnTypeWithGeneric",
-      "label": "FnTypeWithGeneric",
-      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
-      "type": "Type",
-      "lineNumber": 30,
-      "columnNumber": 1
     },
     {
       "id": "def-public.ImAnObject.foo",

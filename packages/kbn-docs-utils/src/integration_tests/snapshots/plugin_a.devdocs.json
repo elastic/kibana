@@ -2731,7 +2731,15 @@
           "tags": [],
           "label": "getSearchService2",
           "description": [
-            "\nThis uses an inlined object type rather than referencing an exported type, which is discouraged.\nprefer the way {@link getSearchService} is typed.\n"
+            "\nThis uses an inlined object type rather than referencing an exported type, which is discouraged.\nprefer the way ",
+            {
+              "pluginId": "pluginA",
+              "scope": "public",
+              "docId": "kibPluginAPluginApi",
+              "section": "def-public.getSearchService",
+              "text": "getSearchService"
+            },
+            " is typed.\n"
           ],
           "signature": [
             "(searchSpec: { username: string; password: string; }) => string"
@@ -3019,7 +3027,14 @@
           "trackAdoption": false,
           "children": [],
           "returnComment": [
-            "The currently selected {@link SearchLanguage }"
+            "The currently selected ",
+            {
+              "pluginId": "pluginA",
+              "scope": "public",
+              "docId": "kibPluginAPluginApi",
+              "section": "def-public.SearchLanguage",
+              "text": "SearchLanguage"
+            }
           ]
         }
       ],

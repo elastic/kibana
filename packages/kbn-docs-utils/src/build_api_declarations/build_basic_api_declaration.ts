@@ -13,7 +13,7 @@ import type { ApiDeclaration } from '../types';
 import { maybeCollectReferences } from './get_references';
 import { getSignature } from './get_signature';
 import { getTypeKind } from './get_type_kind';
-import { getCommentsFromNode, getJSDocTags } from './js_doc_utils';
+import { getCommentsFromNode, getJSDocTags, type PluginContext } from './js_doc_utils';
 import type { BuildApiDecOpts } from './types';
 import { getSourceLocationForNode } from './utils';
 
@@ -22,6 +22,10 @@ import { getSourceLocationForNode } from './utils';
  * children or references, still need to be added in.
  */
 export function buildBasicApiDeclaration(node: Node, opts: BuildApiDecOpts): ApiDeclaration {
+  const pluginContext: PluginContext = {
+    pluginId: opts.currentPluginId,
+    scope: opts.scope,
+  };
   const tags = getJSDocTags(node);
   const deprecated = tags.find((t) => t.getTagName() === 'deprecated') !== undefined;
   const removeByTag = tags.find((t) => t.getTagName() === 'removeBy');
@@ -49,7 +53,7 @@ export function buildBasicApiDeclaration(node: Node, opts: BuildApiDecOpts): Api
     type: getTypeKind(node),
     tags: getTagNames(tags),
     label,
-    description: getCommentsFromNode(node),
+    description: getCommentsFromNode(node, pluginContext),
     signature: getSignature(node, opts.plugins, opts.log),
     path,
     lineNumber,
