@@ -51,6 +51,22 @@ export const searchRequestParamsSchema = schema.object({
       },
     })
   ),
+  sort_field: schema.maybe(
+    schema.literal('updated_at', {
+      meta: {
+        description:
+          'An optional field to sort results by. If not provided and `query` is not specified, results are sorted by `updated_at` descending.',
+      },
+    })
+  ),
+  sort_order: schema.maybe(
+    schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+      meta: {
+        description:
+          'The sort direction used with `sort_field`. Defaults to `desc` when `sort_field` is provided.',
+      },
+    })
+  ),
 });
 
 export const searchResponseBodySchema = schema.object({

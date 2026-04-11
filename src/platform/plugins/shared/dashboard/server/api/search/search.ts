@@ -28,6 +28,13 @@ export async function search(
   const includedTags = normalizeToArray(searchParams.tags);
   const excludedTags = normalizeToArray(searchParams.excluded_tags);
 
+  const hasQuery = Boolean(searchParams.query);
+  const requestedSortField = searchParams.sort_field;
+  const requestedSortOrder = searchParams.sort_order ?? 'desc';
+
+  const sortField = requestedSortField ?? (!hasQuery ? ('updated_at' as const) : undefined);
+  const sortOrder = requestedSortField ? requestedSortOrder : sortField ? 'desc' : undefined;
+
   const soResponse = await core.savedObjects.client.find<DashboardSavedObjectAttributes>({
     type: DASHBOARD_SAVED_OBJECT_TYPE,
     searchFields: ['title^3', 'description'],
@@ -44,6 +51,7 @@ export async function search(
     page: searchParams.page,
     defaultSearchOperator: 'AND',
     ...tagsToFindOptions({ included: includedTags, excluded: excludedTags }),
+    ...(sortField ? { sortField, sortOrder } : {}),
   });
 
   return {

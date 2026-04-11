@@ -32,9 +32,11 @@ const buildUrl = (params: Record<string, string | string[] | number | undefined>
 };
 
 apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => {
+  let editorCredentials: RoleApiCredentials;
   let viewerCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
+    editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
     viewerCredentials = await requestAuth.getApiKey('viewer');
     await kbnClient.importExport.load(KBN_ARCHIVES.MANY_DASHBOARDS);
     await kbnClient.importExport.load(KBN_ARCHIVES.TAGS);
@@ -45,6 +47,18 @@ apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => 
   });
 
   apiTest('should retrieve a paginated list of dashboards', async ({ apiClient }) => {
+    // Bump a single dashboard's updated_at so we can assert default ordering deterministically.
+    await apiClient.put(`api/dashboards/test-dashboard-00`, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...editorCredentials.apiKeyHeader,
+      },
+      body: {
+        title: `My dashboard (0) - updated ${Date.now()}`,
+      },
+      responseType: 'json',
+    });
+
     const response = await apiClient.get(SEARCH_ENDPOINT, {
       headers: {
         ...COMMON_HEADERS,
@@ -85,6 +99,31 @@ apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => 
     expect(response).toHaveStatusCode(200);
     expect(response.body.total).toBe(101);
     expect(response.body.dashboards).toHaveLength(10);
+  });
+
+  apiTest('should allow explicit sorting by updated_at', async ({ apiClient }) => {
+    const response = await apiClient.get(buildUrl({ sort_field: 'updated_at', sort_order: 'desc' }), {
+      headers: {
+        ...COMMON_HEADERS,
+        ...viewerCredentials.apiKeyHeader,
+      },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.dashboards[0].id).toBe('test-dashboard-00');
+  });
+
+  apiTest('validation - should reject unsupported sort_field', async ({ apiClient }) => {
+    const response = await apiClient.get(buildUrl({ sort_field: 'updated_by' }), {
+      headers: {
+        ...COMMON_HEADERS,
+        ...viewerCredentials.apiKeyHeader,
+      },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(400);
   });
 
   apiTest(

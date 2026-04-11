@@ -194,6 +194,7 @@ export const useDashboardListingTable = ({
       } = {}
     ) => {
       const searchStartTime = window.performance.now();
+      const normalizedSearchTerm = searchTerm.trim();
 
       const [userResponse, globalPrivilegeResponse] = await Promise.allSettled([
         coreServices.userProfile.getCurrent(),
@@ -208,10 +209,13 @@ export const useDashboardListingTable = ({
 
       return findService
         .search({
-          query: searchTerm,
+          query: normalizedSearchTerm,
           per_page: listingLimit,
           tags: (references ?? []).map(({ id }) => id),
           excluded_tags: (referencesToExclude ?? []).map(({ id }) => id),
+          ...(normalizedSearchTerm.length === 0
+            ? { sort_field: 'updated_at', sort_order: 'desc' }
+            : {}),
         })
         .then(({ total, dashboards }) => {
           const searchEndTime = window.performance.now();
