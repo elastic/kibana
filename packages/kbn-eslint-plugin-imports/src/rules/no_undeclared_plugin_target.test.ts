@@ -271,7 +271,7 @@ tsTester.run('@kbn/imports/no_undeclared_plugin_target', NoUndeclaredPluginTarge
     },
     // Common code importing undeclared target is also validated
     {
-      filename: 'common_utils.ts',
+      filename: 'dashboard_browser_import.ts',
       code: `import { Foo } from '@kbn/dashboard-plugin/common';`,
       errors: [
         {

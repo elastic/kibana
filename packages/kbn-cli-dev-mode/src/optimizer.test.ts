@@ -112,20 +112,36 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
-it('uses options to create valid OptimizerConfig', () => {
-  setup();
-  setup({
-    ...defaultOptions,
-    cache: false,
-    dist: false,
-    runExamples: false,
-    pluginPaths: [],
-    pluginScanDirs: [],
-    repoRoot: '/foo/bar',
-    watch: false,
+describe('webpack optimizer path', () => {
+  let previousKbnUseRspack: string | undefined;
+
+  beforeEach(() => {
+    previousKbnUseRspack = process.env.KBN_USE_RSPACK;
+    delete process.env.KBN_USE_RSPACK;
   });
 
-  expect(OptimizerConfig.create.mock.calls).toMatchInlineSnapshot(`
+  afterEach(() => {
+    if (previousKbnUseRspack === undefined) {
+      delete process.env.KBN_USE_RSPACK;
+    } else {
+      process.env.KBN_USE_RSPACK = previousKbnUseRspack;
+    }
+  });
+
+  it('uses options to create valid OptimizerConfig', () => {
+    setup();
+    setup({
+      ...defaultOptions,
+      cache: false,
+      dist: false,
+      runExamples: false,
+      pluginPaths: [],
+      pluginScanDirs: [],
+      repoRoot: '/foo/bar',
+      watch: false,
+    });
+
+    expect(OptimizerConfig.create.mock.calls).toMatchInlineSnapshot(`
     Array [
       Array [
         Object {
@@ -157,54 +173,54 @@ it('uses options to create valid OptimizerConfig', () => {
       ],
     ]
   `);
-});
-
-it('is ready when optimizer phase is success or issue and logs in familiar format', async () => {
-  const writeLogTo = new PassThrough();
-  const linesPromise = Rx.firstValueFrom(observeLines(writeLogTo).pipe(toArray()));
-
-  const { update$, optimizer } = setup({
-    ...defaultOptions,
-    quiet: false,
-    silent: false,
-    writeLogTo,
   });
 
-  const history: any[] = ['<init>'];
-  subscriptions.push(
-    optimizer.isReady$().subscribe({
-      next(ready) {
-        history.push(`ready: ${ready}`);
-      },
-      error(error) {
-        throw error;
-      },
-      complete() {
-        history.push(`complete`);
-      },
-    })
-  );
+  it('is ready when optimizer phase is success or issue and logs in familiar format', async () => {
+    const writeLogTo = new PassThrough();
+    const linesPromise = Rx.firstValueFrom(observeLines(writeLogTo).pipe(toArray()));
 
-  subscriptions.push(
-    optimizer.run$.subscribe({
-      error(error) {
-        throw error;
-      },
-    })
-  );
+    const { update$, optimizer } = setup({
+      ...defaultOptions,
+      quiet: false,
+      silent: false,
+      writeLogTo,
+    });
 
-  history.push('<success>');
-  update$.next(mockOptimizerUpdate('success'));
+    const history: any[] = ['<init>'];
+    subscriptions.push(
+      optimizer.isReady$().subscribe({
+        next(ready) {
+          history.push(`ready: ${ready}`);
+        },
+        error(error) {
+          throw error;
+        },
+        complete() {
+          history.push(`complete`);
+        },
+      })
+    );
 
-  history.push('<running>');
-  update$.next(mockOptimizerUpdate('running'));
+    subscriptions.push(
+      optimizer.run$.subscribe({
+        error(error) {
+          throw error;
+        },
+      })
+    );
 
-  history.push('<issue>');
-  update$.next(mockOptimizerUpdate('issue'));
+    history.push('<success>');
+    update$.next(mockOptimizerUpdate('success'));
 
-  update$.complete();
+    history.push('<running>');
+    update$.next(mockOptimizerUpdate('running'));
 
-  expect(history).toMatchInlineSnapshot(`
+    history.push('<issue>');
+    update$.next(mockOptimizerUpdate('issue'));
+
+    update$.complete();
+
+    expect(history).toMatchInlineSnapshot(`
     Array [
       "<init>",
       "<success>",
@@ -217,30 +233,31 @@ it('is ready when optimizer phase is success or issue and logs in familiar forma
     ]
   `);
 
-  writeLogTo.end();
-  const lines = await linesPromise;
-  expect(lines).toMatchInlineSnapshot(`
+    writeLogTo.end();
+    const lines = await linesPromise;
+    expect(lines).toMatchInlineSnapshot(`
     Array [
       " np bld    log   [timestamp] [success][@kbn/optimizer] 0 bundles compiled successfully after 0 sec",
       " np bld    log   [timestamp] [error][@kbn/optimizer] webpack compile errors",
     ]
   `);
-});
-
-it('completes immedately and is immediately ready when disabled', () => {
-  const ready$ = new Rx.BehaviorSubject<undefined | boolean>(undefined);
-
-  const { optimizer, update$ } = setup({
-    ...defaultOptions,
-    enabled: false,
   });
 
-  subscriptions.push(optimizer.isReady$().subscribe(ready$));
+  it('completes immedately and is immediately ready when disabled', () => {
+    const ready$ = new Rx.BehaviorSubject<undefined | boolean>(undefined);
 
-  expect(update$.observers).toHaveLength(0);
-  expect(runOptimizer).not.toHaveBeenCalled();
-  expect(ready$).toHaveProperty('isStopped', true);
-  expect(ready$.getValue()).toBe(true);
+    const { optimizer, update$ } = setup({
+      ...defaultOptions,
+      enabled: false,
+    });
+
+    subscriptions.push(optimizer.isReady$().subscribe(ready$));
+
+    expect(update$.observers).toHaveLength(0);
+    expect(runOptimizer).not.toHaveBeenCalled();
+    expect(ready$).toHaveProperty('isStopped', true);
+    expect(ready$.getValue()).toBe(true);
+  });
 });
 
 describe('rspack path', () => {

@@ -36,12 +36,19 @@ describe('scripts/generate_plugin', () => {
   afterEach(async () => await del([PLUGIN_DIR, TMP_DIR]));
 
   it('builds a generated plugin into a viable archive', async () => {
+    // extendEnv merges process.env then this object; must override CI's KBN_USE_RSPACK=true
+    const legacyOptimizerEnv = {
+      ...process.env,
+      KBN_USE_RSPACK: '',
+    };
+
     const generateProc = await execa(
       process.execPath,
       ['scripts/generate_plugin', '-y', '--name', 'fooTestPlugin'],
       {
         cwd: REPO_ROOT,
         all: true,
+        env: legacyOptimizerEnv,
       }
     );
     const filterLogs = (logs: string | undefined) => {
@@ -64,6 +71,7 @@ describe('scripts/generate_plugin', () => {
       {
         cwd: PLUGIN_DIR,
         all: true,
+        env: legacyOptimizerEnv,
       }
     );
 

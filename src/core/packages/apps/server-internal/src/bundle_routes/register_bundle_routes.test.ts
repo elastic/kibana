@@ -65,14 +65,23 @@ const createExternalPluginsUiPlugins = (...ids: string[]): UiPlugins => ({
 describe('registerBundleRoutes', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
   let staticAssets: StaticAssets;
+  let kbnUseRspackBeforeEach: string | undefined;
 
   beforeEach(() => {
+    kbnUseRspackBeforeEach = process.env.KBN_USE_RSPACK;
+    delete process.env.KBN_USE_RSPACK;
+
     router = httpServiceMock.createRouter();
     const basePath = httpServiceMock.createBasePath('/server-base-path') as unknown as BasePath;
     staticAssets = new StaticAssets({ basePath, cdnConfig: {} as any, shaDigest: 'sha' });
   });
 
   afterEach(() => {
+    if (kbnUseRspackBeforeEach === undefined) {
+      delete process.env.KBN_USE_RSPACK;
+    } else {
+      process.env.KBN_USE_RSPACK = kbnUseRspackBeforeEach;
+    }
     registerRouteForBundleMock.mockReset();
   });
 
@@ -89,14 +98,6 @@ describe('registerBundleRoutes', () => {
     expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
       fileHashCache: expect.any(FileHashCache),
       isDist: true,
-      bundlesPath: 'uiSharedDepsSrcDistDir',
-      publicPath: '/server-base-path/sha/bundles/kbn-ui-shared-deps-src/',
-      routePath: '/sha/bundles/kbn-ui-shared-deps-src/',
-    });
-
-    expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
-      fileHashCache: expect.any(FileHashCache),
-      isDist: true,
       bundlesPath: 'uiSharedDepsNpmDistDir',
       publicPath: '/server-base-path/sha/bundles/kbn-ui-shared-deps-npm/',
       routePath: '/sha/bundles/kbn-ui-shared-deps-npm/',
@@ -105,9 +106,9 @@ describe('registerBundleRoutes', () => {
     expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
       fileHashCache: expect.any(FileHashCache),
       isDist: true,
-      bundlesPath: expect.stringMatching(/\/@kbn\/core\/target\/public$/),
-      publicPath: '/server-base-path/sha/bundles/core/',
-      routePath: '/sha/bundles/core/',
+      bundlesPath: 'uiSharedDepsSrcDistDir',
+      publicPath: '/server-base-path/sha/bundles/kbn-ui-shared-deps-src/',
+      routePath: '/sha/bundles/kbn-ui-shared-deps-src/',
     });
 
     expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
@@ -116,6 +117,14 @@ describe('registerBundleRoutes', () => {
       bundlesPath: 'kbnMonacoBundleDir',
       publicPath: '/server-base-path/sha/bundles/kbn-monaco/',
       routePath: '/sha/bundles/kbn-monaco/',
+    });
+
+    expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
+      fileHashCache: expect.any(FileHashCache),
+      isDist: true,
+      bundlesPath: expect.stringMatching(/\/@kbn\/core\/target\/public$/),
+      publicPath: '/server-base-path/sha/bundles/core/',
+      routePath: '/sha/bundles/core/',
     });
   });
 
