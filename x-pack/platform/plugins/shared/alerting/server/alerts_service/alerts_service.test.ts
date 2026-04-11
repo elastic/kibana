@@ -18,7 +18,7 @@ import { AlertsService } from './alerts_service';
 import type { IRuleTypeAlerts } from '../types';
 import { RecoveredActionGroup } from '../types';
 import { retryUntil } from './test_utils';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-server/utils';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-server';
 import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { AlertsClient } from '../alerts_client';
 import { alertsClientMock } from '../alerts_client/alerts_client.mock';

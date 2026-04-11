@@ -15,7 +15,7 @@ import {
   coreUsageDataServiceMock,
 } from '@kbn/core-usage-data-server-mocks';
 import type { savedObjectsExporterMock } from '@kbn/core-saved-objects-server/mocks';
-import type { SavedObjectConfig } from '@kbn/core-saved-objects-server/base_internal';
+import type { SavedObjectConfig } from '@kbn/core-saved-objects-server/internal';
 import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
 import { setupServer, createExportableType } from '@kbn/core-test-helpers-test-utils';
 import {

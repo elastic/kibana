@@ -12,7 +12,7 @@ import type { RawRule, RawRuleAction } from '../../types';
 import type { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { migrationMocks } from '@kbn/core/server/mocks';
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-server/utils';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-server';
 import type { RuleType } from '@kbn/securitysolution-rules';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { isAnyActionSupportIncidents } from './7.11';

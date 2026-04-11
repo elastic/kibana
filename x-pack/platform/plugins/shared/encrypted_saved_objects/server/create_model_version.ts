@@ -10,7 +10,7 @@ import type {
   SavedObjectsModelChange,
   SavedObjectsModelVersion,
 } from '@kbn/core-saved-objects-server';
-import { buildModelVersionTransformFn } from '@kbn/core-saved-objects-server/base_internal';
+import { buildModelVersionTransformFn } from '@kbn/core-saved-objects-server/internal';
 
 import { EncryptionError } from './crypto';
 import type { EncryptedSavedObjectsService, EncryptedSavedObjectTypeRegistration } from './crypto';

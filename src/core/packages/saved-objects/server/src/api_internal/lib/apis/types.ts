@@ -13,7 +13,7 @@ import type {
   SavedObjectsExtensions,
   ISavedObjectsSerializer,
 } from '../../../..';
-import type { IKibanaMigrator, IndexMapping } from '../../../../base_internal';
+import type { IKibanaMigrator, IndexMapping } from '../../../base_internal';
 import type { RepositoryHelpers } from './helpers';
 import type { RepositoryEsClient } from '../repository_es_client';
 

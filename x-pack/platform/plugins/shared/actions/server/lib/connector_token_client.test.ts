@@ -18,8 +18,8 @@ const logger = {
   ...rootLogger,
   get: () => rootLogger,
 } as unknown as jest.Mocked<Logger>;
-jest.mock('@kbn/core-saved-objects-server/utils', () => {
-  const actual = jest.requireActual('@kbn/core-saved-objects-server/utils');
+jest.mock('@kbn/core-saved-objects-server', () => {
+  const actual = jest.requireActual('@kbn/core-saved-objects-server');
   return {
     ...actual,
     SavedObjectsUtils: {

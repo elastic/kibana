@@ -16,7 +16,7 @@ import {
   type CompareModelVersionStatus,
   type CompareModelVersionDetails,
   initialModelVersion,
-} from '../../../../base_internal';
+} from '../../../base_internal';
 import { getUpdatedRootFields } from '../../core/compare_mappings';
 
 interface CheckVersionCompatibilityOpts {

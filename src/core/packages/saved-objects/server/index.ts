@@ -171,3 +171,21 @@ export type {
   SavedObjectReference,
   SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-api-server';
+
+// Utilities (previously @kbn/core-saved-objects-utils-server)
+export {
+  mergeSavedObjectMigrations,
+  mergeSavedObjectMigrationMaps,
+} from './src/utils/merge_migrations';
+export {
+  SavedObjectsUtils,
+  ALL_NAMESPACES_STRING,
+  DEFAULT_NAMESPACE_STRING,
+  FIND_DEFAULT_PAGE,
+  FIND_DEFAULT_PER_PAGE,
+} from './src/utils/saved_objects_utils';
+export {
+  setsAreEqual,
+  arrayMapsAreEqual,
+  setMapsAreEqual,
+} from './src/utils/saved_objects_test_utils';

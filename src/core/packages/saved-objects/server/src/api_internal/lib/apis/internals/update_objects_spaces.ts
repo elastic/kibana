@@ -32,9 +32,9 @@ import type {
   ISavedObjectsSerializer,
   SavedObjectsRawDocSource,
 } from '../../../../..';
-import { ALL_NAMESPACES_STRING } from '../../../../../utils';
+import { ALL_NAMESPACES_STRING } from '../../../../utils';
 import { SavedObjectsErrorHelpers, type DecoratedError } from '../../../../..';
-import type { IndexMapping } from '../../../../../base_internal';
+import type { IndexMapping } from '../../../../base_internal';
 import {
   getBulkOperationError,
   getExpectedVersionProperties,

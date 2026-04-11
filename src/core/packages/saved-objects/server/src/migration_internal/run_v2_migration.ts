@@ -23,7 +23,7 @@ import {
   type MigrationResult,
   type SavedObjectsMigrationConfigType,
   type SavedObjectsTypeMappingDefinitions,
-} from '../../base_internal';
+} from '../base_internal';
 import type { ISavedObjectTypeRegistry, ISavedObjectsSerializer, SavedObjectsRawDoc } from '../..';
 import type { DocumentMigrator } from './document_migrator';
 import { buildActiveMappings, createIndexMap } from './core';

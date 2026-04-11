@@ -8,7 +8,7 @@
 import { omit, cloneDeep } from 'lodash';
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { migrationMocks } from '@kbn/core/server/mocks';
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-server/utils';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-server';
 import type {
   RuleTaskState,
   MutableRuleTaskState,

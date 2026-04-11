@@ -13,8 +13,8 @@ import type { Logger } from '@kbn/core/server';
 import type { ConnectorToken } from '../types';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
-jest.mock('@kbn/core-saved-objects-server/utils', () => {
-  const actual = jest.requireActual('@kbn/core-saved-objects-server/utils');
+jest.mock('@kbn/core-saved-objects-server', () => {
+  const actual = jest.requireActual('@kbn/core-saved-objects-server');
   return {
     ...actual,
     SavedObjectsUtils: {

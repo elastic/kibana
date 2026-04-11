@@ -8,7 +8,7 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-server/base_internal';
+import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-server/internal';
 import type { SavedObjectTestkitDefinition } from './types';
 
 export interface TestkitTypeRegistries {

@@ -11,7 +11,7 @@ import buffer from 'buffer';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { type MigrationResult, SavedObjectsSerializer } from '../../base_internal';
+import { type MigrationResult, SavedObjectsSerializer } from '../base_internal';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import type { RunV2MigrationOpts } from './run_v2_migration';

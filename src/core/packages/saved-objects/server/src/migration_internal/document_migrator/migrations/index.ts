@@ -8,7 +8,7 @@
  */
 
 import type { SavedObjectMigrationMap } from '../../../..';
-import { mergeSavedObjectMigrations } from '../../../../utils';
+import { mergeSavedObjectMigrations } from '../../../utils';
 import { transformMigrationVersion } from './transform_migration_version';
 import { transformSetManagedDefault } from './transform_set_managed_default';
 

@@ -8,8 +8,8 @@
  */
 
 import type { SavedObjectsType } from '../../..';
-import { LEGACY_URL_ALIAS_TYPE, type LegacyUrlAlias } from '../../../base_internal';
-import type { ISavedObjectTypeRegistryInternal } from '../../../base_internal';
+import { LEGACY_URL_ALIAS_TYPE, type LegacyUrlAlias } from '../../base_internal';
+import type { ISavedObjectTypeRegistryInternal } from '../../base_internal';
 
 const legacyUrlAliasType: SavedObjectsType = {
   name: LEGACY_URL_ALIAS_TYPE,

@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectsRawDocSource } from '../../../..';
 import { SavedObjectsErrorHelpers } from '../../../..';
-import { SavedObjectsUtils } from '../../../../utils';
+import { SavedObjectsUtils } from '../../../utils';
 import { getSearchDsl } from '../search';
 import type { ApiExecutionContext } from './types';
 

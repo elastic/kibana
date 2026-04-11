@@ -8,7 +8,7 @@
 import Fs from 'fs/promises';
 
 import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
-import type { LegacyUrlAlias } from '@kbn/core-saved-objects-server/base_internal';
+import type { LegacyUrlAlias } from '@kbn/core-saved-objects-server/internal';
 
 import type { FtrProviderContext } from '../ftr_provider_context';
 

@@ -12,7 +12,7 @@ import fs from 'fs/promises';
 import { range, sortBy } from 'lodash';
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
-import { modelVersionToVirtualVersion } from '@kbn/core-saved-objects-server/base_internal';
+import { modelVersionToVirtualVersion } from '@kbn/core-saved-objects-server/internal';
 import '../jest_matchers';
 import { getKibanaMigratorTestKit, startElasticsearch } from '@kbn/migrator-test-kit';
 import { createType, parseLogFile } from '../test_utils';

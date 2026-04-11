@@ -10,7 +10,7 @@
 import * as Either from 'fp-ts/Either';
 import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsRawDoc, SavedObjectsRawDocSource } from '../../..';
-import type { IndexTypesMap } from '../../../base_internal';
+import type { IndexTypesMap } from '../../base_internal';
 import {
   createBulkDeleteOperationBody,
   createBulkIndexOperationTuple,

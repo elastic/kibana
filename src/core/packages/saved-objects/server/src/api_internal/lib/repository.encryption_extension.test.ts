@@ -21,7 +21,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { kibanaMigratorMock } from '../mocks';
-import type { SavedObjectsSerializer } from '../../../base_internal';
+import type { SavedObjectsSerializer } from '../../base_internal';
 import {
   MAIN_SAVED_OBJECT_INDEX,
   type ISavedObjectsEncryptionExtension,

@@ -8,7 +8,7 @@
  */
 
 import { type SavedObjectsType, MAIN_SAVED_OBJECT_INDEX } from '../../..';
-import { SavedObjectTypeRegistry } from '../../../base_internal';
+import { SavedObjectTypeRegistry } from '../../base_internal';
 import { getAllIndices } from './get_all_indices';
 
 describe('getAllIndices', () => {

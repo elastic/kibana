@@ -19,8 +19,8 @@ import {
   type SavedObject,
   type SavedObjectSanitizedDoc,
 } from '../../../..';
-import { SavedObjectsUtils } from '../../../../utils';
-import { decodeRequestVersion } from '../../../../base_internal';
+import { SavedObjectsUtils } from '../../../utils';
+import { decodeRequestVersion } from '../../../base_internal';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import type { PreflightCheckForCreateResult } from './internals/preflight_check_for_create';
 import { getSavedObjectNamespaces, getCurrentTime, normalizeNamespace, setManaged } from './utils';

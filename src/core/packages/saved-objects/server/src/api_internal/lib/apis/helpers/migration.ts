@@ -14,7 +14,7 @@ import {
   type AuthorizationTypeMap,
   type SavedObject,
 } from '../../../../..';
-import type { IKibanaMigrator } from '../../../../../base_internal';
+import type { IKibanaMigrator } from '../../../../base_internal';
 import type { IEncryptionHelper } from './encryption';
 
 export type IMigrationHelper = PublicMethodsOf<MigrationHelper>;

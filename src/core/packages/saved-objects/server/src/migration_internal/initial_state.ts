@@ -16,8 +16,8 @@ import type {
   IndexMapping,
   IndexTypesMap,
   SavedObjectsMigrationConfigType,
-} from '../../base_internal';
-import { getLatestMappingsVirtualVersionMap } from '../../base_internal';
+} from '../base_internal';
+import { getLatestMappingsVirtualVersionMap } from '../base_internal';
 import {
   getOutdatedDocumentsQuery,
   type OutdatedDocumentsQueryParams,

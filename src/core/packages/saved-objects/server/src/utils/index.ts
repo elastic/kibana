@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { SavedObjectsClient } from './src/api_internal/saved_objects_client';
+export { mergeSavedObjectMigrations, mergeSavedObjectMigrationMaps } from './merge_migrations';
 export {
-  SavedObjectsClientProvider,
-  SavedObjectsRepository,
-  PointInTimeFinder,
-} from './src/api_internal/lib';
-export type { ISavedObjectsClientProvider } from './src/api_internal/lib';
+  SavedObjectsUtils,
+  ALL_NAMESPACES_STRING,
+  DEFAULT_NAMESPACE_STRING,
+  FIND_DEFAULT_PAGE,
+  FIND_DEFAULT_PER_PAGE,
+} from './saved_objects_utils';
+export { setsAreEqual, arrayMapsAreEqual, setMapsAreEqual } from './saved_objects_test_utils';

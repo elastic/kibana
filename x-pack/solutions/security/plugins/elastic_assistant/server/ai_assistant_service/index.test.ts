@@ -18,7 +18,7 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { Subject } from 'rxjs';
 import { ReplaySubject } from 'rxjs';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-server/utils';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-server';
 import { conversationsDataClientMock } from '../__mocks__/data_clients.mock';
 import { authenticatedUser } from '../__mocks__/user';
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';

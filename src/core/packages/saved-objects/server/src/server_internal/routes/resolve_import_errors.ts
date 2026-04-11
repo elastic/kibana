@@ -11,7 +11,7 @@ import { extname } from 'path';
 import type { Readable } from 'stream';
 import { chain } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import type { SavedObjectConfig } from '../../../base_internal';
+import type { SavedObjectConfig } from '../../base_internal';
 import { SavedObjectsImportError } from '../../import_export';
 import type { InternalCoreUsageDataSetup } from '../usage_data_facade';
 import type { InternalSavedObjectRouter } from '../internal_types';

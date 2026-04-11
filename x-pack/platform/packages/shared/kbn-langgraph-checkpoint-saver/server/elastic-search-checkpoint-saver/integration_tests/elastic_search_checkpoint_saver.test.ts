@@ -11,7 +11,7 @@ import { Client as ESClient } from '@elastic/elasticsearch';
 import { ElasticSearchSaver } from '..';
 import type { Checkpoint, CheckpointTuple } from '@langchain/langgraph-checkpoint';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-server/utils';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-server';
 import { uuid6 } from '@langchain/langgraph-checkpoint';
 
 const mockLoggerFactory = loggingSystemMock.create();

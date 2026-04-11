@@ -8,7 +8,7 @@
  */
 
 import { unary } from 'lodash';
-import { SavedObjectsUtils } from '../../../../utils';
+import { SavedObjectsUtils } from '../../../utils';
 import { transformSetManagedDefault } from './transform_set_managed_default';
 
 const transform = unary(SavedObjectsUtils.getMigrationFunction(transformSetManagedDefault));

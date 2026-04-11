@@ -11,7 +11,7 @@ import { mockGetEsErrorMessage } from './delete_legacy_url_aliases.test.mock'; /
 
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { ALL_NAMESPACES_STRING } from '../../../../../utils';
+import { ALL_NAMESPACES_STRING } from '../../../../utils';
 import { typeRegistryMock } from '../../../../../mocks';
 import { deleteLegacyUrlAliases } from './delete_legacy_url_aliases';
 import type { DeleteLegacyUrlAliasesParams } from './delete_legacy_url_aliases';

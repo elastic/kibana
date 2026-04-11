@@ -9,7 +9,7 @@
 
 import type { RegisterDeprecationsConfig } from '@kbn/core-deprecations-server';
 import type { ISavedObjectTypeRegistry } from '../../..';
-import type { SavedObjectConfig } from '../../../base_internal';
+import type { SavedObjectConfig } from '../../base_internal';
 import { getUnknownTypesDeprecations } from './unknown_object_types';
 
 interface GetDeprecationProviderOptions {

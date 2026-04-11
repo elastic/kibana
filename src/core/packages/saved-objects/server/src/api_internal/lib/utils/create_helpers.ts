@@ -8,7 +8,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { IKibanaMigrator, SavedObjectsSerializer } from '../../../../base_internal';
+import type { IKibanaMigrator, SavedObjectsSerializer } from '../../../base_internal';
 import type { ISavedObjectTypeRegistry, SavedObjectsExtensions } from '../../../..';
 import type { RepositoryHelpers } from '../apis/helpers';
 import {

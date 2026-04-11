@@ -9,7 +9,7 @@
 
 import moment from 'moment';
 import { USAGE_COUNTERS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-server/utils';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-server';
 import type {
   SavedObject,
   SavedObjectsRepository,

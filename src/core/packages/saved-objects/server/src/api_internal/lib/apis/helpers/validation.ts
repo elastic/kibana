@@ -10,12 +10,9 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { Logger } from '@kbn/logging';
 import type { ISavedObjectTypeRegistry } from '../../../../..';
-import {
-  SavedObjectsTypeValidator,
-  modelVersionToVirtualVersion,
-} from '../../../../../base_internal';
+import { SavedObjectsTypeValidator, modelVersionToVirtualVersion } from '../../../../base_internal';
 import { SavedObjectsErrorHelpers, type SavedObjectSanitizedDoc } from '../../../../..';
-import { ALL_NAMESPACES_STRING } from '../../../../../utils';
+import { ALL_NAMESPACES_STRING } from '../../../../utils';
 
 export type IValidationHelper = PublicMethodsOf<ValidationHelper>;
 

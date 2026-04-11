@@ -11,7 +11,7 @@ import type { Observable } from 'rxjs';
 import { filter, firstValueFrom } from 'rxjs';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { alertFieldMap, ecsFieldMap, legacyAlertFieldMap } from '@kbn/alerts-as-data-utils';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-server/utils';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-server';
 import {
   ALERT_MUTED,
   ALERT_INSTANCE_ID,

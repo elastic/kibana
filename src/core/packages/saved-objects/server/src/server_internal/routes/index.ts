@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/logging';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import type { RouteDeprecationInfo } from '@kbn/core-http-server';
-import type { SavedObjectConfig, IKibanaMigrator } from '../../../base_internal';
+import type { SavedObjectConfig, IKibanaMigrator } from '../../base_internal';
 import type { InternalCoreUsageDataSetup } from '../usage_data_facade';
 import type { InternalSavedObjectsRequestHandlerContext } from '../internal_types';
 import { registerGetRoute } from './get';

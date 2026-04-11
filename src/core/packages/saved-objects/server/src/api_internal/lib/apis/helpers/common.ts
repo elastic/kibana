@@ -13,8 +13,8 @@ import type {
   ISavedObjectsSpacesExtension,
   ISavedObjectsEncryptionExtension,
 } from '../../../../..';
-import { getIndexForType } from '../../../../../base_internal';
-import { SavedObjectsUtils } from '../../../../../utils';
+import { getIndexForType } from '../../../../base_internal';
+import { SavedObjectsUtils } from '../../../../utils';
 import { SavedObjectsErrorHelpers } from '../../../../..';
 import { normalizeNamespace } from '../utils';
 import type { CreatePointInTimeFinderFn } from '../../point_in_time_finder';

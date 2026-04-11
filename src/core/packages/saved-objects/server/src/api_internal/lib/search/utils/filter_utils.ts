@@ -11,7 +11,7 @@ import { set } from '@kbn/safer-lodash-set';
 import { get, cloneDeep } from 'lodash';
 import * as esKuery from '@kbn/es-query';
 import { SavedObjectsErrorHelpers } from '../../../../..';
-import type { IndexMapping } from '../../../../../base_internal';
+import type { IndexMapping } from '../../../../base_internal';
 
 type KueryNode = any;
 

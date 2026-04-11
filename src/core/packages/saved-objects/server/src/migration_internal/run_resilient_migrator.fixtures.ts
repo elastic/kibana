@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectTypeRegistry } from '../../base_internal';
+import { SavedObjectTypeRegistry } from '../base_internal';
 import type { SavedObjectsType } from '../..';
 
 export const createRegistry = (types: Array<Partial<SavedObjectsType>>) => {

@@ -13,8 +13,8 @@ import { type SavedObject, SavedObjectsErrorHelpers } from '../../../..';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { createSavedObjects } from './create_saved_objects';
 import { extractErrors } from './extract_errors';
-import type { LegacyUrlAlias } from '../../../../base_internal';
-import { LEGACY_URL_ALIAS_TYPE } from '../../../../base_internal';
+import type { LegacyUrlAlias } from '../../../base_internal';
+import { LEGACY_URL_ALIAS_TYPE } from '../../../base_internal';
 
 type CreateSavedObjectsParams = Parameters<typeof createSavedObjects>[0];
 

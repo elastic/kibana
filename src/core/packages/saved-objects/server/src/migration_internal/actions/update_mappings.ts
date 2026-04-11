@@ -10,7 +10,7 @@
 import * as Either from 'fp-ts/Either';
 import type * as TaskEither from 'fp-ts/TaskEither';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { IndexMapping } from '../../../base_internal';
+import type { IndexMapping } from '../../base_internal';
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 import type { RetryableEsClientError } from './catch_retryable_es_client_errors';
 import { DEFAULT_TIMEOUT } from './constants';

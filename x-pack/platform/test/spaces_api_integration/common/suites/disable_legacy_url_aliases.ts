@@ -9,7 +9,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { Agent as SuperTestAgent } from 'supertest';
 
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import type { LegacyUrlAlias } from '@kbn/core-saved-objects-server/base_internal';
+import type { LegacyUrlAlias } from '@kbn/core-saved-objects-server/internal';
 import expect from '@kbn/expect';
 
 import { getUrlPrefix } from '../../../saved_object_api_integration/common/lib/saved_object_test_utils';

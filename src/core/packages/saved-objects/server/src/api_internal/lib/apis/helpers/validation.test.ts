@@ -12,7 +12,7 @@ import type { SavedObjectsType } from '../../../../..';
 import { type SavedObjectSanitizedDoc } from '../../../../..';
 import { ValidationHelper } from './validation';
 import { typedef, typedef1, typedef2 } from './validation_fixtures';
-import { SavedObjectTypeRegistry } from '../../../../../base_internal';
+import { SavedObjectTypeRegistry } from '../../../../base_internal';
 
 const defaultVersion = '8.10.0';
 const modelVirtualVersion = '10.1.0';

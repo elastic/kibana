@@ -35,7 +35,7 @@ import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core/server';
 
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 
-import { decodeRequestVersion, encodeVersion } from '@kbn/core-saved-objects-server/base_internal';
+import { decodeRequestVersion, encodeVersion } from '@kbn/core-saved-objects-server/internal';
 import { nodeBuilder } from '@kbn/es-query';
 import type { IBasePath, ExecutionContextStart } from '@kbn/core/server';
 

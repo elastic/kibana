@@ -26,7 +26,7 @@ import {
   type SavedObject,
   type SavedObjectSanitizedDoc,
 } from '../../../..';
-import { SavedObjectsUtils } from '../../../../utils';
+import { SavedObjectsUtils } from '../../../utils';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import {
   getBulkOperationError,

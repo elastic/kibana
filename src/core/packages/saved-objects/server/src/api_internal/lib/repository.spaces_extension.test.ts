@@ -27,7 +27,7 @@ import type {
   SavedObjectsResolveResponse,
   SavedObjectsBulkUpdateObject,
 } from '@kbn/core-saved-objects-api-server';
-import type { SavedObjectsSerializer } from '../../../base_internal';
+import type { SavedObjectsSerializer } from '../../base_internal';
 import type {
   ISavedObjectsSpacesExtension,
   ISavedObjectsSecurityExtension,

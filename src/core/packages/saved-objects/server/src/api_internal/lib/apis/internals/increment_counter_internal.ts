@@ -17,7 +17,7 @@ import {
   type SavedObject,
   type SavedObjectSanitizedDoc,
 } from '../../../../..';
-import { encodeHitVersion } from '../../../../../base_internal';
+import { encodeHitVersion } from '../../../../base_internal';
 import { DEFAULT_REFRESH_SETTING } from '../../constants';
 import { getCurrentTime, normalizeNamespace } from '../utils';
 import type { ApiExecutionContext } from '../types';

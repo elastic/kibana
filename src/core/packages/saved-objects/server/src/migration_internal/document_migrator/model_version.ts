@@ -19,7 +19,7 @@ import {
   assertValidModelVersion,
   buildModelVersionTransformFn,
   convertModelVersionBackwardConversionSchema,
-} from '../../../base_internal';
+} from '../../base_internal';
 import { TransformSavedObjectDocumentError } from '../core';
 import { type Transform, type TransformFn, TransformType, type TypeVersionSchema } from './types';
 

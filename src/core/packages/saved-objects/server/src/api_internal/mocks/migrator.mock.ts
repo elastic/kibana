@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IKibanaMigrator, IDocumentMigrator } from '../../../base_internal';
+import type { IKibanaMigrator, IDocumentMigrator } from '../../base_internal';
 
 export type KibanaMigratorMock = jest.Mocked<IKibanaMigrator>;
 

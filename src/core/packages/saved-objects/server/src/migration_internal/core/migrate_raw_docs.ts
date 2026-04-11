@@ -18,7 +18,7 @@ import type {
   SavedObjectUnsanitizedDoc,
   ISavedObjectsSerializer,
 } from '../../..';
-import type { IDocumentMigrator } from '../../../base_internal';
+import type { IDocumentMigrator } from '../../base_internal';
 import { TransformSavedObjectDocumentError } from '.';
 
 type MigrateAndConvertFn = IDocumentMigrator['migrateAndConvert'];

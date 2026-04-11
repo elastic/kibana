@@ -8,8 +8,7 @@
 // See: https://github.com/elastic/kibana/issues/117255, this creates mocks to avoid memory leaks from kibana core.
 
 // We _must_ import from the restricted path or we pull in _everything_ including memory leaks from Kibana core
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-server/utils';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
 module.exports = {
   SavedObjectsUtils,

@@ -9,8 +9,8 @@
 
 import { type SavedObject, type CreatedObject, SavedObjectsErrorHelpers } from '../../../..';
 import { extractErrors } from './extract_errors';
-import type { LegacyUrlAlias } from '../../../../base_internal';
-import { LEGACY_URL_ALIAS_TYPE } from '../../../../base_internal';
+import type { LegacyUrlAlias } from '../../../base_internal';
+import { LEGACY_URL_ALIAS_TYPE } from '../../../base_internal';
 
 describe('extractErrors()', () => {
   test('returns empty array when no errors exist', () => {

@@ -13,8 +13,8 @@ import { PLUGIN_SYSTEM_ENABLE_ALL_PLUGINS_CONFIG_PATH } from '@kbn/core-plugins-
 import type {
   FieldListMap,
   SavedObjectsTypeMappingDefinitions,
-} from '@kbn/core-saved-objects-server/base_internal';
-import { getFieldListMapFromMappingDefinitions } from '@kbn/core-saved-objects-server/base_internal';
+} from '@kbn/core-saved-objects-server/internal';
+import { getFieldListMapFromMappingDefinitions } from '@kbn/core-saved-objects-server/internal';
 import { getFieldListMapFromModelVersions } from './get_field_list_from_model_version';
 
 export interface Result {

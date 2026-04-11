@@ -11,7 +11,7 @@ import { setTimeout as timer } from 'timers/promises';
 import { join } from 'path';
 import { omit, sortBy } from 'lodash';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import type { MigrationResult } from '@kbn/core-saved-objects-server/base_internal';
+import type { MigrationResult } from '@kbn/core-saved-objects-server/internal';
 import type { Client } from '@elastic/elasticsearch';
 import {
   clearLog,

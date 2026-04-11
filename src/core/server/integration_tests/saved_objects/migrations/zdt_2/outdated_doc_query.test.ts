@@ -19,7 +19,7 @@ import {
   SavedObjectsSerializer,
   SavedObjectTypeRegistry,
   modelVersionToVirtualVersion,
-} from '@kbn/core-saved-objects-server/base_internal';
+} from '@kbn/core-saved-objects-server/internal';
 import { getOutdatedDocumentsQuery } from '@kbn/core-saved-objects-server/src/migration_internal/zdt/utils';
 
 export const logFilePath = Path.join(__dirname, 'outdated_doc_query.test.log');

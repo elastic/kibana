@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { DEFAULT_INDEX_TYPES_MAP, HASH_TO_VERSION_MAP } from './src/base_internal/constants';
-export { LEGACY_URL_ALIAS_TYPE, type LegacyUrlAlias } from './src/base_internal/legacy_alias';
+export { DEFAULT_INDEX_TYPES_MAP, HASH_TO_VERSION_MAP } from './constants';
+export { LEGACY_URL_ALIAS_TYPE, type LegacyUrlAlias } from './legacy_alias';
 export {
   getProperty,
   getRootProperties,
@@ -20,24 +20,19 @@ export {
   type IndexTypesMap,
   type SavedObjectsTypeMappingDefinitions,
   type IndexMappingMigrationStateMeta,
-} from './src/base_internal/mappings';
-export { SavedObjectsSerializer } from './src/base_internal/serialization';
-export { SavedObjectsTypeValidator } from './src/base_internal/validation';
-export {
-  decodeRequestVersion,
-  decodeVersion,
-  encodeVersion,
-  encodeHitVersion,
-} from './src/base_internal/version';
+} from './mappings';
+export { SavedObjectsSerializer } from './serialization';
+export { SavedObjectsTypeValidator } from './validation';
+export { decodeRequestVersion, decodeVersion, encodeVersion, encodeHitVersion } from './version';
 export {
   savedObjectsConfig,
   savedObjectsMigrationConfig,
   SavedObjectConfig,
   type SavedObjectsConfigType,
   type SavedObjectsMigrationConfigType,
-} from './src/base_internal/saved_objects_config';
-export type { ISavedObjectTypeRegistryInternal } from './src/base_internal/saved_objects_type_registry';
-export { SavedObjectTypeRegistry } from './src/base_internal/saved_objects_type_registry';
+} from './saved_objects_config';
+export type { ISavedObjectTypeRegistryInternal } from './saved_objects_type_registry';
+export { SavedObjectTypeRegistry } from './saved_objects_type_registry';
 export type {
   IKibanaMigrator,
   KibanaMigratorStatus,
@@ -47,7 +42,7 @@ export type {
   IDocumentMigrator,
   DocumentMigrateOptions,
   IsDowngradeRequiredOptions,
-} from './src/base_internal/migration';
+} from './migration';
 export {
   parseObjectKey,
   getObjectKey,
@@ -55,7 +50,7 @@ export {
   getFieldListFromTypeMapping,
   getFieldListMapFromMappingDefinitions,
   type FieldListMap,
-} from './src/base_internal/utils';
+} from './utils';
 export {
   modelVersionVirtualMajor,
   initialModelVersion,
@@ -84,4 +79,4 @@ export {
   convertModelVersionBackwardConversionSchema,
   getVersionAddedMappings,
   getVersionAddedFields,
-} from './src/base_internal/model_version';
+} from './model_version';

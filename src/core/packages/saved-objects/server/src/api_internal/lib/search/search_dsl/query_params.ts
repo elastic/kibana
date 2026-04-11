@@ -11,8 +11,8 @@ import * as esKuery from '@kbn/es-query';
 import type { SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ISavedObjectTypeRegistry } from '../../../../..';
-import { ALL_NAMESPACES_STRING, DEFAULT_NAMESPACE_STRING } from '../../../../../utils';
-import { getProperty, type IndexMapping } from '../../../../../base_internal';
+import { ALL_NAMESPACES_STRING, DEFAULT_NAMESPACE_STRING } from '../../../../utils';
+import { getProperty, type IndexMapping } from '../../../../base_internal';
 import { getReferencesFilter } from './references_filter';
 
 type KueryNode = any;

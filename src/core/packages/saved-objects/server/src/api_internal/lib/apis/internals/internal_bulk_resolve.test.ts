@@ -18,8 +18,8 @@ import type {
   SavedObjectsBulkResolveObject,
   SavedObjectsBaseOptions,
 } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsUtils } from '../../../../../utils';
-import { SavedObjectsSerializer, LEGACY_URL_ALIAS_TYPE } from '../../../../../base_internal';
+import { SavedObjectsUtils } from '../../../../utils';
+import { SavedObjectsSerializer, LEGACY_URL_ALIAS_TYPE } from '../../../../base_internal';
 import { typeRegistryMock } from '../../../../../mocks';
 import { internalBulkResolve, type InternalBulkResolveParams } from './internal_bulk_resolve';
 import { normalizeNamespace } from '../utils';

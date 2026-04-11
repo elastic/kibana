@@ -18,7 +18,7 @@ import type {
   VirtualVersionMap,
   SavedObjectsMigrationConfigType,
   IDocumentMigrator,
-} from '../../../../base_internal';
+} from '../../../base_internal';
 
 /**
  * The set of static, precomputed values and services used by the ZDT migration

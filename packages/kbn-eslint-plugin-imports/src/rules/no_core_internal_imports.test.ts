@@ -86,10 +86,25 @@ for (const [name, tester] of [tsTester, babelTester]) {
           '/repo/src/platform/plugins/shared/my-plugin/server/index.ts',
           '@kbn/some-other-package/internal'
         ),
-        // Core package importing /base_internal (allowed - not /internal)
+        // Core package importing /base_internal from inside src/core/ (allowed)
         make(
-          '/repo/src/platform/plugins/shared/my-plugin/server/index.ts',
+          '/repo/src/core/packages/saved-objects/server-internal/src/service.ts',
           '@kbn/core-saved-objects-server/base_internal'
+        ),
+        // Pre-existing violation allowlist: kbn-check-saved-objects-cli (allowed until moved to src/core/)
+        make(
+          '/repo/packages/kbn-check-saved-objects-cli/src/index.ts',
+          '@kbn/core-saved-objects-server/internal'
+        ),
+        // Pre-existing violation allowlist: kbn-migrator-test-kit (allowed until moved to src/core/)
+        make(
+          '/repo/src/platform/packages/private/kbn-migrator-test-kit/src/index.ts',
+          '@kbn/core-saved-objects-server/internal'
+        ),
+        // Pre-existing violation allowlist: platform plugin (allowed until cleaned up)
+        make(
+          '/repo/x-pack/platform/plugins/shared/encrypted_saved_objects/server/create_model_version.ts',
+          '@kbn/core-saved-objects-server/internal'
         ),
       ],
 
@@ -140,8 +155,47 @@ for (const [name, tester] of [tsTester, babelTester]) {
         // Package outside core importing /internal (blocked)
         {
           ...make(
-            '/repo/packages/kbn-check-saved-objects-cli/src/index.ts',
+            '/repo/packages/kbn-some-other-package/src/index.ts',
             '@kbn/core-data-streams-server/internal'
+          ),
+          errors: [
+            {
+              line: 1,
+              messageId: 'CORE_INTERNAL_IMPORT',
+            },
+          ],
+        },
+        // Platform plugin importing /base_internal (blocked)
+        {
+          ...make(
+            '/repo/src/platform/plugins/shared/alerting/server/index.ts',
+            '@kbn/core-saved-objects-server/base_internal'
+          ),
+          errors: [
+            {
+              line: 1,
+              messageId: 'CORE_INTERNAL_IMPORT',
+            },
+          ],
+        },
+        // Platform plugin importing /api_internal (blocked)
+        {
+          ...make(
+            '/repo/src/platform/plugins/shared/my-plugin/server/index.ts',
+            '@kbn/core-saved-objects-server/api_internal'
+          ),
+          errors: [
+            {
+              line: 1,
+              messageId: 'CORE_INTERNAL_IMPORT',
+            },
+          ],
+        },
+        // Package outside core importing /migration_internal (blocked)
+        {
+          ...make(
+            '/repo/packages/kbn-some-other-package/src/index.ts',
+            '@kbn/core-saved-objects-server/migration_internal'
           ),
           errors: [
             {

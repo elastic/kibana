@@ -424,24 +424,22 @@ export type {
   ISavedObjectsSecurityExtension,
   ISavedObjectsSpacesExtension,
   SavedObjectsExtensions,
-} from '@kbn/core-saved-objects-server';
-export {
   ENCRYPTION_EXTENSION_ID,
   SECURITY_EXTENSION_ID,
   SPACES_EXTENSION_ID,
   SavedObjectsErrorHelpers,
-} from '@kbn/core-saved-objects-server';
-export {
   SavedObjectsUtils,
   mergeSavedObjectMigrationMaps,
-} from '@kbn/core-saved-objects-server/utils';
-export { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-server/base_internal';
-export type { SavedObjectsRepository } from '@kbn/core-saved-objects-server/api_internal';
-export { SavedObjectsClient } from '@kbn/core-saved-objects-server/api_internal';
+} from '@kbn/core-saved-objects-server';
+export {
+  SavedObjectTypeRegistry,
+  SavedObjectsClient,
+} from '@kbn/core-saved-objects-server/internal';
 export type {
+  SavedObjectsRepository,
   SavedObjectsExportError,
   SavedObjectsImportError,
-} from '@kbn/core-saved-objects-server/import_export_internal';
+} from '@kbn/core-saved-objects-server/internal';
 
 export type {
   UiSettingsParams,

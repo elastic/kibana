@@ -17,7 +17,7 @@ import type { BuildFlavor } from '@kbn/config';
 import { ConfigService, Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { KibanaMigrator } from '@kbn/core-saved-objects-server/migration_internal';
+import { KibanaMigrator } from '@kbn/core-saved-objects-server/internal';
 import {
   SavedObjectConfig,
   type SavedObjectsConfigType,
@@ -27,8 +27,8 @@ import {
   type MigrationResult,
   type IndexTypesMap,
   type ISavedObjectTypeRegistryInternal,
-} from '@kbn/core-saved-objects-server/base_internal';
-import { SavedObjectsRepository } from '@kbn/core-saved-objects-server/api_internal';
+} from '@kbn/core-saved-objects-server/internal';
+import { SavedObjectsRepository } from '@kbn/core-saved-objects-server/internal';
 import {
   ElasticsearchConfig,
   type ElasticsearchConfigType,

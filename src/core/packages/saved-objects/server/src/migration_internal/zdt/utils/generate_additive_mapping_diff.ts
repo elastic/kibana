@@ -13,8 +13,8 @@ import {
   getVirtualVersionsFromMappingMeta,
   getVirtualVersionMap,
   getModelVersionDelta,
-} from '../../../../base_internal';
-import { initialModelVersion } from '../../../../base_internal';
+} from '../../../base_internal';
+import { initialModelVersion } from '../../../base_internal';
 import { getUpdatedRootFields } from '../../core/compare_mappings';
 import { getBaseMappings } from '../../core/build_active_mappings';
 

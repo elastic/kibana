@@ -15,7 +15,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import * as Either from 'fp-ts/Either';
 import type { SavedObjectsRawDoc } from '../../..';
-import type { IndexMapping } from '../../../base_internal';
+import type { IndexMapping } from '../../base_internal';
 import type { AliasAction, FetchIndexResponse } from '../actions';
 import type { BulkIndexOperationTuple } from './create_batches';
 import type {

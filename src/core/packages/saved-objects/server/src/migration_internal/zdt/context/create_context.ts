@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getVirtualVersionMap } from '../../../../base_internal';
+import { getVirtualVersionMap } from '../../../base_internal';
 import type { MigrateIndexOptions } from '../migrate_index';
 import type { MigratorContext } from './types';
 

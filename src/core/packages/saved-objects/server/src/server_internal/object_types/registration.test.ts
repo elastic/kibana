@@ -8,7 +8,7 @@
  */
 
 import { typeRegistryMock } from '../../../mocks';
-import { LEGACY_URL_ALIAS_TYPE } from '../../../base_internal';
+import { LEGACY_URL_ALIAS_TYPE } from '../../base_internal';
 import { registerCoreObjectTypes } from './registration';
 
 describe('Core saved object types registration', () => {

@@ -14,7 +14,7 @@ import type {
   IndexMappingMeta,
   IndexMappingSafe,
   SavedObjectsTypeMappingDefinitions,
-} from '../../../base_internal';
+} from '../../base_internal';
 
 /**
  * Creates an index mapping with the core properties required by saved object

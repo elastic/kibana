@@ -17,12 +17,12 @@ import {
   type SavedObjectsRawDocSource,
   SavedObjectsErrorHelpers,
 } from '../../../../..';
-import { ALL_NAMESPACES_STRING } from '../../../../../utils';
+import { ALL_NAMESPACES_STRING } from '../../../../utils';
 import {
   LEGACY_URL_ALIAS_TYPE,
   getObjectKey,
   type LegacyUrlAlias,
-} from '../../../../../base_internal';
+} from '../../../../base_internal';
 import { findLegacyUrlAliases } from './find_legacy_url_aliases';
 import type { CreatePointInTimeFinderFn } from '../../point_in_time_finder';
 import type { RepositoryEsClient } from '../../repository_es_client';

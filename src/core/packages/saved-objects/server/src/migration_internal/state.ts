@@ -12,7 +12,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { DocLinks } from '@kbn/doc-links';
 import type { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsRawDoc, SavedObjectTypeExcludeFromUpgradeFilterHook } from '../..';
-import type { IndexMapping, IndexTypesMap, VirtualVersionMap } from '../../base_internal';
+import type { IndexMapping, IndexTypesMap, VirtualVersionMap } from '../base_internal';
 import type { ControlState } from './state_action_machine';
 import type { AliasAction } from './actions';
 import type { TransformErrorObjects } from './core';

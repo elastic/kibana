@@ -50,10 +50,10 @@ import {
   type IKibanaMigrator,
   DEFAULT_INDEX_TYPES_MAP,
   HASH_TO_VERSION_MAP,
-} from '../../base_internal';
-import { SavedObjectsClient, SavedObjectsClientProvider } from '../../api_internal';
-import { KibanaMigrator } from '../../migration_internal';
-import { SavedObjectsRepository } from '../../api_internal';
+} from '../base_internal';
+import { SavedObjectsClient, SavedObjectsClientProvider } from '../api_internal';
+import { KibanaMigrator } from '../migration_internal';
+import { SavedObjectsRepository } from '../api_internal';
 import { SavedObjectsExporter, SavedObjectsImporter } from '../import_export';
 import type { InternalCoreUsageDataSetup } from './usage_data_facade';
 import { MAIN_SAVED_OBJECT_INDEX } from '../..';

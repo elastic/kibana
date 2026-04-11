@@ -11,8 +11,8 @@ import { mockKibanaMigrator } from '@kbn/core-saved-objects-server/mocks';
 
 export const migratorInstanceMock = mockKibanaMigrator.create();
 export const KibanaMigratorMock = jest.fn().mockImplementation(() => migratorInstanceMock);
-jest.doMock('@kbn/core-saved-objects-server/migration_internal', () => {
-  const actual = jest.requireActual('@kbn/core-saved-objects-server/migration_internal');
+jest.doMock('@kbn/core-saved-objects-server/internal', () => {
+  const actual = jest.requireActual('@kbn/core-saved-objects-server/internal');
   return {
     ...actual,
     KibanaMigrator: KibanaMigratorMock,

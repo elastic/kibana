@@ -6,7 +6,7 @@
  */
 
 import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-server/utils';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-server';
 import type {
   AutomaticImportPluginApiRequestHandlerContext,
   AutomaticImportPluginCoreSetupDependencies,

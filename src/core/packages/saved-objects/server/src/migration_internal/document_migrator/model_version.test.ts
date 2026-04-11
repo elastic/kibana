@@ -16,7 +16,7 @@ import type {
   SavedObjectModelDataBackfillFn,
   SavedObjectUnsanitizedDoc,
 } from '../../..';
-import { modelVersionToVirtualVersion } from '../../../base_internal';
+import { modelVersionToVirtualVersion } from '../../base_internal';
 import type { Transform } from './types';
 import { TransformType } from './types';
 import {

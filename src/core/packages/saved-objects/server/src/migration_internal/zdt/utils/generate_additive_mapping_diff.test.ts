@@ -13,7 +13,7 @@ import {
 } from './generate_additive_mapping_diff.test.mocks';
 
 import type { SavedObjectsModelVersion } from '../../../..';
-import type { IndexMappingMeta, IndexMapping } from '../../../../base_internal';
+import type { IndexMappingMeta, IndexMapping } from '../../../base_internal';
 import { generateAdditiveMappingDiff } from './generate_additive_mapping_diff';
 import { getBaseMappings } from '../../core/build_active_mappings';
 import { createType } from '../test_helpers';

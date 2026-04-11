@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IndexMapping } from '../../../../../base_internal';
+import type { IndexMapping } from '../../../../base_internal';
 import { fieldDefined, hasFilterKeyError } from '../utils/filter_utils';
 
 /**

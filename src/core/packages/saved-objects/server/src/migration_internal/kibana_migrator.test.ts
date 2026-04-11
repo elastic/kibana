@@ -12,7 +12,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { SavedObjectsType } from '../..';
-import { type MigrationResult, SavedObjectTypeRegistry } from '../../base_internal';
+import { type MigrationResult, SavedObjectTypeRegistry } from '../base_internal';
 import { KibanaMigrator, type KibanaMigratorOptions } from './kibana_migrator';
 import { DocumentMigrator } from './document_migrator';
 import { ByteSizeValue } from '@kbn/config-schema';

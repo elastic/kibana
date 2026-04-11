@@ -9,7 +9,7 @@ import { isEmpty, isArray } from 'lodash';
 import Boom from '@hapi/boom';
 
 import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-server/utils';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-server';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
 import type { CasesSearchRequest, CasesFindResponse } from '../../../common/types/api';
 import { CasesSearchRequestRt, CasesFindResponseRt } from '../../../common/types/api';

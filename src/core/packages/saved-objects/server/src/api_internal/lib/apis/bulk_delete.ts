@@ -24,7 +24,7 @@ import type {
   ISavedObjectsSecurityExtension,
 } from '../../../..';
 import { SavedObjectsErrorHelpers, errorContent } from '../../../..';
-import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '../../../../utils';
+import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '../../../utils';
 import { DEFAULT_REFRESH_SETTING, MAX_CONCURRENT_ALIAS_DELETIONS } from '../constants';
 import {
   getBulkOperationError,

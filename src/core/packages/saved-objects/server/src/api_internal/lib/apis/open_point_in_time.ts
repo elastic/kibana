@@ -15,7 +15,7 @@ import type {
   SavedObjectsOpenPointInTimeResponse,
 } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '../../../..';
-import { DEFAULT_NAMESPACE_STRING } from '../../../../utils';
+import { DEFAULT_NAMESPACE_STRING } from '../../../utils';
 import type { ApiExecutionContext } from './types';
 
 export interface PerforOpenPointInTimeParams {

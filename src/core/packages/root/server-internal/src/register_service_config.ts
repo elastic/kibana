@@ -27,7 +27,7 @@ import { opsConfig } from '@kbn/core-metrics-server-internal';
 import {
   savedObjectsConfig,
   savedObjectsMigrationConfig,
-} from '@kbn/core-saved-objects-server/base_internal';
+} from '@kbn/core-saved-objects-server/internal';
 import { config as i18nConfig } from '@kbn/core-i18n-server-internal';
 import { config as deprecationConfig } from '@kbn/core-deprecations-server-internal';
 import { config as userActivityConfig } from '@kbn/core-user-activity-server-internal';

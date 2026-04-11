@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IndexMappingMeta, SavedObjectsTypeMappingDefinitions } from '../../../base_internal';
+import type { IndexMappingMeta, SavedObjectsTypeMappingDefinitions } from '../../base_internal';
 import { buildActiveMappings, getBaseMappings } from './build_active_mappings';
 
 describe('buildActiveMappings', () => {

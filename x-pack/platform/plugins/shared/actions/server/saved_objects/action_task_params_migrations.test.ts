@@ -11,7 +11,7 @@ import type { ActionTaskParams } from '../types';
 import type { SavedObjectReference, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { migrationMocks } from '@kbn/core/server/mocks';
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-server/utils';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-server';
 import { createMockInMemoryConnector } from '../application/connector/mocks';
 
 const context = migrationMocks.createContext();

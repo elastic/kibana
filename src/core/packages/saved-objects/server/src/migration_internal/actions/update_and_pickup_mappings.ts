@@ -12,7 +12,7 @@ import * as TaskEither from 'fp-ts/TaskEither';
 import { pipe } from 'fp-ts/function';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { IndexMapping } from '../../../base_internal';
+import type { IndexMapping } from '../../base_internal';
 import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,

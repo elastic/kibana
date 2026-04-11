@@ -15,7 +15,7 @@ import type {
   SavedObjectsTypeMappingDefinition,
   SavedObjectsModelVersionMap,
 } from '../../..';
-import { assertValidModelVersion, globalSwitchToModelVersionAt } from '../../../base_internal';
+import { assertValidModelVersion, globalSwitchToModelVersionAt } from '../../base_internal';
 import type { SavedObjectsModelChange, SavedObjectsModelMappingsAdditionChange } from '../../..';
 
 /**

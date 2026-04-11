@@ -9,7 +9,7 @@
 
 import { savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-server/utils';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-server';
 
 import type {
   DashboardDocPre700,

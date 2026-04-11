@@ -13,7 +13,7 @@ import {
   type IndexMapping,
   type IndexMappingMeta,
   getVirtualVersionMap,
-} from '../../../../base_internal';
+} from '../../../base_internal';
 import { getBaseMappings, buildTypesMappings } from '../../core';
 
 interface BuildIndexMappingsOpts {

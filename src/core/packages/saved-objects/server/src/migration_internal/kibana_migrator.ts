@@ -33,7 +33,7 @@ import {
   type SavedObjectsMigrationConfigType,
   SavedObjectsSerializer,
   type SavedObjectsTypeMappingDefinitions,
-} from '../../base_internal';
+} from '../base_internal';
 import { createCummulativeLogger } from './create_cummulative_logger';
 import { buildActiveMappings, buildTypesMappings } from './core';
 import { DocumentMigrator } from './document_migrator';

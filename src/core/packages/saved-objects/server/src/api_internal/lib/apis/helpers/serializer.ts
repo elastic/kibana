@@ -10,7 +10,7 @@
 import { omit } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ISavedObjectTypeRegistry, ISavedObjectsSerializer } from '../../../../..';
-import { SavedObjectsUtils } from '../../../../../utils';
+import { SavedObjectsUtils } from '../../../../utils';
 import type {
   SavedObject,
   SavedObjectsRawDoc,

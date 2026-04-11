@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IndexMapping, VirtualVersionMap } from '../../../base_internal';
+import type { IndexMapping, VirtualVersionMap } from '../../base_internal';
 import { getNewAndUpdatedTypes, getUpdatedRootFields } from './compare_mappings';
 
 /**

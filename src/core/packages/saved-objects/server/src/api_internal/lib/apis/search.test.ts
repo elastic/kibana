@@ -16,7 +16,7 @@ import type {
   ISavedObjectsSecurityExtension,
   AuthorizationTypeMap,
 } from '../../../..';
-import type { SavedObjectsSerializer } from '../../../../base_internal';
+import type { SavedObjectsSerializer } from '../../../base_internal';
 import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 

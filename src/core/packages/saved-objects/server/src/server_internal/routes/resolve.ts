@@ -10,7 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import type { RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
-import type { SavedObjectConfig } from '../../../base_internal';
+import type { SavedObjectConfig } from '../../base_internal';
 import type { InternalCoreUsageDataSetup } from '../usage_data_facade';
 import type { InternalSavedObjectRouter } from '../internal_types';
 import { throwIfTypeNotVisibleByAPI, logWarnOnExternalRequest } from './utils';

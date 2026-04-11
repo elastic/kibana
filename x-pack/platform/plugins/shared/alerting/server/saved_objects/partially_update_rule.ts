@@ -12,7 +12,7 @@ import type {
   SavedObjectsUpdateOptions,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { decodeRequestVersion } from '@kbn/core-saved-objects-server/base_internal';
+import { decodeRequestVersion } from '@kbn/core-saved-objects-server/internal';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { RawRule } from '../types';
 

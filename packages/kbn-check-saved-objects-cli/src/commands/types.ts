@@ -9,7 +9,7 @@
 
 import type { ListrTask } from 'listr2';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-server/base_internal';
+import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-server/internal';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { Root } from '@kbn/core-root-server-internal';
 import type {

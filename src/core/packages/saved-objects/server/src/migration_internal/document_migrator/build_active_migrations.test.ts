@@ -21,7 +21,7 @@ import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SavedObjectsType } from '../../..';
 import { buildActiveMigrations } from './build_active_migrations';
-import { SavedObjectTypeRegistry } from '../../../base_internal';
+import { SavedObjectTypeRegistry } from '../../base_internal';
 import type { Transform } from './types';
 import { TransformType } from './types';
 

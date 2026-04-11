@@ -8,8 +8,8 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import type { FieldListMap } from '@kbn/core-saved-objects-server/base_internal';
-import { getVersionAddedFields } from '@kbn/core-saved-objects-server/base_internal';
+import type { FieldListMap } from '@kbn/core-saved-objects-server/internal';
+import { getVersionAddedFields } from '@kbn/core-saved-objects-server/internal';
 
 const getModelVersionAddedFieldsForType = (typeDef: SavedObjectsType): string[] => {
   const addedFieldSet = new Set<string>();

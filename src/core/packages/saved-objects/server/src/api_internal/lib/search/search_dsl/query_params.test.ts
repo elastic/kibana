@@ -10,8 +10,8 @@
 import { getReferencesFilterMock } from './query_params.tests.mocks';
 
 import * as esKuery from '@kbn/es-query';
-import { ALL_NAMESPACES_STRING, DEFAULT_NAMESPACE_STRING } from '../../../../../utils';
-import { SavedObjectTypeRegistry, type IndexMapping } from '../../../../../base_internal';
+import { ALL_NAMESPACES_STRING, DEFAULT_NAMESPACE_STRING } from '../../../../utils';
+import { SavedObjectTypeRegistry, type IndexMapping } from '../../../../base_internal';
 import { getQueryParams } from './query_params';
 import type { SavedObjectsType, SavedObjectsTypeMappingDefinition } from '../../../../..';
 

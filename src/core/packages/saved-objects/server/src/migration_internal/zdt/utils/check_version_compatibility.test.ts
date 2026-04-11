@@ -18,7 +18,7 @@ import type {
   IndexMapping,
   VirtualVersionMap,
   CompareModelVersionResult,
-} from '../../../../base_internal';
+} from '../../../base_internal';
 import { checkVersionCompatibility } from './check_version_compatibility';
 import { createType } from '../test_helpers';
 

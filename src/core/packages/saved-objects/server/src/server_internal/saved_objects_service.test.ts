@@ -42,7 +42,7 @@ import {
   SavedObjectsClient,
   SavedObjectsClientProvider,
   SavedObjectsRepository,
-} from '../../api_internal';
+} from '../api_internal';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 import { SavedObjectsService } from './saved_objects_service';

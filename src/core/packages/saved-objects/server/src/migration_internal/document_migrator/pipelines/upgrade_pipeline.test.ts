@@ -9,7 +9,7 @@
 
 import _ from 'lodash';
 import type { SavedObjectUnsanitizedDoc } from '../../../..';
-import { modelVersionToVirtualVersion } from '../../../../base_internal';
+import { modelVersionToVirtualVersion } from '../../../base_internal';
 import type { Transform, TypeTransforms, TransformFn } from '../types';
 import { TransformType } from '../types';
 import { DocumentUpgradePipeline } from './upgrade_pipeline';

@@ -9,7 +9,7 @@
 
 import * as Rx from 'rxjs';
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-server/base_internal';
+import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-server/internal';
 import { startTSWorker } from '@kbn/dev-utils';
 import type { Result } from './extract_mappings_from_plugins_worker';
 

@@ -13,7 +13,7 @@ import type {
   SavedObjectsMappingProperties,
   SavedObjectTypeExcludeFromUpgradeFilterHook,
 } from '../../../..';
-import type { IndexMapping, IndexMappingMeta } from '../../../../base_internal';
+import type { IndexMapping, IndexMappingMeta } from '../../../base_internal';
 import type { MigrationLog, Progress, TransformRawDocs } from '../../types';
 import type { ControlState } from '../../state_action_machine';
 import type { BulkOperationBatch } from '../../model/create_batches';

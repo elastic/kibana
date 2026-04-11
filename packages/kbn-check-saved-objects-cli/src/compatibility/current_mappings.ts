@@ -10,7 +10,7 @@
 import Fsp from 'fs/promises';
 import Path from 'path';
 
-import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-server/base_internal';
+import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-server/internal';
 import { prettyPrintAndSortKeys } from '@kbn/utils';
 
 export const CURRENT_MAPPINGS_FILE_PATH = Path.resolve(__dirname, '../../current_mappings.json');

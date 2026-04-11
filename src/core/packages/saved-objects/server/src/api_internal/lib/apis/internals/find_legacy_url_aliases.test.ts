@@ -8,7 +8,7 @@
  */
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import { type LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../../../../base_internal';
+import { type LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../../../base_internal';
 import type { SavedObjectsPointInTimeFinderClient } from '@kbn/core-saved-objects-api-server';
 import { savedObjectsPointInTimeFinderMock } from '../../../mocks';
 import type { CreatePointInTimeFinderFn, PointInTimeFinder } from '../../point_in_time_finder';

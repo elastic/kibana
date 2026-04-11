@@ -9,8 +9,8 @@
 
 import { omit } from 'lodash';
 import type { SavedObjectsRawDoc } from '../../../../..';
-import { ALL_NAMESPACES_STRING } from '../../../../../utils';
-import { encodeHitVersion } from '../../../../../base_internal';
+import { ALL_NAMESPACES_STRING } from '../../../../utils';
+import { encodeHitVersion } from '../../../../base_internal';
 import { typeRegistryMock } from '../../../../../mocks';
 import {
   getBulkOperationError,

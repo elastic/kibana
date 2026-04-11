@@ -11,7 +11,7 @@ import { isSupportedEsServer } from '@kbn/core-elasticsearch-server-internal';
 import type { SavedObjectsGetOptions } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectsRawDocSource } from '../../../..';
 import { SavedObjectsErrorHelpers, type SavedObject } from '../../../..';
-import { SavedObjectsUtils } from '../../../../utils';
+import { SavedObjectsUtils } from '../../../utils';
 import { isFoundGetResponse, getSavedObjectFromSource, rawDocExistsInNamespace } from './utils';
 import type { ApiExecutionContext } from './types';
 

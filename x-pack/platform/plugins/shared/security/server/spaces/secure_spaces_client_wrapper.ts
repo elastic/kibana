@@ -13,7 +13,7 @@ import type {
   ISavedObjectsSecurityExtension,
   ISavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-server';
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-server/utils';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-server';
 import type { AuditLogger, AuthorizationServiceSetup } from '@kbn/security-plugin-types-server';
 import type {
   GetAllSpacesOptions,

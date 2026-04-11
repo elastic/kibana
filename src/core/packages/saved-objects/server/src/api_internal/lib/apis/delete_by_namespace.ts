@@ -11,7 +11,7 @@ import * as esKuery from '@kbn/es-query';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import type { SavedObjectsDeleteByNamespaceOptions } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '../../../..';
-import { getRootPropertiesObjects, LEGACY_URL_ALIAS_TYPE } from '../../../../base_internal';
+import { getRootPropertiesObjects, LEGACY_URL_ALIAS_TYPE } from '../../../base_internal';
 import { getSearchDsl } from '../search';
 import type { ApiExecutionContext } from './types';
 

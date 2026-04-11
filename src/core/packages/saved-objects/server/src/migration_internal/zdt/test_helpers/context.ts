@@ -15,7 +15,7 @@ import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import {
   SavedObjectTypeRegistry,
   type SavedObjectsMigrationConfigType,
-} from '../../../../base_internal';
+} from '../../../base_internal';
 import { serializerMock } from '../../../../mocks';
 import type { MigratorContext } from '../context';
 import { createDocumentMigrator } from './document_migrator';

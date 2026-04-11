@@ -8,7 +8,7 @@
  */
 
 import type { SavedObjectsType } from '../../..';
-import type { SavedObjectsTypeMappingDefinitions } from '../../../base_internal';
+import type { SavedObjectsTypeMappingDefinitions } from '../../base_internal';
 
 /**
  * Merge mappings from all registered saved object types.

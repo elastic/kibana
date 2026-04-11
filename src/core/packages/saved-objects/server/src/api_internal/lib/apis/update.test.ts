@@ -17,11 +17,11 @@ import {
   type SavedObjectReference,
   SavedObjectsErrorHelpers,
 } from '../../../..';
-import { ALL_NAMESPACES_STRING } from '../../../../utils';
+import { ALL_NAMESPACES_STRING } from '../../../utils';
 import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { SavedObjectsSerializer } from '../../../../base_internal';
-import { encodeHitVersion } from '../../../../base_internal';
+import type { SavedObjectsSerializer } from '../../../base_internal';
+import { encodeHitVersion } from '../../../base_internal';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { kibanaMigratorMock } from '../../mocks';
 import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';

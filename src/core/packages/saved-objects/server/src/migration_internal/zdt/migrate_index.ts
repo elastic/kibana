@@ -19,7 +19,7 @@ import type {
   SavedObjectsMigrationConfigType,
   MigrationResult,
   IDocumentMigrator,
-} from '../../../base_internal';
+} from '../../base_internal';
 import { migrationStateActionMachine } from './migration_state_action_machine';
 import { createContext } from './context';
 import { next } from './next';

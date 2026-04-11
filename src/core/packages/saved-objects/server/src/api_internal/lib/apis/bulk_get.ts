@@ -22,7 +22,7 @@ import {
 } from '@kbn/core-saved-objects-api-server';
 import type { DecoratedError, SavedObjectsRawDocSource, AuthorizeBulkGetObject } from '../../../..';
 import { SavedObjectsErrorHelpers, errorContent, type SavedObject } from '../../../..';
-import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '../../../../utils';
+import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '../../../utils';
 import { includedFields } from '../utils';
 import { getSavedObjectFromSource, rawDocExistsInNamespaces } from './utils';
 import type { ApiExecutionContext } from './types';

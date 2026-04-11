@@ -8,7 +8,7 @@
  */
 
 import type { SavedObjectsType } from '../../..';
-import { SavedObjectTypeRegistry } from '../../../base_internal';
+import { SavedObjectTypeRegistry } from '../../base_internal';
 import { createIndexMap } from './build_index_map';
 
 const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {

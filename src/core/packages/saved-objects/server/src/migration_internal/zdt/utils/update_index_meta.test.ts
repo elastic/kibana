@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IndexMappingMeta, VirtualVersionMap } from '../../../../base_internal';
+import type { IndexMappingMeta, VirtualVersionMap } from '../../../base_internal';
 import {
   setMetaDocMigrationStarted,
   setMetaDocMigrationComplete,

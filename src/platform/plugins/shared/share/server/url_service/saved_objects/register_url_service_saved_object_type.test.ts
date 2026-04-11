@@ -13,7 +13,7 @@ import type {
   SavedObjectsType,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-server/utils';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-server';
 import { ServerShortUrlClientFactory } from '..';
 import type { LocatorDefinition } from '../../../common/url_service';
 import { UrlService } from '../../../common/url_service';

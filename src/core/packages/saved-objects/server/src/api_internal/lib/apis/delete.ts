@@ -11,8 +11,8 @@ import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-
 import type { SavedObjectsDeleteOptions } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectsRawDocSource } from '../../../..';
 import { SavedObjectsErrorHelpers } from '../../../..';
-import { ALL_NAMESPACES_STRING } from '../../../../utils';
-import { SavedObjectsUtils } from '../../../../utils';
+import { ALL_NAMESPACES_STRING } from '../../../utils';
+import { SavedObjectsUtils } from '../../../utils';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import { deleteLegacyUrlAliases } from './internals/delete_legacy_url_aliases';
 import { getExpectedVersionProperties } from './utils';

@@ -14,14 +14,14 @@ import type { BuildFlavor } from '@kbn/config';
 import { ConfigService, Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { KibanaMigrator } from '@kbn/core-saved-objects-server/migration_internal';
+import { KibanaMigrator } from '@kbn/core-saved-objects-server/internal';
 import {
   SavedObjectConfig,
   type SavedObjectsConfigType,
   type SavedObjectsMigrationConfigType,
   type IndexTypesMap,
-} from '@kbn/core-saved-objects-server/base_internal';
-import { SavedObjectsRepository } from '@kbn/core-saved-objects-server/api_internal';
+} from '@kbn/core-saved-objects-server/internal';
+import { SavedObjectsRepository } from '@kbn/core-saved-objects-server/internal';
 import {
   ElasticsearchConfig,
   type ElasticsearchConfigType,
@@ -33,7 +33,7 @@ import {
   getRequestHandlerFactory,
 } from '@kbn/core-elasticsearch-client-server-internal';
 import { type LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-internal';
-import type { ISavedObjectTypeRegistryInternal } from '@kbn/core-saved-objects-server/base_internal';
+import type { ISavedObjectTypeRegistryInternal } from '@kbn/core-saved-objects-server/internal';
 import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
 import type { LoggerFactory } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';

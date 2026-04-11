@@ -23,10 +23,10 @@ import type {
   SavedObjectsIncrementCounterOptions,
 } from '@kbn/core-saved-objects-api-server';
 import { type SavedObjectUnsanitizedDoc, MAIN_SAVED_OBJECT_INDEX } from '../../../..';
-import { ALL_NAMESPACES_STRING } from '../../../../utils';
+import { ALL_NAMESPACES_STRING } from '../../../utils';
 import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { SavedObjectsSerializer } from '../../../../base_internal';
+import type { SavedObjectsSerializer } from '../../../base_internal';
 import { kibanaMigratorMock } from '../../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 

@@ -8,7 +8,7 @@
  */
 
 import * as Either from 'fp-ts/Either';
-import type { IndexMapping } from '../../../base_internal';
+import type { IndexMapping } from '../../base_internal';
 import type { SavedObjectsMappingProperties } from '../../..';
 import { checkTargetTypesMappings } from './check_target_mappings';
 import { getBaseMappings } from '../core';

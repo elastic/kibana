@@ -15,7 +15,7 @@ import {
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { SavedObjectsSerializer, LEGACY_URL_ALIAS_TYPE } from '../../../../../base_internal';
+import { SavedObjectsSerializer, LEGACY_URL_ALIAS_TYPE } from '../../../../base_internal';
 import { typeRegistryMock } from '../../../../../mocks';
 import type { CreatePointInTimeFinderFn } from '../../point_in_time_finder';
 import {

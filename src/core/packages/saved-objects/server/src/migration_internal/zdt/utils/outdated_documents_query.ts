@@ -9,7 +9,7 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsType } from '../../../..';
-import { getVirtualVersionMap } from '../../../../base_internal';
+import { getVirtualVersionMap } from '../../../base_internal';
 
 interface GetOutdatedDocumentsQueryOps {
   types: SavedObjectsType[];

@@ -8,7 +8,7 @@
  */
 
 import type { ISavedObjectsSerializer, SavedObjectsRawDoc } from '../../../..';
-import type { IDocumentMigrator } from '../../../../base_internal';
+import type { IDocumentMigrator } from '../../../base_internal';
 import type { TransformRawDocs } from '../../types';
 import { migrateRawDocsSafely } from '../../core/migrate_raw_docs';
 

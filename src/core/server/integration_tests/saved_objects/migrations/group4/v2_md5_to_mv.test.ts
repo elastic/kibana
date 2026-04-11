@@ -10,7 +10,7 @@
 import Path from 'path';
 import type { Metadata } from '@elastic/elasticsearch/lib/api/types';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import type { MigrationResult } from '@kbn/core-saved-objects-server/base_internal';
+import type { MigrationResult } from '@kbn/core-saved-objects-server/internal';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {

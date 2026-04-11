@@ -30,7 +30,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { isResponseError } from '@kbn/es-errors';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-server/utils';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-server';
 
 import type { Logger } from '@kbn/logging';
 

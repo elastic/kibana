@@ -14,7 +14,7 @@ import { createPromiseFromStreams, createMapStream, createConcatStream } from '@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsExportByTypeOptions, SavedObjectsExportByObjectOptions } from '../../..';
-import type { SavedObjectConfig } from '../../../base_internal';
+import type { SavedObjectConfig } from '../../base_internal';
 import { SavedObjectsExportError } from '../../import_export';
 import type { InternalCoreUsageDataSetup } from '../usage_data_facade';
 import type { InternalSavedObjectRouter } from '../internal_types';

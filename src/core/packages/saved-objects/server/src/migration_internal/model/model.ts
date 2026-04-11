@@ -9,8 +9,8 @@
 
 import * as Either from 'fp-ts/Either';
 import * as Option from 'fp-ts/Option';
-import type { IndexMapping } from '../../../base_internal';
-import { getVirtualVersionsFromMappings, initialModelVersion } from '../../../base_internal';
+import type { IndexMapping } from '../../base_internal';
+import { getVirtualVersionsFromMappings, initialModelVersion } from '../../base_internal';
 import { isTypeof } from '../actions';
 import type { AliasAction } from '../actions';
 import type { AllActionStates, State } from '../state';

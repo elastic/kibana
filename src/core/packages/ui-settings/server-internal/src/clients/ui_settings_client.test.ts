@@ -11,7 +11,7 @@ import Chance from 'chance';
 import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { mockCreateOrUpgradeSavedConfig } from './ui_settings_client.test.mock';
-import { SavedObjectsClient } from '@kbn/core-saved-objects-server/api_internal';
+import { SavedObjectsClient } from '@kbn/core-saved-objects-server/internal';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import { UiSettingsClient } from './ui_settings_client';
 import {

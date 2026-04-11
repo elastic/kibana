@@ -14,7 +14,7 @@ import {
 import { set } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
 import type { SavedObjectUnsanitizedDoc, SavedObjectsType } from '../../..';
-import { SavedObjectTypeRegistry, LEGACY_URL_ALIAS_TYPE } from '../../../base_internal';
+import { SavedObjectTypeRegistry, LEGACY_URL_ALIAS_TYPE } from '../../base_internal';
 import { DocumentMigrator } from './document_migrator';
 import { TransformSavedObjectDocumentError } from '../core/transform_saved_object_document_error';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';

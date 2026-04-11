@@ -8,7 +8,7 @@
 import { memoize } from 'lodash';
 
 import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-server/utils';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type {

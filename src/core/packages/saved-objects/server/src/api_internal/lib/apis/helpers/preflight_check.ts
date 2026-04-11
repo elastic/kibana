@@ -11,7 +11,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import { isRight } from '@kbn/core-saved-objects-api-server';
 import type { ISavedObjectTypeRegistry, ISavedObjectsSerializer } from '../../../../..';
-import { SavedObjectsUtils } from '../../../../../utils';
+import { SavedObjectsUtils } from '../../../../utils';
 import { SavedObjectsErrorHelpers, type SavedObjectsRawDocSource } from '../../../../..';
 import type { RepositoryEsClient } from '../../repository_es_client';
 import type { PreflightCheckForBulkDeleteParams } from '../internals/repository_bulk_delete_internal_types';

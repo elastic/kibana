@@ -8,7 +8,7 @@
  */
 
 import type { ISavedObjectTypeRegistry } from '../../..';
-import type { SavedObjectsTypeMappingDefinitions } from '../../../base_internal';
+import type { SavedObjectsTypeMappingDefinitions } from '../../base_internal';
 
 export interface CreateIndexMapOptions {
   kibanaIndexName: string;

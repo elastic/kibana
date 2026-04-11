@@ -9,7 +9,7 @@
 
 import { updateMappingsMock } from './update_index_meta.test.mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import type { IndexMappingMeta } from '../../../../base_internal';
+import type { IndexMappingMeta } from '../../../base_internal';
 import { updateIndexMeta } from './update_index_meta';
 
 describe('updateIndexMeta', () => {

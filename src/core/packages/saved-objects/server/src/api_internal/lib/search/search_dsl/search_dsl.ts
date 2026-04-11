@@ -13,7 +13,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { SavedObjectsPitParams } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
 import type { ISavedObjectTypeRegistry } from '../../../../..';
-import type { IndexMapping } from '../../../../../base_internal';
+import type { IndexMapping } from '../../../../base_internal';
 import { getQueryParams, type SearchOperator } from './query_params';
 import { getPitParams } from './pit_params';
 import { getSortingParams } from './sorting_params';

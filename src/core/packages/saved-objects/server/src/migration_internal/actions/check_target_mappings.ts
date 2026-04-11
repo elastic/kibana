@@ -10,7 +10,7 @@
 import * as Either from 'fp-ts/Either';
 import type * as TaskEither from 'fp-ts/TaskEither';
 
-import type { IndexMapping, VirtualVersionMap } from '../../../base_internal';
+import type { IndexMapping, VirtualVersionMap } from '../../base_internal';
 import { getNewAndUpdatedTypes } from '../core/compare_mappings';
 
 /** @internal */

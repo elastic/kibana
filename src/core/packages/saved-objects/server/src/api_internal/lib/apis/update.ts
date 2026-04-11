@@ -19,8 +19,8 @@ import {
   type SavedObject,
   type SavedObjectSanitizedDoc,
 } from '../../../..';
-import { SavedObjectsUtils } from '../../../../utils';
-import { decodeRequestVersion, encodeHitVersion } from '../../../../base_internal';
+import { SavedObjectsUtils } from '../../../utils';
+import { decodeRequestVersion, encodeHitVersion } from '../../../base_internal';
 import { DEFAULT_REFRESH_SETTING, DEFAULT_RETRY_COUNT } from '../constants';
 import { isValidRequest } from '../utils';
 import { getCurrentTime, getSavedObjectFromSource, mergeForUpdate } from './utils';

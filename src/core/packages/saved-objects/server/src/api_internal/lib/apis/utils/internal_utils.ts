@@ -18,8 +18,8 @@ import {
   type SavedObjectsRawDocParseOptions,
   type SavedObjectAccessControl,
 } from '../../../../..';
-import { SavedObjectsUtils, ALL_NAMESPACES_STRING } from '../../../../../utils';
-import { decodeRequestVersion, encodeHitVersion } from '../../../../../base_internal';
+import { SavedObjectsUtils, ALL_NAMESPACES_STRING } from '../../../../utils';
+import { decodeRequestVersion, encodeHitVersion } from '../../../../base_internal';
 
 export interface GetBulkOperationErrorRawResponse {
   status: number;

@@ -14,9 +14,9 @@ import type {
   SavedObjectsType,
   SavedObjectUnsanitizedDoc,
 } from '../../..';
-import { DEFAULT_NAMESPACE_STRING, SavedObjectsUtils } from '../../../utils';
-import type { LegacyUrlAlias } from '../../../base_internal';
-import { LEGACY_URL_ALIAS_TYPE } from '../../../base_internal';
+import { DEFAULT_NAMESPACE_STRING, SavedObjectsUtils } from '../../utils';
+import type { LegacyUrlAlias } from '../../base_internal';
+import { LEGACY_URL_ALIAS_TYPE } from '../../base_internal';
 import { migrations as coreMigrationsMap } from './migrations';
 import { type Transform, TransformType } from './types';
 import { convertMigrationFunction } from './utils';

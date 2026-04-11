@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEFAULT_INDEX_TYPES_MAP } from '../../base_internal';
+import { DEFAULT_INDEX_TYPES_MAP } from '../base_internal';
 import {
   calculateTypeStatuses,
   createWaitGroupMap,

@@ -10,7 +10,7 @@
 import equals from 'fast-deep-equal';
 import Semver from 'semver';
 
-import type { IndexMappingMeta, VirtualVersionMap, IndexMapping } from '../../../base_internal';
+import type { IndexMappingMeta, VirtualVersionMap, IndexMapping } from '../../base_internal';
 import { getBaseMappings } from './build_active_mappings';
 
 /**

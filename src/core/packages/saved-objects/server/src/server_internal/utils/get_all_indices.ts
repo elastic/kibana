@@ -8,7 +8,7 @@
  */
 
 import { MAIN_SAVED_OBJECT_INDEX } from '../../..';
-import type { SavedObjectTypeRegistry } from '../../../base_internal';
+import type { SavedObjectTypeRegistry } from '../../base_internal';
 
 export const getAllIndices = ({ registry }: { registry: SavedObjectTypeRegistry }): string[] => {
   return [

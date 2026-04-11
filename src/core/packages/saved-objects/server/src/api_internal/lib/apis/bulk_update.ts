@@ -28,8 +28,8 @@ import type {
   WithAuditName,
 } from '../../../..';
 import { SavedObjectsErrorHelpers, errorContent, type SavedObject } from '../../../..';
-import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '../../../../utils';
-import { encodeVersion } from '../../../../base_internal';
+import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '../../../utils';
+import { encodeVersion } from '../../../base_internal';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import {
   getBulkOperationError,

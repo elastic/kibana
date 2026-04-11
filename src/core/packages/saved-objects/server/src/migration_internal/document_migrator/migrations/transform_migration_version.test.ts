@@ -8,7 +8,7 @@
  */
 
 import { unary } from 'lodash';
-import { SavedObjectsUtils } from '../../../../utils';
+import { SavedObjectsUtils } from '../../../utils';
 import { transformMigrationVersion } from './transform_migration_version';
 
 const transform = unary(SavedObjectsUtils.getMigrationFunction(transformMigrationVersion));

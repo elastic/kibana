@@ -15,7 +15,7 @@ import {
   type SavedObjectsMigrationConfigType,
   SavedObjectTypeRegistry,
   type IndexMapping,
-} from '../../base_internal';
+} from '../base_internal';
 import type { Logger } from '@kbn/logging';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';

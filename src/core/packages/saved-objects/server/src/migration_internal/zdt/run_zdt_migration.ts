@@ -20,7 +20,7 @@ import type {
   SavedObjectsMigrationConfigType,
   MigrationResult,
   IDocumentMigrator,
-} from '../../../base_internal';
+} from '../../base_internal';
 import { buildMigratorConfigs } from './utils';
 import { migrateIndex } from './migrate_index';
 

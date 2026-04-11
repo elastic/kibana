@@ -46,15 +46,15 @@ import {
   encodeHitVersion,
   SavedObjectsSerializer,
   SavedObjectTypeRegistry,
-} from '../../../base_internal';
-import { DocumentMigrator } from '../../../migration_internal';
+} from '../../base_internal';
+import { DocumentMigrator } from '../../migration_internal';
 import {
   type AuthorizeAndRedactInternalBulkResolveParams,
   type GetFindRedactTypeMapParams,
   type AuthorizationTypeMap,
   SavedObjectsErrorHelpers,
 } from '../../..';
-import type { ISavedObjectTypeRegistryInternal } from '../../../base_internal';
+import type { ISavedObjectTypeRegistryInternal } from '../../base_internal';
 import { mockGetSearchDsl } from '../lib/repository.test.mock';
 import type { SavedObjectsRepository } from '../lib/repository';
 

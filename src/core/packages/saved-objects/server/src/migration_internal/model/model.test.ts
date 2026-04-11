@@ -12,7 +12,7 @@ import * as Either from 'fp-ts/Either';
 import * as Option from 'fp-ts/Option';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { SavedObjectsRawDoc } from '../../..';
-import { DEFAULT_INDEX_TYPES_MAP, type IndexMapping } from '../../../base_internal';
+import { DEFAULT_INDEX_TYPES_MAP, type IndexMapping } from '../../base_internal';
 import type {
   BaseState,
   CalculateExcludeFiltersState,

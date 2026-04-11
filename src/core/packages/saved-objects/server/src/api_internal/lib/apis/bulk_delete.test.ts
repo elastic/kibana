@@ -24,11 +24,11 @@ import type {
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
 } from '@kbn/core-saved-objects-api-server';
-import { ALL_NAMESPACES_STRING } from '../../../../utils';
+import { ALL_NAMESPACES_STRING } from '../../../utils';
 import { SavedObjectsErrorHelpers } from '../../../..';
 import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { SavedObjectsSerializer } from '../../../../base_internal';
+import type { SavedObjectsSerializer } from '../../../base_internal';
 import { kibanaMigratorMock } from '../../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';

@@ -20,7 +20,7 @@ import type {
   SavedObjectsMigrationConfigType,
   MigrationResult,
   IndexTypesMap,
-} from '../../base_internal';
+} from '../base_internal';
 import type { WaitGroup } from './kibana_migrator_utils';
 import type { TransformRawDocs } from './types';
 import { next } from './next';

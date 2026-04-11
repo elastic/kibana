@@ -13,7 +13,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ISavedObjectsSecurityExtension, SavedObjectAccessControl } from '../../../../..';
-import { SavedObjectsSerializer } from '../../../../../base_internal';
+import { SavedObjectsSerializer } from '../../../../base_internal';
 import {
   type ChangeAccessControlParams,
   changeObjectAccessControl,

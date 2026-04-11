@@ -12,7 +12,7 @@ import { combineLatest } from 'rxjs';
 import { startWith, map } from 'rxjs';
 import { type ServiceStatus, ServiceStatusLevels } from '@kbn/core-status-common';
 import type { SavedObjectStatusMeta } from '../..';
-import type { KibanaMigratorStatus } from '../../base_internal';
+import type { KibanaMigratorStatus } from '../base_internal';
 
 export const calculateStatus$ = (
   rawMigratorStatus$: Observable<KibanaMigratorStatus>,

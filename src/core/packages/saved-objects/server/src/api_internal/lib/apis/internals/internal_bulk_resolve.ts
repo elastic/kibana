@@ -24,7 +24,7 @@ import {
   isRight,
 } from '@kbn/core-saved-objects-api-server';
 import pMap from 'p-map';
-import { SavedObjectsUtils } from '../../../../../utils';
+import { SavedObjectsUtils } from '../../../../utils';
 import {
   type SavedObjectsRawDocSource,
   type SavedObject,
@@ -33,7 +33,7 @@ import {
   type WithAuditName,
   SavedObjectsErrorHelpers,
 } from '../../../../..';
-import { LEGACY_URL_ALIAS_TYPE, type LegacyUrlAlias } from '../../../../../base_internal';
+import { LEGACY_URL_ALIAS_TYPE, type LegacyUrlAlias } from '../../../../base_internal';
 // Inlined from @kbn/core-usage-data-base-server-internal to avoid circular dependency
 const CORE_USAGE_STATS_TYPE = 'core-usage-stats';
 const CORE_USAGE_STATS_ID = 'core-usage-stats';

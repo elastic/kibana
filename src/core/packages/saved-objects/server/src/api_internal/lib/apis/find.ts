@@ -28,7 +28,7 @@ import {
   FIND_DEFAULT_PAGE,
   FIND_DEFAULT_PER_PAGE,
   SavedObjectsUtils,
-} from '../../../../utils';
+} from '../../../utils';
 import type { ApiExecutionContext } from './types';
 import {
   validateConvertFilterToKueryNode,

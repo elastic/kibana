@@ -22,8 +22,8 @@ import {
   type ISavedObjectsSerializer,
   SavedObjectsErrorHelpers,
 } from '../../../../..';
-import { SavedObjectsUtils } from '../../../../../utils';
-import { getObjectKey, parseObjectKey } from '../../../../../base_internal';
+import { SavedObjectsUtils } from '../../../../utils';
+import { getObjectKey, parseObjectKey } from '../../../../base_internal';
 import { findLegacyUrlAliases } from './find_legacy_url_aliases';
 import { getRootFields } from '../../utils';
 import type { CreatePointInTimeFinderFn } from '../../point_in_time_finder';

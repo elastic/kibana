@@ -15,8 +15,8 @@ import type {
   IDocumentMigrator,
   DocumentMigrateOptions,
   IsDowngradeRequiredOptions,
-} from '../../../base_internal';
-import { modelVersionToVirtualVersion } from '../../../base_internal';
+} from '../../base_internal';
+import { modelVersionToVirtualVersion } from '../../base_internal';
 import type { ActiveMigrations } from './types';
 import { maxVersion } from './pipelines/utils';
 import { buildActiveMigrations } from './build_active_migrations';

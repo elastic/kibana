@@ -20,7 +20,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { estypes } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { SavedObjectsBulkUpdateObject } from '@kbn/core-saved-objects-api-server';
-import type { SavedObjectsSerializer } from '../../../base_internal';
+import type { SavedObjectsSerializer } from '../../base_internal';
 import type {
   ISavedObjectsSecurityExtension,
   SavedObjectsRawDocSource,
@@ -65,7 +65,7 @@ import {
   HIDDEN_TYPE,
 } from '../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
-import { arrayMapsAreEqual } from '../../../utils';
+import { arrayMapsAreEqual } from '../../utils';
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/types';
 
