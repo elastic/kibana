@@ -183,40 +183,12 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
     }
   );
 
-  describe('checks that user cant add a saved query with an ID that already exists', () => {
-    const duplicateTestQueryId = 'duplicate-test-query';
-    let duplicateTestSavedQueryId: string;
-
-    before(() => {
-      loadSavedQuery({
-        id: duplicateTestQueryId,
-        query: 'select * from uptime;',
-        interval: '3600',
-      }).then((data) => {
-        duplicateTestSavedQueryId = data.saved_object_id;
-      });
-    });
-
-    after(() => {
-      cleanupSavedQuery(duplicateTestSavedQueryId);
-    });
-
-    it('shows ID must be unique error', () => {
-      cy.intercept('GET', '**/api/osquery/saved_queries**').as('savedQueriesLoaded');
-      cy.contains('Saved queries').click();
-      cy.wait('@savedQueriesLoaded');
-      cy.contains('Add saved query').click();
-      cy.get('input[name="id"]').type(`${duplicateTestQueryId}{downArrow}{enter}`);
-
-      cy.contains('ID must be unique').should('not.exist');
-      inputQuery('test');
-      cy.contains('Save query').click();
-      cy.contains('ID must be unique').should('exist');
-    });
-  });
+  // Removed: 'shows ID must be unique error'
+  // Migrated to Jest component test: public/form/query_id_field.test.tsx
+  // Phase 2 migration — ID uniqueness validation is a form-field-level assertion
 
   // Removed: 'checks default values on new saved query'
-  // Migrated to Jest component test: public/routes/saved_queries/edit/form.test.tsx
+  // Migrated to Jest component test: public/form/results_type_field.test.tsx
   // Phase 2 migration — form field default values are UI-only assertions
 
   describe('prebuilt', () => {
@@ -255,7 +227,7 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     // Removed: 'checks result type on prebuilt saved query'
-    // Migrated to Jest component test: public/routes/saved_queries/edit/form.test.tsx
+    // Migrated to Jest component test: public/form/results_type_field.test.tsx
     // Phase 2 migration — result type field rendering is a UI-only assertion
 
     it('user can run prebuilt saved query and add to case', () => {

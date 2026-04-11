@@ -77,18 +77,6 @@ jest.mock('@kbn/cell-actions', () => ({
 let capturedOnInitialStateChange: ((state: Partial<{ isCompareActive: boolean }>) => void) | null =
   null;
 
-jest.mock('@kbn/unified-data-table', () => ({
-  UnifiedDataTable: (props: {
-    onInitialStateChange?: (state: Partial<{ isCompareActive: boolean }>) => void;
-  }) => {
-    capturedOnInitialStateChange = props.onInitialStateChange ?? null;
-
-    return <div data-test-subj="mockUnifiedDataTable" />;
-  },
-  DataLoadingState: { loading: 'loading', loaded: 'loaded' },
-  DataGridDensity: { EXPANDED: 'expanded', COMPACT: 'compact' },
-}));
-
 jest.mock('./results_flyout', () => ({
   OsqueryResultsFlyout: () => null,
 }));

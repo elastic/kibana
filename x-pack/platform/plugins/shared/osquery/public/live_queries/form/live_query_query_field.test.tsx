@@ -79,13 +79,8 @@ const FormWrapper: React.FC<{
   );
 };
 
-// Dynamic import to get the default export
-let LiveQueryQueryField: React.ComponentType<any>;
-
-beforeAll(async () => {
-  const module = await import('./live_query_query_field');
-  LiveQueryQueryField = module.default;
-});
+// Import after all mocks are registered (jest.mock is hoisted above imports by babel-jest)
+import LiveQueryQueryField from './live_query_query_field';
 
 describe('LiveQueryQueryField', () => {
   beforeEach(() => {
