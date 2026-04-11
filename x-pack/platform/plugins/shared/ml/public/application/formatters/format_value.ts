@@ -12,10 +12,10 @@
  * midnight, into a human-readable date/time format.
  */
 
-import moment from 'moment';
 import type { MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 import type { AnomalyDateFunction } from '@kbn/ml-anomaly-utils/types';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { formatTimeValue as formatSharedTimeValue } from '../../../common/util/format_time_value';
 
 const SIGFIGS_IF_ROUNDING = 3; // Number of sigfigs to use for values < 10
 
@@ -107,52 +107,5 @@ export function formatTimeValue(
   mlFunction: AnomalyDateFunction,
   record?: MlAnomalyRecordDoc
 ) {
-  const date =
-    record !== undefined && record.timestamp !== undefined
-      ? new Date(record.timestamp)
-      : new Date();
-
-  switch (mlFunction) {
-    case 'time_of_week': {
-      /**
-       * For time_of_week we model "time in UTC" modulo "duration of week in seconds".
-       * This means the numbers we output from the backend are seconds after a whole number of weeks after 1/1/1970 in UTC.
-       */
-      const remainder = moment(date).unix() % moment.duration(1, 'week').asSeconds();
-      const offset = moment.duration(remainder, 'seconds');
-      const utcMoment = moment.utc(date).subtract(offset).startOf('day').add(value, 's');
-
-      // Convert to local timezone for display
-      const localMoment = moment(utcMoment.valueOf());
-      const formatted = localMoment.format('ddd HH:mm');
-
-      return { formatted, moment: localMoment };
-    }
-
-    case 'time_of_day': {
-      /**
-       * For time_of_day, actual / typical is the UTC offset in seconds from the
-       * start of the day, so need to manipulate to UTC moment of the start of the day
-       * that the anomaly occurred using record timestamp if supplied, add on the offset, and finally
-       * revert to configured timezone for formatting.
-       */
-      const utcMoment = moment.utc(date).startOf('day').add(value, 's');
-
-      // Convert to local timezone
-      const localMoment = moment(utcMoment.valueOf());
-
-      // Get the reference date in local timezone
-      const referenceDate = moment(date).startOf('day');
-
-      // Get the date part of the calculated moment
-      const localMomentDate = localMoment.clone().startOf('day');
-
-      // Calculate the day offset
-      const dayOffset = Math.floor(localMomentDate.diff(referenceDate, 'days'));
-
-      const formatted = localMoment.format('HH:mm');
-
-      return { formatted, moment: localMoment, dayOffset };
-    }
-  }
+  return formatSharedTimeValue(value, mlFunction, record);
 }

@@ -34,11 +34,13 @@ export class PrivateLocationTestService {
   }
 
   async installSyntheticsPackage({ version }: { version?: string } = {}) {
-    await this.supertestWithAuth
-      .post('/api/fleet/setup')
-      .set('kbn-xsrf', 'true')
-      .send()
-      .expect(200);
+    await this.retry.try(async () => {
+      await this.supertestWithAuth
+        .post('/api/fleet/setup')
+        .set('kbn-xsrf', 'true')
+        .send()
+        .expect(200);
+    });
     const resolvedVersion = version ?? (await this.fetchSyntheticsPackageVersion());
     await this.retry.try(async () => {
       await this.supertestWithAuth
@@ -49,6 +51,14 @@ export class PrivateLocationTestService {
         .set('kbn-xsrf', 'true')
         .send({ force: true })
         .expect(200);
+      // Verify the version actually took effect — background Fleet tasks
+      // (e.g. deferred upgradePackageInstallVersion) can race and overwrite it
+      const installedVersion = await this.fetchSyntheticsPackageVersion();
+      if (installedVersion !== resolvedVersion) {
+        throw new Error(
+          `Package version mismatch after install: expected ${resolvedVersion} but got ${installedVersion}`
+        );
+      }
     });
   }
 
@@ -73,7 +83,8 @@ export class PrivateLocationTestService {
           namespace: 'default',
           monitoring_enabled: [],
           space_ids: spaceIds.length > 1 ? spaceIds : undefined,
-        });
+        })
+        .expect(200);
       return response;
     });
   }
