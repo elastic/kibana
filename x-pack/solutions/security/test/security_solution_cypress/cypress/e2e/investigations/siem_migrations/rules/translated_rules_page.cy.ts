@@ -52,7 +52,7 @@ describe(
       role.login();
       visit(`${GET_STARTED_URL}/siem_migrations`);
       selectMigrationConnector();
-      navigateToTranslatedRulesPage();
+      navigateToTranslatedRulesPage(false);
     });
 
     after(() => {

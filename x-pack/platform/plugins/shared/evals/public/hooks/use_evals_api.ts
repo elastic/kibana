@@ -6,6 +6,7 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   EVALS_RUNS_URL,
@@ -102,6 +103,12 @@ export const useDatasets = (filters: DatasetsListFilters = {}) => {
       });
     },
     keepPreviousData: true,
+    retry: (_failureCount, error) => {
+      if (isHttpFetchError(error)) {
+        return !error.response?.status || error.response.status >= 500;
+      }
+      return true;
+    },
   });
 };
 
@@ -115,6 +122,13 @@ export const useDataset = (datasetId: string) => {
         version: API_VERSIONS.internal.v1,
       });
     },
+    retry: (_failureCount, error) => {
+      if (isHttpFetchError(error)) {
+        return !error.response?.status || error.response.status >= 500;
+      }
+      return true;
+    },
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -277,6 +291,12 @@ export const useEvaluationRuns = (filters: RunsListFilters = {}) => {
       });
     },
     keepPreviousData: true,
+    retry: (_failureCount, error) => {
+      if (isHttpFetchError(error)) {
+        return !error.response?.status || error.response.status >= 500;
+      }
+      return true;
+    },
   });
 };
 
@@ -291,6 +311,13 @@ export const useEvaluationRun = (runId: string) => {
         version: API_VERSIONS.internal.v1,
       });
     },
+    retry: (_failureCount, error) => {
+      if (isHttpFetchError(error)) {
+        return !error.response?.status || error.response.status >= 500;
+      }
+      return true;
+    },
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -347,7 +374,8 @@ export const useTrace = (traceId: string | null) => {
   return useQuery({
     queryKey: queryKeys.traces.detail(traceId ?? ''),
     queryFn: async (): Promise<GetTraceResponse> => {
-      const url = EVALS_TRACE_URL.replace('{traceId}', traceId!);
+      if (!traceId) throw new Error('traceId is required');
+      const url = EVALS_TRACE_URL.replace('{traceId}', traceId);
       return services.http!.get<GetTraceResponse>(url, {
         version: API_VERSIONS.internal.v1,
       });
@@ -359,6 +387,7 @@ export const useTrace = (traceId: string | null) => {
 interface TracingProjectsFilters {
   from?: string;
   to?: string;
+  name?: string;
   page?: number;
   perPage?: number;
 }
@@ -379,6 +408,7 @@ export const useTracingProjects = (
       const query: Record<string, string | number> = {};
       if (filters.from) query.from = filters.from;
       if (filters.to) query.to = filters.to;
+      if (filters.name) query.name = filters.name;
       if (filters.page) query.page = filters.page;
       if (filters.perPage) query.per_page = filters.perPage;
 

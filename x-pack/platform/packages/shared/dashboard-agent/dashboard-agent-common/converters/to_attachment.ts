@@ -15,6 +15,7 @@ import {
   type LensApiSchemaType,
   type LensAttributes,
 } from '@kbn/lens-embeddable-utils/config_builder';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type { AttachmentPanel, DashboardSection as DashboardAttachmentSection } from '../types';
 import type { DashboardAttachmentData } from '../types';
 
@@ -33,8 +34,7 @@ export const isLensAttributes = (
  * For Lens panels with internal attributes format, converts to API format.
  */
 export const toAttachmentPanel = (panel: DashboardPanel): AttachmentPanel | undefined => {
-  // TODO: update this when LENS_EMBEDDABLE_TYPE is moved to @kbn/lens-common
-  if (panel.type === 'lens') {
+  if (panel.type === LENS_EMBEDDABLE_TYPE) {
     const panelConfig = panel.config as
       | { attributes?: LensApiSchemaType | LensAttributes }
       | undefined;
@@ -47,8 +47,8 @@ export const toAttachmentPanel = (panel: DashboardPanel): AttachmentPanel | unde
         ) as unknown as Record<string, unknown>;
 
         return {
-          type: 'lens',
-          uid: panel.uid ?? '',
+          type: LENS_EMBEDDABLE_TYPE,
+          id: panel.id ?? '',
           config: {
             ...panelConfig,
             attributes: apiFormatAttributes,
@@ -63,7 +63,7 @@ export const toAttachmentPanel = (panel: DashboardPanel): AttachmentPanel | unde
 
   return {
     type: panel.type,
-    uid: panel.uid ?? '',
+    id: panel.id ?? '',
     config: (panel.config as Record<string, unknown> | undefined) ?? {},
     grid: panel.grid,
   };
@@ -73,7 +73,7 @@ export const toAttachmentPanel = (panel: DashboardPanel): AttachmentPanel | unde
  * Converts a DashboardSection to a DashboardAttachmentSection.
  */
 export const toAttachmentSection = (section: DashboardSection): DashboardAttachmentSection => ({
-  uid: section.uid ?? '',
+  id: section.id ?? '',
   title: section.title,
   collapsed: section.collapsed ?? false,
   grid: { y: section.grid.y },
@@ -99,7 +99,7 @@ export const toAttachmentWidget = (
  * Converts a DashboardState to DashboardAttachmentData.
  * Preserves all dashboard state fields for full round-trip support.
  */
-export const dashboardStateToAttachment = (state: DashboardState): DashboardAttachmentData => {
+export const dashboardStateToAttachmentData = (state: DashboardState): DashboardAttachmentData => {
   return {
     ...state,
     panels: state.panels

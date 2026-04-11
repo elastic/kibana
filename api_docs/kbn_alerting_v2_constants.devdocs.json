@@ -41,6 +41,23 @@
       },
       {
         "parentPluginId": "@kbn/alerting-v2-constants",
+        "id": "def-common.ALERTING_V2_MATCHER_VALUE_SUGGESTIONS_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "ALERTING_V2_MATCHER_VALUE_SUGGESTIONS_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/alerting/v2/notification_policies/suggestions/values\""
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-constants",
         "id": "def-common.ALERTING_V2_NOTIFICATION_POLICY_API_PATH",
         "type": "string",
         "tags": [],
@@ -94,23 +111,6 @@
       },
       {
         "parentPluginId": "@kbn/alerting-v2-constants",
-        "id": "def-common.INTERNAL_ALERTING_V2_SUGGESTIONS_API_PATH",
-        "type": "string",
-        "tags": [],
-        "label": "INTERNAL_ALERTING_V2_SUGGESTIONS_API_PATH",
-        "description": [],
-        "signature": [
-          "\"/internal/notification_policies/suggestions/values\""
-        ],
-        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/index.ts",
-        "lineNumber": 15,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/alerting-v2-constants",
         "id": "def-common.MAX_ARTIFACT_VALUE_LIMIT",
         "type": "number",
         "tags": [],
@@ -139,6 +139,25 @@
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/src/labels.ts",
         "lineNumber": 9,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-constants",
+        "id": "def-common.MAX_TAGS_PER_EPISODE",
+        "type": "number",
+        "tags": [],
+        "label": "MAX_TAGS_PER_EPISODE",
+        "description": [
+          "Maximum number of tags that can be saved on an alert episode"
+        ],
+        "signature": [
+          "25"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/src/labels.ts",
+        "lineNumber": 12,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

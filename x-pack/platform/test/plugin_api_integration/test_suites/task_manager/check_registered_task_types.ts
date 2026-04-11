@@ -219,6 +219,7 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:update_agent_tags:retry',
         'fleet:upgrade-agentless-deployments-task',
         'fleet:upgrade_action:retry',
+        'fleet:verify_permissions',
         'fleet:version-specific-policy-assignment-task',
         'gap-auto-fill-scheduler-task',
         'maintenance-window:generate-events',
