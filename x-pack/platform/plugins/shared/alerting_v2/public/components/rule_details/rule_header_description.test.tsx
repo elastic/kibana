@@ -15,7 +15,7 @@ const baseRule = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
-  metadata: { name: 'My Rule', labels: ['prod', 'infra'] },
+  metadata: { name: 'My Rule', tags: ['prod', 'infra'] },
 } as RuleApiResponse;
 
 const wrap = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
@@ -28,15 +28,40 @@ describe('RuleHeaderDescription', () => {
     expect(screen.getByText('infra')).toBeInTheDocument();
   });
 
-  it('returns null when labels are empty', () => {
+  it('renders description text', () => {
+    const rule = {
+      ...baseRule,
+      metadata: { name: 'My Rule', description: 'Alert when errors exceed threshold.' },
+    } as RuleApiResponse;
+    wrap(<RuleHeaderDescription rule={rule} />);
+    expect(screen.getByTestId('ruleDescription')).toHaveTextContent(
+      'Alert when errors exceed threshold.'
+    );
+  });
+
+  it('renders both description and tags when both are present', () => {
+    const rule = {
+      ...baseRule,
+      metadata: {
+        name: 'My Rule',
+        description: 'Some description',
+        tags: ['prod', 'infra'],
+      },
+    } as RuleApiResponse;
+    wrap(<RuleHeaderDescription rule={rule} />);
+    expect(screen.getByTestId('ruleDescription')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleTags')).toBeInTheDocument();
+  });
+
+  it('returns null when tags are empty and no description', () => {
     const { container } = wrap(
       <RuleHeaderDescription rule={{ ...baseRule, metadata: { name: 'No Tags' } }} />
     );
     expect(container.innerHTML).toBe('');
   });
 
-  it('returns null when labels are undefined', () => {
-    const rule = { ...baseRule, metadata: { name: 'No Labels' } } as RuleApiResponse;
+  it('returns null when tags are undefined and no description', () => {
+    const rule = { ...baseRule, metadata: { name: 'No Tags' } } as RuleApiResponse;
     const { container } = wrap(<RuleHeaderDescription rule={rule} />);
     expect(container.innerHTML).toBe('');
   });
@@ -53,9 +78,9 @@ describe('RuleTitleWithBadges', () => {
     expect(screen.getByTestId('kindBadge')).toHaveTextContent('Detect only');
   });
 
-  it('renders kind as Alert for alert rules', () => {
+  it('renders kind as Alerting for alert rules', () => {
     wrap(<RuleTitleWithBadges rule={{ ...baseRule, kind: 'alert' }} />);
-    expect(screen.getByTestId('kindBadge')).toHaveTextContent('Alert');
+    expect(screen.getByTestId('kindBadge')).toHaveTextContent('Alerting');
   });
 
   it('renders enabled badge when rule is enabled', () => {

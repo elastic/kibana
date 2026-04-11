@@ -16,7 +16,7 @@ import { maintainerIdParamsSchema } from './utils/validator';
 export function registerStopMaintainer(router: EntityStorePluginRouter) {
   router.versioned
     .put({
-      path: `${ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_STOP}`,
+      path: `${ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_STOP}`,
       access: 'internal',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

@@ -18,7 +18,12 @@ import {
   replaySignificantEventsSnapshot,
 } from '../../src/data_generators/replay';
 import { evaluate } from '../../src/evaluate';
-import { createKIFeatureExtractionEvaluators } from '../../src/evaluators/ki_feature_extraction/evaluators';
+import type { KIFeatureExtractionOutput } from '../../src/evaluators/ki_feature_extraction';
+import {
+  createKIFeatureExtractionEvaluators,
+  getFeaturesFromOutput,
+} from '../../src/evaluators/ki_feature_extraction';
+import { createCorrectnessEvaluators } from '../../src/evaluators/correctness/evaluators';
 import {
   getActiveDatasets,
   MANAGED_STREAM_NAME,
@@ -80,7 +85,11 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
 
         await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
 
-        sampleDocuments = await collectSampleDocuments({ esClient, scenario, log });
+        sampleDocuments = await collectSampleDocuments({
+          esClient,
+          scenario,
+          log,
+        });
         if (sampleDocuments.length === 0) {
           throw new Error(`No log documents found after replaying snapshot ${source.snapshotName}`);
         }
@@ -88,12 +97,26 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
 
       evaluate(
         'KI feature extraction',
-        async ({ executorClient, evaluators, inferenceClient, logger, traceEsClient, log }) => {
+        async ({
+          executorClient,
+          evaluators,
+          inferenceClient,
+          evaluationConnector,
+          logger,
+          traceEsClient,
+          log,
+        }) => {
+          const evaluatorInferenceClient = inferenceClient.bindTo({
+            connectorId: evaluationConnector.id,
+          });
+
           await executorClient.runExperiment(
             {
               dataset: {
                 name: `sigevents: KI feature extraction: ${scenario.input.scenario_id} (${dataset.id})`,
-                description: `[${dataset.id}] KI feature extraction from ${scenario.metadata.failure_domain} / ${scenario.metadata.failure_mode}`,
+                description: `[${dataset.id}] KI feature extraction from ${
+                  scenario.metadata.failure_domain
+                }${scenario.metadata.failure_mode ? ` / ${scenario.metadata.failure_mode}` : ''}`,
                 examples: [
                   {
                     input: { sample_documents: sampleDocuments },
@@ -127,6 +150,31 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
               ...createKIFeatureExtractionEvaluators({
                 criteriaFn: evaluators.criteria.bind(evaluators),
                 criteria: scenario.output.criteria,
+              }),
+              ...createCorrectnessEvaluators({
+                inferenceClient: evaluatorInferenceClient,
+                log,
+                extractContext: (_input, metadata) => {
+                  const meta = metadata as Record<string, unknown>;
+                  return `Identify key infrastructure features from log data. Failure domain: ${
+                    meta.failure_domain
+                  }${meta.failure_mode ? `, failure mode: ${meta.failure_mode}` : ''}`;
+                },
+                extractResponse: (output: KIFeatureExtractionOutput) => {
+                  const features = getFeaturesFromOutput(output);
+                  return features
+                    .map(
+                      (f) =>
+                        `[${f.type}] ${f.id}: ${f.description} (confidence: ${
+                          f.confidence
+                        }, evidence: ${(f.evidence ?? []).join('; ')})`
+                    )
+                    .join('\n');
+                },
+                extractGroundTruth: (expected) => {
+                  const value = (expected as Record<string, unknown>)?.expected;
+                  return typeof value === 'string' ? value : '';
+                },
               }),
               evaluators.traceBasedEvaluators.inputTokens,
               evaluators.traceBasedEvaluators.outputTokens,

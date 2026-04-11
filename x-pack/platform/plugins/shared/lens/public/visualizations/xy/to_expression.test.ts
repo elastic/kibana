@@ -477,14 +477,13 @@ describe('#toExpression', () => {
     );
   });
 
-  it('should include legend maxLines and maxPixels in the legendConfig AST when set', () => {
+  it('should include legend maxLines in the legendConfig AST when set', () => {
     const expression = xyVisualization.toExpression(
       {
         legend: {
           position: Position.Bottom,
           isVisible: true,
           maxLines: 3,
-          maxPixels: 333,
         },
         valueLabels: 'hide',
         preferredSeriesType: 'bar',
@@ -506,7 +505,6 @@ describe('#toExpression', () => {
 
     const legendConfig = (expression.chain[0].arguments.legend[0] as Ast).chain[0].arguments;
     expect(legendConfig.maxLines).toEqual([3]);
-    expect(legendConfig.maxPixels).toEqual([333]);
   });
 
   it('should ignore legend size for inside legend', () => {

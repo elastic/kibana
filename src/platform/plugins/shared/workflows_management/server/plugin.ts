@@ -15,12 +15,13 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { TriggerType } from '@kbn/workflows';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows/types/latest';
 import { registerWorkflowAgentBuilderIntegration } from './agent_builder';
 import { defineRoutes } from './api/routes';
-import { WorkflowsManagementApi } from './api/workflows_management_api';
+import { type SmlIndexAttachmentFn, WorkflowsManagementApi } from './api/workflows_management_api';
 import { WorkflowsService } from './api/workflows_management_service';
 import {
   getWorkflowsConnectorAdapter,
@@ -70,6 +71,7 @@ export class WorkflowsPlugin
   private workflowTaskScheduler: WorkflowTaskScheduler | null = null;
   private api: WorkflowsManagementApi | null = null;
   private spaces?: SpacesServiceStart | null = null;
+  private securityStart?: SecurityServiceStart;
   private triggerEventsClient: TriggerEventsDataStreamClient | null = null;
   private analytics?: AnalyticsServiceStart;
   private aiTelemetryClient: WorkflowsAiTelemetryClient | null = null;
@@ -212,7 +214,14 @@ export class WorkflowsPlugin
     const router = core.http.createRouter<WorkflowsRequestHandlerContext>();
 
     // Register server side APIs
-    defineRoutes(router, this.api, this.logger, this.spaces, getWorkflowExecutionEngine);
+    defineRoutes(
+      router,
+      this.api,
+      this.logger,
+      this.spaces,
+      getWorkflowExecutionEngine,
+      () => this.securityStart
+    );
 
     this.setupAiIntegration(core, api, this.aiTelemetryClient);
 
@@ -224,6 +233,8 @@ export class WorkflowsPlugin
   public start(core: CoreStart, plugins: WorkflowsServerPluginStartDeps) {
     this.logger.debug('Workflows Management: Start');
     this.analytics = core.analytics;
+
+    this.securityStart = core.security;
 
     void this.initializeTriggerEventsClient(core);
 
@@ -272,6 +283,26 @@ export class WorkflowsPlugin
         const message = err instanceof Error ? err.message : String(err);
         this.logger.warn(
           `Workflows Management: Failed to register AI integration with Agent Builder: ${message}`
+        );
+      });
+
+    void core.plugins
+      .onStart<{ agentBuilder: { sml: { indexAttachment: SmlIndexAttachmentFn } } }>('agentBuilder')
+      .then(({ agentBuilder }) => {
+        if (agentBuilder.found) {
+          api.setSmlIndexAttachment(
+            agentBuilder.contract.sml.indexAttachment,
+            this.logger.get('sml')
+          );
+          this.logger.debug(
+            'Workflows Management: SML event-driven indexing wired to workflow CRUD'
+          );
+        }
+      })
+      .catch((err) => {
+        const message = err instanceof Error ? err.message : String(err);
+        this.logger.warn(
+          `Workflows Management: Failed to wire SML indexing with Agent Builder: ${message}`
         );
       });
   }

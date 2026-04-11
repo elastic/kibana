@@ -145,12 +145,11 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
 
           await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
 
-          const query = extractionScenario?.input.log_query_filter ?? { match_all: {} };
-
+          const query = extractionScenario?.input.log_query_filter ?? [{ match_all: {} }];
           const searchResult = await esClient.search<Record<string, unknown>>({
             index: MANAGED_STREAM_SEARCH_PATTERN,
             size: SAMPLE_DOCS_SIZE,
-            query,
+            query: { bool: { filter: query } },
             sort: [{ '@timestamp': { order: 'desc' } }],
           });
 
@@ -254,7 +253,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                     `[DEBUG] Tool usage: get_stream_features calls=${toolUsage.get_stream_features.calls}, failures=${toolUsage.get_stream_features.failures}; add_queries calls=${toolUsage.add_queries.calls}, failures=${toolUsage.add_queries.failures}; generated_queries=${queries.length}`
                   );
 
-                  return { queries, traceId: getCurrentTraceId() };
+                  return { queries, toolUsage, traceId: getCurrentTraceId() };
                 },
               },
               [
@@ -269,6 +268,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                 evaluators.traceBasedEvaluators.inputTokens,
                 evaluators.traceBasedEvaluators.outputTokens,
                 evaluators.traceBasedEvaluators.cachedTokens,
+                evaluators.traceBasedEvaluators.toolCalls,
                 createSpanLatencyEvaluator({ traceEsClient, log, spanName: 'ChatComplete' }),
               ]
             );

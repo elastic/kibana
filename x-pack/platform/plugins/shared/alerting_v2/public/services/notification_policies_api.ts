@@ -14,7 +14,7 @@ import type {
   NotificationPolicyResponse,
   UpdateNotificationPolicyBody,
 } from '@kbn/alerting-v2-schemas';
-import { INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
+import { ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
 
 export interface BulkActionNotificationPoliciesResponse {
   processed: number;
@@ -35,7 +35,7 @@ export class NotificationPoliciesApi {
 
   public async getNotificationPolicy(id: string) {
     return this.http.get<NotificationPolicyResponse>(
-      `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}`
+      `${ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}`
     );
   }
 
@@ -43,17 +43,19 @@ export class NotificationPoliciesApi {
     page?: number;
     perPage?: number;
     search?: string;
+    tags?: string[];
     enabled?: boolean;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
   }) {
     return this.http.get<FindNotificationPoliciesResponse>(
-      INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH,
+      ALERTING_V2_NOTIFICATION_POLICY_API_PATH,
       {
         query: {
           page: params.page,
           perPage: params.perPage,
           search: params.search || undefined,
+          tags: params.tags && params.tags.length > 0 ? params.tags : undefined,
           enabled: params.enabled,
           sortField: params.sortField,
           sortOrder: params.sortOrder,
@@ -63,58 +65,69 @@ export class NotificationPoliciesApi {
   }
 
   public async createNotificationPolicy(data: CreateNotificationPolicyData) {
-    return this.http.post<NotificationPolicyResponse>(
-      INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH,
-      { body: JSON.stringify(data) }
-    );
+    return this.http.post<NotificationPolicyResponse>(ALERTING_V2_NOTIFICATION_POLICY_API_PATH, {
+      body: JSON.stringify(data),
+    });
   }
 
   public async updateNotificationPolicy(id: string, data: UpdateNotificationPolicyBody) {
     return this.http.put<NotificationPolicyResponse>(
-      `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}`,
+      `${ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}`,
       { body: JSON.stringify(data) }
     );
   }
 
   public async deleteNotificationPolicy(id: string) {
-    await this.http.delete(`${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}`);
+    await this.http.delete(`${ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}`);
   }
 
   public async enableNotificationPolicy(id: string) {
     return this.http.post<NotificationPolicyResponse>(
-      `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}/_enable`
+      `${ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}/_enable`
     );
   }
 
   public async disableNotificationPolicy(id: string) {
     return this.http.post<NotificationPolicyResponse>(
-      `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}/_disable`
+      `${ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}/_disable`
     );
   }
 
   public async snoozeNotificationPolicy(id: string, snoozedUntil: string) {
     return this.http.post<NotificationPolicyResponse>(
-      `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}/_snooze`,
+      `${ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}/_snooze`,
       { body: JSON.stringify({ snoozedUntil }) }
     );
   }
 
   public async unsnoozeNotificationPolicy(id: string) {
     return this.http.post<NotificationPolicyResponse>(
-      `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}/_unsnooze`
+      `${ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}/_unsnooze`
     );
   }
 
   public async updateNotificationPolicyApiKey(id: string) {
-    await this.http.post(
-      `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}/_update_api_key`
-    );
+    await this.http.post(`${ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}/_update_api_key`);
   }
 
   public async bulkActionNotificationPolicies(body: BulkActionNotificationPoliciesBody) {
     return this.http.post<BulkActionNotificationPoliciesResponse>(
-      `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/_bulk`,
+      `${ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/_bulk`,
       { body: JSON.stringify(body) }
     );
+  }
+
+  public async fetchDataFields() {
+    return this.http.get<string[]>(
+      `${ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/suggestions/data_fields`
+    );
+  }
+
+  public async fetchTags(params?: { search?: string }) {
+    return this.http.get<string[]>(`${ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/suggestions/tags`, {
+      query: {
+        search: params?.search || undefined,
+      },
+    });
   }
 }

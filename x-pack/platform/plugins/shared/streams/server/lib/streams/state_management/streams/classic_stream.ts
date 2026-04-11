@@ -101,9 +101,27 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
   };
 
   private _effectiveSettings?: IngestStreamSettings;
+  private _dataStream?: IndicesDataStream | null;
 
   constructor(definition: Streams.ClassicStream.Definition, dependencies: StateDependencies) {
     super(definition, dependencies);
+  }
+
+  private async fetchDataStream(): Promise<IndicesDataStream | null> {
+    if (this._dataStream === undefined) {
+      try {
+        this._dataStream = await this.dependencies.streamsClient.getDataStream(
+          this._definition.name
+        );
+      } catch (error) {
+        if (isNotFoundError(error)) {
+          this._dataStream = null;
+        } else {
+          throw error;
+        }
+      }
+    }
+    return this._dataStream;
   }
 
   protected doClone(): StreamActiveRecord<Streams.ClassicStream.Definition> {
@@ -674,14 +692,9 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
   }
 
   private async getPipelineTargets({ useFallbackName }: { useFallbackName: boolean }) {
-    let dataStream: IndicesDataStream;
-    try {
-      dataStream = await this.dependencies.streamsClient.getDataStream(this._definition.name);
-    } catch (error) {
-      if (isNotFoundError(error)) {
-        return undefined;
-      }
-      throw error;
+    const dataStream = await this.fetchDataStream();
+    if (!dataStream) {
+      return undefined;
     }
     const unmanagedAssets = await getUnmanagedElasticsearchAssets({
       dataStream,
@@ -709,6 +722,13 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
 
   private async getEffectiveSettings() {
     if (!this._effectiveSettings) {
+      // Replicated data streams have no local index template and the
+      // getDataStreamSettings ES API returns HTTP 400, so return empty settings.
+      const dataStream = await this.fetchDataStream();
+      if (dataStream?.replicated) {
+        this._effectiveSettings = {};
+        return this._effectiveSettings;
+      }
       this._effectiveSettings = getDataStreamSettings(
         await this.dependencies.esClient.indices
           .getDataStreamSettings({ name: this._definition.name })

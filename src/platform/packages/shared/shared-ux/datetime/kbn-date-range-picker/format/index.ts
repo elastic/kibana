@@ -9,6 +9,7 @@
 
 export { durationToDisplayShortText } from './format_duration';
 export {
+  applyTimePrecision,
   dateMathToRelativeParts,
   timeRangeToDisplayText,
   timeRangeToFullFormattedText,

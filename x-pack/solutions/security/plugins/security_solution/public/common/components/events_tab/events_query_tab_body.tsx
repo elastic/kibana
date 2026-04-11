@@ -14,7 +14,7 @@ import type { TableId } from '@kbn/securitysolution-data-table';
 import { dataTableActions } from '@kbn/securitysolution-data-table';
 import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { PageScope } from '../../../data_view_manager/constants';
-import { useBulkAddEventsToCaseActions } from '../../../cases/components/case_events/use_bulk_event_actions';
+import { useBulkAddEventsToCaseActions } from '../../../cases/attachments/event/hooks/use_bulk_event_actions';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import type { CustomBulkAction } from '../../../../common/types';
 import { RowRendererValues } from '../../../../common/api/timeline';
@@ -58,6 +58,11 @@ export type EventsQueryTabBodyComponentProps = Omit<QueryTabBodyProps, 'setQuery
   deleteQuery?: GlobalTimeArgs['deleteQuery'];
   indexNames: string[];
   tableId: TableId;
+  /**
+   * When set (e.g. host details + Entity Store v2 identity filters), the events histogram uses this
+   * serialized query instead of {@link QueryTabBodyProps.filterQuery}, which may still reflect host.name-only scope.
+   */
+  histogramFilterQuery?: string;
 };
 
 const EXTERNAL_ALERTS_URL_PARAM = 'onlyExternalAlerts';
@@ -76,6 +81,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
   deleteQuery,
   endDate,
   filterQuery,
+  histogramFilterQuery,
   startDate,
   tableId,
 }) => {
@@ -171,6 +177,8 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
     [additionalFilters, showExternalAlerts]
   );
 
+  const matrixHistogramFilterQuery = histogramFilterQuery ?? filterQuery;
+
   const addBulkToTimelineActions = useAddBulkToTimelineAction({
     localFilters: composedPageFilters,
     tableId,
@@ -197,7 +205,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
           id={ALERTS_EVENTS_HISTOGRAM_ID}
           startDate={startDate}
           endDate={endDate}
-          filterQuery={filterQuery}
+          filterQuery={matrixHistogramFilterQuery}
           {...(showExternalAlerts ? alertsHistogramConfig : eventsHistogramConfig)}
           subtitle={getHistogramSubtitle}
           sourcererScopeId={newDataViewPickerEnabled ? PageScope.explore : PageScope.default}

@@ -9,6 +9,7 @@ import { partition, sum } from 'lodash';
 import agent from 'elastic-apm-node';
 
 import type { estypes } from '@elastic/elasticsearch';
+import { addSpanLabels } from '@kbn/apm-utils';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
 import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
@@ -69,7 +70,7 @@ Object.entries(aadFieldConversion).forEach(([key, value]) => {
 });
 
 const addApmLabelsFromParams = (params: RuleParams) => {
-  agent.addLabels(
+  addSpanLabels(
     {
       [SECURITY_FROM]: params.from,
       [SECURITY_IMMUTABLE]: params.immutable,
@@ -77,7 +78,7 @@ const addApmLabelsFromParams = (params: RuleParams) => {
       [SECURITY_RULE_ID]: params.ruleId,
       [SECURITY_TO]: params.to,
     },
-    false
+    { isString: false }
   );
 };
 
@@ -108,6 +109,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     eventsTelemetry,
     licensing,
     scheduleNotificationResponseActionsService,
+    endpointAppContextService,
   }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
@@ -317,15 +319,22 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             const gapDuration = `${remainingGap.humanize()} (${remainingGap.asMilliseconds()}ms)`;
             const gapErrorMessage = `${gapDuration} were not queried between this rule execution and the last execution, so signals may have been missed. Consider increasing your look behind time or adding more Kibana instances`;
             if (analytics) {
-              sendGapDetectedTelemetryEvent({
-                analytics,
-                interval,
-                gapDuration: remainingGap,
-                originalFrom,
-                originalTo,
-                ruleParams: params,
-                gapReasonType: gapReason?.type,
-              });
+              try {
+                sendGapDetectedTelemetryEvent({
+                  analytics,
+                  interval,
+                  gapDuration: remainingGap,
+                  originalFrom,
+                  originalTo,
+                  ruleParams: params,
+                  gapReasonType: gapReason?.type,
+                });
+              } catch (error) {
+                // Catching here to prevent telemetry errors from propagating to the Alerting Framework.
+                // The framework would catch the error and mark the rule run as failed.
+                // We don't want the rule to be marked as failed, if only telemetry failed.
+                logger.info(`Failed to send gap detected telemetry event: ${error}`);
+              }
             }
             ruleExecutionLogger.error(gapErrorMessage);
           }
@@ -343,7 +352,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               client: exceptionsClient,
               lists: params.exceptionsList,
               shouldFilterOutEndpointExceptions:
-                experimentalFeatures.endpointExceptionsMovedUnderManagement,
+                await endpointAppContextService.isEndpointExceptionsPerPolicyEnabled(),
             });
 
             const alertTimestampOverride = isPreview ? startedAt : undefined;
@@ -503,13 +512,20 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           }
 
           if (!isPreview && analytics) {
-            sendAlertSuppressionTelemetryEvent({
-              analytics,
-              suppressedAlertsCount: result.suppressedAlertsCount ?? 0,
-              createdAlertsCount: result.createdSignalsCount,
-              ruleAttributes: rule,
-              ruleParams: params,
-            });
+            try {
+              sendAlertSuppressionTelemetryEvent({
+                analytics,
+                suppressedAlertsCount: result.suppressedAlertsCount ?? 0,
+                createdAlertsCount: result.createdSignalsCount,
+                ruleAttributes: rule,
+                ruleParams: params,
+              });
+            } catch (error) {
+              // Catching here to prevent telemetry errors from propagating to the Alerting Framework.
+              // The framework would catch the error and mark the rule run as failed.
+              // We don't want the rule to be marked as failed, if only telemetry failed.
+              logger.info(`Failed to send alert suppression telemetry event: ${error}`);
+            }
           }
 
           return {

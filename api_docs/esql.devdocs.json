@@ -248,7 +248,7 @@
         "label": "DataErrorsControl",
         "description": [],
         "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
-        "lineNumber": 27,
+        "lineNumber": 28,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -261,7 +261,7 @@
             "label": "enabled",
             "description": [],
             "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
-            "lineNumber": 28,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -277,7 +277,7 @@
               "(value: boolean) => void"
             ],
             "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
-            "lineNumber": 29,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -293,7 +293,7 @@
                   "boolean"
                 ],
                 "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
-                "lineNumber": 29,
+                "lineNumber": 30,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -342,7 +342,7 @@
           ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<never>"
         ],
         "path": "src/platform/packages/private/kbn-esql-editor/src/esql_editor.tsx",
-        "lineNumber": 1484,
+        "lineNumber": 1515,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -358,7 +358,7 @@
       "label": "EsqlPluginStart",
       "description": [],
       "path": "src/platform/plugins/shared/esql/public/plugin.ts",
-      "lineNumber": 48,
+      "lineNumber": 50,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -374,7 +374,7 @@
             "EsqlVariablesService"
           ],
           "path": "src/platform/plugins/shared/esql/public/plugin.ts",
-          "lineNumber": 49,
+          "lineNumber": 51,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -387,7 +387,7 @@
           "label": "isServerless",
           "description": [],
           "path": "src/platform/plugins/shared/esql/public/plugin.ts",
-          "lineNumber": 50,
+          "lineNumber": 52,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false

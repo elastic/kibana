@@ -7,10 +7,6 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
-import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
-import type { DashboardApi } from '@kbn/dashboard-plugin/public';
-import type { Subscription } from 'rxjs';
 import type {
   DashboardAgentPluginPublicSetup,
   DashboardAgentPluginPublicStart,
@@ -27,8 +23,7 @@ export class DashboardAgentPlugin
       DashboardAgentPluginPublicStartDependencies
     >
 {
-  private dashboardApi: DashboardApi | undefined;
-  private dashboardAppApiSubscription: Subscription | undefined;
+  private cleanupAttachmentUi?: () => void;
 
   constructor(_initContext: PluginInitializerContext) {}
 
@@ -43,28 +38,22 @@ export class DashboardAgentPlugin
     _core: CoreStart,
     plugins: DashboardAgentPluginPublicStartDependencies
   ): DashboardAgentPluginPublicStart {
-    this.dashboardAppApiSubscription = plugins.dashboard.dashboardAppClientApi$.subscribe((api) => {
-      this.dashboardApi = api;
+    // TODO this causes async imports when plugin starts
+    // Please avoid this practice as it hides plugin size but impacts kibana load performance
+    // Please remove async import.
+    import('./attachment_types').then(({ registerDashboardAttachmentUiDefinition }) => {
+      this.cleanupAttachmentUi = registerDashboardAttachmentUiDefinition({
+        agentBuilder: plugins.agentBuilder,
+        dashboardLocator: plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR),
+        unifiedSearch: plugins.unifiedSearch,
+        dashboardPlugin: plugins.dashboard,
+      });
     });
-    plugins.agentBuilder.attachments.addAttachmentType<DashboardAttachment>(
-      DASHBOARD_ATTACHMENT_TYPE,
-      async () => {
-        const { getDashboardAttachmentUiDefinition } = await import('./attachment_types');
-
-        return getDashboardAttachmentUiDefinition({
-          agentBuilder: plugins.agentBuilder,
-          dashboardLocator: plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR),
-          unifiedSearch: plugins.unifiedSearch,
-          dashboardPlugin: plugins.dashboard,
-          getDashboardApi: () => this.dashboardApi,
-        });
-      }
-    );
 
     return {};
   }
 
   public stop() {
-    this.dashboardAppApiSubscription?.unsubscribe();
+    this.cleanupAttachmentUi?.();
   }
 }

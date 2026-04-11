@@ -26,8 +26,17 @@ const dependency = schema.object({
   actionGroupsToSuppressOn: schema.arrayOf(schema.string()),
 });
 
-export const sloBurnRateParamsSchema = schema.object({
-  sloId: schema.string(),
-  windows: schema.arrayOf(windowSchema),
-  dependencies: schema.maybe(schema.arrayOf(dependency)),
-});
+export const sloBurnRateParamsSchema = schema.object(
+  {
+    sloId: schema.string(),
+    windows: schema.arrayOf(windowSchema),
+    dependencies: schema.maybe(schema.arrayOf(dependency)),
+  },
+  {
+    meta: {
+      title: 'SLO Burn Rate Rule Params',
+      description:
+        'The parameters for the slo burn rate rule. These parameters are appropriate when `rule_type_id` is `slo.rules.burnRate`.',
+    },
+  }
+);

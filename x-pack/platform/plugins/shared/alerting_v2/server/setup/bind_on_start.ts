@@ -12,11 +12,11 @@ import type { ContainerModuleLoadOptions } from 'inversify';
 import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
 import { ResourceManager } from '../lib/services/resource_service/resource_manager';
 import { initializeResources } from '../resources/register_resources';
-import { initializeESQLViews } from '../esql_views/register_views';
 import { scheduleApiKeyInvalidationTask } from '../lib/tasks/invalidate_pending_api_keys/schedule_task';
 import type { PluginConfig } from '../config';
 import type { AlertingServerStartDependencies } from '../types';
 import { scheduleDispatcherTask } from '../lib/dispatcher/schedule_task';
+import { scheduleTelemetryTask } from '../lib/usage/schedule_task';
 
 export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
   bind(OnStart).toConstantValue(async (container) => {
@@ -31,14 +31,9 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
       .get<PluginConfig>();
 
     initializeResources({
-      logger,
       resourceManager,
       esClient,
-    });
-
-    initializeESQLViews({
       logger,
-      esClient,
     });
 
     scheduleDispatcherTask({ taskManager, resourceManager }).catch((error) => {
@@ -59,6 +54,18 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
         error: {
           code: 'API_KEY_INVALIDATION_TASK_SCHEDULE_FAILURE',
           type: 'ApiKeyInvalidationTask',
+        },
+      });
+    });
+
+    scheduleTelemetryTask({
+      logger,
+      taskManager,
+    }).catch((error) => {
+      logger.error(error as Error, {
+        error: {
+          code: 'TELEMETRY_TASK_SCHEDULE_FAILURE',
+          type: 'AlertingV2TelemetryTask',
         },
       });
     });

@@ -62,6 +62,9 @@ export const dedupAssignees = (assignees?: CaseAssignees): CaseAssignees | undef
   return uniqBy(assignees, 'uid');
 };
 
+export const getCloseReasonIfValid = (closeReason?: string): string | undefined =>
+  closeReason != null && closeReason.trim().length > 0 ? closeReason : undefined;
+
 type LatestPushInfo = { index: number; pushedInfo: ExternalService | null } | null;
 
 export const getLatestPushInfo = (
