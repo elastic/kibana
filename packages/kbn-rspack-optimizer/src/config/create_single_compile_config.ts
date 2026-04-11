@@ -261,6 +261,13 @@ export async function createSingleCompileConfig(
     limitsPath = DEFAULT_LIMITS_PATH,
   } = options;
 
+  if (hmr && hmrPort == null) {
+    throw new Error(
+      'hmrPort is required when hmr is enabled — the HMR SSE server must be started and its port passed to createSingleCompileConfig'
+    );
+  }
+  const resolvedHmrPort = hmrPort as number;
+
   // Discover all plugins
   const plugins = await discoverPlugins({
     repoRoot,
@@ -287,7 +294,7 @@ export async function createSingleCompileConfig(
       `Unified compilation: ${pluginEntries.length} bundles (core + ${plugins.length} plugins)`
     );
     if (hmr) {
-      log.info(`HMR enabled (port ${hmrPort})`);
+      log.info(`HMR enabled (port ${resolvedHmrPort})`);
     }
   }
 
@@ -511,8 +518,7 @@ export async function createSingleCompileConfig(
         'process.env.NODE_ENV': JSON.stringify(dist ? 'production' : 'development'),
         // Match legacy webpack - used for conditional code in plugins
         'process.env.IS_KIBANA_DISTRIBUTABLE': JSON.stringify(dist ? 'true' : 'false'),
-        // HMR SSE server port - injected at build time for the HMR client
-        ...(hmr && hmrPort ? { __KBN_HMR_PORT__: JSON.stringify(hmrPort) } : {}),
+        ...(hmr ? { __KBN_HMR_PORT__: JSON.stringify(resolvedHmrPort) } : {}),
       }),
 
       // Elastic License 2.0 banner for x-pack plugin chunks (dist only)
