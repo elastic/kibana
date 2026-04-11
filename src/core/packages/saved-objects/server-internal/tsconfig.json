@@ -23,7 +23,7 @@
     "@kbn/core-saved-objects-api-server-internal",
     "@kbn/core-saved-objects-base-server-internal",
     "@kbn/core-saved-objects-migration-server-internal",
-    "@kbn/core-saved-objects-import-export-server-internal",
+    "@kbn/core-saved-objects-import-export-server",
     "@kbn/core-usage-data-base-server-internal",
     "@kbn/core-deprecations-server",
     "@kbn/core-node-server",

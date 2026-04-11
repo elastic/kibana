@@ -31,7 +31,7 @@ import { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 import { typeRegistryInstanceMock } from '../saved_objects_service.test.mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
-import { EXPORT_ALL_TYPES_TOKEN } from '@kbn/core-saved-objects-import-export-server-internal';
+import { EXPORT_ALL_TYPES_TOKEN } from '@kbn/core-saved-objects-import-export-server/internal';
 
 async function readStreamToCompletion(stream: Readable) {
   return createPromiseFromStreams([stream, createConcatStream([])]);

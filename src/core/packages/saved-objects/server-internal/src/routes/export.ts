@@ -18,7 +18,7 @@ import type {
   SavedObjectsExportByObjectOptions,
 } from '@kbn/core-saved-objects-server';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
-import { SavedObjectsExportError } from '@kbn/core-saved-objects-import-export-server-internal';
+import { SavedObjectsExportError } from '@kbn/core-saved-objects-import-export-server/internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { InternalSavedObjectRouter } from '../internal_types';
 import { badResponseSchema } from './shared_schemas';

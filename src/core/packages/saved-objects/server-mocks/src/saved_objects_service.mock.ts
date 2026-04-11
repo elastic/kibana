@@ -28,7 +28,7 @@ import { typeRegistryMock, serializerMock } from '@kbn/core-saved-objects-base-s
 import {
   savedObjectsExporterMock,
   savedObjectsImporterMock,
-} from '@kbn/core-saved-objects-import-export-server-mocks';
+} from '@kbn/core-saved-objects-import-export-server/mocks';
 import { migrationMocks } from '@kbn/core-saved-objects-migration-server-mocks';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { lazyObject } from '@kbn/lazy-object';

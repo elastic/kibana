@@ -1,9 +1,9 @@
 {
   "type": "shared-server",
-  "id": "@kbn/core-saved-objects-import-export-server-internal",
+  "id": "@kbn/core-saved-objects-import-export-server",
   "owner": [
     "@elastic/kibana-core"
   ],
   "group": "platform",
-  "visibility": "private"
+  "visibility": "shared"
 }

@@ -7,4 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { savedObjectsExporterMock, savedObjectsImporterMock } from './src';
+export { SavedObjectsImporter, SavedObjectsImportError } from './src/import';
+export {
+  SavedObjectsExporter,
+  SavedObjectsExportError,
+  EXPORT_ALL_TYPES_TOKEN,
+} from './src/export';

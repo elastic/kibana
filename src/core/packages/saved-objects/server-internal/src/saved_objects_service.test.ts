@@ -56,13 +56,13 @@ import {
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
 import type { SavedObjectsAccessControlTransforms } from '@kbn/core-saved-objects-server/src/contracts';
-import * as SavedObjectsImportExportModule from '@kbn/core-saved-objects-import-export-server-internal';
+import * as SavedObjectsImportExportModule from '@kbn/core-saved-objects-import-export-server/internal';
 
 jest.mock('./object_types');
 jest.mock('./deprecations');
 
 // Mock the importer and exporter constructors
-jest.mock('@kbn/core-saved-objects-import-export-server-internal', () => {
+jest.mock('@kbn/core-saved-objects-import-export-server/internal', () => {
   return {
     SavedObjectsExporter: jest.fn().mockImplementation(() => {
       return {};

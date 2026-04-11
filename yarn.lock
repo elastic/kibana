@@ -6051,11 +6051,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-import-export-server-internal@link:src/core/packages/saved-objects/import-export-server-internal":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-saved-objects-import-export-server-mocks@link:src/core/packages/saved-objects/import-export-server-mocks":
+"@kbn/core-saved-objects-import-export-server@link:src/core/packages/saved-objects/import-export-server":
   version "0.0.0"
   uid ""
 

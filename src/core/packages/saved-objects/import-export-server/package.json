@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/core-saved-objects-import-export-server-mocks",
+  "name": "@kbn/core-saved-objects-import-export-server",
   "private": true,
   "version": "1.0.0",
   "author": "Kibana Core",

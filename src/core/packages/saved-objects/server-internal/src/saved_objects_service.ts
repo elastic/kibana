@@ -58,7 +58,7 @@ import { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-inter
 import {
   SavedObjectsExporter,
   SavedObjectsImporter,
-} from '@kbn/core-saved-objects-import-export-server-internal';
+} from '@kbn/core-saved-objects-import-export-server/internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { DeprecationRegistryProvider } from '@kbn/core-deprecations-server';
 import type { NodeInfo } from '@kbn/core-node-server';
