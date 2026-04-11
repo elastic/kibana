@@ -11,7 +11,7 @@ import {
   DEFAULT_BASE_PATH,
   getCreateCasePath,
   getCasesConfigurePath,
-  getCasesTemplatesPath,
+  getCasesConfigureTemplatesPath,
 } from './paths';
 
 export const CasesDeepLinkId = {
@@ -58,7 +58,7 @@ export const getCasesDeepLinks = <T extends AppDeepLink = AppDeepLink>({
       }),
       ...(extend[CasesDeepLinkId.casesTemplates] ?? {}),
       id: CasesDeepLinkId.casesTemplates,
-      path: getCasesTemplatesPath(basePath),
+      path: getCasesConfigureTemplatesPath(basePath),
     } as T & { id: ICasesDeepLinkId });
   }
 

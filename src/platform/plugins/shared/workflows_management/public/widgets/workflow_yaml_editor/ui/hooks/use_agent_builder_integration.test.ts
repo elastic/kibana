@@ -8,11 +8,22 @@
  */
 
 import { act, renderHook } from '@testing-library/react';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { useAgentBuilderIntegration } from './use_agent_builder_integration';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '../../../../../common/agent_builder/constants';
 import { useKibana } from '../../../../hooks/use_kibana';
 
+const mockDispatch = jest.fn();
+jest.mock('react-redux', () => ({
+  ...jest.requireActual('react-redux'),
+  useDispatch: () => mockDispatch,
+}));
 jest.mock('../../../../hooks/use_kibana');
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
+  useUiSetting: jest.fn(),
+}));
+const useUiSettingMock = useUiSetting as jest.MockedFunction<typeof useUiSetting>;
 jest.mock('uuid', () => ({ v4: () => 'mock-uuid-1234' }));
 jest.mock('../../../../features/ai_integration', () => ({
   AttachmentBridge: jest.fn().mockImplementation(() => ({
@@ -32,6 +43,7 @@ jest.mock('../../../../features/ai_integration/proposal_tracker', () => ({
     updateStatus: jest.fn(),
     cascadeDecline: jest.fn().mockReturnValue([]),
     clearAll: jest.fn(),
+    getAllRecords: jest.fn().mockReturnValue([]),
   })),
 }));
 
@@ -108,6 +120,7 @@ describe('useAgentBuilderIntegration', () => {
   beforeEach(() => {
     jest.useFakeTimers();
     mockModel = createMockModel(INITIAL_YAML);
+    useUiSettingMock.mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -507,9 +520,10 @@ describe('useAgentBuilderIntegration', () => {
   });
 
   describe('isAgentBuilderAvailable', () => {
-    it('returns true when agentBuilder is available', () => {
+    it('returns true when agentBuilder is available and experimental features enabled', () => {
       const agentBuilder = createMockAgentBuilder();
       setupKibanaMock(agentBuilder);
+      useUiSettingMock.mockReturnValue(true);
       const editor = createMockEditor(mockModel);
 
       const { result } = renderHook(() =>
@@ -524,6 +538,22 @@ describe('useAgentBuilderIntegration', () => {
 
     it('returns false when agentBuilder is not available', () => {
       setupKibanaMock(undefined);
+      const editor = createMockEditor(mockModel);
+
+      const { result } = renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+        })
+      );
+
+      expect(result.current.isAgentBuilderAvailable).toBe(false);
+    });
+
+    it('returns false when experimental features are disabled', () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      useUiSettingMock.mockReturnValue(false);
       const editor = createMockEditor(mockModel);
 
       const { result } = renderHook(() =>

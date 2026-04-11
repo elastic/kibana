@@ -19,8 +19,8 @@ export const createPluginsService = ({
   return {
     resolveSkillIds: async (pluginIds: string[]): Promise<string[]> => {
       if (pluginIds.length === 0) return [];
-      const client = pluginsServiceStart.getScopedClient({ request });
-      const results = await Promise.all(pluginIds.map((id) => client.get(id).catch(() => null)));
+      const registry = pluginsServiceStart.getRegistry({ request });
+      const results = await Promise.all(pluginIds.map((id) => registry.get(id).catch(() => null)));
       return results
         .filter((p): p is NonNullable<typeof p> => p !== null)
         .flatMap((p) => p.skill_ids);

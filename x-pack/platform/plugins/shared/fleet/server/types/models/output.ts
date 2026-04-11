@@ -70,6 +70,7 @@ const BaseSchema = {
   ca_sha256: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   ca_trusted_fingerprint: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   config_yaml: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  otel_exporter_config_yaml: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   ssl: schema.maybe(
     schema.oneOf([
       schema.literal(null),
@@ -336,10 +337,23 @@ const KafkaUpdateSchema = {
 };
 
 export const OutputSchema = schema.oneOf([
-  schema.object({ ...ElasticSearchSchema }),
-  schema.object({ ...RemoteElasticSearchSchema }),
-  schema.object({ ...LogstashSchema }),
-  schema.object({ ...KafkaSchema }),
+  schema.object({ ...ElasticSearchSchema }, { meta: { id: 'output_elasticsearch' } }),
+  schema.object({ ...RemoteElasticSearchSchema }, { meta: { id: 'output_remote_elasticsearch' } }),
+  schema.object({ ...LogstashSchema }, { meta: { id: 'output_logstash' } }),
+  schema.object({ ...KafkaSchema }, { meta: { id: 'output_kafka' } }),
+]);
+
+// Separate schema for create operations: uses distinct meta IDs so OAS codegen
+// emits named $ref components instead of inline anyOf members, which the
+// Terraform provider requires to distinguish create vs read types.
+export const NewOutputSchema = schema.oneOf([
+  schema.object({ ...ElasticSearchSchema }, { meta: { id: 'new_output_elasticsearch' } }),
+  schema.object(
+    { ...RemoteElasticSearchSchema },
+    { meta: { id: 'new_output_remote_elasticsearch' } }
+  ),
+  schema.object({ ...LogstashSchema }, { meta: { id: 'new_output_logstash' } }),
+  schema.object({ ...KafkaSchema }, { meta: { id: 'new_output_kafka' } }),
 ]);
 
 export const OutputResponseSchema = schema.object({
@@ -349,8 +363,11 @@ export const OutputResponseSchema = schema.object({
 });
 
 export const UpdateOutputSchema = schema.oneOf([
-  schema.object({ ...ElasticSearchUpdateSchema }),
-  schema.object({ ...RemoteElasticSearchUpdateSchema }),
-  schema.object({ ...LogstashUpdateSchema }),
-  schema.object({ ...KafkaUpdateSchema }),
+  schema.object({ ...ElasticSearchUpdateSchema }, { meta: { id: 'update_output_elasticsearch' } }),
+  schema.object(
+    { ...RemoteElasticSearchUpdateSchema },
+    { meta: { id: 'update_output_remote_elasticsearch' } }
+  ),
+  schema.object({ ...LogstashUpdateSchema }, { meta: { id: 'update_output_logstash' } }),
+  schema.object({ ...KafkaUpdateSchema }, { meta: { id: 'update_output_kafka' } }),
 ]);

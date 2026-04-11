@@ -12,7 +12,8 @@
   ],
   "exclude": [
     "target/**/*",
-    "packages/**/*"
+    "packages/**/*",
+    "type_check_validation_loader.js"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -51,6 +52,7 @@
     "@kbn/yarn-lock-validator",
     "@kbn/sort-package-json",
     "@kbn/babel-register",
-    "@kbn/rspack-optimizer"
+    "@kbn/rspack-optimizer",
+    "@kbn/dev-validation-runner"
   ]
 }

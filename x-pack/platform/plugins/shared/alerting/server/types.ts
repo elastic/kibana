@@ -62,6 +62,7 @@ import type {
   SanitizedRule,
   RuleAlertData,
   Artifacts,
+  GapReason,
 } from '../common';
 import type { PublicAlertFactory } from './alert/create_alert_factory';
 import type { RulesSettingsFlappingProperties } from '../common/rules_settings';
@@ -456,9 +457,11 @@ export interface ConsumerExecutionMetrics {
   total_enrichment_duration_ms: number;
   gap_duration_s: number;
   gap_range: { lte: string; gte: string };
+  matched_indices_count: number;
   alerts_candidate_count: number;
   alerts_suppressed_count: number;
   frozen_indices_queried_count: number;
+  gap_reason?: GapReason;
 }
 
 export interface PublicRuleMonitoringService {
@@ -467,7 +470,7 @@ export interface PublicRuleMonitoringService {
     value: ConsumerExecutionMetrics[MetricName]
   ) => void;
   setMetrics: (metrics: Partial<ConsumerExecutionMetrics>) => void;
-  clearGapRange: () => void;
+  clearGap: () => void;
 }
 
 export interface PublicLastRunSetters {

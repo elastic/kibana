@@ -8,7 +8,7 @@
  */
 
 import { render, screen, within, waitFor, act } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
 import { BehaviorSubject } from 'rxjs';
 import { getDataTableRecords, realHits } from '../../../../__fixtures__/real_hits';
 import React from 'react';
@@ -250,7 +250,10 @@ async function renderComponent(
     })
   );
 
-  const user = userEvent.setup();
+  const user = userEvent.setup({
+    pointerEventsCheck: PointerEventsCheckLevel.Never,
+    skipHover: true,
+  });
   const result = render(
     <DiscoverToolkitTestProvider toolkit={toolkit}>
       <DiscoverSidebarResponsive {...props} />
@@ -749,8 +752,7 @@ describe('discover responsive sidebar', function () {
     EXTENDED_TIMEOUT
   );
 
-  // FLAKY: https://github.com/elastic/kibana/issues/225127
-  describe.skip('search bar customization', () => {
+  describe('search bar customization', () => {
     it(
       'should not render CustomDataViewPicker',
       async () => {
@@ -797,13 +799,45 @@ describe('discover responsive sidebar', function () {
       EXTENDED_TIMEOUT
     );
 
-    it('should allow to toggle sidebar', async function () {
-      const { user } = await renderComponent(props);
-      expect(screen.getByTestId('fieldList')).toBeInTheDocument();
-      await user.click(screen.getByTestId('unifiedFieldListSidebar__toggle-collapse'));
-      expect(screen.queryByTestId('fieldList')).not.toBeInTheDocument();
-      await user.click(screen.getByTestId('unifiedFieldListSidebar__toggle-expand'));
-      expect(screen.getByTestId('fieldList')).toBeInTheDocument();
+    it('should sync sidebar toggle state', async function () {
+      const expandedSidebarToggleState$ = new BehaviorSubject<SidebarToggleState>({
+        isCollapsed: true,
+        toggle: () => {},
+      });
+
+      const { result: expandedRender } = await renderComponent({
+        ...props,
+        sidebarToggleState$: expandedSidebarToggleState$,
+      });
+
+      await waitFor(() => {
+        expect(expandedSidebarToggleState$.value.isCollapsed).toBe(false);
+        expect(expandedSidebarToggleState$.value.toggle).toBeDefined();
+      });
+
+      expandedRender.unmount();
+
+      const collapsedSidebarToggleState$ = new BehaviorSubject<SidebarToggleState>({
+        isCollapsed: false,
+        toggle: () => {},
+      });
+
+      await renderComponent(
+        {
+          ...props,
+          sidebarToggleState$: collapsedSidebarToggleState$,
+        },
+        {
+          fieldListUiState: {
+            isCollapsed: true,
+          },
+        }
+      );
+
+      await waitFor(() => {
+        expect(collapsedSidebarToggleState$.value.isCollapsed).toBe(true);
+        expect(collapsedSidebarToggleState$.value.toggle).toBeDefined();
+      });
     });
   });
 

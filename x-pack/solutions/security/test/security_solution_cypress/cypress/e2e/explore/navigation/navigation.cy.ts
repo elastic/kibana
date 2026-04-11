@@ -10,8 +10,7 @@ import {
   ALERTS,
   HOSTS,
   ENDPOINTS,
-  TRUSTED_APPS,
-  EVENT_FILTERS,
+  ARTIFACTS,
   NETWORK,
   OVERVIEW,
   TIMELINES,
@@ -22,7 +21,6 @@ import {
   DASHBOARDS,
   CSP_DASHBOARD,
   INDICATORS,
-  BLOCKLIST,
   CSP_BENCHMARKS,
   CSP_FINDINGS,
   POLICIES,
@@ -41,6 +39,7 @@ import {
   CASES_URL,
   KIBANA_HOME,
   ENDPOINTS_URL,
+  ADMINISTRATION_URL_PREFIX,
   TRUSTED_APPS_URL,
   EVENT_FILTERS_URL,
   NETWORK_URL,
@@ -179,16 +178,16 @@ describe('top-level navigation common to all pages in the Security app', { tags:
     navigateFromHeaderTo(POLICIES);
     cy.url().should('include', POLICIES_URL);
   });
-  it('navigates to the Trusted Apps page', () => {
-    navigateFromHeaderTo(TRUSTED_APPS);
+  it('navigates to the Artifacts page from the Manage panel', () => {
+    navigateFromHeaderTo(ARTIFACTS);
+    cy.url().should('include', ADMINISTRATION_URL_PREFIX);
+  });
+  it('artifact tab deep links still resolve', () => {
+    visit(TRUSTED_APPS_URL);
     cy.url().should('include', TRUSTED_APPS_URL);
-  });
-  it('navigates to the Event Filters page', () => {
-    navigateFromHeaderTo(EVENT_FILTERS);
+    visit(EVENT_FILTERS_URL);
     cy.url().should('include', EVENT_FILTERS_URL);
-  });
-  it('navigates to the Blocklist page', () => {
-    navigateFromHeaderTo(BLOCKLIST);
+    visit(BLOCKLIST_URL);
     cy.url().should('include', BLOCKLIST_URL);
   });
   it('navigates to the CSP Benchmarks page', () => {
@@ -306,6 +305,7 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
   });
 
   it('navigates to the Indicators page', () => {
+    ServerlessHeaders.showMoreItems();
     navigateFromHeaderTo(ServerlessHeaders.THREAT_INTELLIGENCE, true);
     cy.url().should('include', INDICATORS_URL);
   });

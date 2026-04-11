@@ -24,7 +24,7 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/solution_nav/src/solution_nav.tsx",
-        "lineNumber": 106,
+        "lineNumber": 105,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -46,7 +46,7 @@
               }
             ],
             "path": "src/platform/packages/shared/shared-ux/page/solution_nav/src/solution_nav.tsx",
-            "lineNumber": 106,
+            "lineNumber": 105,
             "columnNumber": 51,
             "deprecated": false,
             "trackAdoption": false,
@@ -118,7 +118,7 @@
           "<{}>[] | undefined; children?: React.ReactNode; closeFlyoutButtonPosition?: \"inside\" | \"outside\" | undefined; isOpenOnDesktop?: boolean | undefined; onCollapse?: (() => void) | undefined; canBeCollapsed?: boolean | undefined; footer?: React.ReactNode; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/solution_nav/src/solution_nav.tsx",
-        "lineNumber": 44,
+        "lineNumber": 43,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

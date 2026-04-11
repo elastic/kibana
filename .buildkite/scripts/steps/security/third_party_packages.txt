@@ -29,8 +29,13 @@ yaml-language-server
 @atlaskit/pragmatic-drag-and-drop
 @atlaskit/pragmatic-drag-and-drop-hitbox
 @opentelemetry/exporter-metrics-otlp-proto
+@opentelemetry/api-logs
+@opentelemetry/exporter-logs-otlp-http
+@opentelemetry/sdk-logs
 simple-statistics
 monaco-promql
+json-stable-stringify
+apache-arrow
 oxlint
 react-element-to-jsx-string
 @swc/core

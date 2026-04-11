@@ -105,17 +105,7 @@ export const DETECTION_RULE_RULES_API_CURRENT_VERSION = '2023-10-31';
 
 export const FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings-default*';
 
-// space plachoder - to be replaced by the specific kibana space
-export const GENERIC_ENTITY_INDEX_ENRICH_POLICY =
-  'entity_store_field_retention_generic_<space>_v1.0.0';
-
 export const CLOUD_SECURITY_PLUGIN_VERSION = '1.9.0';
-
-/**
- * Entity store latest index pattern for LOOKUP JOIN queries.
- * The <space> placeholder should be replaced with the actual space ID.
- */
-export const ENTITIES_LATEST_INDEX = '.entities.v2.latest.security_<space>';
 
 /**
  * Relationship fields available in the generic entities index.
@@ -126,29 +116,32 @@ export const ENTITIES_LATEST_INDEX = '.entities.v2.latest.security_<space>';
  * to batch the FORK queries.
  */
 export const ENTITY_RELATIONSHIP_FIELDS = [
-  'Accesses_frequently',
-  'Communicates_with',
-  'Depends_on',
-  'Owns',
-  'Supervises',
+  'accesses_frequently',
+  'accesses_infrequently',
+  'communicates_with',
+  'depends_on',
+  'owns',
+  'owns_inferred',
+  'resolution.resolved_to',
+  'supervises',
 ] as const;
 
-// Keys must match ENTITY_RELATIONSHIP_FIELDS values which use Entity Store naming convention
-/* eslint-disable @typescript-eslint/naming-convention */
 export const ENTITY_RELATIONSHIP_LABELS: Record<
   (typeof ENTITY_RELATIONSHIP_FIELDS)[number],
   string
 > = {
-  Accesses_frequently: 'Accesses frequently',
-  Communicates_with: 'Communicates with',
-  Depends_on: 'Depends on',
-  Owns: 'Owns',
-  Supervises: 'Supervises',
+  accesses_frequently: 'Accesses frequently',
+  accesses_infrequently: 'Accesses infrequently',
+  communicates_with: 'Communicates with',
+  depends_on: 'Depends on',
+  owns: 'Owns',
+  owns_inferred: 'Owns (inferred)',
+  'resolution.resolved_to': 'Resolved to',
+  supervises: 'Supervises',
 };
-/* eslint-enable @typescript-eslint/naming-convention */
 
 /**
- * ECS entity actor fields used for graph visualization.
+ * ECS entity actor fields used for graph visualization (entity store v1 / pre-populated IDs).
  * NOTE: The order has meaning - it represents the fallback mechanism for detecting the actor field.
  */
 export const GRAPH_ACTOR_ENTITY_FIELDS = [
@@ -159,12 +152,51 @@ export const GRAPH_ACTOR_ENTITY_FIELDS = [
 ] as const;
 
 /**
- * ECS entity target fields used for graph visualization.
+ * ECS entity target fields used for graph visualization (entity store v1 / pre-populated IDs).
  * NOTE: The order does NOT have meaning - all target fields are captured and aggregated together.
  */
 export const GRAPH_TARGET_ENTITY_FIELDS = [
   'user.target.entity.id',
   'host.target.entity.id',
   'service.target.entity.id',
+  'entity.target.id',
+] as const;
+
+/**
+ * Raw source fields used to compute actor EUIDs in entity store v2.
+ * These mirror the identity fields from Entity Store definitions.
+ * Server-side code derives these dynamically via euid.getEuidSourceFields().
+ */
+export const GRAPH_ACTOR_EUID_SOURCE_FIELDS = [
+  // user EUID source fields
+  'user.email',
+  'user.id',
+  'user.name',
+  // host EUID source fields
+  'host.id',
+  'host.name',
+  'host.hostname',
+  // service EUID source field
+  'service.name',
+  // generic entity id
+  'entity.id',
+] as const;
+
+/**
+ * Raw source fields used to compute target EUIDs in entity store v2.
+ * Target-namespace equivalents of GRAPH_ACTOR_EUID_SOURCE_FIELDS.
+ */
+export const GRAPH_TARGET_EUID_SOURCE_FIELDS = [
+  // user target EUID source fields
+  'user.target.email',
+  'user.target.id',
+  'user.target.name',
+  // host target EUID source fields
+  'host.target.id',
+  'host.target.name',
+  'host.target.hostname',
+  // service target EUID source field
+  'service.target.name',
+  // generic target entity id
   'entity.target.id',
 ] as const;

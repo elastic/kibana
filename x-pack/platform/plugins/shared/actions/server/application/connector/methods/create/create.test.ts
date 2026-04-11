@@ -929,7 +929,6 @@ describe('create()', () => {
 
     test('throws when secrets validation fails', async () => {
       const actionType = getConnectorType({
-        id: 'my-connector-type',
         validate: {
           secrets: {
             schema: z.any().refine(() => {
@@ -952,6 +951,98 @@ describe('create()', () => {
           },
         })
       ).rejects.toThrow('Secrets validation failed');
+    });
+
+    test('throws when config fails Zod object schema validation', async () => {
+      const actionType = getConnectorType({
+        validate: {
+          config: { schema: z.object({ requiredField: z.string() }) },
+          secrets: { schema: z.any() },
+          params: { schema: z.object({}) },
+        },
+      });
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: 'my-connector-type',
+            config: {},
+            secrets: {},
+          },
+        })
+      ).rejects.toThrow(/error validating connector type config/);
+    });
+
+    test('throws when secrets fail Zod object schema validation', async () => {
+      const actionType = getConnectorType({
+        validate: {
+          config: { schema: z.any() },
+          secrets: { schema: z.object({ apiKey: z.string() }) },
+          params: { schema: z.object({}) },
+        },
+      });
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: 'my-connector-type',
+            config: {},
+            secrets: {},
+          },
+        })
+      ).rejects.toThrow(/error validating connector type secrets/);
+    });
+
+    test('throws when config has wrong type for Zod schema', async () => {
+      const actionType = getConnectorType({
+        validate: {
+          config: { schema: z.object({ port: z.number() }) },
+          secrets: { schema: z.any() },
+          params: { schema: z.object({}) },
+        },
+      });
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: 'my-connector-type',
+            config: { port: 'not-a-number' },
+            secrets: {},
+          },
+        })
+      ).rejects.toThrow(/error validating connector type config/);
+    });
+
+    test('throws when secrets have wrong type for Zod schema', async () => {
+      const actionType = getConnectorType({
+        validate: {
+          config: { schema: z.any() },
+          secrets: { schema: z.object({ apiKey: z.string() }) },
+          params: { schema: z.object({}) },
+        },
+      });
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: 'my-connector-type',
+            config: {},
+            secrets: { apiKey: 12345 },
+          },
+        })
+      ).rejects.toThrow(/error validating connector type secrets/);
     });
   });
 

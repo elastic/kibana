@@ -40,6 +40,8 @@ describe('getJsonSchemaSuggestions', () => {
       yamlLineCounter: null,
       scalarType: null,
       isInLiquidBlock: false,
+      isInTriggerConditionField: false,
+      triggerConditionDefinition: undefined,
       isInTriggersContext: false,
       isInScheduledTriggerWithBlock: false,
       isInStepsContext: false,

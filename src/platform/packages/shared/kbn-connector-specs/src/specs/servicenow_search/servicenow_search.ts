@@ -43,7 +43,6 @@ import type {
   GetAttachmentInput,
   DescribeTableInput,
 } from './types';
-
 export const ServicenowSearch: ConnectorSpec = {
   metadata: {
     id: '.servicenow_search',
@@ -63,6 +62,21 @@ export const ServicenowSearch: ConnectorSpec = {
         defaults: {},
         overrides: {
           meta: {
+            tokenUrl: {
+              placeholder: 'https://your-instance.service-now.com/oauth_token.do',
+            },
+            scope: { hidden: true },
+          },
+        },
+      },
+      {
+        type: 'oauth_authorization_code',
+        defaults: {},
+        overrides: {
+          meta: {
+            authorizationUrl: {
+              placeholder: 'https://your-instance.service-now.com/oauth_auth.do',
+            },
             tokenUrl: {
               placeholder: 'https://your-instance.service-now.com/oauth_token.do',
             },
@@ -290,6 +304,25 @@ export const ServicenowSearch: ConnectorSpec = {
       },
     },
   },
+
+  skill: [
+    'ServiceNow connector — cross-action usage guidance for LLMs.',
+    '',
+    '## Discovery pattern',
+    'When the target table is unknown, start with listTables (optionally filter by query keyword),',
+    'then call describeTable on the chosen table to understand available fields before querying.',
+    '',
+    '## Knowledge articles',
+    'listKnowledgeBases → search (or listRecords) on kb_knowledge table.',
+    'Useful fields: sys_id, number, short_description, text, topic, category, author,',
+    'sys_created_on, sys_updated_on, workflow_state, kb_knowledge_base, kb_category.',
+    'To filter by knowledge base: include kb_knowledge_base=<kb_sys_id> in encodedQuery.',
+    '',
+    '## Attachments',
+    'Attachment sys_ids are not stored on the parent record. Find them first:',
+    '  listRecords(table=sys_attachment, encodedQuery=table_name=<table>^table_sys_id=<record_sys_id>)',
+    'Then call getAttachment with the attachment sys_id to retrieve base64-encoded content.',
+  ].join('\n'),
 
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.servicenowSearch.test.description', {

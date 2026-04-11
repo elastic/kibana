@@ -25,7 +25,7 @@ describe('EVAL > columnsAfter', () => {
       baseColumns,
       '',
       additionalFieldsMock,
-      UnmappedFieldsStrategy.FAIL
+      UnmappedFieldsStrategy.DEFAULT
     );
 
     expect(result).toEqual([
@@ -46,7 +46,7 @@ describe('EVAL > columnsAfter', () => {
       baseColumns,
       '',
       additionalFieldsMock,
-      UnmappedFieldsStrategy.FAIL
+      UnmappedFieldsStrategy.DEFAULT
     );
 
     expect(result).toEqual([
@@ -82,7 +82,7 @@ describe('EVAL > columnsAfter', () => {
       baseColumns,
       queryString,
       additionalFieldsMock,
-      UnmappedFieldsStrategy.FAIL
+      UnmappedFieldsStrategy.DEFAULT
     );
 
     expect(result).toEqual([
@@ -112,7 +112,7 @@ describe('EVAL > columnsAfter', () => {
       baseColumns,
       queryString,
       additionalFieldsMock,
-      UnmappedFieldsStrategy.FAIL
+      UnmappedFieldsStrategy.DEFAULT
     );
 
     expect(result).toEqual([
@@ -139,7 +139,7 @@ describe('EVAL > columnsAfter', () => {
       baseColumns,
       '',
       additionalFieldsMock,
-      UnmappedFieldsStrategy.FAIL
+      UnmappedFieldsStrategy.DEFAULT
     );
 
     expect(result).toEqual(baseColumns);
@@ -152,7 +152,7 @@ describe('EVAL > columnsAfter', () => {
       baseColumns,
       '',
       additionalFieldsMock,
-      UnmappedFieldsStrategy.FAIL
+      UnmappedFieldsStrategy.DEFAULT
     );
 
     expect(result).toEqual([

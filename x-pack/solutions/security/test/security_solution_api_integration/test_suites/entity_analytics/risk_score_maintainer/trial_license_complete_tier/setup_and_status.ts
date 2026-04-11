@@ -12,12 +12,16 @@ import {
   EntityStoreUtils,
   riskEngineRouteHelpersFactory,
   entityMaintainerRouteHelpersFactory,
+  waitForMaintainerRun,
+  cleanUpRiskScoreMaintainer,
 } from '../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const spaces = getService('spaces');
   const retry = getService('retry');
+  const es = getService('es');
+  const log = getService('log');
   const customSpaceName = 'ea-customspace-it';
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
   const maintainerRoutes = entityMaintainerRouteHelpersFactory(supertest);
@@ -26,28 +30,23 @@ export default ({ getService }: FtrProviderContext) => {
     customSpaceName
   );
   const kibanaServer = getService('kibanaServer');
-  const es = getService('es');
 
   const entityStoreUtils = EntityStoreUtils(getService);
   const entityStoreUtilsCustomSpace = EntityStoreUtils(getService, customSpaceName);
 
-  const waitForMaintainerRun = async (
-    routes: ReturnType<typeof entityMaintainerRouteHelpersFactory>,
-    maintainerId: string = 'risk-score'
-  ) => {
-    await retry.waitForWithTimeout(
-      `Entity maintainer "${maintainerId}" to complete at least one run`,
-      60_000,
-      async () => {
-        const response = await routes.getMaintainers();
-        const maintainer = response.body.maintainers.find(
-          (m: { id: string; runs: number }) => m.id === maintainerId
-        );
-        return maintainer !== undefined && maintainer.runs >= 1;
-      }
-    );
-  };
+  const enableEntityStoreV2Setting = async (namespace: string = 'default') => {
+    let settingsUrl = '/internal/kibana/settings';
+    if (namespace !== 'default') {
+      settingsUrl = `/s/${namespace}${settingsUrl}`;
+    }
 
+    await supertest
+      .post(settingsUrl)
+      .set('kbn-xsrf', 'true')
+      .set('x-elastic-internal-origin', 'Kibana')
+      .send({ changes: { 'securitySolution:entityStoreEnableV2': true } })
+      .expect(200);
+  };
   const checkAssets = async (
     spaceId: string,
     maintainerRoutesHelper: ReturnType<typeof entityMaintainerRouteHelpersFactory>
@@ -99,13 +98,18 @@ export default ({ getService }: FtrProviderContext) => {
         description: `Space for ${customSpaceName}`,
         disabledFeatures: [],
       });
+
       await entityStoreUtils.cleanEngines();
       await entityStoreUtilsCustomSpace.cleanEngines();
+      await cleanUpRiskScoreMaintainer({ es, log });
+      await cleanUpRiskScoreMaintainer({ es, log, namespace: customSpaceName });
     });
 
     afterEach(async () => {
       await entityStoreUtils.cleanEngines();
       await entityStoreUtilsCustomSpace.cleanEngines();
+      await cleanUpRiskScoreMaintainer({ es, log });
+      await cleanUpRiskScoreMaintainer({ es, log, namespace: customSpaceName });
     });
 
     after(async () => {
@@ -113,6 +117,11 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('when entityAnalyticsEntityStoreV2 is true', () => {
+      beforeEach(async () => {
+        await enableEntityStoreV2Setting();
+        await enableEntityStoreV2Setting(customSpaceName);
+      });
+
       it('should return 400 for legacy risk engine init api', async () => {
         await riskEngineRoutes.init(400);
       });
@@ -122,15 +131,21 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should setup risk score assets and configuration when entity store is enabled', async () => {
-        await entityStoreUtils.installEntityStoreV2();
-        await waitForMaintainerRun(maintainerRoutes);
+        await entityStoreUtils.installEntityStoreV2({
+          entityTypes: ['host'],
+          waitForEntities: false,
+        });
+        await waitForMaintainerRun({ retry, routes: maintainerRoutes });
 
         await checkAssets('default', maintainerRoutes);
       });
 
       it('should setup risk score assets and configuration in custom namespace', async () => {
-        await entityStoreUtilsCustomSpace.installEntityStoreV2();
-        await waitForMaintainerRun(maintainerRoutesCustomSpace);
+        await entityStoreUtilsCustomSpace.installEntityStoreV2({
+          entityTypes: ['host'],
+          waitForEntities: false,
+        });
+        await waitForMaintainerRun({ retry, routes: maintainerRoutesCustomSpace });
 
         await checkAssets(customSpaceName, maintainerRoutesCustomSpace);
       });

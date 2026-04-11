@@ -104,6 +104,7 @@ const AlertSelectionComponent: React.FC<Props> = ({
               onConnectorSelected={noop}
               onConnectorIdSelected={onConnectorIdSelected}
               selectedConnectorId={connectorId}
+              loadConnectorFeatureId="attack_discovery"
             />
           </EuiFormRow>
           <EuiSpacer size="m" />

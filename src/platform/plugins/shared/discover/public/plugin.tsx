@@ -170,6 +170,10 @@ export class DiscoverPlugin
     });
 
     registerDiscoverEBTManagerAnalytics(core, this.discoverEbtContext$);
+    void getUnifiedChartSectionViewerAnalytics().then(
+      ({ registerUnifiedChartSectionViewerEbtEvents }) =>
+        registerUnifiedChartSectionViewerEbtEvents(core.analytics)
+    );
 
     core.application.register({
       id: PLUGIN_ID,
@@ -473,8 +477,11 @@ export class DiscoverPlugin
     plugins.embeddable.registerLegacyURLTransform(
       SEARCH_EMBEDDABLE_TYPE,
       async (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
+        const discoverServices = await getDiscoverServicesForEmbeddable();
         const { getTransformOut } = await getEmbeddableServices();
-        return getTransformOut(transformDrilldownsOut);
+        return getTransformOut(transformDrilldownsOut, () =>
+          discoverServices.discoverFeatureFlags.getEmbeddableTransformsEnabled()
+        );
       }
     );
   }
@@ -483,6 +490,8 @@ export class DiscoverPlugin
 const getLocators = () => import('./plugin_imports/locators');
 const getEmbeddableServices = () => import('./plugin_imports/embeddable_services');
 const getSharedServices = () => import('./plugin_imports/shared_services');
+const getUnifiedChartSectionViewerAnalytics = () =>
+  import('@kbn/unified-chart-section-viewer/src/analytics');
 
 const getHistoryService = once(async () => {
   const { HistoryService } = await getSharedServices();

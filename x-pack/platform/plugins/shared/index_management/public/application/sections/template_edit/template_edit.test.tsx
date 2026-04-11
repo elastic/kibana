@@ -13,15 +13,19 @@ import { matchPath } from 'react-router-dom';
 
 import type { TemplateDeserialized } from '../../../../common';
 import { API_BASE_PATH } from '../../../../common/constants';
-import type { AppDependencies } from '../../app_context';
-import { AppContextProvider } from '../../app_context';
 import { breadcrumbService } from '../../services/breadcrumbs';
 import { setUiMetricService } from '../../services/api';
 import { getTemplateDetailsLink } from '../../services/routing';
 import { sendRequest, useRequest } from '../../services/use_request';
 import { TemplateEdit } from './template_edit';
-import type { UiMetricService } from '../../services/ui_metric';
-import type { UseRequestResponse } from '../../../shared_imports';
+import { UiMetricService } from '../../services/ui_metric';
+import type { UseRequestResponse, Error as EsUiSharedError } from '../../../shared_imports';
+
+const mockUseAppContext = jest.fn();
+jest.mock('../../app_context', () => ({
+  ...jest.requireActual('../../app_context'),
+  useAppContext: () => mockUseAppContext(),
+}));
 
 jest.mock('../../services/use_request', () => ({
   __esModule: true,
@@ -44,30 +48,28 @@ jest.mock('../../components', () => ({
   TemplateForm: ({
     defaultValue,
     onSave,
+    isEditing,
+    title,
   }: {
     defaultValue: TemplateDeserialized;
     onSave: (t: TemplateDeserialized) => void;
+    isEditing?: boolean;
+    title?: React.ReactNode;
   }) => (
-    <button
-      type="button"
-      data-test-subj="mockTemplateFormSave"
-      onClick={() => onSave(defaultValue)}
-    />
+    <div>
+      <div data-test-subj="mockTemplateFormTitle">{title}</div>
+      <div data-test-subj="mockIsEditing">{String(Boolean(isEditing))}</div>
+      <button
+        type="button"
+        data-test-subj="mockTemplateFormSave"
+        onClick={() => onSave(defaultValue)}
+      />
+    </div>
   ),
 }));
 
 const renderWithProviders = (ui: React.ReactElement) => {
-  const deps = {
-    config: {
-      enableLegacyTemplates: true,
-    },
-  } as unknown as AppDependencies;
-
-  return render(
-    <I18nProvider>
-      <AppContextProvider value={deps}>{ui}</AppContextProvider>
-    </I18nProvider>
-  );
+  return render(<I18nProvider>{ui}</I18nProvider>);
 };
 
 const createRouterProps = ({ name, search = '' }: { name: string; search?: string }) => {
@@ -111,6 +113,8 @@ const makeTemplate = (overrides: Partial<TemplateDeserialized> = {}): TemplateDe
   ...overrides,
 });
 
+const createRequestError = (message: string): EsUiSharedError => ({ error: message, message });
+
 const getUseRequestMock = <T,>({
   isInitialRequest = false,
   isLoading,
@@ -119,9 +123,9 @@ const getUseRequestMock = <T,>({
 }: {
   isInitialRequest?: boolean;
   isLoading: boolean;
-  error: Error | null;
+  error: EsUiSharedError | null;
   data: T | null;
-}): UseRequestResponse<T, Error> => ({
+}): UseRequestResponse<T, EsUiSharedError> => ({
   isInitialRequest,
   isLoading,
   error,
@@ -132,16 +136,20 @@ const getUseRequestMock = <T,>({
 describe('TemplateEdit', () => {
   beforeEach(() => {
     breadcrumbService.setup(jest.fn());
-    setUiMetricService({ trackMetric: jest.fn() } as unknown as UiMetricService);
+    setUiMetricService(new UiMetricService('index_management'));
     jest.mocked(sendRequest).mockResolvedValue({ data: null, error: null });
+    mockUseAppContext.mockReturnValue({ config: { enableLegacyTemplates: true } });
   });
 
   test('renders loading state', () => {
-    jest
-      .mocked(useRequest)
-      .mockReturnValue(
-        getUseRequestMock({ isInitialRequest: true, isLoading: true, error: null, data: null })
-      );
+    jest.mocked(useRequest).mockReturnValue(
+      getUseRequestMock<TemplateDeserialized>({
+        isInitialRequest: true,
+        isLoading: true,
+        error: null,
+        data: null,
+      })
+    );
     const { history, location, match } = createRouterProps({ name: 'my_template' });
 
     renderWithProviders(<TemplateEdit match={match} location={location} history={history} />);
@@ -150,11 +158,13 @@ describe('TemplateEdit', () => {
   });
 
   test('renders error state when load fails', () => {
-    jest
-      .mocked(useRequest)
-      .mockReturnValue(
-        getUseRequestMock({ isLoading: false, error: new Error('boom'), data: null })
-      );
+    jest.mocked(useRequest).mockReturnValue(
+      getUseRequestMock<TemplateDeserialized>({
+        isLoading: false,
+        error: createRequestError('boom'),
+        data: null,
+      })
+    );
     const { history, location, match } = createRouterProps({ name: 'my_template' });
 
     renderWithProviders(<TemplateEdit match={match} location={location} history={history} />);
@@ -219,6 +229,11 @@ describe('TemplateEdit', () => {
 
     renderWithProviders(<TemplateEdit match={match} location={location} history={history} />);
 
+    expect(screen.getByTestId('mockTemplateFormTitle')).toHaveTextContent(
+      `Edit template '${template.name}'`
+    );
+    expect(screen.getByTestId('mockIsEditing')).toHaveTextContent('true');
+
     fireEvent.click(screen.getByTestId('mockTemplateFormSave'));
 
     await waitFor(() =>
@@ -229,6 +244,8 @@ describe('TemplateEdit', () => {
       })
     );
 
-    expect(pushSpy).toHaveBeenCalledWith(getTemplateDetailsLink(template.name, false));
+    await waitFor(() => {
+      expect(pushSpy).toHaveBeenCalledWith(getTemplateDetailsLink(template.name, false));
+    });
   });
 });
