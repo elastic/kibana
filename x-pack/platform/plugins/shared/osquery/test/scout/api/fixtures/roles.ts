@@ -6,27 +6,100 @@
  */
 
 /**
- * Reuses the role definitions from the Cypress YAML file
- * (cypress/lib/kibana_roles/project_controller_security_roles.yml)
- * which mirrors the serverless Security Solution roles.
+ * Scout role definitions for osquery RBAC tests.
  *
- * For stateful Scout tests, these are created on-the-fly via `getApiKeyForCustomRole()`.
- * The Cypress `Role` type includes extra fields (name, run_as) that must be stripped
- * to match the Scout `KibanaRole` interface.
+ * These match the serverless Security Solution role definitions from
+ * cypress/lib/kibana_roles/project_controller_security_roles.yml,
+ * transformed to the KibanaRole format used by Scout's `getApiKeyForCustomRole()`.
+ *
+ * If the YAML source changes, update these definitions accordingly.
  */
 
 import type { KibanaRole } from '@kbn/scout/src/common/services/custom_role';
-import { getServerlessSecurityKibanaRoleDefinitions } from '@kbn/osquery-plugin-cypress/lib/kibana_roles/kibana_roles';
 
-const roles = getServerlessSecurityKibanaRoleDefinitions();
+const SECURITY_ALERT_INDICES = ['.alerts-security*', '.siem-signals-*'];
 
-const toKibanaRole = (role: (typeof roles)[keyof typeof roles]): KibanaRole => ({
+const COMMON_READ_INDICES = [
+  '.lists*',
+  '.items*',
+  'apm-*-transaction*',
+  'traces-apm*',
+  'auditbeat-*',
+  'endgame-*',
+  'filebeat-*',
+  'logs-*',
+  'packetbeat-*',
+  'winlogbeat-*',
+  'metrics-endpoint.metadata_current_*',
+  '.fleet-agents*',
+  '.fleet-actions*',
+  'risk-score.risk-score-*',
+  '.entities.v1.latest.security_*',
+  '.ml-anomalies-*',
+  'security_solution-*.misconfiguration_latest*',
+  '.entity_analytics.monitoring*',
+];
+
+const COMMON_KIBANA_FEATURES = {
+  ml: ['read'],
+  siemV5: ['read', 'endpoint_list_read'],
+  securitySolutionRulesV2: ['read'],
+  securitySolutionAssistant: ['all'],
+  securitySolutionAttackDiscovery: ['all'],
+  securitySolutionTimeline: ['read'],
+  securitySolutionNotes: ['read'],
+  actions: ['read'],
+  builtInAlerts: ['read'],
+  osquery: ['read', 'run_saved_queries'],
+  discover: ['all'],
+  dashboard: ['all'],
+  canvas: ['all'],
+  graph: ['all'],
+  maps: ['all'],
+  visualize: ['all'],
+  savedQueryManagement: ['all'],
+};
+
+export const T1_ANALYST_ROLE: KibanaRole = {
   elasticsearch: {
-    cluster: role.elasticsearch.cluster,
-    indices: role.elasticsearch.indices,
+    cluster: [],
+    indices: [
+      { names: SECURITY_ALERT_INDICES, privileges: ['read', 'write', 'maintenance'] },
+      {
+        names: [...COMMON_READ_INDICES, '.asset-criticality.asset-criticality-*'],
+        privileges: ['read'],
+      },
+    ],
   },
-  kibana: role.kibana,
-});
+  kibana: [
+    {
+      base: [],
+      spaces: ['*'],
+      feature: {
+        ...COMMON_KIBANA_FEATURES,
+        securitySolutionCases: ['read'],
+      },
+    },
+  ],
+};
 
-export const T1_ANALYST_ROLE = toKibanaRole(roles.t1_analyst);
-export const T2_ANALYST_ROLE = toKibanaRole(roles.t2_analyst);
+export const T2_ANALYST_ROLE: KibanaRole = {
+  elasticsearch: {
+    cluster: [],
+    indices: [
+      { names: SECURITY_ALERT_INDICES, privileges: ['read', 'write', 'maintenance'] },
+      { names: COMMON_READ_INDICES, privileges: ['read'] },
+      { names: ['.asset-criticality.asset-criticality-*'], privileges: ['read', 'write'] },
+    ],
+  },
+  kibana: [
+    {
+      base: [],
+      spaces: ['*'],
+      feature: {
+        ...COMMON_KIBANA_FEATURES,
+        securitySolutionCases: ['all'],
+      },
+    },
+  ],
+};
