@@ -10,7 +10,7 @@ import type { IndexAutocompleteItem, ESQLSourceResult, EsqlView } from '@kbn/esq
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import type { ESQLAstAllCommands, ESQLAstJoinCommand, ESQLSource } from '@elastic/esql/types';
-import { isAsExpression, Walker, LeafPrinter } from '@elastic/esql';
+import { isAsExpression, Walker, LeafPrinter, Parser } from '@elastic/esql';
 import type { ISuggestionItem } from '../../registry/types';
 import { pipeCompleteItem, commaCompleteItem } from '../../registry/complete_items';
 import { findFinalWord, withAutoSuggest } from './autocomplete/helpers';
@@ -288,3 +288,12 @@ export const getLookupJoinSource = (command: ESQLAstJoinCommand): string | undef
     return LeafPrinter.print(sourceNode);
   }
 };
+
+export function getIndexSourcesFromQuery(query: string): string[] {
+  try {
+    const { root } = Parser.parse(query);
+    return getSourcesFromCommands(root.commands, 'index').map(({ name }) => name);
+  } catch {
+    return [];
+  }
+}

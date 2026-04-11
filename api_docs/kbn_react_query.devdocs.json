@@ -14341,10 +14341,6 @@
               },
               {
                 "plugin": "alertingVTwo",
-                "path": "x-pack/platform/plugins/shared/alerting_v2/public/hooks/use_existing_rule.ts"
-              },
-              {
-                "plugin": "alertingVTwo",
                 "path": "x-pack/platform/plugins/shared/alerting_v2/public/hooks/use_fetch_workflow.ts"
               },
               {
@@ -14669,11 +14665,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_monitoring/components/execution_events_table/use_execution_events.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_monitoring/components/execution_results_table/use_execution_results.tsx"
+                "path": "x-pack/solutions/security/plugins/security_solution/public/cases/attachments/event/hooks/use_get_events.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -14681,7 +14673,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/cases/components/case_events/use_get_events.tsx"
+                "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/endpoint_hosts/view/hooks/insights/use_fetch_pending_scans.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/endpoint_hosts/view/hooks/insights/use_fetch_insights_ab.ts"
               },
               {
                 "plugin": "securitySolution",

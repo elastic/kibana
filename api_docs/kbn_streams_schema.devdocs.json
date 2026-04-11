@@ -7682,6 +7682,63 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.STREAMS_INFERENCE_PARENT_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "STREAMS_INFERENCE_PARENT_FEATURE_ID",
+        "description": [
+          "Parent feature for Streams (Inference Feature Registry)."
+        ],
+        "signature": [
+          "\"streams\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/inference_feature_ids.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.STREAMS_PARTITIONING_SUGGESTIONS_INFERENCE_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "STREAMS_PARTITIONING_SUGGESTIONS_INFERENCE_FEATURE_ID",
+        "description": [
+          "Partitioning suggestions."
+        ],
+        "signature": [
+          "\"streams_partitioning_suggestions\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/inference_feature_ids.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.STREAMS_PROCESSING_SUGGESTIONS_INFERENCE_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "STREAMS_PROCESSING_SUGGESTIONS_INFERENCE_FEATURE_ID",
+        "description": [
+          "Processing suggestions (pipelines, grok/dissect processors)."
+        ],
+        "signature": [
+          "\"streams_processing_suggestions\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/inference_feature_ids.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID",
         "type": "string",
         "tags": [],
