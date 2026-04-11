@@ -245,6 +245,8 @@ export const Fonts: FunctionComponent<Props> = ({ url, optimizeFontLoading }) =>
                 `font-family: '${family}';`,
                 `font-style: ${style};`,
                 `font-weight: ${weight};`,
+                // font-display: swap renders text immediately with a fallback font
+                // while the webfont downloads, eliminating flash of invisible text (FOIT).
                 ...(optimizeFontLoading ? [`font-display: ${display ?? 'swap'};`] : []),
                 `src: ${src};`,
                 ...(unicodeRange ? [`unicode-range: ${unicodeRange};`] : []),
