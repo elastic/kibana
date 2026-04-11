@@ -9,7 +9,7 @@
 
 import Path from 'path';
 import type { Node } from 'ts-morph';
-import { Project } from 'ts-morph';
+import { Project, SyntaxKind } from 'ts-morph';
 import {
   getJSDocParamComment,
   getJSDocReturnTagComment,
@@ -321,6 +321,67 @@ describe('getJSDocs', () => {
     const jsDocs = getJSDocs(varDecl!);
     expect(jsDocs).toBeDefined();
     expect(jsDocs!.length).toBeGreaterThan(0);
+  });
+
+  it('returns parent JSDoc for PropertyAssignment without its own comment', () => {
+    const testProject = new Project({ useInMemoryFileSystem: true });
+    const testSourceFile = testProject.createSourceFile(
+      'test.ts',
+      `
+      /**
+       * Parent description.
+       * @param scope - A scope string.
+       * @returns The key tuple.
+       */
+      export const keys = {
+        all: (scope: string) => ['list', scope] as const,
+      };
+      `
+    );
+
+    const varDecl = testSourceFile.getVariableDeclaration('keys');
+    expect(varDecl).toBeDefined();
+    const prop = varDecl!
+      .getInitializerIfKindOrThrow(SyntaxKind.ObjectLiteralExpression)
+      .getProperty('all')!;
+
+    const jsDocs = getJSDocs(prop);
+    expect(jsDocs).toBeDefined();
+    expect(jsDocs!.length).toBeGreaterThan(0);
+    expect(jsDocs![0].getDescription()).toContain('Parent description');
+  });
+
+  it('does not return parent JSDoc for PropertyAssignment with its own leading comment', () => {
+    const testProject = new Project({ useInMemoryFileSystem: true });
+    const testSourceFile = testProject.createSourceFile(
+      'test.ts',
+      `
+      /**
+       * Parent description.
+       */
+      export const obj = {
+        /** My own description. */
+        myProp: 'hi',
+      };
+      `
+    );
+
+    const varDecl = testSourceFile.getVariableDeclaration('obj');
+    expect(varDecl).toBeDefined();
+    const prop = varDecl!
+      .getInitializerIfKindOrThrow(SyntaxKind.ObjectLiteralExpression)
+      .getProperty('myProp')!;
+
+    // getJSDocs should return undefined so getCommentsFromNode falls through
+    // to leading comments, preserving the property's own description.
+    const jsDocs = getJSDocs(prop);
+    expect(jsDocs === undefined || jsDocs.length === 0).toBe(true);
+
+    // getCommentsFromNode should pick up the property's own leading comment.
+    const comments = getCommentsFromNode(prop);
+    expect(comments).toBeDefined();
+    expect(comments!.length).toBeGreaterThan(0);
+    expect(comments![0]).toContain('My own description');
   });
 });
 
