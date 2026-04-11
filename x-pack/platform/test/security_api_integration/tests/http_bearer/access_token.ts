@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { expect as jestExpect } from 'expect';
+
 import expect from '@kbn/expect';
 import { adminTestUser } from '@kbn/test';
 
