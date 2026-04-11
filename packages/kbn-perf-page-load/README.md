@@ -54,6 +54,8 @@ node scripts/perf_page_load.js compare <file1> <file2> [--threshold 5]
 | `<file2>` | Path to the comparison JSON result file. |
 | `--threshold` | Regression threshold percentage (default: 5). Exits non-zero if exceeded. |
 
+For each metric, the delta column is a percent change vs the baseline. When the baseline value is **0** and the comparison is non-zero, the change is expressed vs a small **baseline floor** so the percentage stays defined and comparable to `--threshold`: **1 ms** for millisecond metrics, **0.01** for CLS. When both values are **0**, the delta is **0%**.
+
 **Example:**
 
 ```bash

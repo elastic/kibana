@@ -79,13 +79,34 @@ describe('formatComparisonResults', () => {
     expect(table).toContain('+20.0%');
   });
 
-  it('forces delta to 0 when baseline is zero (no divide-by-zero)', () => {
+  it('uses baseline EPS when baseline is zero so delta matches --threshold (ms metrics)', () => {
     const r1 = { page: { ...fullMetrics, tbtMs: 0 } };
     const r2 = { page: { ...fullMetrics, tbtMs: 500 } };
-    const { table } = formatComparisonResults('base', r1, 'pr', r2, 10);
+    const { table, regressions } = formatComparisonResults('base', r1, 'pr', r2, 10);
+    const lines = table.split('\n');
+    const tbtLine = lines.find((l) => l.includes('TBT'));
+    expect(tbtLine).toContain('+50000.0%');
+    expect(regressions.some((r) => r.includes('TBT'))).toBe(true);
+  });
+
+  it('reports 0% delta when both baselines are zero (ms / non-score)', () => {
+    const r1 = { page: { ...fullMetrics, tbtMs: 0 } };
+    const r2 = { page: { ...fullMetrics, tbtMs: 0 } };
+    const { table, regressions } = formatComparisonResults('base', r1, 'pr', r2, 10);
     const lines = table.split('\n');
     const tbtLine = lines.find((l) => l.includes('TBT'));
     expect(tbtLine).toContain('+0.0%');
+    expect(regressions.some((r) => r.includes('TBT'))).toBe(false);
+  });
+
+  it('uses baseline EPS for CLS when baseline is zero', () => {
+    const r1 = { page: { ...fullMetrics, clsScore: 0 } };
+    const r2 = { page: { ...fullMetrics, clsScore: 0.05 } };
+    const { table, regressions } = formatComparisonResults('base', r1, 'pr', r2, 10);
+    const lines = table.split('\n');
+    const clsLine = lines.find((l) => l.includes('CLS'));
+    expect(clsLine).toContain('+500.0%');
+    expect(regressions.some((r) => r.includes('CLS'))).toBe(true);
   });
 
   it('detects regression when timing increase exceeds threshold', () => {

@@ -35,6 +35,14 @@ const METRIC_LABELS: Array<{ key: keyof PageMetrics; label: string; unit: string
 
 const pad = (s: string, w: number) => s.padStart(w);
 
+/** When baseline is 0, percent change is undefined; use a small floor so delta stays finite and comparable to --threshold. */
+const BASELINE_EPS_MS = 1;
+const BASELINE_EPS_CLS = 0.01;
+
+function baselineEpsWhenZero(key: keyof PageMetrics): number {
+  return key === 'clsScore' ? BASELINE_EPS_CLS : BASELINE_EPS_MS;
+}
+
 export const formatSingleResults = (results: Results): string => {
   const pages = Object.keys(results);
   if (pages.length === 0) return 'No results.';
@@ -100,14 +108,16 @@ export const formatComparisonResults = (
 
       const n1 = key === 'performanceScore' ? Math.round((v1 as number) * 100) : (v1 as number);
       const n2 = key === 'performanceScore' ? Math.round((v2 as number) * 100) : (v2 as number);
-      const delta =
-        n1 === 0
-          ? n2 === 0
-            ? 0
-            : key === 'performanceScore'
-            ? 100
-            : 0
-          : ((n2 - n1) / Math.abs(n1)) * 100;
+
+      let delta: number;
+      if (key === 'performanceScore') {
+        delta = n1 === 0 ? (n2 === 0 ? 0 : 100) : ((n2 - n1) / Math.abs(n1)) * 100;
+      } else if (n1 === 0 && n2 === 0) {
+        delta = 0;
+      } else {
+        const base = n1 === 0 ? baselineEpsWhenZero(key) : Math.abs(n1);
+        delta = ((n2 - n1) / base) * 100;
+      }
       const deltaStr = `${delta >= 0 ? '+' : ''}${delta.toFixed(1)}%`;
 
       // For scores, higher is better (regression = decrease). For timings, lower is better (regression = increase).
