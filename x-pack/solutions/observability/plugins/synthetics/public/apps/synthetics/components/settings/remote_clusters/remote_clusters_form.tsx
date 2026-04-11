@@ -45,7 +45,7 @@ interface ClusterUrlRow {
 
 export const RemoteClustersForm = () => {
   const { http } = useKibana().services;
-  const { isServerless } = useSyntheticsSettingsContext();
+  const { isServerless, isCCSEnabled } = useSyntheticsSettingsContext();
   const { data: savedSettings, loading: loadingSettings } = useGetCCSSettings();
   const { saveSettings, isSaving } = usePutCCSSettings();
 
@@ -193,7 +193,7 @@ export const RemoteClustersForm = () => {
     [handleUrlChange, canEdit]
   );
 
-  if (isServerless) {
+  if (isServerless || !isCCSEnabled) {
     return null;
   }
 

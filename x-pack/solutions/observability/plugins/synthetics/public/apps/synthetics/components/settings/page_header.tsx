@@ -27,7 +27,7 @@ export const getSettingsPageHeader = (
 ): EuiPageHeaderProps => {
   // Not a component, but it doesn't matter. Hooks are just functions
   const match = useRouteMatch<{ tabId: SettingsTabId }>(SYNTHETICS_SETTINGS_ROUTE); // eslint-disable-line react-hooks/rules-of-hooks
-  const { isServerless } = useSyntheticsSettingsContext(); // eslint-disable-line react-hooks/rules-of-hooks
+  const { isServerless, isCCSEnabled } = useSyntheticsSettingsContext(); // eslint-disable-line react-hooks/rules-of-hooks
 
   if (!match) {
     return {};
@@ -87,7 +87,7 @@ export const getSettingsPageHeader = (
         isSelected: tabId === 'advanced',
         href: replaceTab('advanced'),
       },
-      ...(!isServerless
+      ...(!isServerless && isCCSEnabled
         ? [
             {
               label: i18n.translate('xpack.synthetics.settingsTabs.remoteClusters', {
