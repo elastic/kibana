@@ -18,16 +18,26 @@ apiTest.describe(
   () => {
     let adminCredentials: RoleSessionCredentials;
     let agentPolicyId: string;
+    let packagePolicyId: string;
     const createdPackIds: string[] = [];
 
     apiTest.beforeAll(async ({ samlAuth, apiClient }) => {
       adminCredentials = await samlAuth.asInteractiveUser('admin');
 
+      // Get installed osquery_manager version (pre-installed as bundled package)
+      const versionResponse = await apiClient.get(
+        `${testData.API_PATHS.FLEET_EPM_PACKAGES}/osquery_manager`,
+        {
+          headers: { ...testData.COMMON_HEADERS, ...adminCredentials.cookieHeader },
+          responseType: 'json',
+        }
+      );
+      const integrationVersion = versionResponse.body?.item?.version;
+
       // Create a real agent policy to use as a valid policy_id
-      const policyResponse = await apiClient.post('api/fleet/agent_policies', {
+      const policyResponse = await apiClient.post(testData.API_PATHS.FLEET_AGENT_POLICIES, {
         headers: {
           ...testData.COMMON_HEADERS,
-          'elastic-api-version': testData.OSQUERY_API_VERSION,
           ...adminCredentials.cookieHeader,
         },
         body: {
@@ -41,6 +51,27 @@ apiTest.describe(
       });
       expect(policyResponse).toHaveStatusCode(200);
       agentPolicyId = policyResponse.body.item.id;
+
+      // Add osquery_manager integration to the agent policy (required for pack association)
+      const packagePolicyResponse = await apiClient.post(
+        testData.API_PATHS.FLEET_PACKAGE_POLICIES,
+        {
+          headers: { ...testData.COMMON_HEADERS, ...adminCredentials.cookieHeader },
+          body: {
+            policy_id: agentPolicyId,
+            package: { name: 'osquery_manager', version: integrationVersion },
+            name: `osquery-integration-${Date.now()}`,
+            description: '',
+            namespace: 'default',
+            inputs: {
+              'osquery_manager-osquery': { enabled: true, streams: {} },
+            },
+          },
+          responseType: 'json',
+        }
+      );
+      expect(packagePolicyResponse).toHaveStatusCode(200);
+      packagePolicyId = packagePolicyResponse.body.item.id;
     });
 
     apiTest.afterAll(async ({ apiClient, apiServices }) => {
@@ -48,12 +79,18 @@ apiTest.describe(
         await apiServices.osquery.packs.delete(packId);
       }
 
+      // Clean up package policy
+      if (packagePolicyId) {
+        await apiClient.delete(`${testData.API_PATHS.FLEET_PACKAGE_POLICIES}/${packagePolicyId}`, {
+          headers: { ...testData.COMMON_HEADERS, ...adminCredentials.cookieHeader },
+        });
+      }
+
       // Clean up agent policy
       if (agentPolicyId) {
-        await apiClient.post('api/fleet/agent_policies/delete', {
+        await apiClient.post(`${testData.API_PATHS.FLEET_AGENT_POLICIES}/delete`, {
           headers: {
             ...testData.COMMON_HEADERS,
-            'elastic-api-version': testData.OSQUERY_API_VERSION,
             ...adminCredentials.cookieHeader,
           },
           body: { agentPolicyId },

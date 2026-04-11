@@ -21,6 +21,9 @@ export const API_PATHS = {
   OSQUERY_SAVED_QUERIES: 'api/osquery/saved_queries',
   OSQUERY_PACKS: 'api/osquery/packs',
   OSQUERY_LIVE_QUERIES: 'api/osquery/live_queries',
+  FLEET_EPM_PACKAGES: 'api/fleet/epm/packages',
+  FLEET_AGENT_POLICIES: 'api/fleet/agent_policies',
+  FLEET_PACKAGE_POLICIES: 'api/fleet/package_policies',
 } as const;
 
 const uniqueId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
