@@ -35,12 +35,12 @@ describe('remote_result_utils', () => {
     };
 
     it('returns remote info with kibanaUrl for a known remote cluster', () => {
-      expect(
-        getRemoteMonitorInfo('cluster1:synthetics-browser-default', remoteKibanaUrls)
-      ).toEqual({
-        remoteName: 'cluster1',
-        kibanaUrl: 'https://cluster1.example.com',
-      });
+      expect(getRemoteMonitorInfo('cluster1:synthetics-browser-default', remoteKibanaUrls)).toEqual(
+        {
+          remoteName: 'cluster1',
+          kibanaUrl: 'https://cluster1.example.com',
+        }
+      );
     });
 
     it('returns remote info with empty kibanaUrl for an unknown remote cluster', () => {
@@ -53,9 +53,7 @@ describe('remote_result_utils', () => {
     });
 
     it('returns undefined for a local index', () => {
-      expect(
-        getRemoteMonitorInfo('synthetics-browser-default', remoteKibanaUrls)
-      ).toBeUndefined();
+      expect(getRemoteMonitorInfo('synthetics-browser-default', remoteKibanaUrls)).toBeUndefined();
     });
 
     it('returns remote info with empty kibanaUrl when remoteKibanaUrls is empty', () => {
