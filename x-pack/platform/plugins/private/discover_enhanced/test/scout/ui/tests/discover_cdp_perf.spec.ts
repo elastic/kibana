@@ -29,7 +29,7 @@ const RSPACK_ONLY_BUNDLE_LABELS: readonly string[] = [
   'vendors-heavy',
 ];
 
-function getExpectedDiscoverPluginIds(projectType: string): string[] {
+function getExpectedDiscoverPluginIds(projectType: string | undefined): string[] {
   return [
     'aiops',
     'discover',
