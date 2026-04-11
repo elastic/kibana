@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import type { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { Plugin } from '@kbn/core/public';
-import { type CoreSetup, type PluginInitializerContext } from '@kbn/core/public';
-import type { ManagementSetup } from '@kbn/management-plugin/public';
+import { type CoreSetup, type CoreStart, type PluginInitializerContext } from '@kbn/core/public';
+import type { ManagementApp, ManagementSetup } from '@kbn/management-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
@@ -41,13 +42,17 @@ export class GenAiSettingsPlugin
       GenAiSettingsStartDeps
     >
 {
+  private registeredApp?: ManagementApp;
+  private licensingSubscription?: Subscription;
+
   constructor(private initializerContext: PluginInitializerContext<GenAiSettingsConfigType>) {}
 
   public setup(
     core: CoreSetup<GenAiSettingsStartDeps, GenAiSettingsPluginStart>,
     { management }: GenAiSettingsSetupDeps
   ): GenAiSettingsPluginSetup {
-    management.sections.section.ai.registerApp({
+    // This section depends mainly on Connectors feature, but should have its own Kibana feature setting in the future.
+    this.registeredApp = management.sections.section.ai.registerApp({
       id: 'genAiSettings',
       title: i18n.translate('genAiSettings.managementSectionLabel', {
         defaultMessage: 'GenAI Settings',
@@ -66,12 +71,39 @@ export class GenAiSettingsPlugin
       },
     });
 
+    // Default to disabled until license and capability checks run in start()
+    this.registeredApp.disable();
+
     return {};
   }
 
-  public start(): GenAiSettingsPluginStart {
+  public start(
+    coreStart: CoreStart,
+    { licensing }: GenAiSettingsStartDeps
+  ): GenAiSettingsPluginStart {
+    const { capabilities } = coreStart.application;
+
+    const hasConnectorsReadPrivilege =
+      capabilities.actions?.show === true && capabilities.actions?.execute === true;
+    const hasAnonymizationPrivilege =
+      capabilities.anonymization?.show === true || capabilities.anonymization?.manage === true;
+
+    if (licensing) {
+      this.licensingSubscription = licensing.license$.subscribe((license) => {
+        const hasEnterpriseLicense = license?.hasAtLeast('enterprise') ?? false;
+
+        if (hasEnterpriseLicense && (hasConnectorsReadPrivilege || hasAnonymizationPrivilege)) {
+          this.registeredApp?.enable();
+        } else {
+          this.registeredApp?.disable();
+        }
+      });
+    }
+
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    this.licensingSubscription?.unsubscribe();
+  }
 }
