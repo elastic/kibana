@@ -213,9 +213,6 @@ export const useDashboardListingTable = ({
           per_page: listingLimit,
           tags: (references ?? []).map(({ id }) => id),
           excluded_tags: (referencesToExclude ?? []).map(({ id }) => id),
-          ...(normalizedSearchTerm.length === 0
-            ? { sort_field: 'updated_at', sort_order: 'desc' }
-            : {}),
         })
         .then(({ total, dashboards }) => {
           const searchEndTime = window.performance.now();

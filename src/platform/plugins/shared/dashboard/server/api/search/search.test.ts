@@ -25,7 +25,7 @@ const createRequestContext = (find: jest.Mock): RequestHandlerContext =>
   } as unknown as RequestHandlerContext);
 
 describe('dashboard search', () => {
-  it('applies default updated_at desc sort when query is absent and no sort_field provided', async () => {
+  it('always applies updated_at desc sort', async () => {
     const find = jest
       .fn()
       .mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 20 });
@@ -40,86 +40,16 @@ describe('dashboard search', () => {
     );
   });
 
-  it('does not force a sort when query is present and no sort_field provided', async () => {
+  it('applies updated_at desc sort when query is present', async () => {
     const find = jest
       .fn()
       .mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 20 });
     const params: DashboardSearchRequestParams = { query: 'hello*', per_page: 20 };
     await search(createRequestContext(find), params);
 
-    const [options] = find.mock.calls[0];
-    expect(options).not.toHaveProperty('sortField');
-    expect(options).not.toHaveProperty('sortOrder');
-  });
-
-  it('applies explicit sorting when sort_field is provided', async () => {
-    const find = jest
-      .fn()
-      .mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 20 });
-    const params: DashboardSearchRequestParams = {
-      sort_field: 'updated_at',
-      sort_order: 'asc',
-      per_page: 20,
-    };
-    await search(createRequestContext(find), params);
-
-    expect(find).toHaveBeenCalledWith(
-      expect.objectContaining({
-        sortField: 'updated_at',
-        sortOrder: 'asc',
-      })
-    );
-  });
-
-  it('allows explicit sorting by created_at', async () => {
-    const find = jest
-      .fn()
-      .mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 20 });
-    const params: DashboardSearchRequestParams = {
-      sort_field: 'created_at',
-      sort_order: 'desc',
-      per_page: 20,
-    };
-    await search(createRequestContext(find), params);
-
-    expect(find).toHaveBeenCalledWith(
-      expect.objectContaining({
-        sortField: 'created_at',
-        sortOrder: 'desc',
-      })
-    );
-  });
-
-  it('applies explicit sorting when query is present and sort_field is provided', async () => {
-    const find = jest
-      .fn()
-      .mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 20 });
-    const params: DashboardSearchRequestParams = {
-      query: 'hello*',
-      sort_field: 'updated_at',
-      sort_order: 'asc',
-      per_page: 20,
-    };
-    await search(createRequestContext(find), params);
-
     expect(find).toHaveBeenCalledWith(
       expect.objectContaining({
         search: 'hello*',
-        sortField: 'updated_at',
-        sortOrder: 'asc',
-      })
-    );
-  });
-
-  it('defaults sort_order to desc when sort_field is provided', async () => {
-    const find = jest
-      .fn()
-      .mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 20 });
-    const params: DashboardSearchRequestParams = { sort_field: 'updated_at', per_page: 20 };
-    await search(createRequestContext(find), params);
-
-    expect(find).toHaveBeenCalledWith(
-      expect.objectContaining({
         sortField: 'updated_at',
         sortOrder: 'desc',
       })
