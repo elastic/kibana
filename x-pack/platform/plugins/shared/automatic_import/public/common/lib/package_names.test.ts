@@ -84,7 +84,7 @@ describe('fetchTakenPackageNames', () => {
 
     expect(result.has('nginx')).toBe(true);
     expect(result.has('my_logs')).toBe(true);
-    expect(result.has('my_logs')).toBe(true); // normalized title same as id in this case
+    expect(result.has('my_logs')).toBe(true);
   });
 
   it('passes deps through to both API calls', async () => {

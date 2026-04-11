@@ -8,8 +8,6 @@
 import React from 'react';
 import { render, waitFor, act } from '@testing-library/react';
 
-// ---- Module mocks ----
-
 const mockLoadAsync = jest.fn();
 jest.mock('jszip', () => ({
   __esModule: true,
@@ -62,10 +60,7 @@ jest.mock('../../license_paywall/license_paywall_card', () => ({
   LicensePaywallCard: () => null,
 }));
 
-// ---- Component under test ----
 import { CreateIntegrationUpload } from './create_integration_upload';
-
-// ---- Helpers ----
 
 const makeZipWithPackageName = (packageName: string) => ({
   files: {
@@ -77,7 +72,6 @@ const makeZipWithPackageName = (packageName: string) => ({
   },
 });
 
-/** Fires a file-change on the EUI file picker input, flushing all async side-effects. */
 const selectFile = async (container: HTMLElement, fileName = 'test.zip') => {
   const input = container.querySelector('input[type="file"]') as HTMLInputElement;
   const file = new File(['zip'], fileName, { type: 'application/zip' });
@@ -85,15 +79,12 @@ const selectFile = async (container: HTMLElement, fileName = 'test.zip') => {
 
   await act(async () => {
     input.dispatchEvent(new Event('change', { bubbles: true }));
-    // flush microtasks so the async IIFE inside onChangeFile resolves
     await Promise.resolve();
     await Promise.resolve();
   });
 };
 
 const renderUpload = () => render(<CreateIntegrationUpload />);
-
-// ---- Tests ----
 
 describe('CreateIntegrationUpload', () => {
   beforeEach(() => {
