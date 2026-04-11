@@ -6,7 +6,17 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+
+const ccsSettingsAttributesSchema = schema.object(
+  {
+    useAllRemoteClusters: schema.boolean(),
+    selectedRemoteClusters: schema.arrayOf(schema.string(), { maxSize: 100 }),
+    remoteKibanaUrls: schema.recordOf(schema.string(), schema.string()),
+  },
+  { unknowns: 'ignore' }
+);
 
 export const SO_SYNTHETICS_CCS_SETTINGS_TYPE = 'synthetics-ccs-settings';
 
@@ -20,6 +30,10 @@ export const syntheticsCCSSettings: SavedObjectsType = {
   modelVersions: {
     1: {
       changes: [],
+      schemas: {
+        forwardCompatibility: ccsSettingsAttributesSchema,
+        create: ccsSettingsAttributesSchema,
+      },
     },
   },
   mappings: {
