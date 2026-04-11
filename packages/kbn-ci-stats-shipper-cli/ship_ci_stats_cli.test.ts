@@ -149,4 +149,40 @@ describe('ship_ci_stats_cli', () => {
 
     await expect(runWithMetrics(metrics, { validate: true })).resolves.toBeUndefined();
   });
+
+  it('lists rspack update command once when multiple rspack metrics are over limit', async () => {
+    const metrics: CiStatsMetric[] = [
+      {
+        group: 'page load bundle size',
+        id: 'pluginA',
+        value: 200,
+        limit: 100,
+        limitConfigPath: 'packages/kbn-rspack-optimizer/limits.yml',
+      },
+      {
+        group: 'page load bundle size',
+        id: 'pluginB',
+        value: 200,
+        limit: 100,
+        limitConfigPath: 'packages/kbn-rspack-optimizer/limits.yml',
+      },
+    ];
+
+    let caught: unknown;
+    try {
+      await runWithMetrics(metrics, { validate: true });
+    } catch (error) {
+      caught = error;
+    }
+
+    expect(caught).toBeDefined();
+    const message = (caught as Error).message;
+    expect(message).toContain('Metric overages:');
+    expect(message.match(/node scripts\/build_rspack_bundles --update-limits/g)?.length ?? 0).toBe(
+      1
+    );
+    expect(
+      message.match(/To update the limit, run the following command locally:/g)?.length ?? 0
+    ).toBe(1);
+  });
 });
