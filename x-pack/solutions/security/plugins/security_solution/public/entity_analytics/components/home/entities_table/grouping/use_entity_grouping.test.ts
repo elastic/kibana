@@ -36,32 +36,12 @@ describe('buildResolutionGroupingQuery', () => {
     });
   });
 
-  it('includes resolutionEntityName filtered sub-agg excluding aliases', () => {
+  it('does not include entity name or type sub-aggs (fetched separately via useFetchTargetMetadata)', () => {
     const result = buildResolutionGroupingQuery(defaultParams);
 
-    const entityNameAgg = result.aggs?.groupByFields?.aggs?.resolutionEntityName;
-    expect(entityNameAgg?.filter).toEqual({
-      bool: {
-        must_not: [{ exists: { field: ENTITY_FIELDS.RESOLVED_TO } }],
-      },
-    });
-    expect(entityNameAgg?.aggs?.name).toEqual({
-      terms: { field: ENTITY_FIELDS.ENTITY_NAME, size: 1 },
-    });
-  });
-
-  it('includes resolutionEntityType filtered sub-agg excluding aliases', () => {
-    const result = buildResolutionGroupingQuery(defaultParams);
-
-    const entityTypeAgg = result.aggs?.groupByFields?.aggs?.resolutionEntityType;
-    expect(entityTypeAgg?.filter).toEqual({
-      bool: {
-        must_not: [{ exists: { field: ENTITY_FIELDS.RESOLVED_TO } }],
-      },
-    });
-    expect(entityTypeAgg?.aggs?.type).toEqual({
-      terms: { field: ENTITY_FIELDS.ENTITY_TYPE, size: 1 },
-    });
+    const aggs = result.aggs?.groupByFields?.aggs;
+    expect(aggs).not.toHaveProperty('resolutionEntityName');
+    expect(aggs).not.toHaveProperty('resolutionEntityType');
   });
 
   it('orders by resolutionRiskScore desc then _count desc', () => {
