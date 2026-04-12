@@ -21,6 +21,65 @@
     "functions": [
       {
         "parentPluginId": "@kbn/as-code-data-views-transforms",
+        "id": "def-common.fromStoredDataView",
+        "type": "Function",
+        "tags": [],
+        "label": "fromStoredDataView",
+        "description": [
+          "\nConvert a stored search-source `index` value (saved object / serialized search source)\nto the as-code data view shape.\n"
+        ],
+        "signature": [
+          "(index: string | ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          " | null | undefined) => Readonly<{} & { type: \"data_view_reference\"; ref_id: string; }> | Readonly<{ time_field?: string | undefined; runtime_fields?: (Readonly<{ script?: string | undefined; format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; name: string; }> | Readonly<{ script?: string | undefined; } & { type: \"composite\"; name: string; fields: Readonly<{ format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; name: string; }>[]; }>)[] | undefined; } & { type: \"data_view_spec\"; index_pattern: string; }>"
+        ],
+        "path": "src/platform/packages/shared/as-code/data-views-transforms/src/from_stored_data_view.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/as-code-data-views-transforms",
+            "id": "def-common.fromStoredDataView.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "index",
+            "description": [
+              "String id (referenced data view), inline {@link DataViewSpec}, or null/undefined"
+            ],
+            "signature": [
+              "string | ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              " | null | undefined"
+            ],
+            "path": "src/platform/packages/shared/as-code/data-views-transforms/src/from_stored_data_view.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "As-code `data_source` object for classic (KQL/Lucene) tabs"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/as-code-data-views-transforms",
         "id": "def-common.fromStoredRuntimeFields",
         "type": "Function",
         "tags": [],
@@ -148,6 +207,56 @@
         ],
         "returnComment": [
           "Array of AsCodeRuntimeField objects, one per entry in `runtimeFields`"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/as-code-data-views-transforms",
+        "id": "def-common.toStoredDataView",
+        "type": "Function",
+        "tags": [],
+        "label": "toStoredDataView",
+        "description": [
+          "\nConvert an as-code data view back to a stored search-source `index` value\n(string id for a referenced data view, or inline {@link DataViewSpec} fields).\n"
+        ],
+        "signature": [
+          "(dataView: Readonly<{} & { type: \"data_view_reference\"; ref_id: string; }> | Readonly<{ time_field?: string | undefined; runtime_fields?: (Readonly<{ script?: string | undefined; format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; name: string; }> | Readonly<{ script?: string | undefined; } & { type: \"composite\"; name: string; fields: Readonly<{ format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; name: string; }>[]; }>)[] | undefined; } & { type: \"data_view_spec\"; index_pattern: string; }>) => string | ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          }
+        ],
+        "path": "src/platform/packages/shared/as-code/data-views-transforms/src/to_stored_data_view.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/as-code-data-views-transforms",
+            "id": "def-common.toStoredDataView.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dataView",
+            "description": [
+              "As-code `data_source` value from classic tab state"
+            ],
+            "signature": [
+              "Readonly<{} & { type: \"data_view_reference\"; ref_id: string; }> | Readonly<{ time_field?: string | undefined; runtime_fields?: (Readonly<{ script?: string | undefined; format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; name: string; }> | Readonly<{ script?: string | undefined; } & { type: \"composite\"; name: string; fields: Readonly<{ format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; name: string; }>[]; }>)[] | undefined; } & { type: \"data_view_spec\"; index_pattern: string; }>"
+            ],
+            "path": "src/platform/packages/shared/as-code/data-views-transforms/src/to_stored_data_view.ts",
+            "lineNumber": 28,
+            "columnNumber": 34,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "Value suitable for `SerializedSearchSourceFields.index`"
         ],
         "initialIsOpen": false
       },

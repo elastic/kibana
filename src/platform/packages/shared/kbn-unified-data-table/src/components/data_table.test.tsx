@@ -817,7 +817,7 @@ describe('UnifiedDataTable', () => {
 
         expect(findTestSubject(component, 'test-body-control-column-cell').exists()).toBeTruthy();
         expect(
-          findTestSubject(component, 'exampleRowControl-visBarVerticalStacked').exists()
+          findTestSubject(component, 'exampleRowControl-chartBarVerticalStack').exists()
         ).toBeTruthy();
 
         // The other actions are within the popover
@@ -917,9 +917,58 @@ describe('UnifiedDataTable', () => {
         expandedDoc,
         getProps().rows,
         ['_source'],
-        setExpandedDocMock,
         columnsMetaOverride
       );
+    },
+    EXTENDED_JEST_TIMEOUT
+  );
+
+  it(
+    'should provide, clear, and re-provide document view metadata when rendered externally',
+    async () => {
+      const rows = esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock));
+      const [expandedDoc] = rows;
+      const setRenderDocumentViewMeta = jest.fn();
+      const component = await getComponent({
+        ...getProps(),
+        rows,
+        expandedDoc,
+        setExpandedDoc: jest.fn(),
+        renderDocumentView: 'external',
+        setRenderDocumentViewMeta,
+      });
+
+      await waitFor(() => {
+        expect(setRenderDocumentViewMeta).toHaveBeenLastCalledWith({
+          displayedRows: rows,
+          displayedColumns: ['_source'],
+        });
+      });
+
+      setRenderDocumentViewMeta.mockClear();
+
+      await act(async () => {
+        component.setProps({ expandedDoc: undefined });
+        component.update();
+      });
+
+      await waitFor(() => {
+        expect(setRenderDocumentViewMeta).toHaveBeenLastCalledWith(undefined);
+      });
+
+      setRenderDocumentViewMeta.mockClear();
+
+      await act(async () => {
+        component.setProps({ expandedDoc });
+        component.update();
+      });
+
+      await waitFor(() => {
+        expect(setRenderDocumentViewMeta).toHaveBeenLastCalledWith({
+          displayedRows: rows,
+          displayedColumns: ['_source'],
+        });
+      });
     },
     EXTENDED_JEST_TIMEOUT
   );

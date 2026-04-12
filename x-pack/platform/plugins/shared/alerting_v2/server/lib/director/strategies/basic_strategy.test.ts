@@ -6,8 +6,11 @@
  */
 
 import { BasicTransitionStrategy } from './basic_strategy';
-import type { AlertEpisodeStatus, AlertEventStatus } from '../../../resources/alert_events';
-import { alertEpisodeStatus, alertEventStatus } from '../../../resources/alert_events';
+import type {
+  AlertEpisodeStatus,
+  AlertEventStatus,
+} from '../../../resources/datastreams/alert_events';
+import { alertEpisodeStatus, alertEventStatus } from '../../../resources/datastreams/alert_events';
 import { createRuleResponse } from '../../test_utils';
 import { buildLatestAlertEvent, buildStrategyStateTransitionContext } from '../test_utils';
 

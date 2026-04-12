@@ -7,7 +7,7 @@
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { createBehavioralAnalysisModule } from './alert_analysis_module';
+import { createBehavioralAnalysisModule } from './behavioral_analysis_module';
 import type { LeadEntity } from '../types';
 
 const createEntity = (type: string, name: string, email?: string): LeadEntity => ({
@@ -46,7 +46,7 @@ const createAlertAggResponse = (
         },
         distinct_rules: { buckets: b.rules.map((r) => ({ key: r, doc_count: 1 })) },
         max_risk_score: { value: b.maxRiskScore },
-        top_5_alerts: { hits: { hits: [] } },
+        top_alerts: { hits: { hits: [] } },
       })),
     },
     by_host: {
@@ -58,7 +58,7 @@ const createAlertAggResponse = (
         },
         distinct_rules: { buckets: b.rules.map((r) => ({ key: r, doc_count: 1 })) },
         max_risk_score: { value: b.maxRiskScore },
-        top_5_alerts: { hits: { hits: [] } },
+        top_alerts: { hits: { hits: [] } },
       })),
     },
   },

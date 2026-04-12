@@ -18,7 +18,11 @@ import type {
   ConcreteTaskInstance,
 } from '@kbn/task-manager-plugin/server';
 import { DEFAULT_MAX_WORKERS } from '@kbn/task-manager-plugin/server/config';
-import { getDeleteTaskRunResult, TaskPriority } from '@kbn/task-manager-plugin/server/task';
+import {
+  getDeleteTaskRunResult,
+  TaskCost,
+  TaskPriority,
+} from '@kbn/task-manager-plugin/server/task';
 import { initRoutes } from './init_routes';
 
 // this plugin's dependendencies
@@ -382,6 +386,35 @@ export class SampleTaskManagerFixturePlugin
         paramsSchema: schema.object({}),
         createTaskRunner: () => ({
           async run() {},
+        }),
+      },
+      extraLargeCostTask: {
+        title: 'Task used for testing task cost',
+        cost: TaskCost.ExtraLarge,
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
+          async run() {
+            const { state, schedule } = taskInstance;
+            const prevState = state || { count: 0 };
+            const count = (prevState.count || 0) + 1;
+
+            const [{ elasticsearch }] = await core.getStartServices();
+            await elasticsearch.client.asInternalUser.index({
+              index: '.kibana_task_manager_test_result',
+              body: {
+                type: 'task',
+                taskType: 'extraLargeCostTask',
+                taskId: taskInstance.id,
+                state: JSON.stringify(state),
+                ranAt: new Date(),
+              },
+              refresh: true,
+            });
+
+            return {
+              state: { count },
+              schedule,
+            };
+          },
         }),
       },
       lowPriorityTask: {

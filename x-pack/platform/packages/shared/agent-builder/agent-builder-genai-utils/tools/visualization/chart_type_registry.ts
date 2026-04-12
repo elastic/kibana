@@ -21,6 +21,7 @@ import { mosaicStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder
 interface ChartTypeRegistryEntry {
   schema: { validate: (config: unknown) => any; getSchema: () => any };
   guidance: { description: string; guideline: string };
+  configPromptRules?: string[];
 }
 
 /**
@@ -34,7 +35,7 @@ interface ChartTypeRegistryEntry {
  * TypeScript enforces exhaustiveness via `satisfies Record<SupportedChartType, ...>` —
  * a missing entry is a compile error.
  */
-export const chartTypeRegistry = {
+export const chartTypeRegistry: Record<SupportedChartType, ChartTypeRegistryEntry> = {
   [SupportedChartType.Metric]: {
     schema: esqlMetricState,
     guidance: {
@@ -52,6 +53,11 @@ export const chartTypeRegistry = {
       guideline:
         "Choose 'gauge' when showing a value within a range, progress toward a goal, or performance against min/max thresholds",
     },
+    configPromptRules: [
+      "Always omit the optional 'min' and 'max' fields from the final configuration.",
+      'Do not infer, synthesize, or backfill gauge bounds from the ES|QL results or the user request.',
+      'Only include goal/target-related fields when the user explicitly asks for a goal or threshold.',
+    ],
   },
   [SupportedChartType.XY]: {
     schema: xyStateSchemaESQL,
@@ -134,7 +140,7 @@ export const chartTypeRegistry = {
         "Choose 'mosaic' when visualizing the joint distribution of two categorical dimensions",
     },
   },
-} satisfies Record<SupportedChartType, ChartTypeRegistryEntry>;
+};
 
 export type ChartTypeRegistry = typeof chartTypeRegistry;
 

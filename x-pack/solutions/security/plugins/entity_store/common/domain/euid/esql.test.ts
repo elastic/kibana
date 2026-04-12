@@ -9,6 +9,7 @@ import {
   getEuidEsqlEvaluation,
   getEuidEsqlDocumentsContainsIdFilter,
   getEuidEsqlFilterBasedOnDocument,
+  getFieldEvaluationsEsql,
   getFieldEvaluationsEsqlFromDefinition,
 } from './esql';
 import { getEntityDefinition } from '../definitions/registry';
@@ -218,17 +219,19 @@ describe('getEuidEsqlDocumentsContainsIdFilter', () => {
 });
 
 describe('getFieldEvaluationsEsql', () => {
-  it('returns empty string for entity types without field evaluations', () => {
-    expect(getFieldEvaluationsEsqlFromDefinition(getEntityDefinition('generic', 'default'))).toBe(
-      undefined
-    );
-    expect(getFieldEvaluationsEsqlFromDefinition(getEntityDefinition('host', 'default'))).toBe(
-      undefined
-    );
-    expect(getFieldEvaluationsEsqlFromDefinition(getEntityDefinition('service', 'default'))).toBe(
-      undefined
-    );
-  });
+  it.each(['generic', 'host', 'service'] as const)(
+    'returns shared entity.source EVAL fragment for %s',
+    (entityType) => {
+      const result = getFieldEvaluationsEsql(entityType);
+
+      expect(result).toContain('_src_entity_source0 = MV_FIRST(event.module)');
+      expect(result).toContain('_src_entity_source1 = MV_FIRST(event.dataset)');
+      expect(result).toContain('_src_entity_source2 = MV_FIRST(data_stream.dataset)');
+      expect(result).toContain('_src_entity_source = CASE(');
+      expect(result).toContain('entity.source = CASE(');
+      expect(result).toContain('NULL, _src_entity_source)');
+    }
+  );
 
   it('returns EVAL fragment for user entity.namespace', () => {
     const result = getFieldEvaluationsEsqlFromDefinition(getEntityDefinition('user', 'default'));
@@ -239,12 +242,20 @@ describe('getFieldEvaluationsEsql', () => {
       `${v0} = MV_FIRST(event.module)`,
       `${v1} = MV_FIRST(SPLIT(MV_FIRST(data_stream.dataset), "."))`,
       `${base} = CASE((${v0} IS NOT NULL AND ${v0} != ""), ${v0}, (${v1} IS NOT NULL AND ${v1} != ""), ${v1}, NULL)`,
-      `entity.namespace = CASE((${base} IS NULL OR ${base} == ""), "unknown", (${base} == "okta" OR ${base} == "entityanalytics_okta"), "okta", (${base} == "azure" OR ${base} == "entityanalytics_entra_id"), "entra_id", (${base} == "o365" OR ${base} == "o365_metrics"), "microsoft_365", (${base} == "entityanalytics_ad"), "active_directory", ${base})`,
     ].join(', ');
     expect(result).toBeDefined();
     expect(result?.replace(/\s+/g, ' ').trim()).toContain(
       namespacePart.replace(/\s+/g, ' ').trim()
     );
+    expect(result).toContain('entity.namespace = CASE(');
+    expect(result).toContain(
+      '(_src_entity_namespace == "okta" OR _src_entity_namespace == "entityanalytics_okta")'
+    );
+    expect(result).toContain('"local"');
+    expect(result).toContain(
+      '(_src_entity_namespace IS NULL OR _src_entity_namespace == ""), "unknown"'
+    );
+    expect(result).not.toContain('_fe_inner_entity_namespace');
     expect(result).not.toContain('entity.confidence');
     expect(result).not.toContain('_src_entity_confidence');
   });
@@ -280,7 +291,7 @@ true, CASE((user.email IS NOT NULL AND user.email != "" AND entity.namespace IS 
 });
 
 describe('getEuidEsqlFilterBasedOnDocument user local namespace', () => {
-  it('uses user.name@host.id@entity.namespace when whenConditionTrueSetFieldsPreAgg sets entity.namespace to local', () => {
+  it('uses user.name@host.id@entity.namespace when fieldEvaluations set entity.namespace to local', () => {
     const result = getEuidEsqlFilterBasedOnDocument('user', {
       user: { name: 'alice' },
       host: { id: 'host-1' },

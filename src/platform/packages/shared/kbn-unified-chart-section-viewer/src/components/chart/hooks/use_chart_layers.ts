@@ -15,6 +15,7 @@ import {
   createTimeBucketAggregation,
   getLensMetricFormat,
   firstNonNullable,
+  resolveMetricUnit,
 } from '../../../common/utils';
 
 interface UseChartLayersParams {
@@ -27,11 +28,8 @@ interface UseChartLayersParams {
 
 /**
  * A hook that computes the Lens series layer configuration for the metrics chart.
- *
- * @param dimensions - An array of dimension fields to break down the series by.
- * @param metric - The metric field to be visualized.
- * @param color - The color to apply to the series.
- * @returns An array of LensSeriesLayer configurations.
+ * Properly normalizes metric units to ensure they are displayed correctly in the chart
+ * (e.g., 'byte' -> 'bytes', handling multiple units over time).
  */
 export const useChartLayers = ({
   dimensions = [],
@@ -41,16 +39,16 @@ export const useChartLayers = ({
   customFunction,
 }: UseChartLayersParams): LensSeriesLayer[] => {
   return useMemo((): LensSeriesLayer[] => {
-    const type = firstNonNullable(metricItem.fieldTypes);
+    const fieldTypes = metricItem.fieldTypes;
     const instrument = firstNonNullable(metricItem.metricTypes);
-    const resolvedUnit = firstNonNullable(metricItem.units);
+    const resolvedUnit = resolveMetricUnit(metricItem.metricName, metricItem.units);
 
-    if (!type || !instrument) {
+    if (fieldTypes.length === 0 || !instrument) {
       return [];
     }
 
     const metricField = createMetricAggregation({
-      type,
+      types: fieldTypes,
       instrument,
       metricName: metricItem.metricName,
       customFunction,

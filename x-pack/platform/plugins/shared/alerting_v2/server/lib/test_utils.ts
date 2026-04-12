@@ -20,7 +20,7 @@ import type {
 } from './rule_executor/types';
 import type { RuleResponse } from './rules_client';
 import type { QueryPayload } from './rule_executor/get_query_payload';
-import type { AlertEvent } from '../resources/alert_events';
+import type { AlertEvent } from '../resources/datastreams/alert_events';
 import type { RuleExecutionPipelineInput } from './rule_executor/execution_pipeline';
 import { createExecutionContext } from './execution_context';
 import type { RuleSavedObjectAttributes } from '../saved_objects';
@@ -59,7 +59,6 @@ export function createRuleResponse(overrides: Partial<RuleResponse> = {}): RuleR
     evaluation: {
       query: {
         base: 'FROM logs-* | LIMIT 10',
-        condition: 'WHERE true',
       },
     },
     grouping: { fields: [] },
@@ -86,7 +85,6 @@ export function createRuleSoAttributes(
     evaluation: {
       query: {
         base: 'FROM logs-* | LIMIT 10',
-        condition: 'WHERE true',
       },
     },
     grouping: { fields: [] },
@@ -198,6 +196,7 @@ export function createAlertEvent(overrides: Partial<AlertEvent> = {}): AlertEven
     status: 'breached',
     source: 'internal',
     type: 'signal',
+    space_id: 'default',
     ...overrides,
   };
 }
