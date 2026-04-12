@@ -21,5 +21,5 @@ export { savedObjectsRepositoryMock } from './src/api/lib/repository.mock';
 export { savedObjectsClientProviderMock } from './src/api/lib/scoped_client_provider.mock';
 export { savedObjectsExtensionsMock } from './src/extensions/saved_objects_extensions.mock';
 export { savedObjectsServiceMock } from './src/service/saved_objects_service.mock';
-export { savedObjectsImporterMock } from './src/import_export/mocks/saved_objects_importer.mock';
-export { savedObjectsExporterMock } from './src/import_export/mocks/saved_objects_exporter.mock';
+export { savedObjectsImporterMock } from './src/import_export/import/saved_objects_importer.mock';
+export { savedObjectsExporterMock } from './src/import_export/export/saved_objects_exporter.mock';

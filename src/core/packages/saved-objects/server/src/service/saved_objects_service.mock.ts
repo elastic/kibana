@@ -22,8 +22,8 @@ import type {
 } from '.';
 import { savedObjectsRepositoryMock, savedObjectsClientMock } from '../../mocks';
 import { typeRegistryMock, serializerMock } from '../../mocks';
-import { savedObjectsExporterMock } from '../import_export/mocks/saved_objects_exporter.mock';
-import { savedObjectsImporterMock } from '../import_export/mocks/saved_objects_importer.mock';
+import { savedObjectsExporterMock } from '../import_export/export/saved_objects_exporter.mock';
+import { savedObjectsImporterMock } from '../import_export/import/saved_objects_importer.mock';
 import { migrationMocks } from '../../mocks';
 import { MAIN_SAVED_OBJECT_INDEX } from '../..';
 import { lazyObject } from '@kbn/lazy-object';
