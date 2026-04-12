@@ -49,7 +49,6 @@ export const buildPoliciesDefinitions = (
           indices: sourceIndices.join(', '),
         },
       }),
-      sortText: 'D',
     })
   );
 
@@ -123,7 +122,6 @@ export const noPoliciesAvailableSuggestion: ISuggestionItem = {
   detail: i18n.translate('kbn-esql-language.esql.autocomplete.noPoliciesLabelsFound', {
     defaultMessage: 'Click to create',
   }),
-  sortText: 'D',
   category: SuggestionCategory.CUSTOM_ACTION,
   command: {
     id: 'esql.policies.create',
@@ -149,7 +147,6 @@ export const modeSuggestions: ISuggestionItem[] = ENRICH_MODES?.map(({ name, des
         description,
       },
     }),
-    sortText: 'D',
   })
 );
 
@@ -160,7 +157,6 @@ export const onSuggestion: ISuggestionItem = withAutoSuggest({
   detail: i18n.translate('kbn-esql-language.esql.definitions.onDoc', {
     defaultMessage: 'On',
   }),
-  sortText: '1',
 });
 
 export const withSuggestion: ISuggestionItem = withAutoSuggest({
@@ -170,7 +166,6 @@ export const withSuggestion: ISuggestionItem = withAutoSuggest({
   detail: i18n.translate('kbn-esql-language.esql.definitions.withDoc', {
     defaultMessage: 'With',
   }),
-  sortText: '1',
 });
 
 export const buildMatchingFieldsDefinition = (
@@ -188,7 +183,6 @@ export const buildMatchingFieldsDefinition = (
           matchingField,
         },
       }),
-      sortText: 'D',
       category: SuggestionCategory.FIELD,
     })
   );

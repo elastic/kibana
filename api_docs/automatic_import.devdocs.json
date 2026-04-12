@@ -284,7 +284,7 @@
         "label": "AutomaticImportPluginSetupDependencies",
         "description": [],
         "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-        "lineNumber": 54,
+        "lineNumber": 58,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -306,7 +306,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-            "lineNumber": 55,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -329,7 +329,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-            "lineNumber": 56,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -351,7 +351,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-            "lineNumber": 57,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -373,7 +373,30 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-            "lineNumber": 58,
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-server.AutomaticImportPluginSetupDependencies.searchInferenceEndpoints",
+            "type": "Object",
+            "tags": [],
+            "label": "searchInferenceEndpoints",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "searchInferenceEndpoints",
+                "scope": "server",
+                "docId": "kibSearchInferenceEndpointsPluginApi",
+                "section": "def-server.SearchInferenceEndpointsPluginSetup",
+                "text": "SearchInferenceEndpointsPluginSetup"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -389,7 +412,7 @@
         "label": "AutomaticImportPluginStartDependencies",
         "description": [],
         "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-        "lineNumber": 60,
+        "lineNumber": 65,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -412,7 +435,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-            "lineNumber": 61,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -434,7 +457,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-            "lineNumber": 62,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -456,7 +479,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-            "lineNumber": 63,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -478,7 +501,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-            "lineNumber": 64,
+            "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -500,7 +523,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-            "lineNumber": 65,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -530,7 +553,7 @@
               " | undefined) => void; }"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-            "lineNumber": 66,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -552,7 +575,30 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-            "lineNumber": 67,
+            "lineNumber": 72,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-server.AutomaticImportPluginStartDependencies.searchInferenceEndpoints",
+            "type": "Object",
+            "tags": [],
+            "label": "searchInferenceEndpoints",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "searchInferenceEndpoints",
+                "scope": "server",
+                "docId": "kibSearchInferenceEndpointsPluginApi",
+                "section": "def-server.SearchInferenceEndpointsPluginStart",
+                "text": "SearchInferenceEndpointsPluginStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -574,7 +620,7 @@
         "The plugin setup interface"
       ],
       "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-      "lineNumber": 40,
+      "lineNumber": 44,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -596,7 +642,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-          "lineNumber": 42,
+          "lineNumber": 46,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -619,7 +665,7 @@
             " | undefined"
           ],
           "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-          "lineNumber": 43,
+          "lineNumber": 47,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -637,7 +683,7 @@
             "(isAvailable: boolean) => void"
           ],
           "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-          "lineNumber": 44,
+          "lineNumber": 48,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -653,7 +699,7 @@
                 "boolean"
               ],
               "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-              "lineNumber": 48,
+              "lineNumber": 52,
               "columnNumber": 20,
               "deprecated": false,
               "trackAdoption": false,
@@ -674,7 +720,7 @@
       "label": "AutomaticImportPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-      "lineNumber": 52,
+      "lineNumber": 56,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -1422,7 +1468,7 @@
           "{ integrationId: string; title: string; totalDataStreamCount: number; successfulDataStreamCount: number; createdBy: string; status: any; logo?: string | undefined; version?: string | undefined; createdByProfileUid?: string | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
-        "lineNumber": 207,
+        "lineNumber": 211,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1439,7 +1485,7 @@
           "{ version: string; categories: string[]; langSmithOptions?: { projectName: string; apiKey: string; } | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 59,
+        "lineNumber": 67,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1456,7 +1502,7 @@
           "{ integration_id: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 46,
+        "lineNumber": 54,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1473,7 +1519,7 @@
           "{ version: string; categories: string[]; langSmithOptions?: { projectName: string; apiKey: string; } | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 28,
+        "lineNumber": 36,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1827,7 +1873,7 @@
           "{ connectorId: string; integrationId: string; title: string; description: string; langSmithOptions?: { projectName: string; apiKey: string; } | undefined; logo?: string | undefined; dataStreams?: { dataStreamId: string; title: string; description: string; inputTypes: { name: any; }[]; }[] | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 67,
+        "lineNumber": 75,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1844,7 +1890,7 @@
           "{ integration_id?: string | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 106,
+        "lineNumber": 114,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1899,7 +1945,7 @@
           "{ integration_id: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 118,
+        "lineNumber": 126,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1933,8 +1979,59 @@
           "{ integration_id: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 131,
+        "lineNumber": 152,
         "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.DownloadAutoImportIntegrationRequestQuery",
+        "type": "Type",
+        "tags": [],
+        "label": "DownloadAutoImportIntegrationRequestQuery",
+        "description": [],
+        "signature": [
+          "{ intent: any; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 139,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.DownloadIntentEnum",
+        "type": "Type",
+        "tags": [],
+        "label": "DownloadIntentEnum",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.DownloadIntentEnum",
+        "type": "Any",
+        "tags": [],
+        "label": "DownloadIntentEnum",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 34,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1950,7 +2047,7 @@
           "{ integrationId: string; title: string; totalDataStreamCount: number; successfulDataStreamCount: number; createdBy: string; status: any; logo?: string | undefined; version?: string | undefined; createdByProfileUid?: string | undefined; }[]"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 144,
+        "lineNumber": 165,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1967,7 +2064,7 @@
           "{ integration_id: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 149,
+        "lineNumber": 170,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1981,10 +2078,10 @@
         "label": "GetAutoImportIntegrationResponse",
         "description": [],
         "signature": [
-          "{ integrationResponse: { integrationId: string; title: string; description: string; dataStreams: { dataStreamId: string; title: string; description: string; inputTypes: { name: any; }[]; status: any; }[]; status: any; logo?: string | undefined; version?: string | undefined; createdBy?: string | undefined; createdByProfileUid?: string | undefined; }; }"
+          "{ integrationResponse: { integrationId: string; title: string; description: string; dataStreams: { dataStreamId: string; title: string; description: string; inputTypes: { name: any; }[]; status: any; }[]; status: any; logo?: string | undefined; version?: string | undefined; connectorId?: string | undefined; createdBy?: string | undefined; createdByProfileUid?: string | undefined; }; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 162,
+        "lineNumber": 183,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2038,7 +2135,7 @@
           "\nThe integration response object with its settings."
         ],
         "signature": [
-          "{ integrationId: string; title: string; description: string; dataStreams: { dataStreamId: string; title: string; description: string; inputTypes: { name: any; }[]; status: any; }[]; status: any; logo?: string | undefined; version?: string | undefined; createdBy?: string | undefined; createdByProfileUid?: string | undefined; }"
+          "{ integrationId: string; title: string; description: string; dataStreams: { dataStreamId: string; title: string; description: string; inputTypes: { name: any; }[]; status: any; }[]; status: any; logo?: string | undefined; version?: string | undefined; connectorId?: string | undefined; createdBy?: string | undefined; createdByProfileUid?: string | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
         "lineNumber": 164,
@@ -2060,7 +2157,7 @@
           "{ projectName: string; apiKey: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
-        "lineNumber": 250,
+        "lineNumber": 254,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2270,7 +2367,7 @@
           "{ description?: string | undefined; logo?: string | undefined; langSmithOptions?: { projectName: string; apiKey: string; } | undefined; dataStreams?: { description?: string | undefined; inputTypes?: { name: any; }[] | undefined; rawSamples?: string[] | undefined; }[] | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 182,
+        "lineNumber": 203,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2287,7 +2384,7 @@
           "{ integration_id: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 169,
+        "lineNumber": 190,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2435,7 +2532,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
-        "lineNumber": 211,
+        "lineNumber": 215,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2471,7 +2568,7 @@
           "$strict>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 62,
+        "lineNumber": 70,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2493,7 +2590,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 49,
+        "lineNumber": 57,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2529,7 +2626,7 @@
           "$strict>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 29,
+        "lineNumber": 37,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2591,7 +2688,7 @@
           "$strict>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 70,
+        "lineNumber": 78,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2615,7 +2712,7 @@
           "$strict>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 109,
+        "lineNumber": 117,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2701,7 +2798,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 121,
+        "lineNumber": 129,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2747,7 +2844,27 @@
           "$strip>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 134,
+        "lineNumber": 155,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.DownloadAutoImportIntegrationRequestQuery",
+        "type": "Object",
+        "tags": [],
+        "label": "DownloadAutoImportIntegrationRequestQuery",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ intent: any; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 142,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2791,7 +2908,7 @@
           "$strip>>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 147,
+        "lineNumber": 168,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2813,7 +2930,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 152,
+        "lineNumber": 173,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2841,6 +2958,10 @@
           ">; description: ",
           "ZodString",
           "; version: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; connectorId: ",
           "ZodOptional",
           "<",
           "ZodString",
@@ -2877,7 +2998,7 @@
           "$strict>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 163,
+        "lineNumber": 184,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2976,6 +3097,10 @@
           "ZodOptional",
           "<",
           "ZodString",
+          ">; connectorId: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
           ">; createdBy: ",
           "ZodOptional",
           "<",
@@ -3031,7 +3156,7 @@
           "$strict>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
-        "lineNumber": 254,
+        "lineNumber": 258,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3173,7 +3298,7 @@
           "$strict>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 185,
+        "lineNumber": 206,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3195,7 +3320,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 172,
+        "lineNumber": 193,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

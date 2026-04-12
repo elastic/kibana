@@ -19,7 +19,7 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
         name: { type: 'text', fields: { keyword: { type: 'keyword' } } },
         description: { type: 'text' },
         owner: { type: 'keyword' },
-        labels: { type: 'keyword' },
+        tags: { type: 'keyword' },
       },
     },
     time_field: { type: 'keyword' },
@@ -34,7 +34,6 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
         query: {
           properties: {
             base: { type: 'text' },
-            condition: { type: 'text' },
           },
         },
       },
@@ -45,7 +44,6 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
         query: {
           properties: {
             base: { type: 'text' },
-            condition: { type: 'text' },
           },
         },
       },

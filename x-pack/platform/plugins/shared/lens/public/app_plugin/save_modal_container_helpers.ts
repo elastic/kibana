@@ -9,8 +9,11 @@ import { omit } from 'lodash';
 
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import type { LensAppServices, LensSerializedState } from '@kbn/lens-common';
-import { LENS_EMBEDDABLE_TYPE } from '../../common/constants';
+import {
+  LENS_EMBEDDABLE_TYPE,
+  type LensAppServices,
+  type LensSerializedState,
+} from '@kbn/lens-common';
 
 export const redirectToDashboard = ({
   embeddableInput,
