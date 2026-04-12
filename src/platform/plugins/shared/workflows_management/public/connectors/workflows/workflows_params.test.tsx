@@ -962,6 +962,57 @@ describe('WorkflowsParamsFields', () => {
         );
       });
     });
+
+    test('should hide alert state checkboxes for Security detection rules', async () => {
+      const props = {
+        ...defaultProps,
+        ruleTypeId: 'siem.queryRule',
+      };
+
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...props} />);
+      });
+
+      await waitFor(() => {
+        expect(screen.queryByLabelText('New alerts')).not.toBeInTheDocument();
+        expect(screen.queryByLabelText('Ongoing alerts')).not.toBeInTheDocument();
+        expect(screen.queryByLabelText('Recovered alerts')).not.toBeInTheDocument();
+      });
+    });
+
+    test('should show alert state checkboxes for non-SIEM rules', async () => {
+      const props = {
+        ...defaultProps,
+        ruleTypeId: 'metrics.alert.threshold',
+      };
+
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...props} />);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByLabelText('New alerts')).toBeInTheDocument();
+        expect(screen.getByLabelText('Ongoing alerts')).toBeInTheDocument();
+        expect(screen.getByLabelText('Recovered alerts')).toBeInTheDocument();
+      });
+    });
+
+    test('should show alert state checkboxes when ruleTypeId is undefined', async () => {
+      const props = {
+        ...defaultProps,
+        ruleTypeId: undefined,
+      };
+
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...props} />);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByLabelText('New alerts')).toBeInTheDocument();
+        expect(screen.getByLabelText('Ongoing alerts')).toBeInTheDocument();
+        expect(screen.getByLabelText('Recovered alerts')).toBeInTheDocument();
+      });
+    });
   });
 
   describe('Action frequency (summaryMode parameter)', () => {

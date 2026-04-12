@@ -83,12 +83,21 @@ const RUN_PER_ALERT_HELP_TEXT = i18n.translate(
   }
 );
 
+// Security detection rules (ruleTypeId: siem.*) only produce "new" alerts —
+// they have no concept of "ongoing" or "recovered" states. The alert-state
+// checkbox group is hidden for these rules because the setting would have
+// no effect. The ruleTypeId prop is provided by the rule form when rendering
+// the action params component (ActionTypeForm / SystemActionTypeForm).
+const SIEM_RULE_TYPE_PREFIX = 'siem.';
+
 const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<WorkflowsActionParams>> = ({
   actionParams,
   editAction,
   index,
   errors,
+  ruleTypeId,
 }) => {
+  const isDetectionRule = ruleTypeId?.startsWith(SIEM_RULE_TYPE_PREFIX) ?? false;
   const { workflowId, summaryMode = true } = actionParams.subActionParams ?? {};
   const alertStates = normalizeAlertStates(actionParams.subActionParams?.alertStates);
 
@@ -197,26 +206,30 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
         }}
         error={validationError}
       />
-      <EuiSpacer size="m" />
-      <EuiFormRow
-        fullWidth
-        label={
-          <EuiFlexGroup gutterSize="xs" alignItems="center">
-            <EuiFlexItem grow={false}>{RUN_WORKFLOW_FOR_LABEL}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiIconTip content={RUN_WORKFLOW_FOR_HELP_TEXT} position="right" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-      >
-        <EuiCheckboxGroup
-          options={ALERT_STATE_OPTIONS}
-          idToSelectedMap={alertStates}
-          onChange={handleAlertStateChange}
-          legend={{ children: RUN_WORKFLOW_FOR_LABEL, display: 'hidden' }}
-          data-test-subj="workflow-alert-state-checkboxes"
-        />
-      </EuiFormRow>
+      {!isDetectionRule && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFormRow
+            fullWidth
+            label={
+              <EuiFlexGroup gutterSize="xs" alignItems="center">
+                <EuiFlexItem grow={false}>{RUN_WORKFLOW_FOR_LABEL}</EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip content={RUN_WORKFLOW_FOR_HELP_TEXT} position="right" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+          >
+            <EuiCheckboxGroup
+              options={ALERT_STATE_OPTIONS}
+              idToSelectedMap={alertStates}
+              onChange={handleAlertStateChange}
+              legend={{ children: RUN_WORKFLOW_FOR_LABEL, display: 'hidden' }}
+              data-test-subj="workflow-alert-state-checkboxes"
+            />
+          </EuiFormRow>
+        </>
+      )}
       <EuiSpacer size="m" />
       <EuiFormRow
         fullWidth
