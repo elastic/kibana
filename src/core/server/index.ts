@@ -424,6 +424,8 @@ export type {
   ISavedObjectsSecurityExtension,
   ISavedObjectsSpacesExtension,
   SavedObjectsExtensions,
+} from '@kbn/core-saved-objects-server';
+export {
   ENCRYPTION_EXTENSION_ID,
   SECURITY_EXTENSION_ID,
   SPACES_EXTENSION_ID,

@@ -142,7 +142,7 @@ for (const [name, tester] of [tsTester, babelTester]) {
         // X-pack platform plugin importing /internal (blocked)
         {
           ...make(
-            '/repo/x-pack/platform/plugins/shared/alerting/server/index.ts',
+            '/repo/x-pack/solutions/observability/plugins/observability/server/index.ts',
             '@kbn/core-saved-objects-import-export-server/internal'
           ),
           errors: [
