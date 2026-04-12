@@ -9,8 +9,8 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { SavedObjectsType } from '../..';
-import type { IKibanaMigrator, KibanaMigratorStatus } from '../base_internal';
-import { buildActiveMappings, buildTypesMappings } from '../migration_internal';
+import type { IKibanaMigrator, KibanaMigratorStatus } from '../base';
+import { buildActiveMappings, buildTypesMappings } from '../migration';
 import { createDocumentMigratorMock } from '../../mocks';
 import { lazyObject } from '@kbn/lazy-object';
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ISavedObjectsClientProvider } from '../api_internal';
+import type { ISavedObjectsClientProvider } from '../api';
 import { lazyObject } from '@kbn/lazy-object';
 
 const create = (): jest.Mocked<ISavedObjectsClientProvider> =>

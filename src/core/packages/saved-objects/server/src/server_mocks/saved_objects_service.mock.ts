@@ -19,7 +19,7 @@ import type {
   SavedObjectsService,
   InternalSavedObjectsServiceSetup,
   InternalSavedObjectsServiceStart,
-} from '../server_internal';
+} from '../service';
 import { savedObjectsRepositoryMock, savedObjectsClientMock } from '../../mocks';
 import { typeRegistryMock, serializerMock } from '../../mocks';
 import { savedObjectsExporterMock } from '../import_export/mocks/saved_objects_exporter.mock';

@@ -8,7 +8,7 @@
  */
 
 import { lazyObject } from '@kbn/lazy-object';
-import type { ISavedObjectTypeRegistryInternal } from '../base_internal/saved_objects_type_registry';
+import type { ISavedObjectTypeRegistryInternal } from '../base/saved_objects_type_registry';
 
 const createRegistryMock = (): jest.Mocked<ISavedObjectTypeRegistryInternal> => {
   const mock = lazyObject({

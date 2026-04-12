@@ -20,7 +20,7 @@ import {
   SavedObjectTypeRegistry,
   modelVersionToVirtualVersion,
 } from '@kbn/core-saved-objects-server/internal';
-import { getOutdatedDocumentsQuery } from '@kbn/core-saved-objects-server/src/migration_internal/zdt/utils';
+import { getOutdatedDocumentsQuery } from '@kbn/core-saved-objects-server/src/migration/zdt/utils';
 
 export const logFilePath = Path.join(__dirname, 'outdated_doc_query.test.log');
 

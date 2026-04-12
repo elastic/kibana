@@ -9,7 +9,7 @@
 
 import type { SavedObjectsNamespaceType } from '@kbn/core-saved-objects-common';
 import type { SavedObjectUnsanitizedDoc } from '../serialization';
-import type { SavedObjectsMigrationLogger } from '../migration';
+import type { SavedObjectsMigrationLogger } from '../migration_types';
 
 /**
  * Document type used during model migration.

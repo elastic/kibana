@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IDocumentMigrator } from '../base_internal/migration';
+import type { IDocumentMigrator } from '../base/migration';
 import { lazyObject } from '@kbn/lazy-object';
 
 export const createDocumentMigratorMock = (): jest.Mocked<IDocumentMigrator> => {
