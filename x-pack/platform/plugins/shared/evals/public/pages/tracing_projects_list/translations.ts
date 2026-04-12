@@ -64,13 +64,6 @@ export const NO_PROJECTS_BODY = i18n.translate('xpack.evals.tracing.projectsList
     'Tracing projects are automatically created from root inference spans. Ensure OTEL tracing is enabled and the EDOT collector is running.',
 });
 
-export const formatLatency = (ms: number): string => {
-  if (ms >= 1000) return `${(ms / 1000).toFixed(2)}s`;
-  return `${ms.toFixed(1)}ms`;
-};
-
-export const formatErrorRate = (rate: number): string => `${Math.round(rate * 100)}%`;
-
 export const REFRESH_BUTTON_LABEL = i18n.translate(
   'xpack.evals.tracing.projectsList.refreshButtonLabel',
   { defaultMessage: 'Refresh' }
@@ -81,8 +74,16 @@ export const AUTO_REFRESH_ARIA_LABEL = i18n.translate(
   { defaultMessage: 'Configure auto-refresh interval' }
 );
 
-export const formatTokens = (tokens: number): string => {
-  if (tokens >= 1_000_000) return `${(tokens / 1_000_000).toFixed(1)}M`;
-  if (tokens >= 1_000) return `${(tokens / 1_000).toFixed(1)}K`;
-  return String(tokens);
-};
+export const LOAD_ERROR_TITLE = i18n.translate('xpack.evals.tracing.projectsList.loadErrorTitle', {
+  defaultMessage: 'Unable to load projects',
+});
+
+export const getLoadErrorBody = (errorMessage: string) =>
+  i18n.translate('xpack.evals.tracing.projectsList.loadErrorBody', {
+    defaultMessage: 'An error occurred while loading projects: {errorMessage}',
+    values: { errorMessage },
+  });
+
+export const RETRY_BUTTON = i18n.translate('xpack.evals.tracing.projectsList.retryButton', {
+  defaultMessage: 'Retry',
+});
