@@ -6,10 +6,7 @@
  */
 
 import moment from 'moment/moment';
-import type {
-  QueryDslQueryContainer,
-  SearchRequest,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import { isEmpty } from 'lodash';
 import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_span';
@@ -414,7 +411,10 @@ export class OverviewStatusService {
       to: 'now',
     };
 
-    const result = await this.routeContext.syntheticsEsClient.search<RemoteMonitorSource, SearchRequest>(
+    const result = await this.routeContext.syntheticsEsClient.search<
+      RemoteMonitorSource,
+      SearchRequest
+    >(
       {
         size: monitorIds.length,
         query: {
