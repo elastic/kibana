@@ -300,16 +300,19 @@ export const projectTypeToAlias = new Map<string, string>([
   ['workplaceai', 'workplaceai'],
 ]);
 
-// Normalizes CLI aliases (e.g. 'oblt', 'es') to the canonical project type names
-// used in UIAM tokens and ES serverless configuration.
-// Note: 'es' maps to 'elasticsearch' for UIAM (not 'search' which is the Kibana solution name).
-const projectTypeAliases = new Map<string, string>([
-  ['oblt', 'observability'],
-  ['es', 'elasticsearch'],
-]);
+// Normalizes differences between Kibana solution names (`search`), CLI aliases (`es` and `oblt`),
+// and the canonical project type names used in UIAM and ES Serverless configuration.
+const normalizeProjectType = (projectType: string) => {
+  if (projectType === 'search' || projectType === 'es') {
+    return 'elasticsearch';
+  }
 
-const normalizeProjectType = (projectType: string): string =>
-  projectTypeAliases.get(projectType) ?? projectType;
+  if (projectType === 'oblt') {
+    return 'observability';
+  }
+
+  return projectType;
+};
 
 export async function createUiamSessionTokens({
   username,
