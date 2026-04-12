@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiText,
   EuiButtonEmpty,
+  EuiCallOut,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -65,6 +66,9 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
 
   const { data: categoriesData, isLoading: categoriesLoading } = getReadinessCategories;
   const { data: pipelinesData, isLoading: pipelinesLoading } = getReadinessPipelines;
+
+  // If any pipeline has statsAvailable: false, stats are not available for this environment
+  const statsAvailable = pipelinesData ? pipelinesData.every((p) => p.statsAvailable) : true;
 
   // Build index → category mapping from getReadinessCategories
   const indexToCategoryMap = useMemo(() => {
@@ -166,62 +170,66 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         }),
         sortable: true,
         truncateText: true,
-        width: '30%',
+        width: statsAvailable ? '30%' : '70%',
       },
-      {
-        field: 'docsCount',
-        name: i18n.translate(
-          'xpack.securitySolution.siemReadiness.continuity.column.docsIngested',
-          {
-            defaultMessage: 'Docs Ingested',
-          }
-        ),
-        sortable: true,
-        render: (docsCount: number) => docsCount.toLocaleString(),
-        width: '20%',
-      },
-      {
-        field: 'failedDocsCount',
-        name: i18n.translate('xpack.securitySolution.siemReadiness.continuity.column.failedDocs', {
-          defaultMessage: 'Failed Docs',
-        }),
-        sortable: true,
-        render: (failedDocsCount: number) => failedDocsCount.toLocaleString(),
-        width: '15%',
-      },
-      {
-        field: 'failureRate',
-        name: i18n.translate('xpack.securitySolution.siemReadiness.continuity.column.failureRate', {
-          defaultMessage: 'Failure Rate',
-        }),
-        sortable: true,
-        render: (failureRate: string) => `${failureRate}%`,
-        width: '15%',
-      },
-      {
-        field: 'failureRate',
-        name: i18n.translate('xpack.securitySolution.siemReadiness.continuity.column.status', {
-          defaultMessage: 'Status',
-        }),
-        render: (failureRate: string) => {
-          const isCritical = Number(failureRate) > 1;
-          return (
-            <EuiBadge color={isCritical ? 'danger' : 'success'}>
-              {isCritical
-                ? i18n.translate(
-                    'xpack.securitySolution.siemReadiness.continuity.status.criticalFailureRate',
-                    {
-                      defaultMessage: 'Critical failure rate',
-                    }
-                  )
-                : i18n.translate('xpack.securitySolution.siemReadiness.continuity.status.healthy', {
-                    defaultMessage: 'Healthy',
-                  })}
-            </EuiBadge>
-          );
-        },
-        width: '20%',
-      },
+      ...(statsAvailable
+        ? [
+            {
+              field: 'docsCount',
+              name: i18n.translate(
+                'xpack.securitySolution.siemReadiness.continuity.column.docsIngested',
+                { defaultMessage: 'Docs Ingested' }
+              ),
+              sortable: true,
+              render: (docsCount: number) => docsCount.toLocaleString(),
+              width: '20%',
+            } as EuiBasicTableColumn<PipelineInfoWithStatus>,
+            {
+              field: 'failedDocsCount',
+              name: i18n.translate(
+                'xpack.securitySolution.siemReadiness.continuity.column.failedDocs',
+                { defaultMessage: 'Failed Docs' }
+              ),
+              sortable: true,
+              render: (failedDocsCount: number) => failedDocsCount.toLocaleString(),
+              width: '15%',
+            } as EuiBasicTableColumn<PipelineInfoWithStatus>,
+            {
+              field: 'failureRate',
+              name: i18n.translate(
+                'xpack.securitySolution.siemReadiness.continuity.column.failureRate',
+                { defaultMessage: 'Failure Rate' }
+              ),
+              sortable: true,
+              render: (failureRate: string) => `${failureRate}%`,
+              width: '15%',
+            } as EuiBasicTableColumn<PipelineInfoWithStatus>,
+            {
+              field: 'failureRate',
+              name: i18n.translate(
+                'xpack.securitySolution.siemReadiness.continuity.column.status',
+                { defaultMessage: 'Status' }
+              ),
+              render: (failureRate: string) => {
+                const isCritical = isCriticalFailureRateFromString(failureRate);
+                return (
+                  <EuiBadge color={isCritical ? 'danger' : 'success'}>
+                    {isCritical
+                      ? i18n.translate(
+                          'xpack.securitySolution.siemReadiness.continuity.status.criticalFailureRate',
+                          { defaultMessage: 'Critical failure rate' }
+                        )
+                      : i18n.translate(
+                          'xpack.securitySolution.siemReadiness.continuity.status.healthy',
+                          { defaultMessage: 'Healthy' }
+                        )}
+                  </EuiBadge>
+                );
+              },
+              width: '20%',
+            } as EuiBasicTableColumn<PipelineInfoWithStatus>,
+          ]
+        : []),
       {
         field: 'name' as const,
         name: i18n.translate('xpack.securitySolution.siemReadiness.continuity.column.actions', {
@@ -254,7 +262,7 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         ],
       },
     ],
-    [basePath]
+    [basePath, statsAvailable]
   );
 
   // Render function for accordion extra action (right side badges/stats)
@@ -268,32 +276,35 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         {/* Status */}
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            {i18n.translate('xpack.securitySolution.siemReadiness.continuity.status.label', {
-              defaultMessage: 'Status:',
-            })}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color={isCritical ? 'warning' : 'success'}>
-            {isCritical
-              ? i18n.translate(
-                  'xpack.securitySolution.siemReadiness.continuity.status.actionsRequired',
-                  {
-                    defaultMessage: 'Actions required',
-                  }
-                )
-              : i18n.translate('xpack.securitySolution.siemReadiness.continuity.status.healthy', {
-                  defaultMessage: 'Healthy',
+        {statsAvailable && (
+          <>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {i18n.translate('xpack.securitySolution.siemReadiness.continuity.status.label', {
+                  defaultMessage: 'Status:',
                 })}
-          </EuiBadge>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            {'|'}
-          </EuiText>
-        </EuiFlexItem>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color={isCritical ? 'warning' : 'success'}>
+                {isCritical
+                  ? i18n.translate(
+                      'xpack.securitySolution.siemReadiness.continuity.status.actionsRequired',
+                      { defaultMessage: 'Actions required' }
+                    )
+                  : i18n.translate(
+                      'xpack.securitySolution.siemReadiness.continuity.status.healthy',
+                      { defaultMessage: 'Healthy' }
+                    )}
+              </EuiBadge>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {'|'}
+              </EuiText>
+            </EuiFlexItem>
+          </>
+        )}
         {/* Pipelines */}
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
@@ -305,38 +316,44 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         <EuiFlexItem grow={false}>
           <EuiBadge color="hollow">{totalPipelines}</EuiBadge>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            {'|'}
-          </EuiText>
-        </EuiFlexItem>
-        {/* Docs Ingested */}
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            {i18n.translate('xpack.securitySolution.siemReadiness.continuity.docsIngested.label', {
-              defaultMessage: 'Docs Ingested:',
-            })}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow">{totalDocs.toLocaleString()}</EuiBadge>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            {'|'}
-          </EuiText>
-        </EuiFlexItem>
-        {/* Failure Rate */}
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            {i18n.translate('xpack.securitySolution.siemReadiness.continuity.failureRate.label', {
-              defaultMessage: 'Failure Rate:',
-            })}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow">{`${overallFailureRate}%`}</EuiBadge>
-        </EuiFlexItem>
+        {statsAvailable && (
+          <>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {'|'}
+              </EuiText>
+            </EuiFlexItem>
+            {/* Docs Ingested */}
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {i18n.translate(
+                  'xpack.securitySolution.siemReadiness.continuity.docsIngested.label',
+                  { defaultMessage: 'Docs Ingested:' }
+                )}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">{totalDocs.toLocaleString()}</EuiBadge>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {'|'}
+              </EuiText>
+            </EuiFlexItem>
+            {/* Failure Rate */}
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {i18n.translate(
+                  'xpack.securitySolution.siemReadiness.continuity.failureRate.label',
+                  { defaultMessage: 'Failure Rate:' }
+                )}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">{`${overallFailureRate}%`}</EuiBadge>
+            </EuiFlexItem>
+          </>
+        )}
       </EuiFlexGroup>
     );
   };
@@ -359,7 +376,31 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
   return (
     <>
       <EuiSpacer size="m" />
-      {hasDocCriticalFailures && (
+      {!statsAvailable && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            title={i18n.translate(
+              'xpack.securitySolution.siemReadiness.continuity.statsUnavailable.title',
+              { defaultMessage: 'Ingestion stats not available' }
+            )}
+            color="warning"
+            iconType="warning"
+          >
+            <p>
+              {i18n.translate(
+                'xpack.securitySolution.siemReadiness.continuity.statsUnavailable.body',
+                {
+                  defaultMessage:
+                    'Pipeline ingestion stats (docs ingested, failed docs, failure rate) are not available in serverless mode. Pipelines are listed below for reference.',
+                }
+              )}
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
+      {statsAvailable && hasDocCriticalFailures && (
         <>
           <ContinuityWarningPrompt />
           <EuiSpacer size="m" />
@@ -374,7 +415,7 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
             })}
           </EuiText>
         </EuiFlexItem>
-        {hasDocCriticalFailures && (
+        {statsAvailable && hasDocCriticalFailures && (
           <>
             <EuiFlexItem grow={false}>
               <ViewCasesButton caseTagsArray={DATA_CONTINUITY_CASE_TAGS} />

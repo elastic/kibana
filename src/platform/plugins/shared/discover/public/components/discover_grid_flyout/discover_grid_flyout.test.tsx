@@ -315,5 +315,23 @@ describe('Discover flyout', function () {
       expect(customHeader.length).toBe(1);
       expect(customHeader.text()).toBe('Custom Header');
     });
+
+    it('should render custom footer when provided by document profile', async () => {
+      const services = getServices();
+      const scopedProfilesManager = services.profilesManager.createScopedProfilesManager({
+        scopedEbtManager: services.ebtManager.createScopedEBTManager(),
+      });
+      const records = buildDataTableRecordList({
+        records: esHitsMock as EsHitRecord[],
+        dataView: dataViewMock,
+        processRecord: (record) => scopedProfilesManager.resolveDocumentProfile({ record }),
+      });
+      const { component } = await mountComponent({ services, records });
+
+      // The custom footer should be rendered in the flyout
+      const customFooter = findTestSubject(component, 'customDocViewerFooter');
+      expect(customFooter.length).toBe(1);
+      expect(customFooter.text()).toBe('Custom Footer');
+    });
   });
 });

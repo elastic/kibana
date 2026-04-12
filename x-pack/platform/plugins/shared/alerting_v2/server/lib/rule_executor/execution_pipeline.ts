@@ -21,7 +21,7 @@ import {
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
 import { EsServiceInternalToken } from '../services/es_service/tokens';
-import { ALERT_EVENTS_DATA_STREAM } from '../../resources/alert_events';
+import { ALERT_EVENTS_DATA_STREAM } from '../../resources/datastreams/alert_events';
 import { createExecutionContext } from '../execution_context';
 
 /**

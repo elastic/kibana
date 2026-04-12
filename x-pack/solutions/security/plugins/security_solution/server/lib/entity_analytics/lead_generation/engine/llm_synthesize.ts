@@ -31,8 +31,8 @@ Respond ONLY with a valid JSON object (no markdown fences, no extra text) matchi
 {{
   "title": "string - MAXIMUM 4 WORDS. A short threat label, not a sentence. Good: 'Anomalous behavior', 'Credential harvesting', 'Lateral movement detected', 'Privilege escalation'. Bad: 'Suspected Multi-Tactic Attack Targeting DevOps User with Container Escape'",
   "description": "string - a narrative paragraph (plain text, NO markdown, NO bold/italic markers) connecting the evidence, referencing specific data points (scores, alert counts, escalation deltas), explaining why this matters and what the attacker may be doing. Do NOT use asterisks or markdown formatting.",
-  "tags": ["string array - 3 to 6 tags. Use human-readable technique or rule names, NOT numeric IDs. Good: 'Container Escape Attempt', 'Remote Service Execution', 'Credential Access via Brute Force'. Bad: 'T1075', 'T1078'. Also include short contextual tags like 'Privilege Escalation', 'Lateral Movement'."],
-  "recommendations": ["string - a single chat message an analyst can paste into an AI chat assistant to start investigating. It must be a direct request or question the analyst would type. Example: 'Show me the critical/high severity alerts for user \\"jsmith\\" from the last 7 days, grouped by detection rule name, and correlate with the risk score trend over the last 30 days'. Do NOT write generic advice like 'Isolate the account' or 'Review logs'. Write an actual chat prompt."]
+  "tags": ["string array - 3 to 6 tags. Use human-readable technique or rule names, NOT numeric IDs. Only use rule names that appear explicitly in the observation data below; do not invent or guess rule names. Good: 'Container Escape Attempt', 'Remote Service Execution', 'Credential Access via Brute Force'. Bad: 'T1075', 'T1078'. Also include short contextual tags like 'Privilege Escalation', 'Lateral Movement'."],
+  "recommendations": ["string array - 3 to 5 chat messages an analyst can paste into an AI chat assistant to start investigating. Each must be a direct request or question the analyst would type. Examples: 'Show me the critical/high severity alerts for user \\"jsmith\\" from the last 7 days, grouped by detection rule name', 'Generate an ESQL query to show the risk score trend for user \\"jsmith\\" over the last 30 days', 'What processes or network connections has user \\"jsmith\\" initiated in the last 48 hours?'. Do NOT write generic advice like 'Isolate the account' or 'Review logs'. Write actual chat prompts."]
 }}
 
 Analyze the following entity observations and produce a hunting lead.
@@ -131,10 +131,11 @@ export const llmSynthesizeLeadContent = async (
       .map(String)
       .filter((t) => !/^T\d{4}(\.\d{3})?$/i.test(t.trim()))
       .slice(0, 6),
-    recommendations: result.recommendations.map(String).slice(0, 1),
+    recommendations: result.recommendations.map(String).slice(0, 5),
   };
 };
 
+/** Keep only the first N words of a title so card headings stay short. */
 const truncateTitle = (title: string, maxWords: number): string => {
   const words = title.trim().split(/\s+/);
   if (words.length <= maxWords) {
@@ -143,6 +144,7 @@ const truncateTitle = (title: string, maxWords: number): string => {
   return words.slice(0, maxWords).join(' ');
 };
 
+/** Remove markdown bold/italic/heading markers so descriptions render as plain text. */
 const stripMarkdown = (text: string): string =>
   text
     .replace(/#{1,6}\s*/g, '')

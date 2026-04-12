@@ -1,5 +1,5 @@
 {
-  "sha1": "8a6d7640696f2c0ec663cd6946435da5a6f71b39",
+  "sha1": "0238bbe010bdb7274e24c9f0000a122cd613a4b9",
   "tests": [
     {
       "id": "a8dc0a71dd65d42-65fd9c357892a20",
@@ -79,7 +79,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 108,
+        "line": 104,
         "column": 9
       }
     },
@@ -93,7 +93,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 116,
+        "line": 112,
         "column": 9
       }
     },
@@ -107,7 +107,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 108,
+        "line": 104,
         "column": 9
       }
     },
@@ -121,7 +121,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 116,
+        "line": 112,
         "column": 9
       }
     },
@@ -135,7 +135,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 108,
+        "line": 104,
         "column": 9
       }
     },
@@ -149,7 +149,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 116,
+        "line": 112,
         "column": 9
       }
     },
@@ -163,7 +163,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 125,
+        "line": 121,
         "column": 7
       }
     },
@@ -177,7 +177,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 133,
+        "line": 129,
         "column": 7
       }
     },
@@ -191,7 +191,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 141,
+        "line": 137,
         "column": 7
       }
     },
@@ -205,7 +205,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 163,
+        "line": 159,
         "column": 7
       }
     },
@@ -219,7 +219,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 182,
+        "line": 178,
         "column": 7
       }
     },
@@ -233,7 +233,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 201,
+        "line": 197,
         "column": 7
       }
     },
@@ -247,7 +247,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 214,
+        "line": 210,
         "column": 7
       }
     },
@@ -261,7 +261,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 241,
+        "line": 237,
         "column": 7
       }
     },
@@ -275,7 +275,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 254,
+        "line": 250,
         "column": 7
       }
     },
@@ -289,7 +289,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 273,
+        "line": 269,
         "column": 7
       }
     },
@@ -303,7 +303,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 295,
+        "line": 291,
         "column": 7
       }
     },
@@ -336,6 +336,78 @@
       }
     },
     {
+      "id": "3ff6decf4c25127-1e36b15992c9e68",
+      "title": "Workflow editor: validation performance [large_perf (87 steps, 431 vars)] setModelMarkers cascade completes within frame budget after edit",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor_perf.spec.ts",
+        "line": 66,
+        "column": 11
+      }
+    },
+    {
+      "id": "3ff6decf4c25127-bb6c00e207d6b96",
+      "title": "Workflow editor: validation performance [large_perf (87 steps, 431 vars)] frame rate stays above threshold during rapid edits",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor_perf.spec.ts",
+        "line": 225,
+        "column": 11
+      }
+    },
+    {
+      "id": "3ff6decf4c25127-b92795356361dc9",
+      "title": "Workflow editor: validation performance [infosec_demo (150 steps, 361 vars)] setModelMarkers cascade completes within frame budget after edit",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor_perf.spec.ts",
+        "line": 66,
+        "column": 11
+      }
+    },
+    {
+      "id": "3ff6decf4c25127-c189381fa89f5ce",
+      "title": "Workflow editor: validation performance [infosec_demo (150 steps, 361 vars)] frame rate stays above threshold during rapid edits",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor_perf.spec.ts",
+        "line": 225,
+        "column": 11
+      }
+    },
+    {
       "id": "02966260206ed5b-1eaf3f4c5859ccb",
       "title": "Sanity tests for workflows Create, save, run and view a dummy workflow",
       "expectedStatus": "passed",
@@ -349,7 +421,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 40,
+        "line": 41,
         "column": 9
       }
     },
@@ -367,7 +439,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 71,
+        "line": 72,
         "column": 9
       }
     },
@@ -385,7 +457,25 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 94,
+        "line": 95,
+        "column": 9
+      }
+    },
+    {
+      "id": "02966260206ed5b-097049eb176efd2",
+      "title": "Sanity tests for workflows should show root-level property suggestions on empty lines",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor.spec.ts",
+        "line": 137,
         "column": 9
       }
     },
@@ -403,14 +493,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 136,
+        "line": 155,
         "column": 9
       }
     },
     {
       "id": "8a478a8cadc4edc-063497b8c9edff4",
       "title": "Workflow execution - Alert triggers should trigger workflow from alert",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -421,14 +511,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/alert_trigger.spec.ts",
-        "line": 101,
+        "line": 102,
         "column": 9
       }
     },
     {
       "id": "8a478a8cadc4edc-c4010c12909cde8",
       "title": "Workflow execution - Alert triggers should not trigger a disabled workflow when alert fires",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -439,8 +529,36 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/alert_trigger.spec.ts",
-        "line": 224,
+        "line": 225,
         "column": 9
+      }
+    },
+    {
+      "id": "bd0da7b20f7ccf7-fc39598781b03ea",
+      "title": "Workflow execution - Cancellation should cancel a single running execution from the execution details panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/cancellation.spec.ts",
+        "line": 27,
+        "column": 7
+      }
+    },
+    {
+      "id": "bd0da7b20f7ccf7-54e0484e76de34d",
+      "title": "Workflow execution - Cancellation should cancel all active executions from the execution list via Cancel all active",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/cancellation.spec.ts",
+        "line": 48,
+        "column": 7
       }
     },
     {

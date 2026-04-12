@@ -332,7 +332,8 @@ export function ActionsMenu({
     }
 
     if (isActionGroup(selectedOption)) {
-      setCurrentPath([...currentPath, selectedOption.id]);
+      const nextPath = selectedOption.pathIds ?? [...currentPath, selectedOption.id];
+      setCurrentPath([...nextPath]);
       setSearchTerm('');
       setOptions(selectedOption.options);
     } else {
@@ -475,7 +476,7 @@ export function ActionsMenu({
                 ) : (
                   <EuiButtonEmpty
                     onClick={handleBack}
-                    iconType="arrowLeft"
+                    iconType="chevronSingleLeft"
                     size="xs"
                     aria-label={i18n.translate('workflows.actionsMenu.back', {
                       defaultMessage: 'Back',

@@ -63,6 +63,7 @@ if (showHelp) {
         --skip-generic-folders               {dim Skip building package, plugins, etc from source}
         --skip-platform-folders              {dim Skip platform specific folder creation and operations}
         --skip-node-download                 {dim Reuse existing downloads of node.js}
+        --skip-serverless                    {dim Don't build serverless platforms or docker images}
         --skip-os-packages                   {dim Don't produce rpm/deb/docker packages}
         --verbose,-v                         {dim Turn on verbose logging}
         --version-qualifier                  {dim Suffix version with a qualifier}

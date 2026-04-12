@@ -122,7 +122,7 @@ const AssetCriticalitySelectorComponent: React.FC<{
             <EuiFlexItem css={{ flexGrow: 'unset' }}>
               <EuiButtonEmpty
                 data-test-subj="asset-criticality-change-btn"
-                iconType="arrowStart"
+                iconType="chevronLimitLeft"
                 iconSide="left"
                 flush="right"
                 onClick={() => toggleModal(true)}
@@ -272,13 +272,13 @@ export const AssetCriticalityTitle = () => (
   </EuiToolTip>
 );
 
-interface ModalProps {
+export interface AssetCriticalityModalProps {
   initialCriticalityLevel: CriticalityLevel | undefined;
   toggle: (nextValue: boolean) => void;
   onSave: (value: CriticalityLevelWithUnassigned) => void;
 }
 
-const AssetCriticalityModal: React.FC<ModalProps> = ({
+export const AssetCriticalityModal: React.FC<AssetCriticalityModalProps> = ({
   initialCriticalityLevel,
   toggle,
   onSave,

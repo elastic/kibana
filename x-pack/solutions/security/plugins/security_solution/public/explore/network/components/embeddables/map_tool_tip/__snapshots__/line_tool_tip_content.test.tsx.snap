@@ -68,7 +68,7 @@ exports[`LineToolTipContent renders correctly against snapshot 1`] = `
         >
           <span
             color="subdued"
-            data-euiicon-type="arrowRight"
+            data-euiicon-type="chevronSingleRight"
             data-test-subj="arrow-icon"
           />
         </div>
@@ -85,7 +85,7 @@ exports[`LineToolTipContent renders correctly against snapshot 1`] = `
         >
           <span
             color="subdued"
-            data-euiicon-type="arrowLeft"
+            data-euiicon-type="chevronSingleLeft"
             data-test-subj="arrow-icon"
           />
         </div>
@@ -213,7 +213,7 @@ exports[`LineToolTipContent renders correctly against snapshot when rendering cl
         >
           <span
             color="subdued"
-            data-euiicon-type="arrowRight"
+            data-euiicon-type="chevronSingleRight"
             data-test-subj="arrow-icon"
           />
         </div>
@@ -230,7 +230,7 @@ exports[`LineToolTipContent renders correctly against snapshot when rendering cl
         >
           <span
             color="subdued"
-            data-euiicon-type="arrowLeft"
+            data-euiicon-type="chevronSingleLeft"
             data-test-subj="arrow-icon"
           />
         </div>

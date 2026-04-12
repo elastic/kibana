@@ -190,9 +190,10 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-highmem-4
+      machineType: c4d-highmem-4
+      diskType: hyperdisk-balanced
       preemptible: true
-      spotZones: us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-a,us-central1-b,us-central1-c
       diskSizeGb: 105
     timeout_in_minutes: 60
     retry:
@@ -227,7 +228,7 @@ steps:
       provider: gcp
       machineType: n2-standard-2
       diskSizeGb: 105
-    timeout_in_minutes: 10
+    timeout_in_minutes: 15
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
