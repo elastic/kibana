@@ -8,40 +8,28 @@ info:
 paths: {}
 components:
   schemas:
-    EntityRelationshipIdentifiers:
+    EntityRelationship:
       type: object
       additionalProperties: false
       description: >-
-        identifier values for a given relationship (ECS-style dotted field names)
+        One relationship direction: a dynamic `raw_identifiers` object (ECS-style dotted keys →
+        string arrays, no enumerated sub-properties) and canonical target EUIDs under `ids`.
       properties:
-        'entity.id':
+        raw_identifiers:
+          type: object
+          description: >-
+            Raw identifier dimensions keyed by ECS-style dotted names (e.g. host.id); values are
+            keyword arrays. Schema is an open map only (`additionalProperties`), not a fixed property list.
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        ids:
           type: array
           items:
             type: string
-        'host.id':
-          type: array
-          items:
-            type: string
-        'user.id':
-          type: array
-          items:
-            type: string
-        'user.email':
-          type: array
-          items:
-            type: string
-        'host.name':
-          type: array
-          items:
-            type: string
-        'user.name':
-          type: array
-          items:
-            type: string
-        'service.name':
-          type: array
-          items:
-            type: string
+          description: >-
+            Target entity EUIDs for this relationship; used for graph LOOKUP JOIN and DSL filters.
 
     EngineMetadata:
       type: object
@@ -135,21 +123,21 @@ components:
           additionalProperties: false
           properties:
             administers:
-              $ref: '#/components/schemas/EntityRelationshipIdentifiers'
+              $ref: '#/components/schemas/EntityRelationship'
             communicates_with:
-              $ref: '#/components/schemas/EntityRelationshipIdentifiers'
+              $ref: '#/components/schemas/EntityRelationship'
             depends_on:
-              $ref: '#/components/schemas/EntityRelationshipIdentifiers'
+              $ref: '#/components/schemas/EntityRelationship'
             owns_inferred:
-              $ref: '#/components/schemas/EntityRelationshipIdentifiers'
+              $ref: '#/components/schemas/EntityRelationship'
             accesses_infrequently:
-              $ref: '#/components/schemas/EntityRelationshipIdentifiers'
+              $ref: '#/components/schemas/EntityRelationship'
             accesses_frequently:
-              $ref: '#/components/schemas/EntityRelationshipIdentifiers'
+              $ref: '#/components/schemas/EntityRelationship'
             owns:
-              $ref: '#/components/schemas/EntityRelationshipIdentifiers'
+              $ref: '#/components/schemas/EntityRelationship'
             supervises:
-              $ref: '#/components/schemas/EntityRelationshipIdentifiers'
+              $ref: '#/components/schemas/EntityRelationship'
             resolution:
               type: object
               additionalProperties: false

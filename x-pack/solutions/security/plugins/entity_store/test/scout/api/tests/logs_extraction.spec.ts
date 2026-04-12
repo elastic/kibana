@@ -1144,15 +1144,21 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
 
       const owns = relationships!.owns as Record<string, unknown> | undefined;
       expect(owns).toBeDefined();
-      const ownsUser = owns!.user as Record<string, unknown> | undefined;
-      const ownsHost = owns!.host as Record<string, unknown> | undefined;
+      const ownsRawIdentifiers = owns!.raw_identifiers as Record<string, unknown> | undefined;
+      expect(ownsRawIdentifiers).toBeDefined();
+      const ownsUser = ownsRawIdentifiers!.user as Record<string, unknown> | undefined;
+      const ownsHost = ownsRawIdentifiers!.host as Record<string, unknown> | undefined;
       expect(normalizeKeywordList(ownsUser?.email)).toStrictEqual(['owner-rel-test@example.com']);
       expect(normalizeKeywordList(ownsUser?.id)).toStrictEqual(['00u_rel_test']);
       expect(normalizeKeywordList(ownsHost?.name)).toStrictEqual(['asset-rel-01']);
 
       const supervises = relationships!.supervises as Record<string, unknown> | undefined;
       expect(supervises).toBeDefined();
-      const supervisesUser = supervises!.user as Record<string, unknown> | undefined;
+      const supervisesRawIdentifiers = supervises!.raw_identifiers as
+        | Record<string, unknown>
+        | undefined;
+      expect(supervisesRawIdentifiers).toBeDefined();
+      const supervisesUser = supervisesRawIdentifiers!.user as Record<string, unknown> | undefined;
       expect(normalizeKeywordList(supervisesUser?.email)).toStrictEqual(['supervisee@example.com']);
       expect(normalizeKeywordList(supervisesUser?.name)).toStrictEqual(['supervisor_login']);
     }

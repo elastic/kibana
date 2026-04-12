@@ -69,6 +69,7 @@ describe('fetchEntityRelationships', () => {
       // Verify query uses v2 index and LOOKUP JOIN
       expect(query).toContain(`FROM ${indexName}`);
       expect(query).toContain(`LOOKUP JOIN ${indexName} ON entity.id`);
+      expect(query).toContain('`entity.relationships.owns.ids`');
     });
 
     it('should return empty result when entities index is not in lookup mode', async () => {
@@ -153,7 +154,7 @@ describe('fetchEntityRelationships', () => {
       });
       const ids = ['entity-1', 'entity-2', 'entity-3'];
 
-      // Relationship bags: match `entity.relationships.<leaf>.entity.id`; resolution uses resolved_to path
+      // Relationship bags: match `entity.relationships.<leaf>.ids`; resolution uses resolved_to path
       ENTITY_RELATIONSHIP_FIELDS.forEach((field) => {
         if (field === 'resolution.resolved_to') {
           expect(filterArg.bool.should).toContainEqual({
@@ -166,7 +167,7 @@ describe('fetchEntityRelationships', () => {
 
         expect(filterArg.bool.should).toContainEqual({
           terms: {
-            [`entity.relationships.${field}.entity.id`]: ids,
+            [`entity.relationships.${field}.ids`]: ids,
           },
         });
       });

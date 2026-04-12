@@ -9,9 +9,7 @@ import type { Condition } from '@kbn/streamlang';
 import type { EntityType, EntityField, FieldEvaluation } from './entity_schema';
 import { collectValues, newestValue, oldestValue } from './field_retention_operations';
 
-/** Keep in sync with `ENTITY_RELATIONSHIP_IDENTIFIER_FIELDS` in @kbn/cloud-security-posture-common (graph DSL / ES|QL). */
 export const ENTITY_RELATIONSHIP_IDENTIFIER_FIELDS = [
-  'entity.id',
   'host.id',
   'user.id',
   'user.email',
@@ -167,16 +165,24 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
     }),
 
     // RELATIONSHIPS ------------------------------------------------------------
-    ...ENTITY_RELATIONSHIP_COLLECT_LEAVES.flatMap((leaf) =>
-      ENTITY_RELATIONSHIP_IDENTIFIER_FIELDS.map((idField) =>
+    // Source logs use flat `host.entity.relationships.<relationship>.<identifier>`; the entity index
+    // stores raw bags under `raw_identifiers` and canonical EUIDs under `ids`.
+    ...ENTITY_RELATIONSHIP_COLLECT_LEAVES.flatMap((relationship) => [
+      ...ENTITY_RELATIONSHIP_IDENTIFIER_FIELDS.map((idField) =>
         collectValues({
-          source: `${prefix}.relationships.${leaf}.${idField}`,
-          destination: `entity.relationships.${leaf}.${idField}`,
+          source: `${prefix}.relationships.${relationship}.${idField}`,
+          destination: `entity.relationships.${relationship}.raw_identifiers.${idField}`,
           mapping: { type: 'keyword' },
           allowAPIUpdate: true,
         })
-      )
-    ),
+      ),
+      collectValues({
+        source: `${prefix}.relationships.${relationship}.entity.id`,
+        destination: `entity.relationships.${relationship}.ids`,
+        mapping: { type: 'keyword' },
+        allowAPIUpdate: true,
+      }),
+    ]),
     newestValue({
       source: `${prefix}.relationships.resolution.resolved_to`,
       destination: 'entity.relationships.resolution.resolved_to',

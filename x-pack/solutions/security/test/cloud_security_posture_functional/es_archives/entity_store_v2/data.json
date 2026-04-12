@@ -487,7 +487,7 @@
         "type": "Identity",
         "relationships": {
           "owns": {
-            "entity.id": [
+                        "ids": [
               "host:relationships-target-host-1",
               "host:relationships-target-host-2"
             ]
@@ -698,14 +698,14 @@
         "type": "Service Account",
         "relationships": {
           "owns": {
-            "entity.id": [
+                        "ids": [
               "host:projects/my-gcp-project/zones/us-central1-a/instances/web-server-prod-1",
               "host:projects/my-gcp-project/zones/us-east1-b/instances/api-gateway-prod-1",
               "host:projects/my-gcp-project/zones/us-west1-a/instances/db-server-prod-1"
             ]
           },
           "communicates_with": {
-            "entity.id": [
+                        "ids": [
               "host:projects/my-gcp-project/zones/us-central1-a/instances/web-server-prod-1",
               "host:projects/my-gcp-project/zones/us-east1-b/instances/api-gateway-prod-1"
             ]
@@ -999,7 +999,7 @@
         "type": "Identity",
         "relationships": {
           "owns": {
-            "entity.id": [
+                        "ids": [
               "host:rel-hierarchy-host-1",
               "service:Hierarchy Service 1",
               "user:rel-hierarchy-identity-1@gcp"
@@ -1047,7 +1047,7 @@
         "type": "Host",
         "relationships": {
           "communicates_with": {
-            "entity.id": [
+                        "ids": [
               "rel-hierarchy-storage-1",
               "rel-hierarchy-storage-2"
             ]
@@ -1094,7 +1094,7 @@
         "type": "Service",
         "relationships": {
           "communicates_with": {
-            "entity.id": [
+                        "ids": [
               "rel-hierarchy-database-1",
               "rel-hierarchy-database-2"
             ]
@@ -1141,18 +1141,18 @@
         "type": "Identity",
         "relationships": {
           "communicates_with": {
-            "entity.id": [
+                        "ids": [
               "rel-hierarchy-network-1",
               "rel-hierarchy-network-2"
             ]
           },
           "supervises": {
-            "entity.id": [
+                        "ids": [
               "user:rel-hierarchy-delegate-1@gcp"
             ]
           },
           "depends_on": {
-            "entity.id": [
+                        "ids": [
               "user:rel-hierarchy-delegate-1@gcp"
             ]
           }
@@ -1447,7 +1447,7 @@
         "type": "Service",
         "relationships": {
           "communicates_with": {
-            "entity.id": [
+                        "ids": [
               "user:rel-hierarchy-identity-1@gcp"
             ]
           }

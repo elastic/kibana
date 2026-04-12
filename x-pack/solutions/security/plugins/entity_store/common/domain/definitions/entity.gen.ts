@@ -17,18 +17,19 @@
 import { z } from '@kbn/zod/v4';
 
 /**
- * identifier values for a given relationship (ECS-style dotted field names)
+ * One relationship direction: a dynamic `raw_identifiers` object (ECS-style dotted keys → string arrays, no enumerated sub-properties) and canonical target EUIDs under `ids`.
  */
-export type EntityRelationshipIdentifiers = z.infer<typeof EntityRelationshipIdentifiers>;
-export const EntityRelationshipIdentifiers = z
+export type EntityRelationship = z.infer<typeof EntityRelationship>;
+export const EntityRelationship = z
   .object({
-    'entity.id': z.array(z.string()).optional(),
-    'host.id': z.array(z.string()).optional(),
-    'user.id': z.array(z.string()).optional(),
-    'user.email': z.array(z.string()).optional(),
-    'host.name': z.array(z.string()).optional(),
-    'user.name': z.array(z.string()).optional(),
-    'service.name': z.array(z.string()).optional(),
+    /**
+     * Raw identifier dimensions keyed by ECS-style dotted names (e.g. host.id); values are keyword arrays. Schema is an open map only (`additionalProperties`), not a fixed property list.
+     */
+    raw_identifiers: z.object({}).catchall(z.array(z.string())).optional(),
+    /**
+     * Target entity EUIDs for this relationship; used for graph LOOKUP JOIN and DSL filters.
+     */
+    ids: z.array(z.string()).optional(),
   })
   .strict();
 
@@ -106,14 +107,14 @@ export const EntityField = z
       .optional(),
     relationships: z
       .object({
-        administers: EntityRelationshipIdentifiers.optional(),
-        communicates_with: EntityRelationshipIdentifiers.optional(),
-        depends_on: EntityRelationshipIdentifiers.optional(),
-        owns_inferred: EntityRelationshipIdentifiers.optional(),
-        accesses_infrequently: EntityRelationshipIdentifiers.optional(),
-        accesses_frequently: EntityRelationshipIdentifiers.optional(),
-        owns: EntityRelationshipIdentifiers.optional(),
-        supervises: EntityRelationshipIdentifiers.optional(),
+        administers: EntityRelationship.optional(),
+        communicates_with: EntityRelationship.optional(),
+        depends_on: EntityRelationship.optional(),
+        owns_inferred: EntityRelationship.optional(),
+        accesses_infrequently: EntityRelationship.optional(),
+        accesses_frequently: EntityRelationship.optional(),
+        owns: EntityRelationship.optional(),
+        supervises: EntityRelationship.optional(),
         resolution: z
           .object({
             /**

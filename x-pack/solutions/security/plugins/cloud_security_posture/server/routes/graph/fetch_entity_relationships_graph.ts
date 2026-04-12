@@ -30,16 +30,17 @@ interface BuildRelationshipsEsqlQueryParams {
 const RESOLUTION_RELATIONSHIP_FIELD = 'resolution.resolved_to' as const;
 
 /**
- * ECS relationship bags store target EUIDs under `entity.relationships.<leaf>.entity.id`
- * (see entity store schema). Resolution still uses `entity.relationships.resolution.resolved_to`.
+ * ECS relationship leaves store canonical target EUIDs under `entity.relationships.<leaf>.ids`
+ * and raw dimensions under `entity.relationships.<leaf>.raw_identifiers.*` (dynamic bag).
+ * Resolution still uses `entity.relationships.resolution.resolved_to`.
  */
 const buildRelationshipTargetsEval = (field: string): string => {
   const col = `\`_rel_targets_${field}\``;
   if (field === RESOLUTION_RELATIONSHIP_FIELD) {
-    return `${col} = [COALESCE(\`entity.relationships.resolution.resolved_to\`, "")]`;
+    return `${col} = COALESCE(\`entity.relationships.resolution.resolved_to\`, [""])`;
   }
 
-  return `${col} = COALESCE(\`entity.relationships.${field}.entity.id\`, [""])`;
+  return `${col} = COALESCE(\`entity.relationships.${field}.ids\`, [""])`;
 };
 
 /**
@@ -216,7 +217,7 @@ const buildRelationshipDslFilter = (entityIds: EntityId[]) => {
 
     return {
       terms: {
-        [`entity.relationships.${field}.entity.id`]: ids,
+        [`entity.relationships.${field}.ids`]: ids,
       },
     };
   });
