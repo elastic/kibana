@@ -9,6 +9,7 @@ import type { Condition } from '@kbn/streamlang';
 import type { EntityType, EntityField, FieldEvaluation } from './entity_schema';
 import { collectValues, newestValue, oldestValue } from './field_retention_operations';
 
+/** Keep in sync with `ENTITY_RELATIONSHIP_IDENTIFIER_FIELDS` in @kbn/cloud-security-posture-common (graph DSL / ES|QL). */
 export const ENTITY_RELATIONSHIP_IDENTIFIER_FIELDS = [
   'entity.id',
   'host.id',
