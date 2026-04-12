@@ -174,9 +174,19 @@ export async function getGcpAccessToken(
   const jwt = await signJwt(privateKey, claims);
   const data = await exchangeJwtForToken(jwt);
 
+  const accessToken = data.access_token;
+  if (typeof accessToken !== 'string') {
+    throw new Error('Token exchange did not return an access_token');
+  }
+
+  const expiresIn = data.expires_in;
+  if (typeof expiresIn !== 'number') {
+    throw new Error('Token exchange did not return expires_in');
+  }
+
   return {
-    accessToken: data.access_token as string,
-    expiresAt: Date.now() + (data.expires_in as number) * 1000,
+    accessToken,
+    expiresAt: Date.now() + expiresIn * 1000,
   };
 }
 

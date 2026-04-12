@@ -7,9 +7,24 @@
 
 import React, { useState } from 'react';
 import { EuiFilePicker, EuiFormRow, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { z } from '@kbn/zod/v4';
 import type { BaseWidgetProps } from '../types';
+
+const LABELS = {
+  promptText: i18n.translate('responseOpsFormGenerator.fileUpload.promptText', {
+    defaultMessage: 'Select or drag a file',
+  }),
+  readError: i18n.translate('responseOpsFormGenerator.fileUpload.readError', {
+    defaultMessage: 'Failed to read file',
+  }),
+  fileLoaded: (name: string) =>
+    i18n.translate('responseOpsFormGenerator.fileUpload.fileLoaded', {
+      defaultMessage: '{name} loaded',
+      values: { name },
+    }),
+};
 
 type FileUploadWidgetProps = BaseWidgetProps<z.ZodString, Record<string, unknown>>;
 
@@ -55,7 +70,7 @@ export const FileUploadWidget: React.FC<FileUploadWidgetProps> = ({
             }
           };
           reader.onerror = () => {
-            setReadError('Failed to read file');
+            setReadError(LABELS.readError);
             field.setValue('');
           };
           reader.readAsText(file);
@@ -74,7 +89,7 @@ export const FileUploadWidget: React.FC<FileUploadWidgetProps> = ({
           >
             <div>
               <EuiFilePicker
-                initialPromptText={fileName ?? 'Select or drag a file'}
+                initialPromptText={fileName ?? LABELS.promptText}
                 onChange={onFileChange}
                 accept={accept}
                 disabled={formConfig.disabled as boolean | undefined}
@@ -84,7 +99,7 @@ export const FileUploadWidget: React.FC<FileUploadWidgetProps> = ({
               />
               {fileName && Boolean(field.value) && (
                 <EuiText size="xs" color="subdued" style={{ marginTop: 4 }}>
-                  {`${fileName} loaded`}
+                  {LABELS.fileLoaded(fileName)}
                 </EuiText>
               )}
             </div>

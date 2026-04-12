@@ -207,7 +207,13 @@ export const GcpCloudFunctionsConnector: ConnectorSpec = {
     listFunctions: {
       isTool: true,
       input: z.object({
-        pageSize: z.number().optional().describe('Maximum number of functions to return (1-500)'),
+        pageSize: z
+          .number()
+          .int()
+          .min(1)
+          .max(500)
+          .optional()
+          .describe('Maximum number of functions to return (1-500)'),
         pageToken: z.string().optional().describe('Pagination token from a previous response'),
       }),
       handler: async (ctx, input) => {
@@ -220,7 +226,7 @@ export const GcpCloudFunctionsConnector: ConnectorSpec = {
         const parent = buildParentPath(projectId, region);
 
         const queryParams: Record<string, string> = {};
-        if (typedInput.pageSize) {
+        if (typedInput.pageSize !== undefined) {
           queryParams.pageSize = String(typedInput.pageSize);
         }
         if (typedInput.pageToken) {
