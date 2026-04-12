@@ -10,6 +10,19 @@
 import type { IconType } from '@elastic/eui';
 import type { StepStabilityLevel } from '@kbn/workflows';
 
+export interface EditorCommand {
+  id: string;
+  label: string;
+  iconType: IconType;
+  description?: string;
+}
+
+export interface JumpToStepEntry {
+  id: string;
+  label: string;
+  lineStart: number;
+}
+
 interface ActionBase {
   id: string;
   label: string;

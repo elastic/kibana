@@ -41,8 +41,8 @@ jest.mock('../lib/get_action_options', () => ({
   flattenOptions: jest.fn().mockReturnValue([]),
 }));
 
-import type { EditorCommand, JumpToStepEntry } from './actions_menu';
 import { ActionsMenu } from './actions_menu';
+import type { EditorCommand, JumpToStepEntry } from '../types';
 
 const mockCommands: EditorCommand[] = [
   { id: 'foldAll', label: 'Collapse all', iconType: 'minusInCircle' },

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiSelectableOption, IconType, UseEuiTheme } from '@elastic/eui';
+import type { EuiSelectableOption, UseEuiTheme } from '@elastic/eui';
 import {
   EuiBetaBadge,
   EuiButtonEmpty,
@@ -32,24 +32,15 @@ import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { flattenOptions, getActionOptions } from '../lib/get_action_options';
 import {
   type ActionOptionData,
+  type EditorCommand,
   isActionConnectorGroup,
   isActionConnectorOption,
   isActionGroup,
   isActionOption,
+  type JumpToStepEntry,
 } from '../types';
 
-export interface EditorCommand {
-  id: string;
-  label: string;
-  iconType: IconType;
-  description?: string;
-}
-
-export interface JumpToStepEntry {
-  id: string;
-  label: string;
-  lineStart: number;
-}
+export type { EditorCommand, JumpToStepEntry };
 
 export interface ActionsMenuProps {
   onActionSelected: (action: ActionOptionData) => void;
@@ -228,7 +219,12 @@ export function ActionsMenu({
         (entry) => !jumpTerm || entry.id.toLowerCase().includes(jumpTerm)
       );
       if (filteredJumps.length > 0) {
-        result.push({ label: 'Jump to a step', isGroupLabel: true });
+        result.push({
+          label: i18n.translate('workflows.actionsMenu.jumpToStepGroupLabel', {
+            defaultMessage: 'Jump to a step',
+          }),
+          isGroupLabel: true,
+        });
         for (const entry of filteredJumps) {
           result.push({
             id: `__jump:${entry.id}`,
@@ -242,7 +238,12 @@ export function ActionsMenu({
 
     // "Steps: X" mode: show ALL matching step options without limit
     if (isStepsMode) {
-      result.push({ label: 'Add step', isGroupLabel: true });
+      result.push({
+        label: i18n.translate('workflows.actionsMenu.addStepGroupLabel', {
+          defaultMessage: 'Add step',
+        }),
+        isGroupLabel: true,
+      });
       for (const opt of options) {
         result.push(opt as unknown as EuiSelectableOption);
       }
@@ -250,7 +251,12 @@ export function ActionsMenu({
     }
 
     // Normal mode
-    result.push({ label: 'Add step', isGroupLabel: true });
+    result.push({
+      label: i18n.translate('workflows.actionsMenu.addStepGroupLabel', {
+        defaultMessage: 'Add step',
+      }),
+      isGroupLabel: true,
+    });
     const visibleOptions = hasSearch ? options.slice(0, MAX_VISIBLE_STEPS) : options;
     for (const opt of visibleOptions) {
       result.push(opt as unknown as EuiSelectableOption);
@@ -270,7 +276,12 @@ export function ActionsMenu({
       (cmd) => !term || cmd.label.toLowerCase().includes(term)
     );
     if (filteredCmds.length > 0) {
-      result.push({ label: 'Commands', isGroupLabel: true });
+      result.push({
+        label: i18n.translate('workflows.actionsMenu.commandsGroupLabel', {
+          defaultMessage: 'Commands',
+        }),
+        isGroupLabel: true,
+      });
       for (const cmd of filteredCmds) {
         result.push({
           id: `__cmd:${cmd.id}`,
@@ -285,7 +296,12 @@ export function ActionsMenu({
         (entry) => entry.id.toLowerCase().includes(term) || entry.label.toLowerCase().includes(term)
       );
       if (filteredJumps.length > 0) {
-        result.push({ label: 'Jump to a step', isGroupLabel: true });
+        result.push({
+          label: i18n.translate('workflows.actionsMenu.jumpToStepGroupLabel', {
+            defaultMessage: 'Jump to a step',
+          }),
+          isGroupLabel: true,
+        });
         for (const entry of filteredJumps) {
           result.push({
             id: `__jump:${entry.id}`,

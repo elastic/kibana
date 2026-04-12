@@ -66,11 +66,11 @@ import {
   setIsTestModalOpen,
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { ActionsMenuPopover } from '../../../features/actions_menu_popover';
-import type { ActionOptionData } from '../../../features/actions_menu_popover/types';
 import type {
+  ActionOptionData,
   EditorCommand,
   JumpToStepEntry,
-} from '../../../features/actions_menu_popover/ui/actions_menu';
+} from '../../../features/actions_menu_popover/types';
 import { useMonacoMarkersChangedInterceptor } from '../../../features/validate_workflow_yaml/lib/use_monaco_markers_changed_interceptor';
 import { useYamlValidation } from '../../../features/validate_workflow_yaml/lib/use_yaml_validation';
 import type { YamlValidationResult } from '../../../features/validate_workflow_yaml/model/types';
@@ -621,7 +621,7 @@ export const WorkflowYAMLEditor = ({
           editor.trigger('actionsMenu', 'editor.unfoldAll', null);
           break;
         case 'find':
-          editor.trigger('actionsMenu', 'actions.find', null);
+          editor.trigger('actionsMenu', 'editor.action.startFindReplaceAction', null);
           break;
       }
       closeActionsPopover();
