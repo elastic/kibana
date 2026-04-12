@@ -8,12 +8,12 @@
  */
 
 import type { SavedObjectDoc } from '../serialization';
-import type { SavedObjectsModelUnsafeTransformChange } from './model_change';
 import type {
+  SavedObjectsModelUnsafeTransformChange,
   SavedObjectModelTransformationContext,
   SavedObjectModelTransformationDoc,
   SavedObjectModelUnsafeTransformFn,
-} from './transformations';
+} from '.';
 
 interface BeforeType {
   a: boolean;

@@ -11,7 +11,6 @@ import type { Readable } from 'stream';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-server';
-import type { SavedObject } from '..';
 
 /**
  * Utility class used to export savedObjects.
@@ -107,91 +106,9 @@ export interface SavedObjectsExportExcludedObject {
   reason?: string;
 }
 
-/**
- * Context passed down to a {@link SavedObjectsExportTransform | export transform function}
- *
- * @public
- */
-export interface SavedObjectsExportTransformContext {
-  /**
-   * The request that initiated the export request. Can be used to create scoped
-   * services or client inside the {@link SavedObjectsExportTransform | transformation}
-   */
-  request: KibanaRequest;
-}
-
-/**
- * Transformation function used to mutate the exported objects of the associated type.
- *
- * A type's export transform function will be executed once per user-initiated export,
- * for all objects of that type.
- *
- * @example
- * Registering a transform function changing the object's attributes during the export
- * ```ts
- * // src/plugins/my_plugin/server/plugin.ts
- * import { myType } from './saved_objects';
- *
- * export class Plugin() {
- *   setup: (core: CoreSetup) => {
- *     core.savedObjects.registerType({
- *        ...myType,
- *        management: {
- *          ...myType.management,
- *          onExport: (ctx, objects) => {
- *            return objects.map((obj) => ({
- *              ...obj,
- *              attributes: {
- *                ...obj.attributes,
- *                enabled: false,
- *              }
- *            })
- *          }
- *        },
- *     });
- *   }
- * }
- * ```
- *
- * @example
- * Registering a transform function adding additional objects to the export
- * ```ts
- * // src/plugins/my_plugin/server/plugin.ts
- * import { myType } from './saved_objects';
- *
- * export class Plugin() {
- *   setup: (core: CoreSetup) => {
- *     const savedObjectStartContractPromise = getStartServices().then(
- *       ([{ savedObjects: savedObjectsStart }]) => savedObjectsStart
- *     );
- *
- *     core.savedObjects.registerType({
- *        ...myType,
- *        management: {
- *          ...myType.management,
- *          onExport: async (ctx, objects) => {
- *            const { getScopedClient } = await savedObjectStartContractPromise;
- *            const client = getScopedClient(ctx.request);
- *
- *            const depResponse = await client.find({
- *              type: 'my-nested-object',
- *              hasReference: objs.map(({ id, type }) => ({ id, type })),
- *            });
- *
- *            return [...objs, ...depResponse.saved_objects];
- *          }
- *        },
- *     });
- *   }
- * }
- * ```
- *
- * @remarks Trying to change an object's id or type during the transform will result in
- *          a runtime error during the export process.
- *
- * @public
- */
-export type SavedObjectsExportTransform<T = unknown> = (
-  context: SavedObjectsExportTransformContext,
-  objects: Array<SavedObject<T>>
-) => SavedObject[] | Promise<SavedObject[]>;
+// SavedObjectsExportTransformContext and SavedObjectsExportTransform are now
+// defined in @kbn/core-saved-objects-api-server. Re-exported here for backwards compatibility.
+export type {
+  SavedObjectsExportTransformContext,
+  SavedObjectsExportTransform,
+} from '@kbn/core-saved-objects-api-server';

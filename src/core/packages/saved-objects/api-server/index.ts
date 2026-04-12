@@ -84,3 +84,68 @@ export type {
   SavedObjectReference,
   SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-common/src/server_types';
+
+// --- Type registration types (moved from @kbn/core-saved-objects-server) ---
+
+export type {
+  SavedObjectsType,
+  SavedObjectTypeExcludeFromUpgradeFilterHook,
+  SavedObjectTypeVersionGuesser,
+} from './src/saved_objects_type';
+export type { ISavedObjectTypeRegistry } from './src/type_registry';
+export type {
+  SavedObjectsTypeMappingDefinition,
+  SavedObjectsTypeMappingDefinitionSafe,
+  SavedObjectsFieldMapping,
+  SavedObjectsMappingProperties,
+  SavedObjectsMappingPropertiesSafe,
+  SavedObjectsFieldMappingSafe,
+} from './src/mapping_definition';
+export type { SavedObjectsValidationMap, SavedObjectsValidationSpec } from './src/validation';
+export type {
+  SavedObjectMigration,
+  SavedObjectMigrationMap,
+  SavedObjectMigrationContext,
+  SavedObjectMigrationParams,
+  SavedObjectsMigrationLogger,
+  SavedObjectMigrationFn,
+} from './src/migration_types';
+export type {
+  SavedObjectsTypeManagementDefinition,
+  SavedObjectsExportablePredicate,
+} from './src/saved_objects_management';
+export type {
+  SavedObjectsExportTransformContext,
+  SavedObjectsExportTransform,
+} from './src/export_transform';
+export type { SavedObjectsImportHookResult, SavedObjectsImportHook } from './src/import_hook';
+export type {
+  SavedObjectDoc,
+  SavedObjectUnsanitizedDoc,
+  SavedObjectSanitizedDoc,
+} from './src/saved_object_doc';
+export type {
+  ModelVersionIdentifier,
+  SavedObjectsModelVersion,
+  SavedObjectsModelVersionMap,
+  SavedObjectsModelVersionMapProvider,
+  SavedObjectsModelChange,
+  SavedObjectsModelMappingsAdditionChange,
+  SavedObjectsModelMappingsDeprecationChange,
+  SavedObjectsModelDataBackfillChange,
+  SavedObjectsModelDataRemovalChange,
+  SavedObjectsModelUnsafeTransformChange,
+  SavedObjectModelTransformationDoc,
+  SavedObjectModelTransformationContext,
+  SavedObjectModelTransformationFn,
+  SavedObjectModelTransformationResult,
+  SavedObjectModelDataBackfillFn,
+  SavedObjectModelDataBackfillResult,
+  SavedObjectModelUnsafeTransformFn,
+  SavedObjectsModelVersionSchemaDefinitions,
+  SavedObjectModelVersionForwardCompatibilityFn,
+  SavedObjectModelVersionForwardCompatibilityObjectSchema,
+  SavedObjectModelVersionForwardCompatibilitySchema,
+  SavedObjectsFullModelVersion,
+  SavedObjectsFullModelVersionSchemaDefinitions,
+} from './src/model_version';

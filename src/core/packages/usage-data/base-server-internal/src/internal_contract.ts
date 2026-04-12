@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ISavedObjectTypeRegistry, SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type {
+  ISavedObjectTypeRegistry,
+  SavedObjectsType,
+} from '@kbn/core-saved-objects-api-server';
 import type { CoreUsageDataSetup, CoreIncrementUsageCounter } from '@kbn/core-usage-data-server';
 import type { ICoreUsageStatsClient } from './usage_stats_client';
 
