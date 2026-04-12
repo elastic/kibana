@@ -136,6 +136,7 @@ describe('current status route', () => {
       const routeContext: any = {
         request: { query: {} },
         syntheticsEsClient,
+        server: { isElasticsearchServerless: false, config: {} },
       };
 
       const overviewStatusService = new OverviewStatusService(routeContext);
@@ -306,6 +307,7 @@ describe('current status route', () => {
       const routeContext: any = {
         request: { query: {} },
         syntheticsEsClient,
+        server: { isElasticsearchServerless: false, config: {} },
       };
 
       const overviewStatusService = new OverviewStatusService(routeContext);
@@ -422,6 +424,7 @@ describe('current status route', () => {
       const routeContext: any = {
         request: { query: {} },
         syntheticsEsClient,
+        server: { isElasticsearchServerless: false, config: {} },
       };
 
       const overviewStatusService = new OverviewStatusService(routeContext);
@@ -706,6 +709,7 @@ describe('current status route', () => {
         monitorConfigRepository: {
           getAll,
         },
+        server: { isElasticsearchServerless: false, config: {} },
       } as any);
 
       const result = await overviewStatusService.getOverviewStatus();
@@ -779,6 +783,7 @@ describe('current status route', () => {
         monitorConfigRepository: {
           getAll,
         },
+        server: { isElasticsearchServerless: false, config: {} },
       } as any);
 
       const result = await overviewStatusService.getOverviewStatus();
