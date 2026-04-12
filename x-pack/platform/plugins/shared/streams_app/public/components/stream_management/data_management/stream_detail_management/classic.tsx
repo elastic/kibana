@@ -23,13 +23,15 @@ import { StreamDetailDataQuality } from '../../../stream_data_quality';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 import { StreamDetailAttachments } from '../../../stream_detail_attachments';
 import { ClassicAdvancedView } from './advanced_view/classic_advanced_view';
+import { ClassicStreamPartitioning } from '../stream_detail_routing/classic_stream_partitioning';
 
 const classicStreamManagementSubTabs = [
   'overview',
+  'retention',
+  'partitioning',
   'processing',
   'advanced',
   'dataQuality',
-  'retention',
   'significantEvents',
   'schemaEditor',
   'schema',
@@ -66,7 +68,7 @@ export function ClassicStreamDetailManagement({
   } = useStreamsAppParams('/{key}/management/{tab}');
 
   const {
-    features: { attachments, overviewPage },
+    features: { attachments, overviewPage, queryStreams },
   } = useStreamsPrivileges();
 
   const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
@@ -112,29 +114,39 @@ export function ClassicStreamDetailManagement({
     };
   }
 
-  if (definition.data_stream_exists) {
-    tabs.retention = {
-      content: (
-        <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
-      ),
-      label: (
-        <EuiToolTip
-          content={i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
-            defaultMessage:
-              'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
+  tabs.retention = {
+    content: (
+      <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
+    ),
+    label: (
+      <EuiToolTip
+        content={i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
+          defaultMessage:
+            'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
+        })}
+      >
+        <span data-test-subj="retentionTab" tabIndex={0}>
+          {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
+            defaultMessage: 'Retention',
           })}
-        >
-          <span data-test-subj="retentionTab" tabIndex={0}>
-            {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
-              defaultMessage: 'Retention',
-            })}
-          </span>
-        </EuiToolTip>
+        </span>
+      </EuiToolTip>
+    ),
+  };
+
+  if (queryStreams.enabled) {
+    tabs.partitioning = {
+      content: (
+        <ClassicStreamPartitioning definition={definition} refreshDefinition={refreshDefinition} />
       ),
+      label: i18n.translate('xpack.streams.streamDetailView.partitioningTab', {
+        defaultMessage: 'Partitioning',
+      }),
     };
-    if (processing) {
-      tabs.processing = processing;
-    }
+  }
+
+  if (processing && !definition.replicated) {
+    tabs.processing = processing;
   }
 
   tabs.schema = {
@@ -178,7 +190,7 @@ export function ClassicStreamDetailManagement({
     tabs.significantEvents = otherTabs.significantEvents;
   }
 
-  if (definition.privileges.manage) {
+  if (definition.privileges.manage || definition.replicated) {
     tabs.advanced = {
       content: (
         <ClassicAdvancedView definition={definition} refreshDefinition={refreshDefinition} />
@@ -201,6 +213,12 @@ export function ClassicStreamDetailManagement({
   }
 
   if (tab === 'overview' && !overviewPage.enabled) {
+    return (
+      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'retention' } }} />
+    );
+  }
+
+  if (tab === 'partitioning' && !queryStreams.enabled) {
     return (
       <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'retention' } }} />
     );

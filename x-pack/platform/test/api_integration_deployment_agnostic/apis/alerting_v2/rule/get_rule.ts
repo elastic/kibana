@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import type { RoleCredentials } from '../../../services';
 
-const RULE_API_PATH = '/internal/alerting/v2/rule';
+const RULE_API_PATH = '/api/alerting/v2/rules';
 const RULE_SO_TYPE = 'alerting_rule';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -39,11 +39,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(samlAuth.getInternalRequestHeader())
         .send({
           kind: 'alert',
-          metadata: { name: 'get-test-rule', owner: 'team-a', labels: ['test'] },
+          metadata: { name: 'get-test-rule', owner: 'team-a', tags: ['test'] },
           time_field: '@timestamp',
           schedule: { every: '5m', lookback: '10m' },
           evaluation: {
-            query: { base: 'FROM logs-* | LIMIT 10', condition: 'status == "error"' },
+            query: { base: 'FROM logs-* | LIMIT 10 | WHERE status == "error"' },
           },
           grouping: { fields: ['host.name'] },
         });
@@ -62,12 +62,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.body.metadata).to.eql({
         name: 'get-test-rule',
         owner: 'team-a',
-        labels: ['test'],
+        tags: ['test'],
       });
       expect(response.body.time_field).to.be('@timestamp');
       expect(response.body.schedule).to.eql({ every: '5m', lookback: '10m' });
       expect(response.body.evaluation).to.eql({
-        query: { base: 'FROM logs-* | LIMIT 10', condition: 'status == "error"' },
+        query: { base: 'FROM logs-* | LIMIT 10 | WHERE status == "error"' },
       });
       expect(response.body.grouping).to.eql({ fields: ['host.name'] });
       expect(response.body.enabled).to.be(true);

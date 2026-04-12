@@ -9,16 +9,19 @@ import { v4 as uuidv4 } from 'uuid';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import { isInferenceProviderError } from '@kbn/inference-common';
-import type { Insight } from '@kbn/streams-schema';
-import { getImpactLevel } from '@kbn/streams-schema';
+import {
+  type Insight,
+  getImpactLevel,
+  STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
+} from '@kbn/streams-schema';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { TaskContext } from '../../tasks/task_definitions';
 import { cancellableTask } from '../../tasks/cancellable_task';
 import type { TaskParams } from '../../tasks/types';
 import { generateInsights } from '../insights/generate_insights';
-import { getErrorMessage } from '../../streams/errors/parse_error';
+import { parseError } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
-import { resolveConnectorId } from '../../../routes/utils/resolve_connector_id';
+import { resolveConnectorForFeature } from '../../../routes/utils/resolve_connector_for_feature';
 
 export interface InsightsDiscoveryTaskResult {
   insights: Insight[];
@@ -28,6 +31,7 @@ export interface InsightsDiscoveryTaskResult {
 export interface InsightsDiscoveryTaskParams {
   /** When provided, only generate insights for these stream names. Otherwise all streams are used. */
   streamNames?: string[];
+  connectorId?: string;
 }
 
 export const STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE = 'streams_insights_discovery';
@@ -42,9 +46,13 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
               if (!runContext.fakeRequest) {
                 throw new Error('Request is required to run this task');
               }
+              const { fakeRequest } = runContext;
 
-              const { streamNames, _task } = runContext.taskInstance
-                .params as TaskParams<InsightsDiscoveryTaskParams>;
+              const {
+                streamNames,
+                connectorId: connectorIdOverride,
+                _task,
+              } = runContext.taskInstance.params as TaskParams<InsightsDiscoveryTaskParams>;
 
               const {
                 taskClient,
@@ -53,19 +61,19 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                 inferenceClient,
                 queryClient,
                 insightClient,
-                modelSettingsClient,
-                uiSettingsClient,
               } = await taskContext.getScopedClients({
                 request: runContext.fakeRequest,
               });
 
               const taskLogger = taskContext.logger.get('insights_discovery');
-              const settings = await modelSettingsClient.getSettings();
-              const connectorId = await resolveConnectorId({
-                connectorId: settings.connectorIdDiscovery,
-                uiSettingsClient,
-                logger: taskLogger,
-              });
+              const connectorId =
+                connectorIdOverride ??
+                (await resolveConnectorForFeature({
+                  searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
+                  featureId: STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
+                  featureName: 'discovery',
+                  request: fakeRequest,
+                }));
               taskLogger.debug(`Using connector ${connectorId} for discovery`);
               const boundInferenceClient = inferenceClient.bindTo({ connectorId });
 
@@ -105,25 +113,29 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                     );
                   } catch (persistError) {
                     taskContext.logger.error(
-                      `Failed to persist ${result.insights.length} insights: ${getErrorMessage(
-                        persistError
-                      )}`
+                      `Failed to persist ${result.insights.length} insights: ${
+                        parseError(persistError).message
+                      }`
                     );
                   }
                 }
 
                 await taskClient.complete<InsightsDiscoveryTaskParams, InsightsDiscoveryTaskResult>(
                   _task,
-                  { streamNames },
+                  { streamNames, connectorId: connectorIdOverride },
                   { insights, tokensUsed: result.tokens_used }
                 );
               } catch (error) {
-                // Get connector info for error enrichment
-                const connector = await inferenceClient.getConnectorById(connectorId);
-
-                const errorMessage = isInferenceProviderError(error)
-                  ? formatInferenceProviderError(error, connector)
-                  : getErrorMessage(error);
+                // Get connector info for error enrichment, preserving the original error if lookup fails
+                let errorMessage = parseError(error).message;
+                try {
+                  const connector = await inferenceClient.getConnectorById(connectorId);
+                  if (isInferenceProviderError(error)) {
+                    errorMessage = formatInferenceProviderError(error, connector);
+                  }
+                } catch {
+                  // Connector lookup failed — use the original error message
+                }
 
                 if (
                   errorMessage.includes('ERR_CANCELED') ||
@@ -138,7 +150,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
 
                 await taskClient.fail<InsightsDiscoveryTaskParams>(
                   _task,
-                  { streamNames },
+                  { streamNames, connectorId: connectorIdOverride },
                   errorMessage
                 );
                 return getDeleteTaskRunResult();

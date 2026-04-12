@@ -143,7 +143,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
         aria-label={MORE_ACTIONS}
         className={VISUALIZATION_ACTIONS_BUTTON_CLASS}
         data-test-subj={dataTestSubj}
-        iconType="boxesHorizontal"
+        iconType="boxesVertical"
         onClick={onButtonClick}
       />
     ),

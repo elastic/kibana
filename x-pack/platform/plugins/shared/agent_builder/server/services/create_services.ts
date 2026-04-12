@@ -74,7 +74,11 @@ export class ServiceManager {
     const skillsSetup = this.services.skills.setup();
 
     this.internalSetup = {
-      tools: this.services.tools.setup({ logger: logger.get('tools'), workflowsManagement }),
+      tools: this.services.tools.setup({
+        logger: logger.get('tools'),
+        workflowsManagement,
+        config: this.config,
+      }),
       agents: this.services.agents.setup({ logger: logger.get('agents') }),
       attachments: this.services.attachments.setup(),
       hooks: this.services.hooks.setup({ logger: logger.get('hooks') }),
@@ -115,7 +119,10 @@ export class ServiceManager {
       return runner;
     };
 
-    const attachments = this.services.attachments.start();
+    const attachments = this.services.attachments.start({
+      spaces,
+      savedObjects,
+    });
     const sml = this.services.sml.start({
       logger: logger.get('sml'),
       securityAuthz: securityPlugin?.authz,

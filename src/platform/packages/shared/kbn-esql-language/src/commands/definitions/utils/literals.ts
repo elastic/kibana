@@ -32,7 +32,6 @@ export interface DateLiteralsOptions {
 export const buildConstantsDefinitions = (
   userConstants: string[],
   detail?: string,
-  sortText?: string,
   /**
    * Whether or not to advance the cursor and open the suggestions dialog after inserting the constant.
    */
@@ -54,7 +53,6 @@ export const buildConstantsDefinitions = (
           defaultMessage: `Constant`,
         }),
       ...(documentationValue ? { documentation: { value: documentationValue } } : {}),
-      sortText: sortText ?? 'A',
       ...(category && { category }),
     };
 
@@ -68,7 +66,6 @@ export function getDateLiterals(options?: DateLiteralsOptions) {
       i18n.translate('kbn-esql-language.esql.autocomplete.namedParamDefinition', {
         defaultMessage: 'Bind to time filter',
       }),
-      '1A',
       options,
       // appears when the user opens the second level popover
       i18n.translate('kbn-esql-language.esql.autocomplete.timeNamedParamDoc', {
@@ -85,7 +82,6 @@ export function getDateLiterals(options?: DateLiteralsOptions) {
       detail: i18n.translate('kbn-esql-language.esql.autocomplete.chooseFromTimePicker', {
         defaultMessage: 'Click to choose',
       }),
-      sortText: '1A',
       category: SuggestionCategory.CUSTOM_ACTION,
       command: {
         id: 'esql.timepicker.choose',
@@ -112,7 +108,6 @@ export function getTimeUnitLiterals(
   const items: ISuggestionItem[] = [
     ...buildConstantsDefinitions(
       timeUnitsToSuggest.map(({ name }) => name),
-      undefined,
       undefined,
       {
         addComma,
@@ -145,7 +140,7 @@ export function getCompatibleLiterals(
   if (types.includes('time_duration')) {
     // TODO distinction between date_period and time durations!
     const timeLiteralSuggestions = [
-      ...buildConstantsDefinitions(getUnitDuration(1), undefined, undefined, options),
+      ...buildConstantsDefinitions(getUnitDuration(1), undefined, options),
     ];
     if (options?.supportsControls) {
       const userDefinedColumns =

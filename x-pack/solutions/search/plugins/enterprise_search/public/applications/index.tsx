@@ -72,6 +72,7 @@ export const renderApp = (
     fleet,
     uiActions,
     searchNavigation,
+    spaces,
   } = plugins;
 
   const productFeatures = features ?? { ...DEFAULT_PRODUCT_FEATURES };
@@ -106,6 +107,7 @@ export const renderApp = (
     lens,
     ml,
     navigateToUrl,
+    notifications,
     productFeatures,
     renderHeaderActions: (HeaderActions) =>
       params.setHeaderActionMenu(
@@ -117,6 +119,7 @@ export const renderApp = (
     setChromeIsVisible: chrome.setIsVisible,
     setDocTitle: chrome.docTitle.change,
     share,
+    spaces,
     uiActions,
     uiSettings,
     updateSideNavDefinition,

@@ -14,7 +14,9 @@ import type { CreateSLOForm } from '../../../types';
 
 export const useApmDefaultValues = () => {
   const { watch, setValue } = useFormContext<CreateSLOForm<APMTransactionErrorRateIndicator>>();
-  const { data: apmIndex } = useFetchApmIndex();
+  const {
+    data: { metric: apmIndex },
+  } = useFetchApmIndex();
 
   const [serviceName = '', environment = '', transactionType = '', transactionName = ''] = watch([
     'indicator.params.service',
