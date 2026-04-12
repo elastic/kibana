@@ -11,20 +11,15 @@ import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import type {
   SavedObjectsClientContract,
   ISavedObjectsRepository,
-  SavedObjectsPointInTimeFinderClient,
 } from '@kbn/core-saved-objects-api-server';
-import { PointInTimeFinder } from '../lib/point_in_time_finder';
-
-// mock duplicated from `@kbn/core/saved-objects-api-server-mocks` to avoid cyclic dependencies
+import { PointInTimeFinder } from '..';
 
 const createPointInTimeFinderMock = ({
   logger = loggerMock.create(),
   savedObjectsMock,
 }: {
   logger?: MockedLogger;
-  savedObjectsMock: jest.Mocked<
-    ISavedObjectsRepository | SavedObjectsClientContract | SavedObjectsPointInTimeFinderClient
-  >;
+  savedObjectsMock: jest.Mocked<ISavedObjectsRepository | SavedObjectsClientContract>;
 }): jest.Mock => {
   const mock = jest.fn();
 
@@ -46,15 +41,6 @@ const createPointInTimeFinderMock = ({
   return mock;
 };
 
-const createPointInTimeFinderClientMock = (): jest.Mocked<SavedObjectsPointInTimeFinderClient> => {
-  return {
-    find: jest.fn(),
-    openPointInTimeForType: jest.fn().mockResolvedValue({ id: 'some_pit_id' }),
-    closePointInTime: jest.fn(),
-  };
-};
-
 export const savedObjectsPointInTimeFinderMock = {
   create: createPointInTimeFinderMock,
-  createClient: createPointInTimeFinderClientMock,
 };

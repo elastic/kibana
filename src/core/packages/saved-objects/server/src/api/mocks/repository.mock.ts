@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { savedObjectsPointInTimeFinderMock } from './point_in_time_finder.mock';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import { lazyObject } from '@kbn/lazy-object';
 
-// mock duplicated from `@kbn/core/saved-objects-api-server-mocks` to avoid cyclic dependencies
-
-const createRepositoryMock = () => {
-  const mock: jest.Mocked<ISavedObjectsRepository> = {
+const create = () => {
+  const mock: jest.Mocked<ISavedObjectsRepository> = lazyObject({
     checkConflicts: jest.fn(),
     create: jest.fn(),
     bulkCreate: jest.fn(),
@@ -36,14 +36,16 @@ const createRepositoryMock = () => {
     collectMultiNamespaceReferences: jest.fn(),
     updateObjectsSpaces: jest.fn(),
     getCurrentNamespace: jest.fn(),
-    asScopedToNamespace: jest.fn().mockImplementation(createRepositoryMock),
+    asScopedToNamespace: jest.fn().mockImplementation(create),
     changeOwnership: jest.fn(),
     changeAccessMode: jest.fn(),
-  };
+  });
+
+  mock.createPointInTimeFinder = savedObjectsPointInTimeFinderMock.create({
+    savedObjectsMock: mock,
+  });
 
   return mock;
 };
 
-export const repositoryMock = {
-  create: createRepositoryMock,
-};
+export const savedObjectsRepositoryMock = { create };

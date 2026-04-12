@@ -23,8 +23,8 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { SavedObjectsSerializer } from '../../../base';
 import { encodeHitVersion } from '../../../base';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { kibanaMigratorMock } from '../../mocks';
-import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
+import { kibanaMigratorMock } from '../../test_helpers';
+import { savedObjectsExtensionsMock } from '../../test_helpers/saved_objects_extensions.mock';
 import type { ISavedObjectsSecurityExtension, SavedObjectsRawDocSource } from '../../../..';
 import {
   NAMESPACE_AGNOSTIC_TYPE,

@@ -7,13 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IDocumentMigrator } from '../base/migration';
+import type { ISavedObjectsSerializer } from '../../serialization';
 import { lazyObject } from '@kbn/lazy-object';
 
-export const createDocumentMigratorMock = (): jest.Mocked<IDocumentMigrator> => {
-  return lazyObject({
-    migrate: jest.fn().mockImplementation((doc: unknown) => doc),
-    migrateAndConvert: jest.fn().mockImplementation((doc: unknown) => doc),
-    isDowngradeRequired: jest.fn().mockReturnValue(false),
+const createSerializerMock = () => {
+  const mock: jest.Mocked<ISavedObjectsSerializer> = lazyObject({
+    isRawSavedObject: jest.fn(),
+    rawToSavedObject: jest.fn(),
+    savedObjectToRaw: jest.fn(),
+    generateRawId: jest.fn(),
+    generateRawLegacyUrlAliasId: jest.fn(),
   });
+  return mock;
+};
+
+export const serializerMock = {
+  create: createSerializerMock,
 };

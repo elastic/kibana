@@ -9,7 +9,7 @@
 
 import { SavedObjectTypeRegistry } from '../../base';
 import { SavedObjectsRepository } from './repository';
-import { kibanaMigratorMock } from '../mocks';
+import { kibanaMigratorMock } from '../test_helpers';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 

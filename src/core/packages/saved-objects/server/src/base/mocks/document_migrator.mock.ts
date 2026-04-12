@@ -7,16 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ISavedObjectsClientProvider } from '../api';
+import type { IDocumentMigrator } from '../migration';
 import { lazyObject } from '@kbn/lazy-object';
 
-const create = (): jest.Mocked<ISavedObjectsClientProvider> =>
-  lazyObject({
-    getClient: jest.fn(),
-    setClientFactory: jest.fn(),
-    getExtensions: jest.fn(),
+export const createDocumentMigratorMock = (): jest.Mocked<IDocumentMigrator> => {
+  return lazyObject({
+    migrate: jest.fn().mockImplementation((doc: unknown) => doc),
+    migrateAndConvert: jest.fn().mockImplementation((doc: unknown) => doc),
+    isDowngradeRequired: jest.fn().mockReturnValue(false),
   });
-
-export const savedObjectsClientProviderMock = {
-  create,
 };

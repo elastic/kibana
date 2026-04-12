@@ -8,7 +8,7 @@
  */
 
 import { lazyObject } from '@kbn/lazy-object';
-import type { SavedObjectMigrationContext, SavedObjectsMigrationLogger } from '../..';
+import type { SavedObjectMigrationContext, SavedObjectsMigrationLogger } from '../../..';
 
 export const createSavedObjectsMigrationLoggerMock =
   (): jest.Mocked<SavedObjectsMigrationLogger> => {

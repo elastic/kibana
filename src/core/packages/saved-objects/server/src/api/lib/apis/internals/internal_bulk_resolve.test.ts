@@ -33,8 +33,8 @@ import {
   setupAuthorizeAndRedactInternalBulkResolveFailure,
   setupAuthorizeAndRedactInternalBulkResolveSuccess,
 } from '../../../test_helpers/repository.test.common';
-import { savedObjectsExtensionsMock } from '../../../mocks/saved_objects_extensions.mock';
-import { apiContextMock, type ApiExecutionContextMock } from '../../../mocks';
+import { savedObjectsExtensionsMock } from '../../../test_helpers/saved_objects_extensions.mock';
+import { apiContextMock, type ApiExecutionContextMock } from '../../../test_helpers';
 
 const VERSION_PROPS = { _seq_no: 1, _primary_term: 1 };
 const OBJ_TYPE = 'obj-type';

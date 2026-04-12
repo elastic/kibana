@@ -24,9 +24,9 @@ import { ALL_NAMESPACES_STRING } from '../../../utils';
 import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SavedObjectsSerializer } from '../../../base';
-import { kibanaMigratorMock } from '../../mocks';
+import { kibanaMigratorMock } from '../../test_helpers';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
+import { savedObjectsExtensionsMock } from '../../test_helpers/saved_objects_extensions.mock';
 import type { ISavedObjectsSecurityExtension } from '../../../..';
 
 import {

@@ -12,7 +12,7 @@ import type {
   SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
-import { savedObjectsPointInTimeFinderMock } from '../mocks';
+import { savedObjectsPointInTimeFinderMock } from '../test_helpers';
 
 import { PointInTimeFinder } from './point_in_time_finder';
 

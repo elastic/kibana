@@ -13,8 +13,8 @@ import {
 } from './bulk_get.isolated.test.mocks';
 import type { estypes } from '@elastic/elasticsearch';
 import type { SavedObject, CheckAuthorizationResult } from '../../../..';
-import type { ApiExecutionContextMock } from '../../mocks';
-import { apiContextMock } from '../../mocks';
+import type { ApiExecutionContextMock } from '../../test_helpers';
+import { apiContextMock } from '../../test_helpers';
 import { performBulkGet } from './bulk_get';
 
 interface ObjectInfo {

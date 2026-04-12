@@ -29,7 +29,7 @@ import type {
   SavedObjectsSearchOptions,
 } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsClient } from './saved_objects_client';
-import { repositoryMock, savedObjectsPointInTimeFinderMock } from './mocks';
+import { repositoryMock, savedObjectsPointInTimeFinderMock } from './test_helpers';
 
 describe('SavedObjectsClient', () => {
   let mockRepository: ReturnType<typeof repositoryMock.create>;

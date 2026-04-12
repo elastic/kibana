@@ -21,7 +21,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { SavedObjectsRepository } from '../repository';
-import { kibanaMigratorMock, savedObjectsExtensionsMock } from '../../mocks';
+import { kibanaMigratorMock, savedObjectsExtensionsMock } from '../../test_helpers';
 import {
   HIDDEN_TYPE,
   mappings,

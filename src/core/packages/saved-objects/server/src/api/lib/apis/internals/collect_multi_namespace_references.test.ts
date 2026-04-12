@@ -32,7 +32,7 @@ import {
   setupAuthorizeAndRedactMultiNamespaceReferenencesFailure,
   setupAuthorizeAndRedactMultiNamespaceReferenencesSuccess,
 } from '../../../test_helpers/repository.test.common';
-import { savedObjectsExtensionsMock } from '../../../mocks/saved_objects_extensions.mock';
+import { savedObjectsExtensionsMock } from '../../../test_helpers/saved_objects_extensions.mock';
 import type { WithAuditName } from '../../../../..';
 import { type ISavedObjectsSecurityExtension, SavedObjectsErrorHelpers } from '../../../../..';
 

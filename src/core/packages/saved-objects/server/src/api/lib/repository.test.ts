@@ -15,7 +15,7 @@ import {
 
 import { SavedObjectsRepository } from './repository';
 import { loggerMock } from '@kbn/logging-mocks';
-import { kibanaMigratorMock } from '../mocks';
+import { kibanaMigratorMock } from '../test_helpers';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import {
@@ -25,7 +25,7 @@ import {
 } from '../test_helpers/repository.test.common';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import type { ISavedObjectsSpacesExtension } from '../../..';
-import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
+import { savedObjectsExtensionsMock } from '../test_helpers/saved_objects_extensions.mock';
 
 describe('SavedObjectsRepository', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;

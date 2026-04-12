@@ -35,7 +35,7 @@ import type {
   SavedObject,
 } from '../../..';
 import { SavedObjectsErrorHelpers } from '../../..';
-import { kibanaMigratorMock } from '../mocks';
+import { kibanaMigratorMock } from '../test_helpers';
 import {
   createRegistry,
   createDocumentMigrator,
@@ -61,7 +61,7 @@ import {
   setupAuthorizeFunc,
   setupAuthorizeFind,
 } from '../test_helpers/repository.test.common';
-import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
+import { savedObjectsExtensionsMock } from '../test_helpers/saved_objects_extensions.mock';
 
 const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
 

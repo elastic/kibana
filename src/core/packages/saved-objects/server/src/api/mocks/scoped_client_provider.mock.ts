@@ -7,20 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ISavedObjectsSerializer } from '../serialization';
+import type { ISavedObjectsClientProvider } from '..';
 import { lazyObject } from '@kbn/lazy-object';
 
-const createSerializerMock = () => {
-  const mock: jest.Mocked<ISavedObjectsSerializer> = lazyObject({
-    isRawSavedObject: jest.fn(),
-    rawToSavedObject: jest.fn(),
-    savedObjectToRaw: jest.fn(),
-    generateRawId: jest.fn(),
-    generateRawLegacyUrlAliasId: jest.fn(),
+const create = (): jest.Mocked<ISavedObjectsClientProvider> =>
+  lazyObject({
+    getClient: jest.fn(),
+    setClientFactory: jest.fn(),
+    getExtensions: jest.fn(),
   });
-  return mock;
-};
 
-export const serializerMock = {
-  create: createSerializerMock,
+export const savedObjectsClientProviderMock = {
+  create,
 };

@@ -29,7 +29,7 @@ import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SavedObjectsSerializer } from '../../../base';
 import { encodeHitVersion } from '../../../base';
-import { kibanaMigratorMock } from '../../mocks';
+import { kibanaMigratorMock } from '../../test_helpers';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import {
@@ -54,7 +54,7 @@ import {
   MULTI_NAMESPACE_TYPE,
 } from '../../test_helpers/repository.test.common';
 import type { ISavedObjectsSecurityExtension } from '../../../..';
-import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
+import { savedObjectsExtensionsMock } from '../../test_helpers/saved_objects_extensions.mock';
 
 interface ExpectedErrorResult {
   type: string;

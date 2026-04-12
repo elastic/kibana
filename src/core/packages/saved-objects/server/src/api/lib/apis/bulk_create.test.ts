@@ -32,7 +32,7 @@ import { ALL_NAMESPACES_STRING } from '../../../utils';
 import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SavedObjectsSerializer } from '../../../base';
-import { kibanaMigratorMock } from '../../mocks';
+import { kibanaMigratorMock } from '../../test_helpers';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import {
@@ -60,7 +60,7 @@ import {
   mockTimestampFieldsWithCreated,
 } from '../../test_helpers/repository.test.common';
 import type { ISavedObjectsSecurityExtension } from '../../../..';
-import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
+import { savedObjectsExtensionsMock } from '../../test_helpers/saved_objects_extensions.mock';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.

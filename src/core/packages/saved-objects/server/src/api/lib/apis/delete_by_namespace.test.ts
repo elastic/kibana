@@ -21,7 +21,7 @@ import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SavedObjectsSerializer } from '../../../base';
 import { LEGACY_URL_ALIAS_TYPE } from '../../../base';
-import { kibanaMigratorMock } from '../../mocks';
+import { kibanaMigratorMock } from '../../test_helpers';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import {
