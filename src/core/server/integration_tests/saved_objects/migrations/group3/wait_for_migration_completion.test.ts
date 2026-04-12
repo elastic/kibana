@@ -11,7 +11,7 @@ import Path from 'path';
 import fs from 'fs/promises';
 import { parse } from 'hjson';
 import { kibanaPackageJson as pkg } from '@kbn/repo-info';
-import { retryAsync } from '@kbn/core-saved-objects-server/mocks';
+import { retryAsync } from '@kbn/core-saved-objects-server/src/migration/helpers/retry_async';
 import {
   createRootWithCorePlugins,
   createTestServers,

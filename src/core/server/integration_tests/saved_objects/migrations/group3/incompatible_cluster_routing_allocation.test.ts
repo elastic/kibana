@@ -13,7 +13,7 @@ import { parse } from 'hjson';
 import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { LogRecord } from '@kbn/logging';
-import { retryAsync } from '@kbn/core-saved-objects-server/mocks';
+import { retryAsync } from '@kbn/core-saved-objects-server/src/migration/helpers/retry_async';
 import { BASELINE_TEST_ARCHIVE_SMALL } from '../kibana_migrator_archive_utils';
 import { getRelocatingMigratorTestKit } from '@kbn/migrator-test-kit/fixtures';
 import { clearLog } from '@kbn/migrator-test-kit';
