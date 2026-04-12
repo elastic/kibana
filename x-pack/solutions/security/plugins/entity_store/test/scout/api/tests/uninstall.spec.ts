@@ -60,9 +60,7 @@ apiTest.describe('Entity Store uninstall', { tag: ENTITY_STORE_TAGS }, () => {
   };
 
   const assertTaskGone = async (kbnClient: ApiWorkerFixtures['kbnClient'], taskId: string) => {
-    await expect(kbnClient.savedObjects.get({ type: 'task', id: taskId })).rejects.toThrow(
-      `Saved object [task/${taskId}] not found`
-    );
+    await expect(kbnClient.savedObjects.get({ type: 'task', id: taskId })).rejects.toThrow('404');
   };
 
   apiTest('stops the history snapshot task on uninstall', async ({ apiClient, kbnClient }) => {
