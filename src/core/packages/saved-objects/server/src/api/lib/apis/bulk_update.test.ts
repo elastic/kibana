@@ -54,7 +54,7 @@ import {
   MULTI_NAMESPACE_TYPE,
 } from '../../test_helpers/repository.test.common';
 import type { ISavedObjectsSecurityExtension } from '../../../..';
-import { savedObjectsExtensionsMock } from '../../test_helpers/saved_objects_extensions.mock';
+import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
 
 interface ExpectedErrorResult {
   type: string;

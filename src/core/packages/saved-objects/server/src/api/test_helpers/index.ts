@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { savedObjectsPointInTimeFinderMock } from './point_in_time_finder.mock';
 export { kibanaMigratorMock } from './kibana_migrator.mock';
-export { repositoryMock } from './repository.mock';
 export {
   apiHelperMocks,
   type SerializerHelperMock,
@@ -22,4 +20,3 @@ export {
 export { apiContextMock, type ApiExecutionContextMock } from './api_context.mock';
 export { createDocumentMigratorMock, createMigratorMock } from './migrator.mock';
 export { createEncryptionHelperMock } from './helpers';
-export { savedObjectsExtensionsMock } from './saved_objects_extensions.mock';

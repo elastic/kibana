@@ -19,7 +19,7 @@ import {
   changeObjectAccessControl,
 } from './change_object_access_control';
 import { mockGetBulkOperationError } from './update_objects_spaces.test.mock';
-import { savedObjectsExtensionsMock } from '../../../test_helpers/saved_objects_extensions.mock';
+import { savedObjectsExtensionsMock } from '../../../mocks/saved_objects_extensions.mock';
 
 jest.mock('../utils', () => ({
   getBulkOperationError: jest.fn(),

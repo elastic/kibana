@@ -11,19 +11,28 @@ import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import type {
+  ISavedObjectsEncryptionExtension,
+  ISavedObjectsSecurityExtension,
+  ISavedObjectsSpacesExtension,
+} from '../../..';
 import { SavedObjectTypeRegistry } from '../../base';
 import { serializerMock } from '../../../mocks';
 import type { ApiExecutionContext } from '../lib/apis/types';
 import type { RepositoryHelpersMock } from './api_helpers.mocks';
 import { apiHelperMocks } from './api_helpers.mocks';
-import { savedObjectsExtensionsMock } from './saved_objects_extensions.mock';
+import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 import type { KibanaMigratorMock } from './migrator.mock';
 import { createMigratorMock } from './migrator.mock';
 
 export type ApiExecutionContextMock = Pick<ApiExecutionContext, 'allowedTypes' | 'mappings'> & {
   registry: SavedObjectTypeRegistry;
   helpers: RepositoryHelpersMock;
-  extensions: ReturnType<typeof savedObjectsExtensionsMock.create>;
+  extensions: {
+    encryptionExtension: jest.Mocked<ISavedObjectsEncryptionExtension>;
+    securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>;
+    spacesExtension: jest.Mocked<ISavedObjectsSpacesExtension>;
+  };
   client: ElasticsearchClientMock;
   serializer: ReturnType<typeof serializerMock.create>;
   migrator: KibanaMigratorMock;
@@ -38,7 +47,7 @@ const createApiExecutionContextMock = ({
   return {
     registry: new SavedObjectTypeRegistry(),
     helpers: apiHelperMocks.create(),
-    extensions: savedObjectsExtensionsMock.create(),
+    extensions: savedObjectsExtensionsMock.create() as ApiExecutionContextMock['extensions'],
     client: elasticsearchClientMock.createElasticsearchClient(),
     serializer: serializerMock.create(),
     migrator: createMigratorMock(),

@@ -25,7 +25,7 @@ import type { SavedObjectsSerializer } from '../../../base';
 import { kibanaMigratorMock } from '../../test_helpers';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ISavedObjectsSecurityExtension } from '../../../..';
-import { savedObjectsExtensionsMock } from '../../test_helpers/saved_objects_extensions.mock';
+import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
 
 import {
   NAMESPACE_AGNOSTIC_TYPE,

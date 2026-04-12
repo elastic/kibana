@@ -60,7 +60,7 @@ import {
   mockTimestampFieldsWithCreated,
 } from '../../test_helpers/repository.test.common';
 import type { ISavedObjectsSecurityExtension } from '../../../..';
-import { savedObjectsExtensionsMock } from '../../test_helpers/saved_objects_extensions.mock';
+import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.

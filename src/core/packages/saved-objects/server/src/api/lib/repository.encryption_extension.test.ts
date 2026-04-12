@@ -46,7 +46,7 @@ import {
   updateSuccess,
   type TypeIdTuple,
 } from '../test_helpers/repository.test.common';
-import { savedObjectsExtensionsMock } from '../test_helpers/saved_objects_extensions.mock';
+import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 
 describe('SavedObjectsRepository Encryption Extension', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;

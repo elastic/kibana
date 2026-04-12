@@ -49,7 +49,9 @@ const createSecurityExtension = (): jest.Mocked<ISavedObjectsSecurityExtension> 
     getCurrentUser: jest.fn(),
     includeSavedObjectNames: jest.fn(),
     authorizeChangeAccessControl: jest.fn(),
-    filterInaccessibleObjectsForBulkAction: jest.fn(),
+    filterInaccessibleObjectsForBulkAction: jest
+      .fn()
+      .mockImplementation((expectedResults) => Promise.resolve(expectedResults)),
   });
 
 const createSpacesExtension = (): jest.Mocked<ISavedObjectsSpacesExtension> =>

@@ -64,7 +64,7 @@ import {
   setupAuthorizeFind,
   HIDDEN_TYPE,
 } from '../test_helpers/repository.test.common';
-import { savedObjectsExtensionsMock } from '../test_helpers/saved_objects_extensions.mock';
+import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 import { arrayMapsAreEqual } from '../../utils';
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/types';
