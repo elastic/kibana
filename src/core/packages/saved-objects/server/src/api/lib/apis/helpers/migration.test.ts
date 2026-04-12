@@ -12,7 +12,7 @@ import {
   createMigratorMock,
   createDocumentMigratorMock,
   createEncryptionHelperMock,
-} from '../../../test_helpers';
+} from '../../../mocks';
 import { MigrationHelper } from './migration';
 
 const createSavedObject = (id = 'foo'): SavedObject => {

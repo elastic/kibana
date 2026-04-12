@@ -22,7 +22,7 @@ import {
   SPACES_EXTENSION_ID,
 } from '../../..';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
+import { savedObjectsExtensionsMock } from '../../extensions/saved_objects_extensions.mock';
 
 /**
  * @internal only used for unit tests

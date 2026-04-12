@@ -20,8 +20,8 @@ import type { estypes } from '@elastic/elasticsearch';
 import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SavedObjectsSerializer } from '../../../base';
-import type { ApiExecutionContextMock } from '../../test_helpers';
-import { apiContextMock, kibanaMigratorMock } from '../../test_helpers';
+import type { ApiExecutionContextMock } from '../../mocks';
+import { apiContextMock, kibanaMigratorMock } from '../../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import {
@@ -33,7 +33,7 @@ import {
   createSpySerializer,
   createConflictErrorPayload,
   createType,
-} from '../../test_helpers/repository.test.common';
+} from '../../mocks/repository.test.common';
 import { performRemoveReferencesTo } from './remove_references_to';
 
 describe('SavedObjectsRepository', () => {

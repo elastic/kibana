@@ -22,10 +22,10 @@ import { ALL_NAMESPACES_STRING } from '../../../utils';
 import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SavedObjectsSerializer } from '../../../base';
-import { kibanaMigratorMock } from '../../test_helpers';
+import { kibanaMigratorMock } from '../../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ISavedObjectsSecurityExtension } from '../../../..';
-import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
+import { savedObjectsExtensionsMock } from '../../../extensions/saved_objects_extensions.mock';
 
 import {
   NAMESPACE_AGNOSTIC_TYPE,
@@ -41,7 +41,7 @@ import {
   getSuccess,
   createBadRequestErrorPayload,
   createGenericNotFoundErrorPayload,
-} from '../../test_helpers/repository.test.common';
+} from '../../mocks/repository.test.common';
 
 describe('#get', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;

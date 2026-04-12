@@ -20,14 +20,14 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { SavedObjectsRepository } from '../repository';
-import { kibanaMigratorMock } from '../../test_helpers';
-import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
+import { kibanaMigratorMock } from '../../mocks';
+import { savedObjectsExtensionsMock } from '../../../extensions/saved_objects_extensions.mock';
 import {
   mappings,
   createRegistry,
   createDocumentMigrator,
   createSpySerializer,
-} from '../../test_helpers/repository.test.common';
+} from '../../mocks/repository.test.common';
 
 const EMPTY_ESQL_RESPONSE = {
   columns: [],

@@ -20,7 +20,7 @@ import { SavedObjectsRepository } from './repository';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { kibanaMigratorMock } from '../test_helpers';
+import { kibanaMigratorMock } from '../mocks';
 import type { SavedObjectsSerializer } from '../../base';
 import {
   MAIN_SAVED_OBJECT_INDEX,
@@ -45,8 +45,8 @@ import {
   MULTI_NAMESPACE_ENCRYPTED_TYPE,
   updateSuccess,
   type TypeIdTuple,
-} from '../test_helpers/repository.test.common';
-import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
+} from '../mocks/repository.test.common';
+import { savedObjectsExtensionsMock } from '../../extensions/saved_objects_extensions.mock';
 
 describe('SavedObjectsRepository Encryption Extension', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;

@@ -21,7 +21,7 @@ import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SavedObjectsSerializer } from '../../../base';
 import { LEGACY_URL_ALIAS_TYPE } from '../../../base';
-import { kibanaMigratorMock } from '../../test_helpers';
+import { kibanaMigratorMock } from '../../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import {
@@ -30,7 +30,7 @@ import {
   createRegistry,
   createDocumentMigrator,
   createSpySerializer,
-} from '../../test_helpers/repository.test.common';
+} from '../../mocks/repository.test.common';
 
 describe('#deleteByNamespace', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;

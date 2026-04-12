@@ -21,8 +21,8 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { SavedObjectsRepository } from '../repository';
-import { kibanaMigratorMock } from '../../test_helpers';
-import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
+import { kibanaMigratorMock } from '../../mocks';
+import { savedObjectsExtensionsMock } from '../../../extensions/saved_objects_extensions.mock';
 import {
   HIDDEN_TYPE,
   mappings,
@@ -32,7 +32,7 @@ import {
   generateIndexPatternSearchResults,
   CUSTOM_INDEX_TYPE,
   MULTI_NAMESPACE_CUSTOM_INDEX_TYPE,
-} from '../../test_helpers/repository.test.common';
+} from '../../mocks/repository.test.common';
 import { mergeUserQueryWithNamespacesBool } from './search';
 import type { NamespacesBoolFilter } from '../search/search_dsl/query_params';
 import type { estypes } from '@elastic/elasticsearch';

@@ -31,8 +31,8 @@ import {
   setupRedactPassthrough,
   authMap,
   setupAuthorizeFunc,
-} from '../../../test_helpers/repository.test.common';
-import { savedObjectsExtensionsMock } from '../../../mocks/saved_objects_extensions.mock';
+} from '../../../mocks/repository.test.common';
+import { savedObjectsExtensionsMock } from '../../../../extensions/saved_objects_extensions.mock';
 
 type SetupParams = Partial<
   Pick<UpdateObjectsSpacesParams, 'objects' | 'spacesToAdd' | 'spacesToRemove' | 'options'>

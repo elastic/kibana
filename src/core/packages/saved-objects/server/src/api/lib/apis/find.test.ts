@@ -18,7 +18,7 @@ import type { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server
 import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SavedObjectsSerializer } from '../../../base';
-import { kibanaMigratorMock } from '../../test_helpers';
+import { kibanaMigratorMock } from '../../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import * as esKuery from '@kbn/es-query';
 
@@ -34,7 +34,7 @@ import {
   createSpySerializer,
   generateIndexPatternSearchResults,
   findSuccess,
-} from '../../test_helpers/repository.test.common';
+} from '../../mocks/repository.test.common';
 
 const { nodeTypes } = esKuery;
 

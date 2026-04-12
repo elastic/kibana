@@ -13,8 +13,8 @@ import {
   rawDocExistsInNamespaceMock,
 } from './get.isolated.test.mocks';
 import type { SavedObject, CheckAuthorizationResult } from '../../../..';
-import type { ApiExecutionContextMock } from '../../test_helpers';
-import { apiContextMock } from '../../test_helpers';
+import type { ApiExecutionContextMock } from '../../mocks';
+import { apiContextMock } from '../../mocks';
 import { performGet } from './get';
 
 const createSavedObject = (id = 'foo'): SavedObject => {

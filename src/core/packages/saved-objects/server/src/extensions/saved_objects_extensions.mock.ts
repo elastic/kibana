@@ -12,7 +12,7 @@ import type {
   ISavedObjectsSecurityExtension,
   ISavedObjectsSpacesExtension,
   SavedObjectsExtensions,
-} from '../../..';
+} from '../..';
 import { lazyObject } from '@kbn/lazy-object';
 
 const createEncryptionExtension = (): jest.Mocked<ISavedObjectsEncryptionExtension> =>

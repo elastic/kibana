@@ -10,7 +10,7 @@
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { type LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../../../base';
 import type { SavedObjectsPointInTimeFinderClient } from '@kbn/core-saved-objects-api-server';
-import { savedObjectsPointInTimeFinderMock } from '../../../mocks/point_in_time_finder.mock';
+import { savedObjectsPointInTimeFinderMock } from '../../point_in_time_finder.mock';
 import type { CreatePointInTimeFinderFn, PointInTimeFinder } from '../../point_in_time_finder';
 import { findLegacyUrlAliases } from './find_legacy_url_aliases';
 

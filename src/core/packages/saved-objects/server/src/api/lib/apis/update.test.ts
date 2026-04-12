@@ -23,8 +23,8 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { SavedObjectsSerializer } from '../../../base';
 import { encodeHitVersion } from '../../../base';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { kibanaMigratorMock } from '../../test_helpers';
-import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
+import { kibanaMigratorMock } from '../../mocks';
+import { savedObjectsExtensionsMock } from '../../../extensions/saved_objects_extensions.mock';
 import type { ISavedObjectsSecurityExtension, SavedObjectsRawDocSource } from '../../../..';
 import {
   NAMESPACE_AGNOSTIC_TYPE,
@@ -46,7 +46,7 @@ import {
   mockTimestampFieldsWithCreated,
   ACCESS_CONTROL_TYPE,
   MULTI_NAMESPACE_TYPE,
-} from '../../test_helpers/repository.test.common';
+} from '../../mocks/repository.test.common';
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 
 describe('#update', () => {

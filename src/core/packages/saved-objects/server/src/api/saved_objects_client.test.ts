@@ -29,8 +29,8 @@ import type {
   SavedObjectsSearchOptions,
 } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsClient } from './saved_objects_client';
-import { savedObjectsRepositoryMock } from './mocks/repository.mock';
-import { savedObjectsPointInTimeFinderMock } from './mocks/point_in_time_finder.mock';
+import { savedObjectsRepositoryMock } from './lib/repository.mock';
+import { savedObjectsPointInTimeFinderMock } from './lib/point_in_time_finder.mock';
 
 describe('SavedObjectsClient', () => {
   let mockRepository: ReturnType<typeof savedObjectsRepositoryMock.create>;

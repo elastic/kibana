@@ -8,10 +8,10 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { SavedObjectsType } from '../../..';
-import type { IKibanaMigrator, KibanaMigratorStatus } from '../../base';
-import { buildActiveMappings, buildTypesMappings } from '..';
-import { createDocumentMigratorMock } from '../../../mocks';
+import type { SavedObjectsType } from '../..';
+import type { IKibanaMigrator, KibanaMigratorStatus } from '../base';
+import { buildActiveMappings, buildTypesMappings } from '.';
+import { createDocumentMigratorMock } from '../../mocks';
 import { lazyObject } from '@kbn/lazy-object';
 
 const defaultSavedObjectTypes: SavedObjectsType[] = [

@@ -21,7 +21,7 @@ import { serializerMock } from '../../../mocks';
 import type { ApiExecutionContext } from '../lib/apis/types';
 import type { RepositoryHelpersMock } from './api_helpers.mocks';
 import { apiHelperMocks } from './api_helpers.mocks';
-import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
+import { savedObjectsExtensionsMock } from '../../extensions/saved_objects_extensions.mock';
 import type { KibanaMigratorMock } from './migrator.mock';
 import { createMigratorMock } from './migrator.mock';
 
