@@ -383,6 +383,8 @@ export class TaskManagerRunner implements TaskRunner {
           'transaction.type': TASK_MANAGER_RUN_TRANSACTION_TYPE,
           'kibana.task.type': this.taskType,
         },
+        // Make sure that this is a parent transaction (not a child of any other ongoing transaction)
+        root: true,
       },
       async () => {
         const apmTrans = apm.startTransaction(this.taskType, TASK_MANAGER_RUN_TRANSACTION_TYPE, {
@@ -559,7 +561,11 @@ export class TaskManagerRunner implements TaskRunner {
 
     return withActiveSpan(
       'mark-task-as-running',
-      { attributes: { 'transaction.type': TASK_MANAGER_TRANSACTION_TYPE } },
+      {
+        attributes: { 'transaction.type': TASK_MANAGER_TRANSACTION_TYPE },
+        // Make sure that this is a parent transaction (not a child of any other ongoing transaction)
+        root: true,
+      },
       async () => {
         const apmTrans = apm.startTransaction(
           TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,

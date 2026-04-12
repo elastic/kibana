@@ -5,9 +5,9 @@ set -euo pipefail
 # Reads credentials from a file, deletes the file immediately, then makes the API call.
 # This ensures credentials never appear in the calling process's output.
 #
-# When agentBuilder:connectorsEnabled is true, creating a connector automatically:
-# - Creates workflows from the connector spec's agentBuilderWorkflows
-# - Creates Agent Builder tools for workflows tagged 'agent-builder-tool'
+# When agentBuilder:experimentalFeatures is true, creating a connector automatically
+# indexes it into the Semantic Metadata Layer (SML), making its sub-actions
+# discoverable by AI agents.
 
 CONNECTOR_TYPE=""
 CONNECTOR_NAME=""
@@ -172,7 +172,7 @@ if [[ "$HTTP_CODE" -ge 200 && "$HTTP_CODE" -lt 300 ]]; then
     echo ""
     echo "Connector ID: $CONNECTOR_ID"
     echo ""
-    echo "If this connector has agentBuilderWorkflows, workflows and tools were auto-created."
+    echo "The connector's sub-actions are now discoverable by AI agents via the SML."
     echo "Use list_connectors.sh to verify."
   fi
 else
