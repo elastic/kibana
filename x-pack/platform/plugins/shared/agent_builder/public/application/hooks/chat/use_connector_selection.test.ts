@@ -6,6 +6,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
+import { BehaviorSubject } from 'rxjs';
 import { useConnectorSelection } from './use_connector_selection';
 
 jest.mock('../use_kibana', () => ({
@@ -25,12 +26,12 @@ const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseLocalStorage = useLocalStorage as jest.MockedFunction<typeof useLocalStorage>;
 
 describe('useConnectorSelection', () => {
-  let mockSettingsGet: jest.Mock;
+  let defaultConnector$: BehaviorSubject<string | undefined>;
   let localStorageState: { [key: string]: string | undefined };
   let mockSetLocalStorage: jest.Mock;
 
   beforeEach(() => {
-    mockSettingsGet = jest.fn();
+    defaultConnector$ = new BehaviorSubject<string | undefined>(undefined);
     localStorageState = {};
     mockSetLocalStorage = jest.fn((newValue: string) => {
       localStorageState[storageKeys.lastUsedConnector] = newValue;
@@ -47,7 +48,7 @@ describe('useConnectorSelection', () => {
       services: {
         settings: {
           client: {
-            get: mockSettingsGet,
+            get$: jest.fn().mockReturnValue(defaultConnector$),
           },
         },
       },
@@ -60,8 +61,6 @@ describe('useConnectorSelection', () => {
 
   describe('selectedConnector', () => {
     it('should return undefined when no connector is selected and no default is set', () => {
-      mockSettingsGet.mockReturnValue(undefined);
-
       const { result } = renderHook(() => useConnectorSelection());
 
       expect(result.current.selectedConnector).toBeUndefined();
@@ -69,7 +68,6 @@ describe('useConnectorSelection', () => {
     });
 
     it('should return the connector from localStorage when set', () => {
-      mockSettingsGet.mockReturnValue(undefined);
       localStorageState[storageKeys.lastUsedConnector] = 'connector-1';
 
       const { result } = renderHook(() => useConnectorSelection());
@@ -78,7 +76,16 @@ describe('useConnectorSelection', () => {
     });
 
     it('should return defaultConnectorId from settings', () => {
-      mockSettingsGet.mockReturnValue('default-connector');
+      defaultConnector$ = new BehaviorSubject<string | undefined>('default-connector');
+      mockUseKibana.mockReturnValue({
+        services: {
+          settings: {
+            client: {
+              get$: jest.fn().mockReturnValue(defaultConnector$),
+            },
+          },
+        },
+      } as any);
 
       const { result } = renderHook(() => useConnectorSelection());
 
@@ -88,8 +95,6 @@ describe('useConnectorSelection', () => {
 
   describe('selectConnector', () => {
     it('should update localStorage when a connector is selected', () => {
-      mockSettingsGet.mockReturnValue(undefined);
-
       const { result } = renderHook(() => useConnectorSelection());
 
       act(() => {
@@ -101,8 +106,6 @@ describe('useConnectorSelection', () => {
     });
 
     it('should update selected connector when selectConnector is called', () => {
-      mockSettingsGet.mockReturnValue(undefined);
-
       const { result, rerender } = renderHook(() => useConnectorSelection());
 
       act(() => {
@@ -116,8 +119,6 @@ describe('useConnectorSelection', () => {
     });
 
     it('should allow selecting different connectors sequentially', () => {
-      mockSettingsGet.mockReturnValue(undefined);
-
       const { result, rerender } = renderHook(() => useConnectorSelection());
 
       act(() => {
@@ -155,7 +156,16 @@ describe('useConnectorSelection', () => {
     });
 
     it('should maintain selection stability across re-renders', () => {
-      mockSettingsGet.mockReturnValue('default-connector');
+      defaultConnector$ = new BehaviorSubject<string | undefined>('default-connector');
+      mockUseKibana.mockReturnValue({
+        services: {
+          settings: {
+            client: {
+              get$: jest.fn().mockReturnValue(defaultConnector$),
+            },
+          },
+        },
+      } as any);
       localStorageState[storageKeys.lastUsedConnector] = 'connector-2';
 
       const { result, rerender } = renderHook(() => useConnectorSelection());
@@ -172,14 +182,24 @@ describe('useConnectorSelection', () => {
     });
 
     it('should update when default connector changes in settings', () => {
-      mockSettingsGet.mockReturnValue('default-connector-1');
+      defaultConnector$ = new BehaviorSubject<string | undefined>('default-connector-1');
+      mockUseKibana.mockReturnValue({
+        services: {
+          settings: {
+            client: {
+              get$: jest.fn().mockReturnValue(defaultConnector$),
+            },
+          },
+        },
+      } as any);
 
-      const { result, rerender } = renderHook(() => useConnectorSelection());
+      const { result } = renderHook(() => useConnectorSelection());
 
       expect(result.current.defaultConnectorId).toBe('default-connector-1');
 
-      mockSettingsGet.mockReturnValue('default-connector-2');
-      rerender();
+      act(() => {
+        defaultConnector$.next('default-connector-2');
+      });
 
       expect(result.current.defaultConnectorId).toBe('default-connector-2');
     });

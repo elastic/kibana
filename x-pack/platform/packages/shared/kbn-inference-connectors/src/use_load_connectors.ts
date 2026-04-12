@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { UseQueryResult } from '@kbn/react-query';
-import { useQuery } from '@kbn/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import type { IHttpFetchError, HttpSetup } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
@@ -52,6 +52,20 @@ export const useLoadConnectors = ({
   settings,
 }: UseLoadConnectorsProps): UseLoadConnectorsResult => {
   const [soEntryFound, setSoEntryFound] = useState(false);
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const sub = settings.client.getUpdate$().subscribe(({ key }) => {
+      if (
+        key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR ||
+        key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY
+      ) {
+        queryClient.invalidateQueries(QUERY_KEY);
+      }
+    });
+    return () => sub.unsubscribe();
+  }, [settings, queryClient]);
+
   const query = useQuery(
     [...QUERY_KEY, featureId],
     async () => {

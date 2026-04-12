@@ -30,26 +30,26 @@ export interface UseDefaultModelSettingsReturn {
 
 export const useDefaultModelSettings = (): UseDefaultModelSettingsReturn => {
   const { services } = useKibana();
-  const uiSettings = services.uiSettings;
+  const settingsClient = services.settings.client;
   const notifications = services.notifications;
 
   const getSavedState = useCallback((): DefaultModelSettingsState => {
-    const defaultModelId = uiSettings.get<string>(
+    const defaultModelId = settingsClient.get<string>(
       GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
       NO_DEFAULT_MODEL
     );
-    const disallowOtherModels = uiSettings.get<boolean>(
+    const disallowOtherModels = settingsClient.get<boolean>(
       GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
       false
     );
     return { defaultModelId, disallowOtherModels };
-  }, [uiSettings]);
+  }, [settingsClient]);
 
   const [savedState, setSavedState] = useState<DefaultModelSettingsState>(getSavedState);
   const [state, setState] = useState<DefaultModelSettingsState>(getSavedState);
 
   useEffect(() => {
-    const subscription = uiSettings.getUpdate$().subscribe(({ key }) => {
+    const subscription = settingsClient.getUpdate$().subscribe(({ key }) => {
       if (
         key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR ||
         key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY
@@ -59,7 +59,7 @@ export const useDefaultModelSettings = (): UseDefaultModelSettingsReturn => {
       }
     });
     return () => subscription.unsubscribe();
-  }, [uiSettings, getSavedState]);
+  }, [settingsClient, getSavedState]);
 
   const isDirty = useMemo(
     () =>
@@ -81,10 +81,10 @@ export const useDefaultModelSettings = (): UseDefaultModelSettingsReturn => {
   const save = useCallback(async () => {
     try {
       if (state.defaultModelId !== savedState.defaultModelId) {
-        await uiSettings.set(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR, state.defaultModelId);
+        await settingsClient.set(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR, state.defaultModelId);
       }
       if (state.disallowOtherModels !== savedState.disallowOtherModels) {
-        await uiSettings.set(
+        await settingsClient.set(
           GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
           state.disallowOtherModels
         );
@@ -98,7 +98,7 @@ export const useDefaultModelSettings = (): UseDefaultModelSettingsReturn => {
         text: (e as Error)?.message ?? 'Unknown error',
       });
     }
-  }, [state, savedState, uiSettings, getSavedState, notifications]);
+  }, [state, savedState, settingsClient, getSavedState, notifications]);
 
   const reset = useCallback(() => {
     setState(savedState);
