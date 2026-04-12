@@ -46,6 +46,22 @@ function getExpectedDiscoverPluginIds(projectType: string | undefined): string[]
   ];
 }
 
+/**
+ * [rspack-transition] RSPack unified build loads shared chunks (vendors, shared-plugins, etc.)
+ * that inflate totalSize compared to legacy per-plugin bundles, but individual plugin sizes shrink.
+ * Returns separate thresholds until the legacy optimizer is removed.
+ */
+function getBundleSizeLimits(pluginNames: string[]) {
+  const isRspack = pluginNames.includes('kibana');
+  return {
+    isRspack,
+    totalSize: isRspack ? 4.5 * 1024 * 1024 : 3.1 * 1024 * 1024,
+    bundleCount: isRspack ? 30 : 100,
+    discoverSize: isRspack ? 200 * 1024 : 650 * 1024,
+    unifiedSearchSize: isRspack ? 150 * 1024 : 450 * 1024,
+  };
+}
+
 test.describe(
   'Discover App - Performance Metrics & Bundle Analysis',
   { tag: [...tags.deploymentAgnostic, ...tags.performance] },
@@ -93,32 +109,25 @@ test.describe(
 
       // Collect and validate stats
       const stats = perfTracker.collectJsBundleStats(currentUrl);
-      expect(
-        stats.totalSize,
-        `Total bundles size loaded on page should not exceed 3.1 MB`
-      ).toBeLessThan(3.1 * 1024 * 1024);
-      expect(
-        stats.bundleCount,
-        `Total bundle chunks count loaded on page should not exceed 100`
-      ).toBeLessThan(100);
+      const loadedPluginNames = stats.plugins.map((p) => p.name).sort((a, b) => a.localeCompare(b));
+      const limits = getBundleSizeLimits(loadedPluginNames);
+
+      expect(stats.totalSize).toBeLessThan(limits.totalSize);
+      expect(stats.bundleCount).toBeLessThan(limits.bundleCount);
 
       const expectedPlugins = getExpectedDiscoverPluginIds(config.projectType);
-      const loadedPluginNames = stats.plugins.map((p) => p.name).sort((a, b) => a.localeCompare(b));
       const bundleAssertion = evaluateDiscoverBundlePluginAssertion(
         loadedPluginNames,
         expectedPlugins,
         RSPACK_ONLY_BUNDLE_LABELS
       );
       expect(bundleAssertion).toStrictEqual({ ok: true });
-      // Validate individual plugin bundle sizes
-      expect(
-        stats.plugins.find((p) => p.name === 'discover')?.totalSize,
-        `Total 'discover' bundles size should not exceed 650 KB`
-      ).toBeLessThan(650 * 1024);
-      expect(
-        stats.plugins.find((p) => p.name === 'unifiedSearch')?.totalSize,
-        `Total 'unifiedSearch' bundles size should not exceed 450 KB`
-      ).toBeLessThan(450 * 1024);
+      expect(stats.plugins.find((p) => p.name === 'discover')?.totalSize).toBeLessThan(
+        limits.discoverSize
+      );
+      expect(stats.plugins.find((p) => p.name === 'unifiedSearch')?.totalSize).toBeLessThan(
+        limits.unifiedSearchSize
+      );
     });
 
     test('measures Performance Metrics before and after Discover load', async ({

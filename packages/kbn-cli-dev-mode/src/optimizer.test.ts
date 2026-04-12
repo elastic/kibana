@@ -102,6 +102,7 @@ function setup(options: Options = defaultOptions) {
 const subscriptions: Rx.Subscription[] = [];
 
 expect.addSnapshotSerializer(createReplaceSerializer(/\[\d\d:\d\d:\d\d\.\d\d\d\]/, '[timestamp]'));
+expect.addSnapshotSerializer(createReplaceSerializer(/\x1b\[[0-9;]*m/g, ''));
 
 afterEach(() => {
   for (const sub of subscriptions) {
