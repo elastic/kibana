@@ -1,5 +1,5 @@
 {
-  "sha1": "cf010439c83db50692933ba6098b3391002b9d71",
+  "sha1": "4373ad17b8b42f327a1acdb765f0632c780fb59a",
   "tests": [
     {
       "id": "71242d88739937b-70753e6cedbcd4d",
@@ -797,6 +797,28 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
         "line": 300,
+        "column": 14
+      }
+    },
+    {
+      "id": "d324c688bbf2d2c-a83e03e8b613d0b",
+      "title": "Traces in Discover - Explore from SLO SLO Details - \"Traces in Discover\" from SLI chart opens traces experience",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_slo.spec.ts",
+        "line": 82,
         "column": 14
       }
     },

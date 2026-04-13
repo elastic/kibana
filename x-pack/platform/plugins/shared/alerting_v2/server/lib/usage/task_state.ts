@@ -34,7 +34,6 @@ const stateSchemaV1 = schema.object({
   ),
   count_by_schedule: schema.maybe(schema.arrayOf(nameValuePairSchema)),
   count_by_lookback: schema.maybe(schema.arrayOf(nameValuePairSchema)),
-  count_with_query_condition: schema.maybe(schema.number()),
   count_with_recovery_policy: schema.maybe(schema.number()),
   count_by_recovery_policy_type: schema.maybe(
     schema.object({
@@ -42,7 +41,6 @@ const stateSchemaV1 = schema.object({
       no_breach: schema.maybe(schema.number()),
     })
   ),
-  count_with_recovery_query_condition: schema.maybe(schema.number()),
   avg_pending_count: schema.maybe(schema.nullable(schema.number())),
   avg_recovering_count: schema.maybe(schema.nullable(schema.number())),
   count_by_pending_timeframe: schema.maybe(schema.arrayOf(nameValuePairSchema)),
@@ -117,10 +115,8 @@ export const stateSchemaByVersion = {
       count_by_kind: state.count_by_kind ?? undefined,
       count_by_schedule: state.count_by_schedule ?? undefined,
       count_by_lookback: state.count_by_lookback ?? undefined,
-      count_with_query_condition: state.count_with_query_condition ?? undefined,
       count_with_recovery_policy: state.count_with_recovery_policy ?? undefined,
       count_by_recovery_policy_type: state.count_by_recovery_policy_type ?? undefined,
-      count_with_recovery_query_condition: state.count_with_recovery_query_condition ?? undefined,
       avg_pending_count: state.avg_pending_count ?? undefined,
       avg_recovering_count: state.avg_recovering_count ?? undefined,
       count_by_pending_timeframe: state.count_by_pending_timeframe ?? undefined,
