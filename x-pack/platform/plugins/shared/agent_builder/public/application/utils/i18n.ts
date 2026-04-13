@@ -12,6 +12,18 @@ export const labels = {
     optional: i18n.translate('xpack.agentBuilder.common.optional', {
       defaultMessage: 'Optional',
     }),
+    markdownViewModeLegend: i18n.translate('xpack.agentBuilder.common.markdownViewModeLegend', {
+      defaultMessage: 'Markdown view mode',
+    }),
+    markdownViewRenderedLabel: i18n.translate(
+      'xpack.agentBuilder.common.markdownViewRenderedLabel',
+      {
+        defaultMessage: 'Rendered',
+      }
+    ),
+    markdownViewRawLabel: i18n.translate('xpack.agentBuilder.common.markdownViewRawLabel', {
+      defaultMessage: 'Raw',
+    }),
   },
   conversations: {
     title: i18n.translate('xpack.agentBuilder.conversations.title', {
@@ -490,6 +502,11 @@ export const labels = {
       ),
     },
   },
+  byAuthor: (author: string) =>
+    i18n.translate('xpack.agentBuilder.byAuthor', {
+      defaultMessage: 'By {author}',
+      values: { author },
+    }),
   skills: {
     title: i18n.translate('xpack.agentBuilder.skills.title', { defaultMessage: 'Skills' }),
     newSkillButton: i18n.translate('xpack.agentBuilder.skills.newSkillButton', {
@@ -797,12 +814,6 @@ export const labels = {
         defaultMessage: 'Search available skills',
       }
     ),
-    availableSkillsSummary: (showing: number, total: number) =>
-      i18n.translate('xpack.agentBuilder.agentSkills.availableSkillsSummary', {
-        defaultMessage:
-          'Showing {showing} of {total} {total, plural, one {Available skill} other {Available skills}}',
-        values: { showing, total },
-      }),
     addButtonLabel: i18n.translate('xpack.agentBuilder.agentSkills.addButtonLabel', {
       defaultMessage: 'Add',
     }),
@@ -887,24 +898,6 @@ export const labels = {
       'xpack.agentBuilder.agentSkills.skillDetailInstructionsLabel',
       {
         defaultMessage: 'Instructions',
-      }
-    ),
-    instructionsViewModeLegend: i18n.translate(
-      'xpack.agentBuilder.agentSkills.instructionsViewModeLegend',
-      {
-        defaultMessage: 'Instructions view mode',
-      }
-    ),
-    instructionsViewRenderedLabel: i18n.translate(
-      'xpack.agentBuilder.agentSkills.instructionsViewRenderedLabel',
-      {
-        defaultMessage: 'Rendered',
-      }
-    ),
-    instructionsViewRawLabel: i18n.translate(
-      'xpack.agentBuilder.agentSkills.instructionsViewRawLabel',
-      {
-        defaultMessage: 'Raw',
       }
     ),
     noSkillSelectedMessage: i18n.translate(
@@ -1090,12 +1083,6 @@ export const labels = {
         defaultMessage: 'Search available plugins',
       }
     ),
-    availablePluginsSummary: (showing: number, total: number) =>
-      i18n.translate('xpack.agentBuilder.agentPlugins.availablePluginsSummary', {
-        defaultMessage:
-          'Showing {showing} of {total} {total, plural, one {Available plugin} other {Available plugins}}',
-        values: { showing, total },
-      }),
     noAvailablePluginsMatchMessage: i18n.translate(
       'xpack.agentBuilder.agentPlugins.noAvailablePluginsMatchMessage',
       {
@@ -1114,8 +1101,14 @@ export const labels = {
         values: { source },
       }),
     pluginDetailIdLabel: i18n.translate('xpack.agentBuilder.agentPlugins.pluginDetailIdLabel', {
-      defaultMessage: 'ID',
+      defaultMessage: 'Plugin ID',
     }),
+    pluginDetailIdCopyLabel: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.pluginDetailIdCopyLabel',
+      {
+        defaultMessage: 'Copy plugin ID',
+      }
+    ),
     pluginDetailNameLabel: i18n.translate('xpack.agentBuilder.agentPlugins.pluginDetailNameLabel', {
       defaultMessage: 'Name',
     }),
@@ -1128,7 +1121,7 @@ export const labels = {
     pluginDetailSkillsLabel: i18n.translate(
       'xpack.agentBuilder.agentPlugins.pluginDetailSkillsLabel',
       {
-        defaultMessage: 'Skills',
+        defaultMessage: 'Skills included',
       }
     ),
     pluginDetailAuthorLabel: i18n.translate(
@@ -1141,6 +1134,12 @@ export const labels = {
       'xpack.agentBuilder.agentPlugins.pluginDetailSourceLabel',
       {
         defaultMessage: 'Source',
+      }
+    ),
+    pluginDetailInstructionsLabel: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.pluginDetailInstructionsLabel',
+      {
+        defaultMessage: 'Instructions',
       }
     ),
     installPluginFlyoutTitle: i18n.translate(
@@ -1280,11 +1279,6 @@ export const labels = {
         defaultMessage: 'Search available tools',
       }
     ),
-    availableToolsSummary: (showing: number, total: number) =>
-      i18n.translate('xpack.agentBuilder.agentTools.availableToolsSummary', {
-        defaultMessage: 'Showing {showing} of {total} {total, plural, one {Tool} other {Tools}}',
-        values: { showing, total },
-      }),
     noAvailableToolsMatchMessage: i18n.translate(
       'xpack.agentBuilder.agentTools.noAvailableToolsMatchMessage',
       {
