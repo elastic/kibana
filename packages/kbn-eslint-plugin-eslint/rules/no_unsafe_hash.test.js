@@ -57,6 +57,14 @@ ruleTester.run('@kbn/eslint/no_unsafe_hash', rule, {
        hash(myHash);
       `,
     },
+    // valid: sha1 in a file that has an allowlist entry for sha1
+    {
+      code: dedent`
+       import { createHash } from 'crypto';
+       createHash('sha1');
+      `,
+      filename: path.resolve(KIBANA_ROOT, 'packages/kbn-optimizer/src/common/dll_manifest.ts'),
+    },
   ],
 
   invalid: [
