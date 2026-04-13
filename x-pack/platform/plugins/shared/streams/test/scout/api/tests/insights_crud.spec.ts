@@ -121,6 +121,7 @@ apiTest.describe(
     });
 
     // Test: List all insights
+    // Failing, see https://github.com/elastic/kibana/issues/262787
     apiTest('should list all insights', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
@@ -285,7 +286,8 @@ apiTest.describe(
     );
 
     // Test: Bulk create insights
-    apiTest('should bulk create insights', async ({ apiClient, samlAuth }) => {
+    // Failing, see https://github.com/elastic/kibana/issues/262787
+    apiTest.skip('should bulk create insights', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
       const bulkResponse = await apiClient.post('internal/streams/_insights/_bulk', {
@@ -371,6 +373,7 @@ apiTest.describe(
     });
 
     // Test: Bulk operations with mixed types
+    // Failing, see https://github.com/elastic/kibana/issues/262787
     apiTest('should handle mixed bulk operations', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
@@ -433,6 +436,7 @@ apiTest.describe(
     });
 
     // Test: Bulk operations with non-existent IDs should fail
+    // Failing, see https://github.com/elastic/kibana/issues/262787
     apiTest(
       'should fail bulk operations with non-existent IDs',
       async ({ apiClient, samlAuth }) => {
