@@ -301,7 +301,12 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
   if (flatten) {
     handleFlattenedOutput(filteredModulesWithExcludedConfigs, flagsReader, log);
   } else {
-    handleNonFlattenedOutput(filteredModulesWithExcludedConfigs, flagsReader, log, selectiveTesting);
+    handleNonFlattenedOutput(
+      filteredModulesWithExcludedConfigs,
+      flagsReader,
+      log,
+      selectiveTesting
+    );
   }
 };
 
