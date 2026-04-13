@@ -92,11 +92,7 @@ if is_pr; then
   if is_pr_with_label "ci:security-genai-run-evals-local-prompts"; then
     export IS_SECURITY_AI_PROMPT_TEST=true
   fi
-
-  # These can be removed once we're not supporting Jenkins and Buildkite at the same time
-  # These are primarily used by github checks reporter and can be configured via /github_checks_api.json
-  export ghprbGhRepository="elastic/kibana"
-  export ghprbActualCommit="$BUILDKITE_COMMIT"
+  
   export BUILD_URL="$BUILDKITE_BUILD_URL"
 
   set_git_merge_base
@@ -142,7 +138,7 @@ export TEST_GROUP_TYPE_FUNCTIONAL="Functional Tests"
 # tells the gh command what our default repo is
 export GH_REPO=github.com/elastic/kibana
 
-if [[ "${TEST_ENABLE_FIPS_VERSION:-}" == "140-2" ]] || [[ "${TEST_ENABLE_FIPS_VERSION:-}" == "140-3" ]] || is_pr_with_label "ci:enable-fips-140-2-agent" || is_pr_with_label "ci:enable-fips-140-3-agent"; then
+if should_enable_fips; then
   ES_SECURITY_ENABLED=true
   export ES_SECURITY_ENABLED
   # used by FIPS agents to link FIPS OpenSSL modules

@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import * as i18n from './translations';
 
 export const FieldType = {
   INPUT_TEXT: 'INPUT_TEXT',
@@ -13,6 +14,8 @@ export const FieldType = {
   SELECT_BASIC: 'SELECT_BASIC',
   TEXTAREA: 'TEXTAREA',
   DATE_PICKER: 'DATE_PICKER',
+  CHECKBOX_GROUP: 'CHECKBOX_GROUP',
+  RADIO_GROUP: 'RADIO_GROUP',
 } as const;
 
 export type FieldType = (typeof FieldType)[keyof typeof FieldType];
@@ -75,10 +78,7 @@ const BaseFieldSchema = z.object({
   validation: ValidationSchema.optional(),
   metadata: z
     .object({
-      default: z.preprocess(
-        (val) => (val instanceof Date ? val.toISOString() : val),
-        z.string().optional()
-      ),
+      default: z.union([z.string(), z.number(), z.array(z.string())]).optional(),
     })
     .catchall(z.unknown())
     .optional(),
@@ -134,6 +134,61 @@ export const DatePickerFieldSchema = BaseFieldSchema.extend({
     .optional(),
 });
 
+const uniqueStrings = (arr: string[]) => new Set(arr).size === arr.length;
+
+export const CheckboxGroupFieldSchema = BaseFieldSchema.extend({
+  control: z.literal(FieldType.CHECKBOX_GROUP),
+  metadata: z
+    .object({
+      options: z
+        .array(z.string())
+        .max(30, { message: i18n.FIELD_OPTIONS_MAX_ITEMS(30) })
+        .refine(uniqueStrings, { message: i18n.FIELD_OPTIONS_MUST_BE_UNIQUE }),
+      default: z
+        .array(z.string())
+        .refine(uniqueStrings, { message: i18n.FIELD_DEFAULT_VALUES_MUST_BE_UNIQUE })
+        .optional(),
+    })
+    .catchall(z.unknown())
+    .superRefine((meta, ctx) => {
+      if (meta.default === undefined) return;
+      const invalidValues = (meta.default as string[]).filter(
+        (v) => !(meta.options as string[]).includes(v)
+      );
+      if (invalidValues.length > 0) {
+        ctx.addIssue({
+          code: 'custom',
+          message: i18n.FIELD_DEFAULT_VALUES_NOT_IN_OPTIONS(invalidValues),
+        });
+      }
+    }),
+});
+
+export const RadioGroupFieldSchema = BaseFieldSchema.extend({
+  control: z.literal(FieldType.RADIO_GROUP),
+  metadata: z
+    .object({
+      options: z
+        .array(z.string())
+        .min(2, { message: i18n.FIELD_OPTIONS_MIN_ITEMS(2) })
+        .max(20, { message: i18n.FIELD_OPTIONS_MAX_ITEMS(20) })
+        .refine(uniqueStrings, { message: i18n.FIELD_OPTIONS_MUST_BE_UNIQUE }),
+      default: z.string().optional(),
+    })
+    .catchall(z.unknown())
+    .superRefine((meta, ctx) => {
+      if (
+        meta.default !== undefined &&
+        !(meta.options as string[]).includes(meta.default as string)
+      ) {
+        ctx.addIssue({
+          code: 'custom',
+          message: i18n.FIELD_DEFAULT_NOT_IN_OPTIONS(meta.default as string),
+        });
+      }
+    }),
+});
+
 /**
  * This can be used to parse `fields` section in the YAML `definition` of the template.
  */
@@ -143,4 +198,6 @@ export const FieldSchema = z.discriminatedUnion('control', [
   SelectBasicFieldSchema,
   TextareaFieldSchema,
   DatePickerFieldSchema,
+  CheckboxGroupFieldSchema,
+  RadioGroupFieldSchema,
 ]);

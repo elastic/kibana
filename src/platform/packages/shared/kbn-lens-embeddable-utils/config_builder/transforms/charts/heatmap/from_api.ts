@@ -24,7 +24,7 @@ import { DEFAULT_LAYER_ID } from '../../../constants';
 import { legendSizeCompat } from '../legend_sizes';
 import { getSharedChartAPIToLensState, stripUndefined } from '../utils';
 import type { HeatmapState } from '../../../schema';
-import { fromColorByValueAPIToLensState } from '../../coloring';
+import { fromColorByValueAPIToLensState, isAutoColor } from '../../coloring';
 import {
   addLayerColumn,
   buildDatasourceStates,
@@ -48,7 +48,10 @@ function getAccessorName(type: 'x' | 'y' | 'value') {
 function buildVisualizationState(config: HeatmapState): HeatmapVisualizationState {
   const layer = config;
   const valueAccessor = getAccessorName('value');
-  const basePalette = layer.metric.color && fromColorByValueAPIToLensState(layer.metric.color);
+  const basePalette =
+    layer.metric.color && !isAutoColor(layer.metric.color)
+      ? fromColorByValueAPIToLensState(layer.metric.color)
+      : undefined;
   const xAxisLabelRotation = axisLabelOrientationCompat.toState(layer.axes?.x?.labels?.orientation);
 
   return {
@@ -74,9 +77,9 @@ function buildVisualizationState(config: HeatmapState): HeatmapVisualizationStat
       }),
     },
     legend: {
-      isVisible: layer.legend?.visible ?? true,
-      position: layer.legend?.position ?? 'right',
+      isVisible: layer.legend?.visibility !== 'hidden',
       type: 'heatmap_legend',
+      position: 'right',
       ...stripUndefined<HeatmapLegendConfigResult>({
         maxLines: layer.legend?.truncate_after_lines,
         legendSize: legendSizeCompat.toState(layer.legend?.size),
@@ -140,8 +143,7 @@ type HeatmapAttributesWithoutFiltersAndQuery = Omit<HeatmapAttributes, 'state'> 
 };
 
 export function fromAPItoLensState(config: HeatmapState): HeatmapAttributesWithoutFiltersAndQuery {
-  const _buildDataLayer = (cfg: unknown, i: number) =>
-    buildFormBasedLayer(cfg as HeatmapStateNoESQL);
+  const _buildDataLayer = (cfg: unknown) => buildFormBasedLayer(cfg as HeatmapStateNoESQL);
 
   const { layers, usedDataviews } = buildDatasourceStates(config, _buildDataLayer, getValueColumns);
 
