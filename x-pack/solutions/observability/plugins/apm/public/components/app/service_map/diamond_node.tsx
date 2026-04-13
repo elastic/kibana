@@ -171,6 +171,7 @@ export const DiamondNode = memo(
           <Handle type="target" position={targetPosition ?? Position.Left} css={handleStyles} />
           {badge}
           <div
+            data-test-subj="serviceMapNodeDiamondHit"
             css={diamondStyles}
             role="button"
             tabIndex={0}
