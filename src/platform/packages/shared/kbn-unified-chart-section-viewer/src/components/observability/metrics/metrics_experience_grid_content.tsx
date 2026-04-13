@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import {
@@ -18,7 +18,7 @@ import {
   useEuiTheme,
   type EuiFlexGridProps,
 } from '@elastic/eui';
-import type { ParsedMetricItem, UnifiedMetricsGridProps } from '../../../types';
+import type { Dimension, ParsedMetricItem, UnifiedMetricsGridProps } from '../../../types';
 import { getEsqlQuery } from './utils/get_esql_query';
 import { PAGE_SIZE } from '../../../common/constants';
 import { isLegacyHistogram } from '../../../common/utils/legacy_histogram';
@@ -38,11 +38,13 @@ export interface MetricsExperienceGridContentProps
   > {
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   metricItems: ParsedMetricItem[];
+  activeDimensions: Dimension[];
   isDiscoverLoading?: boolean;
 }
 
 export const MetricsExperienceGridContent = ({
   metricItems,
+  activeDimensions,
   services,
   discoverFetch$,
   fetchParams,
@@ -60,29 +62,7 @@ export const MetricsExperienceGridContent = ({
 
   const whereStatements = useMemo(() => extractWhereCommand(esqlQuery), [esqlQuery]);
 
-  const { searchTerm, currentPage, selectedDimensions, onPageChange } = useMetricsExperienceState();
-
-  // Buffer selectedDimensions so the grid only receives updated dimensions after
-  // the METRICS_INFO query completes. This prevents a race condition where new
-  // dimensions flow to the grid before metricItems have been refreshed.
-  const [bufferedDimensions, setBufferedDimensions] = useState(selectedDimensions);
-  const wasLoadingRef = useRef(isDiscoverLoading);
-
-  useEffect(() => {
-    if (wasLoadingRef.current && !isDiscoverLoading) {
-      // Loading just finished — sync buffered dimensions with the current selection
-      setBufferedDimensions(selectedDimensions);
-    }
-    wasLoadingRef.current = isDiscoverLoading;
-  }, [isDiscoverLoading, selectedDimensions]);
-
-  // Immediately clear buffered dimensions when the user deselects all,
-  // since no METRICS_INFO query fires for an empty selection
-  useEffect(() => {
-    if (selectedDimensions.length === 0) {
-      setBufferedDimensions(selectedDimensions);
-    }
-  }, [selectedDimensions]);
+  const { searchTerm, currentPage, onPageChange } = useMetricsExperienceState();
 
   const {
     currentPageItems: currentPageFields = [],
@@ -139,7 +119,7 @@ export const MetricsExperienceGridContent = ({
         {isDiscoverLoading && <MetricsGridLoadingProgress />}
         <MetricsGrid
           columns={columns}
-          dimensions={bufferedDimensions}
+          dimensions={activeDimensions}
           services={services}
           metricItems={currentPageFields}
           onBrushEnd={onBrushEnd}
