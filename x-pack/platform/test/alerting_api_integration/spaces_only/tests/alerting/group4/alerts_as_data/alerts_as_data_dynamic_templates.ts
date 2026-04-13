@@ -32,6 +32,10 @@ export default function createAlertsAsDataDynamicTemplatesTest({ getService }: F
   const alertsAsDataIndex =
     '.internal.alerts-observability.test.alerts.dynamic.templates.alerts-default-000001';
 
+  /** Matches `getIndexTemplateAndPattern` for context `observability.test.alerts.dynamic.templates`. */
+  const alertsIndexTemplateName =
+    '.alerts-observability.test.alerts.dynamic.templates.alerts-default-index-template';
+
   describe('dynamic templates', function () {
     this.tags('skipFIPS');
     describe('alerts as data fields limit', function () {
@@ -45,6 +49,11 @@ export default function createAlertsAsDataDynamicTemplatesTest({ getService }: F
       });
 
       it(`should add the dynamic fields`, async () => {
+        // Fills mappings to the default total_fields limit, then adds a new mapped field. Kibana
+        // auto-increases index.mapping.total_fields.limit on the backing index and composable
+        // index template. That path must not forward ES GET-only template metadata (e.g.
+        // created_date) to indices.putIndexTemplate or the update fails with
+        // invalid_index_template_exception and the new field is never mapped.
         // First run doesn't add the dynamic fields
         const createdRule = await supertestWithoutAuth
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
@@ -136,6 +145,34 @@ export default function createAlertsAsDataDynamicTemplatesTest({ getService }: F
 
         // new dynamic field has been added
         expect(dynamicField).to.eql('keyword');
+
+        await retry.try(async () => {
+          const { index_templates: indexTemplates } = await es.indices.getIndexTemplate({
+            name: alertsIndexTemplateName,
+          });
+          expect(indexTemplates.length).to.eql(1);
+          const templateLimit = parseInt(
+            String(
+              get(
+                indexTemplates[0].index_template,
+                'template.settings.index.mapping.total_fields.limit'
+              )
+            ),
+            10
+          );
+          expect(templateLimit).to.be.greaterThan(TOTAL_FIELDS_LIMIT);
+        });
+
+        await retry.try(async () => {
+          const indexSettingsResp = await es.indices.getSettings({ index: alertsAsDataIndex });
+          const indexLimit = parseInt(
+            String(
+              get(indexSettingsResp[alertsAsDataIndex], 'settings.index.mapping.total_fields.limit')
+            ),
+            10
+          );
+          expect(indexLimit).to.be.greaterThan(TOTAL_FIELDS_LIMIT);
+        });
       });
     });
 
