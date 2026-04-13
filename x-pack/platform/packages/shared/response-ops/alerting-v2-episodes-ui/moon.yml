@@ -35,6 +35,7 @@ dependsOn:
   - '@kbn/alerting-v2-constants'
   - '@kbn/es-types'
   - '@kbn/search-types'
+  - '@kbn/unified-data-table'
 tags:
   - shared-browser
   - package
