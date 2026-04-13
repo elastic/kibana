@@ -19,6 +19,7 @@ import type {
   ESQLAstQueryExpression,
 } from '@elastic/esql/types';
 import { EDITOR_MARKER } from '../constants';
+import { TRAILING_COMMA_REGEX } from './shared';
 
 export function isMarkerNode(node: ESQLAstItem | undefined): boolean {
   if (Array.isArray(node)) {
@@ -315,7 +316,6 @@ export function correctQuerySyntax(_query: string) {
   return query;
 }
 
-const PROMQL_TRAILING_COMMA_REGEX = /,\s*$/;
 const PROMQL_TRAILING_COLON_REGEX = /:\s*$/;
 
 /**
@@ -328,7 +328,7 @@ export function correctPromqlQuerySyntax(input: string): string {
 
   if (
     !query.includes(EDITOR_MARKER) &&
-    (PROMQL_TRAILING_COMMA_REGEX.test(query) || PROMQL_TRAILING_COLON_REGEX.test(query))
+    (TRAILING_COMMA_REGEX.test(query) || PROMQL_TRAILING_COLON_REGEX.test(query))
   ) {
     query += ` ${EDITOR_MARKER}`;
   }

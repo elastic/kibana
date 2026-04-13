@@ -40,6 +40,7 @@ import {
 import { getAllFunctions } from '../../definitions/utils/functions';
 import { FunctionDefinitionTypes } from '../../definitions/types';
 import { getPosition, getCommaAndPipe, rightAfterColumn } from './utils';
+import { TRAILING_COMMA_REGEX } from '../../definitions/utils/shared';
 import { findAstPosition } from '../../definitions/utils/ast';
 import { getAssignmentExpressionRoot } from '../../definitions/utils/expressions';
 import { inOperators, nullCheckOperators } from '../../definitions/all_operators';
@@ -109,7 +110,7 @@ export async function autocomplete(
 
   switch (pos) {
     case 'expression_without_assignment': {
-      const isNewMultipleExpression = /,\s*$/.test(innerText);
+      const isNewMultipleExpression = TRAILING_COMMA_REGEX.test(innerText);
 
       const expressionRoot = isNewMultipleExpression
         ? undefined // we're in a new expression, but there isn't an AST node for it yet
@@ -233,7 +234,7 @@ export async function autocomplete(
 
     case 'grouping_expression_without_assignment': {
       let expressionRoot: ESQLAstItem | undefined;
-      if (!/,\s*$/.test(innerText)) {
+      if (!TRAILING_COMMA_REGEX.test(innerText)) {
         const byNode = command.args[command.args.length - 1] as ESQLCommandOption;
 
         expressionRoot = byNode.args[byNode.args.length - 1];
@@ -392,7 +393,7 @@ function buildCustomFilteringContext(
     return undefined;
   }
 
-  const shouldGetNextArgument = /,\s*$/.test(innerText);
+  const shouldGetNextArgument = TRAILING_COMMA_REGEX.test(innerText);
   const basicContext = buildExpressionFunctionParameterContext(
     foundFunction,
     context,

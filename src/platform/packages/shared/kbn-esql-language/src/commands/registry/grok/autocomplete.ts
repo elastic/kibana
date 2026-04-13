@@ -15,6 +15,7 @@ import type { ISuggestionItem, ICommandContext } from '../types';
 import { buildConstantsDefinitions } from '../../definitions/utils/literals';
 import { ESQL_STRING_TYPES } from '../../definitions/types';
 import { findAutocompleteAstPosition } from '../../../language/shared/parse_for_autocomplete_query';
+import { TRAILING_COMMA_REGEX } from '../../definitions/utils/shared';
 
 export async function autocomplete(
   query: string,
@@ -36,7 +37,7 @@ export async function autocomplete(
   const hasField = commandArgs.length >= 1;
   const hasPatterns = commandArgs.length >= 2;
   const endsWithSpace = /\s$/.test(innerText);
-  const endsWithComma = /,\s*$/.test(innerText);
+  const endsWithComma = TRAILING_COMMA_REGEX.test(innerText);
 
   // No field yet OR still typing field name (no patterns and no trailing space) - suggest field names
   if (!hasField || (hasField && !hasPatterns && !endsWithSpace)) {
