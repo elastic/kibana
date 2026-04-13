@@ -43,10 +43,13 @@ if (!outPath) {
   fs.mkdirSync(path.dirname(resolvedOutPath), { recursive: true });
   fs.writeFileSync(resolvedOutPath, JSON.stringify(Array.from(affectedPackages).sort(), null, 2));
 
-  // TODO: temp override — hardcoded to false to test selective testing on this branch,
-  // which itself touches critical Scout files and would otherwise always bypass selection.
-  void touchedCriticalFiles(changedFiles, CRITICAL_FILES_SCOUT);
-  const criticalTouched = false;
+  // Top-level check: if critical Scout files were touched, the all Scout tests should run.
+  const criticalTouched = touchedCriticalFiles(changedFiles, CRITICAL_FILES_SCOUT);
+  if (criticalTouched) {
+    console.warn(
+      'Critical Scout files changed — selective testing will be skipped (full suite run)'
+    );
+  }
 
   // Output true/false to stdout for the shell script to capture.
   process.stdout.write(criticalTouched ? 'true' : 'false');
