@@ -12,7 +12,12 @@ import {
   AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
 } from '../constants';
 import { PackagePolicyValidationError } from '../errors';
-import type { NewPackagePolicyInput, PackageInfo, RegistryPolicyTemplate } from '../types';
+import type {
+  AgentlessDeploymentReleaseStatus,
+  NewPackagePolicyInput,
+  PackageInfo,
+  RegistryPolicyTemplate,
+} from '../types';
 
 export interface RegistryInputForDeploymentMode {
   type: string;
@@ -180,6 +185,24 @@ export function validateDeploymentModesForInputs(
     }
   });
 }
+
+/**
+ * Returns the agentless-specific release status for a package or integration.
+ * Returns `undefined` if agentless is not enabled for the package/integration.
+ * Defaults to `'beta'` when agentless is enabled but no release field is specified.
+ */
+export const getAgentlessReleaseForPackage = (
+  packageInfo?: Pick<PackageInfo, 'policy_templates'>,
+  integrationToEnable?: string
+): AgentlessDeploymentReleaseStatus | undefined => {
+  const template = integrationToEnable
+    ? packageInfo?.policy_templates?.find(({ name }) => name === integrationToEnable)
+    : packageInfo?.policy_templates?.find((t) => t.deployment_modes?.agentless?.enabled === true);
+
+  if (!template?.deployment_modes?.agentless?.enabled) return undefined;
+
+  return template.deployment_modes.agentless.release ?? 'beta';
+};
 
 /**
  * Derive global data tags for agentless agent policies from package agentless info.
