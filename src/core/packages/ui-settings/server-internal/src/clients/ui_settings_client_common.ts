@@ -106,6 +106,17 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
     changes: Record<string, any>,
     { handleWriteErrors }: { validateKeys?: boolean; handleWriteErrors?: boolean } = {}
   ) {
+    // Await any in-flight getUserProvided() to prevent race condition where
+    // the in-flight read completes after invalidation and repopulates cache with stale data
+    if (this.sharedUserProvidedCache) {
+      const inflight = this.sharedUserProvidedCache.getInflight(this.namespace);
+      if (inflight) {
+        await inflight.catch(() => {
+          // Ignore errors from in-flight request, we'll invalidate regardless
+        });
+      }
+    }
+
     this.cache.del();
 
     // Invalidate shared getUserProvided cache for this namespace

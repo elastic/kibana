@@ -1213,23 +1213,17 @@ describe('ui settings', () => {
     });
 
     describe('in-flight cleanup', () => {
-      it('clears in-flight promises on invalidation', async () => {
+      it('prevents stale data from being cached when setMany runs during getUserProvided', async () => {
         const savedObjectsClient = savedObjectsClientMock.create();
         const sharedCache = new NamespacedCache<Record<string, any>>();
 
-        let resolveFirstCall: (value: any) => void;
-        const firstCallPromise = new Promise((resolve) => {
-          resolveFirstCall = resolve;
+        let resolveGetCall: (value: any) => void;
+        const delayedGetPromise = new Promise((resolve) => {
+          resolveGetCall = resolve;
         });
 
-        let callCount = 0;
-        savedObjectsClient.get.mockImplementation(() => {
-          callCount++;
-          if (callCount === 1) {
-            return firstCallPromise as any;
-          }
-          return Promise.resolve({ attributes: { foo: 'updated' } }) as any;
-        });
+        savedObjectsClient.get.mockReturnValueOnce(delayedGetPromise as any);
+        savedObjectsClient.get.mockReturnValue({ attributes: { foo: 'after-write' } } as any);
         savedObjectsClient.update.mockResolvedValue({} as any);
 
         const uiSettings = new UiSettingsClient({
@@ -1244,16 +1238,18 @@ describe('ui settings', () => {
           sharedUserProvidedCache: sharedCache,
         });
 
-        const inflightCall = uiSettings.getUserProvided();
+        const getUserProvidedCall = uiSettings.getUserProvided();
 
-        await uiSettings.set('foo', 'bar');
+        const setManyPromise = uiSettings.setMany({ foo: 'new-value' });
 
-        const newCallPromise = uiSettings.getUserProvided();
+        resolveGetCall!({ attributes: { foo: 'before-write' } });
 
-        resolveFirstCall!({ attributes: { foo: 'original' } });
+        await Promise.all([getUserProvidedCall, setManyPromise]);
 
-        await Promise.all([inflightCall, newCallPromise]);
+        const result = await uiSettings.getUserProvided(); // cache should be invalidated at this point
 
+        // If stale data was cached, second call would return 'before-write' value and there would be no need to call savedObjectsClient.get again.
+        expect(result.foo).toEqual({ userValue: 'after-write' });
         expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
       });
 
