@@ -20,7 +20,6 @@ export const [getOverlays, setOverlays] = createGetterSetter<CoreStart['overlays
 export const [getIndexPatterns, setIndexPatterns] =
   createGetterSetter<DataViewsContract>('IndexPatterns');
 
-/** Used by ES|QL filter creation so TIMEFIELD_ROUTE can match the Lens/embeddable path. */
 export const [getHttp, setHttp] = createGetterSetter<HttpStart>('Http', false);
 
 export const [getSearchService, setSearchService] =
