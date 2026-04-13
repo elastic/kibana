@@ -7,12 +7,12 @@ For general information about writing evaluation tests, configuration, and usage
 
 ## Evaluation suites
 
-| Suite | Spec | What it measures |
-| --- | --- | --- |
-| **KI feature extraction** | `ki_feature_extraction/ki_feature_extraction.spec.ts` | Can the LLM identify entities, dependencies, and infrastructure from raw log samples? |
-| **KI query generation** | `ki_query_generation/ki_query_generation.spec.ts` | Can the LLM produce valid, hit-producing ES\|QL rules for significant event detection? |
-| **KI feature exclusion** | `ki_feature_exclusion/ki_feature_exclusion.spec.ts` | Does the LLM respect excluded features and avoid regenerating them in follow-up runs? |
-| **KI feature duplication** | `ki_feature_duplication/ki_feature_duplication.spec.ts` | Are KIs stable and semantically unique across repeated extraction runs? |
+| Suite                      | Spec                                                    | What it measures                                                                       |
+| -------------------------- | ------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| **KI feature extraction**  | `ki_feature_extraction/ki_feature_extraction.spec.ts`   | Can the LLM identify entities, dependencies, and infrastructure from raw log samples?  |
+| **KI query generation**    | `ki_query_generation/ki_query_generation.spec.ts`       | Can the LLM produce valid, hit-producing ES\|QL rules for significant event detection? |
+| **KI feature exclusion**   | `ki_feature_exclusion/ki_feature_exclusion.spec.ts`     | Does the LLM respect excluded features and avoid regenerating them in follow-up runs?  |
+| **KI feature duplication** | `ki_feature_duplication/ki_feature_duplication.spec.ts` | Are KIs stable and semantically unique across repeated extraction runs?                |
 
 ## Prerequisites
 
@@ -129,57 +129,63 @@ node scripts/evals run \
 
 ### CLI options
 
-| Flag | Description |
-| --- | --- |
-| `--suite` | Suite ID to run (use `significant-events`) |
-| `--project` | Connector/model project to evaluate against |
-| `--judge` | Connector ID for the LLM judge (use Gemini 3 Pro for consistency) |
-| `--repetitions` | Number of times to repeat each evaluation example (e.g., `3`) |
+| Flag             | Description                                                                                             |
+| ---------------- | ------------------------------------------------------------------------------------------------------- |
+| `--suite`        | Suite ID to run (use `significant-events`)                                                              |
+| `--project`      | Connector/model project to evaluate against                                                             |
+| `--judge`        | Connector ID for the LLM judge (use Gemini 3 Pro for consistency)                                       |
+| `--repetitions`  | Number of times to repeat each evaluation example (e.g., `3`)                                           |
 | `--trace-es-url` | URL of the Elasticsearch cluster where traces are stored (e.g., `https://user:pass@trace-cluster:9200`) |
-| `--dry-run` | Preview the command without executing |
+| `--dry-run`      | Preview the command without executing                                                                   |
 
 ### Environment variables
 
-| Variable | Description | Default |
-| --- | --- | --- |
-| `SIGEVENTS_SNAPSHOT_RUN` | Run ID subfolder in GCS to replay snapshots from | `2026-02-25` |
-| `SIGEVENTS_DATASET` | Dataset(s) to run (comma-separated or `all`) | `all` |
-| `KI_QUERY_GENERATION_KI_FEATURE_SOURCE` | KI feature source for KI query generation (`canonical`, `snapshot`, `both`) | `both` |
-| `GCS_CREDENTIALS` | GCS service account JSON for snapshot access | — |
-| `TRACING_ES_URL` | Elasticsearch URL for trace queries (if traces are in a separate cluster) | Falls back to test cluster |
-| `TRACING_ES_API_KEY` | API key for the trace Elasticsearch cluster | — |
+| Variable                                | Description                                                                 | Default                    |
+| --------------------------------------- | --------------------------------------------------------------------------- | -------------------------- |
+| `SIGEVENTS_SNAPSHOT_RUN`                | Run ID subfolder in GCS to replay snapshots from                            | `2026-02-25`               |
+| `SIGEVENTS_DATASET`                     | Dataset(s) to run (comma-separated or `all`)                                | `all`                      |
+| `KI_QUERY_GENERATION_KI_FEATURE_SOURCE` | KI feature source for KI query generation (`canonical`, `snapshot`, `both`) | `both`                     |
+| `GCS_CREDENTIALS`                       | GCS service account JSON for snapshot access                                | —                          |
+| `TRACING_ES_URL`                        | Elasticsearch URL for trace queries (if traces are in a separate cluster)   | Falls back to test cluster |
+| `TRACING_ES_API_KEY`                    | API key for the trace Elasticsearch cluster                                 | —                          |
 
 ## Collected metrics
 
 ### Deterministic (CODE) evaluators
 
-| Evaluator | Suite | Description |
-| --- | --- | --- |
-| **type_validation** | KI feature extraction | All KI types are valid (`entity`, `infrastructure`, `technology`, `dependency`, `schema`) |
-| **evidence_grounding** | KI feature extraction | Evidence strings are grounded in input documents; `evidence_doc_ids` reference real docs |
-| **ki_feature_count** | KI feature extraction | KI feature count falls within expected bounds |
-| **confidence_bounds** | KI feature extraction | No KI exceeds the maximum confidence threshold |
-| **type_assertions** | KI feature extraction | Required types are present; forbidden types are absent |
-| **ki_query_generation_code_evaluator** | KI query generation | ES\|QL syntax validity and execution hit rate |
-| **ki_feature_duplication** | KI feature duplication | Structural deduplication |
+| Evaluator                              | Suite                  | Description                                                                               |
+| -------------------------------------- | ---------------------- | ----------------------------------------------------------------------------------------- |
+| **type_validation**                    | KI feature extraction  | All KI types are valid (`entity`, `infrastructure`, `technology`, `dependency`, `schema`) |
+| **evidence_coverage**                  | KI feature extraction  | Every KI feature includes at least one evidence string                                    |
+| **evidence_grounding**                 | KI feature extraction  | Evidence strings are grounded in input documents; `evidence_doc_ids` reference real docs  |
+| **ki_feature_count**                   | KI feature extraction  | KI feature count falls within expected bounds                                             |
+| **type_assertions**                    | KI feature extraction  | Required types are present; forbidden types are absent                                    |
+| **filter_coverage**                    | KI feature extraction  | Every entity feature includes a filter condition (when `expect_entity_filters: true`)     |
+| **filter_grounding**                   | KI feature extraction  | Entity filter equality pairs are grounded in input sample documents                       |
+| **ki_query_generation_code_evaluator** | KI query generation    | ES\|QL syntax validity, category/severity compliance, and execution hit rate              |
+| **tool_usage_validation**              | KI query generation    | Validates `get_stream_features` and `add_queries` tool calls were invoked correctly       |
+| **ki_feature_duplication**             | KI feature duplication | Structural deduplication                                                                  |
 
 ### LLM-as-a-judge evaluators
 
-| Evaluator | Suite | Description |
-| --- | --- | --- |
-| **scenario_criteria** | KI feature extraction, KI query generation | Scenario-specific criteria (e.g. "must identify payment service") |
-| **llm_exclude_compliance** | KI feature exclusion | Excluded features are not regenerated in follow-up identification runs |
-| **llm_semantic_uniqueness** | KI feature duplication | Semantic deduplication across KIs |
-| **llm_id_consistency** | KI feature duplication | Same KI ID refers to the same concept across runs |
+| Evaluator                   | Suite                                      | Description                                                                                                     |
+| --------------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| **scenario_criteria**       | KI feature extraction, KI query generation | Scenario-specific criteria (e.g. "must identify payment service")                                               |
+| **confidence_calibration**  | KI feature extraction                      | Confidence values reflect evidence directness — features with indirect evidence should not claim confidence=100 |
+| **Factuality**              | KI feature extraction                      | LLM-judged factual accuracy of extracted features against expected ground truth                                  |
+| **Relevance**               | KI feature extraction                      | LLM-judged relevance of extracted features to the failure domain                                                |
+| **llm_exclude_compliance**  | KI feature exclusion                       | Excluded features don't reappear in follow-up runs; non-excluded features are preserved                         |
+| **llm_semantic_uniqueness** | KI feature duplication                     | Semantic deduplication across KIs                                                                               |
+| **llm_id_consistency**      | KI feature duplication                     | Same KI ID refers to the same concept across runs                                                               |
 
 ### Trace-based evaluators
 
-| Evaluator | Description |
-| --- | --- |
-| **Input Tokens** | Total input tokens consumed per evaluation |
-| **Output Tokens** | Total output tokens generated per evaluation |
+| Evaluator         | Description                                   |
+| ----------------- | --------------------------------------------- |
+| **Input Tokens**  | Total input tokens consumed per evaluation    |
+| **Output Tokens** | Total output tokens generated per evaluation  |
 | **Cached Tokens** | Total cached input tokens used per evaluation |
-| **Latency** | Duration of the `ChatComplete` inference span |
+| **Latency**       | Duration of the `ChatComplete` inference span |
 
 ## Adding a new dataset
 
