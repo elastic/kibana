@@ -46,10 +46,6 @@ export const AlertingV2UsageCollectorSchema: MakeSchemaFrom<AlertingV2Usage> = {
       value: { type: 'long', _meta: { description: 'Number of rules with this lookback.' } },
     },
   },
-  count_with_query_condition: {
-    type: 'long',
-    _meta: { description: 'Number of rules with a query condition.' },
-  },
   count_with_recovery_policy: {
     type: 'long',
     _meta: { description: 'Number of rules with a recovery policy.' },
@@ -63,10 +59,6 @@ export const AlertingV2UsageCollectorSchema: MakeSchemaFrom<AlertingV2Usage> = {
       type: 'long',
       _meta: { description: 'Number of rules with recovery policy type no_breach.' },
     },
-  },
-  count_with_recovery_query_condition: {
-    type: 'long',
-    _meta: { description: 'Number of rules with a recovery query condition.' },
   },
   avg_pending_count: {
     type: 'float',
