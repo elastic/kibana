@@ -12,6 +12,7 @@ export { AzureSharedKeyAuth } from './auth_types/azure_shared_key';
 export * from './auth_types/aws_credentials';
 export * from './auth_types/bearer';
 export * from './auth_types/basic';
+export * from './auth_types/gcp_service_account';
 export * from './auth_types/none';
 export * from './auth_types/oauth';
 export * from './auth_types/oauth_authorization_code';
