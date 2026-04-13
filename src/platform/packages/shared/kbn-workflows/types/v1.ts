@@ -265,10 +265,17 @@ const MAX_BULK_CREATE_WORKFLOWS = 500;
 // plain UUIDs, while rejecting leading/trailing separators, snake case and
 // special characters like spaces, dots, or '@'.
 export const WORKFLOW_ID_PATTERN = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
+export const WORKFLOW_ID_MAX_LENGTH = 255;
+export const WORKFLOW_ID_MIN_LENGTH = 3;
 
 export const CreateWorkflowCommandSchema = z.object({
   yaml: z.string().max(MAX_WORKFLOW_YAML_LENGTH),
-  id: z.string().min(3).max(255).regex(WORKFLOW_ID_PATTERN).optional(),
+  id: z
+    .string()
+    .min(WORKFLOW_ID_MIN_LENGTH)
+    .max(WORKFLOW_ID_MAX_LENGTH)
+    .regex(WORKFLOW_ID_PATTERN)
+    .optional(),
 });
 export type CreateWorkflowCommand = z.infer<typeof CreateWorkflowCommandSchema>;
 

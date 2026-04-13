@@ -14,8 +14,8 @@ describe('isValidWorkflowId', () => {
     expect(isValidWorkflowId('workflow-1')).toBe(true);
   });
 
-  it('should accept IDs with dots, hyphens, and underscores', () => {
-    expect(isValidWorkflowId('my.workflow_v2-beta')).toBe(true);
+  it('should accept IDs with hyphens', () => {
+    expect(isValidWorkflowId('my-workflow-v2-beta')).toBe(true);
   });
 
   it('should accept an ID of exactly 255 characters', () => {

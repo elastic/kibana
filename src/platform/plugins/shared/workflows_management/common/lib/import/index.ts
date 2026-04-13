@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MAX_WORKFLOW_YAML_LENGTH, WORKFLOW_ID_PATTERN } from '@kbn/workflows';
+import {
+  MAX_WORKFLOW_YAML_LENGTH,
+  WORKFLOW_ID_MAX_LENGTH,
+  WORKFLOW_ID_MIN_LENGTH,
+  WORKFLOW_ID_PATTERN,
+} from '@kbn/workflows';
 import { z } from '@kbn/zod';
 
 export const MAX_IMPORT_WORKFLOWS = 500;
@@ -36,7 +41,12 @@ export function isUnsafeWorkflowId(id: string): boolean {
  * characters, and known prototype-pollution keys.
  */
 export function isValidWorkflowId(id: string): boolean {
-  return !isUnsafeWorkflowId(id) && WORKFLOW_ID_PATTERN.test(id);
+  return (
+    !isUnsafeWorkflowId(id) &&
+    id.length >= WORKFLOW_ID_MIN_LENGTH &&
+    id.length <= WORKFLOW_ID_MAX_LENGTH &&
+    WORKFLOW_ID_PATTERN.test(id)
+  );
 }
 
 // ZIP magic bytes: PK (0x50 0x4B)
@@ -59,7 +69,7 @@ export const WORKFLOW_EXPORT_VERSION = '1';
 export { MAX_WORKFLOW_YAML_LENGTH };
 
 export const WorkflowExportEntrySchema = z.object({
-  id: z.string().min(3).max(255).regex(WORKFLOW_ID_PATTERN),
+  id: z.string().min(WORKFLOW_ID_MIN_LENGTH).max(WORKFLOW_ID_MAX_LENGTH).regex(WORKFLOW_ID_PATTERN),
   yaml: z.string().max(MAX_WORKFLOW_YAML_LENGTH),
 });
 
