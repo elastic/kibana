@@ -33,7 +33,6 @@ export function stripCustomIdentifiers(dsl: StreamlangDSL): StreamlangDSL {
   };
 
   return {
-    ...dsl,
-    steps: stripFromSteps(dsl.steps),
+    steps: stripFromSteps(dsl.steps ?? []),
   };
 }
