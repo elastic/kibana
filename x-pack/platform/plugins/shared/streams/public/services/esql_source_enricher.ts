@@ -10,7 +10,6 @@ import type { ESQLSourceResult } from '@kbn/esql-types';
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import type { Streams as StreamsSchema } from '@kbn/streams-schema';
-import { LRUCache } from 'lru-cache';
 import type { StreamsRepositoryClient } from '../api';
 
 export const STREAMS_CACHE_TTL_MS = 60_000;
@@ -32,18 +31,36 @@ export function createStreamsSourceEnricher(
   application: Promise<Pick<ApplicationStart, 'getUrlForApp'>>,
   perf: { now: () => number } = performance
 ): (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]> {
-  const streamsCache = new LRUCache<'streams', Map<string, StreamsSchema.all.Definition>>({
-    max: 1,
-    ttl: STREAMS_CACHE_TTL_MS,
-    perf,
-    fetchMethod: async (_key, _staleValue, { signal }) => {
-      const { streams } = await repositoryClient.fetch('GET /api/streams 2023-10-31', {
-        signal,
-      });
-      return new Map(streams.map((stream) => [stream.name, stream]));
-    },
-  });
+  let cachedStreams: Map<string, StreamsSchema.all.Definition> | undefined;
+  let cacheExpiry = 0;
+  let pendingFetch: Promise<Map<string, StreamsSchema.all.Definition>> | undefined;
 
+  const getStreams = (): Promise<Map<string, StreamsSchema.all.Definition>> => {
+    if (cachedStreams !== undefined && perf.now() < cacheExpiry) {
+      return Promise.resolve(cachedStreams);
+    }
+    if (!pendingFetch) {
+      pendingFetch = repositoryClient
+        .fetch('GET /api/streams 2023-10-31', {
+          signal: null,
+        })
+        .then(({ streams }) => {
+          const map = new Map(streams.map((stream) => [stream.name, stream]));
+          cachedStreams = map;
+          cacheExpiry = perf.now() + STREAMS_CACHE_TTL_MS;
+          pendingFetch = undefined;
+          return map;
+        })
+        .catch((err) => {
+          pendingFetch = undefined;
+          throw err;
+        });
+    }
+    return pendingFetch;
+  };
+
+  // Importing the streams schema here so it stays outside the main code path
+  // but is still loaded lazily
   const streamsSchemaPromise = import('@kbn/streams-schema');
 
   return async (sources: ESQLSourceResult[]): Promise<ESQLSourceResult[]> => {
@@ -51,7 +68,7 @@ export function createStreamsSourceEnricher(
       const app = await application;
       const { Streams } = await streamsSchemaPromise;
 
-      const streams = await streamsCache.forceFetch('streams');
+      const streams = await getStreams();
 
       return sources.map((source) => {
         const stream = streams.get(source.name);

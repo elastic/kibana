@@ -185,9 +185,7 @@ describe('createStreamsSourceEnricher', () => {
 
   describe('caching', () => {
     const makeFakePerf = () => {
-      // Must start above 0: lru-cache stores the start timestamp and guards with `!!s`,
-      // so a start of 0 would cause isStale() to always return false.
-      let now = 1;
+      let now = 0;
       return { now: () => now, tick: (ms: number) => (now += ms) };
     };
 
