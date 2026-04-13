@@ -53,6 +53,23 @@ import {
 } from './url';
 import type { DashboardInternalApi } from '../dashboard_api/types';
 
+const readPassThroughContextFromHistoryState = (state: unknown): SerializableRecord | undefined => {
+  if (!state || typeof state !== 'object' || !('passThroughContext' in state)) {
+    return undefined;
+  }
+  return state.passThroughContext as SerializableRecord;
+};
+
+/**
+ * Locator / `navigateToApp` store dashboard fields on `history.state`, which survives a full
+ * reload. After those fields are merged into the initial dashboard input, return the next
+ * `history.state`: only `passThroughContext` if present, otherwise `undefined`.
+ */
+const historyStateAfterConsumingLocator = (raw: unknown): SerializableRecord | undefined => {
+  const passThrough = readPassThroughContextFromHistoryState(raw);
+  return passThrough !== undefined ? { passThroughContext: passThrough } : undefined;
+};
+
 export interface DashboardAppProps {
   history: History;
   savedDashboardId?: string;
@@ -147,9 +164,12 @@ export function DashboardApp({
     const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
 
     const getInitialInput = () => {
+      const scopedHistory = getScopedHistory();
+      const rawLocationState = scopedHistory.location.state;
+
       let stateFromLocator: Partial<DashboardState> = {};
       try {
-        stateFromLocator = extractDashboardState(getScopedHistory().location.state);
+        stateFromLocator = extractDashboardState(rawLocationState);
       } catch (e) {
         // eslint-disable-next-line no-console
         console.warn('Unable to extract dashboard state from locator. Error: ', e);
@@ -161,6 +181,18 @@ export function DashboardApp({
       } catch (e) {
         // eslint-disable-next-line no-console
         console.warn('Unable to extract dashboard state from URL. Error: ', e);
+      }
+
+      if (Object.keys(stateFromLocator).length > 0) {
+        try {
+          scopedHistory.replace({
+            ...scopedHistory.location,
+            state: historyStateAfterConsumingLocator(rawLocationState),
+          });
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          console.warn('Unable to strip consumed locator state from history. Error: ', e);
+        }
       }
 
       // Override all state with URL + Locator input
@@ -199,8 +231,7 @@ export function DashboardApp({
       },
       getInitialInput,
       getPassThroughContext: () =>
-        (getScopedHistory().location.state as { passThroughContext?: SerializableRecord })
-          ?.passThroughContext,
+        readPassThroughContextFromHistoryState(getScopedHistory().location.state),
       validateLoadedSavedObject: validateOutcome,
       fullScreenMode:
         kbnUrlStateStorage.get<{ fullScreenMode?: boolean }>(DASHBOARD_STATE_STORAGE_KEY)

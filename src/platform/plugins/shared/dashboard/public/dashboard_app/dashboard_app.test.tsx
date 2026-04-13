@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ScopedHistory } from '@kbn/core-application-browser';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
 import React, { useEffect } from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { cleanup as cleanupDom, render, screen, waitFor } from '@testing-library/react';
 
 import type { DashboardRendererProps } from '../dashboard_renderer/dashboard_renderer';
 import { DashboardRenderer } from '../dashboard_renderer/dashboard_renderer';
@@ -18,6 +20,7 @@ import { DashboardTopNav } from '../dashboard_top_nav';
 import { buildMockDashboardApi } from '../mocks';
 import { dataService } from '../services/kibana_services';
 import { DashboardApp } from './dashboard_app';
+import { DashboardMountContext } from './hooks/dashboard_mount_context';
 
 jest.mock('../dashboard_renderer/dashboard_renderer');
 jest.mock('../dashboard_top_nav');
@@ -32,6 +35,14 @@ describe('Dashboard App', () => {
   // this is in the dashboard app for the renderer when provided an expanded panel id
   const expandPanelSpy = jest.spyOn(dashboardApi, 'expandPanel');
 
+  function DefaultDashboardRendererMock({ onApiAvailable }: DashboardRendererProps) {
+    useEffect(() => {
+      onApiAvailable?.(dashboardApi, dashboardInternalApi);
+    }, [onApiAvailable]);
+
+    return <div>Test renderer</div>;
+  }
+
   beforeAll(() => {
     mockHistory = createMemoryHistory();
     historySpy = jest.spyOn(mockHistory, 'replace');
@@ -41,16 +52,7 @@ describe('Dashboard App', () => {
      * and hitting errors that aren't relevant
      */
     (DashboardTopNav as jest.Mock).mockImplementation(() => <>Top nav</>);
-    (DashboardRenderer as jest.Mock).mockImplementation(
-      ({ onApiAvailable }: DashboardRendererProps) => {
-        // we need overwrite the onApiAvailable prop to get access to the dashboard API in this test
-        useEffect(() => {
-          onApiAvailable?.(dashboardApi, dashboardInternalApi);
-        }, [onApiAvailable]);
-
-        return <div>Test renderer</div>;
-      }
-    );
+    (DashboardRenderer as jest.Mock).mockImplementation(DefaultDashboardRendererMock);
   });
 
   beforeEach(() => {
@@ -109,6 +111,135 @@ describe('Dashboard App', () => {
       expect(dashboardApi.expandedPanelId$.getValue()).toBe(undefined);
       expect(historySpy).toHaveBeenCalledTimes(1);
       expect(mockHistory.location.pathname).toBe('/create');
+    });
+  });
+
+  describe('getCreationOptions: locator history.state', () => {
+    const renderWithMountContext = (ui: React.ReactElement, scopedHistory: MemoryHistory) =>
+      render(
+        <DashboardMountContext.Provider
+          value={{
+            restorePreviousUrl: jest.fn(),
+            scopedHistory: () => scopedHistory as unknown as ScopedHistory,
+            onAppLeave: jest.fn(),
+            setHeaderActionMenu: jest.fn(),
+            getListingTabs: () => [],
+          }}
+        >
+          {ui}
+        </DashboardMountContext.Provider>
+      );
+
+    beforeEach(() => {
+      (DashboardRenderer as jest.Mock).mockImplementation(
+        ({ getCreationOptions, onApiAvailable }: DashboardRendererProps) => {
+          useEffect(() => {
+            void (async () => {
+              const options = await getCreationOptions?.();
+              options?.getInitialInput?.();
+              onApiAvailable?.(dashboardApi, dashboardInternalApi);
+            })();
+          }, [getCreationOptions, onApiAvailable]);
+
+          return <div>Test renderer</div>;
+        }
+      );
+    });
+
+    afterEach(() => {
+      cleanupDom();
+      (DashboardRenderer as jest.Mock).mockImplementation(DefaultDashboardRendererMock);
+    });
+
+    it('strips locator dashboard keys from history.state but keeps passThroughContext', async () => {
+      const locatorHistory = createMemoryHistory();
+      locatorHistory.replace({
+        pathname: '/',
+        search: '',
+        hash: '',
+        state: {
+          title: 'From locator',
+          viewMode: 'edit',
+          passThroughContext: { preserved: true } as SerializableRecord,
+        },
+      });
+
+      renderWithMountContext(
+        <DashboardApp
+          redirectTo={jest.fn()}
+          history={locatorHistory}
+          setDashboardAppApi={jest.fn()}
+        />,
+        locatorHistory
+      );
+
+      await waitFor(() => {
+        expect(locatorHistory.location.state).toEqual({
+          passThroughContext: { preserved: true },
+        });
+      });
+    });
+
+    it('clears history.state entirely when locator payload had no passThroughContext', async () => {
+      const locatorHistory = createMemoryHistory();
+      locatorHistory.replace({
+        pathname: '/',
+        search: '',
+        hash: '',
+        state: {
+          title: 'From locator',
+          viewMode: 'edit',
+        },
+      });
+
+      renderWithMountContext(
+        <DashboardApp
+          redirectTo={jest.fn()}
+          history={locatorHistory}
+          setDashboardAppApi={jest.fn()}
+        />,
+        locatorHistory
+      );
+
+      await waitFor(() => {
+        expect(locatorHistory.location.state).toBeUndefined();
+      });
+    });
+
+    it('does not clear history.state when there is no locator dashboard payload', async () => {
+      const historyOnlyPassThrough = createMemoryHistory();
+      historyOnlyPassThrough.replace({
+        pathname: '/',
+        search: '',
+        hash: '',
+        state: { passThroughContext: { only: true } as SerializableRecord },
+      });
+      const replaceSpy = jest.spyOn(historyOnlyPassThrough, 'replace');
+
+      renderWithMountContext(
+        <DashboardApp
+          redirectTo={jest.fn()}
+          history={historyOnlyPassThrough}
+          setDashboardAppApi={jest.fn()}
+        />,
+        historyOnlyPassThrough
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('Test renderer')).toBeInTheDocument();
+      });
+
+      const clearedStateCalls = replaceSpy.mock.calls.filter(
+        (call) =>
+          call[0] &&
+          typeof call[0] === 'object' &&
+          'state' in call[0] &&
+          (call[0] as { state?: unknown }).state === undefined
+      );
+      expect(clearedStateCalls).toHaveLength(0);
+      expect(historyOnlyPassThrough.location.state).toEqual({
+        passThroughContext: { only: true },
+      });
     });
   });
 });
