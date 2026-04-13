@@ -175,7 +175,9 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
         logger.info('Setting up logs.ecs and child streams');
         await setupChildStreams('logs.ecs');
       } catch (error) {
-        logger.error(new Error(`Error occurred while forking streams`, { cause: error }));
+        const wrapped = new Error('Error occurred while forking streams', { cause: error });
+        logger.error(wrapped);
+        throw wrapped;
       }
     },
     generate: ({ range, clients: { streamsClient } }) => {
