@@ -304,28 +304,24 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         },
       },
       {
+        field: 'indexName' as const,
         name: i18n.translate('xpack.securitySolution.siemReadiness.quality.table.column.action', {
           defaultMessage: 'Actions',
         }),
-        width: '15%',
-        render: () => {
-          const dataQualityUrl = `${basePath}/app/security/data_quality`;
-          return (
-            <div style={{ textAlign: 'right' }}>
-              <EuiButtonEmpty
-                size="xs"
-                href={dataQualityUrl}
-                target="_blank"
-                iconType="popout"
-                iconSide="right"
-              >
-                {i18n.translate('xpack.securitySolution.siemReadiness.quality.action.view', {
-                  defaultMessage: 'View Data quality',
-                })}
-              </EuiButtonEmpty>
-            </div>
-          );
-        },
+        actions: [
+          {
+            render: () => {
+              const dataQualityUrl = `${basePath}/app/security/data_quality`;
+              return (
+                <EuiButtonEmpty size="s" href={dataQualityUrl} target="_blank">
+                  {i18n.translate('xpack.securitySolution.siemReadiness.quality.action.view', {
+                    defaultMessage: 'View Data quality',
+                  })}
+                </EuiButtonEmpty>
+              );
+            },
+          },
+        ],
       },
     ],
     [basePath]
@@ -409,7 +405,7 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
               <EuiButtonEmpty
                 iconSide="right"
                 size="s"
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 onClick={handleCreateCase}
                 data-test-subj="createNewCaseButton"
               >

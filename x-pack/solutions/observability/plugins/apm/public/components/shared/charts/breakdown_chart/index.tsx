@@ -23,7 +23,7 @@ import {
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { getVizColorForIndex } from '../../../../../common/viz_colors';
@@ -41,6 +41,7 @@ import { ChartContainer } from '../chart_container';
 import { isTimeseriesEmpty, onBrushEnd } from '../helper/helper';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
+import { sliceApmTimeseriesToValidYRange } from '../utils/split_line_series_for_edge_dots';
 import { getMaxY, getResponseTimeTickFormatter } from '../transaction_charts/helper';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getTimeZone } from '../helper/timezone';
@@ -84,6 +85,11 @@ export function BreakdownChart({
   const annotationColor = euiTheme.colors.accentSecondary;
 
   const isEmpty = isTimeseriesEmpty(timeseries);
+
+  const trimmedTimeseries = useMemo(
+    () => (timeseries?.length ? sliceApmTimeseriesToValidYRange(timeseries) : timeseries),
+    [timeseries]
+  );
 
   const maxY = getMaxY(timeseries);
   const yTickFormat: TickFormatter =
@@ -142,8 +148,8 @@ export function BreakdownChart({
           />
         )}
 
-        {timeseries?.length ? (
-          timeseries.map((serie, index) => {
+        {trimmedTimeseries?.length ? (
+          trimmedTimeseries.map((serie, index) => {
             return (
               <AreaSeries
                 timeZone={timeZone}

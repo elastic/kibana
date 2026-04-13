@@ -10,3 +10,4 @@
 export const WORKFLOWS_EXTENSIONS_EXAMPLE_APP_ID = 'workflowsExtensionsExample';
 export const WORKFLOWS_EXTENSIONS_EXAMPLE_APP_TITLE = 'Workflows Extensions Example';
 export const EMIT_EVENT_ROUTE_PATH = '/api/workflows_extensions_example/emit';
+export const EMIT_LOOP_ROUTE_PATH = '/api/workflows_extensions_example/emit_loop';

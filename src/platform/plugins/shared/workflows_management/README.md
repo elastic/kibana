@@ -26,22 +26,22 @@ To use workflows, you need an **active Enterprise license**. Workflows are not a
 
 ---
 
-## Enable the Feature Flag
+## The Feature Flag
 
-The workflows management UI is developed behind a UI setting (feature flag). By default, the feature is disabled. To enable it for development or testing, add the following to your `kibana.dev.yml`:
+The workflows feature UI setting is enabled by default, it can be disabled via Kibana config with:
 
 ```yml
 uiSettings.overrides:
-  workflows:ui:enabled: true
+  workflows:ui:enabled: false
 ```
 
-If running in Serverless or Cloud dev environments, it may be more practical to adjust these via API:
+If running in Serverless or Cloud dev environments, you can disable it via API:
 
 ```bash
 POST kbn://internal/kibana/settings
 {
    "changes": {
-      "workflows:ui:enabled": true
+      "workflows:ui:enabled": false
    }
 }
 ```

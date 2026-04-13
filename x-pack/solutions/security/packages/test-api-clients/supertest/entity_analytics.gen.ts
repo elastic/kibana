@@ -80,6 +80,7 @@ import type { PreviewRiskScoreRequestBodyInput } from '@kbn/security-solution-pl
 import type { SearchPrivilegesIndicesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/search_indices.gen';
 import type { StartEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/start.gen';
 import type { StopEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/stop.gen';
+import type { SyncWatchlistRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/sync/sync.gen';
 import type {
   UpdatePrivMonUserRequestParamsInput,
   UpdatePrivMonUserRequestBodyInput,
@@ -92,6 +93,7 @@ import type {
   UpdateWatchlistEntitySourceRequestParamsInput,
   UpdateWatchlistEntitySourceRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/data_source/update.gen';
+import type { UploadWatchlistCsvRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/csv_upload/csv_upload.gen';
 import type {
   UpsertEntitiesBulkRequestQueryInput,
   UpsertEntitiesBulkRequestBodyInput,
@@ -551,9 +553,17 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
-  internalUploadAssetCriticalityRecords(kibanaSpace: string = 'default') {
+  /**
+      * Uploads a CSV file to assign asset criticality.
+
+CSV must contain header row with "type" and "criticality_level" columns, in addition to ECS fields used to match entities in the entity store (e.g. "host.name", "user.id", "user.email").
+
+Each row will match up to 10,000 entities.
+
+      */
+  internalUploadAssetCriticalityV2Csv(kibanaSpace: string = 'default') {
     return supertest
-      .post(getRouteUrlForSpace('/internal/asset_criticality/upload_csv', kibanaSpace))
+      .post(getRouteUrlForSpace('/internal/asset_criticality/upload_csv_v2', kibanaSpace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -727,6 +737,18 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
+  syncWatchlist(props: SyncWatchlistProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          replaceParams('/api/entity_analytics/watchlists/{watchlist_id}/sync', props.params),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
   /**
    * Calculates and persists Risk Scores for an entity, returning the calculated risk score.
    */
@@ -807,6 +829,29 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
+      * Uploads a CSV file to add entities to a watchlist. The CSV must contain a header row
+with a "type" column (user, host, service, or generic) and one or more ECS identity
+fields (e.g. "user.name", "host.hostname") used to match entities in the entity store.
+
+Matched entities are added to the watchlist and their `entity.attributes.watchlists`
+field is updated in the entity store.
+
+Each row will match up to 10,000 entities.
+
+      */
+  uploadWatchlistCsv(props: UploadWatchlistCsvProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          replaceParams('/api/entity_analytics/watchlists/{watchlist_id}/csv_upload', props.params),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
       * Update or create many entities in Entity Store.
 If the specified entity already exists, it is updated with the provided values.  If the entity does not exist, a new one is created.
 The creation is asynchronous. The time for a document to be present in the  final index depends on the entity store transform and usually takes more than 1 minute.
@@ -850,11 +895,11 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
 
   return {
     ...securitySolutionApiServiceFactory(supertestService),
-    withUser: (user: { username: string; password: string }) => {
+    withUser: (user: { username: string; password?: string }) => {
       const kbnUrl = formatUrl({ ...config.get('servers.kibana'), auth: false });
 
       return securitySolutionApiServiceFactory(
-        supertest_.agent(kbnUrl).auth(user.username, user.password)
+        supertest_.agent(kbnUrl).auth(user.username, user.password ?? 'changeme')
       );
     },
   };
@@ -970,6 +1015,9 @@ export interface StartEntityEngineProps {
 export interface StopEntityEngineProps {
   params: StopEntityEngineRequestParamsInput;
 }
+export interface SyncWatchlistProps {
+  params: SyncWatchlistRequestParamsInput;
+}
 export interface TriggerRiskScoreCalculationProps {
   body: TriggerRiskScoreCalculationRequestBodyInput;
 }
@@ -988,6 +1036,9 @@ export interface UpdateWatchlistProps {
 export interface UpdateWatchlistEntitySourceProps {
   params: UpdateWatchlistEntitySourceRequestParamsInput;
   body: UpdateWatchlistEntitySourceRequestBodyInput;
+}
+export interface UploadWatchlistCsvProps {
+  params: UploadWatchlistCsvRequestParamsInput;
 }
 export interface UpsertEntitiesBulkProps {
   query: UpsertEntitiesBulkRequestQueryInput;

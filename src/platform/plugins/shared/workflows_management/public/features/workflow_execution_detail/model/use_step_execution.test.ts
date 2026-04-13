@@ -11,11 +11,13 @@ import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ExecutionStatus } from '@kbn/workflows';
+import { useWorkflowsApi } from '@kbn/workflows-ui';
 import { useStepExecution } from './use_step_execution';
-import { useKibana } from '../../../hooks/use_kibana';
 
-jest.mock('../../../hooks/use_kibana');
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+jest.mock('@kbn/workflows-ui', () => ({
+  useWorkflowsApi: jest.fn(),
+}));
+const mockUseWorkflowsApi = useWorkflowsApi as jest.MockedFunction<typeof useWorkflowsApi>;
 
 const createWrapper = (queryClient: QueryClient) => {
   const Wrapper = ({ children }: { children: React.ReactNode }) =>
@@ -24,7 +26,7 @@ const createWrapper = (queryClient: QueryClient) => {
 };
 
 describe('useStepExecution', () => {
-  let mockHttpGet: jest.Mock;
+  let mockGetStepExecution: jest.Mock;
   let queryClient: QueryClient;
 
   const stepResponse = {
@@ -36,9 +38,9 @@ describe('useStepExecution', () => {
 
   beforeEach(() => {
     jest.useFakeTimers();
-    mockHttpGet = jest.fn().mockResolvedValue(stepResponse);
-    mockUseKibana.mockReturnValue({
-      services: { http: { get: mockHttpGet } },
+    mockGetStepExecution = jest.fn().mockResolvedValue(stepResponse);
+    mockUseWorkflowsApi.mockReturnValue({
+      getStepExecution: mockGetStepExecution,
     } as any);
     queryClient = new QueryClient({
       defaultOptions: {
@@ -59,7 +61,7 @@ describe('useStepExecution', () => {
     );
 
     expect(result.current.isFetching).toBe(false);
-    expect(mockHttpGet).not.toHaveBeenCalled();
+    expect(mockGetStepExecution).not.toHaveBeenCalled();
   });
 
   it('should fetch when both IDs are provided', async () => {
@@ -69,7 +71,7 @@ describe('useStepExecution', () => {
     );
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockHttpGet).toHaveBeenCalledWith('/api/workflowExecutions/exec-1/steps/step-doc-1');
+    expect(mockGetStepExecution).toHaveBeenCalledWith('exec-1', 'step-doc-1');
     expect(result.current.data).toEqual(stepResponse);
   });
 
@@ -87,15 +89,14 @@ describe('useStepExecution', () => {
     expect(cachedQuery.state.isInvalidated).toBe(false);
     expect(cachedQuery.state.dataUpdateCount).toBe(1);
 
-    // After initial fetch, no refetch should happen even after the polling interval
-    mockHttpGet.mockClear();
+    mockGetStepExecution.mockClear();
     jest.advanceTimersByTime(10_000);
-    expect(mockHttpGet).not.toHaveBeenCalled();
+    expect(mockGetStepExecution).not.toHaveBeenCalled();
   });
 
   it('should poll when fetched data has non-terminal status', async () => {
     const runningResponse = { ...stepResponse, status: 'running', output: undefined };
-    mockHttpGet.mockResolvedValue(runningResponse);
+    mockGetStepExecution.mockResolvedValue(runningResponse);
 
     const { result } = renderHook(
       () => useStepExecution('exec-1', 'step-doc-1', ExecutionStatus.RUNNING),
@@ -103,17 +104,17 @@ describe('useStepExecution', () => {
     );
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockHttpGet).toHaveBeenCalledTimes(1);
+    expect(mockGetStepExecution).toHaveBeenCalledTimes(1);
 
     // Advance past the 5s refetch interval — should trigger another fetch
-    mockHttpGet.mockClear();
+    mockGetStepExecution.mockClear();
     jest.advanceTimersByTime(5_000);
-    await waitFor(() => expect(mockHttpGet).toHaveBeenCalled());
+    await waitFor(() => expect(mockGetStepExecution).toHaveBeenCalled());
   });
 
   it('should stop polling when fetched data transitions to terminal status', async () => {
     const runningResponse = { ...stepResponse, status: 'running', output: undefined };
-    mockHttpGet.mockResolvedValue(runningResponse);
+    mockGetStepExecution.mockResolvedValue(runningResponse);
 
     const { result } = renderHook(
       () => useStepExecution('exec-1', 'step-doc-1', ExecutionStatus.RUNNING),
@@ -123,22 +124,21 @@ describe('useStepExecution', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     // Now the fetched data returns terminal status
-    mockHttpGet.mockResolvedValue(stepResponse);
-    mockHttpGet.mockClear();
+    mockGetStepExecution.mockResolvedValue(stepResponse);
+    mockGetStepExecution.mockClear();
     jest.advanceTimersByTime(5_000);
-    await waitFor(() => expect(mockHttpGet).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(mockGetStepExecution).toHaveBeenCalledTimes(1));
 
-    // After receiving terminal data, polling should stop
-    mockHttpGet.mockClear();
+    mockGetStepExecution.mockClear();
     jest.advanceTimersByTime(15_000);
-    expect(mockHttpGet).not.toHaveBeenCalled();
+    expect(mockGetStepExecution).not.toHaveBeenCalled();
   });
 
   it('should keep polling when external status is terminal but fetched data is not yet', async () => {
     // Simulates ES eventual consistency: lightweight polling says completed,
     // but the full step document hasn't refreshed yet.
     const runningResponse = { ...stepResponse, status: 'running', output: undefined };
-    mockHttpGet.mockResolvedValue(runningResponse);
+    mockGetStepExecution.mockResolvedValue(runningResponse);
 
     const { result } = renderHook(
       () => useStepExecution('exec-1', 'step-doc-1', ExecutionStatus.COMPLETED),
@@ -148,9 +148,9 @@ describe('useStepExecution', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     // Should still poll because the fetched data is not terminal yet
-    mockHttpGet.mockClear();
+    mockGetStepExecution.mockClear();
     jest.advanceTimersByTime(5_000);
-    await waitFor(() => expect(mockHttpGet).toHaveBeenCalled());
+    await waitFor(() => expect(mockGetStepExecution).toHaveBeenCalled());
   });
 
   it('should use the correct query key structure', async () => {

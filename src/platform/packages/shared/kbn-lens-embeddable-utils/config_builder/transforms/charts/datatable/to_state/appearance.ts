@@ -90,10 +90,10 @@ function buildPagingState(config: DatatableState): Pick<DatatableVisualizationSt
 function buildShowRowNumbers(
   config: DatatableState
 ): Pick<DatatableVisualizationState, 'showRowNumbers'> {
-  if (config.show_row_numbers == null) {
+  if (config.row_numbers == null) {
     return {};
   }
-  return { showRowNumbers: config.show_row_numbers };
+  return { showRowNumbers: config.row_numbers.visible };
 }
 
 export function buildAppearanceState(

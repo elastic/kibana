@@ -7,9 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { globalSetupHook, getSynthtraceClient } from '@kbn/scout';
+import { globalSetupHook } from '@kbn/scout';
+import { getSynthtraceClient } from '@kbn/scout-synthtrace';
 import { createMetricsTestIndexIfNeeded } from '../fixtures/metrics_experience';
-import { TRACES, richTrace, traceCorrelatedLogs } from '../fixtures/traces_experience';
+import {
+  TRACES,
+  richTrace,
+  traceCorrelatedLogs,
+  minimalTraceCorrelatedLogs,
+  deepTrace,
+} from '../fixtures/traces_experience';
 
 globalSetupHook(
   'Setup Discover tests data',
@@ -65,6 +72,9 @@ globalSetupHook(
       await apmEsClient.index(apmData);
       log.debug('[setup:traces] Rich APM trace data indexed');
 
+      await apmEsClient.index(deepTrace(timeRange));
+      log.debug('[setup:traces] Deep trace data indexed');
+
       const logData = traceCorrelatedLogs({
         ...timeRange,
         traceId: correlationIds.richTraceId,
@@ -75,6 +85,15 @@ globalSetupHook(
 
       await logsEsClient.index(logData);
       log.debug('[setup:traces] Correlated log data indexed');
+
+      const minimalLogData = minimalTraceCorrelatedLogs({
+        ...timeRange,
+        traceId: correlationIds.minimalTraceId,
+        transactionId: correlationIds.minimalTransactionId,
+      });
+
+      await logsEsClient.index(minimalLogData);
+      log.debug('[setup:traces] Minimal trace log data indexed');
     }
   }
 );

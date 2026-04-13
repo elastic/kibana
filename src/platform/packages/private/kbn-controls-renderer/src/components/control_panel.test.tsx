@@ -10,11 +10,7 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import {
-  DEFAULT_CONTROL_GROW,
-  DEFAULT_CONTROL_WIDTH,
-  OPTIONS_LIST_CONTROL,
-} from '@kbn/controls-constants';
+import { OPTIONS_LIST_CONTROL, DEFAULT_PINNED_CONTROL_STATE } from '@kbn/controls-constants';
 import {
   registerReactEmbeddableFactory,
   type EmbeddableFactory,
@@ -59,6 +55,7 @@ const mockOptionsListFactory: EmbeddableFactory<{ type: typeof OPTIONS_LIST_CONT
       serializeState: () => ({
         type: OPTIONS_LIST_CONTROL,
       }),
+      applySerializedState: () => undefined,
     });
     return {
       Component: () => <div data-test-subj="optionsListControl">Options list control</div>,
@@ -84,11 +81,10 @@ describe('render', () => {
       const controlPanel = render(
         <ControlPanel
           control={{
-            uid: 'control1',
+            ...DEFAULT_PINNED_CONTROL_STATE,
+            id: 'control1',
             type: 'optionsListControl',
             order: 0,
-            width: DEFAULT_CONTROL_WIDTH,
-            grow: DEFAULT_CONTROL_GROW,
           }}
           parentApi={parentApi}
           setControlPanelRef={jest.fn()}
@@ -105,7 +101,7 @@ describe('render', () => {
       const controlPanel = render(
         <ControlPanel
           control={{
-            uid: 'control1',
+            id: 'control1',
             type: 'optionsListControl',
             order: 0,
             width: 'small',

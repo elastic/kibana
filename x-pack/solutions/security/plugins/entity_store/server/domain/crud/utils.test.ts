@@ -14,7 +14,7 @@ import {
 } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import { BadCRUDRequestError } from '../errors';
-import { hashEuid, validateAndTransformDocForUpsert } from './utils';
+import { validateAndTransformDoc, validateDocIdentification } from './utils';
 
 jest.mock('../../../common/domain/definitions/registry', () => ({
   ...jest.requireActual('../../../common/domain/definitions/registry'),
@@ -39,7 +39,9 @@ const createDefinition = (type: EntityType, fields: EntityField[]): ManagedEntit
   type,
   fields,
   identityField: {
-    euidFields: [[{ field: 'entity.id' }]],
+    euidRanking: {
+      branches: [{ ranking: [[{ field: 'entity.id' }]] }],
+    },
     documentsFilter: isNotEmptyCondition('entity.id'),
   },
   indexPatterns: ['logs-*'],
@@ -50,147 +52,390 @@ describe('crud_client utils', () => {
     jest.clearAllMocks();
   });
 
-  it('hashEuid: returns a valid MD5 hash', () => {
-    const hashedId = hashEuid('entity-id');
+  describe('validateDocIdentification', () => {
+    it('returns doc entity.id when no generatedId', () => {
+      const doc: Entity = { entity: { id: 'my-id' } };
+      expect(validateDocIdentification(doc, undefined)).toBe('my-id');
+    });
 
-    expect(hashedId).toMatch(/^[a-f0-9]{32}$/);
-    expect(hashedId).toBe('169fbe0cb705d8d8811b5098d0cf4588');
+    it('returns generatedId when doc has no entity.id', () => {
+      const doc = { host: { name: 'some-host' } } as Entity;
+      expect(validateDocIdentification(doc, 'generated-id')).toBe('generated-id');
+    });
+
+    it('returns generatedId when doc entity.id matches generatedId', () => {
+      const doc: Entity = { entity: { id: 'same-id' } };
+      expect(validateDocIdentification(doc, 'same-id')).toBe('same-id');
+    });
+
+    it('prefers generatedId over doc entity.id when both present', () => {
+      const doc: Entity = { entity: { id: 'supplied-id' } };
+      expect(() => validateDocIdentification(doc, 'different-id')).toThrow(
+        new BadCRUDRequestError(
+          'Supplied ID supplied-id does not match generated EUID different-id'
+        )
+      );
+    });
+
+    it('on forced user update, trusts doc entity.id when it disagrees with generated EUID', () => {
+      const doc: Entity = { entity: { id: 'store-id' } };
+      expect(
+        validateDocIdentification(doc, 'derived-id', {
+          force: true,
+          operation: 'update',
+          entityType: 'user',
+        })
+      ).toBe('store-id');
+    });
+
+    it('forced update still throws on id mismatch when entity type is not user', () => {
+      const doc: Entity = { entity: { id: 'store-id' } };
+      expect(() =>
+        validateDocIdentification(doc, 'derived-id', {
+          force: true,
+          operation: 'update',
+          entityType: 'host',
+        })
+      ).toThrow(
+        new BadCRUDRequestError('Supplied ID store-id does not match generated EUID derived-id')
+      );
+    });
+
+    it('still throws on create when doc entity.id disagrees with generated EUID even if force', () => {
+      const doc: Entity = { entity: { id: 'store-id' } };
+      expect(() =>
+        validateDocIdentification(doc, 'derived-id', { force: true, operation: 'create' })
+      ).toThrow(
+        new BadCRUDRequestError('Supplied ID store-id does not match generated EUID derived-id')
+      );
+    });
+
+    it('throws when doc has no entity.id and generatedId is undefined', () => {
+      const doc = { host: { name: 'some-host' } } as Entity;
+      expect(() => validateDocIdentification(doc, undefined)).toThrow(
+        new BadCRUDRequestError('Could not derive EUID from document or find it in entity.id')
+      );
+    });
   });
 
-  it('validateAndTransformDocForUpsert: returns generic document with timestamp', () => {
-    mockGetEntityDefinition.mockReturnValue(createDefinition('generic', []));
+  describe('validateAndTransformDoc', () => {
+    it('returns ValidatedDoc with id and transformed doc', () => {
+      mockGetEntityDefinition.mockReturnValue(createDefinition('generic', []));
 
-    const doc: Entity = {
-      entity: { id: 'entity-generic' },
-    };
-    const result = validateAndTransformDocForUpsert('generic', 'default', doc, true);
+      const doc: Entity = { entity: { id: 'entity-generic' } };
+      const result = validateAndTransformDoc('update', 'generic', 'default', doc, undefined, true);
 
-    expect(result).toEqual(
-      expect.objectContaining({
-        '@timestamp': expect.any(String),
-        entity: { id: 'entity-generic' },
-      })
-    );
-  });
+      expect(result.id).toBe('entity-generic');
+      expect(result.doc).toEqual(
+        expect.objectContaining({
+          '@timestamp': expect.any(String),
+          entity: { id: 'entity-generic' },
+        })
+      );
+    });
 
-  it('transformDocForUpsert: nests entity under typed field and preserves name', () => {
-    mockGetEntityDefinition.mockReturnValue(createDefinition('host', [createField('host.name')]));
+    it('throws when doc entity.id does not match generatedId', () => {
+      mockGetEntityDefinition.mockReturnValue(createDefinition('generic', []));
 
-    const doc: Entity = {
-      entity: { id: 'entity-host' },
-      host: { name: 'original-host-name' },
-    };
-    const result = validateAndTransformDocForUpsert('host', 'default', doc, false);
+      const doc: Entity = { entity: { id: 'doc-id' }, host: { name: 'some-host' } };
+      expect(() =>
+        validateAndTransformDoc('update', 'generic', 'default', doc, 'generated-id', false)
+      ).toThrow(
+        new BadCRUDRequestError('Supplied ID doc-id does not match generated EUID generated-id')
+      );
+    });
 
-    expect(result).toEqual(expect.objectContaining({ '@timestamp': expect.any(String) }));
-    expect(result).not.toHaveProperty('entity');
-    expect(result).toHaveProperty('host.entity.id', 'entity-host');
-    expect(result).toHaveProperty('host.name', 'original-host-name');
-  });
+    it('forced user update uses doc entity.id when it does not match generatedId', () => {
+      mockGetEntityDefinition.mockReturnValue(createDefinition('user', []));
 
-  it('getFieldDescriptions: ignores identity source fields from validation', () => {
-    mockGetEntityDefinition.mockReturnValue(createDefinition('host', []));
+      const doc: Entity = { entity: { id: 'doc-id' }, user: { name: 'u' } };
+      const result = validateAndTransformDoc(
+        'update',
+        'user',
+        'default',
+        doc,
+        'generated-id',
+        true
+      );
 
-    const doc: Entity = {
-      entity: { id: 'entity-host-identity' },
-      host: { name: 'identity-host' },
-    };
+      expect(result.id).toBe('doc-id');
+    });
 
-    expect(() => validateAndTransformDocForUpsert('host', 'default', doc, false)).not.toThrow();
-  });
+    it('forced update on non-user type throws when doc entity.id does not match generatedId', () => {
+      mockGetEntityDefinition.mockReturnValue(createDefinition('generic', []));
 
-  it('assertOnlyNonForcedAttributesInReq: allows updates for allowAPIUpdate fields', () => {
-    mockGetEntityDefinition.mockReturnValue(
-      createDefinition('generic', [createField('entity.attributes.watchlists', true)])
-    );
+      const doc: Entity = { entity: { id: 'doc-id' }, host: { name: 'some-host' } };
+      expect(() =>
+        validateAndTransformDoc('update', 'generic', 'default', doc, 'generated-id', true)
+      ).toThrow(
+        new BadCRUDRequestError('Supplied ID doc-id does not match generated EUID generated-id')
+      );
+    });
 
-    const doc = {
-      entity: {
-        id: 'entity-allow-update',
-        attributes: {
-          watchlists: ['privileged_watchlist_id'],
+    it('uses generatedId when doc entity.id matches', () => {
+      mockGetEntityDefinition.mockReturnValue(createDefinition('generic', []));
+
+      const doc: Entity = { entity: { id: 'same-id' }, host: { name: 'some-host' } };
+      const result = validateAndTransformDoc('update', 'generic', 'default', doc, 'same-id', true);
+
+      expect(result.id).toBe('same-id');
+    });
+
+    it('uses generatedId when doc has no entity.id', () => {
+      mockGetEntityDefinition.mockReturnValue(createDefinition('generic', []));
+
+      const doc = { host: { name: 'some-host' } } as Entity;
+      const result = validateAndTransformDoc(
+        'update',
+        'generic',
+        'default',
+        doc,
+        'generated-id',
+        true
+      );
+
+      expect(result.id).toBe('generated-id');
+      expect(doc.entity?.id).toBe('generated-id');
+    });
+
+    it('uses doc entity.id when generatedId is undefined', () => {
+      mockGetEntityDefinition.mockReturnValue(createDefinition('generic', []));
+
+      const doc: Entity = { entity: { id: 'doc-id' } };
+      const result = validateAndTransformDoc('update', 'generic', 'default', doc, undefined, true);
+
+      expect(result.id).toBe('doc-id');
+    });
+
+    describe('name defaulting on create vs update', () => {
+      it('defaults entity.name from entity.id on create when name is not present', () => {
+        mockGetEntityDefinition.mockReturnValue(createDefinition('host', []));
+
+        const doc: Entity = { entity: { id: 'entity-host' } };
+        const result = validateAndTransformDoc('create', 'host', 'default', doc, undefined, true);
+
+        expect(result.doc).toHaveProperty('entity.name', 'entity-host');
+      });
+
+      it('does not default type.name on update when name is not present', () => {
+        mockGetEntityDefinition.mockReturnValue(createDefinition('host', []));
+
+        const doc: Entity = { entity: { id: 'entity-host' } };
+        const result = validateAndTransformDoc('update', 'host', 'default', doc, undefined, true);
+
+        expect(result.doc).not.toHaveProperty('host.name');
+      });
+
+      it('preserves existing name on both create and update', () => {
+        mockGetEntityDefinition.mockReturnValue(
+          createDefinition('host', [createField('host.name')])
+        );
+
+        const createDoc: Entity = {
+          entity: { id: 'entity-host' },
+          host: { name: 'explicit-name' },
+        };
+        const createResult = validateAndTransformDoc(
+          'create',
+          'host',
+          'default',
+          createDoc,
+          undefined,
+          false
+        );
+        expect(createResult.doc).toHaveProperty('host.name', 'explicit-name');
+
+        const updateDoc: Entity = {
+          entity: { id: 'entity-host' },
+          host: { name: 'explicit-name' },
+        };
+        const updateResult = validateAndTransformDoc(
+          'update',
+          'host',
+          'default',
+          updateDoc,
+          undefined,
+          false
+        );
+        expect(updateResult.doc).toHaveProperty('host.name', 'explicit-name');
+      });
+    });
+
+    it('ignores identity source fields from validation', () => {
+      mockGetEntityDefinition.mockReturnValue(createDefinition('host', []));
+
+      const doc: Entity = {
+        entity: { id: 'entity-host-identity' },
+        host: { name: 'identity-host' },
+      };
+
+      expect(() =>
+        validateAndTransformDoc('update', 'host', 'default', doc, undefined, false)
+      ).not.toThrow();
+    });
+
+    it('allows updates for allowAPIUpdate fields', () => {
+      mockGetEntityDefinition.mockReturnValue(
+        createDefinition('generic', [createField('entity.attributes.watchlists', true)])
+      );
+
+      const doc = {
+        entity: {
+          id: 'entity-allow-update',
+          attributes: {
+            watchlists: ['privileged_watchlist_id'],
+          },
         },
-      },
-    } as Entity;
-    const result = validateAndTransformDocForUpsert('generic', 'default', doc, false);
+      } as Entity;
+      const result = validateAndTransformDoc('update', 'generic', 'default', doc, undefined, false);
 
-    expect(result).toHaveProperty('entity.attributes.watchlists', ['privileged_watchlist_id']);
-  });
+      expect(result.doc).toHaveProperty('entity.attributes.watchlists', [
+        'privileged_watchlist_id',
+      ]);
+    });
 
-  it('getFieldDescriptions: throws for fields missing from definition', () => {
-    mockGetEntityDefinition.mockReturnValue(createDefinition('generic', []));
+    it('throws for fields missing from definition', () => {
+      mockGetEntityDefinition.mockReturnValue(createDefinition('generic', []));
 
-    const doc: Entity = {
-      entity: {
-        id: 'entity-invalid-field',
-        attributes: {
-          managed: true,
+      const doc: Entity = {
+        entity: {
+          id: 'entity-invalid-field',
+          attributes: { managed: true },
         },
-      },
-    };
+      };
 
-    expect(() => validateAndTransformDocForUpsert('generic', 'default', doc, false)).toThrow(
-      new BadCRUDRequestError(
-        'The following attributes are not allowed to be updated: [entity.attributes.managed]'
-      )
-    );
-  });
+      expect(() =>
+        validateAndTransformDoc('update', 'generic', 'default', doc, undefined, false)
+      ).toThrow(
+        new BadCRUDRequestError(
+          'The following attributes are not allowed to be updated: [entity.attributes.managed]'
+        )
+      );
+    });
 
-  it('assertOnlyNonForcedAttributesInReq: throws when non-force request updates restricted fields', () => {
-    mockGetEntityDefinition.mockReturnValue(
-      createDefinition('generic', [createField('entity.attributes.managed', false)])
-    );
+    it('throws when non-force request updates restricted fields', () => {
+      mockGetEntityDefinition.mockReturnValue(
+        createDefinition('generic', [createField('entity.attributes.managed', false)])
+      );
 
-    const doc: Entity = {
-      entity: {
-        id: 'entity-restricted-update',
-        attributes: {
-          managed: true,
+      const doc: Entity = {
+        entity: {
+          id: 'entity-restricted-update',
+          attributes: { managed: true },
         },
-      },
-    };
+      };
 
-    expect(() => validateAndTransformDocForUpsert('generic', 'default', doc, false)).toThrow(
-      new BadCRUDRequestError(
-        'The following attributes are not allowed to be updated without forcing it (?force=true): entity.attributes.managed'
-      )
-    );
-  });
+      expect(() =>
+        validateAndTransformDoc('update', 'generic', 'default', doc, undefined, false)
+      ).toThrow(
+        new BadCRUDRequestError(
+          'The following attributes are not allowed to be updated without forcing it (?force=true): entity.attributes.managed'
+        )
+      );
+    });
 
-  it('validateAndTransformDocForUpsert: bypasses validation when force=true', () => {
-    mockGetEntityDefinition.mockReturnValue(
-      createDefinition('generic', [createField('entity.attributes.managed', false)])
-    );
+    it('bypasses validation when force=true', () => {
+      mockGetEntityDefinition.mockReturnValue(
+        createDefinition('generic', [createField('entity.attributes.managed', false)])
+      );
 
-    const doc: Entity = {
-      entity: {
-        id: 'entity-force-update',
-        attributes: {
-          managed: true,
+      const doc: Entity = {
+        entity: {
+          id: 'entity-force-update',
+          attributes: { managed: true },
         },
-      },
-    };
+      };
 
-    expect(() => validateAndTransformDocForUpsert('generic', 'default', doc, true)).not.toThrow();
-  });
+      expect(() =>
+        validateAndTransformDoc('update', 'generic', 'default', doc, undefined, true)
+      ).not.toThrow();
+    });
 
-  it('validateAndTransformDocForUpsert: accepts flat doc (dot-notation keys) when force=true', () => {
-    mockGetEntityDefinition.mockReturnValue(
-      createDefinition('user', [createField('entity.id'), createField('entity.name')])
-    );
+    describe('generic vs typed entity transform', () => {
+      it('keeps entity at root level for generic type', () => {
+        mockGetEntityDefinition.mockReturnValue(createDefinition('generic', []));
 
-    const flatDoc = {
-      'entity.id': 'user:u1',
-      'entity.name': 'alice',
-    } as unknown as Entity;
+        const doc: Entity = { entity: { id: 'gen-1', type: 'custom' } };
+        const result = validateAndTransformDoc(
+          'create',
+          'generic',
+          'default',
+          doc,
+          undefined,
+          true
+        );
 
-    const result = validateAndTransformDocForUpsert('user', 'default', flatDoc, true);
+        expect(result.doc).toHaveProperty('entity.id', 'gen-1');
+        expect(result.doc).toHaveProperty('entity.type', 'custom');
+        expect(result.doc).toHaveProperty('@timestamp');
+      });
 
-    expect(result).toHaveProperty('@timestamp');
-    expect(typeof result['@timestamp']).toBe('string');
-    expect(result['entity.id']).toBe('user:u1');
-    expect(result['entity.name']).toBe('alice');
-    expect(result).toHaveProperty('user');
-    expect((result.user as Record<string, unknown>).entity).toBeUndefined();
+      it('creates the type object when not present in typed entity', () => {
+        mockGetEntityDefinition.mockReturnValue(createDefinition('service', []));
+
+        const doc: Entity = { entity: { id: 'svc-1' } };
+        const result = validateAndTransformDoc(
+          'create',
+          'service',
+          'default',
+          doc,
+          undefined,
+          true
+        );
+
+        expect(result.doc).toHaveProperty('entity');
+        expect(result.doc).toHaveProperty('entity.id', 'svc-1');
+        expect(result.doc).toHaveProperty('entity.name', 'svc-1');
+        expect(result.doc).not.toHaveProperty('service');
+      });
+    });
+
+    describe('flattened documents', () => {
+      it('handles unflattened doc with generatedId for generic type', () => {
+        mockGetEntityDefinition.mockReturnValue(
+          createDefinition('generic', [createField('entity.attributes.watchlists', true)])
+        );
+
+        // Simulate a flat doc that has been unflattened at the route level
+        const doc: Entity = {
+          entity: {
+            attributes: {
+              watchlists: ['privileged_watchlist_id'],
+            },
+          },
+        };
+        const result = validateAndTransformDoc(
+          'update',
+          'generic',
+          'default',
+          doc,
+          'generated-id',
+          false
+        );
+
+        expect(result.id).toBe('generated-id');
+        expect(result.doc).toHaveProperty('entity.id', 'generated-id');
+        expect(result.doc).toHaveProperty('entity.attributes.watchlists', [
+          'privileged_watchlist_id',
+        ]);
+      });
+
+      it('handles unflattened doc for host type', () => {
+        mockGetEntityDefinition.mockReturnValue(
+          createDefinition('host', [createField('host.name')])
+        );
+
+        const doc: Entity = {
+          entity: { id: 'host:flat-host' },
+          host: { name: 'flat-host' },
+        };
+        const result = validateAndTransformDoc('update', 'host', 'default', doc, undefined, false);
+
+        expect(result.id).toBe('host:flat-host');
+        expect(result.doc).not.toHaveProperty('host.entity');
+        expect(result.doc).toHaveProperty('entity.id', 'host:flat-host');
+        expect(result.doc).toHaveProperty('host.name', 'flat-host');
+      });
+    });
   });
 });

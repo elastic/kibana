@@ -48,7 +48,7 @@ export const OutputSection: React.FunctionComponent<OutputSectionProps> = ({
         <>
           <EuiSpacer size="s" />
           <EuiButtonEmpty
-            iconType="plusInCircle"
+            iconType="plusCircle"
             href={getHref('settings_create_outputs')}
             data-test-subj="addOutputBtn"
           >

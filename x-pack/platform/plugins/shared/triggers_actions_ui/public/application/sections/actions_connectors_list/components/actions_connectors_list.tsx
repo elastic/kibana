@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiInMemoryTable,
@@ -97,6 +97,7 @@ const ActionsConnectorsList = ({
     setBreadcrumbs,
     chrome,
     docLinks,
+    actions: { isEarsEnabled },
   } = useKibana().services;
 
   const { euiTheme } = useEuiTheme();
@@ -105,6 +106,13 @@ const ActionsConnectorsList = ({
   const location = useLocation();
   const canDelete = hasDeleteActionsCapability(capabilities);
   const canSave = hasSaveActionsCapability(capabilities);
+  const isDisabledEarsConnector = useCallback(
+    (item: ActionConnectorTableItem | ActionConnector) =>
+      !isEarsEnabled &&
+      'config' in item &&
+      (item.config as Record<string, unknown>)?.authType === 'ears',
+    [isEarsEnabled]
+  );
 
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
   const [pageIndex, setPageIndex] = useState<number>(0);
@@ -182,7 +190,7 @@ const ActionsConnectorsList = ({
   useEffect(() => {
     if (connectorId && !isLoadingActions) {
       const connector = actions.find((action) => action.id === connectorId);
-      if (connector) {
+      if (connector && !isDisabledEarsConnector(connector)) {
         editItem(connector, EditConnectorTabs.Configuration);
       }
 
@@ -190,7 +198,15 @@ const ActionsConnectorsList = ({
 
       window.history.replaceState(null, '', linkToConnectors);
     }
-  }, [actions, connectorId, editItem, history, isLoadingActions, location]);
+  }, [
+    actions,
+    connectorId,
+    editItem,
+    history,
+    isDisabledEarsConnector,
+    isLoadingActions,
+    location,
+  ]);
 
   function setDeleteConnectorWarning(connectors: string[]) {
     const show = connectors.some((c) => {
@@ -238,7 +254,10 @@ const ActionsConnectorsList = ({
                 title={name}
                 onClick={() => editItem(item, EditConnectorTabs.Configuration)}
                 key={item.id}
-                disabled={actionTypesIndex ? !actionTypesIndex[item.actionTypeId]?.enabled : true}
+                disabled={
+                  isDisabledEarsConnector(item) ||
+                  (actionTypesIndex ? !actionTypesIndex[item.actionTypeId]?.enabled : true)
+                }
               >
                 {name}
               </EuiLink>
@@ -263,6 +282,22 @@ const ActionsConnectorsList = ({
             {showDeprecatedTooltip && (
               <EuiFlexItem grow={false}>
                 <ConnectorIconTipWithSpacing />
+              </EuiFlexItem>
+            )}
+            {isDisabledEarsConnector(item) && (
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  type="warning"
+                  color="warning"
+                  content={i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.earsDisabledDescription',
+                    {
+                      defaultMessage:
+                        'EARS authentication is disabled. Enable it via xpack.actions.ears.enabled in kibana.yml.',
+                    }
+                  )}
+                  position="right"
+                />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -372,7 +407,9 @@ const ActionsConnectorsList = ({
 
         return (
           <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-            {usesOAuthAuthorizationCode(item) && <OAuthOperations item={item} />}
+            {usesOAuthAuthorizationCode(item) && !isDisabledEarsConnector(item) && (
+              <OAuthOperations item={item} />
+            )}
             <DeleteOperation canDelete={canDelete} item={item} onDelete={() => onDelete([item])} />
             {showFixButton && (
               <EuiFlexItem grow={false} style={{ marginLeft: 4 }}>
@@ -400,6 +437,7 @@ const ActionsConnectorsList = ({
             {!showFixButton && (
               <RunOperation
                 canExecute={
+                  !isDisabledEarsConnector(item) &&
                   isStackConnector &&
                   hasExecuteActionsCapability(capabilities, actionType?.subFeature)
                 }
@@ -418,13 +456,20 @@ const ActionsConnectorsList = ({
       loading={isLoadingActions || isLoadingActionTypes}
       items={actionConnectorTableItems}
       sorting={true}
-      itemId="id"
+      itemId={(item: ActionConnectorTableItem) =>
+        item.isPreconfigured ? `preconfigured_${item.id}` : item.id
+      }
       columns={actionsTableColumns}
       css={disabledActConnectorCss}
+      tableCaption={i18n.translate(
+        'xpack.triggersActionsUI.sections.actionsConnectorsList.tableCaption',
+        { defaultMessage: 'Connectors' }
+      )}
       rowProps={(item: ActionConnectorTableItem) => ({
         className:
-          !item.isPreconfigured &&
-          (!actionTypesIndex || !actionTypesIndex[item.actionTypeId]?.enabled)
+          isDisabledEarsConnector(item) ||
+          (!item.isPreconfigured &&
+            (!actionTypesIndex || !actionTypesIndex[item.actionTypeId]?.enabled))
             ? 'actConnectorsList__tableRowDisabled'
             : '',
         'data-test-subj': 'connectors-row',
@@ -432,7 +477,9 @@ const ActionsConnectorsList = ({
       cellProps={(item: ActionConnectorTableItem) => ({
         'data-test-subj': 'cell',
         className:
-          !actionTypesIndex || !actionTypesIndex[item.actionTypeId]?.enabled
+          isDisabledEarsConnector(item) ||
+          !actionTypesIndex ||
+          !actionTypesIndex[item.actionTypeId]?.enabled
             ? 'actConnectorsList__tableCellDisabled'
             : '',
       })}
@@ -513,7 +560,8 @@ const ActionsConnectorsList = ({
           onDeleted={(deleted: string[]) => {
             if (selectedItems.length === 0 || selectedItems.length === deleted.length) {
               const updatedActions = actions.filter(
-                (action) => action.id && !connectorsToDelete.includes(action.id)
+                (action) =>
+                  action.id && !(connectorsToDelete.includes(action.id) && !action.isPreconfigured)
               );
               setActions(updatedActions);
               setSelectedItems([]);

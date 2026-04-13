@@ -141,12 +141,49 @@ export const knownModels: ModelDefinition[] = [
     id: 'claude-4-sonnet',
     provider: ModelProvider.Anthropic,
     family: ModelFamily.Claude,
-    contextWindow: 200000,
+    contextWindow: 1000000,
   },
   {
     id: 'claude-4-opus',
     provider: ModelProvider.Anthropic,
     family: ModelFamily.Claude,
+    contextWindow: 200000,
+  },
+  {
+    id: 'claude-4.5-sonnet',
+    provider: ModelProvider.Anthropic,
+    family: ModelFamily.Claude,
+    contextWindow: 1000000,
+  },
+  {
+    id: 'claude-4.6-sonnet',
+    provider: ModelProvider.Anthropic,
+    family: ModelFamily.Claude,
+    contextWindow: 1000000,
+  },
+  {
+    id: 'claude-4.6-opus',
+    provider: ModelProvider.Anthropic,
+    family: ModelFamily.Claude,
+    contextWindow: 200000,
+  },
+  // OpenAI o-series reasoning models
+  {
+    id: 'o3-mini',
+    provider: ModelProvider.OpenAI,
+    family: ModelFamily.GPT,
+    contextWindow: 200000,
+  },
+  {
+    id: 'o3',
+    provider: ModelProvider.OpenAI,
+    family: ModelFamily.GPT,
+    contextWindow: 200000,
+  },
+  {
+    id: 'o4-mini',
+    provider: ModelProvider.OpenAI,
+    family: ModelFamily.GPT,
     contextWindow: 200000,
   },
 ];

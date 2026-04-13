@@ -70,7 +70,7 @@ function getSaveButtonMeta({
             defaultMessage: 'Save and return',
           }),
       emphasize: true,
-      iconType: contextFromEmbeddable ? 'save' : 'checkInCircleFilled',
+      iconType: contextFromEmbeddable ? 'save' : 'checkCircleFill',
       testId: 'lnsApp_saveAndReturnButton',
       description: i18n.translate('xpack.lens.app.saveAndReturnButtonAriaLabel', {
         defaultMessage: 'Save the current lens visualization and return to the last app',
@@ -322,7 +322,6 @@ export const LensTopNavMenu = ({
   title,
   goBackToOriginatingApp,
   contextOriginatingApp,
-  initialContextIsEmbedded,
   topNavMenuEntryGenerators,
   initialContext,
   indexPatternService,
@@ -575,21 +574,22 @@ export const LensTopNavMenu = ({
   const adHocDataViews = indexPatterns.filter((pattern) => !pattern.isPersisted());
 
   const topNavConfig = useMemo(() => {
-    const showReplaceInDashboard =
-      initialContext?.originatingApp === 'dashboards' && !initialInput?.savedObjectId;
-    const showReplaceInCanvas =
-      initialContext?.originatingApp === 'canvas' && !initialInput?.savedObjectId;
     const contextFromEmbeddable =
       initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable;
+    const showReplaceInDashboard = Boolean(
+      !initialInput?.ref_id && contextFromEmbeddable && initialContext?.embeddableId
+    );
+    const showReplaceInCanvas =
+      initialContext?.originatingApp === 'canvas' && !initialInput?.ref_id;
 
     const isComingFromDashboardView =
       incomingState?.originatingApp &&
+      incomingState.originatingApp !== 'visualize' &&
       incomingState?.originatingPath &&
       !incomingState.originatingPath.includes('/list/');
 
     const showSaveAndReturn =
-      !(showReplaceInDashboard || showReplaceInCanvas) &&
-      Boolean(isComingFromDashboardView || initialContextIsEmbedded);
+      !(showReplaceInDashboard || showReplaceInCanvas) && Boolean(isComingFromDashboardView);
 
     const hasData = Boolean(activeData && Object.keys(activeData).length);
     const csvEnabled = Boolean(isSaveable && hasData);
@@ -781,7 +781,7 @@ export const LensTopNavMenu = ({
                   onTitleDuplicate: noop, // Title can never change from this action
                 },
                 {
-                  saveToLibrary: Boolean(initialInput?.savedObjectId),
+                  saveToLibrary: Boolean(initialInput?.ref_id),
                 }
               );
             }
@@ -860,9 +860,8 @@ export const LensTopNavMenu = ({
     return (additionalMenuEntries || []).concat(baseMenuEntries);
   }, [
     initialContext,
-    initialInput?.savedObjectId,
+    initialInput?.ref_id,
     incomingState,
-    initialContextIsEmbedded,
     activeData,
     isSaveable,
     application,

@@ -22,7 +22,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { RuleAction } from '@kbn/alerting-types';
-import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
+import { useAssistantContext } from '@kbn/elastic-assistant';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import { DEFAULT_END, DEFAULT_START } from '@kbn/elastic-assistant-common';
 import type { Filter } from '@kbn/es-query';
 
@@ -77,6 +78,7 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
   const { alertsIndexPattern, http, settings } = useAssistantContext();
   const { data: aiConnectors, isLoading: isLoadingConnectors } = useLoadConnectors({
     http,
+    featureId: 'attack_discovery',
     settings,
   });
   const { data: { schedule } = { schedule: undefined }, isLoading: isLoadingSchedule } =

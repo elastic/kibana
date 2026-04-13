@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { SyncNowLink } from './sync_now_link';
 
 export const MwsPendingSyncCallout = ({ syncInterval }: { syncInterval: number }) => {
   return (
@@ -23,9 +24,16 @@ export const MwsPendingSyncCallout = ({ syncInterval }: { syncInterval: number }
       >
         <FormattedMessage
           id="xpack.synthetics.maintenanceWindowCallout.pendingSync.description"
-          defaultMessage="One or more maintenance windows have been recently modified or deleted. It may take up to {syncInterval} {syncInterval, plural, one {minute} other {minutes}} for changes to be applied to private location monitors."
-          values={{ syncInterval }}
+          defaultMessage="One or more maintenance windows have been recently modified or deleted."
         />
+        <EuiSpacer size="s" />
+        <EuiText size="xs" color="subdued">
+          <FormattedMessage
+            id="xpack.synthetics.maintenanceWindowCallout.pendingSync.syncNote"
+            defaultMessage="It may take up to {syncInterval} {syncInterval, plural, one {minute} other {minutes}} for changes to be applied to private location monitors. {syncNowLink}"
+            values={{ syncInterval, syncNowLink: <SyncNowLink /> }}
+          />
+        </EuiText>
       </EuiCallOut>
       <EuiSpacer size="s" />
     </>

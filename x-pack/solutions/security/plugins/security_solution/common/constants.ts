@@ -35,6 +35,7 @@ export const NOTES_FEATURE_ID = 'securitySolutionNotes' as const;
 export const SERVER_APP_ID = 'siem' as const;
 export const SECURITY_FEATURE_ID = SECURITY_FEATURE_ID_V5;
 export const RULES_FEATURE_ID = RULES_FEATURE_LATEST;
+export { ALERTS_FEATURE_ID } from '@kbn/security-solution-features/constants';
 export const APP_NAME = 'Security' as const;
 export const APP_ICON_SOLUTION = 'logoSecurity' as const;
 export const APP_PATH = `/app/security` as const;
@@ -120,7 +121,6 @@ export const RULES_LANDING_PATH = `${RULES_PATH}/landing` as const;
 export const RULES_ADD_PATH = `${RULES_PATH}/add_rules` as const;
 export const RULES_UPDATES = `${RULES_PATH}/updates` as const;
 export const RULES_CREATE_PATH = `${RULES_PATH}/create` as const;
-export const AI_RULE_CREATION_PATH = `${RULES_PATH}/ai_rule_creation` as const;
 export const EXCEPTIONS_PATH = '/exceptions' as const;
 export const EXCEPTION_LIST_DETAIL_PATH = `${EXCEPTIONS_PATH}/details/:detailName` as const;
 export const HOSTS_PATH = '/hosts' as const;
@@ -155,7 +155,6 @@ export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH =
   '/entity_analytics_privileged_user_monitoring' as const;
 export const ENTITY_ANALYTICS_OVERVIEW_PATH = `/entity_analytics_overview` as const;
 export const ENTITY_ANALYTICS_HOME_PAGE_PATH = '/entity_analytics_home_page' as const;
-export const ENTITY_ANALYTICS_WATCHLISTS_PATH = '/entity_analytics_watchlists' as const;
 export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}` as const;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}` as const;
 export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}` as const;
@@ -173,6 +172,7 @@ export const APP_RESPONSE_ACTIONS_HISTORY_PATH =
 export const APP_SCRIPT_LIBRARY_PATH = `${APP_PATH}${SCRIPT_LIBRARY_PATH}` as const;
 export const NOTES_PATH = `${MANAGEMENT_PATH}/notes` as const;
 export const SIEM_MIGRATIONS_PATH = '/siem_migrations' as const;
+export const SIEM_MIGRATIONS_MANAGE_PATH = `${SIEM_MIGRATIONS_PATH}/manage` as const;
 export const SIEM_MIGRATIONS_LANDING_PATH = `${SIEM_MIGRATIONS_PATH}/landing` as const;
 export const SIEM_MIGRATIONS_RULES_PATH = `${SIEM_MIGRATIONS_PATH}/rules` as const;
 export const SIEM_MIGRATIONS_DASHBOARDS_PATH = `${SIEM_MIGRATIONS_PATH}/dashboards` as const;
@@ -263,21 +263,17 @@ export const EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION =
 export const INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION =
   'securitySolution:includedDataStreamNamespacesForRuleExecution' as const;
 
+/** This hidden Kibana Advanced Setting stores gap reason types to exclude from gap monitoring and auto-fill */
+export const EXCLUDED_GAP_REASONS_KEY = 'securitySolution:excludedGapReasons' as const;
+
 /** The default value for the included data stream namespaces setting (empty = no filter) */
 export const DATA_STREAM_NAMESPACES_DEFAULT_SETTING: string[] = [];
-
-/** This Kibana Advanced Setting allows users to enable/disable the Graph Visualizations for alerts and events */
-export const ENABLE_GRAPH_VISUALIZATION_SETTING =
-  'securitySolution:enableGraphVisualization' as const;
 
 /** This Kibana Advanced Setting allows users to enable/disable the Asset Inventory feature */
 export const ENABLE_ASSET_INVENTORY_SETTING = 'securitySolution:enableAssetInventory' as const;
 
 /** This Kibana Advanced Setting allows users to enable/disable the Cloud Connector Feature */
 export const ENABLE_CLOUD_CONNECTOR_SETTING = 'securitySolution:enableCloudConnector' as const;
-
-/** This Kibana Advanced Setting allows users to enable/disable the SIEM Readiness Feature */
-export const ENABLE_SIEM_READINESS_SETTING = 'securitySolution:enableSiemReadiness' as const;
 
 /**
  * Id for the notifications alerting type
@@ -490,6 +486,7 @@ export const RULES_TABLE_MAX_PAGE_SIZE = 100;
  * we will need to update these constants with the corresponding version.
  */
 export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
+  AI_RULE_CREATION_MENU: 'securitySolution.rulesManagementPage.aiRuleCreationMenuTour.v9.4',
   RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v9.2',
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
   DEFAULT_LLM: `elasticAssistant.elasticLLM.costAwarenessTour.assistantHeader.v8.19.default`,
@@ -529,8 +526,9 @@ export const DEFAULT_ALERT_TAGS_VALUE = [
   i18n.FURTHER_INVESTIGATION_REQUIRED,
 ] as const;
 
-export const DEFAULT_ALERT_CLOSE_REASONS_KEY = 'securitySolution:alertCloseReasons' as const;
-export const DEFAULT_ALERT_CLOSE_REASONS_VALUE = [] as const;
+export const DEFAULT_DETECTIONS_CLOSE_REASONS_KEY =
+  'securitySolution:detectionsCloseReasons' as const;
+export const DEFAULT_DETECTIONS_CLOSE_REASONS_VALUE = [] as const;
 
 /**
  * Max length for the comments within security solution
@@ -723,5 +721,7 @@ export enum SecurityAgentBuilderAttachments {
   entity = 'security.entity',
   rule = 'security.rule',
 }
+
+export const SECURITY_RULE_ATTACHMENT_ID = 'ai-rule-creation';
 
 export const THREAT_HUNTING_AGENT_ID = `${internalNamespaces.security}.agent`;

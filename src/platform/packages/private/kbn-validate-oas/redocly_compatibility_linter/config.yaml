@@ -1,0 +1,10 @@
+plugins:
+  - compatibility_rules_plugin.js
+
+rules:
+  spec-strict-refs: error
+  no-unresolved-refs: error
+  no-identical-paths: error
+  operation-parameters-unique: error
+  compatibility-rules-plugin/path-parameters-required: error
+  compatibility-rules-plugin/no-empty-nullable-enum: error

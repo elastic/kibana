@@ -50,13 +50,13 @@ export default meta;
 const createEntityItem = (overrides: Partial<EntityItem> = {}): EntityItem => ({
   itemType: DOCUMENT_TYPE_ENTITY,
   id: 'entity-1',
-  type: 'host',
   label: 'host-01.acme.com',
   icon: 'storage',
   risk: 75,
   timestamp: new Date('2023-12-01T10:30:00Z'),
   ips: ['10.200.0.101'],
   countryCodes: ['US'],
+  entity: { type: 'host' },
   ...overrides,
 });
 
@@ -97,7 +97,7 @@ const ContentTemplate: StoryFn<ContentTemplateArgs> = (args) => {
 
   if (firstItem && firstItem.itemType === DOCUMENT_TYPE_ENTITY) {
     icon = firstItem.icon ?? icon;
-    groupedItemsType = capitalize(`${firstItem.type}s`) || 'Entities';
+    groupedItemsType = capitalize(`${firstItem.entity?.type}s`) || 'Entities';
   }
 
   // Create mock pagination controls
@@ -139,7 +139,7 @@ EntitiesGroup.args = {
     createEntityItem({
       id: 'host-1',
       label: 'web-server-01.prod',
-      type: 'host',
+      entity: { type: 'host' },
       icon: 'storage',
       risk: 85,
       ips: ['10.0.1.10'],
@@ -148,7 +148,7 @@ EntitiesGroup.args = {
     createEntityItem({
       id: 'host-2',
       label: 'db-server-02.prod',
-      type: 'host',
+      entity: { type: 'host' },
       icon: 'storage',
       risk: 45,
       ips: ['10.0.1.11'],
@@ -157,7 +157,7 @@ EntitiesGroup.args = {
     createEntityItem({
       id: 'host-3',
       label: 'api-server-03.staging',
-      type: 'host',
+      entity: { type: 'host' },
       icon: 'storage',
       risk: 65,
       ips: ['10.0.2.15'],
@@ -192,7 +192,7 @@ EventsGroup.args = {
       id: 'event-3',
       action: 'process_execution',
       actor: { id: 'user-003', label: 'admin', icon: 'user' },
-      target: { id: 'process-003', label: 'powershell.exe', icon: 'console' },
+      target: { id: 'process-003', label: 'powershell.exe', icon: 'commandLine' },
     }),
   ],
 };
@@ -244,7 +244,7 @@ EventsAndAlertsGroup.args = {
       id: 'event-mixed-1',
       action: 'user_login',
       actor: { id: 'user-normal', label: 'jane.smith', icon: 'user' },
-      target: { id: 'workstation-01', label: 'WS-001', icon: 'desktop' },
+      target: { id: 'workstation-01', label: 'WS-001', icon: 'display' },
     }),
     createAlertItem({
       id: 'alert-mixed-1',
@@ -344,7 +344,7 @@ export const LargeGroup: StoryFn<ContentTemplateArgs> = () => {
     !str ? '' : str[0].toUpperCase() + str.slice(1).toLowerCase();
   if (firstItem && firstItem.itemType === DOCUMENT_TYPE_ENTITY) {
     icon = firstItem.icon ?? icon;
-    groupedItemsType = capitalize(`${firstItem.type}s`) || 'Entities';
+    groupedItemsType = capitalize(`${firstItem.entity?.type}s`) || 'Entities';
   }
 
   // Slice items for current page

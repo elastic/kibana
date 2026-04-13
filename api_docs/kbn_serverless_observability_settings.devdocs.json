@@ -33,7 +33,7 @@
           "string[]"
         ],
         "path": "src/platform/packages/shared/serverless/settings/observability_project/index.ts",
-        "lineNumber": 44,
+        "lineNumber": 45,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -67,7 +67,7 @@
           "string[]"
         ],
         "path": "src/platform/packages/shared/serverless/settings/observability_project/index.ts",
-        "lineNumber": 37,
+        "lineNumber": 38,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

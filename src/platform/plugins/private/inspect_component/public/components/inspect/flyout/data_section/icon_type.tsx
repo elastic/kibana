@@ -41,7 +41,7 @@ export const IconType = ({ iconType }: Props) => {
           />
         )}
       </EuiText>
-      {iconType && <EuiIcon type={iconType} size="m" />}
+      {iconType && <EuiIcon type={iconType} size="m" aria-hidden={true} />}
     </EuiFlexGroup>
   );
 };
