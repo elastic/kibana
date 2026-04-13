@@ -152,6 +152,7 @@ const previouslyRegisteredTypes = [
   'security-rule',
   'security-solution-signals-migration',
   'security:reference-data',
+  'security:endpoint-scripts-library',
   'risk-engine-configuration',
   'entity-engine-status',
   'server',
