@@ -47,7 +47,7 @@ export const toAttachmentPanel = (panel: DashboardPanel): AttachmentPanel | unde
         ) as unknown as Record<string, unknown>;
 
         return {
-          type: 'lens',
+          type: LENS_EMBEDDABLE_TYPE,
           id: panel.id ?? '',
           config: {
             ...panelConfig,

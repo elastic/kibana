@@ -17,6 +17,7 @@ project:
   owner: '@elastic/observability-ui'
   sourceRoot: x-pack/solutions/observability/packages/utils-server
 dependsOn:
+  - '@kbn/core'
   - '@kbn/es-query'
   - '@kbn/traced-es-client'
   - '@kbn/alerting-plugin'
