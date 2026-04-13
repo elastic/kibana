@@ -10,8 +10,8 @@
 import React, { type ReactNode, useMemo } from 'react';
 import {
   EuiScreenReaderOnly,
+  euiShadow,
   EuiSplitPanel,
-  logicalCSS,
   useEuiTheme,
   useGeneratedHtmlId,
   type UseEuiTheme,
@@ -29,28 +29,21 @@ import { useScroll } from '../../hooks/use_scroll';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 import { getHighContrastBorder } from '../../hooks/use_high_contrast_mode_styles';
 
-const getSidePanelWrapperStyles = (euiThemeContext: UseEuiTheme) => {
-  const { euiTheme } = euiThemeContext;
-  return css`
-    box-sizing: border-box;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    width: ${SIDE_PANEL_WIDTH - SIDE_PANEL_CONTENT_GAP}px;
-    margin-bottom: ${layoutVar('application.marginBottom', '0px')};
-    background-color: transparent;
-    box-shadow: none;
-    border-radius: 0;
+const getSidePanelWrapperStyles = (euiThemeContext: UseEuiTheme) => css`
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: ${SIDE_PANEL_WIDTH - SIDE_PANEL_CONTENT_GAP}px;
+  margin-bottom: ${layoutVar('application.marginBottom', '0px')};
+  background-color: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
+  border-radius: ${euiThemeContext.euiTheme.border.radius.medium};
 
-    ${logicalCSS(
-      'border-left',
-      `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`
-    )};
+  // use outline for consistency with the application layout style
+  outline: ${getHighContrastBorder(euiThemeContext)};
 
-    // use outline for consistency with the application layout style
-    outline: ${getHighContrastBorder(euiThemeContext)};
-  `;
-};
+  ${euiShadow(euiThemeContext, 'xs', { border: 'none' })};
+`;
 
 export interface SidePanelIds {
   secondaryNavigationInstructionsId: string;

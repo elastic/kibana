@@ -9,9 +9,6 @@
 
 import { useEuiOverflowScroll } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { layoutVar } from '@kbn/core-chrome-layout-constants';
-
-const topBarHeightVar = layoutVar('application.topBar.height', '49px');
 
 /**
  * Hook for handling scroll styles.
@@ -22,7 +19,8 @@ const topBarHeightVar = layoutVar('application.topBar.height', '49px');
 export const useScroll = (withMask: boolean = false) => {
   const scrollStyles = css`
     ${useEuiOverflowScroll('y', withMask)}
-    scroll-padding-top: ${topBarHeightVar};
+    --secondary-menu-header-height: 50px;
+    scroll-padding-top: var(--secondary-menu-header-height);
   `;
 
   return scrollStyles;

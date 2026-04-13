@@ -187,7 +187,7 @@ const Layout = ({ ...props }: PropsAndArgs) => {
           headerHeight,
           navigationWidth,
           sidebarWidth: 48,
-          applicationTopBarHeight: 49,
+          applicationTopBarHeight: 48,
           applicationBottomBarHeight: 48,
         }}
       >
