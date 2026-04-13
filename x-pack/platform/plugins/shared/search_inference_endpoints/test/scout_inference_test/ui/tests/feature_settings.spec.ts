@@ -7,35 +7,38 @@
 
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
-import { mockInferenceEndpoints } from '../fixtures/mock_data/inference_endpoints';
+import { mockInferenceEndpoints as mockEndpointsData } from '../fixtures/mock_data/inference_endpoints';
+import {
+  mockConnectors,
+  mockEmptyConnectors,
+  unmockConnectors,
+  mockInferenceEndpoints,
+  unmockInferenceEndpoints,
+} from '../fixtures/mocks';
 
 test.describe(
   'Feature Settings',
   { tag: ['@local-stateful-classic', '@local-stateful-search', '@local-serverless-search'] },
   () => {
-    test.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await pageObjects.featureSettings.mockConnectors();
+    test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
+      await mockConnectors(page);
       await browserAuth.loginAsPrivilegedUser();
       await pageObjects.featureSettings.goto();
     });
 
-    test.afterEach(async ({ pageObjects }) => {
-      await pageObjects.featureSettings.unmockConnectors();
+    test.afterEach(async ({ page }) => {
+      await unmockConnectors(page);
+      await unmockInferenceEndpoints(page);
     });
 
-    test('shows empty state when no models are available', async ({ pageObjects }) => {
+    test('shows empty state when no models are available', async ({ page, pageObjects }) => {
       const { featureSettings } = pageObjects;
-      await featureSettings.unmockConnectors();
-      await featureSettings.mockEmptyConnectors();
+      await unmockConnectors(page);
+      await mockEmptyConnectors(page);
       await featureSettings.gotoEmptyState();
 
-      try {
-        await expect(featureSettings.noModelsEmptyPrompt).toBeVisible();
-        await expect(featureSettings.addModelsButton).toBeVisible();
-      } finally {
-        await featureSettings.unmockConnectors();
-        await featureSettings.mockConnectors();
-      }
+      await expect(featureSettings.noModelsEmptyPrompt).toBeVisible();
+      await expect(featureSettings.addModelsButton).toBeVisible();
     });
 
     test('displays page header', async ({ pageObjects }) => {
@@ -152,100 +155,90 @@ test.describe(
       });
     });
 
-    test('searching in add model popover filters the results', async ({ pageObjects }) => {
+    test('searching in add model popover filters the results', async ({ page, pageObjects }) => {
       const { featureSettings } = pageObjects;
-      await featureSettings.mockInferenceEndpoints(mockInferenceEndpoints);
+      await mockInferenceEndpoints(page, mockEndpointsData);
       await featureSettings.goto();
 
-      try {
-        await test.step('open popover and verify models are listed', async () => {
-          await featureSettings.addModelButton('test_feature_alpha').click();
-          await expect(featureSettings.addModelSearch).toBeVisible();
-          await expect(featureSettings.addModelOptions).not.toHaveCount(0);
-        });
+      await test.step('open popover and verify models are listed', async () => {
+        await featureSettings.addModelButton('test_feature_alpha').click();
+        await expect(featureSettings.addModelSearch).toBeVisible();
+        await expect(featureSettings.addModelOptions).not.toHaveCount(0);
+      });
 
-        await test.step('typing a search term reduces the list', async () => {
-          const countBeforeSearch = await featureSettings.addModelOptions.count();
-          await featureSettings.addModelSearch.fill('anthropic');
-          await expect(featureSettings.addModelOptions).not.toHaveCount(countBeforeSearch);
-          await expect(featureSettings.addModelOptions).not.toHaveCount(0);
-        });
-      } finally {
-        await featureSettings.unmockInferenceEndpoints();
-      }
+      await test.step('typing a search term reduces the list', async () => {
+        const countBeforeSearch = await featureSettings.addModelOptions.count();
+        await featureSettings.addModelSearch.fill('anthropic');
+        await expect(featureSettings.addModelOptions).not.toHaveCount(countBeforeSearch);
+        await expect(featureSettings.addModelOptions).not.toHaveCount(0);
+      });
     });
 
     test('selecting a model from the popover adds it to the endpoint list', async ({
+      page,
       pageObjects,
     }) => {
       const { featureSettings } = pageObjects;
-      await featureSettings.mockInferenceEndpoints(mockInferenceEndpoints);
+      await mockInferenceEndpoints(page, mockEndpointsData);
       await featureSettings.goto();
 
-      try {
-        const alphaRows = featureSettings.endpointRowsFor('test_feature_alpha');
-        await expect(alphaRows).not.toHaveCount(0);
-        const initialCount = await alphaRows.count();
+      const alphaRows = featureSettings.endpointRowsFor('test_feature_alpha');
+      await expect(alphaRows).not.toHaveCount(0);
+      const initialCount = await alphaRows.count();
 
-        await test.step('open popover and select a model', async () => {
-          await featureSettings.addModelButton('test_feature_alpha').click();
-          await expect(featureSettings.addModelSearch).toBeVisible();
-          await featureSettings.addModelOption('anthropic').click();
-        });
+      await test.step('open popover and select a model', async () => {
+        await featureSettings.addModelButton('test_feature_alpha').click();
+        await expect(featureSettings.addModelSearch).toBeVisible();
+        await featureSettings.addModelOption('anthropic').click();
+      });
 
-        await test.step('endpoint row count increases by one', async () => {
-          await expect(alphaRows).toHaveCount(initialCount + 1);
-        });
+      await test.step('endpoint row count increases by one', async () => {
+        await expect(alphaRows).toHaveCount(initialCount + 1);
+      });
 
-        await test.step('save button becomes enabled', async () => {
-          await expect(featureSettings.saveButton).toBeEnabled();
-        });
-      } finally {
-        await featureSettings.unmockInferenceEndpoints();
-      }
+      await test.step('save button becomes enabled', async () => {
+        await expect(featureSettings.saveButton).toBeEnabled();
+      });
     });
 
     test('copy to applies source endpoint list to the target sub-feature', async ({
+      page,
       pageObjects,
     }) => {
       const { featureSettings } = pageObjects;
-      await featureSettings.mockInferenceEndpoints(mockInferenceEndpoints);
+      await mockInferenceEndpoints(page, mockEndpointsData);
       await featureSettings.goto();
 
-      try {
-        const betaCard = featureSettings.subFeatureCard('test_feature_beta');
+      const betaCard = featureSettings.subFeatureCard('test_feature_beta');
 
-        await test.step('target sub-feature shows its original endpoint', async () => {
-          await expect(betaCard).toContainText('openai');
-          await expect(betaCard).not.toContainText('anthropic');
-        });
+      await test.step('target sub-feature shows its original endpoint', async () => {
+        await expect(betaCard).toContainText('openai');
+        await expect(betaCard).not.toContainText('anthropic');
+      });
 
-        await test.step('open copy to modal from source sub-feature', async () => {
-          await featureSettings.copyToButton('test_feature_alpha').click();
-          await expect(featureSettings.copyToModalApply).toBeVisible();
-          await expect(featureSettings.copyToModalApply).toBeDisabled();
-        });
+      await test.step('open copy to modal from source sub-feature', async () => {
+        await featureSettings.copyToButton('test_feature_alpha').click();
+        await expect(featureSettings.copyToModalApply).toBeVisible();
+        await expect(featureSettings.copyToModalApply).toBeDisabled();
+      });
 
-        await test.step('select target sub-feature', async () => {
-          await featureSettings.copyToModalCheckbox('test_feature_beta').click();
-        });
+      await test.step('select target sub-feature', async () => {
+        await featureSettings.copyToModalCheckbox('test_feature_beta').click();
+      });
 
-        await test.step('apply copies endpoints to target', async () => {
-          await expect(featureSettings.copyToModalApply).toBeEnabled();
-          await featureSettings.copyToModalApply.click();
-          await expect(featureSettings.copyToModalApply).toBeHidden();
-        });
+      await test.step('apply copies endpoints to target', async () => {
+        await expect(featureSettings.copyToModalApply).toBeEnabled();
+        await featureSettings.copyToModalApply.click();
+        await expect(featureSettings.copyToModalApply).toBeHidden();
+      });
 
-        await test.step('target sub-feature now contains source endpoint', async () => {
-          await expect(betaCard).toContainText('anthropic');
-        });
+      await test.step('target sub-feature now contains source endpoint', async () => {
+        await expect(betaCard).toContainText('anthropic');
+      });
 
-        await test.step('save button becomes enabled', async () => {
-          await expect(featureSettings.saveButton).toBeEnabled();
-        });
-      } finally {
-        await featureSettings.unmockInferenceEndpoints();
-      }
+      await test.step('save button becomes enabled', async () => {
+        await expect(featureSettings.saveButton).toBeEnabled();
+      });
     });
   }
 );

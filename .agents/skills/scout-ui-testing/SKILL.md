@@ -38,7 +38,8 @@ description: Use when creating, updating, debugging, or reviewing Scout UI tests
 ## Page objects (UI)
 
 - Prefer `page.testSubj.locator(...)`, role/label locators; avoid brittle CSS.
-- Keep selectors + interactions inside the page object class.
+- Keep selectors + interactions inside the page object class. **Do not use `expect` assertions in page objects** — use `waitForSelector` for waiting on elements. Assertions belong in test specs only.
+- **Keep route mocks out of page objects** — page objects are for UI interactions only. Put `page.route()` mocks in a dedicated `fixtures/mocks.ts` file as standalone functions that accept `page` as a parameter. See `cloud_security_posture/test/scout_cspm_agentless/ui/fixtures/mocks.ts` for the reference pattern.
 - Don't make API calls from page objects (use `apiServices`/`kbnClient` in hooks instead).
 - Register plugin page objects by extending the `pageObjects` fixture in `test/scout*/ui/fixtures/index.ts`.
 - **Use `readonly` class fields for static locators** — assign them in the constructor, not as getter methods. Use methods only for parameterized locators/actions. See `DashboardApp` in `kbn-scout` for the reference pattern.

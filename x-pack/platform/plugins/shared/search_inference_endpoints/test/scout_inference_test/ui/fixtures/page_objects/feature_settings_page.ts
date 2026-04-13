@@ -6,7 +6,6 @@
  */
 
 import type { ScoutPage, Locator } from '@kbn/scout';
-import { expect } from '@kbn/scout/ui';
 
 export class FeatureSettingsPage {
   // Header
@@ -89,12 +88,12 @@ export class FeatureSettingsPage {
 
   public async goto() {
     await this.page.gotoApp('management/modelManagement/model_settings');
-    await expect(this.pageHeader).toBeVisible();
+    await this.page.testSubj.waitForSelector('modelSettingsPageHeader', { state: 'visible' });
   }
 
   public async gotoEmptyState() {
     await this.page.gotoApp('management/modelManagement/model_settings');
-    await expect(this.noModelsEmptyPrompt).toBeVisible();
+    await this.page.testSubj.waitForSelector('settings-no-models', { state: 'visible' });
   }
 
   // --- Parameterized Locators ---
@@ -129,56 +128,5 @@ export class FeatureSettingsPage {
 
   public resetLink(parentName: string): Locator {
     return this.page.testSubj.locator(`reset-${parentName}`);
-  }
-
-  // --- Route Mocking ---
-
-  public async mockConnectors() {
-    await this.page.route('**/internal/inference/connectors', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          connectors: [
-            {
-              connectorId: 'mock-connector',
-              name: 'Mock Connector',
-              type: '.gen-ai',
-              config: {},
-              capabilities: {},
-              isPreconfigured: false,
-            },
-          ],
-        }),
-      });
-    });
-  }
-
-  public async mockEmptyConnectors() {
-    await this.page.route('**/internal/inference/connectors', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ connectors: [] }),
-      });
-    });
-  }
-
-  public async unmockConnectors() {
-    await this.page.unroute('**/internal/inference/connectors');
-  }
-
-  public async mockInferenceEndpoints(endpoints: unknown[]) {
-    await this.page.route('**/internal/inference_endpoints/endpoints', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ inference_endpoints: endpoints }),
-      });
-    });
-  }
-
-  public async unmockInferenceEndpoints() {
-    await this.page.unroute('**/internal/inference_endpoints/endpoints');
   }
 }
