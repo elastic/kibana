@@ -166,6 +166,7 @@ export const EntitiesDataTable = ({
     sort,
     query,
     queryError,
+    filters,
     getRowsFromPages,
     onChangeItemsPerPage,
     onResetFilters,
@@ -361,13 +362,12 @@ export const EntitiesDataTable = ({
               operation,
               dataView
             );
-            filterManager.addFilters(newFilters);
             setUrlQuery({
-              filters: filterManager.getFilters(),
+              filters: [...filters, ...newFilters],
             });
           }
         : undefined,
-    [dataView, filterManager, setUrlQuery]
+    [dataView, filterManager, filters, setUrlQuery]
   );
 
   const onResize = (colSettings: { columnId: string; width: number | undefined }) => {
