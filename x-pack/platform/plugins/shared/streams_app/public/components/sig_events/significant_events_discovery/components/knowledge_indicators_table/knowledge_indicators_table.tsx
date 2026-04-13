@@ -335,7 +335,7 @@ export function KnowledgeIndicatorsTable() {
       },
       {
         name: EVENTS_COLUMN_LABEL,
-        width: '13%',
+        width: '110px',
         render: (ki: KnowledgeIndicator) => {
           if (ki.kind !== 'query' || !ki.rule.backed) {
             return null;
@@ -360,7 +360,7 @@ export function KnowledgeIndicatorsTable() {
       },
       {
         name: TYPE_COLUMN_LABEL,
-        width: '13%',
+        width: '90px',
         render: (ki: KnowledgeIndicator) => {
           if (ki.kind === 'feature') {
             return (
@@ -374,7 +374,7 @@ export function KnowledgeIndicatorsTable() {
       },
       {
         name: CONFIDENCE_COLUMN_LABEL,
-        width: '8%',
+        width: '70px',
         render: (ki: KnowledgeIndicator) => {
           if (ki.kind !== 'feature') return null;
           return (
@@ -386,14 +386,14 @@ export function KnowledgeIndicatorsTable() {
       },
       {
         name: STREAM_COLUMN_LABEL,
-        width: '10%',
+        width: '110px',
         render: (ki: KnowledgeIndicator) => {
           return <EuiBadge color="hollow">{getKnowledgeIndicatorStreamName(ki)}</EuiBadge>;
         },
       },
       {
         name: BACKED_STATUS_COLUMN,
-        width: '10%',
+        width: '100px',
         render: (ki: KnowledgeIndicator) => {
           if (ki.kind !== 'query') return null;
           return (
@@ -411,7 +411,7 @@ export function KnowledgeIndicatorsTable() {
       },
       {
         name: ACTIONS_COLUMN_LABEL,
-        width: '7%',
+        width: '60px',
         align: 'right',
         render: (ki: KnowledgeIndicator) => (
           <KnowledgeIndicatorActionsCell
