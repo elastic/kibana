@@ -117,29 +117,29 @@ ${forkBranches}
     ${concatJsonObjectPropertyEsqlExprSafe('id', '_target_id')},
     ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', 'entity')},
     ${JSON_OBJECT_SEPARATOR}, "\\"entity\\":", ${JSON_OBJECT_START},
-    ${concatJsonObjectPropertyEsqlExpr(
-      'availableInEntityStore',
-      'CASE(_target_name IS NOT NULL OR _target_type IS NOT NULL, "true", "false")'
-    )},
-    CASE(_target_name IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
-      ${concatJsonObjectPropertyEsqlExprAsString('name', '_target_name')}), ""),
-    CASE(_target_type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
-      ${concatJsonObjectPropertyEsqlExprAsString('type', '_target_type')}), ""),
-    CASE(_target_sub_type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
-      ${concatJsonObjectPropertyEsqlExprAsString('sub_type', '_target_sub_type')}), ""),
-    CASE(
-      _target_host_ip IS NOT NULL,
-      CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":", ${JSON_OBJECT_START},
-        "\\"ip\\":\\"", TO_STRING(_target_host_ip), "\\"",
-        ${JSON_OBJECT_END}),
-      ""
-    ),
-    CASE(_target_engine_metadata_type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
-      ${concatJsonObjectPropertyEsqlExprAsString(
-        'engine_type',
-        '_target_engine_metadata_type'
-      )}), ""),
-    ${JSON_OBJECT_SEPARATOR}, _target_source_fields,
+      ${concatJsonObjectPropertyEsqlExpr(
+        'availableInEntityStore',
+        'CASE(_target_name IS NOT NULL OR _target_type IS NOT NULL, "true", "false")'
+      )},
+      CASE(_target_name IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsString('name', '_target_name')}), ""),
+      CASE(_target_type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsString('type', '_target_type')}), ""),
+      CASE(_target_sub_type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsString('sub_type', '_target_sub_type')}), ""),
+      CASE(
+        _target_host_ip IS NOT NULL,
+        CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":", ${JSON_OBJECT_START},
+          "\\"ip\\":\\"", TO_STRING(_target_host_ip), "\\"",
+          ${JSON_OBJECT_END}),
+        ""
+      ),
+      CASE(_target_engine_metadata_type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsString(
+          'engine_type',
+          '_target_engine_metadata_type'
+        )}), ""),
+      ${JSON_OBJECT_SEPARATOR}, _target_source_fields,
     ${JSON_OBJECT_END},
   ${JSON_OBJECT_END})
 // Group by actor entity, relationship, and target type/subtype (for target grouping)
