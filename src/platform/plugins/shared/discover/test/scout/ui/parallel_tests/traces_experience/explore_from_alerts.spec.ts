@@ -77,7 +77,7 @@ spaceTest.describe(
   },
   () => {
     let ruleId: string;
-    let alertUuid: string;
+    let alertDocId: string;
 
     spaceTest.beforeAll(async ({ scoutSpace, config, apiServices, esClient }) => {
       await setupTracesExperience(scoutSpace, config);
@@ -104,17 +104,18 @@ spaceTest.describe(
       );
       ruleId = response.data.id;
 
-      alertUuid = faker.string.uuid();
+      const alertUuid = faker.string.uuid();
       const alertIndex = config.serverless
         ? SERVERLESS_APM_ALERTS_INDEX
         : STATEFUL_APM_ALERTS_INDEX;
 
-      await esClient.index({
+      const indexResponse = await esClient.index({
         index: alertIndex,
-        id: alertUuid,
+        op_type: 'create',
         refresh: 'wait_for',
         document: createAlertDocument({ alertUuid, ruleId, spaceId: scoutSpace.id }),
       });
+      alertDocId = indexResponse._id;
     });
 
     spaceTest.beforeEach(async ({ browserAuth }) => {
@@ -146,7 +147,7 @@ spaceTest.describe(
       'Alert details - "Traces in Discover" opens traces experience',
       async ({ page, pageObjects }) => {
         await spaceTest.step('navigate to alert details page', async () => {
-          await page.gotoApp(`observability/alerts/${alertUuid}`, {
+          await page.gotoApp(`observability/alerts/${alertDocId}`, {
             params: ALERT_TIME_RANGE,
           });
         });

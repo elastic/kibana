@@ -28,6 +28,8 @@ function createAlertDetailsApmTest(alertIndex: string) {
     esClient,
   }: ExtendedScoutTestFixtures & ObltWorkerFixtures) => {
     let ruleId: string;
+    let alertDocId: string;
+
     const alertUuid = faker.string.uuid();
 
     await test.step('create rule via API', async () => {
@@ -52,9 +54,9 @@ function createAlertDetailsApmTest(alertIndex: string) {
     });
 
     await test.step('index alert document', async () => {
-      await esClient.index({
+      const response = await esClient.index({
         index: alertIndex,
-        id: alertUuid,
+        op_type: 'create',
         refresh: 'wait_for',
         document: createApmAlertDocument({
           alertUuid,
@@ -71,10 +73,12 @@ function createAlertDetailsApmTest(alertIndex: string) {
           transactionType: TRANSACTION_TYPE,
         }),
       });
+
+      alertDocId = response._id;
     });
 
     await test.step('navigate to alert details page', async () => {
-      await alertDetailsPage.goto(alertUuid);
+      await alertDetailsPage.goto(alertDocId);
     });
 
     await test.step('open the chart actions dropdown on the Latency chart', async () => {
