@@ -5,7 +5,12 @@
  * 2.0.
  */
 
+import { createEsClientForFtrConfig } from '@kbn/test';
+
 import type { FtrProviderContext } from '../../ftr_provider_context';
+
+/** Must match `CommonPageObject.loginIfPrompted` (default FTR browser user). */
+const FTR_DEFAULT_BROWSER_USER = { username: 'test_user', password: 'changeme' } as const;
 
 // Minimal search-session fixtures for the accessibility test. The `search-session` SO type is
 // hidden and not importable via the standard SO API, so we use kibanaServer.savedObjects.create.
@@ -87,6 +92,7 @@ const SEARCH_SESSIONS = [
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { searchSessionsManagement } = getPageObjects(['searchSessionsManagement']);
   const a11y = getService('a11y');
+  const config = getService('config');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const find = getService('find');
@@ -94,6 +100,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Search sessions Accessibility', () => {
     before(async () => {
+      // SearchSessionService.find filters by realm + username from the current Kibana user. The
+      // browser logs in as `test_user` whenever `security.disableTestUser` is false (see
+      // CommonPageObject.loginIfPrompted); using `kibanaTestUser` (elastic) only matches if that
+      // is also who is logged in, which is not the default FTR setup.
+      const disableTestUser = config.get('security.disableTestUser');
+      const esAuth = disableTestUser
+        ? {
+            username: config.get('servers.kibana.username'),
+            password: config.get('servers.kibana.password'),
+          }
+        : FTR_DEFAULT_BROWSER_USER;
+
+      const elasticsearch = createEsClientForFtrConfig(config, {
+        authOverride: esAuth,
+      });
+      let realmType: string;
+      let realmName: string;
+      let username: string;
+      try {
+        const auth = await elasticsearch.security.authenticate();
+        realmType = auth.authentication_realm.type;
+        realmName = auth.authentication_realm.name;
+        username = auth.username;
+      } finally {
+        await elasticsearch.close();
+      }
+
       for (const { id, name, status, appId } of SEARCH_SESSIONS) {
         await kibanaServer.savedObjects.create({
           type: 'search-session',
@@ -108,10 +141,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             idMapping: {},
             sessionId: id,
             version: '8.8.0',
-            // Required so the session service's user-based filter matches the FTR test user.
-            realmType: 'reserved',
-            realmName: 'reserved',
-            username: 'elastic',
+            realmType,
+            realmName,
+            username,
           },
         });
       }
