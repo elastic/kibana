@@ -14,9 +14,11 @@ import {
 import { getSyntheticsDynamicSettings } from '../../saved_objects/synthetics_settings';
 import { syntheticsParamType } from '../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import type { SyntheticsParams } from '../../../common/runtime_types';
+import type { OverviewStatusState, SyntheticsParams } from '../../../common/runtime_types';
 import type { SyntheticsServerSetup } from '../../types';
-import type { SyntheticsRestApiRouteFactory } from '../types';
+import type { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
+import type { OverviewStatusQuery } from '../common';
+import { OverviewStatusService } from '../overview_status/overview_status_service';
 import { getPrivateLocationsAndAgentPolicies } from '../settings/private_locations/get_private_locations';
 import { getAgentPoliciesAsInternalUser } from '../settings/private_locations/get_agent_policies';
 import {
@@ -114,6 +116,18 @@ const collectGlobalParamMetadata = async (savedObjectsClient: SavedObjectsClient
   return params;
 };
 
+const getOverviewStatusForDiagnostics = async (
+  routeContext: RouteContext
+): Promise<OverviewStatusState | { error: string }> => {
+  try {
+    return await new OverviewStatusService(
+      routeContext as RouteContext<Record<string, unknown>, OverviewStatusQuery>
+    ).getOverviewStatus();
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : String(e) };
+  }
+};
+
 export const getSyntheticsDiagnosticsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.SYNTHETICS_DIAGNOSTICS,
@@ -136,6 +150,7 @@ export const getSyntheticsDiagnosticsRoute: SyntheticsRestApiRouteFactory = () =
       packagePolicies,
       globalParams,
       dynamicSettings,
+      overviewStatus,
     ] = await Promise.all([
       monitorConfigRepository.getAll({}),
       getPrivateLocationsAndAgentPolicies(savedObjectsClient, syntheticsMonitorClient),
@@ -143,6 +158,7 @@ export const getSyntheticsDiagnosticsRoute: SyntheticsRestApiRouteFactory = () =
       listAllSyntheticsPackagePolicies(savedObjectsClient, server),
       collectGlobalParamMetadata(savedObjectsClient),
       getSyntheticsDynamicSettings(savedObjectsClient),
+      getOverviewStatusForDiagnostics(routeContext),
     ]);
 
     const referencedPackagePolicyIds = new Set<string>();
@@ -204,6 +220,7 @@ export const getSyntheticsDiagnosticsRoute: SyntheticsRestApiRouteFactory = () =
         spaceId,
         kibanaVersion: server.stackVersion,
       },
+      overviewStatus,
       monitors,
       monitorCountByLocationId: countMonitorsByLocationId(monitorSavedObjects),
       referencedPackagePolicyIds: [...referencedPackagePolicyIds].sort(),
