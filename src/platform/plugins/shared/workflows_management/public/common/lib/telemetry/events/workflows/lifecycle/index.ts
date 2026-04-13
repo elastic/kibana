@@ -193,6 +193,14 @@ const workflowCreatedSchema: RootSchema<ReportWorkflowCreatedActionParams> = {
       optional: false,
     },
   },
+  hasTriggerConditions: {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether any configured trigger has a non-empty on.condition. Only presence is tracked.',
+      optional: false,
+    },
+  },
 };
 
 const workflowUpdatedSchema: RootSchema<ReportWorkflowUpdatedActionParams> = {

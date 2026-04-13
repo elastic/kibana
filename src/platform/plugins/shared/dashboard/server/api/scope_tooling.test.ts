@@ -48,7 +48,7 @@ describe('stripUnmappedKeys', () => {
             y: 0,
           },
           type: 'typeWithSchema',
-          uid: 'panel1',
+          id: 'panel1',
         },
       ],
       pinned_panels: [
@@ -58,7 +58,7 @@ describe('stripUnmappedKeys', () => {
             field_name: 'field1',
           },
           grow: false,
-          uid: 'pinned1',
+          id: 'pinned1',
           type: 'pinnedTypeWithSchema',
           width: 'small',
         },
@@ -68,7 +68,7 @@ describe('stripUnmappedKeys', () => {
             field_name: 'field2',
           },
           grow: false,
-          uid: 'pinned2',
+          id: 'pinned2',
           type: 'pinnedTypeWithoutSchema',
           width: 'small',
         },
@@ -90,8 +90,8 @@ describe('stripUnmappedKeys', () => {
                 "x": 0,
                 "y": 0,
               },
+              "id": "panel1",
               "type": "typeWithSchema",
-              "uid": "panel1",
             },
           ],
           "pinned_panels": Array [
@@ -101,15 +101,23 @@ describe('stripUnmappedKeys', () => {
                 "field_name": "field1",
               },
               "grow": false,
+              "id": "pinned1",
               "type": "pinnedTypeWithSchema",
-              "uid": "pinned1",
               "width": "small",
             },
           ],
           "title": "my dashboard",
         },
         "warnings": Array [
-          "Dropped panel pinned2, panel schema not available for panel type: pinnedTypeWithoutSchema. Panels without schemas are not supported by dashboard REST endpoints",
+          Object {
+            "message": "Panel schema not available for panel type: pinnedTypeWithoutSchema. Panels without schemas are not supported by dashboard REST endpoints",
+            "panel_config": Object {
+              "data_view_id": "dv1",
+              "field_name": "field2",
+            },
+            "panel_type": "pinnedTypeWithoutSchema",
+            "type": "dropped_panel",
+          },
         ],
       }
     `);
@@ -179,7 +187,7 @@ describe('stripUnmappedKeys', () => {
             y: 0,
           },
           type: 'typeWithoutSchema',
-          uid: '12345',
+          id: '12345',
         },
       ],
     };
@@ -190,7 +198,14 @@ describe('stripUnmappedKeys', () => {
           "title": "my dashboard",
         },
         "warnings": Array [
-          "Dropped panel 12345, panel schema not available for panel type: typeWithoutSchema. Panels without schemas are not supported by dashboard REST endpoints",
+          Object {
+            "message": "Panel schema not available for panel type: typeWithoutSchema. Panels without schemas are not supported by dashboard REST endpoints",
+            "panel_config": Object {
+              "foo": "some value",
+            },
+            "panel_type": "typeWithoutSchema",
+            "type": "dropped_panel",
+          },
         ],
       }
     `);
@@ -219,7 +234,7 @@ describe('stripUnmappedKeys', () => {
             y: 0,
           },
           type: 'typeWithSchema',
-          uid: '12345',
+          id: '12345',
         },
       ],
     };
@@ -230,112 +245,14 @@ describe('stripUnmappedKeys', () => {
           "title": "my dashboard",
         },
         "warnings": Array [
-          "Dropped panel 12345, panel config is not supported. Reason: Unmapped panel type.",
-        ],
-      }
-    `);
-  });
-
-  it('should drop panel enhancements', () => {
-    mockGetTransforms.mockImplementation(() => {
-      return {
-        schema: schema.object({
-          foo: schema.string(),
-        }),
-      };
-    });
-    const dashboardState = {
-      title: 'my dashboard',
-      panels: [
-        {
-          config: {
-            title: 'panel',
-            enhancements: {
-              dynamicActions: {
-                events: [],
-              },
+          Object {
+            "message": "Unmapped panel type",
+            "panel_config": Object {
+              "foo": "some value",
             },
+            "panel_type": "typeWithSchema",
+            "type": "dropped_panel",
           },
-          grid: {
-            h: 15,
-            w: 24,
-            x: 0,
-            y: 0,
-          },
-          type: 'typeWithSchema',
-          uid: 'panel1',
-        },
-        {
-          collapsed: false,
-          grid: { y: 0 },
-          panels: [
-            {
-              config: {
-                title: 'panel in section',
-                enhancements: {
-                  dynamicActions: {
-                    events: [{}],
-                  },
-                },
-              },
-              grid: {
-                h: 15,
-                w: 24,
-                x: 0,
-                y: 0,
-              },
-              type: 'typeWithSchema',
-              uid: 'panelInSection1',
-            },
-          ],
-          title: 'section 1',
-        },
-      ],
-    };
-    expect(stripUnmappedKeys(dashboardState)).toMatchInlineSnapshot(`
-      Object {
-        "data": Object {
-          "panels": Array [
-            Object {
-              "config": Object {
-                "title": "panel",
-              },
-              "grid": Object {
-                "h": 15,
-                "w": 24,
-                "x": 0,
-                "y": 0,
-              },
-              "type": "typeWithSchema",
-              "uid": "panel1",
-            },
-            Object {
-              "collapsed": false,
-              "grid": Object {
-                "y": 0,
-              },
-              "panels": Array [
-                Object {
-                  "config": Object {
-                    "title": "panel in section",
-                  },
-                  "grid": Object {
-                    "h": 15,
-                    "w": 24,
-                    "x": 0,
-                    "y": 0,
-                  },
-                  "type": "typeWithSchema",
-                  "uid": "panelInSection1",
-                },
-              ],
-              "title": "section 1",
-            },
-          ],
-          "title": "my dashboard",
-        },
-        "warnings": Array [
-          "Dropped unmapped panel config key 'enhancements' from panel panelInSection1",
         ],
       }
     `);

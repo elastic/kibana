@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import React, { lazy, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { BoolQuery } from '@kbn/es-query';
+import { useHistory, useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiTabbedContent, useEuiTheme } from '@elastic/eui';
 import type { AlertStatusValues } from '@kbn/alerting-plugin/common';
-import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { ALERT_RULE_UUID, ALERT_STATUS } from '@kbn/rule-data-utils';
+import type { PublicAlertStatus } from '@kbn/rule-data-utils';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import { DEFAULT_CONTROLS } from '@kbn/alerts-ui-shared/src/alert_filter_controls/constants';
 import { defaultAlertsTableColumns } from '@kbn/response-ops-alerts-table/configuration';
 import type { AlertsTable as AlertsTableType } from '@kbn/response-ops-alerts-table';
 import type { AlertDetailsNavigation, CasesService } from '@kbn/response-ops-alerts-table/types';
@@ -74,6 +78,9 @@ export function RuleComponent({
   durationEpoch = Date.now(),
   isLoadingChart,
 }: RuleComponentProps) {
+  const history = useHistory();
+  const location = useLocation();
+
   const {
     ruleTypeRegistry,
     actionTypeRegistry,
@@ -91,6 +98,14 @@ export function RuleComponent({
   } = useKibana().services;
 
   const [cases, setCases] = useState<CasesService>();
+
+  const tabsRef = useRef<HTMLDivElement>(null);
+
+  const [selectedTabId, setSelectedTabId] = useState<string>(() => {
+    const params = new URLSearchParams(location.search);
+    const tabId = params.get('tabId');
+    return tabId === 'history' ? EVENT_LOG_LIST_TAB : ALERT_LIST_TAB;
+  });
 
   useEffect(() => {
     getCasesPlugin?.()
@@ -237,42 +252,101 @@ export function RuleComponent({
     [renderRuleAlertList, ruleType.id]
   );
 
-  const tabs = [
-    {
-      id: ALERT_LIST_TAB,
-      name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.rule.alertsTabText', {
-        defaultMessage: 'Alerts',
-      }),
-      'data-test-subj': 'ruleAlertListTab',
-      content: renderRuleAlertsContent(),
+  const scrollAlertsIntoView = useCallback(
+    (status?: PublicAlertStatus) => {
+      setAlertSummaryWidgetTimeRange(getDefaultAlertSummaryTimeRange());
+      setSelectedTabId(ALERT_LIST_TAB);
+
+      const controlConfigs = DEFAULT_CONTROLS.map((control) => {
+        if (control.field_name === ALERT_STATUS) {
+          return {
+            ...control,
+            selected_options: status ? [status] : [],
+          };
+        }
+        return control;
+      });
+
+      const path = setStateToKbnUrl(
+        'searchBarParams',
+        {
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+          kuery: '',
+          controlConfigs,
+        },
+        { useHash: false, storeInHashQuery: false },
+        `${location.pathname}?tabId=alerts`
+      );
+
+      history.replace(path);
+
+      tabsRef.current?.scrollIntoView({ behavior: 'smooth' });
     },
-    {
-      id: EVENT_LOG_LIST_TAB,
-      name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.rule.eventLogTabText', {
-        defaultMessage: 'History',
-      }),
-      'data-test-subj': 'eventLogListTab',
-      content: suspendedComponentWithProps<RuleEventLogListProps<'stackManagement'>>(
-        RuleEventLogList,
-        'xl'
-      )({
-        fetchRuleSummary: false,
-        ruleId: rule.id,
-        ruleType,
-        ruleSummary,
-        numberOfExecutions,
-        refreshToken,
-        isLoadingRuleSummary: isLoadingChart,
-        onChangeDuration,
-        requestRefresh,
-      }),
-    },
-  ];
+    [history, location.pathname]
+  );
+
+  const tabs = useMemo(
+    () => [
+      {
+        id: ALERT_LIST_TAB,
+        name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.rule.alertsTabText', {
+          defaultMessage: 'Alerts',
+        }),
+        'data-test-subj': 'ruleAlertListTab',
+        content: renderRuleAlertsContent(),
+      },
+      {
+        id: EVENT_LOG_LIST_TAB,
+        name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.rule.eventLogTabText', {
+          defaultMessage: 'History',
+        }),
+        'data-test-subj': 'eventLogListTab',
+        content: suspendedComponentWithProps<RuleEventLogListProps<'stackManagement'>>(
+          RuleEventLogList,
+          'xl'
+        )({
+          fetchRuleSummary: false,
+          ruleId: rule.id,
+          ruleType,
+          ruleSummary,
+          numberOfExecutions,
+          refreshToken,
+          isLoadingRuleSummary: isLoadingChart,
+          onChangeDuration,
+          requestRefresh,
+        }),
+      },
+    ],
+    [
+      renderRuleAlertsContent,
+      rule.id,
+      ruleType,
+      ruleSummary,
+      numberOfExecutions,
+      refreshToken,
+      isLoadingChart,
+      onChangeDuration,
+      requestRefresh,
+    ]
+  );
+
+  const selectedTab = useMemo(
+    () => tabs.find((tab) => tab.id === selectedTabId) || tabs[0],
+    [tabs, selectedTabId]
+  );
 
   const renderTabs = () => {
     const isEnabled = getIsExperimentalFeatureEnabled('rulesDetailLogs');
     if (isEnabled) {
-      return <EuiTabbedContent data-test-subj="ruleDetailsTabbedContent" tabs={tabs} />;
+      return (
+        <EuiTabbedContent
+          data-test-subj="ruleDetailsTabbedContent"
+          tabs={tabs}
+          selectedTab={selectedTab}
+          onTabClick={(tab) => setSelectedTabId(tab.id)}
+        />
+      );
     }
     return renderRuleAlertsContent();
   };
@@ -295,10 +369,14 @@ export function RuleComponent({
           <AlertSummaryWidget
             ruleTypeIds={[rule.ruleTypeId]}
             consumers={[rule.consumer]}
-            filter={alertsSearchEsQuery}
+            filter={{
+              term: {
+                [ALERT_RULE_UUID]: rule.id,
+              },
+            }}
             timeRange={alertSummaryWidgetTimeRange}
-            onClick={() => {
-              setAlertSummaryWidgetTimeRange(getDefaultAlertSummaryTimeRange());
+            onClick={(status?: PublicAlertStatus) => {
+              scrollAlertsIntoView(status);
             }}
             dependencies={{ charts, uiSettings }}
           />
@@ -316,6 +394,7 @@ export function RuleComponent({
       </EuiFlexGroup>
 
       <EuiSpacer size="xl" />
+      <div ref={tabsRef} />
       <input
         type="hidden"
         data-test-subj="alertsDurationEpoch"

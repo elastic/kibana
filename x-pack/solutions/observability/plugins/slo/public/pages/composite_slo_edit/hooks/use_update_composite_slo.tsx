@@ -1,0 +1,87 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { useMutation, useQueryClient } from '@kbn/react-query';
+import { ALL_VALUE, type UpdateCompositeSLOResponse } from '@kbn/slo-schema';
+import React from 'react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { useKibana } from '../../../hooks/use_kibana';
+import { sloKeys } from '../../../hooks/query_key_factory';
+import type { CreateCompositeSLOForm } from '../types';
+
+type ServerError = IHttpFetchError<ResponseErrorBody>;
+
+export function useUpdateCompositeSlo() {
+  const {
+    i18n: i18nStart,
+    theme,
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    UpdateCompositeSLOResponse,
+    ServerError,
+    { compositeSloId: string; compositeSlo: CreateCompositeSLOForm }
+  >(
+    ['updateCompositeSlo'],
+    ({ compositeSloId, compositeSlo }) => {
+      return http.put<UpdateCompositeSLOResponse>(
+        `/api/observability/slo_composites/${encodeURIComponent(compositeSloId)}`,
+        { body: JSON.stringify(toApiPayload(compositeSlo)) }
+      );
+    },
+    {
+      onSuccess: (_data, { compositeSloId, compositeSlo }) => {
+        queryClient.invalidateQueries({ queryKey: sloKeys.compositeLists(), exact: false });
+        queryClient.invalidateQueries({
+          queryKey: sloKeys.compositeDetail(compositeSloId),
+          exact: false,
+        });
+        toasts.addSuccess({
+          title: toMountPoint(
+            <span>
+              {i18n.translate('xpack.slo.compositeSloUpdate.successNotification', {
+                defaultMessage: 'Successfully updated composite SLO "{name}"',
+                values: { name: compositeSlo.name },
+              })}
+            </span>,
+            { i18n: i18nStart, theme }
+          ),
+        });
+      },
+      onError: (error, { compositeSlo }) => {
+        toasts.addError(new Error(error.body?.message ?? error.message), {
+          title: i18n.translate('xpack.slo.compositeSloUpdate.errorNotification', {
+            defaultMessage: 'Failed to update composite SLO "{name}"',
+            values: { name: compositeSlo.name },
+          }),
+        });
+      },
+    }
+  );
+}
+
+function toApiPayload(form: CreateCompositeSLOForm) {
+  return {
+    name: form.name,
+    description: form.description,
+    members: form.members.map(({ sloId, instanceId, weight }) => ({
+      sloId,
+      ...(instanceId && instanceId !== ALL_VALUE ? { instanceId } : {}),
+      weight,
+    })),
+    compositeMethod: 'weightedAverage',
+    timeWindow: form.timeWindow,
+    budgetingMethod: 'occurrences',
+    objective: { target: form.objective.target / 100 },
+    tags: form.tags,
+  };
+}

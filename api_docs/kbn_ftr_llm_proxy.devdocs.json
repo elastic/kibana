@@ -916,7 +916,7 @@
         "label": "ToolMessage",
         "description": [],
         "signature": [
-          "{ role: \"assistant\"; content: string | null; audio?: ",
+          "{ content: string | null; role: \"assistant\"; audio?: ",
           "ChatCompletionAudio",
           " | null | undefined; annotations?: ",
           "ChatCompletionMessage",

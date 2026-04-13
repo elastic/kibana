@@ -118,6 +118,11 @@ export interface ReportWorkflowCreatedActionParams
    * Number of constants defined in the workflow.
    */
   constCount: number;
+  /**
+   * Whether any configured trigger has a non-empty on.condition.
+   * Only presence is tracked; condition contents are never reported.
+   */
+  hasTriggerConditions: boolean;
 }
 
 /**

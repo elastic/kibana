@@ -14,9 +14,11 @@ import {
 } from '@kbn/security-solution-plugin/common/test';
 import { setupUsers } from './setup_users';
 import { CLOUD_SERVERLESS, IS_SERVERLESS } from '../env_var_names_constants';
+import { suppressGlobalAnnouncements } from '../tasks/api_calls/common';
 
 before(() => {
   cy.task('esArchiverLoad', { archiveName: 'auditbeat_single' });
+  suppressGlobalAnnouncements();
 });
 
 if (!Cypress.env(IS_SERVERLESS) && !Cypress.env(CLOUD_SERVERLESS)) {

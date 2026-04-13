@@ -91,6 +91,11 @@ dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-browser'
   - '@kbn/share-plugin'
+  - '@kbn/core-security-server'
+  - '@kbn/core-elasticsearch-server'
+  - '@kbn/logging'
+  - '@kbn/core-saved-objects-api-server'
+  - '@kbn/management-settings-ids'
 tags:
   - plugin
   - prod
@@ -108,26 +113,6 @@ fileGroups:
     - .storybook/**/*.tsx
     - server/**/*.json
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

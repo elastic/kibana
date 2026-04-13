@@ -9,6 +9,7 @@
 
 import { renderHook, act } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { GROUP_NOT_SET_VALUE } from '@kbn/esql-utils';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import type { AggregateQuery } from '@kbn/es-query';
 import { dataViewWithTimefieldMock } from '../../../../../../__mocks__/data_view_with_timefield';
@@ -18,7 +19,17 @@ import type { ESQLDataGroupNode } from '../blocks';
 import { CascadedDocumentsProvider } from '../cascaded_documents_provider';
 import type { CascadedDocumentsContext } from '../cascaded_documents_provider';
 import { createElement, type ReactNode } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import type { CascadedDocumentsFetcher } from '../../../../data_fetching/cascaded_documents_fetcher';
+
+jest.mock('../telemetry', () => ({
+  useCascadedDocumentsTelemetry: () => ({
+    trackCascadeExpanded: jest.fn(),
+    trackCascadeCollapsed: jest.fn(),
+    trackCascadeOptOut: jest.fn(),
+    trackCascadeOpenInNewTab: jest.fn(),
+  }),
+}));
 
 describe('data_fetching related hooks', () => {
   beforeEach(() => {
@@ -90,7 +101,7 @@ describe('data_fetching related hooks', () => {
       expect(result.current.columnTypes.get('count')).toBe('number');
     });
 
-    it('should skip undefined and null values in grouping', () => {
+    it('should assign undefined and null values in grouping to the ES|QL unset value', () => {
       const mockRows = createMockRows([
         { category: 'A', count: 10 },
         { category: undefined, count: 5 },
@@ -107,9 +118,10 @@ describe('data_fetching related hooks', () => {
         })
       );
 
-      expect(result.current.data).toHaveLength(2);
+      expect(result.current.data).toHaveLength(3);
       expect(result.current.data.find((r) => r.groupValue === 'A')).toBeDefined();
       expect(result.current.data.find((r) => r.groupValue === 'B')).toBeDefined();
+      expect(result.current.data.find((r) => r.groupValue === GROUP_NOT_SET_VALUE)).toBeDefined();
     });
 
     it('should aggregate multiple applied functions', () => {
@@ -216,6 +228,14 @@ describe('data_fetching related hooks', () => {
         esqlVariables: undefined,
         timeRange: undefined,
         viewModeToggle: undefined,
+        expandedDoc$: new BehaviorSubject<DataTableRecord | undefined>(undefined),
+        expandedDocOwner$: new BehaviorSubject<string | undefined>(undefined),
+        getExpandedDocSetter: () => jest.fn(),
+        getRenderDocumentViewMetaSetter: () => undefined,
+        getDataCascadeUiState: jest.fn(),
+        getDataGridUiStateMap: jest.fn(),
+        setDataCascadeUiState: jest.fn(),
+        setDataGridUiState: jest.fn(),
         cascadeGroupingChangeHandler: jest.fn(),
         onUpdateESQLQuery: jest.fn(),
         openInNewTab: jest.fn(),
