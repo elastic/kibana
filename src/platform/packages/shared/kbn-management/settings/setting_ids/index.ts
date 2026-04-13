@@ -9,7 +9,7 @@
 
 // General settings
 export const DISABLE_REQUEST_BATCHING_ID = 'bfetch:disable';
-export const ELASTIC_CONSOLE_ENABLED_SETTING_ID = 'elasticConsole:enabled';
+export const ELASTIC_CONSOLE_ENABLED_SETTING_ID = 'elasticRamen:enabled';
 export const DISABLE_BATCH_COMPRESSION_ID = 'bfetch:disableCompression';
 export const CSV_QUOTE_VALUES_ID = 'csv:quoteValues';
 export const CSV_SEPARATOR_ID = 'csv:separator';
@@ -159,6 +159,7 @@ export const OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATT
   'observability:streamsContinuousKiExtractionExcludedStreamPatterns';
 export const OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS =
   'observability:streamsSigEventsIndexPatterns';
+export const OBSERVABILITY_STREAMS_ENABLE_MEMORY = 'observability:streamsEnableMemory';
 export const OBSERVABILITY_ENABLE_DIAGNOSTIC_MODE = 'observability:enableDiagnosticMode';
 
 // Reporting settings

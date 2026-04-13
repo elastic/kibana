@@ -539,10 +539,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Whether Elastic Workflows and related experiences are enabled.' },
   },
-  'workflows:aiAgent:enabled': {
-    type: 'boolean',
-    _meta: { description: 'Whether AI-powered workflow authoring assistance is enabled.' },
-  },
   'banners:placement': {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
@@ -769,6 +765,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
         'Comma-separated index patterns used for Significant Events stream filtering and analysis.',
     },
   },
+  'observability:streamsEnableMemory': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable memory in Streams',
+    },
+  },
   'observability:enableDiagnosticMode': {
     type: 'boolean',
     _meta: {
@@ -802,7 +804,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Switches the Entity Store Engine to v2',
     },
   },
-  'elasticConsole:enabled': {
+  'elasticRamen:enabled': {
     type: 'boolean',
     _meta: {
       description: 'Non-default value of setting.',

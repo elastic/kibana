@@ -23,6 +23,8 @@ import {
   ESQLVariableType,
   EsqlControlType,
   TIMEFIELD_ROUTE,
+  isQueryESQLControl,
+  isStaticESQLControl,
   type ESQLControlVariable,
 } from '@kbn/esql-types';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
@@ -102,7 +104,7 @@ export function ValueControlForm({
   );
 
   const [selectedValues, setSelectedValues] = useState<EuiComboBoxOptionOption[]>(
-    initialState?.available_options
+    isStaticESQLControl(initialState)
       ? initialState.available_options.map((option) => {
           return {
             label: option,
@@ -115,7 +117,9 @@ export function ValueControlForm({
 
   const [valuesQuery, setValuesQuery] = useState<string>(
     variableType === ESQLVariableType.VALUES
-      ? initialState?.esql_query ?? INITIAL_EMPTY_STATE_QUERY
+      ? isQueryESQLControl(initialState)
+        ? initialState.esql_query
+        : INITIAL_EMPTY_STATE_QUERY
       : ''
   );
   const [esqlQueryErrors, setEsqlQueryErrors] = useState<Error[] | undefined>();
@@ -240,7 +244,7 @@ export function ValueControlForm({
 
   useEffect(() => {
     if (!selectedValues?.length && controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY) {
-      if (initialState?.esql_query) {
+      if (isQueryESQLControl(initialState)) {
         onValuesQuerySubmit(initialState.esql_query);
       } else if (valuesRetrieval) {
         setSuggestedQuery();
@@ -249,7 +253,7 @@ export function ValueControlForm({
   }, [
     selectedValues?.length,
     controlFlyoutType,
-    initialState?.esql_query,
+    initialState,
     variableName,
     valuesRetrieval,
     onValuesQuerySubmit,

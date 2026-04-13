@@ -324,6 +324,9 @@ describe('InferenceConnector', () => {
           asStream: true,
           meta: true,
           requestTimeout: 180_000,
+          headers: {
+            'X-Elastic-Product-Use-Case': 'inference',
+          },
         }
       );
     });
@@ -352,6 +355,9 @@ describe('InferenceConnector', () => {
           meta: true,
           requestTimeout: 180_000,
           signal,
+          headers: {
+            'X-Elastic-Product-Use-Case': 'inference',
+          },
         }
       );
     });

@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import type { SavedObjectAttributes } from '@kbn/core/server';
 import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
-import { getWorkflowTemplatesForConnector } from '@kbn/connector-specs/server';
 import type { ConnectorCreateParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { validateConfig, validateConnector, validateSecrets } from '../../../../lib';
@@ -190,7 +189,6 @@ export async function create({
       request: context.request,
       services: hookServices,
       wasSuccessful,
-      workflowTemplates: getWorkflowTemplatesForConnector(actionTypeId),
     },
     context.logger
   );

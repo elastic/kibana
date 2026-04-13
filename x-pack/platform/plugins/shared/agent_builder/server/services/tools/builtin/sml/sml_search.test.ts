@@ -42,6 +42,12 @@ describe('createSmlSearchTool', () => {
     expect(tool.tags).toEqual(['sml', 'search']);
   });
 
+  it('description mentions workflows and wildcard query', () => {
+    const tool = createSmlSearchTool({ getSmlService });
+    expect(tool.description).toContain('workflows');
+    expect(tool.description).toContain('"*"');
+  });
+
   it('calls search with correct params', async () => {
     mockSearch.mockResolvedValue({ results: [], total: 0 });
     const tool = createSmlSearchTool({ getSmlService });
