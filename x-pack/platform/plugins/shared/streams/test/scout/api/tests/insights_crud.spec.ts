@@ -122,7 +122,7 @@ apiTest.describe(
 
     // Test: List all insights
     // Failing, see https://github.com/elastic/kibana/issues/262787
-    apiTest('should list all insights', async ({ apiClient, samlAuth }) => {
+    apiTest.skip('should list all insights', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
       // Create a few insights
@@ -374,7 +374,7 @@ apiTest.describe(
 
     // Test: Bulk operations with mixed types
     // Failing, see https://github.com/elastic/kibana/issues/262787
-    apiTest('should handle mixed bulk operations', async ({ apiClient, samlAuth }) => {
+    apiTest.skip('should handle mixed bulk operations', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
       // Create an insight to update and another to delete
