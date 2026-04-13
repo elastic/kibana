@@ -6,7 +6,7 @@
  */
 
 import { isEvidenceGrounded } from './is_evidence_grounded';
-import { matchesEvidenceText } from '../common/matches_evidence_text';
+import { matchesEvidenceText } from '../../common/matches_evidence_text';
 
 describe('matchesEvidenceText', () => {
   it('does not match short evidence as a substring inside a larger token', () => {

@@ -132,6 +132,29 @@ describe('GET /internal/evals/tracing/projects/{projectName}/traces', () => {
     expect(boolFilter.bool.minimum_should_match).toBe(1);
   });
 
+  it('escapes wildcard metacharacters in the name filter', async () => {
+    const { handler, context, esClient } = setup();
+    esClient.search.mockResolvedValueOnce({
+      hits: { hits: [], total: { value: 0 } },
+    } as any);
+
+    await handler(
+      context,
+      makeRequest({ query: { name: 'foo*bar?baz\\qux' } }),
+      kibanaResponseFactory
+    );
+
+    const searchCall = esClient.search.mock.calls[0][0] as any;
+    const boolFilter = searchCall.query.bool.filter.find(
+      (f: Record<string, unknown>) => f.bool !== undefined
+    );
+    const expectedValue = '*foo\\*bar\\?baz\\\\qux*';
+    for (const clause of boolFilter.bool.should) {
+      const [wildcardBody] = Object.values(clause.wildcard) as Array<{ value: string }>;
+      expect(wildcardBody.value).toBe(expectedValue);
+    }
+  });
+
   it('does not add name filter when name is not provided', async () => {
     const { handler, context, esClient } = setup();
     esClient.search.mockResolvedValueOnce({
