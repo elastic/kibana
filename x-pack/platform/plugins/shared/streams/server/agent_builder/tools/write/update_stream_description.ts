@@ -65,9 +65,10 @@ export const createUpdateStreamDescriptionTool = ({
   handler: async ({ name, description }, { request }) => {
     const signal = abortSignalFromRequest(request);
     try {
-      const { streamsClient, queryClient, attachmentClient } = await getScopedClients({
+      const { streamsClient, getQueryClient, attachmentClient } = await getScopedClients({
         request,
       });
+      const queryClient = await getQueryClient();
 
       const definition = await streamsClient.getStream(name);
       const { dashboards, queries, rules } = await getStreamAssets({

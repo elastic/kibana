@@ -98,9 +98,10 @@ export const createMapFieldsTool = ({
   handler: async ({ name, fields_json: fieldsJson }, { request }) => {
     const signal = abortSignalFromRequest(request);
     try {
-      const { streamsClient, queryClient, attachmentClient } = await getScopedClients({
+      const { streamsClient, getQueryClient, attachmentClient } = await getScopedClients({
         request,
       });
+      const queryClient = await getQueryClient();
 
       let fields: Record<string, FieldDefinitionConfig>;
       try {

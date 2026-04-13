@@ -92,9 +92,10 @@ export const createSetRetentionTool = ({
     const { name } = params;
     const signal = abortSignalFromRequest(request);
     try {
-      const { streamsClient, queryClient, attachmentClient } = await getScopedClients({
+      const { streamsClient, getQueryClient, attachmentClient } = await getScopedClients({
         request,
       });
+      const queryClient = await getQueryClient();
 
       const ingestLifecycle = toIngestLifecycle(params);
 
