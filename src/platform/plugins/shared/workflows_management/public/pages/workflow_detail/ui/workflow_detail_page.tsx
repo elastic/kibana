@@ -13,6 +13,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { workflowDefaultYaml } from './workflow_default_yml';
 import { WorkflowDetailEditor } from './workflow_detail_editor';
 import { WorkflowDetailHeader } from './workflow_detail_header';
@@ -54,7 +55,24 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
 
   useWorkflowsBreadcrumbs(workflowName);
 
-  const { activeTab, selectedExecutionId, setSelectedExecution } = useWorkflowUrlState();
+  const { canReadWorkflowExecution } = useWorkflowsCapabilities();
+  const {
+    activeTab,
+    selectedExecutionId,
+    setSelectedExecution,
+    setActiveTab: setUrlTab,
+  } = useWorkflowUrlState();
+
+  useEffect(() => {
+    if (!canReadWorkflowExecution) {
+      if (activeTab === 'executions') {
+        setUrlTab('workflow');
+      }
+      if (selectedExecutionId) {
+        setSelectedExecution(null);
+      }
+    }
+  }, [canReadWorkflowExecution, activeTab, selectedExecutionId, setUrlTab, setSelectedExecution]);
 
   // Report detail viewed telemetry when page is ready
   useEffect(() => {
@@ -146,12 +164,15 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
           <WorkflowEditorLayout
             editor={<WorkflowDetailEditor highlightDiff={highlightDiff} />}
             executionList={
-              id && activeTab === 'executions' && !selectedExecutionId ? (
+              id &&
+              activeTab === 'executions' &&
+              !selectedExecutionId &&
+              canReadWorkflowExecution ? (
                 <WorkflowExecutionList workflowId={id} />
               ) : null
             }
             executionDetail={
-              selectedExecutionId ? (
+              selectedExecutionId && canReadWorkflowExecution ? (
                 <WorkflowExecutionDetail
                   executionId={selectedExecutionId}
                   onClose={onCloseExecutionDetail}

@@ -8,13 +8,20 @@
  */
 
 import React from 'react';
-import { EnhancedAlertEventOverviewLazy, EnhancedAlertFlyoutHeaderLazy } from './components';
+import { getFieldValue } from '@kbn/discover-utils';
+import { isCCSRemoteIndexName } from '@kbn/es-query';
+import {
+  AlertEventOverviewLazy,
+  EnhancedAlertEventOverviewLazy,
+  EnhancedAlertFlyoutFooterLazy,
+  EnhancedAlertFlyoutHeaderLazy,
+} from './components';
 import { SECURITY_PROFILE_ID } from './constants';
 import { extendProfileProvider } from '../extend_profile_provider';
 import { createSecurityDocumentProfileProvider } from './security_document_profile';
 import type { ProfileProviderServices } from '../profile_provider_services';
 import * as i18n from './translations';
-import { isAlertDocument } from './utils/is_alert_document';
+import { isAlertDocument, isEventDocument } from './utils/is_alert_document';
 
 export const createSecurityDocumentProfileProviders = (
   providerServices: ProfileProviderServices
@@ -27,20 +34,26 @@ export const createSecurityDocumentProfileProviders = (
       getDocViewer: (prev) => (params) => {
         const prevDocViewer = prev(params);
         const isAlert = isAlertDocument(params.record);
+        const isEvent = isEventDocument(params.record);
+        const isRemoteDocument = isCCSRemoteIndexName(
+          (getFieldValue(params.record, '_index') as string) ?? ''
+        );
 
         return {
           ...prevDocViewer,
-          renderHeader: isAlert
-            ? (props) => (
-                <EnhancedAlertFlyoutHeaderLazy
-                  {...props}
-                  providerServices={providerServices}
-                  fallbackRenderHeader={prevDocViewer.renderHeader}
-                />
-              )
-            : prevDocViewer.renderHeader,
+          renderHeader:
+            (isAlert && !isRemoteDocument) || isEvent
+              ? (props) => (
+                  <EnhancedAlertFlyoutHeaderLazy
+                    {...props}
+                    providerServices={providerServices}
+                    fallbackRenderHeader={prevDocViewer.renderHeader}
+                  />
+                )
+              : prevDocViewer.renderHeader,
           docViewsRegistry: (registry) => {
-            if (isAlert) {
+            if ((isAlert || isEvent) && !isRemoteDocument) {
+              // For local alerts or events, use the enhanced overview
               registry.add({
                 id: 'doc_view_alerts_overview',
                 title: i18n.overviewTabTitle(isAlert),
@@ -49,10 +62,28 @@ export const createSecurityDocumentProfileProviders = (
                   <EnhancedAlertEventOverviewLazy {...props} providerServices={providerServices} />
                 ),
               });
+            } else if ((isAlert || isEvent) && isRemoteDocument) {
+              // For remote alerts or events use the basic overview
+              registry.add({
+                id: 'doc_view_alerts_overview',
+                title: i18n.overviewTabTitle(isAlert),
+                order: 0,
+                render: (props) => <AlertEventOverviewLazy {...props} />,
+              });
             }
 
             return prevDocViewer.docViewsRegistry(registry);
           },
+          renderFooter:
+            isAlert || isEvent
+              ? (props) => (
+                  <EnhancedAlertFlyoutFooterLazy
+                    {...props}
+                    providerServices={providerServices}
+                    fallbackRenderFooter={prevDocViewer.renderFooter}
+                  />
+                )
+              : prevDocViewer.renderFooter,
         };
       },
     },

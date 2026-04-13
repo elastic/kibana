@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
+import { v4 as uuidv4 } from 'uuid';
 import type { SavedObject } from '@kbn/core/server';
 import type {
   Template,
@@ -16,6 +18,7 @@ import type {
   TemplatesFindResponse,
 } from '../../../common/types/api/template/v1';
 import type { CasesClientArgs } from '../types';
+import { Operations } from '../../authorization';
 
 /**
  * API for interacting with templates.
@@ -36,18 +39,50 @@ export interface TemplatesSubClient {
  * @ignore
  */
 export const createTemplatesSubClient = (clientArgs: CasesClientArgs): TemplatesSubClient => {
-  const { templatesService } = clientArgs.services;
+  const { services, authorization, user } = clientArgs;
+  const { templatesService } = services;
 
   const templatesSubClient: TemplatesSubClient = {
     getAllTemplates: (params: TemplatesFindRequest) => templatesService.getAllTemplates(params),
+
     getTemplate: (templateId: string, version?: string) =>
       templatesService.getTemplate(templateId, version),
-    createTemplate: (input: CreateTemplateInput) =>
-      templatesService.createTemplate(input, clientArgs.user.username ?? 'unknown'),
-    updateTemplate: (templateId: string, input: UpdateTemplateInput) =>
-      templatesService.updateTemplate(templateId, input),
-    deleteTemplate: (templateId: string) => templatesService.deleteTemplate(templateId),
+
+    createTemplate: async (input: CreateTemplateInput) => {
+      const id = uuidv4();
+      await authorization.ensureAuthorized({
+        operation: Operations.manageTemplate,
+        entities: [{ owner: input.owner, id }],
+      });
+      return templatesService.createTemplate(input, user.username ?? 'unknown', id);
+    },
+
+    updateTemplate: async (templateId: string, input: UpdateTemplateInput) => {
+      const template = await templatesService.getTemplate(templateId);
+      if (!template) {
+        throw Boom.notFound(`Template with id ${templateId} not found`);
+      }
+      await authorization.ensureAuthorized({
+        operation: Operations.manageTemplate,
+        entities: [{ owner: template.attributes.owner, id: template.id }],
+      });
+      return templatesService.updateTemplate(templateId, input);
+    },
+
+    deleteTemplate: async (templateId: string) => {
+      const template = await templatesService.getTemplate(templateId);
+      if (!template) {
+        throw Boom.notFound(`Template with id ${templateId} not found`);
+      }
+      await authorization.ensureAuthorized({
+        operation: Operations.manageTemplate,
+        entities: [{ owner: template.attributes.owner, id: template.id }],
+      });
+      return templatesService.deleteTemplate(templateId);
+    },
+
     getTags: () => templatesService.getTags(),
+
     getAuthors: () => templatesService.getAuthors(),
   };
 

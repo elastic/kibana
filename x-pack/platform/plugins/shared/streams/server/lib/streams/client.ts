@@ -78,11 +78,12 @@ export class StreamsClient {
       esClientAsInternalUser: ElasticsearchClient;
       esClient: ElasticsearchClient;
       attachmentClient: AttachmentClient;
-      queryClient: QueryClient;
-      featureClient: FeatureClient;
+      queryClient?: QueryClient;
+      featureClient?: FeatureClient;
       storageClient: StreamsStorageClient;
       logger: Logger;
       isServerless: boolean;
+      isSecurityEnabled: boolean;
       isWiredStreamViewsEnabled: boolean;
       isDev: boolean;
     }
@@ -208,7 +209,7 @@ export class StreamsClient {
    *
    * If all required streams are already enabled, it is a noop.
    */
-  async enableStreams(): Promise<EnableStreamsResponse> {
+  async enableStreams({ defer = false }: { defer?: boolean } = {}): Promise<EnableStreamsResponse> {
     // Step 1: Check current state
     const [kibanaStreams, esStreams] = await Promise.all([
       this.checkRootStreamsExistence(),
@@ -256,6 +257,7 @@ export class StreamsClient {
         {
           ...this.dependencies,
           streamsClient: this,
+          deferRootDataStreamMaterialization: defer,
         }
       );
     }
@@ -320,7 +322,11 @@ export class StreamsClient {
       );
 
       const { attachmentClient, queryClient, storageClient } = this.dependencies;
-      await Promise.all([queryClient.clean(), attachmentClient.clean(), storageClient.clean()]);
+      const cleanOps = [attachmentClient.clean(), storageClient.clean()];
+      if (queryClient) {
+        cleanOps.push(queryClient.clean());
+      }
+      await Promise.all(cleanOps);
     }
 
     // Disable in Elasticsearch (parallel calls)
@@ -579,6 +585,7 @@ export class StreamsClient {
         const privileges = await checkAccess({
           name,
           esClient: this.dependencies.esClient,
+          isSecurityEnabled: this.dependencies.isSecurityEnabled,
         });
         if (!privileges.read) {
           throw new SecurityError(`Cannot read stream, insufficient privileges`);
@@ -606,7 +613,11 @@ export class StreamsClient {
       this.dependencies.storageClient.get({ id: name }).then((response) => {
         return this.getStreamDefinitionFromSource(response._source);
       }),
-      checkAccess({ name, esClient: this.dependencies.esClient }).then((privileges) => {
+      checkAccess({
+        name,
+        esClient: this.dependencies.esClient,
+        isSecurityEnabled: this.dependencies.isSecurityEnabled,
+      }).then((privileges) => {
         if (!privileges.read) {
           throw new SecurityError(`Cannot read stream, insufficient privileges`);
         }
@@ -656,6 +667,21 @@ export class StreamsClient {
    */
   async getPrivileges(nameOrNames: string | string[]) {
     const names = Array.isArray(nameOrNames) ? nameOrNames : [nameOrNames];
+
+    if (!this.dependencies.isSecurityEnabled) {
+      return {
+        manage: true,
+        monitor: true,
+        view_index_metadata: true,
+        lifecycle: true,
+        simulate: true,
+        text_structure: true,
+        read_failure_store: true,
+        manage_failure_store: true,
+        create_snapshot_repository: true,
+      };
+    }
+
     const isServerless = this.dependencies.isServerless;
     const REQUIRED_MANAGE_PRIVILEGES = [
       'manage_index_templates',
@@ -855,11 +881,16 @@ export class StreamsClient {
       )
       .flatMap((hit) => this.getStreamDefinitionFromSource(hit._source));
 
+    if (!this.dependencies.isSecurityEnabled) {
+      return streams;
+    }
+
     const privileges = await checkAccessBulk({
       names: streams
         .filter((stream) => !Streams.QueryStream.Definition.is(stream))
         .map((stream) => stream.name),
       esClient,
+      isSecurityEnabled: this.dependencies.isSecurityEnabled,
     });
 
     return streams.filter((stream) => {
@@ -963,7 +994,7 @@ export class StreamsClient {
   private async syncAssets(definition: Streams.all.Definition, request: Streams.all.UpsertRequest) {
     const { dashboards, queries, rules } = request;
 
-    await Promise.all([
+    const ops: Array<Promise<unknown>> = [
       this.dependencies.attachmentClient.syncAttachmentList(
         definition.name,
         dashboards.map((dashboard) => ({
@@ -980,7 +1011,12 @@ export class StreamsClient {
         })),
         'rule'
       ),
-      this.dependencies.queryClient.syncQueries(definition, queries),
-    ]);
+    ];
+
+    if (this.dependencies.queryClient) {
+      ops.push(this.dependencies.queryClient.syncQueries(definition, queries));
+    }
+
+    await Promise.all(ops);
   }
 }

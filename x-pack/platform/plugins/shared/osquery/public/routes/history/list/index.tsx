@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 
@@ -38,7 +38,6 @@ const HistoryPageComponent = () => {
   if (isHistoryEnabled) {
     return (
       <div css={fullWidthContentCss}>
-        <EuiSpacer size="l" />
         <UnifiedHistoryTable />
       </div>
     );

@@ -35,7 +35,7 @@
           "ValidationCliArgs"
         ],
         "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/validation_run_cli.ts",
-        "lineNumber": 81,
+        "lineNumber": 88,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -51,7 +51,7 @@
               "BuildValidationCliArgsOptions"
             ],
             "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/validation_run_cli.ts",
-            "lineNumber": 81,
+            "lineNumber": 88,
             "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
@@ -221,7 +221,7 @@
           "(scriptName: string, args: string[]) => string"
         ],
         "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/validation_run_cli.ts",
-        "lineNumber": 63,
+        "lineNumber": 70,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -237,7 +237,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/validation_run_cli.ts",
-            "lineNumber": 63,
+            "lineNumber": 70,
             "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
@@ -254,7 +254,7 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/validation_run_cli.ts",
-            "lineNumber": 63,
+            "lineNumber": 70,
             "columnNumber": 63,
             "deprecated": false,
             "trackAdoption": false,
@@ -277,7 +277,7 @@
           "(args: string[]) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/validation_run_cli.ts",
-        "lineNumber": 59,
+        "lineNumber": 66,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -293,7 +293,7 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/validation_run_cli.ts",
-            "lineNumber": 59,
+            "lineNumber": 66,
             "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
@@ -319,7 +319,7 @@
           "ValidationRunFlagsInput"
         ],
         "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/validation_run_cli.ts",
-        "lineNumber": 69,
+        "lineNumber": 76,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -335,7 +335,7 @@
               "ValidationRunFlagsReader"
             ],
             "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/validation_run_cli.ts",
-            "lineNumber": 70,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -368,7 +368,7 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/resolve_validation_run_context.ts",
-        "lineNumber": 187,
+        "lineNumber": 186,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -384,7 +384,7 @@
               "ResolveValidationAffectedProjectsOptions"
             ],
             "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/resolve_validation_run_context.ts",
-            "lineNumber": 187,
+            "lineNumber": 186,
             "columnNumber": 57,
             "deprecated": false,
             "trackAdoption": false,
@@ -496,17 +496,24 @@
       {
         "parentPluginId": "@kbn/dev-validation-runner",
         "id": "def-common.VALIDATION_RUN_HELP",
-        "type": "string",
+        "type": "Array",
         "tags": [],
         "label": "VALIDATION_RUN_HELP",
         "description": [
-          "Shared validation help text block for CLI usage messages."
+          "Shared validation flag help items for CLI usage messages."
         ],
         "signature": [
-          "\"\\n        --profile [name]        Validation profile: precommit, quick, agent, branch, pr, full (default: branch)\\n        --scope [scope]         Scope: staged, local, branch, full\\n        --test-mode [mode]      Test selection mode: related, affected, all\\n        --base-ref [git-ref]    Base revision for branch scope\\n        --head-ref [git-ref]    Head revision for branch scope (default: HEAD)\\n        --downstream [mode]     Downstream mode for related/affected: none, direct, deep\\n\""
+          {
+            "pluginId": "@kbn/dev-cli-runner",
+            "scope": "common",
+            "docId": "kibKbnDevCliRunnerPluginApi",
+            "section": "def-common.FlagHelpItem",
+            "text": "FlagHelpItem"
+          },
+          "[]"
         ],
         "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/validation_run_cli.ts",
-        "lineNumber": 27,
+        "lineNumber": 28,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -546,7 +553,7 @@
           "readonly [\"profile\", \"scope\", \"test-mode\", \"base-ref\", \"head-ref\", \"downstream\"]"
         ],
         "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/validation_run_cli.ts",
-        "lineNumber": 15,
+        "lineNumber": 16,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

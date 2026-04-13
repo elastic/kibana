@@ -12,12 +12,15 @@ import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { MetricsExperienceGrid } from './metrics_experience_grid';
 import { withRestorableState } from '../../../restorable_state';
 import { MetricsExperienceStateProvider } from './context/metrics_experience_state_provider';
+import { EventBasedTelemetryProvider } from '../../../context/ebt_telemetry_context';
 import type { UnifiedMetricsGridProps } from '../../../types';
 
 const InternalUnifiedMetricsExperienceGrid = (props: UnifiedMetricsGridProps) => {
   return (
     <PerformanceContextProvider>
-      <MetricsExperienceGrid {...props} />
+      <EventBasedTelemetryProvider analytics={props.services.analytics}>
+        <MetricsExperienceGrid {...props} />
+      </EventBasedTelemetryProvider>
     </PerformanceContextProvider>
   );
 };
