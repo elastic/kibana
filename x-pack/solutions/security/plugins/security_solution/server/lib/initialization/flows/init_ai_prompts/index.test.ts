@@ -42,7 +42,7 @@ describe('initAiPromptsFlow', () => {
     expect(initAiPromptsFlow.id).toBe(INITIALIZATION_FLOW_INIT_AI_PROMPTS);
   });
 
-  it('does not have runFirst set', () => {
+  it('should be configured to run in parallel', () => {
     expect(initAiPromptsFlow.runFirst).toBeUndefined();
   });
 

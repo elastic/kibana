@@ -45,7 +45,7 @@ describe('initPrebuiltRulesFlow', () => {
     expect(initPrebuiltRulesFlow.id).toBe(INITIALIZATION_FLOW_INIT_PREBUILT_RULES);
   });
 
-  it('has runFirst set to true', () => {
+  it('should be configured to run sequentially', () => {
     expect(initPrebuiltRulesFlow.runFirst).toBe(true);
   });
 

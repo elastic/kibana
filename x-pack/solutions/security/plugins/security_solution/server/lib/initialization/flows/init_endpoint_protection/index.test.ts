@@ -49,7 +49,7 @@ describe('initEndpointProtectionFlow', () => {
     expect(initEndpointProtectionFlow.id).toBe(INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION);
   });
 
-  it('does not have runFirst set', () => {
+  it('should be configured to run in parallel', () => {
     expect(initEndpointProtectionFlow.runFirst).toBeUndefined();
   });
 
