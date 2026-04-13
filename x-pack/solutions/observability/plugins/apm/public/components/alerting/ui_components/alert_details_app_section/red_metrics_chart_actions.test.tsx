@@ -8,7 +8,6 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { RedMetricsChartActions } from './red_metrics_chart_actions';
-import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
@@ -19,12 +18,10 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn().mockReturnValue({ services: {} }),
 }));
 
-jest.mock('../../../../context/apm_index_settings/use_apm_index_settings_context');
+jest.mock('../../../../hooks/use_fetcher');
 
 const { useKibana } = jest.requireMock('@kbn/kibana-react-plugin/public');
-const mockUseApmIndexSettingsContext = useApmIndexSettingsContext as jest.MockedFunction<
-  typeof useApmIndexSettingsContext
->;
+const { useFetcher } = jest.requireMock('../../../../hooks/use_fetcher');
 
 const MOCK_TRACES_INDEX = 'traces-apm-*';
 
@@ -63,6 +60,9 @@ const setupMocks = ({
             },
           },
         },
+        apmSourcesAccess: {
+          getApmIndexSettings: jest.fn(),
+        },
       },
     });
   } else {
@@ -70,18 +70,24 @@ const setupMocks = ({
   }
 
   if (hasIndexSettings) {
-    mockUseApmIndexSettingsContext.mockReturnValue({
-      indexSettings: [
-        { configurationName: 'transaction', defaultValue: MOCK_TRACES_INDEX },
-        { configurationName: 'span', savedValue: MOCK_TRACES_INDEX, defaultValue: 'traces-otel-*' },
-      ],
-      indexSettingsStatus: FETCH_STATUS.SUCCESS,
-    } as any);
+    useFetcher.mockReturnValue({
+      data: {
+        apmIndexSettings: [
+          { configurationName: 'transaction', defaultValue: MOCK_TRACES_INDEX },
+          {
+            configurationName: 'span',
+            savedValue: MOCK_TRACES_INDEX,
+            defaultValue: 'traces-otel-*',
+          },
+        ],
+      },
+      status: FETCH_STATUS.SUCCESS,
+    });
   } else {
-    mockUseApmIndexSettingsContext.mockReturnValue({
-      indexSettings: [],
-      indexSettingsStatus: FETCH_STATUS.LOADING,
-    } as any);
+    useFetcher.mockReturnValue({
+      data: undefined,
+      status: FETCH_STATUS.LOADING,
+    });
   }
 };
 

@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ObservabilityPublicPluginsStart } from '@kbn/observability-plugin/public';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import type { ESQLQueryParams } from '../../../shared/links/discover_links/get_esql_query';
 import { getESQLQuery } from '../../../shared/links/discover_links/get_esql_query';
 import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
@@ -42,28 +41,35 @@ interface RedMetricsChartActionsProps {
 
 export function RedMetricsChartActions({ queryParams, timeRange }: RedMetricsChartActionsProps) {
   const {
-    services: { share },
+    services: { share, apmSourcesAccess },
   } = useKibana<ObservabilityPublicPluginsStart>();
 
-  const { indexSettings = [], indexSettingsStatus } = useApmIndexSettingsContext();
+  const { data, status: indexSettingsStatus } = useFetcher(
+    (_, signal) => apmSourcesAccess?.getApmIndexSettings({ signal }),
+    [apmSourcesAccess]
+  );
+
+  const indexSettings = useMemo(() => data?.apmIndexSettings ?? [], [data]);
 
   const [isActionsOpen, setIsActionsOpen] = useState(false);
 
   const { serviceName, ...queryForApm } = queryParams;
 
-  const apmLocator = share?.url?.locators?.get(APM_APP_LOCATOR_ID);
+  const apmLink = useMemo(() => {
+    const apmLocator = share?.url?.locators?.get(APM_APP_LOCATOR_ID);
 
-  const apmLink = apmLocator?.getRedirectUrl({
-    serviceName,
-    serviceOverviewTab: queryParams.transactionName ? 'transactions' : undefined,
-    query: {
-      ...queryForApm,
-      rangeFrom: timeRange.from,
-      rangeTo: timeRange.to,
-    },
-  });
+    return apmLocator?.getRedirectUrl({
+      serviceName,
+      serviceOverviewTab: queryParams.transactionName ? 'transactions' : undefined,
+      query: {
+        ...queryForApm,
+        rangeFrom: timeRange.from,
+        rangeTo: timeRange.to,
+      },
+    });
+  }, [share, serviceName, queryParams.transactionName, queryForApm, timeRange]);
 
-  const discoverLink = (() => {
+  const discoverLink = useMemo(() => {
     if (indexSettingsStatus !== FETCH_STATUS.SUCCESS) return undefined;
 
     const esqlQuery = getESQLQuery({
@@ -80,7 +86,7 @@ export function RedMetricsChartActions({ queryParams, timeRange }: RedMetricsCha
       timeRange,
       query: { esql: esqlQuery },
     });
-  })();
+  }, [share, indexSettingsStatus, queryParams, indexSettings, timeRange]);
 
   return (
     <EuiPopover
