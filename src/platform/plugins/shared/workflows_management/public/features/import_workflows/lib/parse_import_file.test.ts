@@ -534,10 +534,12 @@ describe('parseImportFile', () => {
   });
 
   describe('legacy ZIP backward compatibility', () => {
-    it('should fall back originalId to slug-derived id when ZIP filename does not match current ID pattern', async () => {
+    it('should migrate legacy IDs to slugified format and preserve filename stem as originalId for reference rewriting', async () => {
       // Legacy exports may use uppercase or underscore in filenames (e.g. "My_Workflow.yml").
-      // isValidWorkflowId('My_Workflow') is false under the new pattern, so the code
-      // should fall back to using the slug-derived preview.id as the rewrite key.
+      // isValidWorkflowId('My_Workflow') is false under the new pattern, so `id` falls
+      // back to the slug-derived preview.id. `originalId` keeps the filename stem
+      // because cross-workflow YAML references use the original persisted ID — this
+      // enables the import to rewrite both IDs and references to the new format.
       const zip = new JSZip();
       zip.file('My_Workflow.yml', 'name: My Workflow\nsteps: []');
       zip.file(
@@ -550,10 +552,12 @@ describe('parseImportFile', () => {
       const result = await parseImportFile(file);
 
       expect(result.rawWorkflows).toHaveLength(1);
-      // The slug-derived id from the name "My Workflow"
+      // id is the slugified import ID
       expect(result.rawWorkflows[0].id).toBe('my-workflow');
-      // originalId falls back to slug-derived id because "My_Workflow" fails isValidWorkflowId
-      expect(result.rawWorkflows[0].originalId).toBe('my-workflow');
+      // originalId is the filename stem — used as the key in the rewrite mapping
+      // so that "workflow-id: My_Workflow" references in other YAMLs get rewritten
+      // to "workflow-id: my-workflow"
+      expect(result.rawWorkflows[0].originalId).toBe('My_Workflow');
     });
 
     it('should preserve originalId from filename when it conforms to the current ID pattern', async () => {

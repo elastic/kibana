@@ -259,8 +259,9 @@ export type EsWorkflowCreate = Omit<
 
 export const MAX_WORKFLOW_YAML_LENGTH = 1_048_576;
 const MAX_BULK_CREATE_WORKFLOWS = 500;
-// IDs must start and end with an alphanumeric character (lowercase only), contain only alphanumeric chars,
-// hyphens in the middle, and be between 3 and 255 chars long.
+// IDs must start and end with a lowercase alphanumeric character, contain only lowercase
+// alphanumeric chars and hyphens in the middle. Length is enforced separately via
+// WORKFLOW_ID_MIN_LENGTH (3) and WORKFLOW_ID_MAX_LENGTH (255).
 // This supports semantic IDs ("security-alert-enrichment"), legacy workflow-{uuid} format,
 // plain UUIDs, while rejecting leading/trailing separators, snake case and
 // special characters like spaces, dots, or '@'.

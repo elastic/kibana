@@ -137,7 +137,7 @@ async function parseZipFile(buffer: ArrayBuffer): Promise<ClientPreflightResult>
 
     workflows.push(preview);
     workflowIds.push(importId);
-    rawWorkflows.push({ id: importId, originalId: isLegacyId ? preview.id : originalId, yaml });
+    rawWorkflows.push({ id: importId, originalId, yaml });
   }
 
   if (manifestParsed.data.exportedCount !== workflows.length) {

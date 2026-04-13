@@ -27,7 +27,6 @@ import {
   NonTerminalExecutionStatuses,
   transformWorkflowYamlJsontoEsWorkflow,
   WORKFLOW_ID_MAX_LENGTH,
-  WORKFLOW_ID_PATTERN,
 } from '@kbn/workflows';
 import type {
   ConnectorTypeInfo,
@@ -455,6 +454,28 @@ export class WorkflowsService {
           error: error instanceof Error ? error.message : String(error),
         });
       }
+    }
+
+    // Phase 1.5: Deduplicate in-batch IDs so same-named workflows don't silently
+    // overwrite each other. Earlier IDs win; later duplicates get a numeric suffix.
+    const seenIds = new Set<string>();
+    for (let i = 0; i < validWorkflows.length; i++) {
+      let { id } = validWorkflows[i];
+      if (seenIds.has(id)) {
+        let counter = 0;
+        let candidate: string;
+        do {
+          const suffix = `-${++counter}`;
+          candidate = `${id.slice(0, WORKFLOW_ID_MAX_LENGTH - suffix.length)}${suffix}`;
+        } while (seenIds.has(candidate));
+        validWorkflows[i].id = candidate;
+        validWorkflows[i].workflowData.name =
+          validWorkflows[i].workflowData.name ?? `Untitled workflow`;
+        bulkOperations[i] = {
+          index: { _id: candidate, document: validWorkflows[i].workflowData },
+        };
+      }
+      seenIds.add(validWorkflows[i].id);
     }
 
     // Phase 2: Bulk write all valid workflows
@@ -1818,7 +1839,7 @@ export class WorkflowsService {
   }
 
   private validateWorkflowId(id: string): void {
-    if (!WORKFLOW_ID_PATTERN.test(id)) {
+    if (!isValidWorkflowId(id)) {
       throw new WorkflowValidationError(
         `Invalid workflow ID format. Expected format: lowercase alphanumeric characters with optional hyphens in the middle, received: ${id}`
       );
@@ -1837,22 +1858,45 @@ export class WorkflowsService {
 
   /**
    * Resolves a unique workflow ID by checking for existing workflows in the
-   * given space and appending a numeric suffix if a collision is found.
+   * given space and picking the first available candidate.
    * Only used for server-generated IDs (not user-supplied ones).
+   *
+   * Generates candidate IDs (baseId, baseId-1, baseId-2, ...) and checks them
+   * in a single batch query to avoid sequential network roundtrips.
    */
   private async resolveUniqueWorkflowId(baseId: string, spaceId: string): Promise<string> {
     const MAX_COLLISION_RETRIES = 100;
-    let id = baseId;
-    let counter = 0;
-    while (await this.getWorkflow(id, spaceId)) {
-      if (counter >= MAX_COLLISION_RETRIES) {
-        // Exhausted all retries — fall back to a UUID-based ID to guarantee uniqueness.
-        return `workflow-${generateUuid()}`;
-      }
-      const suffix = `-${++counter}`;
-      id = `${baseId.slice(0, WORKFLOW_ID_MAX_LENGTH - suffix.length)}${suffix}`;
+
+    // Build all candidate IDs upfront
+    const candidates = [baseId];
+    for (let i = 1; i <= MAX_COLLISION_RETRIES; i++) {
+      const suffix = `-${i}`;
+      candidates.push(`${baseId.slice(0, WORKFLOW_ID_MAX_LENGTH - suffix.length)}${suffix}`);
     }
-    return id;
+
+    // Check which candidates already exist in a single batch query.
+    // Intentionally does NOT exclude soft-deleted workflows (no must_not deleted_at)
+    // to avoid reassigning an ID that belongs to a soft-deleted workflow.
+    const response = await this.workflowStorage.getClient().search({
+      query: {
+        bool: {
+          must: [{ ids: { values: candidates } }, { term: { spaceId } }],
+        },
+      },
+      size: candidates.length,
+      _source: false,
+      track_total_hits: false,
+    });
+    const existingIds = new Set(response.hits.hits.map((hit) => hit._id));
+
+    // Return the first candidate that doesn't exist
+    const available = candidates.find((c) => !existingIds.has(c));
+    if (available) {
+      return available;
+    }
+
+    // All candidates taken — fall back to a UUID-based ID to guarantee uniqueness.
+    return `workflow-${generateUuid()}`;
   }
 
   public async getAvailableConnectors(

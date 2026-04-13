@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { detectFileFormat, isDynamicWorkflowReference, isValidWorkflowId } from '.';
+import {
+  detectFileFormat,
+  isDynamicWorkflowReference,
+  isUnsafeWorkflowId,
+  isValidWorkflowId,
+} from '.';
 
 describe('isValidWorkflowId', () => {
   it('should accept a simple alphanumeric ID', () => {
@@ -65,6 +70,41 @@ describe('isValidWorkflowId', () => {
     expect(isValidWorkflowId('workflow@1')).toBe(false);
     expect(isValidWorkflowId('workflow#1')).toBe(false);
     expect(isValidWorkflowId('workflow!1')).toBe(false);
+  });
+});
+
+describe('isUnsafeWorkflowId', () => {
+  it('should reject __proto__', () => {
+    expect(isUnsafeWorkflowId('__proto__')).toBe(true);
+  });
+
+  it('should reject constructor', () => {
+    expect(isUnsafeWorkflowId('constructor')).toBe(true);
+  });
+
+  it('should reject prototype', () => {
+    expect(isUnsafeWorkflowId('prototype')).toBe(true);
+  });
+
+  it('should reject empty string', () => {
+    expect(isUnsafeWorkflowId('')).toBe(true);
+  });
+
+  it('should reject IDs exceeding max length', () => {
+    expect(isUnsafeWorkflowId('a'.repeat(256))).toBe(true);
+  });
+
+  it('should reject IDs containing path traversal (..)', () => {
+    expect(isUnsafeWorkflowId('..%2fetc%2fpasswd')).toBe(true);
+    expect(isUnsafeWorkflowId('../etc/passwd')).toBe(true);
+  });
+
+  it('should reject IDs containing forward slashes', () => {
+    expect(isUnsafeWorkflowId('path/to/file')).toBe(true);
+  });
+
+  it('should accept a normal legacy ID with uppercase and underscores', () => {
+    expect(isUnsafeWorkflowId('My_Workflow')).toBe(false);
   });
 });
 

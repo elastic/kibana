@@ -3261,106 +3261,49 @@ steps:
       expect(mockEsClient.index).not.toHaveBeenCalled();
     };
 
-    describe('valid IDs', () => {
-      it('should accept hyphenated semantic IDs', async () => {
-        await expectValid('security-alert-enrichment');
-      });
-
-      it('should accept short hyphenated IDs', async () => {
-        await expectValid('daily-log-cleanup');
-      });
-
-      it('should accept simple semantic IDs', async () => {
-        await expectValid('user-onboarding');
-      });
-
-      it('should accept IDs with numeric suffixes', async () => {
-        await expectValid('incident-response-2024');
-      });
-
-      it('should accept short 3-character IDs', async () => {
-        await expectValid('dev');
-      });
-
-      it('should accept short 4-character IDs', async () => {
-        await expectValid('test');
-      });
-
-      it('should accept short environment-style IDs', async () => {
-        await expectValid('prod');
-      });
-
-      it('should accept UUIDs (plain, without prefix)', async () => {
-        await expectValid('550e8400-e29b-41d4-a716-446655440000');
-      });
-
-      it('should accept legacy workflow-{uuid} format', async () => {
-        await expectValid('workflow-550e8400-e29b-41d4-a716-446655440000');
-      });
-
-      it('should accept IDs with version suffix', async () => {
-        await expectValid('backup-v2');
-      });
-
-      it('should accept IDs with year suffix', async () => {
-        await expectValid('migration-2024');
-      });
+    it.each([
+      ['hyphenated semantic', 'security-alert-enrichment'],
+      ['short hyphenated', 'daily-log-cleanup'],
+      ['simple semantic', 'user-onboarding'],
+      ['numeric suffix', 'incident-response-2024'],
+      ['3-character minimum', 'dev'],
+      ['4-character', 'test'],
+      ['environment-style', 'prod'],
+      ['plain UUID', '550e8400-e29b-41d4-a716-446655440000'],
+      ['workflow-{uuid} format', 'workflow-550e8400-e29b-41d4-a716-446655440000'],
+      ['version suffix', 'backup-v2'],
+      ['year suffix', 'migration-2024'],
+    ])('should accept valid %s ID: %s', async (_label, id) => {
+      await expectValid(id);
     });
 
-    describe('invalid IDs', () => {
-      it('should throw WorkflowValidationError for IDs containing @', async () => {
-        await expectInvalid('alert@notification');
-      });
+    it.each([
+      ['contains @', 'alert@notification'],
+      ['contains spaces', 'alert notification'],
+      ['contains dots', 'alert.process'],
+      ['starts with hyphen', '-alert'],
+      ['ends with hyphen', 'alert-'],
+      ['starts with underscore', '_alert'],
+      ['ends with underscore', 'alert_'],
+      ['uppercase mixed-case', 'Security-Alert-Enrichment'],
+      ['snake_case', 'process_security_alerts'],
+      ['snake_case multi-segment', 'analyze_user_behavior'],
+    ])('should reject invalid ID (%s): %s', async (_label, id) => {
+      await expectInvalid(id);
+    });
 
-      it('should throw WorkflowValidationError for IDs containing spaces', async () => {
-        await expectInvalid('alert notification');
-      });
+    it('should skip validation and auto-generate a slug ID when empty string is provided', async () => {
+      // An empty string is falsy, so the `if (workflow.id)` guard in createWorkflow
+      // skips validateWorkflowId entirely and derives a slug from the workflow name.
+      // The YAML in makeCommand has name "Test Workflow" which doesn't pass schema
+      // validation, so the default name "Untitled workflow" is used -> "untitled-workflow".
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } } as any);
+      mockEsClient.index.mockResolvedValue({ _id: 'untitled-workflow' } as any);
 
-      it('should throw WorkflowValidationError for IDs containing dots', async () => {
-        await expectInvalid('alert.process');
-      });
+      const result = await service.createWorkflow(makeCommand(''), 'default', mockRequest);
 
-      it('should throw WorkflowValidationError for IDs starting with a hyphen', async () => {
-        await expectInvalid('-alert');
-      });
-
-      it('should throw WorkflowValidationError for IDs ending with a hyphen', async () => {
-        await expectInvalid('alert-');
-      });
-
-      it('should throw WorkflowValidationError for IDs starting with an underscore', async () => {
-        await expectInvalid('_alert');
-      });
-
-      it('should throw WorkflowValidationError for IDs ending with an underscore', async () => {
-        await expectInvalid('alert_');
-      });
-
-      it('should throw uppercase mixed-case IDs', async () => {
-        await expectInvalid('Security-Alert-Enrichment');
-      });
-
-      it('should throw on snake_case IDs', async () => {
-        await expectInvalid('process_security_alerts');
-      });
-
-      it('should throw on snake_case IDs with multiple segments', async () => {
-        await expectInvalid('analyze_user_behavior');
-      });
-
-      it('should skip validation and auto-generate a slug ID when empty string is provided', async () => {
-        // An empty string is falsy, so the `if (workflow.id)` guard in createWorkflow
-        // skips validateWorkflowId entirely and derives a slug from the workflow name.
-        // The YAML in makeCommand has name "Test Workflow" which doesn't pass schema
-        // validation, so the default name "Untitled workflow" is used → "untitled-workflow".
-        mockEsClient.search.mockResolvedValue({ hits: { hits: [] } } as any);
-        mockEsClient.index.mockResolvedValue({ _id: 'untitled-workflow' } as any);
-
-        const result = await service.createWorkflow(makeCommand(''), 'default', mockRequest);
-
-        expect(result.id).toBe('untitled-workflow');
-        expect(mockEsClient.index).toHaveBeenCalled();
-      });
+      expect(result.id).toBe('untitled-workflow');
+      expect(mockEsClient.index).toHaveBeenCalled();
     });
   });
 
@@ -3443,30 +3386,30 @@ steps:
       message: "Hello"
 `;
 
-    const existingWorkflowHit = (id: string) => ({
+    /** Returns a search response containing hits for each of the given IDs. */
+    const existingWorkflowHits = (...ids: string[]) => ({
       hits: {
-        hits: [
-          {
-            _id: id,
-            _source: {
-              name: 'Existing',
-              enabled: true,
-              spaceId: 'default',
-              yaml: 'name: Existing',
-              valid: true,
-              created_at: '2023-01-01T00:00:00.000Z',
-              updated_at: '2023-01-01T00:00:00.000Z',
-              createdBy: 'test-user',
-              lastUpdatedBy: 'test-user',
-            },
+        hits: ids.map((id) => ({
+          _id: id,
+          _source: {
+            name: 'Existing',
+            enabled: true,
+            spaceId: 'default',
+            yaml: 'name: Existing',
+            valid: true,
+            created_at: '2023-01-01T00:00:00.000Z',
+            updated_at: '2023-01-01T00:00:00.000Z',
+            createdBy: 'test-user',
+            lastUpdatedBy: 'test-user',
           },
-        ],
+        })),
       },
     });
 
     const noHits = { hits: { hits: [] } };
 
     it('should return slug unchanged when no collision exists', async () => {
+      // resolveUniqueWorkflowId: single batch search returns no hits
       mockEsClient.search.mockResolvedValue(noHits as any);
       mockEsClient.index.mockResolvedValue({ _id: 'my-workflow' } as any);
 
@@ -3476,9 +3419,8 @@ steps:
     });
 
     it('should append -1 suffix on single collision', async () => {
-      mockEsClient.search
-        .mockResolvedValueOnce(existingWorkflowHit('my-workflow') as any) // "my-workflow" exists
-        .mockResolvedValueOnce(noHits as any); // "my-workflow-1" does not exist
+      // resolveUniqueWorkflowId: batch search returns "my-workflow" as existing
+      mockEsClient.search.mockResolvedValueOnce(existingWorkflowHits('my-workflow') as any);
       mockEsClient.index.mockResolvedValue({ _id: 'my-workflow-1' } as any);
 
       const result = await service.createWorkflow({ yaml: validYaml }, 'default', mockRequest);
@@ -3487,11 +3429,10 @@ steps:
     });
 
     it('should increment suffix on multiple collisions', async () => {
-      mockEsClient.search
-        .mockResolvedValueOnce(existingWorkflowHit('my-workflow') as any) // "my-workflow" exists
-        .mockResolvedValueOnce(existingWorkflowHit('my-workflow-1') as any) // "my-workflow-1" exists
-        .mockResolvedValueOnce(existingWorkflowHit('my-workflow-2') as any) // "my-workflow-2" exists
-        .mockResolvedValueOnce(noHits as any); // "my-workflow-3" is free
+      // resolveUniqueWorkflowId: batch search returns three existing IDs
+      mockEsClient.search.mockResolvedValueOnce(
+        existingWorkflowHits('my-workflow', 'my-workflow-1', 'my-workflow-2') as any
+      );
       mockEsClient.index.mockResolvedValue({ _id: 'my-workflow-3' } as any);
 
       const result = await service.createWorkflow({ yaml: validYaml }, 'default', mockRequest);
@@ -3513,9 +3454,8 @@ steps:
 `;
       const longSlug = 'a'.repeat(255);
 
-      mockEsClient.search
-        .mockResolvedValueOnce(existingWorkflowHit(longSlug) as any) // long slug exists
-        .mockResolvedValueOnce(noHits as any); // truncated + "-1" is free
+      // resolveUniqueWorkflowId: batch search returns the long slug as existing
+      mockEsClient.search.mockResolvedValueOnce(existingWorkflowHits(longSlug) as any);
       mockEsClient.index.mockResolvedValue({ _id: 'truncated' } as any);
 
       await service.createWorkflow({ yaml: longYaml }, 'default', mockRequest);
@@ -3526,8 +3466,12 @@ steps:
     });
 
     it('should fall back to UUID after exhausting max collision retries', async () => {
-      // Mock getWorkflow to always return a hit (simulating 100+ collisions)
-      mockEsClient.search.mockResolvedValue(existingWorkflowHit('my-workflow') as any);
+      // resolveUniqueWorkflowId: batch search returns ALL 101 candidate IDs as existing
+      const allCandidates = ['my-workflow'];
+      for (let i = 1; i <= 100; i++) {
+        allCandidates.push(`my-workflow-${i}`);
+      }
+      mockEsClient.search.mockResolvedValueOnce(existingWorkflowHits(...allCandidates) as any);
       mockEsClient.index.mockResolvedValue({ _id: 'fallback' } as any);
 
       await service.createWorkflow({ yaml: validYaml }, 'default', mockRequest);
@@ -3542,15 +3486,12 @@ steps:
       auth: { credentials: { username: 'test-user' } },
     } as any;
 
-    it('should generate the same slug-based ID for two workflows with identical names in a batch', async () => {
-      // bulkCreateWorkflows does NOT call resolveUniqueWorkflowId, so two
-      // same-named workflows in a single batch will produce the same slug.
-      // ES bulk index with the same _id causes the second to overwrite the first.
+    it('should deduplicate in-batch IDs when two workflows have the same name', async () => {
       mockEsClient.bulk.mockResolvedValue({
         errors: false,
         items: [
           { index: { _id: 'duplicate-name', status: 201 } },
-          { index: { _id: 'duplicate-name', status: 200 } },
+          { index: { _id: 'duplicate-name-1', status: 201 } },
         ],
         took: 10,
       } as any);
@@ -3572,17 +3513,17 @@ steps:
         mockRequest
       );
 
-      // Both operations are sent to ES with the same ID
       const bulkCall = mockEsClient.bulk.mock.calls[0][0] as {
         operations: Array<{ index: { _id: string } }>;
       };
       const ids = bulkCall.operations
         .filter((op): op is { index: { _id: string } } => 'index' in op)
         .map((op) => op.index._id);
-      expect(ids[0]).toBe(ids[1]);
-      expect(ids[0]).toBe('duplicate-name');
 
-      // The caller (import flow) is responsible for in-batch deduplication
+      // First workflow keeps the original slug, second gets a suffix
+      expect(ids[0]).toBe('duplicate-name');
+      expect(ids[1]).toBe('duplicate-name-1');
+
       expect(result.created).toHaveLength(2);
     });
   });
