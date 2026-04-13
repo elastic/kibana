@@ -45,7 +45,7 @@ export interface NetworkDetailsProps {
 }
 
 /**
- * Component rendering all the network details for the expandable flyout
+ * Component rendering all the network details for the flyout.
  */
 export const NetworkDetails = ({ ip, flowTarget }: NetworkDetailsProps) => {
   const dispatch = useDispatch();

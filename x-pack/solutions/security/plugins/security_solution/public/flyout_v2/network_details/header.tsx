@@ -12,8 +12,8 @@ import { SecurityPageName } from '@kbn/deeplinks-security';
 import { getNetworkDetailsUrl } from '../../common/components/link_to';
 import { SecuritySolutionLinkAnchor } from '../../common/components/links';
 import type { FlowTargetSourceDest } from '../../../common/search_strategy';
-import { FlyoutHeader } from '../shared/components/flyout_header';
-import { FlyoutTitle } from '../../flyout_v2/shared/components/flyout_title';
+import { FlyoutHeader } from '../../flyout/shared/components/flyout_header';
+import { FlyoutTitle } from '../shared/components/flyout_title';
 import { encodeIpv6 } from '../../common/lib/helpers';
 
 export interface PanelHeaderProps extends React.ComponentProps<typeof EuiFlyoutHeader> {
@@ -30,7 +30,7 @@ export interface PanelHeaderProps extends React.ComponentProps<typeof EuiFlyoutH
 const urlParamOverride = { timeline: { isOpen: false } };
 
 /**
- *  Header component for the network details flyout
+ * Header component for the network details flyout.
  */
 export const PanelHeader: FC<PanelHeaderProps> = memo(
   ({ ip, flowTarget, ...flyoutHeaderProps }: PanelHeaderProps) => {

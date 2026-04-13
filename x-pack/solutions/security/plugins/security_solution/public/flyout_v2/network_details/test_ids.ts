@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PREFIX } from '../shared/test_ids';
+import { PREFIX } from '../../flyout/shared/test_ids';
 
 export const PREVIEW_FOOTER_TEST_ID = `${PREFIX}NetworkPreviewFooter` as const;
 export const PREVIEW_FOOTER_LINK_TEST_ID = `${PREVIEW_FOOTER_TEST_ID}Link` as const;

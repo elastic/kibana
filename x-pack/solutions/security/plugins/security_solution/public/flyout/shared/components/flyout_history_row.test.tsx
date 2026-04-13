@@ -26,7 +26,7 @@ import { useBasicDataFromDetailsData } from '../../document_details/shared/hooks
 import { useEventDetails } from '../../document_details/shared/hooks/use_event_details';
 import { DocumentDetailsRightPanelKey } from '../../document_details/shared/constants/panel_keys';
 import { RulePanelKey } from '../../rule_details/right';
-import { NetworkPanelKey } from '../../network_details';
+import { NetworkPanelKey } from '../../../flyout_v2/network_details';
 import {
   ATTACK_DETAILS_HISTORY_ROW_TEST_ID,
   DOCUMENT_DETAILS_HISTORY_ROW_TEST_ID,

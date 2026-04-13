@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { NetworkDetails } from './components/network_details';
-import { FlyoutBody } from '../shared/components/flyout_body';
+import { FlyoutBody } from '../../flyout/shared/components/flyout_body';
 import type { FlowTargetSourceDest } from '../../../common/search_strategy';
 
 export interface PanelContentProps {
@@ -24,7 +24,7 @@ export interface PanelContentProps {
 }
 
 /**
- * Network details expandable flyout right section
+ * Network details flyout content section.
  */
 export const PanelContent: FC<PanelContentProps> = memo(({ ip, flowTarget }: PanelContentProps) => {
   return (

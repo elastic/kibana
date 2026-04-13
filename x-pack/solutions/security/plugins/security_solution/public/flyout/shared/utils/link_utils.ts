@@ -24,7 +24,7 @@ import {
   NetworkPanelKey,
   NetworkPreviewPanelKey,
   NETWORK_PREVIEW_BANNER,
-} from '../../network_details';
+} from '../../../flyout_v2/network_details';
 import { RulePanelKey, RulePreviewPanelKey, RULE_PREVIEW_BANNER } from '../../rule_details/right';
 import { DocumentDetailsPreviewPanelKey } from '../../document_details/shared/constants/panel_keys';
 import { EVENT_PREVIEW_BANNER } from '../../document_details/preview/constants';

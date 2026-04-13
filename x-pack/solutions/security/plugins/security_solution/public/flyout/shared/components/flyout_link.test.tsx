@@ -13,7 +13,7 @@ import { TestProviders } from '../../../common/mock';
 import { mockFlyoutApi } from '../../document_details/shared/mocks/mock_flyout_context';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { HostPanelKey, UserPanelKey } from '../../entity_details/shared/constants';
-import { NetworkPanelKey } from '../../network_details';
+import { NetworkPanelKey } from '../../../flyout_v2/network_details';
 import { RulePanelKey } from '../../rule_details/right';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 import { useWhichFlyout } from '../../document_details/shared/hooks/use_which_flyout';

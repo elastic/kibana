@@ -29,8 +29,12 @@ import { EasePanel } from './ease';
 import { SessionViewPanelProvider } from './document_details/session_view/context';
 import type { SessionViewPanelProps } from './document_details/session_view';
 import { SessionViewPanel } from './document_details/session_view';
-import type { NetworkExpandableFlyoutProps } from './network_details';
-import { NetworkPanel, NetworkPanelKey, NetworkPreviewPanelKey } from './network_details';
+import type { NetworkExpandableFlyoutProps } from '../flyout_v2/network_details';
+import {
+  NetworkPanel,
+  NetworkPanelKey,
+  NetworkPreviewPanelKey,
+} from '../flyout_v2/network_details';
 import { Flyouts } from './document_details/shared/constants/flyouts';
 import {
   DocumentDetailsAlertReasonPanelKey,

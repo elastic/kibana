@@ -14,7 +14,7 @@ import {
 import { PREVIEW_FOOTER_TEST_ID } from './test_ids';
 import { NetworkPanel } from '.';
 import { FlowTargetSourceDest } from '../../../common/search_strategy';
-import { mockFlyoutApi } from '../document_details/shared/mocks/mock_flyout_context';
+import { mockFlyoutApi } from '../../flyout/document_details/shared/mocks/mock_flyout_context';
 import { TestProviders } from '../../common/mock';
 
 jest.mock('@kbn/expandable-flyout');

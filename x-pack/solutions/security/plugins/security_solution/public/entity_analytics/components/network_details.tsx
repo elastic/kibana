@@ -12,7 +12,7 @@ import { FlowTargetSourceDest } from '../../../common/search_strategy/security_s
 import { NetworkDetailsLink } from '../../common/components/links';
 import { TruncatableText } from '../../common/components/truncatable_text';
 import { getEmptyTagValue } from '../../common/components/empty_value';
-import { NetworkPanelKey } from '../../flyout/network_details';
+import { NetworkPanelKey } from '../../flyout_v2/network_details';
 
 interface Props {
   ip: string | undefined | null;

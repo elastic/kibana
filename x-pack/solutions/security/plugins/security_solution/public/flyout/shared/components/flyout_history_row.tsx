@@ -28,7 +28,7 @@ import { useEventDetails } from '../../document_details/shared/hooks/use_event_d
 import { getAlertTitle, getEventTitle } from '../../../flyout_v2/document/utils/get_header_title';
 import { getField } from '../../document_details/shared/utils';
 import { RulePanelKey } from '../../rule_details/right';
-import { NetworkPanelKey } from '../../network_details';
+import { NetworkPanelKey } from '../../../flyout_v2/network_details';
 import { useRuleDetails } from '../../rule_details/hooks/use_rule_details';
 import {
   DOCUMENT_DETAILS_HISTORY_ROW_TEST_ID,

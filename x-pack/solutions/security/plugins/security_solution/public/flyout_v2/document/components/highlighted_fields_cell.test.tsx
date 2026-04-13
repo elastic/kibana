@@ -22,7 +22,7 @@ import { HostPreviewPanelKey } from '../../../flyout/entity_details/host_right';
 import { HOST_PREVIEW_BANNER } from '../../../flyout/document_details/right/components/host_entity_overview';
 import { UserPreviewPanelKey } from '../../../flyout/entity_details/user_right';
 import { USER_PREVIEW_BANNER } from '../../../flyout/document_details/right/components/user_entity_overview';
-import { NETWORK_PREVIEW_BANNER, NetworkPreviewPanelKey } from '../../../flyout/network_details';
+import { NETWORK_PREVIEW_BANNER, NetworkPreviewPanelKey } from '../../network_details';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 
 jest.mock('../../../management/hooks');

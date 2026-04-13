@@ -13,7 +13,10 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { EventFieldsData } from '../../../../common/components/event_details/types';
 import { TableFieldValueCell } from './table_field_value_cell';
 import { TestProviders } from '../../../../common/mock';
-import { NetworkPreviewPanelKey, NETWORK_PREVIEW_BANNER } from '../../../network_details';
+import {
+  NetworkPreviewPanelKey,
+  NETWORK_PREVIEW_BANNER,
+} from '../../../../flyout_v2/network_details';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID } from './test_ids';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';

@@ -14,7 +14,7 @@ import { StatefulEventContext } from '../../../common/components/events_viewer/s
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { getOrEmptyTagFromValue } from '../../../common/components/empty_value';
 import { NetworkDetailsLink } from '../../../common/components/links';
-import { NetworkPanelKey } from '../../../flyout/network_details';
+import { NetworkPanelKey } from '../../../flyout_v2/network_details';
 import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
 
 const tryStringify = (value: string | object | null | undefined): string => {

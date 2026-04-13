@@ -13,7 +13,7 @@ import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/tel
 import { mockFlyoutApi } from '../../../../flyout/document_details/shared/mocks/mock_flyout_context';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useWhichFlyout } from '../../../../flyout/document_details/shared/hooks/use_which_flyout';
-import { NetworkPanelKey } from '../../../../flyout/network_details';
+import { NetworkPanelKey } from '../../../../flyout_v2/network_details';
 
 const mockedTelemetry = createTelemetryServiceMock();
 jest.mock('../../../../common/lib/kibana', () => {

@@ -14,7 +14,7 @@ import { PreviewPanelFooter } from './footer';
 import type { FlowTargetSourceDest } from '../../../common/search_strategy';
 import { PanelHeader } from './header';
 import { PanelContent } from './content';
-import { FlyoutNavigation } from '../shared/components/flyout_navigation';
+import { FlyoutNavigation } from '../../flyout/shared/components/flyout_navigation';
 
 export interface NetworkExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'network-details' | 'network-preview';
@@ -52,7 +52,7 @@ export interface NetworkPanelProps extends Record<string, unknown> {
 }
 
 /**
- * Panel to be displayed in the network details expandable flyout right section
+ * Panel to be displayed in the network details expandable flyout right section.
  */
 export const NetworkPanel: FC<NetworkPanelProps> = memo(
   ({ ip, flowTarget, scopeId, isPreviewMode }) => {

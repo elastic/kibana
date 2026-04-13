@@ -12,7 +12,7 @@ import { FormattedIp } from '.';
 import { TestProviders } from '../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
-import { NetworkPanelKey } from '../../../flyout/network_details';
+import { NetworkPanelKey } from '../../../flyout_v2/network_details';
 import { createExpandableFlyoutApiMock } from '../../../common/mock/expandable_flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 

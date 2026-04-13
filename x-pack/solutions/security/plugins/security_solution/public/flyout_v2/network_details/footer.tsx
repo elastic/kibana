@@ -30,7 +30,7 @@ export interface PreviewPanelFooterProps {
 }
 
 /**
- * Footer at the bottom of preview panel with a link to open network details flyout
+ * Footer at the bottom of preview panel with a link to open network details flyout.
  */
 export const PreviewPanelFooter: FC<PreviewPanelFooterProps> = ({ ip, flowTarget, scopeId }) => {
   const { openFlyout } = useExpandableFlyoutApi();
