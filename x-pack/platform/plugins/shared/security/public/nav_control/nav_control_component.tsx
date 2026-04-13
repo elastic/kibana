@@ -70,6 +70,7 @@ interface SecurityNavControlProps {
   logoutUrl: string;
   userMenuLinks$: Observable<UserMenuLink[]>;
   renderButton?: (props: SecurityNavControlRenderButtonProps) => NonNullable<ReactNode>;
+  avatarSize?: 's' | 'm' | 'l';
 }
 
 export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
@@ -77,6 +78,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   logoutUrl,
   userMenuLinks$,
   renderButton,
+  avatarSize = 's',
 }) => {
   const userMenuLinks = useObservable(userMenuLinks$, []);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -95,11 +97,11 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
     <UserAvatar
       user={userProfile.value.user}
       avatar={userProfile.value.data.avatar}
-      size="s"
+      size={avatarSize}
       data-test-subj="userMenuAvatar"
     />
   ) : currentUser.value && userProfile.error ? (
-    <UserAvatar user={currentUser.value} size="s" data-test-subj="userMenuAvatar" />
+    <UserAvatar user={currentUser.value} size={avatarSize} data-test-subj="userMenuAvatar" />
   ) : (
     <EuiLoadingSpinner size="m" />
   );

@@ -134,6 +134,7 @@ export class SecurityNavControlService {
           logoutUrl={this.logoutUrl}
           userMenuLinks$={this.userMenuLinks$}
           renderButton={chromeNextUserMenuButton}
+          avatarSize="m"
         />
       </Providers>
     );
