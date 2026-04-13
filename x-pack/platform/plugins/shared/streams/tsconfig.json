@@ -49,6 +49,7 @@
     "@kbn/traced-es-client",
     "@kbn/zod-helpers",
     "@kbn/inference-common",
+    "@kbn/inference-prompt-utils",
     "@kbn/std",
     "@kbn/core-http-server",
     "@kbn/core-saved-objects-api-server",
@@ -87,7 +88,8 @@
     "@kbn/agent-builder-common",
     "@kbn/datemath",
     "@kbn/setup-node-env",
+    "@kbn/core-security-server",
     "@kbn/workflows-management-plugin",
-    "@kbn/workflows",
+    "@kbn/workflows"
   ]
 }
