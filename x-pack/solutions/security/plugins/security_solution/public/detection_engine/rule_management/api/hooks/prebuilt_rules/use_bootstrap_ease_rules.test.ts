@@ -15,7 +15,7 @@ import { useInvalidateFindRulesQuery } from '../use_find_rules_query';
 import {
   BOOTSTRAP_EASE_RULES_KEY,
   useBootstrapEaseRulesMutation,
-} from './use_bootstrap_promotion_rules';
+} from './use_bootstrap_ease_rules';
 
 jest.mock('../../api', () => ({
   bootstrapEaseRules: jest.fn(),

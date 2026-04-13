@@ -10,17 +10,14 @@ import { useSecuritySolutionInitialization } from '../../../common/components/in
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { INITIALIZATION_FLOW_INIT_PREBUILT_RULES } from '../../../../common/api/initialization';
-import { useBootstrapEaseRulesMutation } from '../../../detection_engine/rule_management/api/hooks/prebuilt_rules/use_bootstrap_promotion_rules';
-import {
-  useBootstrapEaseRules,
-  useIsBootstrappingEaseRules,
-} from './use_bootstrap_promotion_rules';
+import { useBootstrapEaseRulesMutation } from '../../../detection_engine/rule_management/api/hooks/prebuilt_rules/use_bootstrap_ease_rules';
+import { useBootstrapEaseRules, useIsBootstrappingEaseRules } from './use_bootstrap_ease_rules';
 
 jest.mock('../../../common/components/initialization/use_security_solution_initialization');
 jest.mock('../../../common/components/user_privileges');
 jest.mock('../../../common/hooks/use_app_toasts');
 jest.mock(
-  '../../../detection_engine/rule_management/api/hooks/prebuilt_rules/use_bootstrap_promotion_rules'
+  '../../../detection_engine/rule_management/api/hooks/prebuilt_rules/use_bootstrap_ease_rules'
 );
 
 // useIsMutating is used by useIsBootstrappingEaseRules

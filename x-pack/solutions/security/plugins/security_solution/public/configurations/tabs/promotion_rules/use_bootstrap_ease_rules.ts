@@ -18,7 +18,7 @@ import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import {
   BOOTSTRAP_EASE_RULES_KEY,
   useBootstrapEaseRulesMutation,
-} from '../../../detection_engine/rule_management/api/hooks/prebuilt_rules/use_bootstrap_promotion_rules';
+} from '../../../detection_engine/rule_management/api/hooks/prebuilt_rules/use_bootstrap_ease_rules';
 import * as i18n from '../../../detection_engine/rule_management/logic/translations';
 
 /**
