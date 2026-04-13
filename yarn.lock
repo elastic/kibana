@@ -2382,10 +2382,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.11.1.tgz#435248596e044fa1d39a54d820115fefedfe25ef"
   integrity sha512-zUJCq/0RUUGLcsFpZ8iHReboE8POZZ3XBnEd8DtxWnkf0Eb87VvcZWoQNwQHctPdQkzEmN4VRwLk4kuPX2Es+A==
 
-"@elastic/esql@1.8.0":
-  version "1.8.0"
-  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-1.8.0.tgz#c654f843f6c88ce8dbe40ef129551a17507adc99"
-  integrity sha512-+ibCpnqfc3tBC7hAhrvBsf9npihEorjVjAhpIlKdMcvOhss45bm5XpzuiRJLwJTo6ckZjNIyitCsA5ev8CpzCQ==
+"@elastic/esql@2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-2.0.0.tgz#6794e2791d3b342bd29b49fa1ec56a6354b16314"
+  integrity sha512-KiP4m8pXdbmvqt8jEbQltKF4sBg/GhZSFoSFX82Fp9HDY/N+SlZIg9GdrxEGScugSvf1+CO8aJbaHONwS0MNnA==
   dependencies:
     antlr4 "4.13.2"
     tree-dump "1.1.0"
@@ -27290,10 +27290,10 @@ moment-duration-format@2.3.2:
   resolved "https://registry.yarnpkg.com/moment-duration-format/-/moment-duration-format-2.3.2.tgz#5fa2b19b941b8d277122ff3f87a12895ec0d6212"
   integrity sha512-cBMXjSW+fjOb4tyaVHuaVE/A5TqkukDWiOfxxAjY+PEqmmBQlLwn+8OzwPiG3brouXKY5Un4pBjAeB6UToXHaQ==
 
-moment-timezone@0.6.0:
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.6.0.tgz#c5a6519171f31a64739ea75d33f5c136c08ff608"
-  integrity sha512-ldA5lRNm3iJCWZcBCab4pnNL3HSZYXVb/3TYr75/1WCTWYuTqYUb5f/S384pncYjJ88lbO8Z4uPDvmoluHJc8Q==
+moment-timezone@0.6.1:
+  version "0.6.1"
+  resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.6.1.tgz#c324a71a8285583eb679ced4ba3dcfa53fdce500"
+  integrity sha512-1B9lmAhB9D9/sHaPC1N7wLFEVUoFldxOpOO96lOD1PvJ43vCd0ozDPbu0FEL3++VvawOlDkq8YD373tJmP5JHw==
   dependencies:
     moment "^2.29.4"
 
