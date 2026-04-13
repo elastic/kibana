@@ -1,5 +1,6 @@
 # SLOs
 
+<!-- temp: trigger selective testing for @kbn/slo-plugin -->
 A Kibana plugin
 
 ---
