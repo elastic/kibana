@@ -91,9 +91,9 @@ export const markModulesAffectedStatus = (
   });
 
   log.info(
-    `Selective testing: ${affectedCount} affected module(s), ${
+    `Affected modules: ${affectedCount} affected, ${
       marked.length - affectedCount
-    } rest, ${unmappedCount} unmapped`
+    } unaffected, ${unmappedCount} unmapped`
   );
 
   return marked;

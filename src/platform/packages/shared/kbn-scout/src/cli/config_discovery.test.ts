@@ -730,7 +730,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
 
     const infoCalls = log.info.mock.calls;
     expect(infoCalls.length).toBeGreaterThan(0);
-    expect(infoCalls[0][0]).toContain('Found Playwright config files');
+    expect(infoCalls.some((call) => call[0].includes('Found Playwright config files'))).toBe(true);
 
     // Check that config logs include tags
     const configLogs = infoCalls.filter((call) => call[0].startsWith('- '));
@@ -804,7 +804,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     expect(Array.isArray(savedData)).toBe(true);
 
     expect(log.info).toHaveBeenCalledWith(
-      expect.stringContaining('Scout configs were filtered for CI. Saved')
+      expect.stringContaining('Scout configs saved for CI (full suite)')
     );
   });
 

@@ -220,7 +220,8 @@ const splitStreamsTestsByServerRunFlags = (
 const handleNonFlattenedOutput = (
   filteredModules: ModuleDiscoveryInfo[],
   flagsReader: FlagsReader,
-  log: ToolingLog
+  log: ToolingLog,
+  selectiveTesting: boolean
 ): void => {
   if (flagsReader.boolean('save')) {
     const filteredForCiModules = filterModulesByScoutCiConfig(log, filteredModules);
@@ -231,8 +232,9 @@ const handleNonFlattenedOutput = (
     const { plugins: savedPluginCount, packages: savedPackageCount } =
       countModulesByType(splitModules);
 
+    const runScope = selectiveTesting ? 'selective' : 'full suite';
     log.info(
-      `Scout configs were filtered for CI. Saved ${savedPluginCount} plugin(s) and ${savedPackageCount} package(s) to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'`
+      `Scout configs saved for CI (${runScope}): ${savedPluginCount} plugin(s) and ${savedPackageCount} package(s) written to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'`
     );
     return;
   }
@@ -280,6 +282,10 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
     log.info(
       `Selective testing: Scout discovery limited to affected modules (${modulesForTargetTags.length} of ${modulesAfterAffectedMark.length})`
     );
+  } else {
+    log.info(
+      `Full suite run: all ${modulesAfterAffectedMark.length} discovered module(s) will be included (selective testing is disabled)`
+    );
   }
 
   // Filter modules by target tags and compute server run flags
@@ -295,7 +301,7 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
   if (flatten) {
     handleFlattenedOutput(filteredModulesWithExcludedConfigs, flagsReader, log);
   } else {
-    handleNonFlattenedOutput(filteredModulesWithExcludedConfigs, flagsReader, log);
+    handleNonFlattenedOutput(filteredModulesWithExcludedConfigs, flagsReader, log, selectiveTesting);
   }
 };
 
