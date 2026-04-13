@@ -6,7 +6,7 @@
  */
 
 import type { AxiosInstance } from 'axios';
-import { normalizeBearerAuthorizationHeaderValue, type GetTokenOpts } from '@kbn/connector-specs';
+import { normalizeAuthorizationHeaderValue, type GetTokenOpts } from '@kbn/connector-specs';
 import type { AxiosErrorWithRetry } from '../axios_utils';
 import { getOAuthAuthorizationCodeAccessToken } from '../get_oauth_authorization_code_access_token';
 import type { AxiosAuthStrategy, AuthStrategyDeps } from './types';
@@ -82,7 +82,7 @@ export class OAuthAuthCodeStrategy implements AxiosAuthStrategy {
         logger.debug(
           `Token refreshed successfully for connectorId ${connectorId}. Retrying request.`
         );
-        const normalizedAccessToken = normalizeBearerAuthorizationHeaderValue(newAccessToken);
+        const normalizedAccessToken = normalizeAuthorizationHeaderValue(newAccessToken);
         error.config.headers.Authorization = normalizedAccessToken;
         axiosInstance.defaults.headers.common.Authorization = normalizedAccessToken;
         return axiosInstance.request(error.config);

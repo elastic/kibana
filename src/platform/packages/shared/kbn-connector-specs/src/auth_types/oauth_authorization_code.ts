@@ -13,21 +13,13 @@ import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
 
 /**
- * OAuth token responses may use `token_type: "bearer"` (lowercase). Stored credentials use that
- * casing in the Authorization header string; some HTTP APIs incorrectly require the scheme `Bearer`.
- *
- * Normalizes only when the scheme is Bearer (case-insensitive) and a non-empty credential follows.
+ * OAuth token responses often use `token_type: "bearer"` (lowercase). If the stored header begins
+ * with `bearer ` (after trim), rewrites the scheme to `Bearer `; otherwise returns the trimmed value.
  */
-export function normalizeBearerAuthorizationHeaderValue(value: string): string {
+export function normalizeAuthorizationHeaderValue(value: string): string {
   const trimmed = value.trim();
-  const spaceIdx = trimmed.indexOf(' ');
-  if (spaceIdx === -1) {
-    return trimmed;
-  }
-  const scheme = trimmed.slice(0, spaceIdx);
-  const credential = trimmed.slice(spaceIdx + 1).trim();
-  if (scheme.toLowerCase() === 'bearer' && credential.length > 0) {
-    return `Bearer ${credential}`;
+  if (trimmed.startsWith('bearer ')) {
+    return `Bearer ${trimmed.slice('bearer '.length)}`;
   }
   return trimmed;
 }
@@ -135,7 +127,7 @@ export const OAuthAuthorizationCode: AuthTypeSpec<AuthSchemaType> = {
 
     // set global defaults
     axiosInstance.defaults.headers.common.Authorization =
-      normalizeBearerAuthorizationHeaderValue(token);
+      normalizeAuthorizationHeaderValue(token);
 
     return axiosInstance;
   },
