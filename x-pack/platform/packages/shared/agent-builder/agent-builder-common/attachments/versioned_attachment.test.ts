@@ -18,10 +18,10 @@ import {
   attachmentVersionSchema,
   versionedAttachmentSchema,
   attachmentVersionRefSchema,
-  versionedAttachmentInputSchema,
   attachmentDiffSchema,
   type VersionedAttachment,
   type AttachmentVersion,
+  attachmentInputSchema,
 } from './versioned_attachment';
 
 describe('versioned_attachment', () => {
@@ -464,7 +464,7 @@ describe('versioned_attachment', () => {
           type: 'text',
           data: { content: 'test' },
         };
-        const result = versionedAttachmentInputSchema.safeParse(valid);
+        const result = attachmentInputSchema.safeParse(valid);
         expect(result.success).toBe(true);
       });
 
@@ -476,7 +476,7 @@ describe('versioned_attachment', () => {
           description: 'My attachment',
           hidden: false,
         };
-        const result = versionedAttachmentInputSchema.safeParse(valid);
+        const result = attachmentInputSchema.safeParse(valid);
         expect(result.success).toBe(true);
       });
 
@@ -484,7 +484,7 @@ describe('versioned_attachment', () => {
         const invalid = {
           data: { content: 'test' },
         };
-        const result = versionedAttachmentInputSchema.safeParse(invalid);
+        const result = attachmentInputSchema.safeParse(invalid);
         expect(result.success).toBe(false);
       });
     });

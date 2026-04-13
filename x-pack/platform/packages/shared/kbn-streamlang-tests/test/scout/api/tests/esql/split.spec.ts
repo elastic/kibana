@@ -30,7 +30,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docs = [{ tags: 'foo,bar,baz' }];
         await testBed.ingest(indexName, docs);
@@ -59,7 +59,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docs = [{ tags: 'foo,bar,baz' }];
         await testBed.ingest(indexName, docs);
@@ -88,7 +88,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [{ path: 'home/user/documents' }];
       await testBed.ingest(indexName, docs);
@@ -113,7 +113,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [{ tags: 'single' }];
       await testBed.ingest(indexName, docs);
@@ -139,7 +139,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docWithField = { tags: 'foo,bar,baz', status: 'doc1' };
         const docWithoutField = { status: 'doc2' }; // Should be filtered out
@@ -169,7 +169,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docWithField = { tags: 'foo,bar,baz', status: 'doc1' };
       const docWithoutField = { status: 'doc2' }; // Should pass through
@@ -202,7 +202,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [
         { tags: 'foo,bar,baz', event: { kind: 'test' }, status: 'doc1' },
@@ -244,7 +244,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docs = [
           {
@@ -297,7 +297,7 @@ apiTest.describe(
           } as SplitProcessor,
         ],
       };
-      expect(() => transpile(streamlangDSL)).toThrow(
+      await expect(transpile(streamlangDSL)).rejects.toThrow(
         'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
       );
     });

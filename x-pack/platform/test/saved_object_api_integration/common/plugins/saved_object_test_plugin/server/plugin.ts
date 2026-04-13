@@ -95,6 +95,12 @@ export class Plugin {
               message: { type: 'text' },
               date: { type: 'date' },
               rating: { type: 'integer' },
+              metadata: {
+                properties: {
+                  author: { type: 'text' },
+                  tag: { type: 'keyword' },
+                },
+              },
             },
           },
         },

@@ -8,7 +8,11 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
-import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
+import type {
+  EsWorkflowExecution,
+  EsWorkflowStepExecution,
+  WorkflowExecutionEventDispatchMetadata,
+} from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
 import { parseDuration } from '../../../utils';
 
@@ -65,6 +69,11 @@ export interface WorkflowExecutionTelemetryMetadata {
    */
   queueDelayMs?: number;
   /**
+   * Time in milliseconds from emitEvent dispatch to workflow execution start.
+   * Present for event-driven executions when dispatch timestamp metadata is available.
+   */
+  emitToStartMs?: number;
+  /**
    * Whether the workflow execution timed out
    */
   timedOut: boolean;
@@ -106,6 +115,11 @@ export interface WorkflowExecutionTelemetryMetadata {
    * Only present for sub-workflow executions when set on the execution context.
    */
   parentWorkflowInvocation?: 'sync' | 'async';
+  /**
+   * Event-chain depth when this run was scheduled by the event-driven trigger handler.
+   * Distinct from `compositionDepth` (sub-workflow nesting). Omitted when not an event-chain execution.
+   */
+  eventChainDepth?: number;
 }
 
 /**
@@ -211,9 +225,13 @@ export function extractExecutionMetadata(
   const ruleId = extractAlertRuleId(workflowExecution);
 
   const compositionContext = extractCompositionContext(workflowExecution);
+  const eventChainDepth = extractEventChainDepthFromExecution(workflowExecution);
 
   // Extract or calculate queue delay
   const queueDelayMs = extractQueueDelayMs(workflowExecution);
+
+  // Calculate emit-to-start delay for event-driven executions, when dispatch metadata is available.
+  const emitToStartMs = extractEmitToStartMs(workflowExecution);
 
   // Calculate time to first step
   const timeToFirstStep = extractTimeToFirstStep(workflowExecution, stepExecutions);
@@ -239,8 +257,10 @@ export function extractExecutionMetadata(
     uniqueStepIdsExecuted: uniqueStepIdsSet.size,
     ...(ruleId && { ruleId }),
     ...compositionContext,
+    ...(eventChainDepth !== undefined && { eventChainDepth }),
     ...(timeToFirstStep !== undefined && { timeToFirstStep }),
     ...(queueDelayMs !== undefined && { queueDelayMs }),
+    ...(emitToStartMs !== undefined && { emitToStartMs }),
     timedOut: timeoutInfo.timedOut,
     ...(timeoutInfo.timeoutMs !== undefined && { timeoutMs: timeoutInfo.timeoutMs }),
     ...(timeoutInfo.timeoutExceededByMs !== undefined && {
@@ -251,8 +271,106 @@ export function extractExecutionMetadata(
   };
 }
 
+function isPlainScheduleMetadataSource(value: unknown): value is Record<string, unknown> {
+  return value != null && typeof value === 'object' && !Array.isArray(value);
+}
+
+/**
+ * Resolves schedule/dispatch metadata using the same precedence as buildWorkflowContext:
+ * top-level `workflowExecution.metadata` first, then `workflowExecution.context.metadata`.
+ */
+function pickScheduleDispatchTimestamp(
+  top: Record<string, unknown> | undefined,
+  nested: Record<string, unknown> | undefined
+): string | number | undefined {
+  const fromTop = top?.eventDispatchTimestamp;
+  if (typeof fromTop === 'string' || typeof fromTop === 'number') {
+    return fromTop;
+  }
+  const fromNested = nested?.eventDispatchTimestamp;
+  if (typeof fromNested === 'string' || typeof fromNested === 'number') {
+    return fromNested;
+  }
+  return undefined;
+}
+
+function pickScheduleEventTriggerId(
+  top: Record<string, unknown> | undefined,
+  nested: Record<string, unknown> | undefined
+): string | undefined {
+  if (typeof top?.eventTriggerId === 'string') {
+    return top.eventTriggerId;
+  }
+  if (typeof nested?.eventTriggerId === 'string') {
+    return nested.eventTriggerId;
+  }
+  return undefined;
+}
+
+function resolveWorkflowExecutionScheduleMetadata(
+  workflowExecution: EsWorkflowExecution
+): WorkflowExecutionEventDispatchMetadata {
+  const top = isPlainScheduleMetadataSource(workflowExecution.metadata)
+    ? workflowExecution.metadata
+    : undefined;
+  const nested = isPlainScheduleMetadataSource(workflowExecution.context?.metadata)
+    ? workflowExecution.context.metadata
+    : undefined;
+
+  const eventDispatchTimestamp = pickScheduleDispatchTimestamp(top, nested);
+  const eventTriggerId = pickScheduleEventTriggerId(top, nested);
+
+  return {
+    ...(eventDispatchTimestamp !== undefined ? { eventDispatchTimestamp } : {}),
+    ...(eventTriggerId !== undefined ? { eventTriggerId } : {}),
+  };
+}
+
+function extractEmitToStartMs(workflowExecution: EsWorkflowExecution): number | undefined {
+  const startedAtMs = Date.parse(workflowExecution.startedAt);
+  if (Number.isNaN(startedAtMs)) {
+    return undefined;
+  }
+
+  const scheduleMeta = resolveWorkflowExecutionScheduleMetadata(workflowExecution);
+  const dispatchTimestamp = scheduleMeta.eventDispatchTimestamp;
+
+  const dispatchMs =
+    typeof dispatchTimestamp === 'string'
+      ? Date.parse(dispatchTimestamp)
+      : typeof dispatchTimestamp === 'number'
+      ? dispatchTimestamp
+      : Number.NaN;
+
+  if (Number.isNaN(dispatchMs)) {
+    return undefined;
+  }
+
+  const delayMs = startedAtMs - dispatchMs;
+  return delayMs >= 0 ? delayMs : undefined;
+}
+
 /** How the parent started this sub-workflow (persisted on child execution context by execute strategies). */
 type ParentWorkflowInvocationMode = 'sync' | 'async';
+
+/**
+ * Reads event-chain depth from execution context (set when scheduled via the event-driven trigger handler).
+ * Same source as `run_workflow` uses for `setWorkflowEventChainContext`.
+ */
+export function extractEventChainDepthFromExecution(
+  workflowExecution: EsWorkflowExecution
+): number | undefined {
+  const context = workflowExecution.context;
+  if (context == null || typeof context !== 'object' || Array.isArray(context)) {
+    return undefined;
+  }
+  const event = (context as Record<string, unknown>).event;
+  if (event == null || typeof event !== 'object' || Array.isArray(event)) {
+    return undefined;
+  }
+  const depth = (event as Record<string, unknown>).eventChainDepth;
+  return typeof depth === 'number' && depth >= 0 ? depth : undefined;
+}
 
 /**
  * Extracts composition context for sub-workflow executions (triggered by workflow.execute / workflow.executeAsync).

@@ -134,6 +134,7 @@ export const DiscoverMainContent = ({
               <PanelsToggle
                 sidebarToggleState$={sidebarToggleState$}
                 omitChartButton={!isChartAvailable}
+                omitTableButton={!isChartAvailable}
                 dataTestSubjSuffix="InPage"
               />
             ) : undefined

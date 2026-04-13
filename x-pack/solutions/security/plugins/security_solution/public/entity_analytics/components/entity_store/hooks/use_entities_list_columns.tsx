@@ -67,6 +67,7 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
                 [EntityPanelParamByType[entityType] ?? '']: value,
                 contextID: ENTITIES_LIST_TABLE_ID,
                 scopeId: ENTITIES_LIST_TABLE_ID,
+                entityId: record.entity.id,
               },
             });
           }
@@ -78,7 +79,7 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
 
         return (
           <EuiButtonIcon
-            iconType="expand"
+            iconType="maximize"
             onClick={onClick}
             aria-label={i18n.translate(
               'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.entityPreview.ariaLabel',

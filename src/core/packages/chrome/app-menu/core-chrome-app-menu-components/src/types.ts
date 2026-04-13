@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiButtonColor, EuiButtonProps, EuiHideForProps, IconType } from '@elastic/eui';
+import type { EuiButtonColor, EuiHideForProps, IconType } from '@elastic/eui';
 import type { SplitButtonWithNotificationProps } from '@kbn/split-button';
 
 /**
@@ -18,6 +18,12 @@ export interface AppMenuRunActionParams {
    * The HTML element that triggered the action. Do not use this to open popovers. Use `items` property to define popover items instead.
    */
   triggerElement: HTMLElement;
+  /**
+   * Returns focus to the originating app menu control (or an internal fallback such as
+   * the overflow button). This is useful when a run action opens and later closes a
+   * modal/flyout/dialog that should restore keyboard focus.
+   */
+  returnFocus: () => void;
   /**
    * Generic context object that can be used to pass additional data to the run action.
    * Consumers can extend this to add custom properties as needed.
@@ -230,6 +236,11 @@ export type AppMenuPopoverItem = Omit<AppMenuItemType, 'iconType' | 'hidden' | '
    * Adds a separator line above or below the item in the popover menu.
    */
   separator?: 'above' | 'below';
+  /**
+   * Optional badge text displayed after the label (e.g. "New").
+   * Rendered as an inline EuiBadge next to the item name.
+   */
+  labelBadgeText?: string;
 };
 
 type AppMenuActionButton = Omit<AppMenuItemCommon, 'order'> & {
@@ -237,20 +248,6 @@ type AppMenuActionButton = Omit<AppMenuItemCommon, 'order'> & {
    * The color of the button.
    */
   color?: EuiButtonColor;
-};
-
-/**
- * Secondary action button type. Can't be a split button.
- */
-export type AppMenuSecondaryActionItem = AppMenuActionButton & {
-  /**
-   * Whether the button should be filled.
-   */
-  isFilled?: boolean;
-  /**
-   * Equal to EUI `minWidth` property.
-   */
-  minWidth?: EuiButtonProps['minWidth'];
 };
 
 /**
@@ -283,8 +280,4 @@ export interface AppMenuConfig {
    * Primary action button to display in the app menu.
    */
   primaryActionItem?: AppMenuPrimaryActionItem;
-  /**
-   * @deprecated secondaryActionItem will be removed in a future release. Use {@link AppMenuConfig.items} instead
-   */
-  secondaryActionItem?: AppMenuSecondaryActionItem;
 }

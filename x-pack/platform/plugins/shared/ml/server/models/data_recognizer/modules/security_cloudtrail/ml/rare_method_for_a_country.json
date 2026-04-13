@@ -12,7 +12,7 @@
         "detector_index": 0
       }
     ],
-    "influencers": ["aws.cloudtrail.user_identity.arn", "source.ip", "source.geo.country_iso_code"]
+    "influencers": ["aws.cloudtrail.user_identity.arn", "source.ip", "source.geo.country_iso_code", "event.action"]
   },
   "allow_lazy_open": true,
   "analysis_limits": {

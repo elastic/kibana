@@ -34,7 +34,6 @@ dependsOn:
   - '@kbn/projects-solutions-groups'
   - '@kbn/deeplinks-workflows'
   - '@kbn/deeplinks-agent-builder'
-  - '@kbn/deeplinks-data-sources'
   - '@kbn/core-chrome-navigation'
   - '@kbn/core-chrome-sidebar'
 tags:
@@ -49,26 +48,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}
