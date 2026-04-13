@@ -28,6 +28,7 @@ export const createNavigationTree = (
       icon: 'logoSecurity',
       link: securityLink(SecurityPageName.landing),
       renderAs: 'home',
+      sideNavStatus: 'hidden',
       title: SOLUTION_NAME,
     },
     {

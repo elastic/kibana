@@ -28,10 +28,11 @@ export const createAiNavigationTree = (
   body: [
     {
       id: 'ease_home',
-      link: securityLink(SecurityPageName.landing),
-      title: SOLUTION_NAME,
       icon: AiNavigationIcon,
+      link: securityLink(SecurityPageName.landing),
       renderAs: 'home',
+      sideNavStatus: 'hidden',
+      title: SOLUTION_NAME,
     },
     {
       id: SecurityPageName.alertSummary,

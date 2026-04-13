@@ -27,6 +27,32 @@ import { isActiveFromUrl } from './utils/is_active_from_url';
 
 const SKIP_WARNINGS = process.env.NODE_ENV === 'production';
 
+const FALLBACK_ICON = 'broom' as const;
+
+const getIcon = (node: ChromeProjectNavigationNode | null): string => {
+  if (node?.icon) {
+    return node.icon as string;
+  }
+
+  if (node && AppDeepLinkIdToIcon[node.id]) {
+    return AppDeepLinkIdToIcon[node.id];
+  }
+
+  if (node?.deepLink?.euiIconType) {
+    return node.deepLink.euiIconType;
+  }
+
+  if (node?.deepLink?.icon) {
+    return node.deepLink.icon;
+  }
+
+  warnOnce(
+    `No icon found for node "${node?.id}". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon "broom".`
+  );
+
+  return FALLBACK_ICON;
+};
+
 export interface NavigationItems {
   logoItem: SideNavLogo;
   navItems: NavigationStructure;
@@ -118,10 +144,11 @@ export const toNavigationItems = (
 
   const logoItem: SideNavLogo = {
     href: warnIfMissing(logoNode, 'href', '/missing-href-😭'),
-    iconType: 'home',
+    iconType: getIcon(logoNode),
     id: warnIfMissing(logoNode, 'id', 'kibana'),
     label: warnIfMissing(logoNode, 'title', 'Kibana'),
     'data-test-subj': logoNode ? getTestSubj(logoNode, ['nav-item-home']) : undefined,
+    ...(logoNode?.sideNavStatus === 'hidden' ? { hideInSideNav: true } : {}),
   };
 
   const toMenuItem = (navNode: ChromeProjectNavigationNode): MenuItem[] | MenuItem | null => {
@@ -364,7 +391,7 @@ function warnAboutDuplicateIcons(
 ) {
   if (SKIP_WARNINGS) return;
   // Collect all items with icons (only logo + primary items, excluding fallback)
-  const icons = [logoItem, ...primaryItems, ...footerItems]
+  const icons = [...(logoItem.hideInSideNav ? [] : [logoItem]), ...primaryItems, ...footerItems]
     .filter(
       (item) =>
         item.iconType && item.iconType !== FALLBACK_ICON && typeof item.iconType === 'string'
@@ -468,7 +495,6 @@ function warnAboutTooManyNewItems(primaryItems: MenuItem[], footerItems: MenuIte
   });
 }
 
-const FALLBACK_ICON = 'broom' as const;
 /**
  * Finds an item href based on the last active item history for a panel opener.
  * @param panelId - The panel opener node id
@@ -539,28 +565,4 @@ const getPanelOpenerHref = (
   }
 
   return firstAvailableHref ?? 'missing-href-😭';
-};
-
-const getIcon = (node: ChromeProjectNavigationNode | null): string => {
-  if (node?.icon) {
-    return node.icon as string;
-  }
-
-  if (node && AppDeepLinkIdToIcon[node.id]) {
-    return AppDeepLinkIdToIcon[node.id];
-  }
-
-  if (node?.deepLink?.euiIconType) {
-    return node.deepLink.euiIconType;
-  }
-
-  if (node?.deepLink?.icon) {
-    return node.deepLink.icon;
-  }
-
-  warnOnce(
-    `No icon found for node "${node?.id}". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon "broom".`
-  );
-
-  return FALLBACK_ICON;
 };

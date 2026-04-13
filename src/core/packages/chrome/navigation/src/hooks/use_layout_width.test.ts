@@ -13,6 +13,7 @@ import {
   COLLAPSED_WIDTH,
   EXPANDED_WIDTH,
   SIDE_PANEL_WIDTH,
+  getSideNavRailWidthPx,
   useLayoutWidth,
 } from './use_layout_width';
 
@@ -48,5 +49,21 @@ describe('useLayoutWidth', () => {
     rerender({ isCollapsed: true, isSidePanelOpen: true });
 
     expect(setWidth).toHaveBeenNthCalledWith(1, COLLAPSED_WIDTH + SIDE_PANEL_WIDTH);
+  });
+});
+
+describe('getSideNavRailWidthPx', () => {
+  it('returns the icon rail width when the side panel is closed', () => {
+    expect(getSideNavRailWidthPx(COLLAPSED_WIDTH)).toBe(COLLAPSED_WIDTH);
+    expect(getSideNavRailWidthPx(EXPANDED_WIDTH)).toBe(EXPANDED_WIDTH);
+  });
+
+  it('strips the flyout width when the side panel is open', () => {
+    expect(getSideNavRailWidthPx(COLLAPSED_WIDTH + SIDE_PANEL_WIDTH)).toBe(COLLAPSED_WIDTH);
+    expect(getSideNavRailWidthPx(EXPANDED_WIDTH + SIDE_PANEL_WIDTH)).toBe(EXPANDED_WIDTH);
+  });
+
+  it('passes through unknown totals (e.g. initial 0)', () => {
+    expect(getSideNavRailWidthPx(0)).toBe(0);
   });
 });

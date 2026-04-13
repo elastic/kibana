@@ -28,6 +28,9 @@ const title = i18n.translate(
     defaultMessage: 'Elasticsearch',
   }
 );
+const homeNavTitle = i18n.translate('xpack.enterpriseSearch.searchNav.home', {
+  defaultMessage: 'Home',
+});
 const icon = 'logoElasticsearch';
 
 /**
@@ -64,10 +67,10 @@ export const getNavigationTreeDefinition = ({
         const navTree: NavigationTreeDefinition = {
           body: [
             {
-              link: SEARCH_HOMEPAGE,
-              title,
               icon,
+              link: SEARCH_HOMEPAGE,
               renderAs: 'home',
+              title: homeNavTitle,
             },
             {
               link: 'discover',

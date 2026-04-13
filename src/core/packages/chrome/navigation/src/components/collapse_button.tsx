@@ -29,6 +29,11 @@ const sideNavCollapseButtonStyles = (euiTheme: UseEuiTheme['euiTheme']) => {
       min-width: ${euiTheme.size.xxl};
     `,
     sideNavCollapseButton: css`
+      color: ${euiTheme.colors.textSubdued};
+      &.euiButtonIcon:hover,
+      &.euiButtonIcon:focus {
+        color: ${euiTheme.colors.textSubdued};
+      }
       &.euiButtonIcon:hover {
         transform: none;
       }

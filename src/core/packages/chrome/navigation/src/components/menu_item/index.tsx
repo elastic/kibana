@@ -73,8 +73,8 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
 
     const buttonStyles = css`
       --menu-item-text-color: ${isHighlighted
-        ? euiTheme.components.buttons.textColorPrimary
-        : euiTheme.components.buttons.textColorText};
+        ? euiTheme.colors.textParagraph
+        : euiTheme.colors.textSubdued};
       --high-contrast-hover-indicator-color: var(--menu-item-text-color);
       ${useHighContrastModeStyles(`.${iconWrapperClassName}`)};
 
@@ -101,7 +101,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
         width: ${euiTheme.size.xl};
         border-radius: ${euiTheme.border.radius.medium};
         background-color: ${isHighlighted
-          ? euiTheme.components.buttons.backgroundPrimary
+          ? euiTheme.colors.backgroundLightText
           : euiTheme.colors.backgroundTransparent};
         z-index: 1;
       }
@@ -116,20 +116,15 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
       }
 
       &:focus-visible .${iconWrapperClassName} {
-        border: ${euiTheme.border.width.thick} solid
-          ${isHighlighted ? euiTheme.colors.textPrimary : euiTheme.colors.textParagraph};
+        border: ${euiTheme.border.width.thick} solid ${euiTheme.colors.textParagraph};
       }
 
       &:hover .${iconWrapperClassName}::before {
-        background-color: ${isHighlighted
-          ? euiTheme.components.buttons.backgroundPrimaryHover
-          : euiTheme.components.buttons.backgroundTextHover};
+        background-color: ${euiTheme.components.buttons.backgroundTextHover};
       }
 
       &:active .${iconWrapperClassName}::before {
-        background-color: ${isHighlighted
-          ? euiTheme.components.buttons.backgroundPrimaryActive
-          : euiTheme.components.buttons.backgroundTextActive};
+        background-color: ${euiTheme.components.buttons.backgroundTextActive};
       }
     `;
 
@@ -157,6 +152,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
     const labelStyles = css`
       ${truncatedStyles}
       ${textStyles}
+      color: inherit;
       overflow: hidden;
       max-width: 100%;
       padding: 0 ${euiTheme.size.s};
@@ -165,8 +161,8 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
     const content = (
       <>
         <div className={iconWrapperClassName}>
-          <Suspense fallback={<EuiIcon aria-hidden color="currentColor" type="empty" />}>
-            <EuiIcon aria-hidden color="currentColor" type={iconType || 'empty'} />
+          <Suspense fallback={<EuiIcon aria-hidden color="currentColor" size="m" type="empty" />}>
+            <EuiIcon aria-hidden color="currentColor" size="m" type={iconType || 'empty'} />
           </Suspense>
           {isNew && <NewItemIndicator isHighlighted={isHighlighted} />}
         </div>

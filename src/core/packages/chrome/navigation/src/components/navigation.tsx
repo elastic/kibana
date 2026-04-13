@@ -94,6 +94,8 @@ export const Navigation = ({
   const sidePanelItemPrefix = `${NAVIGATION_SELECTOR_PREFIX}-sidePanelItem`;
   const moreMenuTriggerTestSubj = `${NAVIGATION_SELECTOR_PREFIX}-moreMenuTrigger`;
 
+  const { hideInSideNav, ...logoForSideNav } = logo;
+
   const {
     actualActiveItemId,
     visuallyActivePageId,
@@ -131,13 +133,15 @@ export const Navigation = ({
       id={NAVIGATION_ROOT_SELECTOR}
     >
       <SideNav isCollapsed={isCollapsed}>
-        <SideNav.Logo
-          isCollapsed={isCollapsed}
-          isCurrent={actualActiveItemId === logo.id}
-          isHighlighted={visuallyActivePageId === logo.id}
-          onClick={() => onItemClick?.(logo)}
-          {...logo}
-        />
+        {!hideInSideNav ? (
+          <SideNav.Logo
+            isCollapsed={isCollapsed}
+            isCurrent={actualActiveItemId === logo.id}
+            isHighlighted={visuallyActivePageId === logo.id}
+            onClick={() => onItemClick?.(logo)}
+            {...logoForSideNav}
+          />
+        ) : null}
 
         <SideNav.PrimaryMenu ref={primaryMenuRef} isCollapsed={isCollapsed}>
           {({ mainNavigationInstructionsId }) => (

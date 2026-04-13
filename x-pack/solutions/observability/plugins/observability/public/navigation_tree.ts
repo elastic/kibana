@@ -20,6 +20,9 @@ const title = i18n.translate(
     defaultMessage: 'Observability',
   }
 );
+const homeNavTitle = i18n.translate('xpack.observability.obltNav.homeOverview', {
+  defaultMessage: 'Overview',
+});
 const icon = 'logoObservability';
 
 /**
@@ -53,7 +56,7 @@ function createNavTree({
     body: [
       {
         link: 'observability-overview',
-        title,
+        title: homeNavTitle,
         icon,
         renderAs: 'home',
       },

@@ -25,8 +25,8 @@ function isEditingFromDashboard(
   return isVizApp && hasOriginatingApp;
 }
 
-const NAV_TITLE = i18n.translate('xpack.serverlessSearch.nav.title', {
-  defaultMessage: 'Elasticsearch',
+const HOME_NAV_TITLE = i18n.translate('xpack.serverlessSearch.nav.home', {
+  defaultMessage: 'Home',
 });
 const PERFORMANCE_TITLE = i18n.translate('xpack.serverlessSearch.nav.performance', {
   defaultMessage: 'Performance',
@@ -61,7 +61,7 @@ export function createNavigationTree({
         icon: 'logoElasticsearch',
         link: 'searchHomepage',
         renderAs: 'home',
-        title: NAV_TITLE,
+        title: HOME_NAV_TITLE,
         breadcrumbStatus: 'hidden',
       },
       {

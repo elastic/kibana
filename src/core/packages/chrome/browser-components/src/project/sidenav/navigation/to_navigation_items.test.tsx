@@ -178,6 +178,13 @@ describe('logo node', () => {
     `);
   });
 
+  test('hides logo row in side nav when home node has sideNavStatus hidden', () => {
+    const tree = structuredClone(navigationTree);
+    tree.body[0].sideNavStatus = 'hidden';
+    const { logoItem } = createNavigationItems(tree);
+    expect(logoItem.hideInSideNav).toBe(true);
+  });
+
   test('Logo node can be active', () => {
     const { activeItemId } = createNavigationItems(navigationTree, [[navigationTree.body[0]]]);
     expect(activeItemId).toBe(navigationTree.body[0].id);

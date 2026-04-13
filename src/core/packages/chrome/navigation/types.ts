@@ -147,4 +147,9 @@ export interface SideNavLogo {
    * (optional) `data-test-subj` attribute for testing and tracking purposes.
    */
   'data-test-subj'?: string;
+  /**
+   * When true, the logo row is omitted from the side nav while `href` / `id` remain
+   * available for project chrome (e.g. header logo, active state on the home route).
+   */
+  hideInSideNav?: boolean;
 }

@@ -32,10 +32,11 @@ export const createNavigationTree = async (
   body: [
     {
       id: 'security_solution_home',
-      link: securityLink(SecurityPageName.landing),
-      title: SOLUTION_NAME,
       icon: 'logoSecurity',
+      link: securityLink(SecurityPageName.landing),
       renderAs: 'home',
+      sideNavStatus: 'hidden',
+      title: SOLUTION_NAME,
     },
     {
       link: 'discover',

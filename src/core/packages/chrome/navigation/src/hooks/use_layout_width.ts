@@ -13,6 +13,18 @@ export const COLLAPSED_WIDTH = 48;
 export const EXPANDED_WIDTH = 100;
 export const SIDE_PANEL_WIDTH = 248;
 
+/**
+ * Chrome `sideNav` width is the full navigation slot (icon rail + flyout side panel when open).
+ * The project header logo rail should match only the icon column — not the flyout width.
+ */
+export const getSideNavRailWidthPx = (totalNavigationWidthPx: number): number => {
+  const railIfPanelOpen = totalNavigationWidthPx - SIDE_PANEL_WIDTH;
+  if (railIfPanelOpen === COLLAPSED_WIDTH || railIfPanelOpen === EXPANDED_WIDTH) {
+    return railIfPanelOpen;
+  }
+  return totalNavigationWidthPx;
+};
+
 interface UseLayoutWidthArgs {
   isCollapsed: boolean;
   isSidePanelOpen: boolean;

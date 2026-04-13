@@ -63,8 +63,22 @@ export const FooterItem = forwardRef<HTMLAnchorElement, FooterItemProps>(
 
     const buttonStyles = css`
       --high-contrast-hover-indicator-color: ${isHighlighted
-        ? euiTheme.colors.textPrimary
-        : euiTheme.colors.textParagraph};
+        ? euiTheme.colors.textParagraph
+        : euiTheme.colors.textSubdued};
+      ${!isHighlighted && `color: ${euiTheme.colors.textSubdued};`}
+      ${isHighlighted &&
+      css`
+        color: ${euiTheme.colors.textParagraph};
+        background-color: ${euiTheme.colors.backgroundLightText};
+        /* Match primary rail: no border on the icon chip (EUI base+text adds borderBasePlain). */
+        border: none;
+        &:hover {
+          background-color: ${euiTheme.components.buttons.backgroundTextHover};
+        }
+        &:active {
+          background-color: ${euiTheme.components.buttons.backgroundTextActive};
+        }
+      `}
       ${highContrastModeStyles}
     `;
 
@@ -82,11 +96,12 @@ export const FooterItem = forwardRef<HTMLAnchorElement, FooterItemProps>(
       'aria-current': isCurrent ? 'page' : undefined,
       'aria-label': label,
       buttonRef: ref,
-      color: isHighlighted ? 'primary' : 'text',
+      color: 'text',
       'data-highlighted': isHighlighted ? 'true' : 'false',
       'data-test-subj': footerItemTestSubj,
       'data-menu-item': 'true',
-      display: isHighlighted ? 'base' : 'empty',
+      /* Always empty: base+text draws a plain border; primary MenuItem chips have none. */
+      display: 'empty',
       iconType: 'empty', // `iconType` is passed in Suspense below
       onKeyDown: handleFooterItemKeyDown,
       size: 's',

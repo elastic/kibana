@@ -98,6 +98,8 @@ export interface SideNavLogo {
   iconType: string;
   /** Optional `data-test-subj` attribute. */
   'data-test-subj'?: string;
+  /** When true, the logo row is omitted from the sidebar. */
+  hideInSideNav?: boolean;
 }
 
 /**

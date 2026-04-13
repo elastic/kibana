@@ -19,6 +19,8 @@ import {
 import { css } from '@emotion/react';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import React, { useCallback, useMemo } from 'react';
+import { useSideNavWidth } from '@kbn/core-chrome-browser-hooks';
+import { getSideNavRailWidthPx } from '@kbn/core-chrome-navigation';
 import { Breadcrumbs } from './breadcrumbs';
 import { HeaderHelpMenu } from '../shared/header_help_menu';
 import {
@@ -36,13 +38,40 @@ import {
   useCustomBranding,
 } from '../shared/chrome_hooks';
 
-const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
+/** Match side nav primary icon chip (32×32). */
+const PROJECT_HEADER_LOGO_CHROME_PX = 32;
+
+const getHeaderCss = ({ size, colors, border }: EuiThemeComputed) => ({
+  logoHeaderSectionItem: css`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    box-sizing: border-box;
+    align-self: stretch;
+    flex-shrink: 0;
+    /* Flush with viewport / side nav: cancel EuiHeader padding-inline-start */
+    margin-inline-start: -${size.xs};
+  `,
   logo: {
     container: css`
       display: flex;
       align-items: center;
       justify-content: center;
-      min-width: ${size.xxl};
+      box-sizing: border-box;
+      align-self: stretch;
+      inline-size: ${PROJECT_HEADER_LOGO_CHROME_PX}px;
+      min-inline-size: ${PROJECT_HEADER_LOGO_CHROME_PX}px;
+      max-inline-size: ${PROJECT_HEADER_LOGO_CHROME_PX}px;
+      min-block-size: 0;
+      border-block-end: ${border.width.thin} solid ${colors.borderBaseSubdued};
+    `,
+    homeLink: css`
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      inline-size: 100%;
+      block-size: 100%;
       cursor: pointer;
     `,
   },
@@ -78,6 +107,18 @@ const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
 });
 
 type HeaderCss = ReturnType<typeof getHeaderCss>;
+
+const getLogoNavRailCss = (sideNavWidthPx: number) => css`
+  box-sizing: border-box;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  flex-shrink: 0;
+  align-self: stretch;
+  inline-size: ${sideNavWidthPx}px;
+  min-inline-size: ${sideNavWidthPx}px;
+  max-inline-size: ${sideNavWidthPx}px;
+`;
 
 const isProjectRootBreadcrumb = (crumb: ChromeBreadcrumb | undefined): boolean => {
   if (!crumb) {
@@ -150,7 +191,7 @@ const Logo = ({ logoCss }: { logoCss: HeaderCss['logo'] }) => {
 
   return (
     <span css={logoCss.container} data-test-subj="nav-header-logo">
-      <a onClick={navigateHome} href={fullHref}>
+      <a css={logoCss.homeLink} onClick={navigateHome} href={fullHref}>
         <LoadingIndicator customLogo={logo} />
       </a>
     </span>
@@ -159,9 +200,13 @@ const Logo = ({ logoCss }: { logoCss: HeaderCss['logo'] }) => {
 
 export const ProjectHeader = React.memo(() => {
   const breadcrumbs = useProjectBreadcrumbs();
+  const sideNavWidth = useSideNavWidth();
   const { euiTheme } = useEuiTheme();
   const headerCss = getHeaderCss(euiTheme);
   const { logo: logoCss } = headerCss;
+
+  const logoNavRailWidthPx = useMemo(() => getSideNavRailWidthPx(sideNavWidth), [sideNavWidth]);
+  const logoNavRailCss = useMemo(() => getLogoNavRailCss(logoNavRailWidthPx), [logoNavRailWidthPx]);
 
   const globalHeaderBreadcrumbs = useMemo(() => {
     const first = breadcrumbs[0];
@@ -179,7 +224,7 @@ export const ProjectHeader = React.memo(() => {
     box-shadow: none !important;
     background-color: ${euiTheme.colors.backgroundTransparent};
     border-bottom-color: ${euiTheme.colors.backgroundTransparent};
-    padding-inline: 4px 8px;
+    padding-inline: ${euiTheme.size.xs} ${euiTheme.size.s};
   `;
 
   return (
@@ -188,9 +233,11 @@ export const ProjectHeader = React.memo(() => {
         <div id="globalHeaderBars" data-test-subj="headerGlobalNav" className="header__bars">
           <EuiHeader position={'static'} className="header__firstBar" css={topBarStyles}>
             <EuiHeaderSection grow={false} css={headerCss.leftHeaderSection}>
-              <EuiHeaderSectionItem>
+              <EuiHeaderSectionItem css={headerCss.logoHeaderSectionItem}>
                 <HeaderPageAnnouncer breadcrumbs={breadcrumbs} />
-                <Logo logoCss={logoCss} />
+                <div css={logoNavRailCss} data-test-subj="projectHeaderLogoNavRail">
+                  <Logo logoCss={logoCss} />
+                </div>
               </EuiHeaderSectionItem>
 
               <EuiHeaderSectionItem css={headerCss.leftNavcontrols}>

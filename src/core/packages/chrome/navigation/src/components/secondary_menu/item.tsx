@@ -74,6 +74,11 @@ export const SecondaryMenuItemComponent = ({
     padding: 6px ${euiTheme.size.s};
     width: 100%;
 
+    &&,
+    && .euiButtonContent {
+      color: ${isHighlighted ? euiTheme.colors.textParagraph : euiTheme.colors.textSubdued};
+    }
+
     > span {
       justify-content: ${iconSide === 'left' ? 'flex-start' : 'space-between'};
     }
@@ -83,8 +88,8 @@ export const SecondaryMenuItemComponent = ({
     }
 
     --high-contrast-hover-indicator-color: ${isHighlighted
-      ? euiTheme.colors.textPrimary
-      : euiTheme.colors.textParagraph};
+      ? euiTheme.colors.textParagraph
+      : euiTheme.colors.textSubdued};
     ${highContrastModeStyles};
   `;
 
@@ -136,6 +141,7 @@ export const SecondaryMenuItemComponent = ({
         <EuiButton
           id={id}
           aria-current={isCurrent ? 'page' : undefined}
+          color="text"
           css={buttonStyles}
           data-highlighted="true"
           data-test-subj={`${resolvedTestSubjPrefix}-${id}`}

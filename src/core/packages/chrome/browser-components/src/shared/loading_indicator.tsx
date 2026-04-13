@@ -8,9 +8,10 @@
  */
 
 import { Global, css } from '@emotion/react';
-import { EuiLoadingSpinner, EuiProgress, EuiIcon, EuiImage } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiProgress, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { ElasticHeaderClusterLogo } from './elastic_header_cluster_logo';
 import { useIsLoading } from './chrome_hooks';
 
 export interface LoadingIndicatorProps {
@@ -28,6 +29,10 @@ export const LoadingIndicator = ({ showAsBar = false, customLogo }: LoadingIndic
     defaultMessage: 'Loading content',
   });
 
+  const logoAria = i18n.translate('core.ui.chrome.headerGlobalNav.logoAriaLabel', {
+    defaultMessage: 'Elastic Logo',
+  });
+
   const logoImage = customLogo ? (
     <EuiImage
       src={customLogo}
@@ -39,14 +44,7 @@ export const LoadingIndicator = ({ showAsBar = false, customLogo }: LoadingIndic
       })}
     />
   ) : (
-    <EuiIcon
-      type={'logoElastic'}
-      size="l"
-      data-test-subj={testSubj}
-      aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.logoAriaLabel', {
-        defaultMessage: 'Elastic Logo',
-      })}
-    />
+    <ElasticHeaderClusterLogo data-test-subj={testSubj} ariaLabel={logoAria} />
   );
 
   const logo = isLoading ? (
