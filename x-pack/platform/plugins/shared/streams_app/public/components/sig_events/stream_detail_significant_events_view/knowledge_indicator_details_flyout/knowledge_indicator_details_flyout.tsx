@@ -30,7 +30,7 @@ import { getConfidenceColor } from '../utils/get_confidence_color';
 import { FlyoutMetadataCard } from '../../../flyout_components/flyout_metadata_card';
 import { FlyoutToolbarHeader } from '../../../flyout_components/flyout_toolbar_header';
 import { SeverityBadge } from '../severity_badge/severity_badge';
-import { useKnowledgeIndicatorsBulkDelete } from '../hooks/use_knowledge_indicators_bulk_delete';
+import { useStreamKnowledgeIndicatorsBulkDelete } from '../hooks/use_stream_knowledge_indicators_bulk_delete';
 import { useRulesDemote } from '../hooks/use_queries_bulk_delete';
 import {
   useKnowledgeIndicatorActions,
@@ -69,7 +69,7 @@ export function KnowledgeIndicatorDetailsFlyout({
   } = useKnowledgeIndicatorActions({ streamName, onSuccess: onClose });
 
   const { deleteKnowledgeIndicatorsInBulk, isDeleting: isKIDeleting } =
-    useKnowledgeIndicatorsBulkDelete({ streamName, onSuccess: onClose });
+    useStreamKnowledgeIndicatorsBulkDelete({ streamName, onSuccess: onClose });
 
   const { demoteRules, isPending: isDemoting } = useRulesDemote({ onSuccess: onClose });
 

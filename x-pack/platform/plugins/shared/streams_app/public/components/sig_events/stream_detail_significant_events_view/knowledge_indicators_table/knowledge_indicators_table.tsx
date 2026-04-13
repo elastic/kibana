@@ -23,7 +23,7 @@ import type { Streams } from '@kbn/streams-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { useKnowledgeIndicatorsBulkDelete } from '../hooks/use_knowledge_indicators_bulk_delete';
+import { useStreamKnowledgeIndicatorsBulkDelete } from '../hooks/use_stream_knowledge_indicators_bulk_delete';
 import { KnowledgeIndicatorActionsCell } from '../knowledge_indicator_actions_cell';
 import { DeleteTableItemsModal } from '../delete_table_items_modal';
 import { SparkPlot } from '../../../spark_plot';
@@ -58,7 +58,7 @@ export function KnowledgeIndicatorsTable({
   const [knowledgeIndicatorsToDelete, setKnowledgeIndicatorsToDelete] = useState<
     KnowledgeIndicator[]
   >([]);
-  const { deleteKnowledgeIndicatorsInBulk, isDeleting } = useKnowledgeIndicatorsBulkDelete({
+  const { deleteKnowledgeIndicatorsInBulk, isDeleting } = useStreamKnowledgeIndicatorsBulkDelete({
     streamName: definition.name,
     onSuccess: () => {
       setSelectedKnowledgeIndicators([]);

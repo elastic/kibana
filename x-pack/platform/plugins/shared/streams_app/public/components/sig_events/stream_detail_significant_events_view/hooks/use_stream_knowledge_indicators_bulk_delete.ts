@@ -13,15 +13,15 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { useQueriesApi } from '../../../../hooks/sig_events/use_queries_api';
 import { useStreamFeaturesApi } from '../../../../hooks/sig_events/use_stream_features_api';
 
-interface UseKnowledgeIndicatorsBulkDeleteParams {
+interface UseStreamKnowledgeIndicatorsBulkDeleteParams {
   streamName: string;
   onSuccess?: () => void;
 }
 
-export function useKnowledgeIndicatorsBulkDelete({
+export function useStreamKnowledgeIndicatorsBulkDelete({
   streamName,
   onSuccess,
-}: UseKnowledgeIndicatorsBulkDeleteParams) {
+}: UseStreamKnowledgeIndicatorsBulkDeleteParams) {
   const {
     core: {
       notifications: { toasts },
