@@ -77,7 +77,7 @@ export const getGridAttrs = async (
     : await getESQLAdHocDataview({
         dataViewsService: data.dataViews,
         query: query.esql,
-        options: { skipFetchFields: true, id: dataViewSpec?.id },
+        options: { skipFetchFields: false, id: dataViewSpec?.id },
         http,
       });
 

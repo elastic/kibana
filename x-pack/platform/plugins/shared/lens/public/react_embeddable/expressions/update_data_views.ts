@@ -25,18 +25,5 @@ export async function getUsedDataViews(
     ...Object.values(adHocDataViewsSpecs ?? {}).map((spec) => dataViews.create(spec)),
   ]);
 
-  const merged = uniqBy(indexPatterns.concat(adHocDataViews), 'id');
-
-  // `dataViews.create` returns the instance cache when `spec.id` matches. Ad-hoc ES|QL views are
-  // often created elsewhere with `skipFetchFields: true` (empty fields). Unified Search needs
-  // populated fields to validate filter pills; refresh when we detect an empty field list.
-  await Promise.all(
-    merged.map(async (dataView) => {
-      if ((dataView.fields?.length ?? 0) === 0) {
-        await dataViews.refreshFields(dataView, true);
-      }
-    })
-  );
-
-  return merged;
+  return uniqBy(indexPatterns.concat(adHocDataViews), 'id');
 }
