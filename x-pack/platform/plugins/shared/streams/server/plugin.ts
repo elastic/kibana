@@ -39,6 +39,7 @@ import {
 import { registerFeatureFlags } from './feature_flags';
 import { ContentService } from './lib/content/content_service';
 import { registerRules } from './lib/sig_events/rules/register_rules';
+import { getSigEventsTuningConfig } from './lib/sig_events/helpers/get_sig_events_tuning_config';
 import { AttachmentService } from './lib/streams/attachments/attachment_service';
 import { QueryService } from './lib/streams/assets/query/query_service';
 import { StreamsService } from './lib/streams/service';
@@ -179,18 +180,19 @@ export class StreamsPlugin
         this.logger
       );
 
-      const [attachmentClient, insightClient, contentClient] = await Promise.all([
+      const [attachmentClient, insightClient, contentClient, tuningConfig] = await Promise.all([
         attachmentService.getClient({
           soClient,
           rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
         }),
         insightService.getInternalClient(),
         contentService.getClient(),
+        getSigEventsTuningConfig(globalUiSettingsClient, this.logger),
       ]);
 
       let featureClientPromise: Promise<FeatureClient> | undefined;
       const getFeatureClient = (): Promise<FeatureClient> => {
-        featureClientPromise ??= featureService.getClient();
+        featureClientPromise ??= featureService.getClient(tuningConfig);
         return featureClientPromise;
       };
 
@@ -205,6 +207,7 @@ export class StreamsPlugin
             esClient: coreStart.elasticsearch.client.asInternalUser,
             soClient,
             rulesClient,
+            config: tuningConfig,
           });
         })();
         return queryClientPromise;
@@ -245,6 +248,7 @@ export class StreamsPlugin
         taskClient,
         streamsSettingsStorageClient,
         isSecurityEnabled,
+        tuningConfig,
       };
     };
 
