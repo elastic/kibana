@@ -54,7 +54,47 @@ export class TestRunner extends EventEmitter {
     return true;
   }
 
-  startRun(config: TestConfig, extraArgs: string[] = []): string {
+  startRepeatedRun(
+    config: TestConfig,
+    repeatCount: number,
+    extraArgs: string[] = []
+  ): string {
+    const batchId = crypto.randomUUID().slice(0, 8);
+    let currentIteration = 0;
+
+    const runNext = (): void => {
+      currentIteration++;
+      if (currentIteration > repeatCount) return;
+
+      const runId = this.startRun(config, extraArgs, {
+        iteration: currentIteration,
+        totalIterations: repeatCount,
+        repeatBatchId: batchId,
+      });
+
+      const check = (): void => {
+        const run = this.getRunById(runId);
+        if (run && (run.status === 'passed' || run.status === 'failed' || run.status === 'stopped')) {
+          if (run.status === 'failed' || run.status === 'stopped' || currentIteration >= repeatCount) {
+            return;
+          }
+          runNext();
+        } else {
+          setTimeout(check, 1000);
+        }
+      };
+      setTimeout(check, 1000);
+    };
+
+    runNext();
+    return batchId;
+  }
+
+  startRun(
+    config: TestConfig,
+    extraArgs: string[] = [],
+    repeatInfo?: { iteration: number; totalIterations: number; repeatBatchId: string }
+  ): string {
     const runId = crypto.randomUUID().slice(0, 8);
     const { command, args } = this.buildCommand(config, extraArgs);
 
@@ -65,6 +105,11 @@ export class TestRunner extends EventEmitter {
       startedAt: new Date().toISOString(),
       output: [],
       errorOutput: [],
+      ...(repeatInfo ? {
+        iteration: repeatInfo.iteration,
+        totalIterations: repeatInfo.totalIterations,
+        repeatBatchId: repeatInfo.repeatBatchId,
+      } : {}),
     };
 
     const child = spawn(command, args, {
@@ -196,8 +241,14 @@ export class TestRunner extends EventEmitter {
           ],
         };
 
+      case 'ci-check':
+        return {
+          command: config.command ?? 'node',
+          args: [...(config.commandArgs ?? []), ...extraArgs],
+        };
+
       default:
-        throw new Error(`Unknown test type: ${config.type}`);
+        throw new Error(`Unknown test type: ${(config as { type: string }).type}`);
     }
   }
 

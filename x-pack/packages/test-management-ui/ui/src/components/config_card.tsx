@@ -8,21 +8,38 @@
 import { useState, useMemo } from 'react';
 import type { TestConfig, TestRunResult, StreamEvent, LogLine, ServerStatus } from '../types.js';
 import { StatusBadge } from './status_badge.js';
-import { TypeBadge } from './type_badge.js';
 import { LogViewer } from './log_viewer.js';
 import { RunSummary } from './run_summary.js';
 import { stripAnsi } from '../utils/strip_ansi.js';
 
 const NEEDS_SERVERS: Set<string> = new Set(['scout', 'ftr']);
 
+const TYPE_COLORS: Record<string, string> = {
+  jest: '#c93c37',
+  'jest-integration': '#e07c58',
+  scout: '#006bb4',
+  ftr: '#490091',
+};
+
+const TYPE_SHORT: Record<string, string> = {
+  jest: 'JEST',
+  'jest-integration': 'JINT',
+  scout: 'SCOUT',
+  ftr: 'FTR',
+};
+
 interface ConfigCardProps {
   config: TestConfig;
   runs: TestRunResult[];
   events: StreamEvent[];
   expanded: boolean;
+  ciStatus?: 'passed' | 'failed';
+  isAffected?: boolean;
+  changedFiles?: string[];
   onToggle: () => void;
-  onRun: (configId: string) => void;
+  onRun: (configId: string, extraArgs?: string[]) => void;
   onStop: (runId: string) => void;
+  onRepeat?: (configId: string, configName: string) => void;
   servers: ServerStatus[];
   esOutput: LogLine[];
   kbnOutput: LogLine[];
@@ -45,20 +62,16 @@ const ServerControl = ({
 }) => {
   const isStopped = !status || status.status === 'stopped' || status.status === 'error';
   return (
-    <div className="flex-row">
-      <span style={{ fontWeight: 600, minWidth: 90 }}>{label}</span>
+    <div className="server-ctrl">
+      <span className="server-ctrl-label">{label}</span>
       <StatusBadge status={status?.status ?? 'stopped'} />
       {status?.uptime ? (
         <span className="text-muted text-small">{Math.round(status.uptime / 1000)}s</span>
       ) : null}
       {isStopped ? (
-        <button className="btn btn-success btn-sm" onClick={onStart}>
-          Start
-        </button>
+        <button className="btn btn-success btn-xs" onClick={onStart}>Start</button>
       ) : (
-        <button className="btn btn-danger btn-sm" onClick={onStop}>
-          Stop
-        </button>
+        <button className="btn btn-danger btn-xs" onClick={onStop}>Stop</button>
       )}
     </div>
   );
@@ -69,9 +82,13 @@ export const ConfigCard = ({
   runs,
   events,
   expanded,
+  ciStatus,
+  isAffected,
+  changedFiles,
   onToggle,
   onRun,
   onStop,
+  onRepeat,
   servers,
   esOutput,
   kbnOutput,
@@ -83,22 +100,15 @@ export const ConfigCard = ({
   const [logTab, setLogTab] = useState<'summary' | 'run' | 'elasticsearch' | 'kibana'>('summary');
 
   const latestRun = runs.length > 0 ? runs[0] : null;
-  const isActive =
-    latestRun?.status === 'running' || latestRun?.status === 'starting';
+  const isActive = latestRun?.status === 'running' || latestRun?.status === 'starting';
   const needsServers = NEEDS_SERVERS.has(config.type);
 
-  const runLines: LogLine[] = latestRun
-    ? [
-        ...latestRun.output.map((d): LogLine => ({ data: d, type: 'output' })),
-        ...latestRun.errorOutput.map((d): LogLine => ({ data: d, type: 'error' })),
-        ...events
-          .filter(
-            (e) =>
-              e.runId === latestRun.id && (e.type === 'output' || e.type === 'error')
-          )
-          .map((e): LogLine => ({ data: e.data ?? '', type: e.type as 'output' | 'error' })),
-      ]
-    : [];
+  const runLines: LogLine[] = useMemo(() => {
+    if (!latestRun) return [];
+    return events
+      .filter((e) => e.runId === latestRun.id && (e.type === 'output' || e.type === 'error'))
+      .map((e): LogLine => ({ data: e.data ?? '', type: e.type as 'output' | 'error' }));
+  }, [latestRun, events]);
 
   const progress = useMemo(() => {
     if (!isActive || !latestRun) return null;
@@ -115,15 +125,9 @@ export const ConfigCard = ({
       for (const sub of subLines) {
         const trimmed = sub.trim();
         const fileMatch = trimmed.match(FILE_RE);
-        if (fileMatch) {
-          seenFiles.add(fileMatch[2]);
-        }
-        if (/^\s*[✓√]\s+/.test(sub)) {
-          testsPassed++;
-        }
-        if (/^\s*[✕✗×]\s+/.test(sub)) {
-          testsFailed++;
-        }
+        if (fileMatch) seenFiles.add(fileMatch[2]);
+        if (/^\s*[✓√]\s+/.test(sub)) testsPassed++;
+        if (/^\s*[✕✗×]\s+/.test(sub)) testsFailed++;
       }
     }
 
@@ -131,72 +135,88 @@ export const ConfigCard = ({
     const totalFiles = Math.max(config.testCount ?? 0, filesCompleted);
     const pct = totalFiles > 0 ? Math.min(100, Math.round((filesCompleted / totalFiles) * 100)) : 0;
 
-    return {
-      filesCompleted,
-      totalFiles,
-      testsPassed,
-      testsFailed,
-      testsTotal: testsPassed + testsFailed,
-      pct,
-    };
+    return { filesCompleted, totalFiles, testsPassed, testsFailed, testsTotal: testsPassed + testsFailed, pct };
   }, [isActive, latestRun, runLines, config.type, config.testCount]);
 
   const esStatus = servers.find((s) => s.name === 'elasticsearch');
   const kbnStatus = servers.find((s) => s.name === 'kibana');
 
+  const typeColor = TYPE_COLORS[config.type] ?? '#69707d';
+  const typeLabel = TYPE_SHORT[config.type] ?? config.type.toUpperCase();
+
+  const statusClass = latestRun
+    ? latestRun.status === 'failed' ? 'row-failed' :
+      latestRun.status === 'passed' ? 'row-passed' :
+      (latestRun.status === 'running' || latestRun.status === 'starting') ? 'row-running' : ''
+    : '';
+
   return (
-    <div
-      className="card"
-      style={{
-        borderColor: expanded ? '#006bb4' : undefined,
-        borderLeftWidth: expanded ? 3 : 1,
-      }}
-    >
-      {/* Header - always visible */}
-      <div className="flex-between" style={{ cursor: 'pointer' }} onClick={onToggle}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div className="flex-row mb-8">
-            <TypeBadge type={config.type} />
-            <strong style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {config.name}
-            </strong>
-            {latestRun && <StatusBadge status={latestRun.status} />}
-            {config.testCount !== undefined && (
-              <span className={`test-count-badge ${config.testCount === 0 ? 'test-count-empty' : ''}`}>
-                {config.testCount === 0 ? 'No test files' : `${config.testCount} file${config.testCount === 1 ? '' : 's'}`}
-              </span>
-            )}
-          </div>
-          <div className="mono text-muted text-small">{config.relativePath}</div>
-          {config.owner && config.owner.length > 0 && (
-            <div className="text-muted text-small mt-8">{config.owner.join(', ')}</div>
-          )}
+    <div className={`config-row${expanded ? ' config-row-expanded' : ''} ${statusClass}`}>
+      {/* Compact row header */}
+      <div className="config-row-header" onClick={onToggle}>
+        <span className="config-type-dot" style={{ background: typeColor }} title={config.type}>
+          {typeLabel}
+        </span>
+
+        <div className="config-row-info">
+          <span className="config-row-name">{config.name}</span>
+          <span className="config-row-path">{config.relativePath}</span>
         </div>
-        <div className="flex-row" onClick={(e) => e.stopPropagation()}>
+
+        {config.owner && config.owner.length > 0 && (
+          <span className="config-row-owner">{config.owner[0]}</span>
+        )}
+
+        {config.testCount !== undefined && config.testCount > 0 && (
+          <span className="config-row-files">{config.testCount} file{config.testCount === 1 ? '' : 's'}</span>
+        )}
+
+        {isAffected && <span className="badge-affected">Changed</span>}
+        {ciStatus === 'failed' && <span className="badge-ci-fail">CI</span>}
+
+        {latestRun && <StatusBadge status={latestRun.status} />}
+
+        {/* Progress mini-bar for running tests */}
+        {progress && progress.totalFiles > 0 && (
+          <div className="config-row-progress">
+            <div className="mini-progress-track">
+              <div
+                className={`mini-progress-fill${progress.testsFailed > 0 ? ' mini-progress-warn' : ''}`}
+                style={{ width: `${progress.pct}%` }}
+              />
+            </div>
+            <span className="mini-progress-text">{progress.pct}%</span>
+          </div>
+        )}
+
+        <div className="config-row-actions" onClick={(e) => e.stopPropagation()}>
           {isActive && latestRun ? (
-            <button className="btn btn-danger btn-sm" onClick={() => onStop(latestRun.id)}>
-              Stop
-            </button>
+            <button className="btn btn-danger btn-xs" onClick={() => onStop(latestRun.id)}>Stop</button>
           ) : (
-            <button className="btn btn-primary btn-sm" onClick={() => onRun(config.id)}>
-              Run
-            </button>
+            <>
+              <button className="btn btn-primary btn-xs" onClick={() => onRun(config.id)}>Run</button>
+              {onRepeat && (config.type === 'jest' || config.type === 'jest-integration') && (
+                <button
+                  className="btn btn-ghost btn-xs"
+                  onClick={() => onRepeat(config.id, config.name)}
+                  title="Run multiple times (flaky detection)"
+                >
+                  N×
+                </button>
+              )}
+            </>
           )}
           <button
-            className="btn btn-secondary btn-sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggle();
-            }}
-            style={{ minWidth: 28, justifyContent: 'center' }}
+            className="btn btn-ghost btn-xs config-row-chevron"
+            onClick={(e) => { e.stopPropagation(); onToggle(); }}
           >
             {expanded ? '▲' : '▼'}
           </button>
         </div>
       </div>
 
-      {/* Progress bar for running Jest tests */}
-      {progress && progress.totalFiles > 0 && (
+      {/* Progress bar for running Jest tests (full-width) */}
+      {progress && progress.totalFiles > 0 && expanded && (
         <div className="progress-section">
           <div className="progress-bar-track">
             <div
@@ -205,54 +225,49 @@ export const ConfigCard = ({
             />
           </div>
           <div className="progress-info">
-            <span>
-              {progress.filesCompleted}/{progress.totalFiles} suites
-            </span>
+            <span>{progress.filesCompleted}/{progress.totalFiles} suites</span>
             <span className="progress-tests">
-              {progress.testsPassed > 0 && (
-                <span className="progress-passed">{progress.testsPassed} passed</span>
-              )}
-              {progress.testsFailed > 0 && (
-                <span className="progress-failed">{progress.testsFailed} failed</span>
-              )}
-              {progress.testsTotal > 0 && (
-                <span className="progress-total">({progress.testsTotal} tests)</span>
-              )}
+              {progress.testsPassed > 0 && <span className="progress-passed">{progress.testsPassed} passed</span>}
+              {progress.testsFailed > 0 && <span className="progress-failed">{progress.testsFailed} failed</span>}
+              {progress.testsTotal > 0 && <span className="progress-total">({progress.testsTotal} tests)</span>}
             </span>
             <span>{progress.pct}%</span>
           </div>
         </div>
       )}
 
-      {/* Expanded section */}
+      {/* Expanded detail panel */}
       {expanded && (
-        <div className="config-expanded">
-          {/* Server controls for FTR/Scout */}
+        <div className="config-detail">
           {needsServers && (
             <div className="server-controls">
-              <div className="flex-between mb-8">
-                <span style={{ fontWeight: 600, fontSize: 13, color: '#69707d' }}>Servers</span>
-              </div>
-              <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-                <ServerControl
-                  label="Elasticsearch"
-                  status={esStatus}
-                  onStart={onStartES}
-                  onStop={onStopES}
-                />
-                <ServerControl
-                  label="Kibana"
-                  status={kbnStatus}
-                  onStart={onStartKbn}
-                  onStop={onStopKbn}
-                />
-              </div>
+              <ServerControl label="Elasticsearch" status={esStatus} onStart={onStartES} onStop={onStopES} />
+              <ServerControl label="Kibana" status={kbnStatus} onStart={onStartKbn} onStop={onStopKbn} />
             </div>
           )}
 
-          {/* Run history summary */}
+          {latestRun?.repeatBatchId && (
+            <div className="repeat-indicator">
+              <span className="repeat-indicator-label">Flaky Detection</span>
+              <span className="repeat-indicator-progress">
+                Run {latestRun.iteration ?? '?'} of {latestRun.totalIterations ?? '?'}
+              </span>
+              {(() => {
+                const batchRuns = runs.filter((r) => r.repeatBatchId === latestRun.repeatBatchId);
+                const passed = batchRuns.filter((r) => r.status === 'passed').length;
+                const failed = batchRuns.filter((r) => r.status === 'failed').length;
+                return (
+                  <span className="repeat-indicator-stats">
+                    {passed > 0 && <span className="progress-passed">{passed}✓</span>}
+                    {failed > 0 && <span className="progress-failed">{failed}✕</span>}
+                  </span>
+                );
+              })()}
+            </div>
+          )}
+
           {runs.length > 1 && (
-            <div className="text-muted text-small mb-8">
+            <div className="text-muted text-small" style={{ marginBottom: 8 }}>
               {runs.length} runs — latest: {latestRun?.status}
               {latestRun?.exitCode !== undefined && ` (exit ${latestRun.exitCode})`}
               {' · '}
@@ -260,71 +275,35 @@ export const ConfigCard = ({
             </div>
           )}
 
-          {/* Tabs */}
-          {needsServers ? (
-            <>
-              <div className="tab-bar">
-                <button
-                  className={logTab === 'summary' ? 'active' : ''}
-                  onClick={() => setLogTab('summary')}
-                >
-                  Summary
-                </button>
-                <button
-                  className={logTab === 'run' ? 'active' : ''}
-                  onClick={() => setLogTab('run')}
-                >
-                  Run Output {latestRun ? `(${latestRun.status})` : ''}
-                </button>
-                <button
-                  className={logTab === 'elasticsearch' ? 'active' : ''}
-                  onClick={() => setLogTab('elasticsearch')}
-                >
+          <div className="tab-bar">
+            <button className={logTab === 'summary' ? 'active' : ''} onClick={() => setLogTab('summary')}>
+              Summary
+            </button>
+            <button className={logTab === 'run' ? 'active' : ''} onClick={() => setLogTab('run')}>
+              Output {latestRun ? `(${latestRun.status})` : ''}
+            </button>
+            {needsServers && (
+              <>
+                <button className={logTab === 'elasticsearch' ? 'active' : ''} onClick={() => setLogTab('elasticsearch')}>
                   ES Logs
                 </button>
-                <button
-                  className={logTab === 'kibana' ? 'active' : ''}
-                  onClick={() => setLogTab('kibana')}
-                >
+                <button className={logTab === 'kibana' ? 'active' : ''} onClick={() => setLogTab('kibana')}>
                   Kibana Logs
                 </button>
-              </div>
-              {logTab === 'summary' ? (
-                <RunSummary run={latestRun} lines={runLines} configType={config.type} />
-              ) : (
-                <LogViewer
-                  lines={
-                    logTab === 'run'
-                      ? runLines
-                      : logTab === 'elasticsearch'
-                        ? esOutput
-                        : kbnOutput
-                  }
-                />
-              )}
-            </>
+              </>
+            )}
+          </div>
+
+          {logTab === 'summary' ? (
+            <RunSummary run={latestRun} lines={runLines} configType={config.type} changedFiles={changedFiles} />
           ) : (
-            <>
-              <div className="tab-bar">
-                <button
-                  className={logTab === 'summary' ? 'active' : ''}
-                  onClick={() => setLogTab('summary')}
-                >
-                  Summary
-                </button>
-                <button
-                  className={logTab === 'run' ? 'active' : ''}
-                  onClick={() => setLogTab('run')}
-                >
-                  Output {latestRun ? `(${latestRun.status})` : ''}
-                </button>
-              </div>
-              {logTab === 'summary' ? (
-                <RunSummary run={latestRun} lines={runLines} configType={config.type} />
-              ) : (
-                <LogViewer lines={runLines} />
-              )}
-            </>
+            <LogViewer
+              lines={
+                logTab === 'run' ? runLines
+                  : logTab === 'elasticsearch' ? esOutput
+                  : kbnOutput
+              }
+            />
           )}
         </div>
       )}

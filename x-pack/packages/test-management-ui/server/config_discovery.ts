@@ -298,13 +298,150 @@ function assignTestCounts(configs: TestConfig[], countMap: Map<string, number>):
   }
 }
 
-export { discoverJestConfigs, discoverJestIntegrationConfigs, discoverScoutConfigs, discoverFtrConfigs, buildTestFileCountMaps, assignTestCounts };
+function getCIChecks(repoRoot: string): TestConfig[] {
+  const tsconfigFiles = gitListFiles(repoRoot, '**/tsconfig.json')
+    .filter((f) => !f.includes('node_modules') && !f.includes('target/'))
+    .sort();
+
+  const tsconfigChoices = tsconfigFiles.map((f) => ({ value: f, label: f }));
+
+  const checks: Array<{
+    name: string;
+    key: string;
+    command: string;
+    args: string[];
+    runOptions?: TestConfig['runOptions'];
+  }> = [
+    {
+      name: 'Quick Checks',
+      key: 'quick_checks',
+      command: 'node',
+      args: ['scripts/quick_checks', '--file', '.buildkite/scripts/steps/checks/quick_checks.json'],
+    },
+    {
+      name: 'Linting (stylelint)',
+      key: 'stylelint',
+      command: 'node',
+      args: ['scripts/stylelint'],
+    },
+    {
+      name: 'Linting (eslint)',
+      key: 'eslint',
+      command: 'node',
+      args: ['scripts/eslint_all_files', '--no-cache'],
+      runOptions: [
+        {
+          key: 'fix',
+          label: 'Auto-fix',
+          type: 'boolean',
+          flag: '--fix',
+        },
+      ],
+    },
+    {
+      name: 'Linting (with types)',
+      key: 'eslint_with_types',
+      command: 'node',
+      args: ['scripts/eslint_with_types'],
+    },
+    {
+      name: 'Linting (oxlint)',
+      key: 'oxlint',
+      command: 'node',
+      args: ['scripts/lint.js'],
+      runOptions: [
+        {
+          key: 'fix',
+          label: 'Auto-fix',
+          type: 'boolean',
+          flag: '--fix',
+        },
+      ],
+    },
+    {
+      name: 'Check Types',
+      key: 'check_types',
+      command: 'node',
+      args: ['scripts/type_check'],
+      runOptions: [
+        {
+          key: 'project',
+          label: 'TypeScript project',
+          type: 'select',
+          flag: '--project',
+          placeholder: 'Search tsconfig files...',
+          choices: tsconfigChoices,
+        },
+      ],
+    },
+    {
+      name: 'Check Changes',
+      key: 'check_changes',
+      command: 'node',
+      args: ['scripts/check_changes.ts'],
+    },
+  ];
+
+  return checks.map((check) => ({
+    id: `ci-check-${check.key}`,
+    type: 'ci-check' as const,
+    name: check.name,
+    configPath: check.key,
+    relativePath: check.key,
+    directory: '.',
+    command: check.command,
+    commandArgs: check.args,
+    runOptions: check.runOptions,
+  }));
+}
+
+function searchTestFiles(
+  repoRoot: string,
+  query: string,
+  allConfigs: TestConfig[]
+): Array<{ file: string; configId: string; configName: string; configType: string }> {
+  const patterns = ['**/*.test.ts', '**/*.test.tsx', '**/*.test.js'];
+  const allFiles: string[] = [];
+  for (const p of patterns) {
+    allFiles.push(...gitListFiles(repoRoot, p));
+  }
+
+  const lower = query.toLowerCase();
+  const matches = allFiles
+    .filter((f) => f.toLowerCase().includes(lower))
+    .slice(0, 50);
+
+  return matches.map((file) => {
+    const fileDir = path.dirname(file);
+    let bestConfig: TestConfig | undefined;
+    let bestLen = 0;
+
+    const jestConfigs = allConfigs.filter((c) => c.type === 'jest' || c.type === 'jest-integration');
+    for (const config of jestConfigs) {
+      const configDir = path.dirname(config.relativePath);
+      if (fileDir.startsWith(configDir) && configDir.length > bestLen) {
+        bestConfig = config;
+        bestLen = configDir.length;
+      }
+    }
+
+    return {
+      file,
+      configId: bestConfig?.id ?? '',
+      configName: bestConfig?.name ?? 'Unknown',
+      configType: bestConfig?.type ?? 'jest',
+    };
+  });
+}
+
+export { discoverJestConfigs, discoverJestIntegrationConfigs, discoverScoutConfigs, discoverFtrConfigs, getCIChecks, buildTestFileCountMaps, assignTestCounts, searchTestFiles };
 
 export function discoverAllConfigs(repoRoot: string): DiscoveredConfigs {
   const jest = discoverJestConfigs(repoRoot);
   const jestIntegration = discoverJestIntegrationConfigs(repoRoot);
   const scout = discoverScoutConfigs(repoRoot);
   const ftr = discoverFtrConfigs(repoRoot);
+  const ciChecks = getCIChecks(repoRoot);
 
   const maps = buildTestFileCountMaps(repoRoot);
   assignTestCounts(jest, maps.unit);
@@ -317,7 +454,8 @@ export function discoverAllConfigs(repoRoot: string): DiscoveredConfigs {
     jestIntegration,
     scout,
     ftr,
-    totalCount: jest.length + jestIntegration.length + scout.length + ftr.length,
+    ciChecks,
+    totalCount: jest.length + jestIntegration.length + scout.length + ftr.length + ciChecks.length,
     discoveredAt: new Date().toISOString(),
     discoveryStatus: 'complete',
   };

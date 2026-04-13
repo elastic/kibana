@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type TestType = 'jest' | 'jest-integration' | 'scout' | 'ftr';
+export type TestType = 'jest' | 'jest-integration' | 'scout' | 'ftr' | 'ci-check';
 
 export interface TestConfig {
   id: string;
@@ -24,6 +24,29 @@ export interface TestConfig {
   owner?: string[];
   /** Number of test files matched within this config's scope */
   testCount?: number;
+  /** For ci-check type: the shell command to run */
+  command?: string;
+  /** For ci-check type: arguments for the command */
+  commandArgs?: string[];
+  /** Configurable options shown in a modal before running */
+  runOptions?: RunOption[];
+}
+
+export type RunOptionType = 'text' | 'select' | 'boolean';
+
+export interface RunOption {
+  key: string;
+  label: string;
+  type: RunOptionType;
+  /** CLI flag to prepend (e.g. "--project") */
+  flag: string;
+  placeholder?: string;
+  /** For select type: available choices */
+  choices?: Array<{ value: string; label: string }>;
+  /** Default value */
+  defaultValue?: string;
+  /** If true, this option is required */
+  required?: boolean;
 }
 
 export type TestRunStatus = 'idle' | 'starting' | 'running' | 'passed' | 'failed' | 'stopped';
@@ -37,6 +60,14 @@ export interface TestRunResult {
   exitCode?: number;
   output: string[];
   errorOutput: string[];
+  /** For flaky detection: which iteration (1-based) */
+  iteration?: number;
+  /** For flaky detection: total iterations requested */
+  totalIterations?: number;
+  /** For flaky detection: batch ID grouping repeated runs */
+  repeatBatchId?: string;
+  /** Test file path when running a single file */
+  testFile?: string;
 }
 
 export interface DiscoveredConfigs {
@@ -44,6 +75,7 @@ export interface DiscoveredConfigs {
   jestIntegration: TestConfig[];
   scout: TestConfig[];
   ftr: TestConfig[];
+  ciChecks: TestConfig[];
   totalCount: number;
   discoveredAt: string;
   discoveryStatus: 'idle' | 'discovering' | 'complete';
@@ -64,4 +96,19 @@ export interface TestRunEvent {
   runId: string;
   data: string;
   timestamp: string;
+}
+
+export interface ChangedFilesInfo {
+  baseBranch: string;
+  changedFiles: string[];
+  affectedConfigIds: string[];
+  affectedTsProjects: string[];
+  changedLintableFiles: string[];
+}
+
+export interface TestFileSearchResult {
+  file: string;
+  configId: string;
+  configName: string;
+  configType: TestType;
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type TestType = 'jest' | 'jest-integration' | 'scout' | 'ftr';
+export type TestType = 'jest' | 'jest-integration' | 'scout' | 'ftr' | 'ci-check';
 
 export interface TestConfig {
   id: string;
@@ -19,6 +19,22 @@ export interface TestConfig {
   ownerPackage?: string;
   owner?: string[];
   testCount?: number;
+  command?: string;
+  commandArgs?: string[];
+  runOptions?: RunOption[];
+}
+
+export type RunOptionType = 'text' | 'select' | 'boolean';
+
+export interface RunOption {
+  key: string;
+  label: string;
+  type: RunOptionType;
+  flag: string;
+  placeholder?: string;
+  choices?: Array<{ value: string; label: string }>;
+  defaultValue?: string;
+  required?: boolean;
 }
 
 export type TestRunStatus = 'idle' | 'starting' | 'running' | 'passed' | 'failed' | 'stopped';
@@ -32,6 +48,10 @@ export interface TestRunResult {
   exitCode?: number;
   output: string[];
   errorOutput: string[];
+  iteration?: number;
+  totalIterations?: number;
+  repeatBatchId?: string;
+  testFile?: string;
 }
 
 export interface DiscoveredConfigs {
@@ -39,6 +59,7 @@ export interface DiscoveredConfigs {
   jestIntegration: TestConfig[];
   scout: TestConfig[];
   ftr: TestConfig[];
+  ciChecks: TestConfig[];
   totalCount: number;
   discoveredAt: string;
   discoveryStatus: 'idle' | 'discovering' | 'complete';
@@ -63,6 +84,46 @@ export interface StreamEvent {
 export interface LogLine {
   data: string;
   type: 'output' | 'error';
+}
+
+export interface CIJob {
+  id: string;
+  name: string;
+  state: string;
+  exitStatus: number | null;
+  webUrl: string;
+}
+
+export interface PRInfo {
+  number: number;
+  title: string;
+  state: string;
+  url: string;
+  branch: string;
+  baseBranch: string;
+  ciStatus: 'pending' | 'passing' | 'failing' | 'unknown';
+  buildkiteUrl?: string;
+  buildkiteBuildNumber?: number;
+  failedJobs: CIJob[];
+  allJobs: CIJob[];
+  failedConfigIds: string[];
+  failedStepNames: string[];
+  failedSteps: Array<{ name: string; url: string }>;
+}
+
+export interface ChangedFilesInfo {
+  baseBranch: string;
+  changedFiles: string[];
+  affectedConfigIds: string[];
+  affectedTsProjects: string[];
+  changedLintableFiles: string[];
+}
+
+export interface TestFileSearchResult {
+  file: string;
+  configId: string;
+  configName: string;
+  configType: string;
 }
 
 export type PageId = 'dashboard' | 'configs';

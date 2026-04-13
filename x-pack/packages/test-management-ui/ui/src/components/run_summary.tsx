@@ -13,6 +13,7 @@ interface RunSummaryProps {
   run: TestRunResult | null;
   lines: LogLine[];
   configType: TestType;
+  changedFiles?: string[];
 }
 
 interface CountBreakdown {
@@ -176,7 +177,7 @@ const CountRow = ({ label, counts }: { label: string; counts: CountBreakdown }) 
   </div>
 );
 
-const FileResultRow = ({ result }: { result: TestFileResult }) => {
+const FileResultRow = ({ result, isChangedFile }: { result: TestFileResult; isChangedFile: boolean }) => {
   const [open, setOpen] = useState(false);
   const hasCases = result.testCases.length > 0;
   const failedCases = result.testCases.filter((tc) => !tc.passed);
@@ -191,6 +192,12 @@ const FileResultRow = ({ result }: { result: TestFileResult }) => {
           {result.passed ? '✓' : '✕'}
         </span>
         <span className="summary-file-path mono">{result.file}</span>
+        {!result.passed && isChangedFile && (
+          <span className="diff-badge diff-badge-new">NEW</span>
+        )}
+        {!result.passed && !isChangedFile && (
+          <span className="diff-badge diff-badge-preexisting">Pre-existing</span>
+        )}
         {result.duration && (
           <span className="summary-file-duration">{result.duration}</span>
         )}
@@ -220,7 +227,8 @@ const FileResultRow = ({ result }: { result: TestFileResult }) => {
   );
 };
 
-const JestSummaryView = ({ summary, run }: { summary: JestSummary; run: TestRunResult | null }) => {
+const JestSummaryView = ({ summary, run, changedFiles }: { summary: JestSummary; run: TestRunResult | null; changedFiles?: string[] }) => {
+  const changedSet = useMemo(() => new Set(changedFiles ?? []), [changedFiles]);
   const hasCounts = summary.suites || summary.tests;
   const overallPassed =
     run?.status === 'passed' ||
@@ -274,9 +282,10 @@ const JestSummaryView = ({ summary, run }: { summary: JestSummary; run: TestRunR
             Test Files ({failedFiles.length} failed, {passedFiles.length} passed)
           </div>
           <div className="summary-file-list">
-            {[...failedFiles, ...passedFiles].map((fr, i) => (
-              <FileResultRow key={i} result={fr} />
-            ))}
+            {[...failedFiles, ...passedFiles].map((fr, i) => {
+              const isChanged = changedSet.size > 0 && [...changedSet].some((cf) => fr.file.includes(cf) || cf.includes(fr.file));
+              return <FileResultRow key={i} result={fr} isChangedFile={isChanged} />;
+            })}
           </div>
         </div>
       )}
@@ -383,14 +392,14 @@ const GenericSummaryView = ({ run, lines }: { run: TestRunResult | null; lines: 
   );
 };
 
-export const RunSummary = ({ run, lines, configType }: RunSummaryProps) => {
+export const RunSummary = ({ run, lines, configType, changedFiles }: RunSummaryProps) => {
   const cleanLines = useMemo(() => toLines(lines), [lines]);
 
   const isJest = configType === 'jest' || configType === 'jest-integration';
 
   if (isJest) {
     const summary = parseJestOutput(cleanLines);
-    return <JestSummaryView summary={summary} run={run} />;
+    return <JestSummaryView summary={summary} run={run} changedFiles={changedFiles} />;
   }
 
   return <GenericSummaryView run={run} lines={cleanLines} />;

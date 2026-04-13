@@ -9383,6 +9383,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/test-management-ui@link:x-pack/packages/test-management-ui":
+  version "0.0.0"
+  uid ""
+
 "@kbn/test-saml-auth@link:src/platform/packages/shared/kbn-test-saml-auth":
   version "0.0.0"
   uid ""

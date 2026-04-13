@@ -29,7 +29,15 @@ export const useEventStream = (): EventStream => {
         setConnected(true);
         return;
       }
-      setEvents((prev) => [...prev.slice(-500), data]);
+      if (data.type === 'replay') {
+        const replayed = (data as unknown as { events: StreamEvent[] }).events ?? [];
+        setEvents((prev) => [...prev, ...replayed].slice(-5000));
+        for (const evt of replayed) {
+          listenersRef.current.forEach((fn) => fn(evt));
+        }
+        return;
+      }
+      setEvents((prev) => [...prev.slice(-5000), data]);
       listenersRef.current.forEach((fn) => fn(data));
     };
     es.onerror = () => setConnected(false);

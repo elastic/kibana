@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { useState, useEffect } from 'react';
-import type { DiscoveredConfigs, TestRunResult, PageId } from './types.js';
+import { useState, useEffect, useCallback } from 'react';
+import type { DiscoveredConfigs, TestRunResult, PRInfo, ChangedFilesInfo } from './types.js';
 import { api } from './api.js';
+import { ConfigsPage } from './pages/configs.js';
 import { useEventStream } from './hooks/use_event_stream.js';
 import { useServers } from './hooks/use_servers.js';
-import { DashboardPage } from './pages/dashboard.js';
-import { ConfigsPage } from './pages/configs.js';
 
 export const App = () => {
-  const [page, setPage] = useState<PageId>('configs');
   const [configs, setConfigs] = useState<DiscoveredConfigs | null>(null);
   const [runs, setRuns] = useState<TestRunResult[]>([]);
+  const [prInfo, setPrInfo] = useState<PRInfo | null>(null);
+  const [changedFiles, setChangedFiles] = useState<ChangedFilesInfo | null>(null);
   const { events, connected, subscribe } = useEventStream();
   const serverState = useServers(subscribe);
 
@@ -25,6 +25,12 @@ export const App = () => {
       if (data.totalCount > 0 || data.discoveryStatus !== 'idle') {
         setConfigs(data);
       }
+    });
+    api.get<{ pr: PRInfo | null }>('/api/pr').then((data) => {
+      setPrInfo(data.pr);
+    });
+    api.get<ChangedFilesInfo>('/api/changed-files').then((data) => {
+      if (data.changedFiles) setChangedFiles(data);
     });
   }, []);
 
@@ -53,8 +59,14 @@ export const App = () => {
     return () => clearInterval(poll);
   }, []);
 
-  const handleRunTest = async (configId: string) => {
-    await api.post('/api/runs', { configId });
+  const handleRunTest = async (configId: string, extraArgs?: string[], repeat?: number) => {
+    await api.post('/api/runs', { configId, extraArgs, repeat: repeat ?? 1 });
+    const data = await api.get<{ runs: TestRunResult[] }>('/api/runs');
+    setRuns(data.runs ?? []);
+  };
+
+  const handleRunTestFile = async (testFile: string, configId: string) => {
+    await api.post('/api/runs/test-file', { testFile, configId });
     const data = await api.get<{ runs: TestRunResult[] }>('/api/runs');
     setRuns(data.runs ?? []);
   };
@@ -65,60 +77,57 @@ export const App = () => {
     setRuns(data.runs ?? []);
   };
 
-  const activeRuns = runs.filter((r) => r.status === 'running' || r.status === 'starting');
+  const handleRefreshPr = useCallback(async () => {
+    const data = await api.post<{ pr: PRInfo | null }>('/api/pr/refresh');
+    setPrInfo(data.pr);
+  }, []);
+
+  const isDiscovering = configs?.discoveryStatus === 'discovering';
 
   return (
-    <div>
-      <div className="sidebar">
-        <h2>Test Management</h2>
-        <nav className="sidebar-nav">
-          <a
-            className={page === 'dashboard' ? 'active' : ''}
-            onClick={() => setPage('dashboard')}
-          >
-            Dashboard
-          </a>
-          <a className={page === 'configs' ? 'active' : ''} onClick={() => setPage('configs')}>
-            Test Configs {activeRuns.length > 0 && `(${activeRuns.length} running)`}
-          </a>
-        </nav>
-        <div style={{ position: 'absolute', bottom: 16, left: 16, right: 16 }}>
-          <div className="flex-row text-small">
-            <span
-              style={{
-                display: 'inline-block',
-                width: 8,
-                height: 8,
-                borderRadius: '50%',
-                background: connected ? '#017d73' : '#bd271e',
-              }}
-            />
-            <span style={{ color: '#98a2b3' }}>
-              {connected ? 'Connected' : 'Disconnected'}
+    <div className="app-shell">
+      <header className="top-bar">
+        <div className="top-bar-left">
+          <span className="top-bar-logo">Test Management</span>
+          {isDiscovering && (
+            <span className="top-bar-discovering">
+              <span className="spinner-sm" />
+              Discovering{configs?.discoveryPhase ? ` ${configs.discoveryPhase}` : ''}...
             </span>
-          </div>
+          )}
         </div>
-      </div>
+        <div className="top-bar-right">
+          <span className="connection-dot" data-connected={connected} />
+          <span className="top-bar-status">{connected ? 'Connected' : 'Disconnected'}</span>
+          <button
+            className="btn btn-ghost btn-sm"
+            onClick={() => api.post('/api/configs/refresh')}
+          >
+            Refresh
+          </button>
+        </div>
+      </header>
 
-      <div className="main-content">
-        {page === 'dashboard' && <DashboardPage configs={configs} runs={runs} />}
-        {page === 'configs' && (
-          <ConfigsPage
-            configs={configs}
-            runs={runs}
-            events={events}
-            servers={serverState.servers}
-            esOutput={serverState.esOutput}
-            kbnOutput={serverState.kbnOutput}
-            onRunTest={handleRunTest}
-            onStopRun={handleStopRun}
-            onStartES={serverState.startES}
-            onStartKbn={serverState.startKbn}
-            onStopES={serverState.stopES}
-            onStopKbn={serverState.stopKbn}
-          />
-        )}
-      </div>
+      <main className="main-content">
+        <ConfigsPage
+          configs={configs}
+          runs={runs}
+          events={events}
+          servers={serverState.servers}
+          esOutput={serverState.esOutput}
+          kbnOutput={serverState.kbnOutput}
+          prInfo={prInfo}
+          changedFiles={changedFiles}
+          onRunTest={handleRunTest}
+          onRunTestFile={handleRunTestFile}
+          onStopRun={handleStopRun}
+          onStartES={serverState.startES}
+          onStartKbn={serverState.startKbn}
+          onStopES={serverState.stopES}
+          onStopKbn={serverState.stopKbn}
+          onRefreshPr={handleRefreshPr}
+        />
+      </main>
     </div>
   );
 };
