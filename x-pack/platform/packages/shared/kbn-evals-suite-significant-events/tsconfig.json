@@ -23,6 +23,7 @@
     "@kbn/es-errors",
     "@kbn/otel-demo",
     "@kbn/ai-tools",
-    "@kbn/std"
+    "@kbn/std",
+    "@kbn/streamlang"
   ]
 }

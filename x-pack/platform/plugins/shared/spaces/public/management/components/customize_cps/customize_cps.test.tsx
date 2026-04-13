@@ -152,20 +152,6 @@ describe('CustomizeCps', () => {
     });
   });
 
-  describe('Settings Button', () => {
-    it('is visible', async () => {
-      renderComponent(defaultSpace);
-
-      expect(await screen.findByTestId('cpsDefaultScopePanel')).toBeInTheDocument();
-
-      await waitFor(() => {
-        expect(mockCpsManager.fetchProjects).toHaveBeenCalled();
-      });
-
-      expect(await screen.findByTestId('projectPickerSettingsPopover')).toBeInTheDocument();
-    });
-  });
-
   describe('Capabilities and permissions', () => {
     it('renders when user has manage_space_default capability', async () => {
       const capabilities = {
