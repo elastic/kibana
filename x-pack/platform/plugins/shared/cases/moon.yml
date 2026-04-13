@@ -80,6 +80,7 @@ dependsOn:
   - '@kbn/securitysolution-rules'
   - '@kbn/alerts-ui-shared'
   - '@kbn/cloud-plugin'
+  - '@kbn/response-ops-detections-close-reason'
   - '@kbn/response-ops-alerts-table'
   - '@kbn/field-formats-plugin'
   - '@kbn/core-http-server-mocks'
@@ -111,6 +112,7 @@ dependsOn:
   - '@kbn/resizable-layout'
   - '@kbn/css-utils'
   - '@kbn/shared-ux-column-presets'
+  - '@kbn/core-ui-settings-browser'
 tags:
   - plugin
   - prod
@@ -124,26 +126,6 @@ fileGroups:
     - server/**/*
     - scripts/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

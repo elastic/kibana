@@ -292,10 +292,32 @@ export function generateCosmosDBApiRequestHeaders(
   };
 }
 
+// Kibana project type names mapped to CLI aliases used for role file paths.
+export const projectTypeToAlias = new Map<string, string>([
+  ['observability', 'oblt'],
+  ['security', 'security'],
+  ['search', 'es'],
+  ['workplaceai', 'workplaceai'],
+]);
+
+// Normalizes differences between Kibana solution names (`search`), CLI aliases (`es` and `oblt`),
+// and the canonical project type names used in UIAM and ES Serverless configuration.
+const normalizeProjectType = (projectType: string) => {
+  if (projectType === 'search' || projectType === 'es') {
+    return 'elasticsearch';
+  }
+
+  if (projectType === 'oblt') {
+    return 'observability';
+  }
+
+  return projectType;
+};
+
 export async function createUiamSessionTokens({
   username,
   organizationId,
-  projectType,
+  projectType: rawProjectType,
   roles,
   fullName,
   email,
@@ -313,6 +335,7 @@ export async function createUiamSessionTokens({
   accessTokenLifetimeSec?: number;
   refreshTokenLifetimeSec?: number;
 }) {
+  const projectType = normalizeProjectType(rawProjectType);
   const iat = Math.floor(Date.now() / 1000);
 
   const givenName = fullName ? fullName.split(' ')[0] : 'Test';
@@ -402,6 +425,97 @@ export async function createUiamSessionTokens({
     refreshToken: prepareJwtForUiam(refreshToken),
     refreshTokenExpiresAt: (iat + refreshTokenLifetimeSec) * 1000,
   };
+}
+
+/**
+ * Creates a UIAM OAuth access token that can be used to test the OAuth token exchange flow.
+ *
+ * Unlike {@link createUiamSessionTokens}, this creates a token with `typ: 'oauth-access-token'`
+ * that includes OAuth-specific claims (audience, scope, client_id, connection_id).
+ */
+export async function createUiamOAuthAccessToken({
+  username,
+  organizationId,
+  projectType,
+  roles,
+  audience,
+  fullName,
+  email,
+  accessTokenLifetimeSec = 3600,
+}: {
+  username: string;
+  organizationId: string;
+  projectType: string;
+  roles: string[];
+  audience: string;
+  fullName?: string;
+  email?: string;
+  accessTokenLifetimeSec?: number;
+}) {
+  const iat = Math.floor(Date.now() / 1000);
+
+  const givenName = fullName ? fullName.split(' ')[0] : 'Test';
+  const familyName = fullName ? fullName.split(' ').slice(1).join(' ') : 'User';
+
+  const userSeedResult = await seedTestUser({
+    userId: username,
+    organizationId,
+    roleId: 'cloud-role-id',
+    projectType,
+    applicationRoles: roles,
+    email,
+    firstName: givenName,
+    lastName: familyName,
+  });
+  if (!userSeedResult.success) {
+    throw userSeedResult.response;
+  }
+
+  const accessTokenBody = Buffer.from(
+    JSON.stringify({
+      typ: 'oauth-access-token',
+      var: 'oauth',
+      iss: 'elastic-cloud',
+      sjt: 'user',
+
+      oid: organizationId,
+      sub: username,
+      given_name: givenName,
+      family_name: familyName,
+      email,
+
+      aud: audience,
+      scope: 'all',
+      client_id: 'test-oauth-client',
+      connection_id: 'test-oauth-connection',
+
+      ras: {
+        platform: [],
+        organization: [],
+        user: [],
+        project: [
+          {
+            role_id: 'cloud-role-id',
+            organization_id: organizationId,
+            project_type: projectType,
+            application_roles: roles,
+            project_scope: { scope: 'all' },
+          },
+        ],
+      },
+
+      nbf: iat,
+      exp: iat + accessTokenLifetimeSec,
+      iat,
+      jti: randomBytes(16).toString('hex'),
+    })
+  ).toString('base64url');
+
+  const tokenHeader = Buffer.from(JSON.stringify({ typ: 'JWT', alg: 'HS256' })).toString(
+    'base64url'
+  );
+
+  return prepareJwtForUiam(`${tokenHeader}.${accessTokenBody}`);
 }
 
 function prepareJwtForUiam(unsignedJwt: string): string {

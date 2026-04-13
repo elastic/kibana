@@ -30,6 +30,7 @@ import {
 } from './commons';
 import {
   applyFieldEvaluations,
+  getFieldEvaluationsFromDefinition,
   getSourceMatchSpec,
   type SourceMatchSpec,
 } from './field_evaluations';
@@ -77,8 +78,9 @@ export function getEuidEsqlFilterBasedOnDocument(
     return `(${identityField.singleField} == "${escapeEsqlString(value)}")`;
   }
 
-  if (identityField.fieldEvaluations?.length) {
-    const evaluated = applyFieldEvaluations(doc, identityField.fieldEvaluations);
+  const fieldEvaluations = identityField.fieldEvaluations ?? [];
+  if (fieldEvaluations.length > 0) {
+    const evaluated = applyFieldEvaluations(doc, fieldEvaluations);
     doc = { ...doc, ...evaluated };
   }
   if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
@@ -96,9 +98,7 @@ export function getEuidEsqlFilterBasedOnDocument(
     return undefined;
   }
 
-  const evaluatedDestinations = new Set(
-    identityField.fieldEvaluations?.map((e) => e.destination) ?? []
-  );
+  const evaluatedDestinations = new Set(fieldEvaluations.map((e) => e.destination));
 
   const onExpressions = Object.entries(fieldsToBeFilteredOn.values)
     .filter(([field]) => !evaluatedDestinations.has(field))
@@ -112,8 +112,8 @@ export function getEuidEsqlFilterBasedOnDocument(
 
   const allParts: string[] = [...onExpressions, ...outExpressions];
 
-  if (identityField.fieldEvaluations?.length) {
-    for (const evaluation of identityField.fieldEvaluations) {
+  if (fieldEvaluations.length > 0) {
+    for (const evaluation of fieldEvaluations) {
       const { exactMatchFields, prefixMatchFields } = getSourceFieldNames(evaluation.sources);
       const sourceFields = [...exactMatchFields, ...prefixMatchFields];
       const hasEvaluatedSource = sourceFields.some((f) => evaluatedDestinations.has(f));
@@ -142,7 +142,7 @@ function sourceToEsqlExpression(source: FieldEvaluation['sources'][number]): str
  *
  * - Source values: each source is read with MV_FIRST so multi-value fields are supported; firstChunkOfField sources use SPLIT then MV_FIRST.
  * - Multiple sources: each is assigned to a variable (_src_<dest>0, _src_<dest>1, ...), then an effective source is the first non-null, non-empty variable (CASE).
- * - Destination: effective source is then mapped with CASE: if null/empty → fallbackValue; else if it matches a whenClause → clause's then; else → effective source as-is.
+ * - Destination: one CASE over `whenClauses` in order (sourceMatch arms, then condition arms), then null/empty → fallbackValue, else effective source.
  *
  * Returns a comma-separated list of EVAL assignments (one or more lines).
  */
@@ -151,18 +151,28 @@ function buildOneFieldEvaluationEsql(evaluation: FieldEvaluation): string {
   const sourceExpressions = sources.map(sourceToEsqlExpression);
   const sourceVariablesBaseName = `_src_${destination.replace(/\./g, '_')}`;
   const effectiveSourceName = sourceVariablesBaseName;
-  const destinationCaseParts: string[] = [
-    `(${effectiveSourceName} IS NULL OR ${effectiveSourceName} == ""), "${escapeEsqlString(
-      fallbackValue
-    )}"`,
-  ];
+  const fallbackExpression =
+    fallbackValue === null ? 'NULL' : `"${escapeEsqlString(fallbackValue)}"`;
+
+  const destinationCaseParts: string[] = [];
   for (const clause of whenClauses) {
-    const conditions = clause.sourceMatchesAny
-      .map((v) => `${effectiveSourceName} == "${escapeEsqlString(v)}"`)
-      .join(' OR ');
-    destinationCaseParts.push(`(${conditions}), "${escapeEsqlString(clause.then)}"`);
+    if ('sourceMatchesAny' in clause) {
+      const conditions = clause.sourceMatchesAny
+        .map((v) => `${effectiveSourceName} == "${escapeEsqlString(v)}"`)
+        .join(' OR ');
+      destinationCaseParts.push(`(${conditions}), "${escapeEsqlString(clause.then)}"`);
+    } else {
+      destinationCaseParts.push(
+        `(${conditionToESQL(clause.condition)}), "${escapeEsqlString(clause.then)}"`
+      );
+    }
   }
+  destinationCaseParts.push(
+    `(${effectiveSourceName} IS NULL OR ${effectiveSourceName} == ""), ${fallbackExpression}`
+  );
   destinationCaseParts.push(effectiveSourceName);
+
+  const destinationCaseExpr = `CASE(${destinationCaseParts.join(', ')})`;
 
   const assignments: string[] = [];
 
@@ -180,7 +190,8 @@ function buildOneFieldEvaluationEsql(evaluation: FieldEvaluation): string {
     assignments.push(`${effectiveSourceName} = CASE(${sourceVarCaseParts.join(', ')})`);
   }
 
-  assignments.push(`${destination} = CASE(${destinationCaseParts.join(', ')})`);
+  assignments.push(`${destination} = ${destinationCaseExpr}`);
+
   return assignments.join(',\n ');
 }
 
@@ -189,6 +200,10 @@ function escapeEsqlString(s: string): string {
 }
 
 function buildSourceClauseEsql(evaluation: FieldEvaluation, spec: SourceMatchSpec): string {
+  if (spec.type === 'condition') {
+    return `(${conditionToESQL(spec.condition)})`;
+  }
+
   const { exactMatchFields, prefixMatchFields } = getSourceFieldNames(evaluation.sources);
   const allSourceFields = [...exactMatchFields, ...prefixMatchFields];
 
@@ -215,12 +230,10 @@ export function getFieldEvaluationsEsql(entityType: EntityType): string | undefi
  * Use in a pipeline as | EVAL <result>. Returns undefined when there are no field evaluations.
  */
 export function getFieldEvaluationsEsqlFromDefinition({
+  fieldEvaluations,
   identityField,
 }: EntityDefinitionWithoutId): string | undefined {
-  if (isSingleFieldIdentity(identityField)) {
-    return undefined;
-  }
-  const evaluations = identityField.fieldEvaluations;
+  const evaluations = getFieldEvaluationsFromDefinition({ fieldEvaluations, identityField });
   if (!evaluations || evaluations.length === 0) {
     return undefined;
   }

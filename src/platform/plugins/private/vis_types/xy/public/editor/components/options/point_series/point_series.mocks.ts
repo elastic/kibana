@@ -341,7 +341,7 @@ export const getVis = (bucketType: string) => {
       title: 'Area',
       description: 'Emphasize the data between an axis and a line.',
       note: '',
-      icon: 'visArea',
+      icon: 'chartArea',
       stage: 'production',
       group: 'aggbased',
       titleInWizard: '',

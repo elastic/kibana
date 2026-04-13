@@ -162,7 +162,7 @@ describe.skip('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
 
       it('should be able to run live prebuilt pack', () => {
         navigateTo('/app/osquery/live_queries');
-        cy.contains('New live query').click();
+        cy.contains('Run query').click();
         cy.getBySel('globalLoadingIndicator').should('not.exist');
         cy.contains('Run a set of queries in a pack.').click();
         cy.getBySel(LIVE_QUERY_EDITOR).should('not.exist');

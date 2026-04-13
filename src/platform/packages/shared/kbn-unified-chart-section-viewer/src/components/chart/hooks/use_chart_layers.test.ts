@@ -8,7 +8,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import type { ParsedMetricItem, MetricUnit } from '../../../types';
+import type { ParsedMetricItem, MetricUnit, NullableMetricUnit } from '../../../types';
 import { useChartLayers } from './use_chart_layers';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 
@@ -24,7 +24,7 @@ describe('useChartLayers', () => {
     dataStream: 'metrics-*',
     fieldTypes: [ES_FIELD_TYPES.DOUBLE],
     metricTypes: ['gauge'],
-    units: ['percent'],
+    units: ['percent', null],
     dimensionFields: [],
   };
 
@@ -87,7 +87,39 @@ describe('useChartLayers', () => {
     );
     const [layer] = result.current;
     expect(layer.yAxis[0]).toHaveProperty('format');
+    expect(layer.yAxis[0].format).toBe('bytes');
+  });
+
+  it('should normalize denormalized units like "byte" to "bytes"', () => {
+    const metricWithDenormalizedUnit: ParsedMetricItem = {
+      ...mockMetric,
+      units: ['byte'] as unknown as NullableMetricUnit[],
+    };
+    const { result } = renderHook(() =>
+      useChartLayers({
+        metricItem: metricWithDenormalizedUnit,
+        dimensions: [],
+      })
+    );
+    const [layer] = result.current;
     expect(layer.yAxis[0]).toHaveProperty('format');
+    expect(layer.yAxis[0].format).toBe('bytes');
+  });
+
+  it('should select the first non-null normalized unit when multiple units exist', () => {
+    const metricWithMultipleUnits: ParsedMetricItem = {
+      ...mockMetric,
+      units: [null, 'byte', 'bytes'] as unknown as NullableMetricUnit[],
+    };
+    const { result } = renderHook(() =>
+      useChartLayers({
+        metricItem: metricWithMultipleUnits,
+        dimensions: [],
+      })
+    );
+    const [layer] = result.current;
+    expect(layer.yAxis[0]).toHaveProperty('format');
+    expect(layer.yAxis[0].format).toBe('bytes');
   });
 
   it('should not include format options if the metric has no unit', () => {

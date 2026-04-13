@@ -35,3 +35,22 @@ export const FLYOUT_RIGHT_PANEL = '[data-test-subj="rightSection"]';
 
 export const ALERTS_DISTRIBUTION_BAR =
   '[data-test-subj="entity-analytics-alerts-distribution-bar"]';
+
+// Grouping selectors (from @kbn/grouping)
+export const GROUP_SELECTOR_DROPDOWN = '[data-test-subj="group-selector-dropdown"]';
+export const GROUPING_TABLE = '[data-test-subj="grouping-table"]';
+export const GROUPING_LEVEL_0 = '[data-test-subj="grouping-level-0"]';
+export const GROUPING_ACCORDION = '[data-test-subj="grouping-accordion"]';
+export const GROUPING_ACCORDION_CONTENT = '[data-test-subj="grouping-accordion-content"]';
+export const GROUP_PANEL_TOGGLE = '[data-test-subj="group-panel-toggle"]';
+export const GROUP_STATS = '[data-test-subj="group-stats"]';
+export const GROUP_COUNT = '[data-test-subj="group-count"]';
+export const IS_LOADING_GROUPING_TABLE = '[data-test-subj="is-loading-grouping-table"]';
+export const GLOBAL_LOADING_INDICATOR_HIDDEN = '[data-test-subj="globalLoadingIndicator-hidden"]';
+export const GLOBAL_LOADING_INDICATOR = '[data-test-subj="globalLoadingIndicator"]';
+
+// Group selector menu options
+export const PANEL_NONE = '[data-test-subj="panel-none"]';
+export const PANEL_ENTITY_TYPE = '[data-test-subj="panel-entity.EngineMetadata.Type"]';
+export const PANEL_RESOLUTION =
+  '[data-test-subj="panel-entity.relationships.resolution.resolved_to"]';

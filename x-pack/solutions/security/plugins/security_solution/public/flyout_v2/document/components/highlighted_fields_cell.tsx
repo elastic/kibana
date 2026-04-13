@@ -27,6 +27,10 @@ const EMPTY_ARRAY: string[] = [];
 
 export interface HighlightedFieldsCellProps {
   /**
+   * Entity id to use for the preview panel
+   */
+  entityId?: string;
+  /**
    * Highlighted field's name used to know what component to display
    */
   field: string;
@@ -71,6 +75,7 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
   showPreview = false,
   ancestorsIndexName,
   displayValuesLimit = 2,
+  entityId,
 }) => {
   const agentType: ResponseActionAgentType = useMemo(() => {
     return getAgentTypeForAgentIdField(originalField);
@@ -126,10 +131,13 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
           <PreviewLink
             field={field}
             value={value}
+            entityId={entityId}
             scopeId={scopeId}
             data-test-subj={HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID}
             ancestorsIndexName={ancestorsIndexName}
-          />
+          >
+            {value}
+          </PreviewLink>
         ) : field === AGENT_STATUS_FIELD_NAME ? (
           <AgentStatus
             agentId={String(value ?? '')}
@@ -141,7 +149,7 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
         )}
       </div>
     ),
-    [agentType, ancestorsIndexName, field, scopeId, showPreview]
+    [agentType, ancestorsIndexName, field, scopeId, showPreview, entityId]
   );
 
   if (values === null) return null;
