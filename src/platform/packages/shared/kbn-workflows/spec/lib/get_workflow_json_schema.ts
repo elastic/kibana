@@ -59,10 +59,10 @@ export function getWorkflowJsonSchema(zodSchema: z.ZodType): z.core.JSONSchema.J
 }
 
 /**
- * AJV resolves relative refs against the nearest `$id` scope. After migrating to Zod v4,
- * nested schemas can contain generated refs like `#/definitions/__schemaN`. If a nested
- * object also has `$id`, AJV may resolve these refs from that nested scope ("from id ...")
- * instead of the root schema, causing compile failures.
+ * Some JSON Schema consumers resolve relative `$ref` values against the nearest `$id` scope.
+ * After migrating to Zod v4, nested schemas can contain generated refs like `#/definitions/__schemaN`.
+ * If a nested object also has `$id`, those refs may resolve from that nested scope ("from id ...")
+ * instead of the root schema and break validation or tooling.
  *
  * We strip non-root `$id` fields so draft-7 root-level `definitions` refs stay resolvable.
  */

@@ -8,15 +8,19 @@
 import expect from '@kbn/expect';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
+const OBS_AI_ASSISTANT_FEATURE_ID = 'observability_ai_assistant_inference_subfeature';
+
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   describe('List connectors', function () {
     before(async () => {
       await observabilityAIAssistantAPIClient.deleteAllActionConnectors();
+      await observabilityAIAssistantAPIClient.clearInferenceSettings();
     });
 
     after(async () => {
+      await observabilityAIAssistantAPIClient.clearInferenceSettings();
       await observabilityAIAssistantAPIClient.deleteAllActionConnectors();
     });
 
@@ -37,18 +41,25 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       expect(connectorsExcludingPreconfiguredInference.length).to.be(0);
     });
 
-    it("returns the gen ai connector if it's been created", async () => {
+    it('returns a connector that is configured for the feature', async () => {
       const connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
         port: 1234,
+      });
+
+      await observabilityAIAssistantAPIClient.configureInferenceSettings({
+        featureId: OBS_AI_ASSISTANT_FEATURE_ID,
+        connectorId,
       });
 
       const res = await observabilityAIAssistantAPIClient.editor({
         endpoint: 'GET /internal/observability_ai_assistant/connectors',
       });
 
-      const connectorsExcludingPreconfiguredInference = res.body.filter((c) => !c.isPreconfigured);
-      expect(connectorsExcludingPreconfiguredInference.length).to.be(1);
+      const matchingConnectors = res.body.filter((c) => c.connectorId === connectorId);
+      expect(matchingConnectors.length).to.be(1);
+      expect(matchingConnectors[0].name).to.be('OpenAI Proxy');
 
+      await observabilityAIAssistantAPIClient.clearInferenceSettings();
       await observabilityAIAssistantAPIClient.deleteActionConnector({ actionId: connectorId });
     });
 
