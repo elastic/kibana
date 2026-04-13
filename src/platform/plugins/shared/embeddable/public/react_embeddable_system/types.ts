@@ -14,11 +14,11 @@ import type {
   HasType,
   PublishesPhaseEvents,
   PublishesUnsavedChanges,
-  ContainerStateManagerInitializer,
 } from '@kbn/presentation-publishing';
 import type React from 'react';
 import type { initializeDrilldownsManager } from '../drilldowns/drilldowns_manager';
 import type { SerializedDrilldowns } from '../../server';
+import type { ContainerStateManagerInitializer } from './initialize_state_api';
 
 /**
  * The default embeddable API that all Embeddables must implement.
