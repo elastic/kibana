@@ -546,7 +546,7 @@ const NO_OCCURRENCES_DESCRIPTION = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.noOccurrencesDescription',
   {
     defaultMessage:
-      "We currently don't detect any events. You can leave it, as it might happen later or modify the query.",
+      "No events detected. Either leave the query as-is to display future events or modify the query to refine detection.",
   }
 );
 
