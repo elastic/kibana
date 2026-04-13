@@ -40,12 +40,14 @@ export const getOAuthExecutorActionType = (
     supportedFeatureIds: ['alerting'],
     validate: {
       config: { schema: oauthExecutorConfigSchema },
+      // Framework validates OAuth secrets (clientId, clientSecret, tokenUrl, authorizationUrl) on flow start/callback; this schema does not duplicate that.
       secrets: { schema: z.any() },
       params: { schema: oauthExecutorParamsSchema },
     },
     async executor({ actionId, config, secrets, services, profileUid, authMode }) {
       const axiosInstance = await actions.getAxiosInstanceWithAuth({
         connectorId: actionId,
+        // `z.any()` does not narrow to the record shape `getAxiosInstanceWithAuth` expects.
         secrets: secrets as Record<string, unknown>,
         connectorTokenClient: services.connectorTokenClient,
         profileUid,

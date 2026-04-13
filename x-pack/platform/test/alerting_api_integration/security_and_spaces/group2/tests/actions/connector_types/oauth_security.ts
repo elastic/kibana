@@ -12,31 +12,10 @@ import {
   ExternalServiceSimulator,
   getExternalServiceSimulatorPath,
 } from '@kbn/actions-simulators-plugin/server/plugin';
-import type { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
-import type { User } from '../../../../../common/types';
 import { Space1AllAtSpace1, GlobalReadAtSpace1 } from '../../../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-
-const RETURN_URL = 'https://localhost:5601/app/connectors';
-
-async function login(
-  supertestWithoutAuth: SupertestWithoutAuthProviderType,
-  user: User
-): Promise<string> {
-  const response = await supertestWithoutAuth
-    .post('/internal/security/login')
-    .set('kbn-xsrf', 'xxx')
-    .send({
-      providerType: 'basic',
-      providerName: 'basic',
-      currentURL: '/',
-      params: { username: user.username, password: user.password },
-    })
-    .expect(200);
-
-  return response.header['set-cookie'][0];
-}
+import { login, RETURN_URL } from './oauth_test_helpers';
 
 export default function oauthSecurityTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -199,11 +178,12 @@ export default function oauthSecurityTests({ getService }: FtrProviderContext) {
     it('rejects callback with invalid state parameter', async () => {
       const { user } = GlobalReadAtSpace1;
 
+      // Unknown state → no oauthState → no returnUrl → handler renders an HTML error page (200). When state is valid, errors redirect (302) with query params.
       const res = await supertestWithoutAuth
         .get(
           `${getUrlPrefix(
             space.id
-          )}/api/actions/connector/_oauth_callback?code=fake-auth-code&state=bogus-state-value`
+          )}/api/actions/connector/_oauth_callback?code=fake-auth-code&state=unknown-state-value`
         )
         .set('Cookie', sessionCookies[user.username])
         .expect(200);

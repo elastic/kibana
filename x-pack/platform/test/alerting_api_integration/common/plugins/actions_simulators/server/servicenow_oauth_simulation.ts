@@ -14,6 +14,9 @@ import type {
   IRouter,
 } from '@kbn/core/server';
 
+/** Auth code sent by tests that need a token with `expires_in: 1` to exercise refresh flows. */
+export const SHORT_EXPIRY_AUTH_CODE = 'fake-auth-code-short-expiry';
+
 let authorizationCodeExchangeSeq = 0;
 let refreshTokenExchangeSeq = 0;
 
@@ -26,6 +29,7 @@ function toOAuthGrantType(value: string | undefined): OAuthGrantType | undefined
   return undefined;
 }
 
+// URL-encoded bodies are usually parsed to objects before this runs; Buffer/string paths cover odd content-types or raw bodies.
 function getFormFields(body: unknown): Record<string, string> {
   if (Buffer.isBuffer(body)) {
     if (body.length === 0) {
@@ -111,12 +115,12 @@ export function initPlugin(router: IRouter, path: string) {
 
       if (grantType === 'authorization_code') {
         authorizationCodeExchangeSeq += 1;
-        const n = authorizationCodeExchangeSeq;
-        const shortLived = fields.code === 'fake-auth-code-short-expiry';
+        const seq = authorizationCodeExchangeSeq;
+        const shortLived = fields.code === SHORT_EXPIRY_AUTH_CODE;
         return jsonResponse(res, 200, {
-          access_token: `sim-oauth-access-${n}`,
-          refresh_token: `sim-oauth-refresh-${n}`,
-          expires_in: shortLived ? 1 : 3660,
+          access_token: `sim-oauth-access-${seq}`,
+          refresh_token: `sim-oauth-refresh-${seq}`,
+          expires_in: shortLived ? 1 : 3600, // conventional oauth expiry time
           token_type: 'Bearer',
         });
       }
@@ -129,17 +133,18 @@ export function initPlugin(router: IRouter, path: string) {
           });
         }
         refreshTokenExchangeSeq += 1;
-        const n = refreshTokenExchangeSeq;
+        const seq = refreshTokenExchangeSeq;
         return jsonResponse(res, 200, {
-          access_token: `sim-oauth-access-refreshed-${n}`,
-          expires_in: 3660,
+          access_token: `sim-oauth-access-refreshed-${seq}`,
+          expires_in: 3600,
           token_type: 'Bearer',
         });
       }
 
+      // Grant types we do not branch on (e.g. JWT bearer) keep the legacy fixed token response.
       return jsonResponse(res, 200, {
         access_token: 'tokentokentoken',
-        expires_in: 3660,
+        expires_in: 3600,
         token_type: 'Bearer',
       });
     }

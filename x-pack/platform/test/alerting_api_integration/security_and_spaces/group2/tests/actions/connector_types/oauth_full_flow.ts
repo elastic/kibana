@@ -12,72 +12,22 @@ import {
   ExternalServiceSimulator,
   getExternalServiceSimulatorPath,
 } from '@kbn/actions-simulators-plugin/server/plugin';
-import type { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
-import type { User } from '../../../../../common/types';
+import { SHORT_EXPIRY_AUTH_CODE } from '@kbn/actions-simulators-plugin/server/servicenow_oauth_simulation';
 import { Space1AllAtSpace1, GlobalReadAtSpace1 } from '../../../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { login, performOAuthFlow } from './oauth_test_helpers';
 
-const RETURN_URL = 'https://localhost:5601/app/connectors';
-
-// Echoed Authorization must match `oauth_token.do` responses in servicenow_oauth_simulation.ts; change both if token shape changes.
+// Token shapes emitted by `oauth_token.do` in servicenow_oauth_simulation.ts; keep these regexes in sync if those strings change.
 const SIMULATOR_INITIAL_ACCESS_TOKEN_AUTH = /^Bearer sim-oauth-access-\d+$/;
 const SIMULATOR_REFRESHED_ACCESS_TOKEN_AUTH = /^Bearer sim-oauth-access-refreshed-\d+$/;
 
+// `kibanaServer.resolveUrl()` embeds basic-auth test credentials; connector `echoUrl` must not, because the connector calls echo with Bearer OAuth only.
 function stripUrlCredentials(url: string): string {
   const u = new URL(url);
   u.username = '';
   u.password = '';
   return u.toString();
-}
-
-async function login(
-  supertestWithoutAuth: SupertestWithoutAuthProviderType,
-  user: User
-): Promise<string> {
-  const response = await supertestWithoutAuth
-    .post('/internal/security/login')
-    .set('kbn-xsrf', 'xxx')
-    .send({
-      providerType: 'basic',
-      providerName: 'basic',
-      currentURL: '/',
-      params: { username: user.username, password: user.password },
-    })
-    .expect(200);
-
-  return response.header['set-cookie'][0];
-}
-
-async function performOAuthFlow(
-  supertestWithoutAuth: SupertestWithoutAuthProviderType,
-  {
-    spaceId,
-    connectorId,
-    sessionCookie,
-    authCode = 'fake-auth-code',
-  }: { spaceId: string; connectorId: string; sessionCookie: string; authCode?: string }
-): Promise<void> {
-  const { body: startFlowResponse } = await supertestWithoutAuth
-    .post(`${getUrlPrefix(spaceId)}/internal/actions/connector/${connectorId}/_start_oauth_flow`)
-    .set('Cookie', sessionCookie)
-    .set('kbn-xsrf', 'foo')
-    .send({ returnUrl: RETURN_URL })
-    .expect(200);
-
-  const callbackResponse = await supertestWithoutAuth
-    .get(
-      `${getUrlPrefix(spaceId)}/api/actions/connector/_oauth_callback?code=${encodeURIComponent(
-        authCode
-      )}&state=${startFlowResponse.state}`
-    )
-    .set('Cookie', sessionCookie)
-    .redirects(0)
-    .expect(302);
-
-  const location = callbackResponse.headers.location;
-  expect(location).to.contain('oauth_authorization=success');
-  expect(location).to.contain('status_code=200');
 }
 
 export default function oauthFullFlowTests({ getService }: FtrProviderContext) {
@@ -284,7 +234,7 @@ export default function oauthFullFlowTests({ getService }: FtrProviderContext) {
       });
 
       it('connector execution refreshes expired token', async function () {
-        this.timeout(120_000);
+        this.timeout(3000);
 
         const simulatorBaseRaw = kibanaServer.resolveUrl(
           getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
@@ -315,10 +265,11 @@ export default function oauthFullFlowTests({ getService }: FtrProviderContext) {
           spaceId: space.id,
           connectorId: connector.id,
           sessionCookie,
-          authCode: 'fake-auth-code-short-expiry',
+          authCode: SHORT_EXPIRY_AUTH_CODE,
         });
 
-        await new Promise((r) => setTimeout(r, 2500));
+        // Simulator returns `expires_in: 1` for SHORT_EXPIRY_AUTH_CODE; wait past that so the next execute triggers refresh.
+        await new Promise((r) => setTimeout(r, 1500));
 
         const { body: executeBody } = await supertestWithoutAuth
           .post(`${getUrlPrefix(space.id)}/api/actions/connector/${connector.id}/_execute`)
