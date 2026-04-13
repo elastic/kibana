@@ -9,6 +9,8 @@
 
 import { default as borealisLight } from '@elastic/eui-theme-borealis/lib/eui_theme_borealis_light.json';
 import { default as borealisDark } from '@elastic/eui-theme-borealis/lib/eui_theme_borealis_dark.json';
+import { EuiThemeBorealis } from '@elastic/eui-theme-borealis';
+import { getComputed } from '@elastic/eui';
 
 const globals: any = typeof window === 'undefined' ? {} : window;
 
@@ -54,6 +56,38 @@ export const _setDarkMode = (mode: boolean) => {
   isDarkMode = mode;
 };
 
+const useCssVars =
+  (typeof process !== 'undefined' &&
+    typeof process.env !== 'undefined' &&
+    process.env.EUI_CSS_VARS === 'true') ||
+  (typeof localStorage !== 'undefined' && localStorage.getItem('EUI_CSS_VARS') === 'true');
+
+const cssVarProxyCache = new Map<string, unknown>();
+
+const createCssVarProxy = (target: Record<string, unknown>, prefix: string): unknown => {
+  if (cssVarProxyCache.has(prefix)) {
+    return cssVarProxyCache.get(prefix);
+  }
+  const proxy = new Proxy(target, {
+    get(obj, key, receiver) {
+      if (typeof key === 'symbol') {
+        return Reflect.get(obj, key, receiver);
+      }
+      const value = Reflect.get(obj, key, receiver);
+      const varName = prefix ? `${prefix}-${key}` : key;
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        return createCssVarProxy(value as Record<string, unknown>, varName);
+      }
+      if (typeof value === 'string') {
+        return `var(--eui-${varName})`;
+      }
+      return value;
+    },
+  });
+  cssVarProxyCache.set(prefix, proxy);
+  return proxy;
+};
+
 const getThemeVars = (): { light: Theme; dark: Theme } => {
   return {
     light: borealisLight,
@@ -67,12 +101,23 @@ export const euiLightVars: Theme = getThemeVars().light;
 export const euiDarkVars: Theme = getThemeVars().dark;
 
 /**
- * EUI Theme vars that automatically adjust to light/dark theme
+ * EUI Theme vars that automatically adjust to light/dark theme.
+ * When EUI_CSS_VARS=true, returns CSS custom property references instead of literal values.
  */
 export const euiThemeVars: Theme = new Proxy(
   isDarkMode ? getThemeVars().dark : getThemeVars().light,
   {
     get(accessedTarget, accessedKey, ...rest) {
+      if (useCssVars && typeof accessedKey === 'string') {
+        const value = Reflect.get(getThemeVars().light, accessedKey, ...rest);
+        if (value && typeof value === 'object' && !Array.isArray(value)) {
+          return createCssVarProxy(value as Record<string, unknown>, accessedKey);
+        }
+        if (typeof value === 'string') {
+          return `var(--eui-${accessedKey})`;
+        }
+        return value;
+      }
       return Reflect.get(
         isDarkMode ? getThemeVars().dark : getThemeVars().light,
         accessedKey,
@@ -93,3 +138,71 @@ export const euiThemeVars: Theme = new Proxy(
 export function getEuiThemeVars(theme: { name: string; darkMode: boolean }) {
   return theme.darkMode ? borealisDark : borealisLight;
 }
+
+// --- CSS Variables generation ---
+
+const flattenTokens = (
+  obj: Record<string, unknown>,
+  prefix = ''
+): Record<string, string | number> => {
+  const result: Record<string, string | number> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    const p = prefix ? `${prefix}-${key}` : key;
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      Object.assign(result, flattenTokens(value as Record<string, unknown>, p));
+    } else if (typeof value === 'string' || typeof value === 'number') {
+      result[p] = value;
+    }
+  }
+  return result;
+};
+
+const varBlock = (tokens: Record<string, string | number>, prefix: string): string =>
+  Object.entries(tokens)
+    .filter(([, v]) => typeof v === 'string')
+    .map(([key, value]) => `  --${prefix}-${key}: ${value};`)
+    .join('\n');
+
+const diffBlock = (
+  light: Record<string, string | number>,
+  dark: Record<string, string | number>,
+  prefix: string
+): string =>
+  Object.entries(dark)
+    .filter(([key, value]) => typeof value === 'string' && value !== light[key])
+    .map(([key, value]) => `  --${prefix}-${key}: ${value};`)
+    .join('\n');
+
+let cachedCss: string | undefined;
+
+/**
+ * Generates a CSS stylesheet string with custom properties for both light and dark themes.
+ * Covers both euiThemeVars flat tokens (--eui-*) and computed useEuiTheme() tokens (--euiTheme-*).
+ */
+export const generateCssVarsStylesheet = (): string => {
+  if (cachedCss) {
+    return cachedCss;
+  }
+
+  const flatLight = flattenTokens(borealisLight as Record<string, unknown>);
+  const flatDark = flattenTokens(borealisDark as Record<string, unknown>);
+  const computedLight = flattenTokens(
+    getComputed(EuiThemeBorealis, {}, 'LIGHT', false) as unknown as Record<string, unknown>
+  );
+  const computedDark = flattenTokens(
+    getComputed(EuiThemeBorealis, {}, 'DARK', false) as unknown as Record<string, unknown>
+  );
+
+  cachedCss = [
+    ':root, [data-theme="light"] {',
+    varBlock(flatLight, 'eui'),
+    varBlock(computedLight, 'euiTheme'),
+    '}',
+    '[data-theme="dark"] {',
+    diffBlock(flatLight, flatDark, 'eui'),
+    diffBlock(computedLight, computedDark, 'euiTheme'),
+    '}',
+  ].join('\n');
+
+  return cachedCss;
+};

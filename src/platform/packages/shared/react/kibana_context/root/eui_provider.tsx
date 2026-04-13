@@ -95,6 +95,18 @@ const componentDefaults: EuiProviderProps<unknown>['componentDefaults'] = {
   },
 };
 
+// TODO(elastic/eui#8902): Re-enable useEuiTheme() context override with CSS variable references.
+//
+// The intent is to wrap EuiProvider children with a component that reads the computed theme from
+// EuiThemeContext and re-provides it with all string values replaced by var(--euiTheme-<path>)
+// references. This would eliminate Emotion style recomputation on theme changes for ~3,945 files.
+//
+// Currently blocked: EUI components internally call JS functions on theme values
+// (transparentize, parseInt, shade, tint, etc.) which break when receiving var() strings.
+// EUI must first migrate to CSS-native equivalents (color-mix, calc) before this override is safe.
+//
+// See: Phase B, section 2.4 in the benchmark plan for the full implementation.
+
 /**
  * Prepares and returns a configured `EuiProvider` for use in Kibana roots.  In most cases, this utility context
  * should not be used.  Instead, refer to `KibanaRootContextProvider` to set up the root of Kibana.

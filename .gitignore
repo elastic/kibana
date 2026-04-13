@@ -31,6 +31,9 @@ types.eslint.config.js
 types.eslint.config.cjs
 __tmp__
 
+# Generated CSS variables for EUI theme prototype
+/src/platform/packages/shared/kbn-ui-theme/eui_theme_vars.css
+
 # Ignore example plugin builds
 /examples/*/build
 /x-pack/examples/*/build

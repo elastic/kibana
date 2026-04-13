@@ -7,8 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CDPSession, TestInfo } from '@playwright/test';
-import type { BundleInfo, PageInfo, PerformanceMetrics, PluginInfo } from './types';
+import type { CDPSession, Page, TestInfo } from '@playwright/test';
+import type {
+  BundleInfo,
+  NavigationTiming,
+  PageInfo,
+  PerformanceMetrics,
+  PluginInfo,
+} from './types';
+import { median, percentile, mean, coefficientOfVariation } from './benchmark_stats';
 
 export class PerformanceTracker {
   private bundleResponses = new Map<string, BundleInfo>();
@@ -134,6 +141,7 @@ export class PerformanceTracker {
       cpuTime: metrics.find((m) => m.name === 'TaskDuration')?.value,
       scriptTime: metrics.find((m) => m.name === 'ScriptDuration')?.value,
       layoutTime: metrics.find((m) => m.name === 'LayoutDuration')?.value,
+      recalcStyleDuration: metrics.find((m) => m.name === 'RecalcStyleDuration')?.value,
       fps: metrics.find((m) => m.name === 'FramesPerSecond')?.value,
       nodesCount: metrics.find((m) => m.name === 'Nodes')?.value,
       documentsCount: metrics.find((m) => m.name === 'Documents')?.value,
@@ -181,4 +189,71 @@ export class PerformanceTracker {
 
     return stats;
   };
+
+  collectBenchmarkReport(
+    scenario: string,
+    runs: Array<{ perf: PerformanceMetrics; nav?: NavigationTiming }>,
+    theme: string = 'light'
+  ) {
+    const metricKeys = [
+      'recalcStyleDuration',
+      'styleRecalcCount',
+      'scriptTime',
+      'layoutTime',
+      'cpuTime',
+    ] as const;
+    const navKeys = ['domContentLoaded', 'fullLoad', 'domInteractive'] as const;
+
+    const computeStats = (values: number[]) => ({
+      values,
+      median: median(values),
+      p95: percentile(values, 95),
+      mean: mean(values),
+      cv: coefficientOfVariation(values),
+    });
+
+    const metrics: Record<string, ReturnType<typeof computeStats>> = {};
+
+    for (const key of metricKeys) {
+      const values = runs.map((r) => r.perf[key] ?? 0);
+      metrics[key] = computeStats(values);
+    }
+
+    for (const key of navKeys) {
+      const values = runs.filter((r) => r.nav).map((r) => r.nav![key]);
+      if (values.length > 0) {
+        metrics[key] = computeStats(values);
+      }
+    }
+
+    const report = {
+      scenario,
+      theme,
+      timestamp: new Date().toISOString(),
+      runs: runs.length,
+      metrics,
+    };
+
+    this.testInfo.attach(`benchmark-${scenario}`, {
+      body: JSON.stringify(report, null, 2),
+      contentType: 'application/json',
+    });
+
+    return report;
+  }
+
+  async captureNavigationTiming(page: Page): Promise<NavigationTiming> {
+    const timing = await page.evaluate(() => {
+      const entry = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+      if (!entry) {
+        return { domContentLoaded: 0, fullLoad: 0, domInteractive: 0 };
+      }
+      return {
+        domContentLoaded: entry.domContentLoadedEventEnd - entry.startTime,
+        fullLoad: entry.loadEventEnd - entry.startTime,
+        domInteractive: entry.domInteractive - entry.startTime,
+      };
+    });
+    return timing;
+  }
 }

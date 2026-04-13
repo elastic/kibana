@@ -39,9 +39,16 @@ export interface PerformanceMetrics {
   cpuTime?: number;
   scriptTime?: number;
   layoutTime?: number;
+  recalcStyleDuration?: number;
   fps?: number;
   nodesCount?: number;
   documentsCount?: number;
   layoutCount?: number;
   styleRecalcCount?: number;
+}
+
+export interface NavigationTiming {
+  domContentLoaded: number;
+  fullLoad: number;
+  domInteractive: number;
 }

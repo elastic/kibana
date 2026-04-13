@@ -14,6 +14,7 @@ import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-
 import type { CoreTheme, ThemeServiceSetup, ThemeServiceStart } from '@kbn/core-theme-browser';
 import { systemThemeIsDark, browsersSupportsSystemTheme } from './system_theme';
 import { createStyleSheet } from './utils';
+import { injectCssVarStylesheet } from './css_vars';
 
 /** @internal */
 export interface ThemeServiceSetupDeps {
@@ -79,6 +80,8 @@ export class ThemeService {
 
     _setDarkMode(darkMode);
     updateKbnThemeTag(theme);
+    document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+    injectCssVarStylesheet();
   }
 }
 
