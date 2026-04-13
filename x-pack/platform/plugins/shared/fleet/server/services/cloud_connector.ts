@@ -98,6 +98,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
    * user-visible package policy counts. Hidden internal packages (e.g. verifier_otel)
    * and non-latest revisions (e.g. `:prev` rollback snapshots) are excluded in the
    * saved-objects filter. Uses a terms aggregation (see `package_policies_aggregation`).
+   * `size` matches {@link SO_SEARCH_LIMIT} so bucket count is not capped at ES default (10).
    */
   private async getPackagePolicyCountsMap(
     soClient: SavedObjectsClientContract
@@ -124,6 +125,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
           count_by_cloud_connector: {
             terms: {
               field: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id`,
+              size: SO_SEARCH_LIMIT,
             },
           },
         },

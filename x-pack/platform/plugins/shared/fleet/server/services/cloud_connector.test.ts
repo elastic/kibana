@@ -15,6 +15,7 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SINGLE_ACCOUNT,
   ORGANIZATION_ACCOUNT,
+  SO_SEARCH_LIMIT,
 } from '../../common/constants';
 import {
   buildPackagePolicyFilterExcludingHiddenPackages,
@@ -597,6 +598,7 @@ describe('CloudConnectorService', () => {
             count_by_cloud_connector: {
               terms: {
                 field: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id`,
+                size: SO_SEARCH_LIMIT,
               },
             },
           },
