@@ -29,6 +29,10 @@ describe('createListIndicesInitializationFlow', () => {
     expect(createListIndicesInitializationFlow.id).toBe(INITIALIZATION_FLOW_CREATE_LIST_INDICES);
   });
 
+  it('should be configured to run in parallel', () => {
+    expect(createListIndicesInitializationFlow.runFirst).toBeUndefined();
+  });
+
   describe('resolveProvisionContext', () => {
     it('throws a FlowInitializationError when the lists plugin context is unavailable', async () => {
       const logger = loggerMock.create();

@@ -354,6 +354,10 @@ describe('initializeSecurityDataViewsFlow', () => {
     expect(initializeSecurityDataViewsFlow.id).toBe(INITIALIZATION_FLOW_SECURITY_DATA_VIEWS);
   });
 
+  it('should be configured to run in parallel', () => {
+    expect(initializeSecurityDataViewsFlow.runFirst).toBeUndefined();
+  });
+
   describe('provision', () => {
     let dataViewsService: jest.Mocked<DataViewsService>;
     let logger: ReturnType<typeof loggerMock.create>;
