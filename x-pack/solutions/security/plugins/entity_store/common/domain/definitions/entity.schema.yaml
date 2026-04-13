@@ -173,6 +173,7 @@ components:
         environment:
           type: string
         criticality:
+          nullable: true
           $ref: '#/components/schemas/AssetCriticalityLevel'
         business_unit:
           type: string

@@ -22,7 +22,7 @@ import type { HooksServiceSetup, HooksServiceStart } from '@kbn/agent-builder-se
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
 import type { ToolsServiceSetup, ToolsServiceStart } from './tools';
-import type { RunnerFactory } from './runner';
+import type { RunnerFactory } from './execution/runner';
 import type { AgentsServiceSetup, AgentsServiceStart } from './agents';
 import type { ConversationService } from './conversation';
 import type { AttachmentServiceSetup, AttachmentServiceStart } from './attachments';
