@@ -201,6 +201,7 @@ function getESServerlessOptions(
     host: serverlessHost,
     resources: serverlessResources,
     uiam: config.get('esServerlessOptions.uiam', false),
+    uiamOAuth: config.get('esServerlessOptions.uiamOAuth', false),
     kibanaUrl: Url.format({
       protocol: config.get('servers.kibana.protocol'),
       hostname: config.get('servers.kibana.hostname'),

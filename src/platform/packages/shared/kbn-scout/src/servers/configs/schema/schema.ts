@@ -99,6 +99,7 @@ export const schema = Joi.object()
         host: Joi.string().ip(),
         resources: Joi.array().items(Joi.string()).default([]),
         uiam: Joi.boolean().default(false),
+        uiamOAuth: Joi.boolean().default(false),
         cps: Joi.boolean().default(false),
       })
       .default(),
