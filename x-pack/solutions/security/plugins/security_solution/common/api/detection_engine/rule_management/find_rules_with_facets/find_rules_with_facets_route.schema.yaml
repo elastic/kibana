@@ -25,9 +25,9 @@ paths:
               properties:
                 fields:
                   type: array
-                  description: Subset of rule fields to return.
+                  description: Subset of rule attributes to return. When omitted, all attributes are returned.
                   items:
-                    type: string
+                    $ref: '../granular_rules_contract.schema.yaml#/components/schemas/FindRulesWithFacetsField'
                 filter:
                   type: string
                   description: |

@@ -26,6 +26,7 @@ import type {
 import type {
   CoverageOverviewFilter,
   FindRulesWithFacetsAggregations,
+  FindRulesWithFacetsField,
   FindRulesWithFacetsResponse,
   FindRulesWithFacetsSearchAfterItem,
   GranularRulesSearch,
@@ -121,6 +122,8 @@ export interface FetchRulesResponse {
 
 export interface FetchRulesWithFacetsProps {
   pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
+  /** Subset of rule attributes to return. When omitted, all attributes are returned. */
+  fields?: FindRulesWithFacetsField[];
   filter?: string;
   search?: GranularRulesSearch;
   sort_field?: z.infer<typeof FindRulesSortField>;

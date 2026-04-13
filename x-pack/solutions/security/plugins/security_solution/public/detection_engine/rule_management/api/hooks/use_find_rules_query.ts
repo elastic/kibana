@@ -13,6 +13,7 @@ import type { SortOrder } from '../../../../../common/api/detection_engine/model
 import type {
   FindRulesSortField,
   FindRulesWithFacetsAggregations,
+  FindRulesWithFacetsField,
   FindRulesWithFacetsSearchAfterItem,
   GranularRulesSearch,
 } from '../../../../../common/api/detection_engine/rule_management';
@@ -22,6 +23,7 @@ import { fetchRulesWithFacets } from '../api';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
 
 export interface FindRulesQueryArgs {
+  fields?: FindRulesWithFacetsField[];
   filter?: string;
   search?: GranularRulesSearch;
   sort_field?: FindRulesSortField;
@@ -63,13 +65,7 @@ export const useFindRulesQuery = (
     async ({ signal }) => {
       const response = await fetchRulesWithFacets({
         signal,
-        filter: queryArgs.filter,
-        sort_field: queryArgs.sort_field,
-        sort_order: queryArgs.sort_order,
-        pagination: queryArgs.pagination,
-        search: queryArgs.search,
-        aggregations: queryArgs.aggregations,
-        search_after: queryArgs.search_after,
+        ...queryArgs,
       });
 
       return { rules: response.data, total: response.total, warnings: response.warnings };

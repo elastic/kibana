@@ -17,6 +17,7 @@
 import { z } from '@kbn/zod/v4';
 
 import {
+  FindRulesWithFacetsField,
   FindRulesWithFacetsAggregations,
   GranularRulesSearch,
   FacetCounts,
@@ -46,9 +47,9 @@ export type FindRulesWithFacetsRequestBody = z.infer<typeof FindRulesWithFacetsR
 export const FindRulesWithFacetsRequestBody = z
   .object({
     /**
-     * Subset of rule fields to return.
+     * Subset of rule attributes to return. When omitted, all attributes are returned.
      */
-    fields: z.array(z.string()).optional(),
+    fields: z.array(FindRulesWithFacetsField).optional(),
     /**
       * KQL filter string.
 

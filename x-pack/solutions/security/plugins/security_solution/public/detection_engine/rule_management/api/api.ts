@@ -235,6 +235,7 @@ export const fetchRules = async ({
  * Fetches all rules from the Detection Engine API with the option to include aggregations
  * and deep pagination via `search_after`.
  *
+ * @param fields subset of rule attributes to return (omit for all attributes)
  * @param filter structured KQL filter
  * @param search free-text search (e.g. `{ term, mode }`)
  * @param sort_field field to sort by
@@ -247,6 +248,7 @@ export const fetchRules = async ({
  * @throws An error if response is not OK
  */
 export const fetchRulesWithFacets = async ({
+  fields,
   filter = '',
   search,
   sort_field = 'enabled',
@@ -264,6 +266,7 @@ export const fetchRulesWithFacets = async ({
     per_page: pagination.perPage,
     sort_field,
     sort_order,
+    fields,
     ...(filter.trim() !== '' ? { filter: filter.trim() } : {}),
     search,
     aggregations,

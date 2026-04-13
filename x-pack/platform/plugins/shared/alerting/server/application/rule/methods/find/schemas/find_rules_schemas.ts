@@ -12,7 +12,12 @@ const savedObjectReferenceSchema = schema.object({
   id: schema.string(),
 });
 
-const sortValueSchema = schema.oneOf([schema.string(), schema.number(), schema.boolean()]);
+const sortValueSchema = schema.oneOf([
+  schema.string(),
+  schema.number(),
+  schema.boolean(),
+  schema.literal(null),
+]);
 
 export const findRulesOptionsSchema = schema.object(
   {

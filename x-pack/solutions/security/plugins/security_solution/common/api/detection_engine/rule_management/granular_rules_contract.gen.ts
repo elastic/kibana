@@ -70,6 +70,37 @@ export type GranularRulesFacetCategoryEnum = typeof GranularRulesFacetCategory.e
 export const GranularRulesFacetCategoryEnum = GranularRulesFacetCategory.enum;
 
 /**
+  * A rule attribute that can be requested via the `fields` parameter on `_find_with_facets`.
+When `fields` is provided, only the listed attributes are returned in each rule object,
+reducing response size for performance.
+
+  */
+export type FindRulesWithFacetsField = z.infer<typeof FindRulesWithFacetsField>;
+export const FindRulesWithFacetsField = z.enum([
+  'name',
+  'tags',
+  'enabled',
+  'alertTypeId',
+  'params',
+  'schedule',
+  'actions',
+  'createdBy',
+  'updatedBy',
+  'createdAt',
+  'updatedAt',
+  'revision',
+  'executionStatus',
+  'lastRun',
+  'monitoring',
+  'snoozeSchedule',
+  'muteAll',
+  'running',
+  'nextRun',
+]);
+export type FindRulesWithFacetsFieldEnum = typeof FindRulesWithFacetsField.enum;
+export const FindRulesWithFacetsFieldEnum = FindRulesWithFacetsField.enum;
+
+/**
   * Common first path segment when writing KQL for the `_find_with_facets` request `filter` field.
 Filters use full paths such as `enabled: true` or `name: "My rule"`.
 

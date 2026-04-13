@@ -10,7 +10,10 @@ import type {
   SortResults,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { FindResult, RulesClient } from '@kbn/alerting-plugin/server';
-import type { FindRulesSortField } from '../../../../../../common/api/detection_engine/rule_management';
+import type {
+  FindRulesSortField,
+  FindRulesWithFacetsField,
+} from '../../../../../../common/api/detection_engine/rule_management';
 
 import type { Page, PerPage, SortOrder } from '../../../../../../common/api/detection_engine';
 
@@ -27,7 +30,7 @@ interface HasReferences {
 export interface FindRuleOptions {
   rulesClient: RulesClient;
   filter: string | undefined;
-  fields: string[] | undefined;
+  fields: FindRulesWithFacetsField[] | undefined;
   sortField: FindRulesSortField | undefined;
   sortOrder: SortOrder | undefined;
   page: Page | undefined;
