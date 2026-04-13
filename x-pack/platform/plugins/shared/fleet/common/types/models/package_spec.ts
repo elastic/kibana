@@ -28,6 +28,7 @@ export interface RegistryVarGroup {
   selector_title: string;
   description?: string;
   required?: boolean; // When true, all vars in the selected option are treated as required
+  show_divider?: boolean; // When false, suppresses the automatic horizontal divider rendered after this var_group's stream section
   options: RegistryVarGroupOption[];
 }
 
