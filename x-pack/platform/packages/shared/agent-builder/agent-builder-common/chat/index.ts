@@ -89,3 +89,24 @@ export {
   isCompactionCompletedEvent,
 } from './events';
 export type { RoundState } from './round_state';
+export {
+  TimelineEventType,
+  type TimelineEventTypeValue,
+  type BaseTimelineEvent,
+  type UserMessageEvent,
+  type AgentExecution,
+  type AgentExecutionEvent,
+  type TimelineEvent,
+  type TimelineConversation,
+  isUserMessageEvent,
+  isAgentExecutionEvent,
+  getLastExecutionEvent,
+  isTimelineConversation,
+} from './conversation';
+export {
+  roundsToTimelineEvents,
+  timelineEventsToRounds,
+  conversationToTimelineConversation,
+  timelineConversationToConversation,
+  agentExecutionEventToRound,
+} from './timeline_converters';

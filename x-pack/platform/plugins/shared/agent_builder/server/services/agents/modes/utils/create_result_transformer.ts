@@ -121,8 +121,12 @@ export interface CreateResultTransformerOptions {
 const estimateConversationTokens = (conversation: ProcessedConversation): number => {
   return estimateTokens(
     JSON.stringify(
-      conversation.previousRounds.map((round) => {
-        return { input: round.input, response: round.response, steps: round.steps };
+      conversation.previousEvents.map((event) => {
+        if (event.type === 'user_message') {
+          return { message: event.processedInput.message };
+        }
+        // agent_execution
+        return { response: event.response, steps: event.steps };
       })
     )
   );

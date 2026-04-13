@@ -11,7 +11,7 @@ import type { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracer
 import type { AIMessageChunk } from '@langchain/core/messages';
 import type { OperatorFunction } from 'rxjs';
 import { EMPTY, mergeMap, of } from 'rxjs';
-import type { ChatAgentEvent, ConversationRound } from '@kbn/agent-builder-common/chat';
+import type { ChatAgentEvent, AgentExecutionEvent } from '@kbn/agent-builder-common/chat';
 import { isToolCallStep } from '@kbn/agent-builder-common/chat';
 import {
   createBrowserToolCallEvent,
@@ -52,21 +52,21 @@ export type ConvertedEvents = ChatAgentEvent | InternalEvent;
 export const convertGraphEvents = ({
   graphName,
   toolManager,
-  pendingRound,
+  pendingExecution,
   logger,
   startTime,
 }: {
   graphName: string;
   toolManager: ToolManager;
-  pendingRound: ConversationRound | undefined;
+  pendingExecution: AgentExecutionEvent | undefined;
   logger: Logger;
   startTime: Date;
 }): OperatorFunction<LangchainStreamEvent, ConvertedEvents> => {
   return (streamEvents$) => {
     const toolCallIdToIdMap = new Map<string, string>();
 
-    if (pendingRound) {
-      const toolCalls = pendingRound.steps.filter(isToolCallStep);
+    if (pendingExecution) {
+      const toolCalls = pendingExecution.steps.filter(isToolCallStep);
       toolCalls.forEach((toolCall) => {
         toolCallIdToIdMap.set(toolCall.tool_call_id, toolCall.tool_id);
       });

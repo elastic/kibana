@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-import type { ConversationRound, ConverseInput, RoundInput } from '@kbn/agent-builder-common';
+import type {
+  ConversationRound,
+  ConverseInput,
+  TimelineEvent,
+  AgentExecutionEvent,
+} from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
   ConversationRoundStepType,
+  TimelineEventType,
   ToolResultType,
   isBadRequestError,
+  roundsToTimelineEvents,
 } from '@kbn/agent-builder-common';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentsService } from '@kbn/agent-builder-server/runner';
@@ -81,6 +88,9 @@ describe('prepareConversation', () => {
     mockGetToolResultId.mockImplementation(() => `generated-id-${++idCounter}`);
   });
 
+  const testUser = { id: 'user-1', username: 'Test User' };
+  const testAgentId = 'agent-1';
+
   const createRound = (parts: Partial<ConversationRound> = {}): ConversationRound => {
     return {
       id: 'round-1',
@@ -105,6 +115,10 @@ describe('prepareConversation', () => {
     };
   };
 
+  const roundsToEvents = (rounds: ConversationRound[]): TimelineEvent[] => {
+    return roundsToTimelineEvents(rounds, testUser, testAgentId);
+  };
+
   describe('with no attachments', () => {
     it('should process a simple nextInput with no attachments', async () => {
       const nextInput: ConverseInput = {
@@ -112,7 +126,7 @@ describe('prepareConversation', () => {
       };
 
       const result = await prepareConversation({
-        previousRounds: [],
+        previousEvents: [],
         nextInput,
         context: mockContext,
       });
@@ -124,7 +138,7 @@ describe('prepareConversation', () => {
           message: 'Hello',
           attachments: [],
         },
-        previousRounds: [],
+        previousEvents: [],
       });
       expect(result.attachmentStateManager).toBeDefined();
 
@@ -138,7 +152,7 @@ describe('prepareConversation', () => {
       };
 
       const result = await prepareConversation({
-        previousRounds: [],
+        previousEvents: [],
         nextInput,
         context: mockContext,
       });
@@ -173,7 +187,7 @@ describe('prepareConversation', () => {
       };
 
       const result = await prepareConversation({
-        previousRounds: [],
+        previousEvents: [],
         nextInput,
         context: mockContext,
       });
@@ -226,7 +240,7 @@ describe('prepareConversation', () => {
       };
 
       const result = await prepareConversation({
-        previousRounds: [],
+        previousEvents: [],
         nextInput,
         context: mockContext,
       });
@@ -277,7 +291,7 @@ describe('prepareConversation', () => {
       };
 
       const result = await prepareConversation({
-        previousRounds: [],
+        previousEvents: [],
         nextInput,
         context: mockContext,
       });
@@ -291,8 +305,8 @@ describe('prepareConversation', () => {
     });
   });
 
-  describe('previousRounds with attachments', () => {
-    it('does not refresh origin_snapshot_at when existing by-reference attachment is only promoted from previous rounds', async () => {
+  describe('previousEvents with attachments', () => {
+    it('does not refresh origin_snapshot_at when existing by-reference attachment is only promoted from previous events', async () => {
       const existing: VersionedAttachment = {
         id: 'a-1',
         type: 'text',
@@ -326,7 +340,7 @@ describe('prepareConversation', () => {
         getAgentDescription: () => 'desc',
       });
 
-      const previousRounds: ConversationRound[] = [
+      const previousEvents: TimelineEvent[] = roundsToEvents([
         createRound({
           id: 'round-1',
           input: {
@@ -334,10 +348,10 @@ describe('prepareConversation', () => {
             attachments: [{ id: 'a-1', type: 'text', data: { content: 'v2' } }],
           },
         }),
-      ];
+      ]);
 
       const result = await prepareConversation({
-        previousRounds,
+        previousEvents,
         nextInput: { message: 'New message' },
         context: mockContext,
       });
@@ -348,7 +362,7 @@ describe('prepareConversation', () => {
       expect(updated?.origin_snapshot_at).toBe(existing.origin_snapshot_at);
     });
 
-    it('should process previous rounds without attachments', async () => {
+    it('should process previous events without attachments', async () => {
       const previousRound = createRound({
         id: 'round-1',
         input: {
@@ -360,25 +374,26 @@ describe('prepareConversation', () => {
         },
       });
 
-      const previousRounds: ConversationRound[] = [previousRound];
+      const previousEvents: TimelineEvent[] = roundsToEvents([previousRound]);
 
       const result = await prepareConversation({
-        previousRounds,
+        previousEvents,
         nextInput: { message: 'New message' },
         context: mockContext,
       });
 
-      expect(result.previousRounds).toHaveLength(1);
-      expect(result.previousRounds[0]).toEqual({
-        ...previousRound,
-        input: {
-          ...previousRound.input,
-          attachments: [],
-        },
-      });
+      // 1 round = 2 events (user message + agent response)
+      expect(result.previousEvents).toHaveLength(2);
+      // First event is a processed user message
+      expect(result.previousEvents[0].type).toBe(TimelineEventType.user_message);
+      expect((result.previousEvents[0] as any).processedInput.message).toBe('Previous message');
+      expect((result.previousEvents[0] as any).processedInput.attachments).toEqual([]);
+      // Second event is an agent response
+      expect(result.previousEvents[1].type).toBe(TimelineEventType.agentExecution);
+      expect((result.previousEvents[1] as AgentExecutionEvent).response.message).toBe('Response');
     });
 
-    it('should process previous rounds with attachments', async () => {
+    it('should process previous events with attachments', async () => {
       const attachment: Attachment = {
         id: 'prev-attachment-id',
         type: 'text',
@@ -389,7 +404,7 @@ describe('prepareConversation', () => {
         attachmentDefinition({ id: 'text', repr: textRepresentation('unused') })
       );
 
-      const previousRounds = [
+      const previousEvents: TimelineEvent[] = roundsToEvents([
         createRound({
           id: 'round-1',
           input: {
@@ -401,28 +416,28 @@ describe('prepareConversation', () => {
             message: 'Response',
           },
         }),
-      ];
+      ]);
 
       const result = await prepareConversation({
-        previousRounds,
+        previousEvents,
         nextInput: { message: 'New message' },
         context: mockContext,
       });
 
-      // stripped from previous rounds
-      expect(result.previousRounds[0].input.attachments).toHaveLength(0);
+      // stripped from previous events (user message events)
+      expect((result.previousEvents[0] as any).processedInput.attachments).toHaveLength(0);
       // promoted to conversation attachments
       expect(result.attachmentStateManager.getAll().map((a) => a.id)).toContain(
         'prev-attachment-id'
       );
     });
 
-    it('should process multiple previous rounds', async () => {
+    it('should process multiple previous events', async () => {
       mockAttachmentsService.getTypeDefinition.mockReturnValue(
         attachmentDefinition({ id: 'text', repr: textRepresentation('unused') })
       );
 
-      const previousRounds = [
+      const previousEvents: TimelineEvent[] = roundsToEvents([
         createRound({
           id: 'round-1',
           input: {
@@ -458,23 +473,25 @@ describe('prepareConversation', () => {
           },
           response: { message: 'Response 3' },
         }),
-      ];
+      ]);
 
       const result = await prepareConversation({
-        previousRounds,
+        previousEvents,
         nextInput: { message: 'New message' },
         context: mockContext,
       });
 
-      expect(result.previousRounds).toHaveLength(3);
-      expect(result.previousRounds[0].id).toBe('round-1');
-      expect(result.previousRounds[0].input.attachments).toHaveLength(0);
+      // 3 rounds = 6 events (3 user messages + 3 agent responses)
+      expect(result.previousEvents).toHaveLength(6);
 
-      expect(result.previousRounds[1].id).toBe('round-2');
-      expect(result.previousRounds[1].input.attachments).toHaveLength(0);
-
-      expect(result.previousRounds[2].id).toBe('round-3');
-      expect(result.previousRounds[2].input.attachments).toHaveLength(0);
+      // User message events have attachments stripped
+      const userEvents = result.previousEvents.filter(
+        (e) => e.type === TimelineEventType.user_message
+      );
+      expect(userEvents).toHaveLength(3);
+      for (const event of userEvents) {
+        expect((event as any).processedInput.attachments).toHaveLength(0);
+      }
 
       expect(mockGetToolResultId).not.toHaveBeenCalled();
 
@@ -482,8 +499,8 @@ describe('prepareConversation', () => {
       expect(ids).toEqual(expect.arrayContaining(['attachment-1', 'attachment-2']));
     });
 
-    it('should preserve all round properties', async () => {
-      const previousRounds = [
+    it('should preserve all event properties', async () => {
+      const rounds = [
         createRound({
           id: 'round-1',
           input: {
@@ -505,37 +522,38 @@ describe('prepareConversation', () => {
         }),
       ];
 
+      const previousEvents: TimelineEvent[] = roundsToEvents(rounds);
+
       const result = await prepareConversation({
-        previousRounds,
+        previousEvents,
         nextInput: { message: 'New message' },
         context: mockContext,
       });
 
-      expect(result.previousRounds[0]).toEqual({
-        ...previousRounds[0],
-        input: {
-          ...previousRounds[0].input,
-          attachments: [],
-        },
-      });
+      // Agent response event preserves steps, response, trace_id, etc.
+      const agentEvent = result.previousEvents[1] as AgentExecutionEvent;
+      expect(agentEvent.type).toBe(TimelineEventType.agentExecution);
+      expect(agentEvent.steps).toEqual(rounds[0].steps);
+      expect(agentEvent.response).toEqual(rounds[0].response);
+      expect(agentEvent.trace_id).toBe('trace-123');
     });
   });
 
   describe('action=regenerate', () => {
-    it('throws a bad request error (400) when conversation has no rounds', async () => {
+    it('throws a bad request error (400) when conversation has no agent responses', async () => {
       await expect(
         prepareConversation({
-          previousRounds: [],
+          previousEvents: [],
           nextInput: { message: 'ignored' },
           context: mockContext,
           action: 'regenerate',
         })
-      ).rejects.toThrow('Cannot regenerate: conversation has no rounds');
+      ).rejects.toThrow('Cannot regenerate: conversation has no agent responses');
 
       let thrown: unknown;
       try {
         await prepareConversation({
-          previousRounds: [],
+          previousEvents: [],
           nextInput: { message: 'ignored' },
           context: mockContext,
           action: 'regenerate',
@@ -546,30 +564,29 @@ describe('prepareConversation', () => {
       expect(isBadRequestError(thrown)).toBe(true);
     });
 
-    it('uses the last round input and ignores nextInput from request', async () => {
-      const lastRoundInput: RoundInput = {
-        message: 'Original message',
-        attachment_refs: [{ attachment_id: 'a-1', version: 1, actor: 'user' as const }],
-      };
-      const previousRounds = [
+    it('uses the last user message input and ignores nextInput from request', async () => {
+      const previousEvents: TimelineEvent[] = roundsToEvents([
         createRound({
           id: 'round-1',
-          input: lastRoundInput,
+          input: {
+            message: 'Original message',
+            attachment_refs: [{ attachment_id: 'a-1', version: 1, actor: 'user' as const }],
+          },
           response: { message: 'Response to regenerate' },
         }),
-      ];
+      ]);
 
       const result = await prepareConversation({
-        previousRounds,
+        previousEvents,
         nextInput: { message: 'ignored by regenerate' },
         context: mockContext,
         action: 'regenerate',
       });
 
-      // Strips the last round from previous rounds
-      expect(result.previousRounds).toHaveLength(0);
+      // Strips the last user message + agent response from previous events
+      expect(result.previousEvents).toHaveLength(0);
 
-      // Uses the last round's input (full spread preserves all fields for downstream)
+      // Uses the last user message's input (full spread preserves all fields for downstream)
       expect(result.nextInput.message).toBe('Original message');
     });
   });

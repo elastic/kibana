@@ -5,15 +5,26 @@
  * 2.0.
  */
 
-import type { Conversation, ConversationRound } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import type { AgentExecutionEvent, TimelineEvent } from '@kbn/agent-builder-common';
+import { ConversationRoundStatus, isAgentExecutionEvent } from '@kbn/agent-builder-common';
+import type { ProcessedTimelineEvent } from './prepare_conversation';
+import { isProcessedAgentExecutionEvent } from './prepare_conversation';
 
-export const getPendingRound = (
-  conversation: Conversation | undefined
-): ConversationRound | undefined => {
-  const lastRound = conversation?.rounds[conversation.rounds.length - 1];
-  if (lastRound?.status === ConversationRoundStatus.awaitingPrompt) {
-    return lastRound;
+/**
+ * Find the last AgentExecutionEvent with `awaiting_prompt` status from timeline events.
+ */
+export const getPendingExecution = (
+  events: TimelineEvent[] | ProcessedTimelineEvent[]
+): AgentExecutionEvent | undefined => {
+  for (let i = events.length - 1; i >= 0; i--) {
+    const event = events[i];
+    if (
+      (isAgentExecutionEvent(event as TimelineEvent) ||
+        isProcessedAgentExecutionEvent(event as ProcessedTimelineEvent)) &&
+      (event as AgentExecutionEvent).status === ConversationRoundStatus.awaitingPrompt
+    ) {
+      return event as AgentExecutionEvent;
+    }
   }
   return undefined;
 };

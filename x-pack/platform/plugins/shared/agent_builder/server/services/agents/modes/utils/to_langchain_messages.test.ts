@@ -8,6 +8,7 @@
 import type { AIMessage, ToolMessage } from '@langchain/core/messages';
 import { isAIMessage, isHumanMessage } from '@langchain/core/messages';
 import type {
+  AgentExecutionEvent,
   ConversationRoundStep,
   ReasoningStep,
   ToolCallStep,
@@ -15,16 +16,23 @@ import type {
 } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
-import { convertPreviousRounds, groupToolCallSteps } from './to_langchain_messages';
+import { convertPreviousEvents, groupToolCallSteps } from './to_langchain_messages';
 import type { ToolCallResultTransformer } from './create_result_transformer';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
-import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
+import type {
+  ProcessedConversation,
+  ProcessedTimelineEvent,
+  ProcessedUserMessageEvent,
+} from './prepare_conversation';
 
-describe('convertPreviousRounds', () => {
+describe('convertPreviousEvents', () => {
   const now = new Date().toISOString();
+
+  let msgCounter = 0;
+  let responseCounter = 0;
 
   const makeRoundInput = (
     message: string,
@@ -67,12 +75,58 @@ describe('convertPreviousRounds', () => {
     tools: [],
   });
 
+  const makeUserMessageEvent = (
+    message: string,
+    attachments: ProcessedAttachment[] = []
+  ): ProcessedUserMessageEvent => ({
+    id: `msg-${++msgCounter}`,
+    timestamp: now,
+    type: 'user_message',
+    user: { id: 'user-1', username: 'Test User' },
+    message,
+    processedInput: {
+      message,
+      attachments,
+    },
+  });
+
+  const makeAgentExecutionEvent = (
+    parts: Partial<AgentExecutionEvent> = {}
+  ): AgentExecutionEvent => ({
+    id: `resp-${++responseCounter}`,
+    timestamp: now,
+    type: 'agent_execution',
+    agent_id: 'test',
+    status: ConversationRoundStatus.completed,
+    steps: [],
+    response: { message: 'Response' },
+    started_at: now,
+    time_to_first_token: 0,
+    time_to_last_token: 0,
+    model_usage: {
+      connector_id: 'unknown',
+      llm_calls: 1,
+      input_tokens: 12,
+      output_tokens: 42,
+    },
+    ...parts,
+  });
+
+  const makeRoundEvents = (
+    message: string,
+    responseParts: Partial<AgentExecutionEvent> = {},
+    attachments: ProcessedAttachment[] = []
+  ): ProcessedTimelineEvent[] => [
+    makeUserMessageEvent(message, attachments),
+    makeAgentExecutionEvent(responseParts),
+  ];
+
   const createConversation = (
     parts: Partial<ProcessedConversation> = {}
   ): ProcessedConversation => {
     return {
       nextInput: { message: '', attachments: [] },
-      previousRounds: [],
+      previousEvents: [],
       attachments: [],
       attachmentTypes: [],
       attachmentStateManager: createAttachmentStateManager([], {
@@ -87,36 +141,14 @@ describe('convertPreviousRounds', () => {
     };
   };
 
-  const createRound = (
-    parts: Partial<ProcessedConversationRound> = {}
-  ): ProcessedConversationRound => {
-    return {
-      id: 'round-1',
-      status: ConversationRoundStatus.completed,
-      input: {
-        message: '',
-        attachments: [],
-      },
-      steps: [],
-      response: {
-        message: 'Response',
-      },
-      started_at: new Date().toISOString(),
-      time_to_first_token: 0,
-      time_to_last_token: 0,
-      model_usage: {
-        connector_id: 'unknown',
-        llm_calls: 1,
-        input_tokens: 12,
-        output_tokens: 42,
-      },
-      ...parts,
-    };
-  };
+  beforeEach(() => {
+    msgCounter = 0;
+    responseCounter = 0;
+  });
 
-  it('returns only the user message if no previous rounds', async () => {
+  it('returns only the user message if no previous events', async () => {
     const nextInput = makeRoundInput('hello');
-    const result = await convertPreviousRounds({
+    const result = await convertPreviousEvents({
       conversation: createConversation({ nextInput }),
     });
     expect(result).toHaveLength(1);
@@ -125,20 +157,15 @@ describe('convertPreviousRounds', () => {
   });
 
   it('handles a round with only user and assistant messages', async () => {
-    const previousRounds = [
-      createRound({
-        id: 'round-1',
-        input: makeRoundInput('hi'),
-        steps: [],
-        response: makeAssistantResponse('hello!'),
-        started_at: now,
-        time_to_first_token: 42,
-        time_to_last_token: 100,
-      }),
-    ];
+    const previousEvents = makeRoundEvents('hi', {
+      steps: [],
+      response: makeAssistantResponse('hello!'),
+      time_to_first_token: 42,
+      time_to_last_token: 100,
+    });
     const nextInput = makeRoundInput('how are you?');
-    const result = await convertPreviousRounds({
-      conversation: createConversation({ previousRounds, nextInput }),
+    const result = await convertPreviousEvents({
+      conversation: createConversation({ previousEvents, nextInput }),
     });
 
     expect(result).toHaveLength(3);
@@ -162,20 +189,15 @@ describe('convertPreviousRounds', () => {
         },
       },
     ]);
-    const previousRounds = [
-      createRound({
-        id: 'round-1',
-        input: makeRoundInput('find foo'),
-        steps: [makeToolCallStep(toolCall)],
-        response: makeAssistantResponse('done!'),
-        started_at: now,
-        time_to_first_token: 42,
-        time_to_last_token: 100,
-      }),
-    ];
+    const previousEvents = makeRoundEvents('find foo', {
+      steps: [makeToolCallStep(toolCall)],
+      response: makeAssistantResponse('done!'),
+      time_to_first_token: 42,
+      time_to_last_token: 100,
+    });
     const nextInput = makeRoundInput('next');
-    const result = await convertPreviousRounds({
-      conversation: createConversation({ previousRounds, nextInput }),
+    const result = await convertPreviousEvents({
+      conversation: createConversation({ previousEvents, nextInput }),
     });
     // 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
     expect(result).toHaveLength(5);
@@ -213,19 +235,14 @@ describe('convertPreviousRounds', () => {
   });
 
   it('handles multiple rounds', async () => {
-    const previousRounds = [
-      createRound({
-        id: 'round-1',
-        input: makeRoundInput('hi'),
+    const previousEvents: ProcessedTimelineEvent[] = [
+      ...makeRoundEvents('hi', {
         steps: [],
         response: makeAssistantResponse('hello!'),
-        started_at: now,
         time_to_first_token: 42,
         time_to_last_token: 100,
       }),
-      createRound({
-        id: 'round-2',
-        input: makeRoundInput('search for bar'),
+      ...makeRoundEvents('search for bar', {
         steps: [
           makeToolCallStep(
             makeToolCallWithResult('call-2', 'lookup', { id: 42 }, [
@@ -234,14 +251,13 @@ describe('convertPreviousRounds', () => {
           ),
         ],
         response: makeAssistantResponse('done with bar'),
-        started_at: now,
         time_to_first_token: 42,
         time_to_last_token: 100,
       }),
     ];
     const nextInput = makeRoundInput('bye');
-    const result = await convertPreviousRounds({
-      conversation: createConversation({ previousRounds, nextInput }),
+    const result = await convertPreviousEvents({
+      conversation: createConversation({ previousEvents, nextInput }),
     });
     // 1 user + 1 assistant + 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
     expect(result).toHaveLength(7);
@@ -287,20 +303,15 @@ describe('convertPreviousRounds', () => {
         },
       },
     ]);
-    const previousRounds = [
-      createRound({
-        id: 'round-1',
-        input: makeRoundInput('find foo'),
-        steps: [makeToolCallStep(toolCall)],
-        response: makeAssistantResponse('done!'),
-        started_at: now,
-        time_to_first_token: 42,
-        time_to_last_token: 100,
-      }),
-    ];
+    const previousEvents = makeRoundEvents('find foo', {
+      steps: [makeToolCallStep(toolCall)],
+      response: makeAssistantResponse('done!'),
+      time_to_first_token: 42,
+      time_to_last_token: 100,
+    });
     const nextInput = makeRoundInput('next');
-    const result = await convertPreviousRounds({
-      conversation: createConversation({ previousRounds, nextInput }),
+    const result = await convertPreviousEvents({
+      conversation: createConversation({ previousEvents, nextInput }),
     });
     // 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
     expect(result).toHaveLength(5);
@@ -320,8 +331,8 @@ describe('convertPreviousRounds', () => {
         'This is the formatted text content'
       );
       const nextInput = makeRoundInput('hello with attachment', [attachment]);
-      const result = await convertPreviousRounds({
-        conversation: createConversation({ previousRounds: [], nextInput }),
+      const result = await convertPreviousEvents({
+        conversation: createConversation({ previousEvents: [], nextInput }),
       });
 
       expect(result).toHaveLength(1);
@@ -351,7 +362,7 @@ describe('convertPreviousRounds', () => {
         attachment1,
         attachment2,
       ]);
-      const result = await convertPreviousRounds({
+      const result = await convertPreviousEvents({
         conversation: createConversation({ nextInput }),
       });
 
@@ -374,20 +385,19 @@ describe('convertPreviousRounds', () => {
         { content: 'previous' },
         'Previous round attachment'
       );
-      const previousRounds = [
-        createRound({
-          id: 'round-1',
-          input: makeRoundInput('message with attachment', [attachment]),
+      const previousEvents = makeRoundEvents(
+        'message with attachment',
+        {
           steps: [],
           response: makeAssistantResponse('got it'),
-          started_at: now,
           time_to_first_token: 42,
           time_to_last_token: 100,
-        }),
-      ];
+        },
+        [attachment]
+      );
       const nextInput = makeRoundInput('next message');
-      const result = await convertPreviousRounds({
-        conversation: createConversation({ previousRounds, nextInput }),
+      const result = await convertPreviousEvents({
+        conversation: createConversation({ previousEvents, nextInput }),
       });
 
       expect(result).toHaveLength(3);
@@ -418,17 +428,12 @@ describe('convertPreviousRounds', () => {
           data: { original: 'data' },
         },
       ]);
-      const previousRounds = [
-        createRound({
-          id: 'round-1',
-          input: makeRoundInput('find foo'),
-          steps: [makeToolCallStep(toolCall)],
-          response: makeAssistantResponse('done!'),
-          started_at: now,
-        }),
-      ];
+      const previousEvents = makeRoundEvents('find foo', {
+        steps: [makeToolCallStep(toolCall)],
+        response: makeAssistantResponse('done!'),
+      });
       const nextInput = makeRoundInput('next');
-      const conversation = createConversation({ previousRounds, nextInput });
+      const conversation = createConversation({ previousEvents, nextInput });
 
       // Custom transformer that modifies all results from a tool call
       const customTransformer: ToolCallResultTransformer = jest.fn(async (toolCallArg) => {
@@ -445,7 +450,7 @@ describe('convertPreviousRounds', () => {
         );
       });
 
-      const result = await convertPreviousRounds({
+      const result = await convertPreviousEvents({
         conversation,
         resultTransformer: customTransformer,
       });
@@ -482,17 +487,12 @@ describe('convertPreviousRounds', () => {
           data: { second: 'result' },
         },
       ]);
-      const previousRounds = [
-        createRound({
-          id: 'round-1',
-          input: makeRoundInput('find foo'),
-          steps: [makeToolCallStep(toolCall)],
-          response: makeAssistantResponse('done!'),
-          started_at: now,
-        }),
-      ];
+      const previousEvents = makeRoundEvents('find foo', {
+        steps: [makeToolCallStep(toolCall)],
+        response: makeAssistantResponse('done!'),
+      });
       const nextInput = makeRoundInput('next');
-      const conversation = createConversation({ previousRounds, nextInput });
+      const conversation = createConversation({ previousEvents, nextInput });
 
       // Transformer that aggregates results
       const customTransformer: ToolCallResultTransformer = jest.fn(async (toolCallArg) => {
@@ -510,7 +510,7 @@ describe('convertPreviousRounds', () => {
         return aggregated;
       });
 
-      const result = await convertPreviousRounds({
+      const result = await convertPreviousEvents({
         conversation,
         resultTransformer: customTransformer,
       });
@@ -540,18 +540,13 @@ describe('convertPreviousRounds', () => {
       const step1: ToolCallStep = { ...makeToolCallStep(toolCall1), tool_call_group_id: groupId };
       const step2: ToolCallStep = { ...makeToolCallStep(toolCall2), tool_call_group_id: groupId };
 
-      const previousRounds = [
-        createRound({
-          id: 'round-1',
-          input: makeRoundInput('find things'),
-          steps: [step1, step2],
-          response: makeAssistantResponse('done!'),
-          started_at: now,
-        }),
-      ];
+      const previousEvents = makeRoundEvents('find things', {
+        steps: [step1, step2],
+        response: makeAssistantResponse('done!'),
+      });
       const nextInput = makeRoundInput('next');
-      const result = await convertPreviousRounds({
-        conversation: createConversation({ previousRounds, nextInput }),
+      const result = await convertPreviousEvents({
+        conversation: createConversation({ previousEvents, nextInput }),
       });
 
       // 1 user + 1 AI (with 2 tool_calls) + 2 ToolMessages + 1 assistant + 1 user
@@ -578,18 +573,13 @@ describe('convertPreviousRounds', () => {
         { tool_result_id: 'r2', type: ToolResultType.other, data: { result: 'b' } },
       ]);
 
-      const previousRounds = [
-        createRound({
-          id: 'round-1',
-          input: makeRoundInput('find things'),
-          steps: [makeToolCallStep(toolCall1), makeToolCallStep(toolCall2)],
-          response: makeAssistantResponse('done!'),
-          started_at: now,
-        }),
-      ];
+      const previousEvents = makeRoundEvents('find things', {
+        steps: [makeToolCallStep(toolCall1), makeToolCallStep(toolCall2)],
+        response: makeAssistantResponse('done!'),
+      });
       const nextInput = makeRoundInput('next');
-      const result = await convertPreviousRounds({
-        conversation: createConversation({ previousRounds, nextInput }),
+      const result = await convertPreviousEvents({
+        conversation: createConversation({ previousEvents, nextInput }),
       });
 
       // 1 user + 2 * (1 AI + 1 Tool) + 1 assistant + 1 user = 7
@@ -616,18 +606,13 @@ describe('convertPreviousRounds', () => {
       const step2: ToolCallStep = { ...makeToolCallStep(toolCall2), tool_call_group_id: groupId };
       const step3 = makeToolCallStep(toolCall3);
 
-      const previousRounds = [
-        createRound({
-          id: 'round-1',
-          input: makeRoundInput('mixed calls'),
-          steps: [step1, step2, step3],
-          response: makeAssistantResponse('done!'),
-          started_at: now,
-        }),
-      ];
+      const previousEvents = makeRoundEvents('mixed calls', {
+        steps: [step1, step2, step3],
+        response: makeAssistantResponse('done!'),
+      });
       const nextInput = makeRoundInput('next');
-      const result = await convertPreviousRounds({
-        conversation: createConversation({ previousRounds, nextInput }),
+      const result = await convertPreviousEvents({
+        conversation: createConversation({ previousEvents, nextInput }),
       });
 
       // 1 user + (1 AI[2 calls] + 2 Tools) + (1 AI[1 call] + 1 Tool) + 1 assistant + 1 user = 8
@@ -654,18 +639,13 @@ describe('convertPreviousRounds', () => {
         tool_call_group_id: groupId,
       };
 
-      const previousRounds = [
-        createRound({
-          id: 'round-1',
-          input: makeRoundInput('find foo'),
-          steps: [reasoningStep, step1],
-          response: makeAssistantResponse('done!'),
-          started_at: now,
-        }),
-      ];
+      const previousEvents = makeRoundEvents('find foo', {
+        steps: [reasoningStep, step1],
+        response: makeAssistantResponse('done!'),
+      });
       const nextInput = makeRoundInput('next');
-      const result = await convertPreviousRounds({
-        conversation: createConversation({ previousRounds, nextInput }),
+      const result = await convertPreviousEvents({
+        conversation: createConversation({ previousEvents, nextInput }),
       });
 
       const aiMsg = result[1] as AIMessage;
@@ -687,18 +667,13 @@ describe('convertPreviousRounds', () => {
         tool_call_group_id: groupId,
       };
 
-      const previousRounds = [
-        createRound({
-          id: 'round-1',
-          input: makeRoundInput('find foo'),
-          steps: [reasoningStep, step1],
-          response: makeAssistantResponse('done!'),
-          started_at: now,
-        }),
-      ];
+      const previousEvents = makeRoundEvents('find foo', {
+        steps: [reasoningStep, step1],
+        response: makeAssistantResponse('done!'),
+      });
       const nextInput = makeRoundInput('next');
-      const result = await convertPreviousRounds({
-        conversation: createConversation({ previousRounds, nextInput }),
+      const result = await convertPreviousEvents({
+        conversation: createConversation({ previousEvents, nextInput }),
       });
 
       const aiMsg = result[1] as AIMessage;
@@ -720,38 +695,33 @@ describe('convertPreviousRounds', () => {
       const step1: ToolCallStep = { ...makeToolCallStep(toolCall1), tool_call_group_id: groupId };
       const step2: ToolCallStep = { ...makeToolCallStep(toolCall2), tool_call_group_id: groupId };
 
-      const previousRounds = [
-        createRound({
-          id: 'round-1',
-          input: makeRoundInput('find things'),
-          steps: [
-            {
-              type: ConversationRoundStepType.reasoning,
-              reasoning: 'group level thought',
-              tool_call_group_id: groupId,
-            } as ReasoningStep,
-            {
-              type: ConversationRoundStepType.reasoning,
-              reasoning: 'reason for call-1',
-              tool_call_id: 'call-1',
-              tool_call_group_id: groupId,
-            } as ReasoningStep,
-            step1,
-            {
-              type: ConversationRoundStepType.reasoning,
-              reasoning: 'reason for call-2',
-              tool_call_id: 'call-2',
-              tool_call_group_id: groupId,
-            } as ReasoningStep,
-            step2,
-          ],
-          response: makeAssistantResponse('done!'),
-          started_at: now,
-        }),
-      ];
+      const previousEvents = makeRoundEvents('find things', {
+        steps: [
+          {
+            type: ConversationRoundStepType.reasoning,
+            reasoning: 'group level thought',
+            tool_call_group_id: groupId,
+          } as ReasoningStep,
+          {
+            type: ConversationRoundStepType.reasoning,
+            reasoning: 'reason for call-1',
+            tool_call_id: 'call-1',
+            tool_call_group_id: groupId,
+          } as ReasoningStep,
+          step1,
+          {
+            type: ConversationRoundStepType.reasoning,
+            reasoning: 'reason for call-2',
+            tool_call_id: 'call-2',
+            tool_call_group_id: groupId,
+          } as ReasoningStep,
+          step2,
+        ],
+        response: makeAssistantResponse('done!'),
+      });
       const nextInput = makeRoundInput('next');
-      const result = await convertPreviousRounds({
-        conversation: createConversation({ previousRounds, nextInput }),
+      const result = await convertPreviousEvents({
+        conversation: createConversation({ previousEvents, nextInput }),
       });
 
       const aiMsg = result[1] as AIMessage;

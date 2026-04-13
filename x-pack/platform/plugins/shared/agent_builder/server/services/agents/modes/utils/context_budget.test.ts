@@ -7,12 +7,17 @@
 
 import type { InferenceConnector } from '@kbn/inference-common';
 import { InferenceConnectorType } from '@kbn/inference-common';
-import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/agent-builder-common';
-import type { ProcessedConversationRound } from './prepare_conversation';
+import type { AgentExecutionEvent } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStatus,
+  ConversationRoundStepType,
+  TimelineEventType,
+} from '@kbn/agent-builder-common';
+import type { ProcessedUserMessageEvent, ProcessedTimelineEvent } from './prepare_conversation';
 import {
   computeContextBudget,
-  estimateRoundTokens,
-  estimateConversationTokens,
+  estimateEventTokens,
+  estimateTimelineTokens,
   shouldTriggerCompaction,
 } from './context_budget';
 
@@ -30,10 +35,10 @@ const createMockConnector = (contextWindowSize?: number): InferenceConnector => 
   },
 });
 
-const createMockRound = (
+const createMockEvents = (
   messageLength: number,
   toolResults: number = 0
-): ProcessedConversationRound => {
+): ProcessedTimelineEvent[] => {
   const steps = Array.from({ length: toolResults }, (_, i) => ({
     type: ConversationRoundStepType.toolCall as const,
     tool_call_id: `tc-${i}`,
@@ -45,13 +50,24 @@ const createMockRound = (
     progression: [],
   }));
 
-  return {
-    id: 'round-1',
-    status: ConversationRoundStatus.completed,
-    input: {
+  const userEvent: ProcessedUserMessageEvent = {
+    id: 'msg-round-1',
+    timestamp: new Date().toISOString(),
+    type: TimelineEventType.user_message,
+    user: { id: 'user-1', username: 'test-user' },
+    message: 'x'.repeat(messageLength),
+    processedInput: {
       message: 'x'.repeat(messageLength),
       attachments: [],
     },
+  };
+
+  const agentEvent: AgentExecutionEvent = {
+    id: 'round-1',
+    timestamp: new Date().toISOString(),
+    type: TimelineEventType.agentExecution,
+    agent_id: 'agent-1',
+    status: ConversationRoundStatus.completed,
     steps,
     response: { message: 'y'.repeat(messageLength) },
     started_at: new Date().toISOString(),
@@ -64,6 +80,8 @@ const createMockRound = (
       output_tokens: 50,
     },
   };
+
+  return [userEvent, agentEvent];
 };
 
 describe('computeContextBudget', () => {
@@ -97,36 +115,39 @@ describe('computeContextBudget', () => {
   });
 });
 
-describe('estimateRoundTokens', () => {
-  it('should estimate tokens for a simple round', () => {
-    const round = createMockRound(400);
-    const tokens = estimateRoundTokens(round);
+describe('estimateEventTokens', () => {
+  it('should estimate tokens for a simple event pair', () => {
+    const events = createMockEvents(400);
+    const userTokens = estimateEventTokens(events[0]);
+    const agentTokens = estimateEventTokens(events[1]);
 
-    // 400 chars / 4 = 100 tokens for message + 100 for response + overhead
-    expect(tokens).toBeGreaterThan(200);
+    // 400 chars / 4 = 100 tokens for message + overhead per event
+    expect(userTokens).toBeGreaterThan(100);
+    expect(agentTokens).toBeGreaterThan(100);
   });
 
   it('should include tool results in estimation', () => {
-    const roundWithTools = createMockRound(400, 3);
-    const roundWithoutTools = createMockRound(400, 0);
+    const eventsWithTools = createMockEvents(400, 3);
+    const eventsWithoutTools = createMockEvents(400, 0);
 
-    expect(estimateRoundTokens(roundWithTools)).toBeGreaterThan(
-      estimateRoundTokens(roundWithoutTools)
+    // Compare the agent response events (index 1) which contain the steps
+    expect(estimateEventTokens(eventsWithTools[1])).toBeGreaterThan(
+      estimateEventTokens(eventsWithoutTools[1])
     );
   });
 });
 
-describe('estimateConversationTokens', () => {
-  it('should sum tokens across all rounds', () => {
-    const rounds = [createMockRound(400), createMockRound(800), createMockRound(200)];
-    const total = estimateConversationTokens(rounds);
+describe('estimateTimelineTokens', () => {
+  it('should sum tokens across all events', () => {
+    const events = [...createMockEvents(400), ...createMockEvents(800), ...createMockEvents(200)];
+    const total = estimateTimelineTokens(events);
 
     expect(total).toBeGreaterThan(0);
-    expect(total).toBe(rounds.reduce((sum, r) => sum + estimateRoundTokens(r), 0));
+    expect(total).toBe(events.reduce((sum, e) => sum + estimateEventTokens(e), 0));
   });
 
-  it('should return 0 for empty rounds', () => {
-    expect(estimateConversationTokens([])).toBe(0);
+  it('should return 0 for empty events', () => {
+    expect(estimateTimelineTokens([])).toBe(0);
   });
 });
 
@@ -134,17 +155,21 @@ describe('shouldTriggerCompaction', () => {
   it('should not trigger for small conversations', () => {
     const connector = createMockConnector(128000);
     const budget = computeContextBudget(connector);
-    const rounds = [createMockRound(100)];
+    const events = createMockEvents(100);
 
-    expect(shouldTriggerCompaction(rounds, budget)).toBe(false);
+    expect(shouldTriggerCompaction(events, budget)).toBe(false);
   });
 
   it('should trigger when conversation exceeds threshold', () => {
     const connector = createMockConnector(1000); // very small window for testing
     const budget = computeContextBudget(connector);
-    // Create rounds with enough text to exceed the threshold
-    const rounds = [createMockRound(2000), createMockRound(2000), createMockRound(2000)];
+    // Create events with enough text to exceed the threshold
+    const events = [
+      ...createMockEvents(2000),
+      ...createMockEvents(2000),
+      ...createMockEvents(2000),
+    ];
 
-    expect(shouldTriggerCompaction(rounds, budget)).toBe(true);
+    expect(shouldTriggerCompaction(events, budget)).toBe(true);
   });
 });

@@ -1,0 +1,216 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Conversation, ConversationRound, UserMessageEvent, AgentExecutionEvent } from '.';
+import { ConversationRoundStatus, TimelineEventType } from '.';
+import {
+  roundsToTimelineEvents,
+  timelineEventsToRounds,
+  conversationToTimelineConversation,
+  timelineConversationToConversation,
+  agentExecutionEventToRound,
+} from './timeline_converters';
+
+const createTestRound = (overrides: Partial<ConversationRound> = {}): ConversationRound => ({
+  id: 'round-1',
+  status: ConversationRoundStatus.completed,
+  input: { message: 'hello' },
+  steps: [],
+  response: { message: 'world' },
+  started_at: '2024-01-01T00:00:00.000Z',
+  time_to_first_token: 100,
+  time_to_last_token: 500,
+  model_usage: {
+    connector_id: 'conn-1',
+    llm_calls: 1,
+    input_tokens: 10,
+    output_tokens: 20,
+  },
+  ...overrides,
+});
+
+const testUser = { id: 'user-1', username: 'testuser' };
+const testAgentId = 'agent-1';
+
+describe('timeline_converters', () => {
+  describe('roundsToTimelineEvents', () => {
+    it('converts empty rounds to empty events', () => {
+      const events = roundsToTimelineEvents([], testUser, testAgentId);
+      expect(events).toEqual([]);
+    });
+
+    it('converts a single round to user_message + agent_execution events', () => {
+      const round = createTestRound();
+      const events = roundsToTimelineEvents([round], testUser, testAgentId);
+
+      expect(events).toHaveLength(2);
+
+      const userEvent = events[0] as UserMessageEvent;
+      expect(userEvent.type).toBe(TimelineEventType.user_message);
+      expect(userEvent.user).toEqual(testUser);
+      expect(userEvent.message).toBe('hello');
+      expect(userEvent.id).toBe('msg-round-1');
+
+      const agentEvent = events[1] as AgentExecutionEvent;
+      expect(agentEvent.type).toBe(TimelineEventType.agentExecution);
+      expect(agentEvent.agent_id).toBe(testAgentId);
+      expect(agentEvent.id).toBe('round-1');
+      expect(agentEvent.response.message).toBe('world');
+      expect(agentEvent.model_usage.input_tokens).toBe(10);
+    });
+
+    it('preserves attachments from round input', () => {
+      const round = createTestRound({
+        input: {
+          message: 'hello',
+          attachments: [{ id: 'att-1', type: 'text', data: { content: 'test' } }],
+          attachment_refs: [{ attachment_id: 'att-1', version: 1 }],
+        },
+      });
+      const events = roundsToTimelineEvents([round], testUser, testAgentId);
+      const userEvent = events[0] as UserMessageEvent;
+
+      expect(userEvent.attachments).toHaveLength(1);
+      expect(userEvent.attachment_refs).toHaveLength(1);
+    });
+
+    it('converts multiple rounds preserving order', () => {
+      const rounds = [
+        createTestRound({ id: 'r1', input: { message: 'first' } }),
+        createTestRound({ id: 'r2', input: { message: 'second' } }),
+      ];
+      const events = roundsToTimelineEvents(rounds, testUser, testAgentId);
+
+      expect(events).toHaveLength(4);
+      expect((events[0] as UserMessageEvent).message).toBe('first');
+      expect((events[1] as AgentExecutionEvent).id).toBe('r1');
+      expect((events[2] as UserMessageEvent).message).toBe('second');
+      expect((events[3] as AgentExecutionEvent).id).toBe('r2');
+    });
+  });
+
+  describe('timelineEventsToRounds', () => {
+    it('converts empty events to empty rounds', () => {
+      const rounds = timelineEventsToRounds([]);
+      expect(rounds).toEqual([]);
+    });
+
+    it('pairs user_message with following agent_execution into a round', () => {
+      const events = roundsToTimelineEvents([createTestRound()], testUser, testAgentId);
+      const rounds = timelineEventsToRounds(events);
+
+      expect(rounds).toHaveLength(1);
+      expect(rounds[0].id).toBe('round-1');
+      expect(rounds[0].input.message).toBe('hello');
+      expect(rounds[0].response.message).toBe('world');
+      expect(rounds[0].model_usage.input_tokens).toBe(10);
+    });
+
+    it('handles agent_execution without preceding user_message', () => {
+      const agentEvent: AgentExecutionEvent = {
+        id: 'resp-1',
+        timestamp: '2024-01-01T00:00:00.000Z',
+        type: TimelineEventType.agentExecution,
+        agent_id: testAgentId,
+        status: ConversationRoundStatus.completed,
+        steps: [],
+        response: { message: 'orphan' },
+        started_at: '2024-01-01T00:00:00.000Z',
+        time_to_first_token: 0,
+        time_to_last_token: 0,
+        model_usage: {
+          connector_id: '',
+          llm_calls: 0,
+          input_tokens: 0,
+          output_tokens: 0,
+        },
+      };
+
+      const rounds = timelineEventsToRounds([agentEvent]);
+      expect(rounds).toHaveLength(1);
+      expect(rounds[0].input.message).toBe('');
+    });
+  });
+
+  describe('conversationToTimelineConversation', () => {
+    it('converts a conversation to TimelineConversation', () => {
+      const conversation: Conversation = {
+        id: 'conv-1',
+        agent_id: testAgentId,
+        user: testUser,
+        title: 'test',
+        created_at: '2024-01-01T00:00:00.000Z',
+        updated_at: '2024-01-01T00:00:00.000Z',
+        rounds: [createTestRound()],
+      };
+
+      const exec = conversationToTimelineConversation(conversation);
+
+      expect(exec.id).toBe('conv-1');
+      expect(exec.timeline).toHaveLength(2);
+      expect(exec.timeline[0].type).toBe('user_message');
+      expect(exec.timeline[1].type).toBe('agent_execution');
+    });
+  });
+
+  describe('timelineConversationToConversation', () => {
+    it('round-trips correctly', () => {
+      const original: Conversation = {
+        id: 'conv-1',
+        agent_id: testAgentId,
+        user: testUser,
+        title: 'test',
+        created_at: '2024-01-01T00:00:00.000Z',
+        updated_at: '2024-01-01T00:00:00.000Z',
+        rounds: [createTestRound()],
+      };
+
+      const exec = conversationToTimelineConversation(original);
+      const restored = timelineConversationToConversation(exec);
+
+      expect(restored.id).toBe(original.id);
+      expect(restored.rounds).toHaveLength(1);
+      expect(restored.rounds[0].input.message).toBe('hello');
+      expect(restored.rounds[0].response.message).toBe('world');
+    });
+  });
+
+  describe('agentExecutionEventToRound', () => {
+    it('converts agent execution event to round with user message', () => {
+      const userMsg: UserMessageEvent = {
+        id: 'msg-1',
+        timestamp: '2024-01-01T00:00:00.000Z',
+        type: TimelineEventType.user_message,
+        user: testUser,
+        message: 'hi',
+      };
+      const agentResp: AgentExecutionEvent = {
+        id: 'resp-1',
+        timestamp: '2024-01-01T00:00:00.000Z',
+        type: TimelineEventType.agentExecution,
+        agent_id: testAgentId,
+        status: ConversationRoundStatus.completed,
+        steps: [],
+        response: { message: 'hey' },
+        started_at: '2024-01-01T00:00:00.000Z',
+        time_to_first_token: 50,
+        time_to_last_token: 200,
+        model_usage: {
+          connector_id: 'c1',
+          llm_calls: 1,
+          input_tokens: 5,
+          output_tokens: 10,
+        },
+      };
+
+      const round = agentExecutionEventToRound(agentResp, userMsg);
+      expect(round.id).toBe('resp-1');
+      expect(round.input.message).toBe('hi');
+      expect(round.response.message).toBe('hey');
+    });
+  });
+});
