@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 import { tagcloudConfigSchema } from '../../schema';
+import type { TagcloudConfig } from '../../schema';
+import { DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../schema/color';
+import { LensConfigBuilder } from '../../config_builder';
 import { validateAPIConverter, validateConverter } from '../validate';
 import {
   basicTagcloudWithAdHocDataView,
@@ -58,6 +62,37 @@ describe('Tagcloud', () => {
 
     it('should convert a comprehensive ESQL-based tagcloud chart', () => {
       validateAPIConverter(comprehensiveEsqlTagcloud, tagcloudConfigSchema);
+    });
+  });
+
+  describe('color default application', () => {
+    it('should emit DEFAULT_CATEGORICAL_COLOR_MAPPING on tag_by when no color is specified', () => {
+      const config = {
+        type: 'tag_cloud',
+        title: 'Tagcloud color default test',
+        data_source: {
+          type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+          index_pattern: 'test-index',
+          time_field: '@timestamp',
+        },
+        metric: {
+          operation: 'count',
+          empty_as_null: false,
+        },
+        tag_by: {
+          operation: 'terms',
+          fields: ['tags.keyword'],
+          limit: 5,
+        },
+        sampling: 1,
+        ignore_global_filters: false,
+      } satisfies TagcloudConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as TagcloudConfig;
+
+      expect(apiOutput.tag_by.color).toEqual(DEFAULT_CATEGORICAL_COLOR_MAPPING);
     });
   });
 });

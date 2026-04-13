@@ -14,11 +14,10 @@ import {
   type EvaluationDataset,
   type Example,
 } from '@kbn/evals';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { AgentBuilderClient } from '../../src/clients/chat/agent_builder_client';
 import type { ConverseAttachment } from '../../src/clients/chat/types';
 import { createCriteriaEvaluator } from '../../src/criteria_evaluator';
-
-const OBSERVABILITY_AGENT_ID = 'observability.agent';
 
 interface ObservabilityAgentExample extends Example {
   input: {
@@ -49,7 +48,7 @@ export const evaluate = base.extend<
 >({
   chatClient: [
     async ({ fetch, log, connector }, use) => {
-      const client = new AgentBuilderClient(fetch, log, connector.id, OBSERVABILITY_AGENT_ID);
+      const client = new AgentBuilderClient(fetch, log, connector.id, agentBuilderDefaultAgentId);
       await use(client);
     },
     { scope: 'worker' },

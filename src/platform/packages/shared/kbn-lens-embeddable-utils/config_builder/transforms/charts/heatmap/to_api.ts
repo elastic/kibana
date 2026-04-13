@@ -24,7 +24,7 @@ import {
   stripUndefined,
 } from '../utils';
 import type { HeatmapConfig } from '../../../schema';
-import { fromColorByValueLensStateToAPI } from '../../coloring';
+import { AUTO_COLOR, fromColorByValueLensStateToAPI } from '../../coloring';
 import { type LensAttributes } from '../../../types';
 import {
   buildDataSourceStateESQL,
@@ -111,9 +111,9 @@ function reverseBuildVisualizationState(
   } satisfies Partial<HeatmapConfig>;
 
   const paletteProps = {
-    ...(visualization.palette && {
-      color: fromColorByValueLensStateToAPI(visualization.palette),
-    }),
+    color: visualization.palette
+      ? fromColorByValueLensStateToAPI(visualization.palette)
+      : AUTO_COLOR,
   } satisfies Partial<HeatmapConfig['metric']>;
 
   if (isTextBasedLayer(layer)) {
