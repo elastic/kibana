@@ -4493,12 +4493,7 @@
             "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "searchGettingStarted",
-                "path": "x-pack/solutions/search/plugins/search_getting_started/server/agent/register_search_agent.ts"
-              }
-            ]
+            "references": []
           },
           {
             "parentPluginId": "@kbn/agent-builder-common",
