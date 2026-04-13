@@ -75,10 +75,20 @@ export const useGridNavigation = ({
           newRowIndex = Math.max(0, rowIndex - 1);
           break;
 
-        case keys.ARROW_DOWN:
+        case keys.ARROW_DOWN: {
           event.preventDefault();
-          newRowIndex = Math.min(gridRows - 1, rowIndex + 1);
+          const nextRow = Math.min(gridRows - 1, rowIndex + 1);
+          if (nextRow > rowIndex) {
+            newRowIndex = nextRow;
+            const rowStartIndex = nextRow * gridColumns;
+            const maxColInRow = Math.min(
+              gridColumns - 1,
+              Math.max(0, totalRows - 1 - rowStartIndex)
+            );
+            newColIndex = Math.min(colIndex, maxColInRow);
+          }
           break;
+        }
 
         case keys.ARROW_LEFT:
           event.preventDefault();
