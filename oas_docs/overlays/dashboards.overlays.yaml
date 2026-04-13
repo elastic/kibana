@@ -78,41 +78,33 @@ actions:
         A [dashboard](https://www.elastic.co/docs/explore-analyze/dashboards) is structured as follows:
 
         - **`title`** (required): the display name of the dashboard.
-        - **`panels`**: array of items placed on a 48-column grid. Each item has a `type`, a `grid` position (`x`, `y`, `w`, `h`), and a `config`. Three item shapes are supported:
-          - **Panel**: embeds a visualization, Discover session, image, or other content.
-          - **Control**: an interactive filter (dropdown, slider). Use controls to let users filter dashboard data interactively. Controls in `panels` apply only to panels in the same section.
+        - **`panels`**: array of items placed on a 48-column grid. Each item has a `type`, a `grid` position (`x`, `y`, `w`, `h`), and a `config`. Two item shapes are supported:
+          - **Panel**: any content type, including visualizations, Discover sessions, images, markdown, and filter controls. The `type` field determines the panel's content and the structure of its `config`.
           - **Section**: a collapsible group of panels. Use sections to organize a large dashboard into logical groups. A section has a `grid.y` position and its own nested `panels` array.
-        - **`pinned_panels`**: controls pinned at the top of the dashboard that apply to all panels.
-        - **`filters`**, **`query`**, **`time_range`**: filter the data displayed across all panels.
 
-        The grid is 48 columns wide. Use `w: 48` for a full-width panel, `w: 24` for half-width, and so on. Height (`h`) and vertical position (`y`) are in grid rows with no fixed maximum.
+          The grid is 48 columns wide. Use `w: 48` for a full-width panel, `w: 24` for half-width, and so on. Height (`h`) and vertical position (`y`) are in grid rows with no fixed maximum.
+        - **`pinned_panels`**: filter controls pinned at the top of the dashboard that apply to all panels. Filter controls placed in `panels` apply only to panels in the same section.
+        - **`filters`**, **`query`**, **`time_range`**: filter the data displayed across all panels.
 
         ## Panel types
 
-        The `type` field in each panel determines what it contains:
+        The `type` field in each panel determines what it contains and the structure of its `config`:
 
-        | Type | Content |
-        |------|---------|
+        | Type | Description |
+        |------|-------------|
         | `vis` | Visualization (bar, line, metric, and so on), supports both data view and ES&#124;QL queries |
         | `discover_session` | Discover session |
         | `image` | Image |
         | `markdown` | Markdown text |
-
-        Control panels use a different `config` structure from content panels:
-
-        | Type | Content |
-        |------|---------|
         | `esql_control` | ES&#124;QL variable control |
         | `options_list_control` | Dropdown filter by field value |
         | `range_slider_control` | Slider filter by numeric range |
         | `time_slider_control` | Time range slider |
 
-        Controls placed in `panels` apply only to panels in the same section. Controls placed in `pinned_panels` apply to all panels.
-
         Additional panel types for observability use cases:
 
-        | Type | Content |
-        |------|---------|
+        | Type | Description |
+        |------|-------------|
         | `slo_alerts` | SLO alerts |
         | `slo_burn_rate` | SLO burn rate |
         | `slo_error_budget` | SLO error budget |
@@ -121,7 +113,7 @@ actions:
         | `synthetics_stats_overview` | Synthetics stats overview |
 
         > info
-        > The following panel types are supported in the Kibana UI but not yet by the REST API. Panels with these types return a `400` error: `map`, `legacy_vis`, `links`, `field_stats_table`, `aiops_change_point_chart`, `aiops_log_rate_analysis`, `aiops_pattern_analysis`.
+        > The following panel types are supported in the Kibana UI but not yet by the REST API: `map`, `legacy_vis`, `links`, `field_stats_table`, `aiops_change_point_chart`, `aiops_log_rate_analysis`, `aiops_pattern_analysis`. Write operations (`POST`, `PUT`) return a `400` error when these panel types are included. Read operations (`GET`) strip these panels from the response and include them in a list of warnings.
 
         ## Embedding library items
 
