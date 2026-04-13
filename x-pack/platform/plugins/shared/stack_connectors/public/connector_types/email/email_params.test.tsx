@@ -322,9 +322,7 @@ describe('EmailParamsFields renders', () => {
         index={0}
       />
     );
-    expect(screen.getByTestId('messageTextArea')).toHaveValue(
-      'not the default message'
-    );
+    expect(screen.getByTestId('messageTextArea')).toHaveValue('not the default message');
 
     rerender(
       <IntlProvider locale="en">
@@ -360,9 +358,7 @@ describe('EmailParamsFields renders', () => {
         index={0}
       />
     );
-    expect(screen.getByTestId('messageTextArea')).toHaveValue(
-      'not the default message'
-    );
+    expect(screen.getByTestId('messageTextArea')).toHaveValue('not the default message');
 
     rerender(
       <IntlProvider locale="en">

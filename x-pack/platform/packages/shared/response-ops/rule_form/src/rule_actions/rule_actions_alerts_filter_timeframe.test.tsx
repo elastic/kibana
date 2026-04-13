@@ -73,8 +73,6 @@ describe('ruleActionsAlertsFilterTimeframe', () => {
 
     // Timezone combobox should show America/Chicago as selected
     const timezoneComboBox = screen.getByTestId('alertsFilterTimeframeTimezone');
-    expect(within(timezoneComboBox).getByRole('combobox')).toHaveValue(
-      'America/Chicago'
-    );
+    expect(within(timezoneComboBox).getByRole('combobox')).toHaveValue('America/Chicago');
   });
 });
