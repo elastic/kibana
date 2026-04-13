@@ -559,9 +559,11 @@ describe('action_form', () => {
       // Open the EuiSuperSelect to see options in the popover
       await userEvent.click(screen.getByTestId('addNewActionConnectorActionGroup-1'));
       await screen.findByTestId('addNewActionConnectorActionGroup-1-option-default');
-      expect(
-        screen.getByTestId('addNewActionConnectorActionGroup-1-option-iHaveRecovered')
-      ).toBeInTheDocument();
+      const iHaveRecoveredOption = screen.getByTestId(
+        'addNewActionConnectorActionGroup-1-option-iHaveRecovered'
+      );
+      expect(iHaveRecoveredOption).toBeInTheDocument();
+      expect(iHaveRecoveredOption).toBeDisabled();
     });
 
     it('renders available connectors for the selected action type', async () => {
