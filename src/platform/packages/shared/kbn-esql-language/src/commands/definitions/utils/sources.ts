@@ -6,8 +6,14 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { IndexAutocompleteItem, ESQLSourceResult, EsqlView } from '@kbn/esql-types';
+import type {
+  ESQLCallbacks,
+  IndexAutocompleteItem,
+  ESQLSourceResult,
+  EsqlView,
+} from '@kbn/esql-types';
 import { SOURCES_TYPES } from '@kbn/esql-types';
+import { EsqlQuery } from '@elastic/esql';
 import { i18n } from '@kbn/i18n';
 import type { ESQLAstAllCommands, ESQLAstJoinCommand, ESQLSource } from '@elastic/esql/types';
 import { isAsExpression, Walker, LeafPrinter } from '@elastic/esql';
@@ -151,6 +157,39 @@ export function getSourcesFromCommands(
   return args.filter(
     (arg) => arg.sourceType === sourceType && arg.name !== '' && arg.name !== EDITOR_MARKER
   );
+}
+
+/**
+ * Display condition for the "Load unmapped fields" quick fix (unknown column): show only when
+ * the query uses at least one data stream source and at least one wired stream source.
+ */
+export async function hasWiredStreamsInQuery(
+  query: string,
+  callbacks: ESQLCallbacks
+): Promise<boolean> {
+  const esqlQuery = EsqlQuery.fromSrc(query);
+  const sourcesInQuery = getSourcesFromCommands(esqlQuery.ast.commands, 'index');
+
+  const dataStreamSources = new Set(
+    (await callbacks.getSources?.())
+      ?.filter((source) => source.type === SOURCES_TYPES.DATA_STREAM)
+      .map((source) => source.name) ?? []
+  );
+
+  const dataStreamSourcesInQuery = sourcesInQuery
+    .filter((source) => sourceExists(source.name, dataStreamSources))
+    .map((source) => source.name);
+
+  // No data streams used as sources, don't display the quick fix.
+  if (!dataStreamSourcesInQuery.length) {
+    return false;
+  }
+
+  // Check if there is a wired stream used as source.
+  const wiredStreams = new Set(
+    (await callbacks.getWiredStreams?.())?.map((stream) => stream.name) ?? []
+  );
+  return sourcesInQuery.some((source) => sourceExists(source.name, wiredStreams));
 }
 
 export function getSourceSuggestions(

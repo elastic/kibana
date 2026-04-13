@@ -8,6 +8,7 @@
  */
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { ILicense } from '@kbn/licensing-types';
+import type { Streams } from '@kbn/streams-schema';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { RecommendedField, RecommendedQuery } from './extensions_autocomplete_types';
 import type {
@@ -136,6 +137,7 @@ export interface ESQLCallbacks {
   }) => Promise<{ indices: IndexAutocompleteItem[] }>;
   getTimeseriesIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
   getViews?: () => Promise<EsqlViewsResult>;
+  getWiredStreams?: () => Promise<Streams.WiredStream.Definition[]>;
   getEditorExtensions?: (queryString: string) => Promise<{
     recommendedQueries: RecommendedQuery[];
     recommendedFields: RecommendedField[];

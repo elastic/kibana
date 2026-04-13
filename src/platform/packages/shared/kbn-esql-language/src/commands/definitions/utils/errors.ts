@@ -19,6 +19,7 @@ import type {
   ESQLMessage,
 } from '@elastic/esql/types';
 import { EsqlQuery, mutate } from '@elastic/esql';
+import type { ESQLCallbacks } from '@kbn/esql-types';
 import type {
   ErrorTypes,
   ErrorValues,
@@ -28,6 +29,7 @@ import type {
 } from '../types';
 import { EsqlSettingNames } from '../generated/settings';
 import { UnmappedFieldsStrategy } from '../../registry/types';
+import { hasWiredStreamsInQuery } from './sources';
 
 function getMessageAndTypeFromId<K extends ErrorTypes>({
   messageId,
@@ -42,6 +44,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
   quickFix?: {
     // HD improve types sharing
     title: string;
+    displayCondition?: (query: string, callbacks: ESQLCallbacks) => Promise<boolean>;
     // A function that recieves the current query and returns it corrected.
     fixQuery: (query: string) => string;
   };
@@ -60,6 +63,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           title: i18n.translate('kbn-esql-language.esql.validation.unknownColumn.quickFix', {
             defaultMessage: 'Load unmapped fields',
           }),
+          displayCondition: hasWiredStreamsInQuery,
           fixQuery: (query: string) => {
             const esqlQuery = EsqlQuery.fromSrc(query, { withFormatting: true });
             mutate.commands.set.upsert(

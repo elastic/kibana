@@ -12,10 +12,11 @@ import { euiShadow } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
-import { uniqBy, type MapCache } from 'lodash';
+import { omit, uniqBy, type MapCache } from 'lodash';
 import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
+import type { ESQLCallbacks } from '@kbn/esql-types';
 import {
   EDITOR_MAX_HEIGHT,
   EDITOR_MIN_HEIGHT,
@@ -390,6 +391,29 @@ export const filterDuplicatedWarnings = (
   return uniqBy(warnings, (warning) => {
     return warning.message;
   });
+};
+
+/**
+ * Filters quick fixes that shouldn't be displayed by checking the display condition.
+ * If no displayCondition is provided by the fix, we assume it should be shown always.
+ */
+export const filterQuickFixes = async (
+  messages: MonacoMessage[],
+  query: string,
+  callbacks: ESQLCallbacks
+): Promise<MonacoMessage[]> => {
+  const result: MonacoMessage[] = [];
+  for (const message of messages) {
+    if (message.quickFix?.displayCondition) {
+      const shouldDisplayFix = await message.quickFix.displayCondition(query, callbacks);
+      if (!shouldDisplayFix) {
+        result.push(omit(message, 'quickFix'));
+        continue;
+      }
+    }
+    result.push(message);
+  }
+  return result;
 };
 
 /**

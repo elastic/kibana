@@ -45,6 +45,7 @@ export type MonacoMessage = monaco.editor.IMarkerData & {
   underlinedWarning?: boolean;
   quickFix?: {
     title: string;
+    displayCondition?: (query: string, callbacks: ESQLCallbacks) => Promise<boolean>;
     fixQuery: (query: string) => string;
   };
 };

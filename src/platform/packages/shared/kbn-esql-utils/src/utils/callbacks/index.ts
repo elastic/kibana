@@ -15,3 +15,4 @@ export { getTimeseriesIndices } from './timeseries_indices';
 export { getViews } from './views';
 export { getInferenceEndpoints } from './inference';
 export { getEditorExtensions } from './extensions';
+export { getWiredStreams } from './wired_streams';

@@ -46,6 +46,10 @@ The callbacks in this directory are designed to:
   - Provides query and fields recommendations based on current context
   - Solution-aware suggestions
 
+- **`wired_streams.ts`** - Fetches wired streams
+  - Retrieves wired streams
+  - Used to trigger special flows for wired streams.
+
 
 ## Usage Example
 

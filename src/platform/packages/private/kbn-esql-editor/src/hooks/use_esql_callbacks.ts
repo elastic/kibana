@@ -24,6 +24,7 @@ import {
   getInferenceEndpoints,
   getTimeseriesIndices,
   getViews,
+  getWiredStreams,
 } from '@kbn/esql-utils';
 import type { getEsqlColumns, getESQLSources } from '@kbn/esql-utils';
 import { clearCacheWhenOld } from '../helpers';
@@ -279,6 +280,10 @@ export const useEsqlCallbacks = ({
     [data.dataViews, kql?.autocomplete, minimalQueryRef]
   );
 
+  const getWiredStreamsCallback = useCallback(async () => {
+    return await getWiredStreams(core.http);
+  }, [core.http]);
+
   return useMemo<ESQLCallbacks>(
     () => ({
       getSources,
@@ -294,6 +299,7 @@ export const useEsqlCallbacks = ({
       getViews: getViewsCallback,
       getEditorExtensions: getEditorExtensionsCallback,
       getInferenceEndpoints: getInferenceEndpointsCallback,
+      getWiredStreams: getWiredStreamsCallback,
       getLicense,
       getActiveProduct,
       getHistoryStarredItems,
@@ -315,6 +321,7 @@ export const useEsqlCallbacks = ({
       getViewsCallback,
       getEditorExtensionsCallback,
       getInferenceEndpointsCallback,
+      getWiredStreamsCallback,
       getLicense,
       getActiveProduct,
       getHistoryStarredItems,

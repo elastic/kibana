@@ -87,6 +87,7 @@ import {
   parseErrors,
   parseWarning,
   useDebounceWithOptions,
+  filterQuickFixes,
 } from './helpers';
 import {
   useInitLatencyTracking,
@@ -785,7 +786,15 @@ const ESQLEditorInternal = function ESQLEditor({
         const { callbacks: timedCallbacks, getCallbacksDuration } =
           createTimedCallbacks(esqlCallbacks);
         const result = await ESQLLang.validate(editorModel.current, code, timedCallbacks, options);
-        return { ...result, callbacksDuration: getCallbacksDuration() };
+        const [errors, warnings] = await Promise.all([
+          filterQuickFixes(result.errors, code, esqlCallbacks),
+          filterQuickFixes(result.warnings, code, esqlCallbacks),
+        ]);
+        return {
+          errors,
+          warnings,
+          callbacksDuration: getCallbacksDuration(),
+        };
       }
       return {
         errors: [],
