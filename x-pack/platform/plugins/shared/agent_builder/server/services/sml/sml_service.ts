@@ -80,7 +80,7 @@ class SmlServiceImpl implements SmlServiceInstance {
           query,
           size,
           spaceId,
-          esClient,
+          esClient: esClient.asInternalUser,
           logger,
           skipContent,
         });
@@ -95,7 +95,7 @@ class SmlServiceImpl implements SmlServiceInstance {
         return checkItemsAccess({
           ids,
           spaceId,
-          esClient,
+          esClient: esClient.asInternalUser,
           request,
           securityAuthz: this.securityAuthz,
           logger,
@@ -105,7 +105,7 @@ class SmlServiceImpl implements SmlServiceInstance {
         return this.getIndexer().indexAttachment(params);
       },
       getDocuments: async ({ ids, spaceId, esClient }) => {
-        return getDocumentsByIds({ ids, spaceId, esClient, logger });
+        return getDocumentsByIds({ ids, spaceId, esClient: esClient.asInternalUser, logger });
       },
       getTypeDefinition: (typeId: string) => {
         return this.registry.get(typeId);

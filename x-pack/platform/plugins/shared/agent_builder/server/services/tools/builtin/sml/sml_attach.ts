@@ -62,7 +62,7 @@ export const createSmlAttachTool = ({
     const resolvedItems = await resolveSmlAttachItems({
       chunkIds,
       sml: smlService,
-      esClient: esClient.asInternalUser,
+      esClient,
       request,
       spaceId,
       savedObjectsClient,
