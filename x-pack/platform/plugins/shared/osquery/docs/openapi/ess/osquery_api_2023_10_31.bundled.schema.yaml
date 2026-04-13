@@ -11,6 +11,125 @@ servers:
       port:
         default: '5601'
 paths:
+  /api/osquery/history:
+    get:
+      description: >
+        Get a unified, time-sorted history of live, rule-triggered, and
+        scheduled osquery executions. The response uses cursor-based pagination.
+      operationId: OsqueryGetUnifiedHistory
+      parameters:
+        - description: The number of results to return per page.
+          in: query
+          name: pageSize
+          required: false
+          schema:
+            default: 20
+            description: The number of results to return per page.
+            maximum: 100
+            minimum: 1
+            type: integer
+        - description: >-
+            A base64-encoded cursor for pagination. Use the value from the
+            previous response to fetch the next page.
+          in: query
+          name: nextPage
+          required: false
+          schema:
+            description: >-
+              A base64-encoded cursor for pagination. Use the value from the
+              previous response to fetch the next page.
+            type: string
+        - description: >-
+            A search string to filter history entries by pack name, query text,
+            or query ID.
+          in: query
+          name: kuery
+          required: false
+          schema:
+            description: >-
+              A search string to filter history entries by pack name, query
+              text, or query ID.
+            type: string
+        - description: Comma-separated list of user IDs to filter live query history.
+          in: query
+          name: userIds
+          required: false
+          schema:
+            description: Comma-separated list of user IDs to filter live query history.
+            example: elastic,admin
+            type: string
+        - description: >-
+            Comma-separated list of source types to include. Valid values are
+            `live`, `rule`, and `scheduled`.
+          in: query
+          name: sourceFilters
+          required: false
+          schema:
+            description: >-
+              Comma-separated list of source types to include. Valid values are
+              `live`, `rule`, and `scheduled`.
+            example: live,scheduled
+            type: string
+        - description: The start of the time range filter (ISO 8601).
+          in: query
+          name: startDate
+          required: false
+          schema:
+            description: The start of the time range filter (ISO 8601).
+            example: '2024-01-01T00:00:00Z'
+            type: string
+        - description: The end of the time range filter (ISO 8601).
+          in: query
+          name: endDate
+          required: false
+          schema:
+            description: The end of the time range filter (ISO 8601).
+            example: '2024-12-31T23:59:59Z'
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                unifiedHistoryExample:
+                  summary: Example unified history response
+                  value:
+                    data:
+                      - actionId: 609c4c66-ba3d-43fa-afdd-53e244577aa0
+                        agentCount: 5
+                        errorCount: 0
+                        id: 3c42c847-eb30-4452-80e0-728584042334
+                        queryName: uptime_query
+                        queryText: select * from uptime;
+                        source: Live
+                        sourceType: live
+                        successCount: 5
+                        timestamp: '2024-07-26T09:59:32.220Z'
+                        totalRows: 42
+                        userId: elastic
+                      - agentCount: 10
+                        errorCount: 1
+                        executionCount: 3
+                        id: pack_my_pack_uptime_3
+                        packId: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
+                        packName: My Pack
+                        plannedTime: '2024-07-26T09:00:00.000Z'
+                        queryName: uptime
+                        queryText: select * from uptime;
+                        scheduleId: pack_my_pack_uptime
+                        source: Scheduled
+                        sourceType: scheduled
+                        successCount: 9
+                        timestamp: '2024-07-26T09:00:00.000Z'
+                        totalRows: 100
+                    hasMore: true
+                    nextPage: eyJhY3Rpb25TZWFyY2hBZnRlciI6WzE3...
+              schema:
+                $ref: '#/components/schemas/GetUnifiedHistoryResponse'
+          description: Indicates a successful call.
+      summary: Get unified query history
+      tags:
+        - Security Osquery API
   /api/osquery/live_queries:
     get:
       description: Get a list of all live queries.
@@ -269,6 +388,30 @@ paths:
       summary: Update a pack
       tags:
         - Security Osquery API
+  /api/osquery/packs/{id}/copy:
+    post:
+      description: >-
+        Create a copy of a query pack with a unique name by appending a `_copy`
+        suffix. If the name already exists, a numeric suffix is added (e.g.,
+        `_copy_2`). The copied pack is always created with `enabled` set to
+        `false`.
+      operationId: OsqueryCopyPacks
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/PackId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CopyPacksResponse'
+          description: OK
+      summary: Copy a pack
+      tags:
+        - Security Osquery API
   /api/osquery/saved_queries:
     get:
       description: Get a list of all saved queries.
@@ -390,6 +533,197 @@ paths:
       summary: Update a saved query
       tags:
         - Security Osquery API
+  /api/osquery/saved_queries/{id}/copy:
+    post:
+      description: >-
+        Create a copy of a saved query with a unique name by appending a `_copy`
+        suffix. If the name already exists, a numeric suffix is added (e.g.,
+        `_copy_2`).
+      operationId: OsqueryCopySavedQuery
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/SavedQueryId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CopySavedQueryResponse'
+          description: OK
+      summary: Copy a saved query
+      tags:
+        - Security Osquery API
+  /api/osquery/scheduled_results/{scheduleId}/{executionCount}:
+    get:
+      description: >
+        Get paginated per-agent action results for a specific scheduled query
+        execution, with success/failure aggregation and execution metadata (pack
+        name, query name/text, timestamp).
+      operationId: OsqueryGetScheduledActionResults
+      parameters:
+        - description: The schedule ID of the scheduled query.
+          in: path
+          name: scheduleId
+          required: true
+          schema:
+            description: The schedule ID of the scheduled query.
+            example: pack_my_pack_uptime
+            type: string
+        - description: The execution count for this scheduled query run.
+          in: path
+          name: executionCount
+          required: true
+          schema:
+            description: The execution count for this scheduled query run.
+            example: 3
+            type: integer
+        - description: The kuery to filter the results by.
+          in: query
+          name: kuery
+          required: false
+          schema:
+            $ref: '#/components/schemas/KueryOrUndefined'
+        - description: The page number to return. The default is 1.
+          in: query
+          name: page
+          required: false
+          schema:
+            $ref: '#/components/schemas/PageOrUndefined'
+        - description: The number of results to return per page. The default is 20.
+          in: query
+          name: pageSize
+          required: false
+          schema:
+            $ref: '#/components/schemas/PageSizeOrUndefined'
+        - description: The field that is used to sort the results.
+          in: query
+          name: sort
+          required: false
+          schema:
+            $ref: '#/components/schemas/SortOrUndefined'
+        - description: Specifies the sort order.
+          in: query
+          name: sortOrder
+          required: false
+          schema:
+            $ref: '#/components/schemas/SortOrderOrUndefined'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                scheduledActionResultsExample:
+                  summary: Example scheduled action results response
+                  value:
+                    aggregations:
+                      failed: 1
+                      pending: 0
+                      successful: 9
+                      totalResponded: 10
+                      totalRowCount: 42
+                    currentPage: 0
+                    edges:
+                      - {}
+                    metadata:
+                      executionCount: 3
+                      packId: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
+                      packName: My Pack
+                      queryName: uptime
+                      queryText: select * from uptime;
+                      scheduleId: pack_my_pack_uptime
+                      timestamp: '2024-07-26T09:00:00.000Z'
+                    pageSize: 20
+                    total: 10
+                    totalPages: 1
+              schema:
+                $ref: '#/components/schemas/GetScheduledActionResultsResponse'
+          description: Indicates a successful call.
+      summary: Get scheduled action results
+      tags:
+        - Security Osquery API
+  /api/osquery/scheduled_results/{scheduleId}/{executionCount}/results:
+    get:
+      description: >
+        Get paginated query result rows (the actual osquery output data) for a
+        specific scheduled query execution.
+      operationId: OsqueryGetScheduledQueryResults
+      parameters:
+        - description: The schedule ID of the scheduled query.
+          in: path
+          name: scheduleId
+          required: true
+          schema:
+            description: The schedule ID of the scheduled query.
+            example: pack_my_pack_uptime
+            type: string
+        - description: The execution count for this scheduled query run.
+          in: path
+          name: executionCount
+          required: true
+          schema:
+            description: The execution count for this scheduled query run.
+            example: 3
+            type: integer
+        - description: The kuery to filter the results by.
+          in: query
+          name: kuery
+          required: false
+          schema:
+            $ref: '#/components/schemas/KueryOrUndefined'
+        - description: The page number to return. The default is 1.
+          in: query
+          name: page
+          required: false
+          schema:
+            $ref: '#/components/schemas/PageOrUndefined'
+        - description: The number of results to return per page. The default is 20.
+          in: query
+          name: pageSize
+          required: false
+          schema:
+            $ref: '#/components/schemas/PageSizeOrUndefined'
+        - description: The field that is used to sort the results.
+          in: query
+          name: sort
+          required: false
+          schema:
+            $ref: '#/components/schemas/SortOrUndefined'
+        - description: Specifies the sort order.
+          in: query
+          name: sortOrder
+          required: false
+          schema:
+            $ref: '#/components/schemas/SortOrderOrUndefined'
+        - description: The start date filter (ISO 8601) to narrow down results.
+          in: query
+          name: startDate
+          required: false
+          schema:
+            description: The start date filter (ISO 8601) to narrow down results.
+            example: '2024-01-01T00:00:00Z'
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                scheduledQueryResultsExample:
+                  summary: Example scheduled query results response
+                  value:
+                    data:
+                      edges:
+                        - {}
+                        - {}
+                      total: 2
+              schema:
+                $ref: '#/components/schemas/GetScheduledQueryResultsResponse'
+          description: Indicates a successful call.
+      summary: Get scheduled query results
+      tags:
+        - Security Osquery API
 components:
   schemas:
     ArrayQueries:
@@ -414,6 +748,49 @@ components:
           $ref: '#/components/schemas/SnapshotOrUndefined'
         version:
           $ref: '#/components/schemas/VersionOrUndefined'
+    CopyPacksResponse:
+      example:
+        data:
+          created_at: '2025-02-26T13:37:30.452Z'
+          created_by: elastic
+          description: My pack
+          enabled: false
+          name: my_pack_copy
+          queries:
+            ports:
+              ecs_mapping:
+                client.port:
+                  field: port
+              interval: 60
+              query: SELECT * FROM listening_ports;
+              removed: false
+              snapshot: true
+              timeout: 120
+          saved_object_id: 1c266590-381f-428c-878f-c80c1334f856
+          shards: {}
+          updated_at: '2025-02-26T13:37:30.452Z'
+          updated_by: elastic
+      type: object
+      properties: {}
+    CopySavedQueryResponse:
+      example:
+        data:
+          created_at: '2025-02-26T13:37:30.452Z'
+          created_by: elastic
+          description: Saved query description
+          ecs_mapping:
+            host.uptime:
+              field: total_seconds
+          id: my_saved_query_copy
+          interval: '60'
+          platform: linux,darwin
+          query: select * from uptime;
+          saved_object_id: 42ba1280-2172-11ee-8523-5765fca79a3c
+          updated_at: '2025-02-26T13:37:30.452Z'
+          updated_by: elastic
+          version: 2.8.0
+      type: object
+      properties: {}
     CreateLiveQueryRequestBody:
       example:
         agent_all: true
@@ -819,6 +1196,129 @@ components:
           total: 2
       type: object
       properties: {}
+    GetScheduledActionResultsResponse:
+      example:
+        aggregations:
+          failed: 1
+          pending: 0
+          successful: 9
+          totalResponded: 10
+          totalRowCount: 42
+        currentPage: 0
+        edges:
+          - {}
+        metadata:
+          executionCount: 3
+          packId: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
+          packName: My Pack
+          queryName: uptime
+          queryText: select * from uptime;
+          scheduleId: pack_my_pack_uptime
+          timestamp: '2024-07-26T09:00:00.000Z'
+        pageSize: 20
+        total: 10
+        totalPages: 1
+      type: object
+      properties:
+        aggregations:
+          $ref: '#/components/schemas/ScheduledActionResultsAggregations'
+        currentPage:
+          description: The current page number (zero-based).
+          type: integer
+        edges:
+          description: The paginated list of per-agent action results.
+          items:
+            type: object
+          type: array
+        inspect:
+          description: Debug/inspection data for the search query.
+          type: object
+        metadata:
+          $ref: '#/components/schemas/ScheduledExecutionMetadata'
+        pageSize:
+          description: The number of results per page.
+          type: integer
+        total:
+          description: The total number of action results.
+          type: integer
+        totalPages:
+          description: The total number of pages.
+          type: integer
+    GetScheduledQueryResultsResponse:
+      description: The response for getting scheduled query results.
+      example:
+        data:
+          edges:
+            - {}
+            - {}
+          total: 2
+      type: object
+      properties:
+        data:
+          description: The query results data wrapper.
+          type: object
+          properties:
+            edges:
+              description: The paginated list of query result rows.
+              items:
+                type: object
+              type: array
+            inspect:
+              description: Debug/inspection data for the search query.
+              type: object
+            total:
+              description: The total number of result rows.
+              type: integer
+    GetUnifiedHistoryResponse:
+      example:
+        data:
+          - actionId: 609c4c66-ba3d-43fa-afdd-53e244577aa0
+            agentCount: 5
+            errorCount: 0
+            id: 3c42c847-eb30-4452-80e0-728584042334
+            queryName: uptime_query
+            queryText: select * from uptime;
+            source: Live
+            sourceType: live
+            successCount: 5
+            timestamp: '2024-07-26T09:59:32.220Z'
+            totalRows: 42
+            userId: elastic
+          - agentCount: 10
+            errorCount: 1
+            executionCount: 3
+            id: pack_my_pack_uptime_3
+            packId: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
+            packName: My Pack
+            plannedTime: '2024-07-26T09:00:00.000Z'
+            queryName: uptime
+            queryText: select * from uptime;
+            scheduleId: pack_my_pack_uptime
+            source: Scheduled
+            sourceType: scheduled
+            successCount: 9
+            timestamp: '2024-07-26T09:00:00.000Z'
+            totalRows: 100
+        hasMore: true
+        nextPage: eyJhY3Rpb25TZWFyY2hBZnRlciI6WzE3...
+      type: object
+      properties:
+        data:
+          description: The list of unified history rows for the current page.
+          items:
+            $ref: '#/components/schemas/UnifiedHistoryRow'
+          type: array
+        hasMore:
+          description: Whether there are more results beyond the current page.
+          type: boolean
+        nextPage:
+          description: >-
+            A base64-encoded cursor to fetch the next page. Absent when there
+            are no more results.
+          type: string
+      required:
+        - data
+        - hasMore
     Interval:
       description: An interval, in seconds, on which to run the query.
       example: '60'
@@ -831,6 +1331,72 @@ components:
       example: 'agent.id: 16d7caf5-efd2-4212-9b62-73dafc91fa13'
       nullable: true
       type: string
+    LiveHistoryRow:
+      allOf:
+        - $ref: '#/components/schemas/UnifiedHistoryRowBase'
+        - type: object
+          properties:
+            actionId:
+              description: The Fleet action ID for the live query.
+              type: string
+            agentAll:
+              description: Whether the query targeted all agents.
+              type: boolean
+            agentIds:
+              description: List of targeted agent IDs.
+              items:
+                type: string
+              type: array
+            agentPlatforms:
+              description: List of targeted agent platforms.
+              items:
+                type: string
+              type: array
+            agentPolicyIds:
+              description: List of targeted agent policy IDs.
+              items:
+                type: string
+              type: array
+            ecsMapping:
+              additionalProperties: true
+              description: ECS mapping configuration used for the query.
+              type: object
+            queriesTotal:
+              description: The total number of sub-queries in the live action.
+              type: integer
+            queriesWithResults:
+              description: The number of sub-queries that returned results.
+              type: integer
+            savedQueryId:
+              description: >-
+                The saved query ID, if the live query was based on a saved
+                query.
+              type: string
+            source:
+              description: >-
+                Whether this was a manually run live query or triggered by a
+                rule.
+              enum:
+                - Live
+                - Rule
+              type: string
+            sourceType:
+              description: Identifies this as a live query history row.
+              enum:
+                - live
+              type: string
+            timeout:
+              description: The query timeout in seconds.
+              type: integer
+            userId:
+              description: The ID of the user who ran the query.
+              type: string
+            userProfileUid:
+              description: The user profile UID of the user who ran the query.
+              type: string
+          required:
+            - sourceType
+            - source
     ObjectQueries:
       additionalProperties:
         $ref: '#/components/schemas/ObjectQueriesItem'
@@ -935,6 +1501,76 @@ components:
     SavedQueryIdOrUndefined:
       $ref: '#/components/schemas/SavedQueryId'
       nullable: true
+    ScheduledActionResultsAggregations:
+      type: object
+      properties:
+        failed:
+          description: The number of agents that returned errors.
+          type: integer
+        pending:
+          description: The number of agents with pending responses.
+          type: integer
+        successful:
+          description: The number of agents that completed successfully.
+          type: integer
+        totalResponded:
+          description: The total number of agents that responded.
+          type: integer
+        totalRowCount:
+          description: The total number of result rows across all agents.
+          type: integer
+    ScheduledExecutionMetadata:
+      description: Execution metadata resolved from the pack saved object.
+      type: object
+      properties:
+        executionCount:
+          description: The execution count for this scheduled query run.
+          type: integer
+        packId:
+          description: The ID of the pack containing the query.
+          type: string
+        packName:
+          description: The name of the pack containing the query.
+          type: string
+        queryName:
+          description: The name of the query within the pack.
+          type: string
+        queryText:
+          description: The SQL query that was executed.
+          type: string
+        scheduleId:
+          description: The schedule ID for the scheduled query.
+          type: string
+        timestamp:
+          description: The timestamp of the most recent response for this execution.
+          type: string
+    ScheduledHistoryRow:
+      allOf:
+        - $ref: '#/components/schemas/UnifiedHistoryRowBase'
+        - type: object
+          properties:
+            executionCount:
+              description: The execution count for this scheduled query run.
+              type: integer
+            plannedTime:
+              description: The planned execution time for the scheduled query.
+              type: string
+            scheduleId:
+              description: The schedule ID for the scheduled query.
+              type: string
+            source:
+              description: Indicates this is a scheduled query execution.
+              enum:
+                - Scheduled
+              type: string
+            sourceType:
+              description: Identifies this as a scheduled query history row.
+              enum:
+                - scheduled
+              type: string
+          required:
+            - sourceType
+            - source
     Shards:
       additionalProperties:
         type: number
@@ -965,6 +1601,54 @@ components:
       example: createdAt
       nullable: true
       type: string
+    UnifiedHistoryRow:
+      oneOf:
+        - $ref: '#/components/schemas/LiveHistoryRow'
+        - $ref: '#/components/schemas/ScheduledHistoryRow'
+    UnifiedHistoryRowBase:
+      type: object
+      properties:
+        agentCount:
+          description: The number of agents targeted by the query.
+          type: integer
+        errorCount:
+          description: The number of agent responses with errors.
+          nullable: true
+          type: integer
+        id:
+          description: Unique identifier for the history row.
+          type: string
+        packId:
+          description: The ID of the pack containing the query.
+          type: string
+        packName:
+          description: The name of the pack containing the query.
+          type: string
+        queryName:
+          description: The name of the query, if available.
+          type: string
+        queryText:
+          description: The SQL query that was executed.
+          type: string
+        spaceId:
+          description: The Kibana space ID where the query was executed.
+          type: string
+        successCount:
+          description: The number of successful agent responses.
+          nullable: true
+          type: integer
+        timestamp:
+          description: The timestamp of the query execution.
+          type: string
+        totalRows:
+          description: The total number of result rows returned across all agents.
+          nullable: true
+          type: integer
+      required:
+        - id
+        - timestamp
+        - queryText
+        - agentCount
     UpdatePacksRequestBody:
       example:
         name: updated_my_pack_name
