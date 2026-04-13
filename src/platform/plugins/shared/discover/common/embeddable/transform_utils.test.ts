@@ -10,6 +10,7 @@
 import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
   AS_CODE_DATA_VIEW_SPEC_TYPE,
+  AS_CODE_ESQL_DATA_SOURCE_TYPE,
 } from '@kbn/as-code-data-views-schema';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_types';
 import {
@@ -211,7 +212,7 @@ describe('search embeddable transform utils', () => {
             density: DataGridDensity.COMPACT,
             header_row_height: 'auto',
             row_height: 'auto',
-            query: { language: 'kuery', query: '' },
+            query: { language: 'kql', expression: '' },
             filters: [],
             data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'data-view-1' },
           },
@@ -277,7 +278,7 @@ describe('search embeddable transform utils', () => {
         description: 'my description',
         tabs: [
           {
-            query: { language: 'kuery', query: 'service.type: "elasticsearch"' },
+            query: { language: 'kql', expression: 'service.type: "elasticsearch"' },
             filters: [
               {
                 type: ASCODE_FILTER_TYPE.CONDITION,
@@ -470,7 +471,7 @@ describe('search embeddable transform utils', () => {
             density: DataGridDensity.COMPACT,
             header_row_height: 'auto',
             row_height: 'auto',
-            query: { language: 'kuery', query: '' },
+            query: { language: 'kql', expression: '' },
             filters: [],
             rows_per_page: 100,
             sample_size: 1000,
@@ -521,7 +522,7 @@ describe('search embeddable transform utils', () => {
             density: DataGridDensity.COMPACT,
             header_row_height: 50,
             row_height: 30,
-            query: { language: 'kuery', query: '' },
+            query: { language: 'kql', expression: '' },
             filters: [],
             rows_per_page: 25,
             sample_size: 500,
@@ -641,8 +642,8 @@ describe('search embeddable transform utils', () => {
       // timeRestore/timeRange are intentionally dropped at the simplified API level
       expect(revertedTabAttrs.rowHeight).toBe(initialTabAttrs.rowHeight);
       expect(revertedTabAttrs.headerRowHeight).toBe(initialTabAttrs.headerRowHeight);
-      expect(revertedTabAttrs.kibanaSavedObjectMeta.searchSourceJSON).toBe(
-        initialTabAttrs.kibanaSavedObjectMeta.searchSourceJSON
+      expect(JSON.parse(revertedTabAttrs.kibanaSavedObjectMeta.searchSourceJSON)).toEqual(
+        JSON.parse(initialTabAttrs.kibanaSavedObjectMeta.searchSourceJSON)
       );
 
       expect(revertedRefs).toEqual(references);
@@ -1003,6 +1004,33 @@ describe('search embeddable transform utils', () => {
         ref_id: 'data-view-1',
       });
       expect('view_mode' in result && result.view_mode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
+      expect('query' in result && result.query).toEqual({ language: 'kql', expression: '' });
+    });
+
+    it('converts stored ES|QL tab to API tab with data_source.type esql', () => {
+      const esql = 'FROM logs-* | LIMIT 100';
+      const storedTab = {
+        sort: [],
+        columns: ['@timestamp'],
+        grid: {},
+        rowHeight: 3,
+        headerRowHeight: 3,
+        density: DataGridDensity.COMPACT,
+        hideChart: false,
+        hideTable: false,
+        isTextBasedQuery: true,
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: JSON.stringify({
+            query: { esql },
+          }),
+        },
+      };
+      const result = fromStoredTab(storedTab, []);
+      expect(result.data_source).toEqual({
+        type: AS_CODE_ESQL_DATA_SOURCE_TYPE,
+        query: esql,
+      });
+      expect('query' in result).toBe(false);
     });
   });
 
@@ -1016,7 +1044,7 @@ describe('search embeddable transform utils', () => {
         density: DataGridDensity.COMPACT,
         header_row_height: 'auto',
         row_height: 'auto',
-        query: { language: 'kuery', query: '' },
+        query: { language: 'kql', expression: '' },
         filters: [],
         rows_per_page: 100,
         sample_size: 500,
@@ -1050,7 +1078,7 @@ describe('search embeddable transform utils', () => {
         density: DataGridDensity.COMPACT,
         header_row_height: 3,
         row_height: 3,
-        query: { language: 'kuery', query: '' },
+        query: { language: 'kql', expression: '' },
         filters: [],
         data_source: {
           type: AS_CODE_DATA_VIEW_SPEC_TYPE,
@@ -1065,6 +1093,25 @@ describe('search embeddable transform utils', () => {
         title: 'my-*',
         timeFieldName: '@timestamp',
       });
+    });
+
+    it('converts API ES|QL tab to stored tab without index', () => {
+      const esql = 'FROM logs-* | LIMIT 50';
+      const apiTab: DiscoverSessionEmbeddableByValueState['tabs'][0] = {
+        column_order: ['@timestamp'],
+        sort: [],
+        density: DataGridDensity.COMPACT,
+        header_row_height: 3,
+        row_height: 3,
+        data_source: { type: AS_CODE_ESQL_DATA_SOURCE_TYPE, query: esql },
+      };
+      const { state, references } = toStoredTab(apiTab);
+      expect(references).toEqual([]);
+      expect(state.isTextBasedQuery).toBe(true);
+      const searchSource = JSON.parse(state.kibanaSavedObjectMeta.searchSourceJSON);
+      expect(searchSource.query).toEqual({ esql });
+      expect(searchSource.index).toBeUndefined();
+      expect(searchSource.filter).toBeUndefined();
     });
   });
 });
