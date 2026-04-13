@@ -792,7 +792,7 @@ describe('XY', () => {
               index_pattern: 'test-index',
               time_field: '@timestamp',
             },
-            type: 'referenceLines',
+            type: 'reference_lines',
             ignore_global_filters: false,
             sampling: 1,
             thresholds: [
