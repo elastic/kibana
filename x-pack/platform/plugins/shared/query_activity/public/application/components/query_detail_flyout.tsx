@@ -88,13 +88,7 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
       return undefined;
     }
     const discoverParams: DiscoverAppLocatorParams = {
-      dataViewSpec: {
-        id: ALL_LOGS_DATA_VIEW_ID,
-        name: 'All logs',
-        title: 'logs-*',
-        timeFieldName: '@timestamp',
-        managed: true,
-      },
+      dataViewId: ALL_LOGS_DATA_VIEW_ID,
       timeRange: { from: rangeFrom, to: rangeTo },
       query: { language: 'kuery', query: `trace.id:"${escapeQuotes(query.traceId)}"` },
       filters: [],
