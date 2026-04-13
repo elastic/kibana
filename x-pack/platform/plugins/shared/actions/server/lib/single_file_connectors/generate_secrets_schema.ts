@@ -32,9 +32,9 @@ export const generateSecretsSchema = (
 ): ValidatorType<ActionTypeSecrets> => {
   const settings = configUtils.getWebhookSettings();
   const isPfxEnabled = settings.ssl.pfx.enabled;
-  // Always include EARS in the static schema so it parses correctly.
-  // The actual gating happens in the customValidator at request time,
-  // which rejects EARS auth when the feature is not enabled.
+  // Always include EARS in the static schema regardless of the feature flag.
+  // This lets the customValidator (below) return a readable error message when EARS is
+  // disabled, instead of a cryptic Zod union discriminator error.
   const schema = generateSecretsSchemaFromSpec(authSpec, { isPfxEnabled, isEarsEnabled: true });
 
   const allowedHostsFieldsByAuthType = buildAllowedHostsFieldsByAuthType(authSpec);
