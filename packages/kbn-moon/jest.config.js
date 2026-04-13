@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
-
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('saved objects management apis', () => {
-    loadTestFile(require.resolve('./find'));
-    loadTestFile(require.resolve('./relationships'));
-    loadTestFile(require.resolve('./scroll_count'));
-  });
-}
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-moon'],
+};
