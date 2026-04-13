@@ -36,6 +36,7 @@ interface IngestWired {
   wired: {
     fields: FieldDefinition;
     routing: RoutingDefinition[];
+    draft?: boolean;
   };
 }
 
@@ -43,6 +44,7 @@ const ingestWiredShape = {
   wired: z.object({
     fields: fieldDefinitionSchema,
     routing: routingDefinitionListSchema,
+    draft: z.boolean().optional(),
   }),
 };
 
