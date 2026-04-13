@@ -93,8 +93,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     };
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/262155
-  describe.skip('Basic functionality', () => {
+  /** ES APIs do not guarantee stable ordering; normalize before deep equality checks. */
+  function sortResourceLists(r: Resources): Resources {
+    return {
+      indices: [...r.indices].sort((a, b) => a.localeCompare(b)),
+      componentTemplates: [...r.componentTemplates].sort((a, b) => a.localeCompare(b)),
+      indexTemplates: [...r.indexTemplates].sort((a, b) => a.localeCompare(b)),
+    };
+  }
+
+  describe('Basic functionality', () => {
     async function getWiredStatus() {
       const response = await viewerApiClient.fetch('GET /api/streams/_status').expect(200);
       return response.body;
@@ -271,8 +279,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             const afterDisable = await getResources();
             // Wired roots are on by default, so the initial snapshot includes their index and
             // component templates; disableStreams removes them. Everything else should match.
-            expect(resourcesExcludingWiredRootAssets(afterDisable)).to.eql(
-              resourcesExcludingWiredRootAssets(resources)
+            expect(sortResourceLists(resourcesExcludingWiredRootAssets(afterDisable))).to.eql(
+              sortResourceLists(resourcesExcludingWiredRootAssets(resources))
             );
             const templateNames = [
               ...afterDisable.componentTemplates,
