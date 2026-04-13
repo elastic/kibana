@@ -25,6 +25,27 @@ import { useHighlightedFieldsPrivilege } from '../../../../flyout_v2/document/ho
 import type { UseBasicDataFromDetailsDataResult } from '../../shared/hooks/use_basic_data_from_details_data';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
+import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...actual,
+    useUiSetting: jest.fn(),
+  };
+});
+
+jest.mock('@kbn/entity-store/public', () => {
+  const actual = jest.requireActual('@kbn/entity-store/public');
+  const { euid } = jest.requireActual('@kbn/entity-store/common/euid_helpers');
+  return {
+    ...actual,
+    useEntityStoreEuidApi: jest.fn(() => ({ euid })),
+  };
+});
+
+jest.mock('../../../entity_details/shared/hooks/use_entity_from_store');
 
 jest.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => ({
   useExpandSection: jest.fn(),
@@ -38,6 +59,14 @@ jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fall
 jest.mock('../../shared/hooks/use_navigate_to_left_panel', () => ({
   useNavigateToLeftPanel: () => jest.fn(),
 }));
+
+jest.mock('../../../../common/lib/kibana', () => {
+  const actual = jest.requireActual('../../../../common/lib/kibana');
+  return {
+    ...actual,
+    useUiSetting: jest.fn().mockReturnValue(false),
+  };
+});
 
 const mockAddSuccess = jest.fn();
 jest.mock('../../../../common/hooks/use_app_toasts', () => ({
@@ -79,9 +108,21 @@ const renderInvestigationSection = (contextValue = panelContextValue) =>
 
 describe('<InvestigationSection />', () => {
   const mockUseExpandSection = jest.mocked(useExpandSection);
+  const mockUseEntityFromStore = useEntityFromStore as jest.Mock;
+  const mockUseUiSetting = useUiSetting as jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseUiSetting.mockReturnValue(false);
+    mockUseEntityFromStore.mockReturnValue({
+      entityRecord: null,
+      entity: null,
+      firstSeen: null,
+      lastSeen: null,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    });
     mockUseExpandSection.mockReturnValue(true);
     (useExpandSection as jest.Mock).mockReturnValue(true);
     (useHighlightedFields as jest.Mock).mockReturnValue([]);

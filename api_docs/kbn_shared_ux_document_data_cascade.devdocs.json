@@ -74,7 +74,7 @@
           "<G, L>> | undefined; }) => React.ReactElement<any>"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/index.tsx",
-        "lineNumber": 36,
+        "lineNumber": 33,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -117,7 +117,7 @@
               "<G, L>> | undefined; }"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/index.tsx",
-            "lineNumber": 28,
+            "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -143,7 +143,7 @@
             "section": "def-common.GroupNode",
             "text": "GroupNode"
           },
-          ", L extends DocWithId>(props: ",
+          ", L extends DocWithId>(_props: ",
           {
             "pluginId": "@kbn/shared-ux-document-data-cascade",
             "scope": "common",
@@ -154,7 +154,7 @@
           "<G, L>) => null"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/data_cascade_impl.tsx",
-        "lineNumber": 50,
+        "lineNumber": 54,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -164,7 +164,7 @@
             "id": "def-common.DataCascadeRow.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "props",
+            "label": "_props",
             "description": [],
             "signature": [
               {
@@ -177,7 +177,7 @@
               "<G, L>"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/data_cascade_impl.tsx",
-            "lineNumber": 51,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -205,7 +205,7 @@
             "section": "def-common.GroupNode",
             "text": "GroupNode"
           },
-          ", L extends DocWithId>(props: ",
+          ", L extends DocWithId>(_props: ",
           {
             "pluginId": "@kbn/shared-ux-document-data-cascade",
             "scope": "common",
@@ -216,7 +216,7 @@
           "<G, L>) => null"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/data_cascade_impl.tsx",
-        "lineNumber": 41,
+        "lineNumber": 45,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -226,7 +226,7 @@
             "id": "def-common.DataCascadeRowCell.$1",
             "type": "Object",
             "tags": [],
-            "label": "props",
+            "label": "_props",
             "description": [],
             "signature": [
               {
@@ -239,7 +239,7 @@
               "<G, L>"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/data_cascade_impl.tsx",
-            "lineNumber": 42,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -517,47 +517,911 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+        "id": "def-common.toRestorableState",
+        "type": "Function",
+        "tags": [],
+        "label": "toRestorableState",
+        "description": [
+          "\nDerives a {@link DataCascadeRestorableState} from a live snapshot,\nkeeping only the fields meaningful for restoration."
+        ],
+        "signature": [
+          "<G extends ",
+          {
+            "pluginId": "@kbn/shared-ux-document-data-cascade",
+            "scope": "common",
+            "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+            "section": "def-common.GroupNode",
+            "text": "GroupNode"
+          },
+          ", L extends DocWithId>(snapshot: ",
+          {
+            "pluginId": "@kbn/shared-ux-document-data-cascade",
+            "scope": "common",
+            "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+            "section": "def-common.DataCascadeUISnapshot",
+            "text": "DataCascadeUISnapshot"
+          },
+          "<G, L>) => ",
+          {
+            "pluginId": "@kbn/shared-ux-document-data-cascade",
+            "scope": "common",
+            "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+            "section": "def-common.DataCascadeRestorableState",
+            "text": "DataCascadeRestorableState"
+          }
+        ],
+        "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/api/index.ts",
+        "lineNumber": 121,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.toRestorableState.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "snapshot",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/shared-ux-document-data-cascade",
+                "scope": "common",
+                "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+                "section": "def-common.DataCascadeUISnapshot",
+                "text": "DataCascadeUISnapshot"
+              },
+              "<G, L>"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/api/index.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+        "id": "def-common.useCascadeVirtualizer",
+        "type": "Function",
+        "tags": [],
+        "label": "useCascadeVirtualizer",
+        "description": [],
+        "signature": [
+          "UseCascadeVirtualizer"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/index.tsx",
+        "lineNumber": 415,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.useCascadeVirtualizer.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Omit<",
+              "CascadeVirtualizerProps",
+              "<G>, \"isRoot\"> & { isRoot: true; }"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/index.tsx",
+            "lineNumber": 195,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+        "id": "def-common.useConnectedChildVirtualizer",
+        "type": "Function",
+        "tags": [],
+        "label": "useConnectedChildVirtualizer",
+        "description": [],
+        "signature": [
+          "<G extends ",
+          {
+            "pluginId": "@kbn/shared-ux-document-data-cascade",
+            "scope": "common",
+            "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+            "section": "def-common.GroupNode",
+            "text": "GroupNode"
+          },
+          ">({ controller, cellId, rowIndex, rows, estimatedRowHeight, overscan, privateScrollElement, }: ",
+          {
+            "pluginId": "@kbn/shared-ux-document-data-cascade",
+            "scope": "common",
+            "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+            "section": "def-common.UseConnectedChildVirtualizerOptions",
+            "text": "UseConnectedChildVirtualizerOptions"
+          },
+          "<G>) => ",
+          {
+            "pluginId": "@kbn/shared-ux-document-data-cascade",
+            "scope": "common",
+            "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+            "section": "def-common.UseConnectedChildVirtualizerResult",
+            "text": "UseConnectedChildVirtualizerResult"
+          }
+        ],
+        "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_connected_child_virtualizer.ts",
+        "lineNumber": 45,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.useConnectedChildVirtualizer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  controller,\n  cellId,\n  rowIndex,\n  rows,\n  estimatedRowHeight,\n  overscan,\n  privateScrollElement,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/shared-ux-document-data-cascade",
+                "scope": "common",
+                "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+                "section": "def-common.UseConnectedChildVirtualizerOptions",
+                "text": "UseConnectedChildVirtualizerOptions"
+              },
+              "<G>"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_connected_child_virtualizer.ts",
+            "lineNumber": 45,
+            "columnNumber": 67,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
       {
         "parentPluginId": "@kbn/shared-ux-document-data-cascade",
-        "id": "def-common.CascadeRowCellNestedVirtualizationAnchorProps",
+        "id": "def-common.CascadeVirtualizerReturnValue",
         "type": "Interface",
         "tags": [],
-        "label": "CascadeRowCellNestedVirtualizationAnchorProps",
-        "description": [
-          "\nProvides the props required to anchor another virtualized list\nwithin our already virtualized row, and have it controlled by the same scrollable parent, if we wish so."
-        ],
+        "label": "CascadeVirtualizerReturnValue",
+        "description": [],
         "signature": [
           {
             "pluginId": "@kbn/shared-ux-document-data-cascade",
             "scope": "common",
             "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
-            "section": "def-common.CascadeRowCellNestedVirtualizationAnchorProps",
-            "text": "CascadeRowCellNestedVirtualizationAnchorProps"
+            "section": "def-common.CascadeVirtualizerReturnValue",
+            "text": "CascadeVirtualizerReturnValue"
           },
-          "<G> extends Pick<",
-          "CascadeVirtualizerProps",
-          "<G>, \"getScrollElement\">"
+          " extends Pick<",
+          "Virtualizer",
+          "<Element, Element>, \"range\" | \"measureElement\" | \"getTotalSize\" | \"getVirtualItems\" | \"isScrolling\" | \"scrollOffset\" | \"scrollElement\" | \"measurementsCache\" | \"calculateRange\">"
         ],
-        "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
-        "lineNumber": 56,
+        "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/index.tsx",
+        "lineNumber": 155,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-document-data-cascade",
-            "id": "def-common.CascadeRowCellNestedVirtualizationAnchorProps.getScrollOffset",
-            "type": "Function",
+            "id": "def-common.CascadeVirtualizerReturnValue.virtualizedRowComputedTranslateValue",
+            "type": "Object",
             "tags": [],
-            "label": "getScrollOffset",
+            "label": "virtualizedRowComputedTranslateValue",
             "description": [],
             "signature": [
-              "() => number"
+              "Map<number, number>"
             ],
-            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/index.tsx",
+            "lineNumber": 168,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.CascadeVirtualizerReturnValue.virtualizedRowsSizeCache",
+            "type": "Object",
+            "tags": [],
+            "label": "virtualizedRowsSizeCache",
+            "description": [],
+            "signature": [
+              "Map<string, number>"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/index.tsx",
+            "lineNumber": 169,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.CascadeVirtualizerReturnValue.scrollToVirtualizedIndex",
+            "type": "Function",
+            "tags": [],
+            "label": "scrollToVirtualizedIndex",
+            "description": [],
+            "signature": [
+              "(offset: number, options: { adjustments?: number | undefined; behavior?: ScrollBehavior | undefined; }) => void"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/index.tsx",
+            "lineNumber": 170,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+                "id": "def-common.CascadeVirtualizerReturnValue.scrollToVirtualizedIndex.$1",
+                "type": "number",
+                "tags": [],
+                "label": "offset",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/index.tsx",
+                "lineNumber": 171,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+                "id": "def-common.CascadeVirtualizerReturnValue.scrollToVirtualizedIndex.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/index.tsx",
+                "lineNumber": 172,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+                    "id": "def-common.CascadeVirtualizerReturnValue.scrollToVirtualizedIndex.$2.adjustments",
+                    "type": "number",
+                    "tags": [],
+                    "label": "adjustments",
+                    "description": [],
+                    "signature": [
+                      "number | undefined"
+                    ],
+                    "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/index.tsx",
+                    "lineNumber": 173,
+                    "columnNumber": 7,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+                    "id": "def-common.CascadeVirtualizerReturnValue.scrollToVirtualizedIndex.$2.behavior",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "behavior",
+                    "description": [],
+                    "signature": [
+                      "ScrollBehavior | undefined"
+                    ],
+                    "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/index.tsx",
+                    "lineNumber": 174,
+                    "columnNumber": 7,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.CascadeVirtualizerReturnValue.scrollToLastVirtualizedRow",
+            "type": "Function",
+            "tags": [],
+            "label": "scrollToLastVirtualizedRow",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/index.tsx",
+            "lineNumber": 177,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.CascadeVirtualizerReturnValue.childController",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "childController",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/shared-ux-document-data-cascade",
+                "scope": "common",
+                "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+                "section": "def-common.ChildVirtualizerController",
+                "text": "ChildVirtualizerController"
+              },
+              " | null"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/index.tsx",
+            "lineNumber": 178,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.CascadeVirtualizerReturnValue.isStable",
+            "type": "boolean",
+            "tags": [],
+            "label": "isStable",
+            "description": [],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/index.tsx",
+            "lineNumber": 179,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+        "id": "def-common.ChildConnectionHandle",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChildConnectionHandle",
+        "description": [],
+        "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.ChildConnectionHandle.reportState",
+            "type": "Function",
+            "tags": [],
+            "label": "reportState",
+            "description": [],
+            "signature": [
+              "(state: Partial<",
+              {
+                "pluginId": "@kbn/shared-ux-document-data-cascade",
+                "scope": "common",
+                "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+                "section": "def-common.ConnectedChildState",
+                "text": "ConnectedChildState"
+              },
+              ">) => void"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+                "id": "def-common.ChildConnectionHandle.reportState.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "Partial<",
+                  {
+                    "pluginId": "@kbn/shared-ux-document-data-cascade",
+                    "scope": "common",
+                    "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+                    "section": "def-common.ConnectedChildState",
+                    "text": "ConnectedChildState"
+                  },
+                  ">"
+                ],
+                "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+                "lineNumber": 32,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.ChildConnectionHandle.detachScrollElement",
+            "type": "Function",
+            "tags": [],
+            "label": "detachScrollElement",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.ChildConnectionHandle.reattachScrollElement",
+            "type": "Function",
+            "tags": [],
+            "label": "reattachScrollElement",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.ChildConnectionHandle.disconnect",
+            "type": "Function",
+            "tags": [],
+            "label": "disconnect",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+        "id": "def-common.ChildVirtualizerConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChildVirtualizerConfig",
+        "description": [],
+        "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.ChildVirtualizerConfig.getScrollElement",
+            "type": "Function",
+            "tags": [],
+            "label": "getScrollElement",
+            "description": [],
+            "signature": [
+              "() => Element | null"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.ChildVirtualizerConfig.scrollMargin",
+            "type": "number",
+            "tags": [],
+            "label": "scrollMargin",
+            "description": [],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.ChildVirtualizerConfig.initialOffset",
+            "type": "number",
+            "tags": [],
+            "label": "initialOffset",
+            "description": [],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.ChildVirtualizerConfig.initialAnchorItemIndex",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "initialAnchorItemIndex",
+            "description": [],
+            "signature": [
+              "number | null"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+        "id": "def-common.ChildVirtualizerController",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChildVirtualizerController",
+        "description": [],
+        "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.ChildVirtualizerController.enqueue",
+            "type": "Function",
+            "tags": [],
+            "label": "enqueue",
+            "description": [
+              "\nLightweight registration that makes the scheduler aware of a row cell\nbefore the full child component mounts. Returns a function to \"dequeue\" the cell."
+            ],
+            "signature": [
+              "(cellId: string, rowIndex: number) => () => void"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+                "id": "def-common.ChildVirtualizerController.enqueue.$1",
+                "type": "string",
+                "tags": [],
+                "label": "cellId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+                "lineNumber": 43,
+                "columnNumber": 11,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+                "id": "def-common.ChildVirtualizerController.enqueue.$2",
+                "type": "number",
+                "tags": [],
+                "label": "rowIndex",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+                "lineNumber": 43,
+                "columnNumber": 27,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.ChildVirtualizerController.isReturningCell",
+            "type": "Function",
+            "tags": [],
+            "label": "isReturningCell",
+            "description": [
+              "\nReturns true if the cell has a persisted anchor, meaning it was previously\nconnected and is now remounting. Allows the cell to bypass the skeleton on\nits very first render, before effects fire."
+            ],
+            "signature": [
+              "(cellId: string) => boolean"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+                "id": "def-common.ChildVirtualizerController.isReturningCell.$1",
+                "type": "string",
+                "tags": [],
+                "label": "cellId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+                "lineNumber": 49,
+                "columnNumber": 19,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.ChildVirtualizerController.getChildConfig",
+            "type": "Function",
+            "tags": [],
+            "label": "getChildConfig",
+            "description": [],
+            "signature": [
+              "(rowIndex: number) => ",
+              {
+                "pluginId": "@kbn/shared-ux-document-data-cascade",
+                "scope": "common",
+                "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+                "section": "def-common.ChildVirtualizerConfig",
+                "text": "ChildVirtualizerConfig"
+              }
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+                "id": "def-common.ChildVirtualizerController.getChildConfig.$1",
+                "type": "number",
+                "tags": [],
+                "label": "rowIndex",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+                "lineNumber": 50,
+                "columnNumber": 18,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.ChildVirtualizerController.getScrollMarginForRow",
+            "type": "Function",
+            "tags": [],
+            "label": "getScrollMarginForRow",
+            "description": [
+              "\nReturns the current start position of a root row from the root\nvirtualizer's measurements. Unlike the memoized config, this always\nreflects the latest measurements, keeping child virtualizers in sync\nwhen the root remeasures items above them."
+            ],
+            "signature": [
+              "(rowIndex: number) => number"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+                "id": "def-common.ChildVirtualizerController.getScrollMarginForRow.$1",
+                "type": "number",
+                "tags": [],
+                "label": "rowIndex",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+                "lineNumber": 57,
+                "columnNumber": 25,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.ChildVirtualizerController.connect",
+            "type": "Function",
+            "tags": [],
+            "label": "connect",
+            "description": [],
+            "signature": [
+              "(cellId: string, rowIndex: number) => ",
+              {
+                "pluginId": "@kbn/shared-ux-document-data-cascade",
+                "scope": "common",
+                "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+                "section": "def-common.ChildConnectionHandle",
+                "text": "ChildConnectionHandle"
+              }
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+                "id": "def-common.ChildVirtualizerController.connect.$1",
+                "type": "string",
+                "tags": [],
+                "label": "cellId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+                "lineNumber": 58,
+                "columnNumber": 11,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+                "id": "def-common.ChildVirtualizerController.connect.$2",
+                "type": "number",
+                "tags": [],
+                "label": "rowIndex",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+                "lineNumber": 58,
+                "columnNumber": 27,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.ChildVirtualizerController.getConnectedChildren",
+            "type": "Function",
+            "tags": [],
+            "label": "getConnectedChildren",
+            "description": [],
+            "signature": [
+              "() => ReadonlyMap<string, ",
+              {
+                "pluginId": "@kbn/shared-ux-document-data-cascade",
+                "scope": "common",
+                "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+                "section": "def-common.ConnectedChildState",
+                "text": "ConnectedChildState"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.ChildVirtualizerController.shouldActivate",
+            "type": "Function",
+            "tags": [],
+            "label": "shouldActivate",
+            "description": [],
+            "signature": [
+              "(rowIndex: number) => boolean"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+                "id": "def-common.ChildVirtualizerController.shouldActivate.$1",
+                "type": "number",
+                "tags": [],
+                "label": "rowIndex",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+                "lineNumber": 60,
+                "columnNumber": 18,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.ChildVirtualizerController.isRootStable",
+            "type": "boolean",
+            "tags": [],
+            "label": "isRootStable",
+            "description": [],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.ChildVirtualizerController.markRootStable",
+            "type": "Function",
+            "tags": [],
+            "label": "markRootStable",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
             "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
@@ -567,16 +1431,128 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-document-data-cascade",
-            "id": "def-common.CascadeRowCellNestedVirtualizationAnchorProps.getScrollMargin",
+            "id": "def-common.ChildVirtualizerController.subscribe",
             "type": "Function",
             "tags": [],
-            "label": "getScrollMargin",
+            "label": "subscribe",
             "description": [],
             "signature": [
-              "() => number"
+              "(listener: () => void) => () => void"
             ],
-            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
             "lineNumber": 63,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+                "id": "def-common.ChildVirtualizerController.subscribe.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "listener",
+                "description": [],
+                "signature": [
+                  "() => void"
+                ],
+                "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+                "lineNumber": 63,
+                "columnNumber": 13,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.ChildVirtualizerController.getPersistedAnchor",
+            "type": "Function",
+            "tags": [],
+            "label": "getPersistedAnchor",
+            "description": [],
+            "signature": [
+              "(cellId: string) => number | null"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+                "id": "def-common.ChildVirtualizerController.getPersistedAnchor.$1",
+                "type": "string",
+                "tags": [],
+                "label": "cellId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+                "lineNumber": 64,
+                "columnNumber": 22,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.ChildVirtualizerController.clearPersistedAnchor",
+            "type": "Function",
+            "tags": [],
+            "label": "clearPersistedAnchor",
+            "description": [
+              "\nRemoves a persisted anchor for a cell. Called when a row collapses so that\nre-expanding goes through the normal stagger/skeleton path."
+            ],
+            "signature": [
+              "(cellId: string) => void"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+                "id": "def-common.ChildVirtualizerController.clearPersistedAnchor.$1",
+                "type": "string",
+                "tags": [],
+                "label": "cellId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+                "lineNumber": 69,
+                "columnNumber": 24,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.ChildVirtualizerController.hasConnectedChildWithPersistedAnchor",
+            "type": "Function",
+            "tags": [],
+            "label": "hasConnectedChildWithPersistedAnchor",
+            "description": [
+              "\nReturns true when at least one connected (non-detached) child has a\npersisted scroll anchor. Used by the root virtualizer to decide whether\nto yield post-measurement corrections to a child."
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -585,23 +1561,180 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-document-data-cascade",
-            "id": "def-common.CascadeRowCellNestedVirtualizationAnchorProps.preventSizeChangePropagation",
+            "id": "def-common.ChildVirtualizerController.haveAllRestoringChildrenStabilized",
             "type": "Function",
             "tags": [],
-            "label": "preventSizeChangePropagation",
+            "label": "haveAllRestoringChildrenStabilized",
             "description": [
-              "\nFunction used to signal to the parent virtualizer that this row's size changes should not be propagated to it.\nThis is only required if the nested virtualization implementation used here measures its rows."
+              "\nReturns true when every child that had an initial persisted anchor has\nreported `hasStabilized: true`. Trivially true when no persisted anchors\nexisted at creation time."
             ],
             "signature": [
-              "() => () => void"
+              "() => boolean"
             ],
-            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
-            "lineNumber": 64,
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.ChildVirtualizerController.destroy",
+            "type": "Function",
+            "tags": [],
+            "label": "destroy",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+        "id": "def-common.ConnectedChildState",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConnectedChildState",
+        "description": [],
+        "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.ConnectedChildState.cellId",
+            "type": "string",
+            "tags": [],
+            "label": "cellId",
+            "description": [],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.ConnectedChildState.rowIndex",
+            "type": "number",
+            "tags": [],
+            "label": "rowIndex",
+            "description": [],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.ConnectedChildState.scrollOffset",
+            "type": "number",
+            "tags": [],
+            "label": "scrollOffset",
+            "description": [],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.ConnectedChildState.range",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "range",
+            "description": [],
+            "signature": [
+              "{ startIndex: number; endIndex: number; } | null"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.ConnectedChildState.totalSize",
+            "type": "number",
+            "tags": [],
+            "label": "totalSize",
+            "description": [],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.ConnectedChildState.totalItemCount",
+            "type": "number",
+            "tags": [],
+            "label": "totalItemCount",
+            "description": [],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.ConnectedChildState.scrollAnchorItemIndex",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "scrollAnchorItemIndex",
+            "description": [],
+            "signature": [
+              "number | null"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.ConnectedChildState.isDetached",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDetached",
+            "description": [],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.ConnectedChildState.hasStabilized",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasStabilized",
+            "description": [],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/child_virtualizer_controller.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -626,7 +1759,7 @@
           "<G, L>"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/api/index.ts",
-        "lineNumber": 78,
+        "lineNumber": 143,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -646,7 +1779,7 @@
               "<G, L> | null"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/api/index.ts",
-            "lineNumber": 82,
+            "lineNumber": 147,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -655,10 +1788,552 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+        "id": "def-common.DataCascadeRestorableState",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataCascadeRestorableState",
+        "description": [
+          "\nSerializable subset of {@link DataCascadeUISnapshot} that a consumer can\npersist and pass back as `initialState` to restore the component."
+        ],
+        "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/api/index.ts",
+        "lineNumber": 102,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.DataCascadeRestorableState.expanded",
+            "type": "Object",
+            "tags": [],
+            "label": "expanded",
+            "description": [],
+            "signature": [
+              "Record<string, boolean> | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/api/index.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.DataCascadeRestorableState.rowSelection",
+            "type": "Object",
+            "tags": [],
+            "label": "rowSelection",
+            "description": [],
+            "signature": [
+              "Record<string, boolean> | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/api/index.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.DataCascadeRestorableState.scrollRect",
+            "type": "Object",
+            "tags": [],
+            "label": "scrollRect",
+            "description": [],
+            "signature": [
+              "{ width: number; height: number; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/api/index.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.DataCascadeRestorableState.scrollAnchorItemIndex",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "scrollAnchorItemIndex",
+            "description": [],
+            "signature": [
+              "number | null | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/api/index.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.DataCascadeRestorableState.connectedChildren",
+            "type": "Object",
+            "tags": [],
+            "label": "connectedChildren",
+            "description": [],
+            "signature": [
+              "Record<string, Pick<",
+              {
+                "pluginId": "@kbn/shared-ux-document-data-cascade",
+                "scope": "common",
+                "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+                "section": "def-common.ConnectedChildState",
+                "text": "ConnectedChildState"
+              },
+              ", \"scrollAnchorItemIndex\" | \"cellId\"> & { isConnected: boolean; }> | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/api/index.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+        "id": "def-common.DataCascadeUISnapshot",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataCascadeUISnapshot",
+        "description": [
+          "\nSnapshot of data cascade ui state for use with useSyncExternalStore.\nIncludes virtualizer-derived state and specific table state."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/shared-ux-document-data-cascade",
+            "scope": "common",
+            "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+            "section": "def-common.DataCascadeUISnapshot",
+            "text": "DataCascadeUISnapshot"
+          },
+          "<G, L> extends Pick<",
+          "TableState",
+          ", \"expanded\" | \"rowSelection\">"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/api/index.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.DataCascadeUISnapshot.scrollRect",
+            "type": "Object",
+            "tags": [],
+            "label": "scrollRect",
+            "description": [],
+            "signature": [
+              "{ width: number; height: number; }"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/api/index.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.DataCascadeUISnapshot.scrollOffset",
+            "type": "number",
+            "tags": [],
+            "label": "scrollOffset",
+            "description": [],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/api/index.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.DataCascadeUISnapshot.range",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "range",
+            "description": [],
+            "signature": [
+              "{ startIndex: number; endIndex: number; } | null"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/api/index.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.DataCascadeUISnapshot.isScrolling",
+            "type": "boolean",
+            "tags": [],
+            "label": "isScrolling",
+            "description": [],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/api/index.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.DataCascadeUISnapshot.activeStickyIndex",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "activeStickyIndex",
+            "description": [],
+            "signature": [
+              "number | null"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/api/index.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.DataCascadeUISnapshot.totalRowCount",
+            "type": "number",
+            "tags": [],
+            "label": "totalRowCount",
+            "description": [],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/api/index.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.DataCascadeUISnapshot.totalSize",
+            "type": "number",
+            "tags": [],
+            "label": "totalSize",
+            "description": [],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/api/index.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.DataCascadeUISnapshot.scrollAnchorItemIndex",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "scrollAnchorItemIndex",
+            "description": [
+              "\nThe index of the topmost virtual item that is currently in view,\nvalue is a derivative of the virtualizer's current scroll offset."
+            ],
+            "signature": [
+              "number | null"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/api/index.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.DataCascadeUISnapshot.connectedChildren",
+            "type": "Object",
+            "tags": [],
+            "label": "connectedChildren",
+            "description": [
+              "\nState of all child virtualizers connected via the controller.\nEmpty when no children are connected."
+            ],
+            "signature": [
+              "{ readonly [x: string]: ",
+              {
+                "pluginId": "@kbn/shared-ux-document-data-cascade",
+                "scope": "common",
+                "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+                "section": "def-common.ConnectedChildState",
+                "text": "ConnectedChildState"
+              },
+              "; }"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/api/index.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+        "id": "def-common.UseConnectedChildVirtualizerOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseConnectedChildVirtualizerOptions",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/shared-ux-document-data-cascade",
+            "scope": "common",
+            "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+            "section": "def-common.UseConnectedChildVirtualizerOptions",
+            "text": "UseConnectedChildVirtualizerOptions"
+          },
+          "<G>"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_connected_child_virtualizer.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.UseConnectedChildVirtualizerOptions.controller",
+            "type": "Object",
+            "tags": [],
+            "label": "controller",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/shared-ux-document-data-cascade",
+                "scope": "common",
+                "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+                "section": "def-common.ChildVirtualizerController",
+                "text": "ChildVirtualizerController"
+              }
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_connected_child_virtualizer.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.UseConnectedChildVirtualizerOptions.cellId",
+            "type": "string",
+            "tags": [],
+            "label": "cellId",
+            "description": [],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_connected_child_virtualizer.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.UseConnectedChildVirtualizerOptions.rowIndex",
+            "type": "number",
+            "tags": [],
+            "label": "rowIndex",
+            "description": [],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_connected_child_virtualizer.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.UseConnectedChildVirtualizerOptions.rows",
+            "type": "Array",
+            "tags": [],
+            "label": "rows",
+            "description": [],
+            "signature": [
+              "Row",
+              "<G>[]"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_connected_child_virtualizer.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.UseConnectedChildVirtualizerOptions.estimatedRowHeight",
+            "type": "number",
+            "tags": [],
+            "label": "estimatedRowHeight",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_connected_child_virtualizer.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.UseConnectedChildVirtualizerOptions.overscan",
+            "type": "number",
+            "tags": [],
+            "label": "overscan",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_connected_child_virtualizer.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.UseConnectedChildVirtualizerOptions.privateScrollElement",
+            "type": "Object",
+            "tags": [],
+            "label": "privateScrollElement",
+            "description": [
+              "\nWhen detached, the child uses this element as its own scroll container.\nIf not provided, the child cannot detach."
+            ],
+            "signature": [
+              "React.RefObject<Element | null> | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_connected_child_virtualizer.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+        "id": "def-common.UseConnectedChildVirtualizerResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseConnectedChildVirtualizerResult",
+        "description": [],
+        "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_connected_child_virtualizer.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.UseConnectedChildVirtualizerResult.virtualizer",
+            "type": "Object",
+            "tags": [],
+            "label": "virtualizer",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/shared-ux-document-data-cascade",
+                "scope": "common",
+                "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+                "section": "def-common.CascadeVirtualizerReturnValue",
+                "text": "CascadeVirtualizerReturnValue"
+              }
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_connected_child_virtualizer.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.UseConnectedChildVirtualizerResult.handle",
+            "type": "Object",
+            "tags": [],
+            "label": "handle",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/shared-ux-document-data-cascade",
+                "scope": "common",
+                "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+                "section": "def-common.ChildConnectionHandle",
+                "text": "ChildConnectionHandle"
+              }
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_connected_child_virtualizer.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.UseConnectedChildVirtualizerResult.isActive",
+            "type": "boolean",
+            "tags": [],
+            "label": "isActive",
+            "description": [],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_connected_child_virtualizer.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.UseConnectedChildVirtualizerResult.isDetached",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDetached",
+            "description": [],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/use_connected_child_virtualizer.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+        "id": "def-common.CascadeRootVirtualizerReturnValue",
+        "type": "Type",
+        "tags": [],
+        "label": "CascadeRootVirtualizerReturnValue",
+        "description": [
+          "\nNarrowed return type for {@link useCascadeVirtualizer} when `isRoot` is `true`.\nGuarantees that `childController` is always defined."
+        ],
+        "signature": [
+          "Omit<",
+          {
+            "pluginId": "@kbn/shared-ux-document-data-cascade",
+            "scope": "common",
+            "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+            "section": "def-common.CascadeVirtualizerReturnValue",
+            "text": "CascadeVirtualizerReturnValue"
+          },
+          ", \"childController\"> & { childController: ",
+          {
+            "pluginId": "@kbn/shared-ux-document-data-cascade",
+            "scope": "common",
+            "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+            "section": "def-common.ChildVirtualizerController",
+            "text": "ChildVirtualizerController"
+          },
+          "; }"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/index.tsx",
+        "lineNumber": 182,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/shared-ux-document-data-cascade",
         "id": "def-common.DataCascadeImplProps",
@@ -670,7 +2345,7 @@
           "DataCascadeImplBaseProps<G, L> & ({ customTableHeader: (props: { availableColumns: string[]; currentSelectedColumns: string[]; onGroupSelection: (groupByColumn: string[]) => void; selectedRows: string[]; }) => React.ReactNode; tableTitleSlot?: undefined; } | { customTableHeader?: undefined; tableTitleSlot: React.FC<{}>; })"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
-        "lineNumber": 277,
+        "lineNumber": 267,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -689,7 +2364,7 @@
           "<G, L>) => React.ReactNode; onCascadeLeafNodeExpanded: (args: OnCascadeLeafNodeExpandedArgs<G>) => Promise<L[]>; onCascadeLeafNodeCollapsed?: ((args: OnCascadeLeafNodeCollapsedArgs<G>) => void) | undefined; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
-        "lineNumber": 207,
+        "lineNumber": 201,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -716,7 +2391,7 @@
           "<G, L>, string | React.JSXElementConstructor<any>>; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
-        "lineNumber": 212,
+        "lineNumber": 206,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

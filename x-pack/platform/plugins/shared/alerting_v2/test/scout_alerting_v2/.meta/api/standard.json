@@ -1,0 +1,145 @@
+{
+  "sha1": "c61c3e7aded349fa68e4f788b71a60d2b6302402",
+  "tests": [
+    {
+      "id": "7d659b2da63538a-85f1c7853cd9e1b",
+      "title": "Episode lifecycle for alert rules should transition through pending -> active when source data keeps breaching",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_lifecycle.spec.ts",
+        "line": 211,
+        "column": 10
+      }
+    },
+    {
+      "id": "7d659b2da63538a-e615b55e187194d",
+      "title": "Episode lifecycle for alert rules should transition active -> recovering -> inactive when source data stops breaching",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_lifecycle.spec.ts",
+        "line": 280,
+        "column": 10
+      }
+    },
+    {
+      "id": "7d659b2da63538a-650627f974905d2",
+      "title": "Episode lifecycle for alert rules should track multiple groups independently",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_lifecycle.spec.ts",
+        "line": 349,
+        "column": 10
+      }
+    },
+    {
+      "id": "7d659b2da63538a-a04d736fac0b492",
+      "title": "Episode lifecycle for alert rules should use pending_count threshold before transitioning to active",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_lifecycle.spec.ts",
+        "line": 429,
+        "column": 10
+      }
+    },
+    {
+      "id": "c54256d5fae7766-1ffc5a96414cd09",
+      "title": "Search rules across all fields should find rules by name prefix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/search_rules.spec.ts",
+        "line": 30,
+        "column": 10
+      }
+    },
+    {
+      "id": "c54256d5fae7766-17a591acd081538",
+      "title": "Search rules across all fields should find rules by description prefix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/search_rules.spec.ts",
+        "line": 57,
+        "column": 10
+      }
+    },
+    {
+      "id": "c54256d5fae7766-ea09193c15d2484",
+      "title": "Search rules across all fields should find rules by tag prefix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/search_rules.spec.ts",
+        "line": 89,
+        "column": 10
+      }
+    },
+    {
+      "id": "c54256d5fae7766-ba60b9b8326389f",
+      "title": "Search rules across all fields should find rules by grouping field prefix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/search_rules.spec.ts",
+        "line": 128,
+        "column": 10
+      }
+    },
+    {
+      "id": "c54256d5fae7766-10c2565fff624c3",
+      "title": "Search rules across all fields should AND multiple search terms together",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/search_rules.spec.ts",
+        "line": 168,
+        "column": 10
+      }
+    },
+    {
+      "id": "c54256d5fae7766-705cb40b3eb7c20",
+      "title": "Search rules across all fields should return empty results when no fields match",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/search_rules.spec.ts",
+        "line": 203,
+        "column": 10
+      }
+    }
+  ]
+}

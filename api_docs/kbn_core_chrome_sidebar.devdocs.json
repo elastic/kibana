@@ -29,7 +29,11 @@
           "\nCreate a sidebar store configuration with schema and actions.\nThe store is instantiated lazily when the app is first accessed.\n"
         ],
         "signature": [
-          "(config: { schema: z.ZodType<TState>; actions: (set: ",
+          "(config: { schema: ",
+          "ZodType",
+          "<TState, unknown, ",
+          "node_modules/zod/v4/core/schemas",
+          "$ZodTypeInternals<TState, unknown>>; actions: (set: ",
           "SetState",
           "<TState>, get: ",
           "GetState",
@@ -61,12 +65,15 @@
               {
                 "parentPluginId": "@kbn/core-chrome-sidebar",
                 "id": "def-common.createSidebarStore.$1.schema",
-                "type": "Any",
+                "type": "Object",
                 "tags": [],
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "z.ZodType<TState>"
+                  "ZodType",
+                  "<TState, unknown, ",
+                  "node_modules/zod/v4/core/schemas",
+                  "$ZodTypeInternals<TState, unknown>>"
                 ],
                 "path": "src/core/packages/chrome/sidebar/sidebar/src/create_sidebar_store.ts",
                 "lineNumber": 54,
@@ -1011,12 +1018,15 @@
           {
             "parentPluginId": "@kbn/core-chrome-sidebar",
             "id": "def-common.SidebarStoreConfig.schema",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "schema",
             "description": [],
             "signature": [
-              "z.ZodType<TState>"
+              "ZodType",
+              "<TState, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<TState, unknown>>"
             ],
             "path": "src/core/packages/chrome/sidebar/sidebar/src/create_sidebar_store.ts",
             "lineNumber": 32,

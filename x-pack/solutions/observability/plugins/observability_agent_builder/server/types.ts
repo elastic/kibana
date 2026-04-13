@@ -28,6 +28,11 @@ import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type {
+  SearchInferenceEndpointsPluginSetup,
+  SearchInferenceEndpointsPluginStart,
+} from '@kbn/search-inference-endpoints/server';
 import type { ObservabilityAgentBuilderDataRegistry } from './data_registry/data_registry';
 
 export interface ObservabilityAgentBuilderPluginSetup {
@@ -44,6 +49,7 @@ export interface ObservabilityAgentBuilderPluginSetupDependencies {
   security: SecurityPluginSetup;
   ml?: MlPluginSetup;
   inference: InferenceServerSetup;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginSetup;
 }
 
 export interface ObservabilityAgentBuilderPluginStartDependencies {
@@ -51,12 +57,14 @@ export interface ObservabilityAgentBuilderPluginStartDependencies {
   apmDataAccess: ApmDataAccessPluginStart;
   logsDataAccess: LogsDataAccessPluginStart;
   metricsDataAccess: MetricsDataPluginStart;
+  licensing: LicensingPluginStart;
   security: SecurityPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
   dataViews: DataViewsServerPluginStart;
   inference: InferenceServerStart;
   ml?: MlPluginStart;
   spaces?: SpacesPluginStart;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
 }
 
 export type ObservabilityAgentBuilderCoreSetup = CoreSetup<
