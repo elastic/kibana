@@ -72,25 +72,27 @@ export function parseLogPaginationCursorRow(
   };
 }
 
+export type LogPaginationCursor =
+  | { hasLogsToProcess: false }
+  | {
+      hasLogsToProcess: true;
+      logsPaginationCursor: PaginationParams;
+      isLastLogsPage: boolean;
+    };
+
 export function interpretLogPaginationCursorRows(
   row: LogPaginationCursorParsedRow | undefined,
   maxLogsPerPage: number
-):
-  | { noMoreLogsToProcess: true }
-  | {
-      noMoreLogsToProcess: false;
-      logsPaginationCursor: PaginationParams;
-      isLastLogsPage: boolean;
-    } {
+): LogPaginationCursor {
   if (row === undefined) {
-    return { noMoreLogsToProcess: true };
+    return { hasLogsToProcess: false };
   }
-  const { logsPaginationCursor, missingLogsToProcess: totalMatchingLogs } = row;
+  const { logsPaginationCursor, missingLogsToProcess } = row;
   // total_logs is count(*) before LIMIT — total rows still in the window. If that fits in one slice (<= max),
   // this slice exhausts the window (including the exact full-page case).
   return {
-    noMoreLogsToProcess: false,
+    hasLogsToProcess: true,
     logsPaginationCursor,
-    isLastLogsPage: totalMatchingLogs <= maxLogsPerPage,
+    isLastLogsPage: missingLogsToProcess <= maxLogsPerPage,
   };
 }

@@ -1,6 +1,6 @@
 # Logs extraction pagination
 
-This document describes how **local** (LOOKUP-based) logs extraction paginates through raw log documents and through **aggregated entity** rows. It is aimed at engineers changing ESQL, saved-object state, or resume behavior.
+This document describes how **local** (LOOKUP-based) logs extraction paginates through raw log documents and through **aggregated entity** rows. It is aimed at engineers changing ESQL, saved-object state, or interrupted-run behavior (when the client **skips the boundary probe**).
 
 For **CCS** (remote-only) extraction, this plugin intentionally keeps the simpler **entity-pagination-only** loop; the same *ideas* (bounding raw scans, compound cursors) apply if that path is extended later.
 
@@ -38,7 +38,7 @@ Together: **outer loop** = advance log slices; **inner loop** = entity pages ins
 | `logsPageCursorEndTimestamp`, `logsPageCursorEndId` | Inclusive end of the current slice; set after a successful **boundary** query; cleared when moving to the next slice. |
 | `paginationTimestamp`, `paginationId` | Entity pagination inside the current slice; cleared when the slice is complete. |
 | `lastExecutionTimestamp` | Updated when a **full** extraction run completes successfully (not `specificWindow`); anchors the next scheduled window with delay. |
-| Corrupt recovery | If `paginationId` is present without a consistent slice, it is passed once as `recoveryId` to the **first boundary** ESQL (inclusive lower time bound); then cleared. Resume **mid-entity-page** may pass the same token into the **first bounded extraction** query instead. |
+| Corrupt recovery | If `paginationId` is present without a consistent slice, it is passed once as `recoveryId` to the **first boundary** ESQL (inclusive lower time bound); then cleared. When the probe is skipped **mid-entity-page**, the same token may go into the **first bounded extraction** query instead. |
 
 `specificWindow` (force APIs / manual runs) **does not** persist `logExtractionState` updates from the loop.
 
@@ -50,7 +50,7 @@ Together: **outer loop** = advance log slices; **inner loop** = entity pages ins
 flowchart TD
   outer[OuterFor_logSlices]
   boundary[executeEsql_buildLogPaginationCursorProbeEsql]
-  checkExhausted{noMoreLogsToProcess?}
+  checkExhausted{hasLogsToProcess?}
   inner[InnerDoWhile_entityPages]
   moreEntities{more entity pages?}
   advance[Advance_log_cursor_clear_entity_and_slice_end]
@@ -58,29 +58,29 @@ flowchart TD
 
   outer --> boundary
   boundary --> checkExhausted
-  checkExhausted -->|yes| done
-  checkExhausted -->|no| inner
+  checkExhausted -->|no| done
+  checkExhausted -->|yes| inner
   inner --> moreEntities
   moreEntities -->|yes| inner
   moreEntities -->|no| advance
   advance --> outer
 ```
 
-### Resume path
+### Skip probe (interrupted run)
 
-If both **entity** cursor and **slice end** exist (interrupted run), the **boundary** step is skipped; the inner loop continues with the same `logsPageCursorStart`, `logsPageCursorEnd`, and entity `pagination*`.
+If both **entity** cursor and **slice end** exist on disk (interrupted run), **`skipProbe`** is true: the **boundary** ESQL is skipped; the inner loop continues with the same `logsPageCursorStart`, `logsPageCursorEnd`, and entity `pagination*`.
 
 ```mermaid
 flowchart TD
   startNode[Read_engine_state]
-  resume{entityPagination_and_sliceEnd?}
+  skipProbe{entityPagination_and_sliceEnd?}
   skipBoundary[Skip_boundary]
   runBoundary[Run_boundary_ESQL]
   extract[Run_bounded_extraction_ESQL_loop]
 
-  startNode --> resume
-  resume -->|yes| skipBoundary
-  resume -->|no| runBoundary
+  startNode --> skipProbe
+  skipProbe -->|yes| skipBoundary
+  skipProbe -->|no| runBoundary
   skipBoundary --> extract
   runBoundary --> extract
 ```

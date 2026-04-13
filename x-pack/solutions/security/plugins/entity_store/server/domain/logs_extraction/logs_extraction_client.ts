@@ -22,6 +22,7 @@ import {
 import {
   buildLogPaginationCursorProbeEsql,
   interpretLogPaginationCursorRows,
+  type LogPaginationCursor,
   parseLogPaginationCursorRow,
 } from './log_pagination_probe_query_builder';
 import {
@@ -327,12 +328,10 @@ export class LogsExtractionClient {
     opts?.abortController?.signal.addEventListener('abort', onAbort);
 
     /** One-shot `recoveryId` for corrupt state: consumed by the probe or the first bounded extraction batch. */
-    const corruptRecoveryCtx: { recoveryId: string | undefined } = {
-      recoveryId: initialEngineState.paginationId,
-    };
-    if (corruptRecoveryCtx.recoveryId) {
+    let recoveryId = initialEngineState.paginationId;
+    if (recoveryId) {
       this.logger.warn(
-        `Recovering from corrupt state, using paginationTimestamp ${fromDateISO} and paginationId ${corruptRecoveryCtx.recoveryId} beginning of the window.`
+        `Recovering from corrupt state, using paginationTimestamp ${fromDateISO} and paginationId ${recoveryId} beginning of the window.`
       );
     }
 
@@ -343,24 +342,27 @@ export class LogsExtractionClient {
           logsPageCursorStart,
           logsPageCursorEnd: logsPageCursorEndFromState,
           entityPagination,
-          resumingEntityPages,
+          skipProbe,
         } = this.readMainLoopCursorsFromState(state);
 
         let logsPageCursorEnd = logsPageCursorEndFromState;
 
-        if (!resumingEntityPages) {
-          const probeOutcome = await this.runLogPaginationCursorProbeForNextSlice({
+        if (!skipProbe) {
+          const probePromise = this.runLogPaginationCursorProbeForNextPage({
             indexPatterns,
             type,
             fromDateISO,
             toDateISO,
             logsPageCursorStart,
             maxLogsPerPage,
-            corruptRecoveryCtx,
+            recoveryId,
             opts,
           });
+          // One-shot id is consumed when the probe query is built (before ES runs), matching prior clear-before-await behavior.
+          recoveryId = undefined;
+          const probeOutcome = await probePromise;
 
-          if (probeOutcome.noMoreLogsToProcess) {
+          if (!probeOutcome.hasLogsToProcess) {
             break;
           }
 
@@ -384,9 +386,9 @@ export class LogsExtractionClient {
           toDateISO,
           logsPageCursorStart,
           logsPageCursorEnd: logsPageCursorEnd!,
-          resumingEntityPages,
+          skipProbe,
           entityPagination,
-          corruptRecoveryCtx,
+          recoveryId,
           state,
         });
 
@@ -394,7 +396,7 @@ export class LogsExtractionClient {
         pages += sliceIngestOutcome.addedToPageCount;
         state = sliceIngestOutcome.state;
 
-        corruptRecoveryCtx.recoveryId = undefined;
+        recoveryId = undefined;
 
         state = this.advanceEngineStateAfterLogPageCompletes(state, logsPageCursorEnd!);
         await this.persistMainLogExtractionStateIfNotManualWindow(type, opts, state);
@@ -413,19 +415,20 @@ export class LogsExtractionClient {
 
   /**
    * Hydrates raw-log slice cursors and entity pagination from the engine descriptor for one outer iteration.
+   * `skipProbe` is true when both entity pagination and slice end are present (interrupted run), so the boundary ESQL probe query is skipped.
    */
   private readMainLoopCursorsFromState(state: EngineLogExtractionState): {
     logsPageCursorStart: PaginationParams | undefined;
     logsPageCursorEnd: PaginationParams | undefined;
     entityPagination: PaginationParams | undefined;
-    resumingEntityPages: boolean;
+    skipProbe: boolean;
   } {
     // Exclusive lower bound on (@timestamp, _id) for raw logs: end of the previous slice, or unset at window start.
     const logsPageCursorStart = paginationFromOptionalFields(
       state.logsPageCursorStartTimestamp,
       state.logsPageCursorStartId
     );
-    // Inclusive upper bound of the current raw-log slice; from disk when resuming mid-entity-pages, else filled by the probe.
+    // Inclusive upper bound of the current raw-log slice; from disk when we skip the probe (interrupted mid-entity-pages), else filled by the probe.
     const logsPageCursorEnd = paginationFromOptionalFields(
       state.logsPageCursorEndTimestamp,
       state.logsPageCursorEndId
@@ -435,28 +438,28 @@ export class LogsExtractionClient {
       state.paginationTimestamp,
       state.paginationId
     );
-    // Mid-run resume: slice end + entity cursor already known—skip the probe and continue bounded extraction.
-    const resumingEntityPages = !!(entityPagination && logsPageCursorEnd);
+    // When both slice end and entity cursor are on disk, skip the boundary probe and continue bounded extraction for this slice.
+    const skipProbe = !!(entityPagination && logsPageCursorEnd);
 
     return {
       logsPageCursorStart,
       logsPageCursorEnd,
       entityPagination,
-      resumingEntityPages,
+      skipProbe,
     };
   }
 
   /**
    * Locates the inclusive upper bound of the next raw-log page (probe ESQL). Clears corrupt `recoveryId` after scheduling the query.
    */
-  private async runLogPaginationCursorProbeForNextSlice({
+  private async runLogPaginationCursorProbeForNextPage({
     indexPatterns,
     type,
     fromDateISO,
     toDateISO,
     logsPageCursorStart,
     maxLogsPerPage,
-    corruptRecoveryCtx,
+    recoveryId,
     opts,
   }: {
     indexPatterns: string[];
@@ -465,26 +468,18 @@ export class LogsExtractionClient {
     toDateISO: string;
     logsPageCursorStart: PaginationParams | undefined;
     maxLogsPerPage: number;
-    corruptRecoveryCtx: { recoveryId: string | undefined };
+    recoveryId: string | undefined;
     opts?: LogsExtractionOptions;
-  }): Promise<
-    | { noMoreLogsToProcess: true }
-    | {
-        noMoreLogsToProcess: false;
-        logsPaginationCursor: PaginationParams;
-        isLastLogsPage: boolean;
-      }
-  > {
+  }): Promise<LogPaginationCursor> {
     const logPaginationCursorProbeQuery = buildLogPaginationCursorProbeEsql({
       indexPatterns,
       type,
       fromDateISO,
       toDateISO,
-      recoveryId: corruptRecoveryCtx.recoveryId,
+      recoveryId,
       logsPageCursorStart,
       maxLogsPerPage,
     });
-    corruptRecoveryCtx.recoveryId = undefined;
 
     const logPaginationCursorProbeResponse = await executeEsqlQuery({
       esClient: this.esClient,
@@ -505,12 +500,12 @@ export class LogsExtractionClient {
       );
     }
 
-    if (interpretedLogPaginationCursor.noMoreLogsToProcess) {
-      return { noMoreLogsToProcess: true };
+    if (!interpretedLogPaginationCursor.hasLogsToProcess) {
+      return { hasLogsToProcess: false };
     }
 
     return {
-      noMoreLogsToProcess: false,
+      hasLogsToProcess: true,
       logsPaginationCursor: interpretedLogPaginationCursor.logsPaginationCursor,
       isLastLogsPage: interpretedLogPaginationCursor.isLastLogsPage,
     };
@@ -530,9 +525,9 @@ export class LogsExtractionClient {
     toDateISO,
     logsPageCursorStart,
     logsPageCursorEnd,
-    resumingEntityPages,
+    skipProbe,
     entityPagination,
-    corruptRecoveryCtx,
+    recoveryId,
     state: initialSliceState,
   }: {
     type: EntityType;
@@ -545,9 +540,9 @@ export class LogsExtractionClient {
     toDateISO: string;
     logsPageCursorStart: PaginationParams | undefined;
     logsPageCursorEnd: PaginationParams;
-    resumingEntityPages: boolean;
+    skipProbe: boolean;
     entityPagination: PaginationParams | undefined;
-    corruptRecoveryCtx: { recoveryId: string | undefined };
+    recoveryId: string | undefined;
     state: EngineLogExtractionState;
   }): Promise<{
     addedToTotalCount: number;
@@ -558,12 +553,8 @@ export class LogsExtractionClient {
     let addedToTotalCount = 0;
     let addedToPageCount = 0;
 
-    let pagination: PaginationParams | undefined = resumingEntityPages
-      ? entityPagination
-      : undefined;
-    let recoveryIdForBounded: string | undefined = resumingEntityPages
-      ? corruptRecoveryCtx.recoveryId
-      : undefined;
+    let pagination = skipProbe ? entityPagination : undefined;
+    let recoveryIdForBounded = skipProbe ? recoveryId : undefined;
 
     do {
       const query = buildLogsExtractionEsqlQuery({
@@ -674,6 +665,11 @@ export class LogsExtractionClient {
   //    fromDate = lastExecutionTimestamp - delay | toDate = now - delay
   // 4. Log page cursors present without lastExecutionTimestamp (e.g. interrupted before first full run):
   //    fromDate = logsPageCursorStartTimestamp | toDate = now - delay — avoids shifting to lookback and skipping data before the cursor.
+  //
+  // Mid log-page: prefer persisted slice start over lastExecutionTimestamp so `from` tracks in-flight slice bounds.
+  // (lastExecution alone can sit ahead of the cursor and narrow the window past data we still owe.)
+  // Lookback remains only as a fallback when we have log-page progress (start or end on disk) but neither
+  // slice start nor lastExecution is set — e.g. slice end persisted before start in a narrow window.
   private getExtractionWindow(
     config: LogExtractionConfig,
     engineState: EngineLogExtractionState,
@@ -707,11 +703,7 @@ export class LogsExtractionClient {
   private getFromDateISOFromPersistedLogPageCursorStart(
     engineState: EngineLogExtractionState
   ): string | undefined {
-    const ts = engineState.logsPageCursorStartTimestamp;
-    if (ts !== undefined && ts !== '') {
-      return ts;
-    }
-    return undefined;
+    return engineState.logsPageCursorStartTimestamp || undefined;
   }
 
   private getDelayedLastExecutionTimestamp(
@@ -812,7 +804,7 @@ function paginationFromOptionalFields(
   ts: string | undefined,
   id: string | undefined
 ): PaginationParams | undefined {
-  if (ts !== undefined && ts !== '' && id !== undefined && id !== '') {
+  if (id && ts) {
     return { timestampCursor: ts, idCursor: id };
   }
   return undefined;

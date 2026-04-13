@@ -23,18 +23,13 @@ describe('buildLogPaginationCursorProbeEsql', () => {
       toDateISO: '2024-01-02T00:00:00.000Z',
       maxLogsPerPage: 100,
     });
-    expect(q).toContain(`| SORT ${TIMESTAMP_FIELD} ASC, \`_id\` ASC`);
-    expect(q).toContain('| LIMIT 100');
-    expect(q).toContain(`| INLINE STATS ${LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD} = count(*)`);
-    expect(q).toContain(
-      `| KEEP ${TIMESTAMP_FIELD}, \`_id\`, ${LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD}`
-    );
+    expect(q).toMatchSnapshot();
   });
 });
 
 describe('interpretLogPaginationCursorRows', () => {
-  it('treats undefined row as noMoreLogsToProcess', () => {
-    expect(interpretLogPaginationCursorRows(undefined, 100)).toEqual({ noMoreLogsToProcess: true });
+  it('treats undefined row as hasLogsToProcess false', () => {
+    expect(interpretLogPaginationCursorRows(undefined, 100)).toEqual({ hasLogsToProcess: false });
   });
 
   it('returns isLastLogsPage false when more matching logs remain than one page', () => {
@@ -43,7 +38,7 @@ describe('interpretLogPaginationCursorRows', () => {
       missingLogsToProcess: 101,
     };
     expect(interpretLogPaginationCursorRows(row, 100)).toEqual({
-      noMoreLogsToProcess: false,
+      hasLogsToProcess: true,
       logsPaginationCursor: row.logsPaginationCursor,
       isLastLogsPage: false,
     });
@@ -55,7 +50,7 @@ describe('interpretLogPaginationCursorRows', () => {
       missingLogsToProcess: 100,
     };
     expect(interpretLogPaginationCursorRows(row, 100)).toEqual({
-      noMoreLogsToProcess: false,
+      hasLogsToProcess: true,
       logsPaginationCursor: row.logsPaginationCursor,
       isLastLogsPage: true,
     });
@@ -67,7 +62,7 @@ describe('interpretLogPaginationCursorRows', () => {
       missingLogsToProcess: 3,
     };
     expect(interpretLogPaginationCursorRows(row, 100)).toEqual({
-      noMoreLogsToProcess: false,
+      hasLogsToProcess: true,
       logsPaginationCursor: row.logsPaginationCursor,
       isLastLogsPage: true,
     });
