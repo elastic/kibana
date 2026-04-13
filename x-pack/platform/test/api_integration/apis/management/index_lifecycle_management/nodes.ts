@@ -7,11 +7,12 @@
 
 import expect from '@kbn/expect';
 
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { registerHelpers } from './nodes.helpers';
 import { NODE_CUSTOM_ATTRIBUTE } from './constants';
 import { initElasticsearchHelpers } from './lib';
 
-export default function ({ getService }) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   const { getNodesStats } = initElasticsearchHelpers(getService);

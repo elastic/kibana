@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export const LENS_ATTACHMENT_TYPE = '.lens';
+export const wait = (time = 1000) => new Promise((resolve) => setTimeout(resolve, time));
+
+export const getPolicyNames = (policies: Array<{ name: string }>) =>
+  policies.map(({ name }) => name);

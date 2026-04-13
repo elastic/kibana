@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { registerHelpers as registerPoliciesHelpers } from './policies.helpers';
 import { registerHelpers as registerIndexHelpers } from './indices.helpers';
 import { registerSnapshotPoliciesHelpers } from './snapshot_policies.helpers';
@@ -15,8 +16,18 @@ import { registerSnapshotRepositoriesHelpers } from './snapshot_repositories.hel
 import { getPolicyPayload, getPolicyPayloadWithSearchableSnapshots } from './fixtures';
 import { initElasticsearchHelpers, getPolicyNames } from './lib';
 
-export default function ({ getService }) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+
+  interface IlmPolicyListItem {
+    name: string;
+    indices: string[];
+    policy: {
+      _meta?: {
+        description: string;
+      };
+    };
+  }
 
   const {
     createIndex,
@@ -56,8 +67,8 @@ export default function ({ getService }) {
 
         await addPolicyToIndex(policyName, indexName);
 
-        const { body } = await loadPolicies(true);
-        const fetchedPolicy = body.find((p) => p.name === policyName);
+        const { body: policies }: { body: IlmPolicyListItem[] } = await loadPolicies(true);
+        const fetchedPolicy = policies.find((p) => p.name === policyName)!;
         expect(fetchedPolicy.indices).to.eql([indexName]);
       });
 
@@ -83,8 +94,8 @@ export default function ({ getService }) {
 
         await addPolicyToIndex(policyName, indexName);
 
-        const { body } = await loadPolicies(true);
-        const fetchedPolicy = body.find((p) => p.name === policyName);
+        const { body: policies }: { body: IlmPolicyListItem[] } = await loadPolicies(true);
+        const fetchedPolicy = policies.find((p) => p.name === policyName)!;
         // The index name is dynamically generated as .ds-<indexName>-XXX so we don't check for exact match
         expect(fetchedPolicy.indices[0]).to.contain(indexName);
       });
@@ -173,8 +184,8 @@ export default function ({ getService }) {
 
         await createPolicy(editedPolicy).expect(200);
 
-        const { body } = await loadPolicies();
-        const loadedPolicy = body.find((p) => p.name === policyName);
+        const { body: policies }: { body: IlmPolicyListItem[] } = await loadPolicies();
+        const loadedPolicy = policies.find((p) => p.name === policyName)!;
         // Make sure the edited policy still has _meta field
         expect(loadedPolicy.policy._meta).to.eql(editedPolicy._meta);
       });

@@ -8,12 +8,12 @@
 import React from 'react';
 
 import deepEqual from 'fast-deep-equal';
-import { LENS_ATTACHMENT_TYPE } from '../../../../common/constants/visualizations';
+import { LENS_ATTACHMENT_TYPE } from '../../../../common/constants';
 import * as i18n from './translations';
 
 import type {
-  PersistableStateAttachmentType,
-  PersistableStateAttachmentViewProps,
+  UnifiedValueAttachmentType,
+  UnifiedValueAttachmentViewProps,
 } from '../../../client/attachment_framework/types';
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
 import type { LensProps } from './types';
@@ -40,14 +40,11 @@ const getVisualizationAttachmentActions = (savedObjectId: string, props: LensPro
 ];
 
 const LensAttachment = React.memo(
-  (props: PersistableStateAttachmentViewProps) => {
-    const { attributes, timeRange, metadata } =
-      props.persistableStateAttachmentState as unknown as LensProps;
-
+  (props: UnifiedValueAttachmentViewProps) => {
+    const { attributes, timeRange, metadata } = props.data.state as unknown as LensProps;
     return <LensRenderer attributes={attributes} timeRange={timeRange} metadata={metadata} />;
   },
-  (prevProps, nextProps) =>
-    deepEqual(prevProps.persistableStateAttachmentState, nextProps.persistableStateAttachmentState)
+  (prevProps, nextProps) => deepEqual(prevProps.data.state, nextProps.data.state)
 );
 
 LensAttachment.displayName = 'LensAttachment';
@@ -60,10 +57,10 @@ const LensAttachmentRendererLazyComponent = React.lazy(async () => {
 
 const getVisualizationAttachmentViewObject = ({
   savedObjectId,
-  persistableStateAttachmentState,
-}: PersistableStateAttachmentViewProps) => {
+  data,
+}: UnifiedValueAttachmentViewProps) => {
   const { attributes: lensAttributes, timeRange: lensTimeRange } =
-    persistableStateAttachmentState as unknown as LensProps;
+    data.state as unknown as LensProps;
 
   return {
     event: i18n.ADDED_VISUALIZATION,
@@ -78,10 +75,10 @@ const getVisualizationAttachmentViewObject = ({
   };
 };
 
-export const getVisualizationAttachmentType = (): PersistableStateAttachmentType => ({
+export const getVisualizationAttachmentType = (): UnifiedValueAttachmentType => ({
   id: LENS_ATTACHMENT_TYPE,
   icon: 'document',
-  displayName: 'Visualizations',
+  displayName: i18n.VISUALIZATIONS,
   getAttachmentViewObject: getVisualizationAttachmentViewObject,
   getAttachmentRemovalObject: () => ({ event: i18n.REMOVED_VISUALIZATION }),
 });
