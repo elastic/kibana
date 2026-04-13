@@ -14,6 +14,7 @@ import type { LogsSource } from '../../public/components/telemetry_context';
  */
 export enum AutomaticImportTelemetryEventType {
   CreateIntegrationPageLoaded = 'automatic_import_create_integration_page_loaded',
+  NewIntegrationPageOpened = 'automatic_import_new_integration_page_opened',
   DataStreamFlyoutOpened = 'automatic_import_data_stream_flyout_opened',
   AnalyzeLogsTriggered = 'automatic_import_analyze_logs_triggered',
   EditDataStreamFlyoutOpened = 'automatic_import_edit_data_stream_flyout_opened',
@@ -42,6 +43,10 @@ export interface CreateIntegrationPageLoadedPayload {
   sessionId?: string;
 }
 
+export interface NewIntegrationPageOpenedPayload {
+  sessionId?: string;
+}
+
 export interface DataStreamFlyoutOpenedPayload {
   sessionId?: string;
   /** Boolean flag if this is the first data stream being created for a new integration */
@@ -55,6 +60,7 @@ export interface EditDataStreamFlyoutOpenedPayload {
 export interface AnalyzeLogsTriggeredPayload {
   sessionId?: string;
   logsSource: LogsSource;
+  inputTypes: string[];
 }
 
 export interface EditPipelineTabOpenedPayload {
@@ -73,6 +79,7 @@ export interface DataStreamCreationCompletePayload {
   dataStreamName: string;
   durationMs: number;
   success: boolean;
+  isFirstDataStream: boolean;
   errorMessage?: string;
 }
 
@@ -95,10 +102,16 @@ export interface DoneButtonClickedPayload {
   sessionId?: string;
 }
 
-export type ReviewApproveMenuClickedPayload = Record<string, never>;
+export interface ReviewApproveMenuClickedPayload {
+  integrationId: string;
+  version: string;
+}
 export type IntegrationDownloadZipClickedPayload = Record<string, never>;
 export type ApproveModalCancelClickedPayload = Record<string, never>;
-export type ApproveModalApproveClickedPayload = Record<string, never>;
+export interface ApproveModalApproveClickedPayload {
+  integrationId: string;
+  version: string;
+}
 
 export interface DataStreamDeleteConfirmedPayload {
   sessionId?: string;
@@ -118,6 +131,8 @@ export interface PipelineEditedPayload {
 export type AutomaticImportTelemetryEventPayload<T extends AutomaticImportTelemetryEventType> =
   T extends AutomaticImportTelemetryEventType.CreateIntegrationPageLoaded
     ? CreateIntegrationPageLoadedPayload
+    : T extends AutomaticImportTelemetryEventType.NewIntegrationPageOpened
+    ? NewIntegrationPageOpenedPayload
     : T extends AutomaticImportTelemetryEventType.DataStreamFlyoutOpened
     ? DataStreamFlyoutOpenedPayload
     : T extends AutomaticImportTelemetryEventType.EditDataStreamFlyoutOpened

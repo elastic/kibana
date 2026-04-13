@@ -84,6 +84,7 @@ jest.mock('../telemetry_context', () => ({
   useTelemetry: () => ({
     reportCancelButtonClicked: mockReportCancelButtonClicked,
     reportDoneButtonClicked: mockReportDoneButtonClicked,
+    reportNewIntegrationPageOpened: jest.fn(),
   }),
 }));
 

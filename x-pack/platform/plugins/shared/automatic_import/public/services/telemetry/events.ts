@@ -27,6 +27,16 @@ export const telemetryEventsSchemas: Partial<
     },
   },
 
+  [AutomaticImportTelemetryEventType.NewIntegrationPageOpened]: {
+    sessionId: {
+      type: 'keyword',
+      _meta: {
+        description: 'The ID to identify all the events in the same session',
+        optional: false,
+      },
+    },
+  },
+
   [AutomaticImportTelemetryEventType.DataStreamFlyoutOpened]: {
     sessionId: {
       type: 'keyword',
@@ -65,6 +75,17 @@ export const telemetryEventsSchemas: Partial<
     logsSource: {
       type: 'keyword',
       _meta: { description: 'Source of logs: upload or index', optional: false },
+    },
+    inputTypes: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: { description: 'An input type selected by the user', optional: false },
+      },
+      _meta: {
+        description: 'Input types selected (e.g. filestream, tcp, udp)',
+        optional: false,
+      },
     },
   },
 
@@ -113,10 +134,28 @@ export const telemetryEventsSchemas: Partial<
     },
   },
 
-  [AutomaticImportTelemetryEventType.ReviewApproveMenuClicked]: {},
+  [AutomaticImportTelemetryEventType.ReviewApproveMenuClicked]: {
+    integrationId: {
+      type: 'keyword',
+      _meta: { description: 'Integration ID', optional: false },
+    },
+    version: {
+      type: 'keyword',
+      _meta: { description: 'Integration version at time of review', optional: false },
+    },
+  },
   [AutomaticImportTelemetryEventType.IntegrationDownloadZipClicked]: {},
   [AutomaticImportTelemetryEventType.ApproveModalCancelClicked]: {},
-  [AutomaticImportTelemetryEventType.ApproveModalApproveClicked]: {},
+  [AutomaticImportTelemetryEventType.ApproveModalApproveClicked]: {
+    integrationId: {
+      type: 'keyword',
+      _meta: { description: 'Integration ID', optional: false },
+    },
+    version: {
+      type: 'keyword',
+      _meta: { description: 'Integration version being approved', optional: false },
+    },
+  },
   [AutomaticImportTelemetryEventType.DataStreamDeleteConfirmed]: {
     sessionId: {
       type: 'keyword',

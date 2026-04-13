@@ -77,6 +77,19 @@ describe('useTelemetry', () => {
     expect(result.current.sessionId).toBe(firstId);
   });
 
+  it('reportNewIntegrationPageOpened calls reportEvent with correct args', () => {
+    const { result } = renderHook(() => useTelemetry(), { wrapper });
+
+    act(() => {
+      result.current.reportNewIntegrationPageOpened();
+    });
+
+    expect(mockReportEvent).toHaveBeenCalledWith(
+      AutomaticImportTelemetryEventType.NewIntegrationPageOpened,
+      expect.objectContaining({ sessionId: expect.any(String) })
+    );
+  });
+
   it('reportDataStreamFlyoutOpened calls reportEvent with correct args', () => {
     const { result } = renderHook(() => useTelemetry(), { wrapper });
 
@@ -116,6 +129,7 @@ describe('useTelemetry', () => {
     act(() => {
       result.current.reportAnalyzeLogsTriggered({
         logsSource: 'file',
+        inputTypes: ['filestream'],
       });
     });
 

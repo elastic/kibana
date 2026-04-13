@@ -510,6 +510,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
     } finally {
       reportAnalyzeLogsTriggered({
         logsSource: logsSourceOption,
+        inputTypes: formData?.dataCollectionMethod ?? [],
       });
     }
   }, [

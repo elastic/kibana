@@ -54,6 +54,13 @@ export const telemetryEventsSchemas: Partial<
         type: 'boolean',
         _meta: { description: 'Whether the creation was successful', optional: false },
       },
+      isFirstDataStream: {
+        type: 'boolean',
+        _meta: {
+          description: 'True if this is the first data stream created for this integration',
+          optional: false,
+        },
+      },
       errorMessage: {
         type: 'keyword',
         _meta: { description: 'Error message if creation failed', optional: true },

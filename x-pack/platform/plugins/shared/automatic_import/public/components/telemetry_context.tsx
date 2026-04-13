@@ -10,11 +10,15 @@ import { useKibana } from '../common/hooks/use_kibana';
 import { AutomaticImportTelemetryEventType } from '../../common/telemetry/types';
 
 export type LogsSource = 'file' | 'index';
+type ReportNewIntegrationPageOpened = () => void;
 type ReportDataStreamFlyoutOpened = (params: { isFirstDataStream: boolean }) => void;
 
 type ReportEditDataStreamFlyoutOpened = () => void;
 
-type ReportAnalyzeLogsTriggered = (params: { logsSource: LogsSource }) => void;
+type ReportAnalyzeLogsTriggered = (params: {
+  logsSource: LogsSource;
+  inputTypes: string[];
+}) => void;
 
 type ReportEditPipelineTabOpened = () => void;
 
@@ -36,6 +40,7 @@ type ReportPipelineEdited = (params: {
 
 interface TelemetryContextProps {
   sessionId: string;
+  reportNewIntegrationPageOpened: ReportNewIntegrationPageOpened;
   reportDataStreamFlyoutOpened: ReportDataStreamFlyoutOpened;
   reportEditDataStreamFlyoutOpened: ReportEditDataStreamFlyoutOpened;
   reportAnalyzeLogsTriggered: ReportAnalyzeLogsTriggered;
@@ -50,6 +55,7 @@ interface TelemetryContextProps {
 
 const defaultTelemetryContext: TelemetryContextProps = {
   sessionId: '',
+  reportNewIntegrationPageOpened: () => {},
   reportDataStreamFlyoutOpened: () => {},
   reportEditDataStreamFlyoutOpened: () => {},
   reportAnalyzeLogsTriggered: () => {},
@@ -84,6 +90,12 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
     }
   }, [telemetry]);
 
+  const reportNewIntegrationPageOpened = useCallback<ReportNewIntegrationPageOpened>(() => {
+    telemetry?.reportEvent(AutomaticImportTelemetryEventType.NewIntegrationPageOpened, {
+      sessionId: sessionData.current.sessionId,
+    });
+  }, [telemetry]);
+
   const reportDataStreamFlyoutOpened = useCallback<ReportDataStreamFlyoutOpened>(
     ({ isFirstDataStream }) => {
       telemetry?.reportEvent(AutomaticImportTelemetryEventType.DataStreamFlyoutOpened, {
@@ -101,10 +113,11 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
   }, [telemetry]);
 
   const reportAnalyzeLogsTriggered = useCallback<ReportAnalyzeLogsTriggered>(
-    ({ logsSource }) => {
+    ({ logsSource, inputTypes }) => {
       telemetry?.reportEvent(AutomaticImportTelemetryEventType.AnalyzeLogsTriggered, {
         sessionId: sessionData.current.sessionId,
         logsSource,
+        inputTypes,
       });
     },
     [telemetry]
@@ -161,6 +174,7 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
   const value = useMemo<TelemetryContextProps>(
     () => ({
       sessionId: sessionData.current.sessionId,
+      reportNewIntegrationPageOpened,
       reportDataStreamFlyoutOpened,
       reportEditDataStreamFlyoutOpened,
       reportAnalyzeLogsTriggered,
@@ -173,6 +187,7 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
       reportPipelineEdited,
     }),
     [
+      reportNewIntegrationPageOpened,
       reportDataStreamFlyoutOpened,
       reportEditDataStreamFlyoutOpened,
       reportAnalyzeLogsTriggered,

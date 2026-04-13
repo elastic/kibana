@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -145,8 +145,16 @@ export const IntegrationManagement = React.memo(() => {
 
   const { integrationId } = useParams<{ integrationId?: string }>();
   const { integration, isLoading, isError } = useGetIntegrationById(integrationId);
-  const { reportCancelButtonClicked } = useTelemetry();
+  const { reportCancelButtonClicked, reportNewIntegrationPageOpened } = useTelemetry();
   const { createUpdateIntegrationMutation } = useCreateUpdateIntegration();
+
+  const newIntegrationReported = useRef(false);
+  useEffect(() => {
+    if (!integrationId && !newIntegrationReported.current) {
+      newIntegrationReported.current = true;
+      reportNewIntegrationPageOpened();
+    }
+  }, [integrationId, reportNewIntegrationPageOpened]);
 
   const integrationsHomeHref = useMemo(
     () => application.getUrlForApp(INTEGRATIONS_APP_ID),

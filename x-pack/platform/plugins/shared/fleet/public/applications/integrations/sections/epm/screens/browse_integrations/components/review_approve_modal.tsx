@@ -293,7 +293,7 @@ export const ReviewApproveModal: React.FC<{
 
     (automaticImport?.telemetry as AutomaticImportTelemetry)?.reportEvent(
       'automatic_import_approve_modal_approve_clicked',
-      {}
+      { integrationId, version: reviewVersion.trim() }
     );
     setIsApproving(true);
     setReviewError(null);

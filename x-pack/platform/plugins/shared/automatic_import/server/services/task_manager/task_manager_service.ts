@@ -50,6 +50,10 @@ export interface DataStreamTaskParams extends DataStreamParams {
    */
   dataStreamName: string;
   /**
+   * True if this is the first data stream being created for this integration.
+   */
+  isFirstDataStream: boolean;
+  /**
    * Optional LangSmith tracing options to propagate to the agent invocation.
    */
   langSmithOptions?: LangSmithOptions;
@@ -217,6 +221,7 @@ export class TaskManagerService {
       connectorId,
       integrationName,
       dataStreamName,
+      isFirstDataStream,
       langSmithOptions,
     } = params as DataStreamTaskParams;
 
@@ -318,6 +323,16 @@ export class TaskManagerService {
       this.logger.debug(`Data stream ${dataStreamId} updated successfully`);
       this.logger.debug(`Task ${taskId} result: ${JSON.stringify(result)}`);
 
+      this.reportDataStreamCreationComplete({
+        integrationId,
+        integrationName,
+        dataStreamId,
+        dataStreamName,
+        durationMs: Date.now() - startTime,
+        success: true,
+        isFirstDataStream,
+      });
+
       return {
         state: {
           task_status: TASK_STATUSES.completed,
@@ -373,6 +388,7 @@ export class TaskManagerService {
         dataStreamName,
         durationMs: Date.now() - startTime,
         success: false,
+        isFirstDataStream,
         errorMessage,
       });
 
@@ -390,6 +406,7 @@ export class TaskManagerService {
     dataStreamName: string;
     durationMs: number;
     success: boolean;
+    isFirstDataStream: boolean;
     errorMessage?: string;
   }) {
     try {
@@ -401,6 +418,7 @@ export class TaskManagerService {
         dataStreamName: params.dataStreamName,
         durationMs: params.durationMs,
         success: params.success,
+        isFirstDataStream: params.isFirstDataStream,
         ...(params.errorMessage ? { errorMessage: params.errorMessage } : {}),
       });
     } catch (telemetryError) {
