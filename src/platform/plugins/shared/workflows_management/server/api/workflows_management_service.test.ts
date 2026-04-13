@@ -1342,8 +1342,8 @@ steps:
       mockEsClient.bulk.mockResolvedValue({
         errors: false,
         items: [
-          { index: { _id: 'workflow-1', status: 201 } },
-          { index: { _id: 'workflow-2', status: 201 } },
+          { create: { _id: 'workflow-1', status: 201 } },
+          { create: { _id: 'workflow-2', status: 201 } },
         ],
         took: 10,
       } as any);
@@ -1393,9 +1393,9 @@ steps:
       mockEsClient.bulk.mockResolvedValue({
         errors: true,
         items: [
-          { index: { _id: 'workflow-1', status: 201 } },
+          { create: { _id: 'workflow-1', status: 201 } },
           {
-            index: {
+            create: {
               _id: 'workflow-2',
               status: 400,
               error: { type: 'mapper_parsing_exception', reason: 'failed to parse' },
@@ -1444,7 +1444,7 @@ steps:
     it('should handle invalid yaml in bulk create without failing entire batch', async () => {
       mockEsClient.bulk.mockResolvedValue({
         errors: false,
-        items: [{ index: { _id: 'workflow-1', status: 201 } }],
+        items: [{ create: { _id: 'workflow-1', status: 201 } }],
         took: 10,
       } as any);
 
@@ -1480,7 +1480,7 @@ steps:
     it('should reject malformed custom IDs and include them in failed', async () => {
       mockEsClient.bulk.mockResolvedValue({
         errors: false,
-        items: [{ index: { _id: 'workflow-1', status: 201 } }],
+        items: [{ create: { _id: 'workflow-1', status: 201 } }],
         took: 10,
       } as any);
 
@@ -1529,7 +1529,7 @@ steps:
 
       mockEsClient.bulk.mockResolvedValue({
         errors: false,
-        items: [{ index: { _id: 'workflow-1', status: 201 } }],
+        items: [{ create: { _id: 'workflow-1', status: 201 } }],
         took: 10,
       } as any);
 
@@ -1563,7 +1563,7 @@ steps:
 
       mockEsClient.bulk.mockResolvedValue({
         errors: false,
-        items: [{ index: { _id: 'workflow-1', status: 201 } }],
+        items: [{ create: { _id: 'workflow-1', status: 201 } }],
         took: 10,
       } as any);
 
@@ -1629,10 +1629,10 @@ steps:
       expect(firstOp).not.toHaveProperty('create');
     });
 
-    it('should use index operation by default (no overwrite)', async () => {
+    it('should use create operation by default (no overwrite)', async () => {
       mockEsClient.bulk.mockResolvedValue({
         errors: false,
-        items: [{ index: { _id: 'workflow-1', status: 201 } }],
+        items: [{ create: { _id: 'workflow-1', status: 201 } }],
         took: 10,
       } as any);
 
@@ -1658,8 +1658,269 @@ steps:
 
       const bulkCall = mockEsClient.bulk.mock.calls[0][0];
       const firstOp = bulkCall.operations?.[0];
-      expect(firstOp).toHaveProperty('index');
-      expect(firstOp).not.toHaveProperty('create');
+      expect(firstOp).toHaveProperty('create');
+      expect(firstOp).not.toHaveProperty('index');
+    });
+
+    it('should fail user-supplied IDs that already exist when overwrite is false', async () => {
+      // Mock checkExistingIds search to return 'my-custom-id' as existing
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _id: 'my-custom-id',
+              _source: { name: 'Existing', spaceId: 'default', yaml: '', valid: true },
+            },
+          ],
+          total: { value: 1 },
+        },
+      } as any);
+
+      const workflows = [
+        {
+          id: 'my-custom-id',
+          yaml: `
+name: workflow one
+triggers:
+  - type: manual
+steps:
+  - type: console
+    name: step-one
+    with:
+      message: "Hello"
+`,
+        },
+      ];
+
+      const result = await service.bulkCreateWorkflows(workflows, 'default', mockRequest);
+
+      expect(result.created).toHaveLength(0);
+      expect(result.failed).toHaveLength(1);
+      expect(result.failed[0].id).toBe('my-custom-id');
+      expect(result.failed[0].error).toContain('already exists');
+      expect(mockEsClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('should allow user-supplied IDs that already exist when overwrite is true', async () => {
+      mockEsClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ index: { _id: 'my-custom-id', status: 200 } }],
+        took: 10,
+      } as any);
+
+      const workflows = [
+        {
+          id: 'my-custom-id',
+          yaml: `
+name: workflow one
+triggers:
+  - type: manual
+steps:
+  - type: console
+    name: step-one
+    with:
+      message: "Hello"
+`,
+        },
+      ];
+
+      const result = await service.bulkCreateWorkflows(workflows, 'default', mockRequest, {
+        overwrite: true,
+      });
+
+      expect(result.created).toHaveLength(1);
+      expect(result.failed).toHaveLength(0);
+      // Should NOT have called search for conflict check when overwrite is true
+      // (only the resolveUniqueWorkflowIdsBatch search is expected for server-gen IDs,
+      // but this workflow has a custom ID so no server-gen resolution needed)
+    });
+
+    it('should resolve server-generated ID collisions against database', async () => {
+      // Mock resolveUniqueWorkflowIdsBatch search to return 'workflow-one' as existing
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _id: 'workflow-one',
+              _source: { name: 'Existing', spaceId: 'default', yaml: '', valid: true },
+            },
+          ],
+          total: { value: 1 },
+        },
+      } as any);
+
+      mockEsClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ create: { _id: 'workflow-one-1', status: 201 } }],
+        took: 10,
+      } as any);
+
+      const workflows = [
+        {
+          yaml: `
+name: Workflow One
+triggers:
+  - type: manual
+steps:
+  - type: console
+    name: step-one
+    with:
+      message: "Hello"
+`,
+        },
+      ];
+
+      const result = await service.bulkCreateWorkflows(workflows, 'default', mockRequest);
+
+      expect(result.created).toHaveLength(1);
+      expect(result.failed).toHaveLength(0);
+
+      const bulkCall = mockEsClient.bulk.mock.calls[0][0] as {
+        operations: Array<{ create: { _id: string } }>;
+      };
+      const id = bulkCall.operations
+        .filter((op): op is { create: { _id: string } } => 'create' in op)
+        .map((op) => op.create._id);
+
+      // Should have resolved to workflow-one-1 since workflow-one already exists
+      expect(id[0]).toBe('workflow-one-1');
+    });
+
+    it('should resolve server-generated IDs against both database and in-batch', async () => {
+      // Mock: 'duplicate-name' already exists in the database
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _id: 'duplicate-name',
+              _source: { name: 'Existing', spaceId: 'default', yaml: '', valid: true },
+            },
+          ],
+          total: { value: 1 },
+        },
+      } as any);
+
+      mockEsClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [
+          { create: { _id: 'duplicate-name-1', status: 201 } },
+          { create: { _id: 'duplicate-name-2', status: 201 } },
+        ],
+        took: 10,
+      } as any);
+
+      const yaml = `
+name: Duplicate Name
+triggers:
+  - type: manual
+steps:
+  - type: console
+    name: step-one
+    with:
+      message: "Hello"
+`;
+
+      const result = await service.bulkCreateWorkflows(
+        [{ yaml }, { yaml }],
+        'default',
+        mockRequest
+      );
+
+      const bulkCall = mockEsClient.bulk.mock.calls[0][0] as {
+        operations: Array<{ create: { _id: string } }>;
+      };
+      const ids = bulkCall.operations
+        .filter((op): op is { create: { _id: string } } => 'create' in op)
+        .map((op) => op.create._id);
+
+      // 'duplicate-name' taken in DB, so first gets -1, second gets -2
+      expect(ids[0]).toBe('duplicate-name-1');
+      expect(ids[1]).toBe('duplicate-name-2');
+
+      expect(result.created).toHaveLength(2);
+    });
+
+    it('should fail duplicate user-supplied IDs within the same batch', async () => {
+      mockEsClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ create: { _id: 'same-id', status: 201 } }],
+        took: 10,
+      } as any);
+
+      const workflows = [
+        {
+          id: 'same-id',
+          yaml: `
+name: workflow one
+triggers:
+  - type: manual
+steps:
+  - type: console
+    name: step-one
+    with:
+      message: "Hello"
+`,
+        },
+        {
+          id: 'same-id',
+          yaml: `
+name: workflow two
+triggers:
+  - type: manual
+steps:
+  - type: console
+    name: step-two
+    with:
+      message: "World"
+`,
+        },
+      ];
+
+      const result = await service.bulkCreateWorkflows(workflows, 'default', mockRequest);
+
+      expect(result.created).toHaveLength(1);
+      expect(result.failed).toHaveLength(1);
+      expect(result.failed[0].error).toContain('Duplicate workflow id');
+    });
+
+    it('should handle create operation version_conflict_engine_exception gracefully', async () => {
+      mockEsClient.bulk.mockResolvedValue({
+        errors: true,
+        items: [
+          {
+            create: {
+              _id: 'workflow-one',
+              status: 409,
+              error: {
+                type: 'version_conflict_engine_exception',
+                reason: 'document already exists',
+              },
+            },
+          },
+        ],
+        took: 10,
+      } as any);
+
+      const workflows = [
+        {
+          yaml: `
+name: workflow one
+triggers:
+  - type: manual
+steps:
+  - type: console
+    name: step-one
+    with:
+      message: "Hello"
+`,
+        },
+      ];
+
+      const result = await service.bulkCreateWorkflows(workflows, 'default', mockRequest);
+
+      expect(result.created).toHaveLength(0);
+      expect(result.failed).toHaveLength(1);
+      expect(result.failed[0].error).toContain('document already exists');
     });
   });
 
@@ -3490,8 +3751,8 @@ steps:
       mockEsClient.bulk.mockResolvedValue({
         errors: false,
         items: [
-          { index: { _id: 'duplicate-name', status: 201 } },
-          { index: { _id: 'duplicate-name-1', status: 201 } },
+          { create: { _id: 'duplicate-name', status: 201 } },
+          { create: { _id: 'duplicate-name-1', status: 201 } },
         ],
         took: 10,
       } as any);
@@ -3514,11 +3775,11 @@ steps:
       );
 
       const bulkCall = mockEsClient.bulk.mock.calls[0][0] as {
-        operations: Array<{ index: { _id: string } }>;
+        operations: Array<{ create: { _id: string } }>;
       };
       const ids = bulkCall.operations
-        .filter((op): op is { index: { _id: string } } => 'index' in op)
-        .map((op) => op.index._id);
+        .filter((op): op is { create: { _id: string } } => 'create' in op)
+        .map((op) => op.create._id);
 
       // First workflow keeps the original slug, second gets a suffix
       expect(ids[0]).toBe('duplicate-name');

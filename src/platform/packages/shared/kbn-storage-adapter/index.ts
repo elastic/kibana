@@ -63,6 +63,9 @@ export type StorageClientBulkOperation<TDocument extends { _id?: string }> =
   | {
       index: { document: Omit<TDocument, '_id'>; _id?: string };
     }
+  | {
+      create: { document: Omit<TDocument, '_id'>; _id?: string };
+    }
   | { delete: { _id: string } };
 
 export interface StorageClientBulkOptions {

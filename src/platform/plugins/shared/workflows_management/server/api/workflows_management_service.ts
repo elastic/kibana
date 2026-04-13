@@ -414,10 +414,14 @@ export class WorkflowsService {
 
     const created: WorkflowDetailDto[] = [];
     const failed: Array<{ index: number; id: string; error: string }> = [];
-    const bulkOperations: Array<{ index: { _id: string; document: WorkflowProperties } }> = [];
+    const bulkOperations: Array<
+      | { index: { _id: string; document: WorkflowProperties } }
+      | { create: { _id: string; document: WorkflowProperties } }
+    > = [];
     const validWorkflows: Array<{
       idx: number;
       id: string;
+      hasCustomId: boolean;
       workflowData: WorkflowProperties;
       definition?: WorkflowYaml;
     }> = [];
@@ -444,6 +448,7 @@ export class WorkflowsService {
         validWorkflows.push({
           idx: i,
           id: prepared.id,
+          hasCustomId: !!workflows[i].id,
           workflowData: prepared.workflowData,
           definition: prepared.definition,
         });
@@ -456,27 +461,15 @@ export class WorkflowsService {
       }
     }
 
-    // Phase 1.5: Deduplicate in-batch IDs so same-named workflows don't silently
-    // overwrite each other. Earlier IDs win; later duplicates get a numeric suffix.
-    const seenIds = new Set<string>();
-    for (let i = 0; i < validWorkflows.length; i++) {
-      let { id } = validWorkflows[i];
-      if (seenIds.has(id)) {
-        let counter = 0;
-        let candidate: string;
-        do {
-          const suffix = `-${++counter}`;
-          candidate = `${id.slice(0, WORKFLOW_ID_MAX_LENGTH - suffix.length)}${suffix}`;
-        } while (seenIds.has(candidate));
-        validWorkflows[i].id = candidate;
-        validWorkflows[i].workflowData.name =
-          validWorkflows[i].workflowData.name ?? `Untitled workflow`;
-        bulkOperations[i] = {
-          index: { _id: candidate, document: validWorkflows[i].workflowData },
-        };
-      }
-      seenIds.add(validWorkflows[i].id);
-    }
+    // Phase 1.5: Resolve IDs — deduplicate in-batch and check database for collisions.
+    const overwrite = options?.overwrite ?? false;
+    await this.resolveAndDeduplicateBulkIds(
+      validWorkflows,
+      bulkOperations,
+      failed,
+      overwrite,
+      spaceId
+    );
 
     // Phase 2: Bulk write all valid workflows
     if (bulkOperations.length > 0) {
@@ -487,7 +480,7 @@ export class WorkflowsService {
 
       // Process bulk response
       bulkResponse.items.forEach((item, itemIndex) => {
-        const operation = item.index;
+        const operation = item.index ?? item.create;
         const validWorkflow = validWorkflows[itemIndex];
 
         if (operation?.error) {
@@ -1897,6 +1890,191 @@ export class WorkflowsService {
 
     // All candidates taken — fall back to a UUID-based ID to guarantee uniqueness.
     return `workflow-${generateUuid()}`;
+  }
+
+  /**
+   * Phase 1.5 of bulkCreateWorkflows: resolves server-generated IDs against the
+   * database and in-batch collisions, checks user-supplied IDs for conflicts,
+   * deduplicates within the batch, and rebuilds bulkOperations with the correct
+   * ES operation type (create vs index) based on the overwrite flag.
+   *
+   * Mutates validWorkflows, bulkOperations, and failed in place.
+   */
+  private async resolveAndDeduplicateBulkIds(
+    validWorkflows: Array<{
+      idx: number;
+      id: string;
+      hasCustomId: boolean;
+      workflowData: WorkflowProperties;
+      definition?: WorkflowYaml;
+    }>,
+    bulkOperations: Array<
+      | { index: { _id: string; document: WorkflowProperties } }
+      | { create: { _id: string; document: WorkflowProperties } }
+    >,
+    failed: Array<{ index: number; id: string; error: string }>,
+    overwrite: boolean,
+    spaceId: string
+  ): Promise<void> {
+    const seenIds = new Set<string>();
+
+    // Separate server-generated IDs (need collision resolution) from user-supplied IDs
+    const serverGenWorkflows: typeof validWorkflows = [];
+    const userSuppliedIds: string[] = [];
+
+    for (const vw of validWorkflows) {
+      if (vw.hasCustomId) {
+        userSuppliedIds.push(vw.id);
+      } else {
+        serverGenWorkflows.push(vw);
+      }
+    }
+
+    // For server-generated IDs: resolve unique IDs in batch
+    // (handles both in-batch dedup and database collision avoidance)
+    if (serverGenWorkflows.length > 0) {
+      const resolvedIds = await this.resolveUniqueWorkflowIdsBatch(
+        serverGenWorkflows.map((vw) => vw.id),
+        seenIds,
+        spaceId
+      );
+      for (let j = 0; j < serverGenWorkflows.length; j++) {
+        serverGenWorkflows[j].id = resolvedIds[j];
+      }
+    }
+
+    // For user-supplied IDs with overwrite: false — check for conflicts in the database
+    if (!overwrite && userSuppliedIds.length > 0) {
+      const existingUserIds = await this.checkExistingIds(userSuppliedIds, spaceId);
+      for (let i = validWorkflows.length - 1; i >= 0; i--) {
+        if (validWorkflows[i].hasCustomId && existingUserIds.has(validWorkflows[i].id)) {
+          failed.push({
+            index: validWorkflows[i].idx,
+            id: validWorkflows[i].id,
+            error: `Workflow with id '${validWorkflows[i].id}' already exists`,
+          });
+          validWorkflows.splice(i, 1);
+          bulkOperations.splice(i, 1);
+        }
+      }
+    }
+
+    // Deduplicate user-supplied IDs within the batch (first wins, later ones fail).
+    // Server-generated IDs are already guaranteed unique by resolveUniqueWorkflowIdsBatch.
+    for (let i = validWorkflows.length - 1; i >= 0; i--) {
+      if (validWorkflows[i].hasCustomId) {
+        const { id } = validWorkflows[i];
+        if (seenIds.has(id)) {
+          failed.push({
+            index: validWorkflows[i].idx,
+            id,
+            error: `Duplicate workflow id '${id}' in batch`,
+          });
+          validWorkflows.splice(i, 1);
+          bulkOperations.splice(i, 1);
+        } else {
+          seenIds.add(id);
+        }
+      }
+    }
+
+    // Rebuild bulkOperations with correct IDs and operation type
+    for (let i = 0; i < validWorkflows.length; i++) {
+      const vw = validWorkflows[i];
+      if (overwrite) {
+        bulkOperations[i] = { index: { _id: vw.id, document: vw.workflowData } };
+      } else {
+        bulkOperations[i] = { create: { _id: vw.id, document: vw.workflowData } };
+      }
+    }
+  }
+
+  /**
+   * Batched version of resolveUniqueWorkflowId for multiple base IDs.
+   * Generates candidate IDs for each base, checks them all in a single ES query,
+   * and picks the first available candidate per base ID while also respecting
+   * the in-batch `seenIds` set to avoid collisions within the same batch.
+   */
+  private async resolveUniqueWorkflowIdsBatch(
+    baseIds: string[],
+    seenIds: Set<string>,
+    spaceId: string
+  ): Promise<string[]> {
+    const MAX_COLLISION_RETRIES = 100;
+
+    // Build candidate lists per base ID
+    const candidatesByIndex: string[][] = [];
+    const allCandidates = new Set<string>();
+
+    for (const baseId of baseIds) {
+      const candidates = [baseId];
+      for (let i = 1; i <= MAX_COLLISION_RETRIES; i++) {
+        const suffix = `-${i}`;
+        candidates.push(`${baseId.slice(0, WORKFLOW_ID_MAX_LENGTH - suffix.length)}${suffix}`);
+      }
+      candidatesByIndex.push(candidates);
+      for (const c of candidates) {
+        allCandidates.add(c);
+      }
+    }
+
+    // Single batch query to check which candidates already exist.
+    // Intentionally does NOT exclude soft-deleted workflows (no must_not deleted_at)
+    // to avoid reassigning an ID that belongs to a soft-deleted workflow.
+    const candidateArray = [...allCandidates];
+    const existingIds = new Set<string>();
+
+    if (candidateArray.length > 0) {
+      const response = await this.workflowStorage.getClient().search({
+        query: {
+          bool: {
+            must: [{ ids: { values: candidateArray } }, { term: { spaceId } }],
+          },
+        },
+        size: candidateArray.length,
+        _source: false,
+        track_total_hits: false,
+      });
+      for (const hit of response.hits.hits) {
+        if (hit._id) {
+          existingIds.add(hit._id);
+        }
+      }
+    }
+
+    // Resolve each base ID to the first available candidate
+    const resolvedIds: string[] = [];
+    for (const candidates of candidatesByIndex) {
+      const available = candidates.find((c) => !existingIds.has(c) && !seenIds.has(c));
+      const resolvedId = available ?? `workflow-${generateUuid()}`;
+      resolvedIds.push(resolvedId);
+      seenIds.add(resolvedId);
+    }
+
+    return resolvedIds;
+  }
+
+  /**
+   * Checks which of the given IDs already exist in the given space.
+   * Returns the set of IDs that exist.
+   */
+  private async checkExistingIds(ids: string[], spaceId: string): Promise<Set<string>> {
+    if (ids.length === 0) {
+      return new Set();
+    }
+
+    const response = await this.workflowStorage.getClient().search({
+      query: {
+        bool: {
+          must: [{ ids: { values: ids } }, { term: { spaceId } }],
+        },
+      },
+      size: ids.length,
+      _source: false,
+      track_total_hits: false,
+    });
+
+    return new Set(response.hits.hits.map((hit) => hit._id).filter((id): id is string => !!id));
   }
 
   public async getAvailableConnectors(
