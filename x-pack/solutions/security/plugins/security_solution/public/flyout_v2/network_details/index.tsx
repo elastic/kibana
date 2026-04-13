@@ -49,22 +49,28 @@ export interface NetworkPanelProps extends Record<string, unknown> {
    * If in preview mode, show preview banner and hide navigation
    */
   isPreviewMode?: boolean;
+  /**
+   * True for old flyout, false for v2, should remove when old flyout is removed
+   */
+  isOldFlyout?: boolean;
 }
 
 /**
  * Panel to be displayed in the network details expandable flyout right section.
  */
 export const NetworkPanel: FC<NetworkPanelProps> = memo(
-  ({ ip, flowTarget, scopeId, isPreviewMode }) => {
+  ({ ip, flowTarget, scopeId, isPreviewMode, isOldFlyout }) => {
     return (
       <>
-        <FlyoutNavigation
-          flyoutIsExpandable={false}
-          isPreviewMode={isPreviewMode}
-          isRulePreview={scopeId === TableId.rulePreview}
-        />
-        <PanelHeader ip={ip} flowTarget={flowTarget} />
-        <PanelContent ip={ip} flowTarget={flowTarget} />
+        {isOldFlyout && (
+          <FlyoutNavigation
+            flyoutIsExpandable={false}
+            isPreviewMode={isPreviewMode}
+            isRulePreview={scopeId === TableId.rulePreview}
+          />
+        )}
+        <PanelHeader ip={ip} flowTarget={flowTarget} isOldFlyout={isOldFlyout} />
+        <PanelContent ip={ip} flowTarget={flowTarget} isOldFlyout={isOldFlyout} />
         {isPreviewMode && <PreviewPanelFooter ip={ip} flowTarget={flowTarget} scopeId={scopeId} />}
       </>
     );

@@ -7,11 +7,13 @@
 
 import type { FC } from 'react';
 import React, { memo } from 'react';
+import type { EuiPaddingSize } from '@elastic/eui';
 import { EuiFlyoutBody, EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 interface FlyoutBodyProps extends React.ComponentProps<typeof EuiFlyoutBody> {
   children: React.ReactNode;
+  paddingSize?: EuiPaddingSize;
 }
 
 /**
@@ -29,7 +31,7 @@ export const FlyoutBody: FC<FlyoutBodyProps> = memo(({ children, ...flyoutBodyPr
         }
       `}
     >
-      <EuiPanel hasShadow={false} color="transparent">
+      <EuiPanel hasShadow={false} color="transparent" paddingSize={flyoutBodyProps.paddingSize}>
         {children}
       </EuiPanel>
     </EuiFlyoutBody>

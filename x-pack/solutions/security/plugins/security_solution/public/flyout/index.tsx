@@ -273,13 +273,15 @@ export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredP
   },
   {
     key: NetworkPanelKey,
-    component: (props) => <NetworkPanel {...(props as NetworkExpandableFlyoutProps).params} />,
+    component: (props) => (
+      <NetworkPanel {...(props as NetworkExpandableFlyoutProps).params} isOldFlyout />
+    ),
     'aria-label': NETWORK_PANEL_ARIA_LABEL,
   },
   {
     key: NetworkPreviewPanelKey,
     component: (props) => (
-      <NetworkPanel {...(props as NetworkExpandableFlyoutProps).params} isPreviewMode />
+      <NetworkPanel {...(props as NetworkExpandableFlyoutProps).params} isPreviewMode isOldFlyout />
     ),
     'aria-label': NETWORK_PREVIEW_PANEL_ARIA_LABEL,
   },
