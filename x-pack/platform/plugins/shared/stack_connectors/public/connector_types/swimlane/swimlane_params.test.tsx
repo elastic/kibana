@@ -81,9 +81,9 @@ describe('SwimlaneParamsFields renders', () => {
     expect(editAction).not.toHaveBeenCalled();
 
     rerender(
-        <I18nProvider>
-          <SwimlaneParamsFields {...defaultProps} actionConnector={{ ...connector, id: '1234' }} />
-        </I18nProvider>
+      <I18nProvider>
+        <SwimlaneParamsFields {...defaultProps} actionConnector={{ ...connector, id: '1234' }} />
+      </I18nProvider>
     );
     expect(editAction).toHaveBeenCalledWith(
       'subActionParams',
@@ -100,9 +100,9 @@ describe('SwimlaneParamsFields renders', () => {
     expect(editAction).not.toHaveBeenCalled();
 
     rerender(
-        <I18nProvider>
-          <SwimlaneParamsFields {...defaultProps} actionConnector={{ ...connector, id: '1234' }} />
-        </I18nProvider>
+      <I18nProvider>
+        <SwimlaneParamsFields {...defaultProps} actionConnector={{ ...connector, id: '1234' }} />
+      </I18nProvider>
     );
     expect(editAction).toHaveBeenCalledWith(
       'subActionParams',

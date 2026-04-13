@@ -157,12 +157,12 @@ describe('ServiceNowITSMParamsFields renders', () => {
     const { rerender } = renderWithI18n(<ServiceNowITSMParamsFields {...defaultProps} />);
     expect(editAction.mock.calls.length).toEqual(0);
     rerender(
-        <I18nProvider>
-          <ServiceNowITSMParamsFields
-            {...defaultProps}
-            actionConnector={{ ...connector, id: '1234' }}
-          />
-        </I18nProvider>
+      <I18nProvider>
+        <ServiceNowITSMParamsFields
+          {...defaultProps}
+          actionConnector={{ ...connector, id: '1234' }}
+        />
+      </I18nProvider>
     );
     expect(editAction.mock.calls.length).toEqual(1);
     expect(editAction.mock.calls[0][1]).toEqual({
@@ -181,9 +181,9 @@ describe('ServiceNowITSMParamsFields renders', () => {
     const { rerender } = renderWithI18n(<ServiceNowITSMParamsFields {...newProps} />);
     expect(editAction.mock.calls.length).toEqual(0);
     rerender(
-        <I18nProvider>
-          <ServiceNowITSMParamsFields {...newProps} actionConnector={{ ...connector, id: '1234' }} />
-        </I18nProvider>
+      <I18nProvider>
+        <ServiceNowITSMParamsFields {...newProps} actionConnector={{ ...connector, id: '1234' }} />
+      </I18nProvider>
     );
     expect(editAction.mock.calls.length).toEqual(1);
     expect(editAction.mock.calls[0][1]).toEqual({

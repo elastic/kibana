@@ -35,9 +35,7 @@ describe('RuleStatusFilter', () => {
   });
 
   it('can open the popover correctly', async () => {
-    renderWithI18n(
-      <RuleStatusFilter selectedStatuses={[]} onChange={onChangeMock} />
-    );
+    renderWithI18n(<RuleStatusFilter selectedStatuses={[]} onChange={onChangeMock} />);
 
     expect(screen.queryByTestId('ruleStatusFilterSelect')).not.toBeInTheDocument();
 
