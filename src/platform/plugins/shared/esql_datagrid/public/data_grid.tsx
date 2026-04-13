@@ -172,6 +172,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
                 type="discoverApp"
                 size="s"
                 color="primary"
+                aria-hidden={true}
                 css={css`
                   margin-right: 4px;
                 `}

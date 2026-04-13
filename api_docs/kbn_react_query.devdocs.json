@@ -14749,6 +14749,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/home/entities_table/grouping/use_fetch_grouped_data.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/home/entities_table/hooks/use_fetch_grid_data.ts"
               },
               {
