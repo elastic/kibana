@@ -39,6 +39,7 @@ import {
 import { registerFeatureFlags } from './feature_flags';
 import { ContentService } from './lib/content/content_service';
 import { registerRules } from './lib/sig_events/rules/register_rules';
+import { getSigEventsTuningConfig } from './lib/sig_events/helpers/get_sig_events_tuning_config';
 import { AttachmentService } from './lib/streams/attachments/attachment_service';
 import { QueryService } from './lib/streams/assets/query/query_service';
 import { StreamsService } from './lib/streams/service';
@@ -177,13 +178,15 @@ export class StreamsPlugin
         this.logger
       );
 
+      const tuningConfig = await getSigEventsTuningConfig(globalUiSettingsClient, this.logger);
+
       const [attachmentClient, featureClient, insightClient, contentClient, queryClient] =
         await Promise.all([
           attachmentService.getClient({
             soClient,
             rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
           }),
-          featureService.getClient(),
+          featureService.getClient(tuningConfig),
           insightService.getInternalClient(),
           contentService.getClient(),
           queryService.getClient({
@@ -193,6 +196,7 @@ export class StreamsPlugin
               request,
               DEFAULT_SPACE_ID
             ),
+            config: tuningConfig,
           }),
         ]);
 
@@ -231,6 +235,7 @@ export class StreamsPlugin
         taskClient,
         streamsSettingsStorageClient,
         isSecurityEnabled,
+        tuningConfig,
       };
     };
 
