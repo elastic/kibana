@@ -72,7 +72,7 @@ export const ProjectListItem = ({ project, index, isOriginProject }: ProjectList
         <EuiFlexItem grow={false}>
           <EuiFlexGroup responsive={false} gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIcon type={getSolutionIcon(project._type)} />
+              <EuiIcon type={getSolutionIcon(project._type)} aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="s" color="text">
