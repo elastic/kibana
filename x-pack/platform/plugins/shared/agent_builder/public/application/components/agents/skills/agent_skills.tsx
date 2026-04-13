@@ -284,8 +284,8 @@ export const AgentSkills: React.FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        <EuiSpacer size="s" />
-        <EuiText size="s" color="subdued">
+        <EuiSpacer size="m" />
+        <EuiText size="m" color="default">
           {labels.agentSkills.pageDescription}
         </EuiText>
       </div>
