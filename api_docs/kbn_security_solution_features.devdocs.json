@@ -115,7 +115,7 @@
             "signature": [
               "{ id: string; name: string; order?: number | undefined; alerting?: ",
               "AlertingKibanaPrivilege",
-              " | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | null | undefined; category: ",
+              " | undefined; cases?: readonly string[] | undefined; description?: string | null | undefined; hidden?: boolean | undefined; category: ",
               "AppCategory",
               "; app: readonly string[]; privileges: { all: ",
               {
@@ -421,7 +421,7 @@
         "signature": [
           "{ id: string; name: string; order?: number | undefined; alerting?: ",
           "AlertingKibanaPrivilege",
-          " | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | null | undefined; category: ",
+          " | undefined; cases?: readonly string[] | undefined; description?: string | null | undefined; hidden?: boolean | undefined; category: ",
           "AppCategory",
           "; app: readonly string[]; privileges: { all: ",
           {
@@ -1768,7 +1768,7 @@
         "label": "SubFeaturesPrivileges",
         "description": [],
         "signature": [
-          "{ id?: string | undefined; name?: string | undefined; includeIn?: \"none\" | \"read\" | \"all\" | undefined; minimumLicense?: ",
+          "{ id?: string | undefined; name?: string | undefined; includeIn?: \"none\" | \"all\" | \"read\" | undefined; minimumLicense?: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -1822,7 +1822,7 @@
             "section": "def-common.RecursivePartial",
             "text": "RecursivePartial"
           },
-          "<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; } | undefined>; disabled?: ",
+          "<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; manageTemplates?: readonly string[] | undefined; } | undefined>; disabled?: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",

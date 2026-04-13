@@ -6,6 +6,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { useModelSettingsForm } from './use_model_settings_form';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
 import { useInferenceSettings, useSaveInferenceSettings } from '../../hooks/use_inference_settings';
@@ -142,10 +143,7 @@ describe('useModelSettingsForm', () => {
     });
 
     expect(mockSaveSettings).toHaveBeenCalledWith({
-      features: expect.arrayContaining([
-        { feature_id: 'child_1', endpoints: [{ id: 'ep-1' }, { id: 'ep-2' }] },
-        { feature_id: 'child_2', endpoints: [{ id: 'endpoint-c' }] },
-      ]),
+      features: [{ feature_id: 'child_1', endpoints: [{ id: 'ep-1' }, { id: 'ep-2' }] }],
     });
   });
 
@@ -163,6 +161,7 @@ describe('useModelSettingsForm', () => {
     expect(result.current.assignments.child_1).toEqual(['endpoint-a', 'endpoint-b']);
     expect(result.current.assignments.child_2).toEqual(['endpoint-c']);
     expect(mockSaveSettings).toHaveBeenCalledTimes(1);
+    expect(mockSaveSettings).toHaveBeenCalledWith({ features: [] });
   });
 
   it('resetSection does nothing for unknown section', () => {
@@ -175,7 +174,7 @@ describe('useModelSettingsForm', () => {
     expect(mockSaveSettings).not.toHaveBeenCalled();
   });
 
-  it('falls back to parent recommendedEndpoints when child has none', () => {
+  it('falls back to Kibana default endpoint when child and parent have no recommendations', () => {
     const childWithNoRecommended: InferenceFeatureConfig = {
       ...childFeature2,
       recommendedEndpoints: [],
@@ -187,7 +186,9 @@ describe('useModelSettingsForm', () => {
 
     const { result } = renderHook(() => useModelSettingsForm());
 
-    expect(result.current.assignments.child_2).toEqual([]);
+    expect(result.current.assignments.child_2).toEqual([
+      defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION,
+    ]);
   });
 
   it('falls back to parent recommendedEndpoints when parent has them and child has none', () => {
@@ -233,6 +234,30 @@ describe('useModelSettingsForm', () => {
     });
 
     expect(result.current.assignments.child_2).toEqual(['parent-ep']);
+  });
+
+  it('save excludes features matching Kibana default endpoint from payload', () => {
+    const childWithNoRecommended: InferenceFeatureConfig = {
+      ...childFeature2,
+      recommendedEndpoints: [],
+    };
+    mockUseRegisteredFeatures.mockReturnValue({
+      features: [parentFeature, childFeature1, childWithNoRecommended],
+      isLoading: false,
+    });
+
+    const { result } = renderHook(() => useModelSettingsForm());
+
+    act(() => {
+      result.current.updateEndpoints('child_1', ['ep-1']);
+    });
+    act(() => {
+      result.current.save();
+    });
+
+    expect(mockSaveSettings).toHaveBeenCalledWith({
+      features: [{ feature_id: 'child_1', endpoints: [{ id: 'ep-1' }] }],
+    });
   });
 
   it('isLoading is true when any dependency is loading', () => {

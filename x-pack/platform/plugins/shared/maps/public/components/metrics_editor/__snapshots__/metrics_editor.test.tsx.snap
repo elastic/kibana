@@ -30,7 +30,7 @@ exports[`should add default count metric when metrics is empty array 1`] = `
     textAlign="center"
   >
     <EuiButtonEmpty
-      iconType="plusInCircleFilled"
+      iconType="plusCircle"
       onClick={[Function]}
       size="xs"
     >
@@ -74,7 +74,7 @@ exports[`should render metrics editor 1`] = `
     textAlign="center"
   >
     <EuiButtonEmpty
-      iconType="plusInCircleFilled"
+      iconType="plusCircle"
       onClick={[Function]}
       size="xs"
     >

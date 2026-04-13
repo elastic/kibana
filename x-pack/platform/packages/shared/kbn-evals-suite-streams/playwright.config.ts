@@ -5,14 +5,16 @@
  * 2.0.
  */
 import Path from 'path';
-import { defineConfig } from '@playwright/test';
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
+import { defineConfig } from '@playwright/test';
 
-export default defineConfig(
-  createPlaywrightEvalsConfig({
-    testDir: Path.resolve(__dirname, './evals'),
-  }),
-  {
-    testIgnore: ['**/significant_events/**'],
-  }
-);
+const baseConfig = createPlaywrightEvalsConfig({
+  testDir: Path.resolve(__dirname, './evals'),
+  runGlobalSetup: true,
+});
+
+export default defineConfig({
+  ...baseConfig,
+  workers: 20,
+  fullyParallel: true,
+});

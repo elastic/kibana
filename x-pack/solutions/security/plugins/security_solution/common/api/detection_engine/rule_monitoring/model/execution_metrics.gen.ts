@@ -53,4 +53,15 @@ export const RuleExecutionMetrics = z.object({
       lte: z.string(),
     })
     .optional(),
+  /**
+   * Detected reason for the execution gap
+   */
+  gap_reason: z
+    .object({
+      /**
+       * The type of reason for the gap (rule_disabled or rule_did_not_run)
+       */
+      type: z.enum(['rule_disabled', 'rule_did_not_run']),
+    })
+    .optional(),
 });

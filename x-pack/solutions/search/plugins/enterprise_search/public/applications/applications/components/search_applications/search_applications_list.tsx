@@ -59,7 +59,7 @@ export const CreateSearchApplicationButton: React.FC<CreateSearchApplicationButt
       title={
         <EuiFlexGroup justifyContent="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="beaker" />
+            <EuiIcon type="flask" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <FormattedMessage
@@ -80,7 +80,7 @@ export const CreateSearchApplicationButton: React.FC<CreateSearchApplicationButt
     >
       <EuiButton
         fill
-        iconType="plusInCircle"
+        iconType="plusCircle"
         data-test-subj="enterprise-search-search-applications-creation-button"
         data-telemetry-id="entSearchApplications-list-createSearchApplication"
         isDisabled={disabled}

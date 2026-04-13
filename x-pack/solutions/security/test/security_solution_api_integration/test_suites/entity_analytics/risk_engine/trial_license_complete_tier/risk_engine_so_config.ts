@@ -22,6 +22,9 @@ export default ({ getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
 
+  const es = getService('es');
+  const log = getService('log');
+
   describe('@ess @ serverless @serverless QA risk_engine_so_update_config', () => {
     before(async () => {
       const soId = await kibanaServer.savedObjects.find({
@@ -95,7 +98,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(currentSoConfig2.attributes).to.have.property('excludeAlertStatuses');
 
       await riskEngineRoutes.disable();
-      await waitForRiskEngineTaskToBeGone;
+      await waitForRiskEngineTaskToBeGone({ es, log });
 
       updatedSoBody.exclude_alert_statuses = [];
 

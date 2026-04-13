@@ -252,6 +252,7 @@ export class Authorization {
 
       return {
         filter: getOwnersFilter(operation.savedObjectType, authorizedOwners),
+        authorizedOwners,
         ensureSavedObjectsAreAuthorized: (entities: OwnerEntity[]) => {
           for (const entity of entities) {
             if (!authorizedOwners.includes(entity.owner)) {

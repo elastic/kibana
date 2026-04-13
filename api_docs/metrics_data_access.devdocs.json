@@ -7572,13 +7572,13 @@
       },
       {
         "parentPluginId": "metricsDataAccess",
-        "id": "def-common.OS_NAME",
+        "id": "def-common.OS_TYPE",
         "type": "string",
         "tags": [],
-        "label": "OS_NAME",
+        "label": "OS_TYPE",
         "description": [],
         "signature": [
-          "\"os.name\""
+          "\"os.type\""
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
         "lineNumber": 27,

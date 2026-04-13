@@ -35,5 +35,14 @@ interface FindSLOTemplatesResponse {
   results: SLOTemplateResponse[];
 }
 
+interface FindSLOTemplateTagsResponse {
+  tags: string[];
+}
+
 export { findSLOTemplatesParamsSchema, getSLOTemplateParamsSchema };
-export type { SLOTemplateResponse, GetSLOTemplateResponse, FindSLOTemplatesResponse };
+export type {
+  SLOTemplateResponse,
+  GetSLOTemplateResponse,
+  FindSLOTemplatesResponse,
+  FindSLOTemplateTagsResponse,
+};

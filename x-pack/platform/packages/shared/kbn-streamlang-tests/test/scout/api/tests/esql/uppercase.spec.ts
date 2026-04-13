@@ -27,15 +27,15 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'test message 1' }, { message: 'test message 2' }];
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
-      expect(esqlResult.documents).toHaveLength(2);
-      expect(esqlResult.documents[0]?.message).toBe('TEST MESSAGE 1');
-      expect(esqlResult.documents[1]?.message).toBe('TEST MESSAGE 2');
+      expect(esqlResult.documentsOrdered).toHaveLength(2);
+      expect(esqlResult.documentsOrdered[0]?.message).toBe('TEST MESSAGE 1');
+      expect(esqlResult.documentsOrdered[1]?.message).toBe('TEST MESSAGE 2');
     });
 
     apiTest('should uppercase a field into a target field', async ({ testBed, esql }) => {
@@ -51,15 +51,15 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'test message 1' }, { message: 'test message 2' }];
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
-      expect(esqlResult.documents).toHaveLength(2);
-      expect(esqlResult.documents[0]?.message_upper).toBe('TEST MESSAGE 1');
-      expect(esqlResult.documents[1]?.message_upper).toBe('TEST MESSAGE 2');
+      expect(esqlResult.documentsOrdered).toHaveLength(2);
+      expect(esqlResult.documentsOrdered[0]?.message_upper).toBe('TEST MESSAGE 1');
+      expect(esqlResult.documentsOrdered[1]?.message_upper).toBe('TEST MESSAGE 2');
     });
 
     apiTest('should uppercase a field with a where condition', async ({ testBed, esql }) => {
@@ -78,7 +78,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [
         { message: 'test message 1', should_uppercase: 'yes' },
@@ -87,9 +87,9 @@ apiTest.describe(
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
-      expect(esqlResult.documents).toHaveLength(2);
-      expect(esqlResult.documents[0]?.message).toBe('TEST MESSAGE 1');
-      expect(esqlResult.documents[1]?.message).toBe('test message 2');
+      expect(esqlResult.documentsOrdered).toHaveLength(2);
+      expect(esqlResult.documentsOrdered[0]?.message).toBe('TEST MESSAGE 1');
+      expect(esqlResult.documentsOrdered[1]?.message).toBe('test message 2');
     });
 
     apiTest(
@@ -111,7 +111,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docs = [
           { message: 'test message 1', should_uppercase: 'yes' },
@@ -120,9 +120,9 @@ apiTest.describe(
         await testBed.ingest(indexName, docs);
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
-        expect(esqlResult.documents).toHaveLength(2);
-        expect(esqlResult.documents[0]?.message_upper).toBe('TEST MESSAGE 1');
-        expect(esqlResult.documents[1]?.message_upper).toBeNull();
+        expect(esqlResult.documentsOrdered).toHaveLength(2);
+        expect(esqlResult.documentsOrdered[0]?.message_upper).toBe('TEST MESSAGE 1');
+        expect(esqlResult.documentsOrdered[1]?.message_upper).toBeNull();
       }
     );
   }
