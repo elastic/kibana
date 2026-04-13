@@ -41,8 +41,9 @@ export const getBurnRateEmbeddableFactory = ({
   const factory: EmbeddableFactory<BurnRateEmbeddableState, BurnRateApi> = {
     type: SLO_BURN_RATE_EMBEDDABLE_ID,
     buildEmbeddable: async ({
-      initialState,
+      uuid,
       finalizeApi,
+      initialState,
       initializeStateApi,
       initializeDrilldownsManager,
     }) => {

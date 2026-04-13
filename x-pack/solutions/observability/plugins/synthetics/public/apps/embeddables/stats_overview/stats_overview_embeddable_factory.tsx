@@ -63,9 +63,10 @@ export const getStatsOverviewEmbeddableFactory = (
     type: SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
     buildEmbeddable: async ({
       initializeDrilldownsManager,
+      initializeStateApi,
       initialState,
       finalizeApi,
-      initializeStateApi,
+      uuid,
     }) => {
       const [coreStart, pluginStart] = await getStartServices();
 
