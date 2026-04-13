@@ -7,6 +7,7 @@
 
 import { findCompositeSLOParamsSchema, findCompositeSLOResponseSchema } from '@kbn/slo-schema';
 import {
+  type CompositeSLORepository,
   DefaultBurnRatesClient,
   DefaultCompositeSLORepository,
   DefaultSummaryClient,
@@ -14,6 +15,47 @@ import {
 } from '../../../services';
 import { createSloServerRoute } from '../../create_slo_server_route';
 import { assertPlatinumLicense } from '../utils/assert_platinum_license';
+
+// TODO: remove once status is a stored field on the composite SLO summary index
+async function findWithComputedStatusFilter({
+  compositeSloRepository,
+  getCompositeSLO,
+  statusFilter,
+  search,
+  tags,
+  sortBy,
+  sortDirection,
+  page,
+  perPage,
+}: {
+  compositeSloRepository: CompositeSLORepository;
+  getCompositeSLO: GetCompositeSLO;
+  statusFilter: string[];
+  search: string | undefined;
+  tags: string[];
+  sortBy: string | undefined;
+  sortDirection: string | undefined;
+  page: number;
+  perPage: number;
+}) {
+  const allResults = await compositeSloRepository.search({
+    search,
+    pagination: { page: 1, perPage: 10000 },
+    tags,
+    sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt' | undefined,
+    sortDirection: sortDirection as 'asc' | 'desc' | undefined,
+  });
+
+  const allDetails = await getCompositeSLO.executeBatch(allResults.results.map((r) => r.id));
+
+  const matchingIds = new Set(
+    allDetails.filter((d) => statusFilter.includes(d.summary.status)).map((d) => d.id)
+  );
+
+  const filtered = allResults.results.filter((r) => matchingIds.has(r.id));
+  const start = (page - 1) * perPage;
+  return { results: filtered.slice(start, start + perPage), total: filtered.length, page, perPage };
+}
 
 export const findCompositeSLORoute = createSloServerRoute({
   endpoint: 'GET /api/observability/slo_composites 2023-10-31',
@@ -40,16 +82,6 @@ export const findCompositeSLORoute = createSloServerRoute({
     const statusFilter = query.status ? query.status.split(',').map((s) => s.trim()) : [];
 
     if (statusFilter.length > 0) {
-      // Status is a computed field — fetch all definitions matching search/tags, batch-compute
-      // summaries, filter by status server-side, then return the correctly paginated slice.
-      const allResults = await compositeSloRepository.search({
-        search: query.search,
-        pagination: { page: 1, perPage: 10000 },
-        tags,
-        sortBy: query.sortBy,
-        sortDirection: query.sortDirection,
-      });
-
       const burnRatesClient = new DefaultBurnRatesClient(scopedClusterClient.asCurrentUser);
       const summaryClient = new DefaultSummaryClient(
         scopedClusterClient.asCurrentUser,
@@ -61,18 +93,18 @@ export const findCompositeSLORoute = createSloServerRoute({
         summaryClient
       );
 
-      const allDetails = await getCompositeSLO.executeBatch(allResults.results.map((r) => r.id));
-
-      const matchingIds = new Set(
-        allDetails.filter((d) => statusFilter.includes(d.summary.status)).map((d) => d.id)
-      );
-
-      const filteredResults = allResults.results.filter((r) => matchingIds.has(r.id));
-      const total = filteredResults.length;
-      const start = (page - 1) * perPage;
-      const pageResults = filteredResults.slice(start, start + perPage);
-
-      return findCompositeSLOResponseSchema.encode({ results: pageResults, total, page, perPage });
+      const result = await findWithComputedStatusFilter({
+        compositeSloRepository,
+        getCompositeSLO,
+        statusFilter,
+        search: query.search,
+        tags,
+        sortBy: query.sortBy,
+        sortDirection: query.sortDirection,
+        page,
+        perPage,
+      });
+      return findCompositeSLOResponseSchema.encode(result);
     }
 
     const result = await compositeSloRepository.search({
