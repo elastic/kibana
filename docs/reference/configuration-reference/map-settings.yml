@@ -8,7 +8,7 @@ collection: Map settings in Kibana
 id: map-settings-kb
 
 groups:
-  - group: General settings
+  - group: General map settings
     id: general-map-settings
     settings:
 
