@@ -15,7 +15,7 @@ import type {
 } from './types';
 import { ToolsService } from './tools';
 import { AgentsService } from './agents';
-import { RunnerFactoryImpl } from './runner';
+import { RunnerFactoryImpl } from './execution/runner';
 import { ConversationServiceImpl } from './conversation';
 import { type AttachmentService, createAttachmentService } from './attachments';
 import { HooksService } from './hooks';
@@ -74,7 +74,11 @@ export class ServiceManager {
     const skillsSetup = this.services.skills.setup();
 
     this.internalSetup = {
-      tools: this.services.tools.setup({ logger: logger.get('tools'), workflowsManagement }),
+      tools: this.services.tools.setup({
+        logger: logger.get('tools'),
+        workflowsManagement,
+        config: this.config,
+      }),
       agents: this.services.agents.setup({ logger: logger.get('agents') }),
       attachments: this.services.attachments.setup(),
       hooks: this.services.hooks.setup({ logger: logger.get('hooks') }),

@@ -16,19 +16,27 @@ export interface FooterProps {
    * The document to display
    */
   hit: DataTableRecord;
+  /**
+   * Callback invoked after alert mutations to refresh flyout data.
+   */
+  onAlertUpdated: () => void;
+  /**
+   * Callback to open the notes flyout.
+   */
+  onShowNotes: () => void;
 }
 
 /**
  * Footer component rendered at the top of the new document flyout in Security Solution and in Discover
  */
-export const Footer = memo(({ hit }: FooterProps) => {
+export const Footer = memo(({ hit, onAlertUpdated, onShowNotes }: FooterProps) => {
   return (
     <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
       <EuiFlexItem grow={false}>
         <FooterAiActions hit={hit} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <TakeAction hit={hit} />
+        <TakeAction hit={hit} onAlertUpdated={onAlertUpdated} onShowNotes={onShowNotes} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

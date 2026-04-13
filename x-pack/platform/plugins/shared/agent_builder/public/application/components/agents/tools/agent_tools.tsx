@@ -45,6 +45,8 @@ import { ToolDetailPanel } from './tool_detail_panel';
 import { PageWrapper } from '../common/page_wrapper';
 import { ICON_DIMENSIONS } from '../common/constants';
 import { useListDetailPageStyles } from '../common/styles';
+import { useCanEditAgent } from '../../../hooks/agents/use_can_edit_agent';
+import { ToolsCustomizeEmptyState } from './tools_customize_empty_state';
 
 const ActiveToolsList: React.FC<{
   filteredActiveTools: ToolDefinition[];
@@ -55,6 +57,7 @@ const ActiveToolsList: React.FC<{
   isRemoving: boolean;
   onSelect: (id: string) => void;
   onRemove: (tool: ToolDefinition) => void;
+  canEditAgent: boolean;
 }> = ({
   filteredActiveTools,
   searchQuery,
@@ -64,6 +67,7 @@ const ActiveToolsList: React.FC<{
   isRemoving,
   onSelect,
   onRemove,
+  canEditAgent,
 }) => {
   if (filteredActiveTools.length === 0) {
     return (
@@ -101,6 +105,7 @@ const ActiveToolsList: React.FC<{
                 <EuiBadge color="hollow">{labels.agentTools.readOnlyBadge}</EuiBadge>
               ) : undefined
             }
+            canEditAgent={canEditAgent}
           />
         );
       })}
@@ -118,6 +123,7 @@ export const AgentTools: React.FC = () => {
 
   const { agent, isLoading: agentLoading } = useAgentBuilderAgentById(agentId);
   const { tools: allTools, isLoading: toolsLoading } = useToolsService();
+  const canEditAgent = useCanEditAgent({ agent });
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedToolId, setSelectedToolId] = useQueryState<string>(searchParamNames.toolId);
@@ -239,6 +245,8 @@ export const AgentTools: React.FC = () => {
     }
   }, [selectedToolId, activeTools, handleRemoveTool, enableElasticCapabilities, defaultToolIdSet]);
 
+  const showCustomizeEmptyState = activeTools.length === 0 && !searchQuery.trim();
+
   const isLoading = agentLoading || toolsLoading;
 
   if (isLoading) {
@@ -246,6 +254,27 @@ export const AgentTools: React.FC = () => {
       <EuiFlexGroup alignItems="center" justifyContent="center" css={styles.loadingSpinner}>
         <EuiLoadingSpinner size="xl" />
       </EuiFlexGroup>
+    );
+  }
+
+  const toolModals = isLibraryOpen ? (
+    <ToolLibraryPanel
+      onClose={closeLibrary}
+      allTools={allTools}
+      activeToolIdSet={libraryActiveToolIdSet}
+      onToggleTool={handleToggleTool}
+      mutatingToolId={mutatingToolId}
+      enableElasticCapabilities={enableElasticCapabilities}
+      builtinToolIdSet={defaultToolIdSet}
+    />
+  ) : null;
+
+  if (showCustomizeEmptyState) {
+    return (
+      <PageWrapper>
+        <ToolsCustomizeEmptyState canEditAgent={canEditAgent} onOpenLibrary={openLibrary} />
+        {toolModals}
+      </PageWrapper>
     );
   }
 
@@ -272,11 +301,13 @@ export const AgentTools: React.FC = () => {
                   {labels.agentTools.manageAllTools}
                 </EuiButtonEmpty>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton fill iconType="plusInCircle" iconSide="left" onClick={openLibrary}>
-                  {labels.agentTools.addToolButton}
-                </EuiButton>
-              </EuiFlexItem>
+              {canEditAgent && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton fill iconType="plusInCircle" iconSide="left" onClick={openLibrary}>
+                    {labels.agentTools.addToolButton}
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -309,6 +340,7 @@ export const AgentTools: React.FC = () => {
               isRemoving={updateToolsMutation.isLoading}
               onSelect={setSelectedToolId}
               onRemove={handleRemoveTool}
+              canEditAgent={canEditAgent}
             />
           </div>
         </EuiFlexItem>
@@ -319,6 +351,7 @@ export const AgentTools: React.FC = () => {
               toolId={selectedToolId}
               onRemove={handleRemoveSelectedTool}
               isAutoIncluded={enableElasticCapabilities && defaultToolIdSet.has(selectedToolId)}
+              canEditAgent={canEditAgent}
             />
           ) : (
             <EuiFlexGroup
@@ -334,17 +367,7 @@ export const AgentTools: React.FC = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {isLibraryOpen && (
-        <ToolLibraryPanel
-          onClose={closeLibrary}
-          allTools={allTools}
-          activeToolIdSet={libraryActiveToolIdSet}
-          onToggleTool={handleToggleTool}
-          mutatingToolId={mutatingToolId}
-          enableElasticCapabilities={enableElasticCapabilities}
-          builtinToolIdSet={defaultToolIdSet}
-        />
-      )}
+      {toolModals}
     </PageWrapper>
   );
 };

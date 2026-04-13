@@ -65,6 +65,7 @@
       "share",
       "agentBuilder",
       "slo",
+      "cps",
     ],
     "requiredBundles": [
       "fleet",

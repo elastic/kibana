@@ -16,6 +16,8 @@ export const DASHBOARDS_URL = '/app/security/dashboards';
 export const ASSETS_URL = '/app/security/assets';
 export const ENDPOINTS_URL = '/app/security/administration/endpoints';
 export const POLICIES_URL = '/app/security/administration/policy';
+/** Any artifact tab lives under this path prefix (trusted apps, event filters, blocklist, etc.) */
+export const ADMINISTRATION_URL_PREFIX = '/app/security/administration';
 export const TRUSTED_APPS_URL = '/app/security/administration/trusted_apps';
 export const EVENT_FILTERS_URL = '/app/security/administration/event_filters';
 export const BLOCKLIST_URL = '/app/security/administration/blocklist';

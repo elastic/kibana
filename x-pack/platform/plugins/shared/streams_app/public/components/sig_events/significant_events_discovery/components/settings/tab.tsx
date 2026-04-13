@@ -25,29 +25,29 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
-import { OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS } from '@kbn/management-settings-ids';
+import {
+  OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS,
+  OBSERVABILITY_STREAMS_SIG_EVENTS_TUNING_CONFIG,
+} from '@kbn/management-settings-ids';
 import { DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
 import {
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
   MIN_EXTRACTION_INTERVAL_HOURS,
+  DEFAULT_SIG_EVENTS_TUNING_CONFIG,
+  type SigEventsTuningConfig,
 } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../../../hooks/use_kibana';
+import { useModelSettingsUrl } from '../../../../../hooks/use_model_settings_url';
 import { getFormattedError } from '../../../../../util/errors';
 import { useContinuousExtractionSettings } from './use_continuous_extraction_settings';
+import {
+  SigEventsTuningConfigEditor,
+  configToAnnotatedYaml,
+} from './sig_events_tuning_config_editor';
 
 export function SettingsTab() {
-  const {
-    dependencies: {
-      start: { share },
-    },
-    core,
-  } = useKibana();
-
-  const modelSettingsUrl = useMemo(() => {
-    const managementLocator = share.url.locators.get(MANAGEMENT_APP_LOCATOR);
-    return managementLocator?.getRedirectUrl({ sectionId: 'ml', appId: 'model_settings' }) ?? '';
-  }, [share.url.locators]);
+  const { core } = useKibana();
+  const modelSettingsUrl = useModelSettingsUrl();
 
   const [savedIndexPatterns, setSavedIndexPatterns] = useState<string>(() =>
     core.settings.client.get<string>(
@@ -62,14 +62,41 @@ export function SettingsTab() {
     http: core.http,
   });
 
+  const savedConfigYaml = useMemo(() => {
+    try {
+      const raw = core.settings.globalClient.get<unknown>(
+        OBSERVABILITY_STREAMS_SIG_EVENTS_TUNING_CONFIG,
+        DEFAULT_SIG_EVENTS_TUNING_CONFIG
+      );
+      const parsed =
+        typeof raw === 'string'
+          ? (JSON.parse(raw) as Partial<SigEventsTuningConfig>)
+          : (raw as Partial<SigEventsTuningConfig>);
+      return configToAnnotatedYaml({ ...DEFAULT_SIG_EVENTS_TUNING_CONFIG, ...parsed });
+    } catch {
+      return configToAnnotatedYaml(DEFAULT_SIG_EVENTS_TUNING_CONFIG);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const [draftConfigYaml, setDraftConfigYaml] = useState<string>(savedConfigYaml);
+  const [parsedTuningConfig, setParsedTuningConfig] = useState<SigEventsTuningConfig | null>(null);
+  const [savedConfigYamlState, setSavedConfigYamlState] = useState<string>(savedConfigYaml);
+
   const [isSaving, setIsSaving] = useState(false);
 
-  const hasChanges = indexPatterns !== savedIndexPatterns || continuousExtraction.hasChanged;
+  const hasTuningConfigChanges = draftConfigYaml !== savedConfigYamlState;
+  const hasChanges =
+    indexPatterns !== savedIndexPatterns ||
+    continuousExtraction.hasChanged ||
+    hasTuningConfigChanges;
 
   const handleCancel = useCallback(() => {
     setIndexPatterns(savedIndexPatterns);
     continuousExtraction.reset();
-  }, [savedIndexPatterns, continuousExtraction]);
+    setDraftConfigYaml(savedConfigYamlState);
+    setParsedTuningConfig(null);
+  }, [savedIndexPatterns, savedConfigYamlState, continuousExtraction]);
 
   const handleSave = useCallback(async () => {
     setIsSaving(true);
@@ -85,6 +112,18 @@ export function SettingsTab() {
       if (continuousExtraction.hasChanged) {
         await continuousExtraction.save();
       }
+
+      if (hasTuningConfigChanges && parsedTuningConfig) {
+        const fullConfig = { ...DEFAULT_SIG_EVENTS_TUNING_CONFIG, ...parsedTuningConfig };
+        await core.settings.globalClient.set(
+          OBSERVABILITY_STREAMS_SIG_EVENTS_TUNING_CONFIG,
+          JSON.stringify(fullConfig)
+        );
+        const newSavedYaml = configToAnnotatedYaml(fullConfig);
+        setSavedConfigYamlState(newSavedYaml);
+        setDraftConfigYaml(newSavedYaml);
+        setParsedTuningConfig(null);
+      }
     } catch (err) {
       core.notifications.toasts.addDanger({
         title: i18n.translate('xpack.streams.significantEventsDiscovery.settings.saveErrorTitle', {
@@ -97,10 +136,13 @@ export function SettingsTab() {
     }
   }, [
     core.settings.client,
+    core.settings.globalClient,
     core.notifications.toasts,
     indexPatterns,
     savedIndexPatterns,
     continuousExtraction,
+    hasTuningConfigChanges,
+    parsedTuningConfig,
   ]);
 
   return (
@@ -361,6 +403,59 @@ export function SettingsTab() {
         </EuiPanel>
       </EuiPanel>
 
+      <EuiSpacer />
+
+      <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
+        <EuiPanel hasShadow={false} color="subdued">
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <h3>
+                  {i18n.translate('xpack.streams.significantEventsDiscovery.settings.tuningTitle', {
+                    defaultMessage: 'Significant Events tuning',
+                  })}
+                </h3>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                iconType="refresh"
+                onClick={() => {
+                  const defaultYaml = configToAnnotatedYaml(DEFAULT_SIG_EVENTS_TUNING_CONFIG);
+                  setDraftConfigYaml(defaultYaml);
+                  setParsedTuningConfig(DEFAULT_SIG_EVENTS_TUNING_CONFIG);
+                }}
+              >
+                {i18n.translate(
+                  'xpack.streams.significantEventsDiscovery.settings.resetToDefaults',
+                  { defaultMessage: 'Reset to defaults' }
+                )}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+        <EuiPanel hasShadow={false} hasBorder={false}>
+          <EuiCallOut
+            size="s"
+            color="warning"
+            iconType="warning"
+            title={i18n.translate('xpack.streams.significantEventsDiscovery.settings.tuningInfo', {
+              defaultMessage:
+                'These are advanced settings that control how features are discovered and queries are searched. Incorrect values may degrade extraction quality or cause unexpected behavior. Changes take effect on the next run.',
+            })}
+          />
+          <EuiSpacer size="m" />
+          <SigEventsTuningConfigEditor
+            value={draftConfigYaml}
+            onChange={(yaml, parsed) => {
+              setDraftConfigYaml(yaml);
+              setParsedTuningConfig(parsed);
+            }}
+          />
+        </EuiPanel>
+      </EuiPanel>
+
       {hasChanges && (
         <EuiBottomBar data-test-subj="streams-significant-events-settings-bottom-bar">
           <EuiFlexGroup justifyContent="flexEnd">
@@ -388,6 +483,7 @@ export function SettingsTab() {
                     size="s"
                     onClick={handleSave}
                     isLoading={isSaving}
+                    isDisabled={hasTuningConfigChanges && parsedTuningConfig === null}
                   >
                     {i18n.translate(
                       'xpack.streams.significantEventsDiscovery.settings.saveChangesButton',

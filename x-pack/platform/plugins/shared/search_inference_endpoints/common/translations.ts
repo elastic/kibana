@@ -167,7 +167,7 @@ export const RESOURCE_BASED_BILLING_DESCRIPTION = i18n.translate(
 );
 
 export const SETTINGS_TITLE = i18n.translate('xpack.searchInferenceEndpoints.settings.title', {
-  defaultMessage: 'Settings',
+  defaultMessage: 'Feature settings',
 });
 
 export const SETTINGS_SAVE_BUTTON = i18n.translate(
@@ -331,5 +331,41 @@ export const VIEW_DOCUMENTATION_LINK = i18n.translate(
   'xpack.searchInferenceEndpoints.providerInference.viewDocumentation',
   {
     defaultMessage: 'View documentation',
+  }
+);
+
+export const SETTINGS_NO_MODELS_TITLE = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.noModels.title',
+  {
+    defaultMessage: 'No models available',
+  }
+);
+
+export const SETTINGS_NO_MODELS_DESCRIPTION = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.noModels.description',
+  {
+    defaultMessage: 'There are no inference models configured. Add models to get started.',
+  }
+);
+
+export const SETTINGS_NO_MODELS_NO_CLOUD_DESCRIPTION = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.noModels.noCloudDescription',
+  {
+    defaultMessage:
+      'There are no inference models configured. Add models or connect your deployment to the Elastic Inference Service to get started.',
+  }
+);
+
+export const SETTINGS_NO_MODELS_ADD_MODELS = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.noModels.addModels',
+  {
+    defaultMessage: 'Add models',
+  }
+);
+
+export const SETTINGS_NO_MODELS_CONNECT_EIS = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.noModels.connectEis',
+  {
+    defaultMessage: 'Connect Elastic Inference Service',
   }
 );

@@ -87,12 +87,6 @@ describe('UnifiedSidebar', () => {
       expect(screen.getByTestId('agentBuilderSidebar-conversation')).toBeInTheDocument();
       expect(screen.queryByTestId('agentBuilderSidebar-manage')).not.toBeInTheDocument();
     });
-
-    it('renders for connectors route', () => {
-      renderSidebar('/agents/my-agent/connectors');
-      expect(screen.getByTestId('agentBuilderSidebar-conversation')).toBeInTheDocument();
-      expect(screen.queryByTestId('agentBuilderSidebar-manage')).not.toBeInTheDocument();
-    });
   });
 
   describe('manage sidebar', () => {
