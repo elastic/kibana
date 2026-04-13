@@ -83,7 +83,7 @@ export const deriveRecoveryDelayModeFromStateTransition = (
   stateTransition?: StateTransition | null
 ): FormValues['stateTransitionRecoveryDelayMode'] => {
   if (stateTransition?.recoveringTimeframe != null) return 'duration';
-  if (stateTransition?.recoveringCount != null) return 'breaches';
+  if (stateTransition?.recoveringCount != null) return 'recoveries';
   return 'immediate';
 };
 
@@ -115,7 +115,7 @@ const mapStateTransition = (formValues: FormValues) => {
   }
 
   if (recoveryMode !== 'immediate') {
-    if (recoveryMode === 'breaches' && stateTransition.recoveringCount != null) {
+    if (recoveryMode !== 'duration' && stateTransition.recoveringCount != null) {
       out.recovering_count = stateTransition.recoveringCount;
     }
     if (recoveryMode === 'duration') {
