@@ -76,7 +76,7 @@ export function ChatHeader({
   copyUrl,
   deleteConversation,
   handleArchiveConversation,
-  navigateToConnectorsManagementApp,
+  navigateToModelManagementApp,
 }: {
   connectors: UseGenAIConnectorsResult;
   conversationId?: string;
@@ -97,7 +97,7 @@ export function ChatHeader({
   copyConversationToClipboard: (conversation: Conversation) => void;
   copyUrl: (id: string) => void;
   handleArchiveConversation: (id: string, isArchived: boolean) => Promise<void>;
-  navigateToConnectorsManagementApp: (application: ApplicationStart) => void;
+  navigateToModelManagementApp: (application: ApplicationStart) => void;
 }) {
   const theme = useEuiTheme();
   const breakpoint = useCurrentEuiBreakpoint();
@@ -123,7 +123,7 @@ export function ChatHeader({
     <ChatActionsMenu
       connectors={connectors}
       disabled={licenseInvalid}
-      navigateToConnectorsManagementApp={navigateToConnectorsManagementApp}
+      navigateToModelManagementApp={navigateToModelManagementApp}
       isConversationApp={isConversationApp}
     />
   );
@@ -277,7 +277,7 @@ export function ChatHeader({
                                 { defaultMessage: 'Navigate to conversations' }
                               )}
                               data-test-subj="observabilityAiAssistantChatHeaderButton"
-                              iconType="discuss"
+                              iconType="comment"
                               onClick={() => navigateToConversation(conversationId)}
                             />
                           </EuiToolTip>

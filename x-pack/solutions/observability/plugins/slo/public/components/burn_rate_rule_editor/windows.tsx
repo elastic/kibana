@@ -339,7 +339,7 @@ export function Windows({ slo, windows, errors, onChange, totalNumberOfWindows }
             data-test-subj="sloBurnRateRuleAddWindowButton"
             color={'primary'}
             size="s"
-            iconType={'plusInCircleFilled'}
+            iconType={'plusCircle'}
             onClick={handleAddWindow}
             isDisabled={windows.length === (totalNumberOfWindows || 4)}
             aria-label={i18n.translate('xpack.slo.rules.addWindowAriaLabel', {

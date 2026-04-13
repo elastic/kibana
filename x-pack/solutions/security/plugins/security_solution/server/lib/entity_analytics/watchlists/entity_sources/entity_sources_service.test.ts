@@ -12,23 +12,22 @@ import {
 } from '@kbn/core/server/mocks';
 import { createEntitySourcesService } from './entity_sources_service';
 
-const mockListEntitySources = jest.fn();
-
 jest.mock('../management/watchlist_config');
-jest.mock('../../privilege_monitoring/saved_objects', () => ({
-  MonitoringEntitySourceDescriptorClient: jest.fn().mockImplementation(() => ({
-    list: mockListEntitySources,
-  })),
-}));
+jest.mock('./infra/entity_source_client');
 jest.mock('../entities/service');
 jest.mock('./sync/index_sync');
 jest.mock('../entities/utils');
 
-const { mockWatchlistGet, mockGetEntitySourceIds } = jest.requireMock(
+const { mockListEntitySources } = jest.requireMock('./infra/entity_source_client') as {
+  mockListEntitySources: jest.Mock;
+};
+
+const { mockWatchlistGet, mockGetEntitySourceIds, mockWatchlistList } = jest.requireMock(
   '../management/watchlist_config'
 ) as {
   mockWatchlistGet: jest.Mock;
   mockGetEntitySourceIds: jest.Mock;
+  mockWatchlistList: jest.Mock;
 };
 
 const { mockListEntityStoreEntities } = jest.requireMock('../entities/service') as {
@@ -59,7 +58,7 @@ describe('createEntitySourcesService', () => {
         {
           id: 'source-a',
           type: 'index',
-          indexPattern: 'user.id',
+          identifierField: 'user.id',
         },
         {
           id: 'source-b',
@@ -75,16 +74,23 @@ describe('createEntitySourcesService', () => {
     });
     mockListEntityStoreEntities
       .mockResolvedValueOnce({
-        user: ['user:1'],
-        host: [],
-        service: [],
-        generic: [],
+        entityIdsByType: {
+          user: ['user:1'],
+          host: [],
+          service: [],
+          generic: [],
+        },
+        correlationMap: new Map(),
+        watchlistsByEuid: new Map(),
       })
       .mockResolvedValueOnce({
-        user: ['user:2'],
-        host: ['host:1'],
-        service: [],
-        generic: [],
+        entityIdsByType: {
+          user: ['user:2'],
+          host: ['host:1'],
+          service: [],
+          generic: [],
+        },
+        watchlistsByEuid: new Map(),
       });
     mockPlainIndexSync.mockResolvedValue(undefined);
     mockGetIndexForWatchlist.mockReturnValue('.lists-watchlist-vip-users-default');
@@ -103,7 +109,7 @@ describe('createEntitySourcesService', () => {
     expect(mockWatchlistGet).toHaveBeenCalledWith('watchlist-1');
     expect(mockGetEntitySourceIds).toHaveBeenCalledWith('watchlist-1');
     expect(mockListEntitySources).toHaveBeenCalledWith({});
-    expect(mockGetIndexForWatchlist).toHaveBeenCalledWith('VIP Users', namespace);
+    expect(mockGetIndexForWatchlist).toHaveBeenCalledWith(namespace);
 
     expect(mockListEntityStoreEntities).toHaveBeenCalledTimes(2);
     expect(mockListEntityStoreEntities).toHaveBeenNthCalledWith(1, {
@@ -124,6 +130,8 @@ describe('createEntitySourcesService', () => {
           service: [],
           generic: [],
         },
+        correlationMap: expect.any(Map),
+        watchlistsByEuid: expect.any(Map),
       },
       {
         sourceId: 'source-c',
@@ -133,11 +141,90 @@ describe('createEntitySourcesService', () => {
           service: [],
           generic: [],
         },
+        watchlistsByEuid: expect.any(Map),
       },
     ]);
 
     expect(logger.info).toHaveBeenCalledWith(
       '[WatchlistSync] Completed sync for watchlist watchlist-1 (VIP Users)'
     );
+  });
+
+  describe('syncAllWatchlists', () => {
+    const createService = () =>
+      createEntitySourcesService({ esClient, soClient, logger, namespace });
+
+    it('syncs each watchlist returned by list', async () => {
+      mockWatchlistList.mockResolvedValue([
+        { id: 'wl-1', name: 'VIP Users' },
+        { id: 'wl-2', name: 'Privileged Hosts' },
+      ]);
+
+      const service = createService();
+      // Stub syncWatchlist indirectly via the mocks it calls
+      mockWatchlistGet.mockResolvedValue({ name: 'stub' });
+      mockGetEntitySourceIds.mockResolvedValue([]);
+      mockListEntitySources.mockResolvedValue({ sources: [] });
+
+      await service.syncAllWatchlists();
+
+      expect(mockWatchlistList).toHaveBeenCalledTimes(1);
+      // syncWatchlist is called once per watchlist — get is the first call it makes
+      expect(mockWatchlistGet).toHaveBeenCalledTimes(2);
+      expect(mockWatchlistGet).toHaveBeenCalledWith('wl-1');
+      expect(mockWatchlistGet).toHaveBeenCalledWith('wl-2');
+    });
+
+    it('skips sync and logs debug when no watchlists exist', async () => {
+      mockWatchlistList.mockResolvedValue([]);
+
+      const service = createService();
+      await service.syncAllWatchlists();
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        'No watchlists found for namespace "default". Skipping sync.'
+      );
+      expect(mockWatchlistGet).not.toHaveBeenCalled();
+    });
+
+    it('filters out watchlists without an id', async () => {
+      mockWatchlistList.mockResolvedValue([
+        { id: 'wl-1', name: 'VIP Users' },
+        { id: undefined, name: 'No ID' },
+        { name: 'Also No ID' },
+      ]);
+
+      const service = createService();
+      mockWatchlistGet.mockResolvedValue({ name: 'stub' });
+      mockGetEntitySourceIds.mockResolvedValue([]);
+      mockListEntitySources.mockResolvedValue({ sources: [] });
+
+      await service.syncAllWatchlists();
+
+      expect(mockWatchlistGet).toHaveBeenCalledTimes(1);
+      expect(mockWatchlistGet).toHaveBeenCalledWith('wl-1');
+    });
+
+    it('continues syncing remaining watchlists when one fails', async () => {
+      mockWatchlistList.mockResolvedValue([
+        { id: 'wl-1', name: 'Failing' },
+        { id: 'wl-2', name: 'Succeeding' },
+      ]);
+
+      const service = createService();
+      mockWatchlistGet
+        .mockRejectedValueOnce(new Error('get failed'))
+        .mockResolvedValueOnce({ name: 'Succeeding' });
+      mockGetEntitySourceIds.mockResolvedValue([]);
+      mockListEntitySources.mockResolvedValue({ sources: [] });
+
+      await service.syncAllWatchlists();
+
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to sync watchlist "Failing" (wl-1): get failed')
+      );
+      // Second watchlist still synced
+      expect(mockWatchlistGet).toHaveBeenCalledWith('wl-2');
+    });
   });
 });

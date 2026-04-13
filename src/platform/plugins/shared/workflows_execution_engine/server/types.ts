@@ -39,6 +39,7 @@ export interface WorkflowsExecutionEnginePluginStart {
   executeWorkflow: ExecuteWorkflow;
   executeWorkflowStep: ExecuteWorkflowStep;
   cancelWorkflowExecution: CancelWorkflowExecution;
+  cancelAllActiveWorkflowExecutions: CancelAllActiveWorkflowExecutions;
   resumeWorkflowExecution: ResumeWorkflowExecution;
   workflowEventLoggerService: IWorkflowEventLoggerService;
   scheduleWorkflow: ScheduleWorkflow;
@@ -72,6 +73,7 @@ export type ExecuteWorkflow = (
 export type ExecuteWorkflowStep = (
   workflow: WorkflowExecutionEngineModel,
   stepId: string,
+  executionContext: Record<string, unknown> | undefined,
   contextOverride: Record<string, unknown>,
   request: KibanaRequest
 ) => Promise<ExecuteWorkflowStepResponse>;
@@ -80,6 +82,11 @@ export type CancelWorkflowExecution = (
   workflowExecutionId: string,
   spaceId: string
 ) => Promise<void>;
+
+export type CancelAllActiveWorkflowExecutions = (params: {
+  spaceId: string;
+  workflowId: string;
+}) => Promise<void>;
 
 export type ResumeWorkflowExecution = (
   executionId: string,

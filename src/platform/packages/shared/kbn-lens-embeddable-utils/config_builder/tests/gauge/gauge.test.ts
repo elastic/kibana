@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 import { gaugeStateSchema } from '../../schema/charts/gauge';
+import type { GaugeState } from '../../schema/charts/gauge';
+import { AUTO_COLOR, NO_COLOR } from '../../schema/color';
+import { LensConfigBuilder } from '../../config_builder';
 import { validateAPIConverter, validateConverter } from '../validate';
 import {
   basicGaugeWithAdHocDataView,
@@ -35,7 +39,7 @@ describe('Gauge', () => {
       validateConverter(gaugeAttributesWithPercentageColorMode, gaugeStateSchema);
     });
 
-    it('should convert a gauge chart with ESQL dataset', () => {
+    it('should convert a gauge chart with ESQL datasource', () => {
       validateConverter(gaugeESQLAttributes, gaugeStateSchema);
     });
 
@@ -70,6 +74,45 @@ describe('Gauge', () => {
 
     it('should convert a comprehensive ESQL-based gauge chart', () => {
       validateAPIConverter(comprehensiveEsqlGauge, gaugeStateSchema);
+    });
+  });
+
+  describe('color default application', () => {
+    const baseGauge = {
+      type: 'gauge',
+      title: 'Color default test',
+      data_source: {
+        type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+        index_pattern: 'test-index',
+        time_field: '@timestamp',
+      },
+      metric: {
+        operation: 'count',
+        empty_as_null: false,
+      },
+      sampling: 1,
+      ignore_global_filters: false,
+    } satisfies GaugeState;
+
+    it('should emit AUTO_COLOR when no color is specified', () => {
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(baseGauge);
+      const apiOutput = builder.toAPIFormat(lensState) as GaugeState;
+
+      expect(apiOutput.metric.color).toEqual(AUTO_COLOR);
+    });
+
+    it('should emit NO_COLOR when color is explicitly set to `none`', () => {
+      const config = {
+        ...baseGauge,
+        metric: { ...baseGauge.metric, color: NO_COLOR },
+      } satisfies GaugeState;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as GaugeState;
+
+      expect(apiOutput.metric.color).toEqual(NO_COLOR);
     });
   });
 });

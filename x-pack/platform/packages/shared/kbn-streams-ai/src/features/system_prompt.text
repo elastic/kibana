@@ -81,7 +81,7 @@ Schema features describe the **log schema family** evident from field names and 
 - Good: Standalone infrastructure and technology features even when also referenced in an entity's context — they carry independent value
 - Bad: Do not combine multiple unrelated components or technologies into one feature
 
-Also: **do not emit multiple features with the same (`type`, `subtype`, `properties`) tuple**. Merge evidence/tags/meta instead.
+Also: **do not emit multiple features that represent the same real-world component** — even if their exact property values differ slightly (naming variations, suffixes, abbreviations). When two features share the same `type`, `subtype`, and describe the same logical entity, merge evidence/tags/meta into a single feature instead.
 
 ## Naming Conventions
 
@@ -360,6 +360,16 @@ Version formatting rules (important for vulnerability analysis):
   }
 }
 ```
+
+## Previously Identified Features
+
+If `previously_identified_features` are provided in the input, they contain features already identified in previous iterations. Follow these rules:
+1. Before emitting any feature, check whether it **represents the same real-world component** as one already in the list — even if property values differ slightly (different naming conventions, suffixes, abbreviations). Two features refer to the same component when they share the same `type` and `subtype` and their `properties` describe the same logical entity.
+2. When a feature matches an existing one, **re-emit it using the exact same `id`** from the list. Return the information extracted from the current sample documents — the system will merge it with the prior version.
+3. **Do not re-emit existing features unchanged** — only re-emit when the current documents contain matching evidence and genuinely new information to add.
+4. **Focus on discovering features not yet covered** by the list above, but always verify a candidate is not a variant of an existing feature before emitting it as new.
+
+If `previously_identified_features` is empty or absent, ignore this section entirely.
 
 ## Excluded Features
 

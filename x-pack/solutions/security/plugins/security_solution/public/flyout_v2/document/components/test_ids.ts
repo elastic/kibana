@@ -11,10 +11,28 @@ export const FLYOUT_MISSING_ALERTS_PRIVILEGE_TEST_ID = `${PREFIX}MissingAlertsPr
 
 /* Header */
 
-export const HEADER_TITLE_TEST_ID = `${PREFIX}AlertTitle` as const;
-export const HEADER_TITLE_LINK_TEST_ID = `${PREFIX}AlertTitleLink` as const;
+export const TIMESTAMP_TEST_ID = `${PREFIX}HeaderTimestamp` as const;
+export const TITLE_TEST_ID = `${PREFIX}AlertTitle` as const;
+export const TITLE_LINK_TEST_ID = `${PREFIX}AlertTitleLink` as const;
+export const EVENT_TITLE_TEST_ID = `${PREFIX}EventTitle` as const;
+export const SEVERITY_VALUE_TEST_ID = 'severity' as const;
+export const STATUS_TITLE_TEST_ID = `${PREFIX}HeaderStatusTitle` as const;
+export const STATUS_BUTTON_TEST_ID = 'rule-status-badge' as const;
+export const RISK_SCORE_TITLE_TEST_ID = `${PREFIX}HeaderRiskScoreTitle` as const;
+export const RISK_SCORE_VALUE_TEST_ID = `${PREFIX}HeaderRiskScoreValue` as const;
+export const ASSIGNEES_EMPTY_TEST_ID = `${PREFIX}HeaderAssigneesEmpty` as const;
+export const ASSIGNEES_TEST_ID = `${PREFIX}HeaderAssignees` as const;
+export const ASSIGNEES_TITLE_TEST_ID = `${PREFIX}HeaderAssigneesTitle` as const;
+export const ASSIGNEES_ADD_BUTTON_TEST_ID = `${PREFIX}HeaderAssigneesAddButton` as const;
 
 /* About */
+
+export const EVENT_CATEGORY_DESCRIPTION_TEST_ID = `${PREFIX}EventCategoryDescription` as const;
+export const EVENT_KIND_DESCRIPTION_TEST_ID = `${PREFIX}EventKindDescription` as const;
+export const EVENT_KIND_DESCRIPTION_TEXT_TEST_ID = `${EVENT_KIND_DESCRIPTION_TEST_ID}Text` as const;
+export const EVENT_KIND_DESCRIPTION_CATEGORIES_TEST_ID =
+  `${EVENT_KIND_DESCRIPTION_TEST_ID}Categories` as const;
+export const EVENT_RENDERER_TEST_ID = `${PREFIX}EventRenderer` as const;
 
 const ALERT_DESCRIPTION_TEST_ID = `${PREFIX}AlertDescription` as const;
 export const ALERT_DESCRIPTION_TITLE_TEST_ID = `${ALERT_DESCRIPTION_TEST_ID}Title` as const;
@@ -111,3 +129,7 @@ export const SUMMARY_ROW_LOADING_TEST_ID = (dataTestSubj: string) => `${dataTest
 export const SUMMARY_ROW_TEXT_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Text`;
 export const SUMMARY_ROW_VALUE_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Value`;
 export const SUMMARY_ROW_BUTTON_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Button`;
+
+/* Footer */
+
+export const FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID = `${PREFIX}FooterDropdownButton` as const;

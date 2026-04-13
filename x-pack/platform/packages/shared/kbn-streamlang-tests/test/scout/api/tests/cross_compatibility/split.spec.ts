@@ -29,8 +29,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ tags: 'foo,bar,baz' }];
         await testBed.ingest('ingest-split-basic', docs, processors);
@@ -58,8 +58,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [{ tags: 'foo,bar,baz' }];
       await testBed.ingest('ingest-split-target', docs, processors);
@@ -88,8 +88,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [{ path: 'home/user/documents' }];
       await testBed.ingest('ingest-split-slash', docs, processors);
@@ -115,8 +115,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [{ tags: 'single' }];
       await testBed.ingest('ingest-split-single', docs, processors);
@@ -153,8 +153,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [
         { tags: 'foo,bar,baz', should_split: 'yes' },
@@ -215,10 +215,10 @@ apiTest.describe(
           };
 
           // Both transpilers should reject Mustache template syntax
-          expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
+          await expect(transpileIngestPipeline(streamlangDSL)).rejects.toThrow(
             'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
           );
-          expect(() => transpileEsql(streamlangDSL)).toThrow(
+          await expect(transpileEsql(streamlangDSL)).rejects.toThrow(
             'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
           );
         }
@@ -248,8 +248,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ message: 'hello world test' }];
         await testBed.ingest('ingest-split-space', docs, processors);
@@ -280,8 +280,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ other_field: 'value' }]; // Missing 'tags' field
 
@@ -315,8 +315,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ tags: 'A,,B,,' }]; // Has empty trailing elements
         await testBed.ingest('ingest-split-trailing', docs, processors);

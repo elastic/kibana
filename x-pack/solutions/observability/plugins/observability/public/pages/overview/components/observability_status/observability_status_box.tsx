@@ -67,7 +67,7 @@ export function CompletedStatusBox({
         <EuiFlexItem>
           <div>
             <EuiIcon
-              type="checkInCircleFilled"
+              type="checkCircleFill"
               color="success"
               className="eui-displayInline eui-alignMiddle"
               style={{ marginRight: 8 }}
@@ -81,7 +81,7 @@ export function CompletedStatusBox({
           <EuiButtonEmpty
             data-test-subj="o11yCompletedStatusBoxButton"
             size="s"
-            iconType="plusInCircle"
+            iconType="plusCircle"
             flush="right"
             onClick={goToAddLink}
           >
@@ -150,7 +150,7 @@ export function EmptyStatusBox({
         <EuiFlexItem>
           <div>
             <EuiIcon
-              type="minusInCircleFilled"
+              type="minusCircle"
               color="warning"
               className="eui-displayInline eui-alignMiddle"
               style={{ marginRight: 8 }}
