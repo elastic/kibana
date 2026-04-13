@@ -103,10 +103,11 @@ export async function getESQLAdHocDataview({
 
   const indexPattern = getIndexPatternFromESQLQuery(query);
   const prefix = options?.idPrefix ?? 'esql';
-  const hashInput = timeFieldName
-    ? `${prefix}-${indexPattern}-${timeFieldName}`
-    : `${prefix}-${indexPattern}`;
-  const dataViewId = options?.id ?? (await sha256(hashInput));
+  const dataViewId =
+    options?.id ??
+    (await sha256(
+      timeFieldName ? `${prefix}-${indexPattern}-${timeFieldName}` : `${prefix}-${indexPattern}`
+    ));
 
   if (options?.createNewInstanceEvenIfCachedOneAvailable) {
     // overwise it might return a cached data view with a different time field
