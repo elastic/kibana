@@ -13,8 +13,7 @@ import { getDefaultConfigs } from '../../configurations/default_configs';
 import { USER_AGENT_NAME } from '../../configurations/constants/elasticsearch_fieldnames';
 import { obsvReportConfigMap } from '../../obsv_exploratory_view';
 
-// Failing: See https://github.com/elastic/kibana/issues/253605
-describe.skip('SelectedFilters', function () {
+describe('SelectedFilters', function () {
   mockAppDataView();
 
   const dataViewSeries = getDefaultConfigs({
@@ -39,9 +38,14 @@ describe.skip('SelectedFilters', function () {
       }
     );
 
-    await waitFor(() => {
-      screen.getByText('Chrome');
-      screen.getByTitle('Filter: Browser family: Chrome. Select for more filter actions.');
-    });
-  });
+    await waitFor(
+      () => {
+        expect(screen.getByText('Chrome')).toBeInTheDocument();
+        expect(
+          screen.getByTitle('Filter: Browser family: Chrome. Select for more filter actions.')
+        ).toBeInTheDocument();
+      },
+      { timeout: 10_000 }
+    );
+  }, 15_000);
 });
