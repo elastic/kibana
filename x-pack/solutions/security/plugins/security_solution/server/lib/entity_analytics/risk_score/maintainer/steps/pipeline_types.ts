@@ -34,7 +34,7 @@ export interface RiskScoreModifierEntity {
     };
   };
   asset?: {
-    criticality?: AssetCriticalityLevel;
+    criticality?: AssetCriticalityLevel | null;
   };
 }
 

@@ -13,6 +13,7 @@ import type {
   HttpSetup,
   NotificationsStart,
 } from '@kbn/core/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { QueryActivityApiService } from '../lib/api';
 
@@ -25,6 +26,7 @@ export interface QueryActivityCapabilities {
 
 export interface QueryActivityAppContextValue {
   chrome: ChromeStart;
+  dataViews: DataViewsContract;
   http: HttpSetup;
   notifications: NotificationsStart;
   apiService: QueryActivityApiService;
