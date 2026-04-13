@@ -144,6 +144,7 @@ export const waitForMaintainerRun = async ({
       (m: { id: string; runs: number }) => m.id === maintainerId
     );
     baselineRuns = existing?.runs ?? 0;
+    log?.info(`[YING DEBUG] Baseline runs count for maintainer "${maintainerId}": ${baselineRuns}`);
   } catch {
     log?.info(
       `[YING DEBUG] Failed to get baseline runs count for maintainer "${maintainerId}". Maintainer does not exist`
