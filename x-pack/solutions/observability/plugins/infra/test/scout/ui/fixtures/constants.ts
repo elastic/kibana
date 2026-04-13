@@ -107,6 +107,14 @@ export const DATE_WITH_POD_DATA = '04/01/2023 6:20:59 PM';
 export const POD_COUNT = 1;
 export const POD_NAMES = Array.from({ length: POD_COUNT }, (_, i) => `pod-${i}`);
 
+export const SEMCONV_HOST1_NAME = 'semconv-host-1';
+export const SEMCONV_HOST2_NAME = 'semconv-host-2';
+
+export const SEMCONV_HOSTS = [{ hostName: SEMCONV_HOST1_NAME }, { hostName: SEMCONV_HOST2_NAME }];
+
+export const DATE_WITH_SEMCONV_DATA_FROM = '2023-04-02T18:20:00.000Z';
+export const DATE_WITH_SEMCONV_DATA_TO = '2023-04-02T18:21:00.000Z';
+
 export const DATE_WITHOUT_DATA = '04/01/2024 6:20:59 PM';
 
 export const EXTENDED_TIMEOUT = 45000; // 45 seconds
