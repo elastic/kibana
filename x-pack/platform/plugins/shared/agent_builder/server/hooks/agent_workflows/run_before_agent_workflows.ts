@@ -140,7 +140,7 @@ export async function runBeforeAgentWorkflows({
 }
 
 async function isPreExecutionWorkflowEnabled(uiSettingsClient: IUiSettingsClient) {
-  return uiSettingsClient.get<boolean>(WORKFLOWS_UI_SETTING_ID);
+  return (await uiSettingsClient.get<boolean>(WORKFLOWS_UI_SETTING_ID)) ?? true;
 }
 
 async function getWorkflowIds(
