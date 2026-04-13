@@ -38,6 +38,11 @@ export const createListStreamsTool = ({
 
     **When NOT to use:**
     - User already named an exact stream and wants details — use ${GET_STREAM} instead
+
+    **Formatting:** Show as an indented tree reflecting the parent-child hierarchy. Each line: "stream.name (type) — description". Omit the description if empty. Indent child streams under their parent based on the dot-separated name depth. Example:
+    - \`logs.ecs\` (Wired) — Root stream for ECS-formatted logs
+      - \`logs.ecs.android\` (Wired)
+      - \`logs.ecs.linux\` (Wired)
   `),
   tags: ['streams'],
   schema: listStreamsSchema,

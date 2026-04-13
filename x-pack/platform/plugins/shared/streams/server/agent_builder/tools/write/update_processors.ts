@@ -115,6 +115,7 @@ export const createUpdateProcessorsTool = ({
             data: {
               success: true,
               stream: name,
+              note: 'Pipeline updated. This change affects newly ingested documents only — existing documents are not reprocessed.',
               result: result.result,
             },
           },

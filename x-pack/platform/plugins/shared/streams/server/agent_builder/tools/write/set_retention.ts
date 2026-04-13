@@ -28,12 +28,11 @@ const setRetentionSchema = z.object({
     ),
   data_retention: z
     .string()
+    .optional()
     .describe(
-      'For "dsl" type only: retention period, e.g. "30d", "90d", "1y". Pass empty string "" for unlimited retention. Ignored for inherit/ilm types.'
+      'Required for "dsl" type only: retention period, e.g. "30d", "90d", "1y". Omit for unlimited retention.'
     ),
-  ilm_policy: z
-    .string()
-    .describe('For "ilm" type only: ILM policy name. Pass empty string "" if not using ilm type.'),
+  ilm_policy: z.string().optional().describe('Required for "ilm" type only: ILM policy name.'),
   change_description: z
     .string()
     .optional()
@@ -51,7 +50,7 @@ const toIngestLifecycle = (input: z.infer<typeof setRetentionSchema>): IngestStr
         dsl: { data_retention: input.data_retention || undefined },
       };
     case 'ilm':
-      return { ilm: { policy: input.ilm_policy } };
+      return { ilm: { policy: input.ilm_policy ?? '' } };
   }
 };
 

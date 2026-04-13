@@ -142,6 +142,7 @@ export const createForkStreamTool = ({
               parent,
               child: childName,
               status: conditionStatus,
+              note: 'Child stream created. Routing takes effect for newly ingested documents only — existing documents remain in the parent stream.',
               result: result.result,
             },
           },

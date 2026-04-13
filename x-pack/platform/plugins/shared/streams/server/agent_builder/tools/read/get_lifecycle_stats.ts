@@ -44,6 +44,8 @@ export const createGetLifecycleStatsTool = ({
     **When NOT to use:**
     - User wants data quality info — use ${GET_DATA_QUALITY}
     - User wants field mappings — use ${GET_SCHEMA}
+
+    **Formatting:** Single summary line (e.g. "Retention: ILM policy 'hot-warm-30d', 45.2 GB, 12.3M docs").
   `),
   tags: ['streams'],
   schema: getLifecycleStatsSchema,

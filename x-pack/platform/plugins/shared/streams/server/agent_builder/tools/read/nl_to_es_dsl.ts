@@ -79,8 +79,14 @@ const NL_TO_ES_DSL_SYSTEM_PROMPT = dedent(`
   Input: "errors from host web-01 in the last 24 hours"
   Output: { "query": { "bool": { "must": [{ "term": { "host.name": "web-01" } }, { "match": { "log.level": "error" } }, { "range": { "@timestamp": { "gte": "now-24h" } } }] } }, "sort": [{ "@timestamp": { "order": "desc" } }], "size": 20 }
 
+  Input: "documents that are not errors in the last hour"
+  Output: { "query": { "bool": { "must": [{ "range": { "@timestamp": { "gte": "now-1h" } } }], "must_not": [{ "match": { "log.level": "error" } }] } }, "sort": [{ "@timestamp": { "order": "desc" } }], "size": 20 }
+
   Input: "document count over time in 1-hour buckets"
   Output: { "query": { "match_all": {} }, "aggs": { "over_time": { "date_histogram": { "field": "@timestamp", "fixed_interval": "1h" } } }, "size": 0 }
+
+  Input: "average response_time by service.name" (response_time is long, aggregatable; service.name is keyword, aggregatable)
+  Output: { "query": { "match_all": {} }, "aggs": { "by_service": { "terms": { "field": "service.name", "size": 20 }, "aggs": { "avg_response_time": { "avg": { "field": "response_time" } } } } }, "size": 0 }
 
   Input: "documents mentioning chrome" (message is match_only_text, not aggregatable)
   Output: { "query": { "wildcard": { "message": { "value": "*chrome*" } } }, "sort": [{ "@timestamp": { "order": "desc" } }], "size": 20 }

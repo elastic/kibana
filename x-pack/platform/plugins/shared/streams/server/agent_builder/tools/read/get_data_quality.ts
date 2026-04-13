@@ -63,6 +63,8 @@ export const createGetDataQualityTool = ({
     **When NOT to use:**
     - User wants field-level schema info — use ${GET_SCHEMA}
     - User wants storage or retention info — use ${GET_LIFECYCLE_STATS}
+
+    **Formatting:** Concise summary line (e.g. "Quality: poor — 3.2% degraded, 1.8% failed").
   `),
   tags: ['streams'],
   schema: getDataQualitySchema,

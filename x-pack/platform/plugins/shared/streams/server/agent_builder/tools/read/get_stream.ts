@@ -36,6 +36,14 @@ export const createGetStreamTool = ({
 
     **When NOT to use:**
     - User only asks about one specific aspect (schema, quality, lifecycle, or documents) — use the focused tool instead
+
+    **Formatting:** Sectioned output with clear headings.
+    Processing steps — numbered list. Each step is either a processor or a condition:
+    - Processor: "action field (params)" e.g. "set attributes.secure = \\"false\\""
+    - Condition: "IF field operator value:" followed by indented child steps
+    - Omit { always: {} } conditions entirely — show their nested steps directly
+    Example: 1. IF user.name equals "user1": date user.name (format: UNIX_MS) / 2. set attributes.secure = "false"
+    Routing — show as a flow: "parent → child (WHERE condition)". One line per route. Omit { always: {} } conditions.
   `),
   tags: ['streams'],
   schema: getStreamSchema,

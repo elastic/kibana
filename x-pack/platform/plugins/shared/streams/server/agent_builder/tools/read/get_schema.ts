@@ -44,6 +44,8 @@ export const createGetSchemaTool = ({
     **When NOT to use:**
     - User wants a general stream overview — use ${GET_STREAM}
     - User wants data quality or lifecycle info — use the focused tool
+
+    **Formatting:** Show fields as "field.name: type", grouped by source (own vs inherited).
   `),
   tags: ['streams'],
   schema: getSchemaSchema,

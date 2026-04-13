@@ -38,6 +38,13 @@ export const createDeleteStreamTool = ({
   type: ToolType.builtin,
   description: dedent(`
     Permanently deletes a stream and all of its child streams. This is irreversible.
+
+    **When to use:**
+    - User explicitly asks to delete or remove a stream
+
+    **When NOT to use:**
+    - User wants to stop routing to a child — suggest disabling the routing rule on the parent instead
+    - User wants to remove processors or field mappings — use the appropriate focused tool
   `),
   tags: ['streams', 'management'],
   schema: deleteStreamSchema,

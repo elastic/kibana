@@ -30,5 +30,5 @@ export const classifyError = (err: unknown): string => {
   if (statusCode === 409 || message.includes('Could not acquire lock')) {
     return 'Another stream operation is in progress. Try again in a moment.';
   }
-  return 'Unexpected server error.';
+  return `Unexpected error: ${message.slice(0, 200)}`;
 };

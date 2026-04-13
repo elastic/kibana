@@ -60,6 +60,8 @@ export const createGetFailedDocumentsTool = ({
 
     **When NOT to use:**
     - User wants aggregate quality metrics (degraded %, failed %) — use ${GET_DATA_QUALITY}
+
+    **Formatting:** Show the error type breakdown first (e.g. "mapper_exception — 42 docs"). Then show each sample document with its error type, error message, and key fields from the original document. Group samples by error type when multiple types are present.
   `),
   tags: ['streams'],
   schema: getFailedDocumentsSchema,

@@ -58,6 +58,11 @@ export const createQueryDocumentsTool = ({
     **When NOT to use:**
     - User wants pre-computed quality/lifecycle metrics — use the focused tool
     - User wants field definitions — use ${GET_SCHEMA}
+
+    **Formatting documents:**
+    - Full/raw documents: show each as a compact "field.name: value" block. Omit stream.name (already known).
+    - Browsing/summarizing: show a table with @timestamp and 3-4 key fields (e.g. body.text, host.name, log.level). Mention how many fields were omitted.
+    **Formatting aggregations:** Always include the metric value alongside each key (e.g. "host2 — 1,532 docs", "200 — 45.2%"). For terms aggregations, show the doc_count. For metric aggregations, show the computed value with units where known.
   `),
   tags: ['streams'],
   schema: queryDocumentsSchema,

@@ -38,8 +38,10 @@ describe('classifyError', () => {
     expect(result).toContain('inference connector');
   });
 
-  it('returns generic message for unknown errors', () => {
-    expect(classifyError(new Error('something random'))).toBe('Unexpected server error.');
+  it('returns message with truncated details for unknown errors', () => {
+    expect(classifyError(new Error('something random'))).toBe(
+      'Unexpected error: something random'
+    );
   });
 
   it('handles non-Error values (string)', () => {
@@ -49,7 +51,7 @@ describe('classifyError', () => {
   });
 
   it('handles non-Error values (plain object) via String coercion', () => {
-    expect(classifyError({ message: 'Cannot find stream' })).toBe('Unexpected server error.');
+    expect(classifyError({ message: 'Cannot find stream' })).toContain('Unexpected error:');
   });
 
   it('handles non-Error with toString containing keywords', () => {
