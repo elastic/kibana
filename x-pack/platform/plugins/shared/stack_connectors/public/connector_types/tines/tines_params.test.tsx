@@ -160,9 +160,7 @@ describe('TinesParamsFields renders', () => {
       await userEvent.click(toggleButton);
 
       expect(screen.getByTestId(/tines-storySelector-optionsList/)).toBeInTheDocument();
-      expect(screen.getByTestId(/tines-storySelector-optionsList/)).toHaveTextContent(
-        story.name
-      );
+      expect(screen.getByTestId(/tines-storySelector-optionsList/)).toHaveTextContent(story.name);
       expect(
         within(screen.getByTestId('tines-webhookSelector')).getByRole('combobox')
       ).toBeDisabled();
@@ -189,9 +187,7 @@ describe('TinesParamsFields renders', () => {
       );
       await userEvent.click(toggleButton);
 
-      expect(screen.getByTestId(/tines-storySelector-optionsList/)).toHaveTextContent(
-        'Published'
-      );
+      expect(screen.getByTestId(/tines-storySelector-optionsList/)).toHaveTextContent('Published');
     });
 
     it('should enable with webhook selector when story selected', async () => {
@@ -475,9 +471,7 @@ describe('TinesParamsFields renders', () => {
         );
         expect(screen.queryByTestId('tines-fallbackCallout')).not.toBeInTheDocument();
         expect(screen.getByTestId('tines-webhookUrlInput')).toBeInTheDocument();
-        expect(screen.getByTestId('tines-webhookUrlInput')).toHaveValue(
-          webhookUrl
-        );
+        expect(screen.getByTestId('tines-webhookUrlInput')).toHaveValue(webhookUrl);
       });
 
       it('should render webhook url fallback when stories request has error', () => {

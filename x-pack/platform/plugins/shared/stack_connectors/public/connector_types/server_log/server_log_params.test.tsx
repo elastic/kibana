@@ -167,9 +167,7 @@ describe('ServerLogParamsFields renders', () => {
         index={0}
       />
     );
-    expect(screen.getByTestId('messageTextArea')).toHaveValue(
-      'not the default message'
-    );
+    expect(screen.getByTestId('messageTextArea')).toHaveValue('not the default message');
 
     rerender(
       <ServerLogParamsFields
@@ -200,9 +198,7 @@ describe('ServerLogParamsFields renders', () => {
         index={0}
       />
     );
-    expect(screen.getByTestId('messageTextArea')).toHaveValue(
-      'not the default message'
-    );
+    expect(screen.getByTestId('messageTextArea')).toHaveValue('not the default message');
 
     rerender(
       <ServerLogParamsFields
