@@ -131,7 +131,6 @@ describe('<DocumentFlyout />', () => {
         ownFocus: false,
         resizable: true,
         size: 'm',
-        type: 'overlay',
       })
     );
   });

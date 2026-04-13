@@ -17,8 +17,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import * as i18n from './translations';
 
 type AlertEpisodeDurationUnit = 'm' | 'h' | 'd';
 
@@ -31,24 +31,9 @@ export const computeEpisodeSnoozedUntil = (
 };
 
 const ALERT_EPISODE_UNIT_OPTIONS: Array<{ value: AlertEpisodeDurationUnit; text: string }> = [
-  {
-    value: 'm',
-    text: i18n.translate('xpack.alertingV2.episodesUi.snoozeForm.minutes', {
-      defaultMessage: 'Minutes',
-    }),
-  },
-  {
-    value: 'h',
-    text: i18n.translate('xpack.alertingV2.episodesUi.snoozeForm.hours', {
-      defaultMessage: 'Hours',
-    }),
-  },
-  {
-    value: 'd',
-    text: i18n.translate('xpack.alertingV2.episodesUi.snoozeForm.days', {
-      defaultMessage: 'Days',
-    }),
-  },
+  { value: 'm', text: i18n.SNOOZE_FORM_MINUTES },
+  { value: 'h', text: i18n.SNOOZE_FORM_HOURS },
+  { value: 'd', text: i18n.SNOOZE_FORM_DAYS },
 ];
 
 const ALERT_EPISODE_COMMON_SNOOZE_TIMES: Array<{
@@ -56,34 +41,10 @@ const ALERT_EPISODE_COMMON_SNOOZE_TIMES: Array<{
   value: number;
   unit: AlertEpisodeDurationUnit;
 }> = [
-  {
-    label: i18n.translate('xpack.alertingV2.episodesUi.snoozeForm.preset.1h', {
-      defaultMessage: '1 hour',
-    }),
-    value: 1,
-    unit: 'h',
-  },
-  {
-    label: i18n.translate('xpack.alertingV2.episodesUi.snoozeForm.preset.3h', {
-      defaultMessage: '3 hours',
-    }),
-    value: 3,
-    unit: 'h',
-  },
-  {
-    label: i18n.translate('xpack.alertingV2.episodesUi.snoozeForm.preset.8h', {
-      defaultMessage: '8 hours',
-    }),
-    value: 8,
-    unit: 'h',
-  },
-  {
-    label: i18n.translate('xpack.alertingV2.episodesUi.snoozeForm.preset.1d', {
-      defaultMessage: '1 day',
-    }),
-    value: 1,
-    unit: 'd',
-  },
+  { label: i18n.SNOOZE_FORM_PRESET_1H, value: 1, unit: 'h' },
+  { label: i18n.SNOOZE_FORM_PRESET_3H, value: 3, unit: 'h' },
+  { label: i18n.SNOOZE_FORM_PRESET_8H, value: 8, unit: 'h' },
+  { label: i18n.SNOOZE_FORM_PRESET_1D, value: 1, unit: 'd' },
 ];
 
 export function AlertEpisodeSnoozeForm({
@@ -101,11 +62,7 @@ export function AlertEpisodeSnoozeForm({
   return (
     <div data-test-subj="alertEpisodeSnoozeForm">
       <EuiTitle size="xxxs">
-        <h4>
-          {i18n.translate('xpack.alertingV2.episodesUi.snoozeForm.title', {
-            defaultMessage: 'Snooze notifications',
-          })}
-        </h4>
+        <h4>{i18n.SNOOZE_FORM_TITLE}</h4>
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
@@ -115,12 +72,7 @@ export function AlertEpisodeSnoozeForm({
             value={durationValue}
             onChange={(e) => setDurationValue(Math.max(1, parseInt(e.target.value, 10) || 1))}
             compressed
-            aria-label={i18n.translate(
-              'xpack.alertingV2.episodesUi.snoozeForm.durationValueAriaLabel',
-              {
-                defaultMessage: 'Snooze duration value',
-              }
-            )}
+            aria-label={i18n.SNOOZE_FORM_DURATION_VALUE_ARIA_LABEL}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false} style={{ width: 120 }}>
@@ -129,19 +81,12 @@ export function AlertEpisodeSnoozeForm({
             value={durationUnit}
             onChange={(e) => setDurationUnit(e.target.value as AlertEpisodeDurationUnit)}
             compressed
-            aria-label={i18n.translate(
-              'xpack.alertingV2.episodesUi.snoozeForm.unitSelectAriaLabel',
-              {
-                defaultMessage: 'Snooze duration unit',
-              }
-            )}
+            aria-label={i18n.SNOOZE_FORM_UNIT_SELECT_ARIA_LABEL}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton size="s" onClick={() => applySnooze(durationValue, durationUnit)}>
-            {i18n.translate('xpack.alertingV2.episodesUi.snoozeForm.apply', {
-              defaultMessage: 'Apply',
-            })}
+            {i18n.SNOOZE_FORM_APPLY}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -149,9 +94,7 @@ export function AlertEpisodeSnoozeForm({
       <EuiHorizontalRule margin="s" />
 
       <EuiText size="xs" color="subdued">
-        {i18n.translate('xpack.alertingV2.episodesUi.snoozeForm.commonlyUsed', {
-          defaultMessage: 'Commonly used',
-        })}
+        {i18n.SNOOZE_FORM_COMMONLY_USED}
       </EuiText>
       <EuiSpacer size="xs" />
       <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="spaceBetween" wrap>
