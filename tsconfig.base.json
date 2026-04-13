@@ -282,6 +282,8 @@
       "@kbn/config-mocks/*": ["src/platform/packages/private/kbn-config-mocks/*"],
       "@kbn/config-schema": ["src/platform/packages/shared/kbn-config-schema"],
       "@kbn/config-schema/*": ["src/platform/packages/shared/kbn-config-schema/*"],
+      "@kbn/connector-cli": ["src/platform/packages/shared/kbn-connector-cli"],
+      "@kbn/connector-cli/*": ["src/platform/packages/shared/kbn-connector-cli/*"],
       "@kbn/connector-schemas": ["src/platform/packages/shared/kbn-connector-schemas"],
       "@kbn/connector-schemas/*": ["src/platform/packages/shared/kbn-connector-schemas/*"],
       "@kbn/connector-specs": ["src/platform/packages/shared/kbn-connector-specs"],

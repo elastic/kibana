@@ -1,0 +1,12 @@
+spec_id: .jira-cloud
+name: "Jira Cloud (testing)"
+auth_type: basic
+config:
+  subdomain: "workplace-search"
+secrets:
+  username:
+    vault: secret/ent-search-team/connectors-sources/jira-confluence-cloud
+    field: username
+  password:
+    vault: secret/ent-search-team/connectors-sources/jira-confluence-cloud
+    field: api-token

@@ -1,0 +1,9 @@
+spec_id: .github
+name: "GitHub (testing)"
+auth_type: bearer
+config:
+  serverUrl: "https://api.githubcopilot.com/mcp/"
+secrets:
+  token:
+    vault: secret/ent-search-team/ws-github
+    field: PAT
