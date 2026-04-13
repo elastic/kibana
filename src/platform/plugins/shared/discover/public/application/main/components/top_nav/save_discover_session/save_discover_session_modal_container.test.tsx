@@ -17,12 +17,8 @@ import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { DiscoverServices } from '../../../../../build_services';
 import {
-  CurrentTabProvider,
-  InternalStateProvider,
-  RuntimeStateManagerProvider,
   fromTabStateToSavedObjectTab,
   internalStateActions,
-  useInternalStateSelector,
 } from '../../../state_management/redux';
 import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
@@ -34,17 +30,13 @@ import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 import { dataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 import { TransferAction } from '../../../../../plugin_imports/embeddable_editor_service';
+import { DiscoverToolkitTestProvider } from '../../../../../__mocks__/test_provider';
 
 jest.mock('./discover_session_save_dashboard_modal', () => ({
   DiscoverSessionSaveDashboardModal: jest.fn(() => null),
 }));
 
 const MockModal = jest.mocked(DiscoverSessionSaveDashboardModal);
-
-const CurrentTabProviderFromStore = ({ children }: { children: React.ReactNode }) => {
-  const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
-  return <CurrentTabProvider currentTabId={currentTabId}>{children}</CurrentTabProvider>;
-};
 
 const defaultServices = createDiscoverServicesMock();
 
@@ -163,18 +155,14 @@ const setup = async ({
   const onClose = jest.fn();
 
   render(
-    <InternalStateProvider store={toolkit.internalState}>
-      <RuntimeStateManagerProvider value={toolkit.runtimeStateManager}>
-        <CurrentTabProviderFromStore>
-          <DiscoverSessionSaveModalContainer
-            initialCopyOnSave={initialCopyOnSave}
-            onClose={onClose}
-            onSaveCb={onSaveCb}
-            services={services}
-          />
-        </CurrentTabProviderFromStore>
-      </RuntimeStateManagerProvider>
-    </InternalStateProvider>
+    <DiscoverToolkitTestProvider toolkit={toolkit}>
+      <DiscoverSessionSaveModalContainer
+        initialCopyOnSave={initialCopyOnSave}
+        onClose={onClose}
+        onSaveCb={onSaveCb}
+        services={services}
+      />
+    </DiscoverToolkitTestProvider>
   );
 
   const modalProps: DiscoverSessionSaveDashboardModalProps | undefined = MockModal.mock.calls.length
@@ -650,12 +638,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
 
     it('should navigate to dashboard when dashboardId is set', async () => {
       const services = createDiscoverServicesMock();
-      const stateTransfer = services.embeddable.getStateTransfer();
-      jest.spyOn(services.embeddable, 'getStateTransfer').mockReturnValue(stateTransfer);
-      const navigateToWithEmbeddablePackagesSpy = jest.spyOn(
-        stateTransfer,
-        'navigateToWithEmbeddablePackages'
-      );
+      const transferSpy = jest.spyOn(services.embeddableEditor, 'transferBackToEditor');
       const { modalProps } = await setup({
         initialCopyOnSave: true,
         services,
@@ -665,25 +648,16 @@ describe('DiscoverSessionSaveModalContainer', () => {
         await modalProps?.onSave(getOnSaveProps({ dashboardId: 'dashboard-123' }));
       });
 
-      expect(navigateToWithEmbeddablePackagesSpy).toHaveBeenCalledWith('dashboards', {
+      expect(transferSpy).toHaveBeenCalledWith(TransferAction.SaveByReference, {
+        app: 'dashboards',
         path: '#/view/dashboard-123',
-        state: [
-          {
-            type: 'discover_session',
-            serializedState: { savedObjectId: 'the-saved-search-id' },
-          },
-        ],
+        state: { savedObjectId: 'the-saved-search-id' },
       });
     });
 
     it('should navigate to new dashboard when dashboardId is "new"', async () => {
       const services = createDiscoverServicesMock();
-      const stateTransfer = services.embeddable.getStateTransfer();
-      jest.spyOn(services.embeddable, 'getStateTransfer').mockReturnValue(stateTransfer);
-      const navigateToWithEmbeddablePackagesSpy = jest.spyOn(
-        stateTransfer,
-        'navigateToWithEmbeddablePackages'
-      );
+      const transferSpy = jest.spyOn(services.embeddableEditor, 'transferBackToEditor');
       const { modalProps } = await setup({
         initialCopyOnSave: true,
         services,
@@ -693,57 +667,10 @@ describe('DiscoverSessionSaveModalContainer', () => {
         await modalProps?.onSave(getOnSaveProps({ dashboardId: 'new' }));
       });
 
-      expect(navigateToWithEmbeddablePackagesSpy).toHaveBeenCalledWith('dashboards', {
+      expect(transferSpy).toHaveBeenCalledWith(TransferAction.SaveByReference, {
+        app: 'dashboards',
         path: '#/create',
-        state: [
-          {
-            type: 'discover_session',
-            serializedState: { savedObjectId: 'the-saved-search-id' },
-          },
-        ],
-      });
-    });
-
-    it('should navigate to dashboard by value when addToLibrary is false', async () => {
-      const services = createDiscoverServicesMock();
-      const stateTransfer = services.embeddable.getStateTransfer();
-      jest.spyOn(services.embeddable, 'getStateTransfer').mockReturnValue(stateTransfer);
-      const navigateToWithEmbeddablePackagesSpy = jest.spyOn(
-        stateTransfer,
-        'navigateToWithEmbeddablePackages'
-      );
-      const saveSpy = jest.spyOn(services.savedSearch, 'saveDiscoverSession');
-      const { modalProps } = await setup({
-        persistedDiscoverSession: false,
-        services,
-      });
-
-      await act(async () => {
-        await modalProps?.onSave(
-          getOnSaveProps({
-            addToLibrary: false,
-            dashboardId: 'dashboard-123',
-            newDescription: 'My description',
-            newTitle: 'My Session',
-          })
-        );
-      });
-
-      expect(saveSpy).not.toHaveBeenCalled();
-      expect(navigateToWithEmbeddablePackagesSpy).toHaveBeenCalledWith('dashboards', {
-        path: '#/view/dashboard-123',
-        state: [
-          {
-            type: 'discover_session',
-            serializedState: {
-              attributes: expect.objectContaining({
-                tabs: expect.any(Array),
-              }),
-              description: 'My description',
-              title: 'My Session',
-            },
-          },
-        ],
+        state: { savedObjectId: 'the-saved-search-id' },
       });
     });
 

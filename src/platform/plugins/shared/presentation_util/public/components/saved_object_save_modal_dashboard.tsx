@@ -26,12 +26,14 @@ function SavedObjectSaveModalDashboard<T = void>(props: SaveModalDashboardProps<
     objectType,
     onClose,
     canSaveByReference,
+    forceSaveByReference,
     hideDashboardOptions,
     initialDashboardOption,
     onCopyOnSaveChangeCb,
   } = props;
   const { id: documentId } = documentInfo;
   const initialCopyOnSave = !Boolean(documentId);
+  const shouldForceSaveByReference = Boolean(forceSaveByReference && canSaveByReference);
 
   const { canAccessDashboards, canCreateNewDashboards } = useMemo(() => {
     return getPresentationCapabilities();
@@ -49,7 +51,7 @@ function SavedObjectSaveModalDashboard<T = void>(props: SaveModalDashboardProps<
       : 'existing'
   );
   const [isAddToLibrarySelected, setAddToLibrary] = useState<boolean>(
-    canSaveByReference &&
+    (shouldForceSaveByReference || canSaveByReference) &&
       (!initialCopyOnSave || disableDashboardOptions || initialDashboardOption === null)
   );
   const [selectedDashboard, setSelectedDashboard] = useState<{ id: string; name: string } | null>(
@@ -67,6 +69,7 @@ function SavedObjectSaveModalDashboard<T = void>(props: SaveModalDashboardProps<
             setDashboardOption(option);
           }}
           canSaveByReference={canSaveByReference}
+          showAddToLibraryCheckbox={!shouldForceSaveByReference}
           {...{
             copyOnSave,
             documentId,
@@ -102,7 +105,11 @@ function SavedObjectSaveModalDashboard<T = void>(props: SaveModalDashboardProps<
       }
     }
 
-    await props.onSave({ ...onSaveProps, dashboardId, addToLibrary: isAddToLibrarySelected });
+    await props.onSave({
+      ...onSaveProps,
+      dashboardId,
+      addToLibrary: shouldForceSaveByReference ? true : isAddToLibrarySelected,
+    });
   };
 
   const saveLibraryLabel =
@@ -131,7 +138,11 @@ function SavedObjectSaveModalDashboard<T = void>(props: SaveModalDashboardProps<
       onSave={onModalSave}
       title={documentInfo.title}
       showCopyOnSave={documentId ? true : false}
-      options={isAddToLibrarySelected || hideDashboardOptions ? tagOptions : undefined} // Show tags when not adding to dashboard
+      options={
+        shouldForceSaveByReference || isAddToLibrarySelected || hideDashboardOptions
+          ? tagOptions
+          : undefined
+      } // Show tags when not adding to dashboard
       description={documentInfo.description}
       showDescription={true}
       mustCopyOnSaveMessage={props.mustCopyOnSaveMessage}

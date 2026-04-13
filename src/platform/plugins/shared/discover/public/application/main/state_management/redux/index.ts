@@ -67,6 +67,8 @@ export {
 export {
   selectAllTabs,
   selectRecentlyClosedTabs,
+  selectPersistedDiscoverSession,
+  selectSavedDataViews,
   selectTab,
   selectTabAppState,
   selectTabCombinedFilters,

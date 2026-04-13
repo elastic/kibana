@@ -40,6 +40,8 @@ export interface SaveModalDashboardProps<T = void> {
   customModalTitle?: React.ReactNode;
   /** Whether to hide the dashboard destination options. */
   hideDashboardOptions?: boolean;
+  /** Whether to always save by reference and hide the add-to-library checkbox. */
+  forceSaveByReference?: boolean;
   /** The initially selected dashboard saving option. */
   initialDashboardOption?: DashboardSavingOption;
   /** Callback invoked when the copy-on-save option changes. */

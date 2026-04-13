@@ -86,29 +86,26 @@ export const DiscoverSessionSaveDashboardModal: FC<DiscoverSessionSaveDashboardM
   ) : null;
 
   const timeSwitch = isTimeBased ? (
-    <>
-      <EuiSpacer size="s" />
-      <EuiFormRow
-        helpText={
+    <EuiFormRow
+      helpText={
+        <FormattedMessage
+          id="discover.topNav.saveModal.storeTimeWithSearchToggleDescription"
+          defaultMessage="Update the time filter and refresh interval to the current selection when using this session."
+        />
+      }
+    >
+      <EuiSwitch
+        checked={timeRestore}
+        data-test-subj="storeTimeWithSearch"
+        label={
           <FormattedMessage
-            id="discover.topNav.saveModal.storeTimeWithSearchToggleDescription"
-            defaultMessage="Update the time filter and refresh interval to the current selection when using this session."
+            id="discover.topNav.saveModal.storeTimeWithSearchToggleLabel"
+            defaultMessage="Store time with Discover session"
           />
         }
-      >
-        <EuiSwitch
-          checked={timeRestore}
-          data-test-subj="storeTimeWithSearch"
-          label={
-            <FormattedMessage
-              id="discover.topNav.saveModal.storeTimeWithSearchToggleLabel"
-              defaultMessage="Store time with Discover session"
-            />
-          }
-          onChange={(e) => setTimeRestore(e.target.checked)}
-        />
-      </EuiFormRow>
-    </>
+        onChange={(e) => setTimeRestore(e.target.checked)}
+      />
+    </EuiFormRow>
   ) : null;
 
   const tagOptions = (
@@ -134,6 +131,7 @@ export const DiscoverSessionSaveDashboardModal: FC<DiscoverSessionSaveDashboardM
       canSaveByReference={true}
       customModalTitle={customModalTitle}
       documentInfo={{ description, id: sessionId, title }}
+      forceSaveByReference={true}
       hideDashboardOptions={hideDashboardOptions}
       initialDashboardOption={null}
       mustCopyOnSaveMessage={

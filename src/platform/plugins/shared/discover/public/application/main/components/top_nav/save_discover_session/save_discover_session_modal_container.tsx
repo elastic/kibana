@@ -9,23 +9,20 @@
 
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { DiscoverServices } from '../../../../../build_services';
-import type { SearchEmbeddablePanelApiState } from '../../../../../embeddable/types';
 import { TransferAction } from '../../../../../plugin_imports/embeddable_editor_service';
 import {
   getSerializedSearchSourceDataViewDetails,
   internalStateActions,
   selectAllTabs,
-  selectTabSavedSearchByValueAttributes,
+  selectPersistedDiscoverSession,
+  selectSavedDataViews,
   selectTabRuntimeState,
   useInternalStateDispatch,
-  useInternalStateGetState,
+  useInternalStateSelector,
   useRuntimeStateManager,
-  useCurrentTabSelector,
 } from '../../../state_management/redux';
 import {
   DiscoverSessionSaveDashboardModal,
@@ -46,12 +43,11 @@ export const DiscoverSessionSaveModalContainer = ({
   services,
 }: DiscoverSessionSaveModalContainerProps) => {
   const dispatch = useInternalStateDispatch();
-  const getState = useInternalStateGetState();
   const runtimeStateManager = useRuntimeStateManager();
-  const currentTabId = useCurrentTabSelector((tab) => tab.id);
-  const internalState = getState();
-  const allTabs = selectAllTabs(internalState);
-  const persistedDiscoverSession = internalState.persistedDiscoverSession;
+  const allTabs = useInternalStateSelector(selectAllTabs);
+  const persistedDiscoverSession = useInternalStateSelector(selectPersistedDiscoverSession);
+  const savedDataViews = useInternalStateSelector(selectSavedDataViews);
+
   const isEmbeddedEditor = services.embeddableEditor.isEmbeddedEditor();
 
   const timeRestore = persistedDiscoverSession?.tabs.some((tab) => tab.timeRestore) ?? false;
@@ -63,7 +59,7 @@ export const DiscoverSessionSaveModalContainer = ({
 
     const tabDataViewDetails = getSerializedSearchSourceDataViewDetails(
       tab.initialInternalState?.serializedSearchSource,
-      internalState.savedDataViews
+      savedDataViews
     );
 
     return Boolean(tabDataViewDetails?.timeFieldName);
@@ -83,41 +79,7 @@ export const DiscoverSessionSaveModalContainer = ({
     setCopyOnSaveToggled(newCopyOnSave);
   }, []);
 
-  const navigateToDashboard = (
-    dashboardId: string,
-    serializedState: SearchEmbeddablePanelApiState
-  ) => {
-    const state: Array<EmbeddablePackageState<SearchEmbeddablePanelApiState>> = [
-      { type: SEARCH_EMBEDDABLE_TYPE, serializedState },
-    ];
-
-    services.embeddable.getStateTransfer().navigateToWithEmbeddablePackages('dashboards', {
-      state,
-      path: dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`,
-    });
-  };
-
-  const navigateToDashboardByValue = async (
-    dashboardId: string,
-    newTitle: string,
-    newDescription: string
-  ) => {
-    const attributes = await selectTabSavedSearchByValueAttributes({
-      tabId: currentTabId,
-      getState,
-      runtimeStateManager,
-      services,
-    });
-
-    navigateToDashboard(dashboardId, {
-      attributes,
-      description: newDescription,
-      title: newTitle,
-    });
-  };
-
   const executeSave = async ({
-    addToLibrary,
     dashboardId,
     isTitleDuplicateConfirmed,
     newCopyOnSave,
@@ -127,7 +89,6 @@ export const DiscoverSessionSaveModalContainer = ({
     newTitle,
     onTitleDuplicate,
   }: OnSaveProps & {
-    addToLibrary?: boolean;
     dashboardId?: string | null;
     newTags: string[];
     newTimeRestore: boolean;
@@ -136,11 +97,6 @@ export const DiscoverSessionSaveModalContainer = ({
     nextSelectedTabId?: string;
     redirectedToDashboard?: boolean;
   }> => {
-    if (addToLibrary === false && dashboardId) {
-      await navigateToDashboardByValue(dashboardId, newTitle, newDescription);
-      return { discoverSession: undefined, redirectedToDashboard: true };
-    }
-
     const userWantsCopy = initialCopyOnSave || newCopyOnSave;
     const effectiveCopyOnSave = userWantsCopy && !!persistedDiscoverSession?.id;
 
@@ -153,20 +109,17 @@ export const DiscoverSessionSaveModalContainer = ({
         newTags,
         isTitleDuplicateConfirmed,
         onTitleDuplicate,
-        skipResetDiscoverSession: Boolean(dashboardId),
       })
     ).unwrap();
 
     if (response.discoverSession) {
       if (dashboardId) {
-        dispatch(
-          internalStateActions.setUnsavedChanges({
-            hasUnsavedChanges: false,
-            unsavedTabIds: [],
-          })
-        );
-        navigateToDashboard(dashboardId, {
-          savedObjectId: response.discoverSession.id,
+        services.embeddableEditor.transferBackToEditor(TransferAction.SaveByReference, {
+          app: 'dashboards',
+          path: dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`,
+          state: {
+            savedObjectId: response.discoverSession.id,
+          },
         });
         return { ...response, redirectedToDashboard: true };
       }
