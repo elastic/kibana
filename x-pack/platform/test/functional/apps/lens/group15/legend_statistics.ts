@@ -47,9 +47,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.missingOrFail('lens-legend-width-limit-input');
   }
 
-  async function expectListTruncationInput() {
-    await testSubjects.existOrFail('lens-legend-width-limit-input');
+  async function expectNoTruncationInput() {
     await testSubjects.missingOrFail('lens-legend-max-lines-input');
+    await testSubjects.missingOrFail('lens-legend-truncate-switch');
   }
 
   async function expectLegendListFormat() {
@@ -111,10 +111,10 @@ Max
         await expectLegendTableToHaveText(tableText);
       });
 
-      it('shows list layout and width limit truncation option', async () => {
+      it('shows list layout with no truncation option', async () => {
         await lens.openLegendSettingsFlyout();
         await setLegendPositionTop();
-        await expectListTruncationInput();
+        await expectNoTruncationInput();
         await lens.closeFlyoutWithBackButton();
 
         await expectLegendListFormat();

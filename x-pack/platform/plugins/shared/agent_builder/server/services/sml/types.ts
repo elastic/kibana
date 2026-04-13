@@ -42,8 +42,6 @@ export interface SmlContext {
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
-  /** The current user's request, when available. Absent during background crawler runs. */
-  request?: KibanaRequest;
 }
 
 /**
@@ -131,10 +129,11 @@ export interface SmlDocument {
 }
 
 /**
- * An SML search result — an SML document enriched with a search score.
+ * An SML search result — same fields as {@link SmlDocument} plus relevance score.
+ * `content` is optional when the query excluded it from `_source` (e.g. `skipContent`).
  */
-export type SmlSearchResult = SmlDocument & {
-  /** Search relevance score */
+export type SmlSearchResult = Omit<SmlDocument, 'content'> & {
+  content?: string;
   score: number;
 };
 
@@ -194,11 +193,13 @@ export interface SmlService {
   getCrawler: () => SmlCrawler;
   /** Search the SML index, filtering results by space and permissions */
   search: (params: {
-    keywords: string[];
+    query: string;
     size?: number;
     spaceId: string;
     esClient: ElasticsearchClient;
     request: KibanaRequest;
+    /** When true, Elasticsearch omits `content` from `_source` (smaller payloads for autocomplete). */
+    skipContent?: boolean;
   }) => Promise<{ results: SmlSearchResult[]; total: number }>;
 
   /**
@@ -206,7 +207,7 @@ export interface SmlService {
    * Returns a map of document id → authorized (true/false).
    */
   checkItemsAccess: (params: {
-    items: Array<{ id: string; type: string }>;
+    ids: string[];
     spaceId: string;
     esClient: ElasticsearchClient;
     request: KibanaRequest;
@@ -221,7 +222,6 @@ export interface SmlService {
     esClient: ElasticsearchClient;
     savedObjectsClient: SavedObjectsClientContract;
     logger: Logger;
-    request?: KibanaRequest;
   }) => Promise<void>;
 
   /** Fetch SML documents by their chunk IDs, scoped to a space */

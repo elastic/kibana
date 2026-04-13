@@ -15,6 +15,7 @@ import {
 import { EuiSkeletonText } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import { SecurityPageName } from '../../../../common/constants';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { ReferenceErrorModal } from '../../../common/components/reference_error_modal';
@@ -24,11 +25,17 @@ import { NotFoundPage } from '../../../app/404';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
 import { LinkToRuleDetails, ListWithSearch, ManageRules } from '../../components';
 import { useListDetailsView } from '../../hooks';
+import { useKibana } from '../../../common/lib/kibana';
 import * as i18n from '../../translations';
 import type { CheckExceptionTtlActionTypes } from '../../components/expired_exceptions_list_items_modal';
 import { IncludeExpiredExceptionsModal } from '../../components/expired_exceptions_list_items_modal';
 
 export const ListsDetailViewComponent: FC = () => {
+  const {
+    services: { application, cps },
+  } = useKibana();
+  useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
+
   const { detailName: exceptionListId } = useParams<{
     detailName: string;
   }>();

@@ -27,7 +27,11 @@ import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/i
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { Moment } from 'moment';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { InferenceConnector } from '@kbn/inference-common';
+import type {
+  InferenceClient,
+  InferenceConnector,
+  InferenceConnectorType,
+} from '@kbn/inference-common';
 import moment from 'moment';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
@@ -107,6 +111,7 @@ export function getAssistantToolParams({
   apiConfig,
   esClient,
   connectorTimeout,
+  inferenceClient,
   langChainTimeout,
   langSmithProject,
   langSmithApiKey,
@@ -123,6 +128,7 @@ export function getAssistantToolParams({
   apiConfig: ApiConfig;
   esClient: ElasticsearchClient;
   connectorTimeout: number;
+  inferenceClient?: InferenceClient;
   langChainTimeout: number;
   langSmithProject?: string;
   langSmithApiKey?: string;
@@ -157,9 +163,15 @@ export function getAssistantToolParams({
     ],
   };
 
+  const isInferenceEndpoint =
+    apiConfig.actionTypeId === ('.inference' as InferenceConnectorType.Inference) &&
+    inferenceClient != null;
+
   const llm = new ActionsClientLlm({
     actionsClient,
     connectorId: apiConfig.connectorId,
+    inferenceClient: isInferenceEndpoint ? inferenceClient : undefined,
+    isInferenceEndpoint,
     llmType: getLlmType(apiConfig.actionTypeId),
     logger,
     temperature: 0, // zero temperature because we want structured JSON output
@@ -427,6 +439,7 @@ export const invokeDefendInsightsGraph = async ({
   apiConfig,
   connectorTimeout,
   esClient,
+  inferenceClient,
   langSmithProject,
   langSmithApiKey,
   latestReplacements,
@@ -446,6 +459,7 @@ export const invokeDefendInsightsGraph = async ({
   apiConfig: ApiConfig;
   connectorTimeout: number;
   esClient: ElasticsearchClient;
+  inferenceClient?: InferenceClient;
   langSmithProject?: string;
   langSmithApiKey?: string;
   latestReplacements: Replacements;
@@ -465,6 +479,9 @@ export const invokeDefendInsightsGraph = async ({
   }
 
   const llmType = getLlmType(apiConfig.actionTypeId);
+  const isInferenceEndpoint =
+    apiConfig.actionTypeId === ('.inference' as InferenceConnectorType.Inference) &&
+    inferenceClient != null;
   const model = apiConfig.model;
   const tags = [DEFEND_INSIGHTS_ID, llmType, model].flatMap((tag) => tag ?? []);
 
@@ -482,6 +499,8 @@ export const invokeDefendInsightsGraph = async ({
   const llm = new ActionsClientLlm({
     actionsClient,
     connectorId: apiConfig.connectorId,
+    inferenceClient: isInferenceEndpoint ? inferenceClient : undefined,
+    isInferenceEndpoint,
     llmType,
     logger,
     temperature: 0,

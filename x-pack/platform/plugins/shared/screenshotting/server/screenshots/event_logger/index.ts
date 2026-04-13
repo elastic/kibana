@@ -8,7 +8,8 @@
 import type { Logger, LogMeta } from '@kbn/core/server';
 import type { ConfigType } from '@kbn/screenshotting-server';
 import apm from 'elastic-apm-node';
-import { type Span as OtelSpan, SpanStatusCode, trace } from '@opentelemetry/api';
+import { withActiveSpan } from '@kbn/tracing-utils';
+import { type Span as OtelSpan, trace } from '@opentelemetry/api';
 import { v4 as uuidv4 } from 'uuid';
 import type { CaptureResult } from '..';
 import { PLUGIN_ID } from '../../../common';
@@ -87,7 +88,6 @@ type LogAdapter = (
 ) => void;
 
 type Labels = Record<keyof SimpleEvent, number | undefined>;
-type TransactionEndFn = (args: { labels: Partial<Labels> }) => void;
 type LogEndFn = (metricData?: Partial<SimpleEvent>) => void;
 
 function fillLogData(
@@ -168,41 +168,36 @@ export class EventLogger {
   }
 
   /**
-   * General method for logging the beginning of any of this plugin's pipeline
-   *
-   * @returns {ScreenshottingEndFn}
+   * Wraps work in both an APM transaction and an OTel span with active context.
+   * The callback receives a setLabels function to set attributes on both APM and OTel before the transaction ends.
+   * withActiveSpan keeps the OTel context active so sub-spans (from log() or auto-instrumentation) are parented correctly.
    */
-  // Manual OTel span management: withActiveSpan can't be used here because the span must outlive the synchronous return.
-  public startTransaction(
-    action: Transactions.SCREENSHOTTING | Transactions.PDF
-  ): TransactionEndFn {
+  public withTransaction<T>(
+    action: Transactions.SCREENSHOTTING | Transactions.PDF,
+    fn: (setLabels: (labels: Partial<Labels>) => void) => T
+  ): T {
     const transaction = apm.startTransaction(action, PLUGIN_ID);
     this.transactions[action] = transaction;
-
-    const tracer = trace.getTracer(PLUGIN_ID);
-    const otelSpan: OtelSpan = tracer.startSpan(action, {
-      attributes: { 'transaction.type': PLUGIN_ID },
-    });
 
     this.startTiming(action);
     this.logEvent(action, 'start', { action });
 
-    return ({ labels }) => {
-      Object.entries(labels).forEach(([label]) => {
-        const labelField = label as keyof SimpleEvent;
-        const labelValue = labels[labelField];
-        transaction.setLabel(label, labelValue, false);
-        if (labelValue !== undefined) {
-          otelSpan.setAttribute(label, labelValue);
-        }
-      });
+    return withActiveSpan(action, { attributes: { 'transaction.type': PLUGIN_ID } }, (otelSpan) => {
+      const setLabels = (labels: Partial<Labels>) => {
+        Object.entries(labels).forEach(([label]) => {
+          const labelField = label as keyof SimpleEvent;
+          const labelValue = labels[labelField];
+          transaction.setLabel(label, labelValue, false);
+          if (labelValue !== undefined && otelSpan) {
+            otelSpan.setAttribute(label, labelValue);
+          }
+        });
+        transaction.end();
+        this.logEvent(action, 'complete', { ...labels, action }, this.timings[action]);
+      };
 
-      transaction.end();
-      otelSpan.setStatus({ code: SpanStatusCode.OK });
-      otelSpan.end();
-
-      this.logEvent(action, 'complete', { ...labels, action }, this.timings[action]);
-    };
+      return fn(setLabels);
+    }) as T;
   }
 
   /**
@@ -225,12 +220,18 @@ export class EventLogger {
     const txn = this.transactions[transaction];
     const span = txn?.startSpan(action, type);
 
+    const tracer = trace.getTracer(PLUGIN_ID);
+    const otelSpan: OtelSpan | undefined = tracer?.startSpan(action, {
+      attributes: { 'span.type': type },
+    });
+
     this.spans.set(action, span);
     this.startTiming(action);
     this.logEvent(message, 'start', { ...metricsPre, action });
 
     return (metricData = {}) => {
       span?.end();
+      otelSpan?.end();
       this.logEvent(
         message,
         'complete',

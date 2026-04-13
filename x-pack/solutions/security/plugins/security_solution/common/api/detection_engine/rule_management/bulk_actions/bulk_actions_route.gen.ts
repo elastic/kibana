@@ -65,6 +65,7 @@ export const BulkActionsDryRunErrCode = z.enum([
   'THRESHOLD_RULE_TYPE_IN_SUPPRESSION',
   'UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD',
   'RULE_FILL_GAPS_DISABLED_RULE',
+  'USER_INSUFFICIENT_RULE_PRIVILEGES',
 ]);
 export type BulkActionsDryRunErrCodeEnum = typeof BulkActionsDryRunErrCode.enum;
 export const BulkActionsDryRunErrCodeEnum = BulkActionsDryRunErrCode.enum;
@@ -136,6 +137,10 @@ Only valid when query property is undefined.
    * Gap fill statuses to filter rules with gaps by status (used together with gaps_range_*).
    */
   gap_fill_statuses: z.array(GapFillStatus).optional(),
+  /**
+   * Gap auto fill scheduler ID used to determine gap fill status for rules
+   */
+  gap_auto_fill_scheduler_id: z.string().optional(),
 });
 
 export type BulkDeleteRules = z.infer<typeof BulkDeleteRules>;

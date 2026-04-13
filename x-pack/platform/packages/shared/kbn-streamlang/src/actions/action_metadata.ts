@@ -854,6 +854,33 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
     ],
   },
 
+  enrich: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.enrich.name', {
+      defaultMessage: 'Enrich',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.enrich.description', {
+      defaultMessage: 'Enrich a field with a policy',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.enrich.usage', {
+      defaultMessage: 'Provide a `policy_name` to enrich data with the policy.',
+    }),
+    examples: [
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.enrich.examples.simple', {
+          defaultMessage: 'Enrich data with a policy',
+        }),
+        yaml: `- action: enrich
+  policy_name: my_policy
+  to: my_enriched_field`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.enrich.tips.ignoreMissing', {
+        defaultMessage: 'Ignore missing fields by setting ignore_missing to true',
+      }),
+    ],
+  },
+
   manual_ingest_pipeline: {
     name: i18n.translate('xpack.streamlang.actionMetadata.manualIngestPipeline.name', {
       defaultMessage: 'Manual Ingest Pipeline',

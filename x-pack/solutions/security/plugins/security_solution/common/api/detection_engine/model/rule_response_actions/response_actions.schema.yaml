@@ -231,12 +231,22 @@ components:
         - params
 
     ResponseAction:
+      discriminator:
+        propertyName: action_type_id
+        mapping:
+          .osquery: '#/components/schemas/OsqueryResponseAction'
+          .endpoint: '#/components/schemas/EndpointResponseAction'
       oneOf:
         - $ref: '#/components/schemas/OsqueryResponseAction'
         - $ref: '#/components/schemas/EndpointResponseAction'
 
     # Camel Cased versions of ResponseAction
     RuleResponseAction:
+      discriminator:
+        propertyName: actionTypeId
+        mapping:
+          .osquery: '#/components/schemas/RuleResponseOsqueryAction'
+          .endpoint: '#/components/schemas/RuleResponseEndpointAction'
       oneOf:
         - $ref: '#/components/schemas/RuleResponseOsqueryAction'
         - $ref: '#/components/schemas/RuleResponseEndpointAction'
