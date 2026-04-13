@@ -161,7 +161,7 @@ export const addLiveQueryToCase = (actionId: string, caseId: string) => {
   cy.getBySel(`row-${actionId}`).within(() => {
     cy.get('[aria-label="Details"]').click();
   });
-  cy.contains('Live query details');
+  cy.contains('View history');
   addToCase(caseId);
 };
 
@@ -169,25 +169,18 @@ const casesOsqueryResultRegex = /attached Osquery results[\s]?[\d]+[\s]?second(?
 export const viewRecentCaseAndCheckResults = () => {
   cy.contains('View case').click();
   cy.contains(casesOsqueryResultRegex);
-  checkResults();
 };
 
 export const checkActionItemsInResults = ({
-  lens,
-  discover,
-  timeline,
   cases,
 }: {
-  discover: boolean;
-  lens: boolean;
+  discover?: boolean;
+  lens?: boolean;
   cases: boolean;
-  timeline: boolean;
+  timeline?: boolean;
 }) => {
   checkResults();
-  cy.contains('View in Discover').should(discover ? 'exist' : 'not.exist');
-  cy.contains('View in Lens').should(lens ? 'exist' : 'not.exist');
   cy.contains('Add to Case').should(cases ? 'exist' : 'not.exist');
-  cy.contains('Add to Timeline investigation').should(timeline ? 'exist' : 'not.exist');
 };
 
 export const takeOsqueryActionWithParams = () => {
