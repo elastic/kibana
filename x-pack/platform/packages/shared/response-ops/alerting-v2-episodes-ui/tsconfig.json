@@ -33,6 +33,7 @@
     "@kbn/react-hooks",
     "@kbn/alerting-v2-constants",
     "@kbn/es-types",
-    "@kbn/search-types"
+    "@kbn/search-types",
+    "@kbn/unified-data-table"
   ]
 }
