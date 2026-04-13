@@ -30,8 +30,11 @@ import {
   keys,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import '@xyflow/react/dist/style.css';
 import { css } from '@emotion/react';
+import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
+import { getDagreLayoutFailureDiagnostics } from './dagre_layout_failure_diagnostics';
 import { applyDagreLayout } from './layout';
 import { FIT_VIEW_PADDING, FIT_VIEW_DURATION, FIT_VIEW_DEFER_MS } from './constants';
 import { ServiceNode } from './service_node';
@@ -94,6 +97,8 @@ function GraphInner({
   showMinimap = true,
   showPopover = true,
 }: GraphProps) {
+  const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
+  const { telemetry } = services;
   const { euiTheme } = useEuiTheme();
   const { fitView } = useReactFlow();
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
@@ -118,9 +123,19 @@ function GraphInner({
     [getAnimationDuration]
   );
 
+  // EBT + console fire once per failed layout computation (each useMemo re-run that throws),
+  // not strictly once per page visit—intentional for measuring failure frequency.
+  const onDagreLayoutFailure = useCallback(
+    (error: unknown) => {
+      telemetry.reportServiceMapDagreLayoutFallback(getDagreLayoutFailureDiagnostics(error));
+      console.error('[APM Service map] Dagre.layout failed; using grid fallback.', error);
+    },
+    [telemetry]
+  );
+
   const layoutedNodes = useMemo(
-    () => applyDagreLayout(initialNodes, initialEdges),
-    [initialNodes, initialEdges]
+    () => applyDagreLayout(initialNodes, initialEdges, {}, onDagreLayoutFailure),
+    [initialNodes, initialEdges, onDagreLayoutFailure]
   );
 
   const [nodes, setNodes, onNodesChange] = useNodesState<ServiceMapNode>(layoutedNodes);

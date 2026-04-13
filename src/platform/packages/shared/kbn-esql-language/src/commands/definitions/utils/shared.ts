@@ -14,6 +14,9 @@ import type { ESQLUserDefinedColumn, ICommandContext } from '../../registry/type
 import { getLastNonWhitespaceChar } from './autocomplete/helpers';
 import type { SupportedDataType } from '../types';
 
+/** Matches a trailing comma (with optional whitespace) at end of text — used to detect "starting a new argument/expression" */
+export const TRAILING_COMMA_REGEX = /,\s*$/;
+
 export const techPreviewLabel = i18n.translate(
   'kbn-esql-language.esql.autocomplete.techPreviewLabel',
   {

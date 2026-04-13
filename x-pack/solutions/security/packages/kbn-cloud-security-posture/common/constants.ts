@@ -161,7 +161,6 @@ export const GRAPH_TARGET_ENTITY_FIELDS = [
   'service.target.entity.id',
   'entity.target.id',
 ] as const;
-
 /**
  * Raw source fields used to compute actor EUIDs in entity store v2.
  * These mirror the identity fields from Entity Store definitions.
