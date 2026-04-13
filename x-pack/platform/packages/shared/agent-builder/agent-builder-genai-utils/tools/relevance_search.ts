@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { ScopedModel } from '@kbn/agent-builder-server';
-import type { PerformMatchSearchResponse } from './steps';
+import type { PerformMatchSearchResponse, TopSnippetsConfig } from './steps';
 import { performMatchSearch } from './steps';
 import { resolveResource } from './utils/resources';
 
@@ -28,6 +28,7 @@ export const relevanceSearch = async ({
   model,
   esClient,
   logger,
+  topSnippetsConfig,
 }: {
   term: string;
   target: string;
@@ -35,6 +36,8 @@ export const relevanceSearch = async ({
   model: ScopedModel;
   esClient: ElasticsearchClient;
   logger: Logger;
+  /** When provided, uses ES|QL TOP_SNIPPETS instead of ES highlighting. */
+  topSnippetsConfig?: TopSnippetsConfig;
 }): Promise<RelevanceSearchResponse> => {
   const { fields } = await resolveResource({ resourceName: target, esClient });
 
@@ -53,5 +56,6 @@ export const relevanceSearch = async ({
     size,
     esClient,
     logger,
+    topSnippetsConfig,
   });
 };

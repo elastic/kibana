@@ -8,17 +8,21 @@
  */
 
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
-import type { ApplicationStart, HttpSetup, NotificationsStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { createWorkflowYamlAttachmentUiDefinition } from './workflow_yaml_attachment_renderer';
 import { workflowYamlDiffAttachmentUiDefinition } from './workflow_yaml_diff_attachment_renderer';
 import {
   WORKFLOW_YAML_ATTACHMENT_TYPE,
   WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
 } from '../../../../common/agent_builder/constants';
+import type { TelemetryServiceClient } from '../../../common/lib/telemetry/types';
 
 export const registerWorkflowAttachmentRenderers = (
   attachments: AttachmentServiceStartContract,
-  services: { http: HttpSetup; notifications: NotificationsStart; application: ApplicationStart }
+  services: {
+    core: CoreStart;
+    telemetry: TelemetryServiceClient;
+  }
 ): void => {
   attachments.addAttachmentType(
     WORKFLOW_YAML_ATTACHMENT_TYPE,

@@ -17,7 +17,7 @@ import {
   MAX_ASSIGNEES_PER_CASE,
   MAX_CUSTOM_FIELDS_PER_CASE,
 } from '../../../common/constants';
-import { mockCases } from '../../mocks';
+import { mockCaseComments, mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { Operations } from '../../authorization';
 import { bulkUpdate, getOperationsToAuthorize } from './bulk_update';
@@ -56,6 +56,10 @@ describe('update', () => {
       clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
         new Map()
       );
+      clientArgs.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
+        [mockCases[0].id]: 0,
+        [mockCases[1].id]: 0,
+      });
     });
 
     it('notifies an assignee', async () => {
@@ -1914,6 +1918,400 @@ describe('update', () => {
         ).rejects.toThrowErrorMatchingInlineSnapshot(
           `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Unauthorized"`
         );
+      });
+    });
+
+    describe('Case close reason', () => {
+      const clientArgs = createCasesClientMockArgs();
+
+      beforeEach(() => {
+        jest.clearAllMocks();
+        clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
+        clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+          saved_objects: [],
+          total: 0,
+          per_page: 10,
+          page: 1,
+        });
+        clientArgs.services.caseService.patchCases.mockResolvedValue({
+          saved_objects: [{ ...mockCases[0] }],
+        });
+        clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+          new Map()
+        );
+      });
+
+      it('propagates closeReason to alerts without persisting it on cases', async () => {
+        const closeReason = 'false_positive';
+        const alertComment = {
+          ...mockCaseComments[3],
+          score: 0,
+          references: [
+            {
+              ...mockCaseComments[3].references[0],
+              id: mockCases[0].id,
+            },
+          ],
+        };
+
+        clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+          saved_objects: [alertComment],
+          total: 1,
+          per_page: 10,
+          page: 1,
+        });
+        clientArgs.services.alertsService.updateAlertsStatus.mockResolvedValue(1);
+
+        await bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                status: CaseStatuses.closed,
+                closeReason,
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        );
+
+        expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalledWith([
+          {
+            id: 'test-id',
+            index: 'test-index',
+            status: CaseStatuses.closed,
+            closingReason: closeReason,
+          },
+        ]);
+
+        const updatedAttributes =
+          clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
+
+        expect(updatedAttributes).not.toHaveProperty('closeReason');
+      });
+
+      it('does not propagate empty closeReason values to alerts', async () => {
+        const alertComment = {
+          ...mockCaseComments[3],
+          score: 0,
+          references: [
+            {
+              ...mockCaseComments[3].references[0],
+              id: mockCases[0].id,
+            },
+          ],
+        };
+
+        clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+          saved_objects: [alertComment],
+          total: 1,
+          per_page: 10,
+          page: 1,
+        });
+        clientArgs.services.alertsService.updateAlertsStatus.mockResolvedValue(1);
+
+        await bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                status: CaseStatuses.closed,
+                closeReason: '   ',
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        );
+
+        expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalledWith([
+          {
+            id: 'test-id',
+            index: 'test-index',
+            status: CaseStatuses.closed,
+            closingReason: undefined,
+          },
+        ]);
+      });
+
+      it('propagates custom closeReason values to alerts', async () => {
+        const closeReason = 'my custom reason';
+        const alertComment = {
+          ...mockCaseComments[3],
+          score: 0,
+          references: [
+            {
+              ...mockCaseComments[3].references[0],
+              id: mockCases[0].id,
+            },
+          ],
+        };
+
+        clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+          saved_objects: [alertComment],
+          total: 1,
+          per_page: 10,
+          page: 1,
+        });
+        clientArgs.services.alertsService.updateAlertsStatus.mockResolvedValue(1);
+
+        await bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                status: CaseStatuses.closed,
+                closeReason,
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        );
+
+        expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalledWith([
+          {
+            id: 'test-id',
+            index: 'test-index',
+            status: CaseStatuses.closed,
+            closingReason: closeReason,
+          },
+        ]);
+      });
+
+      it('returns synced alert count when only one of two alerts is updated', async () => {
+        const closeReason = 'false_positive';
+        const existingClosedAlertReason = 'benign_positive';
+        const firstAlertComment = {
+          ...mockCaseComments[3],
+          score: 0,
+          references: [{ ...mockCaseComments[3].references[0], id: mockCases[0].id }],
+        };
+        const secondAlertComment = {
+          ...mockCaseComments[4],
+          score: 0,
+          references: [{ ...mockCaseComments[4].references[0], id: mockCases[0].id }],
+        };
+
+        clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+          saved_objects: [firstAlertComment, secondAlertComment],
+          total: 2,
+          per_page: 10,
+          page: 1,
+        });
+        // Simulates alert A already being closed while alert B is open.
+        const alertStateById = new Map([
+          [
+            'test-id',
+            {
+              status: CaseStatuses.closed,
+              closingReason: existingClosedAlertReason,
+            },
+          ],
+          [
+            'test-id-2',
+            {
+              status: CaseStatuses.open,
+              closingReason: undefined,
+            },
+          ],
+        ]);
+        clientArgs.services.alertsService.updateAlertsStatus.mockImplementation(async (alerts) => {
+          let updatedAlertsCount = 0;
+          alerts.forEach((alert) => {
+            const currentAlert = alertStateById.get(alert.id);
+            if (
+              currentAlert?.status === CaseStatuses.open &&
+              alert.status === CaseStatuses.closed
+            ) {
+              alertStateById.set(alert.id, {
+                status: CaseStatuses.closed,
+                closingReason: alert.closingReason,
+              });
+              updatedAlertsCount++;
+            }
+          });
+          return updatedAlertsCount;
+        });
+
+        const result = await bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                status: CaseStatuses.closed,
+                closeReason,
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        );
+
+        expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalledWith([
+          {
+            id: 'test-id',
+            index: 'test-index',
+            status: CaseStatuses.closed,
+            closingReason: closeReason,
+          },
+          {
+            id: 'test-id-2',
+            index: 'test-index-2',
+            status: CaseStatuses.closed,
+            closingReason: closeReason,
+          },
+        ]);
+        expect(result[0]).toEqual(
+          expect.objectContaining({
+            updateSummary: {
+              syncedAlertCount: 1,
+            },
+          })
+        );
+        expect(alertStateById.get('test-id')).toEqual({
+          status: CaseStatuses.closed,
+          closingReason: existingClosedAlertReason,
+        });
+        expect(alertStateById.get('test-id-2')).toEqual({
+          status: CaseStatuses.closed,
+          closingReason: closeReason,
+        });
+      });
+
+      it('does not update alerts with an invalid close reason', async () => {
+        const invalidCloseReason = 'invalid_reason';
+        const clientArgsWithValidator = {
+          ...clientArgs,
+          closeReasonValidator: jest.fn().mockResolvedValue(false),
+        };
+
+        await expect(
+          bulkUpdate(
+            {
+              cases: [
+                {
+                  id: mockCases[0].id,
+                  version: mockCases[0].version ?? '',
+                  status: CaseStatuses.closed,
+                  closeReason: invalidCloseReason,
+                },
+              ],
+            },
+            clientArgsWithValidator,
+            casesClientMock
+          )
+        ).rejects.toThrow(`Invalid close reason: "${invalidCloseReason}"`);
+
+        expect(clientArgs.services.alertsService.updateAlertsStatus).not.toHaveBeenCalled();
+      });
+
+      it('does not propagate closeReason when status is not closed', async () => {
+        const closeReason = 'false_positive';
+        const firstAlertComment = {
+          ...mockCaseComments[3],
+          score: 0,
+          references: [{ ...mockCaseComments[3].references[0], id: mockCases[0].id }],
+        };
+
+        clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+          saved_objects: [firstAlertComment],
+          total: 1,
+          per_page: 10,
+          page: 1,
+        });
+        clientArgs.services.alertsService.updateAlertsStatus.mockResolvedValue(1);
+
+        await bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                status: CaseStatuses['in-progress'],
+                closeReason,
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        );
+
+        expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalledWith([
+          {
+            id: 'test-id',
+            index: 'test-index',
+            status: CaseStatuses['in-progress'],
+            closingReason: undefined,
+          },
+        ]);
+      });
+
+      it('returns per-case synced alert count', async () => {
+        const alertComment = {
+          ...mockCaseComments[3],
+          score: 0,
+          references: [
+            {
+              ...mockCaseComments[3].references[0],
+              id: mockCases[0].id,
+            },
+          ],
+        };
+        clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+          saved_objects: [alertComment],
+          total: 1,
+          per_page: 10,
+          page: 1,
+        });
+
+        clientArgs.services.alertsService.updateAlertsStatus.mockResolvedValue(3);
+
+        const result = await bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                status: CaseStatuses.closed,
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        );
+
+        expect(result[0]).toEqual(
+          expect.objectContaining({
+            updateSummary: {
+              syncedAlertCount: 3,
+            },
+          })
+        );
+        expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalled();
+      });
+
+      it('omits updateSummary when no alerts are synced', async () => {
+        const result = await bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                status: CaseStatuses['in-progress'],
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        );
+
+        expect(result[0]).not.toHaveProperty('updateSummary');
       });
     });
   });

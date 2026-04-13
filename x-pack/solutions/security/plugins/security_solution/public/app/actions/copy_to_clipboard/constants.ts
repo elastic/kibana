@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const COPY_TO_CLIPBOARD_ICON = 'copyClipboard';
+export const COPY_TO_CLIPBOARD_ICON = 'copy';
 export const COPY_TO_CLIPBOARD = i18n.translate(
   'xpack.securitySolution.actions.cellValue.copyToClipboard.displayName',
   {

@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import {
   waitForPluginInitialized,
-  cleanupEntityStore,
   waitForEntityDataIndexed,
-  waitForEnrichPolicyCreated,
-  executeEnrichPolicy,
   dataViewRouteHelpersFactory,
-  initEntityEnginesWithRetry,
+  installEntityStoreV2,
+  uninstallEntityStoreV2,
+  waitForEntityStoreV2Running,
 } from '../../../cloud_security_posture_api/utils';
 import type { SecurityTelemetryFtrProviderContext } from '../../config.base';
 
@@ -41,6 +39,17 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
     this.tags(['cloud_security_posture_graph_viz']);
 
     before(async () => {
+      // Clean up any leftover alerts indices from previous failed runs
+      for (const suffix of ['000001', '000002']) {
+        try {
+          await es.indices.delete({
+            index: `.internal.alerts-security.alerts-default-${suffix}`,
+          });
+        } catch (e) {
+          // Ignore if index doesn't exist
+        }
+      }
+
       // security_alerts_modified_mappings - contains mappings for actor and target
       // security_alerts - does not contain mappings for actor and target
       await esArchiver.load(
@@ -53,24 +62,23 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await waitForPluginInitialized({ retry, supertest, logger });
       await ebtUIHelper.setOptIn(true); // starts the recording of events from this moment
 
-      // Enable asset inventory setting (required for entity store with 'generic' type)
-      await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });
+      // Enable asset inventory and entity store v2 settings
+      await kibanaServer.uiSettings.update({
+        'securitySolution:enableAssetInventory': true,
+        'securitySolution:entityStoreEnableV2': true,
+      });
 
       // Initialize security-solution-default data-view (required by entity store)
       const dataView = dataViewRouteHelpersFactory(supertest);
       await dataView.create('security-solution');
 
-      // Initialize entity engine (required for graph visualization)
-      await initEntityEnginesWithRetry({
-        supertest,
-        retry,
-        logger,
-        entityTypes: ['generic'],
-      });
+      // Install Entity Store V2 (required for graph visualization)
+      await installEntityStoreV2({ supertest, logger });
+      await waitForEntityStoreV2Running({ supertest, retry, logger });
     });
 
     after(async () => {
-      await cleanupEntityStore({ supertest, logger });
+      await uninstallEntityStoreV2({ supertest, logger });
       // Using unload destroys index's alias of .alerts-security.alerts-default which causes a failure in other tests
       // Instead we delete all alerts from the index
       await es.deleteByQuery({
@@ -105,31 +113,31 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.toggleSearchBar();
 
       // Show actions by entity
-      await expandedFlyoutGraph.showActionsByEntity('admin@example.com');
-      await expandedFlyoutGraph.expectFilterTextEquals(0, 'user.entity.id: admin@example.com');
-      await expandedFlyoutGraph.expectFilterPreviewEquals(0, 'user.entity.id: admin@example.com');
+      await expandedFlyoutGraph.showActionsByEntity('user:admin@example.com@gcp');
+      await expandedFlyoutGraph.expectFilterTextEquals(0, 'user.id: admin@example.com');
+      await expandedFlyoutGraph.expectFilterPreviewEquals(0, 'user.id: admin@example.com');
 
       // Show actions on entity
-      await expandedFlyoutGraph.showActionsOnEntity('admin@example.com');
+      await expandedFlyoutGraph.showActionsOnEntity('user:admin@example.com@gcp');
       await expandedFlyoutGraph.expectFilterTextEquals(
         0,
-        'user.entity.id: admin@example.com OR user.target.entity.id: admin@example.com'
+        'user.id: admin@example.com OR user.target.id: admin@example.com'
       );
 
       await expandedFlyoutGraph.expectFilterPreviewEquals(
         0,
-        'user.entity.id: admin@example.com OR user.target.entity.id: admin@example.com'
+        'user.id: admin@example.com OR user.target.id: admin@example.com'
       );
 
       // Explore related entities
-      await expandedFlyoutGraph.exploreRelatedEntities('admin@example.com');
+      await expandedFlyoutGraph.exploreRelatedEntities('user:admin@example.com@gcp');
       await expandedFlyoutGraph.expectFilterTextEquals(
         0,
-        'user.entity.id: admin@example.com OR user.target.entity.id: admin@example.com OR related.entity: admin@example.com'
+        'user.id: admin@example.com OR user.target.id: admin@example.com OR related.entity: user:admin@example.com@gcp'
       );
       await expandedFlyoutGraph.expectFilterPreviewEquals(
         0,
-        'user.entity.id: admin@example.com OR user.target.entity.id: admin@example.com OR related.entity: admin@example.com'
+        'user.id: admin@example.com OR user.target.id: admin@example.com OR related.entity: user:admin@example.com@gcp'
       );
 
       // Show events with the same action
@@ -139,11 +147,11 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       await expandedFlyoutGraph.expectFilterTextEquals(
         0,
-        'user.entity.id: admin@example.com OR user.target.entity.id: admin@example.com OR related.entity: admin@example.com OR event.action: google.iam.admin.v1.CreateRole'
+        'user.id: admin@example.com OR user.target.id: admin@example.com OR related.entity: user:admin@example.com@gcp OR event.action: google.iam.admin.v1.CreateRole'
       );
       await expandedFlyoutGraph.expectFilterPreviewEquals(
         0,
-        'user.entity.id: admin@example.com OR user.target.entity.id: admin@example.com OR related.entity: admin@example.com OR event.action: google.iam.admin.v1.CreateRole'
+        'user.id: admin@example.com OR user.target.id: admin@example.com OR related.entity: user:admin@example.com@gcp OR event.action: google.iam.admin.v1.CreateRole'
       );
 
       await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
@@ -154,22 +162,22 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       );
       await expandedFlyoutGraph.expectFilterTextEquals(
         0,
-        'user.entity.id: admin@example.com OR user.target.entity.id: admin@example.com OR related.entity: admin@example.com'
+        'user.id: admin@example.com OR user.target.id: admin@example.com OR related.entity: user:admin@example.com@gcp'
       );
       await expandedFlyoutGraph.expectFilterPreviewEquals(
         0,
-        'user.entity.id: admin@example.com OR user.target.entity.id: admin@example.com OR related.entity: admin@example.com'
+        'user.id: admin@example.com OR user.target.id: admin@example.com OR related.entity: user:admin@example.com@gcp'
       );
 
       // Hide actions on entity
-      await expandedFlyoutGraph.hideActionsOnEntity('admin@example.com');
+      await expandedFlyoutGraph.hideActionsOnEntity('user:admin@example.com@gcp');
       await expandedFlyoutGraph.expectFilterTextEquals(
         0,
-        'user.entity.id: admin@example.com OR related.entity: admin@example.com'
+        'user.id: admin@example.com OR related.entity: user:admin@example.com@gcp'
       );
       await expandedFlyoutGraph.expectFilterPreviewEquals(
         0,
-        'user.entity.id: admin@example.com OR related.entity: admin@example.com'
+        'user.id: admin@example.com OR related.entity: user:admin@example.com@gcp'
       );
 
       // Clear filters
@@ -177,7 +185,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       // Add custom filter
       await expandedFlyoutGraph.addFilter({
-        field: 'user.entity.id',
+        field: 'user.id',
         operation: 'is',
         value: 'admin2@example.com',
       });
@@ -246,7 +254,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       // Add filter for actor entity
       await expandedFlyoutGraph.showSearchBar();
       await expandedFlyoutGraph.addFilter({
-        field: 'user.entity.id',
+        field: 'user.id',
         operation: 'is',
         value: 'admin3@example.com',
       });
@@ -334,47 +342,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
     });
 
     describe('ECS fields only', function () {
-      // Entity store is initialized once at the parent level to avoid race conditions
-      // Tests run sequentially: first v1 (ENRICH), then v2 (LOOKUP JOIN)
-      before(async () => {
-        // Clean up any leftover resources from previous runs
-        await cleanupEntityStore({ supertest, logger });
-
-        // Delete entity indices completely to start fresh
-        try {
-          await es.indices.delete({
-            index: getEntitiesLatestIndexName(),
-            ignore_unavailable: true,
-          });
-        } catch (e) {
-          // Ignore if index doesn't exist
-        }
-
-        // Enable asset inventory setting
-        await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });
-
-        // Initialize security-solution-default data-view (required by entity store)
-        const dataView = dataViewRouteHelpersFactory(supertest);
-        await dataView.create('security-solution');
-
-        // Initialize entity engine for 'generic' type ONCE - this is reused by both v1 and v2 tests
-        await initEntityEnginesWithRetry({
-          supertest,
-          retry,
-          logger,
-          entityTypes: ['generic'],
-        });
-      });
-
-      after(async () => {
-        // Clean up entity store resources
-        await cleanupEntityStore({ supertest, logger });
-
-        // Disable asset inventory setting
-        await kibanaServer.uiSettings.update({
-          'securitySolution:enableAssetInventory': false,
-        });
-      });
+      // Entity store v2 is installed at the parent level for graph visibility.
+      // Enrichment tests use LOOKUP JOIN (v2) with custom entity data loaded via esArchiver.
 
       // Shared test suite that registers all test cases - called from both v1 and v2 describe blocks
       const runEnrichmentTests = () => {
@@ -393,8 +362,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           // Expected nodes:
           // - 1 grouped actor node (2 actors: multi-actor-1, multi-actor-2 - same Identity/GCP IAM User)
           // - 1 grouped storage node (2 buckets: target-bucket-1, target-bucket-2 - same Storage/GCP Storage Bucket)
-          // - 1 grouped service node (2 service accounts: target-multi-service-1, target-multi-service-2 - same Service/GCP Service Account)
-          // - 1 label node (actor group -> storage group and service group)
+          // - 1 single service node (service:TargetMultiService1 - Service)
+          // - 1 label node (actor group -> storage group and service node)
           const expectedNodes = 4;
           await networkEventsPage.flyout.assertGraphNodesNumber(expectedNodes);
 
@@ -402,7 +371,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           await expandedFlyoutGraph.waitGraphIsLoaded();
           await expandedFlyoutGraph.assertGraphNodesNumber(expectedNodes);
 
-          const actorNodeId = '71373527ad0e2cf75e214cd168630ad1';
+          const actorNodeId = 'dd46938f412437c539cbff915873c550';
           await expandedFlyoutGraph.assertNodeEntityTag(actorNodeId, 'Identity');
           await expandedFlyoutGraph.assertNodeEntityDetails(actorNodeId, 'GCP IAM User');
 
@@ -413,9 +382,9 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             'GCP Storage Bucket'
           );
 
-          const serviceNodeId = '0039c3b5dd064364a5f7edac77c2e158';
+          const serviceNodeId = 'service:TargetMultiService1';
           await expandedFlyoutGraph.assertNodeEntityTag(serviceNodeId, 'Service');
-          await expandedFlyoutGraph.assertNodeEntityDetails(serviceNodeId, 'GCP Service Account');
+          await expandedFlyoutGraph.assertNodeEntityDetails(serviceNodeId, 'TargetMultiService1');
         });
 
         it('expanded flyout - MV_EXPAND deduplication: single label node for targets with different entity types', async () => {
@@ -460,12 +429,12 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           await expandedFlyoutGraph.assertGraphNodesNumber(expectedNodes);
 
           // Verify actor node
-          const actorNodeId = 'mv-expand-test-actor@example.com';
+          const actorNodeId = 'user:mv-expand-test-actor@example.com@gcp';
           await expandedFlyoutGraph.assertNodeEntityTag(actorNodeId, 'Identity');
           await expandedFlyoutGraph.assertNodeEntityDetails(actorNodeId, 'MvExpandTestActor');
 
-          // Verify first target (Identity type)
-          const identityTargetNodeId = 'mv-expand-target-identity';
+          // Verify first target (Identity type - user entity in entity store)
+          const identityTargetNodeId = 'user:mv-expand-target-identity@gcp';
           await expandedFlyoutGraph.assertNodeEntityTag(identityTargetNodeId, 'Identity');
           await expandedFlyoutGraph.assertNodeEntityDetails(
             identityTargetNodeId,
@@ -489,42 +458,9 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         });
       };
 
-      describe('via ENRICH policy (v1)', () => {
-        before(async () => {
-          // Load v1 entity data
-          await esArchiver.load(
-            'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store'
-          );
-
-          // Wait for entity data to be fully indexed
-          await waitForEntityDataIndexed({
-            es,
-            logger,
-            retry,
-            entitiesIndex: '.entities.v1.latest.security_*',
-            expectedCount: 15,
-          });
-
-          await waitForEnrichPolicyCreated({ es, retry, logger });
-          await executeEnrichPolicy({ es, retry, logger });
-        });
-
-        runEnrichmentTests();
-      });
-
       describe('via LOOKUP JOIN (v2)', () => {
         before(async () => {
-          // Delete v2 manually since its not being deleted by the cleanupEntityStore function
-          try {
-            await es.indices.delete({
-              index: getEntitiesLatestIndexName(),
-              ignore_unavailable: true,
-            });
-          } catch (e) {
-            // Ignore if index doesn't exist
-          }
-
-          // Load v2 entity data
+          // Load v2 entity data into the entity store index created by v2 install
           await esArchiver.load(
             'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store_v2'
           );
@@ -573,12 +509,13 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             await expandedFlyoutGraph.waitGraphIsLoaded();
             await expandedFlyoutGraph.assertGraphNodesNumber(expectedNodes);
             // Verify actor node
-            const actorNodeId = 'gcp-admin-user@my-gcp-project.iam.gserviceaccount.com';
+            const actorNodeId = 'user:gcp-admin-user@my-gcp-project.iam.gserviceaccount.com@gcp';
             await expandedFlyoutGraph.assertNodeEntityTag(actorNodeId, 'Service Account');
             await expandedFlyoutGraph.assertNodeEntityDetails(actorNodeId, 'GCP Admin User');
 
-            // Verify service target node
-            const serviceTargetNodeId = 'data-pipeline@my-gcp-project.iam.gserviceaccount.com';
+            // Verify service target node (user type entity in entity store)
+            const serviceTargetNodeId =
+              'user:data-pipeline@my-gcp-project.iam.gserviceaccount.com@gcp';
             await expandedFlyoutGraph.assertNodeEntityTag(serviceTargetNodeId, 'Service Account');
             await expandedFlyoutGraph.assertNodeEntityDetails(
               serviceTargetNodeId,
@@ -586,14 +523,14 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             );
 
             await expandedFlyoutGraph.showEntityDetails(
-              'data-pipeline@my-gcp-project.iam.gserviceaccount.com'
+              'user:data-pipeline@my-gcp-project.iam.gserviceaccount.com@gcp'
             );
             await expandedFlyoutGraph.assertPreviewPopoverIsOpen();
 
             await expandedFlyoutGraph.closePreviewSection();
 
             await expandedFlyoutGraph.showEntityRelationships(
-              'data-pipeline@my-gcp-project.iam.gserviceaccount.com'
+              'user:data-pipeline@my-gcp-project.iam.gserviceaccount.com@gcp'
             );
 
             await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
@@ -609,14 +546,14 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             await expandedFlyoutGraph.assertGraphNodesNumber(expectedNodesWithRelationships);
 
             const communicatesWithRelationshipNodeId =
-              'rel(data-pipeline@my-gcp-project.iam.gserviceaccount.com-Communicates_with)';
+              'rel(user:data-pipeline@my-gcp-project.iam.gserviceaccount.com@gcp-communicates_with)';
             await expandedFlyoutGraph.assertNodeExists(communicatesWithRelationshipNodeId);
 
             const ownsRelationshipNodeId =
-              'rel(data-pipeline@my-gcp-project.iam.gserviceaccount.com-Owns)';
+              'rel(user:data-pipeline@my-gcp-project.iam.gserviceaccount.com@gcp-owns)';
             await expandedFlyoutGraph.assertNodeExists(ownsRelationshipNodeId);
 
-            const communicatesWithIdRelationshipTargetNodeId = 'd4f3b950f4345da123745ee6c3806cf1';
+            const communicatesWithIdRelationshipTargetNodeId = '06530c8b5bd27028c4f78cb987f08cc0';
             await expandedFlyoutGraph.assertNodeEntityTag(
               communicatesWithIdRelationshipTargetNodeId,
               'Host'
@@ -630,7 +567,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
               2
             );
 
-            const ownsIdRelationshipTargetNodeId = '6cf356f3b9190616a3d11bd98e0acdfd';
+            const ownsIdRelationshipTargetNodeId = '2aab291bca8891f6ba943173ab574130';
             await expandedFlyoutGraph.assertNodeEntityTag(ownsIdRelationshipTargetNodeId, 'Host');
             await expandedFlyoutGraph.assertNodeEntityDetails(
               ownsIdRelationshipTargetNodeId,
@@ -656,7 +593,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             await expandedFlyoutGraph.assertGraphNodesNumber(expectedNodesWithActions);
 
             const eventTargetNodeId =
-              'projects/my-gcp-project/zones/us-west1-a/instances/db-server-prod-1';
+              'host:projects/my-gcp-project/zones/us-west1-a/instances/db-server-prod-1';
             await expandedFlyoutGraph.assertNodeEntityTag(eventTargetNodeId, 'Host');
             await expandedFlyoutGraph.assertNodeEntityDetails(
               eventTargetNodeId,
@@ -720,21 +657,21 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             await expandedFlyoutGraph.dismissCallout();
 
             // Verify root user (actor) node
-            const rootNodeId = 'rel-hierarchy-root-user';
+            const rootNodeId = 'user:rel-hierarchy-root-user@gcp';
             await expandedFlyoutGraph.assertNodeEntityTag(rootNodeId, 'Identity');
             await expandedFlyoutGraph.assertNodeEntityDetails(rootNodeId, 'Hierarchy Root User');
 
             // Verify intermediate identity node
-            const hostNodeId = 'rel-hierarchy-identity-1';
+            const hostNodeId = 'user:rel-hierarchy-identity-1@gcp';
             await expandedFlyoutGraph.assertNodeEntityTag(hostNodeId, 'Identity');
             await expandedFlyoutGraph.assertNodeEntityDetails(hostNodeId, 'Hierarchy Identity 1');
 
             // Verify intermediate host node
-            const serviceNodeId = 'rel-hierarchy-host-1';
+            const serviceNodeId = 'host:rel-hierarchy-host-1';
             await expandedFlyoutGraph.assertNodeEntityTag(serviceNodeId, 'Host');
             await expandedFlyoutGraph.assertNodeEntityDetails(serviceNodeId, 'Hierarchy Host 1');
 
-            await expandedFlyoutGraph.showEntityRelationships('rel-hierarchy-root-user');
+            await expandedFlyoutGraph.showEntityRelationships('user:rel-hierarchy-root-user@gcp');
             await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
 
             const expectedNodesWithSingleOwnsRelationship = 6;
@@ -742,7 +679,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
               expectedNodesWithSingleOwnsRelationship
             );
 
-            const ownsRelationshipNodeId = 'rel(rel-hierarchy-root-user-Owns)';
+            const ownsRelationshipNodeId = 'rel(user:rel-hierarchy-root-user@gcp-owns)';
             await expandedFlyoutGraph.assertNodeExists(ownsRelationshipNodeId);
 
             await expandedFlyoutGraph.showEntityRelationships(hostNodeId);
@@ -751,7 +688,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             await expandedFlyoutGraph.showEntityRelationships(serviceNodeId);
             await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
 
-            await expandedFlyoutGraph.showEntityRelationships('rel-hierarchy-service-1');
+            await expandedFlyoutGraph.showEntityRelationships('service:Hierarchy Service 1');
             await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
 
             // Expected nodes with multiple relationships:
@@ -769,17 +706,18 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             // - Depends_on: rel-hierarchy-delegate-1
             // - Communicates_with: rel-hierarchy-network-1, rel-hierarchy-network-2
             // Supervises and Depends_on share the same target (delegate-1), so they are stacked in a group
-            const supervisesRelationshipNodeId = 'rel(rel-hierarchy-identity-1-Supervises)';
+            const supervisesRelationshipNodeId =
+              'rel(user:rel-hierarchy-identity-1@gcp-supervises)';
             await expandedFlyoutGraph.assertNodeExists(supervisesRelationshipNodeId);
 
-            const dependsOnRelationshipNodeId = 'rel(rel-hierarchy-identity-1-Depends_on)';
+            const dependsOnRelationshipNodeId = 'rel(user:rel-hierarchy-identity-1@gcp-depends_on)';
             await expandedFlyoutGraph.assertNodeExists(dependsOnRelationshipNodeId);
 
             const communicatesWithRelationshipNodeId =
-              'rel(rel-hierarchy-identity-1-Communicates_with)';
+              'rel(user:rel-hierarchy-identity-1@gcp-communicates_with)';
             await expandedFlyoutGraph.assertNodeExists(communicatesWithRelationshipNodeId);
 
-            const delegateTargetNodeId = 'rel-hierarchy-delegate-1';
+            const delegateTargetNodeId = 'user:rel-hierarchy-delegate-1@gcp';
             await expandedFlyoutGraph.assertNodeEntityTag(delegateTargetNodeId, 'User');
             await expandedFlyoutGraph.assertNodeEntityDetails(
               delegateTargetNodeId,
@@ -805,15 +743,15 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             await expandedFlyoutGraph.closePreviewSection();
 
             const communicatesWithHostRelationshipNodeId =
-              'rel(rel-hierarchy-host-1-Communicates_with)';
+              'rel(host:rel-hierarchy-host-1-communicates_with)';
             await expandedFlyoutGraph.assertNodeExists(communicatesWithHostRelationshipNodeId);
 
             const communicatesWithStorageRelationshipNodeId =
-              'rel(rel-hierarchy-service-1-Communicates_with)';
+              'rel(service:Hierarchy Service 1-communicates_with)';
             await expandedFlyoutGraph.assertNodeExists(communicatesWithStorageRelationshipNodeId);
 
             // Verify external-caller entity and its relationship
-            const externalCallerNodeId = 'rel-hierarchy-external-caller';
+            const externalCallerNodeId = 'service:Hierarchy External Caller';
             await expandedFlyoutGraph.assertNodeEntityTag(externalCallerNodeId, 'Service');
             await expandedFlyoutGraph.assertNodeEntityDetails(
               externalCallerNodeId,
@@ -821,7 +759,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             );
 
             const externalCallerRelationshipNodeId =
-              'rel(rel-hierarchy-external-caller-Communicates_with)';
+              'rel(service:Hierarchy External Caller-communicates_with)';
             await expandedFlyoutGraph.assertNodeExists(externalCallerRelationshipNodeId);
             // Show actions by identity-1 to see the two new events (AuditLog and UserOperation)
             await expandedFlyoutGraph.showActionsByEntity(hostNodeId);
@@ -834,13 +772,13 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
             await expandedFlyoutGraph.assertNodeEntityTag(delegateTargetNodeId, 'User');
 
-            await expandedFlyoutGraph.showEntityRelationships('rel-hierarchy-identity-1');
+            await expandedFlyoutGraph.showEntityRelationships('user:rel-hierarchy-identity-1@gcp');
             await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
 
             // Verify the group node exists that contains 2 label and 2 relationship nodes
             // (stacked together because they share the same source-target pair: identity-1 → delegate-1)
             const stackedGroupNodeId =
-              'grp(30fe1a3db6add7620bc17c65035dd458088ccd164c434ad513a790fa9abc1575)';
+              'grp(5984ac700cba276bc19d9466132abd9809f6342b58a5294a695be4957d9eb8b0)';
             await expandedFlyoutGraph.assertNodeExists(stackedGroupNodeId);
 
             // hide entity relationships

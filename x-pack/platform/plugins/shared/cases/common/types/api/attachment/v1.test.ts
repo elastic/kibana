@@ -347,7 +347,7 @@ describe('Attachments', () => {
           error: 'error',
           message: 'not found',
           status: 404,
-          attachmentId: 'abc',
+          savedObjectId: 'abc',
         },
       ],
     };

@@ -63,6 +63,7 @@ describe('getInitialAppState', () => {
         appState: {
           breakdownField: 'customBreakDownField',
           hideChart: true,
+          hideTable: true,
           rowsPerPage: 250,
           hideAggregatedPreview: true,
         },
@@ -91,6 +92,7 @@ describe('getInitialAppState', () => {
         filters: [customFilter],
         grid: {},
         hideChart: true,
+        hideTable: false,
         dataSource: createDataViewDataSource({ dataViewId: 'the-data-view-id' }),
         interval: 'auto',
         query: customQuery,
@@ -176,6 +178,7 @@ describe('getInitialAppState', () => {
         "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": undefined,
+        "hideTable": undefined,
         "interval": "auto",
         "query": Object {
           "language": "kuery",
@@ -221,6 +224,7 @@ describe('getInitialAppState', () => {
         "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": undefined,
+        "hideTable": undefined,
         "interval": "auto",
         "query": Object {
           "language": "kuery",
@@ -234,6 +238,23 @@ describe('getInitialAppState', () => {
         "viewMode": undefined,
       }
     `);
+  });
+
+  test('should not allow both chart and table to be hidden at the same time', () => {
+    const services = createDiscoverServicesMock();
+    const actual = getInitialAppState({
+      hasGlobalState: false,
+      initialUrlState: {
+        hideChart: true,
+        hideTable: true,
+      },
+      persistedTab: undefined,
+      dataView: dataViewWithTimefieldMock,
+      services,
+    });
+
+    expect(actual.hideChart).toBe(true);
+    expect(actual.hideTable).toBe(false);
   });
 
   const getPersistedTab = ({ services }: { services: DiscoverServices }) =>
