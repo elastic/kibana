@@ -44,6 +44,10 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.alerts`,
   `${internalNamespaces.security}.get_entity`,
   `${internalNamespaces.security}.search_entities`,
+  `${internalNamespaces.security}.pci_scope_discovery`,
+  `${internalNamespaces.security}.pci_compliance_check`,
+  `${internalNamespaces.security}.pci_compliance_report`,
+  `${internalNamespaces.security}.pci_field_mapper`,
 
   // Streams
   `${internalNamespaces.streams}.list_streams`,
@@ -118,6 +122,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'alert-analysis',
   'detection-rule-edit',
   'threat-hunting',
+  'pci-compliance',
 
   // O11Y
   'observability.rca',

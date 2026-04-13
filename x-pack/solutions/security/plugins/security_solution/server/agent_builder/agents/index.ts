@@ -12,7 +12,7 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_c
 import { createThreatHuntingAgent } from './threat_hunting_agent';
 
 /**
- * Registers all security agent builder tools with the agentBuilder plugin
+ * Registers all security agent builder agents with the agentBuilder plugin
  */
 export const registerAgents = async (
   agentBuilder: AgentBuilderPluginSetup,
