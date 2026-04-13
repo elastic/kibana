@@ -135,9 +135,7 @@ paths:
         The copied pack is always created with `enabled` set to `false`.
       operationId: OsqueryCopyPacks
       x-codegen-enabled: true
-      #      TODO: Remove the empty x-labels array and uncomment the following line when feature flag is enabled
-      x-labels: [ ]
-      #      x-labels: [serverless, ess]
+      x-labels: [ serverless, ess ]
       parameters:
         - name: id
           in: path
