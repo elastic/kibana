@@ -7,6 +7,7 @@
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
+import { setGrouping } from '../../../tasks/entity_analytics/entity_analytics_home';
 import { ENTITY_ANALYTICS_HOME_PAGE_URL } from '../../../urls/navigation';
 import {
   PAGE_TITLE,
@@ -55,6 +56,7 @@ describe(
 
     beforeEach(() => {
       login();
+      setGrouping(['none']);
       visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
       waitForTableToLoad();
     });
@@ -70,13 +72,13 @@ describe(
       });
 
       it('displays the correct entity count', () => {
-        cy.contains('6 entities').should('be.visible');
+        cy.contains('8 entities').should('be.visible');
       });
 
       it('shows all default column headers', () => {
         const expectedHeaders = [
           'Entity name',
-          'Entity id',
+          'Entity ID',
           'Data source',
           'Resolved to',
           'Entity type',
@@ -187,6 +189,7 @@ describe(
   () => {
     beforeEach(() => {
       login();
+      setGrouping(['none']);
       visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
       cy.get(PAGE_TITLE).should('exist');
     });

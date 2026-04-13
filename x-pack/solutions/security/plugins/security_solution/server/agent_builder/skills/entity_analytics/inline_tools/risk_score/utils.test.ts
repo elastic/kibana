@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityType } from '@kbn/entity-store/common';
+import type { EntityType } from '@kbn/entity-store/public';
 import { getRiskFieldPaths, intervalToEsql } from './utils';
 
 describe('Risk Score utils', () => {

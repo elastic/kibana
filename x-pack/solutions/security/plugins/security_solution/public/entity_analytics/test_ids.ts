@@ -33,6 +33,7 @@ export const ENTITY_ANALYTICS_MANAGEMENT_TABS_TEST_ID = 'entityAnalyticsManageme
 export const RISK_SCORE_TAB_TEST_ID = 'riskScoreTab';
 export const ASSET_CRITICALITY_TAB_TEST_ID = 'assetCriticalityTab';
 export const ENGINE_STATUS_TAB_TEST_ID = 'engineStatusTab';
+export const WATCHLISTS_TAB_TEST_ID = 'watchlistsTab';
 export const ENGINE_STATUS_PANEL_TEST_ID = 'engine-status-panel';
 export const ENTITY_STORE_FEATURE_FLAG_CALLOUT_TEST_ID = 'entity-store-feature-flag-callout';
 

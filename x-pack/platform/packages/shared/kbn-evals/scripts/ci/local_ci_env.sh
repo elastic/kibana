@@ -46,6 +46,8 @@ TRACING_ES_API_KEY="$(jq -r '.tracingEs.apiKey // empty' <<<"$CONFIG_JSON")"
 
 TRACING_EXPORTERS_JSON="$(jq -c '.tracingExporters // empty' <<<"$CONFIG_JSON")"
 GCS_CREDENTIALS="$(jq -c '.gcsDatasetAccessCredentials // empty' <<<"$CONFIG_JSON")"
+EVALUATIONS_KBN_URL="$(jq -r '.evaluationsKbn.url // empty' <<<"$CONFIG_JSON")"
+EVALUATIONS_KBN_API_KEY="$(jq -r '.evaluationsKbn.apiKey // empty' <<<"$CONFIG_JSON")"
 
 if [[ -z "$LITELLM_BASE_URL" || -z "$LITELLM_VIRTUAL_KEY" ]]; then
   die "Missing litellm.baseUrl or litellm.virtualKey in $CONFIG_PATH"
@@ -64,6 +66,12 @@ export EVALUATIONS_ES_API_KEY
 export TRACING_ES_URL
 export TRACING_ES_API_KEY
 export GCS_CREDENTIALS
+if [[ -n "$EVALUATIONS_KBN_URL" ]]; then
+  export EVALUATIONS_KBN_URL
+fi
+if [[ -n "$EVALUATIONS_KBN_API_KEY" ]]; then
+  export EVALUATIONS_KBN_API_KEY
+fi
 if [[ -n "$TRACING_EXPORTERS_JSON" && "$TRACING_EXPORTERS_JSON" != "null" ]]; then
   export TRACING_EXPORTERS="$TRACING_EXPORTERS_JSON"
 fi
@@ -115,6 +123,8 @@ echo "  LITELLM_TEAM_NAME=$LITELLM_TEAM_NAME"
 echo "  LITELLM_TEAM_ID=${LITELLM_TEAM_ID:+<redacted>}"
 echo "  EVALUATION_CONNECTOR_ID=$EVALUATION_CONNECTOR_ID"
 echo "  EVALUATIONS_ES_URL=${EVALUATIONS_ES_URL:-<empty>}"
+echo "  EVALUATIONS_KBN_URL=${EVALUATIONS_KBN_URL:-<empty>}"
+echo "  EVALUATIONS_KBN_API_KEY=${EVALUATIONS_KBN_API_KEY:+<redacted>}"
 echo "  TRACING_ES_URL=${TRACING_ES_URL:-<empty>}"
 if [[ -n "${TRACING_EXPORTERS:-}" ]]; then
   echo "  TRACING_EXPORTERS=<set (JSON array)>"

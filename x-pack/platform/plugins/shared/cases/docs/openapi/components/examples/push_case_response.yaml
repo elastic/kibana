@@ -4,8 +4,11 @@ value:
     "id": "b917f300-0ed9-11ed-bd18-65557fe66949",
     "version": "WzE3NjgsM10=",
     "comments": [],
+    "observables": [],
     "totalComment": 0,
     "totalAlerts": 0,
+    "totalEvents": 0,
+    "total_observables": 0,
     "description": "A case description.",
     "title": "Case title 1",
     "tags": [

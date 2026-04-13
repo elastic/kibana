@@ -974,7 +974,7 @@
         "label": "VISUALIZE_EMBEDDABLE_TYPE",
         "description": [],
         "signature": [
-          "\"visualization\""
+          "\"legacy_vis\""
         ],
         "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
         "lineNumber": 13,
