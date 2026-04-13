@@ -58,7 +58,7 @@ export const ProcessorsEmptyPrompt: FunctionComponent<Props> = ({ onLoadJson }) 
       }
       actions={[
         <AddProcessorButton
-          key="addProcessor"
+          key="add"
           ref={buttonRef}
           onClick={() => {
             onTreeAction({
@@ -67,7 +67,7 @@ export const ProcessorsEmptyPrompt: FunctionComponent<Props> = ({ onLoadJson }) 
             });
           }}
         />,
-        <LoadFromJsonButton key="loadFromJson" onDone={onLoadJson} />,
+        <LoadFromJsonButton key="import" onDone={onLoadJson} />,
       ]}
     />
   );

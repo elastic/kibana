@@ -17,6 +17,8 @@ import {
   GET_LOCAL_DATE_PICKER_APPLY_BUTTON,
   GET_LOCAL_DATE_PICKER_END_DATE_POPOVER_BUTTON,
   GET_LOCAL_SHOW_DATES_BUTTON,
+  GET_DATE_RANGE_PICKER_CONTROL_BUTTON,
+  DATE_RANGE_PICKER_INPUT,
   GLOBAL_FILTERS_CONTAINER,
 } from '../screens/date_picker';
 
@@ -69,28 +71,40 @@ export const updateDateRangeInLocalDatePickers = (
   startDate: string,
   endDate: string
 ) => {
-  cy.get(GET_LOCAL_SHOW_DATES_BUTTON(localQueryBarSelector)).click();
-  cy.get(DATE_PICKER_ABSOLUTE_TAB).first().click();
+  cy.get(localQueryBarSelector).then(($container) => {
+    if ($container.find('[data-test-subj="dateRangePickerControlButton"]').length) {
+      // New DateRangePicker: type the full range as ISO into the text input.
+      // Convert "MMM D, YYYY @ HH:mm:ss.SSS" → ISO by stripping the " @ " separator.
+      const toIso = (d: string) => new Date(d.replace(' @ ', ' ')).toISOString();
+      cy.get(GET_DATE_RANGE_PICKER_CONTROL_BUTTON(localQueryBarSelector)).click();
+      cy.get(DATE_RANGE_PICKER_INPUT).clear();
+      cy.get(DATE_RANGE_PICKER_INPUT).type(`${toIso(startDate)} to ${toIso(endDate)}{enter}`);
+    } else {
+      // Legacy EuiSuperDatePicker
+      cy.get(GET_LOCAL_SHOW_DATES_BUTTON(localQueryBarSelector)).click();
+      cy.get(DATE_PICKER_ABSOLUTE_TAB).first().click();
 
-  cy.get(DATE_PICKER_ABSOLUTE_INPUT).click();
-  cy.get(DATE_PICKER_ABSOLUTE_INPUT).clear();
-  cy.get(DATE_PICKER_ABSOLUTE_INPUT).type(`${startDate}{enter}`);
-  cy.get(GET_LOCAL_DATE_PICKER_APPLY_BUTTON(localQueryBarSelector)).click();
-  cy.get(GET_LOCAL_DATE_PICKER_APPLY_BUTTON(localQueryBarSelector)).should(
-    'not.have.text',
-    'Updating'
-  );
+      cy.get(DATE_PICKER_ABSOLUTE_INPUT).click();
+      cy.get(DATE_PICKER_ABSOLUTE_INPUT).clear();
+      cy.get(DATE_PICKER_ABSOLUTE_INPUT).type(`${startDate}{enter}`);
+      cy.get(GET_LOCAL_DATE_PICKER_APPLY_BUTTON(localQueryBarSelector)).click();
+      cy.get(GET_LOCAL_DATE_PICKER_APPLY_BUTTON(localQueryBarSelector)).should(
+        'not.have.text',
+        'Updating'
+      );
 
-  cy.get(GET_LOCAL_DATE_PICKER_END_DATE_POPOVER_BUTTON(localQueryBarSelector)).click();
+      cy.get(GET_LOCAL_DATE_PICKER_END_DATE_POPOVER_BUTTON(localQueryBarSelector)).click();
 
-  cy.get(DATE_PICKER_ABSOLUTE_TAB).first().click();
+      cy.get(DATE_PICKER_ABSOLUTE_TAB).first().click();
 
-  cy.get(DATE_PICKER_ABSOLUTE_INPUT).click();
-  cy.get(DATE_PICKER_ABSOLUTE_INPUT).clear();
-  cy.get(DATE_PICKER_ABSOLUTE_INPUT).type(`${endDate}{enter}`);
-  cy.intercept('internal/search/esql_async').as('esqlQuery');
-  cy.get(GET_LOCAL_DATE_PICKER_APPLY_BUTTON(localQueryBarSelector)).click();
-  cy.wait('@esqlQuery');
+      cy.get(DATE_PICKER_ABSOLUTE_INPUT).click();
+      cy.get(DATE_PICKER_ABSOLUTE_INPUT).clear();
+      cy.get(DATE_PICKER_ABSOLUTE_INPUT).type(`${endDate}{enter}`);
+      cy.intercept('internal/search/esql_async').as('esqlQuery');
+      cy.get(GET_LOCAL_DATE_PICKER_APPLY_BUTTON(localQueryBarSelector)).click();
+      cy.wait('@esqlQuery');
+    }
+  });
 };
 
 export const showStartEndDate = (container: string = GLOBAL_FILTERS_CONTAINER) => {
