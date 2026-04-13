@@ -8,6 +8,52 @@ info:
 paths: {}
 components:
   schemas:
+    EntityRelationship:
+      type: object
+      additionalProperties: false
+      description: >-
+        One relationship direction: a dynamic `raw_identifiers` object (ECS-style dotted keys →
+        string arrays, no enumerated sub-properties) and canonical target EUIDs under `ids`.
+      properties:
+        raw_identifiers:
+          type: object
+          additionalProperties: false
+          properties:
+            entity.id:
+              type: array
+              items:
+                type: string
+            host.id:
+              type: array
+              items:
+                type: string
+            host.name:
+              type: array
+              items:
+                type: string
+            user.email:
+              type: array
+              items:
+                type: string
+            user.id:
+              type: array
+              items:
+                type: string
+            user.name:
+              type: array
+              items:
+                type: string
+            service.name:
+              type: array
+              items:
+                type: string
+        ids:
+          type: array
+          items:
+            type: string
+          description: >-
+            Target entity EUIDs for this relationship; used for graph LOOKUP JOIN and DSL filters.
+
     EngineMetadata:
       type: object
       additionalProperties: false
@@ -52,6 +98,22 @@ components:
               type: boolean
             mfa_enabled:
               type: boolean
+            storage_class:
+              type: string
+              description: Storage tier or class assigned to a storage resource (e.g. hot, warm, cold, standard, archive).
+            permissions:
+              type: array
+              items:
+                type: string
+              description: Action-level permissions granted to this entity (not roles or groups).
+            known_redirects:
+              type: array
+              items:
+                type: string
+              description: Known redirect URIs or URLs (e.g. OAuth application callbacks).
+            oauth_consent_restriction:
+              type: string
+              description: OAuth consent restriction (e.g. admin_only, verified_only, unrestricted).
         behaviors:
           type: object
           additionalProperties: false
@@ -83,34 +145,22 @@ components:
           type: object
           additionalProperties: false
           properties:
+            administers:
+              $ref: '#/components/schemas/EntityRelationship'
             communicates_with:
-              type: array
-              items:
-                type: string
+              $ref: '#/components/schemas/EntityRelationship'
             depends_on:
-              type: array
-              items:
-                type: string
-            owns:
-              type: array
-              items:
-                type: string
-            accesses_frequently:
-              type: array
-              items:
-                type: string
-            accesses_infrequently:
-              type: array
-              items:
-                type: string
+              $ref: '#/components/schemas/EntityRelationship'
             owns_inferred:
-              type: array
-              items:
-                type: string
+              $ref: '#/components/schemas/EntityRelationship'
+            accesses_infrequently:
+              $ref: '#/components/schemas/EntityRelationship'
+            accesses_frequently:
+              $ref: '#/components/schemas/EntityRelationship'
+            owns:
+              $ref: '#/components/schemas/EntityRelationship'
             supervises:
-              type: array
-              items:
-                type: string
+              $ref: '#/components/schemas/EntityRelationship'
             resolution:
               type: object
               additionalProperties: false
@@ -173,6 +223,7 @@ components:
         environment:
           type: string
         criticality:
+          nullable: true
           $ref: '#/components/schemas/AssetCriticalityLevel'
         business_unit:
           type: string

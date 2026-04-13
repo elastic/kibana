@@ -7,7 +7,7 @@
 
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { NotificationPolicyClient } from '../../lib/notification_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
@@ -17,7 +17,7 @@ import { ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
 import { buildRouteValidationWithZod } from '../route_validation';
 
 const updateNotificationPolicyApiKeyParamsSchema = z.object({
-  id: z.string(),
+  id: z.string().describe('The notification policy identifier.'),
 });
 
 @injectable()
@@ -37,7 +37,15 @@ export class UpdateNotificationPolicyApiKeyRoute extends BaseAlertingRoute {
     request: {
       params: buildRouteValidationWithZod(updateNotificationPolicyApiKeyParamsSchema),
     },
-  } as const;
+    response: {
+      204: {
+        description: 'Indicates a successful call.',
+      },
+      404: {
+        description: 'Indicates a notification policy with the given ID does not exist.',
+      },
+    },
+  };
 
   protected readonly routeName = 'update notification policy api key';
 
