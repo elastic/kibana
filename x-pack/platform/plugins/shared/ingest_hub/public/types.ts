@@ -34,5 +34,5 @@ export type IngestHubSetup = Record<string, never>;
 
 export interface IngestHubStart {
   registerIngestFlow: (flow: IngestFlow) => void;
-  navigationAvailable$: Observable<boolean>;
+  appEnabled$: Observable<boolean>;
 }

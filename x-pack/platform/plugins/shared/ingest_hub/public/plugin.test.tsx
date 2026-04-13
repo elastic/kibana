@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { of } from 'rxjs';
-import { firstValueFrom } from 'rxjs';
+import { of, firstValueFrom } from 'rxjs';
 import type { AppUpdater, PluginInitializerContext } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
-import { IngestHubPlugin } from './plugin';
+import type { IngestHubPlugin as IngestHubPluginClass } from './plugin';
 
 const createPluginContext = (buildFlavor: 'traditional' | 'serverless' = 'traditional') =>
   ({
@@ -30,11 +29,19 @@ const disableFeatureFlag = (coreStart: ReturnType<typeof coreMock.createStart>) 
 };
 
 describe('IngestHubPlugin', () => {
+  let IngestHubPlugin: typeof IngestHubPluginClass;
+
+  // needed to reset observable values between tests
+  beforeEach(async () => {
+    jest.resetModules();
+    ({ IngestHubPlugin } = await import('./plugin'));
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('navigationAvailable$', () => {
+  describe('appEnabled$', () => {
     it('emits false when feature flag is disabled', async () => {
       const plugin = new IngestHubPlugin(createPluginContext());
       plugin.setup(coreMock.createSetup());
@@ -42,12 +49,12 @@ describe('IngestHubPlugin', () => {
       const coreStart = coreMock.createStart();
       disableFeatureFlag(coreStart);
 
-      const { navigationAvailable$ } = plugin.start(coreStart, {});
-      await expect(firstValueFrom(navigationAvailable$)).resolves.toBe(false);
+      const { appEnabled$ } = plugin.start(coreStart, {});
+      await expect(firstValueFrom(appEnabled$)).resolves.toBe(false);
     });
 
     describe('serverless', () => {
-      let plugin: IngestHubPlugin;
+      let plugin: IngestHubPluginClass;
       let coreStart: ReturnType<typeof coreMock.createStart>;
 
       beforeEach(() => {
@@ -64,8 +71,8 @@ describe('IngestHubPlugin', () => {
           projectType: 'observability',
         } as CloudStart['serverless'];
 
-        const { navigationAvailable$ } = plugin.start(coreStart, { cloud });
-        await expect(firstValueFrom(navigationAvailable$)).resolves.toBe(true);
+        const { appEnabled$ } = plugin.start(coreStart, { cloud });
+        await expect(firstValueFrom(appEnabled$)).resolves.toBe(true);
       });
 
       it('emits false for security project', async () => {
@@ -75,13 +82,13 @@ describe('IngestHubPlugin', () => {
           projectType: 'security',
         } as CloudStart['serverless'];
 
-        const { navigationAvailable$ } = plugin.start(coreStart, { cloud });
-        await expect(firstValueFrom(navigationAvailable$)).resolves.toBe(false);
+        const { appEnabled$ } = plugin.start(coreStart, { cloud });
+        await expect(firstValueFrom(appEnabled$)).resolves.toBe(false);
       });
     });
 
-    describe('classic deployment', () => {
-      let plugin: IngestHubPlugin;
+    describe('self-managed', () => {
+      let plugin: IngestHubPluginClass;
       let coreStart: ReturnType<typeof coreMock.createStart>;
 
       beforeEach(() => {
@@ -91,9 +98,17 @@ describe('IngestHubPlugin', () => {
         enableFeatureFlag(coreStart);
       });
 
-      it('emits true without spaces plugin', async () => {
-        const { navigationAvailable$ } = plugin.start(coreStart, {});
-        await expect(firstValueFrom(navigationAvailable$)).resolves.toBe(true);
+      it('emits true with classic space solution', async () => {
+        const spaces = spacesPluginMock.createStartContract();
+        spaces.getActiveSpace.mockResolvedValue({
+          id: 'default',
+          name: 'Default',
+          solution: 'classic',
+          disabledFeatures: [],
+        });
+
+        const { appEnabled$ } = plugin.start(coreStart, { spaces });
+        await expect(firstValueFrom(appEnabled$)).resolves.toBe(true);
       });
 
       it('emits true with oblt space solution', async () => {
@@ -105,27 +120,27 @@ describe('IngestHubPlugin', () => {
           disabledFeatures: [],
         });
 
-        const { navigationAvailable$ } = plugin.start(coreStart, { spaces });
-        await expect(firstValueFrom(navigationAvailable$)).resolves.toBe(true);
+        const { appEnabled$ } = plugin.start(coreStart, { spaces });
+        await expect(firstValueFrom(appEnabled$)).resolves.toBe(true);
       });
 
-      it('emits false with es space solution', async () => {
+      it('emits false with security space solution', async () => {
         const spaces = spacesPluginMock.createStartContract();
         spaces.getActiveSpace.mockResolvedValue({
           id: 'default',
           name: 'Default',
-          solution: 'es',
+          solution: 'security',
           disabledFeatures: [],
         });
 
-        const { navigationAvailable$ } = plugin.start(coreStart, { spaces });
-        await expect(firstValueFrom(navigationAvailable$)).resolves.toBe(false);
+        const { appEnabled$ } = plugin.start(coreStart, { spaces });
+        await expect(firstValueFrom(appEnabled$)).resolves.toBe(false);
       });
     });
   });
 
   describe('setup', () => {
-    let plugin: IngestHubPlugin;
+    let plugin: IngestHubPluginClass;
     let coreSetup: ReturnType<typeof coreMock.createSetup>;
     let coreStart: ReturnType<typeof coreMock.createStart>;
 
@@ -158,11 +173,49 @@ describe('IngestHubPlugin', () => {
           visibleIn: [],
         });
       });
+
+      it('hides app in a non-allowed space solution even when flag is enabled', async () => {
+        enableFeatureFlag(coreStart);
+        const spaces = spacesPluginMock.createStartContract();
+        spaces.getActiveSpace.mockResolvedValue({
+          id: 'default',
+          name: 'Default',
+          solution: 'security',
+          disabledFeatures: [],
+        });
+        coreSetup.getStartServices.mockResolvedValue([coreStart, { spaces }, {}]);
+        plugin.setup(coreSetup);
+
+        const { updater$ } = coreSetup.application.register.mock.calls[0][0];
+        const updater = await firstValueFrom(updater$!);
+        expect((updater as AppUpdater)!({} as unknown as Parameters<AppUpdater>[0])).toEqual({
+          visibleIn: [],
+        });
+      });
     });
 
     describe('mount', () => {
       it('redirects to discover when feature flag is disabled', async () => {
-        (coreStart.featureFlags.getBooleanValue as jest.Mock).mockReturnValue(false);
+        disableFeatureFlag(coreStart);
+        plugin.setup(coreSetup);
+
+        const { mount } = coreSetup.application.register.mock.calls[0][0];
+        const unmount = await mount(coreMock.createAppMountParameters());
+
+        expect(coreStart.application.navigateToApp).toHaveBeenCalledWith('discover');
+        unmount();
+      });
+
+      it('redirects to discover in a non-allowed space solution even when flag is enabled', async () => {
+        enableFeatureFlag(coreStart);
+        const spaces = spacesPluginMock.createStartContract();
+        spaces.getActiveSpace.mockResolvedValue({
+          id: 'default',
+          name: 'Default',
+          solution: 'security',
+          disabledFeatures: [],
+        });
+        coreSetup.getStartServices.mockResolvedValue([coreStart, { spaces }, {}]);
         plugin.setup(coreSetup);
 
         const { mount } = coreSetup.application.register.mock.calls[0][0];

@@ -18,7 +18,17 @@ import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { INGEST_HUB_APP_ID } from '@kbn/deeplinks-observability';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, catchError, from, map, of, switchMap } from 'rxjs';
+import {
+  BehaviorSubject,
+  catchError,
+  firstValueFrom,
+  from,
+  map,
+  of,
+  shareReplay,
+  switchMap,
+} from 'rxjs';
+import { once } from 'lodash';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type {
   IngestHubSetup,
@@ -34,30 +44,33 @@ const IngestHubApp = dynamic(() =>
 
 const ALLOWED_SPACE_SOLUTIONS = new Set(['classic', 'oblt']);
 
-const createNavigationAvailable$ = (
-  coreStart: CoreStart,
-  deps: IngestHubStartDependencies,
-  isServerless: boolean
-): Observable<boolean> => {
-  const projectType = deps.cloud?.serverless.projectType;
+const getAppEnabled$ = once(
+  (
+    coreStart: CoreStart,
+    deps: IngestHubStartDependencies,
+    isServerless: boolean
+  ): Observable<boolean> => {
+    const projectType = deps.cloud?.serverless.projectType;
 
-  return coreStart.featureFlags.getBooleanValue$(INGEST_HUB_ENABLED_FLAG, false).pipe(
-    switchMap((enabled) => {
-      if (!enabled) return of(false);
+    return coreStart.featureFlags.getBooleanValue$(INGEST_HUB_ENABLED_FLAG, false).pipe(
+      switchMap((enabled) => {
+        if (!enabled) return of(false);
 
-      if (isServerless) {
-        return of(projectType === 'observability');
-      }
+        if (isServerless) {
+          return of(projectType === 'observability');
+        }
 
-      if (!deps.spaces?.getActiveSpace) return of(true);
+        if (!deps.spaces?.getActiveSpace) return of(true);
 
-      return from(deps.spaces.getActiveSpace()).pipe(
-        map((space) => ALLOWED_SPACE_SOLUTIONS.has(space.solution ?? '')),
-        catchError(() => of(true))
-      );
-    })
-  );
-};
+        return from(deps.spaces.getActiveSpace()).pipe(
+          map((space) => ALLOWED_SPACE_SOLUTIONS.has(space.solution ?? '')),
+          catchError(() => of(true))
+        );
+      }),
+      shareReplay(1)
+    );
+  }
+);
 
 export class IngestHubPlugin
   implements Plugin<IngestHubSetup, IngestHubStart, object, IngestHubStartDependencies>
@@ -67,6 +80,7 @@ export class IngestHubPlugin
   constructor(private readonly context: PluginInitializerContext) {}
 
   setup(coreSetup: CoreSetup<IngestHubStartDependencies>): IngestHubSetup {
+    const isServerless = this.context.env.packageInfo.buildFlavor === 'serverless';
     const startServicesPromise = coreSetup.getStartServices();
 
     coreSetup.application.register({
@@ -78,22 +92,23 @@ export class IngestHubPlugin
       appRoute: '/app/ingest-hub',
       category: DEFAULT_APP_CATEGORIES.management,
       updater$: from(startServicesPromise).pipe(
-        switchMap(([coreStart]) =>
-          coreStart.featureFlags.getBooleanValue$(INGEST_HUB_ENABLED_FLAG, false).pipe(
-            map((enabled): AppUpdater => {
-              return () => ({
-                visibleIn: enabled ? ['sideNav', 'globalSearch'] : [],
-              });
-            })
+        switchMap(([coreStart, deps]) =>
+          getAppEnabled$(coreStart, deps, isServerless).pipe(
+            map(
+              (appEnabled): AppUpdater =>
+                () => ({
+                  visibleIn: appEnabled ? ['sideNav', 'globalSearch'] : [],
+                })
+            )
           )
         )
       ),
       mount: async (params: AppMountParameters) => {
-        const [coreStart] = await startServicesPromise;
-        const isEnabled = coreStart.featureFlags.getBooleanValue(INGEST_HUB_ENABLED_FLAG, false);
+        const [coreStart, deps] = await startServicesPromise;
+        const appEnabled = await firstValueFrom(getAppEnabled$(coreStart, deps, isServerless));
         const { element, history } = params;
 
-        if (!isEnabled) {
+        if (!appEnabled) {
           coreStart.application.navigateToApp('discover');
           return () => {};
         }
@@ -125,7 +140,7 @@ export class IngestHubPlugin
         }
         this.ingestFlows$.next([...existing, flow]);
       },
-      navigationAvailable$: createNavigationAvailable$(coreStart, deps, isServerless),
+      appEnabled$: getAppEnabled$(coreStart, deps, isServerless),
     };
   }
 }

@@ -46,13 +46,13 @@ function createNavTree({
   showAiAssistant,
   isCloudEnabled,
   showAlertingV2,
-  ingestHubAvailable,
+  ingestHubEnabled,
 }: {
   streamsAvailable?: boolean;
   showAiAssistant?: boolean;
   isCloudEnabled?: boolean;
   showAlertingV2?: boolean;
-  ingestHubAvailable?: boolean;
+  ingestHubEnabled?: boolean;
 }) {
   const navTree: NavigationTreeDefinition = {
     body: [
@@ -418,7 +418,7 @@ function createNavTree({
       },
     ],
     footer: [
-      ingestHubAvailable
+      ingestHubEnabled
         ? {
             link: 'ingestHub' as const,
             title: i18n.translate('xpack.observability.obltNav.ingestHub', {
@@ -723,15 +723,15 @@ export const createDefinition = (
   navigationTree$: combineLatest([
     pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
     coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE),
-    pluginsStart.ingestHub?.navigationAvailable$ || of(false),
+    pluginsStart.ingestHub?.appEnabled$ || of(false),
   ]).pipe(
-    map(([{ status }, chatExperience, ingestHubAvailable]) =>
+    map(([{ status }, chatExperience, ingestHubEnabled]) =>
       createNavTree({
         streamsAvailable: status === 'enabled',
         showAiAssistant: chatExperience !== AIChatExperience.Agent,
         isCloudEnabled: pluginsStart.cloud?.isCloudEnabled,
         showAlertingV2: Boolean(coreStart.application.capabilities.alertingVTwo),
-        ingestHubAvailable,
+        ingestHubEnabled,
       })
     )
   ),
