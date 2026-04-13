@@ -116,6 +116,12 @@ export const esProjectTypeFromKbn = new Map<string, string>([
   ['workplaceai', 'workplaceai'],
 ]);
 
+// ES operator/settings.json expects 'elasticsearch' for all `elasticsearch_*` project types.
+export const esSettingsProjectTypeFromKbn = new Map<string, string>([
+  ...esProjectTypeFromKbn.entries(),
+  ['es', 'elasticsearch'],
+]);
+
 export const kbnProjectTypeFromEs = new Map<string, string>([
   ['elasticsearch_general_purpose', 'es'],
   ['elasticsearch_search', 'es'],
@@ -909,7 +915,7 @@ export async function setupServerlessVolumes(
     ...getESp12Volume(),
     ...serverlessResources,
     ...(await getOperatorVolume(
-      esProjectTypeFromKbn.get(projectType)!,
+      esSettingsProjectTypeFromKbn.get(projectType)!,
       ssl,
       overrides?.projectId,
       overrides?.operatorPath
@@ -1239,7 +1245,8 @@ async function registerLinkedProjectInOriginSettings(log: ToolingLog, options: S
 
   const currentJson = JSON.parse(await Fsp.readFile(settingsPath, 'utf-8'));
 
-  const esProjectType = esProjectTypeFromKbn.get(options.projectType) ?? options.projectType;
+  const esProjectType =
+    esSettingsProjectTypeFromKbn.get(options.projectType) ?? options.projectType;
   const linkedNodeName = `es01${LINKED_CLUSTER_NAME_SUFFIX}`;
   const linkedEndpoint = `${linkedNodeName}:${REMOTE_CLUSTER_SERVER_PORT}`;
 
