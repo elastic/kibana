@@ -7,11 +7,11 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import {
-  INITIALIZATION_FLOW_INIT_DETECTION_ENGINE_RULE_MONITORING,
+  INITIALIZATION_FLOW_INIT_DETECTION_RULE_MONITORING,
   INITIALIZATION_FLOW_STATUS_READY,
 } from '../../../../../common/api/initialization';
 import type { InitializationFlowContext } from '../../types';
-import { initDetectionEngineRuleMonitoringFlow } from '.';
+import { initDetectionRuleMonitoringFlow } from '.';
 
 const createMockHealthClient = () => ({
   installAssetsForMonitoringHealth: jest.fn().mockResolvedValue(undefined),
@@ -32,25 +32,25 @@ const createMockInitializationFlowContext = (
     logger: loggerMock.create(),
   } as unknown as InitializationFlowContext);
 
-describe('initDetectionEngineRuleMonitoringFlow', () => {
+describe('initDetectionRuleMonitoringFlow', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('has the correct id', () => {
-    expect(initDetectionEngineRuleMonitoringFlow.id).toBe(
-      INITIALIZATION_FLOW_INIT_DETECTION_ENGINE_RULE_MONITORING
+    expect(initDetectionRuleMonitoringFlow.id).toBe(
+      INITIALIZATION_FLOW_INIT_DETECTION_RULE_MONITORING
     );
   });
 
   it('should be configured to run in parallel', () => {
-    expect(initDetectionEngineRuleMonitoringFlow.runFirst).toBeUndefined();
+    expect(initDetectionRuleMonitoringFlow.runFirst).toBeUndefined();
   });
 
   describe('runFlow', () => {
     it('returns ready on successful asset installation', async () => {
       const context = createMockInitializationFlowContext();
-      const result = await initDetectionEngineRuleMonitoringFlow.runFlow(context);
+      const result = await initDetectionRuleMonitoringFlow.runFlow(context);
 
       expect(result).toEqual({ status: INITIALIZATION_FLOW_STATUS_READY, payload: null });
     });
@@ -59,7 +59,7 @@ describe('initDetectionEngineRuleMonitoringFlow', () => {
       const healthClient = createMockHealthClient();
       const context = createMockInitializationFlowContext(healthClient);
 
-      await initDetectionEngineRuleMonitoringFlow.runFlow(context);
+      await initDetectionRuleMonitoringFlow.runFlow(context);
 
       expect(healthClient.installAssetsForMonitoringHealth).toHaveBeenCalledTimes(1);
     });
@@ -71,7 +71,7 @@ describe('initDetectionEngineRuleMonitoringFlow', () => {
       );
 
       const context = createMockInitializationFlowContext(healthClient);
-      await expect(initDetectionEngineRuleMonitoringFlow.runFlow(context)).rejects.toThrow(
+      await expect(initDetectionRuleMonitoringFlow.runFlow(context)).rejects.toThrow(
         'Failed to import saved objects'
       );
     });

@@ -48,7 +48,7 @@ components:
         - init-prebuilt-rules
         - init-endpoint-protection
         - init-ai-prompts
-        - init-detection-engine-rule-monitoring
+        - init-detection-rule-monitoring
 
     InitializationFlowsResult:
       type: object
@@ -77,7 +77,7 @@ components:
           oneOf:
             - $ref: '#/components/schemas/PackageInstallReadyResult'
             - $ref: '#/components/schemas/InitializationFlowErrorResult'
-        init-detection-engine-rule-monitoring:
+        init-detection-rule-monitoring:
           oneOf:
             - $ref: '#/components/schemas/InstallDetectionEngineRuleMonitoringAssetsReadyResult'
             - $ref: '#/components/schemas/InitializationFlowErrorResult'

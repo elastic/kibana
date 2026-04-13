@@ -57,9 +57,9 @@ jest.mock('./flows/init_ai_prompts', () => ({
   },
 }));
 
-jest.mock('./flows/init_detection_engine_rule_monitoring', () => ({
-  initDetectionEngineRuleMonitoringFlow: {
-    id: 'init-detection-engine-rule-monitoring' as const,
+jest.mock('./flows/init_detection_rule_monitoring', () => ({
+  initDetectionRuleMonitoringFlow: {
+    id: 'init-detection-rule-monitoring' as const,
     runFlow: jest.fn().mockResolvedValue({ status: 'ready' as const }),
   },
 }));

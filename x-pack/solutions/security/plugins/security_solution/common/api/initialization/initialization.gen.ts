@@ -26,7 +26,7 @@ export const InitializationFlowId = z.enum([
   'init-prebuilt-rules',
   'init-endpoint-protection',
   'init-ai-prompts',
-  'init-detection-engine-rule-monitoring',
+  'init-detection-rule-monitoring',
 ]);
 export type InitializationFlowIdEnum = typeof InitializationFlowId.enum;
 export const InitializationFlowIdEnum = InitializationFlowId.enum;
@@ -99,7 +99,7 @@ export const InitializationFlowsResult = z.object({
     .union([PackageInstallReadyResult, InitializationFlowErrorResult])
     .optional(),
   'init-ai-prompts': z.union([PackageInstallReadyResult, InitializationFlowErrorResult]).optional(),
-  'init-detection-engine-rule-monitoring': z
+  'init-detection-rule-monitoring': z
     .union([InstallDetectionEngineRuleMonitoringAssetsReadyResult, InitializationFlowErrorResult])
     .optional(),
 });

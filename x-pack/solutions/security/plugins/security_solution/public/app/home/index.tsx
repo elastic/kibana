@@ -24,7 +24,7 @@ import {
   INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
   INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
   INITIALIZATION_FLOW_INIT_AI_PROMPTS,
-  INITIALIZATION_FLOW_INIT_DETECTION_ENGINE_RULE_MONITORING,
+  INITIALIZATION_FLOW_INIT_DETECTION_RULE_MONITORING,
 } from '../../../common/api/initialization';
 import { TopValuesPopover } from '../components/top_values_popover/top_values_popover';
 import { useInitSourcerer } from '../../sourcerer/containers/use_init_sourcerer';
@@ -65,7 +65,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
     INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
     INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
     INITIALIZATION_FLOW_INIT_AI_PROMPTS,
-    INITIALIZATION_FLOW_INIT_DETECTION_ENGINE_RULE_MONITORING,
+    INITIALIZATION_FLOW_INIT_DETECTION_RULE_MONITORING,
   ]);
 
   return (

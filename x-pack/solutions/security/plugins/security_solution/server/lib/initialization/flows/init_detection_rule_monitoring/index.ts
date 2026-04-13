@@ -6,7 +6,7 @@
  */
 
 import {
-  INITIALIZATION_FLOW_INIT_DETECTION_ENGINE_RULE_MONITORING,
+  INITIALIZATION_FLOW_INIT_DETECTION_RULE_MONITORING,
   INITIALIZATION_FLOW_STATUS_READY,
 } from '../../../../../common/api/initialization';
 import type {
@@ -15,8 +15,8 @@ import type {
   InitializationFlowResult,
 } from '../../types';
 
-export const initDetectionEngineRuleMonitoringFlow: InitializationFlowDefinition<null> = {
-  id: INITIALIZATION_FLOW_INIT_DETECTION_ENGINE_RULE_MONITORING,
+export const initDetectionRuleMonitoringFlow: InitializationFlowDefinition<null> = {
+  id: INITIALIZATION_FLOW_INIT_DETECTION_RULE_MONITORING,
   runFlow: async (context: InitializationFlowContext): Promise<InitializationFlowResult<null>> => {
     const securityContext = await context.requestHandlerContext.securitySolution;
 
@@ -28,7 +28,7 @@ export const initDetectionEngineRuleMonitoringFlow: InitializationFlowDefinition
 
     await healthClient.installAssetsForMonitoringHealth();
 
-    context.logger.info('Detection engine rule monitoring assets initialized');
+    context.logger.info('Detection rule monitoring assets initialized');
 
     return { status: INITIALIZATION_FLOW_STATUS_READY, payload: null };
   },

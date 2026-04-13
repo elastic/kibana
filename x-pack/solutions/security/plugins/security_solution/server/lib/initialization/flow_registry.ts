@@ -16,7 +16,7 @@ import {
   INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
   INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
   INITIALIZATION_FLOW_INIT_AI_PROMPTS,
-  INITIALIZATION_FLOW_INIT_DETECTION_ENGINE_RULE_MONITORING,
+  INITIALIZATION_FLOW_INIT_DETECTION_RULE_MONITORING,
   INITIALIZATION_FLOW_STATUS_ERROR,
 } from '../../../common/api/initialization';
 import type {
@@ -29,7 +29,7 @@ import { initializeSecurityDataViewsFlow } from './flows/initialize_security_dat
 import { initPrebuiltRulesFlow } from './flows/init_prebuilt_rules';
 import { initEndpointProtectionFlow } from './flows/init_endpoint_protection';
 import { initAiPromptsFlow } from './flows/init_ai_prompts';
-import { initDetectionEngineRuleMonitoringFlow } from './flows/init_detection_engine_rule_monitoring';
+import { initDetectionRuleMonitoringFlow } from './flows/init_detection_rule_monitoring';
 
 // Each flow has a different TPayload type, so `any` is needed to store
 // them in a single map. Type safety is preserved inside each flow definition.
@@ -40,8 +40,7 @@ const flows: Record<InitializationFlowId, InitializationFlowDefinition<any>> = {
   [INITIALIZATION_FLOW_INIT_PREBUILT_RULES]: initPrebuiltRulesFlow,
   [INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION]: initEndpointProtectionFlow,
   [INITIALIZATION_FLOW_INIT_AI_PROMPTS]: initAiPromptsFlow,
-  [INITIALIZATION_FLOW_INIT_DETECTION_ENGINE_RULE_MONITORING]:
-    initDetectionEngineRuleMonitoringFlow,
+  [INITIALIZATION_FLOW_INIT_DETECTION_RULE_MONITORING]: initDetectionRuleMonitoringFlow,
 };
 
 export class FlowInitializationError extends Error {}
@@ -135,7 +134,9 @@ export const runInitializationFlows = async (
   const parallel = requestedFlows.filter((id) => !flows[id]?.runFirst);
 
   logger.debug(
-    `Running ${requestedFlows.length} initialization flows — sequential: [${sequential.join(', ')}], parallel: [${parallel.join(', ')}]`
+    `Running ${requestedFlows.length} initialization flows — sequential: [${sequential.join(
+      ', '
+    )}], parallel: [${parallel.join(', ')}]`
   );
 
   // Run runFirst flows sequentially
@@ -150,11 +151,17 @@ export const runInitializationFlows = async (
   );
 
   const allResults = [...sequentialResults, ...parallelResults];
-  const succeededFlows = allResults.filter(({ result }) => result.status === 'ready').map(({ id }) => id);
-  const failedFlows = allResults.filter(({ result }) => result.status !== 'ready').map(({ id }) => id);
+  const succeededFlows = allResults
+    .filter(({ result }) => result.status === 'ready')
+    .map(({ id }) => id);
+  const failedFlows = allResults
+    .filter(({ result }) => result.status !== 'ready')
+    .map(({ id }) => id);
 
   logger.debug(
-    `Initialization flows completed — succeeded: [${succeededFlows.join(', ')}], failed: [${failedFlows.join(', ')}]`
+    `Initialization flows completed — succeeded: [${succeededFlows.join(
+      ', '
+    )}], failed: [${failedFlows.join(', ')}]`
   );
 
   const flowResults = allResults.reduce((acc, { id, result }) => {
