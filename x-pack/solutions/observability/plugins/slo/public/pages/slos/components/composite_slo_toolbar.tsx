@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiSelectable,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
@@ -200,16 +201,23 @@ export function CompositeSloToolbar({
         </EuiFilterGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false} css={{ display: 'flex', alignItems: 'center' }}>
-        <EuiButtonIcon
-          data-test-subj="compositeSloListClearFilters"
-          iconType="eraser"
-          display="empty"
-          isDisabled={!hasActiveFilters}
-          onClick={onClearFilters}
-          aria-label={i18n.translate('xpack.slo.compositeSloList.clearFilters', {
+        <EuiToolTip
+          content={i18n.translate('xpack.slo.compositeSloList.clearFilters', {
             defaultMessage: 'Clear filters',
           })}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            data-test-subj="compositeSloListClearFilters"
+            iconType="eraser"
+            display="empty"
+            isDisabled={!hasActiveFilters}
+            onClick={onClearFilters}
+            aria-label={i18n.translate('xpack.slo.compositeSloList.clearFilters', {
+              defaultMessage: 'Clear filters',
+            })}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
