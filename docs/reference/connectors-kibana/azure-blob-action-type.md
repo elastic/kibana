@@ -1,7 +1,7 @@
 ---
 navigation_title: "Azure Blob Storage"
 type: reference
-description: "Use the Azure Blob Storage connector to list containers and blobs, retrieve blob content, and get blob properties via the Azure Blob Service REST API."
+description: "Use the Azure Blob Storage connector to list containers and blobs, retrieve blob content, and get blob properties using the Azure Blob Service REST API."
 applies_to:
   stack: preview 9.4
   serverless: preview
@@ -9,7 +9,7 @@ applies_to:
 
 # Azure Blob Storage connector [azure-blob-action-type]
 
-The Azure Blob Storage connector integrates with Azure Blob Storage via the [Blob Service REST API](https://learn.microsoft.com/en-us/rest/api/storageservices/blob-service-rest-api). It supports listing containers, listing blobs, retrieving blob content, and getting blob properties. Use it as a data source for federated search.
+The Azure Blob Storage connector integrates with Azure Blob Storage using the [Blob Service REST API](https://learn.microsoft.com/en-us/rest/api/storageservices/blob-service-rest-api). It supports listing containers, listing blobs, retrieving blob content, and getting blob properties. Use it as a data source for federated search.
 
 ## Create connectors in {{kib}} [define-azure-blob-ui]
 
@@ -61,6 +61,6 @@ The connector uses **Shared Key** (storage account key) authentication.
 1. In the [Azure Portal](https://portal.azure.com), open your storage account.
 2. Go to **Security + networking** → **Access keys** (or **Storage account** → **Access keys**).
 3. Copy the **Storage account name** (for example, `myaccount`) and one of the **Key** values (key1 or key2). The key is a base64-encoded string.
-4. When creating the connector via the UI, enter the account name and key in the configured fields. When using the data source creation API, pass credentials as a single string in the form `accountName:accountKey` (for example, `myaccount:base64key...`); the first colon separates the name from the key, so the key itself must not contain colons.
+4. When creating the connector from the UI, enter the account name and key in the configured fields. When using the data source creation API, pass credentials as a single string in the form `accountName:accountKey` (for example, `myaccount:base64key...`); the first colon separates the name from the key, so the key itself must not contain colons.
 
 For details, see [Authorize with Shared Key](https://learn.microsoft.com/en-us/rest/api/storageservices/authorize-with-shared-key).
