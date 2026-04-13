@@ -9,5 +9,5 @@ applies_to:
 
 # APM settings in Kibana [apm-settings-kb]
 
-::::{settings} /reference/configuration-reference/apm-settings.yml
-::::
+:::{settings} /reference/configuration-reference/apm-settings.yml
+:::
