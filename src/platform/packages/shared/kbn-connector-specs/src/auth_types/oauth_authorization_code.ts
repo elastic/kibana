@@ -12,6 +12,18 @@ import type { AxiosInstance } from 'axios';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
 
+/**
+ * OAuth token responses often use `token_type: "bearer"` (lowercase). If the stored header begins
+ * with `bearer ` (after trim), rewrites the scheme to `Bearer `; otherwise returns the trimmed value.
+ */
+export function normalizeAuthorizationHeaderValue(value: string): string {
+  const trimmed = value.trim();
+  if (trimmed.startsWith('bearer ')) {
+    return `Bearer ${trimmed.slice('bearer '.length)}`;
+  }
+  return trimmed;
+}
+
 const authSchema = z
   .object({
     authorizationUrl: z.url().meta({
@@ -114,7 +126,8 @@ export const OAuthAuthorizationCode: AuthTypeSpec<AuthSchemaType> = {
     }
 
     // set global defaults
-    axiosInstance.defaults.headers.common.Authorization = token;
+    axiosInstance.defaults.headers.common.Authorization =
+      normalizeAuthorizationHeaderValue(token);
 
     return axiosInstance;
   },
