@@ -11,6 +11,7 @@ import type { ColorMapping, ColorStop, CustomPaletteParams, PaletteOutput } from
 import type { KbnPaletteId } from '@kbn/palettes';
 import type {
   AllColoringTypes,
+  AutoColorType,
   ColorByValueAbsolute,
   ColorByValueStep,
   ColorByValueType,
@@ -18,9 +19,11 @@ import type {
   ColorMappingColorDefType,
   ColorMappingGradientType,
   ColorMappingType,
+  NoColorType,
   StaticColorType,
   UnassignedColorType,
 } from '../../schema/color';
+export { NO_COLOR, AUTO_COLOR, DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../schema/color';
 import type { SerializableValueType } from '../../schema/serializedValue';
 import { getReversibleMappings } from '../charts/utils';
 
@@ -445,4 +448,12 @@ export function isColorByValueAbsolute(color?: AllColoringTypes): color is Color
 export function isColorMappingColor(color?: AllColoringTypes): color is ColorMappingType {
   if (!color || !('mode' in color)) return false;
   return color.mode === 'categorical' || color.mode === 'gradient';
+}
+
+export function isNoColor(color?: AllColoringTypes): color is NoColorType {
+  return !!color && 'type' in color && color.type === 'none';
+}
+
+export function isAutoColor(color?: AllColoringTypes): color is AutoColorType {
+  return !!color && 'type' in color && color.type === 'auto';
 }
