@@ -51,8 +51,6 @@ export const createMapFieldsTool = ({
     Maps unmapped fields on a stream by adding field definitions.
     For wired streams, adds to ingest.wired.fields.
     For classic streams, adds to ingest.classic.field_overrides.
-
-    Use get_schema first to see which fields are unmapped, then map them using this tool.
   `),
   tags: ['streams', 'management'],
   schema: mapFieldsSchema,

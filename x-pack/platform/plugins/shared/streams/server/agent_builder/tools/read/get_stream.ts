@@ -59,11 +59,16 @@ export const createGetStreamTool = ({
 
       if (Streams.WiredStream.Definition.is(definition)) {
         result.type = 'wired';
+        result.stream_hierarchy = 'wired';
         result.lifecycle = definition.ingest.lifecycle;
         result.processing = definition.ingest.processing;
         result.failure_store = definition.ingest.failure_store;
         result.fields = definition.ingest.wired.fields;
         result.routing = definition.ingest.wired.routing;
+
+        if (definition.ingest.processing.steps.length > 0) {
+          result.processing_format = 'streamlang';
+        }
 
         const [ancestors, descendants] = await Promise.all([
           streamsClient.getAncestors(name),
@@ -80,13 +85,17 @@ export const createGetStreamTool = ({
         }));
       } else if (Streams.ClassicStream.Definition.is(definition)) {
         result.type = 'classic';
+        result.stream_hierarchy = 'standalone';
         result.lifecycle = definition.ingest.lifecycle;
         result.processing = definition.ingest.processing;
         result.failure_store = definition.ingest.failure_store;
         result.field_overrides = definition.ingest.classic.field_overrides;
+
+        if (definition.ingest.processing.steps.length > 0) {
+          result.processing_format = 'streamlang';
+        }
       } else if (Streams.QueryStream.Definition.is(definition)) {
         result.type = 'query';
-        result.query = definition.query;
       }
 
       return {

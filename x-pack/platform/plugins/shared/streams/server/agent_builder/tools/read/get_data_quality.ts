@@ -105,6 +105,16 @@ export const createGetDataQualityTool = ({
       });
       const failureStoreStatus = detectFailureStoreStatus(definition);
 
+      const interpretation: string[] = [];
+      if (failedCount > 0) {
+        interpretation.push(
+          "Failed documents indicate processing errors in this stream's pipeline configuration."
+        );
+      }
+      if (degradedCount > 0) {
+        interpretation.push("Degraded documents indicate unmapped fields in this stream's schema.");
+      }
+
       return {
         results: [
           {
@@ -119,6 +129,7 @@ export const createGetDataQualityTool = ({
               recent_failed_time_range: { start, end },
               quality,
               failure_store_status: failureStoreStatus,
+              ...(interpretation.length > 0 && { interpretation }),
             },
           },
         ],

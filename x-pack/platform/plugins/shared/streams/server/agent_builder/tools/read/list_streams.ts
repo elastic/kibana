@@ -15,6 +15,8 @@ import type { GetScopedClients } from '../../../routes/types';
 import {
   STREAMS_LIST_STREAMS_TOOL_ID as LIST_STREAMS,
   STREAMS_GET_STREAM_TOOL_ID as GET_STREAM,
+  STREAMS_GET_LIFECYCLE_STATS_TOOL_ID as GET_LIFECYCLE_STATS,
+  STREAMS_GET_DATA_QUALITY_TOOL_ID as GET_DATA_QUALITY,
 } from '../tool_ids';
 import { classifyError } from '../error_utils';
 
@@ -33,7 +35,7 @@ export const createListStreamsTool = ({
     **When to use:**
     - User asks "what streams do I have?" or "show me my streams"
     - You need to resolve a partial stream name (e.g. "nginx") to an exact name (e.g. "logs.ecs.nginx")
-    - Comparing storage or quality across multiple streams (combine with get_lifecycle_stats or get_data_quality)
+    - Comparing storage or quality across multiple streams (combine with ${GET_LIFECYCLE_STATS} or ${GET_DATA_QUALITY})
     - Discovering available streams before drilling into one
 
     **When NOT to use:**

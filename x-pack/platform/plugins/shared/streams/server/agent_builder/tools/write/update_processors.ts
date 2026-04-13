@@ -10,11 +10,11 @@ import { i18n } from '@kbn/i18n';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import type { StreamlangDSL } from '@kbn/streamlang';
 import dedent from 'dedent';
 import type { GetScopedClients } from '../../../routes/types';
 import { STREAMS_UPDATE_PROCESSORS_TOOL_ID } from '../tool_ids';
 import { classifyError } from '../error_utils';
+import { validateProcessingJson } from '../format_validation_errors';
 import { patchIngestAndUpsert } from '../../../lib/streams/helpers/ingest_upsert';
 import { getConfirmationMessage } from './confirmation_helpers';
 import { type StreamsWriteQueue, abortSignalFromRequest } from '../write_queue';
@@ -24,7 +24,7 @@ const updateProcessorsSchema = z.object({
   processing_json: z
     .string()
     .describe(
-      'JSON string of the processing pipeline. Must have a "steps" array. Example: \'{"steps":[{"action":"grok","from":"message","patterns":["%{COMBINEDAPACHELOG}"]}]}\'. Use get_stream first to see the current pipeline format, then modify and pass the complete updated pipeline.'
+      `Streamlang JSON string. Must have a "steps" array. Example: '{"steps":[{"action":"grok","from":"message","patterns":["%{COMBINEDAPACHELOG}"]}]}'. To remove a step, pass the pipeline without it: '{"steps":[]}'. Pass the complete updated pipeline — all existing steps plus any modifications. Common actions (key params): grok (from, patterns), dissect (from, pattern), date (from, formats, to), set (to, value|copy_from), rename (from, to), remove (from), convert (from, type). All actions support optional "where" (condition) and "ignore_failure".`
     ),
   change_description: z
     .string()
@@ -46,7 +46,7 @@ export const createUpdateProcessorsTool = ({
   description: dedent(`
     Updates the processing pipeline on a stream. Replaces the entire processing configuration with the provided definition.
 
-    Use get_stream first to see the current processing pipeline, then modify it and pass the complete updated pipeline as a JSON string.
+    Requires the complete updated pipeline as a JSON string. To remove a problematic processor, pass the pipeline without that step.
   `),
   tags: ['streams', 'management'],
   schema: updateProcessorsSchema,
@@ -72,9 +72,9 @@ export const createUpdateProcessorsTool = ({
         request,
       });
 
-      let processing: StreamlangDSL;
+      let parsed: unknown;
       try {
-        processing = JSON.parse(processingJson) as StreamlangDSL;
+        parsed = JSON.parse(processingJson);
       } catch {
         return {
           results: [
@@ -89,6 +89,23 @@ export const createUpdateProcessorsTool = ({
           ],
         };
       }
+
+      const validation = validateProcessingJson(parsed);
+      if (!validation.success) {
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: {
+                message: `Invalid Streamlang pipeline: ${validation.error}`,
+                operation: 'update_processors',
+                likely_cause: 'invalid_streamlang',
+              },
+            },
+          ],
+        };
+      }
+      const processing = validation.data;
 
       const result = await writeQueue.enqueue(
         () =>

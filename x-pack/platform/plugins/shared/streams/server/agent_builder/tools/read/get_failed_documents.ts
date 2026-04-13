@@ -131,6 +131,7 @@ export const createGetFailedDocumentsTool = ({
               error_type_breakdown: errorTypeBreakdown,
               sample_documents: sampleDocuments,
               returned_count: sampleDocuments.length,
+              error_source: 'stream_processing',
             },
           },
         ],

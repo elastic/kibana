@@ -10,12 +10,12 @@ import { i18n } from '@kbn/i18n';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import type { Condition } from '@kbn/streamlang';
 import { isNeverCondition } from '@kbn/streamlang';
 import dedent from 'dedent';
 import type { GetScopedClients } from '../../../routes/types';
 import { STREAMS_FORK_STREAM_TOOL_ID } from '../tool_ids';
 import { classifyError } from '../error_utils';
+import { validateConditionJson } from '../format_validation_errors';
 import { getConfirmationMessage } from './confirmation_helpers';
 import { type StreamsWriteQueue, abortSignalFromRequest } from '../write_queue';
 
@@ -56,8 +56,6 @@ export const createForkStreamTool = ({
     Documents matching the condition are routed from the parent to the new child stream.
 
     Child names MUST follow the parent.childname convention: for parent "logs.ecs", use "logs.ecs.nginx"; for parent "logs.otel", use "logs.otel.nginx".
-
-    Use get_stream on the parent first if you haven't already verified it exists and is a wired stream in this conversation.
 
     Only works on wired streams. When creating multiple children under the same parent, call this tool sequentially (they modify the parent's routing table). Children under different parents can be created in parallel.
   `),
@@ -102,9 +100,9 @@ export const createForkStreamTool = ({
     try {
       const { streamsClient } = await getScopedClients({ request });
 
-      let condition: Condition;
+      let parsed: unknown;
       try {
-        condition = JSON.parse(conditionJson) as Condition;
+        parsed = JSON.parse(conditionJson);
       } catch {
         return {
           results: [
@@ -119,6 +117,23 @@ export const createForkStreamTool = ({
           ],
         };
       }
+
+      const validation = validateConditionJson(parsed);
+      if (!validation.success) {
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: {
+                message: `Invalid routing condition: ${validation.error}`,
+                operation: 'fork_stream',
+                likely_cause: 'invalid_condition',
+              },
+            },
+          ],
+        };
+      }
+      const condition = validation.data;
 
       const conditionStatus = status ?? (isNeverCondition(condition) ? 'disabled' : 'enabled');
 
