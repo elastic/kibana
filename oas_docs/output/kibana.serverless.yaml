@@ -295,8 +295,19 @@ tags:
       description: Space overview
   - name: streams
     description: |
-      Streams is a new and experimental way to manage your data in Kibana (currently experimental - expect changes).
+      Streams provide a unified data management layer for ingestion, routing, and processing. There are three stream types:
+      * **Wired** streams are managed by Kibana. They route documents to child streams based on
+        field conditions and support custom field mappings and processing steps.
+
+      * **Classic** streams map to existing Elasticsearch data streams. You can add processing
+        steps to classic streams without changing their underlying index template.
+
+      * **Query** streams are virtual aggregations backed by an ES|QL expression. They aggregate
+        data from multiple streams into a single logical view without duplicating documents.
     x-displayName: Streams
+    externalDocs:
+      description: Streams documentation
+      url: https://www.elastic.co/docs/solutions/observability/streams
   - name: system
     x-displayName: System
     description: |
@@ -428,7 +439,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Handles the OAuth 2.0 authorization code callback from external providers. Exchanges the authorization code for access and refresh tokens.
+        Handles the OAuth 2.0 authorization code callback from external providers. Exchanges the authorization code for access and refresh tokens.<br/><br/>[Required authorization] Route required privileges: actions:oauth.
       operationId: get-actions-connector-oauth-callback
       parameters:
         - description: The authorization code returned by the OAuth provider.
@@ -621,6 +632,8 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 36
+            minLength: 1
             type: string
       requestBody:
         content:
@@ -3823,7 +3836,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Delete a user-created skill by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageSkills.
+        Delete a user-created skill by ID. If agents still reference the skill, the request returns 409 unless force=true, which removes the skill from agents first. Built-in skills cannot be deleted.<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageSkills.
       operationId: delete-agent-builder-skills-skillid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -3838,11 +3851,39 @@ paths:
           name: skillId
           required: true
           schema:
+            maxLength: 512
+            minLength: 1
             type: string
-      responses: {}
+        - description: If true, removes the skill from agents that use it and then deletes it. If false and any agent uses the skill, the request returns 409 Conflict with the list of agents.
+          in: query
+          name: force
+          required: false
+          schema:
+            default: false
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                deleteSkillResponseExample:
+                  description: Example response showing that the deletion operation was successful
+                  value:
+                    success: true
+          description: Indicates a successful response
       summary: Delete a skill
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X DELETE "https://${KIBANA_URL}/api/agent_builder/skills/{skillId}?force=false" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - lang: Console
+          source: |
+            DELETE kbn:/api/agent_builder/skills/{skillId}
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -3863,6 +3904,8 @@ paths:
           name: skillId
           required: true
           schema:
+            maxLength: 512
+            minLength: 1
             type: string
       responses: {}
       summary: Get a skill by id
@@ -3895,6 +3938,8 @@ paths:
           name: skillId
           required: true
           schema:
+            maxLength: 512
+            minLength: 1
             type: string
       requestBody:
         content:
@@ -8713,11 +8758,9 @@ paths:
           name: search_fields
           required: false
           schema:
-            anyOf:
-              - items:
-                  type: string
-                type: array
-              - type: string
+            items:
+              type: string
+            type: array
         - description: Determines which field is used to sort the results. The field must exist in the `attributes` key of the response.
           in: query
           name: sort_field
@@ -8754,11 +8797,9 @@ paths:
           name: fields
           required: false
           schema:
-            anyOf:
-              - items:
-                  type: string
-                type: array
-              - type: string
+            items:
+              type: string
+            type: array
         - description: 'A KQL string that you filter with an attribute from your saved object. It should look like `savedObjectType.attributes.title: "myTitle"`. However, if you used a direct attribute of a saved object, such as `updatedAt`, you must define your filter, for example, `savedObjectType.updatedAt > 2018-12-22`.'
           in: query
           name: filter
@@ -18823,23 +18864,25 @@ paths:
                 agent_type:
                   $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
                 alert_ids:
-                  description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+                  description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
                   example:
                     - alert-id-1
                     - alert-id-2
                   items:
                     minLength: 1
                     type: string
+                  maxItems: 50
                   minItems: 1
                   type: array
                 case_ids:
-                  description: The IDs of cases where the action taken will be logged.
+                  description: The IDs of cases where the action taken will be logged. Max of 50.
                   example:
                     - case-id-1
                     - case-id-2
                   items:
                     minLength: 1
                     type: string
+                  maxItems: 50
                   minItems: 1
                   type: array
                 comment:
@@ -19170,23 +19213,25 @@ paths:
                 agent_type:
                   $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
                 alert_ids:
-                  description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+                  description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
                   example:
                     - alert-id-1
                     - alert-id-2
                   items:
                     minLength: 1
                     type: string
+                  maxItems: 50
                   minItems: 1
                   type: array
                 case_ids:
-                  description: The IDs of cases where the action taken will be logged.
+                  description: The IDs of cases where the action taken will be logged. Max of 50.
                   example:
                     - case-id-1
                     - case-id-2
                   items:
                     minLength: 1
                     type: string
+                  maxItems: 50
                   minItems: 1
                   type: array
                 comment:
@@ -19418,90 +19463,6 @@ paths:
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/protection_updates_note/{package_policy_id}</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-  /api/endpoint/scripts_library:
-    get:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/scripts_library</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Retrieve a list of scripts
-      operationId: EndpointScriptLibraryListScripts
-      parameters:
-        - description: Page number of the results to return. Defaults to 1.
-          in: query
-          name: page
-          required: false
-          schema:
-            $ref: '#/components/schemas/Security_Endpoint_Management_API_Page'
-        - description: Number of results to return per page. Defaults to 10. Max value is 1000.
-          in: query
-          name: pageSize
-          required: false
-          schema:
-            $ref: '#/components/schemas/Security_Endpoint_Management_API_ApiPageSize'
-        - description: The field to sort the results by. Defaults to name.
-          in: query
-          name: sortField
-          required: false
-          schema:
-            $ref: '#/components/schemas/Security_Endpoint_Management_API_ApiSortField'
-        - description: The direction to sort the results by. Defaults to asc (ascending).
-          in: query
-          name: sortDirection
-          required: false
-          schema:
-            $ref: '#/components/schemas/Security_Endpoint_Management_API_SortDirection'
-        - description: |
-            A KQL query string to filter the list of scripts. Nearly all fields in the script object are searchable.
-          in: query
-          name: kuery
-          required: false
-          schema:
-            allOf:
-              - $ref: '#/components/schemas/Security_Endpoint_Management_API_Kuery'
-              - example: platform:windows
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                response:
-                  summary: List of scripts response example
-                  value:
-                    data: []
-                    page: 1
-                    pageSize: 10
-                    sortDirection: asc
-                    sortField: name
-                    total: 100
-              schema:
-                type: object
-                properties:
-                  data:
-                    items:
-                      $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointScript'
-                    type: array
-                  page:
-                    $ref: '#/components/schemas/Security_Endpoint_Management_API_Page'
-                  pageSize:
-                    $ref: '#/components/schemas/Security_Endpoint_Management_API_ApiPageSize'
-                  sortDirection:
-                    $ref: '#/components/schemas/Security_Endpoint_Management_API_SortDirection'
-                  sortField:
-                    $ref: '#/components/schemas/Security_Endpoint_Management_API_ApiSortField'
-                  total:
-                    description: The total number of scripts matching the query
-                    type: integer
-          description: List of scripts response
-      summary: Get a list of scripts
-      tags:
-        - Security Endpoint Management API
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
   /api/entity_analytics/monitoring/engine/delete:
     delete:
       operationId: DeleteMonitoringEngine
@@ -20202,6 +20163,112 @@ paths:
         <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/watchlists/{id}</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+  /api/entity_analytics/watchlists/{watchlist_id}/csv_upload:
+    post:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/watchlists/{watchlist_id}/csv_upload</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Uploads a CSV file to add entities to a watchlist. The CSV must contain a header row
+        with a "type" column (user, host, service, or generic) and one or more ECS identity
+        fields (e.g. "user.name", "host.hostname") used to match entities in the entity store.
+
+        Matched entities are added to the watchlist and their `entity.attributes.watchlists`
+        field is updated in the entity store.
+
+        Each row will match up to 10,000 entities.
+      operationId: UploadWatchlistCsv
+      parameters:
+        - description: The ID of the watchlist to add entities to
+          example: high-risk-vendors
+          in: path
+          name: watchlist_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            examples:
+              csvUpload:
+                summary: CSV file with user entities
+                value:
+                  file: |
+                    type,user.name
+                    user,john.doe
+                    user,jane.smith
+            schema:
+              type: object
+              properties:
+                file:
+                  description: The CSV file to upload.
+                  format: binary
+                  type: string
+              required:
+                - file
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                CsvUploadResponse:
+                  summary: CSV upload response with mixed results
+                  value:
+                    failed: 1
+                    items:
+                      - matchedEntities: 1
+                        status: success
+                      - error: Invalid entity type
+                        matchedEntities: 0
+                        status: failure
+                      - matchedEntities: 0
+                        status: unmatched
+                    successful: 1
+                    total: 3
+                    unmatched: 1
+              schema:
+                type: object
+                properties:
+                  failed:
+                    description: Number of rows that failed to process
+                    example: 1
+                    type: integer
+                  items:
+                    items:
+                      $ref: '#/components/schemas/Security_Entity_Analytics_API_WatchlistCsvUploadResponseItem'
+                    type: array
+                  successful:
+                    description: Number of rows that matched at least one entity
+                    example: 1
+                    type: integer
+                  total:
+                    description: Total number of rows processed
+                    example: 3
+                    type: integer
+                  unmatched:
+                    description: Number of rows that matched no entities
+                    example: 1
+                    type: integer
+                required:
+                  - successful
+                  - failed
+                  - total
+                  - unmatched
+                  - items
+          description: Upload successful
+        '413':
+          description: File too large
+      summary: Upload a CSV file to add entities to a watchlist
+      tags:
+        - Security Entity Analytics API
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/entity_analytics/watchlists/list:
     get:
       operationId: ListWatchlists
@@ -24448,6 +24515,8 @@ paths:
                               - count
                           maxItems: 1000
                           type: array
+                        created_at:
+                          type: string
                         data_output_id:
                           nullable: true
                           type: string
@@ -24498,6 +24567,9 @@ paths:
                           type: boolean
                         is_protected:
                           description: Indicates whether the agent policy has tamper protection enabled. Default false.
+                          type: boolean
+                        is_verifier:
+                          description: Indicates this is a short-lived verifier policy used for OTel permission verification.
                           type: boolean
                         keep_monitoring_alive:
                           default: false
@@ -25348,6 +25420,9 @@ paths:
                   type: boolean
                 is_protected:
                   type: boolean
+                is_verifier:
+                  description: Indicates this is a short-lived verifier policy used for OTel permission verification.
+                  type: boolean
                 keep_monitoring_alive:
                   default: false
                   description: When set to true, monitoring will be enabled but logs/metrics collection will be disabled
@@ -25555,6 +25630,8 @@ paths:
                             - count
                         maxItems: 1000
                         type: array
+                      created_at:
+                        type: string
                       data_output_id:
                         nullable: true
                         type: string
@@ -25605,6 +25682,9 @@ paths:
                         type: boolean
                       is_protected:
                         description: Indicates whether the agent policy has tamper protection enabled. Default false.
+                        type: boolean
+                      is_verifier:
+                        description: Indicates this is a short-lived verifier policy used for OTel permission verification.
                         type: boolean
                       keep_monitoring_alive:
                         default: false
@@ -26442,6 +26522,8 @@ paths:
                               - count
                           maxItems: 1000
                           type: array
+                        created_at:
+                          type: string
                         data_output_id:
                           nullable: true
                           type: string
@@ -26492,6 +26574,9 @@ paths:
                           type: boolean
                         is_protected:
                           description: Indicates whether the agent policy has tamper protection enabled. Default false.
+                          type: boolean
+                        is_verifier:
+                          description: Indicates this is a short-lived verifier policy used for OTel permission verification.
                           type: boolean
                         keep_monitoring_alive:
                           default: false
@@ -27308,6 +27393,8 @@ paths:
                             - count
                         maxItems: 1000
                         type: array
+                      created_at:
+                        type: string
                       data_output_id:
                         nullable: true
                         type: string
@@ -27358,6 +27445,9 @@ paths:
                         type: boolean
                       is_protected:
                         description: Indicates whether the agent policy has tamper protection enabled. Default false.
+                        type: boolean
+                      is_verifier:
+                        description: Indicates this is a short-lived verifier policy used for OTel permission verification.
                         type: boolean
                       keep_monitoring_alive:
                         default: false
@@ -28207,6 +28297,9 @@ paths:
                   type: boolean
                 is_protected:
                   type: boolean
+                is_verifier:
+                  description: Indicates this is a short-lived verifier policy used for OTel permission verification.
+                  type: boolean
                 keep_monitoring_alive:
                   default: false
                   description: When set to true, monitoring will be enabled but logs/metrics collection will be disabled
@@ -28414,6 +28507,8 @@ paths:
                             - count
                         maxItems: 1000
                         type: array
+                      created_at:
+                        type: string
                       data_output_id:
                         nullable: true
                         type: string
@@ -28464,6 +28559,9 @@ paths:
                         type: boolean
                       is_protected:
                         description: Indicates whether the agent policy has tamper protection enabled. Default false.
+                        type: boolean
+                      is_verifier:
+                        description: Indicates this is a short-lived verifier policy used for OTel permission verification.
                         type: boolean
                       keep_monitoring_alive:
                         default: false
@@ -29393,6 +29491,8 @@ paths:
                             - count
                         maxItems: 1000
                         type: array
+                      created_at:
+                        type: string
                       data_output_id:
                         nullable: true
                         type: string
@@ -29443,6 +29543,9 @@ paths:
                         type: boolean
                       is_protected:
                         description: Indicates whether the agent policy has tamper protection enabled. Default false.
+                        type: boolean
+                      is_verifier:
+                        description: Indicates this is a short-lived verifier policy used for OTel permission verification.
                         type: boolean
                       keep_monitoring_alive:
                         default: false
@@ -31142,12 +31245,10 @@ paths:
           name: policyIds
           required: false
           schema:
-            anyOf:
-              - items:
-                  type: string
-                maxItems: 1000
-                type: array
-              - type: string
+            items:
+              type: string
+            maxItems: 1000
+            type: array
         - in: query
           name: kuery
           required: false
@@ -31252,12 +31353,10 @@ paths:
           name: agentsIds
           required: true
           schema:
-            anyOf:
-              - items:
-                  type: string
-                maxItems: 10000
-                type: array
-              - type: string
+            items:
+              type: string
+            maxItems: 10000
+            type: array
         - in: query
           name: pkgName
           required: false
@@ -34177,6 +34276,71 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/fleet/agents/{agentId}/effective_config:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/{agentId}/effective_config</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get an agent's effective config by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.
+      operationId: get-fleet-agents-agentid-effective-config
+      parameters:
+        - description: The agent ID to get effective config of
+          in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                successResponse:
+                  value:
+                    effective_config: {}
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  effective_config: {}
+                required:
+                  - effective_config
+          description: 'OK: A successful request.'
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequestResponse:
+                  value:
+                    message: Bad Request
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: A bad request.
+      summary: Get an agent's effective config
+      tags:
+        - Elastic Agents
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/fleet/agents/{agentId}/migrate:
     post:
       description: |-
@@ -36415,6 +36579,12 @@ paths:
                         vars:
                           additionalProperties: {}
                           type: object
+                        verification_failed_at:
+                          type: string
+                        verification_started_at:
+                          type: string
+                        verification_status:
+                          type: string
                       required:
                         - id
                         - name
@@ -36568,6 +36738,12 @@ paths:
                       vars:
                         additionalProperties: {}
                         type: object
+                      verification_failed_at:
+                        type: string
+                      verification_started_at:
+                        type: string
+                      verification_status:
+                        type: string
                     required:
                       - id
                       - name
@@ -36727,6 +36903,12 @@ paths:
                       vars:
                         additionalProperties: {}
                         type: object
+                      verification_failed_at:
+                        type: string
+                      verification_started_at:
+                        type: string
+                      verification_status:
+                        type: string
                     required:
                       - id
                       - name
@@ -36873,6 +37055,12 @@ paths:
                       vars:
                         additionalProperties: {}
                         type: object
+                      verification_failed_at:
+                        type: string
+                      verification_started_at:
+                        type: string
+                      verification_status:
+                        type: string
                     required:
                       - id
                       - name
@@ -42668,6 +42856,103 @@ paths:
       summary: Delete assets for an input package
       tags:
         - Elastic Package Manager (EPM)
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/fleet/epm/packages/{pkgName}/{pkgVersion}/dependencies:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}/{pkgVersion}/dependencies</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.
+      operationId: get-fleet-epm-packages-pkgname-pkgversion-dependencies
+      parameters:
+        - description: Package name
+          in: path
+          name: pkgName
+          required: true
+          schema:
+            type: string
+        - description: Package version
+          in: path
+          name: pkgVersion
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                dependenciesResponse:
+                  value:
+                    items:
+                      - name: aws
+                        title: AWS
+                        version: ^2.0.0
+                      - name: system
+                        title: System
+                        version: ^1.0.0
+                noDependenciesResponse:
+                  value:
+                    items: []
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  items:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        title:
+                          type: string
+                        version:
+                          type: string
+                      required:
+                        - name
+                        - version
+                        - title
+                    maxItems: 1000
+                    type: array
+                required:
+                  - items
+          description: 'OK: A successful request.'
+        '400':
+          content:
+            application/json:
+              examples:
+                packageNotFoundResponse:
+                  value:
+                    message: '[my-package-1.0.0] package not found in registry'
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: A bad request.
+      summary: Get package dependencies
+      tags:
+        - Elastic Package Manager (EPM)
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -55316,23 +55601,15 @@ paths:
           name: status
           required: false
           schema:
-            anyOf:
-              - enum:
-                  - running
-                  - finished
-                  - upcoming
-                  - archived
-                  - disabled
-                type: string
-              - items:
-                  enum:
-                    - running
-                    - finished
-                    - upcoming
-                    - archived
-                    - disabled
-                  type: string
-                type: array
+            items:
+              enum:
+                - running
+                - finished
+                - upcoming
+                - archived
+                - disabled
+              type: string
+            type: array
         - description: The page number to return.
           in: query
           name: page
@@ -60311,7 +60588,95 @@ paths:
                   properties: {}
                 - nullable: true
                 - {}
-      responses: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                listStreams:
+                  value:
+                    streams:
+                      - description: Root logs stream
+                        ingest:
+                          failure_store:
+                            inherit: {}
+                          lifecycle:
+                            inherit: {}
+                          processing:
+                            steps: []
+                            updated_at: '2025-01-10T08:00:00.000Z'
+                          settings: {}
+                          wired:
+                            fields:
+                              '@timestamp':
+                                type: date
+                              log.level:
+                                type: keyword
+                              message:
+                                type: match_only_text
+                            routing:
+                              - destination: logs.nginx
+                                status: enabled
+                                where:
+                                  eq: nginx
+                                  field: host.name
+                        name: logs
+                        type: wired
+                        updated_at: '2025-01-10T08:00:00.000Z'
+                      - description: Web server access logs, routed by severity
+                        ingest:
+                          failure_store:
+                            inherit: {}
+                          lifecycle:
+                            inherit: {}
+                          processing:
+                            steps: []
+                            updated_at: '2025-01-15T10:30:00.000Z'
+                          settings: {}
+                          wired:
+                            fields:
+                              host.name:
+                                type: keyword
+                              http.response.status_code:
+                                type: long
+                              message:
+                                type: match_only_text
+                            routing:
+                              - destination: logs.nginx.errors
+                                status: enabled
+                                where:
+                                  field: http.response.status_code
+                                  gte: 500
+                        name: logs.nginx
+                        type: wired
+                        updated_at: '2025-01-15T10:30:00.000Z'
+                      - description: Legacy application logs
+                        ingest:
+                          classic: {}
+                          failure_store:
+                            disabled: {}
+                          lifecycle:
+                            dsl:
+                              data_retention: 30d
+                          processing:
+                            steps:
+                              - action: grok
+                                from: message
+                                ignore_missing: true
+                                patterns:
+                                  - '%{TIMESTAMP_ISO8601:timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message}'
+                            updated_at: '2024-12-01T09:00:00.000Z'
+                          settings: {}
+                        name: logs-myapp-default
+                        type: classic
+                        updated_at: '2024-12-01T09:00:00.000Z'
+                      - description: All error-level logs across every stream
+                        name: logs.errors
+                        query:
+                          esql: FROM logs* | WHERE log.level == "error"
+                          view: logs.errors-view
+                        type: query
+                        updated_at: '2025-01-20T14:00:00.000Z'
       summary: Get stream list
       tags:
         - streams
@@ -60498,7 +60863,70 @@ paths:
                   properties: {}
                 - nullable: true
                 - {}
-      responses: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getWiredStream:
+                  value:
+                    dashboards: []
+                    data_stream_exists: true
+                    effective_failure_store:
+                      disabled: {}
+                      from: logs
+                    effective_lifecycle:
+                      dsl:
+                        data_retention: 7d
+                      from: logs
+                    effective_settings: {}
+                    inherited_fields:
+                      '@timestamp':
+                        from: logs
+                        type: date
+                      log.level:
+                        from: logs
+                        type: keyword
+                    privileges:
+                      create_snapshot_repository: false
+                      lifecycle: true
+                      manage: true
+                      manage_failure_store: true
+                      monitor: true
+                      read_failure_store: true
+                      simulate: true
+                      text_structure: true
+                      view_index_metadata: true
+                    queries: []
+                    rules: []
+                    stream:
+                      description: Web server access logs, routed by severity
+                      ingest:
+                        failure_store:
+                          inherit: {}
+                        lifecycle:
+                          inherit: {}
+                        processing:
+                          steps: []
+                          updated_at: '2025-01-15T10:30:00.000Z'
+                        settings: {}
+                        wired:
+                          fields:
+                            host.name:
+                              type: keyword
+                            http.response.status_code:
+                              type: long
+                            message:
+                              type: match_only_text
+                          routing:
+                            - destination: logs.nginx.errors
+                              status: enabled
+                              where:
+                                field: http.response.status_code
+                                gte: 500
+                      name: logs.nginx
+                      type: wired
+                      updated_at: '2025-01-15T10:30:00.000Z'
       summary: Get a stream
       tags:
         - streams
@@ -60532,6 +60960,71 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              createQueryStream:
+                value:
+                  dashboards: []
+                  queries: []
+                  rules: []
+                  stream:
+                    description: All error-level logs across every stream
+                    query:
+                      esql: FROM logs* | WHERE log.level == "error"
+                      view: logs.errors-view
+                    type: query
+              createWiredStream:
+                value:
+                  dashboards: []
+                  queries: []
+                  rules: []
+                  stream:
+                    description: Web server access logs, routed by severity
+                    ingest:
+                      failure_store:
+                        inherit: {}
+                      lifecycle:
+                        inherit: {}
+                      processing:
+                        steps: []
+                      settings: {}
+                      wired:
+                        fields:
+                          host.name:
+                            type: keyword
+                          http.response.status_code:
+                            type: long
+                          message:
+                            type: match_only_text
+                        routing:
+                          - destination: logs.nginx.errors
+                            status: enabled
+                            where:
+                              field: http.response.status_code
+                              gte: 500
+                    type: wired
+              updateClassicStream:
+                value:
+                  dashboards: []
+                  queries: []
+                  rules: []
+                  stream:
+                    description: Legacy application logs managed as a classic data stream
+                    ingest:
+                      classic: {}
+                      failure_store:
+                        disabled: {}
+                      lifecycle:
+                        dsl:
+                          data_retention: 30d
+                      processing:
+                        steps:
+                          - action: grok
+                            from: message
+                            ignore_missing: true
+                            patterns:
+                              - '%{TIMESTAMP_ISO8601:timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message}'
+                      settings: {}
+                    type: classic
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamUpsertRequest'
       responses: {}
@@ -60569,6 +61062,15 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              forkStream:
+                value:
+                  status: enabled
+                  stream:
+                    name: logs.nginx.errors
+                  where:
+                    eq: '500'
+                    field: http.response.status_code
             schema:
               additionalProperties: false
               type: object
@@ -60626,7 +61128,45 @@ paths:
                   properties: {}
                 - nullable: true
                 - {}
-      responses: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getWiredIngest:
+                  value:
+                    ingest:
+                      failure_store:
+                        inherit: {}
+                      lifecycle:
+                        inherit: {}
+                      processing:
+                        steps:
+                          - action: grok
+                            from: message
+                            ignore_missing: false
+                            patterns:
+                              - '%{IPORHOST:client.ip} %{USER:ident} %{USER:auth} \[%{HTTPDATE:@timestamp}\] "%{WORD:http.method} %{DATA:url.original} HTTP/%{NUMBER:http.version}" %{NUMBER:http.response.status_code:int} (?:%{NUMBER:http.response.body.bytes:int}|-)'
+                        updated_at: '2025-01-15T10:30:00.000Z'
+                      settings: {}
+                      wired:
+                        fields:
+                          client.ip:
+                            type: ip
+                          http.method:
+                            type: keyword
+                          http.response.body.bytes:
+                            type: long
+                          http.response.status_code:
+                            type: long
+                          url.original:
+                            type: wildcard
+                        routing:
+                          - destination: logs.nginx.errors
+                            status: enabled
+                            where:
+                              field: http.response.status_code
+                              gte: 500
       summary: Get ingest stream settings
       tags:
         - streams
@@ -60660,6 +61200,40 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              upsertWiredIngest:
+                value:
+                  ingest:
+                    failure_store:
+                      inherit: {}
+                    lifecycle:
+                      inherit: {}
+                    processing:
+                      steps:
+                        - action: grok
+                          from: message
+                          ignore_missing: false
+                          patterns:
+                            - '%{IPORHOST:client.ip} %{USER:ident} %{USER:auth} \[%{HTTPDATE:@timestamp}\] "%{WORD:http.method} %{DATA:url.original} HTTP/%{NUMBER:http.version}" %{NUMBER:http.response.status_code:int} (?:%{NUMBER:http.response.body.bytes:int}|-)'
+                    settings: {}
+                    wired:
+                      fields:
+                        client.ip:
+                          type: ip
+                        http.method:
+                          type: keyword
+                        http.response.body.bytes:
+                          type: long
+                        http.response.status_code:
+                          type: long
+                        url.original:
+                          type: wildcard
+                      routing:
+                        - destination: logs.nginx.errors
+                          status: enabled
+                          where:
+                            eq: '500'
+                            field: http.response.status_code
             schema:
               additionalProperties: false
               type: object
@@ -60883,6 +61457,11 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              upsertQueryStream:
+                value:
+                  query:
+                    esql: FROM logs* | WHERE log.level == "error" | KEEP @timestamp, message, host.name, log.level
             schema:
               additionalProperties: false
               type: object
@@ -61475,29 +62054,21 @@ paths:
           name: attachmentTypes
           required: false
           schema:
-            anyOf:
-              - enum:
-                  - dashboard
-                  - rule
-                  - slo
-                type: string
-              - items:
-                  enum:
-                    - dashboard
-                    - rule
-                    - slo
-                  type: string
-                type: array
+            items:
+              enum:
+                - dashboard
+                - rule
+                - slo
+              type: string
+            type: array
         - description: Filter by tags (single value or array)
           in: query
           name: tags
           required: false
           schema:
-            anyOf:
-              - type: string
-              - items:
-                  type: string
-                type: array
+            items:
+              type: string
+            type: array
       requestBody:
         content:
           application/json:
@@ -61822,6 +62393,7 @@ paths:
                     - 15c1929b-0af7-42bd-85a8-56e234cc7c4e
                   items:
                     type: string
+                  maxItems: 100
                   type: array
                 searchIds:
                   description: Saved search IDs that should be deleted alongside the timelines
@@ -61830,6 +62402,7 @@ paths:
                     - 6ce1b592-84e3-4b4a-9552-f189d4b82075
                   items:
                     type: string
+                  maxItems: 100
                   type: array
               required:
                 - savedObjectIds
@@ -62687,7 +63260,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve a paginated list of workflows with optional filtering.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read.
+        Retrieve a paginated list of workflows with optional filtering.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read OR workflowsManagement:readExecution.
       operationId: get-workflows
       parameters:
         - description: Free-text search query.
@@ -62715,34 +63288,28 @@ paths:
           name: enabled
           required: false
           schema:
-            anyOf:
-              - type: boolean
-              - items:
-                  type: boolean
-                maxItems: 2
-                type: array
+            items:
+              type: boolean
+            maxItems: 2
+            type: array
         - description: Filter by creator.
           in: query
           name: createdBy
           required: false
           schema:
-            anyOf:
-              - type: string
-              - items:
-                  type: string
-                maxItems: 1000
-                type: array
+            items:
+              type: string
+            maxItems: 1000
+            type: array
         - description: Filter by tags.
           in: query
           name: tags
           required: false
           schema:
-            anyOf:
-              - type: string
-              - items:
-                  type: string
-                maxItems: 1000
-                type: array
+            items:
+              type: string
+            maxItems: 1000
+            type: array
       responses:
         '200':
           content:
@@ -63808,7 +64375,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve summary statistics about workflows, including total, enabled, and disabled counts, as well as execution history metrics for the last 30 days.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read.
+        Retrieve summary statistics about workflows, including total, enabled, and disabled counts; execution history metrics for the last 30 days are included only when the caller has execution read privilege.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read OR workflowsManagement:readExecution.
       operationId: get-workflows-stats
       parameters: []
       responses:
@@ -63859,7 +64426,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Execute a single step from a workflow definition in test mode.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute.
+        Execute a single step from a workflow definition in test mode.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute AND workflowsManagement:read.
       operationId: post-workflows-step-test
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -63970,7 +64537,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Execute a workflow in test mode without requiring it to be saved or enabled. Provide either a workflow ID to test a saved workflow, a YAML definition to test an unsaved draft, or both to test a modified version of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute.
+        Execute a workflow in test mode without requiring it to be saved or enabled. Provide either a workflow ID to test a saved workflow, a YAML definition to test an unsaved draft, or both to test a modified version of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute AND workflowsManagement:read.
       operationId: post-workflows-test
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -64472,7 +65039,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create a copy of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:create.
+        Create a copy of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:create AND workflowsManagement:read.
       operationId: post-workflows-workflow-id-clone
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -64562,7 +65129,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Execute a workflow by its ID with the provided inputs. The workflow must be enabled and have a valid definition. Returns an execution ID that can be used to monitor progress.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute.
+        Execute a workflow by its ID with the provided inputs. The workflow must be enabled and have a valid definition. Returns an execution ID that can be used to monitor progress.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute AND workflowsManagement:read.
       operationId: post-workflows-workflow-id-run
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -64662,60 +65229,41 @@ paths:
           name: statuses
           required: false
           schema:
-            anyOf:
-              - enum:
-                  - pending
-                  - waiting
-                  - waiting_for_input
-                  - running
-                  - completed
-                  - failed
-                  - cancelled
-                  - timed_out
-                  - skipped
-                type: string
-              - items:
-                  enum:
-                    - pending
-                    - waiting
-                    - waiting_for_input
-                    - running
-                    - completed
-                    - failed
-                    - cancelled
-                    - timed_out
-                    - skipped
-                  type: string
-                maxItems: 9
-                type: array
+            items:
+              enum:
+                - pending
+                - waiting
+                - waiting_for_input
+                - running
+                - completed
+                - failed
+                - cancelled
+                - timed_out
+                - skipped
+              type: string
+            maxItems: 9
+            type: array
         - description: Filter by execution type.
           in: query
           name: executionTypes
           required: false
           schema:
-            anyOf:
-              - enum:
-                  - test
-                  - production
-                type: string
-              - items:
-                  enum:
-                    - test
-                    - production
-                  type: string
-                maxItems: 2
-                type: array
+            items:
+              enum:
+                - test
+                - production
+              type: string
+            maxItems: 2
+            type: array
         - description: Filter by the user who triggered the execution.
           in: query
           name: executedBy
           required: false
           schema:
-            anyOf:
-              - type: string
-              - items:
-                  type: string
-                maxItems: 100
-                type: array
+            items:
+              type: string
+            maxItems: 100
+            type: array
         - description: Whether to exclude step-level execution data.
           in: query
           name: omitStepRuns
@@ -64958,30 +65506,104 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                findSloResponse:
+                  summary: A paginated list of SLOs
+                  value:
+                    page: 1
+                    perPage: 25
+                    results:
+                      - budgetingMethod: occurrences
+                        createdAt: '2025-01-12T10:03:19.000Z'
+                        description: Availability of my web service
+                        enabled: true
+                        groupBy: '*'
+                        id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                        indicator:
+                          params:
+                            filter: 'field.environment : "production" and service.name : "my-service"'
+                            good: 'request.status_code : "2xx"'
+                            index: logs-*
+                            timestampField: '@timestamp'
+                            total: 'request.status_code : *'
+                          type: sli.kql.custom
+                        instanceId: '*'
+                        name: My Service Availability
+                        objective:
+                          target: 0.99
+                        revision: 1
+                        settings:
+                          frequency: 5m
+                          syncDelay: 5m
+                        summary:
+                          errorBudget:
+                            consumed: 0.17
+                            initial: 0.01
+                            isEstimated: false
+                            remaining: 0.83
+                          sliValue: 0.9983
+                          status: HEALTHY
+                        tags:
+                          - production
+                          - web-service
+                        timeWindow:
+                          duration: 30d
+                          type: rolling
+                        updatedAt: '2025-01-12T10:03:19.000Z'
+                        version: 2
+                    total: 42
               schema:
                 $ref: '#/components/schemas/SLOs_find_slo_response'
           description: Successful request
         '400':
           content:
             application/json:
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    error: Bad Request
+                    message: 'Invalid value ''invalid'' supplied to: sortBy'
+                    statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
             application/json:
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [slo_read] is unauthorized for user'
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
-          description: Unauthorized response
+          description: Forbidden response
         '404':
           content:
             application/json:
+              examples:
+                notFoundExample:
+                  summary: Not found
+                  value:
+                    error: Not Found
+                    message: SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found
+                    statusCode: 404
               schema:
                 $ref: '#/components/schemas/SLOs_404_response'
           description: Not found response
@@ -65001,6 +65623,32 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              createSloKqlExample:
+                summary: Create an SLO with a KQL indicator
+                value:
+                  budgetingMethod: occurrences
+                  description: Availability of my web service measured by successful HTTP responses
+                  indicator:
+                    params:
+                      filter: 'field.environment : "production" and service.name : "my-service"'
+                      good: 'request.status_code : "2xx"'
+                      index: logs-*
+                      timestampField: '@timestamp'
+                      total: 'request.status_code : *'
+                    type: sli.kql.custom
+                  name: My Service Availability
+                  objective:
+                    target: 0.99
+                  settings:
+                    frequency: 5m
+                    syncDelay: 5m
+                  tags:
+                    - production
+                    - web-service
+                  timeWindow:
+                    duration: 30d
+                    type: rolling
             schema:
               $ref: '#/components/schemas/SLOs_create_slo_request'
         required: true
@@ -65008,30 +65656,63 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                createSloResponse:
+                  summary: Create SLO response
+                  value:
+                    id: 8853df00-ae2e-11ed-90af-09bb6422b258
               schema:
                 $ref: '#/components/schemas/SLOs_create_slo_response'
           description: Successful request
         '400':
           content:
             application/json:
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: indicator/type'
+                    statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
             application/json:
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [slo_write] is unauthorized for user'
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
-          description: Unauthorized response
+          description: Forbidden response
         '409':
           content:
             application/json:
+              examples:
+                conflictExample:
+                  summary: Conflict
+                  value:
+                    error: Conflict
+                    message: SLO [d077e940-1515-11ee-9c50-9d096392f520] already exists
+                    statusCode: 409
               schema:
                 $ref: '#/components/schemas/SLOs_409_response'
           description: Conflict - The SLO id already exists
@@ -65052,6 +65733,13 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              bulkDeleteRequest:
+                summary: Bulk delete two SLOs
+                value:
+                  list:
+                    - 8853df00-ae2e-11ed-90af-09bb6422b258
+                    - d077e940-1515-11ee-9c50-9d096392f520
             schema:
               $ref: '#/components/schemas/SLOs_bulk_delete_request'
         required: true
@@ -65059,27 +65747,53 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                bulkDeleteResponse:
+                  summary: Bulk delete response with task ID
+                  value:
+                    taskId: d08506b7-f0e8-4f8b-a06a-a83940f4db91
               schema:
                 $ref: '#/components/schemas/SLOs_bulk_delete_response'
           description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: list'
+                    statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
             application/json:
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [slo_write] is unauthorized for user'
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
-          description: Unauthorized response
+          description: Forbidden response
       summary: Bulk delete SLO definitions and their associated summary and rollup data.
       tags:
         - slo
@@ -65105,27 +65819,68 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                bulkDeleteStatusComplete:
+                  summary: Completed bulk deletion
+                  value:
+                    isDone: true
+                    results:
+                      - id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                        success: true
+                      - id: d077e940-1515-11ee-9c50-9d096392f520
+                        success: true
+                bulkDeleteStatusPartialFailure:
+                  summary: Completed with partial failure
+                  value:
+                    isDone: true
+                    results:
+                      - id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                        success: true
+                      - error: SLO [d077e940-1515-11ee-9c50-9d096392f520] not found
+                        id: d077e940-1515-11ee-9c50-9d096392f520
+                        success: false
               schema:
                 $ref: '#/components/schemas/SLOs_bulk_delete_status_response'
           description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: taskId'
+                    statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
             application/json:
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [slo_write] is unauthorized for user'
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
-          description: Unauthorized response
+          description: Forbidden response
       summary: Retrieve the status of the bulk deletion
       tags:
         - slo
@@ -65143,6 +65898,24 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              purgeByAgeExample:
+                summary: Purge rollup data older than 7 days
+                value:
+                  list:
+                    - 8853df00-ae2e-11ed-90af-09bb6422b258
+                  purgePolicy:
+                    age: 7d
+                    purgeType: fixed-age
+              purgeByTimestampExample:
+                summary: Purge rollup data before a specific date
+                value:
+                  list:
+                    - 8853df00-ae2e-11ed-90af-09bb6422b258
+                    - d077e940-1515-11ee-9c50-9d096392f520
+                  purgePolicy:
+                    purgeType: fixed-time
+                    timestamp: '2024-12-31T00:00:00.000Z'
             schema:
               $ref: '#/components/schemas/SLOs_bulk_purge_rollup_request'
         required: true
@@ -65150,27 +65923,53 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                bulkPurgeResponse:
+                  summary: Bulk purge response with task ID
+                  value:
+                    taskId: 8853df00-ae2e-11ed-90af-09bb6422b258
               schema:
                 $ref: '#/components/schemas/SLOs_bulk_purge_rollup_response'
           description: Successful request
         '400':
           content:
             application/json:
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: purgePolicy/purgeType'
+                    statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
             application/json:
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [slo_write] is unauthorized for user'
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
-          description: Unauthorized response
+          description: Forbidden response
       summary: Batch delete rollup and summary data
       tags:
         - slo
@@ -65188,6 +65987,15 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              deleteInstancesExample:
+                summary: Delete specific SLO instances
+                value:
+                  list:
+                    - instanceId: host-abc123
+                      sloId: 8853df00-ae2e-11ed-90af-09bb6422b258
+                    - instanceId: host-def456
+                      sloId: 8853df00-ae2e-11ed-90af-09bb6422b258
             schema:
               $ref: '#/components/schemas/SLOs_delete_slo_instances_request'
         required: true
@@ -65197,21 +66005,42 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: list/0/sloId'
+                    statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
             application/json:
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [slo_write] is unauthorized for user'
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
-          description: Unauthorized response
+          description: Forbidden response
       summary: Batch delete rollup and summary data
       tags:
         - slo
@@ -65233,24 +66062,52 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: id'
+                    statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
             application/json:
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [slo_write] is unauthorized for user'
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
-          description: Unauthorized response
+          description: Forbidden response
         '404':
           content:
             application/json:
+              examples:
+                notFoundExample:
+                  summary: Not found
+                  value:
+                    error: Not Found
+                    message: SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found
+                    statusCode: 404
               schema:
                 $ref: '#/components/schemas/SLOs_404_response'
           description: Not found response
@@ -65278,30 +66135,100 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getSloResponse:
+                  summary: Get SLO response
+                  value:
+                    budgetingMethod: occurrences
+                    createdAt: '2025-01-12T10:03:19.000Z'
+                    description: Availability of my web service
+                    enabled: true
+                    groupBy: '*'
+                    id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                    indicator:
+                      params:
+                        filter: 'field.environment : "production" and service.name : "my-service"'
+                        good: 'request.status_code : "2xx"'
+                        index: logs-*
+                        timestampField: '@timestamp'
+                        total: 'request.status_code : *'
+                      type: sli.kql.custom
+                    instanceId: '*'
+                    name: My Service Availability
+                    objective:
+                      target: 0.99
+                    revision: 1
+                    settings:
+                      frequency: 5m
+                      syncDelay: 5m
+                    summary:
+                      errorBudget:
+                        consumed: 0.17
+                        initial: 0.01
+                        isEstimated: false
+                        remaining: 0.83
+                      sliValue: 0.9983
+                      status: HEALTHY
+                    tags:
+                      - production
+                      - web-service
+                    timeWindow:
+                      duration: 30d
+                      type: rolling
+                    updatedAt: '2025-01-12T10:03:19.000Z'
+                    version: 2
               schema:
                 $ref: '#/components/schemas/SLOs_slo_with_summary_response'
           description: Successful request
         '400':
           content:
             application/json:
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: id'
+                    statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
             application/json:
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [slo_read] is unauthorized for user'
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
-          description: Unauthorized response
+          description: Forbidden response
         '404':
           content:
             application/json:
+              examples:
+                notFoundExample:
+                  summary: Not found
+                  value:
+                    error: Not Found
+                    message: SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found
+                    statusCode: 404
               schema:
                 $ref: '#/components/schemas/SLOs_404_response'
           description: Not found response
@@ -65322,6 +66249,19 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              updateSloNameExample:
+                summary: Update the SLO name and tags
+                value:
+                  name: Updated Service Availability
+                  tags:
+                    - production
+                    - updated
+              updateSloObjectiveExample:
+                summary: Update the SLO objective
+                value:
+                  objective:
+                    target: 0.995
             schema:
               $ref: '#/components/schemas/SLOs_update_slo_request'
         required: true
@@ -65329,30 +66269,91 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                updateSloResponse:
+                  summary: Update SLO response
+                  value:
+                    budgetingMethod: occurrences
+                    createdAt: '2025-01-12T10:03:19.000Z'
+                    description: Availability of my web service
+                    enabled: true
+                    groupBy: '*'
+                    id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                    indicator:
+                      params:
+                        filter: 'field.environment : "production" and service.name : "my-service"'
+                        good: 'request.status_code : "2xx"'
+                        index: logs-*
+                        timestampField: '@timestamp'
+                        total: 'request.status_code : *'
+                      type: sli.kql.custom
+                    name: Updated Service Availability
+                    objective:
+                      target: 0.99
+                    revision: 2
+                    settings:
+                      frequency: 5m
+                      syncDelay: 5m
+                    tags:
+                      - production
+                      - updated
+                    timeWindow:
+                      duration: 30d
+                      type: rolling
+                    updatedAt: '2025-03-26T14:30:00.000Z'
+                    version: 2
               schema:
                 $ref: '#/components/schemas/SLOs_slo_definition_response'
           description: Successful request
         '400':
           content:
             application/json:
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: indicator/type'
+                    statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
             application/json:
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [slo_write] is unauthorized for user'
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
-          description: Unauthorized response
+          description: Forbidden response
         '404':
           content:
             application/json:
+              examples:
+                notFoundExample:
+                  summary: Not found
+                  value:
+                    error: Not Found
+                    message: SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found
+                    statusCode: 404
               schema:
                 $ref: '#/components/schemas/SLOs_404_response'
           description: Not found response
@@ -65375,30 +66376,91 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                resetSloResponse:
+                  summary: Reset SLO response
+                  value:
+                    budgetingMethod: occurrences
+                    createdAt: '2025-01-12T10:03:19.000Z'
+                    description: Availability of my web service
+                    enabled: true
+                    groupBy: '*'
+                    id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                    indicator:
+                      params:
+                        filter: 'field.environment : "production" and service.name : "my-service"'
+                        good: 'request.status_code : "2xx"'
+                        index: logs-*
+                        timestampField: '@timestamp'
+                        total: 'request.status_code : *'
+                      type: sli.kql.custom
+                    name: My Service Availability
+                    objective:
+                      target: 0.99
+                    revision: 2
+                    settings:
+                      frequency: 5m
+                      syncDelay: 5m
+                    tags:
+                      - production
+                      - web-service
+                    timeWindow:
+                      duration: 30d
+                      type: rolling
+                    updatedAt: '2025-03-26T14:30:00.000Z'
+                    version: 2
               schema:
                 $ref: '#/components/schemas/SLOs_slo_definition_response'
           description: Successful request
         '400':
           content:
             application/json:
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: id'
+                    statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
             application/json:
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [slo_write] is unauthorized for user'
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
-          description: Unauthorized response
+          description: Forbidden response
         '404':
           content:
             application/json:
+              examples:
+                notFoundExample:
+                  summary: Not found
+                  value:
+                    error: Not Found
+                    message: SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found
+                    statusCode: 404
               schema:
                 $ref: '#/components/schemas/SLOs_404_response'
           description: Not found response
@@ -65423,24 +66485,52 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: id'
+                    statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
             application/json:
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [slo_write] is unauthorized for user'
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
-          description: Unauthorized response
+          description: Forbidden response
         '404':
           content:
             application/json:
+              examples:
+                notFoundExample:
+                  summary: Not found
+                  value:
+                    error: Not Found
+                    message: SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found
+                    statusCode: 404
               schema:
                 $ref: '#/components/schemas/SLOs_404_response'
           description: Not found response
@@ -65465,24 +66555,52 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: id'
+                    statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
             application/json:
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [slo_write] is unauthorized for user'
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
-          description: Unauthorized response
+          description: Forbidden response
         '404':
           content:
             application/json:
+              examples:
+                notFoundExample:
+                  summary: Not found
+                  value:
+                    error: Not Found
+                    message: SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found
+                    statusCode: 404
               schema:
                 $ref: '#/components/schemas/SLOs_404_response'
           description: Not found response
@@ -65560,7 +66678,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
-          description: Unauthorized response
+          description: Forbidden response
       summary: Get the SLO definitions
       tags:
         - slo
@@ -75524,6 +76642,7 @@ components:
         - THRESHOLD_RULE_TYPE_IN_SUPPRESSION
         - UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD
         - RULE_FILL_GAPS_DISABLED_RULE
+        - USER_INSUFFICIENT_RULE_PRIVILEGES
       type: string
     Security_Detections_API_BulkActionSkipResult:
       type: object
@@ -81915,7 +83034,7 @@ components:
       description: Agent ID
       type: string
     Security_Endpoint_Management_API_AgentIds:
-      description: A list of agent IDs. Max of 50.
+      description: A list of agent IDs. Max of 250.
       example:
         - agent-id-1
         - agent-id-2
@@ -81924,7 +83043,7 @@ components:
         - items:
             minLength: 1
             type: string
-          maxItems: 50
+          maxItems: 250
           minItems: 1
           type: array
         - minLength: 1
@@ -81937,24 +83056,6 @@ components:
         - crowdstrike
         - microsoft_defender_endpoint
       example: endpoint
-      type: string
-    Security_Endpoint_Management_API_ApiPageSize:
-      default: 10
-      description: Number of items per page
-      example: 10
-      maximum: 1000
-      minimum: 1
-      type: integer
-    Security_Endpoint_Management_API_ApiSortField:
-      description: Determines which field is used to sort the results.
-      enum:
-        - name
-        - createdAt
-        - createdBy
-        - updatedAt
-        - updatedBy
-        - fileSize
-      example: updatedAt
       type: string
     Security_Endpoint_Management_API_Cancel:
       allOf:
@@ -81984,23 +83085,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -82066,6 +83169,7 @@ components:
         - unisolate
       items:
         $ref: '#/components/schemas/Security_Endpoint_Management_API_Command'
+      maxItems: 50
       type: array
     Security_Endpoint_Management_API_Comment:
       description: Optional comment
@@ -82086,13 +83190,14 @@ components:
       example: '2023-10-31T23:59:59.999Z'
       type: string
     Security_Endpoint_Management_API_EndpointIds:
-      description: List of endpoint IDs (cannot contain empty strings)
+      description: List of endpoint IDs (cannot contain empty strings). Max of 250.
       example:
         - endpoint-id-1
         - endpoint-id-2
       items:
         minLength: 1
         type: string
+      maxItems: 250
       minItems: 1
       type: array
     Security_Endpoint_Management_API_EndpointMetadataResponse:
@@ -82181,90 +83286,6 @@ components:
               revision: 2
       type: object
       properties: {}
-    Security_Endpoint_Management_API_EndpointScript:
-      type: object
-      properties:
-        createdAt:
-          format: date-time
-          type: string
-        createdBy:
-          example: elastic
-          type: string
-        description:
-          description: Description of the script and its purpose/functionality
-          example: Collects host data for investigation
-          type: string
-        downloadUri:
-          description: URI to download the script file. Note that this is the relative path and does not include the space (if applicable)
-          example: /api/endpoint/scripts_library/123e4567-e89b-12d3-a456-426655440000/download
-          type: string
-        example:
-          type: string
-        fileHash:
-          description: SHA256 hash of the script file that was uploaded
-          example: abf573681eb54aac5e05e35bf186d4d31abe45ecf242461490523f11d2a8fbb8
-          type: string
-        fileName:
-          description: Name of the script file that was uploaded
-          example: collect_host_data.sh
-          type: string
-        fileSize:
-          description: Size of the script file that was uploaded in bytes
-          example: 12345
-          type: integer
-        id:
-          example: 123e4567-e89b-12d3-a456-426655440000
-          format: uuid
-          type: string
-        instructions:
-          description: Instructions for using the script, including details around its supported input arguments
-          type: string
-        name:
-          example: Collect host data
-          type: string
-        pathToExecutable:
-          description: |
-            The relative path to the file included in the archive that should be executed once its contents are extracted. Applicable only for scripts uploaded as an archive (.zip file for example).
-          type: string
-        platform:
-          items:
-            $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointScriptPlatform'
-          type: array
-        requiresInput:
-          type: boolean
-        tags:
-          description: Tags that categorize the script
-          items:
-            $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointScriptTags'
-          type: array
-        updatedAt:
-          format: date-time
-          type: string
-        updatedBy:
-          example: admin
-          type: string
-        version:
-          type: string
-    Security_Endpoint_Management_API_EndpointScriptPlatform:
-      enum:
-        - linux
-        - macos
-        - windows
-      type: string
-    Security_Endpoint_Management_API_EndpointScriptTags:
-      enum:
-        - remediationAction
-        - dataCollection
-        - networkDiagnostics
-        - networkAction
-        - systemInventory
-        - forensicCollection
-        - threatHunting
-        - discovery
-        - systemManagement
-        - userManagement
-        - troubleshooting
-      type: string
     Security_Endpoint_Management_API_Execute:
       allOf:
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
@@ -82314,23 +83335,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -82495,23 +83518,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -82574,23 +83599,25 @@ components:
         agent_type:
           $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
         alert_ids:
-          description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+          description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
           example:
             - alert-id-1
             - alert-id-2
           items:
             minLength: 1
             type: string
+          maxItems: 50
           minItems: 1
           type: array
         case_ids:
-          description: The IDs of cases where the action taken will be logged.
+          description: The IDs of cases where the action taken will be logged. Max of 50.
           example:
             - case-id-1
             - case-id-2
           items:
             minLength: 1
             type: string
+          maxItems: 50
           minItems: 1
           type: array
         comment:
@@ -82655,6 +83682,7 @@ components:
           - inactive
           - unenrolled
         type: string
+      maxItems: 20
       type: array
     Security_Endpoint_Management_API_Isolate:
       allOf:
@@ -82749,23 +83777,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -82934,23 +83964,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -83461,23 +84493,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -83528,23 +84562,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -83699,23 +84735,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -83864,23 +84902,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -83944,7 +84984,7 @@ components:
       type: object
       properties: {}
     Security_Endpoint_Management_API_UserIds:
-      description: A list of user IDs.
+      description: A list of user IDs. Max of 50.
       example:
         - user-id-1
         - user-id-2
@@ -83952,12 +84992,13 @@ components:
         - items:
             minLength: 1
             type: string
+          maxItems: 50
           minItems: 1
           type: array
         - minLength: 1
           type: string
     Security_Endpoint_Management_API_WithOutputs:
-      description: A list of action IDs that should include the complete output of the action.
+      description: A list of action IDs that should include the complete output of the action. Max of 50.
       example:
         - action-id-1
         - action-id-2
@@ -83965,6 +85006,7 @@ components:
         - items:
             minLength: 1
             type: string
+          maxItems: 50
           minItems: 1
           type: array
         - minLength: 1
@@ -84575,6 +85617,15 @@ components:
         notes:
           items:
             type: string
+          type: array
+        related_entities:
+          items:
+            type: object
+            properties:
+              entity_id:
+                type: string
+              relationship_type:
+                type: string
           type: array
         score_type:
           description: Distinguishes base, propagated, and resolution scores.
@@ -85217,6 +86268,30 @@ components:
             name:
               description: The name of the user.
               type: string
+    Security_Entity_Analytics_API_WatchlistCsvUploadResponseItem:
+      example:
+        matchedEntities: 1
+        status: success
+      type: object
+      properties:
+        error:
+          description: Error message if the row failed to process
+          example: Invalid entity type
+          type: string
+        matchedEntities:
+          description: Number of entities matched for this row
+          example: 1
+          type: integer
+        status:
+          enum:
+            - success
+            - failure
+            - unmatched
+          example: success
+          type: string
+      required:
+        - status
+        - matchedEntities
     Security_Entity_Analytics_API_WatchlistObject:
       example:
         createdAt: '2026-01-28T12:00:00.000Z'
@@ -85235,6 +86310,9 @@ components:
         description:
           description: Description of the watchlist
           type: string
+        entityCount:
+          description: Number of entities in the watchlist
+          type: number
         entitySourceIds:
           description: List of entity source IDs associated with the watchlist
           items:
@@ -88664,14 +89742,14 @@ components:
         - error
         - message
     SLOs_403_response:
-      title: Unauthorized
+      title: Forbidden
       type: object
       properties:
         error:
-          example: Unauthorized
+          example: Forbidden
           type: string
         message:
-          example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]"
+          example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [slo_write] is unauthorized for user [limited_user] for REST request [/api/observability/slos]]: action [slo_write] is unauthorized for user [limited_user]"
           type: string
         statusCode:
           example: 403

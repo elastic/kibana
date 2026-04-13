@@ -42,7 +42,7 @@ export function TimesliderToggleButton(props: Props) {
         size="s"
         onClick={onClick}
         data-test-subj="timesliderToggleButton"
-        iconType="timeslider"
+        iconType="clockControl"
         aria-label={label}
         title={label}
         color="text"

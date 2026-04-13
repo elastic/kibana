@@ -181,14 +181,20 @@ export function startServer(options: ServerOptions): http.Server {
   });
 
   serverManager.on('server-status', (event: unknown) => {
-    const data = `data: ${JSON.stringify({ type: 'server-status', ...event as Record<string, unknown> })}\n\n`;
+    const data = `data: ${JSON.stringify({
+      type: 'server-status',
+      ...(event as Record<string, unknown>),
+    })}\n\n`;
     for (const client of sseClients) {
       client.write(data);
     }
   });
 
   serverManager.on('server-output', (event: unknown) => {
-    const data = `data: ${JSON.stringify({ type: 'server-output', ...event as Record<string, unknown> })}\n\n`;
+    const data = `data: ${JSON.stringify({
+      type: 'server-output',
+      ...(event as Record<string, unknown>),
+    })}\n\n`;
     for (const client of sseClients) {
       client.write(data);
     }

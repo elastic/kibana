@@ -194,7 +194,11 @@ function discoverScoutConfigs(repoRoot: string): TestConfig[] {
     return {
       id: generateId(relativePath),
       type: 'scout' as const,
-      name: buildConfigName(`Scout ${testKind}${isParallel ? ' Parallel' : ''}`, getOwnerPackage(relativePath), relativePath),
+      name: buildConfigName(
+        `Scout ${testKind}${isParallel ? ' Parallel' : ''}`,
+        getOwnerPackage(relativePath),
+        relativePath
+      ),
       configPath,
       relativePath,
       directory,
@@ -434,7 +438,16 @@ function searchTestFiles(
   });
 }
 
-export { discoverJestConfigs, discoverJestIntegrationConfigs, discoverScoutConfigs, discoverFtrConfigs, getCIChecks, buildTestFileCountMaps, assignTestCounts, searchTestFiles };
+export {
+  discoverJestConfigs,
+  discoverJestIntegrationConfigs,
+  discoverScoutConfigs,
+  discoverFtrConfigs,
+  getCIChecks,
+  buildTestFileCountMaps,
+  assignTestCounts,
+  searchTestFiles,
+};
 
 export function discoverAllConfigs(repoRoot: string): DiscoveredConfigs {
   const jest = discoverJestConfigs(repoRoot);

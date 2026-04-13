@@ -103,12 +103,24 @@ export const ConfigCard = ({
   const isActive = latestRun?.status === 'running' || latestRun?.status === 'starting';
   const needsServers = NEEDS_SERVERS.has(config.type);
 
+<<<<<<< HEAD
   const runLines: LogLine[] = useMemo(() => {
     if (!latestRun) return [];
     return events
       .filter((e) => e.runId === latestRun.id && (e.type === 'output' || e.type === 'error'))
       .map((e): LogLine => ({ data: e.data ?? '', type: e.type as 'output' | 'error' }));
   }, [latestRun, events]);
+=======
+  const runLines: LogLine[] = latestRun
+    ? [
+        ...latestRun.output.map((d): LogLine => ({ data: d, type: 'output' })),
+        ...latestRun.errorOutput.map((d): LogLine => ({ data: d, type: 'error' })),
+        ...events
+          .filter((e) => e.runId === latestRun.id && (e.type === 'output' || e.type === 'error'))
+          .map((e): LogLine => ({ data: e.data ?? '', type: e.type as 'output' | 'error' })),
+      ]
+    : [];
+>>>>>>> b2ad74eea23ae167b1d41ccbe4642cc0d70092b1
 
   const progress = useMemo(() => {
     if (!isActive || !latestRun) return null;
@@ -151,6 +163,7 @@ export const ConfigCard = ({
     : '';
 
   return (
+<<<<<<< HEAD
     <div className={`config-row${expanded ? ' config-row-expanded' : ''} ${statusClass}`}>
       {/* Compact row header */}
       <div className="config-row-header" onClick={onToggle}>
@@ -161,6 +174,38 @@ export const ConfigCard = ({
         <div className="config-row-info">
           <span className="config-row-name">{config.name}</span>
           <span className="config-row-path">{config.relativePath}</span>
+=======
+    <div
+      className="card"
+      style={{
+        borderColor: expanded ? '#006bb4' : undefined,
+        borderLeftWidth: expanded ? 3 : 1,
+      }}
+    >
+      {/* Header - always visible */}
+      <div className="flex-between" style={{ cursor: 'pointer' }} onClick={onToggle}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div className="flex-row mb-8">
+            <TypeBadge type={config.type} />
+            <strong style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {config.name}
+            </strong>
+            {latestRun && <StatusBadge status={latestRun.status} />}
+            {config.testCount !== undefined && (
+              <span
+                className={`test-count-badge ${config.testCount === 0 ? 'test-count-empty' : ''}`}
+              >
+                {config.testCount === 0
+                  ? 'No test files'
+                  : `${config.testCount} file${config.testCount === 1 ? '' : 's'}`}
+              </span>
+            )}
+          </div>
+          <div className="mono text-muted text-small">{config.relativePath}</div>
+          {config.owner && config.owner.length > 0 && (
+            <div className="text-muted text-small mt-8">{config.owner.join(', ')}</div>
+          )}
+>>>>>>> b2ad74eea23ae167b1d41ccbe4642cc0d70092b1
         </div>
 
         {config.owner && config.owner.length > 0 && (
@@ -220,7 +265,9 @@ export const ConfigCard = ({
         <div className="progress-section">
           <div className="progress-bar-track">
             <div
-              className={`progress-bar-fill ${progress.testsFailed > 0 ? 'progress-bar-has-failures' : ''}`}
+              className={`progress-bar-fill ${
+                progress.testsFailed > 0 ? 'progress-bar-has-failures' : ''
+              }`}
               style={{ width: `${progress.pct}%` }}
             />
           </div>
@@ -290,12 +337,26 @@ export const ConfigCard = ({
                 <button className={logTab === 'kibana' ? 'active' : ''} onClick={() => setLogTab('kibana')}>
                   Kibana Logs
                 </button>
+<<<<<<< HEAD
               </>
             )}
           </div>
 
           {logTab === 'summary' ? (
             <RunSummary run={latestRun} lines={runLines} configType={config.type} changedFiles={changedFiles} />
+=======
+              </div>
+              {logTab === 'summary' ? (
+                <RunSummary run={latestRun} lines={runLines} configType={config.type} />
+              ) : (
+                <LogViewer
+                  lines={
+                    logTab === 'run' ? runLines : logTab === 'elasticsearch' ? esOutput : kbnOutput
+                  }
+                />
+              )}
+            </>
+>>>>>>> b2ad74eea23ae167b1d41ccbe4642cc0d70092b1
           ) : (
             <LogViewer
               lines={

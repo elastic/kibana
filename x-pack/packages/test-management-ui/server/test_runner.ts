@@ -198,47 +198,25 @@ export class TestRunner extends EventEmitter {
       case 'jest':
         return {
           command: 'node',
-          args: [
-            'scripts/jest',
-            '--config',
-            config.relativePath,
-            '--verbose',
-            ...extraArgs,
-          ],
+          args: ['scripts/jest', '--config', config.relativePath, '--verbose', ...extraArgs],
         };
 
       case 'jest-integration':
         return {
           command: 'node',
-          args: [
-            'scripts/jest_integration',
-            '--config',
-            config.relativePath,
-            ...extraArgs,
-          ],
+          args: ['scripts/jest_integration', '--config', config.relativePath, ...extraArgs],
         };
 
       case 'scout':
         return {
           command: 'node',
-          args: [
-            'scripts/scout',
-            'run-tests',
-            '--config',
-            config.relativePath,
-            ...extraArgs,
-          ],
+          args: ['scripts/scout', 'run-tests', '--config', config.relativePath, ...extraArgs],
         };
 
       case 'ftr':
         return {
           command: 'node',
-          args: [
-            'scripts/functional_test_runner',
-            '--config',
-            config.relativePath,
-            ...extraArgs,
-          ],
+          args: ['scripts/functional_test_runner', '--config', config.relativePath, ...extraArgs],
         };
 
       case 'ci-check':

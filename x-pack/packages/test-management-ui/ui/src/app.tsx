@@ -85,6 +85,7 @@ export const App = () => {
   const isDiscovering = configs?.discoveryStatus === 'discovering';
 
   return (
+<<<<<<< HEAD
     <div className="app-shell">
       <header className="top-bar">
         <div className="top-bar-left">
@@ -95,6 +96,32 @@ export const App = () => {
               Discovering{configs?.discoveryPhase ? ` ${configs.discoveryPhase}` : ''}...
             </span>
           )}
+=======
+    <div>
+      <div className="sidebar">
+        <h2>Test Management</h2>
+        <nav className="sidebar-nav">
+          <a className={page === 'dashboard' ? 'active' : ''} onClick={() => setPage('dashboard')}>
+            Dashboard
+          </a>
+          <a className={page === 'configs' ? 'active' : ''} onClick={() => setPage('configs')}>
+            Test Configs {activeRuns.length > 0 && `(${activeRuns.length} running)`}
+          </a>
+        </nav>
+        <div style={{ position: 'absolute', bottom: 16, left: 16, right: 16 }}>
+          <div className="flex-row text-small">
+            <span
+              style={{
+                display: 'inline-block',
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                background: connected ? '#017d73' : '#bd271e',
+              }}
+            />
+            <span style={{ color: '#98a2b3' }}>{connected ? 'Connected' : 'Disconnected'}</span>
+          </div>
+>>>>>>> b2ad74eea23ae167b1d41ccbe4642cc0d70092b1
         </div>
         <div className="top-bar-right">
           <span className="connection-dot" data-connected={connected} />
