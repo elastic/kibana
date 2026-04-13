@@ -165,45 +165,45 @@ describe('buildSourcesDefinitions', () => {
       ];
 
       const suggestions = buildSourcesDefinitions(sources, {
-      textBeforeCursor: 'FROM my_t',
-      commandStart: 0,
-    });
+        textBeforeCursor: 'FROM my_t',
+        commandStart: 0,
+      });
 
-    const timeseriesSuggestion = suggestions.find((s) => s.label === 'my_timeseries_index');
-    const regularSuggestion = suggestions.find((s) => s.label === 'regular_index');
-    const timeseriesCommand =
-      timeseriesSuggestion?.command?.id === 'esql.multiCommands'
-        ? (
-            JSON.parse(timeseriesSuggestion.command.arguments?.[0]?.commands ?? '[]') as Array<{
-              id: string;
-              arguments?: unknown[];
-              title: string;
-            }>
-          ).find(({ id }) => id === ESQL_APPLY_TEXT_REPLACEMENT_COMMAND)
-        : timeseriesSuggestion?.command;
+      const timeseriesSuggestion = suggestions.find((s) => s.label === 'my_timeseries_index');
+      const regularSuggestion = suggestions.find((s) => s.label === 'regular_index');
+      const timeseriesCommand =
+        timeseriesSuggestion?.command?.id === 'esql.multiCommands'
+          ? (
+              JSON.parse(timeseriesSuggestion.command.arguments?.[0]?.commands ?? '[]') as Array<{
+                id: string;
+                arguments?: unknown[];
+                title: string;
+              }>
+            ).find(({ id }) => id === ESQL_APPLY_TEXT_REPLACEMENT_COMMAND)
+          : timeseriesSuggestion?.command;
 
-    expect(timeseriesSuggestion?.text).toBe('my_timeseries_index');
-    expect(timeseriesSuggestion?.filterText).toBeUndefined();
-    expect(timeseriesSuggestion?.rangeToReplace).toBeUndefined();
-    expect(timeseriesCommand).toEqual({
-      title: 'Apply text replacement',
-      id: ESQL_APPLY_TEXT_REPLACEMENT_COMMAND,
-      arguments: [
-        {
-          replacementText: 'TS my_timeseries_index',
-          replaceStart: '0',
-          replaceEnd: String('FROM '.length + 'my_timeseries_index'.length),
-        },
-      ],
-    });
+      expect(timeseriesSuggestion?.text).toBe('my_timeseries_index');
+      expect(timeseriesSuggestion?.filterText).toBeUndefined();
+      expect(timeseriesSuggestion?.rangeToReplace).toBeUndefined();
+      expect(timeseriesCommand).toEqual({
+        title: 'Apply text replacement',
+        id: ESQL_APPLY_TEXT_REPLACEMENT_COMMAND,
+        arguments: [
+          {
+            replacementText: 'TS my_timeseries_index',
+            replaceStart: '0',
+            replaceEnd: String('FROM '.length + 'my_timeseries_index'.length),
+          },
+        ],
+      });
 
-    // Timeseries suggestion should have TS prefix and range replacement
-    expect(timeseriesSuggestion?.text).toBe('TS my_timeseries_index');
-    expect(timeseriesSuggestion?.filterText).toBe('FROM my_timeseries_index');
-    expect(timeseriesSuggestion?.rangeToReplace).toBeDefined();
-    expect(timeseriesSuggestion?.rangeToReplace?.start).toBe(0); // FROM starts at position 0
+      // Timeseries suggestion should have TS prefix and range replacement
+      expect(timeseriesSuggestion?.text).toBe('TS my_timeseries_index');
+      expect(timeseriesSuggestion?.filterText).toBe('FROM my_timeseries_index');
+      expect(timeseriesSuggestion?.rangeToReplace).toBeDefined();
+      expect(timeseriesSuggestion?.rangeToReplace?.start).toBe(0); // FROM starts at position 0
 
-    // Regular suggestion should not have TS prefix or range replacement
+      // Regular suggestion should not have TS prefix or range replacement
       expect(regularSuggestion?.text).toBe('regular_index');
       expect(regularSuggestion?.rangeToReplace).toBeUndefined();
     });
@@ -321,6 +321,7 @@ describe('buildSourcesDefinitions', () => {
       expect(suggestion.detail).toBe(SOURCES_TYPES.INDEX);
     });
   });
+});
 
 describe('getIndexSourcesFromQuery', () => {
   it('returns multiple index names from a comma-separated FROM clause', () => {
