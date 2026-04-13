@@ -26,6 +26,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { QUERY_TYPE_MATCH, QUERY_TYPE_STATS } from '@kbn/streams-schema';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
@@ -52,7 +53,7 @@ import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router
 import { LoadingPanel } from '../../../../loading_panel';
 import { SparkPlot } from '../../../../spark_plot';
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
-import { SeverityBadge } from '../severity_badge/severity_badge';
+import { HIGH_SEVERITY_THRESHOLD, SeverityBadge } from '../severity_badge/severity_badge';
 import { useTimefilter } from '../../../../../hooks/use_timefilter';
 import { buildDiscoverParams } from '../../utils/discover_helpers';
 import {
@@ -60,6 +61,7 @@ import {
   BACKED_STATUS_COLUMN,
   CHART_SERIES_NAME,
   CHART_TITLE,
+  CREATE_RULES_BUTTON,
   DELETE_QUERY_ERROR_TOAST_TITLE,
   DETAILS_BUTTON_ARIA_LABEL,
   IMPACT_COLUMN,
@@ -74,11 +76,10 @@ import {
   OPEN_IN_DISCOVER_ACTION_TITLE,
   PROMOTED_BADGE_LABEL,
   PROMOTED_TOOLTIP_CONTENT,
-  PROMOTE_ALL_BUTTON,
-  PROMOTE_ALL_CALLOUT_DESCRIPTION,
   PROMOTE_ALL_ERROR_TOAST_TITLE,
   PROMOTE_QUERY_ACTION_DESCRIPTION,
   PROMOTE_QUERY_ACTION_TITLE,
+  RULE_COUNT_LABEL,
   SAVE_QUERY_ERROR_TOAST_TITLE,
   SEARCH_PLACEHOLDER,
   STREAM_COLUMN,
@@ -90,7 +91,6 @@ import {
   UNABLE_TO_LOAD_QUERIES_BODY,
   UNABLE_TO_LOAD_QUERIES_TITLE,
   getEventsCount,
-  getPromoteAllCalloutTitle,
   getPromoteAllSuccessToast,
 } from './translations';
 import { PromoteAction } from './promote_action';
@@ -161,7 +161,7 @@ export function QueriesTable() {
   );
 
   const promoteAllMutation = useMutation<PromoteResult, Error>({
-    mutationFn: promoteAll,
+    mutationFn: () => promoteAll({ minSeverityScore: HIGH_SEVERITY_THRESHOLD }),
     mutationKey: ['promoteAll'],
     onSuccess: async ({ promoted, skipped_stats: skippedStats }) => {
       const toast = getPromoteAllSuccessToast(promoted, skippedStats);
@@ -447,20 +447,41 @@ export function QueriesTable() {
       {unbackedCount > 0 && (
         <EuiFlexItem grow={false}>
           <EuiCallOut
-            announceOnMount
-            title={getPromoteAllCalloutTitle(unbackedCount)}
-            iconType="info"
+            color="primary"
+            size="s"
+            announceOnMount={false}
             data-test-subj="queriesPromoteAllCallout"
           >
-            <p>{PROMOTE_ALL_CALLOUT_DESCRIPTION}</p>
-            <EuiButton
-              fill
-              onClick={() => promoteAllMutation.mutate()}
-              isLoading={promoteAllMutation.isLoading}
-              data-test-subj="queriesPromoteAllButton"
-            >
-              {PROMOTE_ALL_BUTTON}
-            </EuiButton>
+            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap>
+              <EuiFlexItem grow={false}>
+                <AssetImage type="significantEventsEmptyState" size={62} />
+              </EuiFlexItem>
+              <EuiFlexItem grow>
+                <EuiText size="s">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.streams.significantEventsDiscovery.queriesTable.promoteAllCalloutMessage"
+                      defaultMessage="Based on severity, we recommend to create {ruleCount} based on the last run."
+                      values={{
+                        ruleCount: <strong>{RULE_COUNT_LABEL(unbackedCount)}</strong>,
+                      }}
+                    />
+                  </p>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  color="primary"
+                  size="s"
+                  onClick={() => promoteAllMutation.mutate()}
+                  isLoading={promoteAllMutation.isLoading}
+                  data-test-subj="queriesPromoteAllButton"
+                >
+                  {CREATE_RULES_BUTTON}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiCallOut>
         </EuiFlexItem>
       )}

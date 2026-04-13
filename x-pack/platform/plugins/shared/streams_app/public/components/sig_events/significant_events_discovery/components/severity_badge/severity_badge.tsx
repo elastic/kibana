@@ -45,6 +45,12 @@ export const SIGNIFICANT_EVENT_SEVERITY: Record<
   },
 };
 
+/**
+ * Minimum severity score considered promotable in bulk (High + Critical).
+ * Scores below this threshold (Low, Medium) are excluded from bulk promotion.
+ */
+export const HIGH_SEVERITY_THRESHOLD = 60;
+
 export const scoreSeverity = (score: number): Severity => {
   if (score < 40) {
     return 'low';
