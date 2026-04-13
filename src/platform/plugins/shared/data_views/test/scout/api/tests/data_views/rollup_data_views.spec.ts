@@ -13,7 +13,7 @@ import {
   ES_ARCHIVE_BASIC_INDEX,
   FIELDS_FOR_WILDCARD_PATH,
   INTERNAL_COMMON_HEADERS,
-} from '../fixtures/constants';
+} from '../../fixtures/constants';
 
 apiTest.describe(
   'rollup data views - fields for wildcard',
