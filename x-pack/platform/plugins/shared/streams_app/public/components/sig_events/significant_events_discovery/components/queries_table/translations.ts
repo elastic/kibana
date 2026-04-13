@@ -26,7 +26,7 @@ export const getPromoteAllSuccessToast = (
         'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllNonePromoted',
         {
           defaultMessage:
-            'No queries promoted. {skippedStats} STATS {skippedStats, plural, one {query was} other {queries were}} skipped (not yet supported as rules)',
+            'No queries promoted. {skippedStats} STATS {skippedStats, plural, one {query was} other {queries were}} skipped (not currently supported as background rules)',
           values: { skippedStats },
         }
       ),
