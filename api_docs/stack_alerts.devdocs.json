@@ -82,7 +82,7 @@
           "\".index-threshold\""
         ],
         "path": "x-pack/platform/plugins/shared/stack_alerts/server/rule_types/index_threshold/rule_type.ts",
-        "lineNumber": 28,
+        "lineNumber": 31,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

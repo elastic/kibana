@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { Parser } from '@elastic/esql';
 import { expectSuggestions, getFieldNamesByType } from '../../../__tests__/commands/autocomplete';
 import { indexes, integrations, mockContext } from '../../../__tests__/commands/context_fixtures';
 import { METADATA_FIELDS } from '../options/metadata';
@@ -16,7 +17,6 @@ import {
 import type { ICommandCallbacks } from '../types';
 import { autocomplete } from './autocomplete';
 import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
-import { Parser } from '@elastic/esql';
 
 const metadataFields = [...METADATA_FIELDS].sort();
 
