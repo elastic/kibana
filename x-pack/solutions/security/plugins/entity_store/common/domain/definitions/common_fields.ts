@@ -9,6 +9,11 @@ import type { Condition } from '@kbn/streamlang';
 import type { EntityType, EntityField, FieldEvaluation } from './entity_schema';
 import { collectValues, newestValue, oldestValue } from './field_retention_operations';
 
+/**
+ * Dotted ECS paths collected into `entity.relationships.*.raw_identifiers.<path>`.
+ * Keep `EntityRelationship.raw_identifiers` in `entity.schema.yaml` in sync (same paths plus
+ * `entity.id` on the schema for target hints; ingest maps canonical EUIDs via `.entity.id` → `ids`).
+ */
 export const ENTITY_RELATIONSHIP_IDENTIFIER_FIELDS = [
   'host.id',
   'user.id',

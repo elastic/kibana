@@ -17,15 +17,26 @@
 import { z } from '@kbn/zod/v4';
 
 /**
- * One relationship direction: a dynamic `raw_identifiers` object (ECS-style dotted keys → string arrays, no enumerated sub-properties) and canonical target EUIDs under `ids`.
+ * One relationship direction: `raw_identifiers` holds ECS-style dotted keys → keyword arrays (aligned with ENTITY_RELATIONSHIP_IDENTIFIER_FIELDS plus entity.id), and canonical target EUIDs under `ids`.
  */
 export type EntityRelationship = z.infer<typeof EntityRelationship>;
 export const EntityRelationship = z
   .object({
     /**
-     * Raw identifier dimensions keyed by ECS-style dotted names (e.g. host.id); values are keyword arrays. Schema is an open map only (`additionalProperties`), not a fixed property list.
+     * Raw identifier dimensions for graph / resolution hints. Keys match the entity store relationship identifier field set (see ENTITY_RELATIONSHIP_IDENTIFIER_FIELDS in code).
      */
-    raw_identifiers: z.object({}).catchall(z.array(z.string())).optional(),
+    raw_identifiers: z
+      .object({
+        'entity.id': z.array(z.string()).optional(),
+        'host.id': z.array(z.string()).optional(),
+        'host.name': z.array(z.string()).optional(),
+        'user.email': z.array(z.string()).optional(),
+        'user.id': z.array(z.string()).optional(),
+        'user.name': z.array(z.string()).optional(),
+        'service.name': z.array(z.string()).optional(),
+      })
+      .strict()
+      .optional(),
     /**
      * Target entity EUIDs for this relationship; used for graph LOOKUP JOIN and DSL filters.
      */
