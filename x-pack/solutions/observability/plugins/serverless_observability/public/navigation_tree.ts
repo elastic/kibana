@@ -38,7 +38,7 @@ export const createNavigationTree = ({
           defaultMessage: 'Overview',
         }),
         renderAs: 'home',
-        icon: 'logoObservability',
+        icon: 'home',
         link: overviewAvailable
           ? ('observability-overview' as const)
           : ('observabilityOnboarding' as const),

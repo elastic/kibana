@@ -24,17 +24,10 @@ import type {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-function prependRootAndOptionalSpace(
-  rootCrumb: ChromeBreadcrumb | undefined,
-  spaceSwitcherBreadcrumb: ChromeBreadcrumb | undefined,
-  rest: ChromeBreadcrumb[]
-) {
+function prependRoot(rootCrumb: ChromeBreadcrumb | undefined, rest: ChromeBreadcrumb[]) {
   const prefix: ChromeBreadcrumb[] = [];
   if (rootCrumb) {
     prefix.push(rootCrumb);
-  }
-  if (spaceSwitcherBreadcrumb) {
-    prefix.push(spaceSwitcherBreadcrumb);
   }
   return [...prefix, ...rest];
 }
@@ -46,7 +39,6 @@ export function buildBreadcrumbs({
   activeNodes,
   chromeBreadcrumbs,
   isServerless,
-  spaceSwitcherBreadcrumb,
 }: {
   kibanaName?: string;
   projectBreadcrumbs: {
@@ -57,7 +49,6 @@ export function buildBreadcrumbs({
   cloudLinks: CloudLinks;
   activeNodes: ChromeProjectNavigationNode[][];
   isServerless: boolean;
-  spaceSwitcherBreadcrumb?: ChromeBreadcrumb;
 }): ChromeBreadcrumb[] {
   const rootCrumb = buildRootCrumb({
     kibanaName,
@@ -66,11 +57,7 @@ export function buildBreadcrumbs({
   });
 
   if (projectBreadcrumbs.params.absolute) {
-    return prependRootAndOptionalSpace(
-      rootCrumb,
-      spaceSwitcherBreadcrumb,
-      projectBreadcrumbs.breadcrumbs
-    );
+    return prependRoot(rootCrumb, projectBreadcrumbs.breadcrumbs);
   }
 
   // breadcrumbs take the first active path
@@ -88,11 +75,7 @@ export function buildBreadcrumbs({
 
   // if there are project breadcrumbs set, use them
   if (projectBreadcrumbs.breadcrumbs.length !== 0) {
-    return prependRootAndOptionalSpace(
-      rootCrumb,
-      spaceSwitcherBreadcrumb,
-      [...navBreadcrumbs, ...projectBreadcrumbs.breadcrumbs]
-    );
+    return prependRoot(rootCrumb, [...navBreadcrumbs, ...projectBreadcrumbs.breadcrumbs]);
   }
 
   // otherwise try to merge legacy breadcrumbs with navigational project breadcrumbs using deeplinkid
@@ -110,9 +93,9 @@ export function buildBreadcrumbs({
   }
 
   if (chromeBreadcrumbStartIndex === -1) {
-    return prependRootAndOptionalSpace(rootCrumb, spaceSwitcherBreadcrumb, navBreadcrumbs);
+    return prependRoot(rootCrumb, navBreadcrumbs);
   } else {
-    return prependRootAndOptionalSpace(rootCrumb, spaceSwitcherBreadcrumb, [
+    return prependRoot(rootCrumb, [
       ...navBreadcrumbs.slice(0, navBreadcrumbEndIndex),
       ...chromeBreadcrumbs.slice(chromeBreadcrumbStartIndex),
     ]);

@@ -9,6 +9,7 @@
 
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
+  EuiFlexGroup,
   EuiHeader,
   EuiHeaderSection,
   EuiHeaderSectionItem,
@@ -22,6 +23,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useSideNavWidth } from '@kbn/core-chrome-browser-hooks';
 import { getSideNavRailWidthPx } from '@kbn/core-chrome-navigation';
 import { Breadcrumbs } from './breadcrumbs';
+import { ProjectHeaderSpaceSwitcher } from './project_header_space_switcher';
 import { HeaderHelpMenu } from '../shared/header_help_menu';
 import {
   HeaderNavControls,
@@ -36,12 +38,22 @@ import {
   useNavigateToUrl,
   useBasePath,
   useCustomBranding,
+  useSpaceSwitcherBreadcrumb,
 } from '../shared/chrome_hooks';
 
 /** Match side nav primary icon chip (32×32). */
 const PROJECT_HEADER_LOGO_CHROME_PX = 32;
 
-const getHeaderCss = ({ size, colors, border }: EuiThemeComputed) => ({
+/** Compact header controls (space switcher trigger, CPS search, etc.). */
+const PROJECT_HEADER_COMPACT_CONTROL_PX = 32;
+
+/** Vertical rules between header zones (navcontrols + breadcrumb chevrons). */
+const PROJECT_HEADER_RULE_PX = 24;
+
+const getHeaderCss = ({ size, colors, border }: EuiThemeComputed) => {
+  const ruleHeightPx = `${PROJECT_HEADER_RULE_PX}px`;
+
+  return {
   logoHeaderSectionItem: css`
     display: flex;
     flex-direction: row;
@@ -80,31 +92,64 @@ const getHeaderCss = ({ size, colors, border }: EuiThemeComputed) => ({
     flex-shrink: 1;
   `,
   breadcrumbsSectionItem: css`
+    flex-grow: 0;
+    flex-shrink: 1;
     min-width: 0;
-    /* Override EUI breadcrumb separator: remove rotation, enforce height */
+    max-width: 100%;
+    /* Do not absorb free space between the leading rule and CPS column (keeps 8px gaps tight). */
+    /* Override EUI breadcrumb separator: remove rotation; match project header rule height */
     .euiBreadcrumb:not(:last-of-type)::after {
-      block-size: 20px;
+      block-size: ${ruleHeightPx};
       transform: none;
     }
   `,
   leftNavcontrols: css`
+    flex-grow: 0;
+    flex-shrink: 0;
     .navcontrols__separator {
+      box-sizing: border-box;
       display: flex;
-      margin-right: ${size.xs};
+      align-items: center;
+      align-self: center;
+      /* Horizontal spacing is only via ::after margin-inline (${size.s}); avoids extra gap before CPS */
+      margin-right: 0;
+      block-size: ${ruleHeightPx};
+      min-block-size: ${ruleHeightPx};
       &:after {
         background: ${colors.borderBaseSubdued};
         content: '';
         flex-shrink: 0;
-        margin-block-start: ${size.xs};
-        margin-block-end: 0;
+        margin-block: 0;
         margin-inline: ${size.s};
-        block-size: 20px;
+        block-size: ${ruleHeightPx};
         inline-size: 1px;
         transform: none;
       }
     }
   `,
-});
+  /** Separator after logo / menu rail: flush to rail start; gap before breadcrumbs / space switcher. */
+  leadingHeaderSeparatorAfterLogo: css`
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    align-self: center;
+    margin-inline-start: 0;
+    margin-inline-end: ${size.s};
+    block-size: ${ruleHeightPx};
+    min-block-size: ${ruleHeightPx};
+    &:after {
+      background: ${colors.borderBaseSubdued};
+      content: '';
+      flex-shrink: 0;
+      margin-block: 0;
+      margin-inline: 0;
+      block-size: ${ruleHeightPx};
+      inline-size: 1px;
+      transform: none;
+    }
+  `,
+  };
+};
 
 type HeaderCss = ReturnType<typeof getHeaderCss>;
 
@@ -131,14 +176,7 @@ const isProjectRootBreadcrumb = (crumb: ChromeBreadcrumb | undefined): boolean =
   );
 };
 
-/** Must match `SPACES_PROJECT_BREADCRUMB_TEST_SUBJ` in the spaces plugin (`space_project_breadcrumb_registrar.tsx`). */
-const SPACES_PROJECT_BREADCRUMB_TEST_SUBJ = 'spacesNavBreadcrumb';
-
-const isSpacesProjectBreadcrumb = (crumb: ChromeBreadcrumb | undefined): boolean =>
-  crumb?.['data-test-subj'] === SPACES_PROJECT_BREADCRUMB_TEST_SUBJ;
-
-/** POC: compact header action hit targets (~32px) vs default EUI header chip (~40px / size.xxl). */
-const PROJECT_HEADER_ACTION_BUTTON_PX = 32;
+const PROJECT_HEADER_ACTION_BUTTON_PX = PROJECT_HEADER_COMPACT_CONTROL_PX;
 const PROJECT_HEADER_ACTION_ICON_PX = 16;
 
 const getProjectHeaderRightActionsCss = (_euiTheme: EuiThemeComputed) => css`
@@ -200,6 +238,7 @@ const Logo = ({ logoCss }: { logoCss: HeaderCss['logo'] }) => {
 
 export const ProjectHeader = React.memo(() => {
   const breadcrumbs = useProjectBreadcrumbs();
+  const spaceSwitcherBreadcrumb = useSpaceSwitcherBreadcrumb();
   const sideNavWidth = useSideNavWidth();
   const { euiTheme } = useEuiTheme();
   const headerCss = getHeaderCss(euiTheme);
@@ -213,12 +252,11 @@ export const ProjectHeader = React.memo(() => {
     if (!isProjectRootBreadcrumb(first)) {
       return [];
     }
-    const second = breadcrumbs[1];
-    if (isSpacesProjectBreadcrumb(second)) {
-      return [first, second];
-    }
     return [first];
   }, [breadcrumbs]);
+
+  const showProjectHeaderBreadcrumbRow =
+    globalHeaderBreadcrumbs.length > 0 || Boolean(spaceSwitcherBreadcrumb?.popoverContent);
 
   const topBarStyles = css`
     box-shadow: none !important;
@@ -240,28 +278,36 @@ export const ProjectHeader = React.memo(() => {
                 </div>
               </EuiHeaderSectionItem>
 
-              <EuiHeaderSectionItem css={headerCss.leftNavcontrols}>
-                <HeaderNavControls
-                  position="left"
-                  append={<div className="navcontrols__separator" />}
-                />
-              </EuiHeaderSectionItem>
+              <HeaderNavControls
+                position="left"
+                append={
+                  <div
+                    className="navcontrols__separator"
+                    css={headerCss.leadingHeaderSeparatorAfterLogo}
+                  />
+                }
+              />
 
-              {globalHeaderBreadcrumbs.length > 0 ? (
+              {showProjectHeaderBreadcrumbRow ? (
                 <EuiHeaderSectionItem css={headerCss.breadcrumbsSectionItem}>
                   <BreadcrumbsWithExtensionsWrapper>
-                    <Breadcrumbs breadcrumbs={globalHeaderBreadcrumbs} />
+                    <EuiFlexGroup
+                      alignItems="center"
+                      gutterSize="s"
+                      responsive={false}
+                      wrap={false}
+                    >
+                      {globalHeaderBreadcrumbs.length > 0 ? (
+                        <Breadcrumbs breadcrumbs={globalHeaderBreadcrumbs} />
+                      ) : null}
+                      <ProjectHeaderSpaceSwitcher />
+                    </EuiFlexGroup>
                   </BreadcrumbsWithExtensionsWrapper>
                 </EuiHeaderSectionItem>
               ) : null}
 
               <EuiHeaderSectionItem css={headerCss.leftNavcontrols}>
-                <div
-                  className="navcontrols__separator"
-                  css={css`
-                    margin-right: 0 !important;
-                  `}
-                />
+                <div className="navcontrols__separator" />
                 <EuiHeaderSectionItemButton
                   aria-label="Search multiple"
                   css={css`

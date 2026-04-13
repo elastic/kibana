@@ -111,6 +111,12 @@ export interface InternalChromeStart extends ChromeStart {
      */
     setSpaceSwitcherBreadcrumb(crumb?: ChromeBreadcrumb): void;
 
+    /** Observable of the space switcher crumb (not included in {@link getBreadcrumbs$}). */
+    getSpaceSwitcherBreadcrumb$(): Observable<ChromeBreadcrumb | undefined>;
+
+    /** Current space switcher crumb synchronously. */
+    getSpaceSwitcherBreadcrumb(): ChromeBreadcrumb | undefined;
+
     /**
      * Register a persistent overflow item in the AppMenuBar that survives app navigation.
      * Returns an unregister function to clean up on plugin stop.

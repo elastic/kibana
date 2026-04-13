@@ -76,6 +76,8 @@ export function createChromeApi({ state, services, sidebar }: ChromeApiDeps): In
     getGlobalOverflowItems$: () => projectNavigation.getGlobalOverflowItems$(),
     getBreadcrumbs$: () => projectNavigation.getProjectBreadcrumbs$(),
     getProjectHome$: () => projectNavigation.getProjectHome$(),
+    getSpaceSwitcherBreadcrumb$: () => projectNavigation.getSpaceSwitcherBreadcrumb$(),
+    getSpaceSwitcherBreadcrumb: () => projectNavigation.getSpaceSwitcherBreadcrumb(),
   };
 
   const chromeStart: InternalChromeStart = {

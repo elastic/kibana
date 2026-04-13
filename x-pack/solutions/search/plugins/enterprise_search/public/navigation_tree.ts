@@ -67,7 +67,7 @@ export const getNavigationTreeDefinition = ({
         const navTree: NavigationTreeDefinition = {
           body: [
             {
-              icon,
+              icon: 'home',
               link: SEARCH_HOMEPAGE,
               renderAs: 'home',
               title: homeNavTitle,

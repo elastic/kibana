@@ -11,21 +11,19 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import type { ApplicationStart, Capabilities, CoreStart } from '@kbn/core/public';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
+import { i18n } from '@kbn/i18n';
+
 import { SpacesMenu } from './components/spaces_menu';
 import { useSpaces } from './hooks/use_spaces';
 import type { Space } from '../../common';
 import type { EventTracker } from '../analytics';
-import type { SpacesManager } from '../spaces_manager';
 import { getSpaceSolutionIconType } from '../space_solution_badge';
+import type { SpacesManager } from '../spaces_manager';
 
 /** Matches `data-test-subj` on the raw chrome breadcrumb (before `prepareBreadcrumbs`). */
 export const SPACES_PROJECT_BREADCRUMB_TEST_SUBJ = 'spacesNavBreadcrumb';
 
 const popoutContentId = 'headerSpacesMenuBreadcrumbContent';
-
-const spaceBreadcrumbLabelCss = css`
-  min-width: 0;
-`;
 
 export interface SpaceProjectBreadcrumbRegistrarProps {
   core: CoreStart;
@@ -49,6 +47,14 @@ export function SpaceProjectBreadcrumbRegistrar({
   eventTracker,
 }: SpaceProjectBreadcrumbRegistrarProps) {
   const { euiTheme } = useEuiTheme();
+  const spaceBreadcrumbLabelCss = useMemo(
+    () => css`
+      min-width: 0;
+      color: ${euiTheme.colors.textSubdued};
+      font-weight: ${euiTheme.font.weight.regular};
+    `,
+    [euiTheme.colors.textSubdued, euiTheme.font.weight.regular]
+  );
   const [activeSpace, setActiveSpace] = useState<Space | null>(null);
   const { data, isLoading } = useSpaces(spacesManager);
   const chrome = core.chrome as InternalChromeStart;
@@ -76,14 +82,14 @@ export function SpaceProjectBreadcrumbRegistrar({
         <EuiFlexItem grow={false}>
           <EuiIcon
             type={getSpaceSolutionIconType(activeSpace.solution)}
-            size="s"
+            size="m"
             aria-hidden={true}
           />
         </EuiFlexItem>
         <EuiFlexItem css={spaceBreadcrumbLabelCss}>{activeSpace.name}</EuiFlexItem>
       </EuiFlexGroup>
     );
-  }, [activeSpace, allowSolutionVisibility]);
+  }, [activeSpace, allowSolutionVisibility, spaceBreadcrumbLabelCss]);
 
   useEffect(() => {
     if (!activeSpace || breadcrumbText == null) {
@@ -95,6 +101,13 @@ export function SpaceProjectBreadcrumbRegistrar({
 
     chrome.project.setSpaceSwitcherBreadcrumb({
       text: breadcrumbText,
+      'aria-label': i18n.translate(
+        'xpack.spaces.navControl.projectBreadcrumb.spaceMenuButtonAriaLabel',
+        {
+          defaultMessage: 'Space menu, {spaceName}',
+          values: { spaceName: activeSpace.name },
+        }
+      ),
       'data-test-subj': SPACES_PROJECT_BREADCRUMB_TEST_SUBJ,
       popoverContent: (closePopover) => (
         <SpacesMenu
@@ -126,6 +139,7 @@ export function SpaceProjectBreadcrumbRegistrar({
     };
   }, [
     activeSpace,
+    allowSolutionVisibility,
     breadcrumbText,
     capabilities,
     chrome.project,

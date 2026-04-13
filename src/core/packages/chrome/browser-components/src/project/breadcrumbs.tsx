@@ -27,6 +27,7 @@ export function Breadcrumbs({ breadcrumbs }: Props) {
       aria-label={i18n.translate('core.ui.chrome.breadcrumbs.ariaLabel', {
         defaultMessage: 'Breadcrumbs',
       })}
+      lastBreadcrumbIsCurrentPage={false}
       // reduce number of visible breadcrumbs due to increased max-width of the root breadcrumbs
       responsive={{
         xs: 1,

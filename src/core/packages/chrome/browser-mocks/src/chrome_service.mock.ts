@@ -100,6 +100,8 @@ const createStartContractMock = () => {
       getBreadcrumbs$: jest.fn().mockReturnValue(new BehaviorSubject([])),
       getNavigation$: jest.fn().mockReturnValue(new BehaviorSubject({} as any)),
       getProjectHome$: jest.fn().mockReturnValue(of('/')),
+      getSpaceSwitcherBreadcrumb$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
+      getSpaceSwitcherBreadcrumb: jest.fn().mockReturnValue(undefined),
     }),
     setGlobalFooter: jest.fn(),
     getGlobalFooter$: jest.fn().mockReturnValue(new BehaviorSubject(null)),

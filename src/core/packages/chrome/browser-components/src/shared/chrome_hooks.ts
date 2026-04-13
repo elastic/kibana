@@ -8,7 +8,7 @@
  */
 
 import { useMemo } from 'react';
-import { combineLatest, debounceTime, map } from 'rxjs';
+import { combineLatest, debounceTime, map, of } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
 import { sortBy } from 'lodash';
@@ -48,6 +48,22 @@ export function useProjectBreadcrumbs(): ChromeBreadcrumb[] {
   const chrome = useChromeService();
   const breadcrumbs$ = useMemo(() => chrome.project.getBreadcrumbs$(), [chrome]);
   return useObservable(breadcrumbs$, []);
+}
+
+/**
+ * Space switcher crumb for project header (not part of {@link useProjectBreadcrumbs}).
+ */
+export function useSpaceSwitcherBreadcrumb(): ChromeBreadcrumb | undefined {
+  const chrome = useChromeService();
+  const crumb$ = useMemo((): Observable<ChromeBreadcrumb | undefined> => {
+    const get$ = chrome.project.getSpaceSwitcherBreadcrumb$;
+    return typeof get$ === 'function' ? get$() : of(undefined);
+  }, [chrome]);
+  const initial = useMemo(() => {
+    const get = chrome.project.getSpaceSwitcherBreadcrumb;
+    return typeof get === 'function' ? get() : undefined;
+  }, [chrome]);
+  return useObservable(crumb$, initial);
 }
 
 /**
@@ -161,9 +177,7 @@ export function useNavControls(position: NavControlPosition): ChromeNavControl[]
       return base$;
     }
     return base$.pipe(
-      map((controls) =>
-        controls.filter((c) => getProjectChromePlacement(c) !== 'helpMenuExtras')
-      )
+      map((controls) => controls.filter((c) => getProjectChromePlacement(c) !== 'helpMenuExtras'))
     );
   }, [chrome, position]);
   return useObservable(controls$, []);
@@ -356,7 +370,8 @@ export function useHasAppMenuConfig(): boolean {
       config.secondaryActionItem ||
       (config.headerTabs && config.headerTabs.length > 0) ||
       (config.layout === 'chromeBarV2' &&
-        ((config.secondaryActionItems?.length ?? 0) > 0 || (config.overflowOnlyItems?.length ?? 0) > 0))
+        ((config.secondaryActionItems?.length ?? 0) > 0 ||
+          (config.overflowOnlyItems?.length ?? 0) > 0))
   );
 }
 

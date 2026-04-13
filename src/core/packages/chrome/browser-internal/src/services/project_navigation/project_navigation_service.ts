@@ -228,23 +228,21 @@ export class ProjectNavigationService {
           chromeBreadcrumbs$,
           kibanaName$,
           cloudLinks$,
-          spaceSwitcherBreadcrumb$,
         ]).pipe(
-          map(
-            ([projectBreadcrumbs, nav, chromeBreadcrumbs, kibanaName, links, spaceSwitcherBreadcrumb]) => {
-              return buildBreadcrumbs({
-                kibanaName,
-                projectBreadcrumbs,
-                activeNodes: nav.activeNodes,
-                chromeBreadcrumbs,
-                cloudLinks: links,
-                isServerless: this.isServerless,
-                spaceSwitcherBreadcrumb,
-              });
-            }
-          )
+          map(([projectBreadcrumbs, nav, chromeBreadcrumbs, kibanaName, links]) => {
+            return buildBreadcrumbs({
+              kibanaName,
+              projectBreadcrumbs,
+              activeNodes: nav.activeNodes,
+              chromeBreadcrumbs,
+              cloudLinks: links,
+              isServerless: this.isServerless,
+            });
+          })
         );
       },
+      getSpaceSwitcherBreadcrumb$: () => spaceSwitcherBreadcrumb$.asObservable(),
+      getSpaceSwitcherBreadcrumb: () => spaceSwitcherBreadcrumb$.getValue(),
       getActiveSolutionNavId$: () => activeSolutionNavId$,
       getActiveSolutionNavId: () => currentNavSource$.getValue()?.id ?? null,
     };

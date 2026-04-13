@@ -95,31 +95,6 @@ describe('buildBreadcrumbs', () => {
     ]);
   });
 
-  it('inserts space switcher crumb after root and before nav crumbs', () => {
-    const activeNodes = [
-      [
-        { title: 'Node 1', breadcrumbStatus: 'visible', href: '/node1' },
-      ],
-    ] as ChromeProjectNavigationNode[][];
-    const spaceCrumb = { text: 'My space', 'data-test-subj': 'spacesNavBreadcrumb' };
-    const result = buildBreadcrumbs({
-      cloudLinks: mockCloudLinks,
-      projectBreadcrumbs: { breadcrumbs: [], params: { absolute: false } },
-      activeNodes,
-      chromeBreadcrumbs: [],
-      isServerless: false,
-      spaceSwitcherBreadcrumb: spaceCrumb,
-    });
-
-    expect(result).toEqual([
-      expect.objectContaining({
-        text: 'Deployment',
-      }),
-      spaceCrumb,
-      { text: 'Node 1', href: '/node1' },
-    ]);
-  });
-
   it('returns breadcrumbs without root crumb if kibanaName/cloudLinks is empty', () => {
     const activeNodes = [
       [

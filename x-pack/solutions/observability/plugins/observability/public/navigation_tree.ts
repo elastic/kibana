@@ -23,7 +23,6 @@ const title = i18n.translate(
 const homeNavTitle = i18n.translate('xpack.observability.obltNav.homeOverview', {
   defaultMessage: 'Overview',
 });
-const icon = 'logoObservability';
 
 /**
  * CONTEXT: After restructuring Dashboards to integrate the Visualize library,
@@ -57,7 +56,7 @@ function createNavTree({
       {
         link: 'observability-overview',
         title: homeNavTitle,
-        icon,
+        icon: 'home',
         renderAs: 'home',
       },
       {

@@ -31,7 +31,7 @@ interface NavControlItemsProps {
 
 export function HeaderNavControlItems({ navControls, append = null }: NavControlItemsProps) {
   if (!navControls || navControls.length === 0) {
-    return null;
+    return append ? <>{append}</> : null;
   }
 
   // It should be performant to use the index as the key since these are unlikely
