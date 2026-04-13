@@ -5,18 +5,31 @@
  * 2.0.
  */
 
-import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
+import type {
+  BoundInferenceClient,
+  ChatCompletionTokenCount,
+  ToolCallback,
+  ToolDefinition,
+} from '@kbn/inference-common';
 import { sumTokens } from '@kbn/streams-ai';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Streams } from '@kbn/streams-schema';
 import type { GenerateInsightsResult } from '@kbn/streams-schema';
 import type { LogMeta } from '@kbn/logging';
+import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import type { QueryClient } from '../../streams/assets/query/query_client';
 import type { StreamsClient } from '../../streams/client';
 import { getErrorMessage } from '../../streams/errors/parse_error';
-import { SummarizeQueriesPrompt } from './prompts/summarize_queries/prompt';
-import { SummarizeStreamsPrompt } from './prompts/summarize_streams/prompt';
+import { createSummarizeQueriesPrompt } from './prompts/summarize_queries/prompt';
+import { createSummarizeStreamsPrompt } from './prompts/summarize_streams/prompt';
+import { SUBMIT_INSIGHTS_TOOL_NAME } from './client/insight_tool';
 import { extractInsightsFromResponse, collectQueryData, type QueryData } from './utils';
+
+export interface InsightsMemoryTools {
+  tools: Record<string, ToolDefinition>;
+  callbacks: Record<string, ToolCallback>;
+  systemPromptSnippet: string;
+}
 
 export async function generateInsights({
   streamsClient,
@@ -26,6 +39,7 @@ export async function generateInsights({
   signal,
   logger,
   streamNames,
+  memoryTools,
 }: {
   streamsClient: StreamsClient;
   queryClient: QueryClient;
@@ -35,6 +49,7 @@ export async function generateInsights({
   logger: Logger;
   /** When provided, only generate insights for these streams. Otherwise all streams are used. */
   streamNames?: string[];
+  memoryTools?: InsightsMemoryTools;
 }): Promise<GenerateInsightsResult> {
   const allStreams = await streamsClient.listStreams();
   let streams = allStreams;
@@ -51,6 +66,7 @@ export async function generateInsights({
         inferenceClient,
         signal,
         logger,
+        memoryTools,
       });
       return {
         streamName: stream.name,
@@ -78,10 +94,27 @@ export async function generateInsights({
   }
 
   try {
-    const response = await inferenceClient.prompt({
-      prompt: SummarizeStreamsPrompt,
+    const prompt = createSummarizeStreamsPrompt({
+      additionalTools: memoryTools?.tools,
+      systemPromptSuffix: memoryTools?.systemPromptSnippet,
+    });
+
+    const response = await executeAsReasoningAgent({
+      prompt,
       input: {
         streamInsights: JSON.stringify(streamInsightsWithData),
+      },
+      inferenceClient,
+      maxSteps: memoryTools ? 4 : 2,
+      finalToolChoice: { function: SUBMIT_INSIGHTS_TOOL_NAME },
+      toolCallbacks: {
+        ...(memoryTools?.callbacks ?? {}),
+        [SUBMIT_INSIGHTS_TOOL_NAME]: async (toolCall) => ({
+          response: {
+            status: 'submitted',
+            count: (toolCall.function.arguments as { insights?: unknown[] })?.insights?.length,
+          },
+        }),
       },
       abortSignal: signal,
     });
@@ -117,6 +150,7 @@ async function generateStreamInsights({
   inferenceClient,
   signal,
   logger,
+  memoryTools,
 }: {
   stream: Streams.all.Definition;
   queryClient: QueryClient;
@@ -124,6 +158,7 @@ async function generateStreamInsights({
   inferenceClient: BoundInferenceClient;
   signal: AbortSignal;
   logger: Logger;
+  memoryTools?: InsightsMemoryTools;
 }): Promise<GenerateInsightsResult> {
   const queries = await queryClient.getAssets(stream.name);
 
@@ -147,11 +182,28 @@ async function generateStreamInsights({
   }
 
   try {
-    const response = await inferenceClient.prompt({
-      prompt: SummarizeQueriesPrompt,
+    const prompt = createSummarizeQueriesPrompt({
+      additionalTools: memoryTools?.tools,
+      systemPromptSuffix: memoryTools?.systemPromptSnippet,
+    });
+
+    const response = await executeAsReasoningAgent({
+      prompt,
       input: {
         streamName: stream.name,
         queries: JSON.stringify(queryDataList),
+      },
+      inferenceClient,
+      maxSteps: memoryTools ? 4 : 2,
+      finalToolChoice: { function: SUBMIT_INSIGHTS_TOOL_NAME },
+      toolCallbacks: {
+        ...(memoryTools?.callbacks ?? {}),
+        [SUBMIT_INSIGHTS_TOOL_NAME]: async (toolCall) => ({
+          response: {
+            status: 'submitted',
+            count: (toolCall.function.arguments as { insights?: unknown[] })?.insights?.length,
+          },
+        }),
       },
       abortSignal: signal,
     });
