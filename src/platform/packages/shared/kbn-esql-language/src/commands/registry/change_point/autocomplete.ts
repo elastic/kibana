@@ -70,7 +70,6 @@ export const onSuggestion: ISuggestionItem = withAutoSuggest({
   detail: i18n.translate('kbn-esql-language.esql.definitions.onDoc', {
     defaultMessage: 'On',
   }),
-  sortText: '1',
 });
 
 export const asSuggestion: ISuggestionItem = withAutoSuggest({
@@ -80,7 +79,6 @@ export const asSuggestion: ISuggestionItem = withAutoSuggest({
   detail: i18n.translate('kbn-esql-language.esql.definitions.asDoc', {
     defaultMessage: 'As',
   }),
-  sortText: '2',
 });
 
 const hasOption = (command: ESQLAstAllCommands, name: string): boolean =>

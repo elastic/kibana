@@ -7,12 +7,8 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import { EpisodeActionButton } from './episode_action_button';
-
-const label = i18n.translate('xpack.alertingV2.episodesUi.actions.viewDetailsLabel', {
-  defaultMessage: 'View details',
-});
+import * as i18n from './translations';
 
 export interface AlertEpisodeViewDetailsActionButtonProps {
   href: string;
@@ -31,7 +27,7 @@ export function AlertEpisodeViewDetailsActionButton({
       iconType="eye"
       href={href}
       data-test-subj="alertingEpisodeActionsViewDetailsButton"
-      aria-label={label}
+      aria-label={i18n.ACTIONS_VIEW_DETAILS_LABEL}
       css={css`
         min-inline-size: unset;
       `}
