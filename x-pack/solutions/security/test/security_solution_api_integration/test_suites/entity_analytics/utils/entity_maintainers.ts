@@ -118,14 +118,12 @@ export const entityMaintainerRouteHelpersFactory = (
 };
 
 export const waitForMaintainerRun = async ({
-  log,
   retry,
   routes,
   minRuns = 1,
   maintainerId = 'risk-score',
   timeoutMs = 60_000,
 }: {
-  log?: ToolingLog;
   retry: RetryServiceLike;
   routes: Pick<
     ReturnType<typeof entityMaintainerRouteHelpersFactory>,
@@ -144,49 +142,18 @@ export const waitForMaintainerRun = async ({
       (m: { id: string; runs: number }) => m.id === maintainerId
     );
     baselineRuns = existing?.runs ?? 0;
-    log?.info(`[YING DEBUG] Baseline runs count for maintainer "${maintainerId}": ${baselineRuns}`);
   } catch {
-    log?.info(
-      `[YING DEBUG] Failed to get baseline runs count for maintainer "${maintainerId}". Maintainer does not exist`
-    );
     // Maintainer may not exist yet
   }
 
   let requiredNewRuns = minRuns;
   let manualRunTriggered = false;
   let alreadyRunningHandled = false;
-  // Tracks when we last fired runSoon and the runs count at that moment.
-  // If the task's state-save fails with a 409 version conflict, the runs
-  // counter is never persisted and `manualRunTriggered` would prevent any
-  // further trigger attempts, causing the outer poll to time out.
-  // Re-arm the trigger when no progress is seen after this many ms.
-  let lastTriggerTime: number | null = null;
-  let runsAtLastTrigger = baselineRuns;
-  const RETRIGGER_AFTER_MS = 10_000;
 
   await retry.waitForWithTimeout(
     `Entity maintainer "${maintainerId}" to complete at least ${requiredNewRuns} new run(s) (baseline: ${baselineRuns})`,
     timeoutMs,
     async () => {
-      const response = await routes.getMaintainers(200, [maintainerId]);
-      const maintainer = response.body.maintainers.find(
-        (m: { id: string; runs: number }) => m.id === maintainerId
-      );
-      const currentRuns = maintainer?.runs ?? 0;
-
-      // If we triggered a run but the runs count hasn't advanced after
-      // RETRIGGER_AFTER_MS, assume the state-save lost a 409 race and
-      // re-arm so we can trigger again.
-      if (
-        manualRunTriggered &&
-        lastTriggerTime !== null &&
-        Date.now() - lastTriggerTime > RETRIGGER_AFTER_MS &&
-        currentRuns <= runsAtLastTrigger
-      ) {
-        manualRunTriggered = false;
-        alreadyRunningHandled = false;
-      }
-
       // Keep trying to trigger a manual run until the task accepts it.
       // After stop/start a previous run may still be in-flight; when we
       // see "already running" we need one extra completion but must keep
@@ -196,8 +163,6 @@ export const waitForMaintainerRun = async ({
         try {
           await routes.runMaintainer(maintainerId);
           manualRunTriggered = true;
-          lastTriggerTime = Date.now();
-          runsAtLastTrigger = currentRuns;
         } catch (error) {
           if (isMaintainerAlreadyRunningError(error)) {
             if (!alreadyRunningHandled) {
@@ -207,6 +172,11 @@ export const waitForMaintainerRun = async ({
           }
         }
       }
+
+      const response = await routes.getMaintainers(200, [maintainerId]);
+      const maintainer = response.body.maintainers.find(
+        (m: { id: string; runs: number }) => m.id === maintainerId
+      );
 
       return maintainer !== undefined && maintainer.runs >= baselineRuns + requiredNewRuns;
     }

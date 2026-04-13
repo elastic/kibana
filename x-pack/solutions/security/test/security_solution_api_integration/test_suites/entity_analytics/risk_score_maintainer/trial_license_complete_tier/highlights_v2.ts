@@ -10,12 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
 import { hashEuid } from '@kbn/entity-store/common/domain/euid';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
-import {
-  EntityStoreUtils,
-  entityMaintainerRouteHelpersFactory,
-  waitForMaintainerRun,
-  cleanUpRiskScoreMaintainer,
-} from '../../utils';
+import { EntityStoreUtils, cleanUpRiskScoreMaintainer } from '../../utils';
 import { deleteAllDocuments } from '../../utils/elasticsearch_helpers';
 
 const VULNERABILITIES_LATEST_INDEX = 'logs-cloud_security_posture.vulnerabilities_latest-default';
@@ -24,7 +19,6 @@ const ML_JOB_ID = 'test-highlights-v2-security-job';
 const ML_ANOMALY_INDEX = `.ml-anomalies-custom-${ML_JOB_ID}`;
 
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
   const entityAnalyticsApi = getService('entityAnalyticsApi');
   const es = getService('es');
   const log = getService('log');
@@ -32,7 +26,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const kibanaServer = getService('kibanaServer');
 
   const entityStoreUtils = EntityStoreUtils(getService);
-  const maintainerRoutes = entityMaintainerRouteHelpersFactory(supertest);
 
   const LATEST_ALIAS = getEntitiesAlias(ENTITY_LATEST, 'default');
   const RISK_SCORE_DATA_STREAM = 'risk-score.risk-score-default';
@@ -78,16 +71,13 @@ export default ({ getService }: FtrProviderContext): void => {
         .delete({ index: RISK_SCORE_DATA_STREAM, ignore_unavailable: true })
         .catch(() => {});
 
+      // Install the entity store and risk score maintainer, which creates the data stream and index template
       await entityStoreUtils.installEntityStoreV2({
         entityTypes: ['host', 'user'],
         waitForEntities: false,
       });
-      await waitForMaintainerRun({ log, retry, routes: maintainerRoutes });
 
       // Wait for the risk score data stream to be fully created before indexing into it.
-      // The maintainer task completes before createDataStream finishes, so a bulk insert
-      // immediately after waitForMaintainerRun can auto-create a plain index instead of
-      // appending to the data stream, which causes a name conflict on the next run.
       await retry.waitForWithTimeout('risk score data stream to exist', 30_000, async () => {
         try {
           const response = await es.indices.getDataStream({ name: RISK_SCORE_DATA_STREAM });
@@ -96,6 +86,10 @@ export default ({ getService }: FtrProviderContext): void => {
           return false;
         }
       });
+
+      // Additional wait to ensure the risk score maintainer has completed its first run
+      // otherwise it will overwrite the test risk scores we're directly indexing
+      await new Promise((resolve) => setTimeout(resolve, 15000));
 
       // Index host and user entities directly into the entity store latest index
       const entityOperations = [
