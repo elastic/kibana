@@ -14,13 +14,13 @@ export const fetchTakenPackageNames = async (deps: RequestDeps): Promise<Set<str
     getAllIntegrations(deps),
   ]);
 
-  const takenNames = new Set<string>();
-  packagesResponse?.items?.forEach((pkg) => takenNames.add(pkg.id));
+  const existingPackages = new Set<string>();
+  packagesResponse?.items?.forEach((pkg) => existingPackages.add(pkg.id));
   aiv2Integrations?.forEach((integration) => {
     // Package also requires the integration ID to be checked
-    takenNames.add(integration.integrationId);
-    takenNames.add(normalizeTitleName(integration.title));
+    existingPackages.add(integration.integrationId);
+    existingPackages.add(normalizeTitleName(integration.title));
   });
 
-  return takenNames;
+  return existingPackages;
 };
