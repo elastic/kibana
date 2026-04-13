@@ -100,7 +100,7 @@ export abstract class UserActionBuilder {
     value,
     valueKey,
     caseId,
-    attachmentId,
+    savedObjectId,
     connectorId,
     type,
   }: CommonBuilderArguments): SavedObjectParameters => {
@@ -113,7 +113,7 @@ export abstract class UserActionBuilder {
       },
       references: [
         ...this.createCaseReferences(caseId),
-        ...this.createCommentReferences(attachmentId ?? null),
+        ...this.createCommentReferences(savedObjectId ?? null),
         ...(type === UserActionTypes.connector
           ? this.createConnectorReference(connectorId ?? null)
           : []),

@@ -184,7 +184,7 @@ Object {
               "color": "#aa6556",
               "fill": "none",
               "forAccessor": "layer2-column-id-generated-uuid",
-              "icon": "alert",
+              "icon": "warning",
               "iconPosition": "left",
               "lineWidth": 2,
               "textVisibility": true,

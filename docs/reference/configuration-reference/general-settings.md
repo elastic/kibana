@@ -538,6 +538,9 @@ $$$settings-telemetry-optIn$$$ `telemetry.optIn`
 `vis_type_table.legacyVisEnabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Starting from version 7.11, a new datatable visualization is used. Set to `true` to enable the legacy version. In version 8.0 and later, the old implementation is removed and this setting is no longer supported.
 
+`vis_type_timelion.enable` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+:   For 8.0 version and later, set to `false` to disable Timelion vizualizations. **Default: `true`**
+
 `vis_type_vega.enable` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   For 7.7 version and later, set to `false` to disable Vega vizualizations. **Default: `true`**
 
@@ -584,6 +587,9 @@ $$$settings-explore-data-in-chart$$$ `xpack.discoverEnhanced.actions.exploreData
 
 `xpack.securitySolution.disableEndpointRuleAutoInstall` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.2.4+`
 :   Set to `true` to disable the automatic installation of Elastic Defend SIEM rules when a new Endpoint integration policy is created. Introduced with v9.2.4. Default is `false`.
+
+`xpack.securitySolution.maxEndpointScriptFileSize` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.4+`
+:   The maximum file size in bytes for scripts uploaded to the Elastic Defend script library. Default is `26214400` (25MB).
 
 
 `xpack.snapshot_restore.ui.enabled`

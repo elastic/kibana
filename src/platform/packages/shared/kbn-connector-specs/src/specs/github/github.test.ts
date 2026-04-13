@@ -15,7 +15,7 @@ import { GithubConnector } from './github';
 const mockCallTool = jest.fn();
 const mockListTools = jest.fn();
 
-jest.mock('../../lib/mcp', () => ({
+jest.mock('../../lib/mcp/with_mcp_client', () => ({
   withMcpClient: jest.fn(async (_ctx: unknown, fn: (mcp: unknown) => Promise<unknown>) => {
     return fn({ callTool: mockCallTool, listTools: mockListTools });
   }),
@@ -434,7 +434,7 @@ describe('GithubConnector', () => {
     });
 
     it('propagates errors thrown by withMcpClient', async () => {
-      const { withMcpClient } = jest.requireMock('../../lib/mcp');
+      const { withMcpClient } = jest.requireMock('../../lib/mcp/with_mcp_client');
       withMcpClient.mockRejectedValueOnce(new Error('connection refused'));
 
       if (!GithubConnector.test) {

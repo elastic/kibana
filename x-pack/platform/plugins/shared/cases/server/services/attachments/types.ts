@@ -47,7 +47,7 @@ export interface AttachedToCaseArgs {
 }
 
 export interface GetAttachmentArgs {
-  attachmentId: string;
+  savedObjectId: string;
   mode: AttachmentMode;
 }
 
@@ -58,7 +58,9 @@ export interface BulkOptionalAttributes<T>
   saved_objects: Array<OptionalAttributes<T>>;
 }
 
-export type GetAllAlertsAttachToCaseArgs = AttachedToCaseArgs;
+export type GetAllAlertsAttachToCaseArgs = AttachedToCaseArgs & {
+  owner: string;
+};
 
 export interface AlertIdsAggsResult {
   alertIds: {
@@ -69,7 +71,13 @@ export interface AlertIdsAggsResult {
 }
 
 export interface EventIdsAggsResult {
-  eventIds: {
+  legacyEventIds: {
+    buckets: Array<{
+      key: string;
+    }>;
+  };
+  /** Present only when `cases-attachments` is included in the find `type` list (attachments feature enabled). */
+  unifiedEventIds?: {
     buckets: Array<{
       key: string;
     }>;
@@ -88,7 +96,7 @@ export interface CountActionsAttachedToCaseArgs extends AttachedToCaseArgs {
 }
 
 export interface DeleteAttachmentArgs extends IndexRefresh {
-  attachmentIds: string[];
+  savedObjectIds: string[];
 }
 
 export interface CreateAttachmentArgs extends IndexRefresh {
@@ -106,7 +114,7 @@ export interface BulkCreateAttachments extends IndexRefresh {
 }
 
 export interface UpdateArgs {
-  attachmentId: string;
+  savedObjectId: string;
   updatedAttributes: AttachmentPatchAttributesV2;
   options?: Omit<SavedObjectsUpdateOptions<AttachmentAttributesV2>, 'upsert'>;
 }

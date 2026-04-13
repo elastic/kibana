@@ -16,7 +16,8 @@
     "influencers": [
       "host.name",
       "host.id",
-      "destination.ip"
+      "destination.ip",
+      "user_agent.original"
     ]
   },
   "allow_lazy_open": true,
