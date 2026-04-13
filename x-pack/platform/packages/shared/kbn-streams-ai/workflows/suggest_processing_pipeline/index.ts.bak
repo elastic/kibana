@@ -30,23 +30,6 @@ export interface SuggestProcessingPipelineResult {
   };
 }
 
-interface SimulationFeedback {
-  valid: boolean;
-  errors?: string[];
-  metrics?: {
-    sampled: number;
-    fields: string[];
-    parse_rate: number;
-  };
-  processors?: Record<
-    string,
-    {
-      failed_rate: number;
-      errors?: string[];
-    }
-  >;
-}
-
 /**
  * Runs the ingest-pipeline suggestion agent. Callers supply the Zod schema that constrains tool
  * arguments (full vs post-parse-only), sample `documents` that match that mode, and a
@@ -189,9 +172,7 @@ export async function suggestProcessingPipeline({
             response: {
               valid: false,
               errors: [
-                `Temporary fields detected: [${temporaryFields.join(
-                  ', '
-                )}]. Add a 'remove' processor to clean up these intermediate parsing artifacts.`,
+                `Temporary fields detected: [${temporaryFields.join(', ')}]. Add a 'remove' processor to clean up these intermediate parsing artifacts.`,
                 ...uniqueErrors,
               ],
               metrics,

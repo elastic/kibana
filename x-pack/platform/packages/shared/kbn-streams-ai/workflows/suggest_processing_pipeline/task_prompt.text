@@ -1,5 +1,7 @@
 Follow the **system prompt** (rules, workflow, tools, pipeline schema).
 
+**Important:** Always begin with systematic field inspection per the Inspection Checklist. Do not default to empty pipeline—actively look for unmapped fields, temporary artifacts, date strings, numeric strings, and semantic mismatches that need processors.
+
 **Target schema:** {{{fields_schema}}}
 
 ---
@@ -9,7 +11,6 @@ Follow the **system prompt** (rules, workflow, tools, pipeline schema).
 {{{stream.description}}}
 
 ---
-
 {{#upstream_extraction_context}}
 ## Upstream extraction (already applied)
 
@@ -22,8 +23,4 @@ Follow the **system prompt** (rules, workflow, tools, pipeline schema).
 
 JSON overview of fields, sample values, and mapping/schema hints for the **same documents** used in **`simulate_pipeline`**. Not the result of your proposed pipeline—validate with **`simulate_pipeline`**.
 
-{{{initial_dataset_analysis}}}
-
----
-
-Begin with **`simulate_pipeline`** when you have a first candidate; iterate from metrics and errors.
+Begin your work by inspecting fields against the checklist, then use **`simulate_pipeline`** when you have a first candidate; iterate from metrics and errors.
