@@ -52,14 +52,16 @@ export class ServerlessObservabilityPlugin
     const navigationTree$ = combineLatest([
       setupDeps.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
       chatExperience$,
+      setupDeps.ingestHub?.appEnabled$ || of(false),
     ]).pipe(
-      map(([{ status }, chatExperience]) => {
+      map(([{ status }, chatExperience, ingestHubEnabled]) => {
         return createNavigationTree({
           streamsAvailable: status === 'enabled',
           overviewAvailable: core.pricing.isFeatureAvailable('observability:complete_overview'),
           isCasesAvailable: Boolean(setupDeps.cases),
           showAiAssistant: chatExperience !== AIChatExperience.Agent,
           showAlertingV2: Boolean(core.application.capabilities.alertingVTwo),
+          ingestHubEnabled,
         });
       })
     );

@@ -25,12 +25,14 @@ export const createNavigationTree = ({
   isCasesAvailable = true,
   showAiAssistant = true,
   showAlertingV2 = false,
+  ingestHubEnabled = false,
 }: {
   streamsAvailable?: boolean;
   overviewAvailable?: boolean;
   isCasesAvailable?: boolean;
   showAiAssistant?: boolean;
   showAlertingV2?: boolean;
+  ingestHubEnabled?: boolean;
 }): NavigationTreeDefinition => {
   return {
     body: [
@@ -395,13 +397,29 @@ export const createNavigationTree = ({
       },
     ],
     footer: [
-      {
-        title: i18n.translate('xpack.serverlessObservability.nav.getStarted', {
-          defaultMessage: 'Add data',
-        }),
-        link: 'observabilityOnboarding',
-        icon: 'plusCircle',
-      },
+      ingestHubEnabled
+        ? {
+            link: 'ingestHub' as const,
+            title: i18n.translate('xpack.serverlessObservability.nav.ingestHub', {
+              defaultMessage: 'Ingest Hub',
+            }),
+            icon: 'launch',
+            children: [
+              {
+                link: 'ingestHub' as const,
+                title: i18n.translate('xpack.serverlessObservability.nav.ingestHub.getStarted', {
+                  defaultMessage: 'Get started',
+                }),
+              },
+            ],
+          }
+        : {
+            title: i18n.translate('xpack.serverlessObservability.nav.getStarted', {
+              defaultMessage: 'Add data',
+            }),
+            link: 'observabilityOnboarding' as const,
+            icon: 'plusCircle',
+          },
       {
         id: 'devTools',
         title: i18n.translate('xpack.serverlessObservability.nav.devTools', {

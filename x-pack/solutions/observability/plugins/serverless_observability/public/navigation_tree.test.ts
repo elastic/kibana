@@ -83,6 +83,24 @@ describe('Navigation Tree', () => {
     );
   });
 
+  describe('footer ingest hub', () => {
+    it('shows Add data by default when ingestHubEnabled is false', () => {
+      const { footer = [] } = createNavigationTree({});
+      expect(footer[0]).toMatchObject({
+        link: 'observabilityOnboarding',
+        title: 'Add data',
+      });
+    });
+
+    it('shows Ingest Hub when ingestHubEnabled is true', () => {
+      const { footer = [] } = createNavigationTree({ ingestHubEnabled: true });
+      expect(footer[0]).toMatchObject({
+        link: 'ingestHub',
+        title: 'Ingest Hub',
+      });
+    });
+  });
+
   describe('filterForFeatureAvailability', () => {
     it('should return empty array if feature flag is false', () => {
       const node = {
