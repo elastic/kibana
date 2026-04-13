@@ -16,8 +16,8 @@ import type { DrilldownEditorProps } from '@kbn/embeddable-plugin/public';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { DashboardDrilldownState } from '../../server';
 import { findService } from '../dashboard_client';
-import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '../../common/page_bundle_constants';
-import { DashboardNavigationOptionsEditor } from '../dashboard_navigation/options_editor';
+import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
+import { DashboardNavigationOptionsEditor } from '@kbn/dashboard-navigation-options-components';
 
 export const DashboardDrilldownEditor = (props: DrilldownEditorProps<DashboardDrilldownState>) => {
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);

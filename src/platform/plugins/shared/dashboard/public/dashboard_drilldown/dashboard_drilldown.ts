@@ -16,9 +16,9 @@ import type { DashboardDrilldownState } from '../../server/dashboard_drilldown/t
 import { coreServices } from '../services/kibana_services';
 import { getLocation } from './get_location';
 import { cleanEmptyKeys } from '../../common/locator/locator';
+import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
 import {
   DASHBOARD_DRILLDOWN_SUPPORTED_TRIGGERS,
-  DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
 } from '../../common/page_bundle_constants';
 import { DashboardDrilldownEditor } from './editor';
 
