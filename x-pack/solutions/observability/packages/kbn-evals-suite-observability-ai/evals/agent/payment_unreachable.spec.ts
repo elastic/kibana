@@ -11,9 +11,8 @@ import {
   replayObservabilityDataStreams,
   cleanObservabilityDataStreams,
 } from '../../src/data_generators/replay';
+import { GCS_BUCKET } from '../../src/scenarios/constants';
 import { evaluate } from './evaluate';
-
-const GCS_BUCKET = 'obs-ai-datasets';
 
 const PAYMENT_UNREACHABLE_GCS = {
   bucket: GCS_BUCKET,
@@ -23,7 +22,7 @@ const PAYMENT_UNREACHABLE_GCS = {
 const SNAPSHOT_NAME = 'payment-unreachable';
 
 evaluate.describe(
-  'Observability Agent - Payment Unreachable Investigation',
+  'Payment Unreachable Investigation',
   { tag: tags.serverless.observability.complete },
   () => {
     let replayResult: LoadResult;
@@ -41,9 +40,9 @@ evaluate.describe(
     evaluate('investigates payment unreachable investigation', async ({ evaluateDataset }) => {
       await evaluateDataset({
         dataset: {
-          name: 'observability agent: payment-unreachable investigation',
+          name: 'payment-unreachable investigation',
           description:
-            'Evaluates whether the obs agent correctly investigates a checkout service failure caused by the payment service being unreachable',
+            'Evaluates whether the agent correctly investigates a checkout service failure caused by the payment service being unreachable',
           examples: [
             {
               input: {
