@@ -37994,7 +37994,7 @@
           "KafkaOutput"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/output.ts",
-        "lineNumber": 73,
+        "lineNumber": 74,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -38087,7 +38087,7 @@
           " & { id: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/output.ts",
-        "lineNumber": 79,
+        "lineNumber": 80,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

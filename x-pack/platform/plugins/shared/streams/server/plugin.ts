@@ -64,7 +64,9 @@ import { baseFields } from './lib/streams/component_templates/logs_layer';
 import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
 import { registerStreamsAgentBuilder } from './agent_builder/register';
 import { registerSignificantEventsInferenceFeatures } from './register_significant_events_inference_features';
+import { registerSuggestionsInferenceFeatures } from './register_suggestions_inference_features';
 import { PatternExtractionService } from './lib/pattern_extraction/pattern_extraction_service';
+import { registerFieldsMetadataExtractors } from './register_fields_metadata_extractors';
 import { createStreamsSettingsStorageClient } from './lib/streams/storage/streams_settings_storage_client';
 import {
   createContinuousKiExtractionWorkflowService,
@@ -136,6 +138,10 @@ export class StreamsPlugin
     registerRules({ plugins, logger: this.logger.get('rules') });
     registerStreamsSavedObjects(core.savedObjects);
     registerSignificantEventsInferenceFeatures(
+      plugins.searchInferenceEndpoints,
+      this.logger.get('inference-features')
+    );
+    registerSuggestionsInferenceFeatures(
       plugins.searchInferenceEndpoints,
       this.logger.get('inference-features')
     );
@@ -418,10 +424,8 @@ export class StreamsPlugin
               isSecurityEnabled: false,
             });
 
-            await streamsClient.enableStreams({ defer: true });
-
-            await streamsClient.bulkUpsert(
-              this.config.preconfigured.stream_definitions.map(({ name, ...definition }) => ({
+            const streamDefinitions = this.config.preconfigured.stream_definitions.map(
+              ({ name, ...definition }) => ({
                 name,
                 request: Streams.all.UpsertRequest.parse(
                   ROOT_STREAM_NAMES.includes(name)
@@ -440,8 +444,17 @@ export class StreamsPlugin
                       }
                     : definition
                 ),
-              }))
+              })
             );
+
+            if (streamDefinitions.length > 0) {
+              await streamsClient.enableStreams();
+
+              await streamsClient.bulkUpsert(streamDefinitions);
+            } else {
+              await streamsClient.enableStreams({ defer: true });
+            }
+
             this.logger.info('Streams preconfigured successfully');
           }
         }
@@ -464,6 +477,11 @@ export class StreamsPlugin
       .catch((error) => {
         this.logger.error(`Error preconfiguring streams: ${error}`);
       });
+
+    registerFieldsMetadataExtractors({
+      fieldsMetadata: plugins.fieldsMetadata,
+      logger: this.logger,
+    });
 
     return {};
   }

@@ -179,7 +179,6 @@ export function SignificantEventsDiscoveryPage() {
                 })}
               </EuiFlexGroup>
             </EuiFlexItem>
-            <FeedbackButton />
           </EuiFlexGroup>
         }
         tabs={tabs}
