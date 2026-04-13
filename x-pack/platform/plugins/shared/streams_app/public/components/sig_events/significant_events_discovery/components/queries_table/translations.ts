@@ -154,7 +154,7 @@ export const STATS_NOT_PROMOTED_TOOLTIP_CONTENT = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.statsNotPromotedTooltipContent',
   {
     defaultMessage:
-      'STATS queries cannot be promoted to background scanning rules yet. Use "Open in Discover" to preview results.',
+      'STATS queries cannot be promoted to background scanning rules. Use the Open in Discover action to preview results.',
   }
 );
 
