@@ -27,6 +27,22 @@ interface BuildRelationshipsEsqlQueryParams {
   relationshipFields: readonly string[];
 }
 
+const RESOLUTION_RELATIONSHIP_FIELD = 'resolution.resolved_to' as const;
+
+/**
+ * ECS relationship leaves store canonical target EUIDs under `entity.relationships.<leaf>.ids`
+ * and raw dimensions under `entity.relationships.<leaf>.raw_identifiers.*` (dynamic bag).
+ * Resolution still uses `entity.relationships.resolution.resolved_to`.
+ */
+const buildRelationshipTargetsEval = (field: string): string => {
+  const col = `\`_rel_targets_${field}\``;
+  if (field === RESOLUTION_RELATIONSHIP_FIELD) {
+    return `${col} = COALESCE(\`entity.relationships.resolution.resolved_to\`, [""])`;
+  }
+
+  return `${col} = COALESCE(\`entity.relationships.${field}.ids\`, [""])`;
+};
+
 /**
  * Builds ES|QL query for fetching entity relationships from the generic entities index.
  * Uses FORK to expand each relationship field and aggregates results.
@@ -38,20 +54,16 @@ const buildRelationshipsEsqlQuery = ({
   indexName,
   relationshipFields,
 }: BuildRelationshipsEsqlQueryParams): string => {
-  // Build COALESCE statements for each relationship field
-  const coalesceStatements = relationshipFields
-    .map(
-      (field) =>
-        `| EVAL entity.relationships.${field} = COALESCE(entity.relationships.${field}, [""])`
-    )
-    .join('\n');
+  const targetsEval = relationshipFields
+    .map((field) => buildRelationshipTargetsEval(field))
+    .join(',\n  ');
 
-  // Build FORK branches for each relationship field
+  // Build FORK branches: expand flattened targets per relationship leaf
   const forkBranches = relationshipFields
-    .map(
-      (field) =>
-        `  (MV_EXPAND entity.relationships.${field} | EVAL relationship = "${field}" | EVAL _target_id = entity.relationships.${field} | DROP entity.relationships.*)`
-    )
+    .map((field) => {
+      const col = `\`_rel_targets_${field}\``;
+      return `  (MV_EXPAND ${col} | EVAL relationship = "${field}" | EVAL _target_id = TO_STRING(${col}) | DROP entity.relationships.*, ${col})`;
+    })
     .join('\n');
 
   // Store source entity fields before LOOKUP JOIN as they get overwritten by target entity fields
@@ -79,7 +91,8 @@ const buildRelationshipsEsqlQuery = ({
 | RENAME entity.EngineMetadata.Type = _source_engine_metadata_type`;
 
   return `FROM ${indexName}
-${coalesceStatements}
+| EVAL
+  ${targetsEval}
 | FORK
 ${forkBranches}
 | WHERE _target_id != ""
@@ -193,12 +206,21 @@ const buildRelationshipDslFilter = (entityIds: EntityId[]) => {
   // Extract just the IDs for the terms query
   const ids = entityIds.map((entity) => entity.id);
 
-  // Build terms queries for each relationship field
-  const relationshipQueries = ENTITY_RELATIONSHIP_FIELDS.map((field) => ({
-    terms: {
-      [`entity.relationships.${field}`]: ids,
-    },
-  }));
+  const relationshipQueries = ENTITY_RELATIONSHIP_FIELDS.map((field) => {
+    if (field === RESOLUTION_RELATIONSHIP_FIELD) {
+      return {
+        terms: {
+          'entity.relationships.resolution.resolved_to': ids,
+        },
+      };
+    }
+
+    return {
+      terms: {
+        [`entity.relationships.${field}.ids`]: ids,
+      },
+    };
+  });
 
   return {
     bool: {
