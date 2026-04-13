@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/logging';
 import { SavedObjectsErrorHelpers, type CoreStart, type KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { LicenseType } from '@kbn/licensing-types';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import {
   getTaskId,
   removeEntityMaintainer,
@@ -17,6 +18,7 @@ import {
   stopEntityMaintainer,
 } from '../../tasks/entity_maintainers';
 import {
+  canRunMaintainerWithLicense,
   createMaintainerStatus,
   persistMaintainerState,
   runEntityMaintainerTask,
@@ -53,6 +55,7 @@ interface EntityMaintainersClientDeps {
   namespace: string;
   analytics: TelemetryReporter;
   coreStart: CoreStart;
+  licensing: LicensingPluginStart;
 }
 
 export class EntityMaintainersClient {
@@ -61,6 +64,7 @@ export class EntityMaintainersClient {
   private readonly namespace: string;
   private readonly analytics: TelemetryReporter;
   private readonly coreStart: CoreStart;
+  private readonly licensing: LicensingPluginStart;
 
   constructor(deps: EntityMaintainersClientDeps) {
     this.logger = deps.logger;
@@ -68,6 +72,7 @@ export class EntityMaintainersClient {
     this.namespace = deps.namespace;
     this.analytics = deps.analytics;
     this.coreStart = deps.coreStart;
+    this.licensing = deps.licensing;
   }
 
   public async start(id: string, request: KibanaRequest): Promise<void> {
@@ -155,6 +160,16 @@ export class EntityMaintainersClient {
   public async runSync(id: string, request: KibanaRequest): Promise<void> {
     try {
       const { run, setup, initialState } = entityMaintainersRegistry.getRunnerConfigOrThrow(id);
+      const { minLicense } = entityMaintainersRegistry.getOrThrow(id);
+      const hasValidLicense = await canRunMaintainerWithLicense({
+        id,
+        minLicense,
+        licensing: this.licensing,
+        logger: this.logger,
+      });
+      if (!hasValidLicense) {
+        return;
+      }
 
       const taskId = getTaskId(id, this.namespace);
       const task = await this.taskManager.get(taskId);

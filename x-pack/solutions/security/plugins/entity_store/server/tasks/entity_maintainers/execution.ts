@@ -42,6 +42,27 @@ export interface ExecuteMaintainerRunParams {
   logger: Logger;
 }
 
+export async function canRunMaintainerWithLicense({
+  id,
+  minLicense,
+  licensing,
+  logger,
+}: {
+  id: string;
+  minLicense: LicenseType;
+  licensing: LicensingPluginStart;
+  logger: Logger;
+}): Promise<boolean> {
+  const license = await licensing.getLicense();
+  const checkResult = license.check('entityStore', minLicense);
+  if (checkResult.state !== ENTITY_MAINTAINER_LICENSE_CHECK_VALID) {
+    logger.debug(`Entity maintainer "${id}" skipped: insufficient or inactive license`);
+    return false;
+  }
+
+  return true;
+}
+
 export function createMaintainerStatus({
   currentStatus,
   namespace,
@@ -88,10 +109,13 @@ export async function executeMaintainerRun({
     return null;
   }
 
-  const license = await licensing.getLicense();
-  const checkResult = license.check('entityStore', effectiveMinLicense);
-  if (checkResult.state !== ENTITY_MAINTAINER_LICENSE_CHECK_VALID) {
-    logger.debug(`Entity maintainer "${id}" skipped: insufficient or inactive license`);
+  const hasValidLicense = await canRunMaintainerWithLicense({
+    id,
+    minLicense: effectiveMinLicense,
+    licensing,
+    logger,
+  });
+  if (!hasValidLicense) {
     return null;
   }
 
