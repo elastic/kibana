@@ -65,10 +65,8 @@ function buildGroupingsWhereClauses(
   groupings: SLOWithSummaryResponse['groupings']
 ): ReturnType<typeof esql.from> {
   return Object.entries(groupings).reduce((q, [field, value]) => {
-    if (typeof value === 'number') {
-      return q.where`${esql.col(field)} == ${value}`;
-    }
-    return q.where`${esql.col(field)} == ${String(value)}`;
+    const filterValue = typeof value === 'number' ? value : String(value);
+    return q.where`${esql.col(field)} == ${filterValue}`;
   }, query);
 }
 
