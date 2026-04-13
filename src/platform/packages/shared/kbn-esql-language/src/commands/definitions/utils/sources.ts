@@ -160,36 +160,51 @@ export function getSourcesFromCommands(
 }
 
 /**
- * Display condition for the "Load unmapped fields" quick fix (unknown column): show only when
- * the query uses at least one data stream source and at least one wired stream source.
+ * Rreturns true when a wired stream has been used as a source in the query.
+ *
+ * As a performance optimization,
+ * before calling getWiredStreams to check if a source is a wired stream, we check if the there is any stream in the query first.
+ * Taking advantage that getSources() is commonly cached.
+ *
  */
 export async function hasWiredStreamsInQuery(
   query: string,
-  callbacks: ESQLCallbacks
+  callbacks: Pick<ESQLCallbacks, 'getSources' | 'getWiredStreams'> = {}
 ): Promise<boolean> {
-  const esqlQuery = EsqlQuery.fromSrc(query);
-  const sourcesInQuery = getSourcesFromCommands(esqlQuery.ast.commands, 'index');
-
-  const dataStreamSources = new Set(
-    (await callbacks.getSources?.())
-      ?.filter((source) => source.type === SOURCES_TYPES.DATA_STREAM)
-      .map((source) => source.name) ?? []
-  );
-
-  const dataStreamSourcesInQuery = sourcesInQuery
-    .filter((source) => sourceExists(source.name, dataStreamSources))
-    .map((source) => source.name);
-
-  // No data streams used as sources, don't display the quick fix.
-  if (!dataStreamSourcesInQuery.length) {
+  const { getSources, getWiredStreams } = callbacks;
+  if (!getSources || !getWiredStreams) {
     return false;
   }
 
-  // Check if there is a wired stream used as source.
-  const wiredStreams = new Set(
-    (await callbacks.getWiredStreams?.())?.map((stream) => stream.name) ?? []
+  // Parse the query to get the sources in the query.
+  const esqlQuery = EsqlQuery.fromSrc(query);
+  const sourcesInQuery = getSourcesFromCommands(esqlQuery.ast.commands, 'index');
+  if (sourcesInQuery.length === 0) {
+    return false;
+  }
+
+  // Get the available sources from the callbacks.
+  const availableSources = await getSources();
+  const availableDataStreams = new Set(
+    availableSources
+      .filter((source) => source.type === SOURCES_TYPES.DATA_STREAM)
+      .map((source) => source.name)
   );
-  return sourcesInQuery.some((source) => sourceExists(source.name, wiredStreams));
+
+  // Check if any of the sources used in the query are streams.
+  const usedDataStreamSources = sourcesInQuery.filter((source) =>
+    sourceExists(source.name, availableDataStreams)
+  );
+  if (!usedDataStreamSources.length) {
+    return false;
+  }
+
+  // Get the available wired streams from the callbacks.
+  const wiredDefinitions = await getWiredStreams();
+  const wiredStreamNames = new Set(wiredDefinitions.map((stream) => stream.name));
+
+  // Return true if any of the sources is a wired stream.
+  return usedDataStreamSources.some((source) => sourceExists(source.name, wiredStreamNames));
 }
 
 export function getSourceSuggestions(

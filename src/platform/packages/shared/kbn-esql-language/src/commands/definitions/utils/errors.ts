@@ -69,7 +69,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
             mutate.commands.set.upsert(
               esqlQuery.ast,
               EsqlSettingNames.UNMAPPED_FIELDS,
-              UnmappedFieldsStrategy.LOAD
+              `"${UnmappedFieldsStrategy.LOAD}"`
             );
             return esqlQuery.print({ multiline: true });
           },
