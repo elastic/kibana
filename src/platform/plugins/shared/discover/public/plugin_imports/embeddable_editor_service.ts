@@ -115,15 +115,16 @@ export class EmbeddableEditorService {
       this.embeddableStateTransfer.clearEditorState('discover');
       this.embeddableStateTransfer.navigateToWithEmbeddablePackages(app, {
         path,
-        state: serializedState
-          ? [
-              {
-                type: SEARCH_EMBEDDABLE_TYPE,
-                serializedState,
-                embeddableId: this.embeddableState?.embeddableId,
-              },
-            ]
-          : [],
+        state:
+          action !== TransferAction.Cancel
+            ? [
+                {
+                  type: SEARCH_EMBEDDABLE_TYPE,
+                  serializedState: serializedState ?? {},
+                  embeddableId: this.embeddableState?.embeddableId,
+                },
+              ]
+            : [],
       });
     }
   }

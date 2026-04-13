@@ -80,7 +80,6 @@ export const DiscoverSessionSaveModalContainer = ({
   }, []);
 
   const executeSave = async ({
-    dashboardId,
     isTitleDuplicateConfirmed,
     newCopyOnSave,
     newDescription,
@@ -89,18 +88,16 @@ export const DiscoverSessionSaveModalContainer = ({
     newTitle,
     onTitleDuplicate,
   }: OnSaveProps & {
-    dashboardId?: string | null;
     newTags: string[];
     newTimeRestore: boolean;
   }): Promise<{
     discoverSession: DiscoverSession | undefined;
     nextSelectedTabId?: string;
-    redirectedToDashboard?: boolean;
   }> => {
     const userWantsCopy = initialCopyOnSave || newCopyOnSave;
     const effectiveCopyOnSave = userWantsCopy && !!persistedDiscoverSession?.id;
 
-    const response = await dispatch(
+    return await dispatch(
       internalStateActions.saveDiscoverSession({
         newTitle,
         newTimeRestore,
@@ -111,53 +108,53 @@ export const DiscoverSessionSaveModalContainer = ({
         onTitleDuplicate,
       })
     ).unwrap();
-
-    if (response.discoverSession) {
-      if (dashboardId) {
-        services.embeddableEditor.transferBackToEditor(TransferAction.SaveByReference, {
-          app: 'dashboards',
-          path: dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`,
-          state: {
-            savedObjectId: response.discoverSession.id,
-          },
-        });
-        return { ...response, redirectedToDashboard: true };
-      }
-
-      services.toastNotifications.addSuccess({
-        title: i18n.translate('discover.notifications.savedSearchTitle', {
-          defaultMessage: `Discover session ''{savedSearchTitle}'' was saved`,
-          values: { savedSearchTitle: newTitle },
-        }),
-        'data-test-subj': 'saveSearchSuccess',
-      });
-
-      const shouldNavigateToSavedSession =
-        (isEmbeddedEditor && userWantsCopy) ||
-        (!isEmbeddedEditor && response.discoverSession.id !== persistedDiscoverSession?.id);
-
-      if (onSaveCb) {
-        onSaveCb();
-      } else if (shouldNavigateToSavedSession) {
-        services.embeddableEditor.clearEditorState();
-        services.locator.navigate({
-          savedSearchId: response.discoverSession.id,
-          ...(response?.nextSelectedTabId ? { tab: { id: response.nextSelectedTabId } } : {}),
-        });
-      } else if (isEmbeddedEditor) {
-        services.embeddableEditor.transferBackToEditor(TransferAction.SaveSession);
-      }
-    }
-
-    return response;
   };
 
   const onSave = async (props: DiscoverSessionSaveDashboardModalSaveProps) => {
     try {
       const response = await executeSave(props);
 
-      if (response.redirectedToDashboard) return;
-      if (response.discoverSession) onClose();
+      if (!response.discoverSession) return;
+
+      if (props.dashboardId) {
+        services.embeddableEditor.transferBackToEditor(TransferAction.SaveByReference, {
+          app: 'dashboards',
+          path: props.dashboardId === 'new' ? '#/create' : `#/view/${props.dashboardId}`,
+          state: {
+            savedObjectId: response.discoverSession.id,
+          },
+        });
+        return;
+      }
+
+      services.toastNotifications.addSuccess({
+        title: i18n.translate('discover.notifications.savedSearchTitle', {
+          defaultMessage: `Discover session ''{savedSearchTitle}'' was saved`,
+          values: { savedSearchTitle: props.newTitle },
+        }),
+        'data-test-subj': 'saveSearchSuccess',
+      });
+
+      if (onSaveCb) {
+        onSaveCb();
+      } else {
+        const userWantsCopy = initialCopyOnSave || props.newCopyOnSave;
+        const shouldNavigateToSavedSession =
+          (isEmbeddedEditor && userWantsCopy) ||
+          (!isEmbeddedEditor && response.discoverSession.id !== persistedDiscoverSession?.id);
+
+        if (shouldNavigateToSavedSession) {
+          services.embeddableEditor.clearEditorState();
+          services.locator.navigate({
+            savedSearchId: response.discoverSession.id,
+            ...(response?.nextSelectedTabId ? { tab: { id: response.nextSelectedTabId } } : {}),
+          });
+        } else if (isEmbeddedEditor) {
+          services.embeddableEditor.transferBackToEditor(TransferAction.SaveSession);
+        }
+      }
+
+      onClose();
     } catch (error) {
       services.toastNotifications.addDanger({
         title: i18n.translate('discover.notifications.notSavedSearchTitle', {
