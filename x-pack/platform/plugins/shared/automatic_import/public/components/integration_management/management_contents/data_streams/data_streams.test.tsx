@@ -23,6 +23,8 @@ jest.mock('../../../../common', () => ({
       variables: undefined,
     },
   })),
+  isValidNameFormat: jest.fn((v: string) => /^[a-zA-Z0-9_ ]+$/.test(v.trim())),
+  startsWithLetter: jest.fn((v: string) => /^[a-zA-Z]/.test(v.trim())),
 }));
 const mockUseGetIntegrationById = useGetIntegrationById as jest.Mock;
 

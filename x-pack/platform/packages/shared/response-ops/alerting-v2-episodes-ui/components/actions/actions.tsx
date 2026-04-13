@@ -7,14 +7,17 @@
 
 import React, { useState } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiListGroup, EuiPopover } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '@kbn/core-http-browser';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { css } from '@emotion/react';
 import { AlertEpisodeAcknowledgeActionButton } from './acknowledge_action_button';
 import { AlertEpisodeSnoozeActionButton } from './snooze_action_button';
 import type { EpisodeActionState, AlertEpisodeGroupAction } from '../../types/action';
+import { AlertEpisodeTagsFlyout } from './alert_episode_tags_flyout';
 import { AlertEpisodeResolveActionButton } from './resolve_action_button';
+import { AlertEpisodeTagsMenuItem } from './tags_action_button';
 import { AlertEpisodeViewDetailsActionButton } from './view_details_action_button';
+import * as i18n from './translations';
 
 export interface AlertEpisodeActionsProps {
   episodeId?: string;
@@ -31,6 +34,8 @@ export interface AlertEpisodeActionsProps {
    */
   buttonsOutlined?: boolean;
   http: HttpStart;
+  /** Required for Edit Tags (ES|QL tag suggestions). */
+  expressions: ExpressionsStart;
 }
 
 /**
@@ -48,10 +53,12 @@ export function AlertEpisodeActions({
   episodeAction,
   groupAction,
   http,
+  expressions,
   viewDetailsHref,
   buttonsOutlined = true,
 }: AlertEpisodeActionsProps) {
   const [isMoreOpen, setIsMoreOpen] = useState(false);
+  const [isTagsFlyoutOpen, setIsTagsFlyoutOpen] = useState(false);
 
   return (
     <EuiFlexGroup
@@ -87,43 +94,55 @@ export function AlertEpisodeActions({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiPopover
-          aria-label={i18n.translate('xpack.alertingV2.episodesUi.actions.moreActionsAriaLabel', {
-            defaultMessage: 'More actions',
-          })}
-          display="inline-flex"
-          css={css`
-            align-items: center;
-          `}
-          button={
-            <EuiButtonIcon
-              display="empty"
-              color="text"
-              size="xs"
-              iconType="boxesHorizontal"
-              aria-label={i18n.translate(
-                'xpack.alertingV2.episodesUi.actions.moreActionsAriaLabel',
-                {
-                  defaultMessage: 'More actions',
-                }
-              )}
-              onClick={() => setIsMoreOpen((open) => !open)}
-              data-test-subj="alertingEpisodeActionsMoreButton"
-            />
-          }
-          isOpen={isMoreOpen}
-          closePopover={() => setIsMoreOpen(false)}
-          anchorPosition="downLeft"
-          panelPaddingSize="s"
-        >
-          <EuiListGroup gutterSize="none" bordered={false} flush={true} size="l">
-            <AlertEpisodeResolveActionButton
-              lastDeactivateAction={groupAction?.lastDeactivateAction}
+        <>
+          <EuiPopover
+            aria-label={i18n.ACTIONS_MORE_ACTIONS_ARIA_LABEL}
+            display="inline-flex"
+            css={css`
+              align-items: center;
+            `}
+            button={
+              <EuiButtonIcon
+                display="empty"
+                color="text"
+                size="xs"
+                iconType="boxesHorizontal"
+                aria-label={i18n.ACTIONS_MORE_ACTIONS_ARIA_LABEL}
+                onClick={() => setIsMoreOpen((open) => !open)}
+                data-test-subj="alertingEpisodeActionsMoreButton"
+              />
+            }
+            isOpen={isMoreOpen}
+            closePopover={() => setIsMoreOpen(false)}
+            anchorPosition="downLeft"
+            panelPaddingSize="s"
+          >
+            <EuiListGroup gutterSize="none" bordered={false} flush={true} size="l">
+              <AlertEpisodeResolveActionButton
+                lastDeactivateAction={groupAction?.lastDeactivateAction}
+                groupHash={groupHash}
+                http={http}
+              />
+              <AlertEpisodeTagsMenuItem
+                isDisabled={!groupHash}
+                onOpen={() => {
+                  setIsMoreOpen(false);
+                  setIsTagsFlyoutOpen(true);
+                }}
+              />
+            </EuiListGroup>
+          </EuiPopover>
+          {isTagsFlyoutOpen && groupHash ? (
+            <AlertEpisodeTagsFlyout
+              isOpen={isTagsFlyoutOpen}
+              onClose={() => setIsTagsFlyoutOpen(false)}
               groupHash={groupHash}
+              currentTags={groupAction?.tags ?? []}
               http={http}
+              services={{ expressions }}
             />
-          </EuiListGroup>
-        </EuiPopover>
+          ) : null}
+        </>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
