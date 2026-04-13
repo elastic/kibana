@@ -19,7 +19,7 @@ import {
   expectTracesExperienceEnabled,
 } from '../../fixtures/traces_experience';
 
-const APM_ALERTS_INDEX_PATTERN = '.alerts-observability.apm.alerts-*';
+const APM_ALERTS_INDEX_PATTERN = '.*alerts-observability.apm.alerts-*';
 const STATEFUL_APM_ALERTS_INDEX = '.internal.alerts-observability.apm.alerts-default-000001';
 const SERVERLESS_APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-default';
 

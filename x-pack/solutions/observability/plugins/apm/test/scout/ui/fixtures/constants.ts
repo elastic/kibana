@@ -59,7 +59,7 @@ export const SERVICE_SPAN_LINKS_PRODUCER_CONSUMER = 'zzz-producer-consumer';
 export const SERVICE_SPAN_LINKS_CONSUMER_MULTIPLE = 'zzz-consumer-multiple';
 
 // APM alert index constants
-export const APM_ALERTS_INDEX_PATTERN = '.alerts-observability.apm.alerts-*';
+export const APM_ALERTS_INDEX_PATTERN = '.alerts-observability.apm.alerts-*,.internal.alerts-observability.apm.alerts-*';
 // Stateful uses rollover index with .internal prefix
 export const STATEFUL_APM_ALERTS_INDEX = '.internal.alerts-observability.apm.alerts-default-000001';
 // Serverless uses data stream without .internal prefix or numeric suffix

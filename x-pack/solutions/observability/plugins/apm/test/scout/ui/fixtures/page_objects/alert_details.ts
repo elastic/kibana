@@ -13,9 +13,9 @@ export class AlertDetailsPage {
 
   constructor(private readonly page: ScoutPage) {
     this.tracesInDiscoverAction = this.page.testSubj.locator(
-      'apmAlertDetailsTracesInDiscoverAction'
+      'apmAlertDetailsTracesOpenInDiscoverAction'
     );
-    this.viewInApmAction = this.page.testSubj.locator('apmAlertDetailsViewInApmAction');
+    this.viewInApmAction = this.page.testSubj.locator('apmAlertDetailsOpenInApmAction');
   }
 
   async goto(alertId: string) {

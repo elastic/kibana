@@ -112,8 +112,8 @@ describe('RedMetricsChartActions', () => {
 
     fireEvent.click(getByTestId('apmAlertDetailsOpenActionsDropdown'));
 
-    expect(getByTestId('apmAlertDetailsViewInApmAction')).toBeInTheDocument();
-    expect(getByTestId('apmAlertDetailsTracesInDiscoverAction')).toBeInTheDocument();
+    expect(getByTestId('apmAlertDetailsOpenInApmAction')).toBeInTheDocument();
+    expect(getByTestId('apmAlertDetailsTracesOpenInDiscoverAction')).toBeInTheDocument();
   });
 
   it('includes ruleTypeId in data-alert-type attributes', () => {
@@ -122,11 +122,11 @@ describe('RedMetricsChartActions', () => {
 
     fireEvent.click(getByTestId('apmAlertDetailsOpenActionsDropdown'));
 
-    expect(getByTestId('apmAlertDetailsViewInApmAction')).toHaveAttribute(
+    expect(getByTestId('apmAlertDetailsOpenInApmAction')).toHaveAttribute(
       'data-alert-type',
       'apm.transaction_duration'
     );
-    expect(getByTestId('apmAlertDetailsTracesInDiscoverAction')).toHaveAttribute(
+    expect(getByTestId('apmAlertDetailsTracesOpenInDiscoverAction')).toHaveAttribute(
       'data-alert-type',
       'apm.transaction_duration'
     );
@@ -139,7 +139,7 @@ describe('RedMetricsChartActions', () => {
 
       fireEvent.click(getByTestId('apmAlertDetailsOpenActionsDropdown'));
 
-      expect(getByTestId('apmAlertDetailsViewInApmAction')).toHaveAttribute(
+      expect(getByTestId('apmAlertDetailsOpenInApmAction')).toHaveAttribute(
         'href',
         'http://test-apm-url'
       );
@@ -190,7 +190,7 @@ describe('RedMetricsChartActions', () => {
 
       fireEvent.click(getByTestId('apmAlertDetailsOpenActionsDropdown'));
 
-      expect(getByTestId('apmAlertDetailsTracesInDiscoverAction')).toHaveAttribute(
+      expect(getByTestId('apmAlertDetailsTracesOpenInDiscoverAction')).toHaveAttribute(
         'href',
         'http://test-discover-url'
       );
@@ -208,7 +208,7 @@ describe('RedMetricsChartActions', () => {
 
       fireEvent.click(getByTestId('apmAlertDetailsOpenActionsDropdown'));
 
-      expect(getByTestId('apmAlertDetailsTracesInDiscoverAction')).not.toHaveAttribute('href');
+      expect(getByTestId('apmAlertDetailsTracesOpenInDiscoverAction')).not.toHaveAttribute('href');
     });
   });
 });
