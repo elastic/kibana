@@ -9,7 +9,6 @@ import {
   EuiButtonEmpty,
   EuiFieldSearch,
   EuiFilterButton,
-  EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
@@ -135,86 +134,83 @@ export function CompositeSloToolbar({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFilterGroup>
-          <EuiPopover
-            button={
-              <EuiFilterButton
-                data-test-subj="compositeSloListTagFilter"
-                iconType="arrowDown"
-                onClick={handleToggleTagPopover}
-                isSelected={isTagPopoverOpen}
-                numFilters={availableTags.length}
-                hasActiveFilters={selectedTags.length > 0}
-                numActiveFilters={selectedTags.length}
-              >
-                {i18n.translate('xpack.slo.compositeSloList.tagsFilter', {
-                  defaultMessage: 'Tags',
-                })}
-              </EuiFilterButton>
-            }
-            isOpen={isTagPopoverOpen}
-            closePopover={handleCloseTagPopover}
-            panelPaddingSize="none"
-          >
-            <EuiSelectable
-              options={tagOptions}
-              onChange={onTagSelectionChange}
-              searchable
-              searchProps={{
-                placeholder: i18n.translate('xpack.slo.compositeSloList.tagsSearchPlaceholder', {
-                  defaultMessage: 'Search tags',
-                }),
-                compressed: true,
-              }}
+        <EuiPopover
+          button={
+            <EuiFilterButton
+              data-test-subj="compositeSloListTagFilter"
+              iconType="arrowDown"
+              onClick={handleToggleTagPopover}
+              isSelected={isTagPopoverOpen}
+              hasActiveFilters={selectedTags.length > 0}
+              numActiveFilters={selectedTags.length}
             >
-              {(list, tagSearch) => (
-                <div css={{ width: 240 }}>
-                  {tagSearch}
-                  {list}
-                </div>
-              )}
-            </EuiSelectable>
-          </EuiPopover>
-          <EuiPopover
-            button={
-              <EuiFilterButton
-                data-test-subj="compositeSloListStatusFilter"
-                iconType="arrowDown"
-                onClick={handleToggleStatusPopover}
-                isSelected={isStatusPopoverOpen}
-                numFilters={STATUS_OPTIONS.length}
-                hasActiveFilters={selectedStatuses.length > 0}
-                numActiveFilters={selectedStatuses.length}
-              >
-                {i18n.translate('xpack.slo.compositeSloList.statusFilter', {
-                  defaultMessage: 'Status',
-                })}
-              </EuiFilterButton>
-            }
-            isOpen={isStatusPopoverOpen}
-            closePopover={handleCloseStatusPopover}
-            panelPaddingSize="none"
+              {i18n.translate('xpack.slo.compositeSloList.tagsFilter', {
+                defaultMessage: 'Tags',
+              })}
+            </EuiFilterButton>
+          }
+          isOpen={isTagPopoverOpen}
+          closePopover={handleCloseTagPopover}
+          panelPaddingSize="none"
+        >
+          <EuiSelectable
+            options={tagOptions}
+            onChange={onTagSelectionChange}
+            searchable
+            searchProps={{
+              placeholder: i18n.translate('xpack.slo.compositeSloList.tagsSearchPlaceholder', {
+                defaultMessage: 'Search tags',
+              }),
+              compressed: true,
+            }}
           >
-            <EuiSelectable options={statusOptions} onChange={handleStatusChange}>
-              {(list) => <div css={{ width: 160 }}>{list}</div>}
-            </EuiSelectable>
-          </EuiPopover>
-        </EuiFilterGroup>
+            {(list, tagSearch) => (
+              <div css={{ width: 240 }}>
+                {tagSearch}
+                {list}
+              </div>
+            )}
+          </EuiSelectable>
+        </EuiPopover>
       </EuiFlexItem>
-      {hasActiveFilters && (
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            data-test-subj="compositeSloListClearFilters"
-            size="s"
-            iconType="cross"
-            onClick={onClearFilters}
-          >
-            {i18n.translate('xpack.slo.compositeSloList.clearFilters', {
-              defaultMessage: 'Clear filters',
-            })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          button={
+            <EuiFilterButton
+              data-test-subj="compositeSloListStatusFilter"
+              iconType="arrowDown"
+              onClick={handleToggleStatusPopover}
+              isSelected={isStatusPopoverOpen}
+              hasActiveFilters={selectedStatuses.length > 0}
+              numActiveFilters={selectedStatuses.length}
+            >
+              {i18n.translate('xpack.slo.compositeSloList.statusFilter', {
+                defaultMessage: 'Status',
+              })}
+            </EuiFilterButton>
+          }
+          isOpen={isStatusPopoverOpen}
+          closePopover={handleCloseStatusPopover}
+          panelPaddingSize="none"
+        >
+          <EuiSelectable options={statusOptions} onChange={handleStatusChange}>
+            {(list) => <div css={{ width: 160 }}>{list}</div>}
+          </EuiSelectable>
+        </EuiPopover>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          data-test-subj="compositeSloListClearFilters"
+          size="s"
+          iconType="eraser"
+          isDisabled={!hasActiveFilters}
+          onClick={onClearFilters}
+        >
+          {i18n.translate('xpack.slo.compositeSloList.clearFilters', {
+            defaultMessage: 'Clear filters',
+          })}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }

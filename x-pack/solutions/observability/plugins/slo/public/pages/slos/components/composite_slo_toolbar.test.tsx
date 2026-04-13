@@ -34,14 +34,14 @@ describe('CompositeSloToolbar', () => {
     expect(screen.getByTestId('compositeSloListTagFilter')).toBeInTheDocument();
   });
 
-  it('does not show "Clear filters" when no active filters', () => {
+  it('shows "Clear filters" disabled when no active filters', () => {
     render(<CompositeSloToolbar {...defaultProps} hasActiveFilters={false} />);
-    expect(screen.queryByTestId('compositeSloListClearFilters')).not.toBeInTheDocument();
+    expect(screen.getByTestId('compositeSloListClearFilters')).toBeDisabled();
   });
 
-  it('shows "Clear filters" when hasActiveFilters is true', () => {
+  it('shows "Clear filters" enabled when hasActiveFilters is true', () => {
     render(<CompositeSloToolbar {...defaultProps} hasActiveFilters={true} />);
-    expect(screen.getByTestId('compositeSloListClearFilters')).toBeInTheDocument();
+    expect(screen.getByTestId('compositeSloListClearFilters')).not.toBeDisabled();
   });
 
   it('calls onClearFilters when the "Clear filters" button is clicked', () => {
