@@ -58,7 +58,7 @@ export const registerFleetSetupRoute = (router: FleetAuthzRouter) => {
       },
       summary: `Initiate Fleet setup`,
       description:
-        'Initialize Fleet and create the necessary Elasticsearch resources for Fleet to operate. Safe to call multiple times; subsequent calls are idempotent. Returns whether Fleet is initialized and any non-fatal errors encountered during setup.',
+        'Initialize Fleet and create the necessary Elasticsearch resources for Fleet to operate. Safe to call multiple times (idempotent). Returns the initialization status and any non-fatal errors encountered during setup.',
       options: {
         tags: ['oas-tag:Fleet internals'],
       },
@@ -141,9 +141,9 @@ export const registerCreateFleetSetupRoute = (router: FleetAuthzRouter) => {
           ],
         },
       },
-      summary: `Initiate agent setup`,
+      summary: `Initiate Fleet setup`,
       description:
-        'Initialize Fleet agent resources. This endpoint is used by Elastic Agents to trigger Fleet setup. Safe to call multiple times; subsequent calls are idempotent.',
+        'Initialize Fleet. This endpoint is used by Elastic Agents to trigger Fleet setup. Safe to call multiple times; subsequent calls are idempotent.',
       options: {
         tags: ['oas-tag:Elastic Agents'],
       },

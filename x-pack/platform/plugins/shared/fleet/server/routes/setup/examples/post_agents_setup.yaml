@@ -1,11 +1,11 @@
 responses:
   200:
-    description: 'Agent setup completed'
+    description: 'Fleet setup completed'
     content:
       application/json:
         examples:
           agentsSetupSuccessExample:
-            description: 'Agent setup initialized successfully with no non-fatal errors'
+            description: 'Fleet setup initialized successfully with no non-fatal errors'
             value:
               isInitialized: true
               nonFatalErrors: []

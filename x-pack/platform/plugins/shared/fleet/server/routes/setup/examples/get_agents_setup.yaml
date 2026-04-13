@@ -1,6 +1,6 @@
 responses:
   200:
-    description: 'Agent setup status'
+    description: 'Fleet setup status'
     content:
       application/json:
         examples:
