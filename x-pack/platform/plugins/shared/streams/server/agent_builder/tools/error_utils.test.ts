@@ -39,9 +39,7 @@ describe('classifyError', () => {
   });
 
   it('returns message with truncated details for unknown errors', () => {
-    expect(classifyError(new Error('something random'))).toBe(
-      'Unexpected error: something random'
-    );
+    expect(classifyError(new Error('something random'))).toBe('Unexpected error: something random');
   });
 
   it('handles non-Error values (string)', () => {
