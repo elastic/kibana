@@ -24,20 +24,51 @@ interface CompositeSloToolbarProps {
   isLoading: boolean;
   selectedTags: string[];
   availableTags: string[];
+  selectedStatuses?: string[];
   hasActiveFilters: boolean;
   onSearchChange: (value: string) => void;
   onTagSelectionChange: (options: EuiSelectableOption[]) => void;
+  onStatusToggle?: (status: string) => void;
   onClearFilters: () => void;
 }
+
+const STATUS_OPTIONS: Array<{ value: string; label: string }> = [
+  {
+    value: 'HEALTHY',
+    label: i18n.translate('xpack.slo.compositeSloList.statusFilter.healthy', {
+      defaultMessage: 'Healthy',
+    }),
+  },
+  {
+    value: 'DEGRADING',
+    label: i18n.translate('xpack.slo.compositeSloList.statusFilter.degrading', {
+      defaultMessage: 'Degrading',
+    }),
+  },
+  {
+    value: 'VIOLATED',
+    label: i18n.translate('xpack.slo.compositeSloList.statusFilter.violated', {
+      defaultMessage: 'Violated',
+    }),
+  },
+  {
+    value: 'NO_DATA',
+    label: i18n.translate('xpack.slo.compositeSloList.statusFilter.noData', {
+      defaultMessage: 'No data',
+    }),
+  },
+];
 
 export function CompositeSloToolbar({
   search,
   isLoading,
   selectedTags,
   availableTags,
+  selectedStatuses = [],
   hasActiveFilters,
   onSearchChange,
   onTagSelectionChange,
+  onStatusToggle,
   onClearFilters,
 }: CompositeSloToolbarProps) {
   const [isTagPopoverOpen, setIsTagPopoverOpen] = useState(false);
@@ -115,6 +146,16 @@ export function CompositeSloToolbar({
               )}
             </EuiSelectable>
           </EuiPopover>
+          {STATUS_OPTIONS.map(({ value, label }) => (
+            <EuiFilterButton
+              key={value}
+              data-test-subj={`compositeSloListStatusFilter-${value}`}
+              hasActiveFilters={selectedStatuses.includes(value)}
+              onClick={() => onStatusToggle?.(value)}
+            >
+              {label}
+            </EuiFilterButton>
+          ))}
         </EuiFilterGroup>
       </EuiFlexItem>
       {hasActiveFilters && (

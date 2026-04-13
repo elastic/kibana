@@ -18,6 +18,7 @@ const findCompositeSLOParamsSchema = t.partial({
     sortBy: sortBySchema,
     sortDirection: sortDirectionSchema,
     tags: t.string,
+    status: t.string,
   }),
 });
 
