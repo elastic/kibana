@@ -363,9 +363,6 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         )
       );
       pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution/ai4dsoc.yml', cancelable)
-      );
-      pipeline.push(
         getPipeline(
           '.buildkite/pipelines/pull_request/security_solution/detection_engine.yml',
           cancelable
