@@ -29,6 +29,7 @@ export interface GlobalHeaderShellProps {
   logo?: ReactNode;
   switcher?: ReactNode;
   search?: ReactNode;
+  help?: ReactNode;
   actions?: ReactNode;
 }
 
@@ -82,6 +83,11 @@ const useGlobalHeaderStyles = () => {
       gap: ${euiTheme.size.s};
     `;
 
+    const helpSlot = css`
+      display: flex;
+      align-items: center;
+    `;
+
     const separator = css`
       width: 1px;
       height: 20px;
@@ -89,12 +95,12 @@ const useGlobalHeaderStyles = () => {
       background: ${euiTheme.colors.borderBaseSubdued};
     `;
 
-    return { root, leftGroup, switcherSlot, spacer, rightGroup, searchSlot, actionsSlot, separator };
+    return { root, leftGroup, switcherSlot, spacer, rightGroup, searchSlot, actionsSlot, helpSlot, separator };
   }, [euiTheme]);
 };
 
 export const GlobalHeaderShell = React.memo<GlobalHeaderShellProps>(
-  ({ logo, switcher, search, actions }) => {
+  ({ logo, switcher, search, help, actions }) => {
     const { isCollapsed } = useSideNavCollapsed();
     const styles = useGlobalHeaderStyles();
     const logoWidth = isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
@@ -118,6 +124,11 @@ export const GlobalHeaderShell = React.memo<GlobalHeaderShellProps>(
           {search && (
             <div css={styles.searchSlot} data-test-subj="chromeNextGlobalHeaderSearch">
               {search}
+            </div>
+          )}
+          {help && (
+            <div css={styles.helpSlot} data-test-subj="chromeNextGlobalHeaderHelp">
+              {help}
             </div>
           )}
           {actions && (

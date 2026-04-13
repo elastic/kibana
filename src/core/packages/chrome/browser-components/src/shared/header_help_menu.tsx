@@ -43,7 +43,11 @@ const createCustomLink = (
   </Fragment>
 );
 
-export const HeaderHelpMenu = () => {
+interface HeaderHelpMenuProps {
+  renderButton?: (props: { isOpen: boolean; toggleMenu: () => void }) => React.ReactNode;
+}
+
+export const HeaderHelpMenu = ({ renderButton }: HeaderHelpMenuProps = {}) => {
   const [isOpen, setIsOpen] = useState(false);
   const closeMenu = useCallback(() => setIsOpen(false), []);
   const toggleMenu = useCallback(() => setIsOpen((prev) => !prev), []);
@@ -157,7 +161,9 @@ export const HeaderHelpMenu = () => {
     );
   }
 
-  const button = (
+  const button = renderButton ? (
+    renderButton({ isOpen, toggleMenu })
+  ) : (
     <EuiHeaderSectionItemButton
       aria-expanded={isOpen}
       aria-haspopup="true"
