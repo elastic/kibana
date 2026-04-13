@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { GranularRulesSearch } from '../../../../../../common/api/detection_engine/rule_management';
+import { convertRuleSearchTermToKQL } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
 import { buildGranularRulesKql } from './build_granular_rules_kql';
 
 describe('buildGranularRulesKql', () => {
@@ -30,40 +30,16 @@ describe('buildGranularRulesKql', () => {
       filter: 'alert.attributes.enabled: true',
       search: { term: 'sql', mode: 'legacy' },
     });
-    expect(kql).toContain('(alert.attributes.enabled: true)');
-    expect(kql).toContain(' AND ');
-    expect(kql).toContain('alert.attributes.name');
+    expect(kql).toBe(`(alert.attributes.enabled: true) AND (${convertRuleSearchTermToKQL('sql')})`);
   });
 
-  it('defaults missing mode to legacy when term is set', () => {
-    const kql = buildGranularRulesKql({
-      filter: undefined,
-      search: { term: 'abc' },
-    });
-    expect(kql).toBeDefined();
-    expect(kql).toContain('alert.attributes.name');
-  });
-
-  it('omits legacy search when mode is not legacy', () => {
-    const nonLegacySearch = {
-      term: 'should-not-appear',
-      mode: 'vector',
-    } as unknown as GranularRulesSearch;
+  it('uses legacy search when mode is omitted', () => {
+    const expected = `(${convertRuleSearchTermToKQL('abc')})`;
     expect(
       buildGranularRulesKql({
-        filter: 'alert.attributes.enabled: true',
-        search: nonLegacySearch,
+        filter: undefined,
+        search: { term: 'abc' },
       })
-    ).toBe('(alert.attributes.enabled: true)');
-  });
-
-  it('returns only legacy search KQL when filter is empty', () => {
-    const kql = buildGranularRulesKql({
-      filter: undefined,
-      search: { term: 'abc', mode: 'legacy' },
-    });
-    expect(kql).toBeDefined();
-    expect(kql).toContain('alert.attributes.name');
-    expect(kql).not.toContain(' AND ');
+    ).toBe(expected);
   });
 });

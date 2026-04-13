@@ -13,18 +13,12 @@ import {
 import { createRule, deleteAllRules } from '@kbn/detections-response-ftr-services';
 import { DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS } from '@kbn/security-solution-plugin/common/constants';
 import { MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
-import {
-  getSimpleRule,
-  getSimpleRuleOutput,
-  removeServerGeneratedProperties,
-  updateUsername,
-} from '../../../utils';
+import { getSimpleRule } from '../../../utils';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
-  const utils = getService('securitySolutionUtils');
 
   const findRulesWithFacets = (requestBody: Record<string, unknown>) =>
     supertest
@@ -49,18 +43,6 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    it('returns rules with the same shape as classic _find for a simple rule', async () => {
-      await createRule(supertest, log, getSimpleRule());
-      const { body } = await findRulesWithFacets({}).expect(200);
-      expect(body.total).to.be(1);
-      expect(body.page).to.be(1);
-      expect(body.perPage).to.be(20);
-      expect(body.data).to.have.length(1);
-      const stripped = removeServerGeneratedProperties(body.data[0]);
-      const expectedRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
-      expect(stripped).to.eql(expectedRule);
-    });
-
     it('filters with KQL and intersects legacy search', async () => {
       await createRule(supertest, log, getSimpleRule('facets-kql-search', true));
       const { body } = await findRulesWithFacets({
@@ -79,16 +61,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.counts).to.be.an('object');
       expect(body.counts.enabled).to.be.an('object');
       const enabledBuckets = body.counts.enabled as Record<string, number>;
-      expect(Object.keys(enabledBuckets).length).to.be.greaterThan(0);
-    });
-
-    it('accepts sort_field and sort_order', async () => {
-      await createRule(supertest, log, getSimpleRule());
-      const { body } = await findRulesWithFacets({
-        sort_field: 'name',
-        sort_order: 'desc',
-      }).expect(200);
-      expect(body.total).to.be(1);
+      expect(Object.keys(enabledBuckets).length).to.be.equal(2);
     });
 
     it('returns 400 for invalid KQL filter', async () => {

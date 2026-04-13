@@ -571,6 +571,12 @@ describe('Detections Rules API', () => {
         expect.objectContaining({ search_after: [42, 'rule-id'] })
       );
     });
+
+    test('omits filter from the JSON body when the filter is empty or whitespace', async () => {
+      await fetchRulesWithFacets({ filter: '   ' });
+      const [, options] = fetchMock.mock.calls[0];
+      expect(JSON.parse(options.body as string)).not.toHaveProperty('filter');
+    });
   });
 
   describe('fetchRuleById', () => {

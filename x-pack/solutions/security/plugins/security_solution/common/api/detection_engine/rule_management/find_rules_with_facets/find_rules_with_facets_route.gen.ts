@@ -42,7 +42,6 @@ export type FindRulesWithFacetsSearchAfterItem = z.infer<
 export const FindRulesWithFacetsSearchAfterItem =
   FindRulesWithFacetsSearchAfterItemInternal as z.ZodType<FindRulesWithFacetsSearchAfterItem>;
 
-export type FindRulesWithFacetsRequestBody = z.infer<typeof FindRulesWithFacetsRequestBody>;
 export const FindRulesWithFacetsRequestBody = z
   .object({
     /**
@@ -76,7 +75,6 @@ export const FindRulesWithFacetsRequestBody = z
   .strict();
 
 export type FindRulesWithFacetsRequestBody = z.infer<typeof FindRulesWithFacetsRequestBody>;
-export const FindRulesWithFacetsRequestBody = FindRulesWithFacetsRequestBody;
 export type FindRulesWithFacetsRequestBodyInput = z.input<typeof FindRulesWithFacetsRequestBody>;
 
 export type FindRulesWithFacetsResponse = z.infer<typeof FindRulesWithFacetsResponse>;

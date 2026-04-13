@@ -34,8 +34,8 @@ export const validateFindRulesWithFacetsKqlFilter = (filter: string | undefined)
 };
 
 const validateSearchAfterRequiresSort = (body: FindRulesWithFacetsRequestBodyInput): string[] => {
-  const sa = body.search_after;
-  if (sa == null || sa.length === 0) {
+  const searchAfter = body.search_after;
+  if (searchAfter == null || searchAfter.length === 0) {
     return [];
   }
   if (body.sort_field == null || body.sort_order == null) {
