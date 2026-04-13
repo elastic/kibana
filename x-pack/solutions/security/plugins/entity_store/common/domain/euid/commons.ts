@@ -11,6 +11,8 @@ import type {
   CalculatedEntityIdentity,
   EntityDefinitionWithoutId,
   EuidAttribute,
+  EuidField,
+  EuidSeparator,
   FieldEvaluationSource,
   FieldValueSchema,
 } from '../definitions/entity_schema';
@@ -47,11 +49,11 @@ export function getFieldValue(doc: any, field: string): string | undefined {
   // However, it can still happen that elasticsearch
   // client returns an array of values.
   if (Array.isArray(fieldInObject)) {
-    if (fieldInObject.length > 0) {
-      return String(fieldInObject[0]);
-    } else {
-      throw new Error(`Field ${field} is an array but has no values`);
+    if (fieldInObject.length === 0) {
+      return undefined;
     }
+    const first = fieldInObject[0];
+    return first !== undefined && first !== null ? String(first) : undefined;
   }
 
   if (typeof fieldInObject === 'object') {
@@ -234,11 +236,11 @@ export function getFieldsToBeFilteredOut(
   return toFilterOut;
 }
 
-export function isEuidField(attr: EuidAttribute) {
+export function isEuidField(attr: EuidAttribute): attr is EuidField {
   return 'field' in attr;
 }
 
-export function isEuidSeparator(attr: EuidAttribute) {
+export function isEuidSeparator(attr: EuidAttribute): attr is EuidSeparator {
   return 'sep' in attr;
 }
 

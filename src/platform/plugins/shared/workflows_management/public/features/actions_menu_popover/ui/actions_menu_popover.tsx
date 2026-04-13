@@ -16,7 +16,10 @@ import type { ActionsMenuProps } from './actions_menu';
 
 interface ActionsMenuPopoverProps extends EuiPopoverProps, ActionsMenuProps {}
 
-export function ActionsMenuPopover({ onActionSelected, ...props }: ActionsMenuPopoverProps) {
+export const ActionsMenuPopover = React.memo(function ActionsMenuPopover({
+  onActionSelected,
+  ...props
+}: ActionsMenuPopoverProps) {
   return (
     <EuiPopover
       panelPaddingSize="none"
@@ -31,4 +34,4 @@ export function ActionsMenuPopover({ onActionSelected, ...props }: ActionsMenuPo
       <ActionsMenu onActionSelected={onActionSelected} />
     </EuiPopover>
   );
-}
+});

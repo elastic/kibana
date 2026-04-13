@@ -23,7 +23,7 @@ function createPublicRuleMonitoringServiceMock() {
     return {
       setMetric: jest.fn(),
       setMetrics: jest.fn(),
-      clearGapRange: jest.fn(),
+      clearGap: jest.fn(),
     };
   });
 }

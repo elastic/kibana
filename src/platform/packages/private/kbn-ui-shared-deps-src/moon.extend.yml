@@ -9,7 +9,7 @@ tasks:
   extract-version-dependencies:
     command: node
     args:
-      - $workspaceRoot/scripts/extract_version_dependencies.js
+      - scripts/extract_version_dependencies.js
       - src/platform/packages/private/kbn-ui-shared-deps-src/version_dependencies.txt
       - --collect
       - '@babel/plugin-transform-numeric-separator'
@@ -46,7 +46,7 @@ tasks:
     args:
       - build
     deps:
-      - extract-version-dependencies
+      - ~:extract-version-dependencies
       - '^:build-webpack'
     inputs:
       - '@group(src)'

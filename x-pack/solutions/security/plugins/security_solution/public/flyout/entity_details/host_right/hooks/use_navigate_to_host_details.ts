@@ -16,6 +16,7 @@ import { HostPanelKey } from '../../shared/constants';
 
 interface UseNavigateToHostDetailsParams {
   hostName: string;
+  entityId?: string;
   scopeId: string;
   isRiskScoreExist: boolean;
   hasMisconfigurationFindings: boolean;
@@ -23,10 +24,12 @@ interface UseNavigateToHostDetailsParams {
   hasNonClosedAlerts: boolean;
   isPreviewMode: boolean;
   contextID: string;
+  entityStoreEntityId?: string;
 }
 
 export const useNavigateToHostDetails = ({
   hostName,
+  entityId,
   scopeId,
   isRiskScoreExist,
   hasMisconfigurationFindings,
@@ -34,6 +37,7 @@ export const useNavigateToHostDetails = ({
   hasNonClosedAlerts,
   isPreviewMode,
   contextID,
+  entityStoreEntityId,
 }: UseNavigateToHostDetailsParams): ((path: EntityDetailsPath) => void) => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
@@ -47,13 +51,15 @@ export const useNavigateToHostDetails = ({
       const left = {
         id: HostDetailsPanelKey,
         params: {
-          name: hostName,
+          entityId,
+          hostName,
           scopeId,
           isRiskScoreExist,
           path,
           hasMisconfigurationFindings,
           hasVulnerabilitiesFindings,
           hasNonClosedAlerts,
+          entityStoreEntityId,
         },
       };
 
@@ -63,6 +69,7 @@ export const useNavigateToHostDetails = ({
           contextID,
           scopeId,
           hostName,
+          entityId,
         },
       };
 
@@ -77,12 +84,14 @@ export const useNavigateToHostDetails = ({
       openFlyout,
       openLeftPanel,
       hostName,
+      entityId,
       scopeId,
       isRiskScoreExist,
       hasMisconfigurationFindings,
       hasVulnerabilitiesFindings,
       hasNonClosedAlerts,
       contextID,
+      entityStoreEntityId,
     ]
   );
 };

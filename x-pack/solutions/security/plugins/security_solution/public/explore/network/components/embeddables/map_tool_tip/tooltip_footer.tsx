@@ -37,7 +37,7 @@ export const ToolTipFooterComponent = ({
               data-test-subj={'previous-feature-button'}
               color={'text'}
               onClick={previousFeature}
-              iconType="arrowLeft"
+              iconType="chevronSingleLeft"
               aria-label="Next"
               isDisabled={featureIndex <= 0}
             />
@@ -45,7 +45,7 @@ export const ToolTipFooterComponent = ({
               data-test-subj={'next-feature-button'}
               color={'text'}
               onClick={nextFeature}
-              iconType="arrowRight"
+              iconType="chevronSingleRight"
               aria-label="Next"
               isDisabled={featureIndex >= totalFeatures - 1}
             />

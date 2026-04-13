@@ -82,7 +82,7 @@ export const getAlertFilteringMetricLensAttributes: MyGetLensAttributes = ({
       internalReferences: [],
       query: { language: 'kuery', query: '_id :*' },
       visualization: {
-        icon: 'visLine',
+        icon: 'chartLine',
         iconAlign: 'right',
         valuesTextAlign: 'left',
         layerId: 'unifiedHistogram',
