@@ -6,6 +6,7 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
+import { EXTENDED_TIMEOUT } from '..';
 
 export class FunctionsPage {
   public co2PerKWHField: Locator;
@@ -27,14 +28,18 @@ export class FunctionsPage {
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('profiling')}/functions`);
-    await this.page.waitForLoadingIndicatorHidden();
+    await this.page
+      .getByRole('tab', { name: 'TopN functions', exact: true })
+      .waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 
   async gotoWithTimeRange(rangeFrom: string, rangeTo: string) {
     await this.page.goto(
       `${this.kbnUrl.app('profiling')}/functions?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}`
     );
-    await this.page.waitForLoadingIndicatorHidden();
+    await this.page
+      .getByRole('tab', { name: 'TopN functions', exact: true })
+      .waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 
   // TopN Functions methods

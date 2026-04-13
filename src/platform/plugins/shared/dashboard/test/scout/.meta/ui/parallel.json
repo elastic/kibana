@@ -1,5 +1,5 @@
 {
-  "sha1": "166069bf73f9f2d9549c0b75a83af6bd6f3261cd",
+  "sha1": "45da667a575c91dbda6795e5051317411671526c",
   "tests": [
     {
       "id": "98600d12651f127-aa69b48f5334963",
@@ -837,7 +837,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/sync_colors.spec.ts",
-        "line": 118,
+        "line": 121,
         "column": 13
       }
     },
@@ -863,7 +863,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/sync_colors.spec.ts",
-        "line": 170,
+        "line": 173,
         "column": 12
       }
     }
