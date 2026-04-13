@@ -7,11 +7,11 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import {
-  INITIALIZATION_FLOW_INSTALL_AI_PROMPTS_PACKAGE,
+  INITIALIZATION_FLOW_INIT_AI_PROMPTS,
   INITIALIZATION_FLOW_STATUS_READY,
 } from '../../../../../common/api/initialization';
 import type { InitializationFlowContext } from '../../types';
-import { installAiPromptsPackageFlow } from '.';
+import { initAiPromptsFlow } from '.';
 import { installSecurityAiPromptsPackage } from '../../../detection_engine/prebuilt_rules/logic/integrations/install_ai_prompts';
 
 jest.mock('../../../detection_engine/prebuilt_rules/logic/integrations/install_ai_prompts');
@@ -33,17 +33,17 @@ const createMockInitializationFlowContext = (): InitializationFlowContext =>
     },
   } as unknown as InitializationFlowContext);
 
-describe('installAiPromptsPackageFlow', () => {
+describe('initAiPromptsFlow', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('has the correct id', () => {
-    expect(installAiPromptsPackageFlow.id).toBe(INITIALIZATION_FLOW_INSTALL_AI_PROMPTS_PACKAGE);
+    expect(initAiPromptsFlow.id).toBe(INITIALIZATION_FLOW_INIT_AI_PROMPTS);
   });
 
   it('does not have runFirst set', () => {
-    expect(installAiPromptsPackageFlow.runFirst).toBeUndefined();
+    expect(initAiPromptsFlow.runFirst).toBeUndefined();
   });
 
   describe('resolveProvisionContext', () => {
@@ -51,10 +51,7 @@ describe('installAiPromptsPackageFlow', () => {
       const logger = loggerMock.create();
       const context = createMockInitializationFlowContext();
 
-      const provisionContext = await installAiPromptsPackageFlow.resolveProvisionContext(
-        context,
-        logger
-      );
+      const provisionContext = await initAiPromptsFlow.resolveProvisionContext(context, logger);
 
       expect(provisionContext.securityContext).toBeDefined();
     });
@@ -68,7 +65,7 @@ describe('installAiPromptsPackageFlow', () => {
         package: { name: 'security_ai_prompts', version: '1.0.0' } as never,
       });
 
-      const result = await installAiPromptsPackageFlow.provision(
+      const result = await initAiPromptsFlow.provision(
         { securityContext: createMockSecurityContext() as never },
         logger
       );
@@ -90,7 +87,7 @@ describe('installAiPromptsPackageFlow', () => {
         package: { name: 'security_ai_prompts', version: '1.0.0' } as never,
       });
 
-      const result = await installAiPromptsPackageFlow.provision(
+      const result = await initAiPromptsFlow.provision(
         { securityContext: createMockSecurityContext() as never },
         logger
       );
@@ -105,7 +102,7 @@ describe('installAiPromptsPackageFlow', () => {
       const logger = loggerMock.create();
       installSecurityAiPromptsPackageMock.mockResolvedValue(null);
 
-      const result = await installAiPromptsPackageFlow.provision(
+      const result = await initAiPromptsFlow.provision(
         { securityContext: createMockSecurityContext() as never },
         logger
       );
@@ -124,7 +121,7 @@ describe('installAiPromptsPackageFlow', () => {
       const logger = loggerMock.create();
       installSecurityAiPromptsPackageMock.mockResolvedValue(null);
 
-      await installAiPromptsPackageFlow.provision(
+      await initAiPromptsFlow.provision(
         { securityContext: createMockSecurityContext() as never },
         logger
       );
@@ -142,7 +139,7 @@ describe('installAiPromptsPackageFlow', () => {
         package: { name: 'security_ai_prompts', version: '2.0.0' } as never,
       });
 
-      await installAiPromptsPackageFlow.provision(
+      await initAiPromptsFlow.provision(
         { securityContext: createMockSecurityContext() as never },
         logger
       );

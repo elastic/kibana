@@ -7,6 +7,6 @@
 
 import type { IDetectionEngineHealthClient } from '../../../detection_engine/rule_monitoring';
 
-export interface InstallDeRuleMonitoringAssetsProvisionContext {
+export interface InstallDetectionEngineRuleMonitoringAssetsProvisionContext {
   healthClient: IDetectionEngineHealthClient;
 }

@@ -8,16 +8,16 @@
 import type { Logger } from '@kbn/logging';
 import { ProductFeatureRulesKey } from '@kbn/security-solution-features/keys';
 import {
-  INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE,
+  INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
   INITIALIZATION_FLOW_STATUS_READY,
 } from '../../../../../common/api/initialization';
 import type { InitializationFlowContext, InitializationFlowDefinition } from '../../types';
 import type { InstallEndpointPackageProvisionContext } from './types';
 import { installEndpointPackage } from '../../../detection_engine/prebuilt_rules/logic/integrations/install_endpoint_package';
 
-export const installEndpointPackageFlow: InitializationFlowDefinition<InstallEndpointPackageProvisionContext> =
+export const initEndpointProtectionFlow: InitializationFlowDefinition<InstallEndpointPackageProvisionContext> =
   {
-    id: INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE,
+    id: INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
     resolveProvisionContext: async (
       context: InitializationFlowContext
     ): Promise<InstallEndpointPackageProvisionContext> => {

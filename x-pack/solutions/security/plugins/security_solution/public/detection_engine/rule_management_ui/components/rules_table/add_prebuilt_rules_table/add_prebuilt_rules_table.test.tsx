@@ -13,6 +13,7 @@ import { AddPrebuiltRulesTableContextProvider } from './add_prebuilt_rules_table
 import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review';
 import { useFetchPrebuiltRulesStatusQuery } from '../../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query';
 import { useSecuritySolutionInitialization } from '../../../../../common/components/initialization/use_security_solution_initialization';
+import { INITIALIZATION_FLOW_INIT_PREBUILT_RULES } from '../../../../../../common/api/initialization';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { initialUserPrivilegesState } from '../../../../../common/components/user_privileges/user_privileges_context';
@@ -73,7 +74,7 @@ jest.mock(
   '../../../../../common/components/initialization/use_security_solution_initialization',
   () => ({
     useSecuritySolutionInitialization: jest.fn().mockReturnValue({
-      'install-prebuilt-rules-package': { loading: false, result: { status: 'ready' } },
+      'init-prebuilt-rules': { loading: false, result: { status: 'ready' } },
     }),
   })
 );
@@ -108,7 +109,7 @@ jest.mock('../../../../../common/components/user_privileges');
 describe('AddPrebuiltRulesTable', () => {
   afterEach(() => {
     (useSecuritySolutionInitialization as jest.Mock).mockReturnValue({
-      'install-prebuilt-rules-package': { loading: false, result: { status: 'ready' } },
+      [INITIALIZATION_FLOW_INIT_PREBUILT_RULES]: { loading: false, result: { status: 'ready' } },
     });
   });
 
@@ -146,7 +147,7 @@ describe('AddPrebuiltRulesTable', () => {
     });
 
     (useSecuritySolutionInitialization as jest.Mock).mockReturnValue({
-      'install-prebuilt-rules-package': { loading: true },
+      [INITIALIZATION_FLOW_INIT_PREBUILT_RULES]: { loading: true },
     });
 
     render(

@@ -8,7 +8,7 @@
 import { useEffect } from 'react';
 import { useIsMutating } from '@kbn/react-query';
 import {
-  INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
+  INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
   INITIALIZATION_FLOW_STATUS_READY,
   INITIALIZATION_FLOW_STATUS_ERROR,
 } from '../../../../common/api/initialization';
@@ -30,10 +30,8 @@ export const useBootstrapEaseRules = () => {
   const { addError } = useAppToasts();
   const { edit: canEditRules } = useUserPrivileges().rulesPrivileges.rules;
 
-  const initState = useSecuritySolutionInitialization([
-    INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
-  ]);
-  const prebuiltRulesFlowState = initState[INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE];
+  const initState = useSecuritySolutionInitialization([INITIALIZATION_FLOW_INIT_PREBUILT_RULES]);
+  const prebuiltRulesFlowState = initState[INITIALIZATION_FLOW_INIT_PREBUILT_RULES];
   const prebuiltRulesPackageReady =
     prebuiltRulesFlowState?.result?.status === INITIALIZATION_FLOW_STATUS_READY;
   const prebuiltRulesPackageFailed =

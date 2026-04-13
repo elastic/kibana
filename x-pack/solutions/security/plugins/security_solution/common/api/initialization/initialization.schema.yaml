@@ -45,10 +45,10 @@ components:
       enum:
         - create-list-indices
         - security-data-views
-        - install-prebuilt-rules-package
-        - install-endpoint-package
-        - install-ai-prompts-package
-        - install-detection-engine-rule-monitoring-assets
+        - init-prebuilt-rules
+        - init-endpoint-protection
+        - init-ai-prompts
+        - init-detection-engine-rule-monitoring
 
     InitializationFlowsResult:
       type: object
@@ -65,19 +65,19 @@ components:
           oneOf:
             - $ref: '#/components/schemas/SecurityDataViewsReadyResult'
             - $ref: '#/components/schemas/InitializationFlowErrorResult'
-        install-prebuilt-rules-package:
+        init-prebuilt-rules:
           oneOf:
             - $ref: '#/components/schemas/PackageInstallReadyResult'
             - $ref: '#/components/schemas/InitializationFlowErrorResult'
-        install-endpoint-package:
+        init-endpoint-protection:
           oneOf:
             - $ref: '#/components/schemas/PackageInstallReadyResult'
             - $ref: '#/components/schemas/InitializationFlowErrorResult'
-        install-ai-prompts-package:
+        init-ai-prompts:
           oneOf:
             - $ref: '#/components/schemas/PackageInstallReadyResult'
             - $ref: '#/components/schemas/InitializationFlowErrorResult'
-        install-detection-engine-rule-monitoring-assets:
+        init-detection-engine-rule-monitoring:
           oneOf:
             - $ref: '#/components/schemas/InstallDetectionEngineRuleMonitoringAssetsReadyResult'
             - $ref: '#/components/schemas/InitializationFlowErrorResult'

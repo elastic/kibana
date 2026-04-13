@@ -18,10 +18,10 @@ import type {
 import {
   INITIALIZATION_FLOW_CREATE_LIST_INDICES,
   INITIALIZATION_FLOW_SECURITY_DATA_VIEWS,
-  INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
-  INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE,
-  INITIALIZATION_FLOW_INSTALL_AI_PROMPTS_PACKAGE,
-  INITIALIZATION_FLOW_INSTALL_DE_RULE_MONITORING_ASSETS,
+  INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
+  INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
+  INITIALIZATION_FLOW_INIT_AI_PROMPTS,
+  INITIALIZATION_FLOW_INIT_DETECTION_ENGINE_RULE_MONITORING,
   INITIALIZATION_FLOW_STATUS_ERROR,
 } from '../../../common/api/initialization';
 
@@ -34,10 +34,10 @@ type FlowResult =
 import type { InitializationFlowContext, InitializationFlowDefinition } from './types';
 import { createListIndicesInitializationFlow } from './flows/create_list_indices';
 import { initializeSecurityDataViewsFlow } from './flows/initialize_security_data_views';
-import { installPrebuiltRulesPackageFlow } from './flows/install_prebuilt_rules_package';
-import { installEndpointPackageFlow } from './flows/install_endpoint_package';
-import { installAiPromptsPackageFlow } from './flows/install_ai_prompts_package';
-import { installDeRuleMonitoringAssetsFlow } from './flows/install_de_rule_monitoring_assets';
+import { initPrebuiltRulesFlow } from './flows/init_prebuilt_rules';
+import { initEndpointProtectionFlow } from './flows/init_endpoint_protection';
+import { initAiPromptsFlow } from './flows/init_ai_prompts';
+import { initDetectionEngineRuleMonitoringFlow } from './flows/init_detection_engine_rule_monitoring';
 
 // Each flow has a different ProvisionContext type, so `any` is needed to store
 // them in a single map. Type safety is preserved inside each flow definition.
@@ -45,10 +45,11 @@ import { installDeRuleMonitoringAssetsFlow } from './flows/install_de_rule_monit
 const flows: Record<InitializationFlowId, InitializationFlowDefinition<any>> = {
   [INITIALIZATION_FLOW_CREATE_LIST_INDICES]: createListIndicesInitializationFlow,
   [INITIALIZATION_FLOW_SECURITY_DATA_VIEWS]: initializeSecurityDataViewsFlow,
-  [INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE]: installPrebuiltRulesPackageFlow,
-  [INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE]: installEndpointPackageFlow,
-  [INITIALIZATION_FLOW_INSTALL_AI_PROMPTS_PACKAGE]: installAiPromptsPackageFlow,
-  [INITIALIZATION_FLOW_INSTALL_DE_RULE_MONITORING_ASSETS]: installDeRuleMonitoringAssetsFlow,
+  [INITIALIZATION_FLOW_INIT_PREBUILT_RULES]: initPrebuiltRulesFlow,
+  [INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION]: initEndpointProtectionFlow,
+  [INITIALIZATION_FLOW_INIT_AI_PROMPTS]: initAiPromptsFlow,
+  [INITIALIZATION_FLOW_INIT_DETECTION_ENGINE_RULE_MONITORING]:
+    initDetectionEngineRuleMonitoringFlow,
 };
 
 export class FlowInitializationError extends Error {}

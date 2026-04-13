@@ -7,28 +7,39 @@
 
 import type { Logger } from '@kbn/logging';
 import {
-  INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
+  INITIALIZATION_FLOW_INIT_AI_PROMPTS,
   INITIALIZATION_FLOW_STATUS_READY,
 } from '../../../../../common/api/initialization';
 import type { InitializationFlowContext, InitializationFlowDefinition } from '../../types';
-import type { InstallPrebuiltRulesPackageProvisionContext } from './types';
-import { installPrebuiltRulesPackage } from '../../../detection_engine/prebuilt_rules/logic/integrations/install_prebuilt_rules_package';
+import type { InstallAiPromptsPackageProvisionContext } from './types';
+import { installSecurityAiPromptsPackage } from '../../../detection_engine/prebuilt_rules/logic/integrations/install_ai_prompts';
 
-export const installPrebuiltRulesPackageFlow: InitializationFlowDefinition<InstallPrebuiltRulesPackageProvisionContext> =
+export const initAiPromptsFlow: InitializationFlowDefinition<InstallAiPromptsPackageProvisionContext> =
   {
-    id: INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
-    runFirst: true,
+    id: INITIALIZATION_FLOW_INIT_AI_PROMPTS,
     resolveProvisionContext: async (
       context: InitializationFlowContext
-    ): Promise<InstallPrebuiltRulesPackageProvisionContext> => {
+    ): Promise<InstallAiPromptsPackageProvisionContext> => {
       const securityContext = await context.requestHandlerContext.securitySolution;
       return { securityContext };
     },
     provision: async ({ securityContext }, logger: Logger) => {
-      const result = await installPrebuiltRulesPackage(securityContext, logger);
+      const result = await installSecurityAiPromptsPackage(securityContext, logger);
+
+      if (result === null) {
+        logger.debug('AI prompts package installation skipped: package is not available');
+        return {
+          status: INITIALIZATION_FLOW_STATUS_READY,
+          payload: {
+            name: 'security_ai_prompts',
+            version: '',
+            install_status: 'skipped',
+          },
+        };
+      }
 
       logger.info(
-        `Prebuilt rules package initialized: "${result.package.name}" v${result.package.version}`
+        `AI prompts package initialized: "${result.package.name}" v${result.package.version}`
       );
 
       return {

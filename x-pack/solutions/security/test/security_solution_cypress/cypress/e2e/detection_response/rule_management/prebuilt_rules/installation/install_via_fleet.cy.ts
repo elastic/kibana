@@ -7,7 +7,7 @@
 import { times } from 'lodash';
 import {
   INITIALIZE_SECURITY_SOLUTION_URL,
-  INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
+  INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
 } from '@kbn/security-solution-plugin/common/api/initialization';
 import { installSinglePrebuiltRule } from '../../../../../tasks/prebuilt_rules/install_prebuilt_rules';
 import { resetRulesTableState } from '../../../../../tasks/common';
@@ -37,7 +37,7 @@ describe(
           // Only alias the call that includes the prebuilt rules package flow.
           // The frontend fires multiple initialization calls with different flows
           // and cy.wait would otherwise match the wrong one.
-          if (!req.body?.flows?.includes(INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE)) {
+          if (!req.body?.flows?.includes(INITIALIZATION_FLOW_INIT_PREBUILT_RULES)) {
             return;
           }
           req.alias = 'initializeSecuritySolution';
@@ -55,8 +55,7 @@ describe(
         }).then(({ response }) => {
           cy.wrap(response?.statusCode).should('eql', 200);
 
-          const prebuiltRulesResult =
-            response?.body.flows[INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE];
+          const prebuiltRulesResult = response?.body.flows[INITIALIZATION_FLOW_INIT_PREBUILT_RULES];
 
           cy.wrap(prebuiltRulesResult).should('have.property', 'status', 'ready');
           cy.wrap(prebuiltRulesResult)

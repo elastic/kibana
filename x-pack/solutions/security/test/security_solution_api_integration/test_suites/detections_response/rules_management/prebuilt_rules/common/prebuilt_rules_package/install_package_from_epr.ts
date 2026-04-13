@@ -10,8 +10,8 @@ import {
   PREBUILT_RULES_PACKAGE_NAME,
 } from '@kbn/security-solution-plugin/common/detection_engine/constants';
 import {
-  INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
-  INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE,
+  INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
+  INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
 } from '@kbn/security-solution-plugin/common/api/initialization';
 import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
@@ -48,13 +48,12 @@ export default ({ getService }: FtrProviderContext): void => {
           await deleteEndpointFleetPackage({ supertest, es, log, retryService });
 
           const { body } = await initializeSecuritySolution(supertest, [
-            INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
-            INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE,
+            INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
+            INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
           ]).expect(200);
 
-          const prebuiltRulesResult =
-            body.flows[INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE];
-          const endpointResult = body.flows[INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE];
+          const prebuiltRulesResult = body.flows[INITIALIZATION_FLOW_INIT_PREBUILT_RULES];
+          const endpointResult = body.flows[INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION];
 
           expect(prebuiltRulesResult).toMatchObject({
             status: 'ready',

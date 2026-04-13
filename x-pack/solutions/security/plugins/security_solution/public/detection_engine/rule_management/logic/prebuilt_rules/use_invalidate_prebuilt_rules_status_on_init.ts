@@ -7,7 +7,7 @@
 
 import { useEffect } from 'react';
 import { useSecuritySolutionInitialization } from '../../../../common/components/initialization/use_security_solution_initialization';
-import { INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE } from '../../../../../common/api/initialization';
+import { INITIALIZATION_FLOW_INIT_PREBUILT_RULES } from '../../../../../common/api/initialization';
 import { useInvalidateFetchPrebuiltRulesStatusQuery } from '../../api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query';
 
 /**
@@ -16,11 +16,8 @@ import { useInvalidateFetchPrebuiltRulesStatusQuery } from '../../api/hooks/preb
  * counts after a fresh install.
  */
 export const useInvalidatePrebuiltRulesStatusOnInit = () => {
-  const initState = useSecuritySolutionInitialization([
-    INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
-  ]);
-  const isUpgradingSecurityPackages =
-    initState[INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE].loading;
+  const initState = useSecuritySolutionInitialization([INITIALIZATION_FLOW_INIT_PREBUILT_RULES]);
+  const isUpgradingSecurityPackages = initState[INITIALIZATION_FLOW_INIT_PREBUILT_RULES].loading;
 
   const invalidatePrebuiltRulesStatus = useInvalidateFetchPrebuiltRulesStatusQuery();
 

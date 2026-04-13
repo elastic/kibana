@@ -19,14 +19,13 @@ export const INITIALIZATION_FLOW_CREATE_LIST_INDICES =
   InitializationFlowIdEnum['create-list-indices'];
 export const INITIALIZATION_FLOW_SECURITY_DATA_VIEWS =
   InitializationFlowIdEnum['security-data-views'];
-export const INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE =
-  InitializationFlowIdEnum['install-prebuilt-rules-package'];
-export const INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE =
-  InitializationFlowIdEnum['install-endpoint-package'];
-export const INITIALIZATION_FLOW_INSTALL_AI_PROMPTS_PACKAGE =
-  InitializationFlowIdEnum['install-ai-prompts-package'];
-export const INITIALIZATION_FLOW_INSTALL_DE_RULE_MONITORING_ASSETS =
-  InitializationFlowIdEnum['install-detection-engine-rule-monitoring-assets'];
+export const INITIALIZATION_FLOW_INIT_PREBUILT_RULES =
+  InitializationFlowIdEnum['init-prebuilt-rules'];
+export const INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION =
+  InitializationFlowIdEnum['init-endpoint-protection'];
+export const INITIALIZATION_FLOW_INIT_AI_PROMPTS = InitializationFlowIdEnum['init-ai-prompts'];
+export const INITIALIZATION_FLOW_INIT_DETECTION_ENGINE_RULE_MONITORING =
+  InitializationFlowIdEnum['init-detection-engine-rule-monitoring'];
 
 // Flow statuses
 export const INITIALIZATION_FLOW_STATUS_READY = CreateListIndicesReadyResult.shape.status.value;

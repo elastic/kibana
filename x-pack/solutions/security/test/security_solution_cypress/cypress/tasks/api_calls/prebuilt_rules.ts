@@ -10,9 +10,9 @@ import type { PerformRuleInstallationResponseBody } from '@kbn/security-solution
 import { PERFORM_RULE_INSTALLATION_URL } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   INITIALIZE_SECURITY_SOLUTION_URL,
-  INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
-  INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE,
-  INITIALIZATION_FLOW_INSTALL_AI_PROMPTS_PACKAGE,
+  INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
+  INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
+  INITIALIZATION_FLOW_INIT_AI_PROMPTS,
 } from '@kbn/security-solution-plugin/common/api/initialization';
 import {
   ELASTIC_SECURITY_RULE_ID,
@@ -119,7 +119,7 @@ export const bulkCreateRuleAssets = ({
  * so the real packages are never pulled during e2e tests.
  */
 const MOCK_PACKAGE_FLOW_RESULTS: Record<string, object> = {
-  [INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE]: {
+  [INITIALIZATION_FLOW_INIT_PREBUILT_RULES]: {
     status: 'ready',
     payload: {
       name: 'security_detection_engine',
@@ -127,11 +127,11 @@ const MOCK_PACKAGE_FLOW_RESULTS: Record<string, object> = {
       install_status: 'already_installed',
     },
   },
-  [INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE]: {
+  [INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION]: {
     status: 'ready',
     payload: { name: 'endpoint', version: '0.0.0', install_status: 'already_installed' },
   },
-  [INITIALIZATION_FLOW_INSTALL_AI_PROMPTS_PACKAGE]: {
+  [INITIALIZATION_FLOW_INIT_AI_PROMPTS]: {
     status: 'ready',
     payload: { name: 'security_ai_prompts', version: '0.0.0', install_status: 'already_installed' },
   },

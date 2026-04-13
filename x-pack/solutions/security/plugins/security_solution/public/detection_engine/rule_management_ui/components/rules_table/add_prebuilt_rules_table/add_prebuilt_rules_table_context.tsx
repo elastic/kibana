@@ -21,7 +21,7 @@ import {
 } from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_install';
 import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review';
 import { useSecuritySolutionInitialization } from '../../../../../common/components/initialization/use_security_solution_initialization';
-import { INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE } from '../../../../../../common/api/initialization';
+import { INITIALIZATION_FLOW_INIT_PREBUILT_RULES } from '../../../../../../common/api/initialization';
 import { useRulePreviewFlyout } from '../use_rule_preview_flyout';
 import { isUpgradeReviewRequestEnabled } from './add_prebuilt_rules_utils';
 import * as i18n from './translations';
@@ -163,11 +163,8 @@ export const AddPrebuiltRulesTableContextProvider = ({
   useInvalidatePrebuiltRulesStatusOnInit();
   const { data: prebuiltRulesStatus } = useFetchPrebuiltRulesStatusQuery();
 
-  const initState = useSecuritySolutionInitialization([
-    INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
-  ]);
-  const isUpgradingSecurityPackages =
-    initState[INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE].loading;
+  const initState = useSecuritySolutionInitialization([INITIALIZATION_FLOW_INIT_PREBUILT_RULES]);
+  const isUpgradingSecurityPackages = initState[INITIALIZATION_FLOW_INIT_PREBUILT_RULES].loading;
   const isInstallingAllRules =
     useIsMutating({
       mutationKey: PERFORM_ALL_RULES_INSTALLATION_KEY,

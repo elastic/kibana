@@ -23,10 +23,10 @@ export type InitializationFlowId = z.infer<typeof InitializationFlowId>;
 export const InitializationFlowId = z.enum([
   'create-list-indices',
   'security-data-views',
-  'install-prebuilt-rules-package',
-  'install-endpoint-package',
-  'install-ai-prompts-package',
-  'install-detection-engine-rule-monitoring-assets',
+  'init-prebuilt-rules',
+  'init-endpoint-protection',
+  'init-ai-prompts',
+  'init-detection-engine-rule-monitoring',
 ]);
 export type InitializationFlowIdEnum = typeof InitializationFlowId.enum;
 export const InitializationFlowIdEnum = InitializationFlowId.enum;
@@ -92,16 +92,14 @@ export const InitializationFlowsResult = z.object({
   'security-data-views': z
     .union([SecurityDataViewsReadyResult, InitializationFlowErrorResult])
     .optional(),
-  'install-prebuilt-rules-package': z
+  'init-prebuilt-rules': z
     .union([PackageInstallReadyResult, InitializationFlowErrorResult])
     .optional(),
-  'install-endpoint-package': z
+  'init-endpoint-protection': z
     .union([PackageInstallReadyResult, InitializationFlowErrorResult])
     .optional(),
-  'install-ai-prompts-package': z
-    .union([PackageInstallReadyResult, InitializationFlowErrorResult])
-    .optional(),
-  'install-detection-engine-rule-monitoring-assets': z
+  'init-ai-prompts': z.union([PackageInstallReadyResult, InitializationFlowErrorResult]).optional(),
+  'init-detection-engine-rule-monitoring': z
     .union([InstallDetectionEngineRuleMonitoringAssetsReadyResult, InitializationFlowErrorResult])
     .optional(),
 });

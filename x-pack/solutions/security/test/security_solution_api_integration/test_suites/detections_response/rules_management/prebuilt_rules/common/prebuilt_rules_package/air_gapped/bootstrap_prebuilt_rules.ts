@@ -10,8 +10,8 @@ import {
   PREBUILT_RULES_PACKAGE_NAME,
 } from '@kbn/security-solution-plugin/common/detection_engine/constants';
 import {
-  INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
-  INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE,
+  INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
+  INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
 } from '@kbn/security-solution-plugin/common/api/initialization';
 import expect from 'expect';
 import type { FtrProviderContext } from '../../../../../../../ftr_provider_context';
@@ -22,8 +22,8 @@ import {
 } from '../../../../../utils';
 
 const INITIALIZATION_FLOWS = [
-  INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
-  INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE,
+  INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
+  INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
 ];
 
 export default ({ getService }: FtrProviderContext): void => {
@@ -43,13 +43,13 @@ export default ({ getService }: FtrProviderContext): void => {
         200
       );
 
-      expect(body.flows[INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE]).toMatchObject({
+      expect(body.flows[INITIALIZATION_FLOW_INIT_PREBUILT_RULES]).toMatchObject({
         status: 'ready',
         payload: expect.objectContaining({
           name: PREBUILT_RULES_PACKAGE_NAME,
         }),
       });
-      expect(body.flows[INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE]).toMatchObject({
+      expect(body.flows[INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION]).toMatchObject({
         status: 'ready',
         payload: expect.objectContaining({
           name: ENDPOINT_PACKAGE_NAME,
@@ -65,14 +65,14 @@ export default ({ getService }: FtrProviderContext): void => {
         200
       );
 
-      expect(body.flows[INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE]).toMatchObject({
+      expect(body.flows[INITIALIZATION_FLOW_INIT_PREBUILT_RULES]).toMatchObject({
         status: 'ready',
         payload: expect.objectContaining({
           name: PREBUILT_RULES_PACKAGE_NAME,
           install_status: 'already_installed',
         }),
       });
-      expect(body.flows[INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE]).toMatchObject({
+      expect(body.flows[INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION]).toMatchObject({
         status: 'ready',
         payload: expect.objectContaining({
           name: ENDPOINT_PACKAGE_NAME,

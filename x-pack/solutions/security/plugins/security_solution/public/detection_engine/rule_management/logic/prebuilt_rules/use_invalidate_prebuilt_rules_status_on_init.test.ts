@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import { INITIALIZATION_FLOW_INIT_PREBUILT_RULES } from '../../../../../common/api/initialization';
 import { useSecuritySolutionInitialization } from '../../../../common/components/initialization/use_security_solution_initialization';
 import { useInvalidateFetchPrebuiltRulesStatusQuery } from '../../api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query';
 import { useInvalidatePrebuiltRulesStatusOnInit } from './use_invalidate_prebuilt_rules_status_on_init';
@@ -22,7 +23,7 @@ const mockInvalidate = jest.fn();
 
 const mockInitState = ({ loading }: { loading: boolean }) => {
   useSecuritySolutionInitializationMock.mockReturnValue({
-    'install-prebuilt-rules-package': loading
+    [INITIALIZATION_FLOW_INIT_PREBUILT_RULES]: loading
       ? { loading: true as const, result: null }
       : { loading: false as const, result: { status: 'ready' as const } },
   } as never);

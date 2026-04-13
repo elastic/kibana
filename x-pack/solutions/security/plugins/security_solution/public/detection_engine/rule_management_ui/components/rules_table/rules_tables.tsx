@@ -40,7 +40,7 @@ import { RULES_TABLE_PAGE_SIZE_OPTIONS } from './constants';
 import { useRuleManagementFilters } from '../../../rule_management/logic/use_rule_management_filters';
 import type { FindRulesSortField } from '../../../../../common/api/detection_engine/rule_management';
 import { useSecuritySolutionInitialization } from '../../../../common/components/initialization/use_security_solution_initialization';
-import { INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE } from '../../../../../common/api/initialization';
+import { INITIALIZATION_FLOW_INIT_PREBUILT_RULES } from '../../../../../common/api/initialization';
 import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manual_rule_run/use_manual_rule_run_confirmation';
 import { ManualRuleRunModal } from '../../../rule_gaps/components/manual_rule_run';
 import { BulkManualRuleRunLimitErrorModal } from './bulk_actions/bulk_manual_rule_run_limit_error_modal';
@@ -78,11 +78,8 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   const {
     rules: { read: canReadRules },
   } = useUserPrivileges().rulesPrivileges;
-  const initState = useSecuritySolutionInitialization([
-    INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
-  ]);
-  const isUpgradingSecurityPackages =
-    initState[INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE].loading;
+  const initState = useSecuritySolutionInitialization([INITIALIZATION_FLOW_INIT_PREBUILT_RULES]);
+  const isUpgradingSecurityPackages = initState[INITIALIZATION_FLOW_INIT_PREBUILT_RULES].loading;
 
   const rulesTableContext = useRulesTableContext();
   const { data: ruleManagementFilters } = useRuleManagementFilters();

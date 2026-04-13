@@ -31,14 +31,14 @@ import {
 } from '../../../../../../../common/components/initialization/initialization_context';
 import {
   INITIALIZATION_FLOW_STATUS_READY,
-  INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
+  INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
 } from '../../../../../../../../common/api/initialization';
 
 const MockKibanaContextProvider = createKibanaContextProviderMock();
 
 const mockInitializationContextValue: InitializationContextValue = {
   settledState: {
-    [INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE]: {
+    [INITIALIZATION_FLOW_INIT_PREBUILT_RULES]: {
       status: INITIALIZATION_FLOW_STATUS_READY,
       payload: null,
     },

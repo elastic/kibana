@@ -9,9 +9,9 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { InitializationFlowId } from '../../../common/api/initialization';
 import {
   INITIALIZATION_FLOW_CREATE_LIST_INDICES,
-  INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
-  INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE,
-  INITIALIZATION_FLOW_INSTALL_AI_PROMPTS_PACKAGE,
+  INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
+  INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
+  INITIALIZATION_FLOW_INIT_AI_PROMPTS,
   INITIALIZATION_FLOW_STATUS_READY,
   INITIALIZATION_FLOW_STATUS_ERROR,
 } from '../../../common/api/initialization';
@@ -36,34 +36,34 @@ jest.mock('./flows/initialize_security_data_views', () => ({
   },
 }));
 
-jest.mock('./flows/install_prebuilt_rules_package', () => ({
-  installPrebuiltRulesPackageFlow: {
-    id: 'install-prebuilt-rules-package' as const,
+jest.mock('./flows/init_prebuilt_rules', () => ({
+  initPrebuiltRulesFlow: {
+    id: 'init-prebuilt-rules' as const,
     runFirst: true,
     resolveProvisionContext: jest.fn().mockResolvedValue({}),
     provision: jest.fn().mockResolvedValue({ status: 'ready' as const, payload: null }),
   },
 }));
 
-jest.mock('./flows/install_endpoint_package', () => ({
-  installEndpointPackageFlow: {
-    id: 'install-endpoint-package' as const,
+jest.mock('./flows/init_endpoint_protection', () => ({
+  initEndpointProtectionFlow: {
+    id: 'init-endpoint-protection' as const,
     resolveProvisionContext: jest.fn().mockResolvedValue({}),
     provision: jest.fn().mockResolvedValue({ status: 'ready' as const, payload: null }),
   },
 }));
 
-jest.mock('./flows/install_ai_prompts_package', () => ({
-  installAiPromptsPackageFlow: {
-    id: 'install-ai-prompts-package' as const,
+jest.mock('./flows/init_ai_prompts', () => ({
+  initAiPromptsFlow: {
+    id: 'init-ai-prompts' as const,
     resolveProvisionContext: jest.fn().mockResolvedValue({}),
     provision: jest.fn().mockResolvedValue({ status: 'ready' as const, payload: null }),
   },
 }));
 
-jest.mock('./flows/install_de_rule_monitoring_assets', () => ({
-  installDeRuleMonitoringAssetsFlow: {
-    id: 'install-detection-engine-rule-monitoring-assets' as const,
+jest.mock('./flows/init_detection_engine_rule_monitoring', () => ({
+  initDetectionEngineRuleMonitoringFlow: {
+    id: 'init-detection-engine-rule-monitoring' as const,
     resolveProvisionContext: jest.fn().mockResolvedValue({}),
     provision: jest.fn().mockResolvedValue({ status: 'ready' as const }),
   },
@@ -221,23 +221,19 @@ describe('runInitializationFlows', () => {
     it('executes runFirst flows before non-runFirst flows', async () => {
       const executionOrder: string[] = [];
 
-      const { installPrebuiltRulesPackageFlow } = jest.requireMock(
-        './flows/install_prebuilt_rules_package'
-      );
-      const { installEndpointPackageFlow } = jest.requireMock('./flows/install_endpoint_package');
-      const { installAiPromptsPackageFlow } = jest.requireMock(
-        './flows/install_ai_prompts_package'
-      );
+      const { initPrebuiltRulesFlow } = jest.requireMock('./flows/init_prebuilt_rules');
+      const { initEndpointProtectionFlow } = jest.requireMock('./flows/init_endpoint_protection');
+      const { initAiPromptsFlow } = jest.requireMock('./flows/init_ai_prompts');
 
-      installPrebuiltRulesPackageFlow.provision.mockImplementation(async () => {
+      initPrebuiltRulesFlow.provision.mockImplementation(async () => {
         executionOrder.push('prebuilt-rules');
         return { status: INITIALIZATION_FLOW_STATUS_READY, payload: null };
       });
-      installEndpointPackageFlow.provision.mockImplementation(async () => {
+      initEndpointProtectionFlow.provision.mockImplementation(async () => {
         executionOrder.push('endpoint');
         return { status: INITIALIZATION_FLOW_STATUS_READY, payload: null };
       });
-      installAiPromptsPackageFlow.provision.mockImplementation(async () => {
+      initAiPromptsFlow.provision.mockImplementation(async () => {
         executionOrder.push('ai-prompts');
         return { status: INITIALIZATION_FLOW_STATUS_READY, payload: null };
       });
@@ -245,9 +241,9 @@ describe('runInitializationFlows', () => {
       const context = createMockContext();
       await runInitializationFlows(
         [
-          INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE,
-          INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
-          INITIALIZATION_FLOW_INSTALL_AI_PROMPTS_PACKAGE,
+          INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
+          INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
+          INITIALIZATION_FLOW_INIT_AI_PROMPTS,
         ],
         context,
         logger
@@ -263,9 +259,7 @@ describe('runInitializationFlows', () => {
       const { createListIndicesInitializationFlow } = jest.requireMock(
         './flows/create_list_indices'
       );
-      const { installPrebuiltRulesPackageFlow } = jest.requireMock(
-        './flows/install_prebuilt_rules_package'
-      );
+      const { initPrebuiltRulesFlow } = jest.requireMock('./flows/init_prebuilt_rules');
 
       // Temporarily make create-list-indices runFirst for this test
       createListIndicesInitializationFlow.runFirst = true;
@@ -276,17 +270,14 @@ describe('runInitializationFlows', () => {
         executionOrder.push('list-indices');
         return { status: INITIALIZATION_FLOW_STATUS_READY, payload: null };
       });
-      installPrebuiltRulesPackageFlow.provision.mockImplementation(async () => {
+      initPrebuiltRulesFlow.provision.mockImplementation(async () => {
         executionOrder.push('prebuilt-rules');
         return { status: INITIALIZATION_FLOW_STATUS_READY, payload: null };
       });
 
       const context = createMockContext();
       await runInitializationFlows(
-        [
-          INITIALIZATION_FLOW_CREATE_LIST_INDICES,
-          INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
-        ],
+        [INITIALIZATION_FLOW_CREATE_LIST_INDICES, INITIALIZATION_FLOW_INIT_PREBUILT_RULES],
         context,
         logger
       );
@@ -304,19 +295,17 @@ describe('runInitializationFlows', () => {
       const endpointStarted = jest.fn();
       const aiPromptsStarted = jest.fn();
 
-      const { installEndpointPackageFlow } = jest.requireMock('./flows/install_endpoint_package');
-      const { installAiPromptsPackageFlow } = jest.requireMock(
-        './flows/install_ai_prompts_package'
-      );
+      const { initEndpointProtectionFlow } = jest.requireMock('./flows/init_endpoint_protection');
+      const { initAiPromptsFlow } = jest.requireMock('./flows/init_ai_prompts');
 
-      installEndpointPackageFlow.provision.mockImplementation(
+      initEndpointProtectionFlow.provision.mockImplementation(
         () =>
           new Promise<{ status: string; payload: null }>((resolve) => {
             endpointStarted();
             resolveEndpoint = () => resolve({ status: 'ready', payload: null });
           })
       );
-      installAiPromptsPackageFlow.provision.mockImplementation(
+      initAiPromptsFlow.provision.mockImplementation(
         () =>
           new Promise<{ status: string; payload: null }>((resolve) => {
             aiPromptsStarted();
@@ -326,10 +315,7 @@ describe('runInitializationFlows', () => {
 
       const context = createMockContext();
       const promise = runInitializationFlows(
-        [
-          INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE,
-          INITIALIZATION_FLOW_INSTALL_AI_PROMPTS_PACKAGE,
-        ],
+        [INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION, INITIALIZATION_FLOW_INIT_AI_PROMPTS],
         context,
         logger
       );
@@ -421,9 +407,9 @@ describe('runInitializationFlows', () => {
 
     it('deduplicates non-space-aware flows across different spaces', async () => {
       let resolveProvision: (value: { status: string; payload: null }) => void;
-      const { installEndpointPackageFlow } = jest.requireMock('./flows/install_endpoint_package');
+      const { initEndpointProtectionFlow } = jest.requireMock('./flows/init_endpoint_protection');
 
-      installEndpointPackageFlow.provision.mockImplementation(
+      initEndpointProtectionFlow.provision.mockImplementation(
         () =>
           new Promise((resolve) => {
             resolveProvision = resolve;
@@ -443,13 +429,13 @@ describe('runInitializationFlows', () => {
       } as unknown as InitializationFlowContext;
 
       const promise1 = runInitializationFlows(
-        [INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE],
+        [INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION],
         contextSpaceA,
         logger
       );
       await new Promise((r) => setImmediate(r));
       const promise2 = runInitializationFlows(
-        [INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE],
+        [INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION],
         contextSpaceB,
         logger
       );
@@ -458,17 +444,17 @@ describe('runInitializationFlows', () => {
 
       const [response1, response2] = await Promise.all([promise1, promise2]);
 
-      expect(response1.flows[INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE]).toEqual({
+      expect(response1.flows[INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION]).toEqual({
         status: INITIALIZATION_FLOW_STATUS_READY,
         payload: null,
       });
-      expect(response2.flows[INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE]).toEqual({
+      expect(response2.flows[INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION]).toEqual({
         status: INITIALIZATION_FLOW_STATUS_READY,
         payload: null,
       });
 
       // provision was called only once — non-space-aware flows deduplicate across spaces
-      expect(installEndpointPackageFlow.provision).toHaveBeenCalledTimes(1);
+      expect(initEndpointProtectionFlow.provision).toHaveBeenCalledTimes(1);
     });
 
     it('executes a new request after a previous one completes', async () => {

@@ -9,6 +9,7 @@ import { renderHook } from '@testing-library/react';
 import { useSecuritySolutionInitialization } from '../../../common/components/initialization/use_security_solution_initialization';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import { INITIALIZATION_FLOW_INIT_PREBUILT_RULES } from '../../../../common/api/initialization';
 import { useBootstrapEaseRulesMutation } from '../../../detection_engine/rule_management/api/hooks/prebuilt_rules/use_bootstrap_promotion_rules';
 import {
   useBootstrapEaseRules,
@@ -58,7 +59,7 @@ const mockInitState = ({
               : { status: 'error' as const, error: error ?? null },
         };
   useSecuritySolutionInitializationMock.mockReturnValue({
-    'install-prebuilt-rules-package': flowState,
+    [INITIALIZATION_FLOW_INIT_PREBUILT_RULES]: flowState,
   } as never);
 };
 

@@ -21,10 +21,10 @@ import { useUpdateBrowserTitle } from '../../common/hooks/use_update_browser_tit
 import { useUpdateExecutionContext } from '../../common/hooks/use_update_execution_context';
 import { useSecuritySolutionInitialization } from '../../common/components/initialization/use_security_solution_initialization';
 import {
-  INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
-  INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE,
-  INITIALIZATION_FLOW_INSTALL_AI_PROMPTS_PACKAGE,
-  INITIALIZATION_FLOW_INSTALL_DE_RULE_MONITORING_ASSETS,
+  INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
+  INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
+  INITIALIZATION_FLOW_INIT_AI_PROMPTS,
+  INITIALIZATION_FLOW_INIT_DETECTION_ENGINE_RULE_MONITORING,
 } from '../../../common/api/initialization';
 import { TopValuesPopover } from '../components/top_values_popover/top_values_popover';
 import { useInitSourcerer } from '../../sourcerer/containers/use_init_sourcerer';
@@ -62,14 +62,14 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
 
   // Trigger the package installation
   useSecuritySolutionInitialization([
-    INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
-    INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE,
-    INITIALIZATION_FLOW_INSTALL_AI_PROMPTS_PACKAGE,
+    INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
+    INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
+    INITIALIZATION_FLOW_INIT_AI_PROMPTS,
   ]);
 
   // Trigger the installation of monitoring assets in parallel
-  // since `INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE` blocks until it is finished
-  useSecuritySolutionInitialization([INITIALIZATION_FLOW_INSTALL_DE_RULE_MONITORING_ASSETS]);
+  // since `INITIALIZATION_FLOW_INIT_PREBUILT_RULES` blocks until it is finished
+  useSecuritySolutionInitialization([INITIALIZATION_FLOW_INIT_DETECTION_ENGINE_RULE_MONITORING]);
 
   return (
     <SecuritySolutionAppWrapper id="security-solution-app" className="kbnAppWrapper">

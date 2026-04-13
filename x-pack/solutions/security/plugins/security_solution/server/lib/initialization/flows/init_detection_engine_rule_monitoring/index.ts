@@ -7,18 +7,18 @@
 
 import type { Logger } from '@kbn/logging';
 import {
-  INITIALIZATION_FLOW_INSTALL_DE_RULE_MONITORING_ASSETS,
+  INITIALIZATION_FLOW_INIT_DETECTION_ENGINE_RULE_MONITORING,
   INITIALIZATION_FLOW_STATUS_READY,
 } from '../../../../../common/api/initialization';
 import type { InitializationFlowContext, InitializationFlowDefinition } from '../../types';
-import type { InstallDeRuleMonitoringAssetsProvisionContext } from './types';
+import type { InstallDetectionEngineRuleMonitoringAssetsProvisionContext } from './types';
 
-export const installDeRuleMonitoringAssetsFlow: InitializationFlowDefinition<InstallDeRuleMonitoringAssetsProvisionContext> =
+export const initDetectionEngineRuleMonitoringFlow: InitializationFlowDefinition<InstallDetectionEngineRuleMonitoringAssetsProvisionContext> =
   {
-    id: INITIALIZATION_FLOW_INSTALL_DE_RULE_MONITORING_ASSETS,
+    id: INITIALIZATION_FLOW_INIT_DETECTION_ENGINE_RULE_MONITORING,
     resolveProvisionContext: async (
       context: InitializationFlowContext
-    ): Promise<InstallDeRuleMonitoringAssetsProvisionContext> => {
+    ): Promise<InstallDetectionEngineRuleMonitoringAssetsProvisionContext> => {
       const securityContext = await context.requestHandlerContext.securitySolution;
 
       // The health client internally creates an importer backed by

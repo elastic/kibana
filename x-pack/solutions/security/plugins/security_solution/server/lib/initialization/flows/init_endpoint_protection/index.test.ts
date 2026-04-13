@@ -8,11 +8,11 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { ProductFeatureRulesKey } from '@kbn/security-solution-features/keys';
 import {
-  INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE,
+  INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
   INITIALIZATION_FLOW_STATUS_READY,
 } from '../../../../../common/api/initialization';
 import type { InitializationFlowContext } from '../../types';
-import { installEndpointPackageFlow } from '.';
+import { initEndpointProtectionFlow } from '.';
 import { installEndpointPackage } from '../../../detection_engine/prebuilt_rules/logic/integrations/install_endpoint_package';
 
 jest.mock('../../../detection_engine/prebuilt_rules/logic/integrations/install_endpoint_package');
@@ -40,17 +40,17 @@ const createMockInitializationFlowContext = ({
     },
   } as unknown as InitializationFlowContext);
 
-describe('installEndpointPackageFlow', () => {
+describe('initEndpointProtectionFlow', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('has the correct id', () => {
-    expect(installEndpointPackageFlow.id).toBe(INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE);
+    expect(initEndpointProtectionFlow.id).toBe(INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION);
   });
 
   it('does not have runFirst set', () => {
-    expect(installEndpointPackageFlow.runFirst).toBeUndefined();
+    expect(initEndpointProtectionFlow.runFirst).toBeUndefined();
   });
 
   describe('resolveProvisionContext', () => {
@@ -60,7 +60,7 @@ describe('installEndpointPackageFlow', () => {
       const contextDisabled = createMockInitializationFlowContext({
         isExternalDetectionsEnabled: false,
       });
-      const provisionDisabled = await installEndpointPackageFlow.resolveProvisionContext(
+      const provisionDisabled = await initEndpointProtectionFlow.resolveProvisionContext(
         contextDisabled,
         logger
       );
@@ -69,7 +69,7 @@ describe('installEndpointPackageFlow', () => {
       const contextEnabled = createMockInitializationFlowContext({
         isExternalDetectionsEnabled: true,
       });
-      const provisionEnabled = await installEndpointPackageFlow.resolveProvisionContext(
+      const provisionEnabled = await initEndpointProtectionFlow.resolveProvisionContext(
         contextEnabled,
         logger
       );
@@ -81,7 +81,7 @@ describe('installEndpointPackageFlow', () => {
     it('skips installation when external detections is enabled', async () => {
       const logger = loggerMock.create();
 
-      const result = await installEndpointPackageFlow.provision(
+      const result = await initEndpointProtectionFlow.provision(
         {
           securityContext: createMockSecurityContext({
             isExternalDetectionsEnabled: true,
@@ -112,7 +112,7 @@ describe('installEndpointPackageFlow', () => {
         package: { name: 'endpoint', version: '8.15.0' } as never,
       });
 
-      const result = await installEndpointPackageFlow.provision(
+      const result = await initEndpointProtectionFlow.provision(
         {
           securityContext: createMockSecurityContext() as never,
           isExternalDetectionsEnabled: false,
@@ -138,7 +138,7 @@ describe('installEndpointPackageFlow', () => {
         package: { name: 'endpoint', version: '8.15.0' } as never,
       });
 
-      const result = await installEndpointPackageFlow.provision(
+      const result = await initEndpointProtectionFlow.provision(
         {
           securityContext: createMockSecurityContext() as never,
           isExternalDetectionsEnabled: false,
@@ -161,7 +161,7 @@ describe('installEndpointPackageFlow', () => {
         package: { name: 'endpoint', version: '8.15.0' } as never,
       });
 
-      await installEndpointPackageFlow.provision(
+      await initEndpointProtectionFlow.provision(
         {
           securityContext: createMockSecurityContext() as never,
           isExternalDetectionsEnabled: false,
@@ -177,7 +177,7 @@ describe('installEndpointPackageFlow', () => {
       installEndpointPackageMock.mockRejectedValue(new Error('Fleet unavailable'));
 
       await expect(
-        installEndpointPackageFlow.provision(
+        initEndpointProtectionFlow.provision(
           {
             securityContext: createMockSecurityContext() as never,
             isExternalDetectionsEnabled: false,

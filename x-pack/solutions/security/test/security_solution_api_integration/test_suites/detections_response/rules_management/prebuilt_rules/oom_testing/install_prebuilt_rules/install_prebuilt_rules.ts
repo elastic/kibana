@@ -20,8 +20,8 @@ import {
   REVIEW_RULE_INSTALLATION_URL,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
-  INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
-  INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE,
+  INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
+  INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
 } from '@kbn/security-solution-plugin/common/api/initialization';
 import { deleteAllRules, waitFor } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
@@ -92,20 +92,17 @@ export default ({ getService }: FtrProviderContext): void => {
     it('install prebuilt rules from a package', async () => {
       const { statusCode: initStatusCode, body: initResponse } = await initializeSecuritySolution(
         supertest,
-        [
-          INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
-          INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE,
-        ]
+        [INITIALIZATION_FLOW_INIT_PREBUILT_RULES, INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION]
       );
 
       // Assert body first to be able to see error messages in case of failure
-      expect(initResponse.flows[INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE]).toMatchObject({
+      expect(initResponse.flows[INITIALIZATION_FLOW_INIT_PREBUILT_RULES]).toMatchObject({
         status: 'ready',
         payload: expect.objectContaining({
           name: PREBUILT_RULES_PACKAGE_NAME,
         }),
       });
-      expect(initResponse.flows[INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE]).toMatchObject({
+      expect(initResponse.flows[INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION]).toMatchObject({
         status: 'ready',
         payload: expect.objectContaining({
           name: ENDPOINT_PACKAGE_NAME,

@@ -7,11 +7,11 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import {
-  INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
+  INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
   INITIALIZATION_FLOW_STATUS_READY,
 } from '../../../../../common/api/initialization';
 import type { InitializationFlowContext } from '../../types';
-import { installPrebuiltRulesPackageFlow } from '.';
+import { initPrebuiltRulesFlow } from '.';
 import { installPrebuiltRulesPackage } from '../../../detection_engine/prebuilt_rules/logic/integrations/install_prebuilt_rules_package';
 
 jest.mock(
@@ -36,19 +36,17 @@ const createMockInitializationFlowContext = (): InitializationFlowContext =>
     },
   } as unknown as InitializationFlowContext);
 
-describe('installPrebuiltRulesPackageFlow', () => {
+describe('initPrebuiltRulesFlow', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('has the correct id', () => {
-    expect(installPrebuiltRulesPackageFlow.id).toBe(
-      INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE
-    );
+    expect(initPrebuiltRulesFlow.id).toBe(INITIALIZATION_FLOW_INIT_PREBUILT_RULES);
   });
 
   it('has runFirst set to true', () => {
-    expect(installPrebuiltRulesPackageFlow.runFirst).toBe(true);
+    expect(initPrebuiltRulesFlow.runFirst).toBe(true);
   });
 
   describe('resolveProvisionContext', () => {
@@ -56,10 +54,7 @@ describe('installPrebuiltRulesPackageFlow', () => {
       const logger = loggerMock.create();
       const context = createMockInitializationFlowContext();
 
-      const provisionContext = await installPrebuiltRulesPackageFlow.resolveProvisionContext(
-        context,
-        logger
-      );
+      const provisionContext = await initPrebuiltRulesFlow.resolveProvisionContext(context, logger);
 
       expect(provisionContext.securityContext).toBeDefined();
     });
@@ -73,7 +68,7 @@ describe('installPrebuiltRulesPackageFlow', () => {
         package: { name: 'security_detection_engine', version: '1.0.0' } as never,
       });
 
-      const result = await installPrebuiltRulesPackageFlow.provision(
+      const result = await initPrebuiltRulesFlow.provision(
         { securityContext: createMockSecurityContext() as never },
         logger
       );
@@ -95,7 +90,7 @@ describe('installPrebuiltRulesPackageFlow', () => {
         package: { name: 'security_detection_engine', version: '1.0.0' } as never,
       });
 
-      const result = await installPrebuiltRulesPackageFlow.provision(
+      const result = await initPrebuiltRulesFlow.provision(
         { securityContext: createMockSecurityContext() as never },
         logger
       );
@@ -117,7 +112,7 @@ describe('installPrebuiltRulesPackageFlow', () => {
         package: { name: 'security_detection_engine', version: '2.0.0' } as never,
       });
 
-      await installPrebuiltRulesPackageFlow.provision(
+      await initPrebuiltRulesFlow.provision(
         { securityContext: createMockSecurityContext() as never },
         logger
       );
@@ -132,7 +127,7 @@ describe('installPrebuiltRulesPackageFlow', () => {
       installPrebuiltRulesPackageMock.mockRejectedValue(new Error('Fleet unavailable'));
 
       await expect(
-        installPrebuiltRulesPackageFlow.provision(
+        initPrebuiltRulesFlow.provision(
           { securityContext: createMockSecurityContext() as never },
           logger
         )
