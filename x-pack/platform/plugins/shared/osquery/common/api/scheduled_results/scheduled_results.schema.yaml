@@ -12,9 +12,7 @@ paths:
         (pack name, query name/text, timestamp).
       operationId: OsqueryGetScheduledActionResults
       x-codegen-enabled: true
-      #      TODO: Remove the empty x-labels array and uncomment the following line when feature flag is enabled
-      x-labels: [ ]
-      #      x-labels: [serverless, ess]
+      x-labels: [ serverless, ess ]
       parameters:
         - name: scheduleId
           in: path
@@ -71,9 +69,7 @@ paths:
         for a specific scheduled query execution.
       operationId: OsqueryGetScheduledQueryResults
       x-codegen-enabled: true
-      #      TODO: Remove the empty x-labels array and uncomment the following line when feature flag is enabled
-      x-labels: [ ]
-      #      x-labels: [serverless, ess]
+      x-labels: [ serverless, ess ]
       parameters:
         - name: scheduleId
           in: path

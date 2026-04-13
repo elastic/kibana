@@ -11,9 +11,7 @@ paths:
         osquery executions. The response uses cursor-based pagination.
       operationId: OsqueryGetUnifiedHistory
       x-codegen-enabled: true
-      #      TODO: Remove the empty x-labels array and uncomment the following line when feature flag is enabled
-      x-labels: [ ]
-      #      x-labels: [serverless, ess]
+      x-labels: [ serverless, ess ]
       parameters:
         - name: pageSize
           in: query
