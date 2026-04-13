@@ -216,6 +216,8 @@ export interface DeploymentsModesDefault {
   is_default?: boolean;
 }
 
+export type AgentlessDeploymentReleaseStatus = 'beta' | 'ga';
+
 export interface DeploymentsModesAgentless extends DeploymentsModesDefault {
   organization?: string;
   division?: string;
@@ -227,6 +229,7 @@ export interface DeploymentsModesAgentless extends DeploymentsModesDefault {
       memory: string;
     };
   };
+  release?: AgentlessDeploymentReleaseStatus;
 }
 export interface DeploymentsModes {
   agentless: DeploymentsModesAgentless;
