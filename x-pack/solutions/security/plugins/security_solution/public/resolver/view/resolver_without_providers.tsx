@@ -36,6 +36,7 @@ import { DocumentDetailsAnalyzerPanelKey } from '../../flyout/document_details/s
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { DocumentFlyoutWrapper } from '../../flyout_v2/document/document_flyout_wrapper';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useDefaultDocumentFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
 
 export const ANALYZER_PREVIEW_BANNER = {
   title: i18n.translate(
@@ -64,6 +65,7 @@ export const ResolverWithoutProviders = React.memo(
       shouldUpdate,
       filters,
       renderCellActions,
+      onAlertUpdated,
     }: ResolverProps,
     refToForward
   ) {
@@ -73,6 +75,7 @@ export const ResolverWithoutProviders = React.memo(
     const { overlays } = services;
     const store = useStore();
     const history = useHistory();
+    const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
     const { openPreviewPanel } = useExpandableFlyoutApi();
 
     useResolverQueryParamCleaner(resolverComponentInstanceID);
@@ -135,11 +138,14 @@ export const ResolverWithoutProviders = React.memo(
       selectors.resolverTreeHasNodes(state.analyzer[resolverComponentInstanceID])
     );
     const colorMap = useColors();
+    const handleAlertUpdated = useCallback(() => {
+      onAlertUpdated?.();
+    }, [onAlertUpdated]);
 
     const onShowEvent = useCallback<NodeEventOnClick>(
       ({ documentId, indexName }) =>
         () =>
-          overlays?.openSystemFlyout(
+          overlays.openSystemFlyout(
             flyoutProviders({
               services,
               store,
@@ -149,17 +155,24 @@ export const ResolverWithoutProviders = React.memo(
                   documentId={documentId}
                   indexName={indexName}
                   renderCellActions={renderCellActions}
+                  onAlertUpdated={handleAlertUpdated}
                 />
               ),
             }),
             {
-              ownFocus: false,
-              resizable: true,
+              ...defaultFlyoutProperties,
               session: 'inherit',
-              size: 's',
             }
           ),
-      [history, overlays, renderCellActions, services, store]
+      [
+        defaultFlyoutProperties,
+        handleAlertUpdated,
+        history,
+        overlays,
+        renderCellActions,
+        services,
+        store,
+      ]
     );
 
     const onShowPanel = useCallback(() => {
@@ -180,10 +193,8 @@ export const ResolverWithoutProviders = React.memo(
             ),
           }),
           {
-            ownFocus: false,
-            resizable: true,
+            ...defaultFlyoutProperties,
             session: 'inherit',
-            size: 's',
           }
         );
       } else {
@@ -196,6 +207,7 @@ export const ResolverWithoutProviders = React.memo(
         });
       }
     }, [
+      defaultFlyoutProperties,
       history,
       newFlyoutSystemEnabled,
       onShowEvent,

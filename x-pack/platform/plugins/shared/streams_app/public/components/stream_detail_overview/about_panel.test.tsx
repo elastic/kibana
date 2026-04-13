@@ -12,7 +12,7 @@ import { AboutPanel } from './about_panel';
 import {
   createMockWiredStreamDefinition,
   createMockQueryStreamDefinition,
-} from '../data_management/shared/mocks';
+} from '../stream_management/data_management/shared/mocks';
 
 const mockUseStreamDetail = jest.fn();
 const mockUseStreamsAppRouter = jest.fn();

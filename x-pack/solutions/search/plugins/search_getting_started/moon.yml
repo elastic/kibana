@@ -29,7 +29,6 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/search-shared-ui'
   - '@kbn/search-code-examples'
-  - '@kbn/try-in-console'
   - '@kbn/search-navigation'
   - '@kbn/cloud-plugin'
   - '@kbn/serverless'
@@ -41,8 +40,11 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/doc-links'
   - '@kbn/cloud'
+  - '@kbn/agent-builder-plugin'
   - '@kbn/deeplinks-search'
   - '@kbn/scout-search'
+  - '@kbn/search-agent'
+  - '@kbn/shared-ux-ai-components'
 tags:
   - plugin
   - prod
@@ -56,26 +58,6 @@ fileGroups:
     - server/**/*
     - test/scout/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

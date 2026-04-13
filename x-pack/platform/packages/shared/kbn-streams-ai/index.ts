@@ -20,6 +20,7 @@ export { sumTokens } from './src/helpers/sum_tokens';
 export {
   identifyFeatures,
   type IdentifyFeaturesOptions,
+  type PreviouslyIdentifiedFeature,
   type ExcludedFeatureSummary,
   type IgnoredFeature,
 } from './src/features/identify_features';

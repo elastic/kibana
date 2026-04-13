@@ -171,7 +171,7 @@
               "\nCurrent session management\n{@link ISessionService}"
             ],
             "signature": [
-              "{ start: () => string; clear: () => void; reset: () => void; save: (trackingProps: { entryPoint: string; }) => Promise<",
+              "{ start: () => string; clear: () => void; continue: (sessionId: string, keepSearches?: boolean) => void; reset: () => void; save: (trackingProps: { entryPoint: string; }) => Promise<",
               "SearchSessionSavedObject",
               ">; destroy: () => void; readonly state$: ",
               "Observable",
@@ -195,7 +195,7 @@
               "SessionStateContainer",
               "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; isRestore: (state?: ",
               "SessionStateContainer",
-              "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; restore: (sessionId: string) => Promise<void>; continue: (sessionId: string, keepSearches?: boolean) => void; cancel: ({ source }: { source: string; }) => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
+              "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; restore: (sessionId: string) => Promise<void>; cancel: ({ source }: { source: string; }) => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
               {
                 "pluginId": "@kbn/search-types",
                 "scope": "common",
@@ -800,7 +800,7 @@
               "\nCurrent session management\n{@link ISessionService}"
             ],
             "signature": [
-              "{ start: () => string; clear: () => void; reset: () => void; save: (trackingProps: { entryPoint: string; }) => Promise<",
+              "{ start: () => string; clear: () => void; continue: (sessionId: string, keepSearches?: boolean) => void; reset: () => void; save: (trackingProps: { entryPoint: string; }) => Promise<",
               "SearchSessionSavedObject",
               ">; destroy: () => void; readonly state$: ",
               "Observable",
@@ -824,7 +824,7 @@
               "SessionStateContainer",
               "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; isRestore: (state?: ",
               "SessionStateContainer",
-              "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; restore: (sessionId: string) => Promise<void>; continue: (sessionId: string, keepSearches?: boolean) => void; cancel: ({ source }: { source: string; }) => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
+              "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; restore: (sessionId: string) => Promise<void>; cancel: ({ source }: { source: string; }) => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
               {
                 "pluginId": "@kbn/search-types",
                 "scope": "common",
@@ -1374,7 +1374,7 @@
         "label": "ISessionService",
         "description": [],
         "signature": [
-          "{ start: () => string; clear: () => void; reset: () => void; save: (trackingProps: { entryPoint: string; }) => Promise<",
+          "{ start: () => string; clear: () => void; continue: (sessionId: string, keepSearches?: boolean) => void; reset: () => void; save: (trackingProps: { entryPoint: string; }) => Promise<",
           "SearchSessionSavedObject",
           ">; destroy: () => void; readonly state$: ",
           "Observable",
@@ -1398,7 +1398,7 @@
           "SessionStateContainer",
           "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; isRestore: (state?: ",
           "SessionStateContainer",
-          "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; restore: (sessionId: string) => Promise<void>; continue: (sessionId: string, keepSearches?: boolean) => void; cancel: ({ source }: { source: string; }) => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
+          "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; restore: (sessionId: string) => Promise<void>; cancel: ({ source }: { source: string; }) => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
           {
             "pluginId": "@kbn/search-types",
             "scope": "common",
@@ -1597,7 +1597,7 @@
                 "label": "config",
                 "description": [],
                 "signature": [
-                  "Readonly<{} & { search: Readonly<{} & { asyncSearch: Readonly<{ pollInterval?: number | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; query: Readonly<{} & { timefilter: Readonly<{} & { minRefreshInterval: number; }>; }>; enableUiSettingsValidations: boolean; }>"
+                  "Readonly<{} & { search: Readonly<{} & { asyncSearch: Readonly<{ pollInterval?: number | undefined; pollLength?: moment.Duration | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; query: Readonly<{} & { timefilter: Readonly<{} & { minRefreshInterval: number; }>; }>; enableUiSettingsValidations: boolean; }>"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
                 "lineNumber": 84,
@@ -2830,66 +2830,6 @@
     "interfaces": [
       {
         "parentPluginId": "data",
-        "id": "def-server.AsyncSearchStatusResponse",
-        "type": "Interface",
-        "tags": [],
-        "label": "AsyncSearchStatusResponse",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "server",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-server.AsyncSearchStatusResponse",
-            "text": "AsyncSearchStatusResponse"
-          },
-          " extends Omit<",
-          "AsyncSearchResponse",
-          "<unknown>, \"response\">"
-        ],
-        "path": "src/platform/plugins/shared/data/server/search/strategies/ese_search/types.ts",
-        "lineNumber": 30,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-server.AsyncSearchStatusResponse.completion_status",
-            "type": "number",
-            "tags": [],
-            "label": "completion_status",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/platform/plugins/shared/data/server/search/strategies/ese_search/types.ts",
-            "lineNumber": 31,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.AsyncSearchStatusResponse._shards",
-            "type": "Object",
-            "tags": [],
-            "label": "_shards",
-            "description": [],
-            "signature": [
-              "ShardStatistics"
-            ],
-            "path": "src/platform/plugins/shared/data/server/search/strategies/ese_search/types.ts",
-            "lineNumber": 32,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-server.IScopedSearchClient",
         "type": "Interface",
         "tags": [],
@@ -3095,13 +3035,13 @@
                 "signature": [
                   "{ search?: string | undefined; page?: number | undefined; filter?: any; aggs?: Record<string, ",
                   "AggregationsAggregationContainer",
-                  "> | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: ",
+                  "> | undefined; namespaces?: string[] | undefined; fields?: string[] | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: ",
                   "SortOrder",
                   " | undefined; hasReference?: ",
                   "SavedObjectsFindOptionsReference",
                   " | ",
                   "SavedObjectsFindOptionsReference",
-                  "[] | undefined; fields?: string[] | undefined; preference?: string | undefined; pit?: ",
+                  "[] | undefined; preference?: string | undefined; pit?: ",
                   "SavedObjectsPitParams",
                   " | undefined; searchAfter?: ",
                   "SortResults",
@@ -18725,7 +18665,7 @@
           "<Response>"
         ],
         "path": "src/platform/plugins/shared/data/common/search/poll_search.ts",
-        "lineNumber": 29,
+        "lineNumber": 28,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -18741,7 +18681,7 @@
               "() => Promise<Response>"
             ],
             "path": "src/platform/plugins/shared/data/common/search/poll_search.ts",
-            "lineNumber": 30,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -18758,7 +18698,7 @@
               "(() => Promise<void>) | undefined"
             ],
             "path": "src/platform/plugins/shared/data/common/search/poll_search.ts",
-            "lineNumber": 31,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -18781,7 +18721,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/common/search/poll_search.ts",
-            "lineNumber": 32,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -30414,13 +30354,31 @@
             "tags": [],
             "label": "pollInterval",
             "description": [
-              "\nThe number of milliseconds to wait between receiving a response and sending another request\nIf not provided, then a default 1 second interval with back-off up to 5 seconds interval is used"
+              "\nThe number of milliseconds to wait between receiving a response and sending another request\nIf not provided, then it defaults to 0 (no wait time)"
             ],
             "signature": [
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/data/common/search/strategies/ese_search/types.ts",
             "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.IAsyncSearchOptions.pollLength",
+            "type": "string",
+            "tags": [],
+            "label": "pollLength",
+            "description": [
+              "\nThe length of time to wait for results before initiating a new poll request."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/strategies/ese_search/types.ts",
+            "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41323,7 +41281,7 @@
             "label": "inputTypes",
             "description": [],
             "signature": [
-              "(\"kibana_context\" | \"null\")[]"
+              "(\"null\" | \"kibana_context\")[]"
             ],
             "path": "src/platform/plugins/shared/data/common/search/expressions/kibana.ts",
             "lineNumber": 34,

@@ -19,8 +19,7 @@ import {
   verifyRetentionDisplay,
 } from '../../../fixtures/retention_helpers';
 
-// Failing: See https://github.com/elastic/kibana/issues/258662
-test.describe.skip('Stream data retention - updating failure store', () => {
+test.describe('Stream data retention - updating failure store', () => {
   test.beforeAll(async ({ apiServices, logsSynthtraceEsClient, esClient }) => {
     await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
     await esClient.indices.putDataStreamOptions(
@@ -32,6 +31,8 @@ test.describe.skip('Stream data retention - updating failure store', () => {
       },
       { meta: true }
     );
+    // Ensure logs.otel has a backing data stream (deferred by default) so retention UI renders
+    await apiServices.streams.restoreDataStream('logs.otel');
     await apiServices.streams.forkStream('logs.otel', 'logs.otel.nginx', {
       field: 'service.name',
       eq: 'nginx',

@@ -38,7 +38,8 @@ test.describe(
       await expect(editableRules.filter({ hasText: RULE_NAMES.FIRST_RULE_TEST })).toHaveCount(1);
     });
 
-    test('should show the edit action button for an editable rule & open the edit rule flyout', async ({
+    // Skipping because unified rules does not support an edit flyout
+    test.skip('should show the edit action button for an editable rule & open the edit rule flyout', async ({
       pageObjects,
     }) => {
       const editableRules = pageObjects.rulesPage.getEditableRules();

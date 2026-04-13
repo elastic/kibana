@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Query rule execution logic API', function () {
     loadTestFile(require.resolve('./custom_query'));
     loadTestFile(require.resolve('./saved_query'));
+    loadTestFile(require.resolve('./custom_query_metrics'));
   });
 }

@@ -9,23 +9,24 @@
 
 import path from 'path';
 import { schema } from '@kbn/config-schema';
-import type { WorkflowExportEntry } from '../../../../common/lib/import';
+import type { ExportWorkflowsResponse, WorkflowExportEntry } from '../../../../common/lib/import';
+import { WORKFLOW_EXPORT_VERSION } from '../../../../common/lib/import';
 import { stringifyWorkflowDefinition } from '../../../../common/lib/yaml';
-import { generateWorkflowsArchive } from '../../lib/zip_archive';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
 import { withLicenseCheck } from '../utils/with_license_check';
 
-export function registerExportWorkflowsRoute({ router, api, logger, spaces }: RouteDependencies) {
+export function registerExportWorkflowsRoute(deps: RouteDependencies) {
+  const { router, api, logger, spaces, audit } = deps;
   router.versioned
     .post({
       path: '/api/workflows/export',
       access: 'public',
       security: WORKFLOW_READ_SECURITY,
       summary: 'Export workflows',
-      description: 'Export one or more workflows YAML files as a ZIP archive.',
+      description: 'Export one or more workflows as JSON with YAML content and metadata.',
       options: {
         tags: [OAS_TAG],
         availability: AVAILABILITY,
@@ -81,18 +82,22 @@ export function registerExportWorkflowsRoute({ router, api, logger, spaces }: Ro
             );
           }
 
-          const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-          const filename = `workflows_export_${timestamp}.zip`;
-          const zipBuffer = await generateWorkflowsArchive(entries);
-
-          return response.ok({
-            body: zipBuffer,
-            headers: {
-              'Content-Type': 'application/zip',
-              'Content-Disposition': `attachment; filename="${filename}"`,
+          const body: ExportWorkflowsResponse = {
+            entries,
+            manifest: {
+              exportedCount: entries.length,
+              exportedAt: new Date().toISOString(),
+              version: WORKFLOW_EXPORT_VERSION,
             },
+          };
+
+          audit.logWorkflowsExported(request, {
+            ids: entries.map((e) => e.id),
           });
+
+          return response.ok({ body });
         } catch (error) {
+          audit.logWorkflowsExported(request, { error });
           return handleRouteError(response, error);
         }
       })

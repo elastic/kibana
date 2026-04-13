@@ -8,8 +8,9 @@
 import { v4 as uuidv4 } from 'uuid';
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, CoreStart, IRouter, KibanaRequest, Logger } from '@kbn/core/server';
+import { type ConversationRound, isToolCallStep } from '@kbn/agent-builder-common';
 import type { ElasticConsolePluginStart, ElasticConsoleStartDependencies } from '../types';
-import { createConversationStorage } from '../lib/conversation_storage';
+import { createConversationClient } from '../lib/conversation_storage';
 import { isElasticConsoleEnabled } from './is_enabled';
 
 /**
@@ -17,28 +18,16 @@ import { isElasticConsoleEnabled } from './is_enabled';
  * The CLI sends them as objects/arrays. Serialize them so agent_builder can deserialize
  * with JSON.parse when reading conversations back.
  */
-const serializeConversationRounds = (
-  rounds: Array<Record<string, unknown>>
-): Array<Record<string, unknown>> => {
-  return rounds.map((round) => {
-    if (!Array.isArray(round.steps)) {
-      return round;
-    }
-    const steps = round.steps as Array<Record<string, unknown>>;
-    return {
-      ...round,
-      steps: steps.map((step) => {
-        if (
-          step.type === 'tool_call' &&
-          step.results !== undefined &&
-          typeof step.results !== 'string'
-        ) {
-          return { ...step, results: JSON.stringify(step.results) };
-        }
-        return step;
-      }),
-    };
-  });
+const serializeConversationRounds = (rounds: ConversationRound[]): ConversationRound[] => {
+  return rounds.map((round) => ({
+    ...round,
+    steps: round.steps.map((step) => {
+      if (isToolCallStep(step) && step.results !== undefined && typeof step.results !== 'string') {
+        return { ...step, results: JSON.stringify(step.results) };
+      }
+      return step;
+    }),
+  })) as ConversationRound[];
 };
 
 const getSpace = (basePath: string): string => {
@@ -72,7 +61,7 @@ export const registerConversationRoutes = ({
   // List conversations
   router.get(
     {
-      path: '/internal/elastic_console/conversations',
+      path: '/internal/elastic_ramen/conversations',
       security: {
         authz: { requiredPrivileges: ['agentBuilder:write'] },
       },
@@ -92,7 +81,11 @@ export const registerConversationRoutes = ({
         }
 
         const esClient = coreStart.elasticsearch.client.asScoped(request).asInternalUser;
-        const storage = createConversationStorage({ esClient, logger });
+        const client = createConversationClient(esClient);
+
+        if (!(await client.indexExists())) {
+          return response.ok({ body: { results: [] } });
+        }
 
         const basePath = coreStart.http.basePath.get(request);
         const space = getSpace(basePath);
@@ -106,7 +99,7 @@ export const registerConversationRoutes = ({
           filter.push({ term: { agent_id: request.query.agent_id } });
         }
 
-        const results = await storage.search({
+        const results = await client.search({
           track_total_hits: false,
           size: 100,
           query: {
@@ -139,7 +132,7 @@ export const registerConversationRoutes = ({
   // Get single conversation
   router.get(
     {
-      path: '/internal/elastic_console/conversations/{id}',
+      path: '/internal/elastic_ramen/conversations/{id}',
       security: {
         authz: { requiredPrivileges: ['agentBuilder:write'] },
       },
@@ -159,26 +152,31 @@ export const registerConversationRoutes = ({
         }
 
         const esClient = coreStart.elasticsearch.client.asScoped(request).asInternalUser;
-        const storage = createConversationStorage({ esClient, logger });
+        const client = createConversationClient(esClient);
+
+        if (!(await client.indexExists())) {
+          return response.notFound();
+        }
 
         const basePath = coreStart.http.basePath.get(request);
         const space = getSpace(basePath);
         const user = await getCurrentUser(coreStart, request);
 
-        const result = await storage.get({ id: request.params.id });
+        const result = await client.get({ id: request.params.id });
 
+        const hit = result.hits.hits[0];
         if (
-          !result.found ||
-          result._source?.space !== space ||
-          result._source?.user_name !== user.username
+          !hit?._source ||
+          hit._source.space !== space ||
+          hit._source.user_name !== user.username
         ) {
           return response.notFound();
         }
 
         return response.ok({
           body: {
-            id: result._id,
-            ...result._source,
+            id: hit._id,
+            ...hit._source,
           },
         });
       } catch (error) {
@@ -194,7 +192,7 @@ export const registerConversationRoutes = ({
   // Create conversation
   router.post(
     {
-      path: '/internal/elastic_console/conversations',
+      path: '/internal/elastic_ramen/conversations',
       security: {
         authz: { requiredPrivileges: ['agentBuilder:write'] },
       },
@@ -218,7 +216,17 @@ export const registerConversationRoutes = ({
         }
 
         const esClient = coreStart.elasticsearch.client.asScoped(request).asInternalUser;
-        const storage = createConversationStorage({ esClient, logger });
+        const client = createConversationClient(esClient);
+
+        if (!(await client.indexExists())) {
+          return response.customError({
+            statusCode: 503,
+            body: {
+              message:
+                'Conversation storage is not yet initialized. Start a conversation in Agent Builder first.',
+            },
+          });
+        }
 
         const basePath = coreStart.http.basePath.get(request);
         const space = getSpace(basePath);
@@ -226,13 +234,14 @@ export const registerConversationRoutes = ({
 
         const id = uuidv4();
         const now = new Date().toISOString();
+        const rounds = request.body.conversation_rounds as unknown as ConversationRound[];
 
-        await storage.index({
+        await client.index({
           id,
           document: {
             agent_id: request.body.agent_id,
             title: request.body.title,
-            conversation_rounds: serializeConversationRounds(request.body.conversation_rounds),
+            conversation_rounds: serializeConversationRounds(rounds),
             user_id: user.userId,
             user_name: user.username,
             space,
@@ -257,7 +266,7 @@ export const registerConversationRoutes = ({
   // Update conversation
   router.put(
     {
-      path: '/internal/elastic_console/conversations/{id}',
+      path: '/internal/elastic_ramen/conversations/{id}',
       security: {
         authz: { requiredPrivileges: ['agentBuilder:write'] },
       },
@@ -283,32 +292,47 @@ export const registerConversationRoutes = ({
         }
 
         const esClient = coreStart.elasticsearch.client.asScoped(request).asInternalUser;
-        const storage = createConversationStorage({ esClient, logger });
+        const client = createConversationClient(esClient);
+
+        if (!(await client.indexExists())) {
+          return response.customError({
+            statusCode: 503,
+            body: {
+              message:
+                'Conversation storage is not yet initialized. Start a conversation in Agent Builder first.',
+            },
+          });
+        }
 
         const basePath = coreStart.http.basePath.get(request);
         const space = getSpace(basePath);
         const user = await getCurrentUser(coreStart, request);
 
-        const existing = await storage.get({ id: request.params.id });
+        const existing = await client.get({ id: request.params.id });
 
+        const hit = existing.hits.hits[0];
         if (
-          !existing.found ||
-          existing._source?.space !== space ||
-          existing._source?.user_name !== user.username
+          !hit?._source ||
+          hit._source.space !== space ||
+          hit._source.user_name !== user.username
         ) {
           return response.notFound();
         }
 
+        const rounds = request.body.conversation_rounds as unknown as
+          | ConversationRound[]
+          | undefined;
+
         const updatedDoc = {
-          ...existing._source,
+          ...hit._source,
           ...(request.body.title !== undefined && { title: request.body.title }),
-          ...(request.body.conversation_rounds !== undefined && {
-            conversation_rounds: serializeConversationRounds(request.body.conversation_rounds),
+          ...(rounds !== undefined && {
+            conversation_rounds: serializeConversationRounds(rounds),
           }),
           updated_at: new Date().toISOString(),
         };
 
-        await storage.index({
+        await client.index({
           id: request.params.id,
           document: updatedDoc,
         });

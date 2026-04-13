@@ -9,6 +9,11 @@ import type { AnalyticsServiceSetup, Logger, EventTypeOpts } from '@kbn/core/ser
 import type { ItemDocument } from '../types';
 import type { MigrationState } from './types';
 import type { SiemMigrationVendor } from '../../../../../common/siem_migrations/model/common.gen';
+import {
+  SIEM_MIGRATIONS_SOURCE_QUERY_KEYWORDS,
+  siemMigrationEventNames,
+  SiemMigrationsEventTypes,
+} from '../../../telemetry/event_based/events/siem_migrations';
 
 interface StartMigrationTaskTelemetry<I extends ItemDocument = ItemDocument> {
   startItemTranslation: () => {
@@ -37,5 +42,22 @@ export abstract class SiemMigrationTelemetryClient<I extends ItemDocument = Item
     } catch (e) {
       this.logger.error(`Error reporting event ${eventTypeOpts.eventType}: ${e.message}`);
     }
+  }
+
+  public reportSourceQueryKeywords(params: {
+    type: 'rules' | 'dashboards';
+    keywords: string[];
+  }): void {
+    if (params.keywords.length === 0) {
+      return;
+    }
+
+    this.reportEvent(SIEM_MIGRATIONS_SOURCE_QUERY_KEYWORDS, {
+      migrationId: this.migrationId,
+      vendor: this.vendor,
+      eventName: siemMigrationEventNames[SiemMigrationsEventTypes.SourceQueryKeywords],
+      type: params.type,
+      keywords: params.keywords,
+    });
   }
 }

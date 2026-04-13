@@ -26,7 +26,7 @@ export const NewBucketButton = ({
   <EuiButtonEmpty
     data-test-subj={dataTestSubj}
     size="xs"
-    iconType="plusInCircle"
+    iconType="plusCircle"
     onClick={onClick}
     isDisabled={isDisabled}
     flush="left"

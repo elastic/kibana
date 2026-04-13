@@ -19,7 +19,6 @@ import type {
 import { suggestForExpression } from '../../definitions/utils';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
-import { EDITOR_MARKER } from '../../definitions/constants';
 import {
   pipeCompleteItem,
   assignCompletionItem,
@@ -85,7 +84,7 @@ function getPosition(
     return { position: CompletionPosition.AFTER_COMMAND };
   }
 
-  const expressionRoot = prompt?.text !== EDITOR_MARKER ? prompt : undefined;
+  const expressionRoot = prompt;
 
   // (function, literal, or existing column) - handle as primaryExpression
   if (isFunctionExpression(expressionRoot) || isLiteral(prompt) || isExistingColumn) {
@@ -137,7 +136,6 @@ export async function autocomplete(
           values: false,
           addSpaceAfterField: false,
           openSuggestions: false,
-          promoteToTop: true,
         }))
       );
 
@@ -175,7 +173,6 @@ export async function autocomplete(
           ...buildConstantsDefinitions(
             [promptSnippetText],
             '',
-            '1',
             undefined,
             undefined,
             SuggestionCategory.CONSTANT_VALUE
