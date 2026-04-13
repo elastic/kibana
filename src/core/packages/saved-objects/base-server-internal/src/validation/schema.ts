@@ -7,65 +7,58 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, type Type } from '@kbn/config-schema';
+import { z, isZod } from '@kbn/zod';
+import { isConfigSchema } from '@kbn/config-schema';
 import type {
   SavedObjectsValidationSpec,
   SavedObjectSanitizedDoc,
 } from '@kbn/core-saved-objects-server';
-
-// We convert `SavedObjectSanitizedDoc` to its validation schema representation
-// to ensure that we don't forget to keep the schema up-to-date. TS will complain
-// if we update `SavedObjectSanitizedDoc` without making changes below.
-type SavedObjectSanitizedDocSchema = {
-  [K in keyof Required<SavedObjectSanitizedDoc>]: Type<SavedObjectSanitizedDoc[K]>;
-};
-
-const baseSchema = schema.object<SavedObjectSanitizedDocSchema>({
-  id: schema.string({ minLength: 1 }),
-  type: schema.string(),
-  references: schema.arrayOf(
-    schema.object({
-      name: schema.string(),
-      type: schema.string(),
-      id: schema.string(),
-    }),
-    { defaultValue: [], maxSize: 1000 }
-  ),
-  namespace: schema.maybe(schema.string()),
-  namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
-  migrationVersion: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-  coreMigrationVersion: schema.maybe(schema.string()),
-  typeMigrationVersion: schema.maybe(schema.string()),
-  updated_at: schema.maybe(schema.string()),
-  updated_by: schema.maybe(schema.string()),
-  created_at: schema.maybe(schema.string()),
-  created_by: schema.maybe(schema.string()),
-  version: schema.maybe(schema.string()),
-  originId: schema.maybe(schema.string()),
-  managed: schema.maybe(schema.boolean()),
-  accessControl: schema.maybe(
-    schema.object({
-      owner: schema.string(),
-      accessMode: schema.oneOf([schema.literal('write_restricted'), schema.literal('default')]),
-    })
-  ),
-  attributes: schema.recordOf(schema.string(), schema.maybe(schema.any())),
-});
+import { baseConfigSchema, baseZodSchema } from './base_schema';
 
 /**
- * Takes a {@link SavedObjectsValidationSpec} and returns a full schema representing
- * a {@link SavedObjectSanitizedDoc}, with the spec applied to the object's `attributes`.
+ * Generic validator function for a given {@link SavedObjectSanitizedDoc}
  *
  * @internal
  */
-export const createSavedObjectSanitizedDocSchema = (
-  attributesSchema: SavedObjectsValidationSpec | undefined
-) => {
-  if (attributesSchema) {
-    return baseSchema.extends({
+export type SavedObjectSanitizedDocValidator = (
+  document: SavedObjectSanitizedDoc
+) => SavedObjectSanitizedDoc;
+
+/**
+ * Takes a {@link SavedObjectsValidationSpec} and returns a validator function for a full
+ * {@link SavedObjectSanitizedDoc}, with the spec applied to the object's `attributes`.
+ *
+ * @internal
+ */
+export const createSavedObjectSanitizedDocValidator = (
+  attributesSchema?: SavedObjectsValidationSpec
+): SavedObjectSanitizedDocValidator => {
+  if (!attributesSchema) {
+    return (document) => baseConfigSchema.validate(document);
+  }
+
+  if (isZod(attributesSchema)) {
+    const fullSchema = baseZodSchema.extend({
       attributes: attributesSchema,
     });
-  } else {
-    return baseSchema;
+
+    return (document) => {
+      const result = fullSchema.safeParse(document);
+      if (!result.success) {
+        throw new Error(z.prettifyError(result.error));
+      }
+      return result.data;
+    };
   }
+
+  if (isConfigSchema(attributesSchema)) {
+    const fullSchema = baseConfigSchema.extends({
+      attributes: attributesSchema,
+    });
+    return (document) => fullSchema.validate(document);
+  }
+
+  throw new Error(
+    'Unknown attributes schema. Must be defined with `@kbn/zod` or `@kbn/config-schema`.'
+  );
 };

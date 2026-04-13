@@ -8,6 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { convertModelVersionBackwardConversionSchema } from './backward_conversion_schema';
 import type {
   SavedObjectUnsanitizedDoc,
@@ -22,6 +23,16 @@ describe('convertModelVersionBackwardConversionSchema', () => {
     type: 'type',
     attributes: {},
     ...parts,
+  });
+
+  it('should throw if the schema is unknown', () => {
+    const mySchema = {} as any;
+
+    expect(() =>
+      convertModelVersionBackwardConversionSchema(mySchema)
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Unknown forward compatibility schema. Must be defined with \`@kbn/zod\` or \`@kbn/config-schema\`."`
+    );
   });
 
   describe('using functions', () => {
@@ -137,6 +148,73 @@ describe('convertModelVersionBackwardConversionSchema', () => {
         },
         { unknowns: 'ignore' }
       );
+
+      const doc = createDoc({
+        attributes: { durations: ['1m', '4d'], byteSize: '1gb', excluded: true },
+      });
+      const converted = convertModelVersionBackwardConversionSchema(conversionSchema);
+
+      expect(converted(doc)).toEqual({
+        ...doc,
+        attributes: {
+          durations: ['1m', '4d'],
+          byteSize: '1gb',
+        },
+      });
+    });
+  });
+
+  describe('using zod', () => {
+    it('converts the schema', () => {
+      const conversionSchema = z.object({
+        foo: z.string().optional(),
+      });
+      const parseSpy = jest.spyOn(conversionSchema, 'safeParse');
+
+      const doc = createDoc({ attributes: { foo: 'bar' } });
+      const converted = convertModelVersionBackwardConversionSchema(conversionSchema);
+
+      const output = converted(doc);
+
+      expect(parseSpy).toHaveBeenCalledTimes(1);
+      expect(parseSpy).toHaveBeenCalledWith({ foo: 'bar' });
+      expect(output).toEqual(doc);
+    });
+
+    it('returns the document with the updated properties', () => {
+      const conversionSchema = z.object({
+        foo: z.string().optional(),
+      });
+
+      const doc = createDoc({ attributes: { foo: 'bar', hello: 'dolly' } });
+      const converted = convertModelVersionBackwardConversionSchema(conversionSchema);
+
+      const output = converted(doc);
+
+      expect(output).toEqual({
+        ...doc,
+        attributes: {
+          foo: 'bar',
+        },
+      });
+    });
+
+    it('throws if the validation throws', () => {
+      const conversionSchema = z.object({
+        foo: z.string(),
+      });
+
+      const doc = createDoc({ attributes: { foo: 1 } });
+      const converted = convertModelVersionBackwardConversionSchema(conversionSchema);
+
+      expect(() => converted(doc)).toThrow(/Invalid input: expected string, received number/);
+    });
+
+    it('returns the known subset of keys with their original values', () => {
+      const conversionSchema = z.object({
+        durations: z.array(z.string()),
+        byteSize: z.string(),
+      });
 
       const doc = createDoc({
         attributes: { durations: ['1m', '4d'], byteSize: '1gb', excluded: true },

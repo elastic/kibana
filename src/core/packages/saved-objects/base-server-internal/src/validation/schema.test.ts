@@ -8,11 +8,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import type {
   SavedObjectsValidationMap,
   SavedObjectSanitizedDoc,
 } from '@kbn/core-saved-objects-server';
-import { createSavedObjectSanitizedDocSchema } from './schema';
+import { createSavedObjectSanitizedDocValidator } from './schema';
 
 describe('Saved Objects type validation schema', () => {
   const type = 'my-type';
@@ -29,35 +30,44 @@ describe('Saved Objects type validation schema', () => {
     type,
   });
 
+  it('should throw if schema is unknown', () => {
+    const mySchema = {} as any;
+    expect(() => {
+      createSavedObjectSanitizedDocValidator(mySchema);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"Attributes schema unknown. Must be defined with \`@kbn/zod\` or \`@kbn/config-schema\`."`
+    );
+  });
+
   it('should validate attributes based on provided spec', () => {
-    const objectSchema = createSavedObjectSanitizedDocSchema(validationMap['1.0.0']);
+    const validate = createSavedObjectSanitizedDocValidator(validationMap['1.0.0']);
     const data = createMockObject({ foo: 'heya' });
-    expect(() => objectSchema.validate(data)).not.toThrowError();
+    expect(() => validate(data)).not.toThrowError();
   });
 
   it('should fail if invalid attributes are provided', () => {
-    const objectSchema = createSavedObjectSanitizedDocSchema(validationMap['1.0.0']);
+    const validate = createSavedObjectSanitizedDocValidator(validationMap['1.0.0']);
     const data = createMockObject({ foo: false });
-    expect(() => objectSchema.validate(data)).toThrowErrorMatchingInlineSnapshot(
+    expect(() => validate(data)).toThrowErrorMatchingInlineSnapshot(
       `"[attributes.foo]: expected value of type [string] but got [boolean]"`
     );
   });
 
   it('should fail if invalid id is provided', () => {
-    const objectSchema = createSavedObjectSanitizedDocSchema(validationMap['1.0.0']);
+    const validate = createSavedObjectSanitizedDocValidator(validationMap['1.0.0']);
     const data = createMockObject({ foo: 'bar' });
     data.id = '';
-    expect(() => objectSchema.validate(data)).toThrowErrorMatchingInlineSnapshot(
+    expect(() => validate(data)).toThrowErrorMatchingInlineSnapshot(
       `"[id]: value has length [0] but it must have a minimum length of [1]."`
     );
   });
 
   it('should validate top-level properties', () => {
-    const objectSchema = createSavedObjectSanitizedDocSchema(validationMap['1.0.0']);
+    const validate = createSavedObjectSanitizedDocValidator(validationMap['1.0.0']);
     const data = createMockObject({ foo: 'heya' });
 
     expect(() =>
-      objectSchema.validate({
+      validate({
         ...data,
         id: 'abc-123',
         type: 'dashboard',
@@ -86,48 +96,55 @@ describe('Saved Objects type validation schema', () => {
   });
 
   it('should fail if top-level properties are invalid', () => {
-    const objectSchema = createSavedObjectSanitizedDocSchema(validationMap['1.0.0']);
+    const validate = createSavedObjectSanitizedDocValidator(validationMap['1.0.0']);
     const data = createMockObject({ foo: 'heya' });
-    expect(() => objectSchema.validate({ ...data, id: false })).toThrowErrorMatchingInlineSnapshot(
+    expect(() =>
+      validate({
+        ...data,
+        // @ts-expect-error - invalid id
+        id: false,
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
       `"[id]: expected value of type [string] but got [boolean]"`
     );
   });
 
   describe('default schema', () => {
     it('validates a record of attributes', () => {
-      const objectSchema = createSavedObjectSanitizedDocSchema(undefined);
+      const validate = createSavedObjectSanitizedDocValidator(undefined);
       const data = createMockObject({ foo: 'heya' });
 
-      expect(() => objectSchema.validate(data)).not.toThrowError();
+      expect(() => validate(data)).not.toThrowError();
     });
 
     it('fails validation on undefined attributes', () => {
-      const objectSchema = createSavedObjectSanitizedDocSchema(undefined);
+      const validate = createSavedObjectSanitizedDocValidator(undefined);
       const data = createMockObject(undefined);
 
-      expect(() => objectSchema.validate(data)).toThrowErrorMatchingInlineSnapshot(
+      expect(() => validate(data)).toThrowErrorMatchingInlineSnapshot(
         `"[attributes]: expected value of type [object] but got [undefined]"`
       );
     });
 
     it('fails validation on primitive attributes', () => {
-      const objectSchema = createSavedObjectSanitizedDocSchema(undefined);
+      const validate = createSavedObjectSanitizedDocValidator(undefined);
       const data = createMockObject(42);
 
-      expect(() => objectSchema.validate(data)).toThrowErrorMatchingInlineSnapshot(
+      expect(() => validate(data)).toThrowErrorMatchingInlineSnapshot(
         `"[attributes]: expected value of type [object] but got [number]"`
       );
     });
 
     it('fails validation on incorrect access control', () => {
-      const objectSchema = createSavedObjectSanitizedDocSchema(undefined);
+      const validate = createSavedObjectSanitizedDocValidator(undefined);
       const data = createMockObject({ foo: 'heya' });
 
       expect(() =>
-        objectSchema.validate({
+        validate({
           ...data,
           accessControl: {
             owner: 'user1',
+            // @ts-expect-error - invalid accessMode
             accessMode: 'invalid_mode',
           },
         })
@@ -136,6 +153,43 @@ describe('Saved Objects type validation schema', () => {
 - [accessControl.accessMode.0]: expected value to equal [write_restricted]
 - [accessControl.accessMode.1]: expected value to equal [default]`
       );
+    });
+  });
+
+  describe('using zod for attributes', () => {
+    const zodAttributesMap: SavedObjectsValidationMap = {
+      '1.0.0': z.object({
+        foo: z.string(),
+      }),
+    };
+
+    it('should validate attributes based on zod spec', () => {
+      const validate = createSavedObjectSanitizedDocValidator(zodAttributesMap['1.0.0']);
+      const data = createMockObject({ foo: 'heya' });
+      expect(() => validate(data)).not.toThrowError();
+    });
+
+    it('should fail if invalid attributes are provided', () => {
+      const validate = createSavedObjectSanitizedDocValidator(zodAttributesMap['1.0.0']);
+      const data = createMockObject({ foo: false });
+      expect(() => validate(data)).toThrowErrorMatchingInlineSnapshot(`
+        "✖ Invalid input: expected string, received boolean
+          → at attributes.foo"
+      `);
+    });
+
+    it('should fail if invalid id is provided', () => {
+      const validate = createSavedObjectSanitizedDocValidator(zodAttributesMap['1.0.0']);
+      const data = createMockObject({ foo: 'bar' });
+      expect(() =>
+        validate({
+          ...data,
+          id: '',
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "✖ Too small: expected string to have >=1 characters
+          → at id"
+      `);
     });
   });
 });

@@ -12,6 +12,7 @@
   ],
   "kbn_references": [
     "@kbn/utility-types",
+    "@kbn/zod",
     "@kbn/config-schema",
     "@kbn/logging",
     "@kbn/core-http-server",
