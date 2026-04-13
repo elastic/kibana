@@ -47,7 +47,7 @@ export async function suggestProcessingPipeline({
   fieldsMetadataClient,
   esClient,
   initialDatasetAnalysisJson,
-  mappedFields: mappedFieldsOverride,
+  mappedFieldsOverride,
   upstreamSeedParsingContextMarkdown,
 }: {
   definition: Streams.ingest.all.Definition;
