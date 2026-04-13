@@ -303,11 +303,16 @@ export function validateAllMappingsInModelVersion(
   }
 
   const mappingFieldPaths = getMappingFieldPaths(to.mappings);
-  const schemaFields = isZod(createSchema)
-    ? extractMappingCompatibleZodSchemaFields(createSchema)
-    : hasGetSchemaForMapping(createSchema)
-    ? extractMappingCompatibleSchemaFields(createSchema.getSchema())
-    : [];
+  let schemaFields: string[];
+  if (isZod(createSchema)) {
+    schemaFields = extractMappingCompatibleZodSchemaFields(createSchema);
+  } else if (hasGetSchemaForMapping(createSchema)) {
+    schemaFields = extractMappingCompatibleSchemaFields(createSchema.getSchema());
+  } else {
+    throw new Error(
+      `❌ The SO type '${name}' has a 'create' schema that is neither a Zod schema nor a Joi schema. Unable to extract fields for validation.`
+    );
+  }
 
   const normalizedMappingPaths = mappingFieldPaths.map((p) => toSchemaPathFormat(p));
   const undeclaredFields = normalizedMappingPaths.filter((field) => {

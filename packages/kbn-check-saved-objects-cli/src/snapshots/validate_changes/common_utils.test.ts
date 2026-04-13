@@ -10,9 +10,12 @@
 import { schema } from '@kbn/config-schema';
 import { z } from '@kbn/zod';
 import type { ObjectType } from '@kbn/config-schema';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type { MigrationInfoRecord } from '../../types';
 import {
   extractMappingCompatibleSchemaFields,
   extractMappingCompatibleZodSchemaFields,
+  validateAllMappingsInModelVersion,
 } from './common_utils';
 
 function normalizePaths(paths: string[]): string[] {
@@ -144,6 +147,46 @@ describe('common_utils', () => {
       expect(
         normalizePaths(extractMappingCompatibleZodSchemaFields(z.object({ row: rowSchema })))
       ).toEqual(['row.id']);
+    });
+  });
+
+  describe('validateAllMappingsInModelVersion', () => {
+    it('throws when latest model version `schemas.create` is not Zod and has no Joi `getSchema()`', () => {
+      const typeName = 'unsupported-create-schema';
+      const to: MigrationInfoRecord = {
+        name: typeName,
+        hash: 'hash',
+        migrationVersions: [],
+        schemaVersions: [],
+        modelVersions: [
+          {
+            version: '1',
+            modelVersionHash: 'h',
+            changeTypes: [],
+            hasTransformation: false,
+            newMappings: [],
+            schemas: { create: 'h', forwardCompatibility: 'h' },
+          },
+        ],
+        mappings: {},
+      };
+
+      const registeredType = {
+        name: typeName,
+        modelVersions: {
+          1: {
+            changes: [],
+            schemas: {
+              create: { plain: 'object-without-getSchema' },
+              forwardCompatibility: schema.object({}, { unknowns: 'ignore' }),
+            },
+          },
+        },
+      } as unknown as SavedObjectsType;
+
+      expect(() => validateAllMappingsInModelVersion(typeName, to, registeredType)).toThrow(
+        `❌ The SO type '${typeName}' has a 'create' schema that is neither a Zod schema nor a Joi schema. Unable to extract fields for validation.`
+      );
     });
   });
 });
