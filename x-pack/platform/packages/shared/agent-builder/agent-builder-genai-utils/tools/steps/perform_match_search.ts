@@ -310,6 +310,72 @@ const rerankAllSnippets = async ({
   return result;
 };
 
+/**
+ * Combines RERANK and TOP_SNIPPETS into a single ES|QL query, avoiding
+ * a second index read. Returns the reranked doc order and snippets.
+ */
+const rerankAndExtractSnippets = async ({
+  docIds,
+  index,
+  term,
+  fields,
+  resultSize,
+  esClient,
+  logger,
+}: {
+  docIds: string[];
+  index: string;
+  term: string;
+  fields: MappingField[];
+  resultSize: number;
+  esClient: ElasticsearchClient;
+  logger: Logger;
+}): Promise<{ hitOrder: string[]; snippetsByDocId: Map<string, string[]> }> => {
+  if (docIds.length === 0) return { hitOrder: [], snippetsByDocId: new Map() };
+
+  const idList = docIds.map((id) => `"${escapeEsqlString(id)}"`).join(', ');
+  const escapedTerm = escapeEsqlString(term);
+  const fieldPaths = fields.map((f) => f.path);
+  const mvAppendExpr = buildMvAppendExpr(fieldPaths);
+  const snippetCount = rerankSnippets ? snippetRankWindowSize : numSnippets;
+
+  const esqlQuery = `FROM ${index} METADATA _id | WHERE _id IN (${idList}) | RERANK "${escapedTerm}" ON ${fieldPaths} WITH {"inference_id": "${rerankInferenceID}"} | SORT _score DESC | LIMIT ${resultSize} | EVAL doc = MV_DEDUPE(${mvAppendExpr}) | EVAL snippets = TOP_SNIPPETS(doc, "${escapedTerm}", {"num_snippets": ${snippetCount}, "num_words": ${numWords}}) | MV_EXPAND snippets | KEEP _id, snippets`;
+
+  logger.debug(`RERANK + TOP_SNIPPETS combined query: ${esqlQuery}`);
+
+  const esqlResponse = await executeEsql({ query: esqlQuery, esClient });
+
+  const hitOrder: string[] = [];
+  const snippetsByDocId = new Map<string, string[]>();
+  const seen = new Set<string>();
+
+  for (const row of esqlResponse.values) {
+    const docId = row[0];
+    const snippet = row[1];
+    if (typeof docId !== 'string') continue;
+
+    // Preserve RERANK order for doc IDs
+    if (!seen.has(docId)) {
+      seen.add(docId);
+      hitOrder.push(docId);
+    }
+
+    if (!snippetsByDocId.has(docId)) {
+      snippetsByDocId.set(docId, []);
+    }
+    const snippets = snippetsByDocId.get(docId)!;
+    if (Array.isArray(snippet)) {
+      for (const item of snippet) {
+        if (typeof item === 'string') snippets.push(item);
+      }
+    } else if (typeof snippet === 'string') {
+      snippets.push(snippet);
+    }
+  }
+
+  return { hitOrder, snippetsByDocId };
+};
+
 export const performMatchSearch = async ({
   term,
   fields,
@@ -343,13 +409,38 @@ export const performMatchSearch = async ({
   }
 
   let hitOrder = response.hits.hits.map((hit) => hit._id!);
+  const hitsByDocId = new Map(response.hits.hits.map((hit) => [hit._id!, hit]));
   logger.debug(
     `Search returned ${hitOrder.length} hits: [${hitOrder.join(
       ', '
     )}], rerankCandidateDocs=${rerankCandidateDocs}, useSnippets=${useSnippets}`
   );
 
-  if (rerankCandidateDocs) {
+  // When both are enabled, combine RERANK + TOP_SNIPPETS into a single ES|QL query
+  let rawSnippetsByDocId: Map<string, string[]> | undefined;
+
+  if (rerankCandidateDocs && useSnippets) {
+    try {
+      const combined = await rerankAndExtractSnippets({
+        docIds: hitOrder,
+        index,
+        term,
+        fields,
+        resultSize: hardCodedSize,
+        esClient,
+        logger,
+      });
+      hitOrder = combined.hitOrder;
+      rawSnippetsByDocId = combined.snippetsByDocId;
+    } catch (error) {
+      logger.info(
+        `Combined RERANK + TOP_SNIPPETS failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      hitOrder = hitOrder.slice(0, hardCodedSize);
+    }
+  } else if (rerankCandidateDocs) {
     try {
       hitOrder = await rerankDocuments({
         docIds: hitOrder,
@@ -370,23 +461,25 @@ export const performMatchSearch = async ({
     }
   }
 
-  const hitsByDocId = new Map(response.hits.hits.map((hit) => [hit._id!, hit]));
-
   if (useSnippets) {
-    let rawSnippetsByDocId = new Map<string, string[]>();
-    try {
-      rawSnippetsByDocId = await extractSnippetsBatch({
-        docIds: hitOrder,
-        index,
-        term,
-        fields,
-        esClient,
-        logger,
-      });
-    } catch (error) {
-      logger.info(
-        `TOP_SNIPPETS batch query failed: ${error instanceof Error ? error.message : String(error)}`
-      );
+    if (!rawSnippetsByDocId) {
+      rawSnippetsByDocId = new Map<string, string[]>();
+      try {
+        rawSnippetsByDocId = await extractSnippetsBatch({
+          docIds: hitOrder,
+          index,
+          term,
+          fields,
+          esClient,
+          logger,
+        });
+      } catch (error) {
+        logger.info(
+          `TOP_SNIPPETS batch query failed: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
     }
 
     // Dedup snippets per document
