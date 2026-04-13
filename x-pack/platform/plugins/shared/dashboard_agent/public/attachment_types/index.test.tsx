@@ -18,11 +18,6 @@ import type { ChatEvent, RoundCompleteEvent, ConversationRound } from '@kbn/agen
 import { ChatEventType } from '@kbn/agent-builder-common';
 import { ATTACHMENT_REF_OPERATION } from '@kbn/agent-builder-common/attachments';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import {
-  clearUnifiedSearchPersistedState,
-  getPersistedState,
-  setPersistedState,
-} from './canvas_integration/use_dashboard_preview_unified_search';
 import { registerDashboardAttachmentUiDefinition } from '.';
 
 jest.mock('@kbn/dashboard-plugin/public', () => ({
@@ -211,7 +206,6 @@ describe('registerDashboardAttachmentUiDefinition', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    clearUnifiedSearchPersistedState('attachment-1');
     deps = createMockDeps();
     unregister = registerDashboardAttachmentUiDefinition(deps);
     uiDefinition = deps.addAttachmentType.mock.calls[0][1];
@@ -233,46 +227,6 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       })
     );
   });
-
-  it('persists canvas unified search state per attachment across render calls', () => {
-    const attachment: DashboardAttachment = {
-      id: 'attachment-1',
-      type: DASHBOARD_ATTACHMENT_TYPE,
-      data: { title: 'Test Dashboard', description: '', panels: [] },
-    };
-
-    setPersistedState(attachment.id, {
-      filters: [{ meta: { key: 'host.name' } }],
-      query: { query: 'host.name: "web-01"', language: 'kuery' },
-      timeRange: { from: 'now-1h', to: 'now' },
-    });
-
-    expect(getPersistedState(attachment.id)).toEqual({
-      filters: [{ meta: { key: 'host.name' } }],
-      query: { query: 'host.name: "web-01"', language: 'kuery' },
-      timeRange: { from: 'now-1h', to: 'now' },
-    });
-  });
-
-  it('clears persisted canvas unified search state when attachment unmounts', () => {
-    const { getAttachment } = createMockAttachment('attachment-1');
-
-    setPersistedState('attachment-1', {
-      filters: [{ meta: { key: 'host.name' } }],
-      query: { query: 'host.name: "web-01"', language: 'kuery' },
-      timeRange: { from: 'now-1h', to: 'now' },
-    });
-
-    const cleanup = uiDefinition.onAttachmentMount!({
-      getAttachment,
-      updateOrigin,
-    });
-
-    cleanup?.();
-
-    expect(getPersistedState('attachment-1')).toBeUndefined();
-  });
-
   describe('onAttachmentMount - origin sync', () => {
     it('updates origin when new dashboard is saved', async () => {
       const { getAttachment } = createMockAttachment('attachment-1');

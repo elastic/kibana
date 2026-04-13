@@ -16,43 +16,6 @@ import { isEqual } from 'lodash';
 import type { DashboardState } from '@kbn/dashboard-plugin/server';
 import { DEFAULT_TIME_RANGE } from '@kbn/dashboard-agent-common';
 
-interface DashboardPreviewUnifiedSearchState {
-  filters: Filter[];
-  query?: Query;
-  timeRange: TimeRange;
-}
-
-const persistedStateByAttachmentId = new Map<string, DashboardPreviewUnifiedSearchState>();
-
-export const getPersistedState = (attachmentId: string) =>
-  persistedStateByAttachmentId.get(attachmentId);
-
-export const setPersistedState = (
-  attachmentId: string,
-  state: DashboardPreviewUnifiedSearchState
-) => {
-  persistedStateByAttachmentId.set(attachmentId, state);
-};
-
-export const clearUnifiedSearchPersistedState = (attachmentId: string) => {
-  persistedStateByAttachmentId.delete(attachmentId);
-};
-
-const usePersistedState = (attachmentId: string) => {
-  const persistedState = useMemo(() => getPersistedState(attachmentId), [attachmentId]);
-  const onStateChange = useCallback(
-    (state: DashboardPreviewUnifiedSearchState) => {
-      setPersistedState(attachmentId, state);
-    },
-    [attachmentId]
-  );
-
-  return {
-    persistedState,
-    onStateChange,
-  };
-};
-
 interface UseDashboardPreviewUnifiedSearchParams {
   attachmentId: string;
   dashboardApi: DashboardApi | undefined;
@@ -66,7 +29,6 @@ export const useDashboardPreviewUnifiedSearch = ({
   dashboardState,
   filterManager,
 }: UseDashboardPreviewUnifiedSearchParams) => {
-  const { persistedState, onStateChange } = usePersistedState(attachmentId);
   const initialQuery = useMemo(() => toStoredQuery(dashboardState.query), [dashboardState.query]);
   const initialFilters = useMemo(
     () => toStoredFilters(dashboardState.filters) ?? [],
@@ -77,11 +39,9 @@ export const useDashboardPreviewUnifiedSearch = ({
     [dashboardState.time_range]
   );
 
-  const [timeRange, setTimeRange] = useState<TimeRange>(
-    persistedState?.timeRange ?? initialTimeRange
-  );
-  const [query, setQuery] = useState<Query | undefined>(persistedState?.query ?? initialQuery);
-  const [filters, setFilters] = useState<Filter[]>(persistedState?.filters ?? initialFilters);
+  const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
+  const [query, setQuery] = useState<Query | undefined>(initialQuery);
+  const [filters, setFilters] = useState<Filter[]>(initialFilters);
   const [dataViews, setDataViews] = useState<DataView[]>([]);
 
   const normalizeQuery = useCallback((nextQuery: Query | undefined) => {
@@ -97,18 +57,10 @@ export const useDashboardPreviewUnifiedSearch = ({
   }, []);
 
   useEffect(() => {
-    setQuery(persistedState?.query ?? initialQuery);
-    setFilters(persistedState?.filters ?? initialFilters);
-    setTimeRange(persistedState?.timeRange ?? initialTimeRange);
-  }, [attachmentId, initialFilters, initialQuery, initialTimeRange, persistedState]);
-
-  useEffect(() => {
-    onStateChange?.({
-      filters,
-      query,
-      timeRange,
-    });
-  }, [filters, onStateChange, query, timeRange]);
+    setQuery(initialQuery);
+    setFilters(initialFilters);
+    setTimeRange(initialTimeRange);
+  }, [attachmentId, initialFilters, initialQuery, initialTimeRange]);
 
   useEffect(() => {
     const filterManagerSubscription = filterManager.getUpdates$().subscribe(() => {
@@ -219,26 +171,26 @@ export const useDashboardPreviewUnifiedSearch = ({
 
   const searchBarProps = useMemo(
     () => ({
+      query,
+      filters,
+      indexPatterns: dataViews,
+      dateRangeFrom: timeRange.from,
+      dateRangeTo: timeRange.to,
+      onQuerySubmit,
+      onFiltersUpdated,
+      onRefresh,
+      useDefaultBehaviors: true,
+      disableQueryLanguageSwitcher: true,
+      isDisabled: !dashboardApi,
+      dataTestSubj: 'dashboardCanvasSearchBar',
       appName: 'dashboardAgent',
       isAutoRefreshDisabled: true,
       showQueryInput: true,
       showDatePicker: true,
       showFilterBar: true,
       showQueryMenu: false,
-      query,
-      filters,
-      indexPatterns: dataViews,
       screenTitle: dashboardState.title,
       displayStyle: 'inPage' as const,
-      useDefaultBehaviors: true,
-      disableQueryLanguageSwitcher: true,
-      isDisabled: !dashboardApi,
-      dateRangeFrom: timeRange.from,
-      dateRangeTo: timeRange.to,
-      onQuerySubmit,
-      onFiltersUpdated,
-      onRefresh,
-      dataTestSubj: 'dashboardCanvasSearchBar',
     }),
     [
       dashboardApi,
