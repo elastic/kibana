@@ -91,6 +91,12 @@ globalSetupHook(
     await apmSynthtraceEsClient.index(azureFunctionsData);
     log.info('Azure Functions service data indexed');
 
+    // Refresh APM indices to ensure data is immediately searchable
+    // This fixes the index refresh timing issue where synthetic data is not immediately
+    // available in service inventory API, causing tests to timeout
+    await esClient.indices.refresh({ index: 'apm-*,traces-apm*,logs-apm*,metrics-apm*' });
+    log.info('APM indices refreshed - data is now searchable');
+
     log.info('Cleaning up APM ML indices before running the APM tests');
     const jobs = await esClient.ml.getJobs();
     const apmJobs = jobs.jobs.filter((job) => job.job_id.startsWith('apm-'));
