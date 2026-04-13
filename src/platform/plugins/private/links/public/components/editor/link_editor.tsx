@@ -39,7 +39,7 @@ import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-
 import { DashboardNavigationOptionsEditor } from '@kbn/dashboard-navigation-options-components';
 import { DEFAULT_EXTERNAL_LINK_OPTIONS } from '../external_link/constants';
 import { ExternalLinkOptionsEditor } from '../external_link/external_link_options_edtior';
-import { DashboardNavigationOptions } from '@kbn/dashboard-navigation-options-schema';
+import type { DashboardNavigationOptions } from '@kbn/dashboard-navigation-options-schema';
 
 export const LinkEditor = ({
   link,
