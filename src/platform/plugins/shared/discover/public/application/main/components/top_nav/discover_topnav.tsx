@@ -398,6 +398,7 @@ export const DiscoverTopNav = ({
         savedQueryId={savedQuery}
         screenTitle={persistedDiscoverSession?.title}
         showDatePicker={showDatePicker}
+        enableDateRangePicker
         allowSavingQueries
         showSearchBar={true}
         useDefaultBehaviors={true}
