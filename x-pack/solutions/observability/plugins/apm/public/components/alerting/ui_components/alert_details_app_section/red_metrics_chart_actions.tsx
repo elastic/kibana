@@ -116,7 +116,7 @@ export function RedMetricsChartActions({
         <EuiContextMenuItem
           href={apmLink}
           disabled={!apmLink}
-          data-test-subj="apmAlertDetailsViewInApmAction"
+          data-test-subj="apmAlertDetailsOpenInApmAction"
           data-action="openInApm"
           data-source="apmAlertDetails"
           data-alert-type={ruleTypeId}
@@ -126,7 +126,7 @@ export function RedMetricsChartActions({
         <EuiContextMenuItem
           href={discoverLink}
           disabled={!discoverLink}
-          data-test-subj="apmAlertDetailsTracesInDiscoverAction"
+          data-test-subj="apmAlertDetailsTracesOpenInDiscoverAction"
           data-action="openTracesInDiscover"
           data-source="apmAlertDetails"
           data-alert-type={ruleTypeId}

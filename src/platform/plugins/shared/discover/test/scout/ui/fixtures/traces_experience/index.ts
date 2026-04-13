@@ -13,6 +13,7 @@ import type {
   ScoutParallelWorkerFixtures,
 } from '@kbn/scout';
 import { spaceTest as spaceBaseTest, createLazyPageObject } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { TracesExperiencePage } from './page_objects';
 
 export interface TracesExperienceTestFixtures extends ScoutParallelTestFixtures {
@@ -43,6 +44,16 @@ export const spaceTest = spaceBaseTest.extend<
     await use(extendedPageObjects);
   },
 });
+
+export async function expectTracesExperienceEnabled(
+  pageObjects: TracesExperienceTestFixtures['pageObjects']
+) {
+  await pageObjects.discover.waitForDocTableRendered();
+  for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
+    await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
+  }
+  await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
+}
 
 export { TRACES, RICH_TRACE, MINIMAL_TRACE, PRODUCER_TRACE, DEEP_TRACE } from './constants';
 export { setupTracesExperience, teardownTracesExperience } from './setup';

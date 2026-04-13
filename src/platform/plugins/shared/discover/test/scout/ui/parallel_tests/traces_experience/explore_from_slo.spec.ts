@@ -91,18 +91,21 @@ spaceTest.describe(
           }).toPass({ intervals: [5000], timeout: TEST_TIMEOUT });
         });
 
-        await spaceTest.step(
-          'click "Traces in Discover" and verify traces experience',
-          async () => {
+        await spaceTest.step('click "Traces in Discover"', async () => {
+          await expect(async () => {
             await page.testSubj.locator('sliChartActionsButton').click();
             await expect(page.testSubj.locator('sliHistoryChartOpenInDiscoverLink')).toBeVisible();
-            await page.testSubj.locator('sliHistoryChartOpenInDiscoverLink').click();
-            await page.waitForURL('**/app/discover**');
-            for (const column of pageObjects.tracesExperience.grid.profileSpecificColumns) {
-              await expect(page.testSubj.locator(`field-${column}-showDetails`)).toBeVisible();
-            }
+          }).toPass({ timeout: 30_000, intervals: [2_000] });
+
+          await page.testSubj.locator('sliHistoryChartOpenInDiscoverLink').click();
+        });
+
+        await spaceTest.step('verify traces experience', async () => {
+          await page.waitForURL('**/app/discover**');
+          for (const column of pageObjects.tracesExperience.grid.profileSpecificColumns) {
+            await expect(page.testSubj.locator(`field-${column}-showDetails`)).toBeVisible();
           }
-        );
+        });
       }
     );
   }
