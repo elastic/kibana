@@ -609,6 +609,12 @@ const UserRoles: FunctionComponent<UserRoleProps> = ({ user }) => {
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         data-test-subj="userRolesPopover"
+        aria-label={i18n.translate(
+          'xpack.security.accountManagement.userProfile.moreRolesPopoverAriaLabel',
+          {
+            defaultMessage: 'More roles',
+          }
+        )}
       >
         <EuiBadgeGroup
           gutterSize="xs"

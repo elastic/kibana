@@ -87,6 +87,12 @@ export function createRootWithSettings(
     set(settings, 'xpack.security.fipsMode.enabled', true);
     oss = false;
     delete cliArgs.oss;
+    if (cliArgs.serverless) {
+      // In serverless mode, spaces config keys use schema.literal(false) with no defaultValue.
+      // They are only validated when the spaces plugin loads (oss=false), so set them explicitly.
+      set(settings, 'xpack.spaces.allowFeatureVisibility', false);
+      set(settings, 'xpack.spaces.allowSolutionVisibility', false);
+    }
   }
 
   const env = Env.createDefault(

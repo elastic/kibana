@@ -18,11 +18,20 @@ import {
   EuiIconTip,
   EuiButtonIcon,
   EuiTourStep,
+  EuiBetaBadge,
+  EuiBadge,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common';
-import { Streams, LOGS_ROOT_STREAM_NAME } from '@kbn/streams-schema';
+import {
+  Streams,
+  type RootStreamName,
+  LOGS_ROOT_STREAM_NAME,
+  ROOT_STREAM_NAMES,
+  isRoot,
+} from '@kbn/streams-schema';
 import useAsync from 'react-use/lib/useAsync';
 import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
 import { useStreamsTour } from '../streams_tour';
@@ -70,6 +79,20 @@ const datePickerStyle = css`
     height: 40px;
   }
 `;
+
+const TechnicalPreviewBadge = () => (
+  <EuiBetaBadge
+    tooltipContent={i18n.translate('xpack.streams.technicalPreviewTooltip', {
+      defaultMessage: 'This feature is in technical preview. We are working on it...',
+    })}
+    label={i18n.translate('xpack.streams.technicalPreviewLabel', {
+      defaultMessage: 'Technical preview',
+    })}
+    iconType="flask"
+    size="s"
+    css={{ display: 'block' }}
+  />
+);
 
 export function StreamsTreeTable({
   loading,
@@ -429,13 +452,37 @@ export function StreamsTreeTable({
                   >
                     <EuiHighlight search={searchQuery?.text ?? ''}>{item.stream.name}</EuiHighlight>
                   </EuiLink>
-                  {item.stream.name === LOGS_ROOT_STREAM_NAME && (
-                    <DeprecatedLogsBadge
-                      openFlyout={openFlyout}
-                      hasNewStreams={getLegacyLogsStatus(wiredStreamsStatus).hasNewStreams}
-                    />
-                  )}
+                  {(ROOT_STREAM_NAMES.includes(item.stream.name as RootStreamName) ||
+                    Streams.QueryStream.Definition.is(item.stream)) && <TechnicalPreviewBadge />}
                   {Streams.QueryStream.Definition.is(item.stream) && <QueryStreamBadge />}
+                  {item.stream.name === LOGS_ROOT_STREAM_NAME &&
+                    !Streams.QueryStream.Definition.is(item.stream) && (
+                      <DeprecatedLogsBadge
+                        openFlyout={openFlyout}
+                        hasNewStreams={getLegacyLogsStatus(wiredStreamsStatus).hasNewStreams}
+                      />
+                    )}
+                  {isRoot(item.stream.name) &&
+                    item.stream.name !== LOGS_ROOT_STREAM_NAME &&
+                    !item.data_stream &&
+                    !Streams.QueryStream.Definition.is(item.stream) && (
+                      <EuiToolTip
+                        position="right"
+                        content={i18n.translate(
+                          'xpack.streams.streamsTable.pendingDataStream.tooltip',
+                          {
+                            defaultMessage:
+                              'This stream is configured but has no backing data stream yet. Start sending data and the data stream will be created automatically on first ingest.',
+                          }
+                        )}
+                      >
+                        <EuiBadge color="default">
+                          {i18n.translate('xpack.streams.streamsTable.pendingDataStream.label', {
+                            defaultMessage: 'Pending',
+                          })}
+                        </EuiBadge>
+                      </EuiToolTip>
+                    )}
                 </EuiFlexGroup>
               </EuiFlexGroup>
             );
@@ -523,6 +570,7 @@ export function StreamsTreeTable({
           render: (_: unknown, item: TableRow) => (
             <RetentionColumn
               lifecycle={item.effective_lifecycle!}
+              streamName={item.stream.name}
               aria-label={i18n.translate('xpack.streams.streamsTreeTable.retentionCellAriaLabel', {
                 defaultMessage: 'Retention policy for {name}',
                 values: { name: item.stream.name },

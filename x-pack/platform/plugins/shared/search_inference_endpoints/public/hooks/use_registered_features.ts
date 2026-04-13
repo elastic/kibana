@@ -6,6 +6,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
+import { useMemo } from 'react';
 import type { InferenceFeatureResponse } from '../../common/types';
 import { APIRoutes } from '../../common/types';
 import { INFERENCE_FEATURES_QUERY_KEY, ROUTE_VERSIONS } from '../../common/constants';
@@ -29,9 +30,12 @@ export const useRegisteredFeatures = (): {
         { version: ROUTE_VERSIONS.v1 }
       ),
   });
+  // this prevents excessive re-renders in consuming components that use the features array as a dependency
+  // by extracting features from useQuery we lose the useQuery API's caching and memoization
+  const features = useMemo(() => data?.features ?? [], [data?.features]);
 
   return {
-    features: data?.features ?? [],
+    features,
     isLoading,
   };
 };

@@ -28,6 +28,7 @@ import { AgentService } from '../agents/agent_service';
 import type { AutomaticImportSamplesIndexService } from '../samples_index/index_service';
 import { generateFieldMappings } from '../build_integration/fields';
 import { validateFieldMappings } from '../build_integration/validate_fields';
+import type { FieldMapping } from '../../agents/state';
 import type { LangSmithOptions } from '../../routes/types';
 import type { AutomaticImportPluginStartDependencies } from '../../types';
 import type { AutomaticImportSavedObjectService } from '../saved_objects/saved_objects_service';
@@ -277,9 +278,11 @@ export class TaskManagerService {
         `Pipeline generation results objects: ${JSON.stringify(result.pipeline_generation_results)}`
       );
 
+      const agentFieldMappings = (result.field_mappings as FieldMapping[] | undefined) ?? undefined;
       const fieldMapping = await generateFieldMappings(
         (pipelineGenerationResultsObjects ?? []) as Array<Record<string, unknown>>,
-        fieldsMetadataClient
+        fieldsMetadataClient,
+        agentFieldMappings
       );
       this.logger.debug(`Generated field mappings: ${JSON.stringify(fieldMapping)}`);
       this.throwIfAborted(abortSignal);
