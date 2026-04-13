@@ -886,13 +886,10 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
               />
             </EuiFormRow>
             <EuiFormRow
-              helpText={i18n.translate(
-                'xpack.transform.stepDetailsForm.deferValidationHelpText',
-                {
-                  defaultMessage:
-                    'Skips validation of the source index and the destination pipeline when creating the transform. Use this option when the source index is very large and validation would time out.',
-                }
-              )}
+              helpText={i18n.translate('xpack.transform.stepDetailsForm.deferValidationHelpText', {
+                defaultMessage:
+                  'Skips validation of the source index and the destination pipeline when creating the transform. Use this option when the source index is very large and validation would time out.',
+              })}
             >
               <EuiSwitch
                 name="transformDeferValidation"
