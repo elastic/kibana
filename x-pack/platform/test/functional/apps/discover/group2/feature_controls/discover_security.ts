@@ -23,6 +23,7 @@ export default function (ctx: FtrProviderContext) {
   const monacoEditor = getService('monacoEditor');
   const securityService = getService('security');
   const {
+    appMenu,
     common,
     error,
     discover,
@@ -33,6 +34,7 @@ export default function (ctx: FtrProviderContext) {
     unifiedFieldList,
     exports,
   } = getPageObjects([
+    'appMenu',
     'common',
     'error',
     'discover',
@@ -198,7 +200,7 @@ export default function (ctx: FtrProviderContext) {
       it(`doesn't show save button`, async () => {
         await common.navigateToApp('discover');
         await common.waitForTopNavToBeVisible();
-        await testSubjects.existOrFail('discoverNewButton', { timeout: 10000 });
+        await appMenu.existOrFail('discoverNewButton');
         await testSubjects.missingOrFail('discoverSaveButton');
       });
 
@@ -308,7 +310,7 @@ export default function (ctx: FtrProviderContext) {
       it(`doesn't show save button`, async () => {
         await common.navigateToApp('discover');
         await common.waitForTopNavToBeVisible();
-        await testSubjects.existOrFail('discoverNewButton', { timeout: 10000 });
+        await appMenu.existOrFail('discoverNewButton');
         await testSubjects.missingOrFail('discoverSaveButton');
       });
 
