@@ -37,7 +37,8 @@ export type {
   LensBaseLayer,
   LensXYConfigBase,
   LensBreakdownConfig,
+  LensYBoundsConfig,
 } from './types';
 
-export { lensApiConfigSchema } from './schema';
+export { lensApiConfigSchema, extendLensApiConfigSchema } from './schema';
 export type { LensApiConfig } from './schema';

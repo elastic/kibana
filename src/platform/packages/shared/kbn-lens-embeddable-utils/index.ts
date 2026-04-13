@@ -37,8 +37,16 @@ export type {
   LensBaseLayer,
   LensXYConfigBase,
   LensBreakdownConfig,
+  LensYBoundsConfig,
 } from './config_builder';
-export { isLensESQLConfig } from './config_builder/utils';
+export {
+  isLensESQLConfig,
+  isLensAPIFormat,
+  isLensLegacyFormat,
+  isLensLegacyAttributes,
+} from './config_builder/utils';
 
-export { lensApiConfigSchema } from './config_builder';
+export { stripUndefined } from './config_builder/transforms/charts/utils';
+
+export { lensApiConfigSchema, extendLensApiConfigSchema } from './config_builder';
 export type { LensApiConfig } from './config_builder';
