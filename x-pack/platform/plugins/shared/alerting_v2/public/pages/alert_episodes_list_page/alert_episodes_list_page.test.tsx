@@ -11,8 +11,7 @@ import { AlertEpisodesListPage } from './alert_episodes_list_page';
 import type { CustomBulkActions } from '@kbn/unified-data-table';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-
-// ── Mocks ──────────────────────────────────────────────────────────────────────
+import { UnifiedDataTable } from '@kbn/unified-data-table';
 
 jest.mock('@kbn/alerting-v2-episodes-ui/components/actions/bulk_snooze_modal', () => ({
   BulkSnoozeModal: jest.fn(({ onClose, onApplySnooze }) => (
@@ -81,9 +80,6 @@ jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_bulk_create_alert_actions', ()
   useBulkCreateAlertActions: jest.fn().mockImplementation(() => ({ mutate: mockBulkMutate })),
 }));
 
-// ── Helpers ────────────────────────────────────────────────────────────────────
-
-import { UnifiedDataTable } from '@kbn/unified-data-table';
 const mockUnifiedDataTable = jest.mocked(UnifiedDataTable);
 
 const mockHttp = httpServiceMock.createStartContract();
@@ -118,15 +114,11 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn().mockImplementation(() => ({ services: mockServices })),
 }));
 
-// ── Utility ───────────────────────────────────────────────────────────────────
-
 const getCapturedBulkActions = (): CustomBulkActions => {
   const calls = mockUnifiedDataTable.mock.calls;
   const lastCall = calls[calls.length - 1][0];
   return lastCall.customBulkActions as CustomBulkActions;
 };
-
-// ── Tests ─────────────────────────────────────────────────────────────────────
 
 describe('AlertEpisodesListPage bulk actions', () => {
   beforeEach(() => {

@@ -47,14 +47,16 @@ const baseCellProps = {
   dataView: {} as never,
   fieldFormats: {} as never,
   closePopover: jest.fn(),
+  setCellProps: jest.fn(),
+  rowIndex: 0,
+  colIndex: 0,
+  columnsMeta: undefined,
   isDetails: false,
   isExpanded: false,
   isExpandable: false,
 };
 
 beforeEach(() => jest.clearAllMocks());
-
-// ── EpisodeStatusCell ──────────────────────────────────────────────────────────
 
 describe('EpisodeStatusCell', () => {
   const row = makeRow({ 'episode.status': 'active', 'episode.id': 'ep1', group_hash: 'gh1' });
@@ -106,8 +108,6 @@ describe('EpisodeStatusCell', () => {
   });
 });
 
-// ── EpisodeActionsCell ─────────────────────────────────────────────────────────
-
 describe('EpisodeActionsCell', () => {
   const row = makeRow({ 'episode.id': 'ep2', group_hash: 'gh2' });
   const mockHttp = httpServiceMock.createStartContract();
@@ -150,8 +150,6 @@ describe('EpisodeActionsCell', () => {
   });
 });
 
-// ── EpisodeTagsCell ────────────────────────────────────────────────────────────
-
 describe('EpisodeTagsCell', () => {
   it('passes tags from the matched groupAction', () => {
     const row = makeRow({ group_hash: 'gh3' });
@@ -168,8 +166,6 @@ describe('EpisodeTagsCell', () => {
     expect(props.tags).toEqual([]);
   });
 });
-
-// ── EpisodeRuleCell ────────────────────────────────────────────────────────────
 
 describe('EpisodeRuleCell', () => {
   const makeRule = (name: string): Rule =>
