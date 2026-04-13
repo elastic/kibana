@@ -111,19 +111,17 @@ describe('name column builder', () => {
       };
       const result = buildNameColumn({}, context) as NameColumn;
 
-      // Render and verify tags prop is passed through.
       const item = { id: '1', title: 'Test', tags: ['tag-1'] };
-      const rendered = result.render?.('Test', item);
-      // The NameCell should receive showTags=true via the default.
-      expect(rendered).toBeDefined();
+      const rendered = result.render?.('Test', item) as React.ReactElement;
+      expect(rendered.props).toMatchObject({ showTags: true });
     });
 
     it('does not show tags when supports.tags is false', () => {
       const result = buildNameColumn({}, defaultContext) as NameColumn;
       // supports.tags is false in defaultContext — showTags defaults to false.
       const item = { id: '1', title: 'Test', tags: ['tag-1'] };
-      const rendered = result.render?.('Test', item);
-      expect(rendered).toBeDefined();
+      const rendered = result.render?.('Test', item) as React.ReactElement;
+      expect(rendered.props).toMatchObject({ showTags: false });
     });
 
     it('respects explicit showTags=false even when supports.tags is true', () => {
@@ -135,8 +133,8 @@ describe('name column builder', () => {
       const result = buildNameColumn(props, context) as NameColumn;
 
       const item = { id: '1', title: 'Test', tags: ['tag-1'] };
-      const rendered = result.render?.('Test', item);
-      expect(rendered).toBeDefined();
+      const rendered = result.render?.('Test', item) as React.ReactElement;
+      expect(rendered.props).toMatchObject({ showTags: false });
     });
   });
 });
