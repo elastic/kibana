@@ -1201,6 +1201,23 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-snapshot-loader",
+        "id": "def-common.TEMP_INDEX_PREFIX",
+        "type": "string",
+        "tags": [],
+        "label": "TEMP_INDEX_PREFIX",
+        "description": [],
+        "signature": [
+          "\"snapshot-loader-temp-\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/replay/index.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": []
