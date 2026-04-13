@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { z, ZodObject } from '@kbn/zod/v4';
+import type { ZodType } from '@kbn/zod/v4';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolDefinition, ToolType } from '@kbn/agent-builder-common';
@@ -34,10 +34,8 @@ export interface ToolProvider {
 /**
  * AgentBuilder tool, as exposed by tool providers.
  */
-export interface ExecutableTool<
-  TConfig extends object = {},
-  TSchema extends ZodObject<any> = ZodObject<any>
-> extends ToolDefinition<ToolType, TConfig> {
+export interface ExecutableTool<TConfig extends object = {}, TSchema extends ZodType = ZodType>
+  extends ToolDefinition<ToolType, TConfig> {
   /**
    * Tool's input schema, defined as a zod schema.
    */
@@ -45,7 +43,7 @@ export interface ExecutableTool<
   /**
    * Run handler that can be used to execute the tool.
    */
-  execute: ExecutableToolHandlerFn<z.infer<TSchema>>;
+  execute: ExecutableToolHandlerFn<Record<string, unknown>>;
   /**
    * Optional handled to add additional instructions to the LLM.
    * When provided, will replace the description when converting to llm tool.

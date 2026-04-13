@@ -8,6 +8,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod/v4';
 import path from 'node:path';
 import { createToolIdMappings } from '@kbn/agent-builder-genai-utils/langchain';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server';
@@ -123,6 +124,12 @@ To learn more, refer to the [MCP documentation](https://www.elastic.co/docs/expl
           // Expose tools scoped to the request
           for (const tool of tools) {
             const toolSchema = await tool.getSchema();
+            if (!(toolSchema instanceof z.ZodObject)) {
+              logger.debug(
+                `agent_builder MCP: skipping tool "${tool.id}" (Zod schema is not a plain object; MCP bridge requires ZodObject.shape)`
+              );
+              continue;
+            }
             server.tool(
               idMapping.get(tool.id) ?? tool.id,
               tool.description,

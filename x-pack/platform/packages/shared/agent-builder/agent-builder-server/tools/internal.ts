@@ -6,7 +6,7 @@
  */
 
 import type { MaybePromise } from '@kbn/utility-types';
-import type { z, ZodObject } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { ToolDefinition, ToolType } from '@kbn/agent-builder-common';
 import type { ToolHandlerFn } from './handler';
 import type {
@@ -23,7 +23,7 @@ import type { LlmDescriptionHandler } from '../runner';
 export interface InternalToolDefinition<
   TType extends ToolType = ToolType,
   TConfig extends object = {},
-  TSchema extends ZodObject<any> = ZodObject<any>
+  TSchema extends z.ZodType = z.ZodType
 > extends ToolDefinition<TType, TConfig> {
   /**
    * Check if the tool is available for the current context.
@@ -36,7 +36,7 @@ export interface InternalToolDefinition<
   /**
    * Get the handler which can be used to execute the tool.
    */
-  getHandler: () => MaybePromise<ToolHandlerFn<z.infer<TSchema>>>;
+  getHandler: () => MaybePromise<ToolHandlerFn<Record<string, unknown>>>;
   /**
    * Optional handled to add additional instructions to the LLM
    * when specified, this will fully replace the description when converting to LLM tools.

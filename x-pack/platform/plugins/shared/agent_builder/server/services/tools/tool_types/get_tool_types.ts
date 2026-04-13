@@ -13,15 +13,18 @@ import { getIndexSearchToolType, type IndexSearchToolTypeDeps } from './index_se
 import { getWorkflowToolType } from './workflow';
 import { getBuiltinToolType } from './builtin';
 import { getMcpToolType } from './mcp';
+import { getKibanaApiToolType, type KibanaApiToolTypeDeps } from './kibana_api/tool_type';
 
 export const getToolTypeDefinitions = ({
   workflowsManagement,
   actions,
   indexSearchDeps,
+  kibanaApiToolDeps,
 }: {
   workflowsManagement?: WorkflowsServerPluginSetup;
   actions: ActionsPluginStart;
   indexSearchDeps: IndexSearchToolTypeDeps;
+  kibanaApiToolDeps: KibanaApiToolTypeDeps;
 }): AnyToolTypeDefinition[] => {
   const toolTypes: AnyToolTypeDefinition<any, any, any>[] = [
     getBuiltinToolType(),
@@ -29,6 +32,7 @@ export const getToolTypeDefinitions = ({
     getIndexSearchToolType(indexSearchDeps),
     getWorkflowToolType({ workflowsManagement }),
     getMcpToolType({ actions }),
+    getKibanaApiToolType(kibanaApiToolDeps),
   ];
   return toolTypes;
 };

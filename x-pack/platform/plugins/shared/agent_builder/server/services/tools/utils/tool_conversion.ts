@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { z, type ZodObject } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
+import type { ZodType } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolDefinitionWithSchema, ToolDefinition, ToolType } from '@kbn/agent-builder-common';
 import type { Runner, ExecutableTool, InternalToolDefinition } from '@kbn/agent-builder-server';
 
-export const toExecutableTool = <
-  TConfig extends object = {},
-  RunInput extends ZodObject<any> = ZodObject<any>
->({
+export const toExecutableTool = <TConfig extends object = {}, RunInput extends ZodType = ZodType>({
   tool,
   runner,
   request,

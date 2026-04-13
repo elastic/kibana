@@ -7,7 +7,7 @@
 
 import type { ToolType } from '@kbn/agent-builder-common';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server/tools';
-import type { ZodObject } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { ToolTypeDefinition } from '../tool_types';
 import type { ToolTypeConversionContext } from '../tool_types/definitions';
 import type { ToolPersistedDefinition } from './client';
@@ -16,7 +16,7 @@ export const convertPersistedDefinition = <
   TType extends ToolType,
   TConfig extends object,
   TPersistedConfig extends object = TConfig,
-  TSchema extends ZodObject<any> = ZodObject<any>
+  TSchema extends z.ZodType = z.ZodType
 >({
   tool,
   definition,

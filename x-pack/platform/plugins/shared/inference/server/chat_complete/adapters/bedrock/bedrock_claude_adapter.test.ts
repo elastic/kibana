@@ -9,7 +9,12 @@ import { PassThrough } from 'stream';
 import { loggerMock } from '@kbn/logging-mocks';
 import { noop } from 'rxjs';
 import type { InferenceExecutor } from '../../utils/inference_executor';
-import { MessageRole, ToolChoiceType, InferenceConnectorType } from '@kbn/inference-common';
+import {
+  MessageRole,
+  ToolChoiceType,
+  InferenceConnectorType,
+  type ToolSchema,
+} from '@kbn/inference-common';
 import { bedrockClaudeAdapter } from './bedrock_claude_adapter';
 import { addNoToolUsageDirective } from './prompts';
 import { lastValueFrom, toArray } from 'rxjs';
@@ -185,6 +190,49 @@ Human:`,
           },
         },
       ]);
+    });
+
+    it('merges top-level JSON Schema allOf object fragments into one object for Bedrock Converse', () => {
+      bedrockClaudeAdapter
+        .chatComplete({
+          executor: executorMock,
+          logger,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          tools: {
+            merged_tool: {
+              description: 'tool with intersection-style schema',
+              schema: {
+                allOf: [
+                  {
+                    type: 'object',
+                    properties: {
+                      _reasoning: { type: 'string', description: 'why' },
+                    },
+                  },
+                  {
+                    type: 'object',
+                    properties: {
+                      foo: { type: 'string', description: 'bar' },
+                    },
+                    required: ['foo'],
+                  },
+                ],
+              } as unknown as ToolSchema,
+            },
+          },
+        })
+        .subscribe(noop);
+
+      const { tools } = getCallParams();
+      expect(tools).toHaveLength(1);
+      expect(tools[0].toolSpec.inputSchema.json).toEqual({
+        type: 'object',
+        properties: {
+          _reasoning: { type: 'string', description: 'why' },
+          foo: { type: 'string', description: 'bar' },
+        },
+        required: ['foo'],
+      });
     });
 
     it('correctly format messages', () => {

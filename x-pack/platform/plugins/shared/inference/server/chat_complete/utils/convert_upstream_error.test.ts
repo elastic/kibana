@@ -44,6 +44,16 @@ describe('convertUpstreamError', () => {
     expect(error.status).toBe(undefined);
   });
 
+  it('enriches Bedrock tool input JSON Schema errors with remediation context', () => {
+    const bedrockMessage =
+      'Received a bad request status code for request from inference entity id [.anthropic-claude-3.7-sonnet-chat_completion] status [400]. Error message: [The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.]';
+    const error = convertUpstreamError(bedrockMessage);
+    expect(error.message).toContain(bedrockMessage);
+    expect(error.message).toContain('Additional context:');
+    expect(error.message).toContain('"type":"object"');
+    expect(error.status).toEqual(400);
+  });
+
   describe('context length errors', () => {
     const errors = [
       [

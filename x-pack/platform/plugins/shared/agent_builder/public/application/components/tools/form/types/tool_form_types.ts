@@ -6,6 +6,7 @@
  */
 
 import type { EsqlToolFieldTypes, EsqlToolParamValue, ToolType } from '@kbn/agent-builder-common';
+import type { KibanaApiOperationConfig } from '@kbn/agent-builder-common/tools';
 
 export interface EsqlParam {
   name: string;
@@ -64,9 +65,15 @@ export interface McpToolFormData extends BaseToolFormData {
   mcpToolName: string;
 }
 
+export interface KibanaApiToolFormData extends BaseToolFormData {
+  type: ToolType.kibana_api;
+  operations: KibanaApiOperationConfig[];
+}
+
 export type ToolFormData =
   | EsqlToolFormData
   | BuiltinToolFormData
   | IndexSearchToolFormData
   | WorkflowToolFormData
-  | McpToolFormData;
+  | McpToolFormData
+  | KibanaApiToolFormData;

@@ -37,7 +37,8 @@ export const getIndexSearchToolType = (
     getDynamicProps: (config) => {
       return {
         getHandler: () => {
-          return async ({ nlQuery }, { esClient, modelProvider, logger, events, request }) => {
+          return async (params, { esClient, modelProvider, logger, events, request }) => {
+            const { nlQuery } = searchSchema.parse(params);
             const {
               pattern,
               row_limit: rowLimit,

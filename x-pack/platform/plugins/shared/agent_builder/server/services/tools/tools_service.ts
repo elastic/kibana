@@ -43,6 +43,9 @@ export interface ToolsServiceStartDeps {
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
   actions: ActionsPluginStart;
+  /** Used by Kibana API tools (loopback HTTP); resolves public URL, cloud URL, or bind address */
+  getKibanaLoopbackBaseUrl: () => string;
+  serverBasePath: string;
 }
 
 export class ToolsService {
@@ -76,6 +79,8 @@ export class ToolsService {
     uiSettings,
     savedObjects,
     actions,
+    getKibanaLoopbackBaseUrl,
+    serverBasePath,
   }: ToolsServiceStartDeps): ToolsServiceStart {
     const { logger, workflowsManagement, config } = this.setupDeps!;
 
@@ -86,6 +91,11 @@ export class ToolsService {
         uiSettings,
         savedObjects,
         topSnippetsDefaults: config.topSnippets,
+      },
+      kibanaApiToolDeps: {
+        logger: logger.get('kibana_api_tool'),
+        getKibanaLoopbackBaseUrl,
+        serverBasePath,
       },
     });
 

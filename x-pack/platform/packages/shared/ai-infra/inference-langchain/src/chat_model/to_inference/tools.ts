@@ -19,6 +19,28 @@ import type {
 } from '@kbn/inference-common';
 import { ToolChoiceType } from '@kbn/inference-common';
 import type { ToolChoice } from '../types';
+import { normalizeRootJsonSchemaForToolInput } from './normalize_tool_json_schema_root';
+
+function isPlainObjectRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function jsonSchemaToToolSchemaPicked(value: unknown): ToolSchema {
+  const normalized = normalizeRootJsonSchemaForToolInput(value);
+  const picked = pick(normalized, ['type', 'properties', 'required']) as Record<string, unknown>;
+  if (picked.type === 'object' && isPlainObjectRecord(picked.properties)) {
+    return picked as unknown as ToolSchema;
+  }
+  return {
+    type: 'object',
+    properties: isPlainObjectRecord(picked.properties) ? picked.properties : {},
+    ...(Array.isArray(picked.required) &&
+    picked.required.length > 0 &&
+    picked.required.every((x) => typeof x === 'string')
+      ? { required: picked.required as string[] }
+      : {}),
+  } as ToolSchema;
+}
 
 export const toolDefinitionToInference = (
   tools: BindToolsInput[]
@@ -74,20 +96,16 @@ function isZodV4(schema: unknown): boolean {
 function resolveToolSchema(schema: unknown): ToolSchema {
   // Zod v4: use native toJSONSchema
   if (isZodV4(schema)) {
-    return pick(z4.toJSONSchema(schema as unknown as z4.ZodType, { io: 'input' }), [
-      'type',
-      'properties',
-      'required',
-    ]) as ToolSchema;
+    return jsonSchemaToToolSchemaPicked(
+      z4.toJSONSchema(schema as unknown as z4.ZodType, { io: 'input' })
+    );
   }
   // Zod v3: use zod-to-json-schema
   if (isZodSchema(schema as Record<string, unknown>)) {
-    return pick(zodToJsonSchema(schema as Parameters<typeof zodToJsonSchema>[0]), [
-      'type',
-      'properties',
-      'required',
-    ]) as ToolSchema;
+    return jsonSchemaToToolSchemaPicked(
+      zodToJsonSchema(schema as Parameters<typeof zodToJsonSchema>[0])
+    );
   }
   // Plain JSON Schema object
-  return pick(schema as JsonSchema7Type, ['type', 'properties', 'required']) as ToolSchema;
+  return jsonSchemaToToolSchemaPicked(schema as JsonSchema7Type);
 }

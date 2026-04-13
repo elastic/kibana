@@ -23,6 +23,7 @@ import type {
   ListWorkflowsResponse,
   GetWorkflowResponse,
   GetToolTypeInfoResponse,
+  ListKibanaOpenApiOperationsResponse,
   GetToolHealthResponse,
   ListToolHealthResponse,
   BulkCreateMcpToolsResponse,
@@ -41,6 +42,7 @@ import { OAUTH_STATUS } from '../../../common/http_api/tools';
 import { internalApiPath } from '../../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY, TOOLS_WRITE_SECURITY } from '../route_security';
 import { getToolTypeInfo, bulkCreateMcpTools } from '../../services/tools/utils';
+import { searchKibanaOpenApiOperations } from '../../services/kibana_api_tool/openapi_kibana_catalog';
 import { toConnectorItem } from '../utils';
 
 const USER_CONNECTOR_TOKEN_TYPE = 'user_connector_token';
@@ -312,6 +314,28 @@ export function registerInternalToolsRoutes({
         body: {
           toolTypes: getToolTypeInfo(toolTypes),
         },
+      });
+    })
+  );
+
+  // searchable Kibana OpenAPI operations (internal; POC catalog from repo oas_docs)
+  router.get(
+    {
+      path: `${internalApiPath}/tools/_kibana_openapi_operations`,
+      validate: {
+        query: schema.object({
+          q: schema.string({ defaultValue: '' }),
+          limit: schema.number({ defaultValue: 50, min: 1, max: 200 }),
+        }),
+      },
+      options: { access: 'internal' },
+      security: AGENT_BUILDER_READ_SECURITY,
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { q, limit } = request.query;
+      const results = searchKibanaOpenApiOperations(logger, q, limit);
+      return response.ok<ListKibanaOpenApiOperationsResponse>({
+        body: { results },
       });
     })
   );

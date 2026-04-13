@@ -15,6 +15,7 @@ import { indexSearchToolRegistryEntry } from './tool_types/index_search';
 import { builtinToolRegistryEntry } from './tool_types/builtin';
 import { workflowToolRegistryEntry } from './tool_types/workflow';
 import { mcpToolRegistryEntry } from './tool_types/mcp';
+import { kibanaApiToolRegistryEntry } from './tool_types/kibana_api';
 
 export const TOOLS_FORM_REGISTRY = {
   [ToolType.esql]: esqlToolFormRegistryEntry,
@@ -22,6 +23,7 @@ export const TOOLS_FORM_REGISTRY = {
   [ToolType.workflow]: workflowToolRegistryEntry,
   [ToolType.builtin]: builtinToolRegistryEntry,
   [ToolType.mcp]: mcpToolRegistryEntry,
+  [ToolType.kibana_api]: kibanaApiToolRegistryEntry,
 };
 
 export function getToolTypeConfig<T extends ToolType>(

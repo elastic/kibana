@@ -65,6 +65,12 @@ export {
   type McpToolDefinitionWithSchema,
 } from './types/mcp';
 export {
+  isKibanaApiTool,
+  type KibanaApiOperationConfig,
+  type KibanaApiToolConfig,
+  type KibanaApiToolDefinition,
+} from './types/kibana_api';
+export {
   ToolResultType,
   type ToolResult,
   type ErrorResult,

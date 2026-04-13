@@ -76,6 +76,7 @@ export const editableToolTypes: ToolType[] = [
   ToolType.index_search,
   ToolType.workflow,
   ToolType.mcp,
+  ToolType.kibana_api,
 ];
 
 export const defaultAgentToolIds = [

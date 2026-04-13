@@ -10,16 +10,31 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { DEFAULT_SPACE_ID, addSpaceIdToPath, getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 
+type HttpServerBaseUrlDeps = Pick<CoreSetup['http'], 'basePath' | 'getServerInfo'>;
+
+/**
+ * Base URL for server-side loopback HTTP to this Kibana (same resolution as {@link getKibanaUrl}).
+ * Does not require `server.publicBaseUrl` when bind address + cloud URL suffice.
+ */
+export function resolveKibanaLoopbackBaseUrl(params: {
+  http: HttpServerBaseUrlDeps;
+  cloudKibanaUrl?: string;
+}): string {
+  return (
+    params.http.basePath.publicBaseUrl ?? params.cloudKibanaUrl ?? getFallbackKibanaUrl(params.http)
+  );
+}
+
 export function getKibanaUrl(
   coreSetup: CoreSetup,
   cloudSetup?: CloudSetup,
   request?: KibanaRequest,
   spaces?: SpacesPluginStart
 ) {
-  const baseUrl =
-    coreSetup.http.basePath.publicBaseUrl ??
-    cloudSetup?.kibanaUrl ??
-    getFallbackKibanaUrl(coreSetup);
+  const baseUrl = resolveKibanaLoopbackBaseUrl({
+    http: coreSetup.http,
+    cloudKibanaUrl: cloudSetup?.kibanaUrl,
+  });
 
   const pathname = new URL(baseUrl).pathname;
   const serverBasePath = coreSetup.http.basePath.serverBasePath;
@@ -33,7 +48,7 @@ export function getKibanaUrl(
   return baseUrl;
 }
 
-export function getFallbackKibanaUrl({ http }: CoreSetup) {
+export function getFallbackKibanaUrl(http: HttpServerBaseUrlDeps) {
   const basePath = http.basePath;
   const { protocol, hostname, port } = http.getServerInfo();
   return `${protocol}://${hostname}:${port}${basePath

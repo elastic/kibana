@@ -13,11 +13,34 @@ import { createContextLengthExceededError } from '../../../common/chat_complete/
 const connectorStatusCodeRegexp = /Status code: ([0-9]{3})/i;
 const inferenceStatusCodeRegexp = /status \[([0-9]{3})\]/i;
 
+/**
+ * Amazon Bedrock Converse (and similar APIs) require each tool's input JSON Schema to be a JSON
+ * object at the root (`"type": "object"`). Upstream errors often only say `...type must be ...
+ * object`, which is opaque without this context.
+ */
+const appendToolInputSchemaRootHint = (message: string): string => {
+  const lower = message.toLowerCase();
+  const looksLikeToolInputSchemaRejection =
+    lower.includes('inputschema') &&
+    (lower.includes('toolspec') || lower.includes('toolconfig.tools'));
+  const mentionsRootObjectRequirement =
+    lower.includes('must be one of the following: object') ||
+    lower.includes('must be of type object');
+
+  if (!looksLikeToolInputSchemaRejection || !mentionsRootObjectRequirement) {
+    return message;
+  }
+
+  return `${message} Additional context: a tool definition was rejected because its parameter JSON Schema must declare a root JSON object (typically \`{"type":"object","properties":{...}}\`). This often happens when a schema is produced from Zod \`discriminatedUnion\` / \`union\`, \`intersection\` (serializing to top-level \`oneOf\` / \`allOf\`), or other shapes that omit a top-level \`"type":"object"\`. Fix by exposing tool parameters as one plain object (merge fields under a single \`properties\` map, split into separate tools, or normalize the schema before sending it to the model provider), then retry.`;
+};
+
 export const convertUpstreamError = (
   source: string | Error,
   { statusCode, messagePrefix }: { statusCode?: number; messagePrefix?: string } = {}
 ): InferenceTaskProviderError | ChatCompletionContextLengthExceededError => {
-  const message = typeof source === 'string' ? source : source.message;
+  const message = appendToolInputSchemaRootHint(
+    typeof source === 'string' ? source : source.message
+  );
 
   let status = statusCode;
   if (!status && typeof source === 'object') {

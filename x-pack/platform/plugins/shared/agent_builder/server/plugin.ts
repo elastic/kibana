@@ -42,6 +42,7 @@ import { registerSmlCrawlerTaskDefinition, scheduleSmlCrawlerTasks } from './ser
 import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
+import { resolveKibanaLoopbackBaseUrl } from './utils/get_kibana_url';
 
 export class AgentBuilderPlugin
   implements
@@ -59,6 +60,7 @@ export class AgentBuilderPlugin
   private trackingService?: TrackingService;
   private analyticsService?: AnalyticsService;
   private home: HomeServerPluginSetup | null = null;
+  private cloudKibanaUrl?: string;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
@@ -108,6 +110,8 @@ export class AgentBuilderPlugin
       this.logger.get('telemetry').get('analytics')
     );
     this.analyticsService.registerAgentBuilderEventTypes();
+
+    this.cloudKibanaUrl = setupDeps.cloud?.kibanaUrl;
 
     const serviceSetups = this.serviceManager.setupServices({
       logger: this.logger.get('services'),
@@ -281,6 +285,12 @@ export class AgentBuilderPlugin
       taskManager,
       trackingService: this.trackingService,
       analyticsService: this.analyticsService,
+      getKibanaLoopbackBaseUrl: () =>
+        resolveKibanaLoopbackBaseUrl({
+          http: coreStart.http,
+          cloudKibanaUrl: this.cloudKibanaUrl,
+        }),
+      serverBasePath: coreStart.http.basePath.serverBasePath,
     });
 
     const { tools, agents, skills, runnerFactory, execution, plugins, conversations } =

@@ -100,11 +100,14 @@ export class ServiceManager {
     uiSettings,
     savedObjects,
     featureFlags,
+    dataStreams: _dataStreams,
     actions,
     taskManager,
     securityPlugin,
     trackingService,
     analyticsService,
+    getKibanaLoopbackBaseUrl,
+    serverBasePath,
   }: ServicesStartDeps): InternalStartServices {
     if (!this.services) {
       throw new Error('#startServices called before #setupServices');
@@ -135,6 +138,8 @@ export class ServiceManager {
       uiSettings,
       savedObjects,
       actions,
+      getKibanaLoopbackBaseUrl,
+      serverBasePath,
     });
 
     const skillsServiceStart = this.services.skills.start({

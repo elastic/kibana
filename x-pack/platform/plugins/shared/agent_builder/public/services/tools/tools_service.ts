@@ -30,6 +30,7 @@ import type {
   BulkCreateMcpToolsResponse,
   BulkDeleteConnectorsResponse,
   ValidateNamespaceResponse,
+  ListKibanaOpenApiOperationsResponse,
 } from '../../../common/http_api/tools';
 import { publicApiPath, internalApiPath } from '../../../common/constants';
 
@@ -111,6 +112,13 @@ export class ToolsService {
       `${internalApiPath}/tools/_types_info`
     );
     return response.toolTypes;
+  }
+
+  async listKibanaOpenApiOperations({ q = '', limit = 50 }: { q?: string; limit?: number }) {
+    return await this.http.get<ListKibanaOpenApiOperationsResponse>(
+      `${internalApiPath}/tools/_kibana_openapi_operations`,
+      { query: { q, limit } }
+    );
   }
 
   async listConnectors({ type }: { type?: string }) {

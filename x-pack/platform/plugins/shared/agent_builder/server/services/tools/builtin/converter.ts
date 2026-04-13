@@ -6,6 +6,7 @@
  */
 
 import { ToolType } from '@kbn/agent-builder-common';
+import type { z } from '@kbn/zod/v4';
 import type {
   BuiltinToolDefinition,
   StaticToolRegistration,
@@ -47,7 +48,7 @@ export const convertTool = ({
         }
       },
       getSchema: () => tool.schema,
-      getHandler: () => tool.handler,
+      getHandler: () => (params, ctx) => tool.handler(params as z.infer<typeof tool.schema>, ctx),
       summarizeToolReturn: tool.summarizeToolReturn,
     };
   }

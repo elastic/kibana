@@ -33,10 +33,12 @@ export const toolsToConverseBedrock = (tools: ToolOptions['tools'], messages: Me
           description: toolDef.description,
           inputSchema: {
             json: fixSchemaArrayProperties(
-              toolDef.schema ?? {
-                type: 'object' as const,
-                properties: {},
-              }
+              mergeRootAllOfObjectToolSchema(
+                toolDef.schema ?? {
+                  type: 'object' as const,
+                  properties: {},
+                }
+              )
             ),
           },
         },
@@ -67,6 +69,53 @@ export const toolsToConverseBedrock = (tools: ToolOptions['tools'], messages: Me
     ];
   }
 };
+
+/**
+ * Bedrock Converse requires `inputSchema.json.type === "object"`. Zod `intersection` (and similar)
+ * often serializes to top-level `allOf` without `type`, which upstream rejects. When every
+ * `allOf` branch is a JSON object schema, merge into one object (union of properties / required).
+ */
+function mergeRootAllOfObjectToolSchema<T extends ToolSchemaType>(schema: T): T {
+  const root = schema as unknown as Record<string, unknown>;
+  if (root.type === 'object' || !Array.isArray(root.allOf) || root.allOf.length === 0) {
+    return schema;
+  }
+
+  const mergedProps: Record<string, ToolSchemaType> = {};
+  const requiredKeys = new Set<string>();
+
+  for (const fragment of root.allOf) {
+    if (!fragment || typeof fragment !== 'object') {
+      return schema;
+    }
+    const part = fragment as Record<string, unknown>;
+    if (part.type !== 'object' || !part.properties || typeof part.properties !== 'object') {
+      return schema;
+    }
+    for (const [key, propSchema] of Object.entries(
+      part.properties as Record<string, ToolSchemaType>
+    )) {
+      mergedProps[key] = propSchema;
+    }
+    if (Array.isArray(part.required)) {
+      for (const r of part.required as string[]) {
+        requiredKeys.add(r);
+      }
+    }
+  }
+
+  const merged: Record<string, unknown> = {
+    type: 'object',
+    properties: mergedProps,
+  };
+  if (typeof root.description === 'string') {
+    merged.description = root.description;
+  }
+  if (requiredKeys.size > 0) {
+    merged.required = [...requiredKeys];
+  }
+  return merged as unknown as T;
+}
 
 /**
  * Strips JSON Schema keywords that are not supported by the

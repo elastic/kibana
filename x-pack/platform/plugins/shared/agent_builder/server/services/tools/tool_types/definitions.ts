@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolType } from '@kbn/agent-builder-common';
-import type { z, ZodObject } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { LlmDescriptionHandler, ToolHandlerFn } from '@kbn/agent-builder-server';
 import type { ObjectType } from '@kbn/config-schema';
@@ -19,7 +19,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 export interface ToolTypeDefinition<
   TType extends ToolType = ToolType,
   TConfig extends object = {},
-  TSchema extends ZodObject<any> = ZodObject<any>,
+  TSchema extends z.ZodType = z.ZodType,
   /**
    * Configuration shape as it is persisted (e.g. legacy shapes).
    * Most tool types will keep persistence and runtime config aligned.
@@ -103,7 +103,7 @@ export type ToolTypeUpdateValidator<ToolTypeConfig extends object = Record<strin
 export type AnyToolTypeDefinition<
   TType extends ToolType = ToolType,
   TConfig extends object = {},
-  TSchema extends ZodObject<any> = ZodObject<any>
+  TSchema extends z.ZodType = z.ZodType
 > =
   | ToolTypeDefinition<TType, TConfig, TSchema>
   | DisabledToolTypeDefinition<TType>
@@ -112,7 +112,7 @@ export type AnyToolTypeDefinition<
 export const isEnabledDefinition = <
   TType extends ToolType,
   TConfig extends object = {},
-  TSchema extends ZodObject<any> = ZodObject<any>
+  TSchema extends z.ZodType = z.ZodType
 >(
   definition: AnyToolTypeDefinition<TType, TConfig, TSchema>
 ): definition is ToolTypeDefinition<TType, TConfig, TSchema> => {
@@ -122,7 +122,7 @@ export const isEnabledDefinition = <
 export const isBuiltinDefinition = <
   TType extends ToolType,
   TConfig extends object = {},
-  TSchema extends ZodObject<any> = ZodObject<any>
+  TSchema extends z.ZodType = z.ZodType
 >(
   definition: AnyToolTypeDefinition<TType, TConfig, TSchema>
 ): definition is BuiltinToolTypeDefinition => {
@@ -132,7 +132,7 @@ export const isBuiltinDefinition = <
 export const isDisabledDefinition = <
   TType extends ToolType,
   TConfig extends object = {},
-  TSchema extends ZodObject<any> = ZodObject<any>
+  TSchema extends z.ZodType = z.ZodType
 >(
   definition: AnyToolTypeDefinition<TType, TConfig, TSchema>
 ): definition is DisabledToolTypeDefinition<TType> => {
@@ -141,7 +141,7 @@ export const isDisabledDefinition = <
 
 export interface ToolHandlerDynamicProps<
   TConfig extends object = {},
-  TSchema extends ZodObject<any> = ZodObject<any>
+  TSchema extends z.ZodType = z.ZodType
 > {
   /**
    * The zod schema attached to this tool.
@@ -150,7 +150,7 @@ export interface ToolHandlerDynamicProps<
   /**
    * Run handler that can be used to execute the tool.
    */
-  getHandler: () => MaybePromise<ToolHandlerFn<z.infer<TSchema>>>;
+  getHandler: () => MaybePromise<ToolHandlerFn<Record<string, unknown>>>;
   /**
    * Optional handler to add additional instructions to the LLM
    * when specified, this will fully replace the description when converting to LLM tools.
@@ -165,7 +165,7 @@ export interface ToolDynamicPropsContext {
 
 export type ToolHandlerDynamicPropsFn<
   TConfig extends object = {},
-  TSchema extends ZodObject<any> = ZodObject<any>
+  TSchema extends z.ZodType = z.ZodType
 > = (
   config: TConfig,
   ctx: ToolDynamicPropsContext

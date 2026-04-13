@@ -69,6 +69,7 @@
     "@kbn/doc-links",
     "@kbn/ui-actions-plugin",
     "@kbn/workflows",
+    "@kbn/repo-info",
     "@kbn/spaces-utils",
     "@kbn/spaces-plugin",
     "@kbn/licensing-types",

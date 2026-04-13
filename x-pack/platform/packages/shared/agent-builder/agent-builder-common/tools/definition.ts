@@ -32,6 +32,10 @@ export enum ToolType {
    * MCP server tools
    */
   mcp = 'mcp',
+  /**
+   * Call a selected Kibana REST operation (POC: OpenAPI-backed catalog).
+   */
+  kibana_api = 'kibana_api',
 }
 
 /**

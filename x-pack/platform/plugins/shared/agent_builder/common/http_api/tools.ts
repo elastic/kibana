@@ -100,6 +100,22 @@ export interface GetToolTypeInfoResponse {
   toolTypes: ToolTypeInfo[];
 }
 
+/** OpenAPI operation row for Kibana API tool picker (from oas_docs/output/kibana.yaml) */
+export interface KibanaOpenApiOperationSummaryDto {
+  operation_id: string;
+  method: string;
+  path: string;
+  /** OpenAPI `summary` when present */
+  summary?: string;
+  /** Truncated OpenAPI `description` */
+  description?: string;
+  workflow_connector_type: string | null;
+}
+
+export interface ListKibanaOpenApiOperationsResponse {
+  results: KibanaOpenApiOperationSummaryDto[];
+}
+
 /**
  * Tool health status returned by the health API.
  */

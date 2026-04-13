@@ -171,6 +171,12 @@ export const i18nMessages = {
             defaultMessage: 'MCP',
           }
         ),
+        kibanaApiOption: i18n.translate(
+          'xpack.agentBuilder.tools.newTool.configuration.form.type.kibanaApiOption',
+          {
+            defaultMessage: 'Kibana API',
+          }
+        ),
       },
       indexSearch: {
         patternLabel: i18n.translate(
@@ -222,6 +228,27 @@ export const i18nMessages = {
           'xpack.agentBuilder.tools.newTool.configuration.form.esql.parametersLabel',
           {
             defaultMessage: 'ES|QL Parameters',
+          }
+        ),
+      },
+      kibanaApi: {
+        operationsLabel: i18n.translate(
+          'xpack.agentBuilder.tools.newTool.configuration.form.kibanaApi.operationsLabel',
+          {
+            defaultMessage: 'Kibana REST operations',
+          }
+        ),
+        operationsHelp: i18n.translate(
+          'xpack.agentBuilder.tools.newTool.configuration.form.kibanaApi.operationsHelp',
+          {
+            defaultMessage:
+              'Pick one or more documented Kibana APIs (from OpenAPI). The agent must pass operation_id to choose which call to make; path, query, and body types depend on that operation. Requires oas_docs/output/kibana.yaml for the catalog; execution uses this Kibana instance.',
+          }
+        ),
+        operationsPlaceholder: i18n.translate(
+          'xpack.agentBuilder.tools.newTool.configuration.form.kibanaApi.operationsPlaceholder',
+          {
+            defaultMessage: 'Search and select APIs (path, method, or operation id)…',
           }
         ),
       },

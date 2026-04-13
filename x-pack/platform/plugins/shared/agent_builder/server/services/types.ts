@@ -83,6 +83,9 @@ export interface ServicesStartDeps {
   savedObjects: SavedObjectsServiceStart;
   featureFlags: FeatureFlagsStart;
   dataStreams: DataStreamsStart;
+  /** Kibana API tool loopback calls */
+  getKibanaLoopbackBaseUrl: () => string;
+  serverBasePath: string;
   // plugin deps
   inference: InferenceServerStart;
   spaces?: SpacesPluginStart;
