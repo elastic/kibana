@@ -34,30 +34,54 @@ import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
  *
  * Sanitisation strategy:
  *  - `exportsType: "namespace"` → keep (true ESM, named imports work directly).
- *  - `defaultObject: "redirect" | "redirect-warn"` → promote to "namespace".
- *    In webpack these modules redirect named imports to module.exports
- *    properties; "namespace" achieves the same in rspack by generating
- *    property access (e.g. `mod.format`) for each named import.
- *  - Everything else → strip buildMeta entirely (default-only CJS or modules
- *    without export metadata; no named imports expected).
+ *  - `defaultObject: "redirect" | "redirect-warn"` with `exportsType: "flagged"`
+ *    → promote to "namespace". These modules have `__esModule: true`, so
+ *    `.default` exists and named imports map to `module.exports` properties.
+ *  - `defaultObject: "redirect" | "redirect-warn"` with `exportsType: "default"`
+ *    → REMOVE from manifest. These are pure CJS modules where `module.exports`
+ *    IS the default value (no `__esModule` flag). Using "namespace" makes rspack
+ *    look for `.default` which doesn't exist (`import url from 'url'` → crash).
+ *    Removing from the manifest lets rspack bundle the polyfill directly with
+ *    correct CJS interop. `defaultObject` itself causes a Rust panic so can't
+ *    be preserved.
+ *  - `defaultObject: "redirect"` with `exportsType: "dynamic"` → promote to
+ *    "namespace". These are CJS wrappers (e.g. `react/index.js`) that typically
+ *    go through explicit externals anyway. "namespace" preserves named imports.
+ *  - Everything else → strip buildMeta entirely (no named imports expected).
  *
  * NOTE: This can be removed once we delete the legacy optimizer and promote this one to be the optimizer.
  */
 export function loadDllManifest() {
   const raw = JSON.parse(Fs.readFileSync(UiSharedDepsNpm.dllManifestPath, 'utf8'));
-  for (const entry of Object.values(raw.content) as Array<{
-    buildMeta?: { exportsType?: string; defaultObject?: string | boolean };
-  }>) {
+  const keysToRemove: string[] = [];
+
+  for (const [key, entry] of Object.entries(raw.content) as Array<
+    [string, { buildMeta?: { exportsType?: string; defaultObject?: string | boolean } }]
+  >) {
     if (entry.buildMeta) {
       const { exportsType, defaultObject } = entry.buildMeta;
       if (exportsType === 'namespace') {
         entry.buildMeta = { exportsType };
       } else if (defaultObject === 'redirect' || defaultObject === 'redirect-warn') {
-        entry.buildMeta = { exportsType: 'namespace' };
+        if (exportsType === 'default') {
+          // Pure CJS — remove from DLL so rspack bundles it directly with
+          // correct interop (both default and named imports work).
+          keysToRemove.push(key);
+        } else {
+          // flagged, dynamic, or other — "namespace" is safe because either
+          // __esModule provides .default, or the module is resolved via
+          // explicit externals rather than through the DLL reference.
+          entry.buildMeta = { exportsType: 'namespace' };
+        }
       } else {
         entry.buildMeta = undefined;
       }
     }
   }
+
+  for (const key of keysToRemove) {
+    delete raw.content[key];
+  }
+
   return raw;
 }

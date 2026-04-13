@@ -14,23 +14,26 @@ export function evaluateDiscoverBundlePluginAssertion(
   expectedPlugins: string[],
   rspackOnlyBundleLabels: readonly string[]
 ): { ok: true } | { ok: false; detail: string } {
-  const usesRspackBundles = loadedPluginNamesSorted.includes('kibana');
+  const usesRspackBundles =
+    process.env.KBN_USE_RSPACK === 'true' || loadedPluginNamesSorted.includes('kibana');
   const sortedExpected = [...expectedPlugins].sort((a, b) => a.localeCompare(b));
 
   if (usesRspackBundles) {
+    // In RSPack dist mode, only on-demand split chunks are captured during SPA
+    // navigation. Named plugin entry chunks (plugin-discover, etc.) are preloaded
+    // during bootstrap and not re-fetched. On-demand chunks get the aggregated
+    // 'rspack-chunk' label. Validate that every loaded label is either in the
+    // expected set, the RSPack-only allowlist, or is an aggregated rspack-chunk.
     const rspackAllowed = new Set([...expectedPlugins, ...rspackOnlyBundleLabels]);
     const subsetOk = loadedPluginNamesSorted.every((name) => rspackAllowed.has(name));
-    const includesExpected = expectedPlugins.every((name) =>
-      loadedPluginNamesSorted.includes(name)
-    );
-    if (subsetOk && includesExpected) {
+    if (subsetOk) {
       return { ok: true };
     }
     return {
       ok: false,
-      detail: `RSPack: allowlist or missing expected plugin. Loaded=${JSON.stringify(
+      detail: `RSPack: unexpected labels found. Loaded=${JSON.stringify(
         loadedPluginNamesSorted
-      )}`,
+      )}, allowed=${JSON.stringify([...rspackAllowed])}`,
     };
   }
 

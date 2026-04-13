@@ -50,6 +50,14 @@ export function getLogicalBundlePluginLabel(fileName: string): string {
     return base.slice(0, -'.dll'.length);
   }
 
+  // RSPack production split chunks: <numericChunkId>.<contenthash>
+  // In dist mode (`chunkIds: 'deterministic'`), unnamed split chunks get numeric
+  // IDs that cannot be mapped back to a single plugin. Group them under one label.
+  const rspackNumericChunk = /^\d+\.[a-f0-9]{8,}$/i.exec(base);
+  if (rspackNumericChunk) {
+    return 'rspack-chunk';
+  }
+
   // Remaining: first path segment of the basename (shared-plugins, vendors, …)
   return base.split('.')[0];
 }

@@ -38,4 +38,10 @@ describe('getLogicalBundlePluginLabel', () => {
     expect(getLogicalBundlePluginLabel('shared-plugins.abcdef12.js')).toBe('shared-plugins');
     expect(getLogicalBundlePluginLabel('vendors.abcdef12.js')).toBe('vendors');
   });
+
+  it('maps RSPack production numeric split chunks', () => {
+    expect(getLogicalBundlePluginLabel('2511.abcdef12.js')).toBe('rspack-chunk');
+    expect(getLogicalBundlePluginLabel('669.12345678.js')).toBe('rspack-chunk');
+    expect(getLogicalBundlePluginLabel('98703.a1b2c3d4e5.js')).toBe('rspack-chunk');
+  });
 });

@@ -13,12 +13,15 @@ import { testData } from '../fixtures';
 
 /**
  * Extra bundle labels produced only by the unified RSPack build (split chunks + shell).
+ * In RSPack dist mode, unnamed split chunks are labelled 'rspack-chunk' by
+ * getLogicalBundlePluginLabel. In dev mode, named labels like 'plugin-discover' appear.
  * [rspack-transition] Remove this allowlist when the legacy webpack optimizer is gone
  * and tests only target RSPack output — see packages/kbn-rspack-optimizer/LEGACY_REMOVAL_CHECKLIST.md
  */
 const RSPACK_ONLY_BUNDLE_LABELS: readonly string[] = [
   'core',
   'kibana',
+  'rspack-chunk',
   'shared-core',
   'shared-misc',
   'shared-packages',
@@ -50,16 +53,47 @@ function getExpectedDiscoverPluginIds(projectType: string | undefined): string[]
  * [rspack-transition] RSPack unified build loads shared chunks (vendors, shared-plugins, etc.)
  * that inflate totalSize compared to legacy per-plugin bundles, but individual plugin sizes shrink.
  * Returns separate thresholds until the legacy optimizer is removed.
+ *
+ * In RSPack dist mode, named plugin entry chunks (plugin-discover, etc.) are preloaded
+ * during bootstrap and NOT re-fetched during SPA navigation, so only on-demand split
+ * chunks with numeric IDs are captured by CDP. Per-plugin size assertions are not
+ * meaningful in that mode.
  */
-function getBundleSizeLimits(pluginNames: string[]) {
-  const isRspack = pluginNames.includes('kibana');
+function getBundleSizeLimits() {
+  const isRspack = process.env.KBN_USE_RSPACK === 'true';
   return {
     isRspack,
     totalSize: isRspack ? 4.5 * 1024 * 1024 : 3.1 * 1024 * 1024,
     bundleCount: isRspack ? 30 : 100,
-    discoverSize: isRspack ? 200 * 1024 : 650 * 1024,
-    unifiedSearchSize: isRspack ? 150 * 1024 : 450 * 1024,
+    discoverSize: 650 * 1024,
+    unifiedSearchSize: 450 * 1024,
   };
+}
+
+/**
+ * Per-plugin size assertions are only meaningful in legacy mode where individual
+ * plugin entry bundles are fetched during navigation. In RSPack dist mode,
+ * named plugin chunks are preloaded during bootstrap and not re-fetched.
+ */
+function assertLegacyPerPluginSizes(
+  plugins: Array<{ name: string; totalSize: number }>,
+  limits: ReturnType<typeof getBundleSizeLimits>
+) {
+  if (limits.isRspack) return { ok: true };
+
+  const discoverSize = plugins.find((p) => p.name === 'discover')?.totalSize ?? Infinity;
+  const unifiedSearchSize = plugins.find((p) => p.name === 'unifiedSearch')?.totalSize ?? Infinity;
+
+  if (discoverSize >= limits.discoverSize) {
+    return { ok: false, detail: `discover size ${discoverSize} >= ${limits.discoverSize}` };
+  }
+  if (unifiedSearchSize >= limits.unifiedSearchSize) {
+    return {
+      ok: false,
+      detail: `unifiedSearch size ${unifiedSearchSize} >= ${limits.unifiedSearchSize}`,
+    };
+  }
+  return { ok: true };
 }
 
 test.describe(
@@ -110,7 +144,7 @@ test.describe(
       // Collect and validate stats
       const stats = perfTracker.collectJsBundleStats(currentUrl);
       const loadedPluginNames = stats.plugins.map((p) => p.name).sort((a, b) => a.localeCompare(b));
-      const limits = getBundleSizeLimits(loadedPluginNames);
+      const limits = getBundleSizeLimits();
 
       expect(stats.totalSize).toBeLessThan(limits.totalSize);
       expect(stats.bundleCount).toBeLessThan(limits.bundleCount);
@@ -122,12 +156,7 @@ test.describe(
         RSPACK_ONLY_BUNDLE_LABELS
       );
       expect(bundleAssertion).toStrictEqual({ ok: true });
-      expect(stats.plugins.find((p) => p.name === 'discover')?.totalSize).toBeLessThan(
-        limits.discoverSize
-      );
-      expect(stats.plugins.find((p) => p.name === 'unifiedSearch')?.totalSize).toBeLessThan(
-        limits.unifiedSearchSize
-      );
+      expect(assertLegacyPerPluginSizes(stats.plugins, limits)).toStrictEqual({ ok: true });
     });
 
     test('measures Performance Metrics before and after Discover load', async ({
