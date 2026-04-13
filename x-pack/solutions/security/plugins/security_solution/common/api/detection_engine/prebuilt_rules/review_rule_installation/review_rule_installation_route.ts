@@ -10,7 +10,7 @@ import type { RuleTagArray } from '../../model';
 import type { RuleResponse } from '../../model/rule_schema';
 import { PrebuiltRuleAssetsFilter } from '../common/prebuilt_rule_assets_filter';
 import { PrebuiltRuleAssetsSort } from '../common/prebuilt_rule_assets_sort';
-
+// here
 export type ReviewRuleInstallationRequestBody = z.infer<typeof ReviewRuleInstallationRequestBody>;
 export const ReviewRuleInstallationRequestBody = z.object({
   /**

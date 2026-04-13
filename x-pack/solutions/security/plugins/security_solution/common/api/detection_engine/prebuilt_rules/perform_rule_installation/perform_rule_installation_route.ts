@@ -7,7 +7,7 @@
 import * as t from 'io-ts';
 import type { RuleResponse } from '../../model';
 import type { AggregatedPrebuiltRuleError } from '../model';
-
+// here
 export const RuleVersionSpecifier = t.exact(
   t.type({
     rule_id: t.string,
