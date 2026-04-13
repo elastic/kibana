@@ -34,7 +34,7 @@
             "id": "def-public.YamlRuleEditor.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  value,\n  onChange,\n  esqlCallbacks,\n  esqlPropertyNames = DEFAULT_ESQL_PROPERTY_NAMES,\n  isReadOnly = false,\n  height = 320,\n  dataTestSubj = 'alertingV2YamlRuleEditor',\n}",
+            "label": "{\n  value,\n  onChange,\n  esqlCallbacks,\n  esqlPropertyNames = DEFAULT_ESQL_PROPERTY_NAMES,\n  isReadOnly = false,\n  height = 'clamp(320px, calc(100vh - 500px), 750px)',\n  dataTestSubj = 'alertingV2YamlRuleEditor',\n}",
             "description": [],
             "signature": [
               {
@@ -340,12 +340,12 @@
           {
             "parentPluginId": "@kbn/yaml-rule-editor",
             "id": "def-public.YamlRuleEditorProps.height",
-            "type": "number",
+            "type": "CompoundType",
             "tags": [],
             "label": "height",
             "description": [],
             "signature": [
-              "number | undefined"
+              "string | number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/yaml-rule-editor/src/types.ts",
             "lineNumber": 83,

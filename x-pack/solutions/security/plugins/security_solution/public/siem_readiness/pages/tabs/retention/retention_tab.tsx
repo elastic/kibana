@@ -270,7 +270,7 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
           }
         ),
         sortable: (item: RetentionInfoWithStatus) => item?.retentionDays ?? 0,
-        width: '20%',
+        width: '15%',
         render: (retentionPeriod: string | null, item: RetentionInfoWithStatus) => {
           if (!retentionPeriod) {
             return (

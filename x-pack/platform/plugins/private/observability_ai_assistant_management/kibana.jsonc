@@ -18,6 +18,6 @@
       "triggersActionsUi"
     ],
     "optionalPlugins": ["home", "serverless", "productDocBase", "spaces", "cloud"],
-    "requiredBundles": ["kibanaReact", "logsDataAccess"]
+    "requiredBundles": ["kibanaReact", "logsDataAccess", "esUiShared"]
   }
 }
