@@ -362,6 +362,51 @@ describe('LogsExtractionClient', () => {
       jest.useRealTimers();
     });
 
+    it('should prefer logsPageCursorStartTimestamp over delayed lastExecutionTimestamp when both are set', async () => {
+      const fixedNow = new Date('2025-01-15T12:00:00.000Z');
+      jest.useFakeTimers({ now: fixedNow.getTime() });
+
+      const logPageCursorStart = '2025-01-15T06:00:00.000Z';
+      const lastExecutionTimestamp = '2025-01-15T11:00:00.000Z';
+      const delayedLastExecution = moment
+        .utc(lastExecutionTimestamp)
+        .subtract(5, 'seconds')
+        .toISOString();
+
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      };
+
+      const globalStateWithDelay5s = {
+        logsExtraction: LogExtractionConfig.parse({ lookbackPeriod: '3h', delay: '5s' }),
+      } as EntityStoreGlobalState;
+      mockGlobalStateClient.find.mockResolvedValue(globalStateWithDelay5s);
+      mockGlobalStateClient.findOrThrow.mockResolvedValue(globalStateWithDelay5s);
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user', {
+          logsPageCursorStartTimestamp: logPageCursorStart,
+          logsPageCursorStartId: 'cursor-doc',
+          lastExecutionTimestamp,
+        }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
+      );
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      mockExecuteEsqlQuery.mockResolvedValue(mockLogPaginationCursorProbeEmpty());
+      mockIngestEntities.mockResolvedValue(undefined);
+
+      await client.extractLogs('user');
+
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
+        esClient: mockEsClient,
+        query: expect.stringContaining(logPageCursorStart),
+      });
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
+        esClient: mockEsClient,
+        query: expect.not.stringContaining(delayedLastExecution),
+      });
+
+      jest.useRealTimers();
+    });
+
     it('should use paginationTimestamp as from and subtract delay for to', async () => {
       const fixedNow = new Date('2025-01-15T12:00:00.000Z');
       jest.useFakeTimers({ now: fixedNow.getTime() });

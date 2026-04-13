@@ -681,10 +681,10 @@ export class LogsExtractionClient {
 
     let fromDateISO: string;
     if (hasLogPaginationCursorProgress) {
-      // Mid log-page: use last run, then persisted cursor start, else lookback—so `from` stays before the cursor.
+      // Mid log-page: use persisted cursor start, then last run, else lookback—so `from` stays before the cursor.
       fromDateISO =
-        this.getDelayedLastExecutionTimestamp(engineState, delayMs) ||
         this.getFromDateISOFromPersistedLogPageCursorStart(engineState) ||
+        this.getDelayedLastExecutionTimestamp(engineState, delayMs) ||
         this.getFromDateBasedOnLookback(config);
     } else {
       // No log-page cursor: entity pagination, then last run, then lookback.
