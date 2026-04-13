@@ -8,18 +8,15 @@
  */
 
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
-import type { WorkflowsRouter } from '../../../types';
+import type { RouteDependencies } from '../types';
 import { INTERNAL_API_VERSION } from '../utils/route_constants';
 import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
 import { withLicenseCheck } from '../utils/with_license_check';
 
-export function registerGetConfigRoute({
-  router,
-  getWorkflowExecutionEngine,
-}: {
-  router: WorkflowsRouter;
-  getWorkflowExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>;
-}) {
+export function registerGetConfigRoute(
+  { router }: RouteDependencies,
+  getWorkflowExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>
+) {
   router.versioned
     .get({
       path: '/internal/workflows/config',
