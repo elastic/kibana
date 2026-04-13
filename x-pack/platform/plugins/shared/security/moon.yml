@@ -104,6 +104,7 @@ dependsOn:
   - '@kbn/mock-idp-utils'
   - '@kbn/core-user-activity-server'
   - '@kbn/core-user-activity-server-mocks'
+  - '@kbn/core-chrome-browser-components'
 tags:
   - plugin
   - prod
