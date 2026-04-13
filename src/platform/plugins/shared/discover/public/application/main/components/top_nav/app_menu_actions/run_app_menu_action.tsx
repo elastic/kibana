@@ -59,9 +59,7 @@ export async function runAppMenuAction({
   cleanup();
   currentReturnFocus = returnFocus;
 
-  let onFinishActionCalled = false;
   const onFinishAction = () => {
-    onFinishActionCalled = true;
     if (isOpen) {
       cleanup();
     } else {
@@ -79,7 +77,7 @@ export async function runAppMenuAction({
 
   const result = await appMenuItem.run?.(params);
 
-  if (!result || !React.isValidElement(result) || onFinishActionCalled) {
+  if (!result || !React.isValidElement(result)) {
     return;
   }
 
