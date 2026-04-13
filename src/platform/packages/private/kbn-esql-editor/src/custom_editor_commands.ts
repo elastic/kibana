@@ -8,6 +8,7 @@
  */
 
 import { monaco } from '@kbn/monaco';
+import { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from '@kbn/esql-language';
 import {
   ESQLVariableType,
   QuerySource,
@@ -21,6 +22,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { ESQLEditorDeps } from './types';
 import type { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
 import { IndicesBrowserOpenMode } from './resource_browser/types';
+import { getRangeFromOffsets } from './resource_browser/utils';
 
 export interface MonacoCommandDependencies {
   application?: CoreStart['application'];
@@ -40,6 +42,48 @@ export interface MonacoCommandDependencies {
     preloadedFields?: Array<{ name: string; type?: string }>;
   }) => void;
 }
+
+interface TextReplacementCommandPayload {
+  replacementText?: string;
+  replaceStart?: string;
+  replaceEnd?: string;
+}
+
+const applyTextReplacement = (
+  editor: monaco.editor.IStandaloneCodeEditor,
+  payload: TextReplacementCommandPayload | undefined
+) => {
+  if (!payload?.replacementText) {
+    return;
+  }
+
+  const model = editor.getModel();
+
+  if (!model) {
+    return;
+  }
+
+  // Suggestion command arguments are serialized as string maps by contract.
+  const replaceStart = Number(payload.replaceStart);
+  const replaceEnd = Number(payload.replaceEnd);
+
+  if (!Number.isFinite(replaceStart) || !Number.isFinite(replaceEnd) || replaceStart > replaceEnd) {
+    return;
+  }
+
+  const modelLength = model.getValue().length;
+  const boundedStart = Math.max(0, Math.min(replaceStart, modelLength));
+  const boundedEnd = Math.max(boundedStart, Math.min(replaceEnd, modelLength));
+
+  editor.executeEdits('applyTextReplacement', [
+    {
+      range: getRangeFromOffsets(model, boundedStart, boundedEnd),
+      text: payload.replacementText,
+    },
+  ]);
+
+  editor.setPosition(model.getPositionAt(boundedStart + payload.replacementText.length));
+};
 
 const triggerControl = async (
   queryString: string,
@@ -92,6 +136,19 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
   commandDisposables.push(
     monaco.editor.registerCommand('esql.timepicker.choose', (...args) => {
       openTimePickerPopover();
+    })
+  );
+
+  commandDisposables.push(
+    monaco.editor.registerCommand(ESQL_APPLY_TEXT_REPLACEMENT_COMMAND, (...args) => {
+      const [, payload] = args;
+      const editor = editorRef.current;
+
+      if (!editor) {
+        return;
+      }
+
+      applyTextReplacement(editor, payload);
     })
   );
 

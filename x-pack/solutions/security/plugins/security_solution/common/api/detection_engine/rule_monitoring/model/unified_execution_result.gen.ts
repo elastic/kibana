@@ -101,10 +101,6 @@ export const UnifiedExecutionResult = z.object({
      * Number of frozen indices queried during execution (from kibana.alert.rule.execution.metrics.frozen_indices_queried_count).
      */
     frozen_indices_queried_count: z.number().int().nullable(),
-    /**
-     * Indexing duration in milliseconds. Not populated from the execute event currently.
-     */
-    index_duration_ms: z.number().int().nullable(),
   }),
 });
 

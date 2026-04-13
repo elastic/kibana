@@ -21,7 +21,7 @@ interface Props {
 const StatusPopoverButtonComponent: React.FC<Props> = ({ status, disabled = false, onClick }) => {
   return (
     <EuiBadge
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       iconOnClick={onClick}
       iconOnClickAriaLabel={i18n.STATUS_ICON_ARIA}

@@ -95,7 +95,7 @@ export interface AuthenticatorOptions {
   featureUsageService: SecurityFeatureUsageServiceStart;
   userProfileService: UserProfileServiceStartInternal;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
-  config: Pick<ConfigType, 'authc' | 'accessAgreement'>;
+  config: Pick<ConfigType, 'authc' | 'accessAgreement' | 'uiam'>;
   basePath: IBasePath;
   license: SecurityLicense;
   loggers: LoggerFactory;

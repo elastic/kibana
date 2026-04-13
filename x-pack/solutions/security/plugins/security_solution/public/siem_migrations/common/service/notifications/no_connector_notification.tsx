@@ -21,7 +21,7 @@ import { OnboardingCardId, OnboardingTopicId } from '../../../../onboarding/cons
 
 export const getNoConnectorToast = (core: CoreStart): ToastInput => ({
   color: 'danger',
-  iconType: 'alert',
+  iconType: 'warning',
   title: i18n.translate('xpack.securitySolution.siemMigrations.baseService.noConnector.title', {
     defaultMessage: 'No connector configured.',
   }),

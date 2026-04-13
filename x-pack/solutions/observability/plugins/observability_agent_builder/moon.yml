@@ -62,6 +62,9 @@ dependsOn:
   - '@kbn/apm-types-shared'
   - '@kbn/observability-utils-server'
   - '@kbn/calculate-auto'
+  - '@kbn/search-inference-endpoints'
+  - '@kbn/inference-connectors'
+  - '@kbn/react-query'
 tags:
   - plugin
   - prod
@@ -75,26 +78,6 @@ fileGroups:
     - public/**/*
     - scripts/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

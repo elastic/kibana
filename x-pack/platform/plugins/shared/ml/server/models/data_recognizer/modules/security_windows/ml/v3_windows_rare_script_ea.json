@@ -20,7 +20,8 @@
       "host.id",
       "user.name",
       "user.id",
-      "event.module"
+      "event.module",
+      "powershell.file.script_block_hash"
     ]
   },
   "allow_lazy_open": true,
