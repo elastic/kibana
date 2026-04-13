@@ -1,13 +1,9 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
-  "include": [
-    "common/**/*",
-    "public/**/*",
-    "server/**/*",
-  ],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout*/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",
@@ -34,6 +30,7 @@
     "@kbn/react-kibana-context-render",
     "@kbn/shared-ux-table-persist",
     "@kbn/css-utils",
+    "@kbn/scout"
   ],
   "exclude": [
     "target/**/*",
