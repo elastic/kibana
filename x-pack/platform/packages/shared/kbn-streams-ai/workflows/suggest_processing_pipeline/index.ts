@@ -47,7 +47,7 @@ export async function suggestProcessingPipeline({
   fieldsMetadataClient,
   esClient,
   initialDatasetAnalysisJson,
-  mappedFieldsOverride,
+  mappedFields,
   upstreamSeedParsingContextMarkdown,
 }: {
   definition: Streams.ingest.all.Definition;
@@ -61,8 +61,8 @@ export async function suggestProcessingPipeline({
   esClient: ElasticsearchClient;
   /** Pre-computed JSON for `initial_dataset_analysis` (field layout / sample values for `documents`). */
   initialDatasetAnalysisJson: string;
-  /** When set, avoids an extra field_caps call (callers already fetched for the overview). */
-  mappedFieldsOverride?: Record<string, string>;
+  /** Mapped fields from field_caps; callers must fetch before calling. */
+  mappedFields: Record<string, string>;
   /**
    * When the caller runs an upstream grok/dissect seed step, pass a formatted description so the model
    * knows parsing already happened. Omit or leave empty when the full processor schema is used.
@@ -83,8 +83,6 @@ export async function suggestProcessingPipeline({
   }
 
   const isOtel = isOtelStream(definition);
-
-  const mappedFields = mappedFieldsOverride ?? (await getMappedFields(esClient, definition.name));
 
   const input = {
     stream: definition,

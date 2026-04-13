@@ -107,7 +107,7 @@ describe('suggestProcessingPipeline workflow', () => {
           },
         },
       ],
-      input: [{ role: MessageRole.Assistant, content: '' }],
+      input: [{ role: MessageRole.Assistant, content: '', toolCalls: [] }],
     });
 
     await suggestProcessingPipeline({
@@ -121,7 +121,7 @@ describe('suggestProcessingPipeline workflow', () => {
       fieldsMetadataClient: mockFieldsMetadataClient,
       esClient: mockEsClient,
       initialDatasetAnalysisJson: STUB_INITIAL_DATASET_JSON,
-      mappedFieldsOverride: {},
+      mappedFields: {},
     });
 
     expect(simulatePipeline).not.toHaveBeenCalled();
@@ -143,7 +143,7 @@ describe('suggestProcessingPipeline workflow', () => {
           },
         },
       ],
-      input: [{ role: MessageRole.Assistant, content: '' }],
+      input: [{ role: MessageRole.Assistant, content: '', toolCalls: [] }],
     });
 
     await suggestProcessingPipeline({
@@ -157,7 +157,7 @@ describe('suggestProcessingPipeline workflow', () => {
       fieldsMetadataClient: mockFieldsMetadataClient,
       esClient: mockEsClient,
       initialDatasetAnalysisJson: STUB_INITIAL_DATASET_JSON,
-      mappedFieldsOverride: {},
+      mappedFields: {},
       upstreamSeedParsingContextMarkdown: 'UPSTREAM_MARKDOWN_BLOCK',
     });
 
@@ -196,7 +196,7 @@ describe('suggestProcessingPipeline workflow', () => {
           },
         },
       ],
-      input: [{ role: MessageRole.Assistant, content: '' }],
+      input: [{ role: MessageRole.Assistant, content: '', toolCalls: [] }],
     });
 
     const result = await suggestProcessingPipeline({
@@ -210,7 +210,7 @@ describe('suggestProcessingPipeline workflow', () => {
       fieldsMetadataClient: mockFieldsMetadataClient,
       esClient: mockEsClient,
       initialDatasetAnalysisJson: STUB_INITIAL_DATASET_JSON,
-      mappedFieldsOverride: {},
+      mappedFields: {},
     });
 
     expect(result.pipeline?.steps.length).toBe(1);
@@ -236,7 +236,7 @@ describe('suggestProcessingPipeline workflow', () => {
           },
         },
       ],
-      input: [{ role: MessageRole.Assistant, content: '' }],
+      input: [{ role: MessageRole.Assistant, content: '', toolCalls: [] }],
     });
 
     const result = await suggestProcessingPipeline({
@@ -250,7 +250,7 @@ describe('suggestProcessingPipeline workflow', () => {
       fieldsMetadataClient: mockFieldsMetadataClient,
       esClient: mockEsClient,
       initialDatasetAnalysisJson: STUB_INITIAL_DATASET_JSON,
-      mappedFieldsOverride: {},
+      mappedFields: {},
     });
 
     expect(simulatePipeline).not.toHaveBeenCalled();

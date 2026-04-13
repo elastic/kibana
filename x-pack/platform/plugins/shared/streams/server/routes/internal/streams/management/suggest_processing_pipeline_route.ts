@@ -288,7 +288,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           esClient: scopedClusterClient.asCurrentUser,
           fieldsMetadataClient,
           initialDatasetAnalysisJson,
-          mappedFieldsOverride: mappedFields,
+          mappedFields,
           upstreamSeedParsingContextMarkdown: effectiveParsingProcessor
             ? formatUpstreamSeedParsingContextForPromptMarkdown(effectiveParsingProcessor)
             : undefined,
