@@ -7,6 +7,7 @@
 
 jest.mock('../epm/packages');
 
+import { DATASET_VAR_NAME } from '../../../common/constants';
 import type { PackagePolicy } from '../../types';
 import { PackagePolicyValidationError } from '../../errors';
 
@@ -833,10 +834,242 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
             privileges: ['auto_configure', 'create_doc'],
           },
           {
-            names: ['logs-generic.otel-test'],
+            names: ['logs-otel-traces-test'],
             privileges: ['auto_configure', 'create_doc'],
           },
         ],
+      },
+    });
+  });
+
+  it('Falls back to stream dataset when OTel traces data_stream.dataset var is an empty object', async () => {
+    const packagePolicies: PackagePolicy[] = [
+      {
+        id: 'package-policy-otel-dataset-empty-object',
+        name: 'otel-traces-bad-dataset-var',
+        namespace: 'test',
+        enabled: true,
+        package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
+        inputs: [
+          {
+            type: 'otelcol',
+            enabled: true,
+            streams: [
+              {
+                id: 'otel-traces',
+                enabled: true,
+                data_stream: { type: 'traces', dataset: 'otel-traces' },
+                vars: {
+                  [DATASET_VAR_NAME]: { value: {} },
+                },
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      },
+    ];
+
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      'test',
+      packagePolicies
+    );
+    expect(permissions).toMatchObject({
+      'package-policy-otel-dataset-empty-object': {
+        indices: expect.arrayContaining([
+          { names: ['logs-otel-traces-test'], privileges: ['auto_configure', 'create_doc'] },
+        ]),
+      },
+    });
+  });
+
+  it('Falls back to stream dataset when OTel traces data_stream.dataset var is an array', async () => {
+    const packagePolicies: PackagePolicy[] = [
+      {
+        id: 'package-policy-otel-dataset-array',
+        name: 'otel-traces-array-dataset-var',
+        namespace: 'test',
+        enabled: true,
+        package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
+        inputs: [
+          {
+            type: 'otelcol',
+            enabled: true,
+            streams: [
+              {
+                id: 'otel-traces',
+                enabled: true,
+                data_stream: { type: 'traces', dataset: 'otel-traces' },
+                vars: {
+                  [DATASET_VAR_NAME]: { value: ['a', 'b', 'c'] },
+                },
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      },
+    ];
+
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      'test',
+      packagePolicies
+    );
+    expect(permissions).toMatchObject({
+      'package-policy-otel-dataset-array': {
+        indices: expect.arrayContaining([
+          { names: ['logs-otel-traces-test'], privileges: ['auto_configure', 'create_doc'] },
+        ]),
+      },
+    });
+  });
+
+  it('Uses dataset from object-shaped OTel traces data_stream.dataset var', async () => {
+    const packagePolicies: PackagePolicy[] = [
+      {
+        id: 'package-policy-otel-dataset-object',
+        name: 'otel-traces-object-dataset-var',
+        namespace: 'test',
+        enabled: true,
+        package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
+        inputs: [
+          {
+            type: 'otelcol',
+            enabled: true,
+            streams: [
+              {
+                id: 'otel-traces',
+                enabled: true,
+                data_stream: { type: 'traces', dataset: 'otel-traces' },
+                vars: {
+                  [DATASET_VAR_NAME]: { value: { dataset: 'my.custom' } },
+                },
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      },
+    ];
+
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      'test',
+      packagePolicies
+    );
+    expect(permissions).toMatchObject({
+      'package-policy-otel-dataset-object': {
+        indices: expect.arrayContaining([
+          { names: ['logs-my.custom-test'], privileges: ['auto_configure', 'create_doc'] },
+        ]),
+      },
+    });
+  });
+
+  it('Falls back to stream dataset when OTel traces data_stream.dataset var is only whitespace or empty nested dataset', async () => {
+    const whitespacePolicies: PackagePolicy[] = [
+      {
+        id: 'package-policy-otel-dataset-whitespace',
+        name: 'otel-traces-ws',
+        namespace: 'test',
+        enabled: true,
+        package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
+        inputs: [
+          {
+            type: 'otelcol',
+            enabled: true,
+            streams: [
+              {
+                id: 'otel-traces',
+                enabled: true,
+                data_stream: { type: 'traces', dataset: 'otel-traces' },
+                vars: {
+                  [DATASET_VAR_NAME]: { value: '   ' },
+                },
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      },
+    ];
+
+    const emptyNestedPolicies: PackagePolicy[] = [
+      {
+        id: 'package-policy-otel-dataset-empty-nested',
+        name: 'otel-traces-empty-nested',
+        namespace: 'test',
+        enabled: true,
+        package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
+        inputs: [
+          {
+            type: 'otelcol',
+            enabled: true,
+            streams: [
+              {
+                id: 'otel-traces',
+                enabled: true,
+                data_stream: { type: 'traces', dataset: 'otel-traces' },
+                vars: {
+                  [DATASET_VAR_NAME]: { value: { dataset: '' } },
+                },
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      },
+    ];
+
+    const [wsPermissions, nestedPermissions] = await Promise.all([
+      storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', whitespacePolicies),
+      storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', emptyNestedPolicies),
+    ]);
+
+    expect(wsPermissions).toMatchObject({
+      'package-policy-otel-dataset-whitespace': {
+        indices: expect.arrayContaining([
+          { names: ['logs-otel-traces-test'], privileges: ['auto_configure', 'create_doc'] },
+        ]),
+      },
+    });
+    expect(nestedPermissions).toMatchObject({
+      'package-policy-otel-dataset-empty-nested': {
+        indices: expect.arrayContaining([
+          { names: ['logs-otel-traces-test'], privileges: ['auto_configure', 'create_doc'] },
+        ]),
       },
     });
   });
@@ -889,7 +1122,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
             privileges: ['auto_configure', 'create_doc'],
           },
           {
-            names: ['logs-generic.otel-*'],
+            names: ['logs-otel-traces-*'],
             privileges: ['auto_configure', 'create_doc'],
           },
         ],
