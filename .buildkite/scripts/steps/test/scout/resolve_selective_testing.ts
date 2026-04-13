@@ -33,10 +33,12 @@ if (!outPath) {
   // List changed files once; reuse for both affected-packages and critical-files check.
   const changedFiles = listChangedFiles({ mergeBase, commit: 'HEAD' });
 
-  // Write affected modules JSON (replaces the list_affected binary call).
+  // TODO: temp override — ignore critical Scout files when computing affected packages so this
+  // branch's own changes to kbn-scout and CI scripts don't cascade to every downstream module.
   const affectedPackages = await getAffectedPackages(mergeBase, {
     strategy: 'git',
     includeDownstream: true,
+    ignorePatterns: CRITICAL_FILES_SCOUT,
     ignoreUncategorizedChanges: true,
   });
   const resolvedOutPath = path.resolve(outPath);
