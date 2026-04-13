@@ -12,8 +12,9 @@ import { useQuery } from '@kbn/react-query';
 import { lastValueFrom } from 'rxjs';
 import { showErrorToast } from '@kbn/cloud-security-posture';
 import { useContext, useMemo } from 'react';
+import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { QUERY_KEY_GROUPING_DATA, QUERY_KEY_ENTITY_ANALYTICS } from '../constants';
+import { ENTITY_FIELDS, QUERY_KEY_GROUPING_DATA, QUERY_KEY_ENTITY_ANALYTICS } from '../constants';
 import { DataViewContext } from '..';
 
 export type EntitiesGroupingQuery = GroupingQuery | SearchRequest;
@@ -25,15 +26,47 @@ export interface EntitiesGroupingAggregation {
   resolutionRiskScore?: {
     value: number | null;
   };
-  resolutionEntityName?: {
-    doc_count: number;
-    name: { buckets: Array<{ key: string; doc_count: number }> };
-  };
-  resolutionEntityType?: {
-    doc_count: number;
-    type: { buckets: Array<{ key: string; doc_count: number }> };
+}
+
+export interface TargetEntityMetadata {
+  name: string;
+  type: EntityType;
+  riskScore: number | null;
+}
+
+export type TargetMetadataMap = Map<string, TargetEntityMetadata>;
+
+const EMPTY_TARGET_METADATA: TargetMetadataMap = new Map();
+
+interface TargetEntitySource {
+  entity?: {
+    id?: string;
+    name?: string;
+    EngineMetadata?: { Type?: EntityType };
+    relationships?: {
+      resolution?: {
+        risk?: {
+          calculated_score_norm?: number;
+        };
+      };
+    };
   };
 }
+
+export const parseTargetMetadataHits = (hits: Array<{ _source?: unknown }>): TargetMetadataMap => {
+  const result: TargetMetadataMap = new Map();
+  for (const hit of hits) {
+    const { id, name, EngineMetadata, relationships } =
+      (hit._source as TargetEntitySource)?.entity ?? {};
+    const type = EngineMetadata?.Type;
+    const riskScore = relationships?.resolution?.risk?.calculated_score_norm ?? null;
+
+    if (id && name && type) {
+      result.set(id, { name, type, riskScore });
+    }
+  }
+  return result;
+};
 
 export type EntitiesRootGroupingAggregation = RootAggregation<EntitiesGroupingAggregation>;
 
@@ -46,6 +79,19 @@ export const getGroupedEntitiesQuery = (query: EntitiesGroupingQuery, indexPatte
   };
 };
 
+const useEntitySearchParams = () => {
+  const {
+    data: { search: searchService },
+    notifications: { toasts },
+  } = useKibana().services;
+
+  const { dataView } = useContext(DataViewContext);
+
+  const indexPattern = useMemo(() => dataView?.getIndexPattern(), [dataView]);
+
+  return { searchService, toasts, indexPattern };
+};
+
 export const useFetchGroupedData = ({
   query,
   enabled = true,
@@ -53,16 +99,7 @@ export const useFetchGroupedData = ({
   query: EntitiesGroupingQuery;
   enabled: boolean;
 }) => {
-  const {
-    data,
-    notifications: { toasts },
-  } = useKibana().services;
-
-  const { dataView } = useContext(DataViewContext);
-
-  const dataViewIndexPattern = useMemo(() => {
-    return dataView?.getIndexPattern();
-  }, [dataView]);
+  const { searchService, toasts, indexPattern } = useEntitySearchParams();
 
   return useQuery(
     [QUERY_KEY_ENTITY_ANALYTICS, QUERY_KEY_GROUPING_DATA, { query }],
@@ -70,11 +107,11 @@ export const useFetchGroupedData = ({
       const {
         rawResponse: { aggregations },
       } = await lastValueFrom(
-        data.search.search<
+        searchService.search<
           {},
           IKibanaSearchResponse<SearchResponse<{}, EntitiesRootGroupingAggregation>>
         >({
-          params: getGroupedEntitiesQuery(query, dataViewIndexPattern),
+          params: getGroupedEntitiesQuery(query, indexPattern),
         })
       );
 
@@ -84,8 +121,52 @@ export const useFetchGroupedData = ({
     },
     {
       onError: (err: Error) => showErrorToast(toasts, err),
-      enabled: enabled && !!dataViewIndexPattern,
+      enabled: enabled && !!indexPattern,
       keepPreviousData: true,
     }
   );
+};
+
+const QUERY_KEY_TARGET_METADATA = 'entity-analytics-resolution-target-metadata';
+
+export const useFetchTargetMetadata = (entityIds: string[]): TargetMetadataMap => {
+  const { searchService, toasts, indexPattern } = useEntitySearchParams();
+
+  const { data: metadataMap } = useQuery(
+    [QUERY_KEY_ENTITY_ANALYTICS, QUERY_KEY_TARGET_METADATA, entityIds],
+    async () => {
+      const {
+        rawResponse: { hits },
+      } = await lastValueFrom(
+        searchService.search<{}, IKibanaSearchResponse<SearchResponse>>({
+          params: {
+            index: indexPattern,
+            ignore_unavailable: true,
+            size: entityIds.length,
+            _source: [
+              ENTITY_FIELDS.ENTITY_ID,
+              ENTITY_FIELDS.ENTITY_NAME,
+              ENTITY_FIELDS.ENTITY_TYPE,
+              ENTITY_FIELDS.RESOLUTION_RISK_SCORE,
+            ],
+            query: {
+              bool: {
+                filter: [{ terms: { [ENTITY_FIELDS.ENTITY_ID]: entityIds } }],
+                must_not: [{ exists: { field: ENTITY_FIELDS.RESOLVED_TO } }],
+              },
+            },
+          },
+        })
+      );
+
+      return parseTargetMetadataHits(hits.hits);
+    },
+    {
+      onError: (err: Error) => showErrorToast(toasts, err),
+      enabled: entityIds.length > 0 && !!indexPattern,
+      keepPreviousData: true,
+    }
+  );
+
+  return metadataMap ?? EMPTY_TARGET_METADATA;
 };

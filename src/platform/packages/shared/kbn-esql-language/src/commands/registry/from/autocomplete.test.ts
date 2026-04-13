@@ -15,8 +15,7 @@ import {
 } from '../options/recommended_queries';
 import type { ICommandCallbacks } from '../types';
 import { autocomplete } from './autocomplete';
-import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
-import { Parser } from '@elastic/esql';
+import { findAutocompleteAstPosition } from '../../../language/shared/parse_for_autocomplete_query';
 
 const metadataFields = [...METADATA_FIELDS].sort();
 
@@ -80,12 +79,8 @@ describe('FROM Autocomplete', () => {
       };
 
       const suggest = async (query: string) => {
-        const correctedQuery = correctQuerySyntax(query);
-        const { root } = Parser.parse(correctedQuery, { withFormatting: true });
-
         const cursorPosition = query.length;
-        const { command } = findAstPosition(root, cursorPosition);
-
+        const { command } = findAutocompleteAstPosition(query, cursorPosition);
         return autocomplete(query, command!, mockCallbacks, mockContext, cursorPosition);
       };
 
@@ -97,8 +92,8 @@ describe('FROM Autocomplete', () => {
     });
 
     test('suggests visible indices on space', async () => {
-      await fromExpectSuggestions('from /', [...visibleIndices, 'from /(FROM $0)'], mockCallbacks);
-      await fromExpectSuggestions('FROM /', [...visibleIndices, 'FROM /(FROM $0)'], mockCallbacks);
+      await fromExpectSuggestions('from /', [...visibleIndices, '(FROM $0)'], mockCallbacks);
+      await fromExpectSuggestions('FROM /', [...visibleIndices, '(FROM $0)'], mockCallbacks);
       await fromExpectSuggestions('from /index', visibleIndices, mockCallbacks);
     });
 
@@ -107,29 +102,21 @@ describe('FROM Autocomplete', () => {
     });
 
     test('does create suggestions after a closed quote', async () => {
-      await fromExpectSuggestions(
-        'FROM "lolz", ',
-        [...visibleIndices, 'FROM "lolz", (FROM $0)'],
-        mockCallbacks
-      );
+      await fromExpectSuggestions('FROM "lolz", ', [...visibleIndices, '(FROM $0)'], mockCallbacks);
     });
 
     test('doesnt suggest indices twice', async () => {
       await fromExpectSuggestions(
         'from index, ',
-        [...visibleIndices.filter((i) => i !== 'index'), 'from index, (FROM $0)'],
+        [...visibleIndices.filter((i) => i !== 'index'), '(FROM $0)'],
         mockCallbacks
       );
     });
 
     test('suggests comma or pipe after complete index name', async () => {
       const suggest = async (query: string) => {
-        const correctedQuery = correctQuerySyntax(query);
-        const { root } = Parser.parse(correctedQuery, { withFormatting: true });
-
         const cursorPosition = query.length;
-        const { command } = findAstPosition(root, cursorPosition);
-
+        const { command } = findAutocompleteAstPosition(query, cursorPosition);
         return autocomplete(query, command!, mockCallbacks, mockContext, cursorPosition);
       };
       const suggestions = (await suggest('from index')).map((s) => s.text);
@@ -147,16 +134,8 @@ describe('FROM Autocomplete', () => {
       const expectedSuggestions = visibleDataSources.map((source) => source.name);
       mockContext.sources = visibleDataSources;
 
-      await fromExpectSuggestions(
-        'from ',
-        [...expectedSuggestions, 'from (FROM $0)'],
-        mockCallbacks
-      );
-      await fromExpectSuggestions(
-        'FROM ',
-        [...expectedSuggestions, 'FROM (FROM $0)'],
-        mockCallbacks
-      );
+      await fromExpectSuggestions('from ', [...expectedSuggestions, '(FROM $0)'], mockCallbacks);
+      await fromExpectSuggestions('FROM ', [...expectedSuggestions, '(FROM $0)'], mockCallbacks);
       await fromExpectSuggestions(
         'FROM a,/',
         expectedSuggestions.filter((i) => i !== 'a'),
@@ -164,7 +143,7 @@ describe('FROM Autocomplete', () => {
       );
       await fromExpectSuggestions(
         'from a, /',
-        [...expectedSuggestions.filter((i) => i !== 'a'), 'from a, /(FROM $0)'],
+        [...expectedSuggestions.filter((i) => i !== 'a'), '(FROM $0)'],
         mockCallbacks
       );
       await fromExpectSuggestions('from *,/', expectedSuggestions, mockCallbacks);
@@ -182,16 +161,14 @@ describe('FROM Autocomplete', () => {
       const expectedFromViews = ['my_saved_view', 'my-view'];
       await fromExpectSuggestions(
         'from ',
-        [...expectedFromSources, ...expectedFromViews, 'from (FROM $0)'],
+        [...expectedFromSources, ...expectedFromViews, '(FROM $0)'],
         mockCallbacks,
         contextWithViews
       );
       // View names appear when typing (fragment "my_")
       const getSuggestions = async (query: string) => {
-        const correctedQuery = correctQuerySyntax(query);
-        const { root } = Parser.parse(correctedQuery, { withFormatting: true });
         const cursorPosition = query.length;
-        const { command } = findAstPosition(root, cursorPosition);
+        const { command } = findAutocompleteAstPosition(query, cursorPosition);
         return autocomplete(query, command!, mockCallbacks, contextWithViews, cursorPosition);
       };
       const suggestions = (await getSuggestions('FROM my_')).map((s) => s.text);
@@ -284,13 +261,13 @@ describe('FROM Autocomplete', () => {
     ].sort();
 
     test('suggests subquery on space after FROM', async () => {
-      await fromExpectSuggestions('from /', [...visibleIndices, 'from /(FROM $0)'], mockCallbacks);
+      await fromExpectSuggestions('from /', [...visibleIndices, '(FROM $0)'], mockCallbacks);
     });
 
     test('suggests subquery after comma', async () => {
       await fromExpectSuggestions(
         'from index, /',
-        [...visibleIndices.filter((i) => i !== 'index'), 'from index, /(FROM $0)'],
+        [...visibleIndices.filter((i) => i !== 'index'), '(FROM $0)'],
         mockCallbacks
       );
     });

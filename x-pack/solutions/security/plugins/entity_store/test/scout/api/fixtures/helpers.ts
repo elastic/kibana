@@ -18,6 +18,17 @@ import {
 } from './constants';
 
 /**
+ * Normalizes values that may be stored as a single keyword or as keyword[] after
+ * log extraction (e.g. `entity.relationships.*` bags).
+ */
+export const normalizeKeywordList = (value: unknown): string[] => {
+  if (value == null) {
+    return [];
+  }
+  return Array.isArray(value) ? value.map((v) => String(v)) : [String(value)];
+};
+
+/**
  * Deletes all Entity Store data indices: latest, updates, and history snapshots.
  * Call in afterAll / afterEach to prevent stale data from leaking between
  * sequential test-target runs that share the same ES cluster.
