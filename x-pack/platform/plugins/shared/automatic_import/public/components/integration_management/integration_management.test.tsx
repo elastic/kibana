@@ -97,7 +97,7 @@ jest.mock('../../common/components/connector_selector', () => ({
 
 jest.mock('./forms/integration_form', () => ({
   IntegrationFormProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  useIntegrationForm: () => ({ formData: {}, form: {}, submit: mockSubmit }),
+  useIntegrationForm: () => ({ formData: {}, form: {}, submit: mockSubmit, isFormModified: true }),
 }));
 
 jest.mock('../../common/components/button_footer', () => ({

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { passThroughTransformer } from '../../../common/attachments/base';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import type { AttachmentPersistedAttributes } from '../../../common/types/attachments_v1';
 import type { UnifiedAttachmentAttributes } from '../../../common/types/attachments_v2';
@@ -45,4 +46,22 @@ export function transformAttributesForMode({
 
   const legacyAttrs = transformer.toLegacySchema(attributes);
   return { isUnified: false, attributes: legacyAttrs };
+}
+
+export function getTransformerForPatchAttributes(
+  decodedAttributes: AttachmentPatchAttributesV2,
+  requestWithoutType: boolean
+) {
+  if (requestWithoutType) {
+    return passThroughTransformer;
+  }
+
+  if (!decodedAttributes.owner) {
+    throw new Error('Invalid attributes: expected owner when transforming attachment patch');
+  }
+
+  return getAttachmentTypeTransformers(
+    getAttachmentTypeFromAttributes(decodedAttributes),
+    decodedAttributes.owner
+  );
 }

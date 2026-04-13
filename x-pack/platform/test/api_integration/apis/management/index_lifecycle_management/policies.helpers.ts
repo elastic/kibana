@@ -5,24 +5,30 @@
  * 2.0.
  */
 
+import type { IlmPolicy } from '@elastic/elasticsearch/lib/api/types';
+import type { Agent as SuperTestAgent } from 'supertest';
 import { API_BASE_PATH, DEFAULT_POLICY_NAME } from './constants';
 import { getPolicyNames } from './lib';
 
-export const registerHelpers = ({ supertest }) => {
+interface IlmPolicyPayload extends IlmPolicy {
+  name: string;
+}
+
+export const registerHelpers = ({ supertest }: { supertest: SuperTestAgent }) => {
   const loadPolicies = (withIndices = false) =>
     withIndices
       ? supertest.get(`${API_BASE_PATH}/policies?withIndices=true`)
       : supertest.get(`${API_BASE_PATH}/policies`);
 
-  const createPolicy = (policy) => {
+  const createPolicy = (policy: IlmPolicyPayload) => {
     return supertest.post(`${API_BASE_PATH}/policies`).set('kbn-xsrf', 'xxx').send(policy);
   };
 
-  const deletePolicy = (name) => {
+  const deletePolicy = (name: string) => {
     return supertest.delete(`${API_BASE_PATH}/policies/${name}`).set('kbn-xsrf', 'xxx');
   };
 
-  const deleteAllPolicies = (policies) => Promise.all(policies.map(deletePolicy));
+  const deleteAllPolicies = (policies: string[]) => Promise.all(policies.map(deletePolicy));
 
   const cleanUp = () => {
     return loadPolicies()
