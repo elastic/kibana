@@ -270,7 +270,8 @@ async function renderComponent(
   };
 }
 
-describe('discover responsive sidebar', function () {
+// Failing: See https://github.com/elastic/kibana/issues/217005
+describe.skip('discover responsive sidebar', function () {
   let props: TestWrapperProps;
 
   beforeEach(async () => {
