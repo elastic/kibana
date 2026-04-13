@@ -10,7 +10,7 @@ import type {
   PageUpsellings,
   SectionUpsellings,
 } from '@kbn/security-solution-upselling/service/types';
-import type { ProductFeatureKeyType } from '@kbn/security-solution-features/src/types';
+import type { ProductFeatureKeyType } from '@kbn/security-solution-features';
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import type { SecurityProductTypes } from '../../common/config';
 import {
@@ -85,7 +85,7 @@ const configurePluginsUpsellings = (
   const { automaticImport, workflowsManagement } = services;
 
   if (workflowsManagement && !enabledPLIsSet.has(ProductFeatureKey.workflows)) {
-    workflowsManagement?.setUnavailableInServerlessTier({
+    workflowsManagement.setUnavailableInServerlessTier({
       requiredProducts: getRequiredProductTypesForFeature(ProductFeatureKey.workflows),
     });
   }

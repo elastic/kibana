@@ -70,9 +70,9 @@ const LicenseAccessDenied = React.memo(() => {
       <EuiButtonEmpty
         onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
           ev.preventDefault();
-          application.navigateToApp('licenseManagement');
+          application.navigateToApp('management', { deepLinkId: 'license_management' });
         }}
-        href={application.getUrlForApp('licenseManagement')}
+        href={application.getUrlForApp('management', { deepLinkId: 'license_management' })}
       >
         <FormattedMessage
           id="platform.plugins.shared.workflows_management.ui.upgradeLicense.manageLicenseButton"
@@ -206,7 +206,7 @@ const ServerlessTierFooter = React.memo<{
           <p css={{ marginBlock: 0 }}>
             <FormattedMessage
               id="platform.plugins.shared.workflows_management.ui.unavailableInServerlessTier.requiredProducts"
-              defaultMessage="To use Workflows, you need to upgrade your subscription to {count, plural, one {the following product tier} other {one of the following products tiers}}:"
+              defaultMessage="To use Workflows, you need to upgrade your subscription to {count, plural, one {the following product tier} other {one of the following product tiers}}:"
               values={{ count: requiredProducts.length }}
             />
           </p>
