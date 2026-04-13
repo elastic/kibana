@@ -112,13 +112,8 @@ export const Navigation = ({
       flex-shrink: 0;
       gap: 0;
       align-items: stretch;
-      /* Logo-in-rail: 8px under rule then logo (gap 0). Logo hidden: only column gap (8px) would add +8px vs
-         solutions with logo — pull primary menu up by s so first item aligns with logo row top. */
-      ${showTopRailRule && hideInSideNav
-        ? `margin-block-end: -${euiTheme.size.s};`
-        : ''}
     `,
-    [euiTheme.size.s, hideInSideNav, showTopRailRule]
+    []
   );
 
   const {
