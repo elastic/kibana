@@ -142,6 +142,62 @@ describe('GET /internal/evals/tracing/projects', () => {
     );
   });
 
+  it('applies name filter as wildcard on name field when provided', async () => {
+    const { handler, context, esClient } = setup();
+    esClient.search.mockResolvedValueOnce({
+      aggregations: {
+        project_count: { value: 0 },
+        projects: { buckets: [] },
+      },
+    } as any);
+
+    await handler(context, makeRequest({ name: 'alert' }), kibanaResponseFactory);
+
+    const searchCall = esClient.search.mock.calls[0][0] as any;
+    const filters = searchCall.query.bool.filter;
+    expect(filters).toEqual(
+      expect.arrayContaining([{ wildcard: { name: { value: '*alert*', case_insensitive: true } } }])
+    );
+  });
+
+  it('escapes wildcard metacharacters in the name filter', async () => {
+    const { handler, context, esClient } = setup();
+    esClient.search.mockResolvedValueOnce({
+      aggregations: {
+        project_count: { value: 0 },
+        projects: { buckets: [] },
+      },
+    } as any);
+
+    await handler(context, makeRequest({ name: 'my*project?' }), kibanaResponseFactory);
+
+    const searchCall = esClient.search.mock.calls[0][0] as any;
+    const wildcardFilter = searchCall.query.bool.filter.find(
+      (f: Record<string, unknown>) => f.wildcard !== undefined
+    );
+    expect(wildcardFilter).toEqual({
+      wildcard: { name: { value: '*my\\*project\\?*', case_insensitive: true } },
+    });
+  });
+
+  it('does not add name filter when name is not provided', async () => {
+    const { handler, context, esClient } = setup();
+    esClient.search.mockResolvedValueOnce({
+      aggregations: {
+        project_count: { value: 0 },
+        projects: { buckets: [] },
+      },
+    } as any);
+
+    await handler(context, makeRequest(), kibanaResponseFactory);
+
+    const searchCall = esClient.search.mock.calls[0][0] as any;
+    const wildcardFilter = searchCall.query.bool.filter.find(
+      (f: Record<string, unknown>) => f.wildcard !== undefined
+    );
+    expect(wildcardFilter).toBeUndefined();
+  });
+
   it('returns parsed projects with correct field mappings', async () => {
     const { handler, context, esClient } = setup();
     const traceIds = ['trace-1', 'trace-2'];
