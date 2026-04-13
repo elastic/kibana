@@ -8,6 +8,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { AxiosHeaders } from 'axios';
+import type { AxiosInstance } from 'axios';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import type * as Figma from './types';
@@ -16,6 +18,57 @@ const FIGMA_API_BASE = 'https://api.figma.com';
 const FILE_PATH_PREFIXES = ['design', 'file', 'board', 'proto', 'slides'] as const;
 const FILE_PATH_PREFIX_SET: Set<string> = new Set(FILE_PATH_PREFIXES);
 const FILE_KEY_REGEX = /^[0-9a-zA-Z_-]+$/;
+
+/**
+ * TODO(DEBUG_FIGMA_WHOAMI_CURL): Remove `buildWhoAmIReplayCurl`, helpers below, and the log line in
+ * `whoAmI` after debugging. Logs secrets (Authorization) in the curl string.
+ */
+function shellSingleQuoteForCurl(value: string): string {
+  return `'${value.replace(/'/g, `'\\''`)}'`;
+}
+
+function mergeAxiosDefaultHeadersForCurl(
+  client: AxiosInstance,
+  method: 'get' | 'post' | 'put' | 'patch' | 'delete'
+): Record<string, string> {
+  const out: Record<string, string> = {};
+  const mergeBlock = (block: unknown) => {
+    if (block == null) {
+      return;
+    }
+    const plain: Record<string, unknown> =
+      block instanceof AxiosHeaders
+        ? (block.toJSON() as Record<string, unknown>)
+        : typeof block === 'object'
+        ? (block as Record<string, unknown>)
+        : {};
+    for (const [k, v] of Object.entries(plain)) {
+      if (v !== undefined && v !== null && v !== '') {
+        out[String(k)] = String(v);
+      }
+    }
+  };
+  const headersRoot = client.defaults?.headers;
+  if (!headersRoot) {
+    return out;
+  }
+  // Use bracket notation for method-specific headers: on AxiosHeaders, `.get` is the get() method,
+  // not the GET header bucket — `['get']` is the per-verb defaults object.
+  mergeBlock((headersRoot as Record<string, unknown>).common);
+  mergeBlock((headersRoot as Record<string, unknown>)[method]);
+  return out;
+}
+
+function buildWhoAmIReplayCurl(client: AxiosInstance): string {
+  const url = `${FIGMA_API_BASE}/v1/me`;
+  const parts: string[] = ['curl', '-v', '-X', 'GET'];
+  const headers = mergeAxiosDefaultHeadersForCurl(client, 'get');
+  for (const [name, value] of Object.entries(headers)) {
+    parts.push('-H', shellSingleQuoteForCurl(`${name}: ${value}`));
+  }
+  parts.push(shellSingleQuoteForCurl(url));
+  return parts.join(' ');
+}
 
 export const FigmaConnector: ConnectorSpec = {
   metadata: {
@@ -56,6 +109,7 @@ export const FigmaConnector: ConnectorSpec = {
     // https://developers.figma.com/docs/rest-api/file-endpoints/#get-file-nodes
     // Response always includes components and styles maps alongside the document tree.
     getFile: {
+      isTool: true,
       description:
         "Get a Figma file's structure, metadata, components, and styles. " +
         'File keys appear in Figma URLs as the segment after the file type: ' +
@@ -105,6 +159,7 @@ export const FigmaConnector: ConnectorSpec = {
 
     // https://developers.figma.com/docs/rest-api/file-endpoints/#get-image
     renderNodes: {
+      isTool: true,
       description:
         'Render Figma nodes as images. Provide a file key and one or more node IDs to get ' +
         'temporary image URLs (valid for 30 days). Supports PNG, JPG, SVG, and PDF formats. ' +
@@ -146,6 +201,7 @@ export const FigmaConnector: ConnectorSpec = {
 
     // https://developers.figma.com/docs/rest-api/projects-endpoints/#get-project-files
     listProjectFiles: {
+      isTool: true,
       description:
         'List all files in a Figma project. Returns file names, keys, thumbnail URLs, and ' +
         'last modified dates. Use the file keys from the results with the getFile or ' +
@@ -166,6 +222,7 @@ export const FigmaConnector: ConnectorSpec = {
 
     // https://developers.figma.com/docs/rest-api/projects-endpoints/#get-team-projects
     listTeamProjects: {
+      isTool: true,
       description:
         'List all projects in a Figma team. Returns project names and IDs alongside the ' +
         'teamId (so it can be reused in later steps). Use the project IDs with listProjectFiles ' +
@@ -210,12 +267,16 @@ export const FigmaConnector: ConnectorSpec = {
 
     // https://developers.figma.com/docs/rest-api/users-endpoints/#get-me
     whoAmI: {
+      isTool: true,
       description:
         'Get the currently authenticated Figma user. Returns the user ID, handle, email, ' +
         'and profile image URL for the API credentials in use. Useful for verifying which ' +
         'Figma account is connected.',
       input: z.object({}),
       handler: async (ctx): Promise<Figma.WhoAmIResult> => {
+        ctx.log.error(
+          `[TEMP_DEBUG_FIGMA_WHOAMI_CURL_DELETE_ME] ${buildWhoAmIReplayCurl(ctx.client)}`
+        );
         const response = await ctx.client.get(`${FIGMA_API_BASE}/v1/me`);
         const data = response.data as Figma.WhoAmIResult;
         return {

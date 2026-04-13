@@ -15,3 +15,4 @@ export { EARS_PROVIDERS } from './src/auth_types/ears';
 
 export { getConnectorSpec } from './src/get_connector_spec';
 export { isToolAction } from './src/connector_spec';
+export { normalizeBearerAuthorizationHeaderValue } from './src/auth_types/oauth_authorization_code';
