@@ -9,11 +9,10 @@ import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 
 export const AgentBuilderPanelContainer = ({ euiTheme }: UseEuiTheme) => css`
-  border-top: ${euiTheme.border.thin};
-  border-left: none;
-
   @media (max-width: ${euiTheme.breakpoint.m}px) {
-    border-top: none;
+    border-top: ${euiTheme.border.thin};
+  }
+  @media (min-width: ${euiTheme.breakpoint.m}px) {
     border-left: ${euiTheme.border.thin};
   }
 `;
