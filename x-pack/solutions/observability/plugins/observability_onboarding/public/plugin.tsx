@@ -186,11 +186,11 @@ const VersionSwitcherNavControl: React.FC<{
   const [portalEl, setPortalEl] = React.useState<HTMLDivElement | null>(null);
   const toolbarPortalHostRef = React.useRef<HTMLDivElement | null>(null);
   const annotateShortcut = React.useMemo(
-    () => (isAppleLikeClientPlatform() ? '⇧⌥C' : 'Shift+Alt+C'),
+    () => (isAppleLikeClientPlatform() ? '⇧⌘K' : 'Shift+Ctrl+K'),
     []
   );
   const visibilityShortcut = React.useMemo(
-    () => (isAppleLikeClientPlatform() ? '⇧⌘K' : 'Shift+Ctrl+K'),
+    () => (isAppleLikeClientPlatform() ? '⇧⌘L' : 'Shift+Ctrl+L'),
     []
   );
   const annotationsVisible = useSyncExternalStore(
@@ -297,7 +297,7 @@ const VersionSwitcherNavControl: React.FC<{
   React.useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.repeat || isEditableKeyboardTarget(e.target)) return;
-      if (isPrimaryModifier(e) && e.key.toLowerCase() === 'k' && e.shiftKey && !e.altKey) {
+      if (isPrimaryModifier(e) && e.key.toLowerCase() === 'l' && e.shiftKey && !e.altKey) {
         e.preventDefault();
         annotationCanvasVisibility.toggleCanvas();
       }

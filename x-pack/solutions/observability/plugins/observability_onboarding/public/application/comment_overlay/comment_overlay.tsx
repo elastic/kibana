@@ -47,7 +47,9 @@ import {
 import { isEditableKeyboardTarget, isPrimaryModifier } from '../onboarding_shortcut_helpers';
 
 const SO_TYPE = 'observability-onboarding-ui-comment';
-const IDENTITY_KEY = 'kibana_ui_commenter_name';
+/** Bumped when the stored name shape or policy changes; legacy keys are removed on mount. */
+const IDENTITY_KEY = 'kibana_ui_commenter_name_v3';
+const LEGACY_IDENTITY_KEYS = ['kibana_ui_commenter_name', 'kibana_ui_commenter_name_v2'] as const;
 /** Set `localStorage.setItem('obsOnboardingDebugAnnotations','1')` and reload to log resolve/render state. */
 const DEBUG_ANNOTATIONS_KEY = 'obsOnboardingDebugAnnotations';
 
@@ -840,6 +842,16 @@ export const CommentOverlay: React.FC = () => {
   const [showIdentityPrompt, setShowIdentityPrompt] = useState(false);
   const pendingActivation = useRef(false);
 
+  useEffect(() => {
+    try {
+      for (const key of LEGACY_IDENTITY_KEYS) {
+        window.localStorage.removeItem(key);
+      }
+    } catch {
+      // ignore private mode / blocked storage
+    }
+  }, []);
+
   // Annotation mode
   const [isAnnotationMode, setIsAnnotationMode] = useState(false);
   // Live hover state (viewport rect — for the highlight box)
@@ -865,7 +877,7 @@ export const CommentOverlay: React.FC = () => {
   const [removeAllAnnotationsModalOpen, setRemoveAllAnnotationsModalOpen] = useState(false);
   const [removeAllAnnotationsInProgress, setRemoveAllAnnotationsInProgress] = useState(false);
 
-  /** Viewport position of the seek cursor (comment icon + optional hint). */
+  /** Viewport position of the seek cursor (comment icon pill). */
   const [seekCursor, setSeekCursor] = useState<{ x: number; y: number } | null>(null);
   const seekCursorRafRef = useRef<number | null>(null);
   const seekCursorPendingRef = useRef<{ x: number; y: number } | null>(null);
@@ -1124,17 +1136,11 @@ export const CommentOverlay: React.FC = () => {
     }
   }, [canvasVisible, isAnnotationMode]);
 
-  // Keyboard shortcut: ⇧⌥C (Mac) / Shift+Alt+C (others) — ignored in editable fields
+  // Keyboard shortcut: ⇧⌘K (Mac) / Shift+Ctrl+K (others) — ignored in editable fields
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.repeat || isEditableKeyboardTarget(e.target)) return;
-      if (
-        e.shiftKey &&
-        e.altKey &&
-        e.code === 'KeyC' &&
-        !e.metaKey &&
-        !e.ctrlKey
-      ) {
+      if (isPrimaryModifier(e) && e.key.toLowerCase() === 'k' && e.shiftKey && !e.altKey) {
         e.preventDefault();
         activateAnnotationMode();
       }
@@ -1518,7 +1524,7 @@ export const CommentOverlay: React.FC = () => {
             width: ${hoveredRect.width}px;
             height: ${hoveredRect.height}px;
             border: 2px solid ${euiTheme.colors.backgroundFilledPrimary};
-            background: rgba(0, 102, 255, 0.06);
+            background: rgba(0, 102, 255, 0.03);
             border-radius: 4px;
             pointer-events: none;
             z-index: ${annotationModeChromeZ + 2};
@@ -1572,45 +1578,31 @@ export const CommentOverlay: React.FC = () => {
           `}
         >
           {seekCursor ? (
-            <>
+            <div
+              aria-hidden
+              css={css`
+                position: fixed;
+                left: ${seekCursor.x}px;
+                top: ${seekCursor.y}px;
+                transform: translate(10px, 6px);
+                z-index: ${annotationModeChromeZ + 2};
+                pointer-events: none;
+              `}
+            >
               <div
-                aria-hidden
                 css={css`
-                  position: fixed;
-                  left: ${seekCursor.x}px;
-                  top: ${seekCursor.y}px;
-                  transform: translate(10px, 6px);
-                  z-index: ${annotationModeChromeZ + 2};
-                  pointer-events: none;
-                  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  padding: 5px;
+                  border-radius: ${euiTheme.border.radius.medium};
+                  background: ${euiTheme.colors.emptyShade};
+                  ${seekTooltipShadow}
                 `}
               >
-                <EuiIcon type="discuss" size="l" color="primary" />
+                <EuiIcon type="discuss" size="m" color="primary" />
               </div>
-              {annotations.length === 0 ? (
-                <div
-                  data-test-subj="obsOnboardingAnnotationSeekHint"
-                  role="status"
-                  css={css`
-                    position: fixed;
-                    left: ${seekCursor.x}px;
-                    top: ${seekCursor.y}px;
-                    transform: translate(-50%, calc(-100% - 14px));
-                    z-index: ${annotationModeChromeZ + 2};
-                    pointer-events: none;
-                    max-width: min(280px, calc(100vw - 24px));
-                    padding: ${euiTheme.size.xs} ${euiTheme.size.s};
-                    border-radius: ${euiTheme.border.radius.medium};
-                    background: ${euiTheme.colors.backgroundBasePlain};
-                    ${seekTooltipShadow}
-                  `}
-                >
-                  <EuiText size="xs" color="subdued">
-                    Click an element to add your first comment. Press Esc to exit.
-                  </EuiText>
-                </div>
-              ) : null}
-            </>
+            </div>
           ) : null}
         </div>
       )}
