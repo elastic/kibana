@@ -23,3 +23,4 @@ export const META_FIELD_X_OAS_DISCRIMINATOR_DEFAULT_CASE =
   'x-oas-discriminator-default-case' as const;
 export const META_FIELD_X_OAS_ANY = 'x-oas-any-type' as const;
 export const META_FIELD_X_OAS_DISCONTINUED = 'x-oas-discontinued' as const;
+export const META_FIELD_X_OAS_AVAILABILITY = 'x-oas-availability' as const;

@@ -78,8 +78,18 @@ describe('http service', () => {
           {
             path: '/is-auth',
             validate: false,
-            security: { authz: { enabled: false, reason: '' } },
-            options: { authRequired: false },
+            security: {
+              authc: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
           },
           (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
         );
@@ -97,8 +107,18 @@ describe('http service', () => {
           {
             path: '/is-auth',
             validate: false,
-            security: { authz: { enabled: false, reason: '' } },
-            options: { authRequired: false },
+            security: {
+              authc: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
           },
           (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
         );
@@ -117,8 +137,18 @@ describe('http service', () => {
           {
             path: '/is-auth',
             validate: false,
-            security: { authz: { enabled: false, reason: '' } },
-            options: { authRequired: 'optional' },
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
           },
           (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
         );
@@ -138,8 +168,18 @@ describe('http service', () => {
           {
             path: '/is-auth',
             validate: false,
-            security: { authz: { enabled: false, reason: '' } },
-            options: { authRequired: 'optional' },
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
           },
           (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
         );
@@ -204,8 +244,18 @@ describe('http service', () => {
           {
             path: '/get-auth',
             validate: false,
-            security: { authz: { enabled: false, reason: '' } },
-            options: { authRequired: false },
+            security: {
+              authc: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
           },
           (context, req, res) => res.ok({ body: auth.get(req) })
         );

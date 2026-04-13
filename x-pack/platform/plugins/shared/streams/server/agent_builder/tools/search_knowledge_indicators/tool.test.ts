@@ -20,7 +20,7 @@ jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn(),
 }));
 
-describe('search_knowledge_indicators tool', () => {
+describe('search_kis tool', () => {
   const logger = loggingSystemMock.createLogger();
   const server = {} as unknown as StreamsServer;
   const request = {} as unknown as KibanaRequest;
@@ -35,7 +35,7 @@ describe('search_knowledge_indicators tool', () => {
     });
 
     expect(tool.id).toBe(STREAMS_SEARCH_KNOWLEDGE_INDICATORS_TOOL_ID);
-    expect(tool.id).toBe('platform.streams.sig_events.search_knowledge_indicators');
+    expect(tool.id).toBe('platform.streams.sig_events.search_kis');
   });
 
   it('availability returns available when access check succeeds', async () => {

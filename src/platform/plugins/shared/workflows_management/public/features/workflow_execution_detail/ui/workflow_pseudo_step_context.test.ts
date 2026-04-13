@@ -58,6 +58,15 @@ describe('buildTriggerContextFromExecution', () => {
     });
   });
 
+  it('should return event trigger type when triggeredBy from execution is event-driven', () => {
+    const event = { workflow: { id: 'w1' } };
+    const result = buildTriggerContextFromExecution({ event }, 'workflows.failed');
+    expect(result).toEqual({
+      triggerType: 'event',
+      input: event,
+    });
+  });
+
   it('should use event as input when event is present', () => {
     const event = { alerts: [{ id: 'alert-1' }] };
     const result = buildTriggerContextFromExecution({ event, inputs: { ignored: true } });
@@ -113,5 +122,15 @@ describe('buildTriggerStepExecutionFromContext', () => {
     });
     expect(result).not.toBeNull();
     expect(result?.output).toBeUndefined();
+  });
+
+  it('sets trigger_event pseudo-step for event-driven execution', () => {
+    const result = buildTriggerStepExecutionFromContext({
+      ...baseExecution,
+      triggeredBy: 'workflows.failed',
+      context: { event: { error: { message: 'x' } } },
+    });
+    expect(result?.stepId).toBe('event');
+    expect(result?.stepType).toBe('trigger_event');
   });
 });

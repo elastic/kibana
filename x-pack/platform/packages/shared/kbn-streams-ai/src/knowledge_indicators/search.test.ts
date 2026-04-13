@@ -117,6 +117,22 @@ describe('searchKnowledgeIndicators', () => {
     expect(getQueries).toHaveBeenCalledWith(['logs.allowed'], undefined);
   });
 
+  it('returns empty when requested stream_names are not accessible', async () => {
+    const getFeatures = jest.fn(async () => []);
+    const getQueries = jest.fn(async () => []);
+
+    const res = await searchKnowledgeIndicators({
+      params: { stream_names: ['logs.missing'] },
+      getStreamNames: async () => ['logs.allowed'],
+      getFeatures,
+      getQueries,
+    });
+
+    expect(res.knowledge_indicators).toHaveLength(0);
+    expect(getFeatures).not.toHaveBeenCalled();
+    expect(getQueries).not.toHaveBeenCalled();
+  });
+
   it('applies limit to the merged output', async () => {
     const res = await searchKnowledgeIndicators({
       params: { limit: 2 },

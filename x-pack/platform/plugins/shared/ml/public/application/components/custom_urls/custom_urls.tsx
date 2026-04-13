@@ -279,7 +279,7 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
 
     const testButton = (
       <EuiButtonEmpty
-        iconType="popout"
+        iconType="external"
         iconSide="right"
         onClick={this.onTestButtonClick}
         isDisabled={!isValidEditorSettings}
@@ -385,7 +385,7 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
           <>
             <EuiButton
               size="s"
-              iconType="plusInCircle"
+              iconType="plusCircle"
               iconSide="left"
               aria-label={i18n.translate(
                 'xpack.ml.jobsList.editJobFlyout.customUrls.addCustomUrlButtonLabel',

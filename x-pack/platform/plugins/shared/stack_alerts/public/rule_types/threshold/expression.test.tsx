@@ -36,18 +36,6 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
         },
       ];
     },
-    getFields: () => {
-      return Promise.resolve([
-        {
-          name: '@timestamp',
-          type: 'date',
-        },
-        {
-          name: 'field',
-          type: 'text',
-        },
-      ]);
-    },
     getIndexOptions: () => {
       return Promise.resolve([
         {
@@ -69,7 +57,28 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
 });
 
 const dataMock = dataPluginMock.createStartContract();
-const dataViewMock = dataViewPluginMocks.createStartContract();
+const dataViewMock = {
+  ...dataViewPluginMocks.createStartContract(),
+  getFieldsForWildcard: jest.fn().mockResolvedValue([
+    {
+      name: '@timestamp',
+      type: 'date',
+      esTypes: ['date'],
+      searchable: true,
+      aggregatable: true,
+      isMapped: true,
+    },
+    {
+      name: 'field',
+      type: 'string',
+      esTypes: ['text'],
+      searchable: true,
+      aggregatable: false,
+      isMapped: true,
+    },
+  ]),
+  getIndices: jest.fn().mockResolvedValue([]),
+};
 const chartsStartMock = chartPluginMock.createStartContract();
 
 describe('IndexThresholdRuleTypeExpression', () => {

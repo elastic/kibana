@@ -36,7 +36,7 @@ export function createAddPatternAnalysisEmbeddableAction(
   return {
     id: 'create-pattern-analysis-embeddable',
     grouping: AIOPS_EMBEDDABLE_GROUPING,
-    getIconType: () => 'logPatternAnalysis',
+    getIconType: () => 'pattern',
     getDisplayName: () =>
       i18n.translate('xpack.aiops.embeddablePatternAnalysisDisplayName', {
         defaultMessage: 'Pattern analysis',

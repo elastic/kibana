@@ -8,45 +8,21 @@
  */
 
 import { z } from '@kbn/zod';
-import { z as z4 } from '@kbn/zod/v4';
-import { BooleanFromString } from '@kbn/zod-helpers';
 
 export function createLargeSchema() {
   return z.object({
     string: z.string().max(10).min(1),
     maybeNumber: z.number().max(1000).min(1).optional(),
-    booleanDefault: z.boolean({ description: 'defaults to to true' }).default(true),
-    booleanFromString: BooleanFromString.default(false).describe(
-      'boolean or string "true" or "false"'
-    ),
-    ipType: z.string().ip({ version: 'v4' }),
+    booleanDefault: z.boolean().describe('defaults to to true').default(true),
+    ipType: z.ipv4(),
     literalType: z.literal('literallythis'),
     neverType: z.never(),
-    map: z.map(z.string(), z.string()),
     record: z.record(z.string(), z.string()),
     union: z.union([
-      z.string({ description: 'Union string' }).max(1),
-      z.number({ description: 'Union number' }).min(0),
+      z.string().max(1).describe('Union string'),
+      z.number().min(0).describe('Union number'),
     ]),
     uri: z.string().url().default('prototest://something'),
-    any: z.any({ description: 'any type' }),
-  });
-}
-
-export function createLargeSchemaV4() {
-  return z4.object({
-    string: z4.string().max(10).min(1),
-    maybeNumber: z4.number().max(1000).min(1).optional(),
-    booleanDefault: z4.boolean().describe('defaults to to true').default(true),
-    ipType: z4.ipv4(),
-    literalType: z4.literal('literallythis'),
-    neverType: z4.never(),
-    record: z4.record(z4.string(), z4.string()),
-    union: z4.union([
-      z4.string().max(1).describe('Union string'),
-      z4.number().min(0).describe('Union number'),
-    ]),
-    uri: z4.string().url().default('prototest://something'),
-    any: z4.any().describe('any type'),
+    any: z.any().describe('any type'),
   });
 }

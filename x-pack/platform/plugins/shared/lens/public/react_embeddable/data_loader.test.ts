@@ -451,8 +451,8 @@ describe('Data Loader', () => {
         ...internalApi.attributes$.getValue(),
         title: faker.lorem.word(),
       });
-      (api.savedObjectId$ as BehaviorSubject<string | undefined>).next('newSavedObjectId');
-      return 'savedObjectId';
+      (api.savedObjectId$ as BehaviorSubject<string | undefined>).next('newRefId');
+      return 'refId';
     });
   });
 

@@ -62,13 +62,15 @@ const totalDocCountsRoute = createServerRoute({
       .optional(),
   }),
   handler: async ({ getScopedClients, request, server, params }): Promise<StreamDocsStat[]> => {
-    const { scopedClusterClient } = await getScopedClients({ request });
+    const { scopedClusterClient, isSecurityEnabled } = await getScopedClients({ request });
     const streamName = params?.query?.stream;
 
     return await getDocCountsForStreams({
       isServerless: server.isServerless,
       esClient: scopedClusterClient.asCurrentUser,
-      esClientAsSecondaryAuthUser: scopedClusterClient.asSecondaryAuthUser,
+      esClientAsSecondaryAuthUser: isSecurityEnabled
+        ? scopedClusterClient.asSecondaryAuthUser
+        : undefined,
       streamName,
     });
   },

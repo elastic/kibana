@@ -321,8 +321,7 @@ export class WorkflowContextManager {
     const whileEntries: Array<ScopeEntry> = [];
 
     while (!scopeStack.isEmpty()) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const topFrame = scopeStack.getCurrentScope()!;
+      const topFrame = scopeStack.getCurrentScope();
       scopeStack = scopeStack.exitScope();
       const stepExecution = this.workflowExecutionState.getStepExecution(
         buildStepExecutionId(executionId, topFrame.stepId, scopeStack.stackFrames)
@@ -485,8 +484,7 @@ export class WorkflowContextManager {
           output: unknown;
           error: SerializedError | undefined;
         };
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        stepState: Record<string, any> | undefined;
+        stepState: Record<string, unknown> | undefined;
       }
     | undefined {
     const latestStepExecution = this.workflowExecutionState.getLatestStepExecution(stepId);

@@ -6,6 +6,7 @@
  */
 
 import type {
+  MappingRuntimeFields,
   QueryDslFieldAndFormat,
   QueryDslQueryContainer,
   SearchHit,
@@ -30,6 +31,7 @@ export function getSampleDocuments({
   ],
   _source = false,
   timeout = '5s',
+  runtime_mappings,
 }: {
   esClient: ElasticsearchClient;
   index: string | string[];
@@ -41,6 +43,7 @@ export function getSampleDocuments({
   fields?: Array<QueryDslFieldAndFormat | string>;
   _source?: boolean;
   timeout?: string;
+  runtime_mappings?: MappingRuntimeFields;
 }) {
   return esClient
     .search<Record<string, any>>({
@@ -48,6 +51,7 @@ export function getSampleDocuments({
       size,
       track_total_hits: true,
       timeout,
+      runtime_mappings,
       query: {
         bool: {
           must: [...kqlQuery(kql), ...dateRangeQuery(start, end), ...castArray(filter ?? [])],

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { v4 as generateUuid } from 'uuid';
 import type {
   CoreSetup,
@@ -43,6 +44,7 @@ import { initializeLogsRepositoryDataStream } from './repositories/logs_reposito
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import type {
+  CancelAllActiveWorkflowExecutions,
   CancelWorkflowExecution,
   ExecuteWorkflow,
   ExecuteWorkflowStep,
@@ -57,13 +59,16 @@ import { generateExecutionTaskScope } from './utils';
 import { buildWorkflowContext } from './workflow_context_manager/build_workflow_context';
 import type { ContextDependencies } from './workflow_context_manager/types';
 import { WorkflowEventLoggerService } from './workflow_event_logger';
-import { WORKFLOW_RESUME_TASK_TYPE } from './workflow_task_manager/types';
 import type {
   ResumeWorkflowExecutionParams,
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
+import { WORKFLOW_RESUME_TASK_TYPE } from './workflow_task_manager/types';
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
 import { createIndexes } from '../common';
+
+/** Batch size for bulk cancel search_after paging (internal; not exposed on the public API). */
+const BULK_CANCEL_PAGE_SIZE = 10;
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
 
@@ -540,6 +545,8 @@ export class WorkflowsExecutionEnginePlugin
       );
       const spaceId = (context.spaceId as string | undefined) || 'default';
       const metadata = context.metadata as Record<string, unknown> | undefined;
+      const dispatchEventId =
+        typeof metadata?.eventId === 'string' ? metadata.eventId.trim() || undefined : undefined;
       const workflowExecution: Partial<EsWorkflowExecution> = {
         id: generateUuid(),
         spaceId,
@@ -553,6 +560,7 @@ export class WorkflowsExecutionEnginePlugin
         executedBy,
         triggeredBy,
         ...(metadata ? { metadata } : {}),
+        ...(dispatchEventId ? { dispatchEventId } : {}),
       };
 
       const concurrencyGroupKey = this.getConcurrencyGroupKey(
@@ -729,6 +737,7 @@ export class WorkflowsExecutionEnginePlugin
     const executeWorkflowStep: ExecuteWorkflowStep = async (
       workflow,
       stepId,
+      executionContext,
       contextOverride,
       request
     ) => {
@@ -737,6 +746,7 @@ export class WorkflowsExecutionEnginePlugin
       await this.initialize(coreStart);
       const workflowCreatedAt = new Date();
       const context: Record<string, unknown> = {
+        ...(executionContext ?? {}),
         contextOverride,
       };
 
@@ -840,6 +850,46 @@ export class WorkflowsExecutionEnginePlugin
       await workflowTaskManager.forceRunIdleTasks(workflowExecution.id);
     };
 
+    const cancelAllActiveWorkflowExecutions: CancelAllActiveWorkflowExecutions = async ({
+      spaceId,
+      workflowId,
+    }) => {
+      await checkLicense(plugins.licensing);
+      await this.initialize(coreStart);
+
+      let searchAfter: estypes.SortResults | undefined;
+
+      do {
+        const page = await workflowExecutionRepository.findNonTerminalExecutionIdsByWorkflowIdPage({
+          spaceId,
+          workflowId,
+          size: BULK_CANCEL_PAGE_SIZE,
+          searchAfter,
+        });
+
+        if (page.results.length === 0) {
+          break;
+        }
+
+        const outcomes = await Promise.allSettled(
+          page.results.map((id) => cancelWorkflowExecution(id, spaceId))
+        );
+
+        outcomes.forEach((outcome, index) => {
+          if (outcome.status === 'rejected') {
+            const executionId = page.results[index];
+            const message =
+              outcome.reason instanceof Error ? outcome.reason.message : String(outcome.reason);
+            this.logger.warn(
+              `cancelAllActiveWorkflowExecutions: failed to cancel execution ${executionId}: ${message}`
+            );
+          }
+        });
+
+        searchAfter = page.nextSearchAfter;
+      } while (searchAfter !== undefined);
+    };
+
     const resumeWorkflowExecution: ResumeWorkflowExecution = async (
       executionId,
       spaceId,
@@ -890,9 +940,12 @@ export class WorkflowsExecutionEnginePlugin
       executeWorkflowStep,
       scheduleWorkflow,
       cancelWorkflowExecution,
+      cancelAllActiveWorkflowExecutions,
       resumeWorkflowExecution,
       isEventDrivenExecutionEnabled: this.isEventDrivenExecutionEnabled.bind(this),
       isLogTriggerEventsEnabled: this.isLogTriggerEventsEnabled.bind(this),
+      getMaxEventChainDepth: this.getMaxEventChainDepth.bind(this),
+      getMaxWorkflowDepth: this.getMaxWorkflowDepth.bind(this),
     };
   }
 
@@ -904,6 +957,14 @@ export class WorkflowsExecutionEnginePlugin
 
   private isLogTriggerEventsEnabled(): boolean {
     return this.config?.eventDriven?.logEvents ?? true;
+  }
+
+  private getMaxEventChainDepth(): number {
+    return this.config?.eventDriven?.maxChainDepth ?? 10;
+  }
+
+  private getMaxWorkflowDepth(): number {
+    return this.config?.maxWorkflowDepth ?? 10;
   }
 
   private async initialize(coreStart: CoreStart): Promise<void> {

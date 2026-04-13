@@ -5,8 +5,13 @@
  * 2.0.
  */
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import { ENTITY_STORE_ROUTES, getLatestEntitiesIndexName } from '../../../common';
-import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
+import {
+  API_VERSIONS,
+  ENTITY_STORE_ROUTES,
+  getEntitiesAlias,
+  ENTITY_LATEST,
+} from '../../../common';
+import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import { checkAndFormatPrivileges } from './utils/check_and_format_privileges';
@@ -14,8 +19,8 @@ import { checkAndFormatPrivileges } from './utils/check_and_format_privileges';
 export function registerCheckPrivileges(router: EntityStorePluginRouter) {
   router.versioned
     .get({
-      path: ENTITY_STORE_ROUTES.CHECK_PRIVILEGES,
-      access: 'internal',
+      path: ENTITY_STORE_ROUTES.public.CHECK_PRIVILEGES,
+      access: 'public',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -23,14 +28,14 @@ export function registerCheckPrivileges(router: EntityStorePluginRouter) {
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v2,
+        version: API_VERSIONS.public.v1,
         validate: false,
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
         const security = entityStoreCtx.security;
         const spaceId = entityStoreCtx.namespace;
-        const entitiesIndexPattern = getLatestEntitiesIndexName(spaceId);
+        const entitiesIndexPattern = getEntitiesAlias(ENTITY_LATEST, spaceId);
 
         const response = await checkAndFormatPrivileges({
           indexPattern: entitiesIndexPattern,

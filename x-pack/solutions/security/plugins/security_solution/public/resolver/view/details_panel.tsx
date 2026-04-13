@@ -9,12 +9,12 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { CellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 import * as selectors from '../store/selectors';
 import { PanelRouter } from './panels';
 import { ResolverNoProcessEvents } from './resolver_no_process_events';
 import type { State } from '../../common/store/types';
 import type { NodeEventOnClick } from './panels/node_events_of_type';
-import type { ResolverCellActionRenderer } from '../types';
 
 interface DetailsPanelProps {
   /**
@@ -28,7 +28,7 @@ interface DetailsPanelProps {
   /**
    * Renderer used by Resolver panels for field cell actions.
    */
-  renderCellActions: ResolverCellActionRenderer;
+  renderCellActions: CellActionRenderer;
 }
 
 /**

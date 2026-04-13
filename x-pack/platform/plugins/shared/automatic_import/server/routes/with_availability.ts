@@ -6,7 +6,7 @@
  */
 
 import type { RequestHandler, RouteMethod } from '@kbn/core/server';
-import type { AutomaticImportRouteHandlerContext } from '../plugin';
+import type { AutomaticImportPluginRequestHandlerContext } from '../types';
 
 /**
  * Wraps a request handler with a check for whether the API route is available.
@@ -19,8 +19,8 @@ export const withAvailability = <
   B = unknown,
   Method extends RouteMethod = never
 >(
-  handler: RequestHandler<P, Q, B, AutomaticImportRouteHandlerContext, Method>
-): RequestHandler<P, Q, B, AutomaticImportRouteHandlerContext, Method> => {
+  handler: RequestHandler<P, Q, B, AutomaticImportPluginRequestHandlerContext, Method>
+): RequestHandler<P, Q, B, AutomaticImportPluginRequestHandlerContext, Method> => {
   return async (context, req, res) => {
     const { isAvailable } = await context.automaticImport;
     if (!isAvailable()) {

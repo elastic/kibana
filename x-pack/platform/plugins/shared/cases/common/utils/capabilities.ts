@@ -16,6 +16,7 @@ import {
   CASES_REOPEN_CAPABILITY,
   CREATE_COMMENT_CAPABILITY,
   ASSIGN_CASE_CAPABILITY,
+  MANAGE_TEMPLATES_CAPABILITY,
 } from '../constants';
 
 export interface CasesUiCapabilities {
@@ -26,6 +27,7 @@ export interface CasesUiCapabilities {
   reopenCase: readonly string[];
   createComment: readonly string[];
   assignCase: readonly string[];
+  manageTemplates: readonly string[];
 }
 /**
  * Return the UI capabilities for each type of operation. These strings must match the values defined in the UI
@@ -45,4 +47,5 @@ export const createUICapabilities = (): CasesUiCapabilities => ({
   reopenCase: [CASES_REOPEN_CAPABILITY] as const,
   createComment: [CREATE_COMMENT_CAPABILITY] as const,
   assignCase: [ASSIGN_CASE_CAPABILITY] as const,
+  manageTemplates: [MANAGE_TEMPLATES_CAPABILITY] as const,
 });

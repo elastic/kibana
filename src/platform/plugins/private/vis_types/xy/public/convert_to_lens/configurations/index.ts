@@ -10,7 +10,7 @@
 import { LegendValue, Position, ScaleType as ECScaleType } from '@elastic/charts';
 import type { Column } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import type {
-  XYState as XYConfiguration,
+  XYVisualizationState as XYConfiguration,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
 } from '@kbn/lens-common';

@@ -590,6 +590,8 @@ interface ElasticArtifactSearchResponse {
 
 interface GetAgentDownloadUrlResponse {
   url: string;
+  /** The URL to the SHA512 hash file for integrity validation */
+  shaUrl: string;
   /** The file name (ex. the `*.tar.gz` file) */
   fileName: string;
   /** The directory name that the download archive will be extracted to (same as `fileName` but no file extensions) */
@@ -639,6 +641,7 @@ export const getAgentDownloadUrl = async (
 
   return {
     url: searchResult.packages[agentFile].url,
+    shaUrl: searchResult.packages[agentFile].sha_url,
     fileName: agentFile,
     dirName: fileNameWithoutExtension,
   };
@@ -853,7 +856,7 @@ export const enrollHostVmWithFleet = async ({
   const agentUrlInfo = await getAgentDownloadUrl(agentVersion, closestVersionMatch, log);
 
   const agentDownload: DownloadAndStoreAgentResponse = useAgentCache
-    ? await downloadAndStoreAgent(agentUrlInfo.url)
+    ? await downloadAndStoreAgent(agentUrlInfo.url, undefined, agentUrlInfo.shaUrl)
     : { url: agentUrlInfo.url, directory: '', filename: agentUrlInfo.fileName, fullFilePath: '' };
 
   log.info(`Installing Elastic Agent`);
@@ -865,15 +868,27 @@ export const enrollHostVmWithFleet = async ({
     if (useAgentCache) {
       const hostVmDownloadsDir = '/home/ubuntu/_agent_downloads';
 
-      log.debug(
-        `Mounting agents download cache directory [${agentDownload.directory}] to Host VM at [${hostVmDownloadsDir}]`
-      );
-      const downloadsMount = await hostVm.mount(agentDownload.directory, hostVmDownloadsDir);
+      try {
+        log.debug(
+          `Mounting agents download cache directory [${agentDownload.directory}] to Host VM at [${hostVmDownloadsDir}]`
+        );
+        const downloadsMount = await hostVm.mount(agentDownload.directory, hostVmDownloadsDir);
 
-      log.debug(`Extracting download archive on host VM`);
-      await hostVm.exec(`tar -zxf ${downloadsMount.hostDir}/${agentDownload.filename}`);
+        log.debug(`Extracting download archive on host VM`);
+        await hostVm.exec(`tar -zxf ${downloadsMount.hostDir}/${agentDownload.filename}`);
 
-      await downloadsMount.unmount();
+        await downloadsMount.unmount();
+      } catch (mountError) {
+        log.warning(
+          `Mount failed (${mountError.message}). Falling back to file transfer via 'multipass transfer'`
+        );
+        const vmDestPath = `/home/ubuntu/${agentDownload.filename}`;
+        await hostVm.upload(agentDownload.fullFilePath, vmDestPath);
+
+        log.debug(`Extracting download archive on host VM`);
+        await hostVm.exec(`tar -zxf ${vmDestPath}`);
+        await hostVm.exec(`rm -f ${vmDestPath}`);
+      }
     } else {
       log.debug(`Downloading Elastic Agent to host VM`);
       await hostVm.exec(`curl -L ${agentDownload.url} -o ${agentDownload.filename}`);

@@ -7,6 +7,7 @@
   "include": [
     "../../../../../typings/**/*",
     "common/**/*",
+    "docs/**/*",
     "scripts/**/*",
     "server/**/*",
     "public/**/*",
@@ -48,6 +49,7 @@
     "@kbn/traced-es-client",
     "@kbn/zod-helpers",
     "@kbn/inference-common",
+    "@kbn/inference-prompt-utils",
     "@kbn/std",
     "@kbn/core-http-server",
     "@kbn/core-saved-objects-api-server",
@@ -80,8 +82,14 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/logging-mocks",
     "@kbn/core-ui-settings-server",
-    "@kbn/agent-builder-common",
-    "@kbn/agent-builder-server",
     "@kbn/agent-builder-plugin",
+    "@kbn/search-inference-endpoints",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-common",
+    "@kbn/datemath",
+    "@kbn/setup-node-env",
+    "@kbn/core-security-server",
+    "@kbn/workflows-management-plugin",
+    "@kbn/workflows"
   ]
 }

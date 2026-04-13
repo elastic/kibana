@@ -16,9 +16,13 @@ import type { PaletteOutput } from '@kbn/coloring';
 import type { DatatableState, DatatableStateESQL, DatatableStateNoESQL } from '../../../../schema';
 import { isFormBasedLayer, operationFromColumn } from '../../../utils';
 import { getValueApiColumn } from '../../../columns/esql_column';
-import { fromColorByValueLensStateToAPI, fromColorMappingLensStateToAPI } from '../../../coloring';
+import {
+  AUTO_COLOR,
+  fromColorByValueLensStateToAPI,
+  fromColorMappingLensStateToAPI,
+} from '../../../coloring';
 import { isAPIColumnOfBucketType, isAPIColumnOfMetricType } from '../../../columns/utils';
-import { isMetricColumnESQL, isMetricColumnNoESQL } from '../helpers';
+import { isMetricColumnESQL, isMetricColumnNoESQL, colorModeToApplyColorTo } from '../helpers';
 import { stripUndefined } from '../../utils';
 
 type APIMetricRowCommonProps = Partial<
@@ -44,7 +48,7 @@ function buildColorProps(
   const { colorMode, palette, colorMapping } = column;
   if (!colorMode || colorMode === 'none') return {};
 
-  const applyColorTo = colorMode === 'text' ? 'value' : 'background';
+  const applyColorTo = colorModeToApplyColorTo(colorMode);
 
   // Prefer colorMapping if present, otherwise use palette
   if (colorMapping) {
@@ -63,7 +67,7 @@ function buildColorProps(
     };
   }
 
-  return { apply_color_to: applyColorTo };
+  return { apply_color_to: applyColorTo, color: AUTO_COLOR };
 }
 
 type APIMetricProps = APIMetricRowCommonProps &
@@ -107,10 +111,11 @@ function buildRowsAPINoESQL(column: ColumnState): APIRowPropsNoESQL {
     ...buildRowCommonProps(column),
     ...(colorMode && colorMode !== 'none'
       ? {
-          apply_color_to: colorMode === 'text' ? 'value' : 'background',
-          ...(colorMapping || palette
-            ? { color: fromColorMappingLensStateToAPI(colorMapping, palette as PaletteOutput) }
-            : {}),
+          apply_color_to: colorModeToApplyColorTo(colorMode),
+          color:
+            colorMapping || palette
+              ? fromColorMappingLensStateToAPI(colorMapping, palette as PaletteOutput)
+              : AUTO_COLOR,
         }
       : {}),
   };

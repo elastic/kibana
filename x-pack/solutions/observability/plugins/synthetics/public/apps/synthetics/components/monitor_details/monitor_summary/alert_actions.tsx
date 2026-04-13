@@ -71,7 +71,7 @@ export const AlertActions = ({ from, to }: { from: string; to: string }) => {
       {isAlertEnabled ? DISABLE_STATUS_ALERT : ENABLE_STATUS_ALERT}{' '}
       {isLoading && <EuiLoadingSpinner />}
     </EuiContextMenuItem>,
-    <EuiContextMenuItem key="share" icon="list" href={alertsUrl}>
+    <EuiContextMenuItem key="share" icon="listBullet" href={alertsUrl}>
       {VIEW_ALERTS_LABEL}
     </EuiContextMenuItem>,
   ];
@@ -79,7 +79,7 @@ export const AlertActions = ({ from, to }: { from: string; to: string }) => {
   const button = (
     <EuiButtonEmpty
       data-test-subj="syntheticsAlertActionsButton"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={onButtonClick}
     >

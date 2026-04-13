@@ -21,12 +21,17 @@ import {
 import type {
   NewPackagePolicyInput,
   NewPackagePolicyInputStream,
+  RegistryVarGroup,
   RegistryVarsEntry,
 } from '../../../../../../types';
 import type { PackagePolicyConfigValidationResults } from '../../../services';
 import { isAdvancedVar, validationHasErrors } from '../../../services';
+import { shouldShowVar, getVarsControlledByVarGroups } from '../../../services/var_group_helpers';
+import type { VarGroupSelection } from '../../../services/var_group_helpers';
+import { useAgentless } from '../../../single_page_layout/hooks/setup_technology';
 
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
+import { VarGroupSelector } from './var_group_selector';
 
 export interface StreamAdvancedVarsConfig {
   vars: RegistryVarsEntry[];
@@ -43,6 +48,9 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
   inputValidationResults: PackagePolicyConfigValidationResults;
   forceShowErrors?: boolean;
   isEditPage?: boolean;
+  varGroups?: RegistryVarGroup[];
+  varGroupSelections?: VarGroupSelection;
+  onVarGroupSelectionChange?: (groupName: string, optionName: string) => void;
   showDescriptionColumn?: boolean;
   streamAdvancedVars?: StreamAdvancedVarsConfig;
 }> = memo(
@@ -54,28 +62,48 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
     inputValidationResults,
     forceShowErrors,
     isEditPage = false,
+    varGroups,
+    varGroupSelections = {},
+    onVarGroupSelectionChange,
     showDescriptionColumn = true,
     streamAdvancedVars,
   }) => {
     // Showing advanced options toggle state
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
+    const { isAgentlessEnabled } = useAgentless();
 
-    // Split vars into required and advanced, filtering out deprecated vars on new installations
-    const [requiredVars, advancedVars] = useMemo(() => {
+    // Split vars into required and advanced, filtering by var_group visibility and deprecated vars.
+    // Required vars are further split into pre-group (not controlled by any var_group, rendered
+    // above var_group selectors) and post-group (controlled by a selected var_group option,
+    // rendered below var_group selectors) to preserve manifest declaration order intent.
+    const [preGroupRequiredVars, postGroupRequiredVars, advancedVars] = useMemo(() => {
       const _advancedVars: RegistryVarsEntry[] = [];
-      const _requiredVars: RegistryVarsEntry[] = [];
+      const _preGroupVars: RegistryVarsEntry[] = [];
+      const _postGroupVars: RegistryVarsEntry[] = [];
+      const controlledVars = varGroups?.length ? getVarsControlledByVarGroups(varGroups) : null;
       (packageInputVars || []).forEach((varDef) => {
         if (!isEditPage && !!varDef.deprecated) {
           return;
         }
-        if (isAdvancedVar(varDef)) {
+        if (
+          varGroups &&
+          varGroups.length > 0 &&
+          !shouldShowVar(varDef.name, varGroups, varGroupSelections)
+        ) {
+          return;
+        }
+        if (isAdvancedVar(varDef, varGroups, varGroupSelections)) {
           _advancedVars.push(varDef);
+        } else if (controlledVars?.has(varDef.name)) {
+          // Var is controlled by a var_group option — render after the var_group selector
+          _postGroupVars.push(varDef);
         } else {
-          _requiredVars.push(varDef);
+          // Var is independent of var_groups — render before the var_group selector
+          _preGroupVars.push(varDef);
         }
       });
-      return [_requiredVars, _advancedVars];
-    }, [packageInputVars, isEditPage]);
+      return [_preGroupVars, _postGroupVars, _advancedVars];
+    }, [packageInputVars, varGroups, varGroupSelections, isEditPage]);
 
     const allAdvancedVars = useMemo(() => {
       if (!streamAdvancedVars?.vars.length) {
@@ -170,7 +198,47 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
         ) : null}
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="m">
-            {requiredVars.map((varDef) => {
+            {preGroupRequiredVars.map((varDef) => {
+              const { name: varName, type: varType } = varDef;
+
+              const value = packagePolicyInput.vars?.[varName]?.value;
+              const frozen = packagePolicyInput.vars?.[varName]?.frozen;
+
+              return (
+                <EuiFlexItem key={varName}>
+                  <PackagePolicyInputVarField
+                    varDef={varDef}
+                    value={value}
+                    frozen={frozen}
+                    onChange={(newValue: any) => {
+                      updatePackagePolicyInput({
+                        vars: {
+                          ...packagePolicyInput.vars,
+                          [varName]: {
+                            type: varType,
+                            value: newValue,
+                          },
+                        },
+                      });
+                    }}
+                    errors={inputValidationResults.vars?.[varName]}
+                    forceShowErrors={forceShowErrors}
+                    isEditPage={isEditPage}
+                  />
+                </EuiFlexItem>
+              );
+            })}
+            {varGroups?.map((varGroup) => (
+              <EuiFlexItem key={varGroup.name}>
+                <VarGroupSelector
+                  varGroup={varGroup}
+                  selectedOptionName={varGroupSelections[varGroup.name]}
+                  onSelectionChange={onVarGroupSelectionChange ?? (() => {})}
+                  isAgentlessEnabled={isAgentlessEnabled}
+                />
+              </EuiFlexItem>
+            ))}
+            {postGroupRequiredVars.map((varDef) => {
               const { name: varName, type: varType } = varDef;
 
               const value = packagePolicyInput.vars?.[varName]?.value;
@@ -208,7 +276,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
                         size="xs"
-                        iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
+                        iconType={isShowingAdvanced ? 'chevronSingleDown' : 'chevronSingleRight'}
                         onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
                         flush="left"
                       >

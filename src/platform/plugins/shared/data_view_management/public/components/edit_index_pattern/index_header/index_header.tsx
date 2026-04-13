@@ -94,6 +94,12 @@ export const IndexHeader: FC<PropsWithChildren<IndexHeaderProps>> = ({
         isOpen={isOpen}
         closePopover={() => setIsOpen(false)}
         panelPaddingSize="none"
+        aria-label={i18n.translate(
+          'indexPatternManagement.editDataView.moreActionsPopoverAriaLabel',
+          {
+            defaultMessage: 'More actions',
+          }
+        )}
         button={
           <EuiButtonIcon
             iconType="boxesVertical"
@@ -135,7 +141,7 @@ export const IndexHeader: FC<PropsWithChildren<IndexHeaderProps>> = ({
         defaultIndex !== indexPattern.id && setDefault && canSave && indexPattern.isPersisted() && (
           <EuiButtonEmpty
             onClick={setDefault}
-            iconType="starEmpty"
+            iconType="star"
             aria-label={setDefaultAriaLabel}
             data-test-subj="setDefaultIndexPatternButton"
             color="text"

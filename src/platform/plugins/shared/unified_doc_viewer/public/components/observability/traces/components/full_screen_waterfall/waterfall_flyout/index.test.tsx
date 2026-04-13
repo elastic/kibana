@@ -12,6 +12,11 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { WaterfallFlyout, type Props } from '.';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord } from '@kbn/discover-utils';
+import { FlyoutContentId } from '../../../common/constants';
+import { setUnifiedDocViewerServices } from '../../../../../../plugin';
+import { mockUnifiedDocViewerServices } from '../../../../../../__mocks__';
+
+setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
 
 jest.mock('../../../../../doc_viewer_table', () => ({
   __esModule: true,
@@ -50,6 +55,7 @@ describe('WaterfallFlyout', () => {
     hit: mockHit,
     loading: false,
     dataView: dataViewMock,
+    flyoutContentId: FlyoutContentId.SPAN_DETAIL,
     children: <div data-test-subj="customChildren">Custom Children Content</div>,
   };
 

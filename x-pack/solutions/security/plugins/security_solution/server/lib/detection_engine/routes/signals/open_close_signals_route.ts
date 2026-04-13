@@ -9,27 +9,30 @@ import { get } from 'lodash';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
+import {
+  ALERTS_API_ALL,
+  ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
+} from '@kbn/security-solution-features/constants';
 import { ALERT_CLOSING_REASON_VALIDATION_ERROR } from './translations';
 import { DefaultClosingReasonSchema } from '../../../../../common/types';
 import { SetAlertsStatusRequestBody } from '../../../../../common/api/detection_engine/signals';
 import { AlertStatusEnum } from '../../../../../common/api/model';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
-  DEFAULT_ALERT_CLOSE_REASONS_KEY,
   DEFAULT_ALERTS_INDEX,
+  DEFAULT_DETECTIONS_CLOSE_REASONS_KEY,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
 } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { INSIGHTS_CHANNEL } from '../../../telemetry/constants';
 import {
-  getSessionIDfromKibanaRequest,
   createAlertStatusPayloads,
+  getSessionIDfromKibanaRequest,
 } from '../../../telemetry/insights';
 import {
-  setWorkflowStatusHandler,
   getUpdateSignalStatusScript,
+  setWorkflowStatusHandler,
 } from '../common/set_workflow_status_handler';
 
 export const setSignalsStatusRoute = (
@@ -43,7 +46,9 @@ export const setSignalsStatusRoute = (
       access: 'public',
       security: {
         authz: {
-          requiredPrivileges: [ALERTS_API_READ],
+          requiredPrivileges: [
+            { anyRequired: [ALERTS_API_ALL, ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE] },
+          ],
         },
       },
     })
@@ -68,7 +73,9 @@ export const setSignalsStatusRoute = (
 
         let reason;
         if (request.body.status === AlertStatusEnum.closed) {
-          const customReasons = await core.uiSettings.client.get(DEFAULT_ALERT_CLOSE_REASONS_KEY);
+          const customReasons = await core.uiSettings.client.get(
+            DEFAULT_DETECTIONS_CLOSE_REASONS_KEY
+          );
           const validReasons = new Set([...DefaultClosingReasonSchema.options, ...customReasons]);
           if (request.body.reason === undefined || validReasons.has(request.body.reason)) {
             reason = request.body.reason;
