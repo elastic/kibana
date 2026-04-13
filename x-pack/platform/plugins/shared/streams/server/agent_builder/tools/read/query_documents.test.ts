@@ -21,7 +21,7 @@ import {
   detectEmptyAggregations,
   createQueryDocumentsTool,
 } from './query_documents';
-import { createMockGetScopedClients, createMockToolContext } from './test_helpers';
+import { createMockGetScopedClients, createMockToolContext } from '../test_helpers';
 
 describe('createQueryDocumentsTool handler', () => {
   const mockDefinition = {

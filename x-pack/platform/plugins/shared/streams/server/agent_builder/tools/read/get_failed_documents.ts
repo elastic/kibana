@@ -12,21 +12,20 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getFlattenedObject } from '@kbn/std';
 import dateMath from '@kbn/datemath';
 import dedent from 'dedent';
-import type { GetScopedClients } from '../../routes/types';
-import { FAILURE_STORE_SELECTOR } from '../../../common/constants';
+import type { GetScopedClients } from '../../../routes/types';
+import { FAILURE_STORE_SELECTOR } from '../../../../common/constants';
 import {
   STREAMS_GET_FAILED_DOCUMENTS_TOOL_ID as GET_FAILED_DOCUMENTS,
   STREAMS_GET_DATA_QUALITY_TOOL_ID as GET_DATA_QUALITY,
-  STREAMS_LIST_STREAMS_TOOL_ID as LIST_STREAMS,
-} from './tool_ids';
-import { classifyError } from './error_utils';
+} from '../tool_ids';
+import { classifyError } from '../error_utils';
 
 const MAX_SAMPLE_SIZE = 50;
 const MAX_STACK_TRACE_LENGTH = 500;
 const MAX_SOURCE_STRING_LENGTH = 200;
 
 const getFailedDocumentsSchema = z.object({
-  name: z.string().describe('Exact stream name, e.g. "logs.nginx"'),
+  name: z.string().describe('Exact stream name, e.g. "logs.ecs.nginx"'),
   start: z
     .string()
     .optional()
@@ -163,7 +162,7 @@ export const createGetFailedDocumentsTool = ({
               message: `Failed to get failed documents for stream "${name}": ${message}`,
               stream: name,
               operation: 'get_failed_documents',
-              likely_cause: classifyError(err, LIST_STREAMS),
+              likely_cause: classifyError(err),
             },
           },
         ],

@@ -11,12 +11,12 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { Streams } from '@kbn/streams-schema';
 import dedent from 'dedent';
-import type { GetScopedClients } from '../../routes/types';
+import type { GetScopedClients } from '../../../routes/types';
 import {
   STREAMS_LIST_STREAMS_TOOL_ID as LIST_STREAMS,
   STREAMS_GET_STREAM_TOOL_ID as GET_STREAM,
-} from './tool_ids';
-import { classifyError } from './error_utils';
+} from '../tool_ids';
+import { classifyError } from '../error_utils';
 
 const listStreamsSchema = z.object({});
 
@@ -32,7 +32,7 @@ export const createListStreamsTool = ({
 
     **When to use:**
     - User asks "what streams do I have?" or "show me my streams"
-    - You need to resolve a partial stream name (e.g. "nginx") to an exact name (e.g. "logs.nginx")
+    - You need to resolve a partial stream name (e.g. "nginx") to an exact name (e.g. "logs.ecs.nginx")
     - Comparing storage or quality across multiple streams (combine with get_lifecycle_stats or get_data_quality)
     - Discovering available streams before drilling into one
 
@@ -76,7 +76,7 @@ export const createListStreamsTool = ({
             data: {
               message: `Failed to list streams: ${message}`,
               operation: 'list_streams',
-              likely_cause: classifyError(err, LIST_STREAMS),
+              likely_cause: classifyError(err),
             },
           },
         ],

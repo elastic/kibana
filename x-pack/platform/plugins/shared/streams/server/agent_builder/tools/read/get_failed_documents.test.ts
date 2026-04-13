@@ -11,7 +11,7 @@ import {
   isNotFoundError,
   formatFailedDocuments,
 } from './get_failed_documents';
-import { createMockGetScopedClients, createMockToolContext } from './test_helpers';
+import { createMockGetScopedClients, createMockToolContext } from '../test_helpers';
 
 describe('createGetFailedDocumentsTool handler', () => {
   const setup = () => {

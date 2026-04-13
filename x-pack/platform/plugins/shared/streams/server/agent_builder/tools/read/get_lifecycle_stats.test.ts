@@ -13,20 +13,20 @@ import {
   buildRetentionInfo,
   createGetLifecycleStatsTool,
 } from './get_lifecycle_stats';
-import { createMockGetScopedClients, createMockToolContext } from './test_helpers';
+import { createMockGetScopedClients, createMockToolContext } from '../test_helpers';
 
-jest.mock('../../lib/streams/lifecycle/get_effective_lifecycle', () => ({
+jest.mock('../../../lib/streams/lifecycle/get_effective_lifecycle', () => ({
   getEffectiveLifecycle: jest.fn(),
 }));
 
-jest.mock('../../lib/streams/lifecycle/ilm_phases', () => ({
+jest.mock('../../../lib/streams/lifecycle/ilm_phases', () => ({
   ilmPhases: jest.fn(),
 }));
 
 const { getEffectiveLifecycle } = jest.requireMock(
-  '../../lib/streams/lifecycle/get_effective_lifecycle'
+  '../../../lib/streams/lifecycle/get_effective_lifecycle'
 );
-const { ilmPhases } = jest.requireMock('../../lib/streams/lifecycle/ilm_phases');
+const { ilmPhases } = jest.requireMock('../../../lib/streams/lifecycle/ilm_phases');
 
 describe('createGetLifecycleStatsTool handler', () => {
   beforeEach(() => {

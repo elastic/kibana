@@ -116,7 +116,7 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
 
       if (confirmStatus === ConfirmationStatus.rejected) {
         return {
-          results: [createErrorResult('User denied access to this tool.')],
+          results: [createErrorResult('The user chose not to proceed with this action.')],
         };
       }
 

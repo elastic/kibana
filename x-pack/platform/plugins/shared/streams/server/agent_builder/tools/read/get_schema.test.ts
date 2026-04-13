@@ -8,7 +8,7 @@
 import type { Streams } from '@kbn/streams-schema';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { createGetSchemaTool } from './get_schema';
-import { createMockGetScopedClients, createMockToolContext } from './test_helpers';
+import { createMockGetScopedClients, createMockToolContext } from '../test_helpers';
 
 describe('createGetSchemaTool handler', () => {
   const emptySearchResponse = { hits: { hits: [] } } as unknown as SearchResponse;

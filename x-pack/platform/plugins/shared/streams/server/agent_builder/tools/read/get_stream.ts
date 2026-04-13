@@ -11,15 +11,12 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { Streams } from '@kbn/streams-schema';
 import dedent from 'dedent';
-import type { GetScopedClients } from '../../routes/types';
-import {
-  STREAMS_GET_STREAM_TOOL_ID as GET_STREAM,
-  STREAMS_LIST_STREAMS_TOOL_ID as LIST_STREAMS,
-} from './tool_ids';
-import { classifyError } from './error_utils';
+import type { GetScopedClients } from '../../../routes/types';
+import { STREAMS_GET_STREAM_TOOL_ID as GET_STREAM } from '../tool_ids';
+import { classifyError } from '../error_utils';
 
 const getStreamSchema = z.object({
-  name: z.string().describe('Exact stream name, e.g. "logs.nginx"'),
+  name: z.string().describe('Exact stream name, e.g. "logs.ecs.nginx"'),
 });
 
 export const createGetStreamTool = ({
@@ -97,7 +94,7 @@ export const createGetStreamTool = ({
               message: `Failed to get stream "${name}": ${message}`,
               stream: name,
               operation: 'get_stream',
-              likely_cause: classifyError(err, LIST_STREAMS),
+              likely_cause: classifyError(err),
             },
           },
         ],

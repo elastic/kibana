@@ -30,6 +30,9 @@ export const createMockGetScopedClients = () => {
       | 'getAncestors'
       | 'getDescendants'
       | 'getDataStream'
+      | 'upsertStream'
+      | 'forkStream'
+      | 'deleteStream'
     >
   > = {
     getStream: jest.fn(),
@@ -37,16 +40,38 @@ export const createMockGetScopedClients = () => {
     getAncestors: jest.fn().mockResolvedValue([]),
     getDescendants: jest.fn().mockResolvedValue([]),
     getDataStream: jest.fn(),
+    upsertStream: jest.fn().mockResolvedValue({ acknowledged: true, result: 'updated' }),
+    forkStream: jest.fn().mockResolvedValue({ acknowledged: true, result: 'created' }),
+    deleteStream: jest.fn().mockResolvedValue({ acknowledged: true, result: 'deleted' }),
+  };
+
+  const queryClient = {
+    getAssets: jest.fn().mockResolvedValue([]),
+  };
+
+  const attachmentClient = {
+    getAttachments: jest.fn().mockResolvedValue([]),
   };
 
   const getScopedClients = jest.fn().mockResolvedValue({
     streamsClient,
     scopedClusterClient,
     esClient,
+    queryClient,
+    attachmentClient,
   }) as unknown as GetScopedClients;
 
-  return { getScopedClients, streamsClient, esClient, scopedClusterClient };
+  return {
+    getScopedClients,
+    streamsClient,
+    esClient,
+    scopedClusterClient,
+    queryClient,
+    attachmentClient,
+  };
 };
+
+export const createMockRequest = () => httpServerMock.createKibanaRequest();
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const invokeHandler = async <TSchema extends ZodObject<any>>(
