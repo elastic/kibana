@@ -257,6 +257,7 @@ export class AgentBuilderPlugin
       sml: {
         registerType: serviceSetups.sml.registerType.bind(serviceSetups.sml),
       },
+      topSnippets: this.config.topSnippets,
     };
   }
 
@@ -354,7 +355,6 @@ export class AgentBuilderPlugin
             esClient: elasticsearch.client.asInternalUser,
             savedObjectsClient: soClient,
             logger: this.logger.get('services.sml'),
-            request: params.request,
           });
         },
       },

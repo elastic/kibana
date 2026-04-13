@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LegacyMetricState } from '../../schema/charts/legacy_metric';
+import {
+  AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+  AS_CODE_DATA_VIEW_SPEC_TYPE,
+} from '@kbn/as-code-data-views-schema';
+import type { LegacyMetricState, LegacyMetricStateESQL } from '../../schema/charts/legacy_metric';
 
 /**
  * Basic legacy metric chart with ad hoc dataView
@@ -15,9 +19,9 @@ import type { LegacyMetricState } from '../../schema/charts/legacy_metric';
 export const basicLegacyMetricWithAdHocDataView: LegacyMetricState = {
   type: 'legacy_metric',
   title: 'Test Metric',
-  dataset: {
-    type: 'index',
-    index: 'test-index',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+    index_pattern: 'test-index',
     time_field: '@timestamp',
   },
   metric: {
@@ -36,9 +40,9 @@ export const basicLegacyMetricWithDataView: LegacyMetricState = {
   type: 'legacy_metric',
   title: 'Test Metric',
   description: 'A test metric chart',
-  dataset: {
-    type: 'dataView',
-    id: 'test-id',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+    ref_id: 'test-id',
   },
   metric: {
     operation: 'count',
@@ -52,11 +56,11 @@ export const basicLegacyMetricWithDataView: LegacyMetricState = {
 /**
  * ESQL-based legacy metric chart
  */
-export const esqlLegacyMetric: LegacyMetricState = {
+export const esqlLegacyMetric: LegacyMetricStateESQL = {
   type: 'legacy_metric',
   title: 'Test ESQL Metric',
   description: 'A test metric chart using ESQL',
-  dataset: {
+  data_source: {
     type: 'esql',
     query: 'FROM test-index | STATS count = COUNT(*)',
   },
@@ -74,9 +78,9 @@ export const comprehensiveLegacyMetricWithAdHocDataView: LegacyMetricState = {
   type: 'legacy_metric',
   title: 'Comprehensive Test Metric',
   description: 'A comprehensive metric chart with all features',
-  dataset: {
-    type: 'index',
-    index: 'comprehensive-index',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+    index_pattern: 'comprehensive-index',
     time_field: '@timestamp',
   },
   metric: {
@@ -108,9 +112,9 @@ export const comprehensiveLegacyMetricWithDataView: LegacyMetricState = {
   type: 'legacy_metric',
   title: 'Comprehensive Test Metric',
   description: 'A comprehensive metric chart with all features',
-  dataset: {
-    type: 'dataView',
-    id: 'my-custom-data-view-id',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+    ref_id: 'my-custom-data-view-id',
   },
   metric: {
     operation: 'average',
@@ -137,11 +141,11 @@ export const comprehensiveLegacyMetricWithDataView: LegacyMetricState = {
 /**
  * Comprehensive ESQL-based legacy metric chart
  */
-export const comprehensiveEsqlLegacyMetric: LegacyMetricState = {
+export const comprehensiveEsqlLegacyMetric: LegacyMetricStateESQL = {
   type: 'legacy_metric',
   title: 'Test ESQL Metric',
   description: 'A test metric chart using ESQL',
-  dataset: {
+  data_source: {
     type: 'esql',
     query: 'FROM test-index | STATS countA = COUNT(*) WHERE a > 1, countB = COUNT(*) WHERE b > 1',
   },
@@ -172,9 +176,9 @@ export const legacyMetricWithApplyColorToWithoutColor: LegacyMetricState = {
   type: 'legacy_metric',
   title: 'Comprehensive Test Metric',
   description: 'A comprehensive metric chart with all features',
-  dataset: {
-    type: 'dataView',
-    id: 'my-custom-data-view-id',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+    ref_id: 'my-custom-data-view-id',
   },
   metric: {
     operation: 'average',
@@ -196,9 +200,9 @@ export const legacyMetricWithColorWithoutApplyColorTo: LegacyMetricState = {
   type: 'legacy_metric',
   title: 'Comprehensive Test Metric',
   description: 'A comprehensive metric chart with all features',
-  dataset: {
-    type: 'dataView',
-    id: 'my-custom-data-view-id',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+    ref_id: 'my-custom-data-view-id',
   },
   metric: {
     operation: 'average',
