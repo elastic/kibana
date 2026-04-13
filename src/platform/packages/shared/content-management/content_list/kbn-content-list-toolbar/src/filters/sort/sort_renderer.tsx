@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import {
   useContentListConfig,
   useContentListSort,
+  DEFAULT_SORT_FIELDS,
   type SortField,
   type SortingConfig,
 } from '@kbn/content-list-provider';
@@ -212,20 +213,7 @@ export const SortRenderer = ({
     }
 
     // Default options when no sorting config is provided.
-    return [
-      {
-        label: i18nText.nameAsc,
-        field: 'title',
-        direction: 'asc',
-        append: <EuiIcon type="sortUp" aria-hidden={true} />,
-      },
-      {
-        label: i18nText.nameDesc,
-        field: 'title',
-        direction: 'desc',
-        append: <EuiIcon type="sortDown" aria-hidden={true} />,
-      },
-    ];
+    return generateOptionsFromFields(DEFAULT_SORT_FIELDS);
   }, [sortingConfig]);
 
   // Derive checked state from provider sort values instead of duplicating in local state.
