@@ -123,7 +123,9 @@ describe('Find rules with facets route', () => {
 
       expect(response.status).toEqual(400);
       expect(response.body.message).toEqual(
-        expect.arrayContaining(['"sort_order" and "sort_field" must be set together or not at all'])
+        expect.arrayContaining([
+          'when "sort_order" and "sort_field" must exist together or not at all',
+        ])
       );
     });
 
@@ -142,13 +144,16 @@ describe('Find rules with facets route', () => {
   });
 
   describe('facet aggregations', () => {
-    it('returns counts from rulesClient.aggregate and maps friendly facet keys to ES fields', async () => {
-      clients.rulesClient.aggregate.mockResolvedValue({
-        facet_tags: {
-          buckets: [
-            { key: 'tag1', doc_count: 3 },
-            { key: 'tag2', doc_count: 1 },
-          ],
+    it('returns counts from rulesClient.find and maps friendly facet keys to ES fields', async () => {
+      clients.rulesClient.find.mockResolvedValue({
+        ...getFindResultWithSingleHit(),
+        aggregations: {
+          facet_tags: {
+            buckets: [
+              { key: 'tag1', doc_count: 3 },
+              { key: 'tag2', doc_count: 1 },
+            ],
+          },
         },
       });
 
@@ -167,24 +172,29 @@ describe('Find rules with facets route', () => {
       expect(response.body.counts).toEqual({
         tags: { tag1: 3, tag2: 1 },
       });
-      expect(clients.rulesClient.aggregate).toHaveBeenCalledWith(
+      expect(clients.rulesClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
-          aggs: expect.objectContaining({
-            facet_tags: {
-              terms: { field: 'alert.attributes.tags' },
-            },
+          options: expect.objectContaining({
+            aggs: expect.objectContaining({
+              facet_tags: {
+                terms: expect.objectContaining({ field: 'alert.attributes.tags' }),
+              },
+            }),
           }),
         })
       );
     });
 
     it('includes facet values with doc_count 0 in counts', async () => {
-      clients.rulesClient.aggregate.mockResolvedValue({
-        facet_enabled: {
-          buckets: [
-            { key: true, doc_count: 5 },
-            { key: false, doc_count: 0 },
-          ],
+      clients.rulesClient.find.mockResolvedValue({
+        ...getFindResultWithSingleHit(),
+        aggregations: {
+          facet_enabled: {
+            buckets: [
+              { key: true, doc_count: 5 },
+              { key: false, doc_count: 0 },
+            ],
+          },
         },
       });
 

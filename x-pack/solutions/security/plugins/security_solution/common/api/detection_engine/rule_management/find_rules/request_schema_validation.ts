@@ -13,7 +13,7 @@ import type { FindRulesRequestQueryInput } from './find_rules_route.gen';
 export const validateFindRulesRequestQuery = (query: FindRulesRequestQueryInput): string[] => {
   if (query.sort_order != null || query.sort_field != null) {
     if (query.sort_order == null || query.sort_field == null) {
-      return ['"sort_order" and "sort_field" must be set together or not at all'];
+      return ['when "sort_order" and "sort_field" must exist together or not at all'];
     }
   }
   const ruleExecutionGapQueryParamsSet = new Set([

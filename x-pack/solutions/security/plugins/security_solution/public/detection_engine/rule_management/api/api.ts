@@ -265,9 +265,9 @@ export const fetchRulesWithFacets = async ({
     sort_field,
     sort_order,
     ...(filter.trim() !== '' ? { filter: filter.trim() } : {}),
-    ...(search != null ? { search } : {}),
-    ...(aggregations != null ? { aggregations } : {}),
-    ...(search_after?.length ? { search_after } : {}),
+    search,
+    aggregations,
+    search_after,
   };
 
   return KibanaServices.get().http.fetch<FetchRulesWithFacetsResponse>(

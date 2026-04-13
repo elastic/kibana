@@ -46,6 +46,7 @@ export interface FindResult<Params extends RuleParams> {
   total: number;
   searchAfter?: SortResults;
   data: Array<SanitizedRule<Params>>;
+  aggregations?: Record<string, unknown>;
 }
 
 export async function findRules<Params extends RuleParams = never>(
@@ -136,6 +137,7 @@ export async function findRules<Params extends RuleParams = never>(
     per_page: perPage,
     total,
     saved_objects: data,
+    aggregations,
   } = await findRulesSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     savedObjectsFindOptions: {
@@ -215,6 +217,7 @@ export async function findRules<Params extends RuleParams = never>(
       perPage,
       total,
       searchAfter,
+      aggregations,
       // replace siem formatted rules
       data: authorizedData.map((rule) => formattedRulesMap[rule.id] ?? rule),
     };

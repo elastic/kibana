@@ -31,7 +31,10 @@ import type {
   RulesSnoozeSettingsMap,
   SortingOptions,
 } from '../../../../rule_management/logic/types';
-import type { WarningSchema } from '../../../../../../common/api/detection_engine';
+import type {
+  GranularRulesFacetCategory,
+  WarningSchema,
+} from '../../../../../../common/api/detection_engine';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
 import { RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
 import {
@@ -255,7 +258,9 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       sort_field: sortingOptions.field,
       sort_order: sortingOptions.order,
       pagination,
-      aggregations: undefined,
+      aggregations: {
+        counts: ['tags', 'enabled'] as GranularRulesFacetCategory[],
+      },
       ...(searchTerm !== '' ? { search: { term: searchTerm, mode: 'legacy' as const } } : {}),
     };
   }, [filterOptions, sortingOptions, pagination]);

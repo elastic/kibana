@@ -6,16 +6,16 @@
  */
 
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
 
 import type {
   FacetCounts,
   GranularRulesFacetCategory,
 } from '../../../../../../common/api/detection_engine/rule_management/granular_rules_contract.gen';
 import { RULES_FILTER_NAME_TO_ATTRIBUTE } from '../../../../../../common/api/detection_engine/rule_management';
-import { enrichFilterWithRuleTypeMapping } from './enrich_filter_with_rule_type_mappings';
-import { enrichFilterWithRuleIds } from './enrich_filter_with_rule_ids';
-interface TermsAggBuckets {
+
+const DEFAULT_AGGREGATION_MAX_SIZE = 200;
+
+export interface TermsAggBuckets {
   buckets: Array<{
     key: string | number | boolean;
     doc_count: number;
@@ -31,21 +31,11 @@ const bucketsToFacetMap = (buckets: TermsAggBuckets['buckets']): Record<string, 
   return facetCounts;
 };
 
-export const computeGranularFacetCounts = async ({
-  rulesClient,
-  filter,
-  ruleIds,
+export const buildAggregations = ({
   categories,
 }: {
-  rulesClient: RulesClient;
-  filter: string | undefined;
-  ruleIds: string[] | undefined;
   categories: GranularRulesFacetCategory[];
-}): Promise<FacetCounts> => {
-  if (categories.length === 0) {
-    return {};
-  }
-
+}): Record<string, AggregationsAggregationContainer> => {
   const aggregations: Record<string, AggregationsAggregationContainer> = {};
   for (const category of categories) {
     // Allows us to support user friendly names while maintaining raw KQL attributes as an escape hatch.
@@ -53,22 +43,21 @@ export const computeGranularFacetCounts = async ({
       ? category
       : RULES_FILTER_NAME_TO_ATTRIBUTE[category];
     aggregations[`facet_${category}`] = {
-      terms: { field: fieldName },
+      terms: { field: fieldName, size: DEFAULT_AGGREGATION_MAX_SIZE },
     };
   }
 
-  const enrichedFilter = enrichFilterWithRuleTypeMapping(enrichFilterWithRuleIds(filter, ruleIds));
+  return aggregations;
+};
 
-  const raw = await rulesClient.aggregate<Record<string, TermsAggBuckets>>({
-    options: { filter: enrichedFilter },
-    aggs: aggregations,
-  });
-
+export const expandRawAggregationResult = (
+  raw: Record<string, unknown>,
+  categories: GranularRulesFacetCategory[]
+): FacetCounts => {
   const counts: FacetCounts = {};
   for (const category of categories) {
-    const aggResult = raw[`facet_${category}`];
+    const aggResult = raw[`facet_${category}`] as TermsAggBuckets;
     counts[category] = bucketsToFacetMap(aggResult.buckets);
   }
-
   return counts;
 };

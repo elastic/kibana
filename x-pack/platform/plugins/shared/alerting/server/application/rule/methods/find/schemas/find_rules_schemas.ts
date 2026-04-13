@@ -12,12 +12,7 @@ const savedObjectReferenceSchema = schema.object({
   id: schema.string(),
 });
 
-const sortValueSchema = schema.oneOf([
-  schema.string(),
-  schema.number(),
-  schema.boolean(),
-  schema.literal(null),
-]);
+const sortValueSchema = schema.oneOf([schema.string(), schema.number(), schema.boolean()]);
 
 export const findRulesOptionsSchema = schema.object(
   {
@@ -40,6 +35,7 @@ export const findRulesOptionsSchema = schema.object(
     ruleTypeIds: schema.maybe(schema.arrayOf(schema.string())),
     consumers: schema.maybe(schema.arrayOf(schema.string())),
     searchAfter: schema.maybe(schema.arrayOf(sortValueSchema)),
+    aggs: schema.maybe(schema.recordOf(schema.string(), schema.any())),
   },
   { unknowns: 'allow' }
 );

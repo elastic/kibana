@@ -12,11 +12,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import { MAX_RESULTS_WINDOW } from '../../../../../../usage/constants';
 import { DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS } from '../../../../../../../common/constants';
-import type {
-  FacetCounts,
-  FindRulesWithFacetsResponse,
-} from '../../../../../../../common/api/detection_engine/rule_management';
-import type { WarningSchema } from '../../../../../../../common/api/detection_engine';
+import type { FindRulesWithFacetsResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   FindRulesWithFacetsRequestBody,
   validateFindRulesWithFacetsRequestBody,
@@ -24,9 +20,13 @@ import {
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { findRules } from '../../../logic/search/find_rules';
 import { buildGranularRulesKql } from '../../../logic/search/build_granular_rules_kql';
-import { computeGranularFacetCounts } from '../../../logic/search/compute_granular_facet_counts';
+import {
+  buildAggregations,
+  expandRawAggregationResult,
+} from '../../../logic/search/granular_facet_aggregations';
 import { buildSiemResponse } from '../../../../routes/utils';
 import { transformFindAlerts } from '../../../utils/utils';
+import { enrichFilterWithRuleTypeMapping } from '../../../logic/search/enrich_filter_with_rule_type_mappings';
 
 /**
  * Internal route for listing rules with facets and deep pagination. To be made public in a future release.
@@ -85,12 +85,16 @@ export const findRulesWithFacetsRoute = (router: SecuritySolutionPluginRouter, l
               ? ([...searchAfterInput] as SortResults)
               : undefined;
 
-          let ruleIds: string[] | undefined;
-          let warnings: WarningSchema[] | undefined;
-
           const categoryCounts = aggregations?.counts ?? [];
 
-          let counts: FacetCounts | undefined;
+          const aggs =
+            categoryCounts.length > 0
+              ? buildAggregations({
+                  categories: categoryCounts,
+                })
+              : undefined;
+
+          const enrichedFilter = enrichFilterWithRuleTypeMapping(combinedKql);
 
           const rules = await findRules({
             rulesClient,
@@ -98,22 +102,17 @@ export const findRulesWithFacetsRoute = (router: SecuritySolutionPluginRouter, l
             page: searchAfter ? undefined : page,
             sortField,
             sortOrder,
-            filter: combinedKql,
+            filter: enrichedFilter,
             fields,
-            ruleIds,
             searchAfter,
+            aggregations: aggs,
           });
 
-          if (categoryCounts.length > 0) {
-            counts = await computeGranularFacetCounts({
-              rulesClient,
-              filter: combinedKql,
-              ruleIds,
-              categories: categoryCounts,
-            });
-          }
+          const counts = rules.aggregations
+            ? expandRawAggregationResult(rules.aggregations, categoryCounts)
+            : undefined;
 
-          const base = transformFindAlerts(rules, warnings);
+          const base = transformFindAlerts(rules);
 
           const shouldReturnSearchAfter =
             sortField != null &&

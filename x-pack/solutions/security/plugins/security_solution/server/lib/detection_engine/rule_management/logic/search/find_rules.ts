@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  AggregationsAggregationContainer,
+  SortResults,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { FindResult, RulesClient } from '@kbn/alerting-plugin/server';
 import type { FindRulesSortField } from '../../../../../../common/api/detection_engine/rule_management';
 
@@ -32,6 +35,7 @@ export interface FindRuleOptions {
   searchAfter?: SortResults;
   hasReference?: HasReferences | undefined;
   ruleIds?: string[] | undefined;
+  aggregations?: AggregationsAggregationContainer;
 }
 
 export const findRules = ({
@@ -44,6 +48,7 @@ export const findRules = ({
   sortOrder,
   searchAfter,
   hasReference,
+  aggregations,
   ruleIds,
 }: FindRuleOptions): Promise<FindResult<RuleParams>> => {
   return rulesClient.find({
@@ -56,6 +61,7 @@ export const findRules = ({
       sortField: transformSortField(sortField),
       searchAfter,
       hasReference,
+      aggs: aggregations,
     },
   });
 };

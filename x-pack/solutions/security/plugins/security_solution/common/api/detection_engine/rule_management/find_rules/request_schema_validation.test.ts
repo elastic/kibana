@@ -102,7 +102,9 @@ describe('Find rules request schema, additional validation', () => {
         sort_field: 'name',
       };
       const errors = validateFindRulesRequestQuery(schema);
-      expect(errors).toEqual(['"sort_order" and "sort_field" must be set together or not at all']);
+      expect(errors).toEqual([
+        'when "sort_order" and "sort_field" must exist together or not at all',
+      ]);
     });
 
     test('You cannot have sort_order without sort_field', () => {
@@ -110,7 +112,9 @@ describe('Find rules request schema, additional validation', () => {
         sort_order: 'asc',
       };
       const errors = validateFindRulesRequestQuery(schema);
-      expect(errors).toEqual(['"sort_order" and "sort_field" must be set together or not at all']);
+      expect(errors).toEqual([
+        'when "sort_order" and "sort_field" must exist together or not at all',
+      ]);
     });
   });
 });
