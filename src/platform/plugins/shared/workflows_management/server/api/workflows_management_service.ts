@@ -1961,7 +1961,7 @@ export class WorkflowsService {
 
     // Deduplicate user-supplied IDs within the batch (first wins, later ones fail).
     // Server-generated IDs are already guaranteed unique by resolveUniqueWorkflowIdsBatch.
-    for (let i = validWorkflows.length - 1; i >= 0; i--) {
+    for (let i = 0; i < validWorkflows.length; i++) {
       if (validWorkflows[i].hasCustomId) {
         const { id } = validWorkflows[i];
         if (seenIds.has(id)) {
@@ -1972,6 +1972,7 @@ export class WorkflowsService {
           });
           validWorkflows.splice(i, 1);
           bulkOperations.splice(i, 1);
+          i--;
         } else {
           seenIds.add(id);
         }
