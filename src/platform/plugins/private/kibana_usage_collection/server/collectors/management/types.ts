@@ -194,6 +194,7 @@ export interface UsageStats {
   'observability:streamsEnableWiredStreamViews': boolean;
   'observability:streamsEnableOverviewPage': boolean;
   'observability:streamsSigEventsIndexPatterns': string;
+  'observability:streamsEnableMemory': boolean;
   'securitySolution:entityStoreEnableV2': boolean;
   'elasticRamen:enabled': boolean;
   'query_activity:minRunningTime': number;
