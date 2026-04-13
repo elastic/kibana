@@ -12,6 +12,6 @@ import type { IlmPhasesFlyoutFormInternal } from '../form';
 export const GlobalFieldsMount = () => {
   const { control } = useFormContext<IlmPhasesFlyoutFormInternal>();
   return (
-    <Controller name="_meta.searchableSnapshot.repository" control={control} render={() => null} />
+    <Controller name="_meta.searchableSnapshot.repository" control={control} render={() => <></>} />
   );
 };

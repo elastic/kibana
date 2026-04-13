@@ -21,7 +21,7 @@ export const PhaseFieldsMount = ({ phase }: { phase: PhaseName }) => {
           key={path}
           name={path as FieldPath<IlmPhasesFlyoutFormInternal>}
           control={control}
-          render={() => null}
+          render={() => <></>}
         />
       ))}
     </>
