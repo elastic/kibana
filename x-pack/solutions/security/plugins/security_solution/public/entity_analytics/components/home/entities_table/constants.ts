@@ -11,7 +11,8 @@ export {
   ENTITY_ANALYTICS_TABLE_ID,
   ENTITY_ANALYTICS_LOCAL_STORAGE_COLUMNS_KEY,
   ENTITY_ANALYTICS_LOCAL_STORAGE_PAGE_SIZE_KEY,
-  getLatestEntitiesIndexName,
+  getEntitiesAlias,
+  ENTITY_LATEST,
 } from '../constants';
 
 export const MAX_ENTITIES_TO_LOAD = 500;
