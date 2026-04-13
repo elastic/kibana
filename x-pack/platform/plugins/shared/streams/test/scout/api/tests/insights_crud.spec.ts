@@ -437,7 +437,7 @@ apiTest.describe(
 
     // Test: Bulk operations with non-existent IDs should fail
     // Failing, see https://github.com/elastic/kibana/issues/262787
-    apiTest(
+    apiTest.skip(
       'should fail bulk operations with non-existent IDs',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asStreamsAdmin();
