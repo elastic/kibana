@@ -120,9 +120,6 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       >({
         type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
         perPage: 0,
-        filter,
-        aggs: {
-          count_by_cloud_connector: {
             terms: {
               field: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id`,
               size: SO_SEARCH_LIMIT,
