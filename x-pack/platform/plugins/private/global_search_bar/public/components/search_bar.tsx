@@ -32,7 +32,8 @@ import {
 import { euiSelectableTemplateSitewideFormatOptions } from '@elastic/eui/lib/components/selectable/selectable_templates';
 import { euiSelectableTemplateSitewideStyles } from '@elastic/eui/lib/components/selectable/selectable_templates/selectable_template_sitewide.styles';
 import type { EuiSelectableOnChangeEvent } from '@elastic/eui/lib/components/selectable/selectable';
-import { css } from '@emotion/react';
+import { css, Global } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { GlobalSearchFindParams, GlobalSearchResult } from '@kbn/global-search-plugin/public';
 import type { FC } from 'react';
@@ -355,6 +356,19 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
     isMac ? i18nStrings.keyboardShortcutTooltip.onMac : i18nStrings.keyboardShortcutTooltip.onNotMac
   }`;
 
+  const projectSearchRevealAriaLabel = useMemo(
+    () =>
+      i18n.translate('xpack.globalSearchBar.searchBar.showSearchWithShortcutAriaLabel', {
+        defaultMessage: 'Show search bar, keyboard shortcut {shortcut}',
+        values: {
+          shortcut: isMac
+            ? i18nStrings.keyboardShortcutTooltip.onMac
+            : i18nStrings.keyboardShortcutTooltip.onNotMac,
+        },
+      }),
+    [isMac]
+  );
+
   useEvent('keydown', onKeyDown);
 
   const closePalette = useCallback(() => {
@@ -362,56 +376,150 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
     setIsVisible(false);
   }, [reportEvent]);
 
-  /*
-   * Project sidenav: EuiIcon size "s" → euiTheme.size.m (12px). Size "m" → euiTheme.size.base (16px).
-   * Pin the SVG to base so it matches other header icons; !important beats header `font-size: 0` + EUI.
-   */
-  const projectMagnifyIconCss = useMemo(
-    () =>
-      css`
-        &&& {
-          inline-size: ${euiTheme.size.base} !important;
-          block-size: ${euiTheme.size.base} !important;
-          flex-shrink: 0;
+  /** Match EUI form control chrome: default border, hover darkens border only (no fill shift). */
+  const projectChromeSearchRevealButtonCss = useMemo(
+    () => css`
+      &&& {
+        box-sizing: border-box;
+        inline-size: 280px !important;
+        min-inline-size: 280px !important;
+        max-inline-size: 280px !important;
+        background-color: transparent !important;
+        color: ${euiTheme.colors.textSubdued} !important;
+        font-weight: ${euiTheme.font.weight.regular} !important;
+        border: ${euiTheme.border.width.thin} solid ${euiTheme.components.forms.border} !important;
+        /* Figma: frame radius = space xs → 4px */
+        border-radius: 4px !important;
+        box-shadow: none !important;
+        text-align: start !important;
+        /* Figma: 8px horizontal, 6px vertical padding; end inset −2px so shortcut sits closer to the frame edge */
+        padding-block: 6px !important;
+        padding-inline-start: ${euiTheme.size.s} !important;
+        padding-inline-end: ${mathWithUnits(euiTheme.size.s, (x) => x - 2)} !important;
+      }
+
+      /* Figma: 6px gap between icon, label, and shortcut (matches --spaces/6) */
+      &&& [class*='euiButtonDisplayContent'] {
+        justify-content: flex-start !important;
+        inline-size: 100% !important;
+        gap: 6px;
+      }
+
+      &&& .kbnSearchBarProjectRevealLabel {
+        flex: 1 1 0%;
+        min-inline-size: 0;
+        text-align: start;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      /* EuiButton base+text uses an overlay ::before for hover/active; remove so background never changes */
+      &&&:hover::before,
+      &&&:hover:enabled::before,
+      &&&:active::before,
+      &&&:active:enabled::before {
+        display: none !important;
+      }
+
+      &&&:hover,
+      &&&:hover:enabled {
+        background-color: transparent !important;
+        border-color: ${euiTheme.components.forms.borderHovered} !important;
+        box-shadow: none !important;
+      }
+
+      &&&:active,
+      &&&:active:enabled {
+        background-color: transparent !important;
+        border-color: ${euiTheme.components.forms.borderHovered} !important;
+        box-shadow: none !important;
+      }
+
+      &&&:focus-visible {
+        outline: none !important;
+        border-color: ${euiTheme.components.forms.borderFocused} !important;
+        box-shadow: none !important;
+      }
+
+      /* Shortcut span: no overflow:hidden — it would clip descendants; max-width/opacity animate here */
+      &&& .kbnSearchBarProjectRevealShortcut {
+        flex-shrink: 0;
+        min-inline-size: 0;
+        max-width: 0;
+        opacity: 0;
+        margin-inline-start: 0;
+      }
+
+      @media (hover: hover) and (pointer: fine) {
+        &&&:hover .kbnSearchBarProjectRevealShortcut,
+        &&&:focus-visible .kbnSearchBarProjectRevealShortcut {
+          max-width: 10rem;
+          opacity: 1;
+          margin-inline-start: 2px;
         }
-      `,
+      }
+
+      @media (hover: none), (pointer: coarse) {
+        &&& .kbnSearchBarProjectRevealShortcut {
+          max-width: 10rem;
+          opacity: 1;
+          margin-inline-start: 2px;
+        }
+      }
+    `,
     [euiTheme]
   );
 
-  if (chromeStyle === 'project' && !isVisible) {
-    return (
-      <EuiButton
-        aria-label={i18nStrings.showSearchAriaText}
-        buttonRef={visibilityButtonRef}
-        color="text"
-        css={css`
-          background-color: transparent !important;
-          color: ${euiTheme.colors.textSubdued} !important;
-        `}
-        data-test-subj="nav-search-reveal"
-        iconType="search"
-        size="s"
-        onClick={() => {
-          setIsVisible(true);
-        }}
-      >
-        {'Find content... '}
-        <EuiCode
-          css={css`
-            color: ${euiTheme.colors.subduedText} !important;
-          `}
-        >
-          {isMac
-            ? i18nStrings.keyboardShortcutTooltip.onMac
-            : i18nStrings.keyboardShortcutTooltip.onNotMac}
-        </EuiCode>
-      </EuiButton>
-    );
-  }
+  const projectRevealShortcutSurfaceCss = useMemo(
+    () => css`
+      && {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        min-inline-size: 0;
+        block-size: 20px;
+        max-block-size: 20px;
+        overflow: visible;
+        white-space: nowrap;
+        vertical-align: bottom;
+        background-color: ${euiTheme.colors.backgroundLightText};
+        border: none;
+        border-radius: 2px;
+        padding-inline: 6px;
+        padding-block: 0;
+        transition:
+          max-width 150ms ease,
+          opacity 150ms ease,
+          margin-inline-start 150ms ease;
+      }
+    `,
+    [euiTheme]
+  );
+
+  const projectRevealShortcutCodeCss = useMemo(
+    () => css`
+      &&& {
+        background-color: transparent !important;
+        box-shadow: none !important;
+        color: ${euiTheme.colors.subduedText} !important;
+        font-weight: ${euiTheme.font.weight.regular} !important;
+        border-radius: 0 !important;
+        border: none !important;
+        padding-block: 0 !important;
+        padding-inline: 0 !important;
+        max-inline-size: 100%;
+        min-inline-size: 0;
+        overflow: hidden;
+      }
+    `,
+    [euiTheme]
+  );
 
   const getAppendForChromeStyle = () => {
     if (chromeStyle === 'project') {
-      // Project search is a modal; EuiModal provides the close control—no in-field duplicate.
+      // Project search is a modal; close icon is hidden—in-field append / Escape / overlay close instead.
       return undefined;
     }
 
@@ -427,99 +535,144 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
     }
   };
 
-  if (chromeStyle === 'project' && isVisible) {
+  const projectSearchCommandPaletteGlobalCss = useMemo(
+    () => css`
+      /* EuiModal always renders a close icon; hide it for the command palette (Escape / overlay still close). */
+      .kbnGlobalSearchBarProjectModal .euiModal__closeIcon {
+        display: none !important;
+      }
+      /* Outer body: no padding; scroll area gets uniform inset (EUI defaults pad .euiModalBody__overflow only). */
+      .kbnGlobalSearchBarProjectModal .euiModalBody {
+        padding: 0 !important;
+      }
+      .kbnGlobalSearchBarProjectModal .euiModalBody__overflow {
+        padding: ${euiTheme.size.base} !important;
+      }
+    `,
+    [euiTheme]
+  );
+
+  if (chromeStyle === 'project') {
     return (
       <>
-        <EuiModal
-          aria-label={i18nStrings.placeholderText}
-          data-test-subj="nav-search-command-palette"
-          initialFocus='[data-test-subj="nav-search-input"]'
-          style={{ width: 800, height: '50vh' }}
-          onClose={closePalette}
-          outsideClickCloses
-        >
-          <EuiModalBody
-            css={css`
-              padding-top: 24px;
-            `}
-          >
-            <EuiSelectable
-              css={[
-                sitewideTemplateStyles.euiSelectableTemplateSitewide,
-                css`
-                  width: 100%;
-                `,
-              ]}
-              emptyMessage={<EmptyMessage />}
-              errorMessage={
-                searchCharLimitExceeded ? <SearchCharLimitExceededMessage {...props} /> : null
-              }
-              isLoading={isLoading}
-              isPreFiltered
-              listProps={{
-                className: 'eui-yScroll',
-                onFocusBadge: {
-                  iconSide: 'right',
-                  children: (
-                    <EuiI18n
-                      default="Go to"
-                      token="euiSelectableTemplateSitewide.onFocusBadgeGoTo"
-                    />
-                  ),
-                },
-                rowHeight: 68,
-                showIcons: false,
-              }}
-              noMatchesMessage={<PopoverPlaceholder basePath={props.basePathUrl} />}
-              onChange={onChange}
-              options={formattedOptions}
-              renderOption={(option) =>
-                euiSelectableTemplateSitewideRenderOptions(option, searchValue)
-              }
-              searchProps={{
-                append: getAppendForChromeStyle(),
-                autoFocus: true,
-                compressed: true,
-                'aria-label': i18nStrings.placeholderText,
-                'data-test-subj': 'nav-search-input',
-                fullWidth: true,
-                inputRef: setSearchRef,
-                onBlur: () => {
-                  reportEvent.searchBlur();
-                  setShowAppend(!searchValue.length);
-                },
-                onFocus: () => {
-                  reportEvent.searchFocus();
-                  setInitialLoad(true);
-                  setShowAppend(false);
-                },
-                onInput: (e: React.UIEvent<HTMLInputElement>) =>
-                  setSearchValue(e.currentTarget.value),
-                placeholder: i18nStrings.placeholderText,
-                value: searchValue,
-              }}
-              searchable
-              singleSelection
+        {isVisible ? (
+          <>
+            <Global styles={projectSearchCommandPaletteGlobalCss} />
+            <EuiModal
+              aria-label={i18nStrings.placeholderText}
+              className="kbnGlobalSearchBarProjectModal"
+              data-test-subj="nav-search-command-palette"
+              initialFocus='[data-test-subj="nav-search-input"]'
+              style={{ width: 800, height: '50vh' }}
+              onClose={closePalette}
+              outsideClickCloses
             >
-              {(list, search) => (
-                <>
-                  {search}
-                  {list}
-                </>
-              )}
-            </EuiSelectable>
-          </EuiModalBody>
-          <EuiModalFooter>
-            <PopoverFooter />
-          </EuiModalFooter>
-        </EuiModal>
-        <EuiHeaderSectionItemButton
-          aria-label={i18nStrings.popoverButton}
-          data-test-subj="nav-search-expand"
-          onClick={closePalette}
+              <EuiModalBody>
+                <EuiSelectable
+                  css={[
+                    sitewideTemplateStyles.euiSelectableTemplateSitewide,
+                    css`
+                      width: 100%;
+                    `,
+                  ]}
+                  emptyMessage={<EmptyMessage />}
+                  errorMessage={
+                    searchCharLimitExceeded ? <SearchCharLimitExceededMessage {...props} /> : null
+                  }
+                  isLoading={isLoading}
+                  isPreFiltered
+                  listProps={{
+                    className: 'eui-yScroll',
+                    onFocusBadge: {
+                      iconSide: 'right',
+                      children: (
+                        <EuiI18n
+                          default="Go to"
+                          token="euiSelectableTemplateSitewide.onFocusBadgeGoTo"
+                        />
+                      ),
+                    },
+                    rowHeight: 68,
+                    showIcons: false,
+                  }}
+                  noMatchesMessage={<PopoverPlaceholder basePath={props.basePathUrl} />}
+                  onChange={onChange}
+                  options={formattedOptions}
+                  renderOption={(option) =>
+                    euiSelectableTemplateSitewideRenderOptions(option, searchValue)
+                  }
+                  searchProps={{
+                    append: getAppendForChromeStyle(),
+                    autoFocus: true,
+                    compressed: true,
+                    'aria-label': i18nStrings.placeholderText,
+                    'data-test-subj': 'nav-search-input',
+                    fullWidth: true,
+                    inputRef: setSearchRef,
+                    onBlur: () => {
+                      reportEvent.searchBlur();
+                      setShowAppend(!searchValue.length);
+                    },
+                    onFocus: () => {
+                      reportEvent.searchFocus();
+                      setInitialLoad(true);
+                      setShowAppend(false);
+                    },
+                    onInput: (e: React.UIEvent<HTMLInputElement>) =>
+                      setSearchValue(e.currentTarget.value),
+                    placeholder: i18nStrings.placeholderText,
+                    value: searchValue,
+                  }}
+                  searchable
+                  singleSelection
+                >
+                  {(list, search) => (
+                    <>
+                      {search}
+                      {list}
+                    </>
+                  )}
+                </EuiSelectable>
+              </EuiModalBody>
+              <EuiModalFooter>
+                <PopoverFooter />
+              </EuiModalFooter>
+            </EuiModal>
+          </>
+        ) : null}
+        <EuiButton
+          aria-expanded={isVisible}
+          aria-haspopup="dialog"
+          aria-label={projectSearchRevealAriaLabel}
+          buttonRef={visibilityButtonRef}
+          color="text"
+          css={projectChromeSearchRevealButtonCss}
+          data-test-subj="nav-search-reveal"
+          iconType="search"
+          size="s"
+          onClick={() => {
+            if (isVisible) {
+              closePalette();
+            } else {
+              setIsVisible(true);
+            }
+          }}
         >
-          <EuiIcon css={projectMagnifyIconCss} size="m" type="magnify" />
-        </EuiHeaderSectionItemButton>
+          <span className="kbnSearchBarProjectRevealLabel">
+            {i18nStrings.projectChromeSearchRevealLabel}
+          </span>
+          <span
+            aria-hidden
+            className="kbnSearchBarProjectRevealShortcut"
+            css={projectRevealShortcutSurfaceCss}
+          >
+            <EuiCode css={projectRevealShortcutCodeCss}>
+              {isMac
+                ? i18nStrings.keyboardShortcutTooltip.onMac
+                : i18nStrings.keyboardShortcutTooltip.onNotMac}
+            </EuiCode>
+          </span>
+        </EuiButton>
       </>
     );
   }

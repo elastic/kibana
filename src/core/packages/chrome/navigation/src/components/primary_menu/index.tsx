@@ -29,7 +29,7 @@ const getPrimaryMenuStyles = (theme: UseEuiTheme['euiTheme'], isCollapsed: boole
   display: flex;
   flex-direction: column;
   flex: 1;
-  gap: ${isCollapsed ? theme.size.xs : theme.size.base};
+  gap: ${isCollapsed ? theme.size.xs : theme.size.s};
   min-height: 0;
 `;
 

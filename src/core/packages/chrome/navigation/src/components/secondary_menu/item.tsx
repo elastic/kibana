@@ -90,6 +90,29 @@ export const SecondaryMenuItemComponent = ({
     --high-contrast-hover-indicator-color: ${isHighlighted
       ? euiTheme.colors.textParagraph
       : euiTheme.colors.textSubdued};
+
+    ${isHighlighted
+      ? css`
+          /* Match primary rail MenuItem: filled chip, no default EUI outline/shadow/border */
+          && {
+            outline: none !important;
+            box-shadow: none !important;
+            border: none !important;
+            background-color: ${euiTheme.colors.backgroundLightText} !important;
+          }
+          &&:hover:not(:disabled) {
+            background-color: ${euiTheme.components.buttons.backgroundTextHover} !important;
+          }
+          &&:active:not(:disabled) {
+            background-color: ${euiTheme.components.buttons.backgroundTextActive} !important;
+          }
+          &&:focus-visible {
+            outline: none !important;
+            box-shadow: none !important;
+            border: ${euiTheme.border.width.thick} solid ${euiTheme.colors.textParagraph} !important;
+          }
+        `
+      : undefined}
     ${highContrastModeStyles};
   `;
 

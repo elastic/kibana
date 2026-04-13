@@ -70,13 +70,20 @@ export const FooterItem = forwardRef<HTMLAnchorElement, FooterItemProps>(
       css`
         color: ${euiTheme.colors.textParagraph};
         background-color: ${euiTheme.colors.backgroundLightText};
-        /* Match primary rail: no border on the icon chip (EUI base+text adds borderBasePlain). */
+        /* Match primary rail MenuItem chip: no EUI outline / shadow / plain border */
         border: none;
+        outline: none !important;
+        box-shadow: none !important;
         &:hover {
           background-color: ${euiTheme.components.buttons.backgroundTextHover};
         }
         &:active {
           background-color: ${euiTheme.components.buttons.backgroundTextActive};
+        }
+        &:focus-visible {
+          outline: none !important;
+          box-shadow: none !important;
+          border: ${euiTheme.border.width.thick} solid ${euiTheme.colors.textParagraph};
         }
       `}
       ${highContrastModeStyles}

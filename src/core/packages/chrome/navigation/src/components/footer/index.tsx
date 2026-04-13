@@ -11,43 +11,23 @@ import React, { forwardRef, useMemo } from 'react';
 import type { ForwardRefExoticComponent, ReactNode, RefAttributes } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiHorizontalRule,
-  EuiScreenReaderOnly,
-  useEuiTheme,
-  useGeneratedHtmlId,
-  type UseEuiTheme,
-} from '@elastic/eui';
+import { EuiScreenReaderOnly, useEuiTheme, useGeneratedHtmlId, type UseEuiTheme } from '@elastic/eui';
 
 import { FooterItem } from './item';
 import { getFocusableElements } from '../../utils/get_focusable_elements';
 import { handleRovingIndex } from '../../utils/handle_roving_index';
 import { updateTabIndices } from '../../utils/update_tab_indices';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
-import { getHighContrastSeparator } from '../../hooks/use_high_contrast_mode_styles';
+import { SideNavHorizontalMenuSeparator } from '../side_nav/horizontal_menu_separator';
 
-const getFooterWrapperStyles = (euiThemeContext: UseEuiTheme, isCollapsed: boolean) => {
-  const { euiTheme: theme } = euiThemeContext;
-  return {
-    root: css`
-      align-items: center;
-      display: flex;
-      position: relative;
-      flex-direction: column;
-      gap: ${theme.size.xs};
-      justify-content: center;
-      padding-top: ${isCollapsed ? theme.size.s : theme.size.m};
-
-      ${getHighContrastSeparator(euiThemeContext, { side: 'top' })}
-    `,
-    collapseDivider: css`
-      position: relative;
-      background-color: transparent;
-
-      ${getHighContrastSeparator(euiThemeContext, { side: 'top' })}
-    `,
-  };
-};
+const getFooterWrapperStyles = (theme: UseEuiTheme['euiTheme']) => css`
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: ${theme.size.s};
+  justify-content: center;
+  padding-top: 0;
+`;
 
 export interface FooterIds {
   footerNavigationInstructionsId: string;
@@ -87,8 +67,8 @@ const FooterBase = forwardRef<HTMLElement, FooterProps>(
     };
 
     const wrapperStyles = useMemo(
-      () => getFooterWrapperStyles(euiThemeContext, isCollapsed),
-      [euiThemeContext, isCollapsed]
+      () => getFooterWrapperStyles(euiThemeContext.euiTheme),
+      [euiThemeContext.euiTheme]
     );
 
     const renderChildren = () => {
@@ -114,15 +94,26 @@ const FooterBase = forwardRef<HTMLElement, FooterProps>(
           aria-label={i18n.translate('core.ui.chrome.sideNavigation.footerAriaLabel', {
             defaultMessage: 'Side navigation',
           })}
-          css={wrapperStyles.root}
+          css={wrapperStyles}
           onKeyDown={handleRovingIndex}
           ref={handleRef}
           data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-footer`}
         >
+          <SideNavHorizontalMenuSeparator
+            css={css`
+              margin-block-end: ${isCollapsed ? euiThemeContext.euiTheme.size.s : euiThemeContext.euiTheme.size.m};
+            `}
+            data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-footerTopSeparator`}
+          />
           {renderChildren()}
           {collapseButton && (
             <>
-              <EuiHorizontalRule margin="xs" css={wrapperStyles.collapseDivider} />
+              <SideNavHorizontalMenuSeparator
+                css={css`
+                  margin-block: ${euiThemeContext.euiTheme.size.s} 0;
+                `}
+                data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-footerCollapseSeparator`}
+              />
               {collapseButton}
             </>
           )}

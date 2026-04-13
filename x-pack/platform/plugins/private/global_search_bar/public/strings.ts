@@ -8,6 +8,12 @@
 import { i18n } from '@kbn/i18n';
 
 export const i18nStrings = {
+  projectChromeSearchRevealLabel: i18n.translate(
+    'xpack.globalSearchBar.searchBar.projectChromeSearchRevealLabel',
+    {
+      defaultMessage: 'Find apps, content, and more...',
+    }
+  ),
   placeholderText: i18n.translate('xpack.globalSearchBar.searchBar.placeholder', {
     defaultMessage: 'Find apps, content, and more.',
   }),

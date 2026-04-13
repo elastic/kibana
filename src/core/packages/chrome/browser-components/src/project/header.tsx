@@ -9,17 +9,19 @@
 
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiHeader,
   EuiHeaderSection,
   EuiHeaderSectionItem,
-  EuiHeaderSectionItemButton,
-  EuiIcon,
+  EuiPopover,
+  EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
-import React, { useCallback, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useSideNavWidth } from '@kbn/core-chrome-browser-hooks';
 import { getSideNavRailWidthPx } from '@kbn/core-chrome-navigation';
 import { Breadcrumbs } from './breadcrumbs';
@@ -50,6 +52,10 @@ const PROJECT_HEADER_COMPACT_CONTROL_PX = 32;
 /** Vertical rules between header zones (navcontrols + breadcrumb chevrons). */
 const PROJECT_HEADER_RULE_PX = 24;
 
+/** Placeholder until cross-project search exposes result counts to chrome. */
+const PROJECT_HEADER_SEARCH_MULTIPLE_CURRENT = 43;
+const PROJECT_HEADER_SEARCH_MULTIPLE_TOTAL = 134;
+
 const getHeaderCss = ({ size, colors, border }: EuiThemeComputed) => {
   const ruleHeightPx = `${PROJECT_HEADER_RULE_PX}px`;
 
@@ -65,17 +71,27 @@ const getHeaderCss = ({ size, colors, border }: EuiThemeComputed) => {
     margin-inline-start: -${size.xs};
   `,
   logo: {
+    /** Fills header rail height and centers the logo chip (matches former railStack minus the rule). */
+    railCenter: css`
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+      align-items: center;
+      justify-content: center;
+      min-block-size: 0;
+      inline-size: 100%;
+    `,
     container: css`
       display: flex;
       align-items: center;
       justify-content: center;
       box-sizing: border-box;
-      align-self: stretch;
+      flex-shrink: 0;
       inline-size: ${PROJECT_HEADER_LOGO_CHROME_PX}px;
       min-inline-size: ${PROJECT_HEADER_LOGO_CHROME_PX}px;
       max-inline-size: ${PROJECT_HEADER_LOGO_CHROME_PX}px;
       min-block-size: 0;
-      border-block-end: ${border.width.thin} solid ${colors.borderBaseSubdued};
     `,
     homeLink: css`
       display: flex;
@@ -156,6 +172,8 @@ type HeaderCss = ReturnType<typeof getHeaderCss>;
 const getLogoNavRailCss = (sideNavWidthPx: number) => css`
   box-sizing: border-box;
   display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
   align-items: stretch;
   justify-content: center;
   flex-shrink: 0;
@@ -241,6 +259,88 @@ export const ProjectHeader = React.memo(() => {
   const spaceSwitcherBreadcrumb = useSpaceSwitcherBreadcrumb();
   const sideNavWidth = useSideNavWidth();
   const { euiTheme } = useEuiTheme();
+
+  const searchMultipleButtonAriaLabel = useMemo(() => {
+    const countLabel = i18n.translate('core.ui.chrome.projectHeader.searchMultipleCountLabel', {
+      defaultMessage: '{current}/{total}',
+      values: {
+        current: PROJECT_HEADER_SEARCH_MULTIPLE_CURRENT,
+        total: PROJECT_HEADER_SEARCH_MULTIPLE_TOTAL,
+      },
+    });
+    return i18n.translate('core.ui.chrome.projectHeader.searchMultipleButtonAriaLabel', {
+      defaultMessage: 'Search multiple, {countLabel}',
+      values: { countLabel },
+    });
+  }, []);
+
+  const crossProjectSearchPopoverMessage = useMemo(
+    () =>
+      i18n.translate('core.ui.chrome.projectHeader.crossProjectSearchPopoverPlaceholder', {
+        defaultMessage: 'Cross-project search goes here',
+      }),
+    []
+  );
+
+  const [isSearchMultiplePopoverOpen, setIsSearchMultiplePopoverOpen] = useState(false);
+  const closeSearchMultiplePopover = useCallback(() => setIsSearchMultiplePopoverOpen(false), []);
+  const toggleSearchMultiplePopover = useCallback(
+    () => setIsSearchMultiplePopoverOpen((open) => !open),
+    []
+  );
+
+  /** Match {@link ProjectHeaderSpaceSwitcher} trigger: subdued icon + label, 32px row, vertical center. */
+  const searchMultipleTriggerCss = useMemo(
+    () => css`
+      &&& {
+        box-sizing: border-box;
+        display: inline-flex;
+        align-items: center;
+        block-size: ${PROJECT_HEADER_COMPACT_CONTROL_PX}px;
+        min-block-size: ${PROJECT_HEADER_COMPACT_CONTROL_PX}px;
+        max-block-size: ${PROJECT_HEADER_COMPACT_CONTROL_PX}px;
+        min-inline-size: 0;
+        padding-block: 0;
+        padding-inline: ${euiTheme.size.s};
+        border-radius: ${euiTheme.border.radius.small};
+        line-height: 1;
+        color: ${euiTheme.colors.textSubdued};
+        font-weight: ${euiTheme.font.weight.regular};
+      }
+
+      &&& .euiButtonEmpty__text,
+      &&& .euiIcon {
+        color: inherit;
+      }
+
+      &&& .projectHeaderSearchMultiple-countSuffix {
+        color: ${euiTheme.colors.textDisabled};
+      }
+
+      &&&:hover .projectHeaderSearchMultiple-countSuffix,
+      &&&:focus .projectHeaderSearchMultiple-countSuffix {
+        color: ${euiTheme.colors.textDisabled};
+      }
+
+      &&& .euiIcon,
+      &&& .euiIcon svg {
+        width: ${PROJECT_HEADER_ACTION_ICON_PX}px;
+        height: ${PROJECT_HEADER_ACTION_ICON_PX}px;
+      }
+
+      &&&:hover,
+      &&&:focus {
+        text-decoration: none !important;
+        color: ${euiTheme.colors.textSubdued};
+      }
+
+      &&&:hover {
+        background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
+      }
+    `,
+    [euiTheme]
+  );
+
   const headerCss = getHeaderCss(euiTheme);
   const { logo: logoCss } = headerCss;
 
@@ -274,7 +374,9 @@ export const ProjectHeader = React.memo(() => {
               <EuiHeaderSectionItem css={headerCss.logoHeaderSectionItem}>
                 <HeaderPageAnnouncer breadcrumbs={breadcrumbs} />
                 <div css={logoNavRailCss} data-test-subj="projectHeaderLogoNavRail">
-                  <Logo logoCss={logoCss} />
+                  <div css={logoCss.railCenter}>
+                    <Logo logoCss={logoCss} />
+                  </div>
                 </div>
               </EuiHeaderSectionItem>
 
@@ -308,29 +410,28 @@ export const ProjectHeader = React.memo(() => {
 
               <EuiHeaderSectionItem css={headerCss.leftNavcontrols}>
                 <div className="navcontrols__separator" />
-                <EuiHeaderSectionItemButton
-                  aria-label="Search multiple"
-                  css={css`
-                    box-sizing: border-box;
-                    width: ${PROJECT_HEADER_ACTION_BUTTON_PX}px;
-                    min-width: ${PROJECT_HEADER_ACTION_BUTTON_PX}px;
-                    max-width: ${PROJECT_HEADER_ACTION_BUTTON_PX}px;
-                    min-height: ${PROJECT_HEADER_ACTION_BUTTON_PX}px;
-                    height: ${PROJECT_HEADER_ACTION_BUTTON_PX}px;
-                    max-height: ${PROJECT_HEADER_ACTION_BUTTON_PX}px;
-                    padding: 0;
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
-                    svg {
-                      width: ${PROJECT_HEADER_ACTION_ICON_PX}px;
-                      height: ${PROJECT_HEADER_ACTION_ICON_PX}px;
-                    }
-                  `}
-                  onClick={() => {}}
+                <EuiPopover
+                  anchorPosition="downLeft"
+                  button={
+                    <EuiButtonEmpty
+                      aria-label={searchMultipleButtonAriaLabel}
+                      color="text"
+                      css={searchMultipleTriggerCss}
+                      data-test-subj="projectHeaderSearchMultiple"
+                      iconSize="s"
+                      iconType="crossProjectSearch"
+                      size="s"
+                      onClick={toggleSearchMultiplePopover}
+                    >
+                      {PROJECT_HEADER_SEARCH_MULTIPLE_CURRENT}
+                      <span className="projectHeaderSearchMultiple-countSuffix">{`/${PROJECT_HEADER_SEARCH_MULTIPLE_TOTAL}`}</span>
+                    </EuiButtonEmpty>
+                  }
+                  closePopover={closeSearchMultiplePopover}
+                  isOpen={isSearchMultiplePopoverOpen}
                 >
-                  <EuiIcon type="crossProjectSearch" size="m" aria-hidden={true} />
-                </EuiHeaderSectionItemButton>
+                  <EuiText size="s">{crossProjectSearchPopoverMessage}</EuiText>
+                </EuiPopover>
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
 

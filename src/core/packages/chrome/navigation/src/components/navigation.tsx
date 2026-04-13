@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, type ReactNode } from 'react';
+import React, { useMemo, useState, type ReactNode } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useIsWithinBreakpoints } from '@elastic/eui';
+import { useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
 
 import type { NavigationStructure, SideNavLogo, MenuItem, SecondaryMenuItem } from '../../types';
 import {
@@ -22,6 +22,7 @@ import {
   NAVIGATION_SELECTOR_PREFIX,
 } from '../constants';
 import { SideNav } from './side_nav';
+import { SideNavTopRailRule } from './side_nav/top_rail_rule';
 import { SideNavCollapseButton } from './collapse_button';
 import { focusMainContent } from '../utils/focus_main_content';
 import { getHasSubmenu } from '../utils/get_has_submenu';
@@ -74,6 +75,11 @@ export interface NavigationProps {
    * (optional) data-test-subj attribute for testing purposes.
    */
   'data-test-subj'?: string;
+  /**
+   * When true, renders a compact horizontal rule at the top of the side nav rail
+   * (project chrome home rail divider).
+   */
+  showTopRailRule?: boolean;
 }
 
 export const Navigation = ({
@@ -84,6 +90,7 @@ export const Navigation = ({
   onItemClick,
   onToggleCollapsed,
   setWidth,
+  showTopRailRule = false,
   sidePanelFooter,
   ...rest
 }: NavigationProps) => {
@@ -95,6 +102,24 @@ export const Navigation = ({
   const moreMenuTriggerTestSubj = `${NAVIGATION_SELECTOR_PREFIX}-moreMenuTrigger`;
 
   const { hideInSideNav, ...logoForSideNav } = logo;
+  const { euiTheme } = useEuiTheme();
+
+  const sideNavRailAndLogoStackStyles = useMemo(
+    () => css`
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      gap: 0;
+      align-items: stretch;
+      /* Logo-in-rail: 8px under rule then logo (gap 0). Logo hidden: only column gap (8px) would add +8px vs
+         solutions with logo — pull primary menu up by s so first item aligns with logo row top. */
+      ${showTopRailRule && hideInSideNav
+        ? `margin-block-end: -${euiTheme.size.s};`
+        : ''}
+    `,
+    [euiTheme.size.s, hideInSideNav, showTopRailRule]
+  );
 
   const {
     actualActiveItemId,
@@ -133,14 +158,21 @@ export const Navigation = ({
       id={NAVIGATION_ROOT_SELECTOR}
     >
       <SideNav isCollapsed={isCollapsed}>
-        {!hideInSideNav ? (
-          <SideNav.Logo
-            isCollapsed={isCollapsed}
-            isCurrent={actualActiveItemId === logo.id}
-            isHighlighted={visuallyActivePageId === logo.id}
-            onClick={() => onItemClick?.(logo)}
-            {...logoForSideNav}
-          />
+        {showTopRailRule || !hideInSideNav ? (
+          <div css={sideNavRailAndLogoStackStyles}>
+            {showTopRailRule ? (
+              <SideNavTopRailRule withGapBeforeLogo={!hideInSideNav} />
+            ) : null}
+            {!hideInSideNav ? (
+              <SideNav.Logo
+                isCollapsed={isCollapsed}
+                isCurrent={actualActiveItemId === logo.id}
+                isHighlighted={visuallyActivePageId === logo.id}
+                onClick={() => onItemClick?.(logo)}
+                {...logoForSideNav}
+              />
+            ) : null}
+          </div>
         ) : null}
 
         <SideNav.PrimaryMenu ref={primaryMenuRef} isCollapsed={isCollapsed}>

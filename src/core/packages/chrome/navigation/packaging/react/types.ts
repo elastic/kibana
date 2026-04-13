@@ -124,6 +124,8 @@ export interface NavigationProps {
   sidePanelFooter?: ReactNode;
   /** Optional `data-test-subj` attribute for testing purposes. */
   'data-test-subj'?: string;
+  /** When true, renders a compact horizontal rule at the top of the side nav rail. */
+  showTopRailRule?: boolean;
 }
 
 /** Alias for the external package. */
