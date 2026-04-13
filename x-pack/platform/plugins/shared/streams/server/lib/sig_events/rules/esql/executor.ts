@@ -97,7 +97,7 @@ export async function getRuleExecutor(
   );
 
   if (!isEmpty(errors)) {
-    logger.warn(
+    logger.error(
       `alertWithPersistence completed with ${errors.length} error(s) (${
         createdAlerts.length
       } alerts created): ${JSON.stringify(errors)}`
