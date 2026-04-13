@@ -112,14 +112,9 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
     ? outputTypeSupportPresets(inputs.typeInput.value as ValueOf<OutputType>)
     : false;
 
-  // Remote ES output not yet supported in serverless
-  const isStateful = !cloud?.isServerlessEnabled;
-
   const OUTPUT_TYPE_OPTIONS = [
     { value: outputType.Elasticsearch, text: 'Elasticsearch' },
-    ...(isStateful
-      ? [{ value: outputType.RemoteElasticsearch, text: 'Remote Elasticsearch' }]
-      : []),
+    { value: outputType.RemoteElasticsearch, text: 'Remote Elasticsearch' },
     { value: outputType.Logstash, text: 'Logstash' },
     { value: outputType.Kafka, text: 'Kafka' },
   ];
