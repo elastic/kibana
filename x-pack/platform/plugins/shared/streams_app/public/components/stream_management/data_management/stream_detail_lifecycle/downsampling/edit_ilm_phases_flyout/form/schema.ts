@@ -125,7 +125,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
         const value = meta[phase].minAgeValue.trim();
         if (value === '') {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             path: ['_meta', phase, 'minAgeValue'],
             message: requiredMessage,
           });
@@ -135,7 +135,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
         const num = Number(value);
         if (!Number.isFinite(num) || num < 0) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             path: ['_meta', phase, 'minAgeValue'],
             message: nonNegativeMessage,
           });
@@ -144,7 +144,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
 
         if (!Number.isInteger(num)) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             path: ['_meta', phase, 'minAgeValue'],
             message: integerMessage,
           });
@@ -187,7 +187,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
           minAgeValues.cold.ms < minAgeValues.warm.ms
         ) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             path: ['_meta', 'cold', 'minAgeValue'],
             message: warmMinAgeError,
           });
@@ -201,7 +201,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
           minAgeValues.frozen.ms < minAgeValues.cold.ms
         ) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             path: ['_meta', 'frozen', 'minAgeValue'],
             message: coldMinAgeError,
           });
@@ -211,7 +211,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
           minAgeValues.frozen.ms < minAgeValues.warm.ms
         ) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             path: ['_meta', 'frozen', 'minAgeValue'],
             message: warmMinAgeError,
           });
@@ -225,7 +225,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
           minAgeValues.delete.ms < minAgeValues.frozen.ms
         ) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             path: ['_meta', 'delete', 'minAgeValue'],
             message: frozenMinAgeError,
           });
@@ -235,7 +235,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
           minAgeValues.delete.ms < minAgeValues.cold.ms
         ) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             path: ['_meta', 'delete', 'minAgeValue'],
             message: coldMinAgeError,
           });
@@ -245,7 +245,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
           minAgeValues.delete.ms < minAgeValues.warm.ms
         ) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             path: ['_meta', 'delete', 'minAgeValue'],
             message: warmMinAgeError,
           });
@@ -290,7 +290,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
         const value = meta[phase].downsample.fixedIntervalValue.trim();
         if (value === '') {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             path: ['_meta', phase, 'downsample', 'fixedIntervalValue'],
             message: downsampleRequiredMessage,
           });
@@ -300,7 +300,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
         const num = Number(value);
         if (!Number.isFinite(num) || num <= 0) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             path: ['_meta', phase, 'downsample', 'fixedIntervalValue'],
             message: downsampleGreaterThanZeroMessage,
           });
@@ -309,7 +309,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
 
         if (!isIntegerString(value)) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             path: ['_meta', phase, 'downsample', 'fixedIntervalValue'],
             message: integerMessage,
           });
@@ -331,7 +331,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
       ) {
         if (!checkIfGreaterAndMultiple(downsampleValues.warm.ms, downsampleValues.hot.ms)) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             path: ['_meta', 'warm', 'downsample', 'fixedIntervalValue'],
             message: i18n.translate(
               'xpack.streams.editIlmPhasesFlyout.downsamplePreviousIntervalWarmPhaseError',
@@ -349,7 +349,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
         if (downsampleValues.warm) {
           if (!checkIfGreaterAndMultiple(downsampleValues.cold.ms, downsampleValues.warm.ms)) {
             ctx.addIssue({
-              code: z.ZodIssueCode.custom,
+              code: 'custom',
               path: ['_meta', 'cold', 'downsample', 'fixedIntervalValue'],
               message: i18n.translate(
                 'xpack.streams.editIlmPhasesFlyout.downsamplePreviousIntervalColdPhaseWarmError',
@@ -364,7 +364,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
         } else if (downsampleValues.hot) {
           if (!checkIfGreaterAndMultiple(downsampleValues.cold.ms, downsampleValues.hot.ms)) {
             ctx.addIssue({
-              code: z.ZodIssueCode.custom,
+              code: 'custom',
               path: ['_meta', 'cold', 'downsample', 'fixedIntervalValue'],
               message: i18n.translate(
                 'xpack.streams.editIlmPhasesFlyout.downsamplePreviousIntervalColdPhaseHotError',
@@ -385,7 +385,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
         const repo = meta.searchableSnapshot.repository.trim();
         if (repo === '') {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             path: ['_meta', 'searchableSnapshot', 'repository'],
             message: i18n.translate(
               'xpack.streams.editIlmPhasesFlyout.searchableSnapshotRepoRequired',

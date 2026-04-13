@@ -23,7 +23,9 @@ export const zodResolver = <T extends FieldValues>(schema: z.ZodType): Resolver<
         throw error;
       }
       const errors = error.issues.reduce<FieldErrors<T>>((errorMap, issue) => {
-        const path = issue.path.join('.');
+        // Root-level issues (e.g. schema-level refine/superRefine) can have an empty path.
+        // `@kbn/safer-lodash-set` ignores empty paths, so map them to RHF's `errors.root`.
+        const path = issue.path.length > 0 ? issue.path.join('.') : 'root';
         if (!get(errorMap, path)) {
           set(errorMap, path, {
             type: issue.code,
