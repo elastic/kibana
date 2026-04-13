@@ -41,8 +41,8 @@ actions:
                 "grid": {
                   "x": 0,
                   "y": 0,
-                  "w": 48,
-                  "h": 15
+                  "w": 24,
+                  "h": 10
                 },
                 "type": "vis",
                 "config": {
