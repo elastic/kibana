@@ -20,8 +20,9 @@ import React, { type PropsWithChildren, useEffect, useMemo, useState } from 'rea
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useObservable } from '@kbn/use-observable';
-import type { ServerlessTierRequiredProducts } from '../../common/lib/availability/availability_service';
+import type { ServerlessTierRequiredProducts } from '../../common/lib/availability';
 import { useKibana } from '../../hooks/use_kibana';
+import { useTelemetry } from '../../hooks/use_telemetry';
 import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { AccessDenied } from '../access_denied/access_denied';
 
@@ -29,6 +30,7 @@ import { AccessDenied } from '../access_denied/access_denied';
  * Wrapper component to render the workflows app with the availability check
  */
 export const WorkflowsAvailabilityWrapper = React.memo<PropsWithChildren>(({ children }) => {
+  const telemetry = useTelemetry();
   const { availability } = useKibana().services.workflowsManagement;
 
   const availability$ = useMemo(() => availability.getAvailabilityStatus$(), [availability]);
@@ -36,8 +38,10 @@ export const WorkflowsAvailabilityWrapper = React.memo<PropsWithChildren>(({ chi
 
   if (!availabilityStatus.isAvailable) {
     if (availabilityStatus.unavailabilityReason === 'license') {
+      telemetry.reportWorkflowAccessDeniedLicense();
       return <LicenseAccessDenied />;
     } else {
+      telemetry.reportWorkflowAccessDeniedServerlessTier();
       return <ServerlessTierAccessDenied requiredProducts={availabilityStatus.requiredProducts} />;
     }
   }

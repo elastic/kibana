@@ -33,7 +33,7 @@ import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extens
 import type {
   AvailabilityService,
   ServerlessTierRequiredProducts,
-} from './common/lib/availability/availability_service';
+} from './common/lib/availability';
 import type { TelemetryServiceClient } from './common/lib/telemetry/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

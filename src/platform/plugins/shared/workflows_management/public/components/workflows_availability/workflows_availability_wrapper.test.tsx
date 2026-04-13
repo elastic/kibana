@@ -13,6 +13,10 @@ import React from 'react';
 import { of } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
 import { WorkflowsAvailabilityWrapper } from './workflows_availability_wrapper';
+import {
+  workflowEventNames,
+  WorkflowUIEventTypes,
+} from '../../common/lib/telemetry/events/workflows';
 import { createStartServicesMock } from '../../mocks';
 
 const mockUseKibanaServices = createStartServicesMock();
@@ -93,6 +97,25 @@ describe('WorkflowsAvailabilityWrapper', () => {
       expect(screen.getByText('License required:')).toBeInTheDocument();
       expect(screen.getByText('Enterprise')).toBeInTheDocument();
     });
+
+    it('should report telemetry when workflows are unavailable due to license', async () => {
+      renderWithProviders(
+        <WorkflowsAvailabilityWrapper>
+          <div />
+        </WorkflowsAvailabilityWrapper>
+      );
+
+      await waitFor(() =>
+        expect(
+          mockUseKibanaServices.workflowsManagement.telemetry.reportEvent
+        ).toHaveBeenCalledWith(
+          WorkflowUIEventTypes.WorkflowAccessDeniedLicense,
+          expect.objectContaining({
+            eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowAccessDeniedLicense],
+          })
+        )
+      );
+    });
   });
 
   describe('when unavailable due to serverless tier', () => {
@@ -161,6 +184,25 @@ describe('WorkflowsAvailabilityWrapper', () => {
       );
 
       await waitFor(() => expect(screen.getByText('Manage subscription')).toBeInTheDocument());
+    });
+
+    it('should report telemetry when workflows are unavailable due to serverless tier', async () => {
+      renderWithProviders(
+        <WorkflowsAvailabilityWrapper>
+          <div />
+        </WorkflowsAvailabilityWrapper>
+      );
+
+      await waitFor(() =>
+        expect(
+          mockUseKibanaServices.workflowsManagement.telemetry.reportEvent
+        ).toHaveBeenCalledWith(
+          WorkflowUIEventTypes.WorkflowAccessDeniedServerlessTier,
+          expect.objectContaining({
+            eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowAccessDeniedServerlessTier],
+          })
+        )
+      );
     });
   });
 });

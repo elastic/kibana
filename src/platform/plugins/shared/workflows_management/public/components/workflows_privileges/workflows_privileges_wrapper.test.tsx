@@ -8,16 +8,27 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowsPrivilegesWrapper } from './workflows_privileges_wrapper';
+import {
+  workflowEventNames,
+  WorkflowUIEventTypes,
+} from '../../common/lib/telemetry/events/workflows';
 import { mockWorkflowsManagementCapabilities } from '../../hooks/__mocks__/use_workflows_capabilities';
+import { createStartServicesMock } from '../../mocks';
+
+const mockUseKibanaServices = createStartServicesMock();
 
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
   useWorkflowsCapabilities: jest.fn(),
+}));
+
+jest.mock('../../hooks/use_kibana', () => ({
+  useKibana: () => ({ services: mockUseKibanaServices }),
 }));
 
 jest.mock('../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs', () => ({
@@ -56,7 +67,7 @@ describe('WorkflowsPrivilegesWrapper', () => {
     expect(screen.queryByTestId('workflowsAccessDeniedEmptyState')).not.toBeInTheDocument();
   });
 
-  it('should render access denied when the user lacks read privileges', () => {
+  it('should render access denied when the user lacks read privileges', async () => {
     mockUseWorkflowsCapabilities.mockReturnValue({
       ...mockWorkflowsManagementCapabilities,
       canReadWorkflow: false,
@@ -74,6 +85,15 @@ describe('WorkflowsPrivilegesWrapper', () => {
     expect(
       screen.getByText('To view workflows in this space, you need additional privileges.')
     ).toBeInTheDocument();
+
+    await waitFor(() =>
+      expect(mockUseKibanaServices.workflowsManagement.telemetry.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowAccessDeniedPrivileges,
+        expect.objectContaining({
+          eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowAccessDeniedPrivileges],
+        })
+      )
+    );
   });
 
   it('should show required privileges badge in the footer', () => {

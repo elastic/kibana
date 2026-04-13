@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { useTelemetry } from '../../hooks/use_telemetry';
 import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { AccessDenied } from '../access_denied/access_denied';
 
 export const WorkflowsPrivilegesWrapper: React.FC<React.PropsWithChildren> = ({ children }) => {
   const { canReadWorkflow } = useWorkflowsCapabilities();
+
   if (!canReadWorkflow) {
     return <PrivilegesAccessDenied />;
   }
@@ -24,6 +26,11 @@ export const WorkflowsPrivilegesWrapper: React.FC<React.PropsWithChildren> = ({ 
 
 const PrivilegesAccessDenied = () => {
   useWorkflowsBreadcrumbs();
+  const telemetry = useTelemetry();
+
+  useEffect(() => {
+    telemetry.reportWorkflowAccessDeniedPrivileges();
+  }, [telemetry]);
 
   return (
     <AccessDenied

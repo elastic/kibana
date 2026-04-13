@@ -20,7 +20,7 @@ import {
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
-import { AvailabilityService } from './common/lib/availability/availability_service';
+import { AvailabilityService } from './common/lib/availability';
 import { TelemetryService } from './common/lib/telemetry/telemetry_service';
 import { triggerSchemas } from './trigger_schemas';
 import type {

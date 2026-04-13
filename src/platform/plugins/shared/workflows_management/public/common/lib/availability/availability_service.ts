@@ -10,34 +10,13 @@
 import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, combineLatest, map } from 'rxjs';
 import type { ILicense } from '@kbn/licensing-types';
-
-export type UnavailabilityReason = 'license' | 'serverless_tier';
-export type ServerlessTierRequiredProducts = string[];
-export type AvailabilityStatus =
-  | {
-      isAvailable: true;
-    }
-  | {
-      isAvailable: false;
-      unavailabilityReason: 'license';
-    }
-  | {
-      isAvailable: false;
-      unavailabilityReason: 'serverless_tier';
-      requiredProducts: ServerlessTierRequiredProducts;
-    };
-
-export type ServerlessTierAvailability =
-  | {
-      isValid: true;
-    }
-  | {
-      isValid: false;
-      requiredProducts: ServerlessTierRequiredProducts;
-    };
-
+import type {
+  AvailabilityStatus,
+  ServerlessTierAvailability,
+  ServerlessTierRequiredProducts,
+} from './types';
 export class AvailabilityService {
-  private licenseValid$: BehaviorSubject<boolean>;
+  private licenseIsValid$: BehaviorSubject<boolean>;
   private serverlessTierAvailability$: BehaviorSubject<ServerlessTierAvailability>;
   private availabilityStatus$: BehaviorSubject<AvailabilityStatus>;
 
@@ -45,7 +24,7 @@ export class AvailabilityService {
   private availabilityStatusSubscription: Subscription;
 
   constructor() {
-    this.licenseValid$ = new BehaviorSubject<boolean>(true);
+    this.licenseIsValid$ = new BehaviorSubject<boolean>(true);
     this.serverlessTierAvailability$ = new BehaviorSubject<ServerlessTierAvailability>({
       isValid: true,
     });
@@ -53,21 +32,24 @@ export class AvailabilityService {
 
     // Combine the license and serverless tier validity and update the availability status
     this.availabilityStatusSubscription = combineLatest([
-      this.licenseValid$,
+      this.licenseIsValid$,
       this.serverlessTierAvailability$,
-    ]).subscribe(([isLicenseValid, serverlessTierAvailability]) => {
-      if (isLicenseValid && serverlessTierAvailability.isValid) {
+    ]).subscribe(([licenseIsValid, serverlessTierAvailability]) => {
+      if (licenseIsValid && serverlessTierAvailability.isValid) {
         this.availabilityStatus$.next({ isAvailable: true });
         return;
       }
 
-      if (!isLicenseValid) {
-        this.availabilityStatus$.next({ isAvailable: false, unavailabilityReason: 'license' });
+      if (!licenseIsValid) {
+        this.availabilityStatus$.next({
+          isAvailable: false,
+          unavailabilityReason: 'license',
+        });
       } else if (!serverlessTierAvailability.isValid) {
         this.availabilityStatus$.next({
           isAvailable: false,
           unavailabilityReason: 'serverless_tier',
-          requiredProducts: serverlessTierAvailability.requiredProducts ?? [],
+          requiredProducts: serverlessTierAvailability.requiredProducts,
         });
       }
     });
@@ -80,9 +62,9 @@ export class AvailabilityService {
     }
     this.licenseSubscription = license$.subscribe((license) => {
       if (license.hasAtLeast('enterprise')) {
-        this.licenseValid$.next(true);
+        this.licenseIsValid$.next(true);
       } else {
-        this.licenseValid$.next(false);
+        this.licenseIsValid$.next(false);
       }
     });
   }
