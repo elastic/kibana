@@ -208,6 +208,8 @@ t1_analyst:
         - .entities.v1.updates.security_*
         - '.entities.v1.latest.security_*'
         - '.entities.v1.history.*.security_*'
+        - '.entities.v2.latest.security_*'
+        - 'entities-latest-*'
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
         - .entity_analytics.monitoring*
@@ -272,6 +274,8 @@ t2_analyst:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
+        - '.entities.v2.latest.security_*'
+        - 'entities-latest-*'
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
         - .entity_analytics.monitoring*
@@ -352,6 +356,8 @@ t3_analyst:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
+        - '.entities.v2.latest.security_*'
+        - 'entities-latest-*'
         - '.ml-anomalies-*'
         - .entity_analytics.monitoring*
       privileges:
@@ -443,6 +449,8 @@ threat_intelligence_analyst:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
+        - '.entities.v2.latest.security_*'
+        - 'entities-latest-*'
         - '.ml-anomalies-*'
       privileges:
         - read
@@ -522,6 +530,8 @@ rule_author:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
+        - '.entities.v2.latest.security_*'
+        - 'entities-latest-*'
         - '.ml-anomalies-*'
         - .entity_analytics.monitoring*
       privileges:
@@ -581,6 +591,8 @@ soc_manager:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
+        - '.entities.v2.latest.security_*'
+        - 'entities-latest-*'
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
@@ -701,6 +713,8 @@ detections_admin:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
+        - '.entities.v2.latest.security_*'
+        - 'entities-latest-*'
       privileges:
         - read
         - write
@@ -764,6 +778,8 @@ platform_engineer:
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
         - '.entities.v1.reset*'
+        - '.entities.v2.latest.security_*'
+        - 'entities-latest-*'
       privileges:
         - read
         - write
@@ -839,6 +855,8 @@ endpoint_operations_analyst:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
+        - '.entities.v2.latest.security_*'
+        - 'entities-latest-*'
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
       privileges:
@@ -930,6 +948,8 @@ endpoint_policy_manager:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
+        - '.entities.v2.latest.security_*'
+        - 'entities-latest-*'
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
       privileges:
