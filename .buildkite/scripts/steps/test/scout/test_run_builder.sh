@@ -3,6 +3,7 @@
 set -euo pipefail
 
 source .buildkite/scripts/bootstrap.sh
+.buildkite/scripts/setup_es_snapshot_cache.sh
 
 echo '--- Verify Playwright CLI is functional'
 node scripts/scout run-playwright-test-check
