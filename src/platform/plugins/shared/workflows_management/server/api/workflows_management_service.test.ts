@@ -1883,6 +1883,188 @@ steps:
       expect(result.failed[0].error).toContain('Duplicate workflow id');
     });
 
+    it('should keep the first workflow when user-supplied IDs are duplicated in a batch', async () => {
+      mockEsClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ create: { _id: 'same-id', status: 201 } }],
+        took: 10,
+      } as any);
+
+      const workflows = [
+        {
+          id: 'same-id',
+          yaml: `
+name: first workflow
+triggers:
+  - type: manual
+steps:
+  - type: console
+    name: step-one
+    with:
+      message: "I am first"
+`,
+        },
+        {
+          id: 'same-id',
+          yaml: `
+name: second workflow
+triggers:
+  - type: manual
+steps:
+  - type: console
+    name: step-two
+    with:
+      message: "I am second"
+`,
+        },
+      ];
+
+      const result = await service.bulkCreateWorkflows(workflows, 'default', mockRequest);
+
+      expect(result.created).toHaveLength(1);
+      expect(result.created[0].name).toBe('first workflow');
+      expect(result.failed).toHaveLength(1);
+      expect(result.failed[0].index).toBe(1);
+      expect(result.failed[0].error).toContain('Duplicate workflow id');
+    });
+
+    it('should route server-generated IDs around user-supplied IDs in the same batch', async () => {
+      // resolveUniqueWorkflowIdsBatch: no candidates exist in DB
+      mockEsClient.search.mockResolvedValueOnce({ hits: { hits: [] } } as any);
+
+      mockEsClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [
+          { create: { _id: 'my-workflow', status: 201 } },
+          { create: { _id: 'my-workflow-1', status: 201 } },
+        ],
+        took: 10,
+      } as any);
+
+      const workflows = [
+        {
+          id: 'my-workflow',
+          yaml: `
+name: custom id workflow
+triggers:
+  - type: manual
+steps:
+  - type: console
+    name: step-one
+    with:
+      message: "Custom"
+`,
+        },
+        {
+          yaml: `
+name: My Workflow
+triggers:
+  - type: manual
+steps:
+  - type: console
+    name: step-two
+    with:
+      message: "Server gen"
+`,
+        },
+      ];
+
+      const result = await service.bulkCreateWorkflows(workflows, 'default', mockRequest);
+
+      expect(result.created).toHaveLength(2);
+
+      const bulkCall = mockEsClient.bulk.mock.calls[0][0] as {
+        operations: Array<{ create: { _id: string } }>;
+      };
+      const ids = bulkCall.operations
+        .filter((op): op is { create: { _id: string } } => 'create' in op)
+        .map((op) => op.create._id);
+
+      expect(ids[0]).toBe('my-workflow');
+      expect(ids[1]).toBe('my-workflow-1');
+    });
+
+    it('should fail duplicate user-supplied IDs even when overwrite is true', async () => {
+      mockEsClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ index: { _id: 'same-id', status: 200 } }],
+        took: 10,
+      } as any);
+
+      const workflows = [
+        {
+          id: 'same-id',
+          yaml: `
+name: first
+triggers:
+  - type: manual
+steps:
+  - type: console
+    name: step-one
+    with:
+      message: "a"
+`,
+        },
+        {
+          id: 'same-id',
+          yaml: `
+name: second
+triggers:
+  - type: manual
+steps:
+  - type: console
+    name: step-two
+    with:
+      message: "b"
+`,
+        },
+      ];
+
+      const result = await service.bulkCreateWorkflows(workflows, 'default', mockRequest, {
+        overwrite: true,
+      });
+
+      expect(result.created).toHaveLength(1);
+      expect(result.created[0].name).toBe('first');
+      expect(result.failed).toHaveLength(1);
+      expect(result.failed[0].index).toBe(1);
+      expect(result.failed[0].error).toContain('Duplicate workflow id');
+    });
+
+    it('should keep only the first of three user-supplied duplicates', async () => {
+      mockEsClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ create: { _id: 'triple', status: 201 } }],
+        took: 10,
+      } as any);
+
+      const yaml = `
+name: triple workflow
+triggers:
+  - type: manual
+steps:
+  - type: console
+    name: step-one
+    with:
+      message: "Hello"
+`;
+
+      const workflows = [
+        { id: 'triple', yaml },
+        { id: 'triple', yaml },
+        { id: 'triple', yaml },
+      ];
+
+      const result = await service.bulkCreateWorkflows(workflows, 'default', mockRequest);
+
+      expect(result.created).toHaveLength(1);
+      expect(result.failed).toHaveLength(2);
+      expect(result.failed[0].index).toBe(1);
+      expect(result.failed[1].index).toBe(2);
+      expect(result.failed[0].error).toContain('Duplicate workflow id');
+      expect(result.failed[1].error).toContain('Duplicate workflow id');
+    });
+
     it('should handle create operation version_conflict_engine_exception gracefully', async () => {
       mockEsClient.bulk.mockResolvedValue({
         errors: true,

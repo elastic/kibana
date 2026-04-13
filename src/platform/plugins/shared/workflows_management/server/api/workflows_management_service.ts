@@ -396,6 +396,13 @@ export class WorkflowsService {
     return this.transformStorageDocumentToWorkflowDto(id, workflowData);
   }
 
+  /**
+   * Creates multiple workflows in a single bulk operation.
+   *
+   * Note: with `overwrite: true`, concurrent calls targeting the same ID use
+   * last-write-wins semantics (ES `index` operation). Both callers receive a
+   * success response, but only the last write persists.
+   */
   public async bulkCreateWorkflows(
     workflows: CreateWorkflowCommand[],
     spaceId: string,
@@ -1918,13 +1925,16 @@ export class WorkflowsService {
   ): Promise<void> {
     const seenIds = new Set<string>();
 
-    // Separate server-generated IDs (need collision resolution) from user-supplied IDs
+    // Separate server-generated IDs (need collision resolution) from user-supplied IDs.
+    // User-supplied IDs are reserved in seenIds first so that server-generated resolution
+    // routes around them — explicit user IDs always take priority.
     const serverGenWorkflows: typeof validWorkflows = [];
     const userSuppliedIds: string[] = [];
 
     for (const vw of validWorkflows) {
       if (vw.hasCustomId) {
         userSuppliedIds.push(vw.id);
+        seenIds.add(vw.id);
       } else {
         serverGenWorkflows.push(vw);
       }
@@ -1943,10 +1953,12 @@ export class WorkflowsService {
       }
     }
 
-    // For user-supplied IDs with overwrite: false — check for conflicts in the database
+    // For user-supplied IDs with overwrite: false — best-effort check for conflicts in the
+    // database. The ES `create` operation in the bulk call is the real atomicity guarantee;
+    // this pre-check provides a cleaner error message when a conflict is detected early.
     if (!overwrite && userSuppliedIds.length > 0) {
       const existingUserIds = await this.checkExistingIds(userSuppliedIds, spaceId);
-      for (let i = validWorkflows.length - 1; i >= 0; i--) {
+      for (let i = 0; i < validWorkflows.length; i++) {
         if (validWorkflows[i].hasCustomId && existingUserIds.has(validWorkflows[i].id)) {
           failed.push({
             index: validWorkflows[i].idx,
@@ -1955,16 +1967,18 @@ export class WorkflowsService {
           });
           validWorkflows.splice(i, 1);
           bulkOperations.splice(i, 1);
+          i--;
         }
       }
     }
 
     // Deduplicate user-supplied IDs within the batch (first wins, later ones fail).
     // Server-generated IDs are already guaranteed unique by resolveUniqueWorkflowIdsBatch.
+    const seenUserIds = new Set<string>();
     for (let i = 0; i < validWorkflows.length; i++) {
       if (validWorkflows[i].hasCustomId) {
         const { id } = validWorkflows[i];
-        if (seenIds.has(id)) {
+        if (seenUserIds.has(id)) {
           failed.push({
             index: validWorkflows[i].idx,
             id,
@@ -1974,7 +1988,7 @@ export class WorkflowsService {
           bulkOperations.splice(i, 1);
           i--;
         } else {
-          seenIds.add(id);
+          seenUserIds.add(id);
         }
       }
     }
@@ -2003,7 +2017,10 @@ export class WorkflowsService {
   ): Promise<string[]> {
     const MAX_COLLISION_RETRIES = 100;
 
-    // Build candidate lists per base ID
+    // Build candidate lists per base ID.
+    // Note: truncation of near-max-length IDs could cause candidate overlap between
+    // different base IDs. The seenIds check in the resolution loop below prevents
+    // double-assignment, and the UUID fallback guarantees eventual uniqueness.
     const candidatesByIndex: string[][] = [];
     const allCandidates = new Set<string>();
 
@@ -2019,20 +2036,23 @@ export class WorkflowsService {
       }
     }
 
-    // Single batch query to check which candidates already exist.
+    // Batch query to check which candidates already exist.
     // Intentionally does NOT exclude soft-deleted workflows (no must_not deleted_at)
     // to avoid reassigning an ID that belongs to a soft-deleted workflow.
+    // Chunked to stay within ES default max_result_window (10,000).
     const candidateArray = [...allCandidates];
     const existingIds = new Set<string>();
+    const ES_MAX_IDS_PER_QUERY = 10_000;
 
-    if (candidateArray.length > 0) {
+    for (let offset = 0; offset < candidateArray.length; offset += ES_MAX_IDS_PER_QUERY) {
+      const chunk = candidateArray.slice(offset, offset + ES_MAX_IDS_PER_QUERY);
       const response = await this.workflowStorage.getClient().search({
         query: {
           bool: {
-            must: [{ ids: { values: candidateArray } }, { term: { spaceId } }],
+            must: [{ ids: { values: chunk } }, { term: { spaceId } }],
           },
         },
-        size: candidateArray.length,
+        size: chunk.length,
         _source: false,
         track_total_hits: false,
       });
@@ -2058,6 +2078,9 @@ export class WorkflowsService {
   /**
    * Checks which of the given IDs already exist in the given space.
    * Returns the set of IDs that exist.
+   *
+   * Intentionally includes soft-deleted workflows (no must_not deleted_at filter)
+   * to prevent reassigning an ID that belongs to a soft-deleted workflow.
    */
   private async checkExistingIds(ids: string[], spaceId: string): Promise<Set<string>> {
     if (ids.length === 0) {
