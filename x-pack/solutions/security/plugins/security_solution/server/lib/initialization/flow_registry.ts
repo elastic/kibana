@@ -134,6 +134,10 @@ export const runInitializationFlows = async (
   const sequential = requestedFlows.filter((id) => flows[id]?.runFirst);
   const parallel = requestedFlows.filter((id) => !flows[id]?.runFirst);
 
+  logger.debug(
+    `Running ${requestedFlows.length} initialization flows — sequential: [${sequential.join(', ')}], parallel: [${parallel.join(', ')}]`
+  );
+
   // Run runFirst flows sequentially
   const sequentialResults: FlowRunResult[] = [];
   for (const flowId of sequential) {
@@ -146,6 +150,13 @@ export const runInitializationFlows = async (
   );
 
   const allResults = [...sequentialResults, ...parallelResults];
+  const succeededFlows = allResults.filter(({ result }) => result.status === 'ready').map(({ id }) => id);
+  const failedFlows = allResults.filter(({ result }) => result.status !== 'ready').map(({ id }) => id);
+
+  logger.debug(
+    `Initialization flows completed — succeeded: [${succeededFlows.join(', ')}], failed: [${failedFlows.join(', ')}]`
+  );
+
   const flowResults = allResults.reduce((acc, { id, result }) => {
     acc[id] = result;
     return acc;
