@@ -19,15 +19,11 @@ export class EntityMaintainersRegistry {
     return this.entries.has(id);
   }
 
-  get(id: string): EntityMaintainerTaskEntry | undefined {
-    return this.entries.get(id)?.task;
-  }
-
-  getOrThrow(id: string): EntityMaintainerTaskEntry {
+  get(id: string): EntityMaintainerTaskEntry {
     return this.getEntryOrThrow(id).task;
   }
 
-  getLifecycleOrThrow(id: string): EntityMaintainerLifecycle {
+  getLifecycle(id: string): EntityMaintainerLifecycle {
     return this.getEntryOrThrow(id).lifecycle;
   }
 

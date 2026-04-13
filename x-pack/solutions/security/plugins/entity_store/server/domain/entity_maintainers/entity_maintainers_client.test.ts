@@ -54,8 +54,8 @@ jest.mock('../../tasks/entity_maintainers/entity_maintainers_registry', () => ({
   entityMaintainersRegistry: {
     hasId: jest.fn(),
     getAll: jest.fn().mockReturnValue([]),
-    getOrThrow: jest.fn(),
-    getLifecycleOrThrow: jest.fn(),
+    get: jest.fn(),
+    getLifecycle: jest.fn(),
   },
 }));
 
@@ -117,11 +117,11 @@ const { entityMaintainersRegistry } = jest.requireMock(
   entityMaintainersRegistry: {
     hasId: jest.MockedFunction<(id: string) => boolean>;
     getAll: jest.MockedFunction<() => EntityMaintainerTaskEntry[]>;
-    getOrThrow: jest.MockedFunction<
-      typeof import('../../tasks/entity_maintainers/entity_maintainers_registry').entityMaintainersRegistry.getOrThrow
+    get: jest.MockedFunction<
+      typeof import('../../tasks/entity_maintainers/entity_maintainers_registry').entityMaintainersRegistry.get
     >;
-    getLifecycleOrThrow: jest.MockedFunction<
-      typeof import('../../tasks/entity_maintainers/entity_maintainers_registry').entityMaintainersRegistry.getLifecycleOrThrow
+    getLifecycle: jest.MockedFunction<
+      typeof import('../../tasks/entity_maintainers/entity_maintainers_registry').entityMaintainersRegistry.getLifecycle
     >;
   };
 };
@@ -176,7 +176,7 @@ describe('EntityMaintainersClient', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockSavedObjectsErrorHelpers.isNotFoundError.mockReturnValue(false);
-    entityMaintainersRegistry.getOrThrow.mockReturnValue({
+    entityMaintainersRegistry.get.mockReturnValue({
       id: 'maintainer-a',
       interval: '5m',
       minLicense: DEFAULT_ENTITY_MAINTAINER_MIN_LICENSE,
@@ -284,7 +284,7 @@ describe('EntityMaintainersClient', () => {
     });
 
     it('should throw when id is not registered', async () => {
-      entityMaintainersRegistry.getLifecycleOrThrow.mockImplementation(() => {
+      entityMaintainersRegistry.getLifecycle.mockImplementation(() => {
         throw new Error('Entity maintainer not found: unknown-id');
       });
       const client = createClient();
@@ -300,8 +300,8 @@ describe('EntityMaintainersClient', () => {
         metadata: { runs: 1, lastSuccessTimestamp: null, lastErrorTimestamp: null },
         state: {},
       };
-      entityMaintainersRegistry.getLifecycleOrThrow.mockReturnValue(mockLifecycle);
-      entityMaintainersRegistry.getOrThrow.mockReturnValue({
+      entityMaintainersRegistry.getLifecycle.mockReturnValue(mockLifecycle);
+      entityMaintainersRegistry.get.mockReturnValue({
         id: 'maintainer-a',
         interval: '5m',
         minLicense: DEFAULT_ENTITY_MAINTAINER_MIN_LICENSE,
@@ -351,8 +351,8 @@ describe('EntityMaintainersClient', () => {
 
     it('should propagate error when runEntityMaintainerTask throws', async () => {
       runEntityMaintainerTask.mockRejectedValueOnce(new Error('run failed'));
-      entityMaintainersRegistry.getLifecycleOrThrow.mockReturnValue(mockLifecycle);
-      entityMaintainersRegistry.getOrThrow.mockReturnValue({
+      entityMaintainersRegistry.getLifecycle.mockReturnValue(mockLifecycle);
+      entityMaintainersRegistry.get.mockReturnValue({
         id: 'maintainer-a',
         interval: '5m',
         minLicense: DEFAULT_ENTITY_MAINTAINER_MIN_LICENSE,
@@ -367,7 +367,7 @@ describe('EntityMaintainersClient', () => {
 
     it('should skip sync execution when license is invalid', async () => {
       canRunMaintainerWithLicense.mockResolvedValueOnce(false);
-      entityMaintainersRegistry.getLifecycleOrThrow.mockReturnValue(mockLifecycle);
+      entityMaintainersRegistry.getLifecycle.mockReturnValue(mockLifecycle);
       const taskManagerGet = jest.fn().mockResolvedValue({ state: {} });
       const client = createClient({ taskManager: { get: taskManagerGet } });
 

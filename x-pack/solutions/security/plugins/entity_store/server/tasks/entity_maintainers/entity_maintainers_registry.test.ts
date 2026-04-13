@@ -124,14 +124,14 @@ describe('EntityMaintainersRegistry', () => {
         setup,
         initialState,
       });
-      const lifecycle = registry.getLifecycleOrThrow('maintainer-a');
+      const lifecycle = registry.getLifecycle('maintainer-a');
       expect(lifecycle).toEqual({ run, setup, initialState });
     });
   });
 
-  describe('getLifecycleOrThrow', () => {
+  describe('getLifecycle', () => {
     it('should throw when id was not registered', () => {
-      expect(() => registry.getLifecycleOrThrow('maintainer-a')).toThrow(
+      expect(() => registry.getLifecycle('maintainer-a')).toThrow(
         'Entity maintainer not found: maintainer-a'
       );
     });
@@ -144,15 +144,17 @@ describe('EntityMaintainersRegistry', () => {
         run,
         initialState: {},
       });
-      const lifecycle = registry.getLifecycleOrThrow('maintainer-a');
+      const lifecycle = registry.getLifecycle('maintainer-a');
       expect(lifecycle.run).toBe(run);
       expect(lifecycle.setup).toBeUndefined();
     });
   });
 
   describe('get', () => {
-    it('should return undefined when id was not registered', () => {
-      expect(registry.get('maintainer-a')).toBeUndefined();
+    it('should throw when id was not registered', () => {
+      expect(() => registry.get('maintainer-a')).toThrow(
+        'Entity maintainer not found: maintainer-a'
+      );
     });
 
     it('should return the entry when id was registered', () => {
@@ -168,30 +170,7 @@ describe('EntityMaintainersRegistry', () => {
         interval: '5m',
         minLicense: 'basic',
       });
-      expect(registry.get('maintainer-a')!.description).toBeUndefined();
-    });
-  });
-
-  describe('getOrThrow', () => {
-    it('should throw when id was not registered', () => {
-      expect(() => registry.getOrThrow('maintainer-a')).toThrow(
-        'Entity maintainer not found: maintainer-a'
-      );
-    });
-
-    it('should return the entry when id was registered', () => {
-      registry.register({
-        id: 'maintainer-a',
-        interval: '5m',
-        minLicense: 'basic',
-        run,
-        initialState: {},
-      });
-      expect(registry.getOrThrow('maintainer-a')).toEqual({
-        id: 'maintainer-a',
-        interval: '5m',
-        minLicense: 'basic',
-      });
+      expect(registry.get('maintainer-a').description).toBeUndefined();
     });
   });
 
