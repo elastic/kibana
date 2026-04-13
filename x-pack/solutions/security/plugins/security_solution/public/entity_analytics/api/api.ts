@@ -866,12 +866,12 @@ export const useEntityAnalyticsRoutes = () => {
       params,
     }: {
       signal?: AbortSignal;
-      params?: { maxLeads?: number };
+      params: { connectorId: string; maxLeads?: number };
     }) =>
       http.fetch<GenerateLeadsResponse>(GENERATE_LEADS_URL, {
         version: API_VERSIONS.internal.v1,
         method: 'POST',
-        body: JSON.stringify(params ?? {}),
+        body: JSON.stringify(params),
         signal,
       });
 

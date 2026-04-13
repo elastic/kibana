@@ -188,29 +188,22 @@ const runLeadGenerationTask = async ({
       soClient,
     });
 
-    let chatModel;
-    if (fakeRequest) {
-      try {
-        const defaultConnector = await startPlugins.inference.getDefaultConnector(fakeRequest);
-        chatModel = await startPlugins.inference.getChatModel({
-          request: fakeRequest,
-          connectorId: defaultConnector.connectorId,
-          chatModelOptions: {
-            temperature: 0, // structured JSON output — determinism preferred over creativity
-            maxRetries: 0,
-            telemetryMetadata: { pluginId: 'securitySolution' },
-          },
-        });
-      } catch (e) {
-        logger.warn(
-          `[LeadGeneration] Could not resolve inference connector for scheduled task; falling back to rule-based synthesis: ${e.message}`
-        );
-      }
-    } else {
-      logger.warn(
-        '[LeadGeneration] No fakeRequest available in task context; falling back to rule-based synthesis'
+    if (!fakeRequest) {
+      throw new Error(
+        'No fakeRequest available in task context; cannot resolve inference connector'
       );
     }
+
+    const defaultConnector = await startPlugins.inference.getDefaultConnector(fakeRequest);
+    const chatModel = await startPlugins.inference.getChatModel({
+      request: fakeRequest,
+      connectorId: defaultConnector.connectorId,
+      chatModelOptions: {
+        temperature: 0,
+        maxRetries: 0,
+        telemetryMetadata: { pluginId: 'securitySolution' },
+      },
+    });
 
     await runLeadGenerationPipeline({
       listEntities: () => fetchAllLeadEntities(crudClient, logger),

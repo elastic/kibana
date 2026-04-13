@@ -30,6 +30,7 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { PageLoader } from '../../common/components/page_loader';
 import { PageScope } from '../../data_view_manager/constants';
 import { useSpaceId } from '../../common/hooks/use_space_id';
+import { useStoredAssistantConnectorId } from '../../onboarding/components/hooks/use_stored_state';
 import { EntityAnalyticsRecentAnomalies } from '../components/home/anomalies_panel';
 import { WatchlistFilter } from '../components/watchlists/watchlist_filter';
 import { useEntityStoreDataView } from '../components/home/use_entity_store_data_view';
@@ -70,6 +71,9 @@ export const EntityAnalyticsHomePage = () => {
   const leadDetailsEnabled = useIsExperimentalFeatureEnabled('leadGenerationDetailsEnabled');
   const { dataView, status } = useDataView(PageScope.explore);
 
+  const spaceId = useSpaceId();
+  const [storedConnectorId, setStoredConnectorId] = useStoredAssistantConnectorId(spaceId ?? '');
+  const connectorId = storedConnectorId ?? '';
   const {
     leads,
     totalCount,
@@ -79,7 +83,7 @@ export const EntityAnalyticsHomePage = () => {
     generate,
     isScheduled,
     toggleSchedule,
-  } = useHuntingLeads(leadGenerationEnabled);
+  } = useHuntingLeads(connectorId, leadGenerationEnabled);
   const openAgentBuilderWithLead = useLeadAttachment();
 
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
@@ -201,6 +205,8 @@ export const EntityAnalyticsHomePage = () => {
                   onGenerate={generate}
                   isScheduled={isScheduled}
                   onToggleSchedule={toggleSchedule}
+                  connectorId={connectorId}
+                  onConnectorIdSelected={setStoredConnectorId}
                 />
               </EuiFlexItem>
             )}

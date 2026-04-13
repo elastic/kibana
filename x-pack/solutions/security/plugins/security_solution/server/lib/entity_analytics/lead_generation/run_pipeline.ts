@@ -18,7 +18,7 @@ import { createBehavioralAnalysisModule } from './observation_modules/behavioral
 import { createLeadDataClient } from './lead_data_client';
 import type { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
 import type { LeadEntity } from './types';
-import { sortEntitiesByCriticality } from './entity_conversion';
+import { selectCandidateEntities } from './entity_conversion';
 
 export interface RunPipelineParams {
   readonly listEntities: () => Promise<LeadEntity[]>;
@@ -28,7 +28,7 @@ export interface RunPipelineParams {
   readonly riskScoreDataClient: RiskScoreDataClient;
   readonly executionId?: string;
   readonly sourceType: LeadGenerationMode;
-  readonly chatModel?: InferenceChatModel;
+  readonly chatModel: InferenceChatModel;
 }
 
 export interface RunPipelineResult {
@@ -54,11 +54,11 @@ export const runLeadGenerationPipeline = async ({
 
   const fetchStart = Date.now();
   const rawEntities = await listEntities();
-  const leadEntities = sortEntitiesByCriticality(rawEntities);
+  const leadEntities = selectCandidateEntities(rawEntities, logger);
   logger.info(
     `[LeadGeneration][Telemetry] Entity fetch: ${Date.now() - fetchStart}ms (${
-      leadEntities.length
-    } records)`
+      rawEntities.length
+    } total, ${leadEntities.length} candidates)`
   );
 
   if (leadEntities.length === 0) {

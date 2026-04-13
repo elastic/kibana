@@ -12,9 +12,6 @@ import { ChatPromptTemplate } from '@langchain/core/prompts';
 import type { LeadEntity, Observation } from '../types';
 import { entityToKey } from '../observation_modules/utils';
 
-/** Maximum observations included per entity in the LLM prompt to keep context bounded. */
-const MAX_OBSERVATIONS_PER_ENTITY = 5;
-
 export interface ScoredEntityInput {
   readonly entity: LeadEntity;
   readonly priority: number;
@@ -66,11 +63,9 @@ const formatLeadsPayload = (groups: ScoredEntityInput[][]): string => {
           const key = entityToKey(s.entity);
           return s.observations
             .filter((o) => o.entityId === key)
-            .slice(0, MAX_OBSERVATIONS_PER_ENTITY)
             .map((obs) => {
               const metaEntries = Object.entries(obs.metadata)
                 .filter(([, v]) => v !== undefined && v !== null && v !== '')
-                .slice(0, 5)
                 .map(([k, v]) => `${k}=${typeof v === 'object' ? JSON.stringify(v) : String(v)}`)
                 .join(', ');
               return `  - [${obs.severity.toUpperCase()}] ${obs.description} (type=${
@@ -92,7 +87,7 @@ const formatLeadsPayload = (groups: ScoredEntityInput[][]): string => {
 /**
  * Use an LLM to synthesize content for all leads in a single batch call.
  * Returns results in the same order as the input groups.
- * Throws on failure so the caller can fall back to rule-based synthesis.
+ * Throws on failure — the caller should surface the error.
  */
 export const llmSynthesizeBatch = async (
   chatModel: InferenceChatModel,
@@ -105,12 +100,18 @@ export const llmSynthesizeBatch = async (
   const jsonParser = new JsonOutputParser<LlmSynthesisResult[]>();
   const chain = batchSynthesisPrompt.pipe(chatModel).pipe(jsonParser);
 
-  logger.debug(`[LeadGenerationEngine] Invoking LLM for batch synthesis of ${groups.length} leads`);
+  logger.info(`[LeadGenerationEngine] Invoking LLM for batch synthesis of ${groups.length} leads`);
 
   const results = await chain.invoke({
     lead_count: String(groups.length),
     leads_payload: leadsPayload,
   });
+
+  logger.info(
+    `[LeadGenerationEngine] LLM batch synthesis completed — ${
+      results?.length ?? 0
+    } results returned`
+  );
 
   if (!Array.isArray(results) || results.length !== groups.length) {
     throw new Error(

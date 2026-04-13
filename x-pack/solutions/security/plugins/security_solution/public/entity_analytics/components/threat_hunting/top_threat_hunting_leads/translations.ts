@@ -201,6 +201,21 @@ export const SCHEDULE_TOOLTIP = i18n.translate(
   { defaultMessage: 'When enabled, leads are automatically regenerated every 24 hours' }
 );
 
+export const SETTINGS = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.settings',
+  { defaultMessage: 'Settings' }
+);
+
+export const CONNECTOR_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.connectorLabel',
+  { defaultMessage: 'Connector' }
+);
+
+export const OPTIONS_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.optionsLabel',
+  { defaultMessage: 'Options' }
+);
+
 export const SCHEDULE_UPDATE_ERROR = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.scheduleUpdateError',
   { defaultMessage: 'Failed to update schedule' }

@@ -29,7 +29,7 @@ const FETCH_LEADS_PARAMS = {
   },
 };
 
-export const useHuntingLeads = (isEnabled: boolean = true) => {
+export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) => {
   const {
     fetchLeads,
     generateLeads: generateLeadsApi,
@@ -59,7 +59,7 @@ export const useHuntingLeads = (isEnabled: boolean = true) => {
       abortCtrl.current = new AbortController();
       const { signal } = abortCtrl.current;
 
-      await generateLeadsApi({ params: {} });
+      await generateLeadsApi({ params: { connectorId } });
 
       if (signal.aborted) return;
       await delay(INDEX_REFRESH_DELAY_MS);

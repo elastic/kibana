@@ -5,20 +5,27 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
+  EuiIcon,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiPopover,
+  EuiSpacer,
   EuiSwitch,
+  EuiText,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
+import { ConnectorSelectorInline } from '@kbn/elastic-assistant';
+import { noop } from 'lodash/fp';
 import type { HuntingLead } from './types';
 import { LeadCard } from './lead_card';
 import * as i18n from './translations';
@@ -38,6 +45,8 @@ interface TopThreatHuntingLeadsProps {
   onGenerate: () => void;
   isScheduled?: boolean;
   onToggleSchedule?: (enabled: boolean) => void;
+  connectorId: string;
+  onConnectorIdSelected: (id: string) => void;
 }
 
 export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
@@ -53,7 +62,12 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
   onGenerate,
   isScheduled,
   onToggleSchedule,
+  connectorId,
+  onConnectorIdSelected,
 }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
+  const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   return (
     <EuiPanel hasBorder data-test-subj="topThreatHuntingLeads">
       <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
@@ -74,24 +88,12 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
         <EuiFlexItem />
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-            {onToggleSchedule && (
-              <EuiFlexItem grow={false}>
-                <EuiToolTip content={i18n.SCHEDULE_TOOLTIP}>
-                  <EuiSwitch
-                    label={i18n.AUTO_REFRESH}
-                    checked={!!isScheduled}
-                    onChange={(e) => onToggleSchedule(e.target.checked)}
-                    compressed
-                    data-test-subj="leadScheduleToggle"
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-            )}
             <EuiFlexItem grow={false}>
               <EuiButton
                 size="s"
                 iconType="sparkles"
                 isLoading={isGenerating}
+                isDisabled={!connectorId}
                 onClick={onGenerate}
                 data-test-subj="generateLeadsButton"
               >
@@ -122,6 +124,62 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
                 </EuiFlexItem>
               </>
             )}
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                button={
+                  <EuiButtonIcon
+                    aria-label={i18n.SETTINGS}
+                    iconType="boxesVertical"
+                    onClick={togglePopover}
+                    data-test-subj="leadSettingsButton"
+                  />
+                }
+                isOpen={isPopoverOpen}
+                closePopover={closePopover}
+                panelPaddingSize="m"
+                anchorPosition="downRight"
+                aria-label={i18n.OPTIONS_LABEL}
+              >
+                <div style={{ width: 320 }}>
+                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="plugs" aria-hidden={true} />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s">
+                        <strong>{i18n.CONNECTOR_LABEL}</strong>
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <ConnectorSelectorInline
+                        fullWidth
+                        onConnectorSelected={noop}
+                        onConnectorIdSelected={onConnectorIdSelected}
+                        selectedConnectorId={connectorId}
+                        loadConnectorFeatureId="lead_generation"
+                        explicitConnectorSelection
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  {onToggleSchedule && (
+                    <>
+                      <EuiHorizontalRule margin="s" />
+                      <EuiText size="xs" color="subdued">
+                        <strong>{i18n.OPTIONS_LABEL}</strong>
+                      </EuiText>
+                      <EuiSpacer size="s" />
+                      <EuiSwitch
+                        label={i18n.AUTO_REFRESH}
+                        checked={!!isScheduled}
+                        onChange={(e) => onToggleSchedule(e.target.checked)}
+                        compressed
+                        data-test-subj="leadScheduleToggle"
+                      />
+                    </>
+                  )}
+                </div>
+              </EuiPopover>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

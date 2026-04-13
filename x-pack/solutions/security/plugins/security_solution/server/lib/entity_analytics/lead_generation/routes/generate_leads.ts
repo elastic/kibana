@@ -66,11 +66,12 @@ export const generateLeadsRoute = (
           const [, startPlugins] = await getStartServices();
           const crudClient = startPlugins.entityStore.createCRUDClient(esClient, spaceId);
           const { connectorId } = request.body;
-          const chatModel = await resolveChatModel(
-            startPlugins.inference,
-            request,
-            logger,
-            connectorId
+          logger.info(
+            `[LeadGeneration] Resolving connector (connectorId=${connectorId}, executionUuid=${executionUuid})`
+          );
+          const chatModel = await resolveChatModel(startPlugins.inference, request, connectorId);
+          logger.info(
+            `[LeadGeneration] Connector resolved successfully (connectorId=${connectorId}, executionUuid=${executionUuid})`
           );
 
           void (async () => {
@@ -86,7 +87,7 @@ export const generateLeadsRoute = (
                 chatModel,
               });
               logger.info(
-                `[LeadGeneration] Background generation completed (executionUuid=${executionUuid})`
+                `[LeadGeneration] Background generation completed (connectorId=${connectorId}, executionUuid=${executionUuid})`
               );
             } catch (pipelineError) {
               logger.error(
@@ -105,35 +106,19 @@ export const generateLeadsRoute = (
     );
 };
 
-/**
- * Resolves an InferenceChatModel using the default configured inference connector.
- * Returns undefined if no default connector is configured, allowing the pipeline
- * to fall back to rule-based synthesis rather than failing the request.
- */
 const resolveChatModel = async (
   inference: InferenceServerStart,
   request: KibanaRequest,
-  logger: Logger,
-  connectorId?: string
-): Promise<InferenceChatModel | undefined> => {
-  try {
-    const resolvedConnectorId =
-      connectorId ?? (await inference.getDefaultConnector(request)).connectorId;
-    return await inference.getChatModel({
-      request,
-      connectorId: resolvedConnectorId,
-      chatModelOptions: {
-        temperature: 0, // structured JSON output — determinism preferred over creativity
-        maxRetries: 0,
-        telemetryMetadata: {
-          pluginId: 'securitySolution',
-        },
+  connectorId: string
+): Promise<InferenceChatModel> =>
+  inference.getChatModel({
+    request,
+    connectorId,
+    chatModelOptions: {
+      temperature: 0,
+      maxRetries: 0,
+      telemetryMetadata: {
+        pluginId: 'securitySolution',
       },
-    });
-  } catch (e) {
-    logger.warn(
-      `[LeadGeneration] No default inference connector configured; falling back to rule-based synthesis: ${e.message}`
-    );
-    return undefined;
-  }
-};
+    },
+  });
