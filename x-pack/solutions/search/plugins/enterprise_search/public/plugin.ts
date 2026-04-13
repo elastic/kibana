@@ -25,7 +25,10 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
+import type {
+  IndexManagementPluginSetup,
+  IndexManagementPluginStart,
+} from '@kbn/index-management-shared-types';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { MlPluginStart } from '@kbn/ml-plugin/public';
@@ -35,6 +38,7 @@ import type { SearchPlaygroundPluginStart } from '@kbn/search-playground/public'
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-shared-ui';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import {
@@ -45,6 +49,8 @@ import {
   SEARCH_PRODUCT_NAME,
   SEARCH_HOMEPAGE,
   SEARCH_APPS_TITLE,
+  SEARCH_INDEX_MANAGEMENT_APP_ID,
+  SEARCH_INDEX_MANAGEMENT_APP_BASE,
 } from '../common/constants';
 import { registerLocators } from '../common/locators';
 import type { ClientConfigType, InitialAppData } from '../common/types';
@@ -66,6 +72,7 @@ export type EnterpriseSearchPublicStart = ReturnType<EnterpriseSearchPlugin['sta
 interface PluginsSetup {
   cloud?: CloudSetup;
   home?: HomePublicPluginSetup;
+  indexManagement: IndexManagementPluginSetup;
   licensing: LicensingPluginStart;
   security?: SecurityPluginSetup;
   share?: SharePluginSetup;
@@ -88,6 +95,7 @@ export interface PluginsStart {
   searchPlayground?: SearchPlaygroundPluginStart;
   security?: SecurityPluginStart;
   share?: SharePluginStart;
+  spaces?: SpacesPluginStart;
   uiActions: UiActionsStart;
 }
 
@@ -268,6 +276,25 @@ export class EnterpriseSearchPlugin implements Plugin {
         title: ANALYTICS_PLUGIN.NAME,
       });
     }
+
+    core.application.register({
+      appRoute: SEARCH_INDEX_MANAGEMENT_APP_BASE,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      id: SEARCH_INDEX_MANAGEMENT_APP_ID,
+      async mount({ element, history }) {
+        const { renderIndexManagementApp } = await import('./index_management_application');
+        return renderIndexManagementApp(element, {
+          core,
+          history,
+          indexManagement: plugins.indexManagement,
+        });
+      },
+      order: 2,
+      title: i18n.translate('xpack.enterpriseSearch.searchIndexManagement.title', {
+        defaultMessage: 'Index Management',
+      }),
+      visibleIn: [],
+    });
   }
 
   public start(core: CoreStart, plugins: PluginsStart) {
@@ -280,6 +307,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         getNavigationTreeDefinition({
           dynamicItems$: this.sideNavDynamicItems$,
           isCloudEnabled: plugins.cloud?.isCloudEnabled,
+          showAlertingV2: Boolean(core.application.capabilities.alertingVTwo),
         })
       );
     });

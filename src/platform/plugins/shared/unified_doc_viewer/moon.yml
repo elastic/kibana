@@ -63,6 +63,7 @@ dependsOn:
   - '@kbn/deeplinks-analytics'
   - '@kbn/lens-embeddable-utils'
   - '@kbn/restorable-state'
+  - '@kbn/lens-common'
 tags:
   - plugin
   - prod
@@ -77,26 +78,6 @@ fileGroups:
     - server/**/*
     - public/**/*.json
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

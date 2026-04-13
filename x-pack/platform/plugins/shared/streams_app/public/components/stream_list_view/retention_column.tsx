@@ -11,7 +11,13 @@ import React from 'react';
 import type { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
 import type { IngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
-import { isDslLifecycle, isErrorLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
+import {
+  isDslLifecycle,
+  isErrorLifecycle,
+  isIlmLifecycle,
+  isRoot,
+  LOGS_ROOT_STREAM_NAME,
+} from '@kbn/streams-schema';
 import { useKibana } from '../../hooks/use_kibana';
 import {
   INDEFINITE_RETENTION_ARIA_LABEL,
@@ -19,13 +25,15 @@ import {
   NO_DATA_SHORT_LABEL,
   NO_RETENTION_LABEL,
 } from './translations';
-import { getTimeSizeAndUnitLabel } from '../data_management/stream_detail_lifecycle/helpers/format_size_units';
+import { getTimeSizeAndUnitLabel } from '../stream_management/data_management/stream_detail_lifecycle/helpers/format_size_units';
 
 export function RetentionColumn({
   lifecycle,
+  streamName,
   dataTestSubj,
 }: {
   lifecycle: IngestStreamEffectiveLifecycle;
+  streamName?: string;
   dataTestSubj?: string;
 }) {
   const {
@@ -36,6 +44,10 @@ export function RetentionColumn({
   const ilmLocator = share.url.locators.get<IlmLocatorParams>(ILM_LOCATOR_ID);
 
   if (isErrorLifecycle(lifecycle)) {
+    // For logs.ecs and logs.otel (new root streams without a data stream yet), show a dash
+    if (streamName && isRoot(streamName) && streamName !== LOGS_ROOT_STREAM_NAME) {
+      return <span>-</span>;
+    }
     return (
       <EuiBadge
         color="hollow"

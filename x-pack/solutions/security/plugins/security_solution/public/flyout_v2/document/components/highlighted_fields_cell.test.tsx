@@ -32,12 +32,17 @@ jest.mock('@kbn/expandable-flyout');
 
 const mockedTelemetry = createTelemetryServiceMock();
 jest.mock('../../../common/lib/kibana', () => {
+  const kibanaActual = jest.requireActual('../../../common/lib/kibana');
   return {
+    ...kibanaActual,
     useKibana: () => ({
+      ...kibanaActual.useKibana(),
       services: {
+        ...kibanaActual.useKibana().services,
         telemetry: mockedTelemetry,
       },
     }),
+    useUiSetting: jest.fn().mockReturnValue(false),
   };
 });
 
@@ -62,6 +67,10 @@ describe('<HighlightedFieldsCell />', () => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
   });
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should render a basic cell', () => {
     const { getByTestId } = renderHighlightedFieldsCell(['value'], 'field', true);
 
@@ -76,9 +85,36 @@ describe('<HighlightedFieldsCell />', () => {
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
       id: HostPreviewPanelKey,
       params: {
+        contextID: SCOPE_ID,
         hostName: 'test host',
         scopeId: SCOPE_ID,
         banner: HOST_PREVIEW_BANNER,
+        entityId: undefined,
+      },
+    });
+  });
+
+  it('should pass entityId to host preview when provided (document identity / entity resolution)', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <HighlightedFieldsCell
+          values={['test host']}
+          field="host.name"
+          scopeId={SCOPE_ID}
+          showPreview
+          entityId="euid-from-highlighted-fields"
+        />
+      </TestProviders>
+    );
+    getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID).click();
+    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
+      id: HostPreviewPanelKey,
+      params: {
+        contextID: SCOPE_ID,
+        hostName: 'test host',
+        scopeId: SCOPE_ID,
+        banner: HOST_PREVIEW_BANNER,
+        entityId: 'euid-from-highlighted-fields',
       },
     });
   });
@@ -91,9 +127,11 @@ describe('<HighlightedFieldsCell />', () => {
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
       id: UserPreviewPanelKey,
       params: {
+        contextID: SCOPE_ID,
         userName: 'test user',
         scopeId: SCOPE_ID,
         banner: USER_PREVIEW_BANNER,
+        entityId: undefined,
       },
     });
   });

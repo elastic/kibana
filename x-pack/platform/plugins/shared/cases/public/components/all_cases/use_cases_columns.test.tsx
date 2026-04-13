@@ -338,6 +338,15 @@ describe('useCasesColumns ', () => {
           },
           Object {
             "className": "eui-textNoWrap",
+            "field": "status",
+            "minWidth": "6.5em",
+            "name": "Status",
+            "render": [Function],
+            "sortable": true,
+            "width": "6.5em",
+          },
+          Object {
+            "className": "eui-textNoWrap",
             "field": "severity",
             "minWidth": "6em",
             "name": "Severity",
@@ -391,6 +400,15 @@ describe('useCasesColumns ', () => {
             "render": [Function],
             "sortable": true,
             "width": "9em",
+          },
+          Object {
+            "className": "eui-textNoWrap",
+            "field": "status",
+            "minWidth": "6.5em",
+            "name": "Status",
+            "render": [Function],
+            "sortable": true,
+            "width": "6.5em",
           },
           Object {
             "className": "eui-textNoWrap",
@@ -450,6 +468,15 @@ describe('useCasesColumns ', () => {
           },
           Object {
             "className": "eui-textNoWrap",
+            "field": "status",
+            "minWidth": "6.5em",
+            "name": "Status",
+            "render": [Function],
+            "sortable": true,
+            "width": "6.5em",
+          },
+          Object {
+            "className": "eui-textNoWrap",
             "field": "severity",
             "minWidth": "6em",
             "name": "Severity",
@@ -465,6 +492,29 @@ describe('useCasesColumns ', () => {
         ],
         "isLoadingColumns": false,
         "rowHeader": "title",
+      }
+    `);
+  });
+
+  it('keeps the selector action column for closed status filtering', async () => {
+    const { result } = renderHook(
+      () =>
+        useCasesColumns({
+          ...useCasesColumnsProps,
+          isSelectorView: true,
+          filterStatus: [CaseStatuses.closed],
+        }),
+      {
+        wrapper: TestProviders,
+      }
+    );
+
+    const assignActionColumn = result.current.columns[result.current.columns.length - 1];
+    expect(assignActionColumn).toMatchInlineSnapshot(`
+      Object {
+        "align": "right",
+        "render": [Function],
+        "width": "8em",
       }
     `);
   });
