@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { matchesEvidenceText } from '../common/matches_evidence_text';
+import { matchesEvidenceText } from '../../common/matches_evidence_text';
 
 /** Dotted paths may include numeric segments for array indices (e.g. `labels.0.key`). */
 const FIELD_PATH_KEY = '[a-zA-Z_][a-zA-Z0-9_/\\-]*(?:\\.(?:[a-zA-Z_][a-zA-Z0-9_/\\-]*|[0-9]+))*';
@@ -135,6 +135,16 @@ function getAllStringValues(doc: Record<string, unknown>): string[] {
 }
 
 /**
+ * Normalizes an evidence string before grounding checks.
+ * Strips trailing "..." truncation markers that models emit when they
+ * abbreviate long field values (e.g. "body.text=Order confirmed: ...").
+ * After stripping, the remaining prefix can still be matched as a substring.
+ */
+function normalizeEvidence(evidence: string): string {
+  return evidence.replace(/\s*\.\.\.\s*$/, '').trimEnd();
+}
+
+/**
  * Checks whether a single evidence string is grounded in the input documents.
  *
  * 1. Direct quote: checks if the text appears as a substring in any string
@@ -144,11 +154,15 @@ function getAllStringValues(doc: Record<string, unknown>): string[] {
  * 3. Multiple key-values: splits combined evidence like
  *    `"body.text=hello http.status=200"` into individual pairs and checks
  *    that every pair matches a document field.
+ *
+ * Evidence strings are normalized before matching: trailing "..." truncation
+ * markers are stripped so partially-quoted values can still be grounded.
  */
 export function isEvidenceGrounded(
   evidence: string,
   documents: Array<Record<string, unknown>>
 ): boolean {
+  evidence = normalizeEvidence(evidence);
   const matchesStringValue = documents.some((doc) => {
     const allValues = getAllStringValues(doc);
     return allValues.some((val) => matchesEvidenceText(val, evidence));
