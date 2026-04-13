@@ -816,8 +816,16 @@ export class QueryClient {
     } catch (syncError) {
       this.dependencies.logger.error(
         `syncQueryList failed after installQueries for stream "${definition.name}". ` +
-          `Alerting rules may be out of sync with stored query assets until the next sync cycle.`
+          `Attempting to uninstall newly created rules to avoid orphans.`
       );
+      await this.uninstallQueries(toCreate).catch((compensateError) => {
+        this.dependencies.logger.error(
+          `Failed to compensate after syncQueryList failure for stream "${definition.name}": ` +
+            `${
+              compensateError instanceof Error ? compensateError.message : String(compensateError)
+            }`
+        );
+      });
       throw syncError;
     }
   }
