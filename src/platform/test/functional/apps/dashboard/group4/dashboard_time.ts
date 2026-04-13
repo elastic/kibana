@@ -17,7 +17,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { dashboard, header, timePicker } = getPageObjects(['dashboard', 'header', 'timePicker']);
   const pieChart = getService('pieChart');
   const browser = getService('browser');
-  const retry = getService('retry');
 
   describe('dashboard time', () => {
     before(async function () {
@@ -67,14 +66,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await dashboard.loadSavedDashboard(dashboardName);
-        await dashboard.waitForRenderComplete();
-        await header.waitUntilLoadingHasFinished();
-
-        await retry.try(async () => {
-          const time = await timePicker.getTimeConfig();
-          expect(time.start).to.equal(timePicker.defaultStartTime);
-          expect(time.end).to.equal(timePicker.defaultEndTime);
-        });
+        const time = await timePicker.getTimeConfig();
+        expect(time.start).to.equal(timePicker.defaultStartTime);
+        expect(time.end).to.equal(timePicker.defaultEndTime);
       });
 
       // If time is stored with a dashboard, it's supposed to override the current time settings when opened.
