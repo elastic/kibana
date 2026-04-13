@@ -44,6 +44,7 @@ import {
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useQueriesApi, type PromoteResult } from '../../../../../hooks/sig_events/use_queries_api';
 import {
+  HIGH_SEVERITY_THRESHOLD,
   UNBACKED_QUERIES_COUNT_QUERY_KEY,
   useUnbackedQueriesCount,
 } from '../../../../../hooks/sig_events/use_unbacked_queries_count';
@@ -53,7 +54,7 @@ import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router
 import { LoadingPanel } from '../../../../loading_panel';
 import { SparkPlot } from '../../../../spark_plot';
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
-import { HIGH_SEVERITY_THRESHOLD, SeverityBadge } from '../severity_badge/severity_badge';
+import { SeverityBadge } from '../severity_badge/severity_badge';
 import { useTimefilter } from '../../../../../hooks/use_timefilter';
 import { buildDiscoverParams } from '../../utils/discover_helpers';
 import {
@@ -461,7 +462,7 @@ export function QueriesTable() {
                   <p>
                     <FormattedMessage
                       id="xpack.streams.significantEventsDiscovery.queriesTable.promoteAllCalloutMessage"
-                      defaultMessage="Based on severity, we recommend to create {ruleCount} based on the last run."
+                      defaultMessage="Based on severity, we recommend creating {ruleCount} based on the last run."
                       values={{
                         ruleCount: <strong>{RULE_COUNT_LABEL(unbackedCount)}</strong>,
                       }}

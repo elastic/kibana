@@ -8,7 +8,14 @@
 import { type QueryFunctionContext, useQuery } from '@kbn/react-query';
 import { useFetchErrorToast } from '../use_fetch_error_toast';
 import { useQueriesApi } from './use_queries_api';
-import { HIGH_SEVERITY_THRESHOLD } from '../../components/sig_events/significant_events_discovery/components/severity_badge/severity_badge';
+
+/**
+ * Minimum severity score considered promotable in bulk (High + Critical).
+ * Scores below this threshold (Low, Medium) are excluded from bulk promotion.
+ *
+ * Severity bands: Low < 40, Medium [40, 60), High [60, 80), Critical >= 80
+ */
+export const HIGH_SEVERITY_THRESHOLD = 60;
 
 export const UNBACKED_QUERIES_COUNT_QUERY_KEY = ['unbackedQueriesCount'] as const;
 

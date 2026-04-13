@@ -10,7 +10,7 @@ import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
 import { useFetchDiscoveryQueries } from './use_fetch_discovery_queries';
 import { useOnboardingApi } from '../use_onboarding_api';
-import { HIGH_SEVERITY_THRESHOLD } from '../../components/sig_events/significant_events_discovery/components/severity_badge/severity_badge';
+import { HIGH_SEVERITY_THRESHOLD } from './use_unbacked_queries_count';
 
 /**
  * Returns the count and IDs of promotable (draft/not-yet-promoted) queries for a specific stream.
