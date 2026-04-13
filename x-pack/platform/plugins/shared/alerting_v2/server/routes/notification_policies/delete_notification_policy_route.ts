@@ -17,7 +17,7 @@ import { ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
 import { buildRouteValidationWithZod } from '../route_validation';
 
 const deleteNotificationPolicyParamsSchema = z.object({
-  id: z.string(),
+  id: z.string().describe('The notification policy identifier.'),
 });
 
 @injectable()
@@ -37,7 +37,15 @@ export class DeleteNotificationPolicyRoute extends BaseAlertingRoute {
     request: {
       params: buildRouteValidationWithZod(deleteNotificationPolicyParamsSchema),
     },
-  } as const;
+    response: {
+      204: {
+        description: 'Indicates a successful call.',
+      },
+      404: {
+        description: 'Indicates a notification policy with the given ID does not exist.',
+      },
+    },
+  };
 
   protected readonly routeName = 'delete notification policy';
 
