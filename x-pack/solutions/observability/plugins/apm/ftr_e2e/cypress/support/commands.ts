@@ -11,6 +11,7 @@ import moment from 'moment';
 import '@frsource/cypress-plugin-visual-regression-diff';
 import { AXE_CONFIG, AXE_OPTIONS } from '@kbn/axe-config';
 import { ApmUsername } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
+import { suppressGlobalAnnouncements } from './suppress_global_announcements';
 
 Cypress.Commands.add('loginAsSuperUser', () => {
   return cy.loginAs({ username: 'elastic', password: 'changeme' });
@@ -55,6 +56,7 @@ Cypress.Commands.add('loginAsApmReadPrivilegesWithWriteSettingsUser', () => {
 Cypress.Commands.add(
   'loginAs',
   ({ username, password }: { username: string; password: string }) => {
+    suppressGlobalAnnouncements();
     cy.session(
       username,
       () => {
@@ -94,6 +96,7 @@ Cypress.Commands.add('changeTimeRange', (value: string) => {
 });
 
 Cypress.Commands.add('visitKibana', (url, options) => {
+  suppressGlobalAnnouncements();
   cy.visit(url, {
     onBeforeLoad(win) {
       if (options?.localStorageOptions && options.localStorageOptions.length > 0) {
