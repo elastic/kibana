@@ -1652,6 +1652,16 @@ groups:
           - "ech: ga"
           - "self: ga"
 
+      - setting: xpack.securitySolution.maxEndpointScriptFileSize
+        description: |
+          The maximum file size in bytes for scripts uploaded to the Elastic Defend script library. Default is `26214400` (25MB).
+        datatype: bool
+        default: 26214400
+        applies_to:
+          - "stack: ga 9.4+"
+          - "ech: ga"
+          - "self: ga"
+
       - setting: xpack.snapshot_restore.ui.enabled
         description: |
           Set this value to false to disable the Snapshot and Restore UI.
