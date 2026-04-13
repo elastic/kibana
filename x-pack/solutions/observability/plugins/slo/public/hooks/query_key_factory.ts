@@ -126,6 +126,21 @@ export const sloKeys = {
       ...sloKeys.allHealthScanResults(),
       { scanId, size, searchAfter, problematic, allSpaces },
     ] as const,
+  compositeLists: () => [...sloKeys.all, 'compositeList'] as const,
+  compositeList: (filters: {
+    page: number;
+    perPage: number;
+    search?: string;
+    tags?: string;
+    sortBy?: string;
+    sortDirection?: string;
+  }) => [...sloKeys.compositeLists(), filters] as const,
+  compositeDetails: () => [...sloKeys.all, 'compositeDetail'] as const,
+  compositeDetail: (id: string) => [...sloKeys.compositeDetails(), id] as const,
+  compositeHistoricalSummaries: () => [...sloKeys.all, 'compositeHistoricalSummary'] as const,
+  compositeHistoricalSummary: (ids: string[]) =>
+    [...sloKeys.compositeHistoricalSummaries(), ids] as const,
+  compositeSuggestions: () => [...sloKeys.all, 'compositeSuggestions'] as const,
 };
 
 export type SloKeys = typeof sloKeys;
