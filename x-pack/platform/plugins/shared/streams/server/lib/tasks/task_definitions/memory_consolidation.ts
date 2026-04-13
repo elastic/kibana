@@ -113,6 +113,7 @@ export function createStreamsMemoryConsolidationTask(taskContext: TaskContext) {
                     existingPages,
                   },
                   maxSteps: 30,
+                  abortSignal: runContext.abortController.signal,
                   toolCallbacks: {
                     read_memory_page: createReadMemoryPageCallback({ memory }),
 

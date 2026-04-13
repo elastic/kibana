@@ -44,7 +44,7 @@ export function executeAsReasoningAgent<
   TToolCallbacks extends ToolCallbacksOfToolOptions<ToolOptionsOfPrompt<TPrompt>>,
   TFinalToolChoice extends ToolChoice<ToolNamesOf<ToolOptionsOfPrompt<TPrompt>>> | undefined =
     | ToolChoice<ToolNamesOf<ToolOptionsOfPrompt<TPrompt>>>
-    | undefined
+    | undefined,
 >(
   options: UnboundPromptOptions<TPrompt> &
     ReasoningPromptOptions & { prompt: TPrompt } & {
@@ -94,6 +94,7 @@ export async function executeAsReasoningAgent(
     maxSteps = 10,
     power = 'medium',
     toolCallbacks,
+    abortSignal,
   } = options;
   const startTime = Date.now();
 
@@ -102,6 +103,15 @@ export async function executeAsReasoningAgent(
       toolCalls.map(async (toolCall): Promise<ToolMessage> => {
         if (isPlanningToolName(toolCall.function.name)) {
           throw new Error(`Unexpected planning tool call ${toolCall.function.name}`);
+        }
+
+        if (abortSignal?.aborted) {
+          return {
+            response: { error: new Error('Request was aborted'), data: undefined },
+            name: toolCall.function.name,
+            toolCallId: toolCall.toolCallId,
+            role: MessageRole.Tool,
+          };
         }
 
         const callback = toolCallbacks[toolCall.function.name];
@@ -142,6 +152,10 @@ export async function executeAsReasoningAgent(
     stepsLeft: number;
     temperature?: number;
   }): Promise<ReasoningPromptResponse> {
+    if (abortSignal?.aborted) {
+      throw new Error('Request was aborted');
+    }
+
     const lastAssistantMessage = givenMessages.findLast(
       (msg): msg is AssistantMessage => msg.role === MessageRole.Assistant
     );
@@ -212,8 +226,8 @@ export async function executeAsReasoningAgent(
     const toolChoice = forceComplete
       ? options.finalToolChoice || ToolChoiceType.none
       : forceReason
-      ? ToolChoiceType.none
-      : ToolChoiceType.auto;
+        ? ToolChoiceType.none
+        : ToolChoiceType.auto;
 
     const response = await inferenceClient.prompt({
       ...promptOptions,
@@ -241,6 +255,7 @@ export async function executeAsReasoningAgent(
       stream: false,
       temperature,
       toolChoice,
+      abortSignal,
       prevMessages: formatMessages({
         messages: prevMessages,
         power,
