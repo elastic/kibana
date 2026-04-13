@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  AsyncSearchGetRequest,
-  SearchResponse,
-  ShardStatistics,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { AsyncSearchGetRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ISearchRequestParams } from '@kbn/search-types';
 
 export interface IAsyncSearchRequestParams extends ISearchRequestParams {
@@ -26,8 +22,4 @@ export interface AsyncSearchResponse<T = unknown> {
   expiration_time_in_millis: number;
   is_partial: boolean;
   is_running: boolean;
-}
-export interface AsyncSearchStatusResponse extends Omit<AsyncSearchResponse, 'response'> {
-  completion_status?: number;
-  _shards: ShardStatistics;
 }

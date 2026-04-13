@@ -124,6 +124,7 @@ describe('getCustomPropertySuggestions', () => {
         stepType: 'custom-type',
         scope: 'config',
         propertyKey: 'key',
+        values: { config: {}, input: {} },
       });
     });
   });

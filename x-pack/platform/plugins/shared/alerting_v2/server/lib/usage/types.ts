@@ -23,10 +23,8 @@ export interface AlertingV2Usage {
   count_by_kind?: { alert?: number; signal?: number };
   count_by_schedule?: NameValuePair[];
   count_by_lookback?: NameValuePair[];
-  count_with_query_condition?: number;
   count_with_recovery_policy?: number;
   count_by_recovery_policy_type?: { query?: number; no_breach?: number };
-  count_with_recovery_query_condition?: number;
   avg_pending_count?: number | null;
   avg_recovering_count?: number | null;
   count_by_pending_timeframe?: NameValuePair[];
