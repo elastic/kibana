@@ -8,6 +8,7 @@
  */
 
 import type { SavedObjectsType, ModelVersionIdentifier } from '@kbn/core-saved-objects-server';
+import { type z, isZod } from '@kbn/zod';
 import type { MigrationInfoRecord, ModelVersionSummary } from '../../types';
 import { getVersions } from '../../migrations';
 
@@ -110,8 +111,13 @@ export function toSchemaPathFormat(mappingPath: string): string {
  *
  * Accesses Joi schema internals following the same pattern as `getSchemaStructure()` in
  * kbn-config-schema. If Joi internals change, both places will need updating.
+ *
+ * @internal Exported for unit tests
  */
-function extractMappingCompatibleSchemaFields(joiSchema: any, path: string[] = []): string[] {
+export function extractMappingCompatibleSchemaFields(
+  joiSchema: any,
+  path: string[] = []
+): string[] {
   const matches: Array<{ schema: any }> = joiSchema.$_terms?.matches;
   if (matches?.length > 0) {
     return matches.flatMap(({ schema: alt }) => extractMappingCompatibleSchemaFields(alt, path));
@@ -131,6 +137,140 @@ function extractMappingCompatibleSchemaFields(joiSchema: any, path: string[] = [
   }
 
   return path.length > 0 ? [path.join('.')] : [];
+}
+
+/**
+ * Zod equivalent of {@link extractMappingCompatibleSchemaFields}. Walks Zod v4 `def` / `shape` (and
+ * common wrappers) so mapping paths align with the Joi-based extractor for the same logical schema.
+ *
+ * @internal Exported for unit tests
+ */
+export function extractMappingCompatibleZodSchemaFields(
+  zodSchema: z.ZodType,
+  path: string[] = []
+): string[] {
+  const inner = unwrapZodSchemaForMapping(zodSchema);
+  const kind = zodDefType(inner);
+
+  if (kind === 'union') {
+    const options = Reflect.get(zodDefOf(inner), 'options');
+    if (Array.isArray(options) && options.length > 0) {
+      return options.flatMap((opt: unknown) =>
+        isZod(opt) ? extractMappingCompatibleZodSchemaFields(opt, path) : []
+      );
+    }
+  }
+
+  if (kind === 'intersection') {
+    const def = zodDefOf(inner);
+    const left = Reflect.get(def, 'left');
+    const right = Reflect.get(def, 'right');
+    const results: string[] = [];
+    if (isZod(left)) {
+      results.push(...extractMappingCompatibleZodSchemaFields(left, path));
+    }
+    if (isZod(right)) {
+      results.push(...extractMappingCompatibleZodSchemaFields(right, path));
+    }
+    return results.length > 0 ? results : path.length > 0 ? [path.join('.')] : [];
+  }
+
+  if (kind === 'lazy') {
+    const getter = Reflect.get(zodDefOf(inner), 'getter');
+    if (typeof getter === 'function') {
+      const resolved = getter();
+      if (isZod(resolved)) {
+        return extractMappingCompatibleZodSchemaFields(resolved, path);
+      }
+    }
+  }
+
+  if (kind === 'object') {
+    const shape = getZodObjectShape(inner);
+    if (shape && Object.keys(shape).length > 0) {
+      return Object.entries(shape).flatMap(([key, child]) =>
+        extractMappingCompatibleZodSchemaFields(child, [...path, key])
+      );
+    }
+  }
+
+  if (kind === 'array') {
+    const element = Reflect.get(zodDefOf(inner), 'element');
+    if (isZod(element)) {
+      const itemPaths = extractMappingCompatibleZodSchemaFields(element, path);
+      return itemPaths.length > 0 ? itemPaths : path.length > 0 ? [path.join('.')] : [];
+    }
+  }
+
+  return path.length > 0 ? [path.join('.')] : [];
+}
+
+function zodDefOf(schema: z.ZodType): object {
+  const def = Reflect.get(schema, 'def');
+  if (typeof def === 'object' && def !== null) {
+    return def;
+  }
+  return {};
+}
+
+function zodDefType(schema: z.ZodType): string {
+  const t = Reflect.get(zodDefOf(schema), 'type');
+  return typeof t === 'string' ? t : 'unknown';
+}
+
+function unwrapZodSchemaForMapping(schema: z.ZodType): z.ZodType {
+  let s = schema;
+  for (;;) {
+    const kind = zodDefType(s);
+    const def = zodDefOf(s);
+    if (
+      kind === 'optional' ||
+      kind === 'nullable' ||
+      kind === 'default' ||
+      kind === 'catch' ||
+      kind === 'readonly'
+    ) {
+      const next = Reflect.get(def, 'innerType');
+      if (isZod(next)) {
+        s = next;
+        continue;
+      }
+      break;
+    }
+    if (kind === 'pipe') {
+      const next = Reflect.get(def, 'in');
+      if (isZod(next)) {
+        s = next;
+        continue;
+      }
+      break;
+    }
+    break;
+  }
+  return s;
+}
+
+function getZodObjectShape(schema: z.ZodType): Record<string, z.ZodType> | undefined {
+  const shape = Reflect.get(schema, 'shape');
+  if (typeof shape !== 'object' || shape === null || Array.isArray(shape)) {
+    return undefined;
+  }
+  const out: Record<string, z.ZodType> = {};
+  for (const key of Object.keys(shape)) {
+    const v = Reflect.get(shape, key);
+    if (isZod(v)) {
+      out[key] = v;
+    }
+  }
+  return out;
+}
+
+function hasGetSchemaForMapping(value: unknown): value is { getSchema: () => unknown } {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    typeof Reflect.get(value, 'getSchema') === 'function'
+  );
 }
 
 export function validateAllMappingsInModelVersion(
@@ -163,7 +303,11 @@ export function validateAllMappingsInModelVersion(
   }
 
   const mappingFieldPaths = getMappingFieldPaths(to.mappings);
-  const schemaFields = extractMappingCompatibleSchemaFields(createSchema.getSchema());
+  const schemaFields = isZod(createSchema)
+    ? extractMappingCompatibleZodSchemaFields(createSchema)
+    : hasGetSchemaForMapping(createSchema)
+    ? extractMappingCompatibleSchemaFields(createSchema.getSchema())
+    : [];
 
   const normalizedMappingPaths = mappingFieldPaths.map((p) => toSchemaPathFormat(p));
   const undeclaredFields = normalizedMappingPaths.filter((field) => {
