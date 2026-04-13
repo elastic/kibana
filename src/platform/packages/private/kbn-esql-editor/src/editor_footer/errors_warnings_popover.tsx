@@ -17,7 +17,6 @@ import {
   EuiPopover,
   euiTextBreakWord,
   useEuiTheme,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css as classNameCss } from '@emotion/css';
 import { css } from '@emotion/react';
@@ -158,13 +157,12 @@ export function ErrorsWarningsFooterPopover({
 
   const { color, message, label } = getConstsByType(type, visibleItems.length);
   const closePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
-  const popoverTitleId = useGeneratedHtmlId();
 
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
         <EuiPopover
-          aria-labelledby={popoverTitleId}
+          aria-label={label}
           anchorPosition="downLeft"
           hasArrow={false}
           panelPaddingSize="none"
@@ -187,7 +185,6 @@ export function ErrorsWarningsFooterPopover({
           isOpen={isPopoverOpen}
           closePopover={closePopover}
         >
-          <span id={popoverTitleId} hidden>{label}</span>
           {visibleItems.length > 0 && (
             <ErrorsWarningsContent items={visibleItems} type={type} onErrorClick={onErrorClick} />
           )}
