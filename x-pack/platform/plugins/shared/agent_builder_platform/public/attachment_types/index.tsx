@@ -9,10 +9,6 @@ import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser'
 import type { ILocatorClient } from '@kbn/share-plugin/common/url_service';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { GRAPH_ATTACHMENT_TYPE } from '../../common/attachments';
-import { createEsqlAttachmentDefinition } from './esql_attachment';
-import { textAttachmentDefinition } from './text_attachment';
-import { screenContextAttachmentDefinition } from './screen_context_attachment';
-import { graphAttachmentDefinition } from './graph_attachment/graph_attachment';
 
 export const registerAttachmentUiDefinitions = ({
   attachments,
@@ -21,8 +17,20 @@ export const registerAttachmentUiDefinitions = ({
   attachments: AttachmentServiceStartContract;
   locators: ILocatorClient;
 }) => {
-  attachments.addAttachmentType(AttachmentType.text, textAttachmentDefinition);
-  attachments.addAttachmentType(AttachmentType.screenContext, screenContextAttachmentDefinition);
-  attachments.addAttachmentType(AttachmentType.esql, createEsqlAttachmentDefinition({ locators }));
-  attachments.addAttachmentType(GRAPH_ATTACHMENT_TYPE, graphAttachmentDefinition);
+  attachments.addAttachmentType(AttachmentType.text, async () => {
+    const { textAttachmentDefinition } = await import('./text_attachment');
+    return textAttachmentDefinition;
+  });
+  attachments.addAttachmentType(AttachmentType.screenContext, async () => {
+    const { screenContextAttachmentDefinition } = await import('./screen_context_attachment');
+    return screenContextAttachmentDefinition;
+  });
+  attachments.addAttachmentType(AttachmentType.esql, async () => {
+    const { createEsqlAttachmentDefinition } = await import('./esql_attachment');
+    return createEsqlAttachmentDefinition({ locators });
+  });
+  attachments.addAttachmentType(GRAPH_ATTACHMENT_TYPE, async () => {
+    const { graphAttachmentDefinition } = await import('./graph_attachment/graph_attachment');
+    return graphAttachmentDefinition;
+  });
 };

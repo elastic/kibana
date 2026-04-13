@@ -165,7 +165,7 @@ export interface AttachmentServiceStartContract {
    */
   addAttachmentType: <TAttachment extends UnknownAttachment = UnknownAttachment>(
     attachmentType: string,
-    definition: AttachmentUIDefinition<TAttachment>
+    getDefinition: () => Promise<AttachmentUIDefinition<TAttachment>>
   ) => void;
 
   /**
@@ -176,5 +176,5 @@ export interface AttachmentServiceStartContract {
    */
   getAttachmentUiDefinition: <TAttachment extends UnknownAttachment = UnknownAttachment>(
     attachmentType: string
-  ) => AttachmentUIDefinition<TAttachment> | undefined;
+  ) => Promise<AttachmentUIDefinition<TAttachment> | undefined>;
 }

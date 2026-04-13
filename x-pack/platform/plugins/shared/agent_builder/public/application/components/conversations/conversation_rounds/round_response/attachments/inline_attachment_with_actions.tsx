@@ -19,6 +19,7 @@ import { usePersistedConversationId } from '../../../../../hooks/use_persisted_c
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 import { AttachmentHeader } from './attachment_header';
 import { getAttachmentPreviewKey, useCanvasContext } from './canvas_context';
+import { useAttachmentUiDefinition } from '../../../../../hooks/use_attachment_ui_definition';
 
 interface InlineAttachmentWithActionsProps {
   attachment: UnknownAttachment;
@@ -75,7 +76,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
     openSidebarConversationInternal();
   }, [conversationId, updatePersistedConversationId, openSidebarConversationInternal]);
 
-  const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
+  const uiDefinition = useAttachmentUiDefinition(attachment.type);
   const attachmentPreviewKey = getAttachmentPreviewKey(attachment.id, version);
 
   const inlineActionButtons = useMemo(

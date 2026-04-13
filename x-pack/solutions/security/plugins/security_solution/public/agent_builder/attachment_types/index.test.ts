@@ -19,13 +19,14 @@ describe('registerAttachmentUiDefinitions', () => {
     jest.clearAllMocks();
   });
 
-  it('returns attachmentLabel when provided in alert attachment data', () => {
+  it('returns attachmentLabel when provided in alert attachment data', async () => {
     registerAttachmentUiDefinitions(mockAttachments);
 
-    const ruleCall = mockAddAttachmentType.mock.calls.find(
+    const alertCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alert
     );
-    const config = ruleCall![1];
+    expect(alertCall).toBeDefined();
+    const config = await alertCall![1]();
 
     const attachment = {
       id: 'test',
@@ -35,13 +36,14 @@ describe('registerAttachmentUiDefinitions', () => {
     expect(config.getLabel(attachment)).toBe('My Test Security Rule Alert');
   });
 
-  it('returns default label when attachmentLabel is not provided', () => {
+  it('returns default label when attachmentLabel is not provided', async () => {
     registerAttachmentUiDefinitions(mockAttachments);
 
-    const ruleCall = mockAddAttachmentType.mock.calls.find(
+    const alertCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alert
     );
-    const config = ruleCall![1];
+    expect(alertCall).toBeDefined();
+    const config = await alertCall![1]();
 
     const attachment = {
       id: 'test',

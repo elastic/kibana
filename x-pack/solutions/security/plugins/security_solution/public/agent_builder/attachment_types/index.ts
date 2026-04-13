@@ -50,9 +50,8 @@ const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
 
 export const registerAttachmentUiDefinitions = (attachments: AttachmentServiceStartContract) => {
   ATTACHMENT_TYPE_CONFIGS.forEach(({ type, label, icon }) => {
-    attachments.addAttachmentType<UnknownAttachmentWithLabel>(
-      type,
-      createAttachmentTypeConfig(label, icon)
-    );
+    attachments.addAttachmentType<UnknownAttachmentWithLabel>(type, async () => {
+      return createAttachmentTypeConfig(label, icon);
+    });
   });
 };

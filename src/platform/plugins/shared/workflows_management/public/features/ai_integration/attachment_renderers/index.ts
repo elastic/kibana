@@ -9,8 +9,6 @@
 
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import type { CoreStart } from '@kbn/core/public';
-import { createWorkflowYamlAttachmentUiDefinition } from './workflow_yaml_attachment_renderer';
-import { workflowYamlDiffAttachmentUiDefinition } from './workflow_yaml_diff_attachment_renderer';
 import {
   WORKFLOW_YAML_ATTACHMENT_TYPE,
   WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
@@ -24,12 +22,16 @@ export const registerWorkflowAttachmentRenderers = (
     telemetry: TelemetryServiceClient;
   }
 ): void => {
-  attachments.addAttachmentType(
-    WORKFLOW_YAML_ATTACHMENT_TYPE,
-    createWorkflowYamlAttachmentUiDefinition(services)
-  );
-  attachments.addAttachmentType(
-    WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
-    workflowYamlDiffAttachmentUiDefinition
-  );
+  attachments.addAttachmentType(WORKFLOW_YAML_ATTACHMENT_TYPE, async () => {
+    const { createWorkflowYamlAttachmentUiDefinition } = await import(
+      './workflow_yaml_attachment_renderer'
+    );
+    return createWorkflowYamlAttachmentUiDefinition(services);
+  });
+  attachments.addAttachmentType(WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE, async () => {
+    const { workflowYamlDiffAttachmentUiDefinition } = await import(
+      './workflow_yaml_diff_attachment_renderer'
+    );
+    return workflowYamlDiffAttachmentUiDefinition;
+  });
 };
