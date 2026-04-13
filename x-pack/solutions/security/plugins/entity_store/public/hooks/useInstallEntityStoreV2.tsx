@@ -30,7 +30,10 @@ const statusRequestQuery = {
 
 const getStatusRequest: HttpFetchOptionsWithPath = {
   path: ENTITY_STORE_ROUTES.public.STATUS,
-  query: statusRequestQuery,
+  query: {
+    ...statusRequestQuery,
+    apiVersion: '2023-10-31',
+  },
 };
 
 const getStatusV1Request: HttpFetchOptionsWithPath = {
