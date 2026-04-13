@@ -342,6 +342,7 @@ export class CaseCommentModel {
     const eventsAttachedToCase = await this.params.services.attachmentService.getter.getAllEventIds(
       {
         caseId: this.caseInfo.id,
+        owner: this.caseInfo.attributes.owner,
       }
     );
 
