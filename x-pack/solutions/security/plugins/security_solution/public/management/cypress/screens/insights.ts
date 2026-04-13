@@ -54,4 +54,10 @@ export const workflowInsightsSelectors = {
   surveySectionDoesNotExist: () => {
     cy.getByTestSubj('workflowInsightsSurveySection').should('not.exist');
   },
+  connectorSelectorExists: () => {
+    cy.getByTestSubj('connector-selector').should('exist');
+  },
+  connectorSelectorDoesNotExist: () => {
+    cy.getByTestSubj('connector-selector').should('not.exist');
+  },
 };
