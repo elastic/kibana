@@ -20,14 +20,14 @@ import { coreWorkerFixtures } from '@kbn/scout';
 import { getSynthtraceClient } from './get_synthtrace_client';
 
 export interface SynthtraceFixture {
-  apmSynthtraceEsClient: Pick<SynthtraceEsClient<ApmFields>, 'index' | 'clean'>;
-  infraSynthtraceEsClient: Pick<SynthtraceEsClient<InfraDocument>, 'index' | 'clean'>;
-  logsSynthtraceEsClient: Pick<SynthtraceEsClient<LogDocument>, 'index' | 'clean'>;
+  apmSynthtraceEsClient: Pick<SynthtraceEsClient<ApmFields>, 'index' | 'clean' | 'refresh'>;
+  infraSynthtraceEsClient: Pick<SynthtraceEsClient<InfraDocument>, 'index' | 'clean' | 'refresh'>;
+  logsSynthtraceEsClient: Pick<SynthtraceEsClient<LogDocument>, 'index' | 'clean' | 'refresh'>;
 }
 
 const useSynthtraceClient = async <TFields extends Fields>(
   client: SynthtraceEsClient<TFields>,
-  use: (client: Pick<SynthtraceEsClient<TFields>, 'index' | 'clean'>) => Promise<void>
+  use: (client: Pick<SynthtraceEsClient<TFields>, 'index' | 'clean' | 'refresh'>) => Promise<void>
 ) => {
   const index = async (events: SynthtraceGenerator<TFields>) => {
     await client.index(Readable.from(Array.from(events)));
@@ -35,7 +35,9 @@ const useSynthtraceClient = async <TFields extends Fields>(
 
   const clean = async () => await client.clean();
 
-  await use({ index, clean });
+  const refresh = async () => await client.refresh();
+
+  await use({ index, clean, refresh });
 };
 
 export const synthtraceFixture = coreWorkerFixtures.extend<{}, SynthtraceFixture>({
