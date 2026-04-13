@@ -97,4 +97,13 @@ describe('CHANGE_POINT Autocomplete', () => {
       );
     });
   });
+
+  describe('configuration order', () => {
+    it('suggests the pipe after the AS clause, On clause should not be suggested', async () => {
+      await changePointExpectSuggestions(
+        `from a | change_point value as changePointType, pValue `,
+        ['| ']
+      );
+    });
+  });
 });

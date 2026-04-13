@@ -152,6 +152,8 @@
     "@kbn/apm-types",
     "@kbn/apm-types-shared",
     "@kbn/cps",
+    "@kbn/expressions-plugin",
+    "@kbn/ingest-hub-plugin",
   ],
   "exclude": ["target/**/*"]
 }

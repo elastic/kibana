@@ -15,8 +15,7 @@ import { RuleDetailsRoute, getRuleData } from './rule_details_route';
 import type { Rule } from '../../../../types';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useCpsPickerAccess } from '../../../hooks/use_cps_picker_access';
-import { ProjectRoutingAccess } from '@kbn/cps-utils';
+import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 jest.mock('../../../../common/lib/kibana');
 
 jest.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => ({
@@ -38,8 +37,11 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
-jest.mock('../../../hooks/use_cps_picker_access');
-const mockUseCpsPickerAccess = jest.mocked(useCpsPickerAccess);
+jest.mock('@kbn/cps-utils', () => ({
+  ...jest.requireActual('@kbn/cps-utils'),
+  useRouteBasedCpsPickerAccess: jest.fn(),
+}));
+const mockUseRouteBasedCpsPickerAccess = jest.mocked(useRouteBasedCpsPickerAccess);
 
 function renderWithIntl(ui: React.ReactElement) {
   return render(
@@ -160,7 +162,10 @@ describe('rule_details_route', () => {
       expect(resolveRule).toHaveBeenCalledWith(rule.id);
     });
 
-    expect(mockUseCpsPickerAccess).toHaveBeenCalledWith(ProjectRoutingAccess.READONLY);
+    expect(mockUseRouteBasedCpsPickerAccess).toHaveBeenCalledWith(
+      ProjectRoutingAccess.READONLY,
+      expect.any(Object)
+    );
   });
 });
 

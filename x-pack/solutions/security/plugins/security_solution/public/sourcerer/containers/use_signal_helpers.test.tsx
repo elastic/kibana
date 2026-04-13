@@ -10,15 +10,6 @@ import { createMockStore, mockGlobalState, TestProviders } from '../../common/mo
 import { waitFor, renderHook } from '@testing-library/react';
 import { useSignalHelpers } from './use_signal_helpers';
 import type { State } from '../../common/store';
-import { createSourcererDataView } from './create_sourcerer_data_view';
-
-const mockCreateSourcererDataView = jest.fn(() => {
-  const errToReturn = new Error('fake error');
-  errToReturn.name = 'AbortError';
-  throw errToReturn;
-});
-
-jest.mock('./create_sourcerer_data_view');
 
 const mockAddError = jest.fn();
 
@@ -108,72 +99,5 @@ describe.skip('useSignalHelpers', () => {
     await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(result.current.signalIndexNeedsInit).toEqual(false);
     expect(result.current.pollForSignalIndex).not.toEqual(undefined);
-  });
-
-  test('Init happened and signal index does not have data yet, poll function becomes available but createSourcererDataView throws an abort error', async () => {
-    (createSourcererDataView as jest.Mock).mockImplementation(mockCreateSourcererDataView);
-    const state: State = {
-      ...mockGlobalState,
-      sourcerer: {
-        ...mockGlobalState.sourcerer,
-        defaultDataView: {
-          ...mockGlobalState.sourcerer.defaultDataView,
-          title: `auditbeat-*,packetbeat-*,${mockGlobalState.sourcerer.signalIndexName}`,
-          patternList: ['packetbeat-*', 'auditbeat-*'],
-        },
-        kibanaDataViews: [
-          {
-            ...mockGlobalState.sourcerer.defaultDataView,
-            title: `auditbeat-*,packetbeat-*,${mockGlobalState.sourcerer.signalIndexName}`,
-            patternList: ['packetbeat-*', 'auditbeat-*'],
-          },
-        ],
-      },
-    };
-    const store = createMockStore(state);
-    const { result } = renderHook(() => useSignalHelpers(), {
-      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
-        <TestProviders store={store}>{children}</TestProviders>
-      ),
-    });
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(result.current.signalIndexNeedsInit).toEqual(false);
-    expect(result.current.pollForSignalIndex).not.toEqual(undefined);
-    expect(mockAddError).not.toHaveBeenCalled();
-  });
-
-  test('Init happened and signal index does not have data yet, poll function becomes available but createSourcererDataView throws a non-abort error', async () => {
-    (createSourcererDataView as jest.Mock).mockImplementation(() => {
-      throw Error('fake error');
-    });
-    const state: State = {
-      ...mockGlobalState,
-      sourcerer: {
-        ...mockGlobalState.sourcerer,
-        defaultDataView: {
-          ...mockGlobalState.sourcerer.defaultDataView,
-          title: `auditbeat-*,packetbeat-*,${mockGlobalState.sourcerer.signalIndexName}`,
-          patternList: ['packetbeat-*', 'auditbeat-*'],
-        },
-        kibanaDataViews: [
-          {
-            ...mockGlobalState.sourcerer.defaultDataView,
-            title: `auditbeat-*,packetbeat-*,${mockGlobalState.sourcerer.signalIndexName}`,
-            patternList: ['packetbeat-*', 'auditbeat-*'],
-          },
-        ],
-      },
-    };
-    const store = createMockStore(state);
-    const { result } = renderHook(() => useSignalHelpers(), {
-      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
-        <TestProviders store={store}>{children}</TestProviders>
-      ),
-    });
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(result.current.signalIndexNeedsInit).toEqual(false);
-    expect(result.current.pollForSignalIndex).not.toEqual(undefined);
-    result.current.pollForSignalIndex?.();
-    expect(mockAddError).toHaveBeenCalled();
   });
 });

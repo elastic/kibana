@@ -86,10 +86,12 @@ describe('InferenceConnector', () => {
           },
           method: 'POST',
           path: '_inference/chat_completion/test/_stream',
+          querystring: { timeout: '180s' },
         },
         {
           asStream: true,
           meta: true,
+          requestTimeout: 180_000,
           headers: {
             'X-Elastic-Product-Use-Case': 'security_ai_assistant',
           },
@@ -316,10 +318,15 @@ describe('InferenceConnector', () => {
           },
           method: 'POST',
           path: '_inference/chat_completion/test/_stream',
+          querystring: { timeout: '180s' },
         },
         {
           asStream: true,
           meta: true,
+          requestTimeout: 180_000,
+          headers: {
+            'X-Elastic-Product-Use-Case': 'inference',
+          },
         }
       );
     });
@@ -341,11 +348,16 @@ describe('InferenceConnector', () => {
           body: { messages: [{ content: 'Hello world', role: 'user' }], n: undefined },
           method: 'POST',
           path: '_inference/chat_completion/test/_stream',
+          querystring: { timeout: '180s' },
         },
         {
           asStream: true,
           meta: true,
+          requestTimeout: 180_000,
           signal,
+          headers: {
+            'X-Elastic-Product-Use-Case': 'inference',
+          },
         }
       );
     });
