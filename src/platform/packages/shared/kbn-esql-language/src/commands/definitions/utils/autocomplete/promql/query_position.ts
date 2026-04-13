@@ -8,7 +8,6 @@
  */
 
 import { within } from '@elastic/esql';
-import { TRAILING_COMMA_REGEX } from '../../shared';
 import type {
   PromQLAstQueryExpression,
   PromQLBinaryExpression,
@@ -16,6 +15,7 @@ import type {
   PromQLLabel,
   PromQLSelector,
 } from '@elastic/esql';
+import { TRAILING_COMMA_REGEX } from '../../shared';
 import type { PromQLFunctionParamType } from '../../../types';
 import type { CursorMatch, PromqlDetailedPosition } from './types';
 import {
