@@ -32,7 +32,7 @@ import {
   AS_CODE_DATA_VIEW_SPEC_TYPE,
 } from '@kbn/as-code-data-views-schema';
 import type { AsCodeDataViewReference } from '@kbn/as-code-data-views-schema';
-import type { LensAttributes, LensDatatableDataset } from '../types';
+import type { LensAttributes } from '../types';
 import type { LensApiAllOperations, LensApiState, NarrowByType } from '../schema';
 import { fromBucketLensStateToAPI } from './columns/buckets';
 import { getMetricApiColumnFromLensState } from './columns/metric';
@@ -50,7 +50,7 @@ import type {
   DataSourceTypeESQL,
   DataSourceTypeNoESQL,
 } from '../schema/data_source';
-import type { LayerTypeESQL } from '../schema/charts/xy';
+import type { DataLayerTypeESQL } from '../schema/charts/xy';
 import type { XScaleSchemaType } from '../schema/charts/shared';
 import { fromFilterLensStateToAPI, toLensStateFilterLanguage } from './columns/filter';
 
@@ -308,8 +308,6 @@ export function getDataSourceIndex(dataSource: DataSourceType) {
         index: dataSource.ref_id,
         timeFieldName,
       };
-    case 'table':
-      return;
     default:
       throw Error('Data Source type not supported');
   }
@@ -333,30 +331,6 @@ function buildDatasourceStatesLayer(
   ) => TextBasedLayerColumn[], // ValueBasedLayerColumn[]
   fullConfig: LensApiState
 ): [LensDatasourceId, DataSourceStateLayer | undefined] {
-  function buildValueLayer(
-    config: unknown,
-    ds: NarrowByType<DataSourceType, 'table'>
-  ): TextBasedPersistedState['layers'][0] {
-    const table = ds.table as LensDatatableDataset;
-    const xAxisScale =
-      fullConfig.type === 'xy' && fullConfig.axis?.x ? fullConfig.axis.x.scale : undefined;
-    const newLayer = {
-      table,
-      columns: getValueColumns(config, i, xAxisScale),
-      allColumns: table.columns.map(
-        (column): TextBasedLayerColumn => ({
-          fieldName: column.name,
-          columnId: column.id,
-          meta: column.meta,
-        })
-      ),
-      index: '',
-      query: undefined,
-    };
-
-    return newLayer;
-  }
-
   function buildESQLLayer(
     config: unknown,
     ds: NarrowByType<DataSourceType, 'esql'>
@@ -375,9 +349,6 @@ function buildDatasourceStatesLayer(
 
   if (dataSource.type === 'esql') {
     return [LENS_DATASOURCE_ID.TEXT_BASED, buildESQLLayer(layer, dataSource)];
-  }
-  if (dataSource.type === 'table') {
-    return [LENS_DATASOURCE_ID.TEXT_BASED, buildValueLayer(layer, dataSource)];
   }
   return [LENS_DATASOURCE_ID.FORM_BASED, buildDataLayer(layer, i, dataSourceIndex)];
 }
@@ -655,8 +626,11 @@ function extraQueryFromAPIState(state: LensApiState): { esql: string } | Query |
   if ('layers' in state && Array.isArray(state.layers)) {
     // pick only the first one for now
     const esqlLayer = state.layers.find(
-      (layer): layer is LayerTypeESQL =>
-        'data_source' in layer && layer.data_source?.type === 'esql'
+      (layer): layer is DataLayerTypeESQL =>
+        layer.type !== 'reference_lines' &&
+        layer.type !== 'annotations' &&
+        'data_source' in layer &&
+        layer.data_source?.type === 'esql'
     );
     if (esqlLayer && 'query' in esqlLayer.data_source) {
       return { esql: esqlLayer.data_source.query };
