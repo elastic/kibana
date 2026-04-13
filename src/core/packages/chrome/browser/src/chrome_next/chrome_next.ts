@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import type { ChromeNextAiButton } from './ai_button';
 import type { ChromeNextGlobalSearchConfig } from './global_search';
 import type { ChromeNextHeaderConfig } from './header';
 import type { ChromeNextSpaceSelectorConfig } from './space_selector';
-import type { ChromeNextUserMenuConfig } from './user_menu';
 
 /**
  * Chrome-Next APIs: header configuration, AI button slot, global search, user menu, and space selector.
@@ -48,11 +48,12 @@ export interface ChromeNext {
   };
   userMenu: {
     /**
-     * Set the user menu configuration for the Chrome-Next sidenav.
-     * Chrome renders a user avatar in the sidenav footer with a popover listing the provided items.
+     * Set the user menu content for the Chrome-Next global header.
+     * The provided ReactNode is rendered as-is in the header's user menu slot.
+     * The consumer owns the full UI (avatar button, popover, menu items).
      * Pass `undefined` to remove. Global — persists across app changes.
      */
-    set(config?: ChromeNextUserMenuConfig): void;
+    set(content?: ReactNode): void;
   };
   spaceSelector: {
     /**

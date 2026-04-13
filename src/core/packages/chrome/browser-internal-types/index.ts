@@ -21,7 +21,6 @@ import type {
   ChromeNextHeaderConfig,
   ChromeNextGlobalSearchConfig,
   ChromeNextSpaceSelectorConfig,
-  ChromeNextUserMenuConfig,
   ChromeProjectNavigationNode,
   ChromeSetProjectBreadcrumbsParams,
   ChromeUserBanner,
@@ -133,7 +132,7 @@ export interface InternalChromeNext extends ChromeNext {
     get$(): Observable<ChromeNextGlobalSearchConfig | undefined>;
   };
   userMenu: ChromeNext['userMenu'] & {
-    get$(): Observable<ChromeNextUserMenuConfig | undefined>;
+    get$(): Observable<ReactNode>;
   };
   spaceSelector: ChromeNext['spaceSelector'] & {
     get$(): Observable<ChromeNextSpaceSelectorConfig | undefined>;

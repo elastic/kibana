@@ -66,6 +66,4 @@ export type {
   ChromeNextHeaderMetadataSlotItem,
   ChromeNextHeaderTab,
   ChromeNextSpaceSelectorConfig,
-  ChromeNextUserMenuConfig,
-  ChromeNextUserMenuItem,
 } from './src';

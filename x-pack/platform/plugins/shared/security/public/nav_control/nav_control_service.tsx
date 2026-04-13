@@ -12,7 +12,7 @@ import type { Subscription } from 'rxjs';
 import { BehaviorSubject, map, ReplaySubject, takeUntil } from 'rxjs';
 
 import type { CoreStart } from '@kbn/core/public';
-import type { ChromeNextUserMenuItem } from '@kbn/core-chrome-browser';
+import { HeaderActionButton } from '@kbn/core-chrome-browser-components';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type {
@@ -21,11 +21,10 @@ import type {
   UserMenuLink,
 } from '@kbn/security-plugin-types-public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { UserAvatar, type UserProfileAvatarData } from '@kbn/user-profile-components';
 
 import { SecurityNavControl } from './nav_control_component';
+import type { SecurityNavControlRenderButtonProps } from './nav_control_component';
 import type { SecurityLicense } from '../../common';
-import { getUserDisplayName, isUserAnonymous } from '../../common/model';
 import type { SecurityApiClients } from '../components';
 import { AuthenticationProvider, SecurityApiClientsProvider } from '../components';
 
@@ -128,102 +127,44 @@ export class SecurityNavControlService {
   }
 
   private registerChromeNextUserMenu(core: CoreStart, authc: AuthenticationServiceSetup) {
-    const editProfileUrl = core.http.basePath.prepend('/security/account');
-    const { userProfiles } = this.securityApiClients;
-
-    Promise.all([
-      authc.getCurrentUser(),
-      userProfiles
-        .getCurrent<{ avatar: UserProfileAvatarData }>({ dataPath: 'avatar' })
-        .catch(() => null),
-    ])
-      .then(([currentUser, userProfile]) => {
-        const userDisplayName = getUserDisplayName(currentUser);
-        const isAnonymous = isUserAnonymous(currentUser);
-
-        const renderAvatar = () =>
-          userProfile ? (
-            <UserAvatar
-              user={userProfile.user}
-              avatar={userProfile.data.avatar}
-              size="s"
-              data-test-subj="sideNavUserMenuAvatar"
-            />
-          ) : (
-            <UserAvatar user={currentUser} size="s" data-test-subj="sideNavUserMenuAvatar" />
-          );
-
-        const buildItems = (userMenuLinks: UserMenuLink[]): ChromeNextUserMenuItem[] => {
-          const items: ChromeNextUserMenuItem[] = [];
-
-          const sorted = this.sortUserMenuLinks(userMenuLinks);
-          const hasCustomProfileLinks = sorted.some(({ setAsProfile }) => setAsProfile === true);
-
-          if (!isAnonymous && !hasCustomProfileLinks) {
-            items.push({
-              id: 'profileLink',
-              label: i18n.translate('xpack.security.navControlComponent.editProfileLinkText', {
-                defaultMessage: 'Edit profile',
-              }),
-              href: editProfileUrl,
-              'data-test-subj': 'profileLink',
-            });
-          }
-
-          for (const link of sorted) {
-            if (!link.label || (!link.href && !link.onClick)) {
-              continue;
-            }
-            items.push({
-              id: `userMenuLink__${link.label}`,
-              label: link.label,
-              ...(link.href && { href: link.href }),
-              ...(link.onClick && {
-                onClick: () => {
-                  link.onClick?.();
-                },
-              }),
-              'data-test-subj': `userMenuLink__${link.label}`,
-            });
-          }
-
-          items.push({
-            id: 'logoutLink',
-            label: isAnonymous
-              ? i18n.translate('xpack.security.navControlComponent.loginLinkText', {
-                  defaultMessage: 'Log in',
-                })
-              : i18n.translate('xpack.security.navControlComponent.logoutLinkText', {
-                  defaultMessage: 'Log out',
-                }),
-            href: this.logoutUrl,
-            'data-test-subj': 'logoutLink',
-          });
-
-          return items;
-        };
-
-        const setConfig = (userMenuLinks: UserMenuLink[]) => {
-          core.chrome.next.userMenu.set({
-            label: userDisplayName,
-            renderAvatar,
-            items: buildItems(userMenuLinks),
-          });
-        };
-
-        setConfig(this.userMenuLinks$.value);
-
-        this.userMenuLinks$.pipe(takeUntil(this.stop$)).subscribe((links) => setConfig(links));
-      })
-      .catch(() => {
-        // Chrome Next user menu unavailable — legacy nav control still active
-      });
+    core.chrome.next.userMenu.set(
+      <Providers services={core} authc={authc} securityApiClients={this.securityApiClients}>
+        <SecurityNavControl
+          editProfileUrl={core.http.basePath.prepend('/security/account')}
+          logoutUrl={this.logoutUrl}
+          userMenuLinks$={this.userMenuLinks$}
+          renderButton={chromeNextUserMenuButton}
+        />
+      </Providers>
+    );
   }
 
   private sortUserMenuLinks(userMenuLinks: UserMenuLink[]) {
     return sortBy(userMenuLinks, 'order');
   }
 }
+
+const ACCOUNT_MENU_ARIA_LABEL = i18n.translate(
+  'xpack.security.navControlComponent.accountMenuAriaLabel',
+  { defaultMessage: 'Account menu' }
+);
+
+const chromeNextUserMenuButton = ({
+  isOpen,
+  toggleMenu,
+  avatar,
+}: SecurityNavControlRenderButtonProps) => (
+  <HeaderActionButton
+    variant="plain"
+    onClick={toggleMenu}
+    aria-expanded={isOpen}
+    aria-haspopup={true}
+    aria-label={ACCOUNT_MENU_ARIA_LABEL}
+    data-test-subj="chromeNextUserMenuButton"
+  >
+    {avatar}
+  </HeaderActionButton>
+);
 
 export interface ProvidersProps {
   authc: AuthenticationServiceSetup;

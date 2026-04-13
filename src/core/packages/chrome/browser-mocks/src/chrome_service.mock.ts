@@ -9,13 +9,13 @@
 
 import { BehaviorSubject, of } from 'rxjs';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+import type { ReactNode } from 'react';
 import type {
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeNextHeaderConfig,
   ChromeNextGlobalSearchConfig,
   ChromeNextSpaceSelectorConfig,
-  ChromeNextUserMenuConfig,
 } from '@kbn/core-chrome-browser';
 import type {
   InternalChromeSetup,
@@ -35,7 +35,7 @@ const createStartContractMock = () => {
   const nextGlobalSearchState$ = new BehaviorSubject<ChromeNextGlobalSearchConfig | undefined>(
     undefined
   );
-  const nextUserMenuState$ = new BehaviorSubject<ChromeNextUserMenuConfig | undefined>(undefined);
+  const nextUserMenuState$ = new BehaviorSubject<ReactNode>(null);
   const nextSpaceSelectorState$ = new BehaviorSubject<ChromeNextSpaceSelectorConfig | undefined>(
     undefined
   );
@@ -133,8 +133,8 @@ const createStartContractMock = () => {
       }),
       userMenu: lazyObject({
         get$: jest.fn().mockReturnValue(nextUserMenuState$),
-        set: jest.fn((config?: ChromeNextUserMenuConfig) => {
-          nextUserMenuState$.next(config);
+        set: jest.fn((content?: ReactNode) => {
+          nextUserMenuState$.next(content ?? null);
         }),
       }),
       spaceSelector: lazyObject({

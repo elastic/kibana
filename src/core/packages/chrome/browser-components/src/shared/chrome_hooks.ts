@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import { useMemo } from 'react';
 import type { Observable } from 'rxjs';
 import { debounceTime, map } from 'rxjs';
@@ -248,6 +249,12 @@ export function useNextHeader(): ChromeNextHeaderConfig | undefined {
   const chrome = useChromeService();
   const config$ = useMemo(() => chrome.next.header.get$(), [chrome]);
   return useObservable(config$, undefined);
+}
+
+export function useUserMenu(): ReactNode {
+  const chrome = useChromeService();
+  const content$ = useMemo(() => chrome.next.userMenu.get$(), [chrome]);
+  return useObservable(content$, null);
 }
 
 /** Returns whether the next-chrome experience is enabled via feature flag. */

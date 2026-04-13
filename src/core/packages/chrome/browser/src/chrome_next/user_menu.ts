@@ -9,17 +9,4 @@
 
 import type { ReactNode } from 'react';
 
-export interface ChromeNextUserMenuConfig {
-  label: string;
-  renderAvatar: () => ReactNode;
-  items: ChromeNextUserMenuItem[];
-}
-
-export interface ChromeNextUserMenuItem {
-  id: string;
-  label: string;
-  href?: string;
-  isExternal?: boolean;
-  'data-test-subj'?: string;
-  onClick?: () => void;
-}
+export type ChromeNextUserMenu = ReactNode;

@@ -291,12 +291,25 @@ describe('SecurityNavControl', () => {
                     link3
                   </span>
                 </a>
-                <div>
-                  Dummy Component
-                </div>
-                <div
+                <button
+                  class="euiContextMenuItem emotion-euiContextMenuItem-s-center"
+                  data-test-subj="userMenuLink__dummyComponent"
+                  type="button"
+                >
+                  <span
+                    class="emotion-euiContextMenu__icon"
+                    data-euiicon-type="empty"
+                  />
+                  <span
+                    class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
+                  >
+                    dummyComponent
+                  </span>
+                </button>
+                <button
                   class="euiContextMenuItem emotion-euiContextMenuItem-s-center"
                   data-test-subj="logoutLink"
+                  type="button"
                 >
                   <span
                     class="emotion-euiContextMenu__icon"
@@ -307,7 +320,7 @@ describe('SecurityNavControl', () => {
                   >
                     Log out
                   </span>
-                </div>
+                </button>
               </div>
             </div>
           </div>
@@ -413,9 +426,10 @@ describe('SecurityNavControl', () => {
                     link3
                   </span>
                 </a>
-                <div
+                <button
                   class="euiContextMenuItem emotion-euiContextMenuItem-s-center"
                   data-test-subj="logoutLink"
+                  type="button"
                 >
                   <span
                     class="emotion-euiContextMenu__icon"
@@ -426,7 +440,7 @@ describe('SecurityNavControl', () => {
                   >
                     Log out
                   </span>
-                </div>
+                </button>
               </div>
             </div>
           </div>
@@ -481,9 +495,10 @@ describe('SecurityNavControl', () => {
               tabindex="-1"
             >
               <div>
-                <div
+                <button
                   class="euiContextMenuItem emotion-euiContextMenuItem-s-center"
                   data-test-subj="logoutLink"
+                  type="button"
                 >
                   <span
                     class="emotion-euiContextMenu__icon"
@@ -494,7 +509,7 @@ describe('SecurityNavControl', () => {
                   >
                     Log in
                   </span>
-                </div>
+                </button>
               </div>
             </div>
           </div>

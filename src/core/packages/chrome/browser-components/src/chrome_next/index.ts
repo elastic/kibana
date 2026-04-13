@@ -9,5 +9,5 @@
 
 export { AppHeader, AppHeaderShell } from './app_header';
 export type { AppHeaderShellProps } from './app_header';
-export { GlobalHeader, GlobalHeaderShell } from './global_header';
-export type { GlobalHeaderShellProps } from './global_header';
+export { GlobalHeader, GlobalHeaderShell, HeaderActionButton } from './global_header';
+export type { GlobalHeaderShellProps, HeaderActionButtonProps } from './global_header';

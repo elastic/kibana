@@ -31,6 +31,7 @@ export interface GlobalHeaderShellProps {
   search?: ReactNode;
   help?: ReactNode;
   actions?: ReactNode;
+  userMenu?: ReactNode;
 }
 
 const useGlobalHeaderStyles = () => {
@@ -88,6 +89,11 @@ const useGlobalHeaderStyles = () => {
       align-items: center;
     `;
 
+    const userMenuSlot = css`
+      display: flex;
+      align-items: center;
+    `;
+
     const separator = css`
       width: 1px;
       height: 20px;
@@ -95,12 +101,23 @@ const useGlobalHeaderStyles = () => {
       background: ${euiTheme.colors.borderBaseSubdued};
     `;
 
-    return { root, leftGroup, switcherSlot, spacer, rightGroup, searchSlot, actionsSlot, helpSlot, separator };
+    return {
+      root,
+      leftGroup,
+      switcherSlot,
+      spacer,
+      rightGroup,
+      searchSlot,
+      actionsSlot,
+      helpSlot,
+      userMenuSlot,
+      separator,
+    };
   }, [euiTheme]);
 };
 
 export const GlobalHeaderShell = React.memo<GlobalHeaderShellProps>(
-  ({ logo, switcher, search, help, actions }) => {
+  ({ logo, switcher, search, help, actions, userMenu }) => {
     const { isCollapsed } = useSideNavCollapsed();
     const styles = useGlobalHeaderStyles();
     const logoWidth = isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
@@ -134,6 +151,11 @@ export const GlobalHeaderShell = React.memo<GlobalHeaderShellProps>(
           {actions && (
             <div css={styles.actionsSlot} data-test-subj="chromeNextGlobalHeaderActions">
               {actions}
+            </div>
+          )}
+          {userMenu && (
+            <div css={styles.userMenuSlot} data-test-subj="chromeNextGlobalHeaderUserMenu">
+              {userMenu}
             </div>
           )}
         </div>

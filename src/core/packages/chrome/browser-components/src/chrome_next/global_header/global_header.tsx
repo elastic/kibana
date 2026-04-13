@@ -12,12 +12,14 @@ import { GlobalHeaderShell } from './global_header_shell';
 import { GlobalHeaderLogo } from './global_header_logo';
 import { AiButtonSlot } from './ai_button_slot';
 import { HelpButton } from './help_button';
+import { useUserMenu } from '../../shared/chrome_hooks';
 
 export const GlobalHeader = React.memo(() => (
   <GlobalHeaderShell
     logo={<GlobalHeaderLogo />}
     help={<HelpButton />}
     actions={<AiButtonSlot />}
+    userMenu={useUserMenu()}
   />
 ));
 

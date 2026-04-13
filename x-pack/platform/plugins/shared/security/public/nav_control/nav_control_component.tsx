@@ -15,8 +15,8 @@ import {
   EuiLoadingSpinner,
   EuiPopover,
 } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
-import React, { useState } from 'react';
+import type { FunctionComponent, ReactNode } from 'react';
+import React, { useCallback, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 
@@ -59,48 +59,65 @@ const ContextMenuContent = ({ items, closePopover }: ContextMenuProps) => {
   );
 };
 
+export interface SecurityNavControlRenderButtonProps {
+  isOpen: boolean;
+  toggleMenu: () => void;
+  avatar: ReactNode;
+}
+
 interface SecurityNavControlProps {
   editProfileUrl: string;
   logoutUrl: string;
   userMenuLinks$: Observable<UserMenuLink[]>;
+  renderButton?: (props: SecurityNavControlRenderButtonProps) => NonNullable<ReactNode>;
 }
 
 export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   editProfileUrl,
   logoutUrl,
   userMenuLinks$,
+  renderButton,
 }) => {
   const userMenuLinks = useObservable(userMenuLinks$, []);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const userProfile = useUserProfile<{ avatar: UserProfileAvatarData }>('avatar,userSettings');
-  const currentUser = useCurrentUser(); // User profiles do not exist for anonymous users so need to fetch current user as well
+  const currentUser = useCurrentUser();
 
   const displayName = currentUser.value ? getUserDisplayName(currentUser.value) : '';
 
-  const button = (
+  const toggleMenu = useCallback(
+    () => setIsPopoverOpen((value) => (currentUser.value ? !value : false)),
+    [currentUser.value]
+  );
+
+  const avatar = userProfile.value ? (
+    <UserAvatar
+      user={userProfile.value.user}
+      avatar={userProfile.value.data.avatar}
+      size="s"
+      data-test-subj="userMenuAvatar"
+    />
+  ) : currentUser.value && userProfile.error ? (
+    <UserAvatar user={currentUser.value} size="s" data-test-subj="userMenuAvatar" />
+  ) : (
+    <EuiLoadingSpinner size="m" />
+  );
+
+  const button = renderButton ? (
+    renderButton({ isOpen: isPopoverOpen, toggleMenu, avatar })
+  ) : (
     <EuiHeaderSectionItemButton
       aria-expanded={isPopoverOpen}
       aria-haspopup="true"
       aria-label={i18n.translate('xpack.security.navControlComponent.accountMenuAriaLabel', {
         defaultMessage: 'Account menu',
       })}
-      onClick={() => setIsPopoverOpen((value) => (currentUser.value ? !value : false))}
+      onClick={toggleMenu}
       data-test-subj="userMenuButton"
       style={{ lineHeight: 'normal' }}
     >
-      {userProfile.value ? (
-        <UserAvatar
-          user={userProfile.value.user}
-          avatar={userProfile.value.data.avatar}
-          size="s"
-          data-test-subj="userMenuAvatar"
-        />
-      ) : currentUser.value && userProfile.error ? (
-        <UserAvatar user={currentUser.value} size="s" data-test-subj="userMenuAvatar" />
-      ) : (
-        <EuiLoadingSpinner size="m" />
-      )}
+      {avatar}
     </EuiHeaderSectionItemButton>
   );
 
