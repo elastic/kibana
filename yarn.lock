@@ -2410,7 +2410,7 @@
 
 "@elastic/eui@file:./package.tgz":
   version "112.3.0"
-  resolved "file:./package.tgz#7c6d2edfe14dee400f2bb9bb218d9ff8e45c42c3"
+  resolved "file:./package.tgz#262f2826c23b4a6be4ee699ece22597ea1a66efe"
   dependencies:
     "@elastic/prismjs-esql" "^1.1.2"
     "@hello-pangea/dnd" "^16.6.0"
