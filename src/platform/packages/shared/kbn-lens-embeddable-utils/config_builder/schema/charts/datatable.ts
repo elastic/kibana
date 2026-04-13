@@ -11,8 +11,14 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_HEADER_ROW_HEIGHT_LINES, DEFAULT_ROW_HEIGHT_LINES } from '@kbn/lens-common';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
-import { applyColorToSchema, colorByValueSchema, colorMappingSchema } from '../color';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import {
+  applyColorToSchema,
+  colorByValueSchema,
+  colorMappingSchema,
+  autoColorSchema,
+  AUTO_COLOR,
+} from '../color';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import {
   collapseBySchema,
   dslOnlyPanelInfoSchema,
@@ -25,6 +31,8 @@ import {
 } from './shared';
 import { horizontalAlignmentSchema } from '../alignments';
 import { bucketOperationDefinitionSchema } from '../bucket_ops';
+import { builderEnums } from '../enums';
+import { objectUnion } from './utils/object_union';
 
 /**
  * Datatable supports an additional "badge" mode (render colored values as badges),
@@ -49,9 +57,7 @@ const sortingSchema = schema.oneOf(
           min: 0,
           meta: { description: 'Index of the column/row to sort by (0-based)' },
         }),
-        direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
-          meta: { description: 'Sort direction' },
-        }),
+        direction: builderEnums.direction({ meta: { description: 'Sort direction' } }),
       },
       { meta: { description: 'Sort by a metric or row column' } }
     ),
@@ -73,9 +79,7 @@ const sortingSchema = schema.oneOf(
             description: 'Array of pivot values, one for each split_metrics_by column in order',
           },
         }),
-        direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
-          meta: { description: 'Sort direction' },
-        }),
+        direction: builderEnums.direction({ meta: { description: 'Sort direction' } }),
       },
       {
         meta: {
@@ -242,7 +246,11 @@ const datatableStateRowsOptionsNoESQLSchema = {
   /**
    * Color configuration
    */
-  color: schema.maybe(colorMappingSchema),
+  color: schema.maybe(
+    schema.oneOf([colorMappingSchema, autoColorSchema], {
+      defaultValue: AUTO_COLOR,
+    })
+  ),
   /**
    * Whether to enable the one click filter
    */
@@ -266,7 +274,8 @@ const datatableStateRowsOptionsESQLSchema = {
    * Color configuration
    */
   color: schema.maybe(
-    schema.oneOf([colorByValueSchema, colorMappingSchema], {
+    schema.oneOf([colorByValueSchema, colorMappingSchema, autoColorSchema], {
+      defaultValue: AUTO_COLOR,
       meta: {
         description:
           'Color configuration for ESQL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.',
@@ -281,7 +290,8 @@ const datatableStateMetricsOptionsSchema = {
    * Color configuration
    */
   color: schema.maybe(
-    schema.oneOf([colorByValueSchema, colorMappingSchema], {
+    schema.oneOf([colorByValueSchema, colorMappingSchema, autoColorSchema], {
+      defaultValue: AUTO_COLOR,
       meta: {
         description:
           'Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.',
@@ -382,7 +392,7 @@ export const datatableStateSchemaNoESQL = schema.object(
     ...sharedPanelInfoSchema,
     ...dslOnlyPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetSchema,
+    ...dataSourceSchema,
     ...datatableStateSharedOptionsSchema,
     /**
      * Metric columns configuration, must define operation.
@@ -434,7 +444,7 @@ export const datatableStateSchemaESQL = schema.object(
     type: schema.literal('data_table'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
+    ...dataSourceEsqlTableSchema,
     ...datatableStateSharedOptionsSchema,
     /**
      * Metric columns configuration, must define operation.
@@ -493,7 +503,7 @@ export const datatableStateSchemaESQL = schema.object(
   }
 );
 
-export const datatableStateSchema = schema.oneOf(
+export const datatableStateSchema = objectUnion(
   [datatableStateSchemaNoESQL, datatableStateSchemaESQL],
   {
     meta: {

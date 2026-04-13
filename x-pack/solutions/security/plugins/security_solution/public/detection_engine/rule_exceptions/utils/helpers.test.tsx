@@ -2457,9 +2457,7 @@ describe('Exception helpers', () => {
           id: 'kibana.alert.ancestors.id',
           overrideField: 'Source event',
         },
-        {
-          id: 'host.name',
-        },
+        { id: 'host.name' },
         // Fields used in support of Response Actions
         ...SUPPORTED_AGENT_ID_ALERT_FIELDS.map((fieldPath) => {
           return {
@@ -2471,9 +2469,7 @@ describe('Exception helpers', () => {
         {
           id: 'Endpoint.policy.applied.artifacts.global.channel',
         },
-        {
-          id: 'user.name',
-        },
+        { id: 'user.name' },
         {
           id: 'cloud.provider',
         },

@@ -8,8 +8,7 @@
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectAttributes } from '@kbn/core/server';
-import { SavedObjectsUtils } from '@kbn/core/server';
-import { getWorkflowTemplatesForConnector } from '@kbn/connector-specs/server';
+import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { ConnectorCreateParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { validateConfig, validateConnector, validateSecrets } from '../../../../lib';
@@ -18,6 +17,7 @@ import type { HookServices, ActionResult } from '../../../../types';
 import { tryCatch } from '../../../../lib';
 import { invokePostCreateListeners } from '../../../../lib/invoke_lifecycle_listeners';
 import { inferAuthMode } from '../../../../lib/infer_auth_mode';
+import { validateConnectorId } from '../../../../../common/validate_connector_id';
 
 export async function create({
   context,
@@ -83,6 +83,10 @@ export async function create({
     validateConnector(actionType, { config, secrets });
   }
   context.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+
+  if (options?.id) {
+    validateConnectorId(options.id);
+  }
 
   const hookServices: HookServices = {
     scopedClusterClient: context.scopedClusterClient,
@@ -175,12 +179,19 @@ export async function create({
       request: context.request,
       services: hookServices,
       wasSuccessful,
-      workflowTemplates: getWorkflowTemplatesForConnector(actionTypeId),
     },
     context.logger
   );
 
   if (!wasSuccessful) {
+    if (SavedObjectsErrorHelpers.isConflictError(result)) {
+      throw Boom.conflict(
+        i18n.translate('xpack.actions.serverSideErrors.connectorIdConflict', {
+          defaultMessage: 'A connector is already using this ID: {id}. Choose a different ID.',
+          values: { id },
+        })
+      );
+    }
     throw result;
   }
 
