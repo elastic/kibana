@@ -48,9 +48,11 @@ export const upsertFeatureRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<{ acknowledged: boolean }> => {
-    const { getFeatureClient, licensing, uiSettingsClient, streamsClient } = await getScopedClients({
-      request,
-    });
+    const { getFeatureClient, licensing, uiSettingsClient, streamsClient } = await getScopedClients(
+      {
+        request,
+      }
+    );
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
@@ -94,9 +96,11 @@ export const deleteFeatureRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<{ acknowledged: boolean }> => {
-    const { getFeatureClient, licensing, uiSettingsClient, streamsClient } = await getScopedClients({
-      request,
-    });
+    const { getFeatureClient, licensing, uiSettingsClient, streamsClient } = await getScopedClients(
+      {
+        request,
+      }
+    );
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
@@ -136,9 +140,11 @@ export const listFeaturesRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<{ features: Feature[] }> => {
-    const { getFeatureClient, licensing, uiSettingsClient, streamsClient } = await getScopedClients({
-      request,
-    });
+    const { getFeatureClient, licensing, uiSettingsClient, streamsClient } = await getScopedClients(
+      {
+        request,
+      }
+    );
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
@@ -183,9 +189,11 @@ export const listAllFeaturesRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<{ features: Feature[] }> => {
-    const { getFeatureClient, licensing, uiSettingsClient, streamsClient } = await getScopedClients({
-      request,
-    });
+    const { getFeatureClient, licensing, uiSettingsClient, streamsClient } = await getScopedClients(
+      {
+        request,
+      }
+    );
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
@@ -249,9 +257,11 @@ export const bulkFeaturesRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<{ acknowledged: boolean }> => {
-    const { getFeatureClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
-      request,
-    });
+    const { getFeatureClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients(
+      {
+        request,
+      }
+    );
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
