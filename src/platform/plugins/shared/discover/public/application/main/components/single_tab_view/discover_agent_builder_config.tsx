@@ -194,19 +194,14 @@ export const DiscoverAgentBuilderConfig = () => {
       ),
     ];
 
-    if (
-      hasEsqlResults &&
-      documentState.esqlQueryColumns &&
-      documentState.result &&
-      totalHits !== undefined
-    ) {
+    if (hasEsqlResults && documentState.esqlQueryColumns && documentState.result) {
       const esqlQuery = isOfAggregateQueryType(query) ? query.esql : '';
       attachments.push(
         buildEsqlResultsAttachment(
           esqlQuery,
           documentState.esqlQueryColumns,
           documentState.result,
-          totalHits,
+          totalHits ?? documentState.result.length,
           normalizedTimeRange
         )
       );
