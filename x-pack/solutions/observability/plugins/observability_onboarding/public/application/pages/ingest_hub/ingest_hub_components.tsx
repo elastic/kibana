@@ -5,44 +5,79 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiBadge, EuiCard, EuiIcon, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiCard, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 
-const COMPACT_LOGO_SIZE = 20;
+const COMPACT_LOGO_SIZE = 16;
 const COMPACT_LOGO_BG_PADDING = 6;
 
 const LOGO_SIZE = 24;
 const LOGO_BG_PADDING = 8;
+
+/** Same padding as integration cards; 16px image matching card logos at smaller size. */
+const LIST_LOGO_SIZE = 16;
+const LIST_LOGO_BG_PADDING = LOGO_BG_PADDING;
 const CARD_PADDING_PX = 16;
 
-export const CardLogoIcon: React.FC<{ src: string; alt: string }> = ({ src, alt }) => {
+export type CardLogoIconSize = 'default' | 'compact' | 'list';
+
+export const CardLogoIcon: React.FC<{
+  src: string;
+  alt: string;
+  /** `default`: integration cards. `list`: same treatment at 16×16. `compact`: dense legacy row. */
+  size?: CardLogoIconSize;
+}> = ({ src, alt, size = 'default' }) => {
   const { euiTheme } = useEuiTheme();
   const [errored, setErrored] = useState(false);
+  const imgRef = useRef<HTMLImageElement | null>(null);
+  useEffect(() => {
+    setErrored(false);
+  }, [src]);
+  const isCompact = size === 'compact';
+  const isList = size === 'list';
+  const logoPx = isList ? LIST_LOGO_SIZE : isCompact ? COMPACT_LOGO_SIZE : LOGO_SIZE;
+  const padPx = isList
+    ? LIST_LOGO_BG_PADDING
+    : isCompact
+    ? COMPACT_LOGO_BG_PADDING
+    : LOGO_BG_PADDING;
+  const cornerRadius = isCompact && !isList ? Math.round((COMPACT_LOGO_SIZE / LOGO_SIZE) * 8) : 8;
+  const fallbackIconSize = isCompact || isList ? 's' : 'm';
   const wrapperStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    width: LOGO_SIZE + LOGO_BG_PADDING * 2,
-    height: LOGO_SIZE + LOGO_BG_PADDING * 2,
+    width: logoPx + padPx * 2,
+    height: logoPx + padPx * 2,
+    borderRadius: cornerRadius,
     backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-    borderRadius: 8,
     border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
   };
+
+  useEffect(() => {
+    if (errored) return;
+    const img = imgRef.current;
+    if (!img) return;
+    const onErr = () => setErrored(true);
+    img.addEventListener('error', onErr);
+    return () => img.removeEventListener('error', onErr);
+  }, [src, errored, logoPx]);
+
   if (errored) {
     return (
       <div style={wrapperStyle}>
-        <EuiIcon type="logoElastic" size="m" color="text" />
+        <EuiIcon type="logoElastic" size={fallbackIconSize} color="text" />
       </div>
     );
   }
   return (
     <div style={wrapperStyle}>
-        <img
+      <img
+        ref={imgRef}
         src={src}
         alt={alt}
-        style={{ width: LOGO_SIZE, height: LOGO_SIZE, objectFit: 'contain' }}
-        onError={() => setErrored(true)}
+        style={{ width: logoPx, height: logoPx, objectFit: 'contain' }}
       />
     </div>
   );
@@ -151,6 +186,10 @@ export const IntegrationCard: React.FC<{
 const CompactLogoIcon: React.FC<{ src: string; alt: string }> = ({ src, alt }) => {
   const { euiTheme } = useEuiTheme();
   const [errored, setErrored] = useState(false);
+  const imgRef = useRef<HTMLImageElement | null>(null);
+  useEffect(() => {
+    setErrored(false);
+  }, [src]);
   const wrapperStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
@@ -158,10 +197,20 @@ const CompactLogoIcon: React.FC<{ src: string; alt: string }> = ({ src, alt }) =
     width: COMPACT_LOGO_SIZE + COMPACT_LOGO_BG_PADDING * 2,
     height: COMPACT_LOGO_SIZE + COMPACT_LOGO_BG_PADDING * 2,
     backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-    borderRadius: 8,
+    borderRadius: Math.round((COMPACT_LOGO_SIZE / LOGO_SIZE) * 8),
     border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
     flexShrink: 0,
   };
+
+  useEffect(() => {
+    if (errored) return;
+    const img = imgRef.current;
+    if (!img) return;
+    const onErr = () => setErrored(true);
+    img.addEventListener('error', onErr);
+    return () => img.removeEventListener('error', onErr);
+  }, [src, errored]);
+
   if (errored) {
     return (
       <div style={wrapperStyle}>
@@ -172,10 +221,10 @@ const CompactLogoIcon: React.FC<{ src: string; alt: string }> = ({ src, alt }) =
   return (
     <div style={wrapperStyle}>
       <img
+        ref={imgRef}
         src={src}
         alt={alt}
         style={{ width: COMPACT_LOGO_SIZE, height: COMPACT_LOGO_SIZE, objectFit: 'contain' }}
-        onError={() => setErrored(true)}
       />
     </div>
   );
@@ -192,7 +241,13 @@ export const CompactIntegrationCard: React.FC<{
   const { euiTheme } = useEuiTheme();
   const logoSrc = logoUrl ?? '';
   const titleContent = badge ? (
-    <span css={css`display: flex; align-items: center; gap: 8px;`}>
+    <span
+      css={css`
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      `}
+    >
       {name}
       <EuiBadge
         color="default"
@@ -201,8 +256,12 @@ export const CompactIntegrationCard: React.FC<{
           line-height: 1;
           padding: 0 4px;
           height: 18px;
-          .euiBadge__content { padding: 0; }
-          .euiBadge__text { padding: 0; }
+          .euiBadge__content {
+            padding: 0;
+          }
+          .euiBadge__text {
+            padding: 0;
+          }
         `}
       >
         {badge}

@@ -1,0 +1,19 @@
+import type { Observable } from 'rxjs';
+import type { DatasetQualityControllerStateService, WithFilters, WithTableOptions } from '../../state_machines/dataset_quality_controller';
+export interface DatasetQualityController {
+    state$: Observable<DatasetQualityPublicState>;
+    service: DatasetQualityControllerStateService;
+}
+type TableSortOptions = Omit<WithTableOptions['table']['sort'], 'field'> & {
+    field: string;
+};
+export type DatasetQualityTableOptions = Partial<Omit<WithTableOptions['table'], 'sort'> & {
+    sort: TableSortOptions;
+}>;
+export type DatasetQualityFilterOptions = Partial<WithFilters['filters']>;
+export interface DatasetQualityPublicState {
+    table: DatasetQualityTableOptions;
+    filters: DatasetQualityFilterOptions;
+}
+export type DatasetQualityPublicStateUpdate = Partial<DatasetQualityPublicState>;
+export {};

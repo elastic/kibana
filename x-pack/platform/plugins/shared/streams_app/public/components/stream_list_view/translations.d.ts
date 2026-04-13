@@ -1,0 +1,14 @@
+export declare const NAME_COLUMN_HEADER: string;
+export declare const FAILURE_STORE_PERMISSIONS_ERROR: string;
+export declare const DOCUMENTS_COLUMN_HEADER: string;
+export declare const DATA_QUALITY_COLUMN_HEADER: string;
+export declare const RETENTION_COLUMN_HEADER: string;
+export declare const RETENTION_COLUMN_HEADER_ARIA_LABEL: string;
+export declare const NO_STREAMS_MESSAGE: string;
+export declare const STREAMS_TABLE_SEARCH_ARIA_LABEL: string;
+export declare const STREAMS_TABLE_CAPTION_ARIA_LABEL: string;
+export declare const NO_DATA_SHORT_LABEL: string;
+export declare const DOCUMENTS_NO_DATA_ICON_ARIA_LABEL: string;
+export declare const INDEFINITE_RETENTION_ARIA_LABEL: string;
+export declare const INDEFINITE_RETENTION_LABEL: string;
+export declare const NO_RETENTION_LABEL: string;

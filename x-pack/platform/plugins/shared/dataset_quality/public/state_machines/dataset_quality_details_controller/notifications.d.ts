@@ -1,0 +1,10 @@
+import type { IToasts } from '@kbn/core-notifications-browser';
+export declare const fetchDataStreamDetailsFailedNotifier: (toasts: IToasts, error: Error) => void;
+export declare const assertBreakdownFieldEcsFailedNotifier: (toasts: IToasts, error: Error) => void;
+export declare const fetchDataStreamSettingsFailedNotifier: (toasts: IToasts, error: Error) => void;
+export declare const fetchIntegrationDashboardsFailedNotifier: (toasts: IToasts, error: Error) => void;
+export declare const fetchDataStreamIntegrationFailedNotifier: (toasts: IToasts, error: Error) => void;
+export declare const updateFieldLimitFailedNotifier: (toasts: IToasts, error: Error) => void;
+export declare const rolloverDataStreamFailedNotifier: (toasts: IToasts, error: Error, dataStream: string) => void;
+export declare const updateFailureStoreFailedNotifier: (toasts: IToasts, error: Error) => void;
+export declare const updateFailureStoreSuccessNotifier: (toasts: IToasts) => void;
