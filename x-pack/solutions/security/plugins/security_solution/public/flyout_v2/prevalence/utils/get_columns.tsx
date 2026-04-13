@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { IS_OPERATOR } from '@kbn/timelines-plugin/common';
 import type { IdentityFields } from '../../../flyout/document_details/shared/utils';
@@ -314,7 +314,11 @@ export const getColumns = (
   /**
    * Scope id for cell actions
    */
-  scopeId: string
+  scopeId: string,
+  /**
+   * Callback to open the network details flyout for a given IP
+   */
+  onShowNetworkDetails?: (ip: string) => void
 ): Array<EuiBasicTableColumn<PrevalenceDetailsRow>> => [
   fieldColumn,
   {
@@ -325,24 +329,38 @@ export const getColumns = (
       />
     ),
     'data-test-subj': PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
-    render: (data: PrevalenceDetailsRow) => (
-      <EuiFlexGroup direction="column" gutterSize="none">
-        {data.values.map((value) => (
-          <EuiFlexItem key={value}>
-            {renderCellActions ? (
-              renderCellActions({
-                field: data.field,
-                value,
-                scopeId,
-                children: <EuiText size="xs">{value}</EuiText>,
-              })
-            ) : (
+    render: (data: PrevalenceDetailsRow) => {
+      const renderValue = (value: string) => {
+        if (data.field === 'source.ip') {
+          const handleClick = () => {
+            onShowNetworkDetails?.(value);
+          };
+          return (
+            <EuiLink onClick={handleClick}>
               <EuiText size="xs">{value}</EuiText>
-            )}
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    ),
+            </EuiLink>
+          );
+        }
+        return <EuiText size="xs">{value}</EuiText>;
+      };
+
+      return (
+        <EuiFlexGroup direction="column" gutterSize="none">
+          {data.values.map((value) => (
+            <EuiFlexItem key={value}>
+              {renderCellActions
+                ? renderCellActions({
+                    field: data.field,
+                    value,
+                    scopeId,
+                    children: renderValue(value),
+                  })
+                : renderValue(value)}
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      );
+    },
     width: '20%',
   },
   alertCountColumn(isInSecurityApp),
