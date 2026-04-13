@@ -119,7 +119,7 @@ export const registerDashboardAttachmentUiDefinition = ({
           icon: 'eye',
           type: ActionButtonType.SECONDARY,
           handler: () => {
-            // sidebar in dashboard experience - syncronize dashboard app to attachmen
+            // sidebar in dashboard experience - synchronize dashboard app to attachment
             if (dashboardApi) {
               return previewAttachmentInDashboard({
                 attachment,
