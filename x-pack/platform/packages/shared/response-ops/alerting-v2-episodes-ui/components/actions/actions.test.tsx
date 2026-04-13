@@ -10,26 +10,35 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { AlertEpisodeActions } from './actions';
 import { useCreateAlertAction } from '../../hooks/use_create_alert_action';
+import { useFetchAlertEpisodeTagSuggestions } from '../../hooks/use_fetch_alert_episode_tag_suggestions';
 
 jest.mock('../../hooks/use_create_alert_action');
+jest.mock('../../hooks/use_fetch_alert_episode_tag_suggestions');
 
 const useCreateAlertActionMock = jest.mocked(useCreateAlertAction);
+const useFetchAlertEpisodeTagSuggestionsMock = jest.mocked(useFetchAlertEpisodeTagSuggestions);
 
 const mockHttp: HttpStart = httpServiceMock.createStartContract();
+const mockExpressions = expressionsPluginMock.createStartContract();
+
+useCreateAlertActionMock.mockReturnValue({
+  mutate: jest.fn(),
+  isLoading: false,
+} as unknown as ReturnType<typeof useCreateAlertAction>);
+useFetchAlertEpisodeTagSuggestionsMock.mockReturnValue({
+  data: [],
+  isLoading: false,
+  isError: false,
+  isSuccess: true,
+} as unknown as ReturnType<typeof useFetchAlertEpisodeTagSuggestions>);
 
 describe('AlertEpisodeActionsCell', () => {
-  beforeEach(() => {
-    useCreateAlertActionMock.mockReturnValue({
-      mutate: jest.fn(),
-      isLoading: false,
-    } as unknown as ReturnType<typeof useCreateAlertAction>);
-  });
-
   it('renders acknowledge, snooze, and more-actions controls', () => {
-    render(<AlertEpisodeActions http={mockHttp} />);
+    render(<AlertEpisodeActions http={mockHttp} expressions={mockExpressions} />);
     expect(screen.getByTestId('alertEpisodeAcknowledgeActionButton')).toBeInTheDocument();
     expect(screen.getByTestId('alertEpisodeSnoozeActionButton')).toBeInTheDocument();
     expect(screen.getByTestId('alertingEpisodeActionsMoreButton')).toBeInTheDocument();
@@ -39,6 +48,7 @@ describe('AlertEpisodeActionsCell', () => {
     render(
       <AlertEpisodeActions
         http={mockHttp}
+        expressions={mockExpressions}
         viewDetailsHref="/app/management/alertingV2/episodes/ep-1"
       />
     );
@@ -53,6 +63,7 @@ describe('AlertEpisodeActionsCell', () => {
     render(
       <AlertEpisodeActions
         http={mockHttp}
+        expressions={mockExpressions}
         groupAction={{
           groupHash: 'g1',
           ruleId: 'r1',
@@ -72,6 +83,7 @@ describe('AlertEpisodeActionsCell', () => {
     render(
       <AlertEpisodeActions
         http={mockHttp}
+        expressions={mockExpressions}
         groupAction={{
           groupHash: 'g1',
           ruleId: 'r1',
@@ -84,5 +96,26 @@ describe('AlertEpisodeActionsCell', () => {
     );
     await user.click(screen.getByTestId('alertingEpisodeActionsMoreButton'));
     expect(screen.getByText('Unresolve')).toBeInTheDocument();
+  });
+
+  it('shows Edit Tags in the more-actions menu', async () => {
+    const user = userEvent.setup();
+    render(
+      <AlertEpisodeActions
+        http={mockHttp}
+        expressions={mockExpressions}
+        groupAction={{
+          groupHash: 'g1',
+          ruleId: 'r1',
+          lastDeactivateAction: null,
+          lastSnoozeAction: null,
+          snoozeExpiry: null,
+          tags: [],
+        }}
+      />
+    );
+    await user.click(screen.getByTestId('alertingEpisodeActionsMoreButton'));
+    expect(screen.getByTestId('alertingEpisodeActionsTagsButton')).toBeInTheDocument();
+    expect(screen.getByText('Edit Tags')).toBeInTheDocument();
   });
 });
