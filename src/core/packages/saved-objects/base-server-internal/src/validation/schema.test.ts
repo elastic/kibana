@@ -35,7 +35,7 @@ describe('Saved Objects type validation schema', () => {
     expect(() => {
       createSavedObjectSanitizedDocValidator(mySchema);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Attributes schema unknown. Must be defined with \`@kbn/zod\` or \`@kbn/config-schema\`."`
+      `"Unknown attributes schema. Must be defined with \`@kbn/zod\` or \`@kbn/config-schema\`."`
     );
   });
 
