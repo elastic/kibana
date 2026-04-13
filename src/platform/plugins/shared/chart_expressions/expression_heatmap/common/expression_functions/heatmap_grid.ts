@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { EXPRESSION_HEATMAP_GRID_NAME } from '../constants';
+import { EXPRESSION_HEATMAP_GRID_NAME, HeatmapScaleTypes } from '../constants';
 import type { HeatmapGridConfig, HeatmapGridConfigResult } from '../types';
 
 export const heatmapGridConfig: ExpressionFunctionDefinition<
@@ -103,6 +103,14 @@ export const heatmapGridConfig: ExpressionFunctionDefinition<
       types: ['string'],
       help: i18n.translate('expressionHeatmap.function.args.grid.xSortPredicate.help', {
         defaultMessage: 'Specifies the sort order for the X-axis (asc, desc)',
+      }),
+      required: false,
+    },
+    xScaleType: {
+      types: ['string'],
+      options: [...Object.values(HeatmapScaleTypes)],
+      help: i18n.translate('expressionHeatmap.function.args.grid.xScaleType.help', {
+        defaultMessage: 'Specifies the scale type for the X-axis (time, linear, ordinal)',
       }),
       required: false,
     },

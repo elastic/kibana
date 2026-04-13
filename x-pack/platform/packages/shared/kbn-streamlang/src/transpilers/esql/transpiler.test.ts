@@ -15,27 +15,27 @@ import {
 } from '../shared/mocks/test_dsls';
 
 describe('transpile - Streamlang DSL to ES|QL)', () => {
-  it('should transpile a variety of processor steps and where blocks', () => {
-    const result = transpile(comprehensiveTestDSL);
+  it('should transpile a variety of processor steps and where blocks', async () => {
+    const result = await transpile(comprehensiveTestDSL);
     expect(result.query).toMatchSnapshot();
   });
 
-  it('should handle not conditions', () => {
-    const result = transpile(notConditionsTestDSL);
+  it('should handle not conditions', async () => {
+    const result = await transpile(notConditionsTestDSL);
     expect(result.query).toMatchSnapshot();
   });
 
-  it('should handle type coercions', () => {
-    const result = transpile(typeCoercionsTestDSL);
+  it('should handle type coercions', async () => {
+    const result = await transpile(typeCoercionsTestDSL);
     expect(result).toMatchSnapshot();
   });
 
-  it('should warn when manual_ingest_pipeline is used', () => {
-    const result = transpile(manualIngestPipelineTestDSL);
+  it('should warn when manual_ingest_pipeline is used', async () => {
+    const result = await transpile(manualIngestPipelineTestDSL);
     expect(result.query).toMatchSnapshot();
   });
 
-  it('should reject mustache template syntax in json_extract field names', () => {
+  it('should reject mustache template syntax in json_extract field names', async () => {
     const dsl = {
       steps: [
         {
@@ -46,10 +46,10 @@ describe('transpile - Streamlang DSL to ES|QL)', () => {
       ],
     } as unknown as StreamlangDSL;
 
-    expect(() => transpile(dsl)).toThrow();
+    await expect(transpile(dsl)).rejects.toThrow();
   });
 
-  it('should reject invalid json_extract selectors', () => {
+  it('should reject invalid json_extract selectors', async () => {
     const dsl = {
       steps: [
         {
@@ -60,6 +60,6 @@ describe('transpile - Streamlang DSL to ES|QL)', () => {
       ],
     } as unknown as StreamlangDSL;
 
-    expect(() => transpile(dsl)).toThrow('consecutive dots');
+    await expect(transpile(dsl)).rejects.toThrow('consecutive dots');
   });
 });

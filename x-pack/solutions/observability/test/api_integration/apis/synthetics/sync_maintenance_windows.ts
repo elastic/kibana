@@ -109,7 +109,7 @@ export default function ({ getService }: FtrProviderContext) {
             lon: 0,
           },
           agentPolicyId: testFleetPolicyID,
-          spaces: ['*'],
+          spaces: ['default'],
         },
       ];
       expect(apiResponse.body.locations).eql(testLocations);

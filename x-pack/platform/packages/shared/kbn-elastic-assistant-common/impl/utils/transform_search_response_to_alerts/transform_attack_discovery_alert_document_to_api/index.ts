@@ -47,11 +47,13 @@ export const transformAttackDiscoveryAlertDocumentToApi = ({
   attackDiscoveryAlertDocument,
   enableFieldRendering,
   id,
+  index,
   withReplacements,
 }: {
   attackDiscoveryAlertDocument: AttackDiscoveryAlertDocument;
   enableFieldRendering: boolean;
   id: string;
+  index?: string;
   withReplacements: boolean;
 }): AttackDiscoveryApiAlert => {
   const doc = attackDiscoveryAlertDocument as Record<string, unknown>;
@@ -157,5 +159,6 @@ export const transformAttackDiscoveryAlertDocumentToApi = ({
       : undefined,
     assignees: attackDiscoveryAlertDocument[ALERT_WORKFLOW_ASSIGNEE_IDS],
     tags: attackDiscoveryAlertDocument[ALERT_WORKFLOW_TAGS],
+    index,
   };
 };

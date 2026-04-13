@@ -207,7 +207,7 @@ export function HeaderActions({
                 disabled={isLoading}
                 fill
                 iconSide="right"
-                iconType="arrowDown"
+                iconType="chevronSingleDown"
                 onClick={togglePopover}
               >
                 {i18n.translate('xpack.observability.ruleDetails.actionsButtonLabel', {

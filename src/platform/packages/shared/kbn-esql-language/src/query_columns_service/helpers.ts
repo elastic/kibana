@@ -125,8 +125,8 @@ export function getUnmappedFields(
   previousPipeFields: ESQLColumnData[],
   unmappedFieldsStrategy?: UnmappedFieldsStrategy
 ): ESQLColumnData[] {
-  // Not collect unmmaped fields if the strategy is FAIL or undefined
-  if (!unmappedFieldsStrategy || unmappedFieldsStrategy === UnmappedFieldsStrategy.FAIL) {
+  // Not collect unmmaped fields if the strategy is DEFAULT or undefined
+  if (!unmappedFieldsStrategy || unmappedFieldsStrategy === UnmappedFieldsStrategy.DEFAULT) {
     return [];
   }
 
@@ -206,7 +206,7 @@ export async function getCurrentQueryAvailableColumns(
       fields,
       originalQueryText,
       additionalFields,
-      unmappedFieldsStrategy ?? UnmappedFieldsStrategy.FAIL
+      unmappedFieldsStrategy ?? UnmappedFieldsStrategy.DEFAULT
     );
   }
   return fields;
