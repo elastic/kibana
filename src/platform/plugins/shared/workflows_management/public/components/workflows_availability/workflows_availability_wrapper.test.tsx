@@ -156,7 +156,7 @@ describe('WorkflowsAvailabilityWrapper', () => {
       expect(screen.getByText('Security Complete')).toBeInTheDocument();
     });
 
-    it('should show contact admin text when billing URL is not available', () => {
+    it('should show contact admin text when billing URL is not available', async () => {
       mockUseKibanaServices.cloud.getPrivilegedUrls.mockResolvedValue({
         billingUrl: undefined,
       });
@@ -167,9 +167,11 @@ describe('WorkflowsAvailabilityWrapper', () => {
         </WorkflowsAvailabilityWrapper>
       );
 
-      expect(
-        screen.getByText('Contact your administrator to upgrade your subscription.')
-      ).toBeInTheDocument();
+      await waitFor(() =>
+        expect(
+          screen.getByText('Contact your administrator to upgrade your subscription.')
+        ).toBeInTheDocument()
+      );
     });
 
     it('should show manage subscription button when billing URL is available', async () => {
