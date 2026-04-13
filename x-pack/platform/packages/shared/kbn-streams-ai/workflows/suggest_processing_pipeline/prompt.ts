@@ -58,14 +58,13 @@ export const SuggestIngestPipelinePrompt = createPrompt({
       },
       commit_pipeline: {
         description:
-          'Finalize the pipeline after your analysis is complete. Call this when: (1) simulate_pipeline passes with acceptable metrics, OR (2) you determine no pipeline is needed for already-structured data. For structured data that does not need processing, commit with { "steps": [] }.',
+          'Finalize the pipeline after simulation passes (valid: true, no temporary_fields). Only commit { "steps": [] } after verifying the Inspection checklist in the system prompt—all five checks must pass.',
         schema: {
           type: 'object',
           properties: {
             pipeline: {
               type: 'object',
-              description:
-                'The pipeline definition object containing processing steps. Use { "steps": [] } if no processing is needed.',
+              description: 'The pipeline definition object containing processing steps.',
               properties: {},
             },
           },
