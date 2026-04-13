@@ -151,15 +151,20 @@ These are the same creation gates summarized above, repeated here as a quick che
 - **Failed authentication events** (`event.outcome = failure`) are excluded from medium-confidence creation — a brute-force attempt against `admin@host` must not create a phantom entity.
 - **Service accounts** are excluded from the local namespace: `root`, `bin`, `daemon`, `sys`, `nobody`, `jenkins`, `ansible`, `deploy`, `terraform`, `gitlab-runner`, `postgres`, `mysql`, `redis`, `elasticsearch`, `kafka`, `admin`, `operator`, `service`.
 
-## Host Entities
 
-Linear ranking, no branches:
+## Host Entities — Ranked Single-Field Fallback
 
-| Priority | EUID Format | Example |
-|----------|-------------|---------|
-| 1 | `host:{host.id}` | `host:550e8400-e29b-41d4-a716-446655440000` |
-| 2 | `host:{host.name}` | `host:web-prod-01` |
-| 3 | `host:{host.hostname}` | `host:web-prod-01.corp.acme.com` |
+Host EUIDs use a **priority-ranked fallback chain** with no namespace concept. The first field present wins:
+
+| Priority | EUID Output            | Source Field    |
+| -------- | ---------------------- | --------------- |
+| 1        | `host:{host.id}`       | `host.id`       |
+| 2        | `host:{host.name}`     | `host.name`     |
+| 3        | `host:{host.hostname}` | `host.hostname` |
+
+**Example:** A machine with `host.id = HW-UUID-ABC123` produces EUID `host:HW-UUID-ABC123`. If that same machine were seen by an integration that only reports `host.name = prod-web-01`, and `host.id` is absent, the EUID would be `host:prod-web-01` — a **different entity**. This is the primary testing pitfall for hosts: the same physical machine can appear as two entities if different integrations populate different identity fields.
+
+**Strategic motivation:** Host identity is simpler than user identity — there is no namespace. Any integration reporting `host.id`, `host.name`, or `host.hostname` can create or enrich a host entity. The ranking prefers `host.id` (hardware UUID, most stable) but falls back to DNS names when that is all an integration provides (common for network sensors, firewalls, and SIEMs that lack agent-level host instrumentation).
 
 ## Service Entities
 
