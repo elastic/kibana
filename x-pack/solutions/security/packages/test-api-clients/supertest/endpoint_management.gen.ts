@@ -292,6 +292,9 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
+  /**
+   * Get the most recent policy response for an endpoint.
+   */
   getPolicyResponse(props: GetPolicyResponseProps, kibanaSpace: string = 'default') {
     return supertest
       .get(getRouteUrlForSpace('/api/endpoint/policy_response', kibanaSpace))
