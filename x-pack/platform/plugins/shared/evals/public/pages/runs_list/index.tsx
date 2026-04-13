@@ -9,6 +9,8 @@ import React, { useState, useMemo } from 'react';
 import {
   EuiBasicTable,
   EuiBadge,
+  EuiButton,
+  EuiEmptyPrompt,
   EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,7 +18,6 @@ import {
   EuiPageSection,
   EuiSelect,
   EuiSpacer,
-  EuiText,
   useEuiTheme,
   type EuiBasicTableColumn,
   type CriteriaWithPagination,
@@ -35,7 +36,7 @@ export const RunsListPage: React.FC = () => {
   const [searchText, setSearchText] = useState('');
   const [suiteIdFilter, setSuiteIdFilter] = useState('');
 
-  const { data, isLoading, error } = useEvaluationRuns({
+  const { data, isLoading, error, refetch } = useEvaluationRuns({
     page: pageIndex + 1,
     perPage: pageSize,
     branch: searchText || undefined,
@@ -194,24 +195,31 @@ export const RunsListPage: React.FC = () => {
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       {error ? (
-        <>
-          <EuiText color="danger" size="s">
-            <p>{String(error)}</p>
-          </EuiText>
-          <EuiSpacer size="m" />
-        </>
-      ) : null}
-      <EuiBasicTable<EvaluationRunSummary>
-        items={data?.runs ?? []}
-        columns={columns}
-        loading={isLoading}
-        pagination={pagination}
-        onChange={onTableChange}
-        rowProps={(item) => ({
-          onClick: () => history.push(`/runs/${item.run_id}`),
-          style: { cursor: 'pointer' },
-        })}
-      />
+        <EuiEmptyPrompt
+          color="danger"
+          iconType="warning"
+          title={<h2>{i18n.LOAD_ERROR_TITLE}</h2>}
+          body={<p>{i18n.getLoadErrorBody(String(error))}</p>}
+          actions={[
+            <EuiButton onClick={() => refetch()} iconType="refresh">
+              {i18n.RETRY_BUTTON}
+            </EuiButton>,
+          ]}
+        />
+      ) : (
+        <EuiBasicTable<EvaluationRunSummary>
+          tableCaption={i18n.TABLE_CAPTION}
+          items={data?.runs ?? []}
+          columns={columns}
+          loading={isLoading}
+          pagination={pagination}
+          onChange={onTableChange}
+          rowProps={(item) => ({
+            onClick: () => history.push(`/runs/${item.run_id}`),
+            style: { cursor: 'pointer' },
+          })}
+        />
+      )}
     </EuiPageSection>
   );
 };
