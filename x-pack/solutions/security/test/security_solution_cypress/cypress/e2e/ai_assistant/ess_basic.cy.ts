@@ -6,7 +6,6 @@
  */
 
 import { startBasicLicense } from '../../tasks/api_calls/licensing';
-import { setPreferredChatExperienceToClassic } from '../../tasks/api_calls/kibana_advanced_settings';
 import { UPGRADE_CTA } from '../../screens/ai_assistant';
 import { login } from '../../tasks/login';
 import { assertConversationReadOnly, openAssistant } from '../../tasks/assistant';
@@ -15,7 +14,6 @@ import { visitGetStartedPage } from '../../tasks/navigation';
 describe('AI Assistant - Basic License', { tags: ['@ess'] }, () => {
   beforeEach(() => {
     login();
-    setPreferredChatExperienceToClassic();
     startBasicLicense();
     visitGetStartedPage();
   });

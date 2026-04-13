@@ -90,13 +90,6 @@ export const generateConfig = async ({
         ...kbnServerArgs,
       ],
     },
-    uiSettings: {
-      ...baseConfig.get('uiSettings'),
-      globalDefaults: {
-        ...baseConfig.get('uiSettings.globalDefaults'),
-        hideAnnouncements: true,
-      },
-    },
     layout: {
       fixedHeaderHeight: 200,
     },

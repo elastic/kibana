@@ -16,8 +16,7 @@ spaceTest.describe(
   'GenAI Settings - AI Selection Modal Changes',
   { tag: [...tags.stateful.classic] },
   () => {
-    spaceTest.beforeEach(async ({ browserAuth, pageObjects, scoutSpace }) => {
-      await scoutSpace.uiSettings.set({ [AI_CHAT_EXPERIENCE_TYPE]: AIChatExperience.Classic });
+    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsPrivilegedUser();
       await pageObjects.genAiSettings.navigateTo();
     });

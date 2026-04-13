@@ -16,8 +16,7 @@ project:
   channel: ''
   owner: '@elastic/search-kibana'
   sourceRoot: x-pack/platform/packages/shared/ai-assistant/common
-dependsOn:
-  - '@kbn/core-capabilities-common'
+dependsOn: []
 tags:
   - shared-common
   - package

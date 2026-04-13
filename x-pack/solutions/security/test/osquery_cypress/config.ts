@@ -56,12 +56,5 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.packages.0.version=latest`,
       ],
     },
-    uiSettings: {
-      ...xpackFunctionalTestsConfig.get('uiSettings'),
-      globalDefaults: {
-        ...xpackFunctionalTestsConfig.get('uiSettings.globalDefaults'),
-        hideAnnouncements: true,
-      },
-    },
   };
 }

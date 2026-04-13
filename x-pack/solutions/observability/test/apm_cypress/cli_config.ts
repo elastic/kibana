@@ -45,13 +45,6 @@ async function ftrConfig({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
       ],
     },
-    uiSettings: {
-      ...xpackFunctionalTestsConfig.get('uiSettings'),
-      globalDefaults: {
-        ...xpackFunctionalTestsConfig.get('uiSettings.globalDefaults'),
-        hideAnnouncements: true,
-      },
-    },
     testRunner: cypressTestRunner,
   };
 }

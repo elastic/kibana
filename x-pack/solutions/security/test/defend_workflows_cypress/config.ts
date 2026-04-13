@@ -51,12 +51,5 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         )}`,
       ],
     },
-    uiSettings: {
-      ...xpackFunctionalTestsConfig.get('uiSettings'),
-      globalDefaults: {
-        ...xpackFunctionalTestsConfig.get('uiSettings.globalDefaults'),
-        hideAnnouncements: true,
-      },
-    },
   };
 }

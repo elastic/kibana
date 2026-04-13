@@ -26,8 +26,6 @@ export interface ExternalRouteDeps {
   usageStatsServicePromise: Promise<UsageStatsServiceSetup>;
   log: Logger;
   isServerless: boolean;
-  /** Required for {@link initPostSpacesApi} (stateful space create seeds UI settings). */
-  packageInfo?: { version: string; buildNum: number };
 }
 
 export function initExternalSpacesApi(deps: ExternalRouteDeps) {

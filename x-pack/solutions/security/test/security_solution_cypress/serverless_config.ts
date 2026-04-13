@@ -42,11 +42,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         wait: FLEET_PLUGIN_READY_LOG_MESSAGE_REGEXP,
       },
     },
-    uiSettings: {
-      globalDefaults: {
-        hideAnnouncements: true,
-      },
-    },
     testRunner: SecuritySolutionConfigurableCypressTestRunner,
   };
 }
