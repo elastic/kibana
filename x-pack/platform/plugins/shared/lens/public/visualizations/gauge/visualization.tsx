@@ -40,7 +40,11 @@ import type { GaugeVisualizationState } from './constants';
 import { GROUP_ID, LENS_GAUGE_ID } from './constants';
 import { GaugeDimensionEditor } from './dimension_editor';
 import { generateId } from '../../id_generator';
-import { getAccessorsFromState, getDefaultPalette } from './utils';
+import {
+  getAccessorsFromState,
+  getDefaultPalette,
+  resolveGaugePaletteForExpression,
+} from './utils';
 import {
   GAUGE_GOAL_GT_MAX,
   GAUGE_METRIC_GT_MAX,
@@ -142,17 +146,20 @@ const toExpression = (
     return null;
   }
 
+  const { colorMode: resolvedColorMode, palette: resolvedPalette } =
+    resolveGaugePaletteForExpression(paletteService, state);
+
   const gaugeFn = buildExpressionFunction<GaugeExpressionFunctionDefinition>('gauge', {
     metric: state.metricAccessor,
     min: state.minAccessor,
     max: state.maxAccessor,
     goal: state.goalAccessor,
     shape: state.shape ?? GaugeShapes.HORIZONTAL_BULLET,
-    colorMode: state?.colorMode ?? 'none',
-    palette: state.palette?.params
+    colorMode: resolvedColorMode,
+    palette: resolvedPalette
       ? paletteService
           .get(CUSTOM_PALETTE)
-          .toExpression(computePaletteParams(paletteService, state.palette))
+          .toExpression(computePaletteParams(paletteService, resolvedPalette))
       : undefined,
     ticksPosition: state.ticksPosition ?? 'auto',
     labelMinor: state.labelMinor,
@@ -672,7 +679,12 @@ function getConfigurationAccessorsAndPalette(
   paletteService: PaletteRegistry,
   activeData?: FramePublicAPI['activeData']
 ) {
-  const hasColoring = Boolean(state.colorMode !== 'none' && state.palette?.params?.stops);
+  const { colorMode: effectiveColorMode, palette: effectivePalette } =
+    resolveGaugePaletteForExpression(paletteService, state);
+
+  const hasColoring = Boolean(
+    effectiveColorMode !== 'none' && effectivePalette != null && effectivePalette.params?.stops
+  );
 
   const row = getActiveDataForLayer(state?.layerId, activeData)?.rows?.[0];
   const { metricAccessor } = state ?? {};
@@ -680,12 +692,12 @@ function getConfigurationAccessorsAndPalette(
   const accessors = getAccessorsFromState(state);
 
   let palette;
-  if (row != null && metricAccessor != null && state?.palette != null && hasColoring) {
+  if (row != null && metricAccessor != null && effectivePalette != null && hasColoring) {
     const currentMinMax = {
       min: getMinValue(row, accessors),
       max: getMaxValue(row, accessors),
     };
-    const displayStops = applyPaletteParams(paletteService, state?.palette, currentMinMax);
+    const displayStops = applyPaletteParams(paletteService, effectivePalette, currentMinMax);
     palette = displayStops.map(({ color }) => color);
   }
   return { metricAccessor, accessors, palette };
