@@ -60,16 +60,13 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
     newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields
   ) as BrowserFields;
 
-  // Trigger the package installation
+  // Initialize dependencies of certain Security Solution areas and features
   useSecuritySolutionInitialization([
     INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
     INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
     INITIALIZATION_FLOW_INIT_AI_PROMPTS,
+    INITIALIZATION_FLOW_INIT_DETECTION_ENGINE_RULE_MONITORING,
   ]);
-
-  // Trigger the installation of monitoring assets in parallel
-  // since `INITIALIZATION_FLOW_INIT_PREBUILT_RULES` blocks until it is finished
-  useSecuritySolutionInitialization([INITIALIZATION_FLOW_INIT_DETECTION_ENGINE_RULE_MONITORING]);
 
   return (
     <SecuritySolutionAppWrapper id="security-solution-app" className="kbnAppWrapper">
