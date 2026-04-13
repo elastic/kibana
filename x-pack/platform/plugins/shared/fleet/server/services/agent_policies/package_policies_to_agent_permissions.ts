@@ -235,21 +235,11 @@ export function storedPackagePoliciesToAgentPermissions(
                   if (isOtelInput && stream.data_stream.type === 'traces') {
                     // Span events are logs-*-* using the same data_stream.dataset as OTTL routing
                     // (getFullInputStreams + generateOtelTypeTransforms spanevent); include stream var override.
-                    const datasetVarRaw = stream.vars?.[DATASET_VAR_NAME]?.value;
-                    let spanEventDataset =
+                    const baseDataset =
                       stream.compiled_stream?.data_stream?.dataset ?? stream.data_stream.dataset;
-                    if (
-                      datasetVarRaw !== undefined &&
-                      datasetVarRaw !== null &&
-                      datasetVarRaw !== ''
-                    ) {
-                      spanEventDataset =
-                        typeof datasetVarRaw === 'object' &&
-                        datasetVarRaw !== null &&
-                        'dataset' in datasetVarRaw
-                          ? (datasetVarRaw as { dataset: string }).dataset
-                          : String(datasetVarRaw);
-                    }
+                    const spanEventDataset =
+                      extractOtelDatasetVarOverride(stream.vars?.[DATASET_VAR_NAME]?.value) ??
+                      baseDataset;
                     dataStreams_.push({
                       type: 'logs',
                       dataset: spanEventDataset,
@@ -344,6 +334,26 @@ export function getDataStreamPrivileges(
     privileges,
   };
 }
+
+/** Resolves `data_stream.dataset` stream var for OTel span-event index permissions; invalid shapes fall back via undefined. */
+const extractOtelDatasetVarOverride = (raw: unknown): string | undefined => {
+  if (raw === undefined || raw === null || raw === '') {
+    return undefined;
+  }
+  if (typeof raw === 'string') {
+    const trimmed = raw.trim();
+    return trimmed !== '' ? trimmed : undefined;
+  }
+  if (typeof raw === 'object' && raw !== null && 'dataset' in raw) {
+    const d = (raw as { dataset: unknown }).dataset;
+    if (typeof d === 'string') {
+      const trimmed = d.trim();
+      return trimmed !== '' ? trimmed : undefined;
+    }
+    return undefined;
+  }
+  return undefined;
+};
 
 function universalProfilingPermissions(packagePolicyId: string): [string, SecurityRoleDescriptor] {
   const profilingIndexPattern = 'profiling-*';
