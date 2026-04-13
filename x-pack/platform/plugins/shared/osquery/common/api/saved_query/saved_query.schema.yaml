@@ -132,7 +132,9 @@ paths:
         If the name already exists, a numeric suffix is added (e.g., `_copy_2`).
       operationId: OsqueryCopySavedQuery
       x-codegen-enabled: true
-      x-labels: [ serverless, ess ]
+      #      TODO: Remove the empty x-labels array and uncomment the following line when feature flag is enabled
+      x-labels: [ ]
+      #      x-labels: [serverless, ess]
       parameters:
         - name: id
           in: path
