@@ -25,7 +25,7 @@ export const CanUsePublicLocationsCallout = ({
               defaultMessage="You do not have permission to use Elastic managed locations"
             />
           }
-          iconType="alert"
+          iconType="warning"
         >
           <p>
             <FormattedMessage

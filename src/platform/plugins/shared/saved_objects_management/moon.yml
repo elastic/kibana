@@ -43,6 +43,7 @@ dependsOn:
   - '@kbn/shared-ux-table-persist'
   - '@kbn/css-utils'
   - '@kbn/content-management-plugin'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -54,28 +55,9 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout*/**/*
     - '!target/**/*'
     - '!public/management_section/objects_table/saved_objects_table_pseudo.tsx'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}
