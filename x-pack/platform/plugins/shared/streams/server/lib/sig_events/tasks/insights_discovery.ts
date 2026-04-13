@@ -59,11 +59,13 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                 scopedClusterClient,
                 streamsClient,
                 inferenceClient,
-                queryClient,
+                getQueryClient,
                 insightClient,
               } = await taskContext.getScopedClients({
                 request: runContext.fakeRequest,
               });
+
+              const queryClient = await getQueryClient();
 
               const taskLogger = taskContext.logger.get('insights_discovery');
               const connectorId =
