@@ -13,6 +13,7 @@ import { MAX_WORKFLOW_YAML_LENGTH } from '@kbn/workflows';
 import {
   detectFileFormat,
   isUnsafeWorkflowId,
+  isValidWorkflowId,
   MAX_AGGREGATE_IMPORT_BYTES,
   MAX_IMPORT_WORKFLOWS,
   WorkflowExportManifestSchema,
@@ -122,9 +123,13 @@ async function parseZipFile(buffer: ArrayBuffer): Promise<ClientPreflightResult>
     }
 
     const preview = extractWorkflowPreview(yaml);
+    // If the ZIP filename doesn't conform to the current ID pattern (e.g. a legacy
+    // export with uppercase or underscore characters), fall back to the slug-derived
+    // id as the rewrite key so cross-workflow references can still be resolved.
+    const effectiveOriginalId = isValidWorkflowId(originalId) ? originalId : preview.id;
     workflows.push(preview);
     workflowIds.push(preview.id);
-    rawWorkflows.push({ id: preview.id, originalId, yaml });
+    rawWorkflows.push({ id: preview.id, originalId: effectiveOriginalId, yaml });
   }
 
   if (manifestParsed.data.exportedCount !== workflows.length) {

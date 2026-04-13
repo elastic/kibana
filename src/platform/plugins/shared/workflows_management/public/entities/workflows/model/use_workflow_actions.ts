@@ -9,6 +9,7 @@
 
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useMutation, useQueryClient } from '@kbn/react-query';
+import { WORKFLOW_ID_MAX_LENGTH } from '@kbn/workflows';
 import type {
   RunStepCommand,
   RunWorkflowResponseDto,
@@ -400,7 +401,8 @@ export function useWorkflowActions() {
           let counter = 0;
           // add a numeric postfix to avoid collisions with existing workflows or other workflows in the same import batch
           while (conflictIdMapping.has(id)) {
-            id = `${w.id}-${++counter}`;
+            const suffix = `-${++counter}`;
+            id = `${w.id.slice(0, WORKFLOW_ID_MAX_LENGTH - suffix.length)}${suffix}`;
           }
           // register the resolved ID so the next workflow in the batch cannot collide with it
           conflictIdMapping.add(id);
