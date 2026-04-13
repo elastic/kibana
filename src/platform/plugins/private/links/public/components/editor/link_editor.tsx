@@ -197,7 +197,7 @@ export const LinkEditor = ({
                       return externalLinkOptions;
                     }
 
-                    throw new Error('unexpected options type: ', selectedLinkType)
+                    throw new Error(`unexpected options type: ${selectedLinkType}`)
                   }
                   onSave({
                     label: currentLinkLabel === defaultLinkLabel ? undefined : currentLinkLabel,
