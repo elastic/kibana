@@ -19,6 +19,7 @@ import {
 import type { EuiCheckboxGroupOption } from '@elastic/eui';
 import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { isSiemRuleType } from '@kbn/rule-data-utils';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { WorkflowSelectorWithProvider } from '@kbn/workflows-ui';
 import type { AlertStateId, AlertStates, WorkflowsActionParams } from './types';
@@ -83,13 +84,6 @@ const RUN_PER_ALERT_HELP_TEXT = i18n.translate(
   }
 );
 
-// Security detection rules (ruleTypeId: siem.*) only produce "new" alerts —
-// they have no concept of "ongoing" or "recovered" states. The alert-state
-// checkbox group is hidden for these rules because the setting would have
-// no effect. The ruleTypeId prop is provided by the rule form when rendering
-// the action params component (ActionTypeForm / SystemActionTypeForm).
-const SIEM_RULE_TYPE_PREFIX = 'siem.';
-
 const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<WorkflowsActionParams>> = ({
   actionParams,
   editAction,
@@ -97,7 +91,9 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
   errors,
   ruleTypeId,
 }) => {
-  const isDetectionRule = ruleTypeId?.startsWith(SIEM_RULE_TYPE_PREFIX) ?? false;
+  // Security detection rules only produce "new" alerts and have no concept of
+  // "ongoing" or "recovered" states, so the alert-state checkboxes are hidden.
+  const isDetectionRule = ruleTypeId ? isSiemRuleType(ruleTypeId) : false;
   const { workflowId, summaryMode = true } = actionParams.subActionParams ?? {};
   const alertStates = normalizeAlertStates(actionParams.subActionParams?.alertStates);
 

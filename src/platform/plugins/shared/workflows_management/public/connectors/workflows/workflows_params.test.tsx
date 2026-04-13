@@ -980,6 +980,23 @@ describe('WorkflowsParamsFields', () => {
       });
     });
 
+    test('should hide alert state checkboxes for attack-discovery rules', async () => {
+      const props = {
+        ...defaultProps,
+        ruleTypeId: 'attack-discovery',
+      };
+
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...props} />);
+      });
+
+      await waitFor(() => {
+        expect(screen.queryByLabelText('New alerts')).not.toBeInTheDocument();
+        expect(screen.queryByLabelText('Ongoing alerts')).not.toBeInTheDocument();
+        expect(screen.queryByLabelText('Recovered alerts')).not.toBeInTheDocument();
+      });
+    });
+
     test('should show alert state checkboxes for non-SIEM rules', async () => {
       const props = {
         ...defaultProps,
