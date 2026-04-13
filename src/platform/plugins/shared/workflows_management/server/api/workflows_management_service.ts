@@ -460,7 +460,7 @@ export class WorkflowsService {
     // overwrite each other. Earlier IDs win; later duplicates get a numeric suffix.
     const seenIds = new Set<string>();
     for (let i = 0; i < validWorkflows.length; i++) {
-      let { id } = validWorkflows[i];
+      const { id } = validWorkflows[i];
       if (seenIds.has(id)) {
         let counter = 0;
         let candidate: string;
