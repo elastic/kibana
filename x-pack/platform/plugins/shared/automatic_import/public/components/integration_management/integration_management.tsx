@@ -48,6 +48,8 @@ const IntegrationManagementContents: React.FC<IntegrationManagementContentsProps
   const { deleteIntegrationMutation } = useDeleteIntegration();
   const { submit } = useIntegrationForm();
   const hasDataStreams = (integration?.dataStreams?.length ?? 0) > 0;
+  const isDeletingDataStream =
+    integration?.dataStreams?.some((ds) => ds.status === 'deleting') ?? false;
   const shouldOfferIntegrationDelete = Boolean(
     integrationId && integration && (integration.dataStreams?.length ?? 0) === 0
   );
@@ -105,7 +107,8 @@ const IntegrationManagementContents: React.FC<IntegrationManagementContentsProps
       </KibanaPageTemplate>
       <ButtonsFooter
         onAction={handleDone}
-        isActionDisabled={!hasDataStreams}
+        isActionDisabled={!hasDataStreams || isDeletingDataStream}
+        isCancelDisabled={isDeletingDataStream}
         onCancel={handleCancel}
       />
       {isDeleteIntegrationModalVisible && (
@@ -167,6 +170,7 @@ export const IntegrationManagement = React.memo(() => {
       title: integration.title,
       description: integration.description,
       logo: integration.logo,
+      connectorId: integration.connectorId ?? '',
     };
   }, [integration]);
 

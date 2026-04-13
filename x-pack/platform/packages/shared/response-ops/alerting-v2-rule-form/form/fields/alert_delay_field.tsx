@@ -64,8 +64,9 @@ export const AlertDelayField = () => {
   const { layout } = useRuleFormMeta();
   const stateTransition = useWatch({ control, name: 'stateTransition' });
   const selectedMode = useWatch({ control, name: 'stateTransitionAlertDelayMode' });
+  const derived = selectedMode ?? deriveAlertDelayModeFromStateTransition(stateTransition);
   const displayMode: DelayMode =
-    selectedMode ?? deriveAlertDelayModeFromStateTransition(stateTransition);
+    derived === 'immediate' || derived === 'duration' ? derived : 'breaches';
 
   const onModeChange = useCallback(
     (optionId: string) => {
