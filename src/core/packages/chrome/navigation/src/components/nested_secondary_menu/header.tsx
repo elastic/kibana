@@ -28,8 +28,8 @@ export const Header: FC<HeaderProps> = ({ title, 'aria-describedby': ariaDescrib
 
   const titleStyle = css`
     align-items: center;
-    background: ${euiTheme.colors.backgroundBasePlain};
-    border-radius: ${euiTheme.border.radius.medium};
+    background: ${euiTheme.colors.body};
+    border-radius: 0;
     display: flex;
     gap: ${euiTheme.size.s};
     ${headerStyle}

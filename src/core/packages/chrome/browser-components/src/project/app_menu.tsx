@@ -57,7 +57,7 @@ const getAccessibleTitleFromBreadcrumb = (
 const noop = () => {};
 
 /** Fallback when `AppMenuBar` unmounts; matches `grid_layout` default `applicationTopBarHeight`. */
-const PROJECT_APP_MENU_BAR_HEIGHT_DEFAULT = 48;
+const PROJECT_APP_MENU_BAR_HEIGHT_DEFAULT = 49;
 
 const canNavigateToParent = (crumb: ChromeBreadcrumb | undefined): boolean => {
   if (!crumb) {

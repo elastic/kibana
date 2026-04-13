@@ -37,29 +37,40 @@ const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
     const { euiTheme } = useEuiTheme();
     const headerStyle = useMenuHeaderStyle();
 
-    const titleWithBadgeStyles = css`
+    const headerRowStyles = css`
+      ${headerStyle}
       display: flex;
+      flex-direction: row;
       align-items: center;
       gap: ${euiTheme.size.xs};
+      /* Page canvas behind transparent nav ({@link GridLayoutGlobalStyles} html gradient, `colors.body`) */
+      background: ${euiTheme.colors.body};
+      border-radius: 0;
     `;
 
-    const titleStyles = css`
-      ${headerStyle}
-      background: ${euiTheme.colors.backgroundBasePlain};
-      border-radius: ${euiTheme.border.radius.medium};
+    const titleEuiStyles = css`
+      flex: 1;
+      min-width: 0;
+      min-height: 0;
+      margin: 0;
+      align-self: stretch;
+      display: flex;
+      align-items: center;
+      line-height: 1.25;
+      padding-block: 0;
     `;
 
     return (
       <div ref={ref}>
-        <EuiTitle css={titleStyles} size="xs">
-          <div css={titleWithBadgeStyles}>
+        <div css={headerRowStyles}>
+          <EuiTitle css={titleEuiStyles} size="xs">
             <h4>{title}</h4>
-            {/* Always show non-new badges, only show new ones if isNew check allows it */}
-            {badgeType && (badgeType !== 'new' || isNew) && (
-              <BetaBadge type={badgeType} alignment="text-bottom" />
-            )}
-          </div>
-        </EuiTitle>
+          </EuiTitle>
+          {/* Always show non-new badges, only show new ones if isNew check allows it */}
+          {badgeType && (badgeType !== 'new' || isNew) ? (
+            <BetaBadge type={badgeType} alignment="text-bottom" />
+          ) : null}
+        </div>
         {children}
       </div>
     );

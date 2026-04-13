@@ -68,6 +68,8 @@ export const SecondaryMenuItemComponent = ({
     ...(isExternal && { target: '_blank' }),
   };
 
+  const labelColor = isHighlighted ? euiTheme.colors.textParagraph : euiTheme.colors.textSubdued;
+
   const buttonStyles = css`
     font-weight: ${isHighlighted ? euiTheme.font.weight.semiBold : euiTheme.font.weight.regular};
     // 6px comes from Figma, no token
@@ -75,8 +77,21 @@ export const SecondaryMenuItemComponent = ({
     width: 100%;
 
     &&,
-    && .euiButtonContent {
-      color: ${isHighlighted ? euiTheme.colors.textParagraph : euiTheme.colors.textSubdued};
+    && .euiButtonEmpty__content,
+    && [class*='euiButtonDisplayContent'] {
+      color: ${labelColor};
+    }
+
+    &&:hover:not(:disabled),
+    &&:hover:not(:disabled) .euiButtonEmpty__content,
+    &&:hover:not(:disabled) [class*='euiButtonDisplayContent'] {
+      color: ${labelColor};
+    }
+
+    &&:focus-visible,
+    &&:focus-visible .euiButtonEmpty__content,
+    &&:focus-visible [class*='euiButtonDisplayContent'] {
+      color: ${labelColor};
     }
 
     > span {
@@ -87,9 +102,7 @@ export const SecondaryMenuItemComponent = ({
       color: ${iconSide === 'right' ? euiTheme.colors.textDisabled : 'inherit'};
     }
 
-    --high-contrast-hover-indicator-color: ${isHighlighted
-      ? euiTheme.colors.textParagraph
-      : euiTheme.colors.textSubdued};
+    --high-contrast-hover-indicator-color: ${labelColor};
 
     ${isHighlighted
       ? css`

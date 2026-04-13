@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 
 import { SpacesMenu } from './components/spaces_menu';
 import { useSpaces } from './hooks/use_spaces';
+import { ProjectChromeSwitcherRootMenu } from './project_chrome_switcher_root_menu';
 import type { Space } from '../../common';
 import type { EventTracker } from '../analytics';
 import { getSpaceSolutionIconType } from '../space_solution_badge';
@@ -110,26 +111,33 @@ export function SpaceProjectBreadcrumbRegistrar({
       ),
       'data-test-subj': SPACES_PROJECT_BREADCRUMB_TEST_SUBJ,
       popoverContent: (closePopover) => (
-        <SpacesMenu
-          id={popoutContentId}
-          spaces={data || []}
-          serverBasePath={serverBasePath}
-          toggleSpaceSelector={closePopover}
-          capabilities={capabilities}
-          navigateToApp={navigateToApp}
-          navigateToUrl={navigateToUrl}
+        <ProjectChromeSwitcherRootMenu
           activeSpace={activeSpace}
           allowSolutionVisibility={allowSolutionVisibility}
-          eventTracker={eventTracker}
-          onClickManageSpaceBtn={closePopover}
-          isLoading={isLoading}
+          spacesMenu={({ navigateToPreviousContextPanel }) => (
+            <SpacesMenu
+              id={popoutContentId}
+              spaces={data || []}
+              serverBasePath={serverBasePath}
+              toggleSpaceSelector={closePopover}
+              capabilities={capabilities}
+              navigateToApp={navigateToApp}
+              navigateToUrl={navigateToUrl}
+              activeSpace={activeSpace}
+              allowSolutionVisibility={allowSolutionVisibility}
+              eventTracker={eventTracker}
+              onClickManageSpaceBtn={closePopover}
+              isLoading={isLoading}
+              onNavigateToPreviousContextPanel={navigateToPreviousContextPanel}
+            />
+          )}
         />
       ),
       popoverProps: {
         panelPaddingSize: 'none',
         zIndex: Number(euiTheme.levels.navigation) + 1,
         panelProps: {
-          'data-test-subj': 'spaceMenuPopoverPanel',
+          'data-test-subj': 'projectChromeSwitcherRootPanel',
         },
       },
     });

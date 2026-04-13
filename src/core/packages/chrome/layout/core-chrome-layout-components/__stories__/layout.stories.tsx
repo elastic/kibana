@@ -172,7 +172,7 @@ export const Layout: StoryObj<PropsAndArgs> = {
     headerHeight: 48,
     navigationWidth: 48,
     sidebarWidth: 48,
-    applicationTopBarHeight: 48,
+    applicationTopBarHeight: 49,
     applicationBottomBarHeight: 48,
   },
   argTypes: {

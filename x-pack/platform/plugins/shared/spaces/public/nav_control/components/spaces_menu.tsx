@@ -7,8 +7,12 @@
 
 import type { ExclusiveUnion, WithEuiThemeProps } from '@elastic/eui';
 import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
+  EuiIcon,
   EuiLoadingSpinner,
   EuiPopoverTitle,
   EuiSelectable,
@@ -54,6 +58,8 @@ interface Props {
   allowSolutionVisibility: boolean;
   eventTracker: EventTracker;
   isLoading: boolean;
+  /** When set (e.g. project chrome context menu), back returns to the parent switcher panel. */
+  onNavigateToPreviousContextPanel?: () => void;
 }
 class SpacesMenuUI extends Component<Props & WithEuiThemeProps> {
   public render() {
@@ -123,16 +129,43 @@ class SpacesMenuUI extends Component<Props & WithEuiThemeProps> {
           {(list, search) => (
             <Fragment>
               <EuiPopoverTitle paddingSize="s">
-                <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                  <EuiFlexItem
-                    grow={false}
-                    css={css`
-                      padding-left: ${this.props.theme.euiTheme.size.s};
-                    `}
-                  >
-                    {i18n.translate('xpack.spaces.navControl.spacesMenu.selectSpacesTitle', {
-                      defaultMessage: 'Spaces',
-                    })}
+                <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup
+                      gutterSize="xs"
+                      alignItems="center"
+                      responsive={false}
+                      css={
+                        this.props.onNavigateToPreviousContextPanel
+                          ? undefined
+                          : css`
+                              padding-left: ${this.props.theme.euiTheme.size.s};
+                            `
+                      }
+                    >
+                      {this.props.onNavigateToPreviousContextPanel ? (
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonIcon
+                            iconType="chevronSingleLeft"
+                            color="text"
+                            size="xs"
+                            data-test-subj="spacesMenuContextPanelBack"
+                            onClick={this.props.onNavigateToPreviousContextPanel}
+                            aria-label={i18n.translate(
+                              'xpack.spaces.navControl.spacesMenu.backToSwitcherAriaLabel',
+                              {
+                                defaultMessage: 'Back to switcher',
+                              }
+                            )}
+                          />
+                        </EuiFlexItem>
+                      ) : null}
+                      <EuiFlexItem grow={false}>
+                        {i18n.translate('xpack.spaces.navControl.spacesMenu.selectSpacesTitle', {
+                          defaultMessage: 'Spaces',
+                        })}
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>{this.renderManageButton()}</EuiFlexItem>
                 </EuiFlexGroup>
@@ -144,6 +177,7 @@ class SpacesMenuUI extends Component<Props & WithEuiThemeProps> {
                 )}
               </EuiPopoverTitle>
               {list}
+              {this.props.capabilities.spaces.manage ? this.renderCreateSpaceFooter() : null}
             </Fragment>
           )}
         </EuiSelectable>
@@ -164,7 +198,7 @@ class SpacesMenuUI extends Component<Props & WithEuiThemeProps> {
           </Suspense>
         ),
         ...(this.props.allowSolutionVisibility && {
-          append: <SpaceSolutionBadge solution={space.solution} />,
+          append: <SpaceSolutionBadge solution={space.solution} variant="subduedText" />,
         }),
         checked: this.props.activeSpace?.id === space.id ? 'on' : undefined,
         'data-test-subj': `${space.id}-selectableSpaceItem`,
@@ -243,6 +277,53 @@ class SpacesMenuUI extends Component<Props & WithEuiThemeProps> {
         capabilities={this.props.capabilities}
         navigateToApp={this.props.navigateToApp}
       />
+    );
+  };
+
+  private onCreateSpaceClick = () => {
+    this.props.onClickManageSpaceBtn();
+    this.props.navigateToApp('management', { path: 'kibana/spaces/create' });
+  };
+
+  private renderCreateSpaceFooter = () => {
+    const { euiTheme } = this.props.theme;
+
+    return (
+      <Fragment>
+        <EuiHorizontalRule
+          margin="none"
+          css={css`
+            margin-block: ${euiTheme.size.xs};
+          `}
+        />
+        <EuiContextMenuItem
+          size="m"
+          layoutAlign="center"
+          icon={<EuiIcon type="plus" size="m" aria-hidden />}
+          data-test-subj="spacesMenuCreateSpace"
+          onClick={this.onCreateSpaceClick}
+          css={css`
+            box-sizing: border-box;
+            width: 100%;
+            min-block-size: 32px;
+            block-size: 32px;
+            padding: 0 ${euiTheme.size.m};
+            border-radius: ${euiTheme.border.radius.small};
+
+            &:where(a, button):not(:disabled):hover,
+            &:where(a, button):not(:disabled):focus {
+              text-decoration: none;
+              background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
+            }
+          `}
+        >
+          <EuiText size="s" component="span" css={{ fontWeight: euiTheme.font.weight.regular }}>
+            {i18n.translate('xpack.spaces.navControl.spacesMenu.addSpaceLabel', {
+              defaultMessage: 'Add space',
+            })}
+          </EuiText>
+        </EuiContextMenuItem>
+      </Fragment>
     );
   };
 }

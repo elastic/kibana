@@ -5,7 +5,8 @@
  * 2.0.
  */
 import type { EuiBadgeProps } from '@elastic/eui';
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiIcon, euiFontSize, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -71,13 +72,48 @@ export function getSpaceSolutionIconType(solution?: Space['solution']): string {
 
 export type SpaceSolutionBadgeProps = Omit<EuiBadgeProps, 'iconType'> & {
   solution?: Space['solution'];
+  /**
+   * Subdued inline label for compact rows (e.g. space picker) — no badge border or padding.
+   * @default 'badge'
+   */
+  variant?: 'badge' | 'subduedText';
 };
 
-export const SpaceSolutionBadge = ({ solution, ...badgeProps }: SpaceSolutionBadgeProps) => {
+export const SpaceSolutionBadge = ({
+  solution,
+  variant = 'badge',
+  ...badgeProps
+}: SpaceSolutionBadgeProps) => {
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
   const { iconType, label } = useMemo(() => {
     const key = resolveSolutionOptionKey(solution);
     return SolutionOptions[key];
   }, [solution]);
+
+  if (variant === 'subduedText') {
+    return (
+      <span
+        css={css`
+          display: inline-flex;
+          align-items: center;
+          gap: ${euiTheme.size.xs};
+          padding: 0;
+          margin: 0;
+          border: none;
+          outline: none;
+          box-shadow: none;
+          background: transparent;
+          color: ${euiTheme.colors.textSubdued};
+          font-weight: ${euiTheme.font.weight.regular};
+          ${euiFontSize(euiThemeContext, 's', { unit: 'px' })};
+        `}
+      >
+        <EuiIcon type={iconType} size="s" color="subdued" />
+        {label}
+      </span>
+    );
+  }
 
   return (
     <EuiBadge {...(badgeProps as EuiBadgeProps)} iconType={iconType} color="hollow">

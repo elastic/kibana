@@ -50,7 +50,8 @@ const layoutConfigs: { classic: ChromeLayoutConfig; project: ChromeLayoutConfig 
 
     /** The application top bar renders the app specific menu */
     /** we use it only in project style, because in classic it is included as part of the global header */
-    applicationTopBarHeight: 48,
+    /** Matches rendered {@link AppMenuBar} (`header__actionMenu`) height incl. padding + border */
+    applicationTopBarHeight: 49,
     applicationMarginRight: 8,
     applicationMarginBottom: 8,
     sidebarWidth: 0,
