@@ -18,7 +18,7 @@
         "label": "APMEventClient",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
-        "lineNumber": 94,
+        "lineNumber": 95,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -34,7 +34,7 @@
               "{ readonly error: string; readonly transaction: string; readonly span: string; readonly metric: string; readonly onboarding: string; readonly sourcemap: string; }"
             ],
             "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
-            "lineNumber": 98,
+            "lineNumber": 99,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -50,7 +50,7 @@
               "any"
             ],
             "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
-            "lineNumber": 105,
+            "lineNumber": 107,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -72,7 +72,7 @@
                   }
                 ],
                 "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
-                "lineNumber": 105,
+                "lineNumber": 107,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -100,7 +100,7 @@
               ">(operationName: string, params: TParams, options?: { skipProcessorEventFilter?: boolean | undefined; } | undefined) => Promise<TypedSearchResponse<TParams>>"
             ],
             "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
-            "lineNumber": 149,
+            "lineNumber": 152,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -116,7 +116,7 @@
                   "string"
                 ],
                 "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
-                "lineNumber": 150,
+                "lineNumber": 153,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -133,7 +133,7 @@
                   "TParams"
                 ],
                 "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
-                "lineNumber": 151,
+                "lineNumber": 154,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -147,7 +147,7 @@
                 "label": "options",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
-                "lineNumber": 152,
+                "lineNumber": 155,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -163,7 +163,7 @@
                       "boolean | undefined"
                     ],
                     "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
-                    "lineNumber": 152,
+                    "lineNumber": 155,
                     "columnNumber": 17,
                     "deprecated": false,
                     "trackAdoption": false
@@ -192,7 +192,7 @@
               ">(operationName: string, params: TParams) => Promise<TypedLogEventSearchResponse<TParams>>"
             ],
             "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
-            "lineNumber": 191,
+            "lineNumber": 195,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -208,7 +208,7 @@
                   "string"
                 ],
                 "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
-                "lineNumber": 192,
+                "lineNumber": 196,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -225,7 +225,7 @@
                   "TParams"
                 ],
                 "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
-                "lineNumber": 193,
+                "lineNumber": 197,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -253,7 +253,7 @@
               ">(operationName: string, ...allParams: TParams[]) => Promise<TypedMSearchResponse<TParams>>"
             ],
             "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
-            "lineNumber": 228,
+            "lineNumber": 233,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -269,7 +269,7 @@
                   "string"
                 ],
                 "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
-                "lineNumber": 229,
+                "lineNumber": 234,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -286,7 +286,7 @@
                   "TParams[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
-                "lineNumber": 230,
+                "lineNumber": 235,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -308,7 +308,7 @@
               "<unknown>>"
             ],
             "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
-            "lineNumber": 282,
+            "lineNumber": 288,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -324,7 +324,7 @@
                   "string"
                 ],
                 "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
-                "lineNumber": 282,
+                "lineNumber": 288,
                 "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -341,7 +341,7 @@
                   "APMEventEqlSearchRequest"
                 ],
                 "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
-                "lineNumber": 282,
+                "lineNumber": 288,
                 "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -365,7 +365,7 @@
               ">"
             ],
             "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
-            "lineNumber": 298,
+            "lineNumber": 305,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -381,7 +381,7 @@
                   "string"
                 ],
                 "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
-                "lineNumber": 299,
+                "lineNumber": 306,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -398,7 +398,7 @@
                   "APMEventFieldCapsRequest"
                 ],
                 "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
-                "lineNumber": 300,
+                "lineNumber": 307,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -422,7 +422,7 @@
               ">"
             ],
             "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
-            "lineNumber": 321,
+            "lineNumber": 329,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -438,7 +438,7 @@
                   "string"
                 ],
                 "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
-                "lineNumber": 322,
+                "lineNumber": 330,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -455,7 +455,7 @@
                   "APMEventTermsEnumRequest"
                 ],
                 "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
-                "lineNumber": 323,
+                "lineNumber": 331,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -483,7 +483,7 @@
               ") => string[]"
             ],
             "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
-            "lineNumber": 344,
+            "lineNumber": 358,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -505,7 +505,7 @@
                   }
                 ],
                 "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
-                "lineNumber": 344,
+                "lineNumber": 358,
                 "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -579,7 +579,11 @@
             "label": "esClient",
             "description": [],
             "signature": [
-              "{ create: { <TDocument = unknown>(this: That, params: ",
+              "{ child: (opts: ",
+              "ClientOptions",
+              ") => ",
+              "default",
+              "; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument>, options?: ",
               "TransportRequestOptionsWithOutMeta",
@@ -662,10 +666,6 @@
               ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
               "default",
               "; helpers: ",
-              "default",
-              "; child: (opts: ",
-              "ClientOptions",
-              ") => ",
               "default",
               "; asyncSearch: ",
               "default",
@@ -1647,7 +1647,7 @@
                 "section": "def-common.DataTier",
                 "text": "DataTier"
               },
-              "[] | undefined; }"
+              "[] | undefined; projectRouting?: string | undefined; }"
             ],
             "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
             "lineNumber": 87,

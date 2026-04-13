@@ -26,6 +26,7 @@ export type {
   TestWorkflowCommand,
   StackFrame,
   UpdatedWorkflowResponseDto,
+  ValidateWorkflowResponseDto,
   // dtos
   WorkflowDetailDto,
   WorkflowExecutionDto,
@@ -40,6 +41,9 @@ export type {
   WorkflowListItemDto,
   WorkflowAggsDto,
   WorkflowStatsDto,
+  WorkflowStepExecutionListDto,
+  WorkflowMgetResponseDto,
+  ChildWorkflowExecutionItem,
   // enums
   ExecutionStatusUnion,
   ExecutionTypeUnion,
@@ -60,7 +64,9 @@ export type {
   SelectionOption,
   SelectionDetails,
   SelectionContext,
+  StepSelectionValues,
   RequestOptions,
+  GetAvailableConnectorsResponse,
 } from './v1';
 
 // exported full to use enum as values

@@ -7,6 +7,7 @@
 
 import React from 'react';
 
+import { i18n } from '@kbn/i18n';
 import type { BarProps } from './styles';
 import { Bar } from './styles';
 
@@ -15,7 +16,15 @@ interface UtilityBarProps extends BarProps {
 }
 
 export const UtilityBar = React.memo<UtilityBarProps>(({ border, children }) => (
-  <Bar border={border}>{children}</Bar>
+  <Bar
+    border={border}
+    role="group"
+    aria-label={i18n.translate('xpack.securitySolution.utilityBar.defaultAriaLabel', {
+      defaultMessage: 'Utility bar',
+    })}
+  >
+    {children}
+  </Bar>
 ));
 
 UtilityBar.displayName = 'UtilityBar';

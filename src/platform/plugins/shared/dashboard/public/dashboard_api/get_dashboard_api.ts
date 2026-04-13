@@ -32,6 +32,7 @@ import type {
   DashboardApi,
   DashboardCreationOptions,
   DashboardInternalApi,
+  DashboardSaveEvent,
   DashboardUser,
 } from './types';
 import { DASHBOARD_API_TYPE } from './types';
@@ -63,6 +64,7 @@ export function getDashboardApi({
   const fullScreenMode$ = new BehaviorSubject(creationOptions?.fullScreenMode ?? false);
   const isManaged = readResult?.meta.managed ?? false;
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
+  const onSave$ = new Subject<DashboardSaveEvent>();
   const dashboardContainerRef$ = new BehaviorSubject<HTMLElement | null>(null);
 
   const accessControlManager = initializeAccessControlManager(readResult, savedObjectId$);
@@ -73,7 +75,7 @@ export function getDashboardApi({
     savedObjectId,
     accessControl: {
       accessMode: readResult?.data?.access_control?.access_mode,
-      owner: readResult?.data?.access_control?.owner,
+      owner: readResult?.meta?.owner,
     },
     createdBy: readResult?.meta?.created_by,
     user,
@@ -147,6 +149,7 @@ export function getDashboardApi({
     unifiedSearchManager,
     projectRoutingManager,
     setState,
+    onSave$: onSave$.asObservable(),
   });
 
   function getState() {
@@ -189,6 +192,7 @@ export function getDashboardApi({
       description: settingsManager.api.title$.value,
     },
     fullScreenMode$,
+    onSave$: onSave$.asObservable(),
     getAppContext: () => {
       const embeddableAppContext = creationOptions?.getEmbeddableAppContext?.(savedObjectId$.value);
       return {
@@ -204,6 +208,7 @@ export function getDashboardApi({
     setState,
     runInteractiveSave: async () => {
       trackOverlayApi.clearOverlays();
+      const previousDashboardId = savedObjectId$.value;
 
       const {
         description,
@@ -233,24 +238,27 @@ export function getDashboardApi({
         return;
       }
 
-      if (saveResult) {
-        unsavedChangesManager.internalApi.onSave(saveResult.savedState);
-        const settings = settingsManager.api.getSettings();
-        settingsManager.api.setSettings({
-          ...settings,
-          hide_panel_titles: settings.hide_panel_titles ?? false,
-          description: saveResult.savedState.description,
-          tags: saveResult.savedState.tags,
-          title: saveResult.savedState.title,
-        });
-        savedObjectId$.next(saveResult.id);
-      }
+      const settings = settingsManager.api.getSettings();
+      settingsManager.api.setSettings({
+        ...settings,
+        hide_panel_titles: settings.hide_panel_titles ?? false,
+        description: saveResult.savedState.description,
+        tags: saveResult.savedState.tags,
+        title: saveResult.savedState.title,
+      });
+      savedObjectId$.next(saveResult.id);
+      onSave$.next({
+        previousDashboardId,
+        dashboardId: saveResult.id,
+        dashboardState: getState(),
+      });
 
       return saveResult;
     },
     runQuickSave: async () => {
       if (isManaged) return;
       const dashboardState = getState();
+      const previousDashboardId = savedObjectId$.value;
       const saveResult = await saveDashboard({
         dashboardState,
         saveOptions: {},
@@ -259,7 +267,11 @@ export function getDashboardApi({
       });
 
       if (saveResult?.error) return;
-      unsavedChangesManager.internalApi.onSave(dashboardState);
+      onSave$.next({
+        previousDashboardId,
+        dashboardId: saveResult?.id ?? previousDashboardId,
+        dashboardState,
+      });
 
       return;
     },
@@ -307,6 +319,7 @@ export function getDashboardApi({
       searchSessionManager.cleanup();
       unifiedSearchManager.cleanup();
       unsavedChangesManager.cleanup();
+      onSave$.complete();
       layoutManager.cleanup();
       esqlVariablesManager.cleanup();
       timesliceManager.cleanup();

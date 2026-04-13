@@ -13,13 +13,8 @@ export const DEFAULT_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
   requiredPrivileges: ['securitySolution'],
 };
 
-export const API_VERSIONS = {
-  public: {
-    v1: '2023-10-31',
-  },
-  internal: {
-    v2: '2',
-  },
+export const RESOLUTION_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
+  requiredPrivileges: ['securitySolution', 'securitySolution-entity-analytics'],
 };
 
 export type LogExtractionInstallParams = z.infer<typeof LogExtractionInstallParams>;

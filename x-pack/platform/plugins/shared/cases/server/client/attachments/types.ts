@@ -71,9 +71,9 @@ export interface DeleteArgs {
    */
   caseID: string;
   /**
-   * The attachment ID to delete
+   * The attachment saved object id to delete
    */
-  attachmentID: string;
+  savedObjectId: string;
 }
 
 /**
@@ -110,7 +110,7 @@ export interface GetArgs {
   /**
    * The ID of the attachment to retrieve
    */
-  attachmentID: string;
+  savedObjectId: string;
   /**
    * Intermediate mode to specific the response format
    */
@@ -120,9 +120,9 @@ export interface GetArgs {
 export interface BulkGetArgs {
   caseID: string;
   /**
-   * The ids of the attachments
+   * The saved object ids of the attachments
    */
-  attachmentIDs: string[];
+  savedObjectIds: string[];
   /**
    * Intermediate mode to specific the response format
    */

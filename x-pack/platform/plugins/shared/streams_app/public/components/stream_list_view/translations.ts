@@ -80,6 +80,14 @@ export const INDEFINITE_RETENTION_LABEL = i18n.translate(
   { defaultMessage: 'Indefinite' }
 );
 
+export const CPS_DOCUMENTS_WARNING = i18n.translate(
+  'xpack.streams.streamsTreeTable.cpsDocumentsWarning',
+  {
+    defaultMessage:
+      'Cross-project search is active. Document counts shown here are local to this project and may differ from Discover results.',
+  }
+);
+
 export const NO_RETENTION_LABEL = i18n.translate(
   'xpack.streams.streamsRetentionColumn.noDataAriaLabel',
   { defaultMessage: 'No retention policy configured' }

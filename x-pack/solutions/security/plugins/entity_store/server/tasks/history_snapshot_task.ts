@@ -118,6 +118,20 @@ export function registerHistorySnapshotTask({
   });
 }
 
+export async function stopHistorySnapshotTask({
+  logger,
+  taskManager,
+  namespace,
+}: {
+  logger: Logger;
+  taskManager: TaskManagerStartContract;
+  namespace: string;
+}): Promise<void> {
+  const taskId = getHistorySnapshotTaskId(namespace);
+  await taskManager.removeIfExists(taskId);
+  logger.debug(`Stopped history snapshot task ${taskId}`);
+}
+
 export async function scheduleHistorySnapshotTasks({
   logger,
   taskManager,

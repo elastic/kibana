@@ -652,8 +652,8 @@ export const getCaseToUpdate = (
         if (arraysDifference(value, currentValue)) {
           acc[key] = value;
         }
-      } else if (isPlainObject(currentValue) && isPlainObject(value)) {
-        if (!deepEqual(currentValue, value)) {
+      } else if (isPlainObject(value)) {
+        if (currentValue === undefined || !deepEqual(currentValue, value)) {
           acc[key] = value;
         }
       } else if (currentValue !== undefined && value !== currentValue) {

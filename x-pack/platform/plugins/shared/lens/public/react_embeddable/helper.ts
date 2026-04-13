@@ -21,7 +21,7 @@ import type {
   LensSerializedState,
   StructuredDatasourceStates,
   TextBasedPersistedState,
-  XYState,
+  XYVisualizationState,
   XYByReferenceAnnotationLayerConfig,
 } from '@kbn/lens-common';
 import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
@@ -41,10 +41,12 @@ import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/co
 import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
 
 import type { StrippedLensState } from '../../common/transforms/helpers';
+import { isFlattenedAPIConfig, unflattenAPIConfig } from '../../common/transforms/utils';
 import { getLensBuilder } from '../lazy_builder';
 import type { ESQLStartServices } from './esql';
 import { loadESQLAttributes } from './esql';
 import type { LensEmbeddableStartServices } from './types';
+import type { FlattenedLensByValuePanelSchema } from '../../server/types';
 
 export function createEmptyLensState(
   visualizationType: null | string = null,
@@ -85,15 +87,15 @@ export async function deserializeState(
   state: LensSerializedAPIConfig
 ): Promise<LensRuntimeState> {
   const fallbackAttributes = createEmptyLensState().attributes;
-  const savedObjectId = 'savedObjectId' in state ? state.savedObjectId : undefined;
+  const refId = 'ref_id' in state ? state.ref_id : undefined;
 
-  if (savedObjectId) {
+  if (refId) {
     try {
       const { attributes, managed, sharingSavedObjectProps } =
-        await attributeService.loadFromLibrary(savedObjectId);
+        await attributeService.loadFromLibrary(refId);
       return {
         ...state,
-        savedObjectId,
+        ref_id: refId,
         attributes,
         managed,
         sharingSavedObjectProps,
@@ -104,7 +106,7 @@ export async function deserializeState(
     }
   }
 
-  const newState = transformFromApiConfig(state) as LensRuntimeState;
+  const newState = transformFromApiConfig(state as LensSerializedAPIConfig) as LensRuntimeState;
 
   if (newState.isNewPanel) {
     try {
@@ -177,13 +179,29 @@ export function getStructuredDatasourceStates(
   };
 }
 
-export function transformFromApiConfig(state: LensSerializedAPIConfig): LensSerializedState {
+export function transformFromApiConfig(
+  rawState: LensSerializedAPIConfig | FlattenedLensByValuePanelSchema
+): LensSerializedState {
+  // The dashboard may provide state in the flat API format (from server-side transforms)
+  // where chart props sit at the top level without an `attributes` wrapper.
+  // Normalize to the nested format before proceeding.
+  const state: LensSerializedAPIConfig = isFlattenedAPIConfig(rawState)
+    ? unflattenAPIConfig(rawState)
+    : rawState;
+
   const builder = getLensBuilder();
 
   if (!builder?.isEnabled) {
-    // builder not enabled, return the state as is
-    return state as LensSerializedState;
+    if (isLensAPIFormat(state.attributes)) {
+      // This mean the dashboard is giving us an in-memory state
+      // This could be either the new or old state so we need to try to convert below
+    } else {
+      // builder not enabled, return the state as is
+      return state as LensSerializedState;
+    }
   }
+
+  if (!builder) return state as LensSerializedState; // no other option
 
   const chartType = builder.getType(state.attributes);
 
@@ -192,7 +210,6 @@ export function transformFromApiConfig(state: LensSerializedAPIConfig): LensSeri
   }
 
   if (!state.attributes) {
-    // Not sure if this is possible
     throw new Error('attributes are missing');
   }
 
@@ -213,11 +230,11 @@ export function transformFromApiConfig(state: LensSerializedAPIConfig): LensSeri
  * !Important! call stripInheritedContext before transforming to API config
  */
 export function transformToApiConfig(state: StrippedLensState): LensSerializedAPIConfig {
-  const { savedObjectId, attributes } = state;
+  const { ref_id, attributes } = state;
 
-  if (savedObjectId) {
+  if (ref_id) {
     return {
-      savedObjectId,
+      ref_id,
     };
   }
 
@@ -236,7 +253,6 @@ export function transformToApiConfig(state: StrippedLensState): LensSerializedAP
   }
 
   if (!attributes) {
-    // This should only ever handle by-value state.
     throw new Error('attributes are missing');
   }
 
@@ -271,7 +287,7 @@ export function updateAttributesWithAnnotation(
   const { attributes } = state;
   if (attributes.visualizationType !== 'lnsXY') return undefined;
 
-  const vizState = attributes.state.visualization as XYState | undefined;
+  const vizState = attributes.state.visualization as XYVisualizationState | undefined;
   if (!vizState?.layers) return undefined;
 
   // In the persisted form, annotation layers use annotationGroupRef (a reference name)
@@ -343,13 +359,13 @@ export async function saveUpdatedLinkedAnnotationsToLibrary(
   vizState: unknown,
   eventAnnotationService: EventAnnotationServiceType
 ): Promise<unknown> {
-  const xyState = vizState as XYState | undefined;
-  if (!xyState?.layers) return vizState;
+  const XYVisualizationState = vizState as XYVisualizationState | undefined;
+  if (!XYVisualizationState?.layers) return vizState;
 
-  let updatedLayers: XYState['layers'] | undefined;
+  let updatedLayers: XYVisualizationState['layers'] | undefined;
 
-  for (let i = 0; i < xyState.layers.length; i++) {
-    const layer = xyState.layers[i];
+  for (let i = 0; i < XYVisualizationState.layers.length; i++) {
+    const layer = XYVisualizationState.layers[i];
     if (
       'annotationGroupId' in layer &&
       '__lastSaved' in layer &&
@@ -381,7 +397,7 @@ export async function saveUpdatedLinkedAnnotationsToLibrary(
       await eventAnnotationService.updateAnnotationGroup(groupConfig, refLayer.annotationGroupId);
 
       if (!updatedLayers) {
-        updatedLayers = [...xyState.layers];
+        updatedLayers = [...XYVisualizationState.layers];
       }
       updatedLayers[i] = { ...refLayer, __lastSaved: groupConfig };
     }
@@ -389,5 +405,5 @@ export async function saveUpdatedLinkedAnnotationsToLibrary(
 
   if (!updatedLayers) return vizState;
 
-  return { ...xyState, layers: updatedLayers };
+  return { ...XYVisualizationState, layers: updatedLayers };
 }

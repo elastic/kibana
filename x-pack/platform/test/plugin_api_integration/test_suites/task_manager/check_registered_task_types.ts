@@ -44,7 +44,9 @@ export default function ({ getService }: FtrProviderContext) {
     'timedTaskWithLimitedConcurrency',
     'timedTaskWithSingleConcurrency',
     'taskToDisable',
+    'extraLargeCostTask',
     'sampleLongRunningRecurringTask',
+    'sampleRecurringTaskTimingOutWithError',
   ];
 
   // This test is meant to fail when any change is made in task manager registered types.
@@ -54,6 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
       const types = (await getRegisteredTypes())
         .filter((t: string) => !TEST_TYPES.includes(t) && !actionTypeIdsFromSpecs.has(t))
         .sort();
+
       expect(types).to.eql([
         'Fleet-Metrics-Task',
         'Fleet-Usage-Logger',
@@ -108,6 +111,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.xsoar',
         'actions:connector_usage_reporting',
         'actions:oauth_state_cleanup',
+        'actions:user_connector_token_cleanup',
         'actions_telemetry',
         'ad_hoc_run-backfill',
         'agent-builder:run-agent',
@@ -165,6 +169,7 @@ export default function ({ getService }: FtrProviderContext) {
         'alerts_invalidate_api_keys',
         'apm-source-map-migration-task',
         'apm-telemetry-task',
+        'autoImport-dataStream-task',
         'cai:cases_analytics_index_backfill',
         'cai:cases_analytics_index_scheduler',
         'cai:cases_analytics_index_synchronization',
@@ -172,7 +177,6 @@ export default function ({ getService }: FtrProviderContext) {
         'cases_incremental_id_assignment',
         'cloud_security_posture-stats_task',
         'dashboard_telemetry',
-        'data-sources:bulk-delete-task',
         'endpoint:complete-external-response-actions',
         'endpoint:metadata-check-transforms-task',
         'endpoint:user-artifact-packager',
@@ -181,12 +185,15 @@ export default function ({ getService }: FtrProviderContext) {
         'entity_store:field_retention:enrichment',
         'entity_store:health',
         'entity_store:snapshot',
+        'entity_store:v2:entity_maintainer_task:accesses_frequently_and_infrequently',
         'entity_store:v2:entity_maintainer_task:automated-resolution',
+        'entity_store:v2:entity_maintainer_task:communicates_with',
         'entity_store:v2:extract_entity_task:generic',
         'entity_store:v2:extract_entity_task:host',
         'entity_store:v2:extract_entity_task:service',
         'entity_store:v2:extract_entity_task:user',
         'entity_store:v2:history_snapshot_task',
+        'entity_store:v2:status_report_task',
         'fleet:agent-status-change-task',
         'fleet:agentless-deployment-sync-task',
         'fleet:auto-install-content-packages-task',
@@ -212,6 +219,7 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:update_agent_tags:retry',
         'fleet:upgrade-agentless-deployments-task',
         'fleet:upgrade_action:retry',
+        'fleet:verify_permissions',
         'fleet:version-specific-policy-assignment-task',
         'gap-auto-fill-scheduler-task',
         'maintenance-window:generate-events',
@@ -243,9 +251,13 @@ export default function ({ getService }: FtrProviderContext) {
         'slo:health-scan-task',
         'slo:stale-instances-cleanup-task',
         'slo:temp-summary-cleanup-task',
+        'streams_conversation_scraper',
         'streams_description_generation',
         'streams_features_identification',
         'streams_insights_discovery',
+        'streams_memory_consolidation',
+        'streams_memory_generation',
+        'streams_memory_update',
         'streams_onboarding',
         'streams_significant_events_queries_generation',
         'task_manager:delete_inactive_background_task_nodes',

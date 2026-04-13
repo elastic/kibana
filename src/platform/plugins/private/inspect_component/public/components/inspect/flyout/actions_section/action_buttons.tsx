@@ -127,7 +127,7 @@ export const ActionButtons = ({
             href={href}
             css={cardCss}
             layout="vertical"
-            icon={<EuiIcon type={icon} size="xxl" css={iconCss} />}
+            icon={<EuiIcon type={icon} size="xxl" css={iconCss} aria-hidden={true} />}
             title={
               <EuiText color={euiTheme.colors.textPrimary} component="span" css={titleCss}>
                 <FormattedMessage id={i18nId} defaultMessage={label} />

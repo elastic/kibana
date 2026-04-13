@@ -18,8 +18,8 @@ import { setPreferredChatExperienceToAgent } from '../../../../tasks/api_calls/k
 import {
   clickNewAgentBuilderAttachmentButton,
   assertAgentBuilderConversationInputEditorContains,
-} from '../../../../tasks/ai_rule_creation';
-import { NEW_AGENT_BUILDER_ATTACHMENT_BUTTON } from '../../../../screens/ai_rule_creation';
+} from '../../../../tasks/agent_builder';
+import { NEW_AGENT_BUILDER_ATTACHMENT_BUTTON } from '../../../../screens/agent_builder';
 
 const prompt = 'Analyze the attached Security detection rule and provide actionable insights.';
 

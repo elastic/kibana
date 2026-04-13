@@ -12,7 +12,7 @@ import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools'
 import { registerGetConnectorsTool } from './get_connectors_tool';
 
 const mockConnectorResponse = {
-  connectorsByType: {
+  connectorTypes: {
     '.slack': {
       instances: [
         { id: 'slack-1', name: 'Slack #general', isPreconfigured: false, isDeprecated: false },
