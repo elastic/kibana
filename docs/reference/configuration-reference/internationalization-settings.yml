@@ -16,21 +16,20 @@ groups:
 
       - setting: i18n.locale
         description: |
-          Set the {{kib}} interface language:
-
-          * English - `en`
-          * Chinese - `zh-CN`
-          * Japanese - `ja-JP`
-          * French - `fr-FR`
-          * German - `de-DE`
+          Set the {{kib}} interface language.
         datatype: enum
         default: en
         options:
           - option: en
+            description: English
           - option: zh-CN
+            description: Chinese
           - option: ja-JP
+            description: Japanese
           - option: fr-FR
+            description: French
           - option: de-DE
+            description: German
         applies_to:
           stack: ga
           ech: ga
