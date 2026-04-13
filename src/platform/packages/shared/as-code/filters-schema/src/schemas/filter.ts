@@ -233,10 +233,8 @@ const conditionSchema = schema.discriminatedUnion(
 // ====================================================================
 
 export interface AsCodeGroupFilterRecursive {
-  group: {
-    operator: typeof ASCODE_GROUPED_CONDITION_TYPE.AND | typeof ASCODE_GROUPED_CONDITION_TYPE.OR;
-    conditions: Array<TypeOf<typeof conditionSchema> | AsCodeGroupFilterRecursive>;
-  };
+  operator: typeof ASCODE_GROUPED_CONDITION_TYPE.AND | typeof ASCODE_GROUPED_CONDITION_TYPE.OR;
+  conditions: Array<TypeOf<typeof conditionSchema> | AsCodeGroupFilterRecursive>;
 }
 
 /**
