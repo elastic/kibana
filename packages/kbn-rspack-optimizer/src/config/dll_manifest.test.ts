@@ -10,6 +10,7 @@
 import Fs from 'fs';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
+import { loadDllManifest } from './dll_manifest';
 
 describe('DLL manifest integration', () => {
   const manifest = JSON.parse(Fs.readFileSync(UiSharedDepsNpm.dllManifestPath, 'utf8'));
@@ -69,5 +70,88 @@ describe('DLL manifest integration', () => {
       expect(sharedDepsExternals.lodash).toBeDefined();
       expect(sharedDepsExternals.rxjs).toBeDefined();
     });
+  });
+});
+
+describe('loadDllManifest sanitisation', () => {
+  const sanitized = loadDllManifest();
+  const raw = JSON.parse(Fs.readFileSync(UiSharedDepsNpm.dllManifestPath, 'utf8'));
+
+  it('removes pure CJS modules (exportsType=default + redirect/redirect-warn)', () => {
+    const removedKeys = Object.keys(raw.content).filter((key) => {
+      const meta = raw.content[key].buildMeta;
+      return (
+        meta?.exportsType === 'default' &&
+        (meta?.defaultObject === 'redirect' || meta?.defaultObject === 'redirect-warn')
+      );
+    });
+    expect(removedKeys.length).toBeGreaterThan(0);
+    for (const key of removedKeys) {
+      expect(sanitized.content[key]).toBeUndefined();
+    }
+  });
+
+  it('preserves namespace modules with only exportsType', () => {
+    const nsKeys = Object.keys(raw.content).filter(
+      (key) => raw.content[key].buildMeta?.exportsType === 'namespace'
+    );
+    expect(nsKeys.length).toBeGreaterThan(0);
+    for (const key of nsKeys) {
+      expect(sanitized.content[key].buildMeta).toEqual({ exportsType: 'namespace' });
+    }
+  });
+
+  it('normalises flagged+redirect to { exportsType: "flagged" }', () => {
+    const flaggedKeys = Object.keys(raw.content).filter((key) => {
+      const meta = raw.content[key].buildMeta;
+      return (
+        meta?.exportsType === 'flagged' &&
+        (meta?.defaultObject === 'redirect' || meta?.defaultObject === 'redirect-warn')
+      );
+    });
+    expect(flaggedKeys.length).toBeGreaterThan(0);
+    for (const key of flaggedKeys) {
+      expect(sanitized.content[key].buildMeta).toEqual({ exportsType: 'flagged' });
+    }
+  });
+
+  it('normalises dynamic+redirect to { exportsType: "flagged" }', () => {
+    const dynamicKeys = Object.keys(raw.content).filter((key) => {
+      const meta = raw.content[key].buildMeta;
+      return (
+        meta?.exportsType === 'dynamic' &&
+        (meta?.defaultObject === 'redirect' || meta?.defaultObject === 'redirect-warn')
+      );
+    });
+    expect(dynamicKeys.length).toBeGreaterThan(0);
+    for (const key of dynamicKeys) {
+      expect(sanitized.content[key].buildMeta).toEqual({ exportsType: 'flagged' });
+    }
+  });
+
+  it('strips defaultObject from all sanitized entries', () => {
+    for (const entry of Object.values(sanitized.content) as Array<{
+      buildMeta?: { defaultObject?: unknown };
+    }>) {
+      if (entry.buildMeta) {
+        expect(entry.buildMeta.defaultObject).toBeUndefined();
+      }
+    }
+  });
+
+  it('strips buildMeta from modules without redirect defaultObject', () => {
+    const otherKeys = Object.keys(raw.content).filter((key) => {
+      const meta = raw.content[key].buildMeta;
+      return (
+        meta &&
+        meta.exportsType !== 'namespace' &&
+        meta.defaultObject !== 'redirect' &&
+        meta.defaultObject !== 'redirect-warn'
+      );
+    });
+    expect(otherKeys.length).toBeGreaterThan(0);
+    for (const key of otherKeys) {
+      expect(sanitized.content[key].buildMeta).toBeUndefined();
+    }
   });
 });

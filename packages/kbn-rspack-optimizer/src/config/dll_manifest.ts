@@ -25,31 +25,36 @@ import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
  * inside forked worker processes that start after the DLL rebuild.
  *
  * The manifest is built by webpack's DllPlugin and contains `buildMeta` per
- * module. Rspack's DllReferencePlugin has two compatibility gaps:
+ * module. Rspack's DllReferencePlugin supports `exportsType` and
+ * `defaultObject` natively (aligned with webpack's Module.getExportsType in
+ * rspack PR #5502), but `defaultObject: "redirect-warn"` uses a different
+ * shape than webpack's plain string, so we normalise it to `"redirect"`.
  *
- *  1. It panics (Rust crash) on `defaultObject` and `strictHarmonyModule`.
- *  2. It does not generate runtime CJS interop for delegated modules with
- *     `exportsType: "dynamic"` — named imports are statically replaced with
- *     `undefined` instead of being resolved to module.exports properties.
+ * Sanitisation strategy (all Kibana code is strict ESM):
  *
- * Sanitisation strategy:
- *  - `exportsType: "namespace"` → keep (true ESM, named imports work directly).
- *  - `defaultObject: "redirect" | "redirect-warn"` with `exportsType: "flagged"`
- *    → promote to "namespace". These modules have `__esModule: true`, so
- *    `.default` exists and named imports map to `module.exports` properties.
- *  - `defaultObject: "redirect" | "redirect-warn"` with `exportsType: "default"`
- *    → REMOVE from manifest. These are pure CJS modules where `module.exports`
- *    IS the default value (no `__esModule` flag). Using "namespace" makes rspack
- *    look for `.default` which doesn't exist (`import url from 'url'` → crash).
- *    Removing from the manifest lets rspack bundle the polyfill directly with
- *    correct CJS interop. `defaultObject` itself causes a Rust panic so can't
- *    be preserved.
- *  - `defaultObject: "redirect"` with `exportsType: "dynamic"` → promote to
- *    "namespace". These are CJS wrappers (e.g. `react/index.js`) that typically
- *    go through explicit externals anyway. "namespace" preserves named imports.
- *  - Everything else → strip buildMeta entirely (no named imports expected).
+ *  - `exportsType: "namespace"` → keep. True ESM; named imports work.
  *
- * NOTE: This can be removed once we delete the legacy optimizer and promote this one to be the optimizer.
+ *  - `exportsType: "flagged"` (+ `defaultObject: "redirect"|"redirect-warn"`)
+ *    → keep as `{ exportsType: "flagged" }`. Strict importers get
+ *    "default-with-named": `import X` = `module.exports`, named imports =
+ *    `module.exports.prop`. This is identical to webpack's behaviour and
+ *    correct for CJS modules that set `__esModule = true`.
+ *
+ *  - `exportsType: "dynamic"` (+ `defaultObject: "redirect"|"redirect-warn"`)
+ *    → normalise to `{ exportsType: "flagged" }`. For strict importers
+ *    "dynamic" and "flagged" produce the same "default-with-named" result,
+ *    and "flagged" avoids a potential rspack code-gen gap with "dynamic" in
+ *    delegated modules.
+ *
+ *  - `exportsType: "default"` + `defaultObject: "redirect"|"redirect-warn"`
+ *    → REMOVE from manifest. Pure CJS modules where `module.exports` IS the
+ *    value (no `__esModule`). Removing lets rspack bundle the polyfill
+ *    directly with correct CJS interop.
+ *
+ *  - Everything else → strip buildMeta (no named imports expected).
+ *
+ * NOTE: This can be removed once we delete the legacy optimizer and emit
+ * the DLL with rspack directly.
  */
 export function loadDllManifest() {
   const raw = JSON.parse(Fs.readFileSync(UiSharedDepsNpm.dllManifestPath, 'utf8'));
@@ -60,19 +65,24 @@ export function loadDllManifest() {
   >) {
     if (entry.buildMeta) {
       const { exportsType, defaultObject } = entry.buildMeta;
+
       if (exportsType === 'namespace') {
         entry.buildMeta = { exportsType };
-      } else if (defaultObject === 'redirect' || defaultObject === 'redirect-warn') {
-        if (exportsType === 'default') {
-          // Pure CJS — remove from DLL so rspack bundles it directly with
-          // correct interop (both default and named imports work).
-          keysToRemove.push(key);
-        } else {
-          // flagged, dynamic, or other — "namespace" is safe because either
-          // __esModule provides .default, or the module is resolved via
-          // explicit externals rather than through the DLL reference.
-          entry.buildMeta = { exportsType: 'namespace' };
-        }
+      } else if (
+        exportsType === 'flagged' &&
+        (defaultObject === 'redirect' || defaultObject === 'redirect-warn')
+      ) {
+        entry.buildMeta = { exportsType: 'flagged' };
+      } else if (
+        exportsType === 'dynamic' &&
+        (defaultObject === 'redirect' || defaultObject === 'redirect-warn')
+      ) {
+        entry.buildMeta = { exportsType: 'flagged' };
+      } else if (
+        exportsType === 'default' &&
+        (defaultObject === 'redirect' || defaultObject === 'redirect-warn')
+      ) {
+        keysToRemove.push(key);
       } else {
         entry.buildMeta = undefined;
       }

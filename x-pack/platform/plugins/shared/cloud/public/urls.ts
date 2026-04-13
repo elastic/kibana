@@ -99,7 +99,7 @@ export class CloudUrlsService {
 
     let userRoles: readonly string[] = [];
     try {
-      userRoles = (await coreStart.security.authc.getCurrentUser()).roles;
+      userRoles = (await coreStart.security.authc.getCurrentUser()).roles ?? [];
     } catch (e) {
       // If if no user is available, we just return an empty array of roles
     }
