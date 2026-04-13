@@ -279,3 +279,11 @@ export const TAGS_ACTION_SELECT_NONE = i18n.translate(
     defaultMessage: 'Select none',
   }
 );
+
+/** --- Bulk snooze modal --- */
+export const BULK_SNOOZE_MODAL_TITLE = i18n.translate(
+  'xpack.alertingV2.episodesUi.bulkSnoozeModal.title',
+  {
+    defaultMessage: 'Snooze selected episodes',
+  }
+);

@@ -49,12 +49,21 @@ function tagValueFromOptionKey(key: string): string {
 }
 
 export interface AlertEpisodeTagsFlyoutProps {
+  /**
+   * Whether the flyout is open. The caller is responsible for conditionally
+   * mounting this component; this prop is not used internally.
+   */
   isOpen: boolean;
   onClose: () => void;
   groupHash: string;
   currentTags: string[];
   http: HttpStart;
   services: { expressions: ExpressionsStart };
+  /**
+   * When provided, called with the selected tags on save instead of the
+   * internal single-row mutation. The flyout closes immediately after calling.
+   */
+  onSave?: (tags: string[]) => void;
 }
 
 export function AlertEpisodeTagsFlyout({
@@ -63,6 +72,7 @@ export function AlertEpisodeTagsFlyout({
   currentTags,
   http,
   services,
+  onSave,
 }: AlertEpisodeTagsFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const [searchValue, setSearchValue] = useState('');
@@ -145,6 +155,11 @@ export function AlertEpisodeTagsFlyout({
     if (saveBlocked) {
       return;
     }
+    if (onSave) {
+      onSave(selectedTags);
+      onClose();
+      return;
+    }
     createAlertAction(
       {
         groupHash,
@@ -153,7 +168,7 @@ export function AlertEpisodeTagsFlyout({
       },
       { onSuccess: onClose }
     );
-  }, [createAlertAction, groupHash, onClose, saveBlocked, selectedTags]);
+  }, [createAlertAction, groupHash, onClose, onSave, saveBlocked, selectedTags]);
 
   return (
     <EuiFlyout

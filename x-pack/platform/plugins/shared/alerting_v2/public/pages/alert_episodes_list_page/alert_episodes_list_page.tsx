@@ -21,9 +21,8 @@ import {
   logicalCSS,
   useEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import type { SortOrder } from '@kbn/unified-data-table';
+import type { CustomBulkActions, SortOrder } from '@kbn/unified-data-table';
 import {
   DataLoadingState,
   UnifiedDataTable,
@@ -31,7 +30,8 @@ import {
 } from '@kbn/unified-data-table';
 import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
+import type { AlertEpisodeStatus, BulkCreateAlertActionBody } from '@kbn/alerting-v2-schemas';
+import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
 import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
 import { useFetchGroupActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
@@ -44,6 +44,9 @@ import type {
   EpisodesSortState,
 } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
+import { useBulkCreateAlertActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_bulk_create_alert_actions';
+import { BulkSnoozeModal } from '@kbn/alerting-v2-episodes-ui/components/actions/bulk_snooze_modal';
+import { AlertEpisodeTagsFlyout } from '@kbn/alerting-v2-episodes-ui/components/actions/alert_episode_tags_flyout';
 import useObservable from 'react-use/lib/useObservable';
 import type { InputTimeRange } from '@kbn/data-plugin/public/query';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -51,6 +54,7 @@ import { paths } from '../../constants';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
+import * as i18n from './translations';
 import { EpisodesFilterBar } from './components/episodes_filter_bar';
 
 const PAGE_SIZE = 1000;
@@ -97,9 +101,19 @@ const alertEpisodeToDataTableRecord = (row: AlertEpisode, idx: number): DataTabl
   flattened: Object.fromEntries(Object.entries(row)),
 });
 
-function EmptyToolbar() {
-  return <></>;
-}
+const getEpisodesFromDocIds = (
+  selectedDocIds: string[],
+  episodesData: AlertEpisode[]
+): AlertEpisode[] => selectedDocIds.map((id) => episodesData[parseInt(id, 10)]).filter(Boolean);
+
+const uniqueGroupEpisodes = (episodes: AlertEpisode[]): AlertEpisode[] => {
+  const seen = new Set<string>();
+  return episodes.filter((ep) => {
+    if (!ep.group_hash || seen.has(ep.group_hash)) return false;
+    seen.add(ep.group_hash);
+    return true;
+  });
+};
 
 export const AlertEpisodesListPage = () => {
   const services = useKibana<AlertEpisodesKibanaServices>().services;
@@ -129,6 +143,11 @@ export const AlertEpisodesListPage = () => {
     'actions',
   ]);
   const [rowHeight, setRowHeight] = useState(2);
+  const [pendingBulkState, setPendingBulkState] = useState<{
+    action: 'snooze' | 'tag';
+    selectedDocIds: string[];
+  } | null>(null);
+  const [tableKey, setTableKey] = useState(0);
 
   const handleTimeChange = useCallback(
     (range: InputTimeRange) => {
@@ -179,6 +198,25 @@ export const AlertEpisodesListPage = () => {
     services,
   });
 
+  const { mutate: bulkMutate } = useBulkCreateAlertActions(services.http);
+
+  const onBulkSuccess = useCallback(
+    ({ processed, total }: { processed: number; total: number }) => {
+      if (processed === total) {
+        services.toastNotifications.addSuccess(i18n.getBulkSuccessToast(processed));
+      } else {
+        services.toastNotifications.addWarning(i18n.getBulkPartialSuccessToast(processed, total));
+      }
+      setTableKey((k) => k + 1);
+      refetch();
+    },
+    [services.toastNotifications, refetch]
+  );
+
+  const onBulkError = useCallback(() => {
+    services.toastNotifications.addDanger(i18n.BULK_ERROR_TOAST);
+  }, [services.toastNotifications]);
+
   const ruleOptions = useMemo(
     () =>
       Object.entries(rulesCache).map(([id, rule]) => ({
@@ -191,12 +229,16 @@ export const AlertEpisodesListPage = () => {
   const rows = useMemo(() => episodesData?.map(alertEpisodeToDataTableRecord), [episodesData]);
 
   const episodeIds = useMemo(
-    () => episodesData?.map((row) => row['episode.id']).filter(Boolean),
+    () => episodesData?.map((row) => row['episode.id']).filter((id): id is string => id != null),
     [episodesData]
   );
 
   const groupHashes = useMemo(
-    () => [...new Set(episodesData?.map((row) => row.group_hash).filter(Boolean))],
+    () => [
+      ...new Set(
+        episodesData?.map((row) => row.group_hash).filter((h): h is string => h != null) ?? []
+      ),
+    ],
     [episodesData]
   );
 
@@ -210,6 +252,97 @@ export const AlertEpisodesListPage = () => {
     setColumns(cols);
   }, []);
 
+  const customBulkActions = useMemo<CustomBulkActions>(
+    () => [
+      {
+        key: 'acknowledge',
+        label: i18n.BULK_ACKNOWLEDGE,
+        onClick: ({ selectedDocIds }) => {
+          const items: BulkCreateAlertActionBody = getEpisodesFromDocIds(
+            selectedDocIds,
+            episodesData ?? []
+          ).map((ep) => ({
+            group_hash: ep.group_hash,
+            action_type: ALERT_EPISODE_ACTION_TYPE.ACK,
+            episode_id: ep['episode.id'],
+          })) as BulkCreateAlertActionBody;
+          if (items.length) bulkMutate(items, { onSuccess: onBulkSuccess, onError: onBulkError });
+        },
+      },
+      {
+        key: 'unacknowledge',
+        label: i18n.BULK_UNACKNOWLEDGE,
+        onClick: ({ selectedDocIds }) => {
+          const items: BulkCreateAlertActionBody = getEpisodesFromDocIds(
+            selectedDocIds,
+            episodesData ?? []
+          ).map((ep) => ({
+            group_hash: ep.group_hash,
+            action_type: ALERT_EPISODE_ACTION_TYPE.UNACK,
+            episode_id: ep['episode.id'],
+          })) as BulkCreateAlertActionBody;
+          if (items.length) bulkMutate(items, { onSuccess: onBulkSuccess, onError: onBulkError });
+        },
+      },
+      {
+        key: 'snooze',
+        label: i18n.BULK_SNOOZE,
+        onClick: ({ selectedDocIds }) => {
+          setPendingBulkState({ action: 'snooze', selectedDocIds });
+        },
+      },
+      {
+        key: 'unsnooze',
+        label: i18n.BULK_UNSNOOZE,
+        onClick: ({ selectedDocIds }) => {
+          const items: BulkCreateAlertActionBody = uniqueGroupEpisodes(
+            getEpisodesFromDocIds(selectedDocIds, episodesData ?? [])
+          ).map((ep) => ({
+            group_hash: ep.group_hash,
+            action_type: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE,
+          })) as BulkCreateAlertActionBody;
+          if (items.length) bulkMutate(items, { onSuccess: onBulkSuccess, onError: onBulkError });
+        },
+      },
+      {
+        key: 'resolve',
+        label: i18n.BULK_RESOLVE,
+        onClick: ({ selectedDocIds }) => {
+          const items: BulkCreateAlertActionBody = uniqueGroupEpisodes(
+            getEpisodesFromDocIds(selectedDocIds, episodesData ?? [])
+          ).map((ep) => ({
+            group_hash: ep.group_hash,
+            action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+            reason: i18n.RESOLVE_ACTION_REASON,
+          })) as BulkCreateAlertActionBody;
+          if (items.length) bulkMutate(items, { onSuccess: onBulkSuccess, onError: onBulkError });
+        },
+      },
+      {
+        key: 'activate',
+        label: i18n.BULK_ACTIVATE,
+        onClick: ({ selectedDocIds }) => {
+          const items: BulkCreateAlertActionBody = uniqueGroupEpisodes(
+            getEpisodesFromDocIds(selectedDocIds, episodesData ?? [])
+          ).map((ep) => ({
+            group_hash: ep.group_hash,
+            action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
+            reason: i18n.RESOLVE_ACTION_REASON,
+          })) as BulkCreateAlertActionBody;
+          if (items.length) bulkMutate(items, { onSuccess: onBulkSuccess, onError: onBulkError });
+        },
+      },
+      {
+        key: 'edit-tags',
+        label: i18n.BULK_EDIT_TAGS,
+        onClick: ({ selectedDocIds }) => {
+          setPendingBulkState({ action: 'tag', selectedDocIds });
+        },
+      },
+    ],
+    [episodesData, bulkMutate, onBulkSuccess, onBulkError]
+  );
+
   return (
     <div
       data-test-subj="alertingV2EpisodesListPage"
@@ -221,12 +354,7 @@ export const AlertEpisodesListPage = () => {
         min-width: 0;
       `}
     >
-      <EuiPageHeader
-        bottomBorder
-        pageTitle={i18n.translate('xpack.alertingV2.episodes.listPageTitle', {
-          defaultMessage: 'Alert episodes',
-        })}
-      />
+      <EuiPageHeader bottomBorder pageTitle={i18n.LIST_PAGE_TITLE} />
       <EuiSpacer size="m" />
 
       <EuiFlexGroup
@@ -259,16 +387,13 @@ export const AlertEpisodesListPage = () => {
             getTriggerCompatibleActions={services.uiActions.getTriggerCompatibleActions}
           >
             <EuiScreenReaderOnly>
-              <span id="alertingEpisodesTableAriaLabel">
-                {i18n.translate('xpack.alertingV2.episodes.tableAriaLabel', {
-                  defaultMessage: 'Alerting episodes table',
-                })}
-              </span>
+              <span id="alertingEpisodesTableAriaLabel">{i18n.TABLE_ARIA_LABEL}</span>
             </EuiScreenReaderOnly>
             {!dataView ? (
               <EuiLoadingSpinner />
             ) : (
               <UnifiedDataTable
+                key={tableKey}
                 ariaLabelledBy="alertingEpisodesTableAriaLabel"
                 settings={ALERT_EPISODES_TABLE_SETTINGS}
                 css={getTableCss(euiTheme)}
@@ -276,7 +401,6 @@ export const AlertEpisodesListPage = () => {
                   stripes: false,
                   cellPadding: 'l',
                 }}
-                renderCustomToolbar={EmptyToolbar}
                 dataView={dataView}
                 columns={columns}
                 onSetColumns={onSetColumns}
@@ -285,15 +409,11 @@ export const AlertEpisodesListPage = () => {
                 customGridColumnsConfiguration={{
                   actions: ({ column }) => ({
                     ...column,
-                    displayAsText: i18n.translate('xpack.alertingV2.episodes.columns.actions', {
-                      defaultMessage: 'Actions',
-                    }),
+                    displayAsText: i18n.COLUMN_ACTIONS,
                   }),
                   tags: ({ column }) => ({
                     ...column,
-                    displayAsText: i18n.translate('xpack.alertingV2.episodes.columns.tags', {
-                      defaultMessage: 'Tags',
-                    }),
+                    displayAsText: i18n.COLUMN_TAGS,
                   }),
                 }}
                 externalCustomRenderers={{
@@ -401,12 +521,53 @@ export const AlertEpisodesListPage = () => {
                 onSort={onSort}
                 rowHeightState={rowHeight}
                 onUpdateRowHeight={setRowHeight}
+                customBulkActions={customBulkActions}
                 services={services}
               />
             )}
           </CellActionsProvider>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {pendingBulkState?.action === 'snooze' && (
+        <BulkSnoozeModal
+          onClose={() => setPendingBulkState(null)}
+          onApplySnooze={(expiry) => {
+            const items: BulkCreateAlertActionBody = uniqueGroupEpisodes(
+              getEpisodesFromDocIds(pendingBulkState?.selectedDocIds ?? [], episodesData ?? [])
+            ).map((ep) => ({
+              group_hash: ep.group_hash,
+              action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+              expiry,
+            })) as BulkCreateAlertActionBody;
+            if (items.length) bulkMutate(items, { onSuccess: onBulkSuccess, onError: onBulkError });
+            // Note: BulkSnoozeModal auto-closes (calls onClose internally after onApplySnooze)
+          }}
+        />
+      )}
+      {pendingBulkState?.action === 'tag' && (
+        <AlertEpisodeTagsFlyout
+          isOpen={true}
+          onClose={() => setPendingBulkState(null)}
+          // groupHash is required by the prop interface but unused in bulk mode
+          // (onSave bypasses the flyout's internal single-row mutation)
+          groupHash=""
+          // Start with no pre-selected tags in bulk mode since selections may differ across groups
+          currentTags={[]}
+          http={services.http}
+          services={{ expressions: services.expressions }}
+          onSave={(tags) => {
+            const items: BulkCreateAlertActionBody = uniqueGroupEpisodes(
+              getEpisodesFromDocIds(pendingBulkState?.selectedDocIds ?? [], episodesData ?? [])
+            ).map((ep) => ({
+              group_hash: ep.group_hash,
+              action_type: ALERT_EPISODE_ACTION_TYPE.TAG,
+              tags,
+            })) as BulkCreateAlertActionBody;
+            if (items.length) bulkMutate(items, { onSuccess: onBulkSuccess, onError: onBulkError });
+            // onClose is called automatically by the flyout's handleSave after onSave returns
+          }}
+        />
+      )}
     </div>
   );
 };
