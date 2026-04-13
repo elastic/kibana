@@ -117,7 +117,7 @@ export function SettingsTab() {
         const fullConfig = { ...DEFAULT_SIG_EVENTS_TUNING_CONFIG, ...parsedTuningConfig };
         await core.settings.globalClient.set(
           OBSERVABILITY_STREAMS_SIG_EVENTS_TUNING_CONFIG,
-          fullConfig
+          JSON.stringify(fullConfig)
         );
         const newSavedYaml = configToAnnotatedYaml(fullConfig);
         setSavedConfigYamlState(newSavedYaml);
