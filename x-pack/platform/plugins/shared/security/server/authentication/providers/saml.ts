@@ -713,9 +713,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
     return AuthenticationResult.succeeded(
       this.authenticationInfoToAuthenticatedUser(authenticationInfo),
       {
-        authHeaders: {
-          authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
-        },
+        authHeaders: this.isUiamToken(accessToken)
+          ? this.options.uiam.getAuthenticationHeaders(accessToken)
+          : { authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString() },
         ...(this.isUiamToken(accessToken) && {
           userProfileGrant: {
             type: 'uiamAccessToken',
