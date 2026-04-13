@@ -20,11 +20,14 @@ import type {
   SecurityServiceStart,
 } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
+import { toSlugIdentifier } from '@kbn/std';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   ExecutionType,
   NonTerminalExecutionStatuses,
   transformWorkflowYamlJsontoEsWorkflow,
+  WORKFLOW_ID_MAX_LENGTH,
+  WORKFLOW_ID_MIN_LENGTH,
   WORKFLOW_ID_PATTERN,
 } from '@kbn/workflows';
 import type {
@@ -78,6 +81,7 @@ import type {
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_map';
 import { WorkflowConflictError, WorkflowValidationError } from '../../common/lib/errors';
+import { isValidWorkflowId } from '../../common/lib/import';
 
 import { validateWorkflowYaml } from '../../common/lib/validate_workflow_yaml';
 import { updateWorkflowYamlFields } from '../../common/lib/yaml';
@@ -287,7 +291,7 @@ export class WorkflowsService {
       workflowToCreate.definition = undefined;
     }
 
-    const id = workflow.id || this.generateWorkflowId();
+    const id = workflow.id || this.generateWorkflowId(workflowToCreate.name);
 
     const workflowData: WorkflowProperties = {
       name: workflowToCreate.name,
@@ -355,7 +359,11 @@ export class WorkflowsService {
     const now = new Date();
     const triggerDefinitions = this.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
 
-    const { id, workflowData, definition } = this.prepareWorkflowDocument(
+    const {
+      id: baseId,
+      workflowData,
+      definition,
+    } = this.prepareWorkflowDocument(
       workflow,
       zodSchema,
       authenticatedUser,
@@ -364,7 +372,9 @@ export class WorkflowsService {
       triggerDefinitions
     );
 
+    let id = baseId;
     if (workflow.id) {
+      // User-supplied ID: fail on conflict (existing behaviour)
       const existingWorkflow = await this.getWorkflow(workflow.id, spaceId);
       if (existingWorkflow) {
         throw new WorkflowConflictError(
@@ -372,6 +382,9 @@ export class WorkflowsService {
           workflow.id
         );
       }
+    } else {
+      // Server-generated ID: resolve collisions with numeric suffix
+      id = await this.resolveUniqueWorkflowId(baseId, spaceId);
     }
 
     await this.workflowStorage.getClient().index({
@@ -1813,8 +1826,29 @@ export class WorkflowsService {
     }
   }
 
-  private generateWorkflowId(): string {
+  private generateWorkflowId(name?: string): string {
+    if (name) {
+      const slug = toSlugIdentifier(name);
+      if (isValidWorkflowId(slug)) {
+        return slug;
+      }
+    }
     return `workflow-${generateUuid()}`;
+  }
+
+  /**
+   * Resolves a unique workflow ID by checking for existing workflows in the
+   * given space and appending a numeric suffix if a collision is found.
+   * Only used for server-generated IDs (not user-supplied ones).
+   */
+  private async resolveUniqueWorkflowId(baseId: string, spaceId: string): Promise<string> {
+    let id = baseId;
+    let counter = 0;
+    while (await this.getWorkflow(id, spaceId)) {
+      const suffix = `-${++counter}`;
+      id = `${baseId.slice(0, WORKFLOW_ID_MAX_LENGTH - suffix.length)}${suffix}`;
+    }
+    return id;
   }
 
   public async getAvailableConnectors(
