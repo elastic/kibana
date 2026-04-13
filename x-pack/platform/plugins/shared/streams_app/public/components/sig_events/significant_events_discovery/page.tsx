@@ -23,7 +23,6 @@ import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { useUnbackedQueriesCount } from '../../../hooks/sig_events/use_unbacked_queries_count';
 import { useDiscoverySettings } from './context';
-import { FeedbackButton } from '../../feedback_button';
 import { RedirectTo } from '../../redirect_to';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { FeaturesTable } from './components/features_table/features_table';
