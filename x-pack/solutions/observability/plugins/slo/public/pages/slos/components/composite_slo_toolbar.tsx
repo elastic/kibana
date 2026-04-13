@@ -144,6 +144,7 @@ export function CompositeSloToolbar({
                 iconType="arrowDown"
                 onClick={handleToggleTagPopover}
                 isSelected={isTagPopoverOpen}
+                numFilters={availableTags.length}
                 hasActiveFilters={selectedTags.length > 0}
                 numActiveFilters={selectedTags.length}
               >
