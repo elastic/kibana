@@ -44,7 +44,7 @@ export function executeAsReasoningAgent<
   TToolCallbacks extends ToolCallbacksOfToolOptions<ToolOptionsOfPrompt<TPrompt>>,
   TFinalToolChoice extends ToolChoice<ToolNamesOf<ToolOptionsOfPrompt<TPrompt>>> | undefined =
     | ToolChoice<ToolNamesOf<ToolOptionsOfPrompt<TPrompt>>>
-    | undefined,
+    | undefined
 >(
   options: UnboundPromptOptions<TPrompt> &
     ReasoningPromptOptions & { prompt: TPrompt } & {
@@ -226,8 +226,8 @@ export async function executeAsReasoningAgent(
     const toolChoice = forceComplete
       ? options.finalToolChoice || ToolChoiceType.none
       : forceReason
-        ? ToolChoiceType.none
-        : ToolChoiceType.auto;
+      ? ToolChoiceType.none
+      : ToolChoiceType.auto;
 
     const response = await inferenceClient.prompt({
       ...promptOptions,
