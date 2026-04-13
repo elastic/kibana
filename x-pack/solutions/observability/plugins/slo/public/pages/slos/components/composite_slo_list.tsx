@@ -59,10 +59,8 @@ export function CompositeSloList() {
     setPage(0);
   }, []);
 
-  const handleStatusToggle = useCallback((status: string) => {
-    setSelectedStatuses((prev) =>
-      prev.includes(status) ? prev.filter((s) => s !== status) : [...prev, status]
-    );
+  const handleStatusChange = useCallback((statuses: string[]) => {
+    setSelectedStatuses(statuses);
     setPage(0);
   }, []);
 
@@ -138,7 +136,7 @@ export function CompositeSloList() {
         hasActiveFilters={hasActiveFilters}
         onSearchChange={handleSearchChange}
         onTagSelectionChange={handleTagSelection}
-        onStatusToggle={handleStatusToggle}
+        onStatusChange={handleStatusChange}
         onClearFilters={clearFilters}
       />
       <EuiSpacer size="m" />

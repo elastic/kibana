@@ -28,7 +28,7 @@ interface CompositeSloToolbarProps {
   hasActiveFilters: boolean;
   onSearchChange: (value: string) => void;
   onTagSelectionChange: (options: EuiSelectableOption[]) => void;
-  onStatusToggle?: (status: string) => void;
+  onStatusChange?: (statuses: string[]) => void;
   onClearFilters: () => void;
 }
 
@@ -68,10 +68,11 @@ export function CompositeSloToolbar({
   hasActiveFilters,
   onSearchChange,
   onTagSelectionChange,
-  onStatusToggle,
+  onStatusChange,
   onClearFilters,
 }: CompositeSloToolbarProps) {
   const [isTagPopoverOpen, setIsTagPopoverOpen] = useState(false);
+  const [isStatusPopoverOpen, setIsStatusPopoverOpen] = useState(false);
 
   const tagOptions: EuiSelectableOption[] = useMemo(
     () =>
@@ -82,12 +83,40 @@ export function CompositeSloToolbar({
     [availableTags, selectedTags]
   );
 
+  const statusOptions: EuiSelectableOption[] = useMemo(
+    () =>
+      STATUS_OPTIONS.map(({ value, label }) => ({
+        key: value,
+        label,
+        checked: selectedStatuses.includes(value) ? 'on' : undefined,
+      })),
+    [selectedStatuses]
+  );
+
+  const handleStatusChange = useCallback(
+    (options: EuiSelectableOption[]) => {
+      const newStatuses = options
+        .filter((opt) => opt.checked === 'on')
+        .map((opt) => opt.key as string);
+      onStatusChange?.(newStatuses);
+    },
+    [onStatusChange]
+  );
+
   const handleToggleTagPopover = useCallback(() => {
     setIsTagPopoverOpen((prev) => !prev);
   }, []);
 
   const handleCloseTagPopover = useCallback(() => {
     setIsTagPopoverOpen(false);
+  }, []);
+
+  const handleToggleStatusPopover = useCallback(() => {
+    setIsStatusPopoverOpen((prev) => !prev);
+  }, []);
+
+  const handleCloseStatusPopover = useCallback(() => {
+    setIsStatusPopoverOpen(false);
   }, []);
 
   return (
@@ -146,16 +175,30 @@ export function CompositeSloToolbar({
               )}
             </EuiSelectable>
           </EuiPopover>
-          {STATUS_OPTIONS.map(({ value, label }) => (
-            <EuiFilterButton
-              key={value}
-              data-test-subj={`compositeSloListStatusFilter-${value}`}
-              hasActiveFilters={selectedStatuses.includes(value)}
-              onClick={() => onStatusToggle?.(value)}
-            >
-              {label}
-            </EuiFilterButton>
-          ))}
+          <EuiPopover
+            button={
+              <EuiFilterButton
+                data-test-subj="compositeSloListStatusFilter"
+                iconType="arrowDown"
+                onClick={handleToggleStatusPopover}
+                isSelected={isStatusPopoverOpen}
+                numFilters={STATUS_OPTIONS.length}
+                hasActiveFilters={selectedStatuses.length > 0}
+                numActiveFilters={selectedStatuses.length}
+              >
+                {i18n.translate('xpack.slo.compositeSloList.statusFilter', {
+                  defaultMessage: 'Status',
+                })}
+              </EuiFilterButton>
+            }
+            isOpen={isStatusPopoverOpen}
+            closePopover={handleCloseStatusPopover}
+            panelPaddingSize="none"
+          >
+            <EuiSelectable options={statusOptions} onChange={handleStatusChange}>
+              {(list) => <div css={{ width: 160 }}>{list}</div>}
+            </EuiSelectable>
+          </EuiPopover>
         </EuiFilterGroup>
       </EuiFlexItem>
       {hasActiveFilters && (
