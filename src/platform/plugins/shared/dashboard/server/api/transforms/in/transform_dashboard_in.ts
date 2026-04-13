@@ -64,7 +64,7 @@ export const transformDashboardIn = (
     description: '',
     title: '',
     ...rest,
-    ...(pinnedPanels.length && {
+    ...(Object.keys(pinnedPanels).length && {
       pinned_panels: { panels: pinnedPanels },
     }),
     optionsJSON: transformOptionsIn(options ?? {}),
