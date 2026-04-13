@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiIcon, EuiLink, EuiText, useEuiTheme } from '@elastic/e
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-const CONNECTORS_PATH = '/app/management/insightsAndAlerting/triggersActionsConnectors/connectors';
+const CONNECTORS_PATH = '/app/management/modelManagement/model_settings';
 
 interface NoConnectorMessageProps {
   basePath: { prepend: (path: string) => string };
