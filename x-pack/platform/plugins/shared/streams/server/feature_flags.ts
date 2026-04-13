@@ -20,6 +20,7 @@ import {
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS,
   OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS,
+  OBSERVABILITY_STREAMS_ENABLE_MEMORY,
 } from '@kbn/management-settings-ids';
 import { DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
 import type { StreamsPluginStartDependencies } from './types';
@@ -93,6 +94,25 @@ export function registerFeatureFlags(
             technicalPreview: true,
             readonly: true,
             readonlyMode: 'ui',
+          },
+        });
+
+        core.uiSettings.register({
+          [OBSERVABILITY_STREAMS_ENABLE_MEMORY]: {
+            category: ['observability'],
+            name: i18n.translate('xpack.streams.memorySettingsName', {
+              defaultMessage: 'Streams memory',
+            }) as string,
+            value: false,
+            description: i18n.translate('xpack.streams.memorySettingsDescription', {
+              defaultMessage:
+                'Enable the Streams memory feature for accumulating knowledge from significant events discovery.',
+            }),
+            type: 'boolean',
+            schema: schema.boolean(),
+            requiresPageReload: false,
+            solutionViews: ['classic', 'oblt'],
+            technicalPreview: true,
           },
         });
 
