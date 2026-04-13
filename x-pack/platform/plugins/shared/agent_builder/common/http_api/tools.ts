@@ -109,7 +109,6 @@ export interface KibanaOpenApiOperationSummaryDto {
   summary?: string;
   /** Truncated OpenAPI `description` */
   description?: string;
-  workflow_connector_type: string | null;
 }
 
 export interface ListKibanaOpenApiOperationsResponse {

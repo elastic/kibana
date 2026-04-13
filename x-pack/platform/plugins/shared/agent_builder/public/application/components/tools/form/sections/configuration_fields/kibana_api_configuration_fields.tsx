@@ -25,12 +25,11 @@ function humanizeOperationId(operationId: string): string {
 }
 
 function toOption(r: KibanaOpenApiOperationSummaryDto) {
-  const wf = r.workflow_connector_type ? ` [workflow: ${r.workflow_connector_type}]` : '';
   const title =
     (r.summary && r.summary.trim().length > 0 ? r.summary.trim() : undefined) ??
     humanizeOperationId(r.operation_id);
   return {
-    label: `${r.method} ${r.path} — ${title}${wf}`,
+    label: `${r.method} ${r.path} — ${title}`,
     value: r.operation_id,
   };
 }
@@ -61,7 +60,6 @@ function rowToOperation(row: KibanaOpenApiOperationSummaryDto): KibanaApiOperati
     operation_id: row.operation_id,
     method: row.method,
     path_template: row.path,
-    workflow_connector_type: row.workflow_connector_type,
   };
 }
 
@@ -123,7 +121,6 @@ export const KibanaApiConfiguration = () => {
           operation_id: op.operation_id,
           method: op.method,
           path: op.path_template,
-          workflow_connector_type: op.workflow_connector_type,
         });
         changed = true;
       }
@@ -182,7 +179,6 @@ export const KibanaApiConfiguration = () => {
                             operation_id: choice.value,
                             method: '',
                             path_template: '',
-                            workflow_connector_type: null,
                           }
                         );
                       })

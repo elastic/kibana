@@ -50,9 +50,8 @@ export interface KibanaApiToolCallParams {
 }
 
 /**
- * Two execution modes, unified entry:
- * - **workflow_connector**: `buildKibanaRequest(connectorType, flatParams)` (generated connectors).
- * - **openapi_raw**: `buildKibanaRequest('kibana.request', { method, path, body, query })`.
+ * Builds a loopback Kibana HTTP request from an OpenAPI operation and resolved params
+ * via `buildKibanaRequest('kibana.request', { method, path, body, query })`.
  *
  * Space is applied in `execute_kibana_api_http` via `addSpaceIdToPath`, so `spaceId` is not passed here.
  */
@@ -66,15 +65,6 @@ export function buildKibanaApiHttpRequest(
     params.body && typeof params.body === 'object' && !Array.isArray(params.body)
       ? (params.body as Record<string, unknown>)
       : undefined;
-
-  if (operation.workflow_connector_type) {
-    const flat: Record<string, unknown> = {
-      ...pathVals,
-      ...queryVals,
-      ...(bodyVals ?? {}),
-    };
-    return buildKibanaRequest(operation.workflow_connector_type, flat, undefined);
-  }
 
   const filledPath = fillPathTemplate(operation.path_template, pathVals);
   const stringQuery = toQueryStringRecord(queryVals);

@@ -23,7 +23,6 @@ import {
   getCachedOpenApiDocument,
   getKibanaOpenApiOperation,
 } from '../../../kibana_api_tool/openapi_kibana_catalog';
-import { findWorkflowKibanaConnectorType } from '../../../kibana_api_tool/match_workflow_kibana_connector';
 import { configurationSchema, configurationUpdateSchema } from './schemas';
 
 /** Pre-migration persisted shape (single operation). */
@@ -31,7 +30,6 @@ interface LegacyKibanaApiPersistedConfig {
   operation_id: string;
   method: string;
   path_template: string;
-  workflow_connector_type?: string | null;
 }
 
 type PersistedKibanaApiConfig = KibanaApiToolConfig | LegacyKibanaApiPersistedConfig;
@@ -63,7 +61,6 @@ function normalizePersistedKibanaApiConfig(config: PersistedKibanaApiConfig): Ki
           operation_id: config.operation_id,
           method: config.method ?? '',
           path_template: config.path_template ?? '',
-          workflow_connector_type: config.workflow_connector_type ?? null,
         },
       ],
     };
@@ -97,12 +94,10 @@ async function validateOperationsList(
     if (!indexed) {
       throw createBadRequestError(`Unknown OpenAPI operation_id: ${oid}`);
     }
-    const workflowType = findWorkflowKibanaConnectorType(indexed.method, indexed.path_template);
     operations.push({
       operation_id: oid,
       method: indexed.method,
       path_template: indexed.path_template,
-      workflow_connector_type: workflowType,
     });
   }
   return operations;

@@ -13,7 +13,6 @@ const kibanaApiOperationFormSchema = z.object({
   operation_id: z.string().min(1),
   method: z.string().min(1),
   path_template: z.string().min(1),
-  workflow_connector_type: z.string().nullable(),
 });
 
 export const createKibanaApiFormValidationSchema = () =>

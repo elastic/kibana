@@ -10,7 +10,6 @@ import path from 'path';
 import YAML from 'yaml';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { Logger } from '@kbn/logging';
-import { findWorkflowKibanaConnectorType } from './match_workflow_kibana_connector';
 
 const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete'] as const;
 
@@ -22,7 +21,6 @@ export interface KibanaOpenApiOperationSummary {
   summary?: string;
   /** Truncated OpenAPI `description` for UI / search */
   description?: string;
-  workflow_connector_type: string | null;
 }
 
 export interface KibanaOpenApiIndexedOperation {
@@ -78,14 +76,12 @@ function buildIndex(doc: Record<string, unknown>, logger: Logger) {
         rawDescription && rawDescription.length > 800
           ? `${rawDescription.slice(0, 800)}…`
           : rawDescription;
-      const workflowConnectorType = findWorkflowKibanaConnectorType(method, pathTemplate);
       const summary: KibanaOpenApiOperationSummary = {
         operation_id: operationId,
         method,
         path: pathTemplate,
         summary: summaryText,
         description: descriptionText,
-        workflow_connector_type: workflowConnectorType,
       };
       summaries.push(summary);
       byOperationId.set(operationId, {
