@@ -44,35 +44,12 @@ export interface UserProfileEntry {
  * User profiles service for user-based filtering (createdBy, updatedBy, etc.).
  *
  * Provides async methods for fetching user profiles. The provider manages
- * a shared {@link UserProfileStore} cache so that all consumers (field definitions,
- * filter popovers, table cells) read synchronously from a single store.
+ * a shared {@link ProfileCache} so that all consumers (field definitions,
+ * filter popovers, table cells) read synchronously from a single cache.
  */
 export interface ContentListUserProfilesServices {
   /** Resolve specific UIDs to profiles (for on-demand loading). */
   bulkResolve: (uids: string[]) => Promise<UserProfileEntry[]>;
-}
-
-/**
- * Shared, synchronous read interface for cached user profile data.
- *
- * Populated asynchronously via the {@link ContentListUserProfilesServices} methods,
- * then consumed synchronously by field definitions, table cells, and filter popovers.
- */
-export interface UserProfileStore {
-  /** Get all cached profiles. */
-  getAll: () => UserProfileEntry[];
-  /** Look up a single profile by UID (returns `undefined` if not yet cached). */
-  resolve: (uid: string) => UserProfileEntry | undefined;
-  /** Ensure the given UIDs are in the cache (fetches any missing ones). */
-  ensureLoaded: (uids: string[]) => Promise<void>;
-  /**
-   * Merge already-resolved profiles into the cache without a network call.
-   *
-   * Useful when profiles have been fetched through a different path (e.g.
-   * `FilterFacetConfig.getFacets`) and should be available for synchronous
-   * lookups via `resolve`/`getAll`.
-   */
-  merge: (entries: UserProfileEntry[]) => void;
 }
 
 /**

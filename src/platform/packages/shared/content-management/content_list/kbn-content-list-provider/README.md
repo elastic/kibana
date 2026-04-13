@@ -183,5 +183,7 @@ Manages runtime data using a reducer pattern with React Query for data fetching.
 | `useCreatedByFilterToggle()` | `(value: string) => void` | Convenience wrapper around `useFilterToggle` for the `createdBy` field. |
 | `useFilterFacets(filterId, opts?)` | `UseQueryResult<FilterFacet[]>` | Fetch display-ready `FilterFacet[]` for a filter popover (lazy, via React Query). Pass `{ enabled: isOpen }` to fire on popover open. |
 | `useDeleteConfirmation(options)` | `{ showConfirmation, DeleteModal }` | Manage delete confirmation modal state. |
-| `useUserProfileStoreContext()` | `UserProfileStore` | Access the shared user profile cache from `UserProfileStoreProvider`. |
+| `useProfileCache()` | `ProfileCache \| undefined` | Access the shared profile cache instance. Returns `undefined` when user profiles are not configured. |
+| `useProfileCacheVersion()` | `number` | Subscribe to cache version changes. Re-renders only when profiles are loaded. |
+| `useProfile(uid)` | `UserProfileEntry \| undefined` | Resolve a single profile by UID. Self-loading via batched requests. |
 

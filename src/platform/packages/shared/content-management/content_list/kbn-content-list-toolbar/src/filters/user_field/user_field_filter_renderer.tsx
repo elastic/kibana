@@ -19,7 +19,9 @@ import {
 import {
   useContentListConfig,
   useFilterFacets,
-  useUserProfileStoreContext,
+  useProfileCache,
+  SENTINEL_KEYS,
+  MANAGED_USER_FILTER,
 } from '@kbn/content-list-provider';
 import type { UserProfileEntry } from '@kbn/content-list-provider';
 import {
@@ -68,22 +70,25 @@ export const UserFieldFilterRenderer = ({
   const { supports } = useContentListConfig();
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const userProfileStore = useUserProfileStoreContext();
 
+  const profileCache = useProfileCache();
   const facetsQuery = useFilterFacets<UserProfileEntry>(fieldName, { enabled: isPopoverOpen });
 
-  // Seed the `UserProfileStore` cache with profiles resolved by `getFacets`.
-  // This closes the timing gap where a user clicks a facet before
-  // `ensureLoaded` (triggered by the items query) has completed.
+  // Seed the profile cache with profiles resolved by `getFacets`.
+  // This is essential for the direct `ContentListProvider` path where a
+  // custom facet config fetches profiles externally — without seeding,
+  // `parseQueryText` can't resolve emails written by the popover to UIDs.
+  // The client provider path already warms the cache in its `getFacets`,
+  // so this is a no-op there (seed doesn't overwrite existing entries).
   useEffect(() => {
-    if (!facetsQuery.data || !userProfileStore?.merge) {
+    if (!facetsQuery.data || !profileCache) {
       return;
     }
     const entries = facetsQuery.data.map((f) => f.data).filter((e): e is UserProfileEntry => !!e);
     if (entries.length > 0) {
-      userProfileStore.merge(entries);
+      profileCache.seed(entries);
     }
-  }, [facetsQuery.data, userProfileStore]);
+  }, [facetsQuery.data, profileCache]);
 
   const options = useMemo(
     (): Array<SelectableFilterOption<UserProfileEntry>> =>
@@ -91,7 +96,7 @@ export const UserFieldFilterRenderer = ({
         .map(({ key, label, count, data }) => ({
           key,
           label,
-          value: data?.email || key,
+          value: data?.email || label,
           count,
           data,
         }))
@@ -100,22 +105,32 @@ export const UserFieldFilterRenderer = ({
   );
 
   const renderOption = useCallback(
-    (option: SelectableFilterOption<UserProfileEntry>, state: { isActive: boolean }) => (
-      <StandardFilterOption count={option.count} isActive={state.isActive}>
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiAvatar
-              name={option.label}
-              size="s"
-              data-test-subj={`${fieldName}-searchbar-option-${option.key}`}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">{option.label}</EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </StandardFilterOption>
-    ),
+    (option: SelectableFilterOption<UserProfileEntry>, state: { isActive: boolean }) => {
+      const testSubj = `${fieldName}-searchbar-option-${option.key}`;
+      const isSentinel = SENTINEL_KEYS.has(option.key);
+      const avatar = isSentinel ? (
+        <EuiAvatar
+          name={option.label}
+          size="s"
+          iconType={option.key === MANAGED_USER_FILTER ? 'package' : 'userAvatar'}
+          color="subdued"
+          data-test-subj={testSubj}
+        />
+      ) : (
+        <EuiAvatar name={option.label} size="s" data-test-subj={testSubj} />
+      );
+
+      return (
+        <StandardFilterOption count={option.count} isActive={state.isActive}>
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>{avatar}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">{option.label}</EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </StandardFilterOption>
+      );
+    },
     [fieldName]
   );
 

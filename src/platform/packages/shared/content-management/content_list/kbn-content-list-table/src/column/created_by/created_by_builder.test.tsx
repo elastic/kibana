@@ -12,7 +12,8 @@ import { render, screen, act } from '@testing-library/react';
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import {
   ContentListProvider,
-  useUserProfileStoreContext,
+  ProfileCache,
+  useProfileCache,
   type ContentListItem,
   type ContentListSupports,
   type FindItemsParams,
@@ -56,17 +57,20 @@ const defaultContext: ColumnBuilderContext = {
   supports: defaultSupports,
 };
 
-const StoreSeeder = ({ children }: { children: React.ReactNode }) => {
-  const userProfileStore = useUserProfileStoreContext();
+const CacheSeeder = ({ children }: { children: React.ReactNode }) => {
+  const profileCache = useProfileCache();
   const [ready, setReady] = React.useState(false);
   React.useEffect(() => {
-    userProfileStore?.ensureLoaded(mockUsers.map((u) => u.uid)).then(() => setReady(true));
-  }, [userProfileStore]);
+    profileCache?.ensureLoaded(mockUsers.map((u) => u.uid)).then(() => setReady(true));
+  }, [profileCache]);
   if (!ready) {
     return null;
   }
   return <>{children}</>;
 };
+
+const bulkResolve = async (uids: string[]) => mockUsers.filter((u) => uids.includes(u.uid));
+const profileCache = new ProfileCache(bulkResolve);
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <ContentListProvider
@@ -74,12 +78,11 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
     labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
     dataSource={{ findItems: mockFindItems }}
     services={{
-      userProfiles: {
-        bulkResolve: async (uids) => mockUsers.filter((u) => uids.includes(u.uid)),
-      },
+      userProfiles: { bulkResolve },
     }}
+    profileCache={profileCache}
   >
-    <StoreSeeder>{children}</StoreSeeder>
+    <CacheSeeder>{children}</CacheSeeder>
   </ContentListProvider>
 );
 

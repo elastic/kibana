@@ -11,7 +11,7 @@ import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { ContentListProvider } from '../../context';
 import type { FindItemsResult, FindItemsParams } from '../../datasource';
-import { useUserProfileStoreContext } from '../../services';
+import { ProfileCache, useProfileCache } from '../../services';
 import { useContentListSearch } from '../search/use_content_list_search';
 import { useContentListFilters } from './use_content_list_filters';
 import { useFilterToggle } from './use_filter_toggle';
@@ -32,31 +32,37 @@ const mockUser = {
   fullName: 'Jane Test',
 };
 
+const mockBulkResolve = async (uids: string[]) => [mockUser].filter((u) => uids.includes(u.uid));
+
 const createWrapper =
   () =>
-  ({ children }: { children: React.ReactNode }) =>
-    (
+  ({ children }: { children: React.ReactNode }) => {
+    const profileCache = new ProfileCache(mockBulkResolve);
+
+    return (
       <ContentListProvider
         id="test-list"
         labels={{ entity: 'item', entityPlural: 'items' }}
         dataSource={{ findItems: mockFindItems }}
         services={{
           userProfiles: {
-            bulkResolve: async (uids) => [mockUser].filter((u) => uids.includes(u.uid)),
+            bulkResolve: mockBulkResolve,
           },
         }}
+        profileCache={profileCache}
       >
         {children}
       </ContentListProvider>
     );
+  };
 
 const useHookState = () => {
-  const userProfileStore = useUserProfileStoreContext();
+  const profileCache = useProfileCache();
   return {
     toggle: useFilterToggle('createdBy'),
     filters: useContentListFilters(),
     search: useContentListSearch(),
-    userProfileStore,
+    profileCache,
   };
 };
 
@@ -69,13 +75,13 @@ beforeEach(() => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Renders the hook and seeds the user profile store so that UID ↔ email
+ * Renders the hook and seeds the profile cache so that UID ↔ email
  * resolution works in the field definitions.
  */
 const renderWithStore = async () => {
   const hook = renderHook(useHookState, { wrapper: createWrapper() });
   await act(async () => {
-    await hook.result.current.userProfileStore?.ensureLoaded([mockUser.uid]);
+    await hook.result.current.profileCache?.ensureLoaded([mockUser.uid]);
   });
   return hook;
 };

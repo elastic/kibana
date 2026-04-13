@@ -129,13 +129,13 @@ export function createMockFindItems<T extends UserContentCommonSchema>(
     const createdByFilter = filters.createdBy;
     const includeCreators = createdByFilter?.include;
     if (includeCreators && includeCreators.length > 0) {
-      items = items.filter((item) => matchesUserFilter(item.createdBy, includeCreators));
+      items = items.filter((item) => matchesUserFilter(item, includeCreators));
     }
 
     // Apply createdBy exclude filters.
     const excludeCreators = createdByFilter?.exclude;
     if (excludeCreators && excludeCreators.length > 0) {
-      items = items.filter((item) => !matchesUserFilter(item.createdBy, excludeCreators));
+      items = items.filter((item) => !matchesUserFilter(item, excludeCreators));
     }
 
     // Apply starred filter.
@@ -371,8 +371,18 @@ const EXAMPLE_MOCK_ITEMS: ItemWithStatus[] = [
   },
 ];
 
-/** Sentinel value for filtering items without a creator */
+/**
+ * Sentinel value for filtering items without a creator.
+ *
+ * @deprecated Use `MOCK_MANAGED_FILTER` or `MOCK_NO_CREATOR_FILTER` instead.
+ */
 export const NULL_USER = 'no-user';
+
+/** Local sentinel matching `MANAGED_USER_FILTER` from `@kbn/content-list-provider`. */
+const MOCK_MANAGED_FILTER = '__managed__';
+
+/** Local sentinel matching `NO_CREATOR_USER_FILTER` from `@kbn/content-list-provider`. */
+const MOCK_NO_CREATOR_FILTER = '__no_creator__';
 
 /**
  * Build a map of email → uid for user profile lookup.
@@ -402,26 +412,38 @@ function resolveToUid(filterValue: string): string | undefined {
 }
 
 /**
- * Check if an item's creator matches the filter values.
- * Handles both email and uid filter values for backwards compatibility.
+ * Check if an item matches the `createdBy` filter values.
+ *
+ * Recognises the `__managed__` and `__no_creator__` sentinels from
+ * `@kbn/content-list-provider`, as well as the legacy `NULL_USER` value.
+ * Regular UIDs and emails are resolved through `resolveToUid`.
  */
-function matchesUserFilter(itemCreatedBy: string | undefined, filterValues: string[]): boolean {
-  // Resolve all filter values to uids
+function matchesUserFilter(
+  item: { createdBy?: string; managed?: boolean },
+  filterValues: string[]
+): boolean {
+  const includesManaged = filterValues.includes(MOCK_MANAGED_FILTER);
+  const includesNoCreator =
+    filterValues.includes(MOCK_NO_CREATOR_FILTER) || filterValues.includes(NULL_USER);
+
+  if (item.managed && includesManaged) {
+    return true;
+  }
+
+  if (!item.createdBy && !item.managed && includesNoCreator) {
+    return true;
+  }
+
   const resolvedUids = filterValues
-    .filter((v) => v !== NULL_USER)
+    .filter((v) => v !== MOCK_MANAGED_FILTER && v !== MOCK_NO_CREATOR_FILTER && v !== NULL_USER)
     .map(resolveToUid)
     .filter((uid): uid is string => uid !== undefined);
 
-  // Check if NULL_USER is in the filter (matches items without creator)
-  const includesNullUser = filterValues.includes(NULL_USER);
-
-  // Item has no creator
-  if (!itemCreatedBy) {
-    return includesNullUser;
+  if (!item.createdBy) {
+    return false;
   }
 
-  // Check if item's createdBy matches any resolved uid
-  return resolvedUids.includes(itemCreatedBy);
+  return resolvedUids.includes(item.createdBy);
 }
 
 /**
@@ -489,13 +511,13 @@ export const createSimpleMockFindItems = (
     const createdByFilter = filters.createdBy;
     const includeCreators = createdByFilter?.include;
     if (includeCreators && includeCreators.length > 0) {
-      items = items.filter((item) => matchesUserFilter(item.createdBy, includeCreators));
+      items = items.filter((item) => matchesUserFilter(item, includeCreators));
     }
 
     // Apply createdBy exclude filters.
     const excludeCreators = createdByFilter?.exclude;
     if (excludeCreators && excludeCreators.length > 0) {
-      items = items.filter((item) => !matchesUserFilter(item.createdBy, excludeCreators));
+      items = items.filter((item) => !matchesUserFilter(item, excludeCreators));
     }
 
     // Apply starred filter.

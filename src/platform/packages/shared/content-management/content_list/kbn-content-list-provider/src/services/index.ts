@@ -11,6 +11,11 @@ export type {
   ContentListServices,
   ContentListUserProfilesServices,
   UserProfileEntry,
-  UserProfileStore,
 } from './types';
-export { UserProfileStoreProvider, useUserProfileStoreContext } from './use_user_profile_store';
+export { ProfileCache } from './profile_cache';
+export {
+  ProfileCacheContext,
+  useProfileCache,
+  useProfileCacheVersion,
+  useProfile,
+} from './use_profile_cache';

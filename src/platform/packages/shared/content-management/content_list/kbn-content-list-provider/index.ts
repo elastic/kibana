@@ -98,12 +98,24 @@ export type {
 export { EMPTY_MODEL, toFindItemsFilters, useQueryModel } from './src/query_model';
 
 // Services.
-export { useUserProfileStoreContext } from './src/services';
-export type {
-  ContentListUserProfilesServices,
-  UserProfileEntry,
-  UserProfileStore,
+export {
+  ProfileCache,
+  ProfileCacheContext,
+  useProfileCache,
+  useProfileCacheVersion,
+  useProfile,
 } from './src/services';
+export type { ContentListUserProfilesServices, UserProfileEntry } from './src/services';
+
+// Item constants (sentinel keys, labels, and utilities).
+export {
+  MANAGED_USER_FILTER,
+  NO_CREATOR_USER_FILTER,
+  MANAGED_USER_LABEL,
+  NO_CREATOR_USER_LABEL,
+  SENTINEL_KEYS,
+  getCreatorKey,
+} from './src/item';
 
 // Utilities.
 export { contentListKeys } from './src/query';

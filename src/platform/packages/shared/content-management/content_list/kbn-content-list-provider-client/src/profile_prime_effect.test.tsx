@@ -13,40 +13,46 @@ import type { UserContentCommonSchema } from '@kbn/content-management-table-list
 import type {
   ContentListItem,
   ContentListQueryModel,
-  UserProfileStore,
+  ProfileCache,
 } from '@kbn/content-list-provider';
-import {
-  useContentListState,
-  useQueryModel,
-  useUserProfileStoreContext,
-} from '@kbn/content-list-provider';
-import { createPrimingState, primeRelevantProfiles } from './prime_relevant_profiles';
+import { useContentListState, useQueryModel, useProfileCache } from '@kbn/content-list-provider';
 import { ProfilePrimeEffect } from './profile_prime_effect';
 
-jest.mock('@kbn/content-list-provider', () => ({
-  useContentListState: jest.fn(),
-  useQueryModel: jest.fn(),
-  useUserProfileStoreContext: jest.fn(),
-}));
-
-jest.mock('./prime_relevant_profiles', () => {
-  const actual = jest.requireActual('./prime_relevant_profiles');
+jest.mock('@kbn/content-list-provider', () => {
+  const MANAGED = '__managed__';
+  const NO_CREATOR = '__no_creator__';
   return {
-    ...actual,
-    primeRelevantProfiles: jest.fn(),
+    useContentListState: jest.fn(),
+    useQueryModel: jest.fn(),
+    useProfileCache: jest.fn(),
+    MANAGED_USER_FILTER: MANAGED,
+    NO_CREATOR_USER_FILTER: NO_CREATOR,
+    SENTINEL_KEYS: new Set([MANAGED, NO_CREATOR]),
+    getCreatorKey: (item: { managed?: boolean; createdBy?: string }) => {
+      if (item.managed) {
+        return MANAGED;
+      }
+      return item.createdBy ?? NO_CREATOR;
+    },
   };
 });
 
 const mockedUseContentListState = jest.mocked(useContentListState);
 const mockedUseQueryModel = jest.mocked(useQueryModel);
-const mockedUseUserProfileStoreContext = jest.mocked(useUserProfileStoreContext);
-const mockedPrimeRelevantProfiles = jest.mocked(primeRelevantProfiles);
+const mockedUseProfileCache = jest.mocked(useProfileCache);
 
-const createMockStore = (): jest.Mocked<UserProfileStore> => ({
-  getAll: jest.fn().mockReturnValue([]),
+const createMockCache = (): jest.Mocked<
+  Pick<
+    ProfileCache,
+    'resolve' | 'getAll' | 'ensureLoaded' | 'loadOne' | 'subscribe' | 'getSnapshot'
+  >
+> => ({
   resolve: jest.fn().mockReturnValue(undefined),
+  getAll: jest.fn().mockReturnValue([]),
   ensureLoaded: jest.fn().mockResolvedValue(undefined),
-  merge: jest.fn(),
+  loadOne: jest.fn().mockResolvedValue(undefined),
+  subscribe: jest.fn().mockReturnValue(() => {}),
+  getSnapshot: jest.fn().mockReturnValue(0),
 });
 
 const createRenderedItems = (...ids: string[]): ContentListItem[] =>
@@ -101,86 +107,50 @@ describe('ProfilePrimeEffect', () => {
   });
 
   it('primes profiles when the query model references createdBy', async () => {
-    const store = createMockStore();
-    const storeRef = { current: undefined as UserProfileStore | undefined };
-    const primingState = createPrimingState();
+    const cache = createMockCache();
     const allItems = createRawItems('1', '2');
     const getItems = jest.fn(() => allItems);
-    const getDatasetVersion = jest.fn(() => 7);
 
     setMockContentListState('createdBy:jane', createRenderedItems('visible-1'));
     mockedUseQueryModel.mockReturnValue(createQueryModel(['createdBy']));
-    mockedUseUserProfileStoreContext.mockReturnValue(store);
-    mockedPrimeRelevantProfiles.mockResolvedValue(undefined);
+    mockedUseProfileCache.mockReturnValue(cache as unknown as ProfileCache);
 
-    render(
-      <ProfilePrimeEffect
-        getItems={getItems}
-        getDatasetVersion={getDatasetVersion}
-        primingState={primingState}
-        storeRef={storeRef}
-      />
-    );
-
-    expect(storeRef.current).toBe(store);
+    render(<ProfilePrimeEffect getItems={getItems} />);
 
     await waitFor(() => {
-      expect(mockedPrimeRelevantProfiles).toHaveBeenCalledWith(allItems, 7, store, primingState);
+      expect(cache.ensureLoaded).toHaveBeenCalledWith(['user-1', 'user-2']);
     });
   });
 
   it('does not prime profiles for non-user queries', () => {
-    const store = createMockStore();
-    const storeRef = { current: undefined as UserProfileStore | undefined };
-    const primingState = createPrimingState();
+    const cache = createMockCache();
 
     setMockContentListState('tag:production', createRenderedItems('visible-1'));
     mockedUseQueryModel.mockReturnValue(createQueryModel(['tag']));
-    mockedUseUserProfileStoreContext.mockReturnValue(store);
+    mockedUseProfileCache.mockReturnValue(cache as unknown as ProfileCache);
 
-    render(
-      <ProfilePrimeEffect
-        getItems={jest.fn(() => createRawItems('1'))}
-        getDatasetVersion={jest.fn(() => 3)}
-        primingState={primingState}
-        storeRef={storeRef}
-      />
-    );
+    render(<ProfilePrimeEffect getItems={jest.fn(() => createRawItems('1'))} />);
 
-    expect(storeRef.current).toBe(store);
-    expect(mockedPrimeRelevantProfiles).not.toHaveBeenCalled();
+    expect(cache.ensureLoaded).not.toHaveBeenCalled();
   });
 
   it('does not prime profiles until the cached item universe is populated', () => {
-    const store = createMockStore();
-    const storeRef = { current: undefined as UserProfileStore | undefined };
-    const primingState = createPrimingState();
+    const cache = createMockCache();
 
     setMockContentListState('createdBy:jane', createRenderedItems('visible-1'));
     mockedUseQueryModel.mockReturnValue(createQueryModel(['createdBy']));
-    mockedUseUserProfileStoreContext.mockReturnValue(store);
+    mockedUseProfileCache.mockReturnValue(cache as unknown as ProfileCache);
 
-    render(
-      <ProfilePrimeEffect
-        getItems={jest.fn(() => [])}
-        getDatasetVersion={jest.fn(() => 3)}
-        primingState={primingState}
-        storeRef={storeRef}
-      />
-    );
+    render(<ProfilePrimeEffect getItems={jest.fn(() => [])} />);
 
-    expect(storeRef.current).toBe(store);
-    expect(mockedPrimeRelevantProfiles).not.toHaveBeenCalled();
+    expect(cache.ensureLoaded).not.toHaveBeenCalled();
   });
 
   it('re-primes after fetched items change while the user field clause remains active', async () => {
-    const store = createMockStore();
-    const storeRef = { current: undefined as UserProfileStore | undefined };
-    const primingState = createPrimingState();
+    const cache = createMockCache();
 
     let renderedItems = createRenderedItems('visible-1');
     let rawItems = createRawItems('1');
-    let datasetVersion = 1;
 
     mockedUseContentListState.mockImplementation(() => ({
       state: {
@@ -199,75 +169,81 @@ describe('ProfilePrimeEffect', () => {
       refresh: jest.fn().mockResolvedValue(undefined),
     }));
     mockedUseQueryModel.mockReturnValue(createQueryModel(['createdBy']));
-    mockedUseUserProfileStoreContext.mockReturnValue(store);
-    mockedPrimeRelevantProfiles.mockResolvedValue(undefined);
+    mockedUseProfileCache.mockReturnValue(cache as unknown as ProfileCache);
 
     const getItems = jest.fn(() => rawItems);
-    const getDatasetVersion = jest.fn(() => datasetVersion);
 
-    const { rerender } = render(
-      <ProfilePrimeEffect
-        getItems={getItems}
-        getDatasetVersion={getDatasetVersion}
-        primingState={primingState}
-        storeRef={storeRef}
-      />
-    );
+    const { rerender } = render(<ProfilePrimeEffect getItems={getItems} />);
 
     await waitFor(() => {
-      expect(mockedPrimeRelevantProfiles).toHaveBeenNthCalledWith(
-        1,
-        createRawItems('1'),
-        1,
-        store,
-        primingState
-      );
+      expect(cache.ensureLoaded).toHaveBeenNthCalledWith(1, ['user-1']);
     });
 
     renderedItems = createRenderedItems('visible-1', 'visible-2');
     rawItems = createRawItems('1', '2');
-    datasetVersion = 2;
 
-    rerender(
-      <ProfilePrimeEffect
-        getItems={getItems}
-        getDatasetVersion={getDatasetVersion}
-        primingState={primingState}
-        storeRef={storeRef}
-      />
-    );
+    rerender(<ProfilePrimeEffect getItems={getItems} />);
 
     await waitFor(() => {
-      expect(mockedPrimeRelevantProfiles).toHaveBeenNthCalledWith(
-        2,
-        createRawItems('1', '2'),
-        2,
-        store,
-        primingState
-      );
+      expect(cache.ensureLoaded).toHaveBeenNthCalledWith(2, ['user-1', 'user-2']);
     });
   });
 
   it('skips priming when user field values are already resolved', () => {
-    const store = createMockStore();
-    const storeRef = { current: undefined as UserProfileStore | undefined };
-    const primingState = createPrimingState();
+    const cache = createMockCache();
 
     setMockContentListState('createdBy:jane@example.com', createRenderedItems('visible-1'));
-    // No unresolved fields — the email resolved to a UID via the store.
+    // No unresolved fields -- the email resolved to a UID via the cache.
     mockedUseQueryModel.mockReturnValue(createQueryModel(['createdBy'], []));
-    mockedUseUserProfileStoreContext.mockReturnValue(store);
+    mockedUseProfileCache.mockReturnValue(cache as unknown as ProfileCache);
 
-    render(
-      <ProfilePrimeEffect
-        getItems={jest.fn(() => createRawItems('1'))}
-        getDatasetVersion={jest.fn(() => 3)}
-        primingState={primingState}
-        storeRef={storeRef}
-      />
-    );
+    render(<ProfilePrimeEffect getItems={jest.fn(() => createRawItems('1'))} />);
 
-    expect(storeRef.current).toBe(store);
-    expect(mockedPrimeRelevantProfiles).not.toHaveBeenCalled();
+    expect(cache.ensureLoaded).not.toHaveBeenCalled();
+  });
+
+  it('does not prime when cache is undefined', () => {
+    setMockContentListState('createdBy:jane', createRenderedItems('visible-1'));
+    mockedUseQueryModel.mockReturnValue(createQueryModel(['createdBy']));
+    mockedUseProfileCache.mockReturnValue(undefined);
+
+    render(<ProfilePrimeEffect getItems={jest.fn(() => createRawItems('1'))} />);
+
+    // No error thrown, no ensureLoaded called -- cache is undefined.
+  });
+
+  it('excludes sentinel keys from priming', async () => {
+    const cache = createMockCache();
+    const allItems: UserContentCommonSchema[] = [
+      ...createRawItems('1'),
+      {
+        id: 'managed-item',
+        type: 'dashboard',
+        updatedAt: '2024-01-01T00:00:00.000Z',
+        references: [],
+        attributes: { title: 'Managed item' },
+        managed: true,
+        createdBy: 'some-user',
+      },
+      {
+        id: 'no-creator-item',
+        type: 'dashboard',
+        updatedAt: '2024-01-01T00:00:00.000Z',
+        references: [],
+        attributes: { title: 'No creator item' },
+        // No createdBy -- getCreatorKey returns NO_CREATOR_USER_FILTER
+      },
+    ];
+    const getItems = jest.fn(() => allItems);
+
+    setMockContentListState('createdBy:jane', createRenderedItems('visible-1'));
+    mockedUseQueryModel.mockReturnValue(createQueryModel(['createdBy']));
+    mockedUseProfileCache.mockReturnValue(cache as unknown as ProfileCache);
+
+    render(<ProfilePrimeEffect getItems={getItems} />);
+
+    await waitFor(() => {
+      expect(cache.ensureLoaded).toHaveBeenCalledWith(['user-1']);
+    });
   });
 });

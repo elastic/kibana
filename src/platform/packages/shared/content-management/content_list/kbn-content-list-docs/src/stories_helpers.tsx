@@ -27,6 +27,10 @@ import {
   useContentListSort,
   useContentListPagination,
   useContentListConfig,
+  MANAGED_USER_FILTER,
+  MANAGED_USER_LABEL,
+  NO_CREATOR_USER_FILTER,
+  NO_CREATOR_USER_LABEL,
 } from '@kbn/content-list-provider';
 import type {
   FindItemsParams,
@@ -127,6 +131,7 @@ export const createStoryFindItems = (options?: {
         updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
         tags: extractTagIds(item.references),
         createdBy: item.createdBy,
+        managed: item.managed,
       })),
       total: result.total,
     };
@@ -178,23 +183,42 @@ export const createMockTagFacetProvider = (
 /**
  * Creates a mock {@link FilterFacetConfig} for user profiles.
  *
- * Counts are computed from the provided `items` array. Profile metadata
- * comes from `MOCK_USER_PROFILES_MAP`.
+ * Counts are computed from the provided `items` array using `getCreatorKey`
+ * logic so that managed and no-creator items produce sentinel facet entries.
+ * Profile metadata comes from `MOCK_USER_PROFILES_MAP`.
  */
 export const createMockUserProfileFacetProvider = (
   items: UserContentCommonSchema[]
 ): FilterFacetConfig<UserProfileEntry> => ({
   getFacets: async () => {
-    const userCounts = computeCounts(items, (item) => (item.createdBy ? [item.createdBy] : []));
-    return Object.entries(userCounts).map(([uid, count]) => {
-      const profile = MOCK_USER_PROFILES_MAP[uid];
+    const getCreatorKey = (item: UserContentCommonSchema): string => {
+      if ((item as { managed?: boolean }).managed) {
+        return MANAGED_USER_FILTER;
+      }
+      if (!item.createdBy) {
+        return NO_CREATOR_USER_FILTER;
+      }
+      return item.createdBy;
+    };
+
+    const userCounts = computeCounts(items, (item) => [getCreatorKey(item)]);
+
+    return Object.entries(userCounts).map(([key, count]) => {
+      if (key === MANAGED_USER_FILTER) {
+        return { key, label: MANAGED_USER_LABEL, count, data: undefined };
+      }
+      if (key === NO_CREATOR_USER_FILTER) {
+        return { key, label: NO_CREATOR_USER_LABEL, count, data: undefined };
+      }
+
+      const profile = MOCK_USER_PROFILES_MAP[key];
       return {
-        key: uid,
-        label: profile?.user.full_name ?? profile?.user.username ?? uid,
+        key,
+        label: profile?.user.full_name ?? profile?.user.username ?? key,
         count,
         data: profile
           ? {
-              uid,
+              uid: key,
               user: profile.user,
               email: profile.user.email ?? '',
               fullName: profile.user.full_name ?? profile.user.username,

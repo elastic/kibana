@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, createContext, useContext, type ReactNode } from 'react';
+import React, { useMemo, useRef, createContext, useContext, type ReactNode } from 'react';
 import { ContentManagementTagsProvider } from '@kbn/content-management-tags';
 import { FavoritesContextProvider } from '@kbn/content-management-favorites-public';
 import type { ContentListCoreConfig, ContentListConfig, ContentListServices } from './types';
 import type { ContentListFeatures, ContentListSupports } from '../features';
 import type { DataSourceConfig } from '../datasource';
-import { UserProfileStoreProvider } from '../services';
+import { ProfileCache, ProfileCacheContext } from '../services';
 import { ContentListStateProvider } from '../state';
 import { QueryClientProvider, contentListQueryClient } from '../query';
 
@@ -55,6 +55,12 @@ export type ContentListProviderProps = ContentListConfig & {
   services?: ContentListServices;
   /** Feature configuration for enabling/customizing capabilities. */
   features?: ContentListFeatures;
+  /**
+   * Shared profile cache instance (created by the client provider).
+   * When provided, enables user-profile resolution in field definitions,
+   * table cells, and filter popovers.
+   */
+  profileCache?: ProfileCache;
 };
 
 /**
@@ -73,8 +79,8 @@ export type ContentListProviderProps = ContentListConfig & {
  *   to support extracting tag filters from the search bar query text.
  * - **Favorites** (`services.favorites`): wraps with `FavoritesContextProvider`, enabling
  *   star buttons and starred filtering.
- * - **User profiles** (`services.userProfiles`): wraps with `UserProfileStoreProvider`,
- *   providing a shared synchronous cache for user profile resolution.
+ * - **User profiles** (`services.userProfiles`): wraps with `ProfileCacheContext.Provider`,
+ *   providing a shared {@link ProfileCache} for synchronous profile resolution.
  */
 export const ContentListProvider = ({
   children,
@@ -86,6 +92,7 @@ export const ContentListProvider = ({
   queryKeyScope: queryKeyScopeProp,
   features = {},
   services,
+  profileCache,
 }: ContentListProviderProps): JSX.Element => {
   // Derive queryKeyScope: explicit prop takes priority, otherwise derive from id.
   // At least one of id or queryKeyScope is guaranteed by ContentListIdentity type.
@@ -148,14 +155,19 @@ export const ContentListProvider = ({
     </ContentListContext.Provider>
   );
 
-  // User profile store requires QueryClientProvider; wraps inside QueryClientProvider below.
+  // When the caller provides a ProfileCache (e.g. ContentListClientProvider),
+  // use it directly. Otherwise, create one from the userProfiles service so
+  // direct ContentListProvider consumers get profile resolution automatically.
+  const ownCacheRef = useRef<ProfileCache | undefined>(undefined);
+  if (!profileCache && supportsUserProfiles && userProfilesService) {
+    if (!ownCacheRef.current) {
+      ownCacheRef.current = new ProfileCache(userProfilesService.bulkResolve);
+    }
+  }
+  const resolvedCache = profileCache ?? ownCacheRef.current;
+
   content = (
-    <UserProfileStoreProvider
-      service={supportsUserProfiles ? userProfilesService : undefined}
-      queryKeyScope={queryKeyScope}
-    >
-      {content}
-    </UserProfileStoreProvider>
+    <ProfileCacheContext.Provider value={resolvedCache}>{content}</ProfileCacheContext.Provider>
   );
 
   // Wrap with tags provider when tags service is available.

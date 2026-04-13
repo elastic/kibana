@@ -82,7 +82,14 @@ export interface FindItemsParams {
    */
   searchQuery: string;
 
-  /** Active filters (includes the raw `search` text and any structured filters). */
+  /**
+   * Active filters (includes the raw `search` text and any structured filters).
+   *
+   * The `createdBy` dimension may contain sentinel keys ({@link MANAGED_USER_FILTER},
+   * {@link NO_CREATOR_USER_FILTER}) in addition to real user UIDs. Use
+   * {@link getCreatorKey} to map items to matching keys when implementing
+   * client-side filtering.
+   */
   filters: ActiveFilters;
 
   /**

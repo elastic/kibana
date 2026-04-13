@@ -16,11 +16,17 @@ import type {
   FindItemsResult,
   ContentListItem,
 } from '@kbn/content-list-provider';
-import { TAG_FILTER_ID, getIncludeExcludeFlag } from '@kbn/content-list-provider';
+import {
+  TAG_FILTER_ID,
+  getIncludeExcludeFlag,
+  MANAGED_USER_FILTER,
+  NO_CREATOR_USER_FILTER,
+  getCreatorKey,
+} from '@kbn/content-list-provider';
 import type { TableListViewFindItemsFn } from './types';
 
-export const MANAGED_USER_FILTER = '__managed__';
-export const NO_CREATOR_USER_FILTER = '__no_creator__';
+// Re-export for consumers that import from strategy.
+export { MANAGED_USER_FILTER, NO_CREATOR_USER_FILTER, getCreatorKey };
 
 /**
  * A `UserContentCommonSchema` item that may carry decorator-added properties
@@ -69,13 +75,6 @@ export interface ClientStrategy {
   onRefresh: () => Promise<void>;
   /** Returns the full (unfiltered, decorated) item set from the most recent fetch. */
   getItems: () => UserContentCommonSchema[];
-  /**
-   * Monotonic counter that increments each time the cached item universe
-   * changes — either from a new server fetch (search query change) or from
-   * an explicit invalidation. Used by the profile priming routine to avoid
-   * redundant `bulkResolve` calls on a stable dataset.
-   */
-  getDatasetVersion: () => number;
 }
 
 /**
@@ -189,17 +188,6 @@ const asIncludeExclude = (value: ActiveFilters[string]): IncludeExcludeFilter | 
   value != null && typeof value === 'object' && ('include' in value || 'exclude' in value)
     ? (value as IncludeExcludeFilter)
     : undefined;
-
-/**
- * Resolve the effective creator key for an item, mapping to sentinel values
- * for managed items and items without a creator.
- */
-export const getCreatorKey = (item: UserContentCommonSchema): string => {
-  if (item.managed) {
-    return MANAGED_USER_FILTER;
-  }
-  return item.createdBy ?? NO_CREATOR_USER_FILTER;
-};
 
 /**
  * Apply client-side filters to the item set.
@@ -329,7 +317,6 @@ export const createClientStrategy = (
   let rawItems: UserContentCommonSchema[] = [];
   let decoratedItems: UserContentCommonSchema[] = [];
   let lastSearchQuery: string | undefined;
-  let datasetVersion = 0;
 
   const applyDecoration = async () => {
     decoratedItems = decorate ? await decorate(rawItems) : rawItems;
@@ -346,7 +333,6 @@ export const createClientStrategy = (
       rawItems = result.hits;
       await applyDecoration();
       lastSearchQuery = searchQuery;
-      datasetVersion += 1;
     }
 
     let items = filterItems(decoratedItems, filters);
@@ -368,7 +354,6 @@ export const createClientStrategy = (
     lastSearchQuery = undefined;
     rawItems = [];
     decoratedItems = [];
-    datasetVersion += 1;
   };
 
   const onRefresh = async () => {
@@ -380,6 +365,5 @@ export const createClientStrategy = (
     onInvalidate,
     onRefresh,
     getItems: () => decoratedItems,
-    getDatasetVersion: () => datasetVersion,
   };
 };

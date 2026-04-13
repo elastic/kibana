@@ -14,7 +14,7 @@ import type { FavoritesClientPublic } from '@kbn/content-management-favorites-pu
 import type { ContentListUserProfilesServices, UserProfileEntry } from '../services';
 import { ContentListProvider } from '../context';
 import type { FindItemsParams, FindItemsResult } from '../datasource';
-import { useUserProfileStoreContext } from '../services';
+import { ProfileCache, useProfileCache } from '../services';
 import { useFieldDefinitions } from './field_definitions';
 
 // ---------------------------------------------------------------------------
@@ -84,8 +84,12 @@ const createWrapper =
       flags?: Array<{ flagName: string; modelKey: string }>;
     };
   }) =>
-  ({ children }: { children: React.ReactNode }) =>
-    (
+  ({ children }: { children: React.ReactNode }) => {
+    const profileCache = options?.userProfiles
+      ? new ProfileCache(options.userProfiles.bulkResolve)
+      : undefined;
+
+    return (
       <ContentListProvider
         id="test"
         labels={{ entity: 'item', entityPlural: 'items' }}
@@ -96,16 +100,18 @@ const createWrapper =
           favorites: options?.favorites,
         }}
         features={options?.features}
+        profileCache={profileCache}
       >
         {children}
       </ContentListProvider>
     );
+  };
 
-/** Hook exposing both field definitions and the profile store for seeding. */
-const useFieldDefinitionsWithStore = () => {
-  const store = useUserProfileStoreContext();
+/** Hook exposing both field definitions and the profile cache for seeding. */
+const useFieldDefinitionsWithCache = () => {
+  const profileCache = useProfileCache();
   const defs = useFieldDefinitions();
-  return { ...defs, store };
+  return { ...defs, profileCache };
 };
 
 // ---------------------------------------------------------------------------
@@ -215,10 +221,10 @@ describe('useFieldDefinitions', () => {
   describe('user field resolution', () => {
     it('resolves UID to email (preferred) via profile store.', async () => {
       const wrapper = createWrapper({ userProfiles: mockUserProfilesService });
-      const { result } = renderHook(() => useFieldDefinitionsWithStore(), { wrapper });
+      const { result } = renderHook(() => useFieldDefinitionsWithCache(), { wrapper });
 
       await act(async () => {
-        await result.current.store?.ensureLoaded(['u_jane']);
+        await result.current.profileCache?.ensureLoaded(['u_jane']);
       });
 
       const createdByDef = result.current.fields.find((f) => f.fieldName === 'createdBy');
@@ -227,7 +233,7 @@ describe('useFieldDefinitions', () => {
 
     it('falls back to UID when profile is not cached.', () => {
       const wrapper = createWrapper({ userProfiles: mockUserProfilesService });
-      const { result } = renderHook(() => useFieldDefinitionsWithStore(), { wrapper });
+      const { result } = renderHook(() => useFieldDefinitionsWithCache(), { wrapper });
 
       const createdByDef = result.current.fields.find((f) => f.fieldName === 'createdBy');
       expect(createdByDef?.resolveIdToDisplay('u_unknown')).toBe('u_unknown');
@@ -235,10 +241,10 @@ describe('useFieldDefinitions', () => {
 
     it('resolves display email to UID (exact match).', async () => {
       const wrapper = createWrapper({ userProfiles: mockUserProfilesService });
-      const { result } = renderHook(() => useFieldDefinitionsWithStore(), { wrapper });
+      const { result } = renderHook(() => useFieldDefinitionsWithCache(), { wrapper });
 
       await act(async () => {
-        await result.current.store?.ensureLoaded(['u_jane', 'u_john']);
+        await result.current.profileCache?.ensureLoaded(['u_jane', 'u_john']);
       });
 
       const createdByDef = result.current.fields.find((f) => f.fieldName === 'createdBy');
@@ -247,10 +253,10 @@ describe('useFieldDefinitions', () => {
 
     it('resolves display full name to UID (exact match, case-insensitive).', async () => {
       const wrapper = createWrapper({ userProfiles: mockUserProfilesService });
-      const { result } = renderHook(() => useFieldDefinitionsWithStore(), { wrapper });
+      const { result } = renderHook(() => useFieldDefinitionsWithCache(), { wrapper });
 
       await act(async () => {
-        await result.current.store?.ensureLoaded(['u_jane']);
+        await result.current.profileCache?.ensureLoaded(['u_jane']);
       });
 
       const createdByDef = result.current.fields.find((f) => f.fieldName === 'createdBy');
@@ -259,10 +265,10 @@ describe('useFieldDefinitions', () => {
 
     it('fuzzy-resolves partial email to matching UIDs.', async () => {
       const wrapper = createWrapper({ userProfiles: mockUserProfilesService });
-      const { result } = renderHook(() => useFieldDefinitionsWithStore(), { wrapper });
+      const { result } = renderHook(() => useFieldDefinitionsWithCache(), { wrapper });
 
       await act(async () => {
-        await result.current.store?.ensureLoaded(['u_jane', 'u_john']);
+        await result.current.profileCache?.ensureLoaded(['u_jane', 'u_john']);
       });
 
       const createdByDef = result.current.fields.find((f) => f.fieldName === 'createdBy');
@@ -272,14 +278,50 @@ describe('useFieldDefinitions', () => {
 
     it('returns empty array for fuzzy search with no matches.', async () => {
       const wrapper = createWrapper({ userProfiles: mockUserProfilesService });
-      const { result } = renderHook(() => useFieldDefinitionsWithStore(), { wrapper });
+      const { result } = renderHook(() => useFieldDefinitionsWithCache(), { wrapper });
 
       await act(async () => {
-        await result.current.store?.ensureLoaded(['u_jane', 'u_john']);
+        await result.current.profileCache?.ensureLoaded(['u_jane', 'u_john']);
       });
 
       const createdByDef = result.current.fields.find((f) => f.fieldName === 'createdBy');
       expect(createdByDef?.resolveFuzzyDisplayToIds?.('zzz_nomatch')).toEqual([]);
+    });
+
+    it('resolves sentinel key `__managed__` to display label.', () => {
+      const wrapper = createWrapper({ userProfiles: mockUserProfilesService });
+      const { result } = renderHook(() => useFieldDefinitions(), { wrapper });
+      const createdByDef = result.current.fields.find((f) => f.fieldName === 'createdBy');
+      expect(createdByDef?.resolveIdToDisplay('__managed__')).toBe('Managed');
+    });
+
+    it('resolves sentinel key `__no_creator__` to display label.', () => {
+      const wrapper = createWrapper({ userProfiles: mockUserProfilesService });
+      const { result } = renderHook(() => useFieldDefinitions(), { wrapper });
+      const createdByDef = result.current.fields.find((f) => f.fieldName === 'createdBy');
+      expect(createdByDef?.resolveIdToDisplay('__no_creator__')).toBe('No creator');
+    });
+
+    it('resolves sentinel display label "Managed" back to `__managed__`.', () => {
+      const wrapper = createWrapper({ userProfiles: mockUserProfilesService });
+      const { result } = renderHook(() => useFieldDefinitions(), { wrapper });
+      const createdByDef = result.current.fields.find((f) => f.fieldName === 'createdBy');
+      expect(createdByDef?.resolveDisplayToId('Managed')).toBe('__managed__');
+    });
+
+    it('resolves sentinel display label "No creator" back to `__no_creator__`.', () => {
+      const wrapper = createWrapper({ userProfiles: mockUserProfilesService });
+      const { result } = renderHook(() => useFieldDefinitions(), { wrapper });
+      const createdByDef = result.current.fields.find((f) => f.fieldName === 'createdBy');
+      expect(createdByDef?.resolveDisplayToId('No creator')).toBe('__no_creator__');
+    });
+
+    it('resolves raw sentinel keys via `resolveDisplayToId`.', () => {
+      const wrapper = createWrapper({ userProfiles: mockUserProfilesService });
+      const { result } = renderHook(() => useFieldDefinitions(), { wrapper });
+      const createdByDef = result.current.fields.find((f) => f.fieldName === 'createdBy');
+      expect(createdByDef?.resolveDisplayToId('__managed__')).toBe('__managed__');
+      expect(createdByDef?.resolveDisplayToId('__no_creator__')).toBe('__no_creator__');
     });
   });
 });

@@ -12,7 +12,14 @@ import { css } from '@emotion/react';
 import { EuiAvatar, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UserAvatarTip } from '@kbn/user-profile-components';
-import { useCreatedByFilterToggle, useUserProfileStoreContext } from '@kbn/content-list-provider';
+import {
+  useCreatedByFilterToggle,
+  useProfile,
+  MANAGED_USER_FILTER,
+  MANAGED_USER_LABEL,
+  NO_CREATOR_USER_FILTER,
+  NO_CREATOR_USER_LABEL,
+} from '@kbn/content-list-provider';
 
 /** Props for the {@link CreatedByCell} component. */
 export interface CreatedByCellProps {
@@ -30,66 +37,85 @@ const cellCss = css`
 
 /**
  * Determine the filter type from a keyboard or mouse event's modifier keys.
- * Cmd (Mac) or Ctrl (Windows/Linux) → exclude; otherwise → include.
+ * Cmd (Mac) or Ctrl (Windows/Linux) -> exclude; otherwise -> include.
  */
 const getFilterType = (e: { metaKey: boolean; ctrlKey: boolean }): 'include' | 'exclude' =>
   e.metaKey || e.ctrlKey ? 'exclude' : 'include';
 
-const MANAGED_LABEL = i18n.translate(
-  'contentManagement.contentList.table.createdByCell.managedLabel',
-  { defaultMessage: 'Managed' }
-);
-
 /**
  * Cell renderer for `Column.CreatedBy`.
  *
- * Renders a clickable avatar for the item's creator. Clicking the avatar
- * toggles an include filter for that user; holding Cmd/Ctrl toggles an
- * exclude filter instead.
+ * Self-loading: uses `useProfile(uid)` which triggers a batched load if the
+ * profile is not yet cached. Multiple cells mounting in the same frame get
+ * their requests batched into a single `bulkResolve`.
  *
- * Managed items display a non-interactive "Managed" indicator instead of
- * the creator's avatar, consistent with the sentinel-based filtering in
- * the `getCreatorKey` layer.
+ * All avatar types are clickable: clicking toggles an include filter,
+ * holding Cmd/Ctrl toggles exclude. Managed items use the `__managed__`
+ * sentinel, items without a creator use `__no_creator__`, and regular
+ * items filter by their UID.
  */
 export const CreatedByCell = memo(({ createdBy, managed }: CreatedByCellProps) => {
-  const userProfileStore = useUserProfileStoreContext();
+  const user = useProfile(!managed ? createdBy : undefined);
   const toggleFilter = useCreatedByFilterToggle();
-  const user = !managed && createdBy ? userProfileStore?.resolve(createdBy) : undefined;
+
+  const filterKey = managed ? MANAGED_USER_FILTER : createdBy ?? NO_CREATOR_USER_FILTER;
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
-      if (!createdBy) {
-        return;
-      }
-      toggleFilter(createdBy, getFilterType(e));
+      toggleFilter(filterKey, getFilterType(e));
     },
-    [createdBy, toggleFilter]
+    [filterKey, toggleFilter]
   );
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (!createdBy) {
-        return;
-      }
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        toggleFilter(createdBy, getFilterType(e));
+        toggleFilter(filterKey, getFilterType(e));
       }
     },
-    [createdBy, toggleFilter]
+    [filterKey, toggleFilter]
   );
 
   if (managed) {
     return (
-      <EuiToolTip content={MANAGED_LABEL} position="top">
-        <EuiAvatar
-          name={MANAGED_LABEL}
-          size="s"
-          iconType="package"
-          color="subdued"
-          data-test-subj="content-list-createdBy-managed"
-        />
-      </EuiToolTip>
+      <span
+        css={cellCss}
+        onClick={handleClick}
+        role="button"
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
+        aria-label={i18n.translate(
+          'contentManagement.contentList.table.createdByCell.filterAriaLabel',
+          { defaultMessage: 'Filter by creator: {name}', values: { name: MANAGED_USER_LABEL } }
+        )}
+        data-test-subj="content-list-createdBy-managed"
+      >
+        <EuiToolTip content={MANAGED_USER_LABEL} position="top">
+          <EuiAvatar name={MANAGED_USER_LABEL} size="s" iconType="package" color="subdued" />
+        </EuiToolTip>
+      </span>
+    );
+  }
+
+  if (!createdBy) {
+    return (
+      <span
+        css={cellCss}
+        onClick={handleClick}
+        role="button"
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
+        aria-label={i18n.translate(
+          'contentManagement.contentList.table.createdByCell.filterAriaLabel',
+          { defaultMessage: 'Filter by creator: {name}', values: { name: NO_CREATOR_USER_LABEL } }
+        )}
+        data-test-subj="content-list-createdBy-noCreator"
+      >
+        <EuiToolTip content={NO_CREATOR_USER_LABEL} position="top">
+          <EuiAvatar name={NO_CREATOR_USER_LABEL} size="s" iconType="userAvatar" color="subdued" />
+        </EuiToolTip>
+      </span>
     );
   }
 

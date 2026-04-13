@@ -8,7 +8,6 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { i18n } from '@kbn/i18n';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type {
   ContentListCoreConfig,
@@ -16,27 +15,25 @@ import type {
   DataSourceConfig,
   FilterFacetConfig,
   UserProfileEntry,
-  UserProfileStore,
 } from '@kbn/content-list-provider';
 import {
   ContentListProvider,
   isPaginationConfig,
   useContentListState,
+  ProfileCache,
+  MANAGED_USER_FILTER,
+  NO_CREATOR_USER_FILTER,
+  MANAGED_USER_LABEL,
+  NO_CREATOR_USER_LABEL,
+  SENTINEL_KEYS,
 } from '@kbn/content-list-provider';
 import { SAVED_OBJECTS_PER_PAGE_ID } from '@kbn/management-settings-ids';
 import { useFavorites } from '@kbn/content-management-favorites-public';
 import type { Tag } from '@kbn/content-management-tags';
 import type { TableListViewFindItemsFn, ContentListClientServices } from './types';
-import {
-  createClientStrategy,
-  filterItems,
-  getCreatorKey,
-  MANAGED_USER_FILTER,
-  NO_CREATOR_USER_FILTER,
-} from './strategy';
+import { createClientStrategy, filterItems, getCreatorKey } from './strategy';
 import type { ItemDecorator } from './strategy';
 import { ProfilePrimeEffect } from './profile_prime_effect';
-import { createPrimingState, type PrimingState } from './prime_relevant_profiles';
 
 /**
  * Compute per-key item counts from the full item set.
@@ -183,7 +180,7 @@ export const ContentListClientProvider = ({
     []
   );
 
-  const { findItems, onInvalidate, onRefresh, getItems, getDatasetVersion } = useMemo(
+  const { findItems, onInvalidate, onRefresh, getItems } = useMemo(
     () => createClientStrategy(tableListViewFindItems, starredEnabled ? decorate : undefined),
     [tableListViewFindItems, starredEnabled, decorate]
   );
@@ -196,16 +193,12 @@ export const ContentListClientProvider = ({
   const tagsService = services?.tags;
   const userProfilesService = services?.userProfiles;
 
-  // Shared priming state — passed to both the `ProfilePrimeEffect` component
-  // and `getFacets` so they share dedup / version tracking.
-  const primingStateRef = useRef<PrimingState>(createPrimingState());
-  const primingState = primingStateRef.current;
-
-  // Ref bridge for the `UserProfileStore`. The store lives inside
-  // `ContentListProvider`'s context tree; `ProfilePrimeEffect` (rendered as
-  // a child) writes the store here so `getFacets` (defined before the tree
-  // mounts) can read it.
-  const storeRef = useRef<UserProfileStore | undefined>(undefined);
+  // Create the profile cache once and keep a stable reference.
+  const profileCacheRef = useRef<ProfileCache | undefined>(undefined);
+  if (userProfilesService && !profileCacheRef.current) {
+    profileCacheRef.current = new ProfileCache(userProfilesService.bulkResolve);
+  }
+  const profileCache = profileCacheRef.current;
 
   // Build `FilterFacetConfig<Tag>` for tags when the tags service is available
   // and the feature isn't explicitly disabled or already configured.
@@ -241,9 +234,8 @@ export const ContentListClientProvider = ({
   // service is available and the feature isn't explicitly disabled or already
   // configured.
   //
-  // `getFacets` delegates profile loading to the shared priming routine so
-  // that all trigger sites (`ProfilePrimeEffect`, popover, avatar) feed the same
-  // `UserProfileStore`. After priming, facet labels are read from the store.
+  // `getFacets` uses the shared `ProfileCache` — `ensureLoaded` populates
+  // the cache, then `resolve` reads from it directly.
   const userProfilesFeature = useMemo((): ContentListFeatures['userProfiles'] => {
     if (featuresProp.userProfiles === false) {
       return false;
@@ -251,11 +243,11 @@ export const ContentListClientProvider = ({
     if (typeof featuresProp.userProfiles === 'object') {
       return featuresProp.userProfiles;
     }
-    if (!userProfilesService) {
+    if (!userProfilesService || !profileCache) {
       return featuresProp.userProfiles;
     }
 
-    const sentinelKeys = new Set([MANAGED_USER_FILTER, NO_CREATOR_USER_FILTER]);
+    const cache = profileCache;
     const config: FilterFacetConfig<UserProfileEntry> = {
       getFacets: async ({ filters }) => {
         const narrowed = filterItems(getItems(), filters);
@@ -265,53 +257,41 @@ export const ContentListClientProvider = ({
           return [];
         }
 
-        // Resolve profiles for facet labels via a direct bulkResolve call.
-        // We intentionally avoid reading from `store.resolve()` here because
-        // the store's `resolve` function closes over React state that may be
-        // stale after an async merge (state updates are batched and only
-        // visible after the next render). Using the bulkResolve response
-        // directly guarantees fresh data for facet labels.
-        //
-        // The resolved profiles are also merged into the shared store so
-        // that query resolution (`resolveFuzzyDisplayToIds` via
-        // `store.getAll()`) benefits on the next render cycle.
-        const realUids = allKeys.filter((k) => !sentinelKeys.has(k));
-        const profiles = realUids.length > 0 ? await userProfilesService.bulkResolve(realUids) : [];
-        const profilesByUid = new Map(profiles.map((p) => [p.uid, p]));
-
-        const store = storeRef.current;
-        if (store && profiles.length > 0) {
-          store.merge(profiles);
+        // Resolve real user profiles (skip sentinels).
+        const realUids = allKeys.filter((k) => !SENTINEL_KEYS.has(k));
+        if (realUids.length > 0) {
+          await cache.ensureLoaded(realUids);
         }
 
-        const facets = allKeys
-          .filter((key) => key !== NO_CREATOR_USER_FILTER)
-          .map((key) => {
-            if (key === MANAGED_USER_FILTER) {
-              return {
-                key,
-                label: i18n.translate(
-                  'contentManagement.contentList.table.createdByCell.managedLabel',
-                  { defaultMessage: 'Managed' }
-                ),
-                count: userCounts[key] ?? 0,
-                data: undefined,
-              };
-            }
-            const profile = profilesByUid.get(key);
+        return allKeys.map((key) => {
+          if (key === MANAGED_USER_FILTER) {
             return {
               key,
-              label: profile?.fullName ?? key,
+              label: MANAGED_USER_LABEL,
               count: userCounts[key] ?? 0,
-              data: profile,
+              data: undefined,
             };
-          });
-
-        return facets;
+          }
+          if (key === NO_CREATOR_USER_FILTER) {
+            return {
+              key,
+              label: NO_CREATOR_USER_LABEL,
+              count: userCounts[key] ?? 0,
+              data: undefined,
+            };
+          }
+          const profile = cache.resolve(key);
+          return {
+            key,
+            label: profile?.fullName ?? key,
+            count: userCounts[key] ?? 0,
+            data: profile,
+          };
+        });
       },
     };
     return config;
-  }, [featuresProp.userProfiles, userProfilesService, getItems]);
+  }, [featuresProp.userProfiles, userProfilesService, profileCache, getItems]);
 
   const features: ContentListFeatures = useMemo(
     () => ({
@@ -356,17 +336,11 @@ export const ContentListClientProvider = ({
       dataSource={dataSource}
       features={resolvedFeatures}
       services={services}
+      profileCache={profileCache}
       {...rest}
     >
       {starredEnabled && <FavoritesSyncEffect favoriteIdsRef={favoriteIdsRef} />}
-      {userProfilesService && (
-        <ProfilePrimeEffect
-          getItems={getItems}
-          getDatasetVersion={getDatasetVersion}
-          primingState={primingState}
-          storeRef={storeRef}
-        />
-      )}
+      {profileCache && <ProfilePrimeEffect getItems={getItems} />}
       {children}
     </ContentListProvider>
   );

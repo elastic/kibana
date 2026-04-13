@@ -11,10 +11,11 @@ import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { ContentListProvider } from '../context';
 import type { ContentListProviderProps } from '../context';
-import type { FindItemsResult, FindItemsParams } from '../datasource';
+import { getIncludeExcludeFilter, type FindItemsResult, type FindItemsParams } from '../datasource';
 import type { ContentListItem } from '../item';
 import { useContentListItems } from './use_content_list_items';
 import { useContentListSearch } from '../features/search/use_content_list_search';
+import { useContentListFilters } from '../features/filtering/use_content_list_filters';
 
 const sampleItems: ContentListItem[] = [
   { id: '1', title: 'Dashboard A', description: 'First dashboard' },
@@ -179,6 +180,65 @@ describe('useContentListItems', () => {
 
       expect(result.current.items).toEqual([]);
       expect(result.current.totalItems).toBe(0);
+    });
+
+    it('warms the profile cache from fetched items for direct-provider user filters', async () => {
+      const userItems: ContentListItem[] = [{ id: '1', title: 'Dashboard A', createdBy: 'u_jane' }];
+      const userFindItems = jest.fn(
+        async (_params: FindItemsParams): Promise<FindItemsResult> => ({
+          items: userItems,
+          total: userItems.length,
+        })
+      );
+      const bulkResolve = jest.fn(async (uids: string[]) =>
+        uids.includes('u_jane')
+          ? [
+              {
+                uid: 'u_jane',
+                user: {
+                  username: 'jane',
+                  email: 'jane@example.com',
+                  full_name: 'Jane Example',
+                },
+                email: 'jane@example.com',
+                fullName: 'Jane Example',
+              },
+            ]
+          : []
+      );
+
+      const useHookState = () => ({
+        items: useContentListItems(),
+        filters: useContentListFilters(),
+      });
+
+      const { result } = renderHook(useHookState, {
+        wrapper: createWrapper({
+          dataSource: { findItems: userFindItems },
+          services: { userProfiles: { bulkResolve } },
+          features: { search: { initialSearch: 'createdBy:jane@example.com' } },
+        }),
+      });
+
+      await waitFor(() => {
+        expect(result.current.items.isLoading).toBe(false);
+      });
+
+      await waitFor(() => {
+        expect(result.current.filters.filters.createdBy).toEqual({
+          include: ['u_jane'],
+          exclude: [],
+        });
+      });
+
+      await waitFor(() => {
+        expect(
+          userFindItems.mock.calls.some(([params]) => {
+            const createdBy = getIncludeExcludeFilter(params.filters.createdBy);
+            return createdBy?.include?.includes('u_jane') && createdBy?.exclude?.length === 0;
+          })
+        ).toBe(true);
+      });
     });
 
     it('provides an error when `findItems` rejects', async () => {

@@ -77,4 +77,4 @@ export type ContentListConfig = ContentListCoreConfig & {
 };
 
 // Re-export service types.
-export type { ContentListServices, UserProfileStore } from '../services';
+export type { ContentListServices } from '../services';

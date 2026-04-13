@@ -14,7 +14,7 @@ import type { FavoritesClientPublic } from '@kbn/content-management-favorites-pu
 import { ContentListProvider } from '../context';
 import type { FindItemsParams, FindItemsResult } from '../datasource';
 import type { ContentListUserProfilesServices } from '../services';
-import { useUserProfileStoreContext } from '../services';
+import { ProfileCache, useProfileCache } from '../services';
 import { useFieldDefinitions } from './field_definitions';
 
 const mockUsers = [
@@ -73,6 +73,7 @@ const createWrapper =
   }) =>
   ({ children }: { children: React.ReactNode }) => {
     const { tags, userProfiles, favorites, features } = options ?? {};
+    const profileCache = userProfiles ? new ProfileCache(userProfiles.bulkResolve) : undefined;
 
     return (
       <ContentListProvider
@@ -85,6 +86,7 @@ const createWrapper =
           ...(favorites ? { favorites } : {}),
         }}
         features={features}
+        profileCache={profileCache}
       >
         {children}
       </ContentListProvider>
@@ -92,13 +94,13 @@ const createWrapper =
   };
 
 /**
- * Helper hook that exposes both field definitions and the profile store,
- * so tests can seed the store before asserting on field resolution.
+ * Helper hook that exposes both field definitions and the profile cache,
+ * so tests can seed the cache before asserting on field resolution.
  */
-const useFieldDefinitionsWithStore = () => {
-  const userProfileStore = useUserProfileStoreContext();
+const useFieldDefinitionsWithCache = () => {
+  const profileCache = useProfileCache();
   const fieldDefs = useFieldDefinitions();
-  return { ...fieldDefs, userProfileStore };
+  return { ...fieldDefs, profileCache };
 };
 
 describe('useFieldDefinitions', () => {
@@ -107,7 +109,7 @@ describe('useFieldDefinitions', () => {
   });
 
   it('builds tag and createdBy field definitions plus the starred flag when supported', async () => {
-    const { result } = renderHook(() => useFieldDefinitionsWithStore(), {
+    const { result } = renderHook(() => useFieldDefinitionsWithCache(), {
       wrapper: createWrapper({
         tags: mockTagsService,
         userProfiles: mockUserProfilesService,
@@ -118,9 +120,9 @@ describe('useFieldDefinitions', () => {
     expect(result.current.fields.map((field) => field.fieldName)).toEqual(['tag', 'createdBy']);
     expect(result.current.flags).toEqual([{ flagName: 'starred', modelKey: 'starred' }]);
 
-    // Seed the profile store so user-field resolution works.
+    // Seed the profile cache so user-field resolution works.
     await act(async () => {
-      await result.current.userProfileStore?.ensureLoaded(mockUsers.map((u) => u.uid));
+      await result.current.profileCache?.ensureLoaded(mockUsers.map((u) => u.uid));
     });
 
     const tagField = result.current.fields.find((field) => field.fieldName === 'tag');
@@ -155,16 +157,16 @@ describe('useFieldDefinitions', () => {
   });
 
   it('falls back to the raw value when a tag or user cannot be resolved', async () => {
-    const { result } = renderHook(() => useFieldDefinitionsWithStore(), {
+    const { result } = renderHook(() => useFieldDefinitionsWithCache(), {
       wrapper: createWrapper({
         tags: mockTagsService,
         userProfiles: mockUserProfilesService,
       }),
     });
 
-    // Seed the profile store.
+    // Seed the profile cache.
     await act(async () => {
-      await result.current.userProfileStore?.ensureLoaded(mockUsers.map((u) => u.uid));
+      await result.current.profileCache?.ensureLoaded(mockUsers.map((u) => u.uid));
     });
 
     const tagField = result.current.fields.find((field) => field.fieldName === 'tag');

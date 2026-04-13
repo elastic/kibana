@@ -69,6 +69,6 @@ export const useFilterFacets = <T = unknown>(
     queryFn: ({ signal }) =>
       getFacets!({ filters: facetFilters, signal }) as Promise<FilterFacet<T>[]>,
     enabled: (opts?.enabled ?? true) && !!getFacets,
-    staleTime: 30_000,
+    keepPreviousData: true,
   });
 };

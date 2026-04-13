@@ -16,6 +16,5 @@
     "@kbn/management-settings-ids",
     "@kbn/content-management-favorites-public",
     "@kbn/content-management-tags",
-    "@kbn/i18n"
   ]
 }

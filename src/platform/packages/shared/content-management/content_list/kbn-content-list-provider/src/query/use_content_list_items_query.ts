@@ -13,7 +13,7 @@ import { useQuery } from '@kbn/react-query';
 import type { ContentListClientState, ContentListQueryData } from '../state/types';
 import { USER_UID_FIELDS } from '../item';
 import { useContentListConfig } from '../context';
-import { useUserProfileStoreContext } from '../services';
+import { useProfileCache } from '../services';
 import { useQueryModel, toFindItemsFilters } from '../query_model';
 import { DEFAULT_DEBOUNCE_MS } from '../datasource/types';
 import { contentListKeys } from './keys';
@@ -33,7 +33,7 @@ export const useContentListItemsQuery = (
   clientState: ContentListClientState
 ): ContentListQueryData & { refetch: () => Promise<void>; requery: () => Promise<void> } => {
   const { dataSource, queryKeyScope, supports } = useContentListConfig();
-  const userProfileStore = useUserProfileStoreContext();
+  const profileCache = useProfileCache();
 
   const model = useQueryModel(clientState.queryText);
   const activeFilters = useMemo(() => toFindItemsFilters(model), [model]);
@@ -82,11 +82,14 @@ export const useContentListItemsQuery = (
     },
   });
 
-  // Seed user profile cache with UIDs from fetched items.
+  // Prime the profile cache with UIDs from fetched items so that
+  // `resolveDisplayToId` can resolve display values (email, full name)
+  // typed into the search bar for direct `ContentListProvider` consumers.
+  // Cell rendering does not depend on this — `useProfile` self-loads.
   const items = query.data?.items;
   const prevDataUpdatedAtRef = useRef(query.dataUpdatedAt);
   useEffect(() => {
-    if (!userProfileStore || !items || prevDataUpdatedAtRef.current === query.dataUpdatedAt) {
+    if (!profileCache || !items || prevDataUpdatedAtRef.current === query.dataUpdatedAt) {
       return;
     }
     prevDataUpdatedAtRef.current = query.dataUpdatedAt;
@@ -101,9 +104,9 @@ export const useContentListItemsQuery = (
       }
     }
     if (uids.size > 0) {
-      userProfileStore.ensureLoaded(Array.from(uids));
+      profileCache.ensureLoaded(Array.from(uids)).catch(() => {});
     }
-  }, [items, query.dataUpdatedAt, userProfileStore]);
+  }, [items, query.dataUpdatedAt, profileCache]);
 
   // Clear any data-source-level cache before re-executing the query.
   const refetch = useCallback(async () => {

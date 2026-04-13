@@ -14,7 +14,7 @@ import type { FavoritesClientPublic } from '@kbn/content-management-favorites-pu
 import { ContentListProvider } from '../context';
 import type { FindItemsParams, FindItemsResult } from '../datasource';
 import type { ContentListUserProfilesServices } from '../services';
-import { useUserProfileStoreContext } from '../services';
+import { ProfileCache, useProfileCache } from '../services';
 import { EMPTY_MODEL } from './types';
 import { buildSchema } from './parse_query_text';
 import { useQueryModel } from './use_query_model';
@@ -62,29 +62,38 @@ const mockFavoritesService: FavoritesClientPublic = {
   reportRemoveFavoriteClick: () => {},
 };
 
-const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <ContentListProvider
-    id="test-list"
-    labels={{ entity: 'item', entityPlural: 'items' }}
-    dataSource={{ findItems: mockFindItems }}
-    services={{
-      tags: mockTagsService,
-      userProfiles: mockUserProfilesService,
-      favorites: mockFavoritesService,
-    }}
-  >
-    {children}
-  </ContentListProvider>
-);
+/**
+ * Build a fresh wrapper and `ProfileCache` per test to avoid cross-test
+ * cache leakage (the internal `Map` survives `jest.clearAllMocks()`).
+ */
+const createWrapper = () => {
+  const cache = new ProfileCache(mockUserProfilesService.bulkResolve);
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
+    <ContentListProvider
+      id="test-list"
+      labels={{ entity: 'item', entityPlural: 'items' }}
+      dataSource={{ findItems: mockFindItems }}
+      services={{
+        tags: mockTagsService,
+        userProfiles: mockUserProfilesService,
+        favorites: mockFavoritesService,
+      }}
+      profileCache={cache}
+    >
+      {children}
+    </ContentListProvider>
+  );
+  return { wrapper: Wrapper, profileCache: cache };
+};
 
 /**
- * Helper hook that exposes both the derived model and the profile store,
- * so tests can seed the store before asserting on query derivation.
+ * Helper hook that exposes both the derived model and the profile cache,
+ * so tests can seed the cache before asserting on query derivation.
  */
-const useQueryModelWithStore = (queryText: string) => {
-  const userProfileStore = useUserProfileStoreContext();
+const useQueryModelWithCache = (queryText: string) => {
+  const cache = useProfileCache();
   const model = useQueryModel(queryText);
-  return { model, userProfileStore };
+  return { model, profileCache: cache };
 };
 
 describe('useQueryModel', () => {
@@ -93,20 +102,21 @@ describe('useQueryModel', () => {
   });
 
   it('returns the empty model for blank query text', () => {
+    const { wrapper } = createWrapper();
     const { result } = renderHook(() => useQueryModel('   '), { wrapper });
 
     expect(result.current).toEqual(EMPTY_MODEL);
   });
 
   it('derives search text, field filters, and flags from the query', async () => {
+    const { wrapper } = createWrapper();
     const queryText =
       'dashboard createdBy:jane@example.com -tag:Archived tag:Production is:starred status:open is:custom';
 
-    const { result } = renderHook(() => useQueryModelWithStore(queryText), { wrapper });
+    const { result } = renderHook(() => useQueryModelWithCache(queryText), { wrapper });
 
-    // Seed the profile store so createdBy resolution works.
     await act(async () => {
-      await result.current.userProfileStore?.ensureLoaded(mockUsers.map((u) => u.uid));
+      await result.current.profileCache?.ensureLoaded(mockUsers.map((u) => u.uid));
     });
 
     expect(result.current.model.search).toBe('dashboard status:open is:custom');
@@ -119,13 +129,13 @@ describe('useQueryModel', () => {
   });
 
   it('uses fuzzy matching when an exact field match is unavailable', async () => {
-    const { result } = renderHook(() => useQueryModelWithStore('createdBy:jane tag:prod'), {
+    const { wrapper } = createWrapper();
+    const { result } = renderHook(() => useQueryModelWithCache('createdBy:jane tag:prod'), {
       wrapper,
     });
 
-    // Seed the profile store.
     await act(async () => {
-      await result.current.userProfileStore?.ensureLoaded(mockUsers.map((u) => u.uid));
+      await result.current.profileCache?.ensureLoaded(mockUsers.map((u) => u.uid));
     });
 
     expect(result.current.model.filters).toEqual({
@@ -135,6 +145,7 @@ describe('useQueryModel', () => {
   });
 
   it('falls back to trimmed free text when query parsing fails', () => {
+    const { wrapper } = createWrapper();
     const { result } = renderHook(() => useQueryModel('status:open (unclosed'), { wrapper });
 
     expect(result.current).toEqual({

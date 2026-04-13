@@ -17,6 +17,8 @@ import {
   type ContentListUserProfilesServices,
   type FilterFacetConfig,
   type UserProfileEntry,
+  useContentListFilters,
+  useContentListSearch,
 } from '@kbn/content-list-provider';
 import { CreatedByFilterRenderer } from './created_by_filter_renderer';
 
@@ -70,6 +72,19 @@ const createWrapper = (userProfiles?: ContentListUserProfilesServices) => {
   );
 };
 
+const InteractiveCreatedByFilter = () => {
+  const { queryText, setQueryFromEuiQuery } = useContentListSearch();
+  const { filters } = useContentListFilters();
+
+  return (
+    <>
+      <CreatedByFilterRenderer query={Query.parse(queryText)} onChange={setQueryFromEuiQuery} />
+      <span data-test-subj="query-probe">{queryText}</span>
+      <span data-test-subj="filters-probe">{JSON.stringify(filters.createdBy ?? null)}</span>
+    </>
+  );
+};
+
 describe('CreatedByFilterRenderer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -111,6 +126,27 @@ describe('CreatedByFilterRenderer', () => {
 
     expect(onChange).toHaveBeenCalledTimes(1);
     expect(onChange.mock.calls[0][0].text).toContain('createdBy:("jane@example.com")');
+  });
+
+  it('resolves direct-provider facet selections to UID filters', async () => {
+    await act(async () => {
+      render(<InteractiveCreatedByFilter />, {
+        wrapper: createWrapper(mockUserProfilesService),
+      });
+    });
+
+    fireEvent.click(screen.getByText('Created by'));
+    fireEvent.click(await screen.findByText('Jane Example'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('query-probe')).toHaveTextContent('createdBy:("jane@example.com")');
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('filters-probe')).toHaveTextContent(
+        '{"include":["u_jane"],"exclude":[]}'
+      );
+    });
   });
 
   it('renders counts from facets', async () => {
