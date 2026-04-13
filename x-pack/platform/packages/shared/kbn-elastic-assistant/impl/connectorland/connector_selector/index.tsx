@@ -212,7 +212,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
             }
             onManageConnectorsClick={() =>
               navigateToApp('management', {
-                path: '/modelManagement/model_settings',
+                path: '/model_management/model_settings',
               })
             }
             preConfiguredConnectors={preConfiguredConnectors}

@@ -47,7 +47,7 @@ export interface DefinedSections {
   data: ManagementSection;
   insightsAndAlerting: ManagementSection;
   machineLearning: ManagementSection;
-  modelManagement: ManagementSection;
+  model_management: ManagementSection;
   security: ManagementSection;
   kibana: ManagementSection;
   stack: ManagementSection;
@@ -85,7 +85,7 @@ export enum ManagementSectionId {
   Data = 'data',
   InsightsAndAlerting = 'insightsAndAlerting',
   MachineLearning = 'ml',
-  ModelManagement = 'modelManagement',
+  ModelManagement = 'model_management',
   Security = 'security',
   Kibana = 'kibana',
   Stack = 'stack',

@@ -31,7 +31,7 @@ export class NavigationService {
 
   public navigateToLlmConnectorsManagement() {
     this.locators.management.navigateSync({
-      sectionId: 'modelManagement',
+      sectionId: 'model_management',
       appId: 'model_settings',
     });
   }

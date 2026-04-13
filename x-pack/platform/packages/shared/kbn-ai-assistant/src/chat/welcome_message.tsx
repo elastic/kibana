@@ -58,7 +58,7 @@ export function WelcomeMessage({
       setConnectorFlyoutOpen(true);
     } else {
       application?.navigateToApp('management', {
-        path: '/modelManagement/model_settings',
+        path: '/model_management/model_settings',
       });
     }
   };

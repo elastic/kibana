@@ -55,7 +55,7 @@ export const ConnectorMissingCallout = memo(
       () =>
         navigateTo({
           appId: 'management',
-          path: '/modelManagement/model_settings',
+          path: '/model_management/model_settings',
         }),
       [navigateTo]
     );

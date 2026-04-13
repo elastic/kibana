@@ -87,7 +87,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(clusterPerformanceSection?.sectionLinks).to.eql(['queryActivity']);
 
         const modelManagementSection = sections.find(
-          (section) => section.sectionId === 'modelManagement'
+          (section) => section.sectionId === 'model_management'
         );
         expect(modelManagementSection?.sectionLinks).to.eql([
           'elastic_inference_service',

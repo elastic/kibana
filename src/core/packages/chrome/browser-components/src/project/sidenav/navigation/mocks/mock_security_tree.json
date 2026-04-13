@@ -1218,7 +1218,7 @@
           "children": [
             {
               "id": "management:elastic_inference_service",
-              "href": "/jom/app/management/modelManagement/elastic_inference_service",
+              "href": "/jom/app/management/model_management/elastic_inference_service",
               "path": "stack_management.node-model-management.management:elastic_inference_service",
               "title": "Elastic Inference",
               "deepLink": {},
@@ -1227,7 +1227,7 @@
             },
             {
               "id": "management:inference_endpoints",
-              "href": "/jom/app/management/modelManagement/inference_endpoints",
+              "href": "/jom/app/management/model_management/inference_endpoints",
               "path": "stack_management.node-model-management.management:inference_endpoints",
               "title": "External Inference",
               "deepLink": {},
@@ -1236,7 +1236,7 @@
             },
             {
               "id": "management:model_settings",
-              "href": "/jom/app/management/modelManagement/model_settings",
+              "href": "/jom/app/management/model_management/model_settings",
               "path": "stack_management.node-model-management.management:model_settings",
               "title": "Feature Settings",
               "deepLink": {},

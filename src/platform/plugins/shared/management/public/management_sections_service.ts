@@ -47,7 +47,7 @@ export class ManagementSectionsService {
       data: this.registerSection(DataSection),
       insightsAndAlerting: this.registerSection(InsightsAndAlertingSection),
       machineLearning: this.registerSection(MachineLearningSection),
-      modelManagement: this.registerSection(ModelManagementSection),
+      model_management: this.registerSection(ModelManagementSection),
       security: this.registerSection(SecuritySection),
       kibana: this.registerSection(KibanaSection),
       ai: this.registerSection(AISection),

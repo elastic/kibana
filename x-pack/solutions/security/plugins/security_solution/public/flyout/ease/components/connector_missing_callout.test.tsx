@@ -50,7 +50,7 @@ describe('ConnectorMissingCallout', () => {
 
     expect(navigateTo).toHaveBeenCalledWith({
       appId: 'management',
-      path: '/modelManagement/model_settings',
+      path: '/model_management/model_settings',
     });
   });
 

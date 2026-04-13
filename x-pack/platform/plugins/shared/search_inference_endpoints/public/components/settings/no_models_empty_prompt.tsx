@@ -63,7 +63,7 @@ export const NoModelsEmptyPrompt: React.FC = () => {
                 fill={isCloudEnabled}
                 onClick={() =>
                   application.navigateToApp(MANAGEMENT_APP_ID, {
-                    path: `modelManagement/${INFERENCE_ENDPOINTS_APP_ID}`,
+                    path: `model_management/${INFERENCE_ENDPOINTS_APP_ID}`,
                   })
                 }
                 data-test-subj="settings-no-models-add-models"

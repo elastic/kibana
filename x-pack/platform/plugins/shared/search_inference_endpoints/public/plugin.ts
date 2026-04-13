@@ -52,7 +52,7 @@ export class SearchInferenceEndpointsPlugin
     const eisEnabled = isElasticInferenceServiceEnabled(core.uiSettings);
 
     this.registerInferenceEndpoints =
-      plugins.management.sections.section.modelManagement.registerApp({
+      plugins.management.sections.section.model_management.registerApp({
         id: INFERENCE_ENDPOINTS_APP_ID,
         title: eisEnabled ? EXTERNAL_INFERENCE_TITLE : PLUGIN_TITLE,
         order: 2,
@@ -69,26 +69,28 @@ export class SearchInferenceEndpointsPlugin
       });
 
     if (isModelSettingsEnabled(core.uiSettings)) {
-      this.registerModelSettings = plugins.management.sections.section.modelManagement.registerApp({
-        id: MODEL_SETTINGS_APP_ID,
-        title: MODEL_SETTINGS_SECTION_TITLE,
-        order: 3,
-        async mount({ element, history }: ManagementAppMountParams) {
-          const { renderSettingsMgmtApp } = await import('./application');
-          const [coreStart, depsStart] = await core.getStartServices();
-          const startDeps: AppPluginStartDependencies = {
-            ...depsStart,
-            history,
-          };
+      this.registerModelSettings = plugins.management.sections.section.model_management.registerApp(
+        {
+          id: MODEL_SETTINGS_APP_ID,
+          title: MODEL_SETTINGS_SECTION_TITLE,
+          order: 3,
+          async mount({ element, history }: ManagementAppMountParams) {
+            const { renderSettingsMgmtApp } = await import('./application');
+            const [coreStart, depsStart] = await core.getStartServices();
+            const startDeps: AppPluginStartDependencies = {
+              ...depsStart,
+              history,
+            };
 
-          return renderSettingsMgmtApp(coreStart, startDeps, element);
-        },
-      });
+            return renderSettingsMgmtApp(coreStart, startDeps, element);
+          },
+        }
+      );
     }
 
     if (eisEnabled) {
       this.registerElasticInferenceService =
-        plugins.management.sections.section.modelManagement.registerApp({
+        plugins.management.sections.section.model_management.registerApp({
           id: ELASTIC_INFERENCE_SERVICE_APP_ID,
           title: ELASTIC_INFERENCE_SERVICE_TITLE,
           order: 1,
@@ -123,7 +125,7 @@ export class SearchInferenceEndpointsPlugin
     this.licenseSubscription = licensing.license$.subscribe((license) => {
       const hasEnterpriseLicense = license?.hasAtLeast('enterprise');
       const hasAccess =
-        core.application.capabilities.management?.modelManagement?.inference_endpoints === true;
+        core.application.capabilities.management?.model_management?.inference_endpoints === true;
 
       if (hasEnterpriseLicense && hasAccess) {
         this.registerInferenceEndpoints?.enable();

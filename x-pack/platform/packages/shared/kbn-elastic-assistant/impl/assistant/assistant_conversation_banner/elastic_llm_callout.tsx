@@ -84,7 +84,7 @@ export const ElasticLlmCallout = ({ showEISCallout }: { showEISCallout: boolean 
               <EuiLink
                 data-test-subj="elasticLlmConnectorLink"
                 href={getUrlForApp('management', {
-                  path: `/modelManagement/model_settings`,
+                  path: `/model_management/model_settings`,
                 })}
                 target="_blank"
                 rel="noopener noreferrer"

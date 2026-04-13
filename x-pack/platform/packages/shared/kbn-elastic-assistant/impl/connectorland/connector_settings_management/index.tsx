@@ -26,7 +26,7 @@ const ConnectorsSettingsManagementComponent: React.FC = () => {
   const onClick = useCallback(
     () =>
       navigateToApp('management', {
-        path: 'modelManagement/model_settings',
+        path: 'model_management/model_settings',
       }),
     [navigateToApp]
   );

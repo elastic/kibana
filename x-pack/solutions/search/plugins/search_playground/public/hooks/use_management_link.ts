@@ -20,7 +20,7 @@ export const useManagementLink = () => {
   useEffect(() => {
     const getLink = async () => {
       const link = await managementLocator?.getUrl({
-        sectionId: 'modelManagement',
+        sectionId: 'model_management',
         appId: 'model_settings',
       });
       setManagementLink(link || '');

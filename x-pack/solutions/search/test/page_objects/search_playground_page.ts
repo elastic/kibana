@@ -343,7 +343,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
 
         expect(
           await (await testSubjects.find('manageConnectorsLink')).getAttribute('href')
-        ).to.contain('/app/management/modelManagement/model_settings');
+        ).to.contain('/app/management/model_management/model_settings');
 
         await testSubjects.existOrFail('editContextPanel');
         await testSubjects.existOrFail('summarizationPanel');

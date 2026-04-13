@@ -516,10 +516,10 @@
           },
           {
             "parentPluginId": "management",
-            "id": "def-public.DefinedSections.modelManagement",
+            "id": "def-public.DefinedSections.model_management",
             "type": "Object",
             "tags": [],
-            "label": "modelManagement",
+            "label": "model_management",
             "description": [],
             "signature": [
               {

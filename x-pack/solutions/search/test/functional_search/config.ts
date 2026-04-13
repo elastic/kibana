@@ -46,7 +46,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     apps: {
       ...functionalConfig.get('apps'),
       searchInferenceEndpoints: {
-        pathname: '/app/management/modelManagement/inference_endpoints',
+        pathname: '/app/management/model_management/inference_endpoints',
       },
       searchOverview: {
         pathname: '/app/elasticsearch/overview',

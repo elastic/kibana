@@ -18,7 +18,7 @@ export const useModelSettingsUrl = (): string | undefined => {
   return share.url.locators.useUrl(() => ({
     id: MANAGEMENT_APP_LOCATOR,
     params: {
-      sectionId: 'modelManagement',
+      sectionId: 'model_management',
       appId: 'model_settings',
     },
   }));

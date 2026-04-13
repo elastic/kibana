@@ -17,7 +17,7 @@ import type { AIFeatures } from '../../../../../hooks/use_ai_features';
 import type { UseGenAIConnectorsResult } from '../../../../../hooks/use_genai_connectors';
 import { InferenceConnectorType } from '@kbn/inference-common';
 
-const MOCK_MODEL_SETTINGS_URL = '/app/management/modelManagement/model_settings';
+const MOCK_MODEL_SETTINGS_URL = '/app/management/model_management/model_settings';
 
 jest.mock('../../../../../hooks/use_kibana', () => ({
   useKibana: () => ({

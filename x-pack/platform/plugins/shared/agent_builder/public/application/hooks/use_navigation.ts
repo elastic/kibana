@@ -18,7 +18,7 @@ export interface LocationState {
 
 export const INFERENCE_MANAGEMENT_APP_ID = 'management';
 
-export const INFERENCE_MANAGEMENT_PATH = '/modelManagement/model_settings';
+export const INFERENCE_MANAGEMENT_PATH = '/model_management/model_settings';
 
 export const useIsOnManagementLlmConnectorsPage = (): boolean => {
   const {

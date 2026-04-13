@@ -54,7 +54,7 @@ describe('NoModelsEmptyPrompt', () => {
 
     fireEvent.click(screen.getByTestId('settings-no-models-add-models'));
     expect(mockNavigateToApp).toHaveBeenCalledWith('management', {
-      path: 'modelManagement/inference_endpoints',
+      path: 'model_management/inference_endpoints',
     });
   });
 

@@ -137,7 +137,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
               manageConnectors: (
                 <EuiLink
                   href={application.getUrlForApp('management', {
-                    path: 'modelManagement/model_settings',
+                    path: 'model_management/model_settings',
                   })}
                   target="_blank"
                 >
@@ -190,7 +190,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
             manageConnectors: (
               <EuiLink
                 href={application.getUrlForApp('management', {
-                  path: 'modelManagement/model_settings',
+                  path: 'model_management/model_settings',
                 })}
                 target="_blank"
               >

@@ -280,7 +280,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
           label={i18n.CONNECTOR_TITLE}
           helpText={
             <EuiLink
-              href={`${http.basePath.get()}/app/management/modelManagement/model_settings`}
+              href={`${http.basePath.get()}/app/management/model_management/model_settings`}
               target="_blank"
               external
             >
