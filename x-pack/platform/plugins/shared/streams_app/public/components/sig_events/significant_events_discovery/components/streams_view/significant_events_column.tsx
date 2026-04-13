@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiI18nNumber,
+  EuiIconTip,
+  EuiLoadingChart,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -13,6 +20,7 @@ import { useFetchSignificantEvents } from '../../../../../hooks/sig_events/use_f
 import { getFormattedError } from '../../../../../util/errors';
 import { SparkPlot } from '../../../../spark_plot';
 
+const COUNT_WIDTH = '60px';
 const CHART_WIDTH = '100px';
 const EMPTY_COUNT_SYMBOL = '—';
 
@@ -41,12 +49,11 @@ export function SignificantEventsColumn({ streamName }: SignificantEventsColumnP
   return (
     <EuiFlexGroup
       alignItems="center"
-      justifyContent="flexStart"
-      gutterSize="l"
-      css={{ height: euiTheme.size.xl }}
+      gutterSize="m"
+      css={{ height: euiTheme.size.xl, whiteSpace: 'nowrap' }}
     >
       <EventsCount count={significantEventsFetchState.data.total_occurrences} />
-      <EuiFlexItem css={{ maxWidth: CHART_WIDTH }}>
+      <EuiFlexItem grow={false} css={{ width: CHART_WIDTH, flexShrink: 0 }}>
         <SparkPlot
           id={`significant-events-histogram-${streamName}`}
           name={i18n.translate('xpack.streams.significantEventsTable.histogramSeriesTitle', {
@@ -67,7 +74,6 @@ const LoadingPlaceholder = () => {
   return (
     <EuiFlexGroup
       alignItems="center"
-      justifyContent="flexStart"
       gutterSize="m"
       className={css`
         height: ${euiTheme.size.xl};
@@ -79,6 +85,7 @@ const LoadingPlaceholder = () => {
         grow={false}
         className={css`
           width: ${CHART_WIDTH};
+          flex-shrink: 0;
           display: flex;
           justify-content: center;
           align-items: center;
@@ -105,11 +112,13 @@ const EventsCount = ({ count }: { count: number }) => {
     <EuiFlexItem
       grow={false}
       className={css`
-        text-align: center;
+        width: ${COUNT_WIDTH};
+        flex-shrink: 0;
+        text-align: right;
         font-family: 'Roboto Mono', monospace;
       `}
     >
-      {count === 0 ? EMPTY_COUNT_SYMBOL : count}
+      {count === 0 ? EMPTY_COUNT_SYMBOL : <EuiI18nNumber value={count} />}
     </EuiFlexItem>
   );
 };
