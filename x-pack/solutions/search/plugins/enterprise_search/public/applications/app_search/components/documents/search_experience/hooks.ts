@@ -8,9 +8,9 @@
 import { useContext, useEffect, useState } from 'react';
 
 import { SearchContext } from '@elastic/react-search-ui';
-import type { SearchState } from '@elastic/search-ui';
+import type { SearchDriverActions, SearchState } from '@elastic/search-ui';
 
-export const useSearchContextState = () => {
+export const useSearchContextState: () => SearchState = () => {
   const { driver } = useContext(SearchContext);
   const [state, setState] = useState(driver.state);
 
@@ -27,7 +27,7 @@ export const useSearchContextState = () => {
   return state;
 };
 
-export const useSearchContextActions = () => {
+export const useSearchContextActions: () => SearchDriverActions = () => {
   const { driver } = useContext(SearchContext);
   return driver.actions;
 };
