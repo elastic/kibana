@@ -45,7 +45,6 @@ export {
 
 export {
   createMockIdpMetadata,
-  createMockIdpMetadataForUiam,
   createSAMLResponse,
   ensureSAMLRoleMapping,
   generateCosmosDBApiRequestHeaders,

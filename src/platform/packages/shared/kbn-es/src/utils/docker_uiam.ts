@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { writeFile, mkdir, mkdtemp } from 'fs/promises';
-import { tmpdir } from 'os';
+import { writeFile, mkdir } from 'fs/promises';
 import { fetch } from 'undici';
 import { join } from 'path';
 import {
@@ -26,7 +25,6 @@ import {
   MOCK_IDP_UIAM_SERVICE_INTERNAL_URL,
   MOCK_IDP_UIAM_SHARED_SECRET,
   MOCK_IDP_UIAM_SIGNING_SECRET,
-  createMockIdpMetadataForUiam,
 } from '@kbn/mock-idp-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
 import chalk from 'chalk';
@@ -36,7 +34,11 @@ import { Agent } from 'undici';
 import type { ArrayElement } from '@kbn/utility-types';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
-import { SERVERLESS_UIAM_ENTRYPOINT_PATH, SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH } from '../paths';
+import {
+  SERVERLESS_UIAM_ENTRYPOINT_PATH,
+  SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH,
+  SERVERLESS_IDP_METADATA_PATH,
+} from '../paths';
 
 const COSMOS_DB_EMULATOR_DOCKER_REGISTRY = 'docker.elastic.co';
 const COSMOS_DB_EMULATOR_DOCKER_REPO = `${COSMOS_DB_EMULATOR_DOCKER_REGISTRY}/kibana-ci/uiam-azure-cosmos-emulator`;
@@ -325,16 +327,11 @@ if (process.env.UIAM_OAUTH === 'true') {
  * Override with `MOCK_IDP_KIBANA_URL`.
  */
 async function extraDockerParamsForUiamOauthContainer(): Promise<string[]> {
-  const kibanaUrl = process.env.MOCK_IDP_KIBANA_URL ?? 'http://localhost:5601';
-  const metadataDir = await mkdtemp(join(tmpdir(), 'uiam-mock-idp-metadata-'));
-  const metadataPath = join(metadataDir, 'metadata.xml');
-  await writeFile(metadataPath, await createMockIdpMetadataForUiam(kibanaUrl), 'utf8');
-
   const oauthPort = +new URL(MOCK_IDP_UIAM_SERVICE_INTERNAL_URL)?.port + 1;
 
   return [
     '--volume',
-    `${metadataPath}:/tmp/mock-idp-metadata.xml:z`,
+    `${SERVERLESS_IDP_METADATA_PATH}:/tmp/mock-idp-metadata.xml:z`,
     '--env',
     'uiam.saml.idp.metadata=/tmp/mock-idp-metadata.xml',
     '--env',
