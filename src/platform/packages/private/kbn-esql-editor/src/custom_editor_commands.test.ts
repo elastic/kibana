@@ -8,6 +8,7 @@
  */
 
 import { monaco } from '@kbn/monaco';
+import { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from '@kbn/esql-language';
 import { coreMock } from '@kbn/core/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { ESQLVariableType, ControlTriggerSource } from '@kbn/esql-types';
@@ -19,10 +20,18 @@ import {
 import type { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
 import { ESQL_CONTROL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
+const mockModel = {
+  getValue: jest.fn(),
+  getPositionAt: jest.fn(),
+};
+
 const mockEditor = {
   addCommand: jest.fn(),
   getPosition: jest.fn(),
   getValue: jest.fn(),
+  getModel: jest.fn(() => mockModel),
+  executeEdits: jest.fn(),
+  setPosition: jest.fn(),
 } as unknown as monaco.editor.IStandaloneCodeEditor;
 
 const mockUiActions = {
@@ -37,6 +46,8 @@ const mockTelemetryService = {
 describe('Custom Editor Commands', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockModel.getValue.mockReturnValue('');
+    mockModel.getPositionAt.mockReturnValue({ lineNumber: 1, column: 1 });
     // Mock monaco.editor.registerCommand to return a disposable
     jest.spyOn(monaco.editor, 'registerCommand').mockReturnValue({
       dispose: jest.fn(),
@@ -139,6 +150,50 @@ describe('Custom Editor Commands', () => {
         ControlTriggerSource.ADD_CONTROL_BTN,
         'FROM updated_index'
       );
+    });
+
+    it('applies text replacement commands with absolute offsets', () => {
+      mockModel.getValue.mockReturnValue('ROW a = 1\nFROM my_timeseries_index');
+      mockModel.getPositionAt
+        .mockReturnValueOnce({ lineNumber: 2, column: 1 })
+        .mockReturnValueOnce({ lineNumber: 2, column: 25 })
+        .mockReturnValueOnce({ lineNumber: 2, column: 23 });
+
+      const deps = {
+        application: coreMock.createStart().application,
+        uiActions: mockUiActions,
+        telemetryService: mockTelemetryService,
+        editorRef: { current: mockEditor },
+        getCurrentQuery: jest.fn(),
+        esqlVariables: { current: [] },
+        controlsContext: { current: null },
+        openTimePickerPopover: jest.fn(),
+      } as unknown as MonacoCommandDependencies;
+
+      registerCustomCommands(deps);
+
+      const registerCommandCalls = (monaco.editor.registerCommand as jest.Mock).mock.calls;
+      const acceptCommandCall = registerCommandCalls.find(
+        ([commandId]) => commandId === ESQL_APPLY_TEXT_REPLACEMENT_COMMAND
+      );
+      const commandHandler = acceptCommandCall[1];
+
+      commandHandler(null, {
+        replacementText: 'TS my_timeseries_index',
+        replaceStart: '10',
+        replaceEnd: '34',
+      });
+
+      expect(mockEditor.executeEdits).toHaveBeenCalledWith('applyTextReplacement', [
+        {
+          range: new monaco.Range(2, 1, 2, 25),
+          text: 'TS my_timeseries_index',
+        },
+      ]);
+      expect(mockEditor.setPosition).toHaveBeenCalledWith({
+        lineNumber: 2,
+        column: 23,
+      });
     });
   });
 
