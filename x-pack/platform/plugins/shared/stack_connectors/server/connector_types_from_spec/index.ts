@@ -17,7 +17,7 @@ const GATED_CONNECTOR_SPECS: Record<string, keyof ExperimentalFeatures> = {
 
 function isSpecEnabled(spec: ConnectorSpec, experimentalFeatures: ExperimentalFeatures): boolean {
   const flag = GATED_CONNECTOR_SPECS[spec.metadata.id];
-  return experimentalFeatures[flag] ?? false;
+  return experimentalFeatures[flag] ?? true;
 }
 
 export function registerConnectorTypesFromSpecs({
