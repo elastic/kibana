@@ -113,7 +113,7 @@ describe('EntityMaintainersRegistry', () => {
       });
     });
 
-    it('should store and retrieve runner config', () => {
+    it('should store and retrieve lifecycle config', () => {
       const setup = jest.fn().mockResolvedValue({});
       const initialState = { count: 0 };
       registry.register({
@@ -124,19 +124,19 @@ describe('EntityMaintainersRegistry', () => {
         setup,
         initialState,
       });
-      const runnerConfig = registry.getRunnerConfigOrThrow('maintainer-a');
-      expect(runnerConfig).toEqual({ run, setup, initialState });
+      const lifecycle = registry.getLifecycleOrThrow('maintainer-a');
+      expect(lifecycle).toEqual({ run, setup, initialState });
     });
   });
 
-  describe('getRunnerConfigOrThrow', () => {
+  describe('getLifecycleOrThrow', () => {
     it('should throw when id was not registered', () => {
-      expect(() => registry.getRunnerConfigOrThrow('maintainer-a')).toThrow(
+      expect(() => registry.getLifecycleOrThrow('maintainer-a')).toThrow(
         'Entity maintainer not found: maintainer-a'
       );
     });
 
-    it('should return runner config when id was registered', () => {
+    it('should return lifecycle config when id was registered', () => {
       registry.register({
         id: 'maintainer-a',
         interval: '5m',
@@ -144,9 +144,9 @@ describe('EntityMaintainersRegistry', () => {
         run,
         initialState: {},
       });
-      const runnerConfig = registry.getRunnerConfigOrThrow('maintainer-a');
-      expect(runnerConfig.run).toBe(run);
-      expect(runnerConfig.setup).toBeUndefined();
+      const lifecycle = registry.getLifecycleOrThrow('maintainer-a');
+      expect(lifecycle.run).toBe(run);
+      expect(lifecycle.setup).toBeUndefined();
     });
   });
 

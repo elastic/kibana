@@ -55,7 +55,7 @@ jest.mock('../../tasks/entity_maintainers/entity_maintainers_registry', () => ({
     hasId: jest.fn(),
     getAll: jest.fn().mockReturnValue([]),
     getOrThrow: jest.fn(),
-    getRunnerConfigOrThrow: jest.fn(),
+    getLifecycleOrThrow: jest.fn(),
   },
 }));
 
@@ -120,8 +120,8 @@ const { entityMaintainersRegistry } = jest.requireMock(
     getOrThrow: jest.MockedFunction<
       typeof import('../../tasks/entity_maintainers/entity_maintainers_registry').entityMaintainersRegistry.getOrThrow
     >;
-    getRunnerConfigOrThrow: jest.MockedFunction<
-      typeof import('../../tasks/entity_maintainers/entity_maintainers_registry').entityMaintainersRegistry.getRunnerConfigOrThrow
+    getLifecycleOrThrow: jest.MockedFunction<
+      typeof import('../../tasks/entity_maintainers/entity_maintainers_registry').entityMaintainersRegistry.getLifecycleOrThrow
     >;
   };
 };
@@ -255,7 +255,7 @@ describe('EntityMaintainersClient', () => {
 
   describe('runSync', () => {
     const mockRun = jest.fn().mockResolvedValue({});
-    const mockRunnerConfig = { run: mockRun, initialState: {} };
+    const mockLifecycle = { run: mockRun, initialState: {} };
 
     beforeEach(() => {
       createMaintainerStatus.mockReturnValue({
@@ -284,7 +284,7 @@ describe('EntityMaintainersClient', () => {
     });
 
     it('should throw when id is not registered', async () => {
-      entityMaintainersRegistry.getRunnerConfigOrThrow.mockImplementation(() => {
+      entityMaintainersRegistry.getLifecycleOrThrow.mockImplementation(() => {
         throw new Error('Entity maintainer not found: unknown-id');
       });
       const client = createClient();
@@ -300,7 +300,7 @@ describe('EntityMaintainersClient', () => {
         metadata: { runs: 1, lastSuccessTimestamp: null, lastErrorTimestamp: null },
         state: {},
       };
-      entityMaintainersRegistry.getRunnerConfigOrThrow.mockReturnValue(mockRunnerConfig);
+      entityMaintainersRegistry.getLifecycleOrThrow.mockReturnValue(mockLifecycle);
       entityMaintainersRegistry.getOrThrow.mockReturnValue({
         id: 'maintainer-a',
         interval: '5m',
@@ -351,7 +351,7 @@ describe('EntityMaintainersClient', () => {
 
     it('should propagate error when runEntityMaintainerTask throws', async () => {
       runEntityMaintainerTask.mockRejectedValueOnce(new Error('run failed'));
-      entityMaintainersRegistry.getRunnerConfigOrThrow.mockReturnValue(mockRunnerConfig);
+      entityMaintainersRegistry.getLifecycleOrThrow.mockReturnValue(mockLifecycle);
       entityMaintainersRegistry.getOrThrow.mockReturnValue({
         id: 'maintainer-a',
         interval: '5m',
@@ -367,7 +367,7 @@ describe('EntityMaintainersClient', () => {
 
     it('should skip sync execution when license is invalid', async () => {
       canRunMaintainerWithLicense.mockResolvedValueOnce(false);
-      entityMaintainersRegistry.getRunnerConfigOrThrow.mockReturnValue(mockRunnerConfig);
+      entityMaintainersRegistry.getLifecycleOrThrow.mockReturnValue(mockLifecycle);
       const taskManagerGet = jest.fn().mockResolvedValue({ state: {} });
       const client = createClient({ taskManager: { get: taskManagerGet } });
 

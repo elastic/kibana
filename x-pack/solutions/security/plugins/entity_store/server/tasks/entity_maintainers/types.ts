@@ -43,15 +43,20 @@ export interface EntityMaintainerTaskEntry extends EntityMaintainerRegistryData 
   id: string;
 }
 
-export interface EntityMaintainerTaskRunnerConfig {
+export interface EntityMaintainerLifecycle {
   run: EntityMaintainerTaskMethod;
   setup?: EntityMaintainerTaskMethod;
   initialState: EntityMaintainerState;
 }
 
-export interface EntityMaintainerRegistryEntry
+export interface EntityMaintainerRegistration
   extends EntityMaintainerTaskEntry,
-    EntityMaintainerTaskRunnerConfig {}
+    EntityMaintainerLifecycle {}
+
+export interface EntityMaintainerRegistryValue {
+  task: EntityMaintainerTaskEntry;
+  lifecycle: EntityMaintainerLifecycle;
+}
 
 export interface EntityMaintainerStatusMetadata {
   namespace: string;
