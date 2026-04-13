@@ -60,11 +60,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('sets time on open', async function () {
+        await dashboard.waitForRenderComplete();
+        const timeBefore = await timePicker.getTimeConfig();
+        expect(timeBefore.start).to.equal(timePicker.defaultStartTime);
+        expect(timeBefore.end).to.equal(timePicker.defaultEndTime);
         await timePicker.setAbsoluteRange(
           'Jan 1, 2019 @ 00:00:00.000',
           'Jan 2, 2019 @ 00:00:00.000'
         );
-
         await dashboard.loadSavedDashboard(dashboardName);
         const time = await timePicker.getTimeConfig();
         expect(time.start).to.equal(timePicker.defaultStartTime);
