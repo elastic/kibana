@@ -17,12 +17,40 @@ export const uiComment: SavedObjectsType = {
     properties: {
       clientX: { type: 'integer' },
       clientY: { type: 'integer' },
+      elemWidth: { type: 'integer' },
+      elemHeight: { type: 'integer' },
+      selector: { type: 'keyword' },
       text: { type: 'text' },
       author: { type: 'keyword' },
       createdAt: { type: 'date' },
       resolved: { type: 'boolean' },
       replies: { type: 'object', dynamic: false },
       pathname: { type: 'keyword' },
+      floatingAnchor: { type: 'boolean' },
+    },
+  },
+  modelVersions: {
+    1: {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            elemWidth: { type: 'integer' },
+            elemHeight: { type: 'integer' },
+            selector: { type: 'keyword' },
+          },
+        },
+      ],
+    },
+    2: {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            floatingAnchor: { type: 'boolean' },
+          },
+        },
+      ],
     },
   },
 };

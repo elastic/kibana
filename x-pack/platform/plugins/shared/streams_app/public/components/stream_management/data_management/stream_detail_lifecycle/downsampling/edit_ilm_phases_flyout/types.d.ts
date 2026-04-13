@@ -1,0 +1,18 @@
+import type { IlmPolicyPhases, PhaseName } from '@kbn/streams-schema';
+export interface EditIlmPhasesFlyoutProps {
+    initialPhases: IlmPolicyPhases;
+    selectedPhase: PhaseName | undefined;
+    setSelectedPhase: (phase: PhaseName | undefined) => void;
+    onChange: (next: IlmPolicyPhases) => void;
+    onSave: (next: IlmPolicyPhases) => void;
+    onClose: () => void;
+    isMetricsStream: boolean;
+    onChangeDebounceMs?: number;
+    isSaving?: boolean;
+    canCreateRepository?: boolean;
+    searchableSnapshotRepositories?: string[];
+    isLoadingSearchableSnapshotRepositories?: boolean;
+    onRefreshSearchableSnapshotRepositories?: () => void;
+    onCreateSnapshotRepository?: () => void;
+    'data-test-subj'?: string;
+}

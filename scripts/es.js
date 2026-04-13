@@ -13,6 +13,12 @@ var resolve = require('path').resolve;
 var pkg = require('../package.json');
 var kbnEs = require('@kbn/es');
 
+// `node scripts/es` with no subcommand used to start a snapshot; @kbn/es is now
+// command-based and prints help with an empty argv — default to snapshot for dev.
+if (process.argv.slice(2).length === 0) {
+  process.argv.push('snapshot');
+}
+
 kbnEs
   .run({
     license: 'trial',

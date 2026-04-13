@@ -1,0 +1,31 @@
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import type { IngestStreamLifecycle } from '@kbn/streams-schema';
+import type { StreamsAIGrokSuggestionAcceptedProps, StreamsAIGrokSuggestionLatencyProps, StreamsAIDissectSuggestionAcceptedProps, StreamsAIDissectSuggestionLatencyProps, StreamsAttachmentClickEventProps, StreamsAttachmentCountProps, StreamsAttachmentLinkChangedProps, StreamsAttachmentFlyoutOpenedProps, StreamsAttachmentFlyoutActionProps, StreamsChildStreamCreatedProps, StreamsProcessingSavedProps, StreamsSchemaUpdatedProps, StreamsSignificantEventsCreatedProps, StreamsSignificantEventsSuggestionsGeneratedEventProps, WiredStreamsStatusChangedProps, StreamsFeatureIdentificationSavedProps, StreamsFeatureIdentificationDeletedProps, StreamsProcessingSimulationSamplesFetchLatencyProps, StreamsPartitioningSamplesFetchLatencyProps, StreamsTabVisitedProps } from './types';
+export declare class StreamsTelemetryClient {
+    private readonly analytics;
+    constructor(analytics: AnalyticsServiceSetup);
+    trackAttachmentCounts(params: StreamsAttachmentCountProps): void;
+    trackAttachmentClick(params: StreamsAttachmentClickEventProps): void;
+    trackAttachmentLinked(params: StreamsAttachmentLinkChangedProps): void;
+    trackAttachmentUnlinked(params: StreamsAttachmentLinkChangedProps): void;
+    trackAttachmentFlyoutOpened(params: StreamsAttachmentFlyoutOpenedProps): void;
+    trackAttachmentFlyoutAction(params: StreamsAttachmentFlyoutActionProps): void;
+    trackAIGrokSuggestionAccepted(params: StreamsAIGrokSuggestionAcceptedProps): void;
+    trackAIDissectSuggestionAccepted(params: StreamsAIDissectSuggestionAcceptedProps): void;
+    trackWiredStreamsStatusChanged(params: WiredStreamsStatusChangedProps): void;
+    trackProcessingSaved(params: StreamsProcessingSavedProps): void;
+    trackRetentionChanged(lifecycle: IngestStreamLifecycle, streamType: string): void;
+    trackChildStreamCreated(props: StreamsChildStreamCreatedProps): void;
+    trackSchemaUpdated(props: StreamsSchemaUpdatedProps): void;
+    trackSignificantEventsSuggestionsGenerate(params: StreamsSignificantEventsSuggestionsGeneratedEventProps): void;
+    trackSignificantEventsCreated(params: StreamsSignificantEventsCreatedProps): void;
+    trackFeaturesSaved(params: StreamsFeatureIdentificationSavedProps): void;
+    trackFeaturesDeleted(params: StreamsFeatureIdentificationDeletedProps): void;
+    trackTabVisited(params: StreamsTabVisitedProps): void;
+    startTrackingAIDissectSuggestionLatency(params: Pick<StreamsAIDissectSuggestionLatencyProps, 'name' | 'field' | 'connector_id'>): (count: number, rates: number[]) => void;
+    startTrackingAIGrokSuggestionLatency(params: Pick<StreamsAIGrokSuggestionLatencyProps, 'name' | 'field' | 'connector_id'>): (count: number, rates: number[]) => void;
+    startTrackingSimulationSamplesFetchLatency(params: Pick<StreamsProcessingSimulationSamplesFetchLatencyProps, 'stream_name' | 'stream_type' | 'data_source_type'>): () => void;
+    startTrackingPartitioningSamplesFetchLatency(params: Pick<StreamsPartitioningSamplesFetchLatencyProps, 'stream_name' | 'stream_type'>): () => void;
+    private getLifecycleType;
+    private getLifecycleValue;
+}

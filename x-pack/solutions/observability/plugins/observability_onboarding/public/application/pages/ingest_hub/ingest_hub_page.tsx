@@ -6,18 +6,16 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import { useParams, useHistory, useLocation, useRouteMatch } from 'react-router-dom';
 import {
   EuiAccordion,
+  EuiAvatar,
   EuiBadge,
   EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiCallOut,
-  EuiCard,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiCopy,
@@ -34,7 +32,6 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFormRow,
-  EuiHealth,
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
@@ -49,7 +46,6 @@ import {
   EuiSideNav,
   EuiSpacer,
   EuiStat,
-  EuiSteps,
   EuiTab,
   EuiTabs,
   EuiText,
@@ -57,6 +53,14 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useActiveVersion } from '../../version_switcher_widget';
+import {
+  INGEST_HUB_ADD_DATA_NAV_ID,
+  isIngestHubVersion2AddDataPage,
+} from './ingest_hub_experience_targets';
+import { Version2ApiEndpointsSplit } from '../../version_2_api_endpoints_split';
 import {
   SECTIONS,
   SAAS_TILES,
@@ -73,12 +77,9 @@ import {
   LOGO_FALLBACK,
   AWS_INSTALLED_INTEGRATIONS_TABLE,
   API_INGESTION_TILES,
+  API_ENDPOINTS,
 } from './ingest_hub_data';
-import type {
-  IntegrationTile,
-  InstalledIntegrationRow,
-  ApiIngestionTile,
-} from './ingest_hub_data';
+import type { IntegrationTile, InstalledIntegrationRow, ApiIngestionTile } from './ingest_hub_data';
 import { IntegrationCard, CompactIntegrationCard, CardLogoIcon } from './ingest_hub_components';
 import { KubernetesFlyout } from './kubernetes_flyout';
 import { AwsFlyout } from './aws_flyout';
@@ -92,8 +93,16 @@ import rulesHeaderImg from './assets/rules-header.png';
 import { StreamsWelcomeBannerImage } from './streams_welcome_banner_image';
 import { StreamsReplicatedTable } from './streams_replicated_table';
 
-
 type TaggedTile = IntegrationTile & { badge?: string };
+
+const attachHideIntegrationLogoOnError = (img: HTMLImageElement | null) => {
+  if (!img) return;
+  const onError = () => {
+    img.style.display = 'none';
+    img.removeEventListener('error', onError);
+  };
+  img.addEventListener('error', onError);
+};
 
 // ── AI SourceMap data flow view ──────────────────────────────────────────────
 interface AiDataSource {
@@ -119,21 +128,126 @@ interface AiSourceWizard {
 }
 
 const AI_DATA_SOURCES: AiDataSource[] = [
-  { id: 'aws', name: 'Amazon Web Services', category: 'cloud', logoDomain: 'amazon_web_services', volume: '3.6 GB/h', events: '18.2k ev/s' },
-  { id: 'gcp', name: 'Google Cloud Platform', category: 'cloud', logoDomain: 'gcp', volume: '1.3 GB/h', events: '6.7k ev/s' },
-  { id: 'azure', name: 'Azure', category: 'cloud', logoDomain: 'azure', volume: '2.7 GB/h', events: '9.4k ev/s' },
-  { id: 'kubernetes', name: 'Kubernetes', category: 'containers', logoDomain: 'kubernetes', volume: '4.2 GB/h', events: '12.4k ev/s' },
-  { id: 'docker', name: 'Docker', category: 'containers', logoDomain: 'docker', volume: '1.7 GB/h', events: '5.4k ev/s' },
-  { id: 'amazon-ecs', name: 'Amazon ECS', category: 'containers', logoDomain: 'amazon_web_services', volume: '3.1 GB/h', events: '9.8k ev/s' },
-  { id: 'linux', name: 'Linux', category: 'host', logoDomain: 'linux', volume: '1.8 GB/h', events: '11.2k ev/s' },
-  { id: 'windows', name: 'Windows', category: 'host', logoDomain: 'microsoft', volume: '0.9 GB/h', events: '5.1k ev/s' },
-  { id: 'macos', name: 'macOS', category: 'host', logoDomain: 'macos', volume: '0.4 GB/h', events: '2.3k ev/s' },
-  { id: 'opentelemetry', name: 'OpenTelemetry', category: 'applications', logoDomain: 'opentelemetry', volume: '2.4 GB/h', events: '16.8k ev/s' },
-  { id: 'prometheus', name: 'Prometheus', category: 'applications', logoDomain: 'prometheus', volume: '0.2 GB/h', events: '3.9k ev/s' },
-  { id: 'fluent-bit', name: 'Fluent Bit', category: 'applications', logoDomain: 'fluentbit', volume: '3.1 GB/h', events: '222k ev/s' },
-  { id: 'salesforce', name: 'Salesforce', category: 'saas', logoDomain: 'salesforce', volume: '0.3 GB/h', events: '1.8k ev/s' },
-  { id: 'slack', name: 'Slack', category: 'saas', logoDomain: 'slack', volume: '0.2 GB/h', events: '5.2k ev/s' },
-  { id: 'confluence', name: 'Confluence', category: 'saas', logoDomain: 'atlassian', volume: '0.1 GB/h', events: '0.4k ev/s' },
+  {
+    id: 'aws',
+    name: 'Amazon Web Services',
+    category: 'cloud',
+    logoDomain: 'amazon_web_services',
+    volume: '3.6 GB/h',
+    events: '18.2k ev/s',
+  },
+  {
+    id: 'gcp',
+    name: 'Google Cloud Platform',
+    category: 'cloud',
+    logoDomain: 'gcp',
+    volume: '1.3 GB/h',
+    events: '6.7k ev/s',
+  },
+  {
+    id: 'azure',
+    name: 'Azure',
+    category: 'cloud',
+    logoDomain: 'azure',
+    volume: '2.7 GB/h',
+    events: '9.4k ev/s',
+  },
+  {
+    id: 'kubernetes',
+    name: 'Kubernetes',
+    category: 'containers',
+    logoDomain: 'kubernetes',
+    volume: '4.2 GB/h',
+    events: '12.4k ev/s',
+  },
+  {
+    id: 'docker',
+    name: 'Docker',
+    category: 'containers',
+    logoDomain: 'docker',
+    volume: '1.7 GB/h',
+    events: '5.4k ev/s',
+  },
+  {
+    id: 'amazon-ecs',
+    name: 'Amazon ECS',
+    category: 'containers',
+    logoDomain: 'amazon_web_services',
+    volume: '3.1 GB/h',
+    events: '9.8k ev/s',
+  },
+  {
+    id: 'linux',
+    name: 'Linux',
+    category: 'host',
+    logoDomain: 'linux',
+    volume: '1.8 GB/h',
+    events: '11.2k ev/s',
+  },
+  {
+    id: 'windows',
+    name: 'Windows',
+    category: 'host',
+    logoDomain: 'microsoft',
+    volume: '0.9 GB/h',
+    events: '5.1k ev/s',
+  },
+  {
+    id: 'macos',
+    name: 'macOS',
+    category: 'host',
+    logoDomain: 'macos',
+    volume: '0.4 GB/h',
+    events: '2.3k ev/s',
+  },
+  {
+    id: 'opentelemetry',
+    name: 'OpenTelemetry',
+    category: 'applications',
+    logoDomain: 'opentelemetry',
+    volume: '2.4 GB/h',
+    events: '16.8k ev/s',
+  },
+  {
+    id: 'prometheus',
+    name: 'Prometheus',
+    category: 'applications',
+    logoDomain: 'prometheus',
+    volume: '0.2 GB/h',
+    events: '3.9k ev/s',
+  },
+  {
+    id: 'fluent-bit',
+    name: 'Fluent Bit',
+    category: 'applications',
+    logoDomain: 'fluentbit',
+    volume: '3.1 GB/h',
+    events: '222k ev/s',
+  },
+  {
+    id: 'salesforce',
+    name: 'Salesforce',
+    category: 'saas',
+    logoDomain: 'salesforce',
+    volume: '0.3 GB/h',
+    events: '1.8k ev/s',
+  },
+  {
+    id: 'slack',
+    name: 'Slack',
+    category: 'saas',
+    logoDomain: 'slack',
+    volume: '0.2 GB/h',
+    events: '5.2k ev/s',
+  },
+  {
+    id: 'confluence',
+    name: 'Confluence',
+    category: 'saas',
+    logoDomain: 'atlassian',
+    volume: '0.1 GB/h',
+    events: '0.4k ev/s',
+  },
 ];
 
 const AI_SOURCE_CATEGORIES: ReadonlyArray<{ id: AiDataSource['category']; label: string }> = [
@@ -152,11 +266,6 @@ const SECTION_TO_NAV_ID: Record<string, string> = {
   rules: 'migration-rules',
   'data-management': 'data-management',
 };
-
-import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useActiveVersion, versionStore } from '../../version_switcher_widget';
-import type { IngestHubVersion } from '../../version_switcher_widget';
 
 export const IngestHubPage: React.FC = () => {
   const { services } = useKibana();
@@ -184,7 +293,9 @@ export const IngestHubPage: React.FC = () => {
   }, [activeVersion, activeNavId, basePath, history]);
 
   const streamsEmptyPromptRef = React.useRef<HTMLDivElement | null>(null);
-  const [streamsEmptyPromptEl, setStreamsEmptyPromptEl] = React.useState<HTMLDivElement | null>(null);
+  const [streamsEmptyPromptEl, setStreamsEmptyPromptEl] = React.useState<HTMLDivElement | null>(
+    null
+  );
   useEffect(() => {
     if (!streamsEmptyPromptEl || activeVersion !== 'streamsUx' || !services.streamsApp) return;
     const unmount = services.streamsApp.renderEmbeddedStreamsEmptyPrompt(streamsEmptyPromptEl);
@@ -218,6 +329,31 @@ export const IngestHubPage: React.FC = () => {
     }
   }, [location.search]);
   const [integrationsSearch, setIntegrationsSearch] = useState<string>('');
+  const [version2ApiEndpointId, setVersion2ApiEndpointId] = useState<string>(
+    API_ENDPOINTS[0]?.id ?? 'endpoint-elasticsearch'
+  );
+
+  useEffect(() => {
+    if (activeVersion !== 'version2' || selectedCategory !== 'all-api-ingestion') {
+      return;
+    }
+    const q = integrationsSearch.trim().toLowerCase();
+    const filtered = !q
+      ? API_ENDPOINTS
+      : API_ENDPOINTS.filter(
+          (e) =>
+            e.name.toLowerCase().includes(q) ||
+            e.description.toLowerCase().includes(q) ||
+            e.details.toLowerCase().includes(q)
+        );
+    if (filtered.length === 0) {
+      return;
+    }
+    if (!filtered.some((e) => e.id === version2ApiEndpointId)) {
+      setVersion2ApiEndpointId(filtered[0].id);
+    }
+  }, [activeVersion, selectedCategory, integrationsSearch, version2ApiEndpointId]);
+
   const [isStatusPopoverOpen, setIsStatusPopoverOpen] = useState(false);
   const [isSignalsPopoverOpen, setIsSignalsPopoverOpen] = useState(false);
   const [isSetupPopoverOpen, setIsSetupPopoverOpen] = useState(false);
@@ -240,9 +376,7 @@ export const IngestHubPage: React.FC = () => {
     { label: 'Name (Z\u2013A)', checked: undefined as 'on' | undefined },
     { label: 'Recently added', checked: undefined as 'on' | undefined },
   ]);
-  const [flyoutTile, setFlyoutTile] = useState<
-    (IntegrationTile | ApiIngestionTile) | null
-  >(null);
+  const [flyoutTile, setFlyoutTile] = useState<(IntegrationTile | ApiIngestionTile) | null>(null);
 
   const [packagesSearch, setPackagesSearch] = useState('');
   const [packagesCategory, setPackagesCategory] = useState('all');
@@ -748,10 +882,10 @@ export const IngestHubPage: React.FC = () => {
                     badgeLabel === 'Input package'
                       ? 'All input packages'
                       : badgeLabel === 'Asset'
-                        ? 'All assets'
-                        : badgeLabel === 'Connector'
-                          ? 'All connectors'
-                          : `All ${badgeLabel.toLowerCase()}s`,
+                      ? 'All assets'
+                      : badgeLabel === 'Connector'
+                      ? 'All connectors'
+                      : `All ${badgeLabel.toLowerCase()}s`,
                   isSelected: category === 'all',
                   onClick: () => {
                     setCategory('all');
@@ -821,18 +955,15 @@ export const IngestHubPage: React.FC = () => {
               <EuiTab
                 isSelected={integrationsTab === 'installed'}
                 onClick={() => setIntegrationsTab('installed')}
-                append={
-                  (() => {
-                    const hasAwsInstalled =
-                      sessionStorage.getItem('ingestHub:dataAdded') === 'true';
-                    const count = hasAwsInstalled ? AWS_INSTALLED_INTEGRATIONS_TABLE.length : 0;
-                    return count > 0 ? (
-                      <EuiNotificationBadge className="eui-alignCenter" size="m">
-                        {count}
-                      </EuiNotificationBadge>
-                    ) : undefined;
-                  })()
-                }
+                append={(() => {
+                  const hasAwsInstalled = sessionStorage.getItem('ingestHub:dataAdded') === 'true';
+                  const count = hasAwsInstalled ? AWS_INSTALLED_INTEGRATIONS_TABLE.length : 0;
+                  return count > 0 ? (
+                    <EuiNotificationBadge className="eui-alignCenter" size="m">
+                      {count}
+                    </EuiNotificationBadge>
+                  ) : undefined;
+                })()}
               >
                 Installed
               </EuiTab>
@@ -878,273 +1009,325 @@ export const IngestHubPage: React.FC = () => {
               connectorsSearch,
               setConnectorsSearch
             )}
-          {integrationsTab === 'installed' && (() => {
-            // Same in Block UX and Skip UX: show filled table when user completed AWS "See my data" flow
-            const hasAwsInstalled =
-              sessionStorage.getItem('ingestHub:dataAdded') === 'true';
+          {integrationsTab === 'installed' &&
+            (() => {
+              // Same in Block UX and Skip UX: show filled table when user completed AWS "See my data" flow
+              const hasAwsInstalled = sessionStorage.getItem('ingestHub:dataAdded') === 'true';
 
-            if (!hasAwsInstalled) {
-              return (
-                <EuiEmptyPrompt
-                  color="plain"
-                  iconType="package"
-                  title={
-                    <h2>
-                      {i18n.translate(
-                        'xpack.observability_onboarding.ingestHub.installedTab.emptyPromptTitle',
-                        {
-                          defaultMessage: 'No installed data sources yet',
-                        }
-                      )}
-                    </h2>
-                  }
-                  body={
-                    <p>
-                      {i18n.translate(
-                        'xpack.observability_onboarding.ingestHub.installedTab.emptyPromptBody',
-                        {
-                          defaultMessage:
-                            'Complete a get started flow (for example AWS and See my data) to preview installed integrations here. You can also browse all data sources to explore options.',
-                        }
-                      )}
-                    </p>
-                  }
-                  actions={
-                    <EuiButton fill onClick={() => setIntegrationsTab('all')}>
-                      {i18n.translate(
-                        'xpack.observability_onboarding.ingestHub.installedTab.browseAllButton',
-                        { defaultMessage: 'Browse all' }
-                      )}
-                    </EuiButton>
-                  }
-                />
+              if (!hasAwsInstalled) {
+                return (
+                  <EuiEmptyPrompt
+                    color="plain"
+                    iconType="package"
+                    title={
+                      <h2>
+                        {i18n.translate(
+                          'xpack.observability_onboarding.ingestHub.installedTab.emptyPromptTitle',
+                          {
+                            defaultMessage: 'No installed data sources yet',
+                          }
+                        )}
+                      </h2>
+                    }
+                    body={
+                      <p>
+                        {i18n.translate(
+                          'xpack.observability_onboarding.ingestHub.installedTab.emptyPromptBody',
+                          {
+                            defaultMessage:
+                              'Complete a get started flow (for example AWS and See my data) to preview installed integrations here. You can also browse all data sources to explore options.',
+                          }
+                        )}
+                      </p>
+                    }
+                    actions={
+                      <EuiButton
+                        data-test-subj="observabilityOnboardingRenderIntegrationsViewBrowseAllButton"
+                        fill
+                        onClick={() => setIntegrationsTab('all')}
+                      >
+                        {i18n.translate(
+                          'xpack.observability_onboarding.ingestHub.installedTab.browseAllButton',
+                          { defaultMessage: 'Browse all' }
+                        )}
+                      </EuiButton>
+                    }
+                  />
+                );
+              }
+
+              const installedRows: InstalledIntegrationRow[] = AWS_INSTALLED_INTEGRATIONS_TABLE;
+              const filteredRows = installedRows.filter((row) =>
+                row.name.toLowerCase().includes(installedTabSearch.toLowerCase())
               );
-            }
-
-            const installedRows: InstalledIntegrationRow[] = AWS_INSTALLED_INTEGRATIONS_TABLE;
-            const filteredRows = installedRows.filter((row) =>
-              row.name.toLowerCase().includes(installedTabSearch.toLowerCase())
-            );
-            const upgradeCount = filteredRows.filter((r) => r.upgradeVersion).length;
-            const actionsPanelItems = [
-              <EuiContextMenuItem key="upgrade" icon="refresh" onClick={() => setIsInstalledActionsOpen(false)}>
-                Upgrade
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem key="viewPolicies" icon="search" onClick={() => setIsInstalledActionsOpen(false)}>
-                View policies
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem key="edit" icon="pencil" onClick={() => setIsInstalledActionsOpen(false)}>
-                Edit integration
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem key="uninstall" icon="trash" onClick={() => setIsInstalledActionsOpen(false)}>
-                Uninstall integration
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem key="rollback" icon="arrowLeft" onClick={() => setIsInstalledActionsOpen(false)}>
-                Rollback integration
-              </EuiContextMenuItem>,
-            ];
-            return (
-              <>
-                <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
-                  <EuiFlexItem>
-                    <EuiFieldSearch
-                      placeholder="Search"
-                      value={installedTabSearch}
-                      onChange={(e) => setInstalledTabSearch((e.target as HTMLInputElement).value)}
-                      fullWidth
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiFilterGroup>
-                      <EuiFilterButton
-                        iconType="warning"
-                        iconSide="left"
-                        numFilters={upgradeCount}
-                        css={css`
-                          .euiIcon {
-                            color: ${euiTheme.colors.textWarning};
-                          }
-                        `}
-                      >
-                        Upgrade
-                      </EuiFilterButton>
-                      <EuiFilterButton
-                        iconType="error"
-                        iconSide="left"
-                        numFilters={0}
-                        css={css`
-                          .euiIcon {
-                            color: ${euiTheme.colors.textDanger};
-                          }
-                        `}
-                      >
-                        Upgrade failed
-                      </EuiFilterButton>
-                      <EuiFilterButton
-                        iconType="error"
-                        iconSide="left"
-                        numFilters={0}
-                        css={css`
-                          .euiIcon {
-                            color: ${euiTheme.colors.textDanger};
-                          }
-                        `}
-                      >
-                        Install failed
-                      </EuiFilterButton>
-                    </EuiFilterGroup>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiFilterGroup>
-                      <EuiFilterButton numFilters={0}>Custom</EuiFilterButton>
-                    </EuiFilterGroup>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiPopover
-                      button={
-                        <EuiButton
-                          iconType="arrowDown"
-                          iconSide="right"
-                          onClick={() => setIsInstalledActionsOpen((open) => !open)}
+              const upgradeCount = filteredRows.filter((r) => r.upgradeVersion).length;
+              const actionsPanelItems = [
+                <EuiContextMenuItem
+                  key="upgrade"
+                  icon="refresh"
+                  onClick={() => setIsInstalledActionsOpen(false)}
+                >
+                  Upgrade
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  key="viewPolicies"
+                  icon="search"
+                  onClick={() => setIsInstalledActionsOpen(false)}
+                >
+                  View policies
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  key="edit"
+                  icon="pencil"
+                  onClick={() => setIsInstalledActionsOpen(false)}
+                >
+                  Edit integration
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  key="uninstall"
+                  icon="trash"
+                  onClick={() => setIsInstalledActionsOpen(false)}
+                >
+                  Uninstall integration
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  key="rollback"
+                  icon="arrowLeft"
+                  onClick={() => setIsInstalledActionsOpen(false)}
+                >
+                  Rollback integration
+                </EuiContextMenuItem>,
+              ];
+              return (
+                <>
+                  <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
+                    <EuiFlexItem>
+                      <EuiFieldSearch
+                        data-test-subj="observabilityOnboardingRenderIntegrationsViewFieldSearch"
+                        placeholder="Search"
+                        value={installedTabSearch}
+                        onChange={(e) =>
+                          setInstalledTabSearch((e.target as HTMLInputElement).value)
+                        }
+                        fullWidth
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiFilterGroup>
+                        <EuiFilterButton
+                          iconType="warning"
+                          iconSide="left"
+                          numFilters={upgradeCount}
+                          css={css`
+                            .euiIcon {
+                              color: ${euiTheme.colors.textWarning};
+                            }
+                          `}
                         >
-                          Actions
-                        </EuiButton>
-                      }
-                      isOpen={isInstalledActionsOpen}
-                      closePopover={() => setIsInstalledActionsOpen(false)}
-                      anchorPosition="downRight"
-                    >
-                      <EuiContextMenuPanel size="s" items={actionsPanelItems} />
-                    </EuiPopover>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer size="m" />
-                <EuiText color="subdued" size="s">
-                  Showing {filteredRows.length} integration{filteredRows.length !== 1 ? 's' : ''}
-                </EuiText>
-                <EuiSpacer size="s" />
-                <EuiBasicTable<InstalledIntegrationRow>
-                  items={filteredRows}
-                  itemId="id"
-                  tableCaption="Installed integrations"
-                  selection={{
-                    selectable: () => true,
-                    selectableMessage: () => 'Select',
-                    onSelectionChange: (newSelection) => setSelectedInstalledRows(newSelection),
-                    selected: selectedInstalledRows,
-                  }}
-                  rowProps={{ 'data-test-subj': 'installedIntegrationsTableRow' }}
-                  columns={[
-                    {
-                      name: 'Integration name',
-                      render: (row: InstalledIntegrationRow) => (
-                        <EuiLink href="#" color="text">
-                          <EuiFlexGroup gutterSize="s" alignItems="center">
-                            <EuiFlexItem grow={false}>
-                              {row.logoUrl ? (
-                                <span role="img" aria-hidden style={{ display: 'flex' }}>
-                                  <img
-                                    src={row.logoUrl}
-                                    alt=""
-                                    style={{ width: 24, height: 24, objectFit: 'contain' }}
-                                  />
-                                </span>
-                              ) : (
-                                <EuiIcon type="package" size="m" />
-                              )}
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false}>{row.name}</EuiFlexItem>
-                          </EuiFlexGroup>
-                        </EuiLink>
-                      ),
-                    },
-                    {
-                      name: 'Version',
-                      render: (row: InstalledIntegrationRow) =>
-                        row.upgradeVersion ? (
-                          <EuiButtonEmpty
-                            size="s"
-                            iconType="gear"
-                            flush="left"
-                            onClick={() => {}}
+                          Upgrade
+                        </EuiFilterButton>
+                        <EuiFilterButton
+                          iconType="error"
+                          iconSide="left"
+                          numFilters={0}
+                          css={css`
+                            .euiIcon {
+                              color: ${euiTheme.colors.textDanger};
+                            }
+                          `}
+                        >
+                          Upgrade failed
+                        </EuiFilterButton>
+                        <EuiFilterButton
+                          iconType="error"
+                          iconSide="left"
+                          numFilters={0}
+                          css={css`
+                            .euiIcon {
+                              color: ${euiTheme.colors.textDanger};
+                            }
+                          `}
+                        >
+                          Install failed
+                        </EuiFilterButton>
+                      </EuiFilterGroup>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiFilterGroup>
+                        <EuiFilterButton numFilters={0}>Custom</EuiFilterButton>
+                      </EuiFilterGroup>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiPopover
+                        button={
+                          <EuiButton
+                            data-test-subj="observabilityOnboardingRenderIntegrationsViewActionsButton"
+                            iconType="arrowDown"
+                            iconSide="right"
+                            onClick={() => setIsInstalledActionsOpen((open) => !open)}
                           >
-                            Upgrade to {row.upgradeVersion}
-                          </EuiButtonEmpty>
-                        ) : (
-                          <EuiFlexGroup gutterSize="s" alignItems="center">
-                            <EuiFlexItem grow={false}>
-                              <EuiIcon type="checkInCircleFilled" color="success" size="m" />
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false}>{row.version}</EuiFlexItem>
-                          </EuiFlexGroup>
-                        ),
-                    },
-                    {
-                      field: 'dashboards',
-                      name: 'Dashboards',
-                      render: (d: number) => (d > 0 ? <EuiLink href="#">{d}</EuiLink> : '-'),
-                    },
-                    {
-                      field: 'rules',
-                      name: 'Rules',
-                      render: (r: number) => (r > 0 ? r : '-'),
-                    },
-                    {
-                      field: 'attachedPolicies',
-                      name: 'Attached policies',
-                      render: (n: number) =>
-                        n > 0 ? (
-                          <EuiLink href="#">
-                            View {n} {n === 1 ? 'policy' : 'policies'}
+                            Actions
+                          </EuiButton>
+                        }
+                        isOpen={isInstalledActionsOpen}
+                        closePopover={() => setIsInstalledActionsOpen(false)}
+                        anchorPosition="downRight"
+                      >
+                        <EuiContextMenuPanel size="s" items={actionsPanelItems} />
+                      </EuiPopover>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiSpacer size="m" />
+                  <EuiText color="subdued" size="s">
+                    Showing {filteredRows.length} integration{filteredRows.length !== 1 ? 's' : ''}
+                  </EuiText>
+                  <EuiSpacer size="s" />
+                  <EuiBasicTable<InstalledIntegrationRow>
+                    items={filteredRows}
+                    itemId="id"
+                    tableCaption="Installed integrations"
+                    selection={{
+                      selectable: () => true,
+                      selectableMessage: () => 'Select',
+                      onSelectionChange: (newSelection) => setSelectedInstalledRows(newSelection),
+                      selected: selectedInstalledRows,
+                    }}
+                    rowProps={{ 'data-test-subj': 'installedIntegrationsTableRow' }}
+                    columns={[
+                      {
+                        name: 'Integration name',
+                        render: (row: InstalledIntegrationRow) => (
+                          <EuiLink
+                            data-test-subj="observabilityOnboardingRenderIntegrationsViewLink"
+                            href="#"
+                            color="text"
+                          >
+                            <EuiFlexGroup gutterSize="s" alignItems="center">
+                              <EuiFlexItem grow={false}>
+                                {row.logoUrl ? (
+                                  <span role="img" aria-hidden style={{ display: 'flex' }}>
+                                    <img
+                                      src={row.logoUrl}
+                                      alt=""
+                                      style={{ width: 24, height: 24, objectFit: 'contain' }}
+                                    />
+                                  </span>
+                                ) : (
+                                  <EuiIcon type="package" size="m" />
+                                )}
+                              </EuiFlexItem>
+                              <EuiFlexItem grow={false}>{row.name}</EuiFlexItem>
+                            </EuiFlexGroup>
                           </EuiLink>
-                        ) : (
-                          '-'
                         ),
-                    },
-                    {
-                      actions: [
-                        {
-                          name: 'Upgrade',
-                          icon: 'refresh',
-                          type: 'icon' as const,
-                          onClick: () => {},
-                          enabled: (row) => !!row.upgradeVersion,
-                        },
-                        {
-                          name: 'View policies',
-                          icon: 'search',
-                          type: 'icon' as const,
-                          onClick: () => {},
-                        },
-                        {
-                          name: 'Edit integration',
-                          icon: 'pencil',
-                          type: 'icon' as const,
-                          onClick: () => {},
-                        },
-                        {
-                          name: 'Uninstall integration',
-                          icon: 'trash',
-                          type: 'icon' as const,
-                          onClick: () => {},
-                        },
-                        {
-                          name: 'Rollback integration',
-                          icon: 'arrowLeft',
-                          type: 'icon' as const,
-                          onClick: () => {},
-                        },
-                      ],
-                    },
-                  ]}
-                />
-              </>
-            );
-          })()}
+                      },
+                      {
+                        name: 'Version',
+                        render: (row: InstalledIntegrationRow) =>
+                          row.upgradeVersion ? (
+                            <EuiButtonEmpty
+                              data-test-subj="observabilityOnboardingRenderIntegrationsViewButton"
+                              size="s"
+                              iconType="gear"
+                              flush="left"
+                              onClick={() => {}}
+                            >
+                              Upgrade to {row.upgradeVersion}
+                            </EuiButtonEmpty>
+                          ) : (
+                            <EuiFlexGroup gutterSize="s" alignItems="center">
+                              <EuiFlexItem grow={false}>
+                                <EuiIcon type="checkInCircleFilled" color="success" size="m" />
+                              </EuiFlexItem>
+                              <EuiFlexItem grow={false}>{row.version}</EuiFlexItem>
+                            </EuiFlexGroup>
+                          ),
+                      },
+                      {
+                        field: 'dashboards',
+                        name: 'Dashboards',
+                        render: (d: number) =>
+                          d > 0 ? (
+                            <EuiLink
+                              data-test-subj="observabilityOnboardingRenderIntegrationsViewLink"
+                              href="#"
+                            >
+                              {d}
+                            </EuiLink>
+                          ) : (
+                            '-'
+                          ),
+                      },
+                      {
+                        field: 'rules',
+                        name: 'Rules',
+                        render: (r: number) => (r > 0 ? r : '-'),
+                      },
+                      {
+                        field: 'attachedPolicies',
+                        name: 'Attached policies',
+                        render: (n: number) =>
+                          n > 0 ? (
+                            <EuiLink
+                              data-test-subj="observabilityOnboardingRenderIntegrationsViewLink"
+                              href="#"
+                            >
+                              View {n} {n === 1 ? 'policy' : 'policies'}
+                            </EuiLink>
+                          ) : (
+                            '-'
+                          ),
+                      },
+                      {
+                        actions: [
+                          {
+                            name: 'Upgrade',
+                            icon: 'refresh',
+                            type: 'icon' as const,
+                            onClick: () => {},
+                            enabled: (row) => !!row.upgradeVersion,
+                          },
+                          {
+                            name: 'View policies',
+                            icon: 'search',
+                            type: 'icon' as const,
+                            onClick: () => {},
+                          },
+                          {
+                            name: 'Edit integration',
+                            icon: 'pencil',
+                            type: 'icon' as const,
+                            onClick: () => {},
+                          },
+                          {
+                            name: 'Uninstall integration',
+                            icon: 'trash',
+                            type: 'icon' as const,
+                            onClick: () => {},
+                          },
+                          {
+                            name: 'Rollback integration',
+                            icon: 'arrowLeft',
+                            type: 'icon' as const,
+                            onClick: () => {},
+                          },
+                        ],
+                      },
+                    ]}
+                  />
+                </>
+              );
+            })()}
         </div>
       </>
     );
   };
+
+  /**
+   * Add data (`integrations`) for Onboarding Experience Version 2 only.
+   * Other versions use {@link renderIntegrationsView}; fork UI here when v2 should diverge.
+   */
+  const renderVersion2AddDataView = () => renderIntegrationsView();
 
   const renderCompactGrid = (
     tiles: IntegrationTile[],
@@ -1173,7 +1356,12 @@ export const IngestHubPage: React.FC = () => {
     </div>
   );
 
-  const isSkipLikeVersion = activeVersion === 'streamsUx' || activeVersion === 'agentUx' || activeVersion === 'aiSourceMap' || activeVersion === 'version1' || activeVersion === 'version2';
+  const isSkipLikeVersion =
+    activeVersion === 'streamsUx' ||
+    activeVersion === 'agentUx' ||
+    activeVersion === 'aiSourceMap' ||
+    activeVersion === 'version1' ||
+    activeVersion === 'version2';
   const isStopVersion = isSkipLikeVersion;
   const hasAddedData = sessionStorage.getItem('ingestHub:dataAdded') === 'true';
   const isStopFillVersion = activeVersion === 'blockUx' && !hasAddedData;
@@ -1181,8 +1369,7 @@ export const IngestHubPage: React.FC = () => {
   const [isGetStartedFlyoutOpen, setIsGetStartedFlyoutOpen] = useState(() => {
     const onGetStarted = !routeSection || routeSection === 'get-started';
     const skipLikeWithData =
-      isSkipLikeVersion &&
-      sessionStorage.getItem('ingestHub:dataAdded') === 'true';
+      isSkipLikeVersion && sessionStorage.getItem('ingestHub:dataAdded') === 'true';
     return onGetStarted && !skipLikeWithData;
   });
   const [welcomeChildTile, setWelcomeChildTile] = useState<IntegrationTile | null>(null);
@@ -1191,8 +1378,7 @@ export const IngestHubPage: React.FC = () => {
     if (!routeSection || routeSection === 'get-started') {
       // Skip/Agent UX: don't show Welcome flyout when user has already added fake AWS data (start state only)
       const skipLikeWithData =
-        isSkipLikeVersion &&
-        sessionStorage.getItem('ingestHub:dataAdded') === 'true';
+        isSkipLikeVersion && sessionStorage.getItem('ingestHub:dataAdded') === 'true';
       if (skipLikeWithData) {
         setIsGetStartedFlyoutOpen(false);
       } else {
@@ -1235,7 +1421,6 @@ export const IngestHubPage: React.FC = () => {
     }
   }, [isSkipLikeVersion, services.chrome]);
 
-
   const renderAddDataRecommendedContent = () => {
     return (
       <>
@@ -1261,19 +1446,20 @@ export const IngestHubPage: React.FC = () => {
           return (
             <React.Fragment key={section.title}>
               {idx > 0 && <div style={{ height: 40 }} />}
-              <EuiFlexGroup
-                alignItems="baseline"
-                gutterSize="xs"
-                responsive={false}
-                wrap={false}
-              >
-                <EuiFlexItem grow={false} css={css`min-width: 0;`}>
+              <EuiFlexGroup alignItems="baseline" gutterSize="xs" responsive={false} wrap={false}>
+                <EuiFlexItem
+                  grow={false}
+                  css={css`
+                    min-width: 0;
+                  `}
+                >
                   <EuiText size="s" color="subdued">
                     <p style={{ margin: 0, display: 'inline' }}>{section.description}</p>
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
+                    data-test-subj="observabilityOnboardingRenderAddDataRecommendedContentViewAllButton"
                     size="s"
                     flush="left"
                     iconType="arrowRight"
@@ -1299,13 +1485,13 @@ export const IngestHubPage: React.FC = () => {
         {SAAS_TILES.length > 0 && (
           <>
             <div style={{ height: 40 }} />
-            <EuiFlexGroup
-              alignItems="baseline"
-              gutterSize="xs"
-              responsive={false}
-              wrap={false}
-            >
-              <EuiFlexItem grow={false} css={css`min-width: 0;`}>
+            <EuiFlexGroup alignItems="baseline" gutterSize="xs" responsive={false} wrap={false}>
+              <EuiFlexItem
+                grow={false}
+                css={css`
+                  min-width: 0;
+                `}
+              >
                 <EuiText size="s" color="subdued">
                   <p style={{ margin: 0, display: 'inline' }}>
                     Monitor your cloud resources without installing an agent.
@@ -1314,6 +1500,7 @@ export const IngestHubPage: React.FC = () => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
+                  data-test-subj="observabilityOnboardingRenderAddDataRecommendedContentViewAllButton"
                   size="s"
                   flush="left"
                   iconType="arrowRight"
@@ -1359,7 +1546,12 @@ export const IngestHubPage: React.FC = () => {
         {SECTIONS.map((section, idx) => (
           <React.Fragment key={section.title}>
             {idx > 0 && <div style={{ height: 40 }} />}
-            <EuiTitle size="xxs" css={css`color: ${euiTheme.colors.textSubdued};`}>
+            <EuiTitle
+              size="xxs"
+              css={css`
+                color: ${euiTheme.colors.textSubdued};
+              `}
+            >
               <h3>{section.title}</h3>
             </EuiTitle>
             <EuiSpacer size="xl" />
@@ -1369,7 +1561,12 @@ export const IngestHubPage: React.FC = () => {
         {SAAS_TILES.length > 0 && (
           <>
             <div style={{ height: 40 }} />
-            <EuiTitle size="xxs" css={css`color: ${euiTheme.colors.textSubdued};`}>
+            <EuiTitle
+              size="xxs"
+              css={css`
+                color: ${euiTheme.colors.textSubdued};
+              `}
+            >
               <h3>SaaS Products</h3>
             </EuiTitle>
             <EuiSpacer size="xl" />
@@ -1379,7 +1576,12 @@ export const IngestHubPage: React.FC = () => {
         {EXPAND_STACK_TILES.length > 0 && (
           <>
             <div style={{ height: 40 }} />
-            <EuiTitle size="xxs" css={css`color: ${euiTheme.colors.textSubdued};`}>
+            <EuiTitle
+              size="xxs"
+              css={css`
+                color: ${euiTheme.colors.textSubdued};
+              `}
+            >
               <h3>Services and databases often deployed alongside Kubernetes</h3>
             </EuiTitle>
             <div style={{ height: 8 }} />
@@ -1475,10 +1677,7 @@ export const IngestHubPage: React.FC = () => {
             'Send data using APM, the Elasticsearch API, the Kibana API, or Beats, Logstash, and Fleet-managed agents.',
         };
       }
-      if (
-        selectedCategory === 'all-integrations' ||
-        selectedCategory.startsWith('integration:')
-      ) {
+      if (selectedCategory === 'all-integrations' || selectedCategory.startsWith('integration:')) {
         return {
           title: 'All integrations',
           description:
@@ -1499,10 +1698,7 @@ export const IngestHubPage: React.FC = () => {
             'Pre-built dashboards and assets for OpenTelemetry, cloud, and infrastructure data.',
         };
       }
-      if (
-        selectedCategory === 'all-connectors' ||
-        selectedCategory.startsWith('connector:')
-      ) {
+      if (selectedCategory === 'all-connectors' || selectedCategory.startsWith('connector:')) {
         return {
           title: 'All connectors',
           description:
@@ -1606,8 +1802,9 @@ export const IngestHubPage: React.FC = () => {
                       id: 'nav-integrations',
                       name: 'Integrations',
                       icon: <EuiIcon type="apps" size="m" />,
-                      renderItem: browseAccordionSelectAll('all-integrations', (c) =>
-                        c === 'all-integrations' || c.startsWith('integration:')
+                      renderItem: browseAccordionSelectAll(
+                        'all-integrations',
+                        (c) => c === 'all-integrations' || c.startsWith('integration:')
                       ),
                       items: [
                         {
@@ -1632,8 +1829,9 @@ export const IngestHubPage: React.FC = () => {
                       id: 'nav-packages',
                       name: 'Input packages',
                       icon: <EuiIcon type="package" size="m" />,
-                      renderItem: browseAccordionSelectAll('all-packages', (c) =>
-                        c === 'all-packages' || c.startsWith('package:')
+                      renderItem: browseAccordionSelectAll(
+                        'all-packages',
+                        (c) => c === 'all-packages' || c.startsWith('package:')
                       ),
                       items: [
                         {
@@ -1658,8 +1856,9 @@ export const IngestHubPage: React.FC = () => {
                       id: 'nav-assets',
                       name: 'Assets',
                       icon: <EuiIcon type="layers" size="m" />,
-                      renderItem: browseAccordionSelectAll('all-assets', (c) =>
-                        c === 'all-assets' || c.startsWith('asset:')
+                      renderItem: browseAccordionSelectAll(
+                        'all-assets',
+                        (c) => c === 'all-assets' || c.startsWith('asset:')
                       ),
                       items: [
                         {
@@ -1684,8 +1883,9 @@ export const IngestHubPage: React.FC = () => {
                       id: 'nav-connectors',
                       name: 'Connectors',
                       icon: <EuiIcon type="link" size="m" />,
-                      renderItem: browseAccordionSelectAll('all-connectors', (c) =>
-                        c === 'all-connectors' || c.startsWith('connector:')
+                      renderItem: browseAccordionSelectAll(
+                        'all-connectors',
+                        (c) => c === 'all-connectors' || c.startsWith('connector:')
                       ),
                       items: [
                         {
@@ -1755,6 +1955,27 @@ export const IngestHubPage: React.FC = () => {
           <EuiFlexItem grow={1} style={{ minWidth: 0 }}>
             {selectedCategory === 'all' && !rawQ ? (
               renderAddDataRecommendedContent()
+            ) : activeVersion === 'version2' && selectedCategory === 'all-api-ingestion' ? (
+              <>
+                <EuiTitle size="xs">
+                  <h2>API endpoints</h2>
+                </EuiTitle>
+                <EuiSpacer size="xs" />
+                <EuiText size="s" color="subdued">
+                  <p>
+                    Direct access to your deployment&apos;s endpoints. Create an API key to
+                    authenticate.
+                  </p>
+                </EuiText>
+                <EuiSpacer size="l" />
+                <Version2ApiEndpointsSplit
+                  searchQuery={rawQ}
+                  selectedEndpointId={version2ApiEndpointId}
+                  onSelectEndpoint={setVersion2ApiEndpointId}
+                  prependBasePath={(path) => services.http?.basePath.prepend(path) ?? path}
+                  dataTestSubjPrefix="obsOnboardingIngestHubV2ApiEndpoint"
+                />
+              </>
             ) : (
               <>
                 <EuiTitle size="xs">
@@ -1795,7 +2016,10 @@ export const IngestHubPage: React.FC = () => {
         'Your starting point to ingest data, create alerts, manage SLOs, explore Streams, and get the most out of your observability stack'
       )}
       <EuiHorizontalRule margin="none" />
-      <div css={paddedContent} style={{ width: '100%', display: 'flex', flexDirection: 'column', flex: 1 }}>
+      <div
+        css={paddedContent}
+        style={{ width: '100%', display: 'flex', flexDirection: 'column', flex: 1 }}
+      >
         <div style={{ height: 40 }} />
         <EuiAccordion
           id="step1-add-data"
@@ -1812,19 +2036,47 @@ export const IngestHubPage: React.FC = () => {
               gutterSize="none"
               responsive={false}
               wrap={false}
-              css={css`gap: 16px;`}
+              css={css`
+                gap: 16px;
+              `}
             >
               <EuiFlexItem>
                 <EuiTitle size="s">
-                  <h3 css={css`display: flex; align-items: center; gap: 8px;`}>
-                    <span css={css`display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background-color: ${euiTheme.colors.backgroundBaseSubdued}; flex-shrink: 0;`}>
+                  <h3
+                    css={css`
+                      display: flex;
+                      align-items: center;
+                      gap: 8px;
+                    `}
+                  >
+                    <span
+                      css={css`
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        width: 32px;
+                        height: 32px;
+                        border-radius: 50%;
+                        background-color: ${euiTheme.colors.backgroundBaseSubdued};
+                        flex-shrink: 0;
+                      `}
+                    >
                       <EuiIcon type="plusInCircle" size="m" />
                     </span>
                     Add your data
                   </h3>
                 </EuiTitle>
-                <EuiText size="s" color="subdued" css={css`margin-top: 4px;`}>
-                  <p>Connect your data sources or migrate from another platform to start monitoring your infrastructure.</p>
+                <EuiText
+                  size="s"
+                  color="subdued"
+                  css={css`
+                    margin-top: 4px;
+                  `}
+                >
+                  <p>
+                    Connect your data sources or migrate from another platform to start monitoring
+                    your infrastructure.
+                  </p>
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -1917,7 +2169,12 @@ export const IngestHubPage: React.FC = () => {
                         max-width: 100%;
                       `}
                     >
-                      <p css={css`text-align: center; margin-bottom: 0;`}>
+                      <p
+                        css={css`
+                          text-align: center;
+                          margin-bottom: 0;
+                        `}
+                      >
                         Browse integrations for logs, metrics, and traces.
                       </p>
                     </EuiText>
@@ -2027,7 +2284,12 @@ export const IngestHubPage: React.FC = () => {
                         max-width: 100%;
                       `}
                     >
-                      <p css={css`text-align: center; margin-bottom: 0;`}>
+                      <p
+                        css={css`
+                          text-align: center;
+                          margin-bottom: 0;
+                        `}
+                      >
                         Migrate from Splunk, Datadog, or others.
                       </p>
                     </EuiText>
@@ -2119,7 +2381,12 @@ export const IngestHubPage: React.FC = () => {
                         max-width: 100%;
                       `}
                     >
-                      <p css={css`text-align: center; margin-bottom: 0;`}>
+                      <p
+                        css={css`
+                          text-align: center;
+                          margin-bottom: 0;
+                        `}
+                      >
                         Send data via REST API or OpenTelemetry.
                       </p>
                     </EuiText>
@@ -2143,13 +2410,20 @@ export const IngestHubPage: React.FC = () => {
                 wrap
               >
                 <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued" css={css`text-align: center;`}>
-                    <strong>Not ready to add your data?</strong>{' '}
-                    Explore a fully loaded sample Observability environment before setting up.
+                  <EuiText
+                    size="xs"
+                    color="subdued"
+                    css={css`
+                      text-align: center;
+                    `}
+                  >
+                    <strong>Not ready to add your data?</strong> Explore a fully loaded sample
+                    Observability environment before setting up.
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
+                    data-test-subj="observabilityOnboardingRenderGetStartedViewExploreDemoButton"
                     size="xs"
                     href="https://www.elastic.co/start"
                     target="_blank"
@@ -2187,14 +2461,37 @@ export const IngestHubPage: React.FC = () => {
               >
                 <EuiFlexItem>
                   <EuiTitle size="s">
-                    <h3 css={css`display: flex; align-items: center; gap: 8px;`}>
-                      <span css={css`display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background-color: ${euiTheme.colors.backgroundBaseSubdued}; flex-shrink: 0;`}>
+                    <h3
+                      css={css`
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                      `}
+                    >
+                      <span
+                        css={css`
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          width: 32px;
+                          height: 32px;
+                          border-radius: 50%;
+                          background-color: ${euiTheme.colors.backgroundBaseSubdued};
+                          flex-shrink: 0;
+                        `}
+                      >
                         <EuiIcon type="devToolsApp" size="m" />
                       </span>
                       Turn raw data into structured with Streams
                     </h3>
                   </EuiTitle>
-                  <EuiText size="s" color="subdued" css={css`margin-top: 4px;`}>
+                  <EuiText
+                    size="s"
+                    color="subdued"
+                    css={css`
+                      margin-top: 4px;
+                    `}
+                  >
                     <p>
                       Use Streams to route, transform, and organize your incoming data into
                       structured formats for easier querying and analysis.
@@ -2202,7 +2499,9 @@ export const IngestHubPage: React.FC = () => {
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color={hasAddedData ? 'success' : 'warning'}>{hasAddedData ? 'Available' : 'Requires data'}</EuiBadge>
+                  <EuiBadge color={hasAddedData ? 'success' : 'warning'}>
+                    {hasAddedData ? 'Available' : 'Requires data'}
+                  </EuiBadge>
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
@@ -2225,7 +2524,12 @@ export const IngestHubPage: React.FC = () => {
               }
               actions={[
                 <EuiToolTip content="Ingest data first to unlock Streams" key="streams-btn">
-                  <EuiButton disabled>Open Streams</EuiButton>
+                  <EuiButton
+                    data-test-subj="observabilityOnboardingRenderGetStartedViewOpenStreamsButton"
+                    disabled
+                  >
+                    Open Streams
+                  </EuiButton>
                 </EuiToolTip>,
               ]}
               icon={
@@ -2266,21 +2570,47 @@ export const IngestHubPage: React.FC = () => {
               >
                 <EuiFlexItem>
                   <EuiTitle size="s">
-                    <h3 css={css`display: flex; align-items: center; gap: 8px;`}>
-                      <span css={css`display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background-color: ${euiTheme.colors.backgroundBaseSubdued}; flex-shrink: 0;`}>
+                    <h3
+                      css={css`
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                      `}
+                    >
+                      <span
+                        css={css`
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          width: 32px;
+                          height: 32px;
+                          border-radius: 50%;
+                          background-color: ${euiTheme.colors.backgroundBaseSubdued};
+                          flex-shrink: 0;
+                        `}
+                      >
                         <EuiIcon type="discoverApp" size="m" />
                       </span>
                       Explore your data with Discover
                     </h3>
                   </EuiTitle>
-                  <EuiText size="s" color="subdued" css={css`margin-top: 4px;`}>
+                  <EuiText
+                    size="s"
+                    color="subdued"
+                    css={css`
+                      margin-top: 4px;
+                    `}
+                  >
                     <p>
-                      Search, filter, and visualize your ingested data to uncover patterns and insights.
+                      Search, filter, and visualize your ingested data to uncover patterns and
+                      insights.
                     </p>
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color={hasAddedData ? 'success' : 'warning'}>{hasAddedData ? 'Available' : 'Requires data'}</EuiBadge>
+                  <EuiBadge color={hasAddedData ? 'success' : 'warning'}>
+                    {hasAddedData ? 'Available' : 'Requires data'}
+                  </EuiBadge>
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
@@ -2303,6 +2633,7 @@ export const IngestHubPage: React.FC = () => {
               actions={[
                 hasAddedData ? (
                   <EuiButton
+                    data-test-subj="observabilityOnboardingRenderGetStartedViewOpenDiscoverButton"
                     key="discover-btn"
                     fill
                     onClick={() => services.application?.navigateToApp('discover')}
@@ -2311,7 +2642,12 @@ export const IngestHubPage: React.FC = () => {
                   </EuiButton>
                 ) : (
                   <EuiToolTip content="Ingest data first to unlock Discover" key="discover-btn">
-                    <EuiButton disabled>Open Discover</EuiButton>
+                    <EuiButton
+                      data-test-subj="observabilityOnboardingRenderGetStartedViewOpenDiscoverButton"
+                      disabled
+                    >
+                      Open Discover
+                    </EuiButton>
                   </EuiToolTip>
                 ),
               ]}
@@ -2353,14 +2689,37 @@ export const IngestHubPage: React.FC = () => {
               >
                 <EuiFlexItem>
                   <EuiTitle size="s">
-                    <h3 css={css`display: flex; align-items: center; gap: 8px;`}>
-                      <span css={css`display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background-color: ${euiTheme.colors.backgroundBaseSubdued}; flex-shrink: 0;`}>
+                    <h3
+                      css={css`
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                      `}
+                    >
+                      <span
+                        css={css`
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          width: 32px;
+                          height: 32px;
+                          border-radius: 50%;
+                          background-color: ${euiTheme.colors.backgroundBaseSubdued};
+                          flex-shrink: 0;
+                        `}
+                      >
                         <EuiIcon type="dashboardApp" size="m" />
                       </span>
                       Analyze your data using Dashboards
                     </h3>
                   </EuiTitle>
-                  <EuiText size="s" color="subdued" css={css`margin-top: 4px;`}>
+                  <EuiText
+                    size="s"
+                    color="subdued"
+                    css={css`
+                      margin-top: 4px;
+                    `}
+                  >
                     <p>
                       Create and customize dashboards to visualize your data, track key metrics, and
                       gain insights across your infrastructure and applications.
@@ -2368,7 +2727,9 @@ export const IngestHubPage: React.FC = () => {
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color={hasAddedData ? 'success' : 'warning'}>{hasAddedData ? 'Available' : 'Requires data'}</EuiBadge>
+                  <EuiBadge color={hasAddedData ? 'success' : 'warning'}>
+                    {hasAddedData ? 'Available' : 'Requires data'}
+                  </EuiBadge>
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
@@ -2390,7 +2751,12 @@ export const IngestHubPage: React.FC = () => {
               }
               actions={[
                 <EuiToolTip content="Ingest data first to unlock Dashboards" key="dashboards-btn">
-                  <EuiButton disabled>Open Dashboards</EuiButton>
+                  <EuiButton
+                    data-test-subj="observabilityOnboardingRenderGetStartedViewOpenDashboardsButton"
+                    disabled
+                  >
+                    Open Dashboards
+                  </EuiButton>
                 </EuiToolTip>,
               ]}
               icon={
@@ -2431,14 +2797,37 @@ export const IngestHubPage: React.FC = () => {
               >
                 <EuiFlexItem>
                   <EuiTitle size="s">
-                    <h3 css={css`display: flex; align-items: center; gap: 8px;`}>
-                      <span css={css`display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background-color: ${euiTheme.colors.backgroundBaseSubdued}; flex-shrink: 0;`}>
+                    <h3
+                      css={css`
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                      `}
+                    >
+                      <span
+                        css={css`
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          width: 32px;
+                          height: 32px;
+                          border-radius: 50%;
+                          background-color: ${euiTheme.colors.backgroundBaseSubdued};
+                          flex-shrink: 0;
+                        `}
+                      >
                         <EuiIcon type="watchesApp" size="m" />
                       </span>
                       Get notified when issues occur with Alerts
                     </h3>
                   </EuiTitle>
-                  <EuiText size="s" color="subdued" css={css`margin-top: 4px;`}>
+                  <EuiText
+                    size="s"
+                    color="subdued"
+                    css={css`
+                      margin-top: 4px;
+                    `}
+                  >
                     <p>
                       Set up alerting rules to get notified when metrics cross thresholds, services
                       go down, or anomalies are detected.
@@ -2446,7 +2835,9 @@ export const IngestHubPage: React.FC = () => {
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color={hasAddedData ? 'success' : 'warning'}>{hasAddedData ? 'Available' : 'Requires data'}</EuiBadge>
+                  <EuiBadge color={hasAddedData ? 'success' : 'warning'}>
+                    {hasAddedData ? 'Available' : 'Requires data'}
+                  </EuiBadge>
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
@@ -2468,7 +2859,12 @@ export const IngestHubPage: React.FC = () => {
               }
               actions={[
                 <EuiToolTip content="Ingest data first to unlock Alerts" key="alerts-btn">
-                  <EuiButton disabled>Open Alerts</EuiButton>
+                  <EuiButton
+                    data-test-subj="observabilityOnboardingRenderGetStartedViewOpenAlertsButton"
+                    disabled
+                  >
+                    Open Alerts
+                  </EuiButton>
                 </EuiToolTip>,
               ]}
               icon={
@@ -2509,14 +2905,37 @@ export const IngestHubPage: React.FC = () => {
               >
                 <EuiFlexItem>
                   <EuiTitle size="s">
-                    <h3 css={css`display: flex; align-items: center; gap: 8px;`}>
-                      <span css={css`display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background-color: ${euiTheme.colors.backgroundBaseSubdued}; flex-shrink: 0;`}>
+                    <h3
+                      css={css`
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                      `}
+                    >
+                      <span
+                        css={css`
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          width: 32px;
+                          height: 32px;
+                          border-radius: 50%;
+                          background-color: ${euiTheme.colors.backgroundBaseSubdued};
+                          flex-shrink: 0;
+                        `}
+                      >
                         <EuiIcon type="uptimeApp" size="m" />
                       </span>
                       Spot and troubleshoot issues early with SLOs
                     </h3>
                   </EuiTitle>
-                  <EuiText size="s" color="subdued" css={css`margin-top: 4px;`}>
+                  <EuiText
+                    size="s"
+                    color="subdued"
+                    css={css`
+                      margin-top: 4px;
+                    `}
+                  >
                     <p>
                       Define Service Level Objectives to track reliability, measure error budgets,
                       and catch degradations before they impact users.
@@ -2524,7 +2943,9 @@ export const IngestHubPage: React.FC = () => {
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color={hasAddedData ? 'success' : 'warning'}>{hasAddedData ? 'Available' : 'Requires data'}</EuiBadge>
+                  <EuiBadge color={hasAddedData ? 'success' : 'warning'}>
+                    {hasAddedData ? 'Available' : 'Requires data'}
+                  </EuiBadge>
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
@@ -2546,7 +2967,12 @@ export const IngestHubPage: React.FC = () => {
               }
               actions={[
                 <EuiToolTip content="Ingest data first to unlock SLOs" key="slos-btn">
-                  <EuiButton disabled>Open SLOs</EuiButton>
+                  <EuiButton
+                    data-test-subj="observabilityOnboardingRenderGetStartedViewOpenSlOsButton"
+                    disabled
+                  >
+                    Open SLOs
+                  </EuiButton>
                 </EuiToolTip>,
               ]}
               icon={
@@ -2568,18 +2994,39 @@ export const IngestHubPage: React.FC = () => {
           </EuiAccordion>
         </div>
 
-        <EuiFlexGroup gutterSize="m" style={{ marginTop: 'auto', paddingTop: 80, marginBottom: 64 }}>
+        <EuiFlexGroup
+          gutterSize="m"
+          style={{ marginTop: 'auto', paddingTop: 80, marginBottom: 64 }}
+        >
           <EuiFlexItem>
             <EuiPanel
               data-test-subj="observabilityOnboardingGetStartedObservabilityForumCard"
               hasBorder
               paddingSize="m"
-              css={css`border-radius: 8px; text-align: center;`}
+              css={css`
+                border-radius: 8px;
+                text-align: center;
+              `}
             >
-              <EuiTitle size="xxs"><h4>Observability Forum</h4></EuiTitle>
-              <EuiText size="s" color="subdued" css={css`margin-bottom: 4px;`}>Exchange thoughts about Elastic.</EuiText>
+              <EuiTitle size="xxs">
+                <h4>Observability Forum</h4>
+              </EuiTitle>
+              <EuiText
+                size="s"
+                color="subdued"
+                css={css`
+                  margin-bottom: 4px;
+                `}
+              >
+                Exchange thoughts about Elastic.
+              </EuiText>
               <EuiText size="xs">
-                <EuiLink href="https://discuss.elastic.co" target="_blank" external>
+                <EuiLink
+                  data-test-subj="observabilityOnboardingRenderGetStartedViewDiscussInForumLink"
+                  href="https://discuss.elastic.co"
+                  target="_blank"
+                  external
+                >
                   Discuss in Forum
                 </EuiLink>
               </EuiText>
@@ -2590,12 +3037,26 @@ export const IngestHubPage: React.FC = () => {
               data-test-subj="observabilityOnboardingGetStartedDocumentationCard"
               hasBorder
               paddingSize="m"
-              css={css`border-radius: 8px; text-align: center;`}
+              css={css`
+                border-radius: 8px;
+                text-align: center;
+              `}
             >
-              <EuiTitle size="xxs"><h4>Documentation</h4></EuiTitle>
-              <EuiText size="s" color="subdued" css={css`margin-bottom: 4px;`}>In-depth guides and reference content.</EuiText>
+              <EuiTitle size="xxs">
+                <h4>Documentation</h4>
+              </EuiTitle>
+              <EuiText
+                size="s"
+                color="subdued"
+                css={css`
+                  margin-bottom: 4px;
+                `}
+              >
+                In-depth guides and reference content.
+              </EuiText>
               <EuiText size="xs">
                 <EuiLink
+                  data-test-subj="observabilityOnboardingRenderGetStartedViewLearnMoreLink"
                   href="https://www.elastic.co/docs/solutions/observability"
                   target="_blank"
                   external
@@ -2610,12 +3071,30 @@ export const IngestHubPage: React.FC = () => {
               data-test-subj="observabilityOnboardingGetStartedSupportHubCard"
               hasBorder
               paddingSize="m"
-              css={css`border-radius: 8px; text-align: center;`}
+              css={css`
+                border-radius: 8px;
+                text-align: center;
+              `}
             >
-              <EuiTitle size="xxs"><h4>Support Hub</h4></EuiTitle>
-              <EuiText size="s" color="subdued" css={css`margin-bottom: 4px;`}>Get help by opening a case.</EuiText>
+              <EuiTitle size="xxs">
+                <h4>Support Hub</h4>
+              </EuiTitle>
+              <EuiText
+                size="s"
+                color="subdued"
+                css={css`
+                  margin-bottom: 4px;
+                `}
+              >
+                Get help by opening a case.
+              </EuiText>
               <EuiText size="xs">
-                <EuiLink href="https://support.elastic.co" target="_blank" external>
+                <EuiLink
+                  data-test-subj="observabilityOnboardingRenderGetStartedViewOpenSupportHubLink"
+                  href="https://support.elastic.co"
+                  target="_blank"
+                  external
+                >
                   Open Support Hub
                 </EuiLink>
               </EuiText>
@@ -2692,238 +3171,255 @@ export const IngestHubPage: React.FC = () => {
     const isStreamsFeedbackEnabled = services.notifications?.feedback?.isEnabled() ?? true;
 
     return (
-    <>
-      <div css={paddedContent} style={{ width: '100%' }}>
-        <div style={{ width: '100%' }}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 16,
-              paddingTop: 40,
-              paddingBottom: 40,
-              flexWrap: 'wrap',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16, minWidth: 0 }}>
-              <div
-                style={{
-                  backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-                  borderRadius: 12,
-                  padding: 4,
-                  flexShrink: 0,
-                }}
-              >
-                <img
-                  src={rulesHeaderImg}
-                  alt={i18n.translate('xpack.observabilityOnboarding.ingestHub.streams.pageTitle', {
-                    defaultMessage: 'Streams',
-                  })}
-                  style={{ width: 64, height: 64, objectFit: 'contain', display: 'block' }}
-                />
-              </div>
-              <div>
-                <EuiTitle size="l">
-                  <h2>
-                    {i18n.translate('xpack.observabilityOnboarding.ingestHub.streams.pageTitle', {
-                      defaultMessage: 'Streams',
-                    })}
-                  </h2>
-                </EuiTitle>
-                <EuiText size="s" color="subdued" style={{ marginTop: 4 }}>
-                  {i18n.translate('xpack.observabilityOnboarding.ingestHub.streams.pageSubtitle', {
-                    defaultMessage:
-                      'Manage your Elasticsearch data streams in one place. View data quality, retention, and stream details.',
-                  })}
-                </EuiText>
-              </div>
-            </div>
-            <EuiFlexGroup
-              gutterSize="s"
-              alignItems="center"
-              responsive={false}
-              wrap={false}
-              justifyContent="flexEnd"
-              css={css({ marginLeft: 'auto' })}
+      <>
+        <div css={paddedContent} style={{ width: '100%' }}>
+          <div style={{ width: '100%' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 16,
+                paddingTop: 40,
+                paddingBottom: 40,
+                flexWrap: 'wrap',
+              }}
             >
-              {isStreamsFeedbackEnabled && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16, minWidth: 0 }}>
+                <div
+                  style={{
+                    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+                    borderRadius: 12,
+                    padding: 4,
+                    flexShrink: 0,
+                  }}
+                >
+                  <img
+                    src={rulesHeaderImg}
+                    alt={i18n.translate(
+                      'xpack.observabilityOnboarding.ingestHub.streams.pageTitle',
+                      {
+                        defaultMessage: 'Streams',
+                      }
+                    )}
+                    style={{ width: 64, height: 64, objectFit: 'contain', display: 'block' }}
+                  />
+                </div>
+                <div>
+                  <EuiTitle size="l">
+                    <h2>
+                      {i18n.translate('xpack.observabilityOnboarding.ingestHub.streams.pageTitle', {
+                        defaultMessage: 'Streams',
+                      })}
+                    </h2>
+                  </EuiTitle>
+                  <EuiText size="s" color="subdued" style={{ marginTop: 4 }}>
+                    {i18n.translate(
+                      'xpack.observabilityOnboarding.ingestHub.streams.pageSubtitle',
+                      {
+                        defaultMessage:
+                          'Manage your Elasticsearch data streams in one place. View data quality, retention, and stream details.',
+                      }
+                    )}
+                  </EuiText>
+                </div>
+              </div>
+              <EuiFlexGroup
+                gutterSize="s"
+                alignItems="center"
+                responsive={false}
+                wrap={false}
+                justifyContent="flexEnd"
+                css={css({ marginLeft: 'auto' })}
+              >
+                {isStreamsFeedbackEnabled && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      data-test-subj="observabilityOnboardingRenderStreamsViewGiveFeedbackButton"
+                      size="s"
+                      iconType="popout"
+                      href={streamsFeedbackUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      iconSide="right"
+                      aria-label={i18n.translate(
+                        'xpack.observabilityOnboarding.ingestHub.streams.giveFeedbackLabel',
+                        { defaultMessage: 'Give feedback' }
+                      )}
+                    >
+                      {i18n.translate(
+                        'xpack.observabilityOnboarding.ingestHub.streams.giveFeedbackLabel',
+                        { defaultMessage: 'Give feedback' }
+                      )}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                )}
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
+                    data-test-subj="observabilityOnboardingRenderStreamsViewSettingsButton"
                     size="s"
-                    iconType="popout"
-                    href={streamsFeedbackUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    iconSide="right"
+                    iconType="gear"
+                    onClick={() => services.application.navigateToApp?.('streams')}
                     aria-label={i18n.translate(
-                      'xpack.observabilityOnboarding.ingestHub.streams.giveFeedbackLabel',
-                      { defaultMessage: 'Give feedback' }
+                      'xpack.observabilityOnboarding.ingestHub.streams.settingsLabel',
+                      { defaultMessage: 'Settings' }
                     )}
                   >
                     {i18n.translate(
-                      'xpack.observabilityOnboarding.ingestHub.streams.giveFeedbackLabel',
-                      { defaultMessage: 'Give feedback' }
+                      'xpack.observabilityOnboarding.ingestHub.streams.settingsLabel',
+                      { defaultMessage: 'Settings' }
                     )}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="s"
-                  iconType="gear"
-                  onClick={() => services.application.navigateToApp?.('streams')}
-                  aria-label={i18n.translate(
-                    'xpack.observabilityOnboarding.ingestHub.streams.settingsLabel',
-                    { defaultMessage: 'Settings' }
-                  )}
-                >
-                  {i18n.translate(
-                    'xpack.observabilityOnboarding.ingestHub.streams.settingsLabel',
-                    { defaultMessage: 'Settings' }
-                  )}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  size="s"
-                  fill
-                  onClick={() => services.application.navigateToApp?.('streams')}
-                >
-                  {i18n.translate(
-                    'xpack.observabilityOnboarding.ingestHub.streams.createClassicStreamLabel',
-                    { defaultMessage: 'Create classic stream' }
-                  )}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </div>
-        </div>
-      </div>
-      <EuiHorizontalRule margin="none" css={dividerStyle} />
-      <div
-        css={css`
-          width: 100%;
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          min-height: 0;
-          padding-left: ${euiTheme.size.l};
-          padding-right: ${euiTheme.size.l};
-        `}
-      >
-        <div style={{ height: 40 }} />
-        <div ref={(el) => { streamsEmptyPromptRef.current = el; setStreamsEmptyPromptEl(el); }} />
-        {!streamsWelcomeBannerDismissed && (
-          <>
-            <EuiPanel hasBorder paddingSize="m" color="subdued" grow={false} borderRadius="m">
-              <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={false}>
-                  <StreamsWelcomeBannerImage size={140} />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">
-                    <EuiFlexItem
-                      css={css`
-                        flex-grow: 0 !important;
-                        margin-bottom: 4px;
-                      `}
-                    >
-                      <EuiTitle size="xs">
-                        <h4>
-                          {i18n.translate('xpack.streams.welcomeCallout.title', {
-                            defaultMessage:
-                              'Welcome to Streams, our next-generation model to manage your data in a single place',
-                          })}
-                        </h4>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="s" color="subdued">
-                        {i18n.translate('xpack.streams.welcomeCallout.description', {
-                          defaultMessage:
-                            'Your existing Elasticsearch data streams appear here as classic streams, simplifying field extraction and retention management.',
-                        })}
-                        <br />
-                        {i18n.translate('xpack.streams.welcomeCallout.descriptionSecondLine', {
-                          defaultMessage:
-                            'To try the full managed hierarchy experience, enable /logs streams when onboarding new data.',
-                        })}
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiSpacer size="m" />
-                    <EuiFlexItem>
-                      <EuiFlexGroup
-                        direction="row"
-                        gutterSize="s"
-                        responsive={false}
-                        alignItems="center"
-                        justifyContent="flexEnd"
-                      >
-                        {(services.notifications?.tours?.isEnabled() ?? true) && (
-                          <EuiFlexItem grow={false}>
-                            <EuiButton
-                              color="primary"
-                              size="s"
-                              onClick={() => services.application.navigateToApp?.('streams')}
-                            >
-                              {i18n.translate('xpack.streams.welcomeCallout.startTourButton', {
-                                defaultMessage: 'Start tour',
-                              })}
-                            </EuiButton>
-                          </EuiFlexItem>
-                        )}
-                        <EuiFlexItem grow={false}>
-                          <EuiButton
-                            color="primary"
-                            size="s"
-                            href={services.docLinks?.links?.observability?.logsStreams}
-                            target="_blank"
-                            rel="noopener"
-                            iconType="popout"
-                            iconSide="right"
-                          >
-                            {i18n.translate('xpack.streams.welcomeCallout.docsButton', {
-                              defaultMessage: 'View docs',
-                            })}
-                          </EuiButton>
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiLink
-                            onClick={dismissStreamsWelcomeBanner}
-                            aria-label={i18n.translate(
-                              'xpack.streams.welcomeCallout.dismissAriaLabel',
-                              { defaultMessage: 'Dismiss welcome callout' }
-                            )}
-                          >
-                            {i18n.translate('xpack.streams.welcomeCallout.dismissButton', {
-                              defaultMessage: "Don't show this again",
-                            })}
-                          </EuiLink>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                  <EuiButton
+                    data-test-subj="observabilityOnboardingRenderStreamsViewCreateClassicStreamButton"
+                    size="s"
+                    fill
+                    onClick={() => services.application.navigateToApp?.('streams')}
+                  >
+                    {i18n.translate(
+                      'xpack.observabilityOnboarding.ingestHub.streams.createClassicStreamLabel',
+                      { defaultMessage: 'Create classic stream' }
+                    )}
+                  </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </EuiPanel>
-            <EuiSpacer size="l" />
-          </>
-        )}
+            </div>
+          </div>
+        </div>
+        <EuiHorizontalRule margin="none" css={dividerStyle} />
         <div
           css={css`
             width: 100%;
             flex: 1;
-            min-height: 400px;
             display: flex;
             flex-direction: column;
+            min-height: 0;
+            padding-left: ${euiTheme.size.l};
+            padding-right: ${euiTheme.size.l};
           `}
         >
-          <StreamsReplicatedTable />
+          <div style={{ height: 40 }} />
+          <div
+            ref={(el) => {
+              streamsEmptyPromptRef.current = el;
+              setStreamsEmptyPromptEl(el);
+            }}
+          />
+          {!streamsWelcomeBannerDismissed && (
+            <>
+              <EuiPanel hasBorder paddingSize="m" color="subdued" grow={false} borderRadius="m">
+                <EuiFlexGroup alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <StreamsWelcomeBannerImage size={140} />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">
+                      <EuiFlexItem
+                        css={css`
+                          flex-grow: 0 !important;
+                          margin-bottom: 4px;
+                        `}
+                      >
+                        <EuiTitle size="xs">
+                          <h4>
+                            {i18n.translate('xpack.streams.welcomeCallout.title', {
+                              defaultMessage:
+                                'Welcome to Streams, our next-generation model to manage your data in a single place',
+                            })}
+                          </h4>
+                        </EuiTitle>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="s" color="subdued">
+                          {i18n.translate('xpack.streams.welcomeCallout.description', {
+                            defaultMessage:
+                              'Your existing Elasticsearch data streams appear here as classic streams, simplifying field extraction and retention management.',
+                          })}
+                          <br />
+                          {i18n.translate('xpack.streams.welcomeCallout.descriptionSecondLine', {
+                            defaultMessage:
+                              'To try the full managed hierarchy experience, enable /logs streams when onboarding new data.',
+                          })}
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiSpacer size="m" />
+                      <EuiFlexItem>
+                        <EuiFlexGroup
+                          direction="row"
+                          gutterSize="s"
+                          responsive={false}
+                          alignItems="center"
+                          justifyContent="flexEnd"
+                        >
+                          {(services.notifications?.tours?.isEnabled() ?? true) && (
+                            <EuiFlexItem grow={false}>
+                              <EuiButton
+                                data-test-subj="observabilityOnboardingRenderStreamsViewStartTourButton"
+                                color="primary"
+                                size="s"
+                                onClick={() => services.application.navigateToApp?.('streams')}
+                              >
+                                {i18n.translate('xpack.streams.welcomeCallout.startTourButton', {
+                                  defaultMessage: 'Start tour',
+                                })}
+                              </EuiButton>
+                            </EuiFlexItem>
+                          )}
+                          <EuiFlexItem grow={false}>
+                            <EuiButton
+                              data-test-subj="observabilityOnboardingRenderStreamsViewViewDocsButton"
+                              color="primary"
+                              size="s"
+                              href={services.docLinks?.links?.observability?.logsStreams}
+                              target="_blank"
+                              rel="noopener"
+                              iconType="popout"
+                              iconSide="right"
+                            >
+                              {i18n.translate('xpack.streams.welcomeCallout.docsButton', {
+                                defaultMessage: 'View docs',
+                              })}
+                            </EuiButton>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiLink
+                              data-test-subj="observabilityOnboardingRenderStreamsViewDontShowThisAgainLink"
+                              onClick={dismissStreamsWelcomeBanner}
+                              aria-label={i18n.translate(
+                                'xpack.streams.welcomeCallout.dismissAriaLabel',
+                                { defaultMessage: 'Dismiss welcome callout' }
+                              )}
+                            >
+                              {i18n.translate('xpack.streams.welcomeCallout.dismissButton', {
+                                defaultMessage: "Don't show this again",
+                              })}
+                            </EuiLink>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+              <EuiSpacer size="l" />
+            </>
+          )}
+          <div
+            css={css`
+              width: 100%;
+              flex: 1;
+              min-height: 400px;
+              display: flex;
+              flex-direction: column;
+            `}
+          >
+            <StreamsReplicatedTable />
+          </div>
         </div>
-      </div>
-    </>
-  );
+      </>
+    );
   };
 
   const seedAwsLogsAndNavigateToDiscover = async () => {
@@ -2935,71 +3431,211 @@ export const IngestHubPage: React.FC = () => {
         index: 'logs-aws.cloudtrail-default',
         dataset: 'aws.cloudtrail',
         messages: [
-          { level: 'info', msg: 'AssumeRole performed by user:admin from IP 10.0.1.54', action: 'AssumeRole' },
-          { level: 'info', msg: 'ConsoleLogin for user:dev-engineer from 192.168.1.100', action: 'ConsoleLogin' },
-          { level: 'info', msg: 'CreateBucket action on resource arn:aws:s3:::app-logs-backup', action: 'CreateBucket' },
-          { level: 'info', msg: 'PutObject to s3://production-data/configs/app.yaml', action: 'PutObject' },
-          { level: 'info', msg: 'DescribeInstances called by role:ECSServiceRole', action: 'DescribeInstances' },
-          { level: 'warning', msg: 'AuthorizeSecurityGroupIngress on sg-0a1b2c3d4e5f from 0.0.0.0/0', action: 'AuthorizeSecurityGroupIngress' },
-          { level: 'info', msg: 'DeleteObject from s3://temp-uploads/batch-7291.tmp', action: 'DeleteObject' },
-          { level: 'info', msg: 'RunInstances launched i-0abc123def456 (t3.medium)', action: 'RunInstances' },
+          {
+            level: 'info',
+            msg: 'AssumeRole performed by user:admin from IP 10.0.1.54',
+            action: 'AssumeRole',
+          },
+          {
+            level: 'info',
+            msg: 'ConsoleLogin for user:dev-engineer from 192.168.1.100',
+            action: 'ConsoleLogin',
+          },
+          {
+            level: 'info',
+            msg: 'CreateBucket action on resource arn:aws:s3:::app-logs-backup',
+            action: 'CreateBucket',
+          },
+          {
+            level: 'info',
+            msg: 'PutObject to s3://production-data/configs/app.yaml',
+            action: 'PutObject',
+          },
+          {
+            level: 'info',
+            msg: 'DescribeInstances called by role:ECSServiceRole',
+            action: 'DescribeInstances',
+          },
+          {
+            level: 'warning',
+            msg: 'AuthorizeSecurityGroupIngress on sg-0a1b2c3d4e5f from 0.0.0.0/0',
+            action: 'AuthorizeSecurityGroupIngress',
+          },
+          {
+            level: 'info',
+            msg: 'DeleteObject from s3://temp-uploads/batch-7291.tmp',
+            action: 'DeleteObject',
+          },
+          {
+            level: 'info',
+            msg: 'RunInstances launched i-0abc123def456 (t3.medium)',
+            action: 'RunInstances',
+          },
         ],
       },
       {
         index: 'logs-aws.vpcflow-default',
         dataset: 'aws.vpcflow',
         messages: [
-          { level: 'info', msg: '10.0.3.45 → 10.0.5.22:443 ACCEPT 12 packets 4892 bytes', action: 'ACCEPT' },
-          { level: 'error', msg: '10.0.1.17 → 172.16.0.5:22 REJECT 3 packets 180 bytes', action: 'REJECT' },
-          { level: 'info', msg: '10.0.2.88 → 10.0.4.100:5432 ACCEPT 45 packets 32400 bytes', action: 'ACCEPT' },
-          { level: 'info', msg: '192.168.1.50 → 10.0.3.10:80 ACCEPT 8 packets 2048 bytes', action: 'ACCEPT' },
-          { level: 'error', msg: '10.0.5.12 → 10.0.1.4:3389 REJECT 7 packets 420 bytes', action: 'REJECT' },
-          { level: 'info', msg: '10.0.4.100 → 10.0.6.15:8443 ACCEPT 34 packets 22100 bytes', action: 'ACCEPT' },
+          {
+            level: 'info',
+            msg: '10.0.3.45 → 10.0.5.22:443 ACCEPT 12 packets 4892 bytes',
+            action: 'ACCEPT',
+          },
+          {
+            level: 'error',
+            msg: '10.0.1.17 → 172.16.0.5:22 REJECT 3 packets 180 bytes',
+            action: 'REJECT',
+          },
+          {
+            level: 'info',
+            msg: '10.0.2.88 → 10.0.4.100:5432 ACCEPT 45 packets 32400 bytes',
+            action: 'ACCEPT',
+          },
+          {
+            level: 'info',
+            msg: '192.168.1.50 → 10.0.3.10:80 ACCEPT 8 packets 2048 bytes',
+            action: 'ACCEPT',
+          },
+          {
+            level: 'error',
+            msg: '10.0.5.12 → 10.0.1.4:3389 REJECT 7 packets 420 bytes',
+            action: 'REJECT',
+          },
+          {
+            level: 'info',
+            msg: '10.0.4.100 → 10.0.6.15:8443 ACCEPT 34 packets 22100 bytes',
+            action: 'ACCEPT',
+          },
         ],
       },
       {
         index: 'logs-aws.cloudwatch_logs-default',
         dataset: 'aws.cloudwatch_logs',
         messages: [
-          { level: 'info', msg: '[INFO] Lambda function app-processor invoked successfully in 245ms', action: 'LambdaInvoke' },
-          { level: 'error', msg: '[ERROR] Connection timeout to RDS instance db-prod-01 after 30s', action: 'RDSTimeout' },
-          { level: 'warning', msg: '[WARN] Memory utilization at 87% for ECS task web-service/abc123', action: 'ECSMemory' },
-          { level: 'info', msg: '[INFO] API Gateway request 200 OK — GET /api/v1/users — 12ms', action: 'APIGateway' },
-          { level: 'info', msg: '[DEBUG] DynamoDB query consumed 5.0 RCU on table user-sessions', action: 'DynamoDBQuery' },
-          { level: 'error', msg: '[ERROR] ECS container health check failed for task web-service/def456', action: 'ECSHealthCheck' },
+          {
+            level: 'info',
+            msg: '[INFO] Lambda function app-processor invoked successfully in 245ms',
+            action: 'LambdaInvoke',
+          },
+          {
+            level: 'error',
+            msg: '[ERROR] Connection timeout to RDS instance db-prod-01 after 30s',
+            action: 'RDSTimeout',
+          },
+          {
+            level: 'warning',
+            msg: '[WARN] Memory utilization at 87% for ECS task web-service/abc123',
+            action: 'ECSMemory',
+          },
+          {
+            level: 'info',
+            msg: '[INFO] API Gateway request 200 OK — GET /api/v1/users — 12ms',
+            action: 'APIGateway',
+          },
+          {
+            level: 'info',
+            msg: '[DEBUG] DynamoDB query consumed 5.0 RCU on table user-sessions',
+            action: 'DynamoDBQuery',
+          },
+          {
+            level: 'error',
+            msg: '[ERROR] ECS container health check failed for task web-service/def456',
+            action: 'ECSHealthCheck',
+          },
         ],
       },
       {
         index: 'logs-aws.s3access-default',
         dataset: 'aws.s3access',
         messages: [
-          { level: 'info', msg: 'REST.GET.OBJECT production-data/reports/2026-03-09.csv — 200 — 14ms', action: 'GET' },
-          { level: 'info', msg: 'REST.PUT.OBJECT app-logs-backup/2026/03/09/ct-log.gz — 200 — 8ms', action: 'PUT' },
-          { level: 'info', msg: 'REST.GET.BUCKET production-data — 200 — prefix=configs/', action: 'GET' },
-          { level: 'info', msg: 'REST.HEAD.OBJECT static-assets/images/logo.png — 200 — 3ms', action: 'HEAD' },
-          { level: 'info', msg: 'REST.DELETE.OBJECT temp-uploads/batch-7291.tmp — 204 — 5ms', action: 'DELETE' },
+          {
+            level: 'info',
+            msg: 'REST.GET.OBJECT production-data/reports/2026-03-09.csv — 200 — 14ms',
+            action: 'GET',
+          },
+          {
+            level: 'info',
+            msg: 'REST.PUT.OBJECT app-logs-backup/2026/03/09/ct-log.gz — 200 — 8ms',
+            action: 'PUT',
+          },
+          {
+            level: 'info',
+            msg: 'REST.GET.BUCKET production-data — 200 — prefix=configs/',
+            action: 'GET',
+          },
+          {
+            level: 'info',
+            msg: 'REST.HEAD.OBJECT static-assets/images/logo.png — 200 — 3ms',
+            action: 'HEAD',
+          },
+          {
+            level: 'info',
+            msg: 'REST.DELETE.OBJECT temp-uploads/batch-7291.tmp — 204 — 5ms',
+            action: 'DELETE',
+          },
         ],
       },
       {
         index: 'logs-aws.guardduty-default',
         dataset: 'aws.guardduty',
         messages: [
-          { level: 'error', msg: 'UnauthorizedAccess:EC2/SSHBruteForce on i-0abc123def456 — severity: HIGH', action: 'SSHBruteForce' },
-          { level: 'warning', msg: 'Recon:EC2/PortProbeUnprotectedPort on i-0def456abc789 — severity: MEDIUM', action: 'PortProbe' },
-          { level: 'error', msg: 'CryptoCurrency:EC2/BitcoinTool.B on i-0789abc123def — severity: HIGH', action: 'BitcoinTool' },
-          { level: 'warning', msg: 'UnauthorizedAccess:IAMUser/MaliciousIPCaller on user:test-account — severity: LOW', action: 'MaliciousIP' },
-          { level: 'error', msg: 'Trojan:EC2/DNSDataExfiltration on i-0abc999def111 — severity: HIGH', action: 'DNSExfiltration' },
+          {
+            level: 'error',
+            msg: 'UnauthorizedAccess:EC2/SSHBruteForce on i-0abc123def456 — severity: HIGH',
+            action: 'SSHBruteForce',
+          },
+          {
+            level: 'warning',
+            msg: 'Recon:EC2/PortProbeUnprotectedPort on i-0def456abc789 — severity: MEDIUM',
+            action: 'PortProbe',
+          },
+          {
+            level: 'error',
+            msg: 'CryptoCurrency:EC2/BitcoinTool.B on i-0789abc123def — severity: HIGH',
+            action: 'BitcoinTool',
+          },
+          {
+            level: 'warning',
+            msg: 'UnauthorizedAccess:IAMUser/MaliciousIPCaller on user:test-account — severity: LOW',
+            action: 'MaliciousIP',
+          },
+          {
+            level: 'error',
+            msg: 'Trojan:EC2/DNSDataExfiltration on i-0abc999def111 — severity: HIGH',
+            action: 'DNSExfiltration',
+          },
         ],
       },
       {
         index: 'logs-aws.elb_logs-default',
         dataset: 'aws.elb_logs',
         messages: [
-          { level: 'info', msg: 'https 200 app/web-alb/abc123 10.0.1.50:443 "GET /api/health HTTP/2" 0.015s', action: 'GET' },
-          { level: 'info', msg: 'https 200 app/web-alb/abc123 10.0.2.31:443 "POST /api/v1/events HTTP/2" 0.008s', action: 'POST' },
-          { level: 'error', msg: 'https 502 app/web-alb/abc123 10.0.3.72:443 "GET /api/v1/dashboard HTTP/2" 0.030s', action: 'GET' },
-          { level: 'info', msg: 'https 200 app/web-alb/abc123 10.0.4.18:443 "GET /static/app.js HTTP/2" 0.003s', action: 'GET' },
-          { level: 'warning', msg: 'https 429 app/web-alb/abc123 10.0.5.91:443 "POST /api/v1/ingest HTTP/2" 0.045s', action: 'POST' },
+          {
+            level: 'info',
+            msg: 'https 200 app/web-alb/abc123 10.0.1.50:443 "GET /api/health HTTP/2" 0.015s',
+            action: 'GET',
+          },
+          {
+            level: 'info',
+            msg: 'https 200 app/web-alb/abc123 10.0.2.31:443 "POST /api/v1/events HTTP/2" 0.008s',
+            action: 'POST',
+          },
+          {
+            level: 'error',
+            msg: 'https 502 app/web-alb/abc123 10.0.3.72:443 "GET /api/v1/dashboard HTTP/2" 0.030s',
+            action: 'GET',
+          },
+          {
+            level: 'info',
+            msg: 'https 200 app/web-alb/abc123 10.0.4.18:443 "GET /static/app.js HTTP/2" 0.003s',
+            action: 'GET',
+          },
+          {
+            level: 'warning',
+            msg: 'https 429 app/web-alb/abc123 10.0.5.91:443 "POST /api/v1/ingest HTTP/2" 0.045s',
+            action: 'POST',
+          },
         ],
       },
     ];
@@ -3011,31 +3647,35 @@ export const IngestHubPage: React.FC = () => {
         for (const m of src.messages) {
           const ts = new Date(now - docIdx * 1800 - Math.floor(Math.random() * 500)).toISOString();
           bulkBody += JSON.stringify({ index: { _index: src.index } }) + '\n';
-          bulkBody += JSON.stringify({
-            '@timestamp': ts,
-            message: m.msg,
-            log: { level: m.level },
-            data_stream: { dataset: src.dataset, namespace: 'default', type: 'logs' },
-            cloud: { provider: 'aws', region: 'us-west-2', account: { id: '123456789012' } },
-            event: { action: m.action, dataset: src.dataset },
-          }) + '\n';
+          bulkBody +=
+            JSON.stringify({
+              '@timestamp': ts,
+              message: m.msg,
+              log: { level: m.level },
+              data_stream: { dataset: src.dataset, namespace: 'default', type: 'logs' },
+              cloud: { provider: 'aws', region: 'us-west-2', account: { id: '123456789012' } },
+              event: { action: m.action, dataset: src.dataset },
+            }) + '\n';
           docIdx++;
         }
       }
     }
 
-    const basePath = services.http?.basePath.get() ?? '';
+    const httpBasePath = services.http?.basePath.get() ?? '';
 
     try {
-      const resp = await fetch(`${basePath}/api/console/proxy?path=${encodeURIComponent('/_bulk')}&method=POST`, {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: {
-          'Content-Type': 'application/json',
-          'kbn-xsrf': 'reporting',
-        },
-        body: bulkBody,
-      });
+      const resp = await fetch(
+        `${httpBasePath}/api/console/proxy?path=${encodeURIComponent('/_bulk')}&method=POST`,
+        {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'Content-Type': 'application/json',
+            'kbn-xsrf': 'reporting',
+          },
+          body: bulkBody,
+        }
+      );
       if (!resp.ok) {
         throw new Error(`Bulk failed: ${resp.status}`);
       }
@@ -3057,18 +3697,25 @@ export const IngestHubPage: React.FC = () => {
             });
           }
         }
-      } catch { /* last resort: proceed without data */ }
+      } catch {
+        /* last resort: proceed without data */
+      }
     }
 
     let dataViewId = '';
     try {
       const existing = await services.http?.get('/api/data_views');
-      const dvList = (existing as { data_view?: Array<{ id: string; title: string; name?: string }> })?.data_view ?? [];
-      const allLogs = dvList.find((dv) =>
-        dv.name?.toLowerCase() === 'all logs' || dv.title === 'logs-*' || dv.title === 'logs-*-*'
+      const dvList =
+        (existing as { data_view?: Array<{ id: string; title: string; name?: string }> })
+          ?.data_view ?? [];
+      const allLogs = dvList.find(
+        (dv) =>
+          dv.name?.toLowerCase() === 'all logs' || dv.title === 'logs-*' || dv.title === 'logs-*-*'
       );
       dataViewId = allLogs?.id ?? '';
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
 
     setLeavingForDiscover(true);
 
@@ -3102,7 +3749,7 @@ export const IngestHubPage: React.FC = () => {
 
   const renderBlockUxPage = () => (
     <>
-    <style id="blockUxOverrideStyles">{`
+      <style id="blockUxOverrideStyles">{`
       .kbnChromeLayoutNavigation,
       .kbnChromeLayoutSidebar {
         display: none !important;
@@ -3131,156 +3778,177 @@ export const IngestHubPage: React.FC = () => {
         pointer-events: auto !important;
       }
     `}</style>
-    <div
-      css={css`
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: ${euiTheme.colors.backgroundBasePlain};
-        display: flex;
-        flex-direction: column;
-        min-height: 100%;
-      `}
-    >
-      <div css={css`flex: 1; overflow-y: auto;`}>
-        <div css={paddedContent} style={{ width: '100%' }}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-              gap: 16,
-              paddingTop: 40,
-              paddingBottom: 40,
-            }}
-          >
-            <EuiIcon type="logoObservability" size="xxl" />
-            <div>
-              <EuiTitle size="l">
-                <h2>Welcome to Elastic Observability</h2>
-              </EuiTitle>
-              <EuiText size="s" color="subdued" style={{ marginTop: 4 }}>
-                Your starting point to ingest data, create alerts, manage SLOs, explore Streams, and get the most out of your observability stack
-              </EuiText>
-            </div>
-          </div>
-        </div>
-        <EuiHorizontalRule margin="none" css={dividerStyle} />
-        <div css={paddedContent} style={{ width: '100%' }}>
-          <div style={{ height: 32 }} />
-          <div css={css`margin-bottom: 48px;`}>
-            <EuiTitle size="s">
-              <h3>Add your data</h3>
-            </EuiTitle>
-            <EuiText size="s" color="subdued" css={css`margin-top: 4px;`}>
-              <p>Connect your data sources to start monitoring your infrastructure.</p>
-            </EuiText>
-          </div>
-          {SECTIONS.map((section, idx) => (
-            <React.Fragment key={section.title}>
-              {idx > 0 && <div style={{ height: 40 }} />}
-              <EuiTitle size="xs">
-                <h3>{section.title}</h3>
-              </EuiTitle>
-              <EuiText size="s" color="subdued">
-                <p>{section.description}.</p>
-              </EuiText>
-              <EuiSpacer size="xl" />
-              {renderCompactGrid(section.tiles, undefined, undefined, setWelcomeChildTile)}
-            </React.Fragment>
-          ))}
-          {SAAS_TILES.length > 0 && (
-            <>
-              <div style={{ height: 40 }} />
-              <EuiTitle size="xs">
-                <h3>SaaS Products</h3>
-              </EuiTitle>
-              <EuiText size="s" color="subdued" style={{ marginTop: 4 }}>
-                <p>Monitor your cloud resources without installing an agent.</p>
-              </EuiText>
-              <EuiSpacer size="xl" />
-              {renderCompactGrid(SAAS_TILES, undefined, undefined, setWelcomeChildTile)}
-            </>
-          )}
-          <div style={{ height: 64 }} />
-        </div>
-      </div>
-
-      {welcomeChildTile && welcomeChildTile.id === 'kubernetes' && (
-        <KubernetesFlyout
-          logoUrl={welcomeChildTile.logoUrl ?? ''}
-          onClose={() => setWelcomeChildTile(null)}
-        />
-      )}
-
-      {welcomeChildTile && welcomeChildTile.id === 'aws' && (
-        <AwsFlyout
-          logoUrl={welcomeChildTile.logoUrl ?? ''}
-          onClose={() => setWelcomeChildTile(null)}
-          onSeeMyData={() => seedAwsLogsAndNavigateToDiscover()}
-        />
-      )}
-
-      {welcomeChildTile && welcomeChildTile.id !== 'kubernetes' && welcomeChildTile.id !== 'aws' && (
-        <EuiFlyout
-          ownFocus
-          onClose={() => setWelcomeChildTile(null)}
-          aria-labelledby="blockUxChildFlyoutTitle"
+      <div
+        css={css`
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: ${euiTheme.colors.backgroundBasePlain};
+          display: flex;
+          flex-direction: column;
+          min-height: 100%;
+        `}
+      >
+        <div
           css={css`
-            inline-size: 72vw !important;
-            & .euiFlyoutHeader {
-              padding-block: 32px !important;
-              padding-inline: 32px !important;
-            }
-            & .euiFlyoutBody__overflowContent {
-              padding-block: 32px !important;
-              padding-inline: 32px !important;
-            }
-            & .euiFlyoutFooter {
-              padding-block: 16px !important;
-              padding-inline: 32px !important;
-            }
+            flex: 1;
+            overflow-y: auto;
           `}
         >
-          <EuiFlyoutHeader hasBorder>
-            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <CardLogoIcon src={welcomeChildTile.logoUrl ?? ''} alt={`${welcomeChildTile.name} logo`} />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiTitle size="m">
-                  <h2 id="blockUxChildFlyoutTitle">{welcomeChildTile.name}</h2>
+          <div css={paddedContent} style={{ width: '100%' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                gap: 16,
+                paddingTop: 40,
+                paddingBottom: 40,
+              }}
+            >
+              <EuiIcon type="logoObservability" size="xxl" />
+              <div>
+                <EuiTitle size="l">
+                  <h2>Welcome to Elastic Observability</h2>
                 </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            {welcomeChildTile.description ? (
-              <EuiText>
-                <p>{welcomeChildTile.description}</p>
+                <EuiText size="s" color="subdued" style={{ marginTop: 4 }}>
+                  Your starting point to ingest data, create alerts, manage SLOs, explore Streams,
+                  and get the most out of your observability stack
+                </EuiText>
+              </div>
+            </div>
+          </div>
+          <EuiHorizontalRule margin="none" css={dividerStyle} />
+          <div css={paddedContent} style={{ width: '100%' }}>
+            <div style={{ height: 32 }} />
+            <div
+              css={css`
+                margin-bottom: 48px;
+              `}
+            >
+              <EuiTitle size="s">
+                <h3>Add your data</h3>
+              </EuiTitle>
+              <EuiText
+                size="s"
+                color="subdued"
+                css={css`
+                  margin-top: 4px;
+                `}
+              >
+                <p>Connect your data sources to start monitoring your infrastructure.</p>
               </EuiText>
-            ) : (
-              <EuiText color="subdued">
-                <p>No additional details available for this integration.</p>
-              </EuiText>
+            </div>
+            {SECTIONS.map((section, idx) => (
+              <React.Fragment key={section.title}>
+                {idx > 0 && <div style={{ height: 40 }} />}
+                <EuiTitle size="xs">
+                  <h3>{section.title}</h3>
+                </EuiTitle>
+                <EuiText size="s" color="subdued">
+                  <p>{section.description}.</p>
+                </EuiText>
+                <EuiSpacer size="xl" />
+                {renderCompactGrid(section.tiles, undefined, undefined, setWelcomeChildTile)}
+              </React.Fragment>
+            ))}
+            {SAAS_TILES.length > 0 && (
+              <>
+                <div style={{ height: 40 }} />
+                <EuiTitle size="xs">
+                  <h3>SaaS Products</h3>
+                </EuiTitle>
+                <EuiText size="s" color="subdued" style={{ marginTop: 4 }}>
+                  <p>Monitor your cloud resources without installing an agent.</p>
+                </EuiText>
+                <EuiSpacer size="xl" />
+                {renderCompactGrid(SAAS_TILES, undefined, undefined, setWelcomeChildTile)}
+              </>
             )}
-          </EuiFlyoutBody>
-          <EuiFlyoutFooter>
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButton fill>
-                  Add {welcomeChildTile.name}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutFooter>
-        </EuiFlyout>
-      )}
+            <div style={{ height: 64 }} />
+          </div>
+        </div>
 
-      {/* Version switcher is rendered globally via plugin.tsx navControls */}
-    </div>
+        {welcomeChildTile && welcomeChildTile.id === 'kubernetes' && (
+          <KubernetesFlyout
+            logoUrl={welcomeChildTile.logoUrl ?? ''}
+            onClose={() => setWelcomeChildTile(null)}
+          />
+        )}
+
+        {welcomeChildTile && welcomeChildTile.id === 'aws' && (
+          <AwsFlyout
+            logoUrl={welcomeChildTile.logoUrl ?? ''}
+            onClose={() => setWelcomeChildTile(null)}
+            onSeeMyData={() => seedAwsLogsAndNavigateToDiscover()}
+          />
+        )}
+
+        {welcomeChildTile &&
+          welcomeChildTile.id !== 'kubernetes' &&
+          welcomeChildTile.id !== 'aws' && (
+            <EuiFlyout
+              ownFocus
+              onClose={() => setWelcomeChildTile(null)}
+              aria-labelledby="blockUxChildFlyoutTitle"
+              css={css`
+                inline-size: 72vw !important;
+                & .euiFlyoutHeader {
+                  padding-block: 32px !important;
+                  padding-inline: 32px !important;
+                }
+                & .euiFlyoutBody__overflowContent {
+                  padding-block: 32px !important;
+                  padding-inline: 32px !important;
+                }
+                & .euiFlyoutFooter {
+                  padding-block: 16px !important;
+                  padding-inline: 32px !important;
+                }
+              `}
+            >
+              <EuiFlyoutHeader hasBorder>
+                <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <CardLogoIcon
+                      src={welcomeChildTile.logoUrl ?? ''}
+                      alt={`${welcomeChildTile.name} logo`}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiTitle size="m">
+                      <h2 id="blockUxChildFlyoutTitle">{welcomeChildTile.name}</h2>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlyoutHeader>
+              <EuiFlyoutBody>
+                {welcomeChildTile.description ? (
+                  <EuiText>
+                    <p>{welcomeChildTile.description}</p>
+                  </EuiText>
+                ) : (
+                  <EuiText color="subdued">
+                    <p>No additional details available for this integration.</p>
+                  </EuiText>
+                )}
+              </EuiFlyoutBody>
+              <EuiFlyoutFooter>
+                <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton data-test-subj="observabilityOnboardingRenderBlockUxPageButton" fill>
+                      Add {welcomeChildTile.name}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlyoutFooter>
+            </EuiFlyout>
+          )}
+
+        {/* Version switcher is rendered globally via plugin.tsx navControls */}
+      </div>
     </>
   );
 
@@ -3313,9 +3981,7 @@ export const IngestHubPage: React.FC = () => {
   // ── AI SourceMap: data flow view (replaces integrations catalog for aiSourceMap version) ──
   const renderAiSourceMapIntegrationsView = () => {
     const filteredSources = aiSourceFilter
-      ? AI_DATA_SOURCES.filter((s) =>
-          s.name.toLowerCase().includes(aiSourceFilter.toLowerCase())
-        )
+      ? AI_DATA_SOURCES.filter((s) => s.name.toLowerCase().includes(aiSourceFilter.toLowerCase()))
       : AI_DATA_SOURCES;
 
     const liveSources = aiActiveSourceIds.filter((id) => aiWizardStates[id]?.isLive);
@@ -3353,10 +4019,14 @@ export const IngestHubPage: React.FC = () => {
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiText size="s"><strong>Elastic</strong></EuiText>
+              <EuiText size="s">
+                <strong>Elastic</strong>
+              </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued">Data flow</EuiText>
+              <EuiText size="s" color="subdued">
+                Data flow
+              </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiBadge color={overallStatus === 'live' ? 'success' : 'default'}>
@@ -3421,6 +4091,7 @@ export const IngestHubPage: React.FC = () => {
           `}
         >
           <EuiFieldSearch
+            data-test-subj="observabilityOnboardingRenderAiSourceMapIntegrationsViewFieldSearch"
             placeholder="Filter sources..."
             value={aiSourceFilter}
             onChange={(e) => setAiSourceFilter(e.target.value)}
@@ -3456,12 +4127,10 @@ export const IngestHubPage: React.FC = () => {
                       wrapText
                       icon={
                         <img
+                          ref={attachHideIntegrationLogoOnError}
                           src={`${LOGO_FALLBACK}/${source.logoDomain}/${source.logoDomain}-icon.svg`}
                           alt=""
                           style={{ width: 16, height: 16, objectFit: 'contain', display: 'block' }}
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = 'none';
-                          }}
                         />
                       }
                       label={
@@ -3507,8 +4176,8 @@ export const IngestHubPage: React.FC = () => {
               title={<h3>No sources connected</h3>}
               body={
                 <EuiText size="s" color="subdued">
-                  Select a source from the left, or let AI discover what&apos;s running in
-                  your environment.
+                  Select a source from the left, or let AI discover what&apos;s running in your
+                  environment.
                 </EuiText>
               }
               actions={[
@@ -3545,12 +4214,7 @@ export const IngestHubPage: React.FC = () => {
           <style>{`
             @keyframes aiFlowDash { to { stroke-dashoffset: -24; } }
           `}</style>
-          <EuiFlexGroup
-            gutterSize="none"
-            alignItems="center"
-            responsive={false}
-            style={{ gap: 0 }}
-          >
+          <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false} style={{ gap: 0 }}>
             {aiActiveSourceIds.map((id) => {
               const source = AI_DATA_SOURCES.find((s) => s.id === id)!;
               const ws = aiWizardStates[id];
@@ -3578,17 +4242,17 @@ export const IngestHubPage: React.FC = () => {
                     <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween" responsive={false}>
                       <EuiFlexItem grow={false}>
                         <img
+                          ref={attachHideIntegrationLogoOnError}
                           src={`${LOGO_FALLBACK}/${source.logoDomain}/${source.logoDomain}-icon.svg`}
                           alt={source.name}
                           style={{ width: 20, height: 20, objectFit: 'contain' }}
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = 'none';
-                          }}
                         />
                       </EuiFlexItem>
                       {isLive && (
                         <EuiFlexItem grow={false}>
-                          <EuiBadge color="success" style={{ fontSize: 9 }}>live</EuiBadge>
+                          <EuiBadge color="success" style={{ fontSize: 9 }}>
+                            live
+                          </EuiBadge>
                         </EuiFlexItem>
                       )}
                     </EuiFlexGroup>
@@ -3600,9 +4264,13 @@ export const IngestHubPage: React.FC = () => {
                       {isLive ? source.volume : ws ? `Step ${step} of 4` : 'Not configured'}
                     </EuiText>
                     {isLive ? (
-                      <EuiText size="xs" color="subdued">{source.events}</EuiText>
+                      <EuiText size="xs" color="subdued">
+                        {source.events}
+                      </EuiText>
                     ) : (
-                      <EuiText size="xs" color="warning">&uarr; Setup required</EuiText>
+                      <EuiText size="xs" color="warning">
+                        &uarr; Setup required
+                      </EuiText>
                     )}
                     {isLive && (
                       <>
@@ -3648,10 +4316,16 @@ export const IngestHubPage: React.FC = () => {
                   >
                     <EuiIcon type="logoElasticsearch" size="l" />
                     <EuiSpacer size="xs" />
-                    <EuiText size="xs" style={{ fontWeight: 600 }}>Elasticsearch</EuiText>
-                    <EuiText size="xs" color="subdued">Destination</EuiText>
+                    <EuiText size="xs" style={{ fontWeight: 600 }}>
+                      Elasticsearch
+                    </EuiText>
+                    <EuiText size="xs" color="subdued">
+                      Destination
+                    </EuiText>
                     <EuiSpacer size="xs" />
-                    <EuiBadge color="success" style={{ fontSize: 9 }}>&#10003; Receiving</EuiBadge>
+                    <EuiBadge color="success" style={{ fontSize: 9 }}>
+                      &#10003; Receiving
+                    </EuiBadge>
                   </EuiPanel>
                 </EuiFlexItem>
               </>
@@ -3705,21 +4379,13 @@ export const IngestHubPage: React.FC = () => {
           size="s"
           name={String(num)}
           iconType={status === 'done' ? 'check' : undefined}
-          color={
-            status === 'done'
-              ? 'success'
-              : status === 'in-progress'
-              ? 'warning'
-              : 'subdued'
-          }
+          color={status === 'done' ? 'success' : status === 'in-progress' ? 'warning' : 'subdued'}
         />
       );
 
       const stepBadge = (status: 'in-progress' | 'pending' | 'done') => (
         <EuiBadge
-          color={
-            status === 'in-progress' ? 'warning' : status === 'done' ? 'success' : 'default'
-          }
+          color={status === 'in-progress' ? 'warning' : status === 'done' ? 'success' : 'default'}
         >
           {status === 'in-progress' ? 'in progress' : status === 'done' ? 'done' : 'pending'}
         </EuiBadge>
@@ -3733,7 +4399,9 @@ export const IngestHubPage: React.FC = () => {
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>{stepCircle(status, num)}</EuiFlexItem>
           <EuiFlexItem>
-            <EuiText size="s" style={{ fontWeight: 500 }}>{title}</EuiText>
+            <EuiText size="s" style={{ fontWeight: 500 }}>
+              {title}
+            </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{stepBadge(status)}</EuiFlexItem>
         </EuiFlexGroup>
@@ -3786,16 +4454,16 @@ export const IngestHubPage: React.FC = () => {
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <img
+                  ref={attachHideIntegrationLogoOnError}
                   src={`${LOGO_FALLBACK}/${source.logoDomain}/${source.logoDomain}-icon.svg`}
                   alt={source.name}
                   style={{ width: 28, height: 28, objectFit: 'contain' }}
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
                 />
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiText size="s" style={{ fontWeight: 600 }}>{source.name}</EuiText>
+                <EuiText size="s" style={{ fontWeight: 600 }}>
+                  {source.name}
+                </EuiText>
                 <EuiText size="xs" color="subdued">
                   {source.category.charAt(0).toUpperCase() + source.category.slice(1)}
                 </EuiText>
@@ -3824,7 +4492,9 @@ export const IngestHubPage: React.FC = () => {
                 />
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiText size="xs" color="subdued">{wizardStatusLabel}</EuiText>
+                <EuiText size="xs" color="subdued">
+                  {wizardStatusLabel}
+                </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
@@ -4002,10 +4672,7 @@ export const IngestHubPage: React.FC = () => {
                             </EuiButton>
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
-                            <EuiButtonEmpty
-                              data-test-subj="aiSourceMapSaveForLater"
-                              size="s"
-                            >
+                            <EuiButtonEmpty data-test-subj="aiSourceMapSaveForLater" size="s">
                               Save for later
                             </EuiButtonEmpty>
                           </EuiFlexItem>
@@ -4154,7 +4821,9 @@ export const IngestHubPage: React.FC = () => {
                           Confirm selection
                         </EuiButton>
                         <EuiSpacer size="s" />
-                        <EuiText size="xs" color="subdued">not sure? try</EuiText>
+                        <EuiText size="xs" color="subdued">
+                          not sure? try
+                        </EuiText>
                         <EuiSpacer size="xs" />
                         <EuiPanel
                           paddingSize="s"
@@ -4196,17 +4865,15 @@ export const IngestHubPage: React.FC = () => {
                         {msgBubble(
                           <span>
                             Everything looks good! I&apos;ll configure{' '}
-                            <strong>{source.name}</strong> with the settings you selected.
-                            This should take about 30 seconds.
+                            <strong>{source.name}</strong> with the settings you selected. This
+                            should take about 30 seconds.
                           </span>
                         )}
                         <EuiButton
                           data-test-subj="aiSourceMapGoLive"
                           fill
                           color="success"
-                          onClick={() =>
-                            updateAiWizard(aiSelectedSourceId, { isLive: true })
-                          }
+                          onClick={() => updateAiWizard(aiSelectedSourceId, { isLive: true })}
                         >
                           Confirm &amp; go live
                         </EuiButton>
@@ -4286,7 +4953,13 @@ export const IngestHubPage: React.FC = () => {
               : '0/s',
           },
         ].map(({ label, value }) => (
-          <EuiFlexItem key={label} grow={false} css={css`padding: 0 ${euiTheme.size.xl};`}>
+          <EuiFlexItem
+            key={label}
+            grow={false}
+            css={css`
+              padding: 0 ${euiTheme.size.xl};
+            `}
+          >
             <EuiStat title={value} description={label} titleSize="m" textAlign="center" />
           </EuiFlexItem>
         ))}
@@ -4316,353 +4989,173 @@ export const IngestHubPage: React.FC = () => {
 
   return (
     <>
-    <EuiPageTemplate
-      paddingSize="none"
-      restrictWidth={false}
-      css={css`
-        padding-top: 0 !important;
-      `}
-    >
-      <EuiPageTemplate.Section paddingSize="none" restrictWidth={false} grow>
-        {activeNavId === 'get-started' && renderGetStartedView()}
-        {activeNavId === 'integrations' &&
-          (activeVersion === 'aiSourceMap'
-            ? renderAiSourceMapIntegrationsView()
-            : renderIntegrationsView())}
-        {activeNavId === 'platform-migration' && renderPlatformMigrationView()}
-        {activeNavId === 'migration-dashboards' &&
-          renderMigrationPlaceholder(
-            dashboardsHeaderImg,
-            'Dashboard Migration',
-            'Import and migrate dashboards from other platforms into Elastic Observability',
-            'Dashboard migration tools coming soon.'
-          )}
-        {activeNavId === 'migration-rules' &&
-          renderMigrationPlaceholder(
-            rulesHeaderImg,
-            'Rules & Monitors Migration',
-            'Import and migrate alerting rules and monitors from other platforms into Elastic',
-            'Rules & monitors migration tools coming soon.'
-          )}
-        {activeNavId === 'data-management' && renderStreamsView()}
-      </EuiPageTemplate.Section>
-
-      {flyoutTile && flyoutTile.id === 'kubernetes' && (
-        <KubernetesFlyout
-          logoUrl={flyoutTile.logoUrl ?? ''}
-          onClose={() => setFlyoutTile(null)}
-        />
-      )}
-
-      {flyoutTile && flyoutTile.id === 'aws' && (
-        <AwsFlyout
-          logoUrl={flyoutTile.logoUrl ?? ''}
-          onClose={() => setFlyoutTile(null)}
-          onSeeMyData={() => seedAwsLogsAndNavigateToDiscover()}
-        />
-      )}
-
-      {flyoutTile && flyoutTile.id === 'crowdstrike' && (
-        <CrowdStrikeFlyout onClose={() => setFlyoutTile(null)} />
-      )}
-
-      {flyoutTile && 'endpointLabel' in flyoutTile && (
-        <EuiFlyout
-          ownFocus
-          onClose={() => setFlyoutTile(null)}
-          aria-labelledby="apiIngestionFlyoutTitle"
-          css={css`
-            inline-size: 72vw !important;
-            & .euiFlyoutHeader {
-              padding-block: 32px !important;
-              padding-inline: 32px !important;
-            }
-            & .euiFlyoutBody__overflowContent {
-              padding-block: 32px !important;
-              padding-inline: 32px !important;
-            }
-            & .euiFlyoutFooter {
-              padding-block: 16px !important;
-              padding-inline: 32px !important;
-            }
-          `}
-        >
-          <EuiFlyoutHeader hasBorder>
-            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <CardLogoIcon
-                  src={(flyoutTile as ApiIngestionTile).logoUrl ?? ''}
-                  alt={`${flyoutTile.name} logo`}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiTitle size="m">
-                  <h2 id="apiIngestionFlyoutTitle">{flyoutTile.name}</h2>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <EuiText>
-              <p>{(flyoutTile as ApiIngestionTile).description}</p>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <div
-                  css={css`
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    border: 1px solid ${euiTheme.colors.borderBaseSubdued};
-                    border-radius: 6px;
-                    padding: 8px 12px;
-                    font-family: ${euiTheme.font.familyCode};
-                    font-size: 14px;
-                    min-width: 240px;
-                  `}
-                >
-                  <span style={{ flex: 1 }}>
-                    {(flyoutTile as ApiIngestionTile).endpointLabel}
-                  </span>
-                  <EuiCopy
-                    textToCopy={(flyoutTile as ApiIngestionTile).endpointLabel}
-                  >
-                    {(copy) => (
-                      <EuiButtonIcon
-                        iconType="copy"
-                        aria-label="Copy endpoint"
-                        onClick={copy}
-                        size="xs"
-                      />
-                    )}
-                  </EuiCopy>
-                </div>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="m" />
-            <EuiFlexGroup gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButton size="s">Manage API Keys</EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton size="s">Create new API Key</EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutBody>
-          <EuiFlyoutFooter>
-            <EuiButtonEmpty onClick={() => setFlyoutTile(null)}>
-              Close
-            </EuiButtonEmpty>
-          </EuiFlyoutFooter>
-        </EuiFlyout>
-      )}
-
-      {flyoutTile &&
-        flyoutTile.id !== 'kubernetes' &&
-        flyoutTile.id !== 'aws' &&
-        flyoutTile.id !== 'crowdstrike' &&
-        !('endpointLabel' in flyoutTile) && (
-        <EuiFlyout
-          ownFocus
-          onClose={() => setFlyoutTile(null)}
-          aria-labelledby="flyoutTileTitle"
-          css={css`
-            inline-size: 72vw !important;
-            & .euiFlyoutHeader {
-              padding-block: 32px !important;
-              padding-inline: 32px !important;
-            }
-            & .euiFlyoutBody__overflowContent {
-              padding-block: 32px !important;
-              padding-inline: 32px !important;
-            }
-            & .euiFlyoutFooter {
-              padding-block: 16px !important;
-              padding-inline: 32px !important;
-            }
-          `}
-        >
-          <EuiFlyoutHeader hasBorder>
-            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <CardLogoIcon src={flyoutTile.logoUrl ?? ''} alt={`${flyoutTile.name} logo`} />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiTitle size="m">
-                  <h2 id="flyoutTileTitle">{flyoutTile.name}</h2>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            {flyoutTile.description ? (
-              <EuiText>
-                <p>{flyoutTile.description}</p>
-              </EuiText>
-            ) : (
-              <EuiText color="subdued">
-                <p>No additional details available for this integration.</p>
-              </EuiText>
+      <EuiPageTemplate
+        paddingSize="none"
+        restrictWidth={false}
+        css={css`
+          padding-top: 0 !important;
+        `}
+      >
+        <EuiPageTemplate.Section paddingSize="none" restrictWidth={false} grow>
+          {activeNavId === 'get-started' && renderGetStartedView()}
+          {activeNavId === INGEST_HUB_ADD_DATA_NAV_ID &&
+            (activeVersion === 'aiSourceMap'
+              ? renderAiSourceMapIntegrationsView()
+              : isIngestHubVersion2AddDataPage(activeVersion, activeNavId)
+              ? renderVersion2AddDataView()
+              : renderIntegrationsView())}
+          {activeNavId === 'platform-migration' && renderPlatformMigrationView()}
+          {activeNavId === 'migration-dashboards' &&
+            renderMigrationPlaceholder(
+              dashboardsHeaderImg,
+              'Dashboard Migration',
+              'Import and migrate dashboards from other platforms into Elastic Observability',
+              'Dashboard migration tools coming soon.'
             )}
-          </EuiFlyoutBody>
-          <EuiFlyoutFooter>
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="observabilityOnboardingIngestHubPageCloseButton"
-                  onClick={() => setFlyoutTile(null)}
-                >
-                  Close
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton data-test-subj="observabilityOnboardingIngestHubPageButton" fill>
-                  Add {flyoutTile.name}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutFooter>
-        </EuiFlyout>
-      )}
-
-      {isGetStartedFlyoutOpen && (
-        <EuiFlyout
-          ownFocus
-          type="overlay"
-          session="start"
-          flyoutMenuProps={{ title: 'Welcome to Elastic Observability', hideCloseButton: isStopFillVersion }}
-          onClose={isStopFillVersion ? () => {} : () => setIsGetStartedFlyoutOpen(false)}
-          hideCloseButton={isStopFillVersion}
-          aria-labelledby="getStartedFlyoutTitle"
-          css={css`
-            inline-size: 72vw !important;
-            animation-duration: 0s !important;
-            transition-duration: 0s !important;
-            [class*="euiFlyoutMenu__container"] {
-              border-block-end: none !important;
-              block-size: 0 !important;
-              padding: 0 !important;
-              min-height: 0 !important;
-              overflow: hidden !important;
-            }
-            & .euiFlyoutHeader {
-              padding-block: 32px !important;
-              padding-inline: 32px !important;
-            }
-            & .euiFlyoutBody__overflowContent {
-              padding-block: 32px !important;
-              padding-inline: 32px !important;
-            }
-            & .euiFlyoutFooter {
-              padding-block: 16px !important;
-              padding-inline: 32px !important;
-            }
-          `}
-        >
-          <EuiFlyoutHeader hasBorder>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'flex-start',
-                gap: 16,
-              }}
-            >
-              <EuiIcon type="logoObservability" size="xxl" />
-              <div>
-                <EuiTitle size="m">
-                  <h2 id="getStartedFlyoutTitle">Welcome to Elastic Observability</h2>
-                </EuiTitle>
-                <EuiSpacer size="s" />
-                <EuiText grow={false}>
-                  <p>Your starting point to ingest data, create alerts, manage SLOs, explore Streams, and get the most out of your observability stack</p>
-                </EuiText>
-              </div>
-            </div>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <div css={css`margin-bottom: 48px;`}>
-              <EuiTitle size="s">
-                <h3>Get started adding your data</h3>
-              </EuiTitle>
-              <EuiText size="s" color="subdued" css={css`margin-top: 4px;`}>
-                <p>Connect your data sources to start monitoring your infrastructure.</p>
-              </EuiText>
-            </div>
-            {SECTIONS.map((section, idx) => (
-              <React.Fragment key={section.title}>
-                {idx > 0 && <div style={{ height: 40 }} />}
-                <EuiTitle size="xs">
-                  <h3>{section.title}</h3>
-                </EuiTitle>
-                <EuiText size="s" color="subdued">
-                  <p>{section.description}.</p>
-                </EuiText>
-                <EuiSpacer size="xl" />
-                {renderCompactGrid(section.tiles, undefined, undefined, setWelcomeChildTile)}
-              </React.Fragment>
-            ))}
-            {SAAS_TILES.length > 0 && (
-              <>
-                <div style={{ height: 40 }} />
-                <EuiTitle size="xs">
-                  <h3>SaaS Products</h3>
-                </EuiTitle>
-                <EuiText size="s" color="subdued" style={{ marginTop: 4 }}>
-                  <p>Monitor your cloud resources without installing an agent.</p>
-                </EuiText>
-                <EuiSpacer size="xl" />
-                {renderCompactGrid(SAAS_TILES, undefined, undefined, setWelcomeChildTile)}
-              </>
+          {activeNavId === 'migration-rules' &&
+            renderMigrationPlaceholder(
+              rulesHeaderImg,
+              'Rules & Monitors Migration',
+              'Import and migrate alerting rules and monitors from other platforms into Elastic',
+              'Rules & monitors migration tools coming soon.'
             )}
-          </EuiFlyoutBody>
-          {isStopVersion && (
-            <EuiFlyoutFooter>
-              <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" responsive={false}>
+          {activeNavId === 'data-management' && renderStreamsView()}
+        </EuiPageTemplate.Section>
+
+        {flyoutTile && flyoutTile.id === 'kubernetes' && (
+          <KubernetesFlyout
+            logoUrl={flyoutTile.logoUrl ?? ''}
+            onClose={() => setFlyoutTile(null)}
+          />
+        )}
+
+        {flyoutTile && flyoutTile.id === 'aws' && (
+          <AwsFlyout
+            logoUrl={flyoutTile.logoUrl ?? ''}
+            onClose={() => setFlyoutTile(null)}
+            onSeeMyData={() => seedAwsLogsAndNavigateToDiscover()}
+          />
+        )}
+
+        {flyoutTile && flyoutTile.id === 'crowdstrike' && (
+          <CrowdStrikeFlyout onClose={() => setFlyoutTile(null)} />
+        )}
+
+        {flyoutTile && 'endpointLabel' in flyoutTile && (
+          <EuiFlyout
+            ownFocus
+            onClose={() => setFlyoutTile(null)}
+            aria-labelledby="apiIngestionFlyoutTitle"
+            css={css`
+              inline-size: 72vw !important;
+              & .euiFlyoutHeader {
+                padding-block: 32px !important;
+                padding-inline: 32px !important;
+              }
+              & .euiFlyoutBody__overflowContent {
+                padding-block: 32px !important;
+                padding-inline: 32px !important;
+              }
+              & .euiFlyoutFooter {
+                padding-block: 16px !important;
+                padding-inline: 32px !important;
+              }
+            `}
+          >
+            <EuiFlyoutHeader hasBorder>
+              <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    onClick={() => setIsGetStartedFlyoutOpen(false)}
-                  >
-                    Skip
-                  </EuiButtonEmpty>
+                  <CardLogoIcon
+                    src={(flyoutTile as ApiIngestionTile).logoUrl ?? ''}
+                    alt={`${flyoutTile.name} logo`}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiTitle size="m">
+                    <h2 id="apiIngestionFlyoutTitle">{flyoutTile.name}</h2>
+                  </EuiTitle>
                 </EuiFlexItem>
               </EuiFlexGroup>
+            </EuiFlyoutHeader>
+            <EuiFlyoutBody>
+              <EuiText>
+                <p>{(flyoutTile as ApiIngestionTile).description}</p>
+              </EuiText>
+              <EuiSpacer size="m" />
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <div
+                    css={css`
+                      display: flex;
+                      align-items: center;
+                      gap: 8px;
+                      border: 1px solid ${euiTheme.colors.borderBaseSubdued};
+                      border-radius: 6px;
+                      padding: 8px 12px;
+                      font-family: ${euiTheme.font.familyCode};
+                      font-size: 14px;
+                      min-width: 240px;
+                    `}
+                  >
+                    <span style={{ flex: 1 }}>
+                      {(flyoutTile as ApiIngestionTile).endpointLabel}
+                    </span>
+                    <EuiCopy textToCopy={(flyoutTile as ApiIngestionTile).endpointLabel}>
+                      {(copy) => (
+                        <EuiButtonIcon
+                          data-test-subj="observabilityOnboardingIngestHubPageButton"
+                          iconType="copy"
+                          aria-label="Copy endpoint"
+                          onClick={copy}
+                          size="xs"
+                        />
+                      )}
+                    </EuiCopy>
+                  </div>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="m" />
+              <EuiFlexGroup gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    data-test-subj="observabilityOnboardingIngestHubPageManageApiKeysButton"
+                    size="s"
+                  >
+                    Manage API Keys
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    data-test-subj="observabilityOnboardingIngestHubPageCreateNewApiKeyButton"
+                    size="s"
+                  >
+                    Create new API Key
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlyoutBody>
+            <EuiFlyoutFooter>
+              <EuiButtonEmpty
+                data-test-subj="observabilityOnboardingIngestHubPageCloseButton"
+                onClick={() => setFlyoutTile(null)}
+              >
+                Close
+              </EuiButtonEmpty>
             </EuiFlyoutFooter>
-          )}
+          </EuiFlyout>
+        )}
 
-          {welcomeChildTile && welcomeChildTile.id === 'kubernetes' && (
-            <KubernetesFlyout
-              logoUrl={welcomeChildTile.logoUrl ?? ''}
-              onClose={() => setWelcomeChildTile(null)}
-              isChild
-              hideCloseButton={isStopFillVersion}
-            />
-          )}
-
-          {welcomeChildTile && welcomeChildTile.id === 'aws' && (
-            <AwsFlyout
-              logoUrl={welcomeChildTile.logoUrl ?? ''}
-              onClose={() => setWelcomeChildTile(null)}
-              onSeeMyData={() => seedAwsLogsAndNavigateToDiscover()}
-              isChild
-              hideCloseButton={isStopFillVersion}
-            />
-          )}
-
-          {welcomeChildTile && welcomeChildTile.id !== 'kubernetes' && welcomeChildTile.id !== 'aws' && (
+        {flyoutTile &&
+          flyoutTile.id !== 'kubernetes' &&
+          flyoutTile.id !== 'aws' &&
+          flyoutTile.id !== 'crowdstrike' &&
+          !('endpointLabel' in flyoutTile) && (
             <EuiFlyout
-              onClose={() => setWelcomeChildTile(null)}
-              aria-labelledby="welcomeChildFlyoutTitle"
-              session="start"
-              flyoutMenuProps={{ title: welcomeChildTile.name }}
+              ownFocus
+              onClose={() => setFlyoutTile(null)}
+              aria-labelledby="flyoutTileTitle"
               css={css`
                 inline-size: 72vw !important;
-                animation-duration: 0s !important;
-                transition-duration: 0s !important;
-                [class*="euiFlyoutMenu__container"] {
-                  border-block-end: none !important;
-                }
                 & .euiFlyoutHeader {
                   padding-block: 32px !important;
                   padding-inline: 32px !important;
@@ -4680,19 +5173,19 @@ export const IngestHubPage: React.FC = () => {
               <EuiFlyoutHeader hasBorder>
                 <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                   <EuiFlexItem grow={false}>
-                    <CardLogoIcon src={welcomeChildTile.logoUrl ?? ''} alt={`${welcomeChildTile.name} logo`} />
+                    <CardLogoIcon src={flyoutTile.logoUrl ?? ''} alt={`${flyoutTile.name} logo`} />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiTitle size="m">
-                      <h2 id="welcomeChildFlyoutTitle">{welcomeChildTile.name}</h2>
+                      <h2 id="flyoutTileTitle">{flyoutTile.name}</h2>
                     </EuiTitle>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlyoutHeader>
               <EuiFlyoutBody>
-                {welcomeChildTile.description ? (
+                {flyoutTile.description ? (
                   <EuiText>
-                    <p>{welcomeChildTile.description}</p>
+                    <p>{flyoutTile.description}</p>
                   </EuiText>
                 ) : (
                   <EuiText color="subdued">
@@ -4703,17 +5196,233 @@ export const IngestHubPage: React.FC = () => {
               <EuiFlyoutFooter>
                 <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" responsive={false}>
                   <EuiFlexItem grow={false}>
-                    <EuiButton fill>
-                      Add {welcomeChildTile.name}
+                    <EuiButtonEmpty
+                      data-test-subj="observabilityOnboardingIngestHubPageCloseButton"
+                      onClick={() => setFlyoutTile(null)}
+                    >
+                      Close
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton data-test-subj="observabilityOnboardingIngestHubPageButton" fill>
+                      Add {flyoutTile.name}
                     </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlyoutFooter>
             </EuiFlyout>
           )}
-        </EuiFlyout>
-      )}
-    </EuiPageTemplate>
+
+        {isGetStartedFlyoutOpen && (
+          <EuiFlyout
+            ownFocus
+            type="overlay"
+            session="start"
+            flyoutMenuProps={{
+              title: 'Welcome to Elastic Observability',
+              hideCloseButton: isStopFillVersion,
+            }}
+            onClose={isStopFillVersion ? () => {} : () => setIsGetStartedFlyoutOpen(false)}
+            hideCloseButton={isStopFillVersion}
+            aria-labelledby="getStartedFlyoutTitle"
+            css={css`
+              inline-size: 72vw !important;
+              animation-duration: 0s !important;
+              transition-duration: 0s !important;
+              [class*='euiFlyoutMenu__container'] {
+                border-block-end: none !important;
+                block-size: 0 !important;
+                padding: 0 !important;
+                min-height: 0 !important;
+                overflow: hidden !important;
+              }
+              & .euiFlyoutHeader {
+                padding-block: 32px !important;
+                padding-inline: 32px !important;
+              }
+              & .euiFlyoutBody__overflowContent {
+                padding-block: 32px !important;
+                padding-inline: 32px !important;
+              }
+              & .euiFlyoutFooter {
+                padding-block: 16px !important;
+                padding-inline: 32px !important;
+              }
+            `}
+          >
+            <EuiFlyoutHeader hasBorder>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'flex-start',
+                  gap: 16,
+                }}
+              >
+                <EuiIcon type="logoObservability" size="xxl" />
+                <div>
+                  <EuiTitle size="m">
+                    <h2 id="getStartedFlyoutTitle">Welcome to Elastic Observability</h2>
+                  </EuiTitle>
+                  <EuiSpacer size="s" />
+                  <EuiText grow={false}>
+                    <p>
+                      Your starting point to ingest data, create alerts, manage SLOs, explore
+                      Streams, and get the most out of your observability stack
+                    </p>
+                  </EuiText>
+                </div>
+              </div>
+            </EuiFlyoutHeader>
+            <EuiFlyoutBody>
+              <div
+                css={css`
+                  margin-bottom: 48px;
+                `}
+              >
+                <EuiTitle size="s">
+                  <h3>Get started adding your data</h3>
+                </EuiTitle>
+                <EuiText
+                  size="s"
+                  color="subdued"
+                  css={css`
+                    margin-top: 4px;
+                  `}
+                >
+                  <p>Connect your data sources to start monitoring your infrastructure.</p>
+                </EuiText>
+              </div>
+              {SECTIONS.map((section, idx) => (
+                <React.Fragment key={section.title}>
+                  {idx > 0 && <div style={{ height: 40 }} />}
+                  <EuiTitle size="xs">
+                    <h3>{section.title}</h3>
+                  </EuiTitle>
+                  <EuiText size="s" color="subdued">
+                    <p>{section.description}.</p>
+                  </EuiText>
+                  <EuiSpacer size="xl" />
+                  {renderCompactGrid(section.tiles, undefined, undefined, setWelcomeChildTile)}
+                </React.Fragment>
+              ))}
+              {SAAS_TILES.length > 0 && (
+                <>
+                  <div style={{ height: 40 }} />
+                  <EuiTitle size="xs">
+                    <h3>SaaS Products</h3>
+                  </EuiTitle>
+                  <EuiText size="s" color="subdued" style={{ marginTop: 4 }}>
+                    <p>Monitor your cloud resources without installing an agent.</p>
+                  </EuiText>
+                  <EuiSpacer size="xl" />
+                  {renderCompactGrid(SAAS_TILES, undefined, undefined, setWelcomeChildTile)}
+                </>
+              )}
+            </EuiFlyoutBody>
+            {isStopVersion && (
+              <EuiFlyoutFooter>
+                <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      data-test-subj="observabilityOnboardingIngestHubPageSkipButton"
+                      onClick={() => setIsGetStartedFlyoutOpen(false)}
+                    >
+                      Skip
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlyoutFooter>
+            )}
+
+            {welcomeChildTile && welcomeChildTile.id === 'kubernetes' && (
+              <KubernetesFlyout
+                logoUrl={welcomeChildTile.logoUrl ?? ''}
+                onClose={() => setWelcomeChildTile(null)}
+                isChild
+                hideCloseButton={isStopFillVersion}
+              />
+            )}
+
+            {welcomeChildTile && welcomeChildTile.id === 'aws' && (
+              <AwsFlyout
+                logoUrl={welcomeChildTile.logoUrl ?? ''}
+                onClose={() => setWelcomeChildTile(null)}
+                onSeeMyData={() => seedAwsLogsAndNavigateToDiscover()}
+                isChild
+                hideCloseButton={isStopFillVersion}
+              />
+            )}
+
+            {welcomeChildTile &&
+              welcomeChildTile.id !== 'kubernetes' &&
+              welcomeChildTile.id !== 'aws' && (
+                <EuiFlyout
+                  onClose={() => setWelcomeChildTile(null)}
+                  aria-labelledby="welcomeChildFlyoutTitle"
+                  session="start"
+                  flyoutMenuProps={{ title: welcomeChildTile.name }}
+                  css={css`
+                    inline-size: 72vw !important;
+                    animation-duration: 0s !important;
+                    transition-duration: 0s !important;
+                    [class*='euiFlyoutMenu__container'] {
+                      border-block-end: none !important;
+                    }
+                    & .euiFlyoutHeader {
+                      padding-block: 32px !important;
+                      padding-inline: 32px !important;
+                    }
+                    & .euiFlyoutBody__overflowContent {
+                      padding-block: 32px !important;
+                      padding-inline: 32px !important;
+                    }
+                    & .euiFlyoutFooter {
+                      padding-block: 16px !important;
+                      padding-inline: 32px !important;
+                    }
+                  `}
+                >
+                  <EuiFlyoutHeader hasBorder>
+                    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <CardLogoIcon
+                          src={welcomeChildTile.logoUrl ?? ''}
+                          alt={`${welcomeChildTile.name} logo`}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <EuiTitle size="m">
+                          <h2 id="welcomeChildFlyoutTitle">{welcomeChildTile.name}</h2>
+                        </EuiTitle>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlyoutHeader>
+                  <EuiFlyoutBody>
+                    {welcomeChildTile.description ? (
+                      <EuiText>
+                        <p>{welcomeChildTile.description}</p>
+                      </EuiText>
+                    ) : (
+                      <EuiText color="subdued">
+                        <p>No additional details available for this integration.</p>
+                      </EuiText>
+                    )}
+                  </EuiFlyoutBody>
+                  <EuiFlyoutFooter>
+                    <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiButton data-test-subj="observabilityOnboardingIngestHubPageButton" fill>
+                          Add {welcomeChildTile.name}
+                        </EuiButton>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlyoutFooter>
+                </EuiFlyout>
+              )}
+          </EuiFlyout>
+        )}
+      </EuiPageTemplate>
     </>
   );
 };
