@@ -45,6 +45,7 @@ import { ICON_DIMENSIONS } from '../common/constants';
 import { useListDetailPageStyles } from '../common/styles';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { useCanEditAgent } from '../../../hooks/agents/use_can_edit_agent';
+import { SkillsCustomizeEmptyState } from './skills_customize_empty_state';
 
 export const AgentSkills: React.FC = () => {
   const { agentId } = useParams<{ agentId: string }>();
@@ -212,6 +213,8 @@ export const AgentSkills: React.FC = () => {
     return agentSkillIdSet;
   }, [agentSkillIdSet, enableElasticCapabilities, builtinSkillIdSet]);
 
+  const showCustomizeEmptyState = activeSkills.length === 0 && !searchQuery.trim();
+
   const isLoading = agentLoading || skillsLoading;
 
   if (isLoading) {
@@ -219,6 +222,47 @@ export const AgentSkills: React.FC = () => {
       <EuiFlexGroup alignItems="center" justifyContent="center" css={styles.loadingSpinner}>
         <EuiLoadingSpinner size="xl" />
       </EuiFlexGroup>
+    );
+  }
+
+  const skillModals = (
+    <>
+      {isLibraryOpen ? (
+        <SkillLibraryPanel
+          onClose={closeLibrary}
+          allSkills={allSkills}
+          activeSkillIdSet={libraryActiveSkillIdSet}
+          onToggleSkill={handleToggleSkill}
+          mutatingSkillId={mutatingSkillId}
+          enableElasticCapabilities={enableElasticCapabilities}
+          builtinSkillIdSet={builtinSkillIdSet}
+        />
+      ) : null}
+      {editingSkillId ? (
+        <SkillEditFlyout
+          skillId={editingSkillId}
+          onClose={() => setEditingSkillId(null)}
+          onSaved={() => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.skills.byId(editingSkillId) });
+            setSelectedSkillId(editingSkillId);
+          }}
+        />
+      ) : null}
+      {isCreateFlyoutOpen ? (
+        <SkillCreateFlyout
+          onClose={() => setIsCreateFlyoutOpen(false)}
+          onSkillCreated={(skill) => handleAddSkill(skill, { selectOnSuccess: true })}
+        />
+      ) : null}
+    </>
+  );
+
+  if (showCustomizeEmptyState) {
+    return (
+      <PageWrapper>
+        <SkillsCustomizeEmptyState canEditAgent={canEditAgent} onOpenLibrary={openLibrary} />
+        {skillModals}
+      </PageWrapper>
     );
   }
 
@@ -363,35 +407,7 @@ export const AgentSkills: React.FC = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {isLibraryOpen && (
-        <SkillLibraryPanel
-          onClose={closeLibrary}
-          allSkills={allSkills}
-          activeSkillIdSet={libraryActiveSkillIdSet}
-          onToggleSkill={handleToggleSkill}
-          mutatingSkillId={mutatingSkillId}
-          enableElasticCapabilities={enableElasticCapabilities}
-          builtinSkillIdSet={builtinSkillIdSet}
-        />
-      )}
-
-      {editingSkillId && (
-        <SkillEditFlyout
-          skillId={editingSkillId}
-          onClose={() => setEditingSkillId(null)}
-          onSaved={() => {
-            queryClient.invalidateQueries({ queryKey: queryKeys.skills.byId(editingSkillId) });
-            setSelectedSkillId(editingSkillId);
-          }}
-        />
-      )}
-
-      {isCreateFlyoutOpen && (
-        <SkillCreateFlyout
-          onClose={() => setIsCreateFlyoutOpen(false)}
-          onSkillCreated={(skill) => handleAddSkill(skill, { selectOnSuccess: true })}
-        />
-      )}
+      {skillModals}
     </PageWrapper>
   );
 };

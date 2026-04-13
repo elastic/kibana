@@ -14,7 +14,7 @@ import {
   esqlColumnSchema,
   metricOperationDefinitionSchema,
 } from '../metric_ops';
-import { colorByValueSchema } from '../color';
+import { colorByValueSchema, noColorSchema, autoColorSchema, AUTO_COLOR } from '../color';
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import { mergeAllMetricsWithChartDimensionSchema } from './shared';
@@ -122,7 +122,11 @@ const gaugeStateMetricOptionsSchema = {
   /**
    * Color configuration
    */
-  color: schema.maybe(colorByValueSchema),
+  color: schema.maybe(
+    schema.oneOf([colorByValueSchema, noColorSchema, autoColorSchema], {
+      defaultValue: AUTO_COLOR,
+    })
+  ),
   /**
    * Tick marks configuration
    */
@@ -138,7 +142,7 @@ const gaugeStateMetricOptionsSchema = {
         mode: schema.maybe(
           schema.oneOf([schema.literal('auto'), schema.literal('bands')], {
             meta: { description: 'Tick placement mode' },
-            defaultValue: 'auto',
+            defaultValue: 'bands',
           })
         ),
       },

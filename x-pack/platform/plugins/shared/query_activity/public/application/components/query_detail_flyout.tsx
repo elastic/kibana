@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 function prettyPrint(value: string): string {
   try {
@@ -38,6 +38,7 @@ import { escapeQuotes } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { ALL_LOGS_DATA_VIEW_ID } from '@kbn/discover-utils/src';
 import { formatRuntime } from '../../lib/format_runtime';
 import { useQueryActivityAppContext } from '../app_context';
 import { notAvailableLabel } from './query_activity_table';
@@ -56,7 +57,7 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
   onClose,
   onStopQuery,
 }) => {
-  const { url, capabilities } = useQueryActivityAppContext();
+  const { url, capabilities, dataViews } = useQueryActivityAppContext();
   const canCancelTasks = capabilities.canCancelTasks;
   const source = query.source?.trim();
 
@@ -73,18 +74,21 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
     defaultMessage: 'Query details',
   });
 
+  const [dataViewExists, setDataViewExists] = useState(false);
+  useEffect(() => {
+    if (!query.traceId) return;
+    dataViews
+      .get(ALL_LOGS_DATA_VIEW_ID)
+      .then(() => setDataViewExists(true))
+      .catch(() => setDataViewExists(false));
+  }, [query.traceId, dataViews]);
+
   const inspectInDiscoverLinkProps = useMemo(() => {
-    if (!query.traceId) {
+    if (!query.traceId || !dataViewExists) {
       return undefined;
     }
     const discoverParams: DiscoverAppLocatorParams = {
-      dataViewSpec: {
-        id: 'discover-observability-solution-all-logs',
-        name: 'All logs',
-        title: 'logs-*',
-        timeFieldName: '@timestamp',
-        managed: true,
-      },
+      dataViewId: ALL_LOGS_DATA_VIEW_ID,
       timeRange: { from: rangeFrom, to: rangeTo },
       query: { language: 'kuery', query: `trace.id:"${escapeQuotes(query.traceId)}"` },
       filters: [],
@@ -97,7 +101,7 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
           rel: 'noopener noreferrer',
         }
       : undefined;
-  }, [discoverLocator, query.traceId, rangeFrom, rangeTo]);
+  }, [dataViewExists, discoverLocator, query.traceId, rangeFrom, rangeTo]);
 
   return (
     <EuiFlyout aria-label={flyoutAriaLabel} onClose={onClose} size="m" maxWidth={691}>
