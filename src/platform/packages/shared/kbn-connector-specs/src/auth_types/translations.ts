@@ -223,3 +223,44 @@ export const AWS_SECRET_ACCESS_KEY_REQUIRED_MESSAGE = i18n.translate(
 export const EARS_LABEL = i18n.translate('connectorSpecs.ears.label', {
   defaultMessage: 'OAuth 2.0 via Elastic-owned apps',
 });
+
+export const GCP_SERVICE_ACCOUNT_LABEL = i18n.translate('connectorSpecs.gcpServiceAccount.label', {
+  defaultMessage: 'GCP Service Account',
+});
+
+export const GCP_SERVICE_ACCOUNT_JSON_LABEL = i18n.translate(
+  'connectorSpecs.gcpServiceAccount.json.label',
+  {
+    defaultMessage: 'Service Account JSON',
+  }
+);
+
+export const GCP_SERVICE_ACCOUNT_JSON_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.gcpServiceAccount.json.requiredMessage',
+  {
+    defaultMessage: 'Service Account JSON is required',
+  }
+);
+
+export const GCP_SERVICE_ACCOUNT_JSON_HELP_TEXT = i18n.translate(
+  'connectorSpecs.gcpServiceAccount.json.helpText',
+  {
+    defaultMessage:
+      'Paste the contents of your GCP service account JSON key file. You can download this from the GCP Console under IAM & Admin > Service Accounts.',
+  }
+);
+
+export const GCP_SERVICE_ACCOUNT_SCOPE_LABEL = i18n.translate(
+  'connectorSpecs.gcpServiceAccount.scope.label',
+  {
+    defaultMessage: 'OAuth Scope',
+  }
+);
+
+export const GCP_SERVICE_ACCOUNT_SCOPE_HELP_TEXT = i18n.translate(
+  'connectorSpecs.gcpServiceAccount.scope.helpText',
+  {
+    defaultMessage:
+      'OAuth scope for the access token. Defaults to https://www.googleapis.com/auth/cloud-platform.',
+  }
+);
