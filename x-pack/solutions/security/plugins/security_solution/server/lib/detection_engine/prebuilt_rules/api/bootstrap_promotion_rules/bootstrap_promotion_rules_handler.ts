@@ -19,7 +19,7 @@ import { installPromotionRules } from '../../logic/integrations/install_promotio
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 
-export const bootstrapPromotionRulesHandler = async (
+export const bootstrapEaseRulesHandler = async (
   context: SecuritySolutionRequestHandlerContext,
   _: KibanaRequest,
   response: KibanaResponseFactory,
@@ -47,14 +47,14 @@ export const bootstrapPromotionRulesHandler = async (
     });
 
     logger.debug(
-      `bootstrapPromotionRulesHandler: Promotion rules installed: ${ruleResults.installed}, updated: ${ruleResults.updated}, deleted: ${ruleResults.deleted}`
+      `bootstrapEaseRulesHandler: Promotion rules installed: ${ruleResults.installed}, updated: ${ruleResults.updated}, deleted: ${ruleResults.deleted}`
     );
 
     return response.ok({
       body: ruleResults,
     });
   } catch (err) {
-    logger.error(`bootstrapPromotionRulesHandler: Caught error:`, err);
+    logger.error(`bootstrapEaseRulesHandler: Caught error:`, err);
     const error = transformError(err);
     return siemResponse.error({
       body: error.message,

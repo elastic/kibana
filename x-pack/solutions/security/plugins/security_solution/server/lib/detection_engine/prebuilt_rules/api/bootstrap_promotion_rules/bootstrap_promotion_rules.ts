@@ -7,20 +7,17 @@
 
 import type { Logger } from '@kbn/core/server';
 import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
-import { BOOTSTRAP_PROMOTION_RULES_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import { BOOTSTRAP_EASE_RULES_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
-import { bootstrapPromotionRulesHandler } from './bootstrap_promotion_rules_handler';
+import { bootstrapEaseRulesHandler } from './bootstrap_promotion_rules_handler';
 import { throttleRequests } from '../../../../../utils/throttle_requests';
 
-export const bootstrapPromotionRulesRoute = (
-  router: SecuritySolutionPluginRouter,
-  logger: Logger
-) => {
+export const bootstrapEaseRulesRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.versioned
     .post({
       access: 'internal',
-      path: BOOTSTRAP_PROMOTION_RULES_URL,
+      path: BOOTSTRAP_EASE_RULES_URL,
       security: {
         authz: {
           requiredPrivileges: [RULES_API_ALL],
@@ -38,7 +35,7 @@ export const bootstrapPromotionRulesRoute = (
         validate: {},
       },
       throttleRequests((context, request, response) => {
-        return bootstrapPromotionRulesHandler(context, request, response, logger);
+        return bootstrapEaseRulesHandler(context, request, response, logger);
       })
     );
 };

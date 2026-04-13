@@ -16,17 +16,17 @@ import { useSecuritySolutionInitialization } from '../../../common/components/in
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import {
-  BOOTSTRAP_PROMOTION_RULES_KEY,
-  useBootstrapPromotionRulesMutation,
+  BOOTSTRAP_EASE_RULES_KEY,
+  useBootstrapEaseRulesMutation,
 } from '../../../detection_engine/rule_management/api/hooks/prebuilt_rules/use_bootstrap_promotion_rules';
 import * as i18n from '../../../detection_engine/rule_management/logic/translations';
 
 /**
- * Bootstraps promotion rules after the prebuilt rules package is installed.
+ * Bootstraps EASE rules after the prebuilt rules package is installed.
  * Only runs when the user has rule edit privileges.
  * Call this from EASE-specific components (e.g., the PromotionRules wrapper).
  */
-export const useBootstrapPromotionRules = () => {
+export const useBootstrapEaseRules = () => {
   const { addError } = useAppToasts();
   const { edit: canEditRules } = useUserPrivileges().rulesPrivileges.rules;
 
@@ -39,14 +39,14 @@ export const useBootstrapPromotionRules = () => {
   const prebuiltRulesPackageFailed =
     prebuiltRulesFlowState?.result?.status === INITIALIZATION_FLOW_STATUS_ERROR;
 
-  const { mutate: bootstrapPromotionRules } = useBootstrapPromotionRulesMutation({
+  const { mutate: bootstrapEaseRules } = useBootstrapEaseRulesMutation({
     onError: (error) => {
-      addError(error, { title: i18n.BOOTSTRAP_PROMOTION_RULES_FAILURE });
+      addError(error, { title: i18n.BOOTSTRAP_EASE_RULES_FAILURE });
     },
     onSuccess: ({ errors }) => {
       if (errors.length) {
         addError(new Error(errors.map((error) => error.message).join('; ')), {
-          title: i18n.BOOTSTRAP_PROMOTION_RULES_FAILURE,
+          title: i18n.BOOTSTRAP_EASE_RULES_FAILURE,
         });
       }
     },
@@ -67,14 +67,14 @@ export const useBootstrapPromotionRules = () => {
 
   useEffect(() => {
     if (prebuiltRulesPackageReady && canEditRules) {
-      bootstrapPromotionRules();
+      bootstrapEaseRules();
     }
-  }, [prebuiltRulesPackageReady, canEditRules, bootstrapPromotionRules]);
+  }, [prebuiltRulesPackageReady, canEditRules, bootstrapEaseRules]);
 };
 
 /**
- * @returns true if promotion rules are currently being bootstrapped
+ * @returns true if EASE rules are currently being bootstrapped
  */
-export const useIsBootstrappingPromotionRules = () => {
-  return useIsMutating({ mutationKey: BOOTSTRAP_PROMOTION_RULES_KEY }) > 0;
+export const useIsBootstrappingEaseRules = () => {
+  return useIsMutating({ mutationKey: BOOTSTRAP_EASE_RULES_KEY }) > 0;
 };

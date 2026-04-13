@@ -33,7 +33,7 @@ import type {
   ReviewRuleUpgradeResponseBody,
 } from '../../../../common/api/detection_engine/prebuilt_rules';
 import {
-  BOOTSTRAP_PROMOTION_RULES_URL,
+  BOOTSTRAP_EASE_RULES_URL,
   GET_PREBUILT_RULES_BASE_VERSION_URL,
   GET_PREBUILT_RULES_STATUS_URL,
   PERFORM_RULE_INSTALLATION_URL,
@@ -768,8 +768,8 @@ export const performUpgradeRules = async (
     body: JSON.stringify(body),
   });
 
-export const bootstrapPromotionRules = async (): Promise<RuleBootstrapResults> =>
-  KibanaServices.get().http.fetch(BOOTSTRAP_PROMOTION_RULES_URL, {
+export const bootstrapEaseRules = async (): Promise<RuleBootstrapResults> =>
+  KibanaServices.get().http.fetch(BOOTSTRAP_EASE_RULES_URL, {
     method: 'POST',
     version: '1',
   });

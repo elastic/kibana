@@ -35,9 +35,9 @@ export const BOOTSTRAP_PREBUILT_RULES_PACKAGE_FAILURE = i18n.translate(
   }
 );
 
-export const BOOTSTRAP_PROMOTION_RULES_FAILURE = i18n.translate(
-  'xpack.securitySolution.containers.detectionEngine.bootstrapPromotionRulesFailure',
+export const BOOTSTRAP_EASE_RULES_FAILURE = i18n.translate(
+  'xpack.securitySolution.containers.detectionEngine.bootstrapEaseRulesFailure',
   {
-    defaultMessage: 'Failed to bootstrap promotion rules',
+    defaultMessage: 'Failed to bootstrap EASE rules',
   }
 );

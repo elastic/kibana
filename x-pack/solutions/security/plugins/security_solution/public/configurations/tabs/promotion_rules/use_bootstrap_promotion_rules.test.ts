@@ -9,10 +9,10 @@ import { renderHook } from '@testing-library/react';
 import { useSecuritySolutionInitialization } from '../../../common/components/initialization/use_security_solution_initialization';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { useBootstrapPromotionRulesMutation } from '../../../detection_engine/rule_management/api/hooks/prebuilt_rules/use_bootstrap_promotion_rules';
+import { useBootstrapEaseRulesMutation } from '../../../detection_engine/rule_management/api/hooks/prebuilt_rules/use_bootstrap_promotion_rules';
 import {
-  useBootstrapPromotionRules,
-  useIsBootstrappingPromotionRules,
+  useBootstrapEaseRules,
+  useIsBootstrappingEaseRules,
 } from './use_bootstrap_promotion_rules';
 
 jest.mock('../../../common/components/initialization/use_security_solution_initialization');
@@ -22,7 +22,7 @@ jest.mock(
   '../../../detection_engine/rule_management/api/hooks/prebuilt_rules/use_bootstrap_promotion_rules'
 );
 
-// useIsMutating is used by useIsBootstrappingPromotionRules
+// useIsMutating is used by useIsBootstrappingEaseRules
 jest.mock('@kbn/react-query', () => ({
   ...jest.requireActual('@kbn/react-query'),
   useIsMutating: jest.fn().mockReturnValue(0),
@@ -36,10 +36,9 @@ const useSecuritySolutionInitializationMock =
     typeof useSecuritySolutionInitialization
   >;
 const useUserPrivilegesMock = useUserPrivileges as jest.MockedFunction<typeof useUserPrivileges>;
-const useBootstrapPromotionRulesMutationMock =
-  useBootstrapPromotionRulesMutation as jest.MockedFunction<
-    typeof useBootstrapPromotionRulesMutation
-  >;
+const useBootstrapEaseRulesMutationMock = useBootstrapEaseRulesMutation as jest.MockedFunction<
+  typeof useBootstrapEaseRulesMutation
+>;
 
 const mockInitState = ({
   status,
@@ -71,45 +70,45 @@ const mockUserPrivileges = ({ canEditRules }: { canEditRules: boolean }) => {
   } as never);
 };
 
-describe('useBootstrapPromotionRules', () => {
+describe('useBootstrapEaseRules', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useAppToasts as jest.Mock).mockReturnValue({ addError: mockAddError });
-    useBootstrapPromotionRulesMutationMock.mockReturnValue({ mutate: mockMutate } as never);
+    useBootstrapEaseRulesMutationMock.mockReturnValue({ mutate: mockMutate } as never);
   });
 
-  it('calls bootstrapPromotionRules when prebuilt rules are ready and user can edit rules', () => {
+  it('calls bootstrapEaseRules when prebuilt rules are ready and user can edit rules', () => {
     mockInitState({ status: 'ready' });
     mockUserPrivileges({ canEditRules: true });
 
-    renderHook(() => useBootstrapPromotionRules());
+    renderHook(() => useBootstrapEaseRules());
 
     expect(mockMutate).toHaveBeenCalledTimes(1);
   });
 
-  it('does not call bootstrapPromotionRules when prebuilt rules are still loading', () => {
+  it('does not call bootstrapEaseRules when prebuilt rules are still loading', () => {
     mockInitState({ status: 'loading' });
     mockUserPrivileges({ canEditRules: true });
 
-    renderHook(() => useBootstrapPromotionRules());
+    renderHook(() => useBootstrapEaseRules());
 
     expect(mockMutate).not.toHaveBeenCalled();
   });
 
-  it('does not call bootstrapPromotionRules when user lacks rule edit privileges', () => {
+  it('does not call bootstrapEaseRules when user lacks rule edit privileges', () => {
     mockInitState({ status: 'ready' });
     mockUserPrivileges({ canEditRules: false });
 
-    renderHook(() => useBootstrapPromotionRules());
+    renderHook(() => useBootstrapEaseRules());
 
     expect(mockMutate).not.toHaveBeenCalled();
   });
 
-  it('does not call bootstrapPromotionRules when prebuilt rules init failed', () => {
+  it('does not call bootstrapEaseRules when prebuilt rules init failed', () => {
     mockInitState({ status: 'error', error: 'Fleet unavailable' });
     mockUserPrivileges({ canEditRules: true });
 
-    renderHook(() => useBootstrapPromotionRules());
+    renderHook(() => useBootstrapEaseRules());
 
     expect(mockMutate).not.toHaveBeenCalled();
   });
@@ -118,7 +117,7 @@ describe('useBootstrapPromotionRules', () => {
     mockInitState({ status: 'error', error: 'Fleet unavailable' });
     mockUserPrivileges({ canEditRules: true });
 
-    renderHook(() => useBootstrapPromotionRules());
+    renderHook(() => useBootstrapEaseRules());
 
     expect(mockAddError).toHaveBeenCalledWith(new Error('Fleet unavailable'), {
       title: expect.any(String),
@@ -129,7 +128,7 @@ describe('useBootstrapPromotionRules', () => {
     mockInitState({ status: 'error', error: null });
     mockUserPrivileges({ canEditRules: true });
 
-    renderHook(() => useBootstrapPromotionRules());
+    renderHook(() => useBootstrapEaseRules());
 
     expect(mockAddError).toHaveBeenCalledWith(new Error('Unknown error'), {
       title: expect.any(String),
@@ -140,18 +139,18 @@ describe('useBootstrapPromotionRules', () => {
     mockInitState({ status: 'ready' });
     mockUserPrivileges({ canEditRules: true });
 
-    renderHook(() => useBootstrapPromotionRules());
+    renderHook(() => useBootstrapEaseRules());
 
     expect(mockAddError).not.toHaveBeenCalled();
   });
 });
 
-describe('useIsBootstrappingPromotionRules', () => {
+describe('useIsBootstrappingEaseRules', () => {
   it('returns false when no mutation is in flight', () => {
     const { useIsMutating } = jest.requireMock('@kbn/react-query');
     useIsMutating.mockReturnValue(0);
 
-    const { result } = renderHook(() => useIsBootstrappingPromotionRules());
+    const { result } = renderHook(() => useIsBootstrappingEaseRules());
 
     expect(result.current).toBe(false);
   });
@@ -160,7 +159,7 @@ describe('useIsBootstrappingPromotionRules', () => {
     const { useIsMutating } = jest.requireMock('@kbn/react-query');
     useIsMutating.mockReturnValue(1);
 
-    const { result } = renderHook(() => useIsBootstrappingPromotionRules());
+    const { result } = renderHook(() => useIsBootstrappingEaseRules());
 
     expect(result.current).toBe(true);
   });

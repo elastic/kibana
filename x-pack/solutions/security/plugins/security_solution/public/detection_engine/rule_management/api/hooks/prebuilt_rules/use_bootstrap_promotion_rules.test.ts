@@ -9,22 +9,20 @@ import { renderHook, act } from '@testing-library/react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { RuleBootstrapResults } from '../../../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
-import { BOOTSTRAP_PROMOTION_RULES_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import { bootstrapPromotionRules } from '../../api';
+import { BOOTSTRAP_EASE_RULES_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import { bootstrapEaseRules } from '../../api';
 import { useInvalidateFindRulesQuery } from '../use_find_rules_query';
 import {
-  BOOTSTRAP_PROMOTION_RULES_KEY,
-  useBootstrapPromotionRulesMutation,
+  BOOTSTRAP_EASE_RULES_KEY,
+  useBootstrapEaseRulesMutation,
 } from './use_bootstrap_promotion_rules';
 
 jest.mock('../../api', () => ({
-  bootstrapPromotionRules: jest.fn(),
+  bootstrapEaseRules: jest.fn(),
 }));
 jest.mock('../use_find_rules_query');
 
-const bootstrapPromotionRulesMock = bootstrapPromotionRules as jest.MockedFunction<
-  typeof bootstrapPromotionRules
->;
+const bootstrapEaseRulesMock = bootstrapEaseRules as jest.MockedFunction<typeof bootstrapEaseRules>;
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -47,7 +45,7 @@ const createMockResponse = (
   ...overrides,
 });
 
-describe('useBootstrapPromotionRulesMutation', () => {
+describe('useBootstrapEaseRulesMutation', () => {
   let invalidateFindRulesQuery: jest.Mock;
 
   beforeEach(() => {
@@ -56,16 +54,16 @@ describe('useBootstrapPromotionRulesMutation', () => {
     (useInvalidateFindRulesQuery as jest.Mock).mockReturnValue(invalidateFindRulesQuery);
   });
 
-  describe('BOOTSTRAP_PROMOTION_RULES_KEY', () => {
+  describe('BOOTSTRAP_EASE_RULES_KEY', () => {
     it('uses the correct mutation key', () => {
-      expect(BOOTSTRAP_PROMOTION_RULES_KEY).toEqual(['POST', BOOTSTRAP_PROMOTION_RULES_URL]);
+      expect(BOOTSTRAP_EASE_RULES_KEY).toEqual(['POST', BOOTSTRAP_EASE_RULES_URL]);
     });
   });
 
-  it('calls bootstrapPromotionRules API on mutate', async () => {
-    bootstrapPromotionRulesMock.mockResolvedValue(createMockResponse());
+  it('calls bootstrapEaseRules API on mutate', async () => {
+    bootstrapEaseRulesMock.mockResolvedValue(createMockResponse());
 
-    const { result } = renderHook(() => useBootstrapPromotionRulesMutation(), {
+    const { result } = renderHook(() => useBootstrapEaseRulesMutation(), {
       wrapper: createWrapper(),
     });
 
@@ -73,14 +71,14 @@ describe('useBootstrapPromotionRulesMutation', () => {
       await result.current.mutateAsync();
     });
 
-    expect(bootstrapPromotionRulesMock).toHaveBeenCalledTimes(1);
+    expect(bootstrapEaseRulesMock).toHaveBeenCalledTimes(1);
   });
 
   describe('onSuccess', () => {
     it('invalidates find rules query when rules were installed', async () => {
-      bootstrapPromotionRulesMock.mockResolvedValue(createMockResponse({ installed: 3 }));
+      bootstrapEaseRulesMock.mockResolvedValue(createMockResponse({ installed: 3 }));
 
-      const { result } = renderHook(() => useBootstrapPromotionRulesMutation(), {
+      const { result } = renderHook(() => useBootstrapEaseRulesMutation(), {
         wrapper: createWrapper(),
       });
 
@@ -92,9 +90,9 @@ describe('useBootstrapPromotionRulesMutation', () => {
     });
 
     it('invalidates find rules query when rules were updated', async () => {
-      bootstrapPromotionRulesMock.mockResolvedValue(createMockResponse({ updated: 2 }));
+      bootstrapEaseRulesMock.mockResolvedValue(createMockResponse({ updated: 2 }));
 
-      const { result } = renderHook(() => useBootstrapPromotionRulesMutation(), {
+      const { result } = renderHook(() => useBootstrapEaseRulesMutation(), {
         wrapper: createWrapper(),
       });
 
@@ -106,9 +104,9 @@ describe('useBootstrapPromotionRulesMutation', () => {
     });
 
     it('invalidates find rules query when rules were deleted', async () => {
-      bootstrapPromotionRulesMock.mockResolvedValue(createMockResponse({ deleted: 1 }));
+      bootstrapEaseRulesMock.mockResolvedValue(createMockResponse({ deleted: 1 }));
 
-      const { result } = renderHook(() => useBootstrapPromotionRulesMutation(), {
+      const { result } = renderHook(() => useBootstrapEaseRulesMutation(), {
         wrapper: createWrapper(),
       });
 
@@ -120,9 +118,9 @@ describe('useBootstrapPromotionRulesMutation', () => {
     });
 
     it('does not invalidate find rules query when no rules changed', async () => {
-      bootstrapPromotionRulesMock.mockResolvedValue(createMockResponse());
+      bootstrapEaseRulesMock.mockResolvedValue(createMockResponse());
 
-      const { result } = renderHook(() => useBootstrapPromotionRulesMutation(), {
+      const { result } = renderHook(() => useBootstrapEaseRulesMutation(), {
         wrapper: createWrapper(),
       });
 
@@ -135,10 +133,10 @@ describe('useBootstrapPromotionRulesMutation', () => {
 
     it('calls the provided onSuccess callback', async () => {
       const response = createMockResponse({ installed: 1 });
-      bootstrapPromotionRulesMock.mockResolvedValue(response);
+      bootstrapEaseRulesMock.mockResolvedValue(response);
       const onSuccess = jest.fn();
 
-      const { result } = renderHook(() => useBootstrapPromotionRulesMutation({ onSuccess }), {
+      const { result } = renderHook(() => useBootstrapEaseRulesMutation({ onSuccess }), {
         wrapper: createWrapper(),
       });
 
