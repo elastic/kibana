@@ -168,11 +168,13 @@ Host EUIDs use a **priority-ranked fallback chain** with no namespace concept. T
 
 ## Service Entities
 
-Single field, no ranking:
+Service EUIDs are the simplest: a direct mapping from one field, no ranking, no namespace.
 
-| Priority | EUID Format | Example |
-|----------|-------------|---------|
-| 1 (only) | `service:{service.name}` | `service:payment-api` |
+| EUID Output              | Source Field   |
+| ------------------------ | -------------- |
+| `service:{service.name}` | `service.name` |
+
+**Example:** `service:nginx` or `service:elastic-agent`.
 
 ## entity.namespace Computation
 
