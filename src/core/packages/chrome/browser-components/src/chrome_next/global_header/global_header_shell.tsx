@@ -82,7 +82,14 @@ const useGlobalHeaderStyles = () => {
       gap: ${euiTheme.size.s};
     `;
 
-    return { root, leftGroup, switcherSlot, spacer, rightGroup, searchSlot, actionsSlot };
+    const separator = css`
+      width: 1px;
+      height: 20px;
+      flex-shrink: 0;
+      background: ${euiTheme.colors.borderBaseSubdued};
+    `;
+
+    return { root, leftGroup, switcherSlot, spacer, rightGroup, searchSlot, actionsSlot, separator };
   }, [euiTheme]);
 };
 
@@ -104,7 +111,9 @@ export const GlobalHeaderShell = React.memo<GlobalHeaderShellProps>(
             </div>
           )}
         </div>
+        <div css={styles.separator} />
         <div css={styles.spacer} />
+        <div css={styles.separator} />
         <div css={styles.rightGroup}>
           {search && (
             <div css={styles.searchSlot} data-test-subj="chromeNextGlobalHeaderSearch">
