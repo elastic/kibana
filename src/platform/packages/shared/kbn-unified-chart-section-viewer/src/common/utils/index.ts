@@ -9,6 +9,7 @@
 
 export * from './esql/create_esql_query';
 export * from './esql/create_aggregation';
+export * from './esql/resolve_conflicting_field_types';
 export * from './first_null_nullable';
 export * from './metric_unit/get_lens_metric_format';
 export * from './metric_unit/get_unit_label';
