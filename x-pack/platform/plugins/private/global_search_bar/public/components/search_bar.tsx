@@ -548,6 +548,39 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       .kbnGlobalSearchBarProjectModal .euiModalBody__overflow {
         padding: ${euiTheme.size.base} !important;
       }
+      /* Footer: pinned to modal bottom with top rule; full-width help row + pill shortcuts */
+      .kbnGlobalSearchBarProjectModal .euiModalFooter {
+        border-top: ${euiTheme.border.thin} !important;
+        background-color: ${euiTheme.colors.emptyShade} !important;
+        flex-shrink: 0 !important;
+        justify-content: stretch !important;
+        gap: 0 !important;
+        padding-block: ${euiTheme.size.s} !important;
+        padding-inline: ${euiTheme.size.base} !important;
+      }
+      .kbnGlobalSearchBarProjectModal .euiModalFooter > * {
+        flex: 1 1 auto;
+        min-inline-size: 0;
+      }
+      .kbnGlobalSearchBarProjectModal .euiModalFooter p {
+        margin-block: 0;
+      }
+      .kbnGlobalSearchBarProjectModal .euiModalFooter .euiCode {
+        background-color: ${euiTheme.colors.backgroundLightText} !important;
+        color: ${euiTheme.colors.textParagraph} !important;
+        border: none !important;
+        box-shadow: none !important;
+        border-radius: ${euiTheme.border.radius.small} !important;
+        box-sizing: border-box !important;
+        min-block-size: 20px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding-block: 0 !important;
+        padding-inline: ${euiTheme.size.s} !important;
+        line-height: 1 !important;
+        vertical-align: middle;
+      }
     `,
     [euiTheme]
   );
