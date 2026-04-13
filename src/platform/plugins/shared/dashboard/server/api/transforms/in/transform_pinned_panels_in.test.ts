@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { schema } from '@kbn/config-schema';
 import { CONTROL_WIDTH_SMALL } from '@kbn/controls-constants';
 import type { DashboardState } from '../../types';
 import { transformPinnedPanelsIn } from './transform_pinned_panels_in';
@@ -14,14 +15,15 @@ import { transformPinnedPanelsIn } from './transform_pinned_panels_in';
 jest.mock('uuid', () => ({
   v4: jest.fn(() => 'mock-uuid'),
 }));
-jest.mock('../../../kibana_services', () => ({
-  ...jest.requireActual('../../../kibana_services'),
-  embeddableService: {
-    getTransforms: jest.fn(),
-  },
-}));
 
 describe('transformPinnedPanelsIn', () => {
+  beforeAll(() => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('../../../kibana_services').embeddableService = {
+      getTransforms: jest.fn(),
+    };
+  });
+
   const mockPinnedPanelsState: Required<DashboardState>['pinned_panels'] = [
     {
       id: 'control1',
@@ -39,7 +41,7 @@ describe('transformPinnedPanelsIn', () => {
   ];
 
   it('should return empty references if pinned_panels is undefined', () => {
-    const result = transformPinnedPanelsIn(undefined);
+    const result = transformPinnedPanelsIn([]);
     expect(result.references).toEqual([]);
   });
 
@@ -68,5 +70,53 @@ describe('transformPinnedPanelsIn', () => {
     const pinnedPanelsState: Required<DashboardState>['pinned_panels'] = [];
     const result = transformPinnedPanelsIn(pinnedPanelsState);
     expect(result).toEqual({ pinnedPanels: {}, references: [] });
+  });
+});
+
+describe('validation', () => {
+  const TestEmbeddableSchema = schema.object({
+    boo: schema.literal('bear'),
+  });
+
+  beforeAll(() => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('../../../kibana_services').embeddableService = {
+      getTransforms: () => ({ schema: TestEmbeddableSchema }),
+    };
+  });
+
+  it('should throw badRequest error when panel config fails validation', () => {
+    const pinnedPanels = [
+      {
+        type: 'type2',
+        grow: true,
+        width: CONTROL_WIDTH_SMALL,
+        config: { boo: 'boop' },
+      } as unknown as Required<DashboardState>['pinned_panels'][number],
+    ];
+    expect(() => transformPinnedPanelsIn(pinnedPanels, true)).toThrowErrorMatchingInlineSnapshot(
+      `"Unable to transform 1 pinned panels"`
+    );
+  });
+
+  it('should not throw when panel config passes validation', () => {
+    const pinnedPanels = [
+      {
+        type: 'type2',
+        grow: true,
+        width: CONTROL_WIDTH_SMALL,
+        config: { boo: 'bear' },
+      } as unknown as Required<DashboardState>['pinned_panels'][number],
+    ];
+    const result = transformPinnedPanelsIn(pinnedPanels, true);
+    expect(result.pinnedPanels).toEqual({
+      'mock-uuid': {
+        order: 0,
+        type: 'type2',
+        width: 'small',
+        grow: true,
+        config: { boo: 'bear' },
+      },
+    });
   });
 });

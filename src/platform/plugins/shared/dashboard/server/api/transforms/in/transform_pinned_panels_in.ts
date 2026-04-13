@@ -23,7 +23,7 @@ type PinnedPanelsState = Required<DashboardState>['pinned_panels'];
 
 export function transformPinnedPanelsIn(
   pinnedPanels: PinnedPanelsState,
-  isDashboardAppRequest: boolean
+  isDashboardAppRequest: boolean = false
 ): {
   pinnedPanels: Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'];
   references: Reference[];
