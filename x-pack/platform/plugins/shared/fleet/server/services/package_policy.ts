@@ -176,6 +176,8 @@ import { sendTelemetryEvents } from './upgrade_sender';
 import {
   canDeployCustomPackageAsAgentlessOrThrow,
   handleExperimentalDatastreamFeatureOptIn,
+  handleNamespaceTemplateDelete,
+  handleNamespaceTemplateUpdate,
   mapPackagePolicySavedObjectToPackagePolicy,
   preflightCheckPackagePolicy,
 } from './package_policies';
@@ -601,6 +603,16 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     // Handle component template/mappings updates for experimental features, e.g. synthetic source
     await handleExperimentalDatastreamFeatureOptIn({
+      soClient,
+      esClient,
+      packagePolicy: enrichedPackagePolicy,
+    });
+
+    // Handle namespace@custom component template reference injection.
+    // NOTE: This runs before the SO is persisted, consistent with
+    // handleExperimentalDatastreamFeatureOptIn above. If the SO save fails the ref
+    // remains in the ES index template but is harmless (ignore_missing_component_templates).
+    await handleNamespaceTemplateUpdate({
       soClient,
       esClient,
       packagePolicy: enrichedPackagePolicy,
@@ -1657,6 +1669,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       packagePolicy: restOfPackagePolicy,
     });
 
+    // Handle namespace@custom component template reference injection
+    await handleNamespaceTemplateUpdate({
+      soClient,
+      esClient,
+      packagePolicy: restOfPackagePolicy,
+      oldPackagePolicy,
+    });
+
     // If the package version has increased, save the previous package policy revision.
     if (
       appContextService.getExperimentalFeatures().enablePackageRollback &&
@@ -2073,6 +2093,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         if (!options?.fromBulkUpgrade) {
           // Handle component template/mappings updates for experimental features, e.g. synthetic source
           await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
+          // Handle namespace@custom component template reference injection
+          await handleNamespaceTemplateUpdate({
+            soClient,
+            esClient,
+            packagePolicy,
+            oldPackagePolicy,
+          });
         }
 
         policiesToUpdate.push({
@@ -2401,6 +2428,17 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         }
       }
     });
+
+    // Handle namespace@custom template cleanup before SOs are deleted so the
+    // "is namespace still in use?" query can correctly exclude the being-deleted IDs.
+    if (idsToDelete.length > 0) {
+      const policiesToDelete = packagePolicies.filter((p) => idsToDelete.includes(p.id));
+      await handleNamespaceTemplateDelete({
+        soClient,
+        esClient,
+        packagePolicies: policiesToDelete,
+      });
+    }
 
     const secretsToDelete: string[] = [];
     if (idsToDelete.length > 0) {
