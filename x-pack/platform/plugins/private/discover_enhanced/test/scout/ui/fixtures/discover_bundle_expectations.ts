@@ -14,8 +14,7 @@ export function evaluateDiscoverBundlePluginAssertion(
   expectedPlugins: string[],
   rspackOnlyBundleLabels: readonly string[]
 ): { ok: true } | { ok: false; detail: string } {
-  const usesRspackBundles =
-    process.env.KBN_USE_RSPACK === 'true' || loadedPluginNamesSorted.includes('kibana');
+  const usesRspackBundles = process.env.KBN_USE_RSPACK === 'true';
   const sortedExpected = [...expectedPlugins].sort((a, b) => a.localeCompare(b));
 
   if (usesRspackBundles) {
