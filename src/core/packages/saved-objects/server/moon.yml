@@ -18,6 +18,7 @@ project:
   sourceRoot: src/core/packages/saved-objects/server
 dependsOn:
   - '@kbn/utility-types'
+  - '@kbn/zod'
   - '@kbn/config-schema'
   - '@kbn/logging'
   - '@kbn/core-http-server'
