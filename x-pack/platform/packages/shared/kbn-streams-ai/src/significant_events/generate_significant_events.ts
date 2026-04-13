@@ -40,11 +40,6 @@ import {
   type SignificantEventsToolUsage,
 } from './tools/tool_usage';
 
-// Allows the agent to fetch features once, refine queries, then submit.
-// 5 steps gives enough room for a get_stream_features → add_queries →
-// retry cycle when the first batch has validation failures.
-const MAX_REASONING_STEPS = 5;
-
 /**
  * Intermediate representation of a query as produced by the LLM tool output.
  * Uses a flat `esql` string (vs the wrapped `EsqlQuery` in the wire type)
