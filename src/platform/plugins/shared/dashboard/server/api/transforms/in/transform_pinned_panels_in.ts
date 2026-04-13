@@ -21,11 +21,13 @@ import { TransformPanelInError, TransformPanelsInError } from './transform_panel
 
 type PinnedPanelsState = Required<DashboardState>['pinned_panels'];
 
-export function transformPinnedPanelsIn(pinnedPanels?: PinnedPanelsState): {
-  pinnedPanels?: Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'];
+export function transformPinnedPanelsIn(
+  pinnedPanels: PinnedPanelsState,
+  isDashboardAppRequest: boolean
+): {
+  pinnedPanels: Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'];
   references: Reference[];
 } {
-  if (!pinnedPanels) return { references: [] };
   const panelErrors: TransformPanelInError[] = [];
 
   let references: Reference[] = [];
@@ -34,6 +36,20 @@ export function transformPinnedPanelsIn(pinnedPanels?: PinnedPanelsState): {
       const { id = uuidv4(), type } = controlState;
       const transforms = embeddableService.getTransforms(type);
 
+      const panelSchema = transforms?.schema;
+      if (isDashboardAppRequest && panelSchema) {
+        try {
+          panelSchema.validate(controlState.config);
+        } catch (error) {
+          panelErrors.push(
+            new TransformPanelInError(
+              `Validation error: ${error.message}`,
+              type,
+              controlState.config
+            )
+          );
+        }
+      }
       let transformedControlState = { ...controlState } as Partial<
         Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'][number]
       >;
@@ -64,7 +80,11 @@ export function transformPinnedPanelsIn(pinnedPanels?: PinnedPanelsState): {
           }
         } catch (e) {
           panelErrors.push(
-            new TransformPanelInError(e.message, controlState.type, controlState.config)
+            new TransformPanelInError(
+              `Transform error: ${e.message}`,
+              controlState.type,
+              controlState.config
+            )
           );
         }
       } else {
