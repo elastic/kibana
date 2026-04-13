@@ -40,6 +40,6 @@ export const runMaintainerQuerySchema = z.object({
 
 export const initMaintainersBodySchema = z
   .object({
-    enabled: z.boolean().optional(),
+    autoStart: z.boolean().optional().default(true),
   })
   .optional();

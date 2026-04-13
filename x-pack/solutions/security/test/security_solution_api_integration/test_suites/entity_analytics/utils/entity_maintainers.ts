@@ -70,17 +70,17 @@ export const entityMaintainerRouteHelpersFactory = (
 
     initMaintainers: async ({
       expectStatusCode = 200,
-      enabled,
+      autoStart,
     }: {
       expectStatusCode?: number;
-      enabled?: boolean;
+      autoStart?: boolean;
     } = {}) => {
       const response = await withHeaders(
         supertest.post(
           routeWithNamespace(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT, namespace)
         )
       )
-        .send(enabled === undefined ? {} : { enabled })
+        .send(autoStart === undefined ? {} : { autoStart })
         .expect((res) => {
           if (res.status !== expectStatusCode) {
             throw new Error(

@@ -16,20 +16,43 @@ import type { EntityMaintainerTaskEntry } from '../../tasks/entity_maintainers/t
 
 jest.mock('../../tasks/entity_maintainers', () => ({
   getTaskId: jest.fn((id: string, namespace: string) => `${id}:${namespace}`),
-  getTaskType: jest.fn((id: string) => `entity_store:v2:entity_maintainer_task:${id}`),
   removeEntityMaintainer: jest.fn().mockResolvedValue(undefined),
   scheduleEntityMaintainerTask: jest.fn().mockResolvedValue(undefined),
   startEntityMaintainer: jest.fn().mockResolvedValue(undefined),
   stopEntityMaintainer: jest.fn().mockResolvedValue(undefined),
-  executeMaintainerRun: jest.fn().mockResolvedValue(null),
+}));
+
+jest.mock('../../tasks/entity_maintainers/execution', () => ({
+  createMaintainerStatus: jest.fn((params: { namespace?: string; initialState: object }) => ({
+    metadata: {
+      runs: 0,
+      lastSuccessTimestamp: null,
+      lastErrorTimestamp: null,
+      namespace: params.namespace ?? '',
+    },
+    state: params.initialState,
+    taskStatus: 'started',
+  })),
+  runEntityMaintainerTask: jest.fn().mockResolvedValue({
+    state: {
+      metadata: {
+        runs: 1,
+        lastSuccessTimestamp: 'now',
+        lastErrorTimestamp: null,
+        namespace: 'default',
+      },
+      state: {},
+      taskStatus: 'started',
+    },
+  }),
+  persistMaintainerState: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('../../tasks/entity_maintainers/entity_maintainers_registry', () => ({
   entityMaintainersRegistry: {
     hasId: jest.fn(),
-    get: jest.fn(),
     getAll: jest.fn().mockReturnValue([]),
-    getRunners: jest.fn(),
+    getRunnerConfigOrThrow: jest.fn(),
   },
 }));
 
@@ -45,15 +68,12 @@ jest.mock('@kbn/core/server', () => {
 
 const {
   getTaskId,
-  getTaskType,
   removeEntityMaintainer,
   scheduleEntityMaintainerTask,
   startEntityMaintainer,
   stopEntityMaintainer,
-  executeMaintainerRun,
 } = jest.requireMock('../../tasks/entity_maintainers') as {
   getTaskId: jest.MockedFunction<(id: string, namespace: string) => string>;
-  getTaskType: jest.MockedFunction<(id: string) => string>;
   removeEntityMaintainer: jest.MockedFunction<
     typeof import('../../tasks/entity_maintainers').removeEntityMaintainer
   >;
@@ -66,20 +86,29 @@ const {
   stopEntityMaintainer: jest.MockedFunction<
     typeof import('../../tasks/entity_maintainers').stopEntityMaintainer
   >;
-  executeMaintainerRun: jest.MockedFunction<
-    typeof import('../../tasks/entity_maintainers').executeMaintainerRun
-  >;
 };
+
+const { createMaintainerStatus, runEntityMaintainerTask, persistMaintainerState } =
+  jest.requireMock('../../tasks/entity_maintainers/execution') as {
+    createMaintainerStatus: jest.MockedFunction<
+      typeof import('../../tasks/entity_maintainers/execution').createMaintainerStatus
+    >;
+    runEntityMaintainerTask: jest.MockedFunction<
+      typeof import('../../tasks/entity_maintainers/execution').runEntityMaintainerTask
+    >;
+    persistMaintainerState: jest.MockedFunction<
+      typeof import('../../tasks/entity_maintainers/execution').persistMaintainerState
+    >;
+  };
 
 const { entityMaintainersRegistry } = jest.requireMock(
   '../../tasks/entity_maintainers/entity_maintainers_registry'
 ) as {
   entityMaintainersRegistry: {
     hasId: jest.MockedFunction<(id: string) => boolean>;
-    get: jest.MockedFunction<(id: string) => EntityMaintainerTaskEntry | undefined>;
     getAll: jest.MockedFunction<() => EntityMaintainerTaskEntry[]>;
-    getRunners: jest.MockedFunction<
-      typeof import('../../tasks/entity_maintainers/entity_maintainers_registry').entityMaintainersRegistry.getRunners
+    getRunnerConfigOrThrow: jest.MockedFunction<
+      typeof import('../../tasks/entity_maintainers/entity_maintainers_registry').entityMaintainersRegistry.getRunnerConfigOrThrow
     >;
   };
 };
@@ -110,19 +139,12 @@ function createClient(overrides?: {
     },
   } as unknown as CoreStart;
 
-  const licensing = {
-    getLicense: jest
-      .fn()
-      .mockResolvedValue({ check: jest.fn().mockReturnValue({ state: 'valid' }) }),
-  };
-
   return new EntityMaintainersClient({
     logger: loggerMock.create(),
     taskManager,
     namespace: overrides?.namespace ?? 'default',
     analytics: mockAnalytics,
     coreStart,
-    licensing: licensing as any,
   });
 }
 
@@ -208,110 +230,92 @@ describe('EntityMaintainersClient', () => {
 
   describe('runSync', () => {
     const mockRun = jest.fn().mockResolvedValue({});
-    const mockRunners = { run: mockRun, initialState: {} };
-    const mockEntry: EntityMaintainerTaskEntry = {
-      id: 'maintainer-a',
-      interval: '5m',
-      minLicense: DEFAULT_ENTITY_MAINTAINER_MIN_LICENSE,
-    };
+    const mockRunnerConfig = { run: mockRun, initialState: {} };
 
     beforeEach(() => {
-      (executeMaintainerRun as jest.Mock).mockResolvedValue(null);
+      createMaintainerStatus.mockReturnValue({
+        metadata: {
+          runs: 1,
+          lastSuccessTimestamp: null,
+          lastErrorTimestamp: null,
+          namespace: 'default',
+        },
+        state: {},
+        taskStatus: EntityMaintainerTaskStatus.STARTED,
+      });
+      runEntityMaintainerTask.mockResolvedValue({
+        state: {
+          metadata: {
+            runs: 2,
+            lastSuccessTimestamp: 'now',
+            lastErrorTimestamp: null,
+            namespace: 'default',
+          },
+          state: { next: true },
+          taskStatus: EntityMaintainerTaskStatus.STARTED,
+        },
+      });
       mockRun.mockClear();
     });
 
-    it('should return without running when id is not in registry', async () => {
-      entityMaintainersRegistry.hasId.mockReturnValue(false);
+    it('should throw when id is not registered', async () => {
+      entityMaintainersRegistry.getRunnerConfigOrThrow.mockImplementation(() => {
+        throw new Error('Entity maintainer not found: unknown-id');
+      });
       const client = createClient();
-      await client.runSync('unknown-id', createMockRequest());
-
-      expect(executeMaintainerRun).not.toHaveBeenCalled();
+      await expect(client.runSync('unknown-id', createMockRequest())).rejects.toThrow(
+        'Entity maintainer not found: unknown-id'
+      );
     });
 
-    it('should return without running when runners are not registered', async () => {
-      entityMaintainersRegistry.hasId.mockReturnValue(true);
-      entityMaintainersRegistry.getRunners.mockReturnValue(undefined);
-      entityMaintainersRegistry.get.mockReturnValue(mockEntry);
-      const client = createClient();
-
-      await client.runSync('maintainer-a', createMockRequest());
-
-      expect(executeMaintainerRun).not.toHaveBeenCalled();
-    });
-
-    it('should call executeMaintainerRun with task state and registry runners', async () => {
+    it('should run registered callbacks and persist returned state', async () => {
       const taskState = {
         namespace: 'default',
         taskStatus: EntityMaintainerTaskStatus.STARTED,
         metadata: { runs: 1, lastSuccessTimestamp: null, lastErrorTimestamp: null },
         state: {},
       };
-      entityMaintainersRegistry.hasId.mockReturnValue(true);
-      entityMaintainersRegistry.getRunners.mockReturnValue(mockRunners);
-      entityMaintainersRegistry.get.mockReturnValue(mockEntry);
+      entityMaintainersRegistry.getRunnerConfigOrThrow.mockReturnValue(mockRunnerConfig);
       const taskManagerGet = jest.fn().mockResolvedValue({ state: taskState });
-      const client = createClient({ taskManager: { get: taskManagerGet } });
+      const client = createClient({
+        taskManager: { get: taskManagerGet, bulkUpdateState: jest.fn() } as any,
+      });
       const request = createMockRequest();
 
       await client.runSync('maintainer-a', request);
 
       expect(taskManagerGet).toHaveBeenCalledWith('maintainer-a:default');
-      expect(executeMaintainerRun).toHaveBeenCalledWith(
+      expect(createMaintainerStatus).toHaveBeenCalledWith(
         expect.objectContaining({
           currentStatus: taskState,
-          request,
-          taskIdStr: 'maintainer-a:default',
           namespace: 'default',
+          initialState: {},
+        })
+      );
+      expect(runEntityMaintainerTask).toHaveBeenCalledWith(
+        expect.objectContaining({
+          currentStatus: expect.objectContaining({
+            taskStatus: EntityMaintainerTaskStatus.STARTED,
+          }),
+          fakeRequest: request,
           id: 'maintainer-a',
           run: mockRun,
-          initialState: {},
-          effectiveMinLicense: DEFAULT_ENTITY_MAINTAINER_MIN_LICENSE,
+        })
+      );
+      expect(persistMaintainerState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          taskId: 'maintainer-a:default',
+          request,
+          state: expect.objectContaining({
+            metadata: expect.objectContaining({ runs: 2 }),
+          }),
         })
       );
     });
 
-    it('should write state back via bulkUpdateState when result is returned', async () => {
-      const newState = {
-        namespace: 'default',
-        taskStatus: EntityMaintainerTaskStatus.STARTED,
-        metadata: { runs: 2, lastSuccessTimestamp: 'now', lastErrorTimestamp: null },
-        state: { count: 1 },
-      };
-      (executeMaintainerRun as jest.Mock).mockResolvedValue({ state: newState });
-      entityMaintainersRegistry.hasId.mockReturnValue(true);
-      entityMaintainersRegistry.getRunners.mockReturnValue(mockRunners);
-      entityMaintainersRegistry.get.mockReturnValue(mockEntry);
-      const bulkUpdateState = jest.fn().mockResolvedValue({});
-      const taskManagerGet = jest.fn().mockResolvedValue({ state: {} });
-      const client = createClient({ taskManager: { get: taskManagerGet, bulkUpdateState } as any });
-      const request = createMockRequest();
-
-      await client.runSync('maintainer-a', request);
-
-      expect(bulkUpdateState).toHaveBeenCalledWith(['maintainer-a:default'], expect.any(Function), {
-        request,
-      });
-    });
-
-    it('should not call bulkUpdateState when executeMaintainerRun returns null', async () => {
-      (executeMaintainerRun as jest.Mock).mockResolvedValue(null);
-      entityMaintainersRegistry.hasId.mockReturnValue(true);
-      entityMaintainersRegistry.getRunners.mockReturnValue(mockRunners);
-      entityMaintainersRegistry.get.mockReturnValue(mockEntry);
-      const bulkUpdateState = jest.fn().mockResolvedValue({});
-      const taskManagerGet = jest.fn().mockResolvedValue({ state: {} });
-      const client = createClient({ taskManager: { get: taskManagerGet, bulkUpdateState } as any });
-
-      await client.runSync('maintainer-a', createMockRequest());
-
-      expect(bulkUpdateState).not.toHaveBeenCalled();
-    });
-
-    it('should propagate error when executeMaintainerRun throws', async () => {
-      (executeMaintainerRun as jest.Mock).mockRejectedValue(new Error('run failed'));
-      entityMaintainersRegistry.hasId.mockReturnValue(true);
-      entityMaintainersRegistry.getRunners.mockReturnValue(mockRunners);
-      entityMaintainersRegistry.get.mockReturnValue(mockEntry);
+    it('should propagate error when runEntityMaintainerTask throws', async () => {
+      runEntityMaintainerTask.mockRejectedValueOnce(new Error('run failed'));
+      entityMaintainersRegistry.getRunnerConfigOrThrow.mockReturnValue(mockRunnerConfig);
       const taskManagerGet = jest.fn().mockResolvedValue({ state: {} });
       const client = createClient({ taskManager: { get: taskManagerGet } });
 
@@ -411,7 +415,7 @@ describe('EntityMaintainersClient', () => {
       await expect(client.init(request)).rejects.toThrow('schedule failed');
     });
 
-    it('should forward enabled option when scheduling maintainers', async () => {
+    it('should forward autoStart option when scheduling maintainers', async () => {
       entityMaintainersRegistry.getAll.mockReturnValue([
         {
           id: 'm1',
@@ -427,7 +431,7 @@ describe('EntityMaintainersClient', () => {
       const client = createClient({ taskManager: taskManager as any });
       const request = createMockRequest();
 
-      await client.init(request, { enabled: false });
+      await client.init(request, { autoStart: false });
 
       expect(scheduleEntityMaintainerTask).toHaveBeenCalledWith(
         expect.objectContaining({

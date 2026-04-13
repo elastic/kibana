@@ -349,7 +349,7 @@ export const EntityStoreUtils = (
       .set('kbn-xsrf', 'true')
       .set('x-elastic-internal-origin', 'Kibana')
       .set('elastic-api-version', '2')
-      .send({ enabled: false });
+      .send({ autoStart: false });
 
     expect([200, 201]).to.contain(maintainersRes.status);
     return res;

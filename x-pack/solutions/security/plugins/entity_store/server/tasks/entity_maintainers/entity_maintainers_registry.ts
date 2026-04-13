@@ -6,57 +6,55 @@
  */
 
 import type {
-  EntityMaintainerRegistryData,
-  EntityMaintainerState,
+  EntityMaintainerRegistryEntry,
   EntityMaintainerTaskEntry,
-  EntityMaintainerTaskMethod,
+  EntityMaintainerTaskRunnerConfig,
 } from './types';
 
-export interface EntityMaintainerRunners {
-  run: EntityMaintainerTaskMethod;
-  setup?: EntityMaintainerTaskMethod;
-  initialState: EntityMaintainerState;
-}
-
 export class EntityMaintainersRegistry {
-  private readonly tasks = new Map<string, EntityMaintainerRegistryData>();
-  private readonly runners = new Map<string, EntityMaintainerRunners>();
+  private readonly entries = new Map<string, EntityMaintainerRegistryEntry>();
 
   hasId(id: string): boolean {
-    return this.tasks.has(id);
+    return this.entries.has(id);
   }
 
   get(id: string): EntityMaintainerTaskEntry | undefined {
-    const config = this.tasks.get(id);
-    if (!config) {
+    const entry = this.entries.get(id);
+    if (!entry) {
       return undefined;
     }
-    return { id, ...config };
+    return toTaskEntry(entry);
   }
 
-  register({
-    id,
-    interval,
-    description,
-    minLicense,
-    run,
-    setup,
-    initialState,
-  }: EntityMaintainerTaskEntry & EntityMaintainerRunners): void {
-    this.tasks.set(id, { interval, description, minLicense });
-    this.runners.set(id, { run, setup, initialState });
+  getOrThrow(id: string): EntityMaintainerTaskEntry {
+    return toTaskEntry(this.getEntryOrThrow(id));
   }
 
-  getRunners(id: string): EntityMaintainerRunners | undefined {
-    return this.runners.get(id);
+  getRunnerConfigOrThrow(id: string): EntityMaintainerTaskRunnerConfig {
+    const { run, setup, initialState } = this.getEntryOrThrow(id);
+    return { run, setup, initialState };
+  }
+
+  register(entry: EntityMaintainerRegistryEntry): void {
+    this.entries.set(entry.id, entry);
   }
 
   getAll(): EntityMaintainerTaskEntry[] {
-    return Array.from(this.tasks.entries()).map(([id, entry]) => ({
-      id,
-      ...entry,
-    }));
+    return Array.from(this.entries.values()).map(toTaskEntry);
   }
+
+  private getEntryOrThrow(id: string): EntityMaintainerRegistryEntry {
+    const entry = this.entries.get(id);
+    if (!entry) {
+      throw new Error(`Entity maintainer not found: ${id}`);
+    }
+    return entry;
+  }
+}
+
+function toTaskEntry(entry: EntityMaintainerRegistryEntry): EntityMaintainerTaskEntry {
+  const { id, interval, description, minLicense } = entry;
+  return { id, interval, description, minLicense };
 }
 
 export const entityMaintainersRegistry = new EntityMaintainersRegistry();

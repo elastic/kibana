@@ -8,15 +8,11 @@
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { CoreStart, ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import type { LicenseCheckState, LicenseType } from '@kbn/licensing-types';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { CoreStart, KibanaRequest } from '@kbn/core/server';
+import type { LicenseType } from '@kbn/licensing-types';
 import {
   EntityMaintainerTaskStatus,
   EntityMaintainerTelemetryEventType,
-  type EntityMaintainerState,
-  type EntityMaintainerStatus,
-  type EntityMaintainerTaskMethod,
   type RegisterEntityMaintainerConfig,
 } from './types';
 import { TasksConfig } from '../config';
@@ -27,112 +23,15 @@ import type {
   EntityStoreStartPlugins,
 } from '../../types';
 import { entityMaintainersRegistry } from './entity_maintainers_registry';
-import { CRUDClient, type EntityUpdateClient } from '../../domain/crud';
 import type { TelemetryReporter } from '../../telemetry/events';
 import { ENTITY_MAINTAINER_EVENT } from '../../telemetry/events';
-import { wrapTaskRun } from '../../telemetry/traces';
+import { executeMaintainerRun } from './execution';
 
 /** Used when `RegisterEntityMaintainerConfig.minLicense` is omitted (minimum Kibana tier). */
 export const DEFAULT_ENTITY_MAINTAINER_MIN_LICENSE: LicenseType = 'basic';
 
-const ENTITY_MAINTAINER_LICENSE_CHECK_VALID = 'valid' as const satisfies LicenseCheckState;
-
 export function getTaskType(id: string): string {
   return `${TasksConfig[EntityStoreTaskType.enum.entityMaintainer].type}:${id}`;
-}
-
-export interface ExecuteMaintainerRunParams {
-  currentStatus: Partial<EntityMaintainerStatus>;
-  request: KibanaRequest;
-  taskIdStr: string;
-  taskAbortController?: AbortController;
-  namespace?: string;
-  id: string;
-  run: EntityMaintainerTaskMethod;
-  setup?: EntityMaintainerTaskMethod;
-  initialState: EntityMaintainerState;
-  effectiveMinLicense: LicenseType;
-  type: string;
-  coreStart: CoreStart;
-  licensing: LicensingPluginStart;
-  analytics: TelemetryReporter;
-  logger: Logger;
-}
-
-export async function executeMaintainerRun({
-  currentStatus,
-  request,
-  taskIdStr,
-  taskAbortController,
-  namespace,
-  id,
-  run,
-  setup,
-  initialState,
-  effectiveMinLicense,
-  type,
-  coreStart,
-  licensing,
-  analytics,
-  logger,
-}: ExecuteMaintainerRunParams): Promise<{ state: EntityMaintainerStatus } | null> {
-  if (currentStatus.taskStatus === EntityMaintainerTaskStatus.STOPPED) {
-    logger.debug(`Entity maintainer task is stopped, skipping run`);
-    return null;
-  }
-
-  const license = await licensing.getLicense();
-  const checkResult = license.check('entityStore', effectiveMinLicense);
-  if (checkResult.state !== ENTITY_MAINTAINER_LICENSE_CHECK_VALID) {
-    logger.debug(`Entity maintainer "${id}" skipped: insufficient or inactive license`);
-    return null;
-  }
-
-  const currentStatusNamespace =
-    typeof currentStatus?.namespace === 'string' ? currentStatus.namespace : undefined;
-
-  const maintainerStatus: EntityMaintainerStatus = {
-    metadata: {
-      runs: currentStatus?.metadata?.runs || 0,
-      lastSuccessTimestamp: currentStatus?.metadata?.lastSuccessTimestamp || null,
-      lastErrorTimestamp: currentStatus?.metadata?.lastErrorTimestamp || null,
-      namespace: namespace ?? currentStatusNamespace ?? currentStatus?.metadata?.namespace ?? '',
-    },
-    state: currentStatus?.metadata?.runs ? currentStatus.state ?? initialState : initialState,
-    taskStatus: currentStatus?.taskStatus ?? EntityMaintainerTaskStatus.STARTED,
-  };
-
-  const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
-  const crudClient = new CRUDClient({
-    logger,
-    esClient,
-    namespace: maintainerStatus.metadata.namespace,
-  });
-  const taskLogger = logger.get(taskIdStr);
-  const abortController = taskAbortController ?? new AbortController();
-
-  return await wrapTaskRun({
-    spanName: 'entityStore.task.entity_maintainer.run',
-    namespace: maintainerStatus.metadata.namespace,
-    attributes: {
-      'entity_store.task.id': taskIdStr,
-      'entity_store.task.type': type,
-      'entity_store.entity_maintainer.id': id,
-    },
-    run: () =>
-      runEntityMaintainerTask({
-        currentStatus: maintainerStatus,
-        fakeRequest: request,
-        logger: taskLogger,
-        setup,
-        run,
-        abortController,
-        esClient,
-        crudClient,
-        id,
-        analytics,
-      }),
-  });
 }
 
 export function getTaskId(id: string, namespace: string): string {
@@ -249,91 +148,6 @@ export function registerEntityMaintainerTask({
   });
 }
 
-export async function runEntityMaintainerTask({
-  currentStatus,
-  fakeRequest,
-  logger,
-  setup,
-  run,
-  abortController,
-  esClient,
-  crudClient,
-  id,
-  analytics,
-}: {
-  currentStatus: EntityMaintainerStatus;
-  fakeRequest: KibanaRequest;
-  logger: Logger;
-  setup?: EntityMaintainerTaskMethod;
-  run: EntityMaintainerTaskMethod;
-  abortController: AbortController;
-  esClient: ElasticsearchClient;
-  crudClient: EntityUpdateClient;
-  id: string;
-  analytics: TelemetryReporter;
-}): Promise<{ state: EntityMaintainerStatus }> {
-  const namespace = currentStatus.metadata.namespace;
-  const onAbort = () => {
-    logger.debug(`Abort signal received, stopping Entity Maintainer`);
-    analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
-      id,
-      namespace,
-      type: EntityMaintainerTelemetryEventType.ABORT,
-    });
-  };
-  try {
-    abortController.signal.addEventListener('abort', onAbort);
-    const isFirstRun = currentStatus.metadata.runs === 0;
-    if (isFirstRun && setup) {
-      logger.debug(`First run, executing setup`);
-      currentStatus.state = await setup({
-        status: { ...currentStatus },
-        abortController,
-        logger,
-        fakeRequest,
-        esClient,
-        crudClient,
-      });
-      analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
-        id,
-        namespace,
-        type: EntityMaintainerTelemetryEventType.SETUP,
-      });
-    }
-    logger.debug(`Executing run`);
-    currentStatus.state = await run({
-      status: { ...currentStatus },
-      abortController,
-      logger,
-      fakeRequest,
-      esClient,
-      crudClient,
-    });
-    analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
-      id,
-      namespace,
-      type: EntityMaintainerTelemetryEventType.RUN,
-    });
-    currentStatus.metadata.lastSuccessTimestamp = new Date().toISOString();
-  } catch (err) {
-    currentStatus.metadata.lastErrorTimestamp = new Date().toISOString();
-    logger.debug(`Run failed - ${err?.message}`);
-    analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
-      id,
-      namespace,
-      type: EntityMaintainerTelemetryEventType.ERROR,
-      errorMessage: err?.message?.substring(0, 500), // limit error message length to prevent excessively long strings in telemetry
-    });
-  } finally {
-    currentStatus.metadata.runs++;
-    abortController.signal.removeEventListener('abort', onAbort);
-  }
-
-  return {
-    state: currentStatus,
-  };
-}
-
 async function updateTaskStatus({
   taskManager,
   taskId,
@@ -400,7 +214,8 @@ export async function startEntityMaintainer({
     taskStatus: EntityMaintainerTaskStatus.STARTED,
     request,
   });
-  await taskManager.bulkEnable([taskId], false, { request });
+  const runSoon = false;
+  await taskManager.bulkEnable([taskId], runSoon, { request });
   analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
     id,
     namespace,

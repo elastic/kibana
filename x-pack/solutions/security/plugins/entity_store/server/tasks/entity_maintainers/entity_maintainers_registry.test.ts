@@ -113,7 +113,7 @@ describe('EntityMaintainersRegistry', () => {
       });
     });
 
-    it('should store and retrieve runners', () => {
+    it('should store and retrieve runner config', () => {
       const setup = jest.fn().mockResolvedValue({});
       const initialState = { count: 0 };
       registry.register({
@@ -124,17 +124,19 @@ describe('EntityMaintainersRegistry', () => {
         setup,
         initialState,
       });
-      const runners = registry.getRunners('maintainer-a');
-      expect(runners).toEqual({ run, setup, initialState });
+      const runnerConfig = registry.getRunnerConfigOrThrow('maintainer-a');
+      expect(runnerConfig).toEqual({ run, setup, initialState });
     });
   });
 
-  describe('getRunners', () => {
-    it('should return undefined when id was not registered', () => {
-      expect(registry.getRunners('maintainer-a')).toBeUndefined();
+  describe('getRunnerConfigOrThrow', () => {
+    it('should throw when id was not registered', () => {
+      expect(() => registry.getRunnerConfigOrThrow('maintainer-a')).toThrow(
+        'Entity maintainer not found: maintainer-a'
+      );
     });
 
-    it('should return runners when id was registered', () => {
+    it('should return runner config when id was registered', () => {
       registry.register({
         id: 'maintainer-a',
         interval: '5m',
@@ -142,10 +144,9 @@ describe('EntityMaintainersRegistry', () => {
         run,
         initialState: {},
       });
-      const runners = registry.getRunners('maintainer-a');
-      expect(runners).toBeDefined();
-      expect(runners!.run).toBe(run);
-      expect(runners!.setup).toBeUndefined();
+      const runnerConfig = registry.getRunnerConfigOrThrow('maintainer-a');
+      expect(runnerConfig.run).toBe(run);
+      expect(runnerConfig.setup).toBeUndefined();
     });
   });
 
@@ -168,6 +169,29 @@ describe('EntityMaintainersRegistry', () => {
         minLicense: 'basic',
       });
       expect(registry.get('maintainer-a')!.description).toBeUndefined();
+    });
+  });
+
+  describe('getOrThrow', () => {
+    it('should throw when id was not registered', () => {
+      expect(() => registry.getOrThrow('maintainer-a')).toThrow(
+        'Entity maintainer not found: maintainer-a'
+      );
+    });
+
+    it('should return the entry when id was registered', () => {
+      registry.register({
+        id: 'maintainer-a',
+        interval: '5m',
+        minLicense: 'basic',
+        run,
+        initialState: {},
+      });
+      expect(registry.getOrThrow('maintainer-a')).toEqual({
+        id: 'maintainer-a',
+        interval: '5m',
+        minLicense: 'basic',
+      });
     });
   });
 

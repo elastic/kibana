@@ -364,7 +364,7 @@ export const riskScoreMaintainerScenarioFactory = ({
       return;
     }
 
-    // init creates the task with enabled: false; enable TM before waiting for a run.
+    // init can create tasks with autoStart: false; enable Task Manager before waiting for a run.
     await routes.startMaintainer('risk-score');
     await waitForMaintainerRun({ retry, routes, minRuns, timeoutMs });
   };

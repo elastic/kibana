@@ -47,7 +47,7 @@ export function registerInitMaintainers(router: EntityStorePluginRouter) {
           return validationError;
         }
 
-        await entityMaintainersClient.init(req, { enabled: req.body?.enabled });
+        await entityMaintainersClient.init(req, { autoStart: req.body?.autoStart });
 
         return res.ok({ body: { ok: true } });
       })

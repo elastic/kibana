@@ -9,16 +9,18 @@ import type { Logger } from '@kbn/logging';
 import { SavedObjectsErrorHelpers, type CoreStart, type KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { LicenseType } from '@kbn/licensing-types';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import {
-  executeMaintainerRun,
   getTaskId,
-  getTaskType,
   removeEntityMaintainer,
   scheduleEntityMaintainerTask,
   startEntityMaintainer,
   stopEntityMaintainer,
 } from '../../tasks/entity_maintainers';
+import {
+  createMaintainerStatus,
+  persistMaintainerState,
+  runEntityMaintainerTask,
+} from '../../tasks/entity_maintainers/execution';
 import { entityMaintainersRegistry } from '../../tasks/entity_maintainers/entity_maintainers_registry';
 import type {
   EntityMaintainerState,
@@ -26,6 +28,7 @@ import type {
 } from '../../tasks/entity_maintainers/types';
 import { EntityMaintainerTaskStatus } from '../../tasks/entity_maintainers/types';
 import type { TelemetryReporter } from '../../telemetry/events';
+import { CRUDClient } from '../crud';
 
 interface TaskSnapshot {
   runs: number;
@@ -50,7 +53,6 @@ interface EntityMaintainersClientDeps {
   namespace: string;
   analytics: TelemetryReporter;
   coreStart: CoreStart;
-  licensing: LicensingPluginStart;
 }
 
 export class EntityMaintainersClient {
@@ -59,7 +61,6 @@ export class EntityMaintainersClient {
   private readonly namespace: string;
   private readonly analytics: TelemetryReporter;
   private readonly coreStart: CoreStart;
-  private readonly licensing: LicensingPluginStart;
 
   constructor(deps: EntityMaintainersClientDeps) {
     this.logger = deps.logger;
@@ -67,7 +68,6 @@ export class EntityMaintainersClient {
     this.namespace = deps.namespace;
     this.analytics = deps.analytics;
     this.coreStart = deps.coreStart;
-    this.licensing = deps.licensing;
   }
 
   public async start(id: string, request: KibanaRequest): Promise<void> {
@@ -94,7 +94,7 @@ export class EntityMaintainersClient {
    * Schedules only maintainers that do not yet have a task document (taskSnapshot undefined).
    * Uses getMaintainers() to determine which registry entries already have tasks.
    */
-  public async init(request: KibanaRequest, options?: { enabled?: boolean }): Promise<void> {
+  public async init(request: KibanaRequest, options?: { autoStart?: boolean }): Promise<void> {
     this.logger.debug('Initializing entity maintainer tasks');
     try {
       const maintainers = await this.getMaintainers();
@@ -108,7 +108,7 @@ export class EntityMaintainersClient {
             interval,
             namespace: this.namespace,
             request,
-            enabled: options?.enabled,
+            enabled: options?.autoStart ?? true,
           });
         })
       );
@@ -154,42 +154,44 @@ export class EntityMaintainersClient {
 
   public async runSync(id: string, request: KibanaRequest): Promise<void> {
     try {
-      if (!entityMaintainersRegistry.hasId(id)) {
-        this.logger.debug(`Maintainer not found, skipping sync run: ${id}`);
-        return;
-      }
-
-      const runners = entityMaintainersRegistry.getRunners(id);
-      const entry = entityMaintainersRegistry.get(id);
-      if (!runners || !entry) {
-        this.logger.debug(`No runners registered, skipping sync run: ${id}`);
-        return;
-      }
+      const { run, setup, initialState } = entityMaintainersRegistry.getRunnerConfigOrThrow(id);
 
       const taskId = getTaskId(id, this.namespace);
       const task = await this.taskManager.get(taskId);
       const currentStatus = task.state as Partial<EntityMaintainerStatus>;
-
-      const result = await executeMaintainerRun({
+      const maintainerStatus = createMaintainerStatus({
         currentStatus,
-        request,
-        taskIdStr: taskId,
         namespace: this.namespace,
-        id,
-        run: runners.run,
-        setup: runners.setup,
-        initialState: runners.initialState,
-        effectiveMinLicense: entry.minLicense,
-        type: getTaskType(id),
-        coreStart: this.coreStart,
-        licensing: this.licensing,
-        analytics: this.analytics,
+        initialState,
+      });
+      const esClient = this.coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+      const crudClient = new CRUDClient({
         logger: this.logger,
+        esClient,
+        namespace: maintainerStatus.metadata.namespace,
+      });
+      const abortController = new AbortController();
+      const taskLogger = this.logger.get(taskId);
+
+      const result = await runEntityMaintainerTask({
+        currentStatus: maintainerStatus,
+        fakeRequest: request,
+        logger: taskLogger,
+        id,
+        run,
+        setup,
+        abortController,
+        esClient,
+        crudClient,
+        analytics: this.analytics,
       });
 
-      if (result) {
-        await this.taskManager.bulkUpdateState([taskId], () => result.state, { request });
-      }
+      await persistMaintainerState({
+        taskManager: this.taskManager,
+        taskId,
+        state: result.state,
+        request,
+      });
     } catch (error) {
       this.logger.error(`Failed to run entity maintainer task synchronously: ${id}`, { error });
       throw error;
