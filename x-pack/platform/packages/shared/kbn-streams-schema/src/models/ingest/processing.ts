@@ -6,11 +6,10 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { streamlangDSLSchema, type StreamlangDSL } from '@kbn/streamlang';
+import { streamlangDSLSchema, type StreamlangDSLWithUpdatedAt } from '@kbn/streamlang';
 
-export interface IngestStreamProcessing extends StreamlangDSL {
-  updated_at: string;
-}
+/** Streamlang on ingest plus the `updated_at` cursor managed by the stack. */
+export type IngestStreamProcessing = StreamlangDSLWithUpdatedAt;
 
 export const ingestStreamProcessingSchema = streamlangDSLSchema.merge(
   z.object({
