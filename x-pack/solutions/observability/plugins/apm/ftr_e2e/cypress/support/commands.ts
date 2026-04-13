@@ -11,7 +11,7 @@ import moment from 'moment';
 import '@frsource/cypress-plugin-visual-regression-diff';
 import { AXE_CONFIG, AXE_OPTIONS } from '@kbn/axe-config';
 import { ApmUsername } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
-import { suppressGlobalAnnouncements } from './suppress_global_announcements';
+import { resolveKibanaOrigin, suppressGlobalAnnouncements } from './suppress_global_announcements';
 
 Cypress.Commands.add('loginAsSuperUser', () => {
   return cy.loginAs({ username: 'elastic', password: 'changeme' });
@@ -60,7 +60,12 @@ Cypress.Commands.add(
     cy.session(
       username,
       () => {
-        const kibanaUrl = Cypress.env('KIBANA_URL');
+        const kibanaUrl = resolveKibanaOrigin();
+        if (!kibanaUrl) {
+          throw new Error(
+            'APM Cypress login requires Kibana origin: set Cypress env KIBANA_URL or cypress.config baseUrl'
+          );
+        }
         cy.log(`Logging in as ${username} on ${kibanaUrl}`);
         cy.visit('/');
         cy.request({

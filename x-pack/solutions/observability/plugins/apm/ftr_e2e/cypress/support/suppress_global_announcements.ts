@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-function resolveKibanaOrigin(): string | undefined {
+/** Kibana origin from `KIBANA_URL` or Cypress `baseUrl` (trimmed). Shared with `loginAs` and global_settings POST. */
+export function resolveKibanaOrigin(): string | undefined {
   const fromEnv = Cypress.env('KIBANA_URL') as string | undefined;
   const fromConfig = Cypress.config('baseUrl') as string | undefined;
   const raw = fromEnv ?? fromConfig;
@@ -29,7 +30,8 @@ export const suppressGlobalAnnouncements = (): Cypress.Chainable<Cypress.Respons
     cy.log(
       'suppressGlobalAnnouncements: skipping (set KIBANA_URL or cypress baseUrl for global_settings POST)'
     );
-    return cy.wrap(null, { log: false });
+    // No HTTP call; chain type matches cy.request for callers that do not read the body.
+    return cy.wrap(null as unknown as Cypress.Response<unknown>, { log: false });
   }
 
   return cy.request({
