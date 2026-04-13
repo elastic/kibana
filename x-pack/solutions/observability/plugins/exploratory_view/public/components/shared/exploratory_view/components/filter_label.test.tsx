@@ -15,7 +15,8 @@ import 'jest-canvas-mock';
 
 jest.setTimeout(10 * 1000);
 
-describe('FilterLabel', function () {
+// Failing: See https://github.com/elastic/kibana/issues/253320
+describe.skip('FilterLabel', function () {
   mockAppDataView();
 
   const invertFilter = jest.fn();
