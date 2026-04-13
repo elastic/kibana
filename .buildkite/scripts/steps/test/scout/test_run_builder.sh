@@ -2,7 +2,8 @@
 
 set -euo pipefail
 
-source .buildkite/scripts/steps/functional/common.sh
+source .buildkite/scripts/bootstrap.sh
+.buildkite/scripts/setup_es_snapshot_cache.sh
 
 echo '--- Verify Playwright CLI is functional'
 node scripts/scout run-playwright-test-check
@@ -77,13 +78,12 @@ else
   buildkite-agent artifact upload "scout_playwright_configs.json"
 fi
 
-echo '--- Running Scout API Integration Tests'
+echo '--- Running Scout API Integration Tests (against Kibana source code)'
 node scripts/scout.js run-tests \
   --location local \
   --arch stateful \
   --domain classic \
   --config src/platform/packages/shared/kbn-scout/test/scout/api/parallel.playwright.config.ts \
-  --kibanaInstallDir "$KIBANA_BUILD_LOCATION"
 
 source .buildkite/scripts/steps/test/scout/upload_report_events.sh
 

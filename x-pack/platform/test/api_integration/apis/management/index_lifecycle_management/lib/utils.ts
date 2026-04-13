@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export function getIndexPattern(namespace: string): string {
-  return `logs-azure.signinlogs-${namespace}`;
-}
+export const wait = (time = 1000) => new Promise((resolve) => setTimeout(resolve, time));
+
+export const getPolicyNames = (policies: Array<{ name: string }>) =>
+  policies.map(({ name }) => name);

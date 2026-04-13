@@ -8,11 +8,11 @@
 import React, { Suspense } from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import { LENS_ATTACHMENT_TYPE } from '../../../../common';
-import type { PersistableStateAttachmentViewProps } from '../../../client/attachment_framework/types';
+import type { UnifiedValueAttachmentViewProps } from '../../../client/attachment_framework/types';
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
 
 import { basicCase } from '../../../containers/mock';
-import { getVisualizationAttachmentType } from './attachment';
+import { getVisualizationAttachmentType } from '.';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 import { renderWithTestingProviders } from '../../../common/mock';
 
@@ -21,15 +21,27 @@ describe('getVisualizationAttachmentType', () => {
     .fn()
     .mockReturnValue(<div data-test-subj="embeddableComponent" />);
 
-  const attachmentViewProps: PersistableStateAttachmentViewProps = {
-    persistableStateAttachmentTypeId: LENS_ATTACHMENT_TYPE,
-    persistableStateAttachmentState: {
-      attributes: { state: { query: {} } },
-      timeRange: {},
+  const attachmentViewProps: UnifiedValueAttachmentViewProps = {
+    type: LENS_ATTACHMENT_TYPE,
+    data: {
+      state: {
+        attributes: { state: { query: {} } },
+        timeRange: {},
+      },
     },
+    owner: 'securitySolution',
+    createdBy: { username: 'elastic', full_name: null, email: null, profile_uid: null },
+    version: '1',
     savedObjectId: 'test',
     caseData: { title: basicCase.title, id: basicCase.id },
-  };
+    rowContext: {
+      appId: 'cases',
+      manageMarkdownEditIds: [],
+      selectedOutlineCommentId: '',
+      loadingCommentIds: [],
+      euiTheme: {} as never,
+    },
+  } as unknown as UnifiedValueAttachmentViewProps;
 
   beforeEach(() => {
     jest.clearAllMocks();

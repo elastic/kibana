@@ -7,6 +7,7 @@
 
 import React, { useContext, useState, useMemo, useEffect, useCallback } from 'react';
 import _ from 'lodash';
+import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import {
   UnifiedDataTable,
@@ -527,7 +528,9 @@ export const EntitiesDataTable = ({
     <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
       <div
         data-test-subj={TEST_SUBJ_DATA_GRID}
-        className={styles.gridContainer}
+        className={classNames(styles.gridContainer, {
+          [styles.gridContainerLoading]: isLoadingGridData,
+        })}
         style={{
           height: computeDataTableRendering.wrapperHeight,
         }}
