@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { render, screen, waitFor } from '@testing-library/react';
-import { I18nProvider } from '@kbn/i18n-react';
+import { screen, waitFor } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { ThresholdVisualization } from './visualization';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public/types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
@@ -70,17 +70,15 @@ describe('ThresholdVisualization', () => {
   };
 
   function setup() {
-    return render(
-      <I18nProvider>
-        <ThresholdVisualization
-          ruleParams={ruleParams}
-          alertInterval="1m"
-          aggregationTypes={builtInAggregationTypes}
-          comparators={builtInComparators}
-          charts={chartsStartMock}
-          dataFieldsFormats={dataMock.fieldFormats}
-        />
-      </I18nProvider>
+    return renderWithI18n(
+      <ThresholdVisualization
+        ruleParams={ruleParams}
+        alertInterval="1m"
+        aggregationTypes={builtInAggregationTypes}
+        comparators={builtInComparators}
+        charts={chartsStartMock}
+        dataFieldsFormats={dataMock.fieldFormats}
+      />
     );
   }
 
@@ -88,18 +86,16 @@ describe('ThresholdVisualization', () => {
     const refreshRate = 10;
     jest.useFakeTimers({ legacyFakeTimers: true });
 
-    render(
-      <I18nProvider>
-        <ThresholdVisualization
-          ruleParams={ruleParams}
-          alertInterval="1m"
-          aggregationTypes={builtInAggregationTypes}
-          comparators={builtInComparators}
-          charts={chartsStartMock}
-          dataFieldsFormats={dataMock.fieldFormats}
-          refreshRateInMilliseconds={refreshRate}
-        />
-      </I18nProvider>
+    renderWithI18n(
+      <ThresholdVisualization
+        ruleParams={ruleParams}
+        alertInterval="1m"
+        aggregationTypes={builtInAggregationTypes}
+        comparators={builtInComparators}
+        charts={chartsStartMock}
+        dataFieldsFormats={dataMock.fieldFormats}
+        refreshRateInMilliseconds={refreshRate}
+      />
     );
 
     await act(async () => {
@@ -119,17 +115,15 @@ describe('ThresholdVisualization', () => {
   });
 
   test('renders loading message on initial load', async () => {
-    render(
-      <I18nProvider>
-        <ThresholdVisualization
-          ruleParams={ruleParams}
-          alertInterval="1m"
-          aggregationTypes={builtInAggregationTypes}
-          comparators={builtInComparators}
-          charts={chartsStartMock}
-          dataFieldsFormats={dataMock.fieldFormats}
-        />
-      </I18nProvider>
+    renderWithI18n(
+      <ThresholdVisualization
+        ruleParams={ruleParams}
+        alertInterval="1m"
+        aggregationTypes={builtInAggregationTypes}
+        comparators={builtInComparators}
+        charts={chartsStartMock}
+        dataFieldsFormats={dataMock.fieldFormats}
+      />
     );
     expect(screen.getByTestId('firstLoad')).toBeInTheDocument();
 

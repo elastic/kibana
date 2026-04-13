@@ -6,17 +6,14 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import SwimlaneParamsFields from './swimlane_params';
 import { SwimlaneConnectorType } from './types';
 import { mappings } from './mocks';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
-
-const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <I18nProvider>{children}</I18nProvider>
-);
 
 describe('SwimlaneParamsFields renders', () => {
   const editAction = jest.fn();
@@ -60,14 +57,14 @@ describe('SwimlaneParamsFields renders', () => {
   });
 
   test('all params fields are rendered', () => {
-    render(<SwimlaneParamsFields {...defaultProps} />, { wrapper });
+    renderWithI18n(<SwimlaneParamsFields {...defaultProps} />);
 
     expect(screen.getByTestId('severityInput')).toBeInTheDocument();
     expect(screen.getByTestId('commentsTextArea')).toBeInTheDocument();
   });
 
   test('it set the correct default params', () => {
-    render(<SwimlaneParamsFields {...defaultProps} actionParams={{}} />, { wrapper });
+    renderWithI18n(<SwimlaneParamsFields {...defaultProps} actionParams={{}} />);
     expect(editAction).toHaveBeenCalledWith('subAction', 'pushToService', 0);
     expect(editAction).toHaveBeenCalledWith(
       'subActionParams',
@@ -80,11 +77,13 @@ describe('SwimlaneParamsFields renders', () => {
   });
 
   test('it reset the fields when connector changes', () => {
-    const { rerender } = render(<SwimlaneParamsFields {...defaultProps} />, { wrapper });
+    const { rerender } = renderWithI18n(<SwimlaneParamsFields {...defaultProps} />);
     expect(editAction).not.toHaveBeenCalled();
 
     rerender(
-      <SwimlaneParamsFields {...defaultProps} actionConnector={{ ...connector, id: '1234' }} />
+        <I18nProvider>
+          <SwimlaneParamsFields {...defaultProps} actionConnector={{ ...connector, id: '1234' }} />
+        </I18nProvider>
     );
     expect(editAction).toHaveBeenCalledWith(
       'subActionParams',
@@ -97,11 +96,13 @@ describe('SwimlaneParamsFields renders', () => {
   });
 
   test('it set the severity', () => {
-    const { rerender } = render(<SwimlaneParamsFields {...defaultProps} />, { wrapper });
+    const { rerender } = renderWithI18n(<SwimlaneParamsFields {...defaultProps} />);
     expect(editAction).not.toHaveBeenCalled();
 
     rerender(
-      <SwimlaneParamsFields {...defaultProps} actionConnector={{ ...connector, id: '1234' }} />
+        <I18nProvider>
+          <SwimlaneParamsFields {...defaultProps} actionConnector={{ ...connector, id: '1234' }} />
+        </I18nProvider>
     );
     expect(editAction).toHaveBeenCalledWith(
       'subActionParams',
@@ -118,7 +119,7 @@ describe('SwimlaneParamsFields renders', () => {
 
     simpleFields.forEach((field) =>
       test(`${field.key} update triggers editAction`, async () => {
-        render(<SwimlaneParamsFields {...defaultProps} />, { wrapper });
+        renderWithI18n(<SwimlaneParamsFields {...defaultProps} />);
         const theField = screen.getByTestId(field.dataTestSubj);
         await userEvent.tripleClick(theField);
         await userEvent.paste('Bug');
@@ -127,7 +128,7 @@ describe('SwimlaneParamsFields renders', () => {
     );
 
     test('A comment triggers editAction', async () => {
-      render(<SwimlaneParamsFields {...defaultProps} />, { wrapper });
+      renderWithI18n(<SwimlaneParamsFields {...defaultProps} />);
       const commentsTextArea = screen.getByTestId('commentsTextArea');
       await userEvent.type(commentsTextArea, 'Bug');
       expect(editAction.mock.calls.at(-1)[1].comments.length).toEqual(1);

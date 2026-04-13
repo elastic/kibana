@@ -7,8 +7,8 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { render, screen, waitFor } from '@testing-library/react';
-import { I18nProvider } from '@kbn/i18n-react';
+import { screen, waitFor } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import type { DataViewSelectPopoverProps } from './data_view_select_popover';
 import { DataViewSelectPopover } from './data_view_select_popover';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
@@ -99,10 +99,8 @@ const mount = () => {
   };
 
   return {
-    result: render(
-      <I18nProvider>
-        <DataViewSelectPopover {...props} />
-      </I18nProvider>
+    result: renderWithI18n(
+      <DataViewSelectPopover {...props} />
     ),
     dataViewsMock,
   };

@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { I18nProvider } from '@kbn/i18n-react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { useKibana } from '../../../../common/lib/kibana';
 
 import type { Rule } from '../../../../types';
@@ -120,9 +120,6 @@ const mockRule: Rule = {
 };
 
 const loadActionErrorLogMock = jest.fn();
-
-const renderWithI18n = (ui: React.ReactElement) =>
-  render(ui, { wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider> });
 
 describe('rule_error_log', () => {
   beforeEach(() => {

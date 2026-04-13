@@ -7,7 +7,7 @@
 
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import moment from 'moment';
 import React from 'react';
 import { RRuleFrequency } from '../../../../../../types';
@@ -29,7 +29,7 @@ describe('CustomRecurrenceScheduler', () => {
   });
 
   test('render', () => {
-    renderWithKibanaRenderContext(
+    renderWithI18n(
       <CustomRecurrenceScheduler
         startDate={startDate}
         onChange={onChange}
@@ -47,7 +47,7 @@ describe('CustomRecurrenceScheduler', () => {
   });
 
   test('render weekly options', () => {
-    renderWithKibanaRenderContext(
+    renderWithI18n(
       <CustomRecurrenceScheduler
         startDate={startDate}
         onChange={onChange}
@@ -62,7 +62,7 @@ describe('CustomRecurrenceScheduler', () => {
   });
 
   test('render monthly options', () => {
-    renderWithKibanaRenderContext(
+    renderWithI18n(
       <CustomRecurrenceScheduler
         startDate={startDate}
         onChange={onChange}
@@ -77,7 +77,7 @@ describe('CustomRecurrenceScheduler', () => {
   });
 
   test('should call onChange when state changed', async () => {
-    renderWithKibanaRenderContext(
+    renderWithI18n(
       <CustomRecurrenceScheduler
         startDate={startDate}
         onChange={onChange}
@@ -95,7 +95,7 @@ describe('CustomRecurrenceScheduler', () => {
   });
 
   test('should enforce minimum recurrence days', async () => {
-    renderWithKibanaRenderContext(
+    renderWithI18n(
       <CustomRecurrenceScheduler
         startDate={startDate}
         onChange={onChange}

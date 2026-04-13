@@ -6,7 +6,8 @@
  */
 import type { DataView } from '@kbn/data-views-plugin/public';
 import userEvent from '@testing-library/user-event';
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import React, { useState } from 'react';
 import { docLinksServiceMock } from '@kbn/core/public/mocks';
 import { httpServiceMock } from '@kbn/core/public/mocks';
@@ -20,7 +21,6 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { Subject } from 'rxjs';
 import type { ISearchSource } from '@kbn/data-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { I18nProvider } from '@kbn/i18n-react';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 
 jest.mock('@kbn/code-editor', () => {
@@ -226,22 +226,20 @@ const setup = (
     | EsQueryRuleParams<SearchType.esqlQuery>,
   metadata?: EsQueryRuleMetaData
 ) => {
-  return render(
-    <I18nProvider>
-      <KibanaContextProvider
-        services={{
-          data: dataMock,
-          dataViews: dataViewsMock,
-          uiSettings: uiSettingsMock,
-          docLinks: docLinksMock,
-          http: httpMock,
-          unifiedSearch: unifiedSearchMock,
-          dataViewEditor: dataViewEditorMock,
-        }}
-      >
-        <Wrapper ruleParams={ruleParams} metadata={metadata} />
-      </KibanaContextProvider>
-    </I18nProvider>
+  return renderWithI18n(
+    <KibanaContextProvider
+      services={{
+        data: dataMock,
+        dataViews: dataViewsMock,
+        uiSettings: uiSettingsMock,
+        docLinks: docLinksMock,
+        http: httpMock,
+        unifiedSearch: unifiedSearchMock,
+        dataViewEditor: dataViewEditorMock,
+      }}
+    >
+      <Wrapper ruleParams={ruleParams} metadata={metadata} />
+    </KibanaContextProvider>
   );
 };
 

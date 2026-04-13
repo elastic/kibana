@@ -6,13 +6,13 @@
  */
 
 import { screen } from '@testing-library/react';
-import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { BaseSnoozePanel } from './base_snooze_panel';
 
 describe('BaseSnoozePanel', () => {
   test('should render', () => {
-    renderWithKibanaRenderContext(
+    renderWithI18n(
       <BaseSnoozePanel
         hasTitle
         interval="5d"
@@ -37,7 +37,7 @@ describe('BaseSnoozePanel', () => {
   });
 
   test('should render without title', () => {
-    renderWithKibanaRenderContext(
+    renderWithI18n(
       <BaseSnoozePanel
         hasTitle={false}
         isLoading={false}
@@ -55,7 +55,7 @@ describe('BaseSnoozePanel', () => {
   });
 
   test('should render with cancel button', () => {
-    renderWithKibanaRenderContext(
+    renderWithI18n(
       <BaseSnoozePanel
         hasTitle
         isLoading={false}
@@ -73,7 +73,7 @@ describe('BaseSnoozePanel', () => {
   });
 
   test('should render a list of scheduled snoozes', () => {
-    renderWithKibanaRenderContext(
+    renderWithI18n(
       <BaseSnoozePanel
         hasTitle
         isLoading={false}
@@ -115,7 +115,7 @@ describe('BaseSnoozePanel', () => {
   });
 
   test('should disable add snooze schedule button if rule has more than 5 schedules', () => {
-    renderWithKibanaRenderContext(
+    renderWithI18n(
       <BaseSnoozePanel
         hasTitle
         isLoading={false}

@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EventLogListStatusFilter } from './event_log_list_status_filter';
 import { getIsExperimentalFeatureEnabled } from '../../../../../common/get_experimental_features';
@@ -28,10 +29,8 @@ describe('event_log_list_status_filter', () => {
   });
 
   it('renders correctly', () => {
-    const { container } = render(
-      <I18nProvider>
-        <EventLogListStatusFilter selectedOptions={[]} onChange={onChangeMock} />
-      </I18nProvider>
+    const { container } = renderWithI18n(
+      <EventLogListStatusFilter selectedOptions={[]} onChange={onChangeMock} />
     );
 
     // No filter select items shown before popover is opened
@@ -44,10 +43,8 @@ describe('event_log_list_status_filter', () => {
   });
 
   it('can open the popover correctly', async () => {
-    const { container, rerender } = render(
-      <I18nProvider>
-        <EventLogListStatusFilter selectedOptions={[]} onChange={onChangeMock} />
-      </I18nProvider>
+    const { container, rerender } = renderWithI18n(
+      <EventLogListStatusFilter selectedOptions={[]} onChange={onChangeMock} />
     );
 
     // Open the popover by clicking the filter button
@@ -60,9 +57,9 @@ describe('event_log_list_status_filter', () => {
     expect(onChangeMock).toHaveBeenCalledWith(['success']);
 
     rerender(
-      <I18nProvider>
-        <EventLogListStatusFilter selectedOptions={['success']} onChange={onChangeMock} />
-      </I18nProvider>
+        <I18nProvider>
+          <EventLogListStatusFilter selectedOptions={['success']} onChange={onChangeMock} />
+        </I18nProvider>
     );
 
     const badge1 = container.querySelector('.euiNotificationBadge');
@@ -72,12 +69,12 @@ describe('event_log_list_status_filter', () => {
     expect(onChangeMock).toHaveBeenCalledWith(['success', 'failure']);
 
     rerender(
-      <I18nProvider>
-        <EventLogListStatusFilter
-          selectedOptions={['success', 'failure']}
-          onChange={onChangeMock}
-        />
-      </I18nProvider>
+        <I18nProvider>
+          <EventLogListStatusFilter
+            selectedOptions={['success', 'failure']}
+            onChange={onChangeMock}
+          />
+        </I18nProvider>
     );
 
     const badge2 = container.querySelector('.euiNotificationBadge');

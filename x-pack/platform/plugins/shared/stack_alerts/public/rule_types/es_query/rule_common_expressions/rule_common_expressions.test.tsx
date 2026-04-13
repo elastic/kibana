@@ -7,8 +7,8 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { render, screen } from '@testing-library/react';
-import { I18nProvider } from '@kbn/i18n-react';
+import { screen } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { RuleCommonExpressions } from './rule_common_expressions';
 import type { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
 import {
@@ -60,43 +60,41 @@ describe('RuleCommonExpressions', () => {
     hasValidationErrors?: boolean;
     excludeHitsFromPreviousRun?: boolean;
   }) {
-    return render(
-      <I18nProvider>
-        <RuleCommonExpressions
-          esFields={[]}
-          thresholdComparator={ruleParams.thresholdComparator}
-          threshold={ruleParams.threshold}
-          timeWindowSize={ruleParams.timeWindowSize}
-          timeWindowUnit={ruleParams.timeWindowUnit}
-          size={ruleParams.size}
-          aggType={ruleParams.aggType}
-          aggField={ruleParams.aggField}
-          groupBy={ruleParams.groupBy}
-          termSize={ruleParams.termSize}
-          termField={ruleParams.termField}
-          onChangeSelectedAggField={() => {}}
-          onChangeSelectedAggType={() => {}}
-          onChangeSelectedGroupBy={() => {}}
-          onChangeSelectedTermField={() => {}}
-          onChangeSelectedTermSize={() => {}}
-          onChangeThreshold={() => {}}
-          onChangeThresholdComparator={() => {}}
-          onChangeWindowSize={() => {}}
-          onChangeWindowUnit={() => {}}
-          onChangeSizeValue={() => {}}
-          errors={errors}
-          hasValidationErrors={hasValidationErrors}
-          onTestFetch={async () => {
-            return {
-              testResults: { results: [], truncated: false },
-              isGrouped: false,
-              timeWindow: '1m',
-            };
-          }}
-          excludeHitsFromPreviousRun={excludeHitsFromPreviousRun}
-          onChangeExcludeHitsFromPreviousRun={onChangeExcludeHitsFromPreviousRunFn}
-        />
-      </I18nProvider>
+    return renderWithI18n(
+      <RuleCommonExpressions
+        esFields={[]}
+        thresholdComparator={ruleParams.thresholdComparator}
+        threshold={ruleParams.threshold}
+        timeWindowSize={ruleParams.timeWindowSize}
+        timeWindowUnit={ruleParams.timeWindowUnit}
+        size={ruleParams.size}
+        aggType={ruleParams.aggType}
+        aggField={ruleParams.aggField}
+        groupBy={ruleParams.groupBy}
+        termSize={ruleParams.termSize}
+        termField={ruleParams.termField}
+        onChangeSelectedAggField={() => {}}
+        onChangeSelectedAggType={() => {}}
+        onChangeSelectedGroupBy={() => {}}
+        onChangeSelectedTermField={() => {}}
+        onChangeSelectedTermSize={() => {}}
+        onChangeThreshold={() => {}}
+        onChangeThresholdComparator={() => {}}
+        onChangeWindowSize={() => {}}
+        onChangeWindowUnit={() => {}}
+        onChangeSizeValue={() => {}}
+        errors={errors}
+        hasValidationErrors={hasValidationErrors}
+        onTestFetch={async () => {
+          return {
+            testResults: { results: [], truncated: false },
+            isGrouped: false,
+            timeWindow: '1m',
+          };
+        }}
+        excludeHitsFromPreviousRun={excludeHitsFromPreviousRun}
+        onChangeExcludeHitsFromPreviousRun={onChangeExcludeHitsFromPreviousRunFn}
+      />
     );
   }
 

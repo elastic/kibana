@@ -6,22 +6,20 @@
  */
 
 import * as React from 'react';
-import { render, screen } from '@testing-library/react';
-import { I18nProvider } from '@kbn/i18n-react';
+import { screen } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { ExecutionDurationChart, padOrTruncateDurations } from './execution_duration_chart';
 
 describe('execution duration chart', () => {
   it('renders empty state when no execution duration values are available', async () => {
     const executionDuration = mockExecutionDuration();
 
-    render(
-      <I18nProvider>
-        <ExecutionDurationChart
-          executionDuration={executionDuration}
-          numberOfExecutions={60}
-          onChangeDuration={() => {}}
-        />
-      </I18nProvider>
+    renderWithI18n(
+      <ExecutionDurationChart
+        executionDuration={executionDuration}
+        numberOfExecutions={60}
+        onChangeDuration={() => {}}
+      />
     );
 
     expect(screen.getByTestId('executionDurationChartPanel')).toBeInTheDocument();
@@ -35,14 +33,12 @@ describe('execution duration chart', () => {
       valuesWithTimestamp: { '17 Nov 2021 @ 19:19:17': 1, '17 Nov 2021 @ 20:19:17': 2 },
     });
 
-    render(
-      <I18nProvider>
-        <ExecutionDurationChart
-          executionDuration={executionDuration}
-          numberOfExecutions={60}
-          onChangeDuration={() => {}}
-        />
-      </I18nProvider>
+    renderWithI18n(
+      <ExecutionDurationChart
+        executionDuration={executionDuration}
+        numberOfExecutions={60}
+        onChangeDuration={() => {}}
+      />
     );
 
     expect(screen.getByTestId('executionDurationChartPanel')).toBeInTheDocument();

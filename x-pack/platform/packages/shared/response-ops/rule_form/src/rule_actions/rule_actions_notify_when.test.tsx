@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { screen } from '@testing-library/react';
-import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { RuleActionsNotifyWhen } from './rule_actions_notify_when';
 import type { RuleAction } from '@kbn/alerting-types';
 import { RuleNotifyWhen } from '@kbn/alerting-types';
@@ -36,7 +36,7 @@ describe('ruleActionsNotifyWhen', () => {
   ) {
     const { throttle, throttleUnit } = getThrottleProps(frequency);
 
-    return renderWithKibanaRenderContext(
+    return renderWithI18n(
       <RuleActionsNotifyWhen
         frequency={frequency}
         throttle={throttle}

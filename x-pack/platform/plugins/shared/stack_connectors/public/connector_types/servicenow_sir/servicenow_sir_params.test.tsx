@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, render, screen, waitFor, within } from '@testing-library/react';
+import { act, screen, waitFor, within } from '@testing-library/react';
 
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useGetChoices } from '../lib/servicenow/use_get_choices';
@@ -14,6 +14,7 @@ import ServiceNowSIRParamsFields from './servicenow_sir_params';
 import type { Choice } from '../lib/servicenow/types';
 import { merge } from 'lodash';
 import userEvent from '@testing-library/user-event';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
@@ -150,10 +151,8 @@ describe('ServiceNowSIRParamsFields renders', () => {
   });
 
   test('all params fields is rendered', () => {
-    render(
-      <I18nProvider>
-        <ServiceNowSIRParamsFields {...defaultProps} />
-      </I18nProvider>
+    renderWithI18n(
+      <ServiceNowSIRParamsFields {...defaultProps} />
     );
     act(() => {
       onChoicesSuccess(choicesResponse.choices);
@@ -173,10 +172,8 @@ describe('ServiceNowSIRParamsFields renders', () => {
       ...defaultProps,
       errors: { 'subActionParams.incident.short_description': ['error'] },
     };
-    render(
-      <I18nProvider>
-        <ServiceNowSIRParamsFields {...newProps} />
-      </I18nProvider>
+    renderWithI18n(
+      <ServiceNowSIRParamsFields {...newProps} />
     );
     // EuiFieldText with isInvalid renders aria-invalid on the input
     const titleInput = screen.getByTestId('short_descriptionInput');
@@ -190,10 +187,8 @@ describe('ServiceNowSIRParamsFields renders', () => {
       ...defaultProps,
       actionParams: newParams,
     };
-    render(
-      <I18nProvider>
-        <ServiceNowSIRParamsFields {...newProps} />
-      </I18nProvider>
+    renderWithI18n(
+      <ServiceNowSIRParamsFields {...newProps} />
     );
     expect(editAction.mock.calls[0][1]).toEqual({
       incident: {
@@ -210,28 +205,24 @@ describe('ServiceNowSIRParamsFields renders', () => {
       ...defaultProps,
       actionParams: newParams,
     };
-    render(
-      <I18nProvider>
-        <ServiceNowSIRParamsFields {...newProps} />
-      </I18nProvider>
+    renderWithI18n(
+      <ServiceNowSIRParamsFields {...newProps} />
     );
     expect(editAction.mock.calls[0][1]).toEqual('pushToService');
   });
 
   test('Resets fields when connector changes', () => {
-    const { rerender } = render(
-      <I18nProvider>
-        <ServiceNowSIRParamsFields {...defaultProps} />
-      </I18nProvider>
+    const { rerender } = renderWithI18n(
+      <ServiceNowSIRParamsFields {...defaultProps} />
     );
     expect(editAction.mock.calls.length).toEqual(0);
     rerender(
-      <I18nProvider>
-        <ServiceNowSIRParamsFields
-          {...defaultProps}
-          actionConnector={{ ...connector, id: '1234' }}
-        />
-      </I18nProvider>
+        <I18nProvider>
+          <ServiceNowSIRParamsFields
+            {...defaultProps}
+            actionConnector={{ ...connector, id: '1234' }}
+          />
+        </I18nProvider>
     );
     expect(editAction.mock.calls.length).toEqual(1);
     expect(editAction.mock.calls[0][1]).toEqual({
@@ -243,10 +234,8 @@ describe('ServiceNowSIRParamsFields renders', () => {
   });
 
   test('it transforms the categories to options correctly', async () => {
-    render(
-      <I18nProvider>
-        <ServiceNowSIRParamsFields {...defaultProps} />
-      </I18nProvider>
+    renderWithI18n(
+      <ServiceNowSIRParamsFields {...defaultProps} />
     );
     act(() => {
       onChoicesSuccess(choicesResponse.choices);
@@ -271,10 +260,8 @@ describe('ServiceNowSIRParamsFields renders', () => {
   });
 
   test('it transforms the subcategories to options correctly', async () => {
-    render(
-      <I18nProvider>
-        <ServiceNowSIRParamsFields {...defaultProps} />
-      </I18nProvider>
+    renderWithI18n(
+      <ServiceNowSIRParamsFields {...defaultProps} />
     );
     act(() => {
       onChoicesSuccess(choicesResponse.choices);
@@ -304,10 +291,8 @@ describe('ServiceNowSIRParamsFields renders', () => {
   });
 
   test('it transforms the priorities to options correctly', async () => {
-    render(
-      <I18nProvider>
-        <ServiceNowSIRParamsFields {...defaultProps} />
-      </I18nProvider>
+    renderWithI18n(
+      <ServiceNowSIRParamsFields {...defaultProps} />
     );
     act(() => {
       onChoicesSuccess(choicesResponse.choices);
@@ -355,10 +340,8 @@ describe('ServiceNowSIRParamsFields renders', () => {
         },
       },
     });
-    render(
-      <I18nProvider>
-        <ServiceNowSIRParamsFields {...newProps} />
-      </I18nProvider>
+    renderWithI18n(
+      <ServiceNowSIRParamsFields {...newProps} />
     );
     act(() => {
       onChoicesSuccess(choicesResponse.choices);
@@ -414,10 +397,8 @@ describe('ServiceNowSIRParamsFields renders', () => {
 
     simpleFields.forEach((field) =>
       test(`${field.key} update triggers editAction :D`, async () => {
-        render(
-          <I18nProvider>
-            <ServiceNowSIRParamsFields {...defaultProps} />
-          </I18nProvider>
+        renderWithI18n(
+          <ServiceNowSIRParamsFields {...defaultProps} />
         );
         act(() => {
           onChoicesSuccess(choicesResponse.choices);
@@ -435,10 +416,8 @@ describe('ServiceNowSIRParamsFields renders', () => {
     );
 
     test('A comment triggers editAction', async () => {
-      render(
-        <I18nProvider>
-          <ServiceNowSIRParamsFields {...defaultProps} />
-        </I18nProvider>
+      renderWithI18n(
+        <ServiceNowSIRParamsFields {...defaultProps} />
       );
       const commentsTextArea = screen.getByTestId('commentsTextArea');
       await userEvent.tripleClick(commentsTextArea);
@@ -448,9 +427,7 @@ describe('ServiceNowSIRParamsFields renders', () => {
 
     it('updates additional fields', async () => {
       const newValue = JSON.stringify({ bar: 'test' });
-      render(<ServiceNowSIRParamsFields {...defaultProps} />, {
-        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-      });
+      renderWithI18n(<ServiceNowSIRParamsFields {...defaultProps} />);
 
       await userEvent.click(await screen.findByTestId('additional_fieldsJsonEditor'));
       await userEvent.paste(newValue);

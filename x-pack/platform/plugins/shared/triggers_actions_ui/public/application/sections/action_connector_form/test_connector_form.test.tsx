@@ -6,14 +6,14 @@
  */
 
 import React, { lazy } from 'react';
-import { I18nProvider } from '@kbn/i18n-react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import TestConnectorForm from './test_connector_form';
 import { none, some } from 'fp-ts/Option';
 import type { ActionConnector, ActionParamsProps, GenericValidationResult } from '../../../types';
 import { ActionConnectorMode } from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { EuiFormRow, EuiFieldText, EuiText, EuiLink, EuiForm, EuiSelect } from '@elastic/eui';
-import { waitFor, screen, render } from '@testing-library/react';
+import { waitFor, screen } from '@testing-library/react';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 jest.mock('../../../common/lib/kibana');
 
@@ -97,19 +97,17 @@ describe('test_connector_form', () => {
       config: {},
       secrets: {},
     } as ActionConnector;
-    render(
-      <I18nProvider>
-        <TestConnectorForm
-          connector={connector}
-          executeEnabled={true}
-          actionParams={{}}
-          onEditAction={() => {}}
-          isExecutingAction={false}
-          onExecutionAction={async () => {}}
-          executionResult={none}
-          actionTypeRegistry={actionTypeRegistry}
-        />
-      </I18nProvider>
+    renderWithI18n(
+      <TestConnectorForm
+        connector={connector}
+        executeEnabled={true}
+        actionParams={{}}
+        onEditAction={() => {}}
+        isExecutingAction={false}
+        onExecutionAction={async () => {}}
+        executionResult={none}
+        actionTypeRegistry={actionTypeRegistry}
+      />
     );
     const executeActionButton = screen.getByTestId('executeActionButton');
     expect(executeActionButton).toBeInTheDocument();
@@ -140,19 +138,17 @@ describe('test_connector_form', () => {
       secrets: {},
     } as ActionConnector;
 
-    render(
-      <I18nProvider>
-        <TestConnectorForm
-          connector={connector}
-          executeEnabled={true}
-          actionParams={{}}
-          onEditAction={() => {}}
-          isExecutingAction={false}
-          onExecutionAction={async () => {}}
-          executionResult={none}
-          actionTypeRegistry={actionTypeRegistryExecutionMode}
-        />
-      </I18nProvider>
+    renderWithI18n(
+      <TestConnectorForm
+        connector={connector}
+        executeEnabled={true}
+        actionParams={{}}
+        onEditAction={() => {}}
+        isExecutingAction={false}
+        onExecutionAction={async () => {}}
+        executionResult={none}
+        actionTypeRegistry={actionTypeRegistryExecutionMode}
+      />
     );
 
     await waitFor(() => {
@@ -168,22 +164,20 @@ describe('test_connector_form', () => {
       config: {},
       secrets: {},
     } as ActionConnector;
-    render(
-      <I18nProvider>
-        <TestConnectorForm
-          connector={connector}
-          executeEnabled={true}
-          actionParams={{}}
-          onEditAction={() => {}}
-          isExecutingAction={false}
-          onExecutionAction={async () => {}}
-          executionResult={some({
-            actionId: '',
-            status: 'ok',
-          })}
-          actionTypeRegistry={actionTypeRegistry}
-        />
-      </I18nProvider>
+    renderWithI18n(
+      <TestConnectorForm
+        connector={connector}
+        executeEnabled={true}
+        actionParams={{}}
+        onEditAction={() => {}}
+        isExecutingAction={false}
+        onExecutionAction={async () => {}}
+        executionResult={some({
+          actionId: '',
+          status: 'ok',
+        })}
+        actionTypeRegistry={actionTypeRegistry}
+      />
     );
     expect(screen.getByTestId('executionSuccessfulResult')).toBeInTheDocument();
   });
@@ -194,23 +188,21 @@ describe('test_connector_form', () => {
       config: {},
       secrets: {},
     } as ActionConnector;
-    render(
-      <I18nProvider>
-        <TestConnectorForm
-          connector={connector}
-          executeEnabled={true}
-          actionParams={{}}
-          onEditAction={() => {}}
-          isExecutingAction={false}
-          onExecutionAction={async () => {}}
-          executionResult={some({
-            actionId: '',
-            status: 'error',
-            message: 'Error Message',
-          })}
-          actionTypeRegistry={actionTypeRegistry}
-        />
-      </I18nProvider>
+    renderWithI18n(
+      <TestConnectorForm
+        connector={connector}
+        executeEnabled={true}
+        actionParams={{}}
+        onEditAction={() => {}}
+        isExecutingAction={false}
+        onExecutionAction={async () => {}}
+        executionResult={some({
+          actionId: '',
+          status: 'error',
+          message: 'Error Message',
+        })}
+        actionTypeRegistry={actionTypeRegistry}
+      />
     );
     expect(screen.getByTestId('executionFailureResult')).toBeInTheDocument();
   });
@@ -221,22 +213,20 @@ describe('test_connector_form', () => {
       config: {},
       secrets: {},
     } as ActionConnector;
-    render(
-      <I18nProvider>
-        <TestConnectorForm
-          connector={connector}
-          executeEnabled={true}
-          actionParams={{}}
-          onEditAction={() => {}}
-          isExecutingAction={false}
-          onExecutionAction={async () => {}}
-          executionResult={some({
-            actionId: '1234',
-            status: 'ok',
-          })}
-          actionTypeRegistry={actionTypeRegistry}
-        />
-      </I18nProvider>
+    renderWithI18n(
+      <TestConnectorForm
+        connector={connector}
+        executeEnabled={true}
+        actionParams={{}}
+        onEditAction={() => {}}
+        isExecutingAction={false}
+        onExecutionAction={async () => {}}
+        executionResult={some({
+          actionId: '1234',
+          status: 'ok',
+        })}
+        actionTypeRegistry={actionTypeRegistry}
+      />
     );
 
     const result = screen.getByTestId('executionResultCodeBlock');
@@ -259,19 +249,17 @@ describe('test_connector_form', () => {
       config: {},
       secrets: {},
     } as ActionConnector;
-    render(
-      <I18nProvider>
-        <TestConnectorForm
-          connector={connector}
-          executeEnabled={true}
-          actionParams={{}}
-          onEditAction={() => {}}
-          isExecutingAction={false}
-          onExecutionAction={async () => {}}
-          executionResult={some(undefined)}
-          actionTypeRegistry={actionTypeRegistry}
-        />
-      </I18nProvider>
+    renderWithI18n(
+      <TestConnectorForm
+        connector={connector}
+        executeEnabled={true}
+        actionParams={{}}
+        onEditAction={() => {}}
+        isExecutingAction={false}
+        onExecutionAction={async () => {}}
+        executionResult={some(undefined)}
+        actionTypeRegistry={actionTypeRegistry}
+      />
     );
 
     expect(screen.queryByTestId('executionResultCodeBlock')).not.toBeInTheDocument();

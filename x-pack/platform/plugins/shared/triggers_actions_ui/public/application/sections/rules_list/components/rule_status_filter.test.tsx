@@ -8,9 +8,8 @@
 import React from 'react';
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { I18nProvider } from '@kbn/i18n-react';
-import { EuiThemeProvider } from '@elastic/eui';
 import { RuleStatusFilter } from './rule_status_filter';
 
 const onChangeMock = jest.fn();
@@ -21,7 +20,7 @@ describe('RuleStatusFilter', () => {
   });
 
   it('renders correctly', () => {
-    const { container } = renderWithKibanaRenderContext(
+    const { container } = renderWithI18n(
       <RuleStatusFilter selectedStatuses={[]} onChange={onChangeMock} />
     );
 
@@ -36,7 +35,7 @@ describe('RuleStatusFilter', () => {
   });
 
   it('can open the popover correctly', async () => {
-    renderWithKibanaRenderContext(
+    renderWithI18n(
       <RuleStatusFilter selectedStatuses={[]} onChange={onChangeMock} />
     );
 
@@ -51,7 +50,7 @@ describe('RuleStatusFilter', () => {
   });
 
   it('can select statuses', async () => {
-    const { rerender } = renderWithKibanaRenderContext(
+    const { rerender } = renderWithI18n(
       <RuleStatusFilter selectedStatuses={[]} onChange={onChangeMock} />
     );
 
@@ -65,11 +64,9 @@ describe('RuleStatusFilter', () => {
 
     // Re-render with updated props (simulates parent state update after selection)
     rerender(
-      <EuiThemeProvider>
-        <I18nProvider>
-          <RuleStatusFilter selectedStatuses={['enabled']} onChange={onChangeMock} />
-        </I18nProvider>
-      </EuiThemeProvider>
+      <I18nProvider>
+        <RuleStatusFilter selectedStatuses={['enabled']} onChange={onChangeMock} />
+      </I18nProvider>
     );
 
     // Click first option again to deselect

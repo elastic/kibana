@@ -7,8 +7,8 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { render, screen, waitFor, within } from '@testing-library/react';
-import { I18nProvider } from '@kbn/i18n-react';
+import { screen, waitFor, within } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { IndexSelectPopover } from './index_select_popover';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -116,10 +116,8 @@ describe('IndexSelectPopover', () => {
   });
 
   test('renders closed popover initially and opens on click', async () => {
-    render(
-      <I18nProvider>
-        <IndexSelectPopover {...props} />
-      </I18nProvider>
+    renderWithI18n(
+      <IndexSelectPopover {...props} />
     );
 
     const selectIndexExpression = screen.getByTestId('selectIndexExpression');
@@ -134,10 +132,8 @@ describe('IndexSelectPopover', () => {
   });
 
   test('renders search input', async () => {
-    render(
-      <I18nProvider>
-        <IndexSelectPopover {...props} />
-      </I18nProvider>
+    renderWithI18n(
+      <IndexSelectPopover {...props} />
     );
 
     const selectIndexExpression = screen.getByTestId('selectIndexExpression');
@@ -178,10 +174,8 @@ describe('IndexSelectPopover', () => {
       index: [index],
       timeField,
     };
-    render(
-      <I18nProvider>
-        <IndexSelectPopover {...indexSelectProps} />
-      </I18nProvider>
+    renderWithI18n(
+      <IndexSelectPopover {...indexSelectProps} />
     );
     const selectIndexExpression = screen.getByTestId('selectIndexExpression');
     expect(selectIndexExpression).toHaveTextContent(`index ${index}`);

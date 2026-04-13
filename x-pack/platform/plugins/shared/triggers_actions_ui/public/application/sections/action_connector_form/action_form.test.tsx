@@ -13,8 +13,8 @@ import {
 import { coreMock } from '@kbn/core/public/mocks';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { lazy } from 'react';
-import { I18nProvider } from '@kbn/i18n-react';
-import { render, screen, waitFor, act, within } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen, waitFor, act, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useKibana } from '../../../common/lib/kibana';
 import type { GenericValidationResult, RuleUiAction, ValidationResult } from '../../../types';
@@ -383,72 +383,70 @@ describe('action_form', () => {
     ]);
 
     const defaultActionMessage = 'Alert [{{context.metadata.name}}] has exceeded the threshold';
-    const result = render(
-      <I18nProvider>
-        <QueryClientProvider client={new QueryClient()}>
-          <ActionForm
-            actions={initialAlert.actions}
-            messageVariables={{
-              params: [
-                { name: 'testVar1', description: 'test var1' },
-                { name: 'testVar2', description: 'test var2' },
-              ],
-              state: [],
-              context: [{ name: 'contextVar', description: 'context var1' }],
-            }}
-            featureId="alerting"
-            producerId="alerting"
-            defaultActionGroupId={'default'}
-            isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) => {
-              const recoveryActionGroupId = customRecoveredActionGroup
-                ? customRecoveredActionGroup
-                : 'recovered';
-              return isActionGroupDisabledForActionTypeId(
-                actionGroupId === recoveryActionGroupId ? RecoveredActionGroup.id : actionGroupId,
-                actionTypeId
-              );
-            }}
-            setActionIdByIndex={(id: string, index: number) => {
-              initialAlert.actions[index].id = id;
-            }}
-            actionGroups={[
-              { id: 'default', name: 'Default', defaultActionMessage },
-              {
-                id: customRecoveredActionGroup ? customRecoveredActionGroup : 'recovered',
-                name: customRecoveredActionGroup ? 'I feel better' : 'Recovered',
+    const result = renderWithI18n(
+      <QueryClientProvider client={new QueryClient()}>
+        <ActionForm
+          actions={initialAlert.actions}
+          messageVariables={{
+            params: [
+              { name: 'testVar1', description: 'test var1' },
+              { name: 'testVar2', description: 'test var2' },
+            ],
+            state: [],
+            context: [{ name: 'contextVar', description: 'context var1' }],
+          }}
+          featureId="alerting"
+          producerId="alerting"
+          defaultActionGroupId={'default'}
+          isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) => {
+            const recoveryActionGroupId = customRecoveredActionGroup
+              ? customRecoveredActionGroup
+              : 'recovered';
+            return isActionGroupDisabledForActionTypeId(
+              actionGroupId === recoveryActionGroupId ? RecoveredActionGroup.id : actionGroupId,
+              actionTypeId
+            );
+          }}
+          setActionIdByIndex={(id: string, index: number) => {
+            initialAlert.actions[index].id = id;
+          }}
+          actionGroups={[
+            { id: 'default', name: 'Default', defaultActionMessage },
+            {
+              id: customRecoveredActionGroup ? customRecoveredActionGroup : 'recovered',
+              name: customRecoveredActionGroup ? 'I feel better' : 'Recovered',
+            },
+          ]}
+          setActionGroupIdByIndex={(group: string, index: number) => {
+            initialAlert.actions[index].group = group;
+          }}
+          setActions={(_updatedActions: RuleUiAction[]) => {}}
+          setActionParamsProperty={(key: string, value: any, index: number) =>
+            (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
+          }
+          setActionFrequencyProperty={(key: string, value: any, index: number) =>
+            (initialAlert.actions[index] = {
+              ...initialAlert.actions[index],
+              frequency: {
+                ...initialAlert.actions[index].frequency!,
+                [key]: value,
               },
-            ]}
-            setActionGroupIdByIndex={(group: string, index: number) => {
-              initialAlert.actions[index].group = group;
-            }}
-            setActions={(_updatedActions: RuleUiAction[]) => {}}
-            setActionParamsProperty={(key: string, value: any, index: number) =>
-              (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
-            }
-            setActionFrequencyProperty={(key: string, value: any, index: number) =>
-              (initialAlert.actions[index] = {
-                ...initialAlert.actions[index],
-                frequency: {
-                  ...initialAlert.actions[index].frequency!,
-                  [key]: value,
-                },
-              })
-            }
-            setActionAlertsFilterProperty={(key: string, value: any, index: number) =>
-              (initialAlert.actions[index] = {
-                ...initialAlert.actions[index],
-                alertsFilter: {
-                  ...initialAlert.actions[index].alertsFilter,
-                  [key]: value,
-                },
-              })
-            }
-            actionTypeRegistry={actionTypeRegistry}
-            setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
-            ruleTypeId=".es-query"
-          />
-        </QueryClientProvider>
-      </I18nProvider>
+            })
+          }
+          setActionAlertsFilterProperty={(key: string, value: any, index: number) =>
+            (initialAlert.actions[index] = {
+              ...initialAlert.actions[index],
+              alertsFilter: {
+                ...initialAlert.actions[index].alertsFilter,
+                [key]: value,
+              },
+            })
+          }
+          actionTypeRegistry={actionTypeRegistry}
+          setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
+          ruleTypeId=".es-query"
+        />
+      </QueryClientProvider>
     );
 
     // Wait for async data to load

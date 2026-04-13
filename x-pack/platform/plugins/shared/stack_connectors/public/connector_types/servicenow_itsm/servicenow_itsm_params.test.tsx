@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, render, waitFor, screen } from '@testing-library/react';
+import { act, waitFor, screen } from '@testing-library/react';
 import { merge } from 'lodash';
 
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
@@ -16,6 +16,7 @@ import ServiceNowITSMParamsFields from './servicenow_itsm_params';
 import type { Choice } from '../lib/servicenow/types';
 import { ACTION_GROUP_RECOVERED } from '../lib/servicenow/helpers';
 import userEvent from '@testing-library/user-event';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
@@ -126,9 +127,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
   });
 
   test('all params fields is rendered', () => {
-    render(<ServiceNowITSMParamsFields {...defaultProps} />, {
-      wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-    });
+    renderWithI18n(<ServiceNowITSMParamsFields {...defaultProps} />);
     act(() => {
       onChoices(useGetChoicesResponse.choices);
     });
@@ -150,22 +149,20 @@ describe('ServiceNowITSMParamsFields renders', () => {
       ...defaultProps,
       errors: { 'subActionParams.incident.short_description': ['error'] },
     };
-    render(<ServiceNowITSMParamsFields {...newProps} />, {
-      wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-    });
+    renderWithI18n(<ServiceNowITSMParamsFields {...newProps} />);
     expect(screen.getByTestId('short_descriptionInput')).toHaveAttribute('aria-invalid', 'true');
   });
 
   test('Resets fields when connector changes', () => {
-    const { rerender } = render(<ServiceNowITSMParamsFields {...defaultProps} />, {
-      wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-    });
+    const { rerender } = renderWithI18n(<ServiceNowITSMParamsFields {...defaultProps} />);
     expect(editAction.mock.calls.length).toEqual(0);
     rerender(
-      <ServiceNowITSMParamsFields
-        {...defaultProps}
-        actionConnector={{ ...connector, id: '1234' }}
-      />
+        <I18nProvider>
+          <ServiceNowITSMParamsFields
+            {...defaultProps}
+            actionConnector={{ ...connector, id: '1234' }}
+          />
+        </I18nProvider>
     );
     expect(editAction.mock.calls.length).toEqual(1);
     expect(editAction.mock.calls[0][1]).toEqual({
@@ -181,12 +178,12 @@ describe('ServiceNowITSMParamsFields renders', () => {
       ...defaultProps,
       selectedActionGroupId: ACTION_GROUP_RECOVERED,
     };
-    const { rerender } = render(<ServiceNowITSMParamsFields {...newProps} />, {
-      wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-    });
+    const { rerender } = renderWithI18n(<ServiceNowITSMParamsFields {...newProps} />);
     expect(editAction.mock.calls.length).toEqual(0);
     rerender(
-      <ServiceNowITSMParamsFields {...newProps} actionConnector={{ ...connector, id: '1234' }} />
+        <I18nProvider>
+          <ServiceNowITSMParamsFields {...newProps} actionConnector={{ ...connector, id: '1234' }} />
+        </I18nProvider>
     );
     expect(editAction.mock.calls.length).toEqual(1);
     expect(editAction.mock.calls[0][1]).toEqual({
@@ -195,9 +192,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
   });
 
   test('it transforms the categories to options correctly', async () => {
-    render(<ServiceNowITSMParamsFields {...defaultProps} />, {
-      wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-    });
+    renderWithI18n(<ServiceNowITSMParamsFields {...defaultProps} />);
     act(() => {
       onChoices(useGetChoicesResponse.choices);
     });
@@ -213,9 +208,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
   });
 
   test('it transforms the subcategories to options correctly', async () => {
-    render(<ServiceNowITSMParamsFields {...defaultProps} />, {
-      wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-    });
+    renderWithI18n(<ServiceNowITSMParamsFields {...defaultProps} />);
     act(() => {
       onChoices(useGetChoicesResponse.choices);
     });
@@ -228,9 +221,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
   });
 
   test('it transforms the options correctly', async () => {
-    render(<ServiceNowITSMParamsFields {...defaultProps} />, {
-      wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-    });
+    renderWithI18n(<ServiceNowITSMParamsFields {...defaultProps} />);
     act(() => {
       onChoices(useGetChoicesResponse.choices);
     });
@@ -261,9 +252,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
         },
       },
     });
-    render(<ServiceNowITSMParamsFields {...newProps} />, {
-      wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-    });
+    renderWithI18n(<ServiceNowITSMParamsFields {...newProps} />);
     act(() => {
       onChoices(useGetChoicesResponse.choices);
     });
@@ -273,9 +262,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
 
   describe('UI updates', () => {
     test('short_description update triggers editAction :D', async () => {
-      render(<ServiceNowITSMParamsFields {...defaultProps} />, {
-        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-      });
+      renderWithI18n(<ServiceNowITSMParamsFields {...defaultProps} />);
       act(() => {
         onChoices(useGetChoicesResponse.choices);
       });
@@ -286,9 +273,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
     });
 
     test('correlation_id update triggers editAction :D', async () => {
-      render(<ServiceNowITSMParamsFields {...defaultProps} />, {
-        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-      });
+      renderWithI18n(<ServiceNowITSMParamsFields {...defaultProps} />);
       act(() => {
         onChoices(useGetChoicesResponse.choices);
       });
@@ -299,9 +284,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
     });
 
     test('correlation_display update triggers editAction :D', async () => {
-      render(<ServiceNowITSMParamsFields {...defaultProps} />, {
-        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-      });
+      renderWithI18n(<ServiceNowITSMParamsFields {...defaultProps} />);
       act(() => {
         onChoices(useGetChoicesResponse.choices);
       });
@@ -312,9 +295,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
     });
 
     test('description update triggers editAction :D', async () => {
-      render(<ServiceNowITSMParamsFields {...defaultProps} />, {
-        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-      });
+      renderWithI18n(<ServiceNowITSMParamsFields {...defaultProps} />);
       act(() => {
         onChoices(useGetChoicesResponse.choices);
       });
@@ -325,9 +306,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
     });
 
     test('urgency update triggers editAction :D', async () => {
-      render(<ServiceNowITSMParamsFields {...defaultProps} />, {
-        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-      });
+      renderWithI18n(<ServiceNowITSMParamsFields {...defaultProps} />);
       act(() => {
         onChoices(useGetChoicesResponse.choices);
       });
@@ -336,9 +315,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
     });
 
     test('severity update triggers editAction :D', async () => {
-      render(<ServiceNowITSMParamsFields {...defaultProps} />, {
-        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-      });
+      renderWithI18n(<ServiceNowITSMParamsFields {...defaultProps} />);
       act(() => {
         onChoices(useGetChoicesResponse.choices);
       });
@@ -347,9 +324,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
     });
 
     test('impact update triggers editAction :D', async () => {
-      render(<ServiceNowITSMParamsFields {...defaultProps} />, {
-        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-      });
+      renderWithI18n(<ServiceNowITSMParamsFields {...defaultProps} />);
       act(() => {
         onChoices(useGetChoicesResponse.choices);
       });
@@ -358,9 +333,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
     });
 
     test('category update triggers editAction :D', async () => {
-      render(<ServiceNowITSMParamsFields {...defaultProps} />, {
-        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-      });
+      renderWithI18n(<ServiceNowITSMParamsFields {...defaultProps} />);
       act(() => {
         onChoices(useGetChoicesResponse.choices);
       });
@@ -369,9 +342,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
     });
 
     test('subcategory update triggers editAction :D', async () => {
-      render(<ServiceNowITSMParamsFields {...defaultProps} />, {
-        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-      });
+      renderWithI18n(<ServiceNowITSMParamsFields {...defaultProps} />);
       act(() => {
         onChoices(useGetChoicesResponse.choices);
       });
@@ -380,9 +351,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
     });
 
     test('A comment triggers editAction', async () => {
-      render(<ServiceNowITSMParamsFields {...defaultProps} />, {
-        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-      });
+      renderWithI18n(<ServiceNowITSMParamsFields {...defaultProps} />);
       const input = screen.getByTestId('commentsTextArea');
       await userEvent.tripleClick(input);
       await userEvent.paste('Bug');
@@ -394,9 +363,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
         ...defaultProps,
         selectedActionGroupId: 'recovered',
       };
-      render(<ServiceNowITSMParamsFields {...newProps} />, {
-        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-      });
+      renderWithI18n(<ServiceNowITSMParamsFields {...newProps} />);
       expect(screen.getByTestId('correlation_idInput')).toBeInTheDocument();
       expect(screen.queryByTestId('short_descriptionInput')).not.toBeInTheDocument();
     });
@@ -406,15 +373,13 @@ describe('ServiceNowITSMParamsFields renders', () => {
         ...defaultProps,
         selectedActionGroupId: undefined,
       };
-      render(<ServiceNowITSMParamsFields {...newProps} />, {
-        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-      });
+      renderWithI18n(<ServiceNowITSMParamsFields {...newProps} />);
       expect(screen.getByTestId('short_descriptionInput')).toBeInTheDocument();
       expect(screen.getByTestId('correlation_idInput')).toBeInTheDocument();
     });
 
     test('A short description change triggers editAction', async () => {
-      render(
+      renderWithI18n(
         <ServiceNowITSMParamsFields
           actionParams={{}}
           errors={{ ['subActionParams.incident.short_description']: [] }}
@@ -422,10 +387,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
           index={0}
           selectedActionGroupId={'trigger'}
           executionMode={ActionConnectorMode.ActionForm}
-        />,
-        {
-          wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-        }
+        />
       );
 
       const input = screen.getByTestId('short_descriptionInput');
@@ -439,17 +401,14 @@ describe('ServiceNowITSMParamsFields renders', () => {
     });
 
     test('A correlation_id field change triggers edit action correctly when actionGroup is recovered', async () => {
-      render(
+      renderWithI18n(
         <ServiceNowITSMParamsFields
           selectedActionGroupId={'recovered'}
           actionParams={{}}
           errors={{ ['subActionParams.incident.short_description']: [] }}
           editAction={editAction}
           index={0}
-        />,
-        {
-          wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-        }
+        />
       );
 
       const input = screen.getByTestId('correlation_idInput');
@@ -478,18 +437,14 @@ describe('ServiceNowITSMParamsFields renders', () => {
         selectedActionGroupId: ACTION_GROUP_RECOVERED,
       };
 
-      render(<ServiceNowITSMParamsFields {...newProps} />, {
-        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-      });
+      renderWithI18n(<ServiceNowITSMParamsFields {...newProps} />);
 
       expect(screen.getByText('correlation_id_error')).toBeInTheDocument();
     });
 
     it('updates additional fields', async () => {
       const newValue = JSON.stringify({ bar: 'test' });
-      render(<ServiceNowITSMParamsFields {...defaultProps} />, {
-        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-      });
+      renderWithI18n(<ServiceNowITSMParamsFields {...defaultProps} />);
 
       await userEvent.click(await screen.findByTestId('additional_fieldsJsonEditor'));
       await userEvent.paste(newValue);
@@ -509,9 +464,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
     };
 
     test('renders event action dropdown correctly', () => {
-      render(<ServiceNowITSMParamsFields {...newDefaultProps} />, {
-        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-      });
+      renderWithI18n(<ServiceNowITSMParamsFields {...newDefaultProps} />);
       expect(screen.getByTestId('eventActionSelect')).toBeInTheDocument();
       const select = screen.getByTestId('eventActionSelect') as HTMLSelectElement;
       const options = Array.from(select.options)
@@ -524,9 +477,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
     });
 
     test('shows form for trigger action correctly', async () => {
-      render(<ServiceNowITSMParamsFields {...newDefaultProps} />, {
-        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-      });
+      renderWithI18n(<ServiceNowITSMParamsFields {...newDefaultProps} />);
 
       await userEvent.selectOptions(screen.getByTestId('eventActionSelect'), 'trigger');
 
@@ -544,9 +495,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
     });
 
     test('shows form for resolve action correctly', async () => {
-      render(<ServiceNowITSMParamsFields {...newDefaultProps} />, {
-        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-      });
+      renderWithI18n(<ServiceNowITSMParamsFields {...newDefaultProps} />);
 
       expect(editAction.mock.calls[0][1]).toEqual('pushToService');
 
@@ -569,9 +518,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
     });
 
     test('resets form fields on action change', async () => {
-      render(<ServiceNowITSMParamsFields {...newDefaultProps} />, {
-        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-      });
+      renderWithI18n(<ServiceNowITSMParamsFields {...newDefaultProps} />);
 
       const correlationInput = screen.getByTestId('correlation_idInput');
       await userEvent.tripleClick(correlationInput);

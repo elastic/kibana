@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { I18nProvider } from '@kbn/i18n-react';
+import { screen } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import IndexThresholdRuleTypeExpression, { DEFAULT_VALUES } from './expression';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
@@ -96,24 +96,22 @@ describe('IndexThresholdRuleTypeExpression', () => {
   function setup(ruleParams: IndexThresholdRuleParams) {
     const { errors } = validateExpression(ruleParams);
 
-    return render(
-      <I18nProvider>
-        <IndexThresholdRuleTypeExpression
-          ruleInterval="1m"
-          ruleThrottle="1m"
-          alertNotifyWhen="onThrottleInterval"
-          ruleParams={ruleParams}
-          setRuleParams={() => {}}
-          setRuleProperty={() => {}}
-          errors={errors}
-          data={dataMock}
-          dataViews={dataViewMock}
-          defaultActionGroupId=""
-          actionGroups={[]}
-          charts={chartsStartMock}
-          onChangeMetaData={() => {}}
-        />
-      </I18nProvider>
+    return renderWithI18n(
+      <IndexThresholdRuleTypeExpression
+        ruleInterval="1m"
+        ruleThrottle="1m"
+        alertNotifyWhen="onThrottleInterval"
+        ruleParams={ruleParams}
+        setRuleParams={() => {}}
+        setRuleProperty={() => {}}
+        errors={errors}
+        data={dataMock}
+        dataViews={dataViewMock}
+        defaultActionGroupId=""
+        actionGroups={[]}
+        charts={chartsStartMock}
+        onChangeMetaData={() => {}}
+      />
     );
   }
 
