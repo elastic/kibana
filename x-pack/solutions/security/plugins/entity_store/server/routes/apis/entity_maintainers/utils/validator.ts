@@ -57,7 +57,7 @@ export async function validateMaintainersRequest(
     });
   }
 
-  const { status } = await assetManagerClient.getStatus(false);
+  const { status } = await assetManagerClient.getStatus();
   if (status === ENTITY_STORE_STATUS.NOT_INSTALLED) {
     return res.badRequest({
       body: {
