@@ -6,13 +6,26 @@
  */
 
 import expect from '@kbn/expect';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { initElasticsearchHelpers, getRandomString } from './lib';
 import { getTemplatePayload, getPolicyPayload } from './fixtures';
 import { registerHelpers as registerTemplatesHelpers } from './templates.helpers';
 import { registerHelpers as registerPoliciesHelpers } from './policies.helpers';
 
-export default function ({ getService }) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+
+  interface IlmTemplateListItem {
+    name: string;
+    settings: {
+      index?: {
+        lifecycle?: {
+          name?: string;
+          rollover_alias?: string;
+        };
+      };
+    };
+  }
 
   const { createIndexTemplate, cleanUp: cleanUpEsResources } = initElasticsearchHelpers(getService);
 
@@ -32,8 +45,11 @@ export default function ({ getService }) {
         await createIndexTemplate(templateName, getTemplatePayload());
 
         // Load the templates and verify that our new template is in the list
-        const { body } = await loadTemplates().expect(200);
-        expect(body.map((t) => t.name)).to.contain(templateName);
+        const { body: templates }: { body: IlmTemplateListItem[] } = await loadTemplates().expect(
+          200
+        );
+        const templateNames = templates.map((t) => t.name);
+        expect(templateNames).to.contain(templateName);
       });
 
       it('should filter out the system template whose index patterns does not contain wildcard', async () => {
@@ -43,8 +59,11 @@ export default function ({ getService }) {
         await createIndexTemplate(templateName, { ...template, index_patterns: ['no-wildcard'] });
 
         // Load the templates and verify that our new template is **not** in the list
-        const { body } = await loadTemplates().expect(200);
-        expect(body.map((t) => t.name)).not.to.contain(templateName);
+        const { body: templates }: { body: IlmTemplateListItem[] } = await loadTemplates().expect(
+          200
+        );
+        const templateNames = templates.map((t) => t.name);
+        expect(templateNames).not.to.contain(templateName);
       });
     });
 
@@ -66,13 +85,9 @@ export default function ({ getService }) {
         await addPolicyToTemplate(templateName, policyName, rolloverAlias).expect(200);
 
         // Fetch the template and verify that the policy has been attached
-        const { body } = await loadTemplates();
-        const fetchedTemplate = body.find(({ name }) => templateName === name);
-        const {
-          settings: {
-            index: { lifecycle },
-          },
-        } = fetchedTemplate;
+        const { body: templates }: { body: IlmTemplateListItem[] } = await loadTemplates();
+        const fetchedTemplate = templates.find((t) => templateName === t.name)!;
+        const lifecycle = fetchedTemplate.settings.index?.lifecycle!;
         expect(lifecycle.name).to.equal(policyName);
         expect(lifecycle.rollover_alias).to.equal(rolloverAlias);
       });
