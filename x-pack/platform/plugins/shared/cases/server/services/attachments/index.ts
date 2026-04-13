@@ -36,7 +36,6 @@ import {
   getAttachmentTypeTransformers,
   resolveAttachmentSavedObjectType,
 } from '../../common/attachments';
-import { passThroughTransformer } from '../../common/attachments/base';
 
 import { buildFilter, combineFilters } from '../../client/utils';
 import { defaultSortField } from '../../common/utils';
@@ -77,7 +76,7 @@ import type {
   UnifiedAttachmentSavedObjectTransformed,
 } from '../../common/types/attachments_v2';
 import { isSOError } from '../../common/error';
-import { transformAttributesForMode } from './operations/utils';
+import { getTransformerForPatchAttributes, transformAttributesForMode } from './operations/utils';
 
 /**
  * Ensures alert attachments have rule.name, or else existing tests will fail
@@ -535,12 +534,10 @@ export class AttachmentService {
               const decodedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(
                 c.updatedAttributes
               );
-              const transformer = requestWithoutType
-                ? passThroughTransformer
-                : getAttachmentTypeTransformers(
-                    getAttachmentTypeFromAttributes(decodedAttributes),
-                    decodedAttributes.owner
-                  );
+              const transformer = getTransformerForPatchAttributes(
+                decodedAttributes,
+                requestWithoutType
+              );
               const unifiedAttributes = transformer.toUnifiedSchema(decodedAttributes);
 
               return {
@@ -562,12 +559,10 @@ export class AttachmentService {
               c.updatedAttributes
             );
             assertAlertAttachmentHasRuleName(decodedAttributes as Record<string, unknown>);
-            const transformer = requestWithoutType
-              ? passThroughTransformer
-              : getAttachmentTypeTransformers(
-                  getAttachmentTypeFromAttributes(decodedAttributes),
-                  decodedAttributes.owner ?? ''
-                );
+            const transformer = getTransformerForPatchAttributes(
+              decodedAttributes,
+              requestWithoutType
+            );
             const legacyAttributes = transformer.toLegacySchema(decodedAttributes);
             const {
               attributes: extractedAttributes,
@@ -636,12 +631,7 @@ export class AttachmentService {
         const decodedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(
           comments[i].updatedAttributes
         );
-        const transformer = requestWithoutType
-          ? passThroughTransformer
-          : getAttachmentTypeTransformers(
-              getAttachmentTypeFromAttributes(decodedAttributes),
-              decodedAttributes.owner ?? ''
-            );
+        const transformer = getTransformerForPatchAttributes(decodedAttributes, requestWithoutType);
         const legacyAttributes = transformer.toLegacySchema(decodedAttributes);
         const transformedAttachment = injectAttachmentSOAttributesFromRefsForPatch(
           legacyAttributes,
