@@ -156,7 +156,7 @@ async function parseZipFile(buffer: ArrayBuffer): Promise<ClientPreflightResult>
   };
 }
 
-function parseYamlFile(content: string, filename: string): ClientPreflightResult {
+function parseYamlFile(content: string): ClientPreflightResult {
   if (content.length > MAX_WORKFLOW_YAML_LENGTH) {
     throw new Error(
       `File exceeds the maximum YAML length of ${MAX_WORKFLOW_YAML_LENGTH} characters`
@@ -198,5 +198,5 @@ export async function parseImportFile(file: File): Promise<ClientPreflightResult
     throw new Error('The uploaded file is empty');
   }
 
-  return parseYamlFile(content, file.name);
+  return parseYamlFile(content);
 }

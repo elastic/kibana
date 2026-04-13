@@ -46,7 +46,10 @@ function countInputs(raw: unknown): number {
 
 export function generatePreviewId(name: string | null): string {
   const slug = name != null ? toSlugIdentifier(name) : '';
-  return slug.length >= 3 ? slug : `workflow-${generateUuid()}`;
+  if (slug.length >= 3) {
+    return slug;
+  }
+  return `workflow-${generateUuid()}`;
 }
 
 /**
