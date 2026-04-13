@@ -121,6 +121,7 @@ export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAp
               comparisonEnabled={false}
               offset=""
               threshold={thresholdComponent}
+              ruleTypeId={alertRuleTypeId}
             />
             <EuiSpacer size="s" />
             <EuiFlexGroup direction="row" gutterSize="s">
@@ -135,6 +136,7 @@ export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAp
                 comparisonEnabled={false}
                 offset=""
                 timeZone={timeZone}
+                ruleTypeId={alertRuleTypeId}
               />
               <FailedTransactionChart
                 transactionType={transactionType}
@@ -145,6 +147,7 @@ export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAp
                 end={to}
                 comparisonChartTheme={comparisonChartTheme}
                 timeZone={timeZone}
+                ruleTypeId={alertRuleTypeId}
               />
             </EuiFlexGroup>
           </EuiFlexItem>

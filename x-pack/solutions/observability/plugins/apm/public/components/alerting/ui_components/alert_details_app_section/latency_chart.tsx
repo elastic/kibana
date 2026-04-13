@@ -63,6 +63,7 @@ function LatencyChart({
   kuery = '',
   filters,
   threshold,
+  ruleTypeId,
 }: {
   alert: TopAlert;
   transactionType: string;
@@ -83,6 +84,7 @@ function LatencyChart({
   threshold?: ReactElement;
   kuery?: string;
   filters?: BoolQuery;
+  ruleTypeId?: string;
 }) {
   const preferred = usePreferredDataSourceAndBucketSize({
     start,
@@ -244,6 +246,7 @@ function LatencyChart({
                     kuery,
                   }}
                   timeRange={{ from: start, to: end }}
+                  ruleTypeId={ruleTypeId}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

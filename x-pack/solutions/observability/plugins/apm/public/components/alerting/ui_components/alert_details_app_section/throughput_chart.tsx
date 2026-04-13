@@ -41,6 +41,7 @@ function ThroughputChart({
   timeZone,
   kuery = '',
   filters,
+  ruleTypeId,
 }: {
   transactionType: string;
   transactionTypes?: string[];
@@ -56,6 +57,7 @@ function ThroughputChart({
   timeZone: string;
   kuery?: string;
   filters?: BoolQuery;
+  ruleTypeId?: string;
 }) {
   const preferred = usePreferredDataSourceAndBucketSize({
     start,
@@ -170,6 +172,7 @@ function ThroughputChart({
                     kuery,
                   }}
                   timeRange={{ from: start, to: end }}
+                  ruleTypeId={ruleTypeId}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

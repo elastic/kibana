@@ -65,6 +65,7 @@ function FailedTransactionChart({
   filters,
   alertStart,
   alertEnd,
+  ruleTypeId,
 }: {
   transactionType: string;
   transactionTypes?: string[];
@@ -80,6 +81,7 @@ function FailedTransactionChart({
   filters?: BoolQuery;
   alertStart?: number;
   alertEnd?: number;
+  ruleTypeId?: string;
 }) {
   const { euiTheme } = useEuiTheme();
   const {
@@ -208,6 +210,7 @@ function FailedTransactionChart({
                     kuery,
                   }}
                   timeRange={{ from: start, to: end }}
+                  ruleTypeId={ruleTypeId}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

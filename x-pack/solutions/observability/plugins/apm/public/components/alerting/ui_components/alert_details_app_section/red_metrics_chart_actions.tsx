@@ -37,9 +37,14 @@ interface RedMetricsChartActionsProps {
     'serviceName' | 'environment' | 'transactionName' | 'transactionType' | 'kuery'
   >;
   timeRange: { from: string; to: string };
+  ruleTypeId?: string;
 }
 
-export function RedMetricsChartActions({ queryParams, timeRange }: RedMetricsChartActionsProps) {
+export function RedMetricsChartActions({
+  queryParams,
+  timeRange,
+  ruleTypeId,
+}: RedMetricsChartActionsProps) {
   const {
     services: { share, apmSourcesAccess },
   } = useKibana<ObservabilityPublicPluginsStart>();
@@ -114,6 +119,7 @@ export function RedMetricsChartActions({ queryParams, timeRange }: RedMetricsCha
           data-test-subj="apmAlertDetailsViewInApmAction"
           data-action="openInApm"
           data-source="apmAlertDetails"
+          data-alert-type={ruleTypeId}
         >
           {inApmLabel}
         </EuiContextMenuItem>
@@ -123,6 +129,7 @@ export function RedMetricsChartActions({ queryParams, timeRange }: RedMetricsCha
           data-test-subj="apmAlertDetailsTracesInDiscoverAction"
           data-action="openTracesInDiscover"
           data-source="apmAlertDetails"
+          data-alert-type={ruleTypeId}
         >
           {tracesInDiscoverLabel}
         </EuiContextMenuItem>
