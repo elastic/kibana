@@ -400,7 +400,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     const alertFlyoutOverviewTabFeature: SecuritySolutionAlertFlyoutOverviewTabFeature = {
       id: 'security-solution-alert-flyout-overview-tab',
-      render: ({ hit, onAlertUpdated }) => {
+      render: ({ hit, onAlertUpdated, ...docViewProps }) => {
         const servicesPromise = this.getDiscoverFlyoutServices(core);
         const storePromise = this.getDiscoverFlyoutStore(core);
 
@@ -411,6 +411,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               servicesPromise={servicesPromise}
               storePromise={storePromise}
               onAlertUpdated={onAlertUpdated}
+              {...docViewProps}
             />
           </React.Suspense>
         );
@@ -424,7 +425,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
     const headerTitleFeature: SecuritySolutionAlertFlyoutHeaderTitleFeature = {
       id: 'security-solution-alert-flyout-header-title',
-      renderHeader: ({ hit, onAlertUpdated }) => {
+      renderHeader: ({ hit, onAlertUpdated, ...docViewProps }) => {
         const servicesPromise = this.getDiscoverFlyoutServices(core);
         const storePromise = this.getDiscoverFlyoutStore(core);
 
@@ -435,6 +436,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               servicesPromise={servicesPromise}
               storePromise={storePromise}
               onAlertUpdated={onAlertUpdated}
+              {...docViewProps}
             />
           </React.Suspense>
         );
