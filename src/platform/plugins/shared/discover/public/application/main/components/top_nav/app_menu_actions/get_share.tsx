@@ -151,7 +151,7 @@ const buildShareOptions = async ({
     },
     sharingData: {
       isTextBased: isEsqlMode,
-      locatorParams: [{ id: locator.id, params }],
+      locatorParams: [{ id: locator.id, version: services.metadata.version, params }],
       ...searchSourceSharingData,
       // CSV reports can be generated without a saved search so we provide a fallback title
       title:
