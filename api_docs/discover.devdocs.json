@@ -3786,7 +3786,7 @@
             "section": "def-common.DataGridDensity",
             "text": "DataGridDensity"
           },
-          " | undefined; column_order?: string[] | undefined; column_settings?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; header_row_height?: number | \"auto\" | undefined; row_height?: number | \"auto\" | undefined; } & { sort: Readonly<{} & { name: string; direction: \"asc\" | \"desc\"; }>[]; query: Readonly<{} & { esql: string; }>; }>)[]; }> | Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; drilldowns?: ",
+          " | undefined; column_order?: string[] | undefined; column_settings?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; header_row_height?: number | \"auto\" | undefined; row_height?: number | \"auto\" | undefined; } & { sort: Readonly<{} & { name: string; direction: \"asc\" | \"desc\"; }>[]; data_source: Readonly<{} & { type: \"esql\"; query: string; }>; }>)[]; }> | Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; drilldowns?: ",
           {
             "pluginId": "embeddable",
             "scope": "server",
@@ -4516,7 +4516,7 @@
           "; }"
         ],
         "path": "src/platform/plugins/shared/discover/server/embeddable/schema.ts",
-        "lineNumber": 394,
+        "lineNumber": 396,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4541,7 +4541,7 @@
           " | undefined; column_order?: string[] | undefined; column_settings?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; header_row_height?: number | \"auto\" | undefined; row_height?: number | \"auto\" | undefined; rows_per_page?: number | undefined; sample_size?: number | undefined; } & {}>; readonly ref_id: string; }"
         ],
         "path": "src/platform/plugins/shared/discover/server/embeddable/schema.ts",
-        "lineNumber": 400,
+        "lineNumber": 402,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4574,7 +4574,7 @@
           " | undefined; column_order?: string[] | undefined; column_settings?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; header_row_height?: number | \"auto\" | undefined; row_height?: number | \"auto\" | undefined; rows_per_page?: number | undefined; sample_size?: number | undefined; } & {}>; readonly ref_id: string; }"
         ],
         "path": "src/platform/plugins/shared/discover/server/embeddable/schema.ts",
-        "lineNumber": 407,
+        "lineNumber": 409,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4620,10 +4620,10 @@
             "section": "def-common.DataGridDensity",
             "text": "DataGridDensity"
           },
-          " | undefined; column_order?: string[] | undefined; column_settings?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; header_row_height?: number | \"auto\" | undefined; row_height?: number | \"auto\" | undefined; } & { sort: Readonly<{} & { name: string; direction: \"asc\" | \"desc\"; }>[]; query: Readonly<{} & { esql: string; }>; }>)[]; }"
+          " | undefined; column_order?: string[] | undefined; column_settings?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; header_row_height?: number | \"auto\" | undefined; row_height?: number | \"auto\" | undefined; } & { sort: Readonly<{} & { name: string; direction: \"asc\" | \"desc\"; }>[]; data_source: Readonly<{} & { type: \"esql\"; query: string; }>; }>)[]; }"
         ],
         "path": "src/platform/plugins/shared/discover/server/embeddable/schema.ts",
-        "lineNumber": 397,
+        "lineNumber": 399,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4677,10 +4677,10 @@
             "section": "def-common.DataGridDensity",
             "text": "DataGridDensity"
           },
-          " | undefined; column_order?: string[] | undefined; column_settings?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; header_row_height?: number | \"auto\" | undefined; row_height?: number | \"auto\" | undefined; } & { sort: Readonly<{} & { name: string; direction: \"asc\" | \"desc\"; }>[]; query: Readonly<{} & { esql: string; }>; }>)[]; }"
+          " | undefined; column_order?: string[] | undefined; column_settings?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; header_row_height?: number | \"auto\" | undefined; row_height?: number | \"auto\" | undefined; } & { sort: Readonly<{} & { name: string; direction: \"asc\" | \"desc\"; }>[]; data_source: Readonly<{} & { type: \"esql\"; query: string; }>; }>)[]; }"
         ],
         "path": "src/platform/plugins/shared/discover/server/embeddable/schema.ts",
-        "lineNumber": 404,
+        "lineNumber": 406,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4734,7 +4734,7 @@
             "section": "def-common.DataGridDensity",
             "text": "DataGridDensity"
           },
-          " | undefined; column_order?: string[] | undefined; column_settings?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; header_row_height?: number | \"auto\" | undefined; row_height?: number | \"auto\" | undefined; } & { sort: Readonly<{} & { name: string; direction: \"asc\" | \"desc\"; }>[]; query: Readonly<{} & { esql: string; }>; }>)[]; }> | Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; drilldowns?: ",
+          " | undefined; column_order?: string[] | undefined; column_settings?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; header_row_height?: number | \"auto\" | undefined; row_height?: number | \"auto\" | undefined; } & { sort: Readonly<{} & { name: string; direction: \"asc\" | \"desc\"; }>[]; data_source: Readonly<{} & { type: \"esql\"; query: string; }>; }>)[]; }> | Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; drilldowns?: ",
           {
             "pluginId": "embeddable",
             "scope": "server",
@@ -4753,7 +4753,7 @@
           " | undefined; column_order?: string[] | undefined; column_settings?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; header_row_height?: number | \"auto\" | undefined; row_height?: number | \"auto\" | undefined; rows_per_page?: number | undefined; sample_size?: number | undefined; } & {}>; ref_id: string; }>"
         ],
         "path": "src/platform/plugins/shared/discover/server/embeddable/schema.ts",
-        "lineNumber": 410,
+        "lineNumber": 412,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4775,10 +4775,10 @@
             "section": "def-common.DataGridDensity",
             "text": "DataGridDensity"
           },
-          " | undefined; readonly column_order?: string[] | undefined; readonly column_settings?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; readonly header_row_height?: number | \"auto\" | undefined; readonly row_height?: number | \"auto\" | undefined; readonly sort: Readonly<{} & { name: string; direction: \"asc\" | \"desc\"; }>[]; readonly query: Readonly<{} & { esql: string; }>; }"
+          " | undefined; readonly column_order?: string[] | undefined; readonly column_settings?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; readonly header_row_height?: number | \"auto\" | undefined; readonly row_height?: number | \"auto\" | undefined; readonly sort: Readonly<{} & { name: string; direction: \"asc\" | \"desc\"; }>[]; readonly data_source: Readonly<{} & { type: \"esql\"; query: string; }>; }"
         ],
         "path": "src/platform/plugins/shared/discover/server/embeddable/schema.ts",
-        "lineNumber": 395,
+        "lineNumber": 397,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4803,7 +4803,7 @@
           " | undefined; readonly column_order?: string[] | undefined; readonly column_settings?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; readonly header_row_height?: number | \"auto\" | undefined; readonly row_height?: number | \"auto\" | undefined; readonly rows_per_page?: number | undefined; readonly sample_size?: number | undefined; }"
         ],
         "path": "src/platform/plugins/shared/discover/server/embeddable/schema.ts",
-        "lineNumber": 393,
+        "lineNumber": 395,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4849,10 +4849,10 @@
             "section": "def-common.DataGridDensity",
             "text": "DataGridDensity"
           },
-          " | undefined; column_order?: string[] | undefined; column_settings?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; header_row_height?: number | \"auto\" | undefined; row_height?: number | \"auto\" | undefined; } & { sort: Readonly<{} & { name: string; direction: \"asc\" | \"desc\"; }>[]; query: Readonly<{} & { esql: string; }>; }>"
+          " | undefined; column_order?: string[] | undefined; column_settings?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; header_row_height?: number | \"auto\" | undefined; row_height?: number | \"auto\" | undefined; } & { sort: Readonly<{} & { name: string; direction: \"asc\" | \"desc\"; }>[]; data_source: Readonly<{} & { type: \"esql\"; query: string; }>; }>"
         ],
         "path": "src/platform/plugins/shared/discover/server/embeddable/schema.ts",
-        "lineNumber": 396,
+        "lineNumber": 398,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
