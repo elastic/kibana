@@ -80,7 +80,6 @@ export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.observability}.agent`,
   `${internalNamespaces.search}.agent`,
   `${internalNamespaces.security}.agent`,
-  'elasticsearch-onboarding',
 ] as const;
 
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];
@@ -126,6 +125,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   // Search
   `${internalNamespaces.search}.keyword-search`,
   `${internalNamespaces.search}.catalog-ecommerce`,
+  `${internalNamespaces.search}.elasticsearch-onboarding`,
   `${internalNamespaces.search}.vector-hybrid-search`,
   `${internalNamespaces.search}.rag-chatbot`,
   `${internalNamespaces.search}.use-case-library`,
