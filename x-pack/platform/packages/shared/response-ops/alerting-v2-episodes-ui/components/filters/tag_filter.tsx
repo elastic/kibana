@@ -7,11 +7,11 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFilterButton, EuiPopover } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { useFetchEpisodeTagOptions } from '../../hooks/use_fetch_episode_tag_options';
 import { InlineFilterPopover } from './inline_filter_popover';
+import * as i18n from './translations';
 
 interface AlertEpisodesTagFilterProps {
   selectedTags?: string[] | null;
@@ -62,9 +62,7 @@ export function AlertEpisodesTagFilter({
 
   return (
     <EuiPopover
-      aria-label={i18n.translate('xpack.alertingV2EpisodesUi.tagFilter.ariaLabel', {
-        defaultMessage: 'Tag filter',
-      })}
+      aria-label={i18n.TAG_FILTER_ARIA_LABEL}
       button={
         <EuiFilterButton
           iconType="arrowDown"
@@ -76,9 +74,7 @@ export function AlertEpisodesTagFilter({
           numActiveFilters={activeCount > 0 ? activeCount : undefined}
           data-test-subj={`${dataTestSubj}-button`}
         >
-          {i18n.translate('xpack.alertingV2EpisodesUi.tagFilter.label', {
-            defaultMessage: 'Tags',
-          })}
+          {i18n.TAG_FILTER_LABEL}
         </EuiFilterButton>
       }
       isOpen={isOpen}
@@ -94,15 +90,8 @@ export function AlertEpisodesTagFilter({
         searchable={true}
         searchValue={search}
         onSearchChange={setSearch}
-        searchPlaceholder={i18n.translate(
-          'xpack.alertingV2EpisodesUi.tagFilter.searchPlaceholder',
-          {
-            defaultMessage: 'Search tags…',
-          }
-        )}
-        emptyMessage={i18n.translate('xpack.alertingV2EpisodesUi.tagFilter.noMatch', {
-          defaultMessage: 'No tags in this time range',
-        })}
+        searchPlaceholder={i18n.TAG_FILTER_SEARCH_PLACEHOLDER}
+        emptyMessage={i18n.TAG_FILTER_NO_MATCH}
         isLoading={isLoading}
         data-test-subj={`${dataTestSubj}-popover`}
       />

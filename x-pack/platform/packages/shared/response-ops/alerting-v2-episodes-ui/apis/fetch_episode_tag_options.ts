@@ -15,19 +15,19 @@ import {
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 
 export interface FetchEpisodeTagOptionsParams {
-  services: { expressions: ExpressionsStart };
   timeRange?: TimeRange | null;
   abortSignal?: AbortSignal;
+  services: { expressions: ExpressionsStart };
 }
 
 /**
- * Returns distinct tag strings from `.alert-actions` tag events in the given time range.
+ * Returns tag option rows from `.alert-actions` tag events in the given time range.
  */
 export const fetchEpisodeTagOptions = ({
   abortSignal,
-  services: { expressions },
   timeRange,
-}: FetchEpisodeTagOptionsParams): Promise<string[]> => {
+  services: { expressions },
+}: FetchEpisodeTagOptionsParams): Promise<EpisodeTagOptionRow[]> => {
   const query = buildEpisodeTagOptionsQuery().print('basic');
 
   const input: {
@@ -48,16 +48,5 @@ export const fetchEpisodeTagOptions = ({
     query,
     input,
     abortSignal,
-  }).then((rows) => {
-    const seen = new Set<string>();
-    const out: string[] = [];
-    for (const row of rows) {
-      const t = row.tags;
-      if (t && !seen.has(t)) {
-        seen.add(t);
-        out.push(t);
-      }
-    }
-    return out;
   });
 };

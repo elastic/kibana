@@ -77,8 +77,8 @@ export const addEpisodeAggregation = (query: ComposerQuery) => {
 const addGroupHashActionStats = (query: ComposerQuery) => {
   // prettier-ignore
   query
-    .pipe`INLINE STATS last_deactivate_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate") BY group_hash`
-    .pipe`INLINE STATS last_tags = LAST(tags, @timestamp) WHERE action_type IN ("tag") BY group_hash`;
+    .pipe`INLINE STATS last_deactivate_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate"),
+                       last_tags = LAST(tags, @timestamp) WHERE action_type IN ("tag") BY group_hash`;
 };
 
 const addTagsFilter = (query: ComposerQuery, tags: string[]) => {
