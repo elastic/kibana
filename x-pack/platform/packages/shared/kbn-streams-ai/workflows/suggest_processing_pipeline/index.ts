@@ -45,6 +45,7 @@ interface SimulationFeedback {
       errors?: string[];
     }
   >;
+  [key: string]: unknown;
 }
 
 /**
@@ -153,58 +154,11 @@ export async function suggestProcessingPipeline({
         // Collect unique errors from simulation
         const uniqueErrors = getUniqueDocumentErrors(simulateResult);
 
-        // 3. Validate parse rate - if below 80%, mark as invalid
-        const parseRate = metrics.parse_rate;
-        if (parseRate < 80) {
-          return {
-            response: {
-              valid: false,
-              errors: [
-                `Parse rate is too low: ${parseRate.toFixed(
-                  2
-                )}% (minimum required: 80%). The pipeline is not extracting fields from enough documents. Review the processors and ensure they handle the document structure correctly.`,
-                ...uniqueErrors,
-              ],
-              metrics,
-            },
-          };
-        }
-
-        // 4. Validate processor failure rates - each processor should have < 20% failure rate
-        const processorFailures = validateProcessorFailureRates(simulateResult);
-        if (processorFailures.length > 0) {
-          return {
-            response: {
-              valid: false,
-              errors: [...processorFailures, ...uniqueErrors],
-              metrics,
-            },
-          };
-        }
-
-        // 5. Check for temporary fields in output
-        const temporaryFields = detectTemporaryFields(simulateResult);
-        if (temporaryFields.length > 0) {
-          return {
-            response: {
-              valid: false,
-              errors: [
-                `Temporary fields detected: [${temporaryFields.join(
-                  ', '
-                )}]. Add a 'remove' processor to clean up these intermediate parsing artifacts.`,
-                ...uniqueErrors,
-              ],
-              metrics,
-            },
-          };
-        }
+        // Build simulation feedback using the shared function
+        const feedback = buildSimulationFeedback(simulateResult, metrics, uniqueErrors);
 
         return {
-          response: {
-            valid: true,
-            errors: uniqueErrors.length > 0 ? uniqueErrors : undefined,
-            metrics,
-          },
+          response: feedback,
         };
       },
       commit_pipeline: async (toolCall) => {
@@ -335,28 +289,121 @@ function detectTemporaryFields(simulationResult: ProcessingSimulationResponse): 
 }
 
 /**
- * Validates that each processor has a failure rate below 20%.
- * Returns an array of error messages for processors that exceed the threshold.
+ * Builds simulation feedback from simulation result.
+ * Returns a consistent shape with per-processor metrics and validation status.
  */
-function validateProcessorFailureRates(simulationResult: ProcessingSimulationResponse): string[] {
-  const errors: string[] = [];
-  const maxFailureRate = 0.2; // 20%
+function buildSimulationFeedback(
+  simulateResult: ProcessingSimulationResponse,
+  metrics: {
+    sampled: number;
+    fields: string[];
+    parse_rate: number;
+  },
+  uniqueErrors: string[]
+): SimulationFeedback {
+  // Build per-processor feedback
+  const processors: Record<string, { failed_rate: number; errors?: string[] }> = {};
 
-  if (!simulationResult.processors_metrics) {
-    return errors;
-  }
+  if (simulateResult.processors_metrics) {
+    for (const [processorId, processorMetrics] of Object.entries(
+      simulateResult.processors_metrics
+    )) {
+      if (!processorMetrics) continue;
 
-  for (const [processorId, metrics] of Object.entries(simulationResult.processors_metrics)) {
-    if (!metrics) continue;
-    if (metrics.failed_rate > maxFailureRate) {
-      const failurePercentage = (metrics.failed_rate * 100).toFixed(2);
-      errors.push(
-        `Processor "${processorId}" has a failure rate of ${failurePercentage}% (maximum allowed: 20%). This processor is failing on too many documents. Review the processor configuration and ensure it handles the document structure correctly.`
-      );
+      // Get top errors for this processor
+      const processorErrors: string[] = [];
+      if (processorMetrics.errors && processorMetrics.errors.length > 0) {
+        const errorMap = new Map<string, number>();
+        for (const error of processorMetrics.errors) {
+          const key = error.type + ': ' + error.message;
+          errorMap.set(key, (errorMap.get(key) ?? 0) + 1);
+        }
+
+        // Sort by count and take top 3 errors
+        const sortedErrors = Array.from(errorMap.entries())
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 3);
+
+        for (const [errorKey, count] of sortedErrors) {
+          const countStr = count > 1 ? ' (occurred ' + count + ' times)' : '';
+          processorErrors.push('[' + processorId + '] ' + errorKey + countStr);
+        }
+      }
+
+      processors[processorId] = {
+        failed_rate: parseFloat((processorMetrics.failed_rate * 100).toFixed(2)),
+        ...(processorErrors.length > 0 ? { errors: processorErrors } : {}),
+      };
     }
   }
 
-  return errors;
+  // Validate parse rate - if below 80%, mark as invalid
+  const parseRate = metrics.parse_rate;
+  if (parseRate < 80) {
+    return {
+      valid: false,
+      errors: [
+        'Parse rate is too low: ' +
+          parseRate.toFixed(2) +
+          '% (minimum required: 80%). The pipeline is not extracting fields from enough documents. Review the processors and ensure they handle the document structure correctly.',
+        ...uniqueErrors,
+      ],
+      metrics,
+      processors,
+    };
+  }
+
+  // Validate processor failure rates - each processor should have < 20% failure rate
+  const maxFailureRate = 0.2; // 20%
+  const processorFailures: string[] = [];
+  if (simulateResult.processors_metrics) {
+    for (const [processorId, processorMetrics] of Object.entries(
+      simulateResult.processors_metrics
+    )) {
+      if (!processorMetrics) continue;
+      if (processorMetrics.failed_rate > maxFailureRate) {
+        const failurePercentage = (processorMetrics.failed_rate * 100).toFixed(2);
+        processorFailures.push(
+          '[' +
+            processorId +
+            '] Processor has a failure rate of ' +
+            failurePercentage +
+            '% (maximum allowed: 20%). This processor is failing on too many documents. Review the processor configuration and ensure it handles the document structure correctly.'
+        );
+      }
+    }
+  }
+  if (processorFailures.length > 0) {
+    return {
+      valid: false,
+      errors: [...processorFailures, ...uniqueErrors],
+      metrics,
+      processors,
+    };
+  }
+
+  // Check for temporary fields in output
+  const temporaryFields = detectTemporaryFields(simulateResult);
+  if (temporaryFields.length > 0) {
+    return {
+      valid: false,
+      errors: [
+        'Temporary fields detected: [' +
+          temporaryFields.join(', ') +
+          "]. Add a 'remove' processor to clean up these intermediate parsing artifacts.",
+        ...uniqueErrors,
+      ],
+      metrics,
+      processors,
+    };
+  }
+
+  return {
+    valid: true,
+    errors: uniqueErrors.length > 0 ? uniqueErrors : undefined,
+    metrics,
+    processors,
+  };
 }
 
 export function getUniqueDocumentErrors(simulationResult: ProcessingSimulationResponse): string[] {
