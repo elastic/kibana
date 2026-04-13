@@ -33,6 +33,7 @@ interface FeatureSectionProps {
   features: FeatureSettingItem[];
   onReset: () => void;
   onEndpointsChange: (featureId: string, newEndpointIds: string[]) => void;
+  invalidEndpointIds: Set<string>;
   isTechPreview?: boolean;
   isBeta?: boolean;
 }
@@ -43,6 +44,7 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
   features,
   onReset,
   onEndpointsChange,
+  invalidEndpointIds,
   isTechPreview = false,
   isBeta = false,
 }) => {
@@ -113,6 +115,7 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
                   feature={feature}
                   endpointIds={endpointIds}
                   onEndpointsChange={onEndpointsChange}
+                  invalidEndpointIds={invalidEndpointIds}
                 />
               </EuiFlexItem>
             ))}
