@@ -30,7 +30,7 @@ const CaseTooltipContentComponent = React.memo<CaseTooltipContentProps>(
           <EuiFlexItem grow={false}>
             <Status status={status} />
           </EuiFlexItem>
-          <IconWithCount count={totalComments} icon={'editorComment'} />
+          <IconWithCount count={totalComments} icon={'comment'} />
         </EuiFlexGroup>
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem>

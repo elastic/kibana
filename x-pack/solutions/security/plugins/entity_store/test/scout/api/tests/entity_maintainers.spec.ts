@@ -14,15 +14,21 @@ import {
   ENTITY_STORE_SOURCE_INDICES_PRIVILEGES,
   ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
 } from '../../../../server/domain/constants';
-import { getLatestEntitiesIndexName } from '../../../../common/domain/entity_index';
+import { getEntitiesAlias, ENTITY_LATEST } from '../../../../common/domain/entity_index';
 import { getUpdatesEntitiesDataStreamName } from '../../../../server/domain/asset_manager/updates_data_stream';
-import { COMMON_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
+import {
+  PUBLIC_HEADERS,
+  INTERNAL_HEADERS,
+  ENTITY_STORE_ROUTES,
+  ENTITY_STORE_TAGS,
+} from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
+import { clearEntityStoreIndices } from '../fixtures/helpers';
 
 // Init/stop/start/run behavior with registered maintainers is covered by Jest
 // (entity_maintainers_client.test.ts) with a mocked registry.
 
-const TARGET_INDEX_LATEST = getLatestEntitiesIndexName('default');
+const TARGET_INDEX_LATEST = getEntitiesAlias(ENTITY_LATEST, 'default');
 const TARGET_INDEX_UPDATES = getUpdatesEntitiesDataStreamName('default');
 const SAVED_OBJECT_PRIVILEGE = 'saved_object:entity-engine-descriptor-v2/create';
 
@@ -67,12 +73,17 @@ const getRoleWithoutSavedObjectCreate = () => buildRoleDescriptor({ withSavedObj
 
 apiTest.describe('Entity Store entity maintainers', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
+  let internalHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
-      ...COMMON_HEADERS,
+      ...PUBLIC_HEADERS,
+    };
+    internalHeaders = {
+      ...credentials.cookieHeader,
+      ...INTERNAL_HEADERS,
     };
   });
 
@@ -82,12 +93,13 @@ apiTest.describe('Entity Store entity maintainers', { tag: ENTITY_STORE_TAGS }, 
     });
   });
 
-  apiTest.afterEach(async ({ apiClient }) => {
-    await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+  apiTest.afterEach(async ({ apiClient, esClient }) => {
+    await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
     });
+    await clearEntityStoreIndices(esClient);
   });
 
   apiTest(
@@ -97,8 +109,8 @@ apiTest.describe('Entity Store entity maintainers', { tag: ENTITY_STORE_TAGS }, 
         getRoleWithoutTargetIndexPrivileges()
       );
 
-      const response = await apiClient.post(ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT, {
-        headers: { ...COMMON_HEADERS, ...apiKeyHeader },
+      const response = await apiClient.post(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT, {
+        headers: { ...INTERNAL_HEADERS, ...apiKeyHeader },
         responseType: 'json',
         body: {},
       });
@@ -125,8 +137,8 @@ apiTest.describe('Entity Store entity maintainers', { tag: ENTITY_STORE_TAGS }, 
         getRoleWithoutSavedObjectCreate()
       );
 
-      const response = await apiClient.post(ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT, {
-        headers: { ...COMMON_HEADERS, ...apiKeyHeader },
+      const response = await apiClient.post(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT, {
+        headers: { ...INTERNAL_HEADERS, ...apiKeyHeader },
         responseType: 'json',
         body: {},
       });
@@ -139,17 +151,20 @@ apiTest.describe('Entity Store entity maintainers', { tag: ENTITY_STORE_TAGS }, 
   );
 
   apiTest('Should return 400 when entity store is not installed', async ({ apiClient }) => {
-    await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+    await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
     });
 
-    const initResponse = await apiClient.post(ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
+    const initResponse = await apiClient.post(
+      ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT,
+      {
+        headers: internalHeaders,
+        responseType: 'json',
+        body: {},
+      }
+    );
 
     expect(initResponse.statusCode).toBe(400);
     expect(initResponse.body.message).toBe(

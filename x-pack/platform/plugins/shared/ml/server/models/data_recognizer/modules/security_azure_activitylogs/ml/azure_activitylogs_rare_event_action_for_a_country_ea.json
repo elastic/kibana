@@ -19,7 +19,8 @@
       "user.email",
       "event.module",
       "source.ip",
-      "source.geo.country_iso_code"
+      "source.geo.country_iso_code",
+      "event.action"
     ]
   },
   "allow_lazy_open": true,

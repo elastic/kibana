@@ -29,13 +29,6 @@ import type {
   CreateUpdateProtectionUpdatesNoteRequestBodyInput,
   GetProtectionUpdatesNoteRequestParamsInput,
 } from '@kbn/security-solution-plugin/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
-import type {
-  CreateWorkflowInsightRequestBodyInput,
-  GetPendingWorkflowInsightsRequestQueryInput,
-  GetWorkflowInsightsRequestQueryInput,
-  UpdateWorkflowInsightRequestParamsInput,
-  UpdateWorkflowInsightRequestBodyInput,
-} from '@kbn/security-solution-plugin/common/api/endpoint/workflow_insights/workflow_insights.gen';
 import type { EndpointExecuteActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/execute/execute.gen';
 import type { EndpointFileDownloadRequestParamsInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/file_download/file_download.gen';
 import type { EndpointFileInfoRequestParamsInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/file_info/file_info.gen';
@@ -84,14 +77,6 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       )
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .send(props.body as object);
-  },
-  createWorkflowInsight(props: CreateWorkflowInsightProps, kibanaSpace: string = 'default') {
-    return supertest
-      .post(getRouteUrlForSpace('/internal/api/endpoint/workflow_insights', kibanaSpace))
-      .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
@@ -268,6 +253,18 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
+  getEndpointExceptionsPerPolicyOptIn(kibanaSpace: string = 'default') {
+    return supertest
+      .get(
+        getRouteUrlForSpace(
+          '/internal/api/endpoint/endpoint_exceptions_per_policy_opt_in',
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
   getEndpointMetadataList(props: GetEndpointMetadataListProps, kibanaSpace: string = 'default') {
     return supertest
       .get(getRouteUrlForSpace('/api/endpoint/metadata', kibanaSpace))
@@ -289,17 +286,6 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
-  getPendingWorkflowInsights(
-    props: GetPendingWorkflowInsightsProps,
-    kibanaSpace: string = 'default'
-  ) {
-    return supertest
-      .get(getRouteUrlForSpace('/internal/api/endpoint/workflow_insights/pending', kibanaSpace))
-      .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .query(props.query);
-  },
   getPolicyResponse(props: GetPolicyResponseProps, kibanaSpace: string = 'default') {
     return supertest
       .get(getRouteUrlForSpace('/api/endpoint/policy_response', kibanaSpace))
@@ -320,13 +306,17 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
-  getWorkflowInsights(props: GetWorkflowInsightsProps, kibanaSpace: string = 'default') {
+  performEndpointExceptionsPerPolicyOptIn(kibanaSpace: string = 'default') {
     return supertest
-      .get(getRouteUrlForSpace('/internal/api/endpoint/workflow_insights', kibanaSpace))
+      .post(
+        getRouteUrlForSpace(
+          '/internal/api/endpoint/endpoint_exceptions_per_policy_opt_in',
+          kibanaSpace
+        )
+      )
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .query(props.query);
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
    * Run a script on a host. Currently supported only for some agent types.
@@ -336,19 +326,6 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .post(getRouteUrlForSpace('/api/endpoint/action/runscript', kibanaSpace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .send(props.body as object);
-  },
-  updateWorkflowInsight(props: UpdateWorkflowInsightProps, kibanaSpace: string = 'default') {
-    return supertest
-      .put(
-        getRouteUrlForSpace(
-          replaceParams('/internal/api/endpoint/workflow_insights/{insightId}', props.params),
-          kibanaSpace
-        )
-      )
-      .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
@@ -376,9 +353,6 @@ export interface CancelActionProps {
 export interface CreateUpdateProtectionUpdatesNoteProps {
   params: CreateUpdateProtectionUpdatesNoteRequestParamsInput;
   body: CreateUpdateProtectionUpdatesNoteRequestBodyInput;
-}
-export interface CreateWorkflowInsightProps {
-  body: CreateWorkflowInsightRequestBodyInput;
 }
 export interface EndpointExecuteActionProps {
   body: EndpointExecuteActionRequestBodyInput;
@@ -423,22 +397,12 @@ export interface GetEndpointSuggestionsProps {
   params: GetEndpointSuggestionsRequestParamsInput;
   body: GetEndpointSuggestionsRequestBodyInput;
 }
-export interface GetPendingWorkflowInsightsProps {
-  query: GetPendingWorkflowInsightsRequestQueryInput;
-}
 export interface GetPolicyResponseProps {
   query: GetPolicyResponseRequestQueryInput;
 }
 export interface GetProtectionUpdatesNoteProps {
   params: GetProtectionUpdatesNoteRequestParamsInput;
 }
-export interface GetWorkflowInsightsProps {
-  query: GetWorkflowInsightsRequestQueryInput;
-}
 export interface RunScriptActionProps {
   body: RunScriptActionRequestBodyInput;
-}
-export interface UpdateWorkflowInsightProps {
-  params: UpdateWorkflowInsightRequestParamsInput;
-  body: UpdateWorkflowInsightRequestBodyInput;
 }

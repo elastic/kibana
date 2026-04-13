@@ -36,6 +36,12 @@ describe('drilldown registry', () => {
       );
     }
 
+    test('should throw when there is no intersection with supported triggers', () => {
+      expect(() => {
+        registry.getSchema([]);
+      }).toThrow();
+    });
+
     test('should include drilldowns that intersect with supported triggers', () => {
       const onClickDrilldownsSchema = registry.getSchema(['ON_CLICK']);
       const drilldownsJoiSchema = onClickDrilldownsSchema.getPropSchemas().drilldowns?.getSchema();

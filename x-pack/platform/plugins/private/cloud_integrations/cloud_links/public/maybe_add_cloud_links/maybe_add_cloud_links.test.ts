@@ -71,7 +71,7 @@ describe('maybeAddCloudLinks', () => {
       },
       {
         href: 'billing-url',
-        iconType: 'visGauge',
+        iconType: 'chartGauge',
         label: 'Billing',
         order: 200,
       },
@@ -147,7 +147,7 @@ describe('maybeAddCloudLinks', () => {
       },
       {
         href: 'billing-url',
-        iconType: 'visGauge',
+        iconType: 'chartGauge',
         label: 'Billing',
         order: 200,
       },

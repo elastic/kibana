@@ -58,6 +58,25 @@ describe('useHostDetails', () => {
 
     expect(mockSearch).not.toHaveBeenCalled();
   });
+
+  it('does not run search when hostName is missing', () => {
+    const { endDate, startDate, indexNames, id, skip } = defaultProps;
+    renderHook(
+      () =>
+        useHostDetails({
+          endDate,
+          startDate,
+          indexNames,
+          id,
+          skip,
+        }),
+      {
+        wrapper: TestProviders,
+      }
+    );
+
+    expect(mockSearch).not.toHaveBeenCalled();
+  });
   it('skip = true will cancel any running request', () => {
     const props = {
       ...defaultProps,

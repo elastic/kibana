@@ -70,7 +70,7 @@ export function NamespacesSelector({
   const button = (
     <EuiFilterButton
       data-test-subj="datasetQualityNamespacesSelectableButton"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       badgeColor="success"
       onClick={onButtonClick}
       isSelected={isPopoverOpen}

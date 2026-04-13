@@ -25,6 +25,7 @@ import { useAttackInvestigateInTimelineContextMenuItems } from '../../../hooks/a
 import { useAttackCaseContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_case_context_menu_items';
 import { useAttackViewInAiAssistantContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_view_in_ai_assistant_context_menu_items';
 import type { AttacksActionTelemetrySource } from '../../../../common/lib/telemetry/events/attacks/types';
+import { useAttackRunWorkflowContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_run_workflow_context_menu_items';
 
 interface AttacksGroupTakeActionItemsProps {
   attack: AttackDiscoveryAlert;
@@ -58,8 +59,8 @@ export function AttacksGroupTakeActionItems({
   );
 
   const baseAttackProps = useMemo(() => {
-    return { attackId: attack.id, relatedAlertIds: originalAlertIds };
-  }, [attack.id, originalAlertIds]);
+    return { attackId: attack.id, attackIndex: attack.index, relatedAlertIds: originalAlertIds };
+  }, [attack.id, attack.index, originalAlertIds]);
 
   const attacksWithAssignees = useMemo(() => {
     return [{ ...baseAttackProps, assignees: attack.assignees }];
@@ -104,6 +105,13 @@ export function AttacksGroupTakeActionItems({
 
   const attacksWithTimelineAlerts = useMemo(() => [{ ...baseAttackProps }], [baseAttackProps]);
 
+  const { items: runWorkflowItems, panels: runWorkflowPanels } =
+    useAttackRunWorkflowContextMenuItems({
+      attacksForWorkflowRun: attacksWithTimelineAlerts,
+      closePopover,
+      telemetrySource,
+    });
+
   const { items: investigateInTimelineItems } = useAttackInvestigateInTimelineContextMenuItems({
     attacksWithTimelineAlerts,
     closePopover,
@@ -140,6 +148,7 @@ export function AttacksGroupTakeActionItems({
       id: 0,
       items: [
         ...workflowItems,
+        ...runWorkflowItems,
         ...assignItems,
         ...tagsItems,
         ...investigateInTimelineItems,
@@ -148,6 +157,7 @@ export function AttacksGroupTakeActionItems({
       ],
     }),
     [
+      runWorkflowItems,
       workflowItems,
       assignItems,
       tagsItems,
@@ -158,8 +168,8 @@ export function AttacksGroupTakeActionItems({
   );
 
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(
-    () => [defaultPanel, ...workflowPanels, ...assignPanels, ...tagsPanels],
-    [workflowPanels, assignPanels, defaultPanel, tagsPanels]
+    () => [defaultPanel, ...runWorkflowPanels, ...workflowPanels, ...assignPanels, ...tagsPanels],
+    [runWorkflowPanels, workflowPanels, assignPanels, defaultPanel, tagsPanels]
   );
 
   return <EuiContextMenu size={size} initialPanelId={defaultPanel.id} panels={panels} />;

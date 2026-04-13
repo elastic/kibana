@@ -8,7 +8,12 @@
 import type { Feature, Streams } from '@kbn/streams-schema';
 import { ensureMetadata, getSourcesForStream, replaceFromSources } from '@kbn/streams-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { ChatCompletionTokenCount, BoundInferenceClient } from '@kbn/inference-common';
+import type {
+  ChatCompletionTokenCount,
+  BoundInferenceClient,
+  ToolCallback,
+  ToolDefinition,
+} from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import { withSpan } from '@kbn/apm-utils';
@@ -54,6 +59,8 @@ export async function generateSignificantEvents({
   signal,
   systemPrompt,
   logger,
+  additionalTools,
+  additionalToolCallbacks,
 }: {
   stream: Streams.all.Definition;
   esClient: ElasticsearchClient;
@@ -68,6 +75,8 @@ export async function generateSignificantEvents({
   signal: AbortSignal;
   logger: Logger;
   systemPrompt: string;
+  additionalTools?: Record<string, ToolDefinition>;
+  additionalToolCallbacks?: Record<string, ToolCallback>;
 }): Promise<{
   queries: Query[];
   tokensUsed: ChatCompletionTokenCount;
@@ -77,7 +86,7 @@ export async function generateSignificantEvents({
 
   const toolUsage = createDefaultSignificantEventsToolUsage();
 
-  const prompt = createGenerateSignificantEventsPrompt({ systemPrompt });
+  const prompt = createGenerateSignificantEventsPrompt({ systemPrompt, additionalTools });
   const targetSources = getSourcesForStream(stream);
 
   logger.trace('Generating significant events via reasoning agent');
@@ -89,7 +98,7 @@ export async function generateSignificantEvents({
         available_feature_types: SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES.join(', '),
         computed_feature_instructions: getComputedFeatureInstructions(),
       },
-      maxSteps: 4,
+      maxSteps: additionalToolCallbacks ? 6 : 4,
       prompt,
       inferenceClient,
       toolCallbacks: {
@@ -177,6 +186,7 @@ export async function generateSignificantEvents({
             },
           };
         },
+        ...(additionalToolCallbacks ?? {}),
       },
       abortSignal: signal,
     })

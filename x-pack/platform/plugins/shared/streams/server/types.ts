@@ -8,7 +8,10 @@
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type {
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+} from '@kbn/agent-builder-plugin/server';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 import type {
   EncryptedSavedObjectsPluginSetup,
@@ -27,11 +30,20 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { FieldsMetadataServerStart } from '@kbn/fields-metadata-plugin/server';
+import type {
+  FieldsMetadataServerSetup,
+  FieldsMetadataServerStart,
+} from '@kbn/fields-metadata-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { ConsoleStart as ConsoleServerStart } from '@kbn/console-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type {
+  SearchInferenceEndpointsPluginSetup,
+  SearchInferenceEndpointsPluginStart,
+} from '@kbn/search-inference-endpoints/server';
 import type { StreamsConfig } from '../common/config';
+import type { MemoryTriggerRegistry } from './lib/memory/triggers';
 
 export interface StreamsServer {
   core: CoreStart;
@@ -41,8 +53,13 @@ export interface StreamsServer {
   actions: ActionsPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   inference: InferenceServerStart;
+  licensing: LicensingPluginStart;
   isServerless: boolean;
   taskManager: TaskManagerStartContract;
+  memoryTriggerRegistry?: MemoryTriggerRegistry;
+  ensureMemorySkillRegistered?: () => void;
+  ensureMemoryTasksScheduled?: () => Promise<void>;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
 }
 
 export interface ElasticsearchAccessorOptions {
@@ -57,8 +74,11 @@ export interface StreamsPluginSetupDependencies {
   ruleRegistry: RuleRegistryPluginSetup;
   features: FeaturesPluginSetup;
   usageCollection: UsageCollectionSetup;
+  fieldsMetadata: FieldsMetadataServerSetup;
   cloud?: CloudSetup;
   globalSearch?: GlobalSearchPluginSetup;
+  workflowsManagement?: WorkflowsServerPluginSetup;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
 }
 
 export interface StreamsPluginStartDependencies {
@@ -72,5 +92,7 @@ export interface StreamsPluginStartDependencies {
   ruleRegistry: RuleRegistryPluginStart;
   fieldsMetadata: FieldsMetadataServerStart;
   console: ConsoleServerStart;
+  agentBuilder?: AgentBuilderPluginStart;
   spaces?: SpacesPluginStart;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
 }
