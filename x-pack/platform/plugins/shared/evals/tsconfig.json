@@ -23,6 +23,7 @@
     "@kbn/core-http-router-server-mocks",
     "@kbn/code-editor",
     "@kbn/react-kibana-context-theme",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/core-http-browser"
   ]
 }

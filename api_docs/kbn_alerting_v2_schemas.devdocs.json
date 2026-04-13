@@ -535,6 +535,22 @@
           },
           {
             "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.NotificationPolicyResponse.tags",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "tags",
+            "description": [],
+            "signature": [
+              "string[] | null"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
             "id": "def-common.NotificationPolicyResponse.groupingMode",
             "type": "Any",
             "tags": [],
@@ -544,7 +560,7 @@
               "any"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
-            "lineNumber": 23,
+            "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -560,7 +576,7 @@
               "{ strategy?: any; interval?: string | undefined; } | null"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
-            "lineNumber": 24,
+            "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -576,7 +592,7 @@
               "string | null"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
-            "lineNumber": 25,
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -592,7 +608,7 @@
               "{ owner: string; createdByUser: boolean; }"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
-            "lineNumber": 26,
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -608,7 +624,7 @@
               "string | null"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
-            "lineNumber": 30,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -624,7 +640,7 @@
               "string | null"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
-            "lineNumber": 31,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -637,7 +653,7 @@
             "label": "createdAt",
             "description": [],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
-            "lineNumber": 32,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -653,7 +669,7 @@
               "string | null"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
-            "lineNumber": 33,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -669,7 +685,7 @@
               "string | null"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
-            "lineNumber": 34,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -682,7 +698,7 @@
             "label": "updatedAt",
             "description": [],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
-            "lineNumber": 35,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -770,6 +786,25 @@
       },
       {
         "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.BULK_FILTER_MAX_RULES",
+        "type": "number",
+        "tags": [],
+        "label": "BULK_FILTER_MAX_RULES",
+        "description": [
+          "Maximum rules processed in one filter-based bulk operation (select-all)."
+        ],
+        "signature": [
+          "10000"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/constants.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
         "id": "def-common.BulkActionNotificationPoliciesBody",
         "type": "Type",
         "tags": [],
@@ -830,7 +865,24 @@
           "{ ids?: string[] | undefined; filter?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/bulk_operation_schema.ts",
-        "lineNumber": 34,
+        "lineNumber": 41,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.BulkOperationResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "BulkOperationResponse",
+        "description": [],
+        "signature": [
+          "{ rules: Record<any, any>[]; errors: { id: string; error: { message: string; statusCode: number; }; }[]; truncated?: boolean | undefined; totalMatched?: number | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
+        "lineNumber": 340,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -929,10 +981,10 @@
         "label": "CreateNotificationPolicyData",
         "description": [],
         "signature": [
-          "{ name: string; description: string; destinations: { type: any; id: string; }[]; groupingMode: any; matcher?: string | undefined; groupBy?: string[] | undefined; throttle?: { strategy: any; interval?: string | undefined; } | undefined; }"
+          "{ name: string; description: string; destinations: { type: any; id: string; }[]; groupingMode: any; matcher?: string | undefined; groupBy?: string[] | undefined; tags?: string[] | undefined; throttle?: { strategy: any; interval?: string | undefined; } | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
-        "lineNumber": 160,
+        "lineNumber": 161,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -946,7 +998,7 @@
         "label": "CreateRuleData",
         "description": [],
         "signature": [
-          "{ kind: any; metadata: { name: string; description?: string | undefined; owner?: string | undefined; labels?: string[] | undefined; }; time_field: string; schedule: { every: string; lookback?: string | undefined; }; evaluation: { query: { base: string; }; }; recovery_policy?: { type: any; query?: { base?: string | undefined; } | undefined; } | undefined; state_transition?: any; grouping?: { fields: string[]; } | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | undefined; artifacts?: { id: string; type: string; value: string; }[] | undefined; }"
+          "{ kind: any; metadata: { name: string; description?: string | undefined; owner?: string | undefined; tags?: string[] | undefined; }; time_field: string; schedule: { every: string; lookback?: string | undefined; }; evaluation: { query: { base: string; }; }; recovery_policy?: { type: any; query?: { base?: string | undefined; } | undefined; } | undefined; state_transition?: any; grouping?: { fields: string[]; } | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | undefined; artifacts?: { id: string; type: string; value: string; }[] | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
         "lineNumber": 243,
@@ -1018,6 +1070,23 @@
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
         "lineNumber": 89,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.FindRulesResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "FindRulesResponse",
+        "description": [],
+        "signature": [
+          "{ items: Record<any, any>[]; total: number; page: number; perPage: number; }"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
+        "lineNumber": 303,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1376,7 +1445,7 @@
           "{ [x: string]: unknown; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
-        "lineNumber": 190,
+        "lineNumber": 192,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1390,10 +1459,10 @@
         "label": "UpdateNotificationPolicyData",
         "description": [],
         "signature": [
-          "{ groupingMode: any; name?: string | undefined; description?: string | undefined; destinations?: { type: any; id: string; }[] | undefined; matcher?: any; groupBy?: any; throttle?: any; }"
+          "{ groupingMode: any; name?: string | undefined; description?: string | undefined; destinations?: { type: any; id: string; }[] | undefined; matcher?: any; groupBy?: any; tags?: any; throttle?: any; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
-        "lineNumber": 184,
+        "lineNumber": 186,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1407,7 +1476,7 @@
         "label": "UpdateRuleData",
         "description": [],
         "signature": [
-          "{ metadata?: { name?: string | undefined; description?: string | undefined; owner?: string | undefined; labels?: string[] | undefined; } | undefined; time_field?: string | undefined; schedule?: any; evaluation?: { query?: { base?: string | undefined; } | undefined; } | undefined; recovery_policy?: any; state_transition?: any; grouping?: any; no_data?: any; artifacts?: any; enabled?: boolean | undefined; }"
+          "{ metadata?: { name?: string | undefined; description?: string | undefined; owner?: string | undefined; tags?: string[] | undefined; } | undefined; time_field?: string | undefined; schedule?: any; evaluation?: { query?: { base?: string | undefined; } | undefined; } | undefined; recovery_policy?: any; state_transition?: any; grouping?: any; no_data?: any; artifacts?: any; enabled?: boolean | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
         "lineNumber": 272,
@@ -1648,7 +1717,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/bulk_operation_schema.ts",
-        "lineNumber": 17,
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1687,12 +1756,20 @@
           "node_modules/zod/v4/core/schemas",
           "$strip>; }, ",
           "node_modules/zod/v4/core/schemas",
-          "$strip>>; }, ",
+          "$strip>>; truncated: ",
+          "ZodOptional",
+          "<",
+          "ZodBoolean",
+          ">; totalMatched: ",
+          "ZodOptional",
+          "<",
+          "ZodNumber",
+          ">; }, ",
           "node_modules/zod/v4/core/schemas",
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-        "lineNumber": 311,
+        "lineNumber": 313,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1875,6 +1952,12 @@
           "ZodArray",
           "<",
           "ZodString",
+          ">>; tags: ",
+          "ZodOptional",
+          "<",
+          "ZodArray",
+          "<",
+          "ZodString",
           ">>; groupingMode: any; throttle: ",
           "ZodOptional",
           "<",
@@ -1919,7 +2002,7 @@
           "ZodOptional",
           "<",
           "ZodString",
-          ">; labels: ",
+          ">; tags: ",
           "ZodOptional",
           "<",
           "ZodArray",
@@ -2272,7 +2355,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-        "lineNumber": 304,
+        "lineNumber": 306,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2314,7 +2397,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
-        "lineNumber": 186,
+        "lineNumber": 188,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2363,6 +2446,14 @@
           "ZodArray",
           "<",
           "ZodString",
+          ">>>; tags: ",
+          "ZodNullable",
+          "<",
+          "ZodOptional",
+          "<",
+          "ZodArray",
+          "<",
+          "ZodString",
           ">>>; groupingMode: any; throttle: ",
           "ZodNullable",
           "<",
@@ -2380,7 +2471,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
-        "lineNumber": 162,
+        "lineNumber": 163,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2417,7 +2508,7 @@
           "ZodOptional",
           "<",
           "ZodString",
-          ">>; labels: ",
+          ">>; tags: ",
           "ZodOptional",
           "<",
           "ZodOptional",

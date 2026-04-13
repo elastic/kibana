@@ -6,11 +6,17 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
+import { defaultToolsFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import { Footer } from '../../flyout_v2/document/footer';
+import { alertFlyoutHistoryKey } from '../../flyout_v2/document/constants/flyout_history';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
+import { NotesDetails } from '../../flyout_v2/notes';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
+import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 
 export interface AlertFlyoutFooterProps {
   /**
@@ -37,8 +43,30 @@ export const AlertFlyoutFooter = ({
   storePromise,
   onAlertUpdated,
 }: AlertFlyoutFooterProps) => {
+  const history = useHistory();
   const [services, setServices] = useState<StartServices | null>(null);
   const [store, setStore] = useState<SecurityAppStore | null>(null);
+  const isSecurityApp = useIsInSecurityApp();
+  const historyKey = isSecurityApp ? alertFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+
+  const openNotesFlyout = useCallback(() => {
+    if (!services || !store) {
+      return;
+    }
+
+    services.overlays?.openSystemFlyout(
+      flyoutProviders({
+        services,
+        store,
+        history,
+        children: <NotesDetails hit={hit} />,
+      }),
+      {
+        ...defaultToolsFlyoutProperties,
+        historyKey,
+      }
+    );
+  }, [history, historyKey, hit, services, store]);
 
   useEffect(() => {
     let isCanceled = false;
@@ -71,6 +99,6 @@ export const AlertFlyoutFooter = ({
   return flyoutProviders({
     services,
     store,
-    children: <Footer hit={hit} onAlertUpdated={onAlertUpdated} />,
+    children: <Footer hit={hit} onAlertUpdated={onAlertUpdated} onShowNotes={openNotesFlyout} />,
   });
 };

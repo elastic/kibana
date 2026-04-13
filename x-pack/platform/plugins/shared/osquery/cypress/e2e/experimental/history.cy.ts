@@ -7,6 +7,7 @@
 
 import { navigateTo } from '../../tasks/navigation';
 import { checkResults, inputQuery, selectAllAgents, submitQuery } from '../../tasks/live_query';
+import { closeToastIfVisible } from '../../tasks/integrations';
 import {
   loadLiveQuery,
   addTagsToLiveQuery,
@@ -15,6 +16,7 @@ import {
   getPackSavedObject,
   loadScheduledResponse,
   cleanupScheduledResponse,
+  cleanupSavedQueryByName,
 } from '../../tasks/api_fixtures';
 import {
   UNIFIED_HISTORY_TABLE,
@@ -353,6 +355,38 @@ describe(
       navigateTo('/app/osquery/history');
       cy.getBySel(UNIFIED_HISTORY_TABLE, { timeout: 60000 }).should('exist');
       cy.getBySel(UNIFIED_HISTORY_TABLE).find('tbody tr').first().should('contain', 'os_version');
+    });
+
+    it('should save a query from the detail page via Save query button', () => {
+      const savedQueryId = `saved-from-details-${Date.now()}`;
+
+      cy.getBySel(UNIFIED_HISTORY_TABLE).within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.get('[aria-label="Details"]').click();
+          });
+      });
+      cy.contains('Query results');
+
+      cy.getBySel('save-query-button').should('exist').click();
+
+      cy.getBySel('osquery-save-query-flyout').should('exist');
+
+      cy.getBySel('osquery-save-query-flyout').within(() => {
+        cy.get('.monaco-editor').should('exist');
+        cy.get('input[name="id"]').type(`${savedQueryId}{downArrow}{enter}`);
+        cy.get('input[name="description"]').type('Saved from detail page');
+      });
+
+      cy.getBySel('savedQueryFlyoutSaveButton').click();
+      cy.contains('Successfully saved');
+      closeToastIfVisible();
+
+      navigateTo('/app/osquery/saved_queries');
+      cy.contains(savedQueryId);
+
+      cleanupSavedQueryByName(savedQueryId);
     });
   }
 );

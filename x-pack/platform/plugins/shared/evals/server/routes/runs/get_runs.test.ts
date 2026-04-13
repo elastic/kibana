@@ -70,6 +70,7 @@ describe('GET /internal/evals/runs', () => {
       expect.objectContaining({
         query: {
           bool: {
+            must_not: [{ term: { run_id: 'kbn-evals-preflight' } }],
             filter: [{ term: { 'example.dataset.id': 'dataset-123' } }],
           },
         },
