@@ -27,7 +27,7 @@ groups:
   - group: Logging settings
     id: logging-settings
     description: |
-      The following table serves as a quick reference for different logging configuration keys. Note that these are not stand-alone settings and may require additional logging configuration. See the [Configure Logging in {{kib}}](docs-content://deploy-manage/monitor/logging-configuration/kibana-logging.md) guide and complete [examples](docs-content://deploy-manage/monitor/logging-configuration/kibana-log-settings-examples.md) for common configuration use cases.
+      The following list serves as a quick reference for different logging configuration keys. Note that these are not stand-alone settings and may require additional logging configuration. See the [Configure Logging in {{kib}}](docs-content://deploy-manage/monitor/logging-configuration/kibana-logging.md) guide and complete [examples](docs-content://deploy-manage/monitor/logging-configuration/kibana-log-settings-examples.md) for common configuration use cases.
 
     settings:
 
