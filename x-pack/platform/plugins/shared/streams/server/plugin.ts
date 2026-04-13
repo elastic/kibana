@@ -234,6 +234,7 @@ export class StreamsPlugin
         getScopedClients,
         server: this.server,
         logger: this.logger,
+        core,
       });
     }
 
