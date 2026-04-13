@@ -8,6 +8,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { getWaterfallItem } from './waterfall';
 
 export interface TracesFlyout {
   readonly overviewTab: Locator;
@@ -150,15 +151,7 @@ export function createTracesFlyout(page: ScoutPage): TracesFlyout {
         container: timelineFlyout,
         backButton: timelineFlyout.locator('[data-test-subj="euiFlyoutMenuBackButton"]'),
         getWaterfallItem(name: string) {
-          const row = timelineFlyout
-            .locator('[data-test-subj="traceItemRowWrapper"]')
-            .filter({ hasText: name });
-          return {
-            row,
-            content: row.locator('[data-test-subj="apmBarDetailsName"]'),
-            errorBadge: row.locator('[data-test-subj="apmBarDetailsErrorBadge"]'),
-            serviceBadge: row.locator('[data-test-subj="apmBarDetailsServiceNameBadge"]'),
-          };
+          return getWaterfallItem(timelineFlyout, name);
         },
         childDocFlyout: {
           aboutSection: childDocContainer.locator('[data-test-subj="UnifiedDocViewerTableGrid"]'),

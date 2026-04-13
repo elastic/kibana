@@ -10,9 +10,9 @@ import { getIndexPattern } from './constants';
 import { buildCompositeAggQuery, buildBucketUserFilter } from './build_composite_agg';
 import { buildEsqlQuery } from './build_esql_query';
 
-export const azureSigninLogsIntegration: CommunicatesWithIntegrationConfig = {
-  id: 'azure_signinlogs',
-  name: 'Azure Sign-in Logs',
+export const azureAuditLogsIntegration: CommunicatesWithIntegrationConfig = {
+  id: 'azure_auditlogs',
+  name: 'Azure Audit Logs',
   entityType: 'user',
   getIndexPattern,
   buildCompositeAggQuery,

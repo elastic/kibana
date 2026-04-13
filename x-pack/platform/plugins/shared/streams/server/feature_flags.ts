@@ -20,12 +20,39 @@ import {
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS,
   OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS,
+  OBSERVABILITY_STREAMS_SIG_EVENTS_TUNING_CONFIG,
   OBSERVABILITY_STREAMS_ENABLE_MEMORY,
 } from '@kbn/management-settings-ids';
 import { DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
 import type { StreamsPluginStartDependencies } from './types';
 import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '../common';
 import { DEFAULT_EXTRACTION_INTERVAL_HOURS } from '../common/constants';
+import { DEFAULT_SIG_EVENTS_TUNING_CONFIG } from '../common/sig_events_tuning_config';
+
+const sigEventsTuningConfigSchema = schema.object(
+  {
+    sample_size: schema.number({ min: 1, max: 100 }),
+    max_iterations: schema.number({ min: 1, max: 20 }),
+    feature_ttl_days: schema.number({ min: 1, max: 90 }),
+    entity_filtered_ratio: schema.number({ min: 0, max: 1 }),
+    diverse_ratio: schema.number({ min: 0, max: 1 }),
+    max_excluded_features_in_prompt: schema.number({ min: 0, max: 50 }),
+    max_entity_filters: schema.number({ min: 1, max: 50 }),
+    semantic_min_score: schema.number({ min: 0, max: 100 }),
+    rrf_rank_constant: schema.number({ min: 1, max: 100 }),
+  },
+  {
+    validate: (value) => {
+      if (value.entity_filtered_ratio + value.diverse_ratio > 1.0) {
+        return (
+          `entity_filtered_ratio (${value.entity_filtered_ratio}) + ` +
+          `diverse_ratio (${value.diverse_ratio}) must not exceed 1.0 ` +
+          `(remainder is used for random sampling)`
+        );
+      }
+    },
+  }
+);
 
 export function registerFeatureFlags(
   core: CoreSetup<StreamsPluginStartDependencies>,
@@ -169,6 +196,23 @@ export function registerFeatureFlags(
             ),
             type: 'string',
             schema: schema.string(),
+            scope: 'global',
+            solutionViews: ['classic', 'oblt'],
+            readonly: true,
+            readonlyMode: 'ui',
+          },
+          [OBSERVABILITY_STREAMS_SIG_EVENTS_TUNING_CONFIG]: {
+            category: ['observability'],
+            name: i18n.translate('xpack.streams.sigEventsTuningConfigName', {
+              defaultMessage: 'Significant Events tuning',
+            }),
+            value: JSON.stringify(DEFAULT_SIG_EVENTS_TUNING_CONFIG),
+            description: i18n.translate('xpack.streams.sigEventsTuningConfigDescription', {
+              defaultMessage:
+                'JSON configuration for Significant Events tuning parameters including sample sizes, ratios, TTLs, and search thresholds.',
+            }),
+            type: 'json',
+            schema: sigEventsTuningConfigSchema,
             scope: 'global',
             solutionViews: ['classic', 'oblt'],
             readonly: true,
