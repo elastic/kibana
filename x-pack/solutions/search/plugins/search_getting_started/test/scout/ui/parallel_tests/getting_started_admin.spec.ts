@@ -71,11 +71,10 @@ test.describe(
         await expect(tsdsCard).toBeVisible();
       });
 
-      // TODO: Skip until I can confirm if we meant to remove this
-      // await test.step('renders kibana version badge', async () => {
-      //   const versionBadge = await pageObjects.gettingStarted.getKibanaVersionBadge();
-      //   await expect(versionBadge).toBeVisible();
-      // });
+      await test.step('renders kibana version badge', async () => {
+        const versionBadge = await pageObjects.gettingStarted.getKibanaVersionBadge();
+        await expect(versionBadge).toBeVisible();
+      });
     });
 
     test('Sample data buttons navigate to correct pages', async ({ pageObjects, page }) => {

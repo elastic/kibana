@@ -18,8 +18,7 @@ test.describe(
       await pageObjects.gettingStarted.goto();
     });
 
-    // TODO: Skip until I can confirm if we meant to remove this
-    test.skip(
+    test(
       'should show Changelog label in Kibana version on serverless',
       { tag: [...tags.serverless.search] },
       async ({ pageObjects }) => {
