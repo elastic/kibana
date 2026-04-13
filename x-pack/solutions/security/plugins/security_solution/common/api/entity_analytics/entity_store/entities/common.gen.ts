@@ -105,7 +105,7 @@ export const Asset = z
     model: z.string().optional(),
     vendor: z.string().optional(),
     environment: z.string().optional(),
-    criticality: AssetCriticalityLevel.optional(),
+    criticality: AssetCriticalityLevel.nullable().optional(),
     business_unit: z.string().optional(),
   })
   .strict();

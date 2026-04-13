@@ -25,4 +25,6 @@ export * from './get_slo_health';
 export * from './summary_search_client/summary_search_client';
 export * from './search_slo_definitions';
 export * from './slo_definition_client';
+export * from './get_composite_slo';
 export * from './composite_slo_repository';
+export * from './composite_historical_summary_client';
