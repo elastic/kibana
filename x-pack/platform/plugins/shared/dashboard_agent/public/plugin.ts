@@ -39,11 +39,10 @@ export class DashboardAgentPlugin
     _core: CoreStart,
     plugins: DashboardAgentPluginPublicStartDependencies
   ): DashboardAgentPluginPublicStart {
-    this.cleanupDashboardApiForwarding = plugins.dashboard.dashboardAppClientApi$.subscribe(
-      (api) => {
-        plugins.agentBuilder.setActiveDashboardApi(api ?? undefined);
-      }
-    ).unsubscribe;
+    const dashboardApiForwarding = plugins.dashboard.dashboardAppClientApi$.subscribe((api) => {
+      plugins.agentBuilder.setActiveDashboardApi(api ?? undefined);
+    });
+    this.cleanupDashboardApiForwarding = () => dashboardApiForwarding.unsubscribe();
 
     // TODO this causes async imports when plugin starts
     // Please avoid this practice as it hides plugin size but impacts kibana load performance

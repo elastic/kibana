@@ -77,7 +77,6 @@ export class AgentBuilderPlugin
     >
 {
   logger: Logger;
-  private activeDashboardApi$ = new BehaviorSubject<ActiveDashboardApi | undefined>(undefined);
   private conversationActiveConfig: EmbeddableConversationProps = {};
   private internalServices?: AgentBuilderInternalService;
   private setupServices?: {
@@ -159,6 +158,7 @@ export class AgentBuilderPlugin
     const smlService = new SmlService({ http });
     const pluginsService = new PluginsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
+    const activeDashboardApi$ = new BehaviorSubject<ActiveDashboardApi | undefined>(undefined);
 
     if (!this.setupServices) {
       throw new Error('plugin start called before plugin setup');
@@ -207,7 +207,7 @@ export class AgentBuilderPlugin
     };
 
     const internalServices: AgentBuilderInternalService = {
-      activeDashboardApi$: this.activeDashboardApi$,
+      activeDashboardApi$,
       agentService,
       attachmentsService,
       chatService,
@@ -286,7 +286,7 @@ export class AgentBuilderPlugin
         return attachmentsService.updateOrigin(conversationId, attachmentId, origin);
       },
       setActiveDashboardApi: (api: ActiveDashboardApi | undefined) => {
-        this.activeDashboardApi$.next(api);
+        activeDashboardApi$.next(api);
       },
     };
 

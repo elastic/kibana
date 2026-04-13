@@ -34,7 +34,7 @@ export function VisualizeESQL({
   preferredChartType?: ChartType;
   errorMessages?: string[];
   timeRange?: TimeRange;
-  embeddable?: EmbeddableStart;
+  embeddable: EmbeddableStart;
 }) {
   const { lensInput, setLensInput, isLoading } = useLensInput({
     lens,
