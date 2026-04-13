@@ -12,6 +12,7 @@ import { QUERY_TYPE_STATS, ensureMetadata } from '@kbn/streams-schema';
 import { generateSignificantEvents } from '@kbn/streams-ai';
 import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
 import type { FeatureClient } from '../streams/feature/feature_client';
+import type { MemoryDiscoveryTools } from './memory_discovery_tools';
 
 interface Params {
   definition: Streams.all.Definition;
@@ -25,6 +26,7 @@ interface Dependencies {
   logger: Logger;
   signal: AbortSignal;
   esClient: ElasticsearchClient;
+  memoryTools?: MemoryDiscoveryTools;
 }
 
 export async function generateSignificantEventDefinitions(
@@ -36,7 +38,7 @@ export async function generateSignificantEventDefinitions(
   toolUsage: SignificantEventsToolUsage;
 }> {
   const { definition, connectorId, systemPrompt } = params;
-  const { inferenceClient, featureClient, logger, signal, esClient } = dependencies;
+  const { inferenceClient, featureClient, logger, signal, esClient, memoryTools } = dependencies;
 
   const boundInferenceClient = inferenceClient.bindTo({
     connectorId,
@@ -48,12 +50,14 @@ export async function generateSignificantEventDefinitions(
     inferenceClient: boundInferenceClient,
     logger,
     signal,
-    systemPrompt,
+    systemPrompt: memoryTools ? `${systemPrompt}\n${memoryTools.promptSnippet}` : systemPrompt,
     // Server owns data access; AI layer only requests context via this callback.
     getFeatures: async (filters) => {
       const response = await featureClient.getFeatures(definition.name, filters);
       return response.hits;
     },
+    additionalTools: memoryTools?.tools,
+    additionalToolCallbacks: memoryTools?.callbacks,
   });
 
   return {
