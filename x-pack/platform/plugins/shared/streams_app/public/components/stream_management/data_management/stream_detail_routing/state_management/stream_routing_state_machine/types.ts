@@ -19,7 +19,7 @@ import type { RoutingSamplesContext } from './routing_samples_state_machine';
 import type { PartitionSuggestion } from '../../review_suggestions_form/use_review_suggestions_form';
 
 export interface StreamRoutingServiceDependencies {
-  forkSuccessNofitier: (streamName: string) => void;
+  forkSuccessNotifier?: (streamName: string) => void;
   refreshDefinition: () => void;
   streamsRepositoryClient: StreamsRepositoryClient;
   timeState$: TimefilterHook['timeState$'];
@@ -29,7 +29,7 @@ export interface StreamRoutingServiceDependencies {
 }
 
 export interface StreamRoutingInput {
-  definition: Streams.WiredStream.GetResponse;
+  definition: Streams.ingest.all.GetResponse;
 }
 
 export interface BulkForkItem {
@@ -44,7 +44,7 @@ export interface BulkForkResult {
 
 export interface StreamRoutingContext {
   currentRuleId: string | null;
-  definition: Streams.WiredStream.GetResponse;
+  definition: Streams.ingest.all.GetResponse;
   initialRouting: RoutingDefinitionWithUIAttributes[];
   routing: RoutingDefinitionWithUIAttributes[];
   suggestedRuleId: string | null;
@@ -89,7 +89,7 @@ export type StreamRoutingEvent =
       toggle?: boolean;
     }
   | { type: 'routingRule.reviewSuggested'; id: string }
-  | { type: 'stream.received'; definition: Streams.WiredStream.GetResponse }
+  | { type: 'stream.received'; definition: Streams.ingest.all.GetResponse }
   | { type: 'suggestion.edit'; index: number; suggestion: PartitionSuggestion }
   | { type: 'suggestion.changeName'; name: string }
   | { type: 'suggestion.changeCondition'; condition: Condition }
