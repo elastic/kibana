@@ -65,8 +65,8 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = (props) => {
     ? {
         name: props.agent.name,
         symbol: props.agent.avatar_symbol,
-        // Agent color can be overriden
-        color: props.color ?? props.agent.avatar_color,
+        // Agent color takes priority over the prop override
+        color: props.agent.avatar_color ?? props.color,
         readonly: props.agent.readonly,
         icon: props.agent.avatar_icon,
         agentId: props.agent.id,
