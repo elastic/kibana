@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   EuiBasicTable,
   EuiBadge,
@@ -29,6 +29,7 @@ import { useHistory } from 'react-router-dom';
 import type { TracingProject } from '@kbn/evals-common';
 import { useTracingProjects } from '../../hooks/use_evals_api';
 import { LastUpdatedAt } from '../../components/last_updated_at';
+import { formatLatency, formatTokens, formatErrorRate } from '../../utils/format_utils';
 import * as i18n from './translations';
 
 const MIN_REFRESH_INTERVAL = 5000;
@@ -39,6 +40,12 @@ export const TracingProjectsListPage: React.FC = () => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [searchText, setSearchText] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchText), 300);
+    return () => clearTimeout(timer);
+  }, [searchText]);
 
   const [isPaused, setIsPaused] = useState(true);
   const [refreshInterval, setRefreshInterval] = useState(10000);
@@ -48,7 +55,7 @@ export const TracingProjectsListPage: React.FC = () => {
     {
       page: pageIndex + 1,
       perPage: pageSize,
-      name: searchText.trim() || undefined,
+      name: debouncedSearch.trim() || undefined,
     },
     {
       refetchInterval: isPaused ? false : refreshInterval,
@@ -67,7 +74,7 @@ export const TracingProjectsListPage: React.FC = () => {
     []
   );
 
-  const filteredProjects = data?.projects ?? [];
+  const projects = data?.projects ?? [];
 
   const columns: Array<EuiBasicTableColumn<TracingProject>> = useMemo(
     () => [
@@ -104,7 +111,7 @@ export const TracingProjectsListPage: React.FC = () => {
         width: '110px',
         render: (rate: number | undefined) => {
           if (rate == null) return '-';
-          const pct = i18n.formatErrorRate(rate);
+          const pct = formatErrorRate(rate);
           const color = rate > 0.1 ? 'danger' : rate > 0 ? 'warning' : 'default';
           return <EuiBadge color={color}>{pct}</EuiBadge>;
         },
@@ -114,21 +121,21 @@ export const TracingProjectsListPage: React.FC = () => {
         name: i18n.COLUMN_P50_LATENCY,
         sortable: true,
         width: '120px',
-        render: (ms: number | undefined) => (ms != null ? i18n.formatLatency(ms) : '-'),
+        render: (ms: number | undefined) => (ms != null ? formatLatency(ms) : '-'),
       },
       {
         field: 'p99_latency_ms',
         name: i18n.COLUMN_P99_LATENCY,
         sortable: true,
         width: '120px',
-        render: (ms: number | undefined) => (ms != null ? i18n.formatLatency(ms) : '-'),
+        render: (ms: number | undefined) => (ms != null ? formatLatency(ms) : '-'),
       },
       {
         field: 'total_tokens',
         name: i18n.COLUMN_TOTAL_TOKENS,
         sortable: true,
         width: '120px',
-        render: (tokens: number | undefined) => (tokens != null ? i18n.formatTokens(tokens) : '-'),
+        render: (tokens: number | undefined) => (tokens != null ? formatTokens(tokens) : '-'),
       },
     ],
     [history]
@@ -206,14 +213,16 @@ export const TracingProjectsListPage: React.FC = () => {
           color="danger"
           iconType="warning"
           title={<h2>{i18n.LOAD_ERROR_TITLE}</h2>}
-          body={<p>{i18n.getLoadErrorBody(String(error))}</p>}
+          body={
+            <p>{i18n.getLoadErrorBody(error instanceof Error ? error.message : String(error))}</p>
+          }
           actions={[
             <EuiButton onClick={() => refetch()} iconType="refresh">
               {i18n.RETRY_BUTTON}
             </EuiButton>,
           ]}
         />
-      ) : !isLoading && filteredProjects.length === 0 ? (
+      ) : !isLoading && projects.length === 0 ? (
         <EuiEmptyPrompt
           iconType="editorStrike"
           title={<h3>{i18n.NO_PROJECTS_TITLE}</h3>}
@@ -221,7 +230,7 @@ export const TracingProjectsListPage: React.FC = () => {
         />
       ) : (
         <EuiBasicTable<TracingProject>
-          items={filteredProjects}
+          items={projects}
           columns={columns}
           tableCaption={i18n.TABLE_CAPTION}
           loading={isLoading}
