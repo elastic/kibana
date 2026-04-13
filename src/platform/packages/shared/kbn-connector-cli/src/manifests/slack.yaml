@@ -1,0 +1,7 @@
+spec_id: .slack2
+name: "Slack (testing)"
+auth_type: bearer
+secrets:
+  token:
+    vault: secret/ent-search-team/connectors-sources/slack-sandbox
+    field: user_token

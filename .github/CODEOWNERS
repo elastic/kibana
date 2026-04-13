@@ -507,6 +507,7 @@ src/platform/packages/shared/kbn-cleanup-before-exit @elastic/observability-ui
 src/platform/packages/shared/kbn-coloring @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-config @elastic/kibana-core
 src/platform/packages/shared/kbn-config-schema @elastic/kibana-core
+src/platform/packages/shared/kbn-connector-cli @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-schemas @elastic/response-ops
 src/platform/packages/shared/kbn-connector-specs @elastic/response-ops
 src/platform/packages/shared/kbn-content-management-utils @elastic/kibana-data-discovery
