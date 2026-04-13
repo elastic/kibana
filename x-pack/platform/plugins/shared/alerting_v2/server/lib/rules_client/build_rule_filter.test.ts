@@ -51,9 +51,21 @@ describe('buildRuleSoFilter', () => {
       );
     });
 
+    it('maps metadata.description to SO attributes path', () => {
+      expect(buildRuleSoFilter('metadata.description: "high cpu"')).toBe(
+        'alerting_rule.attributes.metadata.description: "high cpu"'
+      );
+    });
+
     it('maps metadata.tags to SO attributes path', () => {
       expect(buildRuleSoFilter('metadata.tags: "production"')).toBe(
         'alerting_rule.attributes.metadata.tags: "production"'
+      );
+    });
+
+    it('maps grouping.fields to SO attributes path', () => {
+      expect(buildRuleSoFilter('grouping.fields: "host.name"')).toBe(
+        'alerting_rule.attributes.grouping.fields: "host.name"'
       );
     });
   });

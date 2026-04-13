@@ -1,5 +1,5 @@
 {
-  "sha1": "61965dd432c65b14fdbfcb970d5b1f2312f54c6b",
+  "sha1": "e764b777f6c14878350c50f629c0de2722d63509",
   "tests": [
     {
       "id": "dc7479c9232fce9-71b670e4054330e",
@@ -202,8 +202,8 @@
       }
     },
     {
-      "id": "437c4f794ffbbb4-b315a5ea7c06808",
-      "title": "automatic_import input validation & abuse sketches (manager) PUT /integrations: rejects empty integrationId (NonEmptyString)",
+      "id": "437c4f794ffbbb4-02d781a636e4334",
+      "title": "automatic_import input validation & abuse sketches (manager) PUT /integrations: rejects empty integrationId (SafeIdentifier)",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -218,6 +218,46 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
         "line": 152,
+        "column": 12
+      }
+    },
+    {
+      "id": "437c4f794ffbbb4-b3eee3d943ff224",
+      "title": "automatic_import input validation & abuse sketches (manager) PUT /integrations: rejects integrationId with hyphens (SafeIdentifier)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
+        "line": 167,
+        "column": 12
+      }
+    },
+    {
+      "id": "437c4f794ffbbb4-1e827df16f9a96c",
+      "title": "automatic_import input validation & abuse sketches (manager) PUT /integrations: rejects integrationId with special characters (SafeIdentifier)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
+        "line": 182,
         "column": 12
       }
     },
@@ -237,7 +277,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
-        "line": 167,
+        "line": 197,
         "column": 12
       }
     },
@@ -257,7 +297,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
-        "line": 183,
+        "line": 213,
         "column": 12
       }
     },
@@ -277,7 +317,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
-        "line": 196,
+        "line": 226,
         "column": 12
       }
     },
@@ -297,7 +337,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
-        "line": 209,
+        "line": 239,
         "column": 12
       }
     },
@@ -317,7 +357,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
-        "line": 221,
+        "line": 251,
         "column": 12
       }
     },
@@ -337,7 +377,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
-        "line": 244,
+        "line": 274,
         "column": 12
       }
     },
@@ -357,7 +397,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
-        "line": 262,
+        "line": 292,
         "column": 12
       }
     },
@@ -377,7 +417,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
-        "line": 275,
+        "line": 305,
         "column": 12
       }
     },
@@ -397,7 +437,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
-        "line": 292,
+        "line": 322,
         "column": 12
       }
     },
@@ -417,13 +457,113 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
-        "line": 308,
+        "line": 338,
         "column": 12
       }
     },
     {
-      "id": "be3fc294e7d5736-d8bc96c0dbd7e73",
-      "title": "automatic_import Integration API (manager approve & download) POST /integrations/{id}/approve: returns 500 when integration has no data streams",
+      "id": "437c4f794ffbbb4-58b27672e000e44",
+      "title": "automatic_import input validation & abuse sketches (manager) POST .../approve: rejects non-semver version string",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
+        "line": 351,
+        "column": 12
+      }
+    },
+    {
+      "id": "437c4f794ffbbb4-1a061047f85cc01",
+      "title": "automatic_import input validation & abuse sketches (manager) POST .../approve: rejects version shorter than minimum (SemVer)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
+        "line": 364,
+        "column": 12
+      }
+    },
+    {
+      "id": "437c4f794ffbbb4-c9fa80af90278c6",
+      "title": "automatic_import input validation & abuse sketches (manager) POST .../upload: rejects sourceIndex exceeding 100 characters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
+        "line": 380,
+        "column": 12
+      }
+    },
+    {
+      "id": "437c4f794ffbbb4-9a51142dc724356",
+      "title": "automatic_import input validation & abuse sketches (manager) POST .../upload: rejects sourceIndex starting with dot (system indices)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
+        "line": 396,
+        "column": 12
+      }
+    },
+    {
+      "id": "437c4f794ffbbb4-e415de24a6e5602",
+      "title": "automatic_import input validation & abuse sketches (manager) PUT /integrations: rejects dataStreamId with hyphens (SafeIdentifier)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
+        "line": 412,
+        "column": 12
+      }
+    },
+    {
+      "id": "be3fc294e7d5736-85b3c511ef765f3",
+      "title": "automatic_import Integration API (manager approve & download) POST /integrations/{id}/approve: returns 400 when integration has no data streams",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -457,7 +597,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/integration_api_manager_approve_download.spec.ts",
-        "line": 53,
+        "line": 52,
         "column": 12
       }
     },
@@ -477,7 +617,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/integration_api_manager_approve_download.spec.ts",
-        "line": 68,
+        "line": 67,
         "column": 12
       }
     },
@@ -497,7 +637,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/integration_api_manager_approve_download.spec.ts",
-        "line": 82,
+        "line": 81,
         "column": 12
       }
     },
