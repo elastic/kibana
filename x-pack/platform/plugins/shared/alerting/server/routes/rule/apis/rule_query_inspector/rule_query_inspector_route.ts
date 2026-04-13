@@ -81,7 +81,13 @@ export const ruleQueryInspectorRoute = (
           });
         }
 
-        const result = await handler(req, rule.params as Record<string, unknown>, mode, alertId);
+        const result = await handler(
+          req,
+          ruleId,
+          rule.params as Record<string, unknown>,
+          mode,
+          alertId
+        );
         return res.ok({ body: result });
       })
     )

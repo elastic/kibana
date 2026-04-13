@@ -81,7 +81,7 @@ describe('ruleQueryInspectorRoute', () => {
 
     expect(rulesClient.get).toHaveBeenCalledWith({ id: 'rule-123' });
     expect(registry.get).toHaveBeenCalledWith('observability.rules.custom_threshold');
-    expect(mockHandler).toHaveBeenCalledWith(req, mockRule.params, 'build', undefined);
+    expect(mockHandler).toHaveBeenCalledWith(req, 'rule-123', mockRule.params, 'build', undefined);
     expect(result).toEqual({ body: mockInspectorResponse });
   });
 
@@ -133,7 +133,13 @@ describe('ruleQueryInspectorRoute', () => {
 
     await handler(context, req, res);
 
-    expect(mockHandler).toHaveBeenCalledWith(req, mockRule.params, 'execute', 'alert-456');
+    expect(mockHandler).toHaveBeenCalledWith(
+      req,
+      'rule-123',
+      mockRule.params,
+      'execute',
+      'alert-456'
+    );
   });
 
   it('passes undefined alertId when alert_id query param is absent', async () => {
@@ -154,6 +160,6 @@ describe('ruleQueryInspectorRoute', () => {
 
     await handler(context, req, res);
 
-    expect(mockHandler).toHaveBeenCalledWith(req, mockRule.params, 'build', undefined);
+    expect(mockHandler).toHaveBeenCalledWith(req, 'rule-123', mockRule.params, 'build', undefined);
   });
 });

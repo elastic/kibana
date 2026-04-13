@@ -25,6 +25,7 @@ export interface RuleQueryInspectorTimeRange {
 
 export type RuleQueryInspectorHandler = (
   request: KibanaRequest,
+  ruleId: string,
   ruleParams: Record<string, unknown>,
   mode: 'build' | 'execute',
   alertId: string | undefined

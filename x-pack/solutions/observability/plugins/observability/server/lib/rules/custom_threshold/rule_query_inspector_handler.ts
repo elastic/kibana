@@ -9,7 +9,7 @@ import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
-import { ALERT_EVALUATION_TIME_RANGE } from '@kbn/rule-data-utils';
+import { ALERT_EVALUATION_TIME_RANGE, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type {
   RuleQueryInspectorHandler,
   RuleQueryInspectorResponse,
@@ -44,13 +44,18 @@ interface HandlerOptions {
 const getTimeRangeFromAlert = async (
   ruleRegistry: RuleRegistryPluginStartContract,
   request: KibanaRequest,
-  alertId: string
+  alertId: string,
+  ruleId: string
 ): Promise<RuleQueryInspectorTimeRange | undefined> => {
   const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
   const alert = await alertsClient.get({ id: alertId });
 
   if (!alert) {
     return undefined;
+  }
+
+  if (alert[ALERT_RULE_UUID] !== ruleId) {
+    throw new Error(`Alert ${alertId} does not belong to rule ${ruleId}`);
   }
 
   const evalTimeRange = (alert as { [ALERT_EVALUATION_TIME_RANGE]?: { gte: string; lte: string } })[
@@ -66,6 +71,7 @@ export const createCustomThresholdRuleQueryInspectorHandler = (
 ): RuleQueryInspectorHandler => {
   return async (
     request: KibanaRequest,
+    ruleId: string,
     ruleParams: Record<string, unknown>,
     mode: 'build' | 'execute',
     alertId: string | undefined
@@ -94,7 +100,7 @@ export const createCustomThresholdRuleQueryInspectorHandler = (
       params.alertOnGroupDisappear !== false && params.noDataBehavior !== 'recover';
 
     const timeRange = alertId
-      ? await getTimeRangeFromAlert(pluginStart.ruleRegistry, request, alertId)
+      ? await getTimeRangeFromAlert(pluginStart.ruleRegistry, request, alertId, ruleId)
       : undefined;
 
     const queries: RuleQueryInspectorResponse['queries'] = [];
