@@ -14,6 +14,7 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
+    "@kbn/i18n-react",
     "@kbn/logging",
     "@kbn/kibana-utils-plugin",
     "@kbn/core-analytics-browser",
@@ -55,7 +56,6 @@
     "@kbn/core-security-server",
     "@kbn/ml-trained-models-utils",
     "@kbn/lock-manager",
-    "@kbn/i18n-react",
     "@kbn/inference-tracing",
     "@kbn/licensing-types",
     "@kbn/llm-tasks-plugin",
@@ -67,6 +67,8 @@
     "@kbn/agent-builder-plugin",
     "@kbn/zod",
     "@kbn/search-inference-endpoints",
+    "@kbn/inference-connectors",
+    "@kbn/react-query",
     "@kbn/shared-ux-ai-components",
   ],
   "exclude": ["target/**/*"]
