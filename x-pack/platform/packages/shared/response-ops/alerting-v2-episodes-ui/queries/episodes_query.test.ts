@@ -45,8 +45,12 @@ describe('buildEpisodesQuery', () => {
     const queryString = query.print('basic');
 
     expect(queryString).toContain(
-      'INLINE STATS last_deactivate_action = LAST(action_type, @timestamp) WHERE (action_type IN ("deactivate", "activate")) BY group_hash'
+      'last_deactivate_action = LAST(action_type, @timestamp) WHERE (action_type IN ("deactivate", "activate"))'
     );
+    expect(queryString).toContain(
+      'last_tags = LAST(tags, @timestamp) WHERE (action_type IN ("tag"))'
+    );
+    expect(queryString).toContain('BY group_hash');
     expect(queryString).toContain('EVAL effective_status = CASE');
     expect(queryString).toContain('last_deactivate_action == "deactivate"');
   });
