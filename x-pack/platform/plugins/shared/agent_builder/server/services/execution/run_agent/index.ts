@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export { AgentsService } from './agents_service';
-export type { AgentRegistry } from './agent_registry';
-export { runAgent } from '../execution/run_agent';
-export type { AgentsServiceSetup, AgentsServiceStart } from './types';
+export { runAgent } from './run_agent';
+export { createAgentHandler } from './create_handler';
+export { runDefaultAgentMode } from './run_chat_agent';
