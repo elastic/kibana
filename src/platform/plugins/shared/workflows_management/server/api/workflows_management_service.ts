@@ -27,7 +27,6 @@ import {
   NonTerminalExecutionStatuses,
   transformWorkflowYamlJsontoEsWorkflow,
   WORKFLOW_ID_MAX_LENGTH,
-  WORKFLOW_ID_MIN_LENGTH,
   WORKFLOW_ID_PATTERN,
 } from '@kbn/workflows';
 import type {
@@ -1842,9 +1841,14 @@ export class WorkflowsService {
    * Only used for server-generated IDs (not user-supplied ones).
    */
   private async resolveUniqueWorkflowId(baseId: string, spaceId: string): Promise<string> {
+    const MAX_COLLISION_RETRIES = 100;
     let id = baseId;
     let counter = 0;
     while (await this.getWorkflow(id, spaceId)) {
+      if (counter >= MAX_COLLISION_RETRIES) {
+        // Exhausted all retries — fall back to a UUID-based ID to guarantee uniqueness.
+        return `workflow-${generateUuid()}`;
+      }
       const suffix = `-${++counter}`;
       id = `${baseId.slice(0, WORKFLOW_ID_MAX_LENGTH - suffix.length)}${suffix}`;
     }

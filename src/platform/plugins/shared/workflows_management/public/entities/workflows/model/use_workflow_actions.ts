@@ -419,12 +419,14 @@ export function useWorkflowActions() {
           };
         });
       } else {
-        // Even without generateNewIds we must rewrite references: the YAML body
-        // still contains the original persisted export IDs, which differ from
-        // the slug-of-name IDs that will be used on import.
+        // Only rewrite references when IDs actually changed (legacy exports where
+        // the original ID doesn't conform to the current pattern and was regenerated
+        // to a slug). For conforming exports originalId === id, so the mapping is an
+        // identity and rewriting is unnecessary.
+        const needsRewrite = workflows.some((w) => w.originalId !== w.id);
         processedWorkflows = workflows.map((w) => ({
           id: w.id,
-          yaml: rewriteWorkflowReferences(w.yaml, baseIdMapping),
+          yaml: needsRewrite ? rewriteWorkflowReferences(w.yaml, baseIdMapping) : w.yaml,
         }));
       }
 

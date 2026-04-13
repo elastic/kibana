@@ -163,12 +163,11 @@ describe('parseImportFile', () => {
       expect(result.format).toBe('zip');
       expect(result.totalWorkflows).toBe(2);
       expect(result.workflows).toHaveLength(2);
-      expect(result.workflowIds).toEqual(['one', 'two']);
-      // originalId is the ZIP entry filename stem (the persisted export ID);
-      // id is the slug-of-name used as the import ID.
+      // Conforming ZIP filenames are preserved as the import IDs
+      expect(result.workflowIds).toEqual(['w-1', 'w-2']);
       expect(result.rawWorkflows).toEqual([
-        { id: 'one', originalId: 'w-1', yaml: 'name: One\nsteps: []' },
-        { id: 'two', originalId: 'w-2', yaml: 'name: Two\nsteps: []' },
+        { id: 'w-1', originalId: 'w-1', yaml: 'name: One\nsteps: []' },
+        { id: 'w-2', originalId: 'w-2', yaml: 'name: Two\nsteps: []' },
       ]);
       expect(result.parseErrors).toHaveLength(0);
     });
@@ -357,7 +356,7 @@ describe('parseImportFile', () => {
       expect(result.parseErrors.some((e) => e.includes('maximum YAML length'))).toBe(true);
     });
 
-    it('should use the name-derived ID from YAML content, not from the ZIP filename', async () => {
+    it('should preserve the conforming ZIP filename as the import ID', async () => {
       const zip = new JSZip();
       zip.file('w-1.yml', 'name: "Hello, World! (2024)"\nsteps: []');
       zip.file(
@@ -372,13 +371,15 @@ describe('parseImportFile', () => {
       const file = createFile(buffer, 'name-vs-filename.zip');
       const result = await parseImportFile(file);
 
-      expect(result.workflowIds).toEqual(['hello-world-2024']);
-      expect(result.rawWorkflows[0].id).toBe('hello-world-2024');
+      // The ZIP filename "w-1" is a valid ID, so it is preserved as the import ID
+      expect(result.workflowIds).toEqual(['w-1']);
+      expect(result.rawWorkflows[0].id).toBe('w-1');
+      // The preview still uses the slug for display
       expect(result.workflows[0].id).toBe('hello-world-2024');
       expect(result.parseErrors).toHaveLength(0);
     });
 
-    it('should fall back to workflow-{uuid} ID when ZIP entry YAML has no name field', async () => {
+    it('should preserve conforming ZIP filename even when YAML has no name field', async () => {
       const zip = new JSZip();
       zip.file('w-1.yml', 'steps:\n  - type: console');
       zip.file(
@@ -393,10 +394,13 @@ describe('parseImportFile', () => {
       const file = createFile(buffer, 'no-name.zip');
       const result = await parseImportFile(file);
 
-      const uuidPattern = /^workflow-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
-      expect(result.workflowIds[0]).toMatch(uuidPattern);
-      expect(result.rawWorkflows[0].id).toBe(result.workflowIds[0]);
-      expect(result.workflows[0].id).toBe(result.workflowIds[0]);
+      // "w-1" is a valid ID, so it is preserved as the import ID even without a name
+      expect(result.workflowIds[0]).toBe('w-1');
+      expect(result.rawWorkflows[0].id).toBe('w-1');
+      // The preview falls back to UUID (no name for slugification)
+      expect(result.workflows[0].id).toMatch(
+        /^workflow-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+      );
       expect(result.parseErrors).toHaveLength(0);
     });
 
@@ -446,9 +450,9 @@ describe('parseImportFile', () => {
       expect(result.parseErrors).toHaveLength(0);
     });
 
-    it('should fall back to workflow-{uuid} when the workflow name slugifies to an empty string', async () => {
+    it('should preserve conforming ZIP filename even when name slugifies to an empty string', async () => {
       // Names consisting entirely of characters that strip to nothing (e.g. "!!!") produce an
-      // empty slug. generatePreviewId must fall back to a UUID in that case.
+      // empty slug in the preview. But the ZIP filename "w-1" is valid, so it is preserved.
       const zip = new JSZip();
       zip.file('w-1.yml', 'name: "!!!"\nsteps: []');
       zip.file(
@@ -463,17 +467,16 @@ describe('parseImportFile', () => {
       const file = createFile(buffer, 'empty-slug.zip');
       const result = await parseImportFile(file);
 
-      const uuidPattern = /^workflow-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
-      expect(result.workflowIds[0]).toMatch(uuidPattern);
-      expect(result.rawWorkflows[0].id).toBe(result.workflowIds[0]);
+      expect(result.workflowIds[0]).toBe('w-1');
+      expect(result.rawWorkflows[0].id).toBe('w-1');
       expect(result.rawWorkflows[0].originalId).toBe('w-1');
       expect(result.parseErrors).toHaveLength(0);
     });
 
-    it('should preserve originalId from ZIP filename for cross-workflow reference rewriting', async () => {
+    it('should preserve conforming ZIP filename IDs for cross-workflow reference rewriting', async () => {
       // Workflow A (persisted ID: "sender-abc") calls Workflow B (persisted ID: "processor-xyz").
-      // On import both get slug-of-name IDs. originalId must carry the persisted export ID so
-      // that the reference rewriter can map it correctly.
+      // Both filenames are conforming IDs, so they are preserved as import IDs.
+      // originalId === id, so no reference rewriting is needed at import time.
       const zip = new JSZip();
       zip.file(
         'sender-abc.yml',
@@ -492,22 +495,21 @@ describe('parseImportFile', () => {
       const file = createFile(buffer, 'related.zip');
       const result = await parseImportFile(file);
 
-      // Import IDs are derived from workflow names
-      expect(result.workflowIds).toContain('sender');
-      expect(result.workflowIds).toContain('processor');
+      // Import IDs are preserved from the conforming filenames
+      expect(result.workflowIds).toContain('sender-abc');
+      expect(result.workflowIds).toContain('processor-xyz');
 
-      const senderRaw = result.rawWorkflows.find((w) => w.id === 'sender')!;
-      const processorRaw = result.rawWorkflows.find((w) => w.id === 'processor')!;
+      const senderRaw = result.rawWorkflows.find((w) => w.id === 'sender-abc')!;
+      const processorRaw = result.rawWorkflows.find((w) => w.id === 'processor-xyz')!;
 
-      // originalId must carry the persisted export ID (the ZIP filename stem)
+      // originalId === id for conforming exports
       expect(senderRaw.originalId).toBe('sender-abc');
       expect(processorRaw.originalId).toBe('processor-xyz');
     });
 
-    it('should assign distinct postfixed IDs when two workflows in the same batch conflict and slug to the same name', async () => {
-      // This test validates the intra-batch collision guard in use_workflow_actions.ts
-      // indirectly via the parse result: both workflows must be parsed successfully
-      // with their individual originalIds intact, ready for the conflict loop.
+    it('should preserve distinct conforming ZIP filenames even when names are identical', async () => {
+      // Both workflows have the same name but different conforming filenames.
+      // The import IDs are preserved from the filenames, so no collision occurs at parse time.
       const zip = new JSZip();
       zip.file('wf-a.yml', 'name: Duplicate\nsteps: []');
       zip.file('wf-b.yml', 'name: Duplicate\nsteps: []');
@@ -523,11 +525,53 @@ describe('parseImportFile', () => {
       const file = createFile(buffer, 'duplicate-names.zip');
       const result = await parseImportFile(file);
 
-      // Both entries parse to the same slug-of-name; originalIds are distinct
-      expect(result.rawWorkflows[0].id).toBe('duplicate');
-      expect(result.rawWorkflows[1].id).toBe('duplicate');
+      // Conforming filenames are preserved as import IDs — distinct by design
+      expect(result.rawWorkflows[0].id).toBe('wf-a');
+      expect(result.rawWorkflows[1].id).toBe('wf-b');
       expect(result.rawWorkflows[0].originalId).toBe('wf-a');
       expect(result.rawWorkflows[1].originalId).toBe('wf-b');
+    });
+  });
+
+  describe('legacy ZIP backward compatibility', () => {
+    it('should fall back originalId to slug-derived id when ZIP filename does not match current ID pattern', async () => {
+      // Legacy exports may use uppercase or underscore in filenames (e.g. "My_Workflow.yml").
+      // isValidWorkflowId('My_Workflow') is false under the new pattern, so the code
+      // should fall back to using the slug-derived preview.id as the rewrite key.
+      const zip = new JSZip();
+      zip.file('My_Workflow.yml', 'name: My Workflow\nsteps: []');
+      zip.file(
+        'manifest.yml',
+        YAML.stringify({ exportedCount: 1, exportedAt: '2024-01-01', version: '1' })
+      );
+      const buffer = await zip.generateAsync({ type: 'arraybuffer' });
+      const file = createFile(buffer, 'legacy.zip');
+
+      const result = await parseImportFile(file);
+
+      expect(result.rawWorkflows).toHaveLength(1);
+      // The slug-derived id from the name "My Workflow"
+      expect(result.rawWorkflows[0].id).toBe('my-workflow');
+      // originalId falls back to slug-derived id because "My_Workflow" fails isValidWorkflowId
+      expect(result.rawWorkflows[0].originalId).toBe('my-workflow');
+    });
+
+    it('should preserve originalId from filename when it conforms to the current ID pattern', async () => {
+      const zip = new JSZip();
+      zip.file('my-workflow.yml', 'name: My Workflow\nsteps: []');
+      zip.file(
+        'manifest.yml',
+        YAML.stringify({ exportedCount: 1, exportedAt: '2024-01-01', version: '1' })
+      );
+      const buffer = await zip.generateAsync({ type: 'arraybuffer' });
+      const file = createFile(buffer, 'current.zip');
+
+      const result = await parseImportFile(file);
+
+      expect(result.rawWorkflows).toHaveLength(1);
+      expect(result.rawWorkflows[0].id).toBe('my-workflow');
+      // originalId is the filename stem because "my-workflow" passes isValidWorkflowId
+      expect(result.rawWorkflows[0].originalId).toBe('my-workflow');
     });
   });
 

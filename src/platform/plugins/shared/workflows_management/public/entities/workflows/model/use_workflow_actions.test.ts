@@ -561,6 +561,93 @@ describe('useWorkflowActions – import mutations', () => {
       expect(parentPayload!.yaml).toContain('workflow-id: child');
       expect(parentPayload!.yaml).not.toContain('workflow-id: child-1');
     });
+
+    it('should preserve references as-is without generateNewIds when IDs are conforming', async () => {
+      mockWorkflowApi.bulkCreateWorkflows.mockResolvedValueOnce(importSuccess);
+
+      const parentYaml = [
+        'name: Parent',
+        'steps:',
+        '  - name: call-child',
+        '    type: workflow.execute',
+        '    with:',
+        '      workflow-id: child-processor',
+      ].join('\n');
+
+      const childYaml = 'name: Child\nsteps: []';
+
+      // For conforming exports, originalId === id (export ID preserved)
+      const workflowsWithRefs: Array<{ id: string; originalId: string; yaml: string }> = [
+        { id: 'parent-workflow', originalId: 'parent-workflow', yaml: parentYaml },
+        { id: 'child-processor', originalId: 'child-processor', yaml: childYaml },
+      ];
+
+      const { result } = renderHook(() => useWorkflowActions(), { wrapper });
+
+      act(() => {
+        result.current.importWorkflows.mutate({
+          workflows: workflowsWithRefs,
+          conflictIds: [],
+        });
+      });
+
+      await waitFor(() => expect(result.current.importWorkflows.isSuccess).toBe(true));
+
+      const [{ workflows: sentWorkflows }] = mockWorkflowApi.bulkCreateWorkflows.mock.calls[0];
+
+      const parentPayload = sentWorkflows.find((w: { id?: string; yaml: string }) =>
+        w.yaml.includes('Parent')
+      );
+
+      expect(parentPayload).toBeDefined();
+      // References should be preserved unchanged — no rewriting needed
+      expect(parentPayload!.yaml).toContain('workflow-id: child-processor');
+      expect(parentPayload!.id).toBe('parent-workflow');
+    });
+
+    it('should rewrite references without generateNewIds only for legacy exports', async () => {
+      mockWorkflowApi.bulkCreateWorkflows.mockResolvedValueOnce(importSuccess);
+
+      const parentYaml = [
+        'name: Parent',
+        'steps:',
+        '  - name: call-child',
+        '    type: workflow.execute',
+        '    with:',
+        '      workflow-id: Old_Export_Id',
+      ].join('\n');
+
+      const childYaml = 'name: Child\nsteps: []';
+
+      // Legacy export: originalId differs from id because the old ID
+      // didn't conform to the new pattern and was regenerated to a slug.
+      const workflowsWithRefs: Array<{ id: string; originalId: string; yaml: string }> = [
+        { id: 'parent', originalId: 'Old_Parent_Id', yaml: parentYaml },
+        { id: 'child', originalId: 'Old_Export_Id', yaml: childYaml },
+      ];
+
+      const { result } = renderHook(() => useWorkflowActions(), { wrapper });
+
+      act(() => {
+        result.current.importWorkflows.mutate({
+          workflows: workflowsWithRefs,
+          conflictIds: [],
+        });
+      });
+
+      await waitFor(() => expect(result.current.importWorkflows.isSuccess).toBe(true));
+
+      const [{ workflows: sentWorkflows }] = mockWorkflowApi.bulkCreateWorkflows.mock.calls[0];
+
+      const parentPayload = sentWorkflows.find((w: { id?: string; yaml: string }) =>
+        w.yaml.includes('Parent')
+      );
+
+      expect(parentPayload).toBeDefined();
+      // The legacy reference should be rewritten from 'Old_Export_Id' to 'child'
+      expect(parentPayload!.yaml).toContain('workflow-id: child');
+      expect(parentPayload!.yaml).not.toContain('workflow-id: Old_Export_Id');
+    });
   });
 
   // ---------------------------------------------------------------------------

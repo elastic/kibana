@@ -123,13 +123,21 @@ async function parseZipFile(buffer: ArrayBuffer): Promise<ClientPreflightResult>
     }
 
     const preview = extractWorkflowPreview(yaml);
-    // If the ZIP filename doesn't conform to the current ID pattern (e.g. a legacy
-    // export with uppercase or underscore characters), fall back to the slug-derived
-    // id as the rewrite key so cross-workflow references can still be resolved.
-    const effectiveOriginalId = isValidWorkflowId(originalId) ? originalId : preview.id;
+    const isLegacyId = !isValidWorkflowId(originalId);
+    // For conforming exports, preserve the original export ID so the import
+    // keeps the same ID the workflow had before export. For legacy exports
+    // (uppercase, underscore, etc.), fall back to the slug-derived ID.
+    const importId = isLegacyId ? preview.id : originalId;
+
+    if (isLegacyId) {
+      parseErrors.push(
+        `Entry [${name}] has a legacy ID format "${originalId}" that will be renamed to "${importId}" to conform to the new ID format`
+      );
+    }
+
     workflows.push(preview);
-    workflowIds.push(preview.id);
-    rawWorkflows.push({ id: preview.id, originalId: effectiveOriginalId, yaml });
+    workflowIds.push(importId);
+    rawWorkflows.push({ id: importId, originalId: isLegacyId ? preview.id : originalId, yaml });
   }
 
   if (manifestParsed.data.exportedCount !== workflows.length) {
