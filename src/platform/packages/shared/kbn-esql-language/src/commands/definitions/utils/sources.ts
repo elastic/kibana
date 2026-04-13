@@ -13,10 +13,12 @@ import type { ESQLAstAllCommands, ESQLAstJoinCommand, ESQLSource } from '@elasti
 import { isAsExpression, Walker, LeafPrinter, Parser } from '@elastic/esql';
 import type { ISuggestionItem } from '../../registry/types';
 import { pipeCompleteItem, commaCompleteItem } from '../../registry/complete_items';
+import { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from '../../registry/constants';
 import { findFinalWord, withAutoSuggest } from './autocomplete/helpers';
 import { EDITOR_MARKER } from '../constants';
 import { metadataSuggestion } from '../../registry/options/metadata';
 import { fuzzySearch } from './shared';
+import { computePrefixRange } from '../../../language/autocomplete/utils/prefix_range';
 
 const removeSourceNameQuotes = (sourceName: string) =>
   sourceName.startsWith('"') && sourceName.endsWith('"') ? sourceName.slice(1, -1) : sourceName;
@@ -58,23 +60,40 @@ export const buildSourcesDefinitions = (
     links?: Array<{ label: string; url: string }>;
     type?: string;
   }>,
-  queryString?: string
-): ISuggestionItem[] =>
-  sources.map(({ name, isIntegration, title, description, links, type }) => {
-    let text = getSafeInsertSourceText(name);
-    const isTimeseries = type === SOURCES_TYPES.TIMESERIES;
-    let rangeToReplace: { start: number; end: number } | undefined;
-    let filterText: string | undefined;
+  sourceReplacementContext?: {
+    textBeforeCursor: string;
+    commandStart: number;
+  }
+): ISuggestionItem[] => {
+  const sourceCommandContext = sourceReplacementContext
+    ? {
+        commandStart: sourceReplacementContext.commandStart,
+        prefixRangeStart: computePrefixRange(sourceReplacementContext.textBeforeCursor).range.start,
+      }
+    : undefined;
 
-    // If this is a timeseries source we should replace FROM with TS.
-    if (isTimeseries && queryString) {
-      text = `TS ${text}`;
-      rangeToReplace = {
-        start: 0,
-        end: queryString.length + 1,
+  return sources.map(({ name, isIntegration, title, description, links, type }) => {
+    const text = getSafeInsertSourceText(name);
+    const isTimeseries = type === SOURCES_TYPES.TIMESERIES;
+    let command: ISuggestionItem['command'];
+
+    if (isTimeseries && sourceCommandContext) {
+      // The command runs after Monaco inserts `text`, so include the inserted source length.
+      const replaceEnd = sourceCommandContext.prefixRangeStart + text.length;
+
+      command = {
+        // Monaco command payloads require a title.
+        title: 'Apply text replacement',
+        id: ESQL_APPLY_TEXT_REPLACEMENT_COMMAND,
+        arguments: [
+          {
+            replacementText: `TS ${text}`,
+            // Command arguments are string maps; the editor command parses them.
+            replaceStart: String(sourceCommandContext.commandStart),
+            replaceEnd: String(replaceEnd),
+          },
+        ],
       };
-      // Keep filterText source-aware so Monaco can rank/filter by the typed source fragment.
-      filterText = `FROM ${name}`;
     }
 
     // Build markdown documentation from description and links (shown in detail popup)
@@ -113,10 +132,10 @@ export const buildSourcesDefinitions = (
             },
           }),
       documentation,
-      ...(rangeToReplace && { rangeToReplace }),
-      ...(filterText && { filterText }),
+      ...(command && { command }),
     });
   });
+};
 
 /**
  * Builds suggestion items for ES|QL views (GET _query/view).
@@ -184,7 +203,10 @@ export function getSourcesFromCommands(
 export function getSourceSuggestions(
   sources: ESQLSourceResult[],
   alreadyUsed: string[],
-  queryString?: string
+  sourceReplacementContext?: {
+    textBeforeCursor: string;
+    commandStart: number;
+  }
 ) {
   // hide indexes that start with .
   return buildSourcesDefinitions(
@@ -200,7 +222,7 @@ export function getSourceSuggestions(
           type,
         };
       }),
-    queryString
+    sourceReplacementContext
   );
 }
 
@@ -209,7 +231,11 @@ export async function additionalSourcesSuggestions(
   sources: ESQLSourceResult[],
   ignored: string[],
   recommendedQuerySuggestions: ISuggestionItem[],
-  views: EsqlView[] = []
+  views: EsqlView[] = [],
+  sourceReplacementContext?: {
+    textBeforeCursor: string;
+    commandStart: number;
+  }
 ) {
   const sourceNames = new Set([
     ...sources.map(({ name }) => name),
@@ -255,7 +281,7 @@ export async function additionalSourcesSuggestions(
     ];
   }
 
-  const sourceSuggestions = getSourceSuggestions(sources, ignored);
+  const sourceSuggestions = getSourceSuggestions(sources, ignored, sourceReplacementContext);
   const viewSuggestions = buildViewsDefinitions(views, ignored);
 
   return [...sourceSuggestions, ...viewSuggestions];
