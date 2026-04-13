@@ -6,7 +6,14 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiListGroup, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiListGroup,
+  EuiListGroupItem,
+  EuiPopover,
+} from '@elastic/eui';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { css } from '@emotion/react';
@@ -24,6 +31,10 @@ export interface AlertEpisodeActionsProps {
   groupHash?: string;
   episodeAction?: EpisodeActionState;
   groupAction?: AlertEpisodeGroupAction;
+  /**
+   * When set, "Open in Discover" appears in the more-actions menu (the rule query must exist).
+   */
+  openInDiscoverHref?: string;
   /**
    * When set, "View details" is an anchor link (pass a base-path-prefixed app URL from the embedding plugin).
    */
@@ -53,6 +64,7 @@ export function AlertEpisodeActions({
   episodeAction,
   groupAction,
   http,
+  openInDiscoverHref,
   expressions,
   viewDetailsHref,
   buttonsOutlined = true,
@@ -130,6 +142,16 @@ export function AlertEpisodeActions({
                   setIsTagsFlyoutOpen(true);
                 }}
               />
+              {openInDiscoverHref && (
+                <EuiListGroupItem
+                  label={i18n.ACTIONS_OPEN_IN_DISCOVER_LABEL}
+                  size="s"
+                  iconType="discoverApp"
+                  href={openInDiscoverHref}
+                  onClick={() => setIsMoreOpen(false)}
+                  data-test-subj="alertingEpisodeOpenInDiscoverButton"
+                />
+              )}
             </EuiListGroup>
           </EuiPopover>
           {isTagsFlyoutOpen && groupHash ? (
