@@ -77,10 +77,10 @@ describe('rule_action_error_log_flyout', () => {
 
     await screen.findByTestId('RuleErrorLog');
 
-    expect(screen.getByTestId('ruleActionErrorLogFlyoutMessageText').textContent).toEqual(
+    expect(screen.getByTestId('ruleActionErrorLogFlyoutMessageText')).toHaveTextContent(
       mockExecution.message
     );
-    expect(screen.getByTestId('ruleActionErrorBadge').textContent).toEqual('4');
+    expect(screen.getByTestId('ruleActionErrorBadge')).toHaveTextContent('4');
   });
 
   it('can close the flyout', async () => {

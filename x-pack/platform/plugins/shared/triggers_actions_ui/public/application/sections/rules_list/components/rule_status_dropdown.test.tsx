@@ -100,7 +100,7 @@ describe('RuleStatusDropdown', () => {
       />
     );
     expect(screen.getByTestId('statusDropdown')).toHaveAttribute('title', 'Snoozed');
-    expect(screen.getByTestId('remainingSnoozeTime').textContent).toBe('3 days');
+    expect(screen.getByTestId('remainingSnoozeTime')).toHaveTextContent('3 days');
   });
 
   test('renders status control as snoozed when rule has muteAll set to true', () => {
@@ -108,7 +108,7 @@ describe('RuleStatusDropdown', () => {
 
     render(<RuleStatusDropdown {...{ ...props, rule: { ...props.rule, muteAll: true } }} />);
     expect(screen.getByTestId('statusDropdown')).toHaveAttribute('title', 'Snoozed');
-    expect(screen.getByTestId('remainingSnoozeTime').textContent).toBe('Indefinitely');
+    expect(screen.getByTestId('remainingSnoozeTime')).toHaveTextContent('Indefinitely');
   });
 
   test('renders status control as disabled when rule is snoozed but also disabled', () => {
@@ -130,7 +130,7 @@ describe('RuleStatusDropdown', () => {
         isEditable={false}
       />
     );
-    expect(screen.getByTestId('statusDropdownReadonly').textContent).toBe('Enabled');
+    expect(screen.getByTestId('statusDropdownReadonly')).toHaveTextContent('Enabled');
   });
 
   describe('autoRecoverAlerts', () => {

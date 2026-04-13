@@ -24,19 +24,19 @@ describe('RulesListAutoRefresh', () => {
     );
 
     const lastUpdateText = screen.getByTestId('rulesListAutoRefresh-lastUpdateText');
-    expect(lastUpdateText.textContent).toEqual('Updated a few seconds ago');
+    expect(lastUpdateText).toHaveTextContent('Updated a few seconds ago');
 
     await act(async () => {
       jest.advanceTimersByTime(1 * 60 * 1000);
     });
 
-    expect(lastUpdateText.textContent).toEqual('Updated a minute ago');
+    expect(lastUpdateText).toHaveTextContent('Updated a minute ago');
 
     await act(async () => {
       jest.advanceTimersByTime(1 * 60 * 1000);
     });
 
-    expect(lastUpdateText.textContent).toEqual('Updated 2 minutes ago');
+    expect(lastUpdateText).toHaveTextContent('Updated 2 minutes ago');
 
     await act(async () => {
       jest.runOnlyPendingTimers();

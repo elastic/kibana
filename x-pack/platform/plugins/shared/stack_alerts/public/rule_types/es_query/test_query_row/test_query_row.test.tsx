@@ -91,7 +91,7 @@ describe('TestQueryRow', () => {
     await userEvent.click(screen.getByTestId('copyQuery'));
     expect(localOnCopyQuery).toHaveBeenCalled();
     expect(screen.getByTestId('copyQueryError')).toBeInTheDocument();
-    expect(screen.getByTestId('copyQueryError').textContent).toContain(errorMessage);
+    expect(screen.getByTestId('copyQueryError')).toHaveTextContent(errorMessage);
   });
 
   it('should clear copyQuery error when clicking copy query again', async () => {

@@ -114,7 +114,7 @@ describe('IndexParamsFields renders', () => {
       'preconfiguredIndexToUse'
     ) as HTMLInputElement;
     expect(preconfiguredIndexToUse).toBeInTheDocument();
-    expect(preconfiguredIndexToUse.value).toBe('default');
+    expect(preconfiguredIndexToUse).toHaveValue('default');
     expect(screen.getByTestId('preconfiguredDocumentToIndex')).toBeInTheDocument();
   });
 
@@ -146,7 +146,7 @@ describe('IndexParamsFields renders', () => {
       'preconfiguredIndexToUse'
     ) as HTMLInputElement;
     expect(preconfiguredIndexToUse).toBeInTheDocument();
-    expect(preconfiguredIndexToUse.value).toBe('not-the-default');
+    expect(preconfiguredIndexToUse).toHaveValue('not-the-default');
     expect(screen.getByTestId('preconfiguredDocumentToIndex')).toBeInTheDocument();
 
     await userEvent.click(screen.getByTestId('resetDefaultIndex'));

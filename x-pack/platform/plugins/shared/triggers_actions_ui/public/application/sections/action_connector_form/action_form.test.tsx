@@ -613,7 +613,7 @@ describe('action_form', () => {
       await waitFor(() => {
         expect(document.querySelector('.euiComboBoxOptionsList__empty')).toBeInTheDocument();
       });
-      expect(document.querySelector('.euiComboBoxOptionsList__empty')?.textContent).toContain(
+      expect(document.querySelector('.euiComboBoxOptionsList__empty')).toHaveTextContent(
         "You've selected all available options"
       );
       // Confirm the selected connector is test3 (Preconfigured Only), not test4

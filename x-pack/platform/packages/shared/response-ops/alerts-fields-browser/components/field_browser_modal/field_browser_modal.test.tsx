@@ -45,7 +45,7 @@ describe('FieldBrowserModal', () => {
   test('it renders the Close button', () => {
     renderComponent();
 
-    expect(screen.getByTestId('close').textContent).toEqual('Close');
+    expect(screen.getByTestId('close')).toHaveTextContent('Close');
   });
 
   test('it invokes the Close button', async () => {
@@ -58,7 +58,7 @@ describe('FieldBrowserModal', () => {
   test('it renders the Reset Fields button', () => {
     renderComponent();
 
-    expect(screen.getByTestId('reset-fields').textContent).toEqual('Reset Fields');
+    expect(screen.getByTestId('reset-fields')).toHaveTextContent('Reset Fields');
   });
 
   test('it invokes onResetColumns callback when the user clicks the Reset Fields button', async () => {

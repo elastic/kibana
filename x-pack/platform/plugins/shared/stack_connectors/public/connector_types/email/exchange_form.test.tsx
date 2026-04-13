@@ -63,13 +63,13 @@ describe('ExchangeFormFields renders', () => {
       </ConnectorFormTestProvider>
     );
     expect(screen.getByTestId('emailClientSecret')).toBeInTheDocument();
-    expect((screen.getByTestId('emailClientSecret') as HTMLInputElement).value).toEqual('');
+    expect(screen.getByTestId('emailClientSecret')).toHaveValue('');
 
     expect(screen.getByTestId('emailClientId')).toBeInTheDocument();
-    expect((screen.getByTestId('emailClientId') as HTMLInputElement).value).toEqual('');
+    expect(screen.getByTestId('emailClientId')).toHaveValue('');
 
     expect(screen.getByTestId('emailTenantId')).toBeInTheDocument();
-    expect((screen.getByTestId('emailTenantId') as HTMLInputElement).value).toEqual('');
+    expect(screen.getByTestId('emailTenantId')).toHaveValue('');
   });
 
   describe('Validation', () => {

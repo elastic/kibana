@@ -58,7 +58,7 @@ describe('WebhookParamsFields renders', () => {
     expect(commentsTextArea).toBeInTheDocument();
     expect(screen.getByTestId('case-severity-selection')).toBeInTheDocument();
     expect(screen.getByTestId('case-status-filter')).toBeInTheDocument();
-    expect(commentsTextArea.disabled).toEqual(false);
+    expect(commentsTextArea).not.toBeDisabled();
   });
 
   test('comments field is disabled when comment data is missing', () => {

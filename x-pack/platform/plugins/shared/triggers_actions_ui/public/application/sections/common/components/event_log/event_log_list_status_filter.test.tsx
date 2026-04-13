@@ -40,7 +40,7 @@ describe('event_log_list_status_filter', () => {
     expect(screen.getByRole('button')).toBeInTheDocument();
 
     const badge = container.querySelector('.euiNotificationBadge');
-    expect(badge?.textContent).toEqual('0');
+    expect(badge).toHaveTextContent('0');
   });
 
   it('can open the popover correctly', async () => {
@@ -66,7 +66,7 @@ describe('event_log_list_status_filter', () => {
     );
 
     const badge1 = container.querySelector('.euiNotificationBadge');
-    expect(badge1?.textContent).toEqual('1');
+    expect(badge1).toHaveTextContent('1');
 
     await userEvent.click(screen.getAllByRole('option')[1]);
     expect(onChangeMock).toHaveBeenCalledWith(['success', 'failure']);
@@ -81,7 +81,7 @@ describe('event_log_list_status_filter', () => {
     );
 
     const badge2 = container.querySelector('.euiNotificationBadge');
-    expect(badge2?.textContent).toEqual('2');
+    expect(badge2).toHaveTextContent('2');
 
     await userEvent.click(screen.getAllByRole('option')[0]);
     expect(onChangeMock).toHaveBeenCalledWith(['failure']);

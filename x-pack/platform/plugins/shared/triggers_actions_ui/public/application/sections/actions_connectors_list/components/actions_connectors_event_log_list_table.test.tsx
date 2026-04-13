@@ -88,18 +88,18 @@ describe('actions_connectors_event_log_list_table', () => {
       const statusCells = document.querySelectorAll(
         '[data-gridcell-column-id="status"] .euiDataGridRowCell__content'
       );
-      expect(statusCells[0]?.textContent).toEqual('succeeded');
+      expect(statusCells[0]).toHaveTextContent('succeeded');
     });
 
     const connectorNameCells = document.querySelectorAll(
       '[data-gridcell-column-id="connector_name"] .euiDataGridRowCell__content'
     );
-    expect(connectorNameCells[0]?.textContent).toEqual('test connector');
+    expect(connectorNameCells[0]).toHaveTextContent('test connector');
 
     const messageCells = document.querySelectorAll(
       '[data-gridcell-column-id="message"] .euiDataGridRowCell__content'
     );
-    expect(messageCells[0]?.textContent).toEqual(
+    expect(messageCells[0]).toHaveTextContent(
       'action executed: .server-log:86020b10-9b3b-11ed-8422-2f5a388a317d: test'
     );
   });

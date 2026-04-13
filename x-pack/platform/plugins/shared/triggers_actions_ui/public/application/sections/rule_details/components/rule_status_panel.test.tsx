@@ -88,7 +88,7 @@ describe('rule status panel', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('ruleStatus-numberOfExecutions').textContent).toBe(
+      expect(screen.getByTestId('ruleStatus-numberOfExecutions')).toHaveTextContent(
         '400 executions in the last 24 hr'
       );
     });

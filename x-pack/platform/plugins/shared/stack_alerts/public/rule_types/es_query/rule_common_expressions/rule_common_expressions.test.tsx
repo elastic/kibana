@@ -7,7 +7,7 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RuleCommonExpressions } from './rule_common_expressions';
 import type { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
@@ -112,9 +112,7 @@ describe('RuleCommonExpressions', () => {
     expect(screen.getByTestId('forLastExpression')).toBeInTheDocument();
     expect(screen.getByTestId('sizeValueExpression')).toBeInTheDocument();
     expect(screen.getByTestId('excludeHitsFromPreviousRunExpression')).toBeInTheDocument();
-    expect(
-      (screen.getByTestId('excludeHitsFromPreviousRunExpression') as HTMLInputElement).checked
-    ).toBe(true);
+    expect(screen.getByTestId('excludeHitsFromPreviousRunExpression')).toBeChecked();
     expect(screen.getByTestId('excludeHitsFromPreviousRunExpression')).not.toBeDisabled();
 
     expect(screen.getByTestId('testQuery')).toBeInTheDocument();
@@ -126,18 +124,14 @@ describe('RuleCommonExpressions', () => {
     expect(screen.getByTestId('thresholdHelpPopover')).toBeInTheDocument();
 
     // Expression items are lazy-loaded; wait for them to render
-    await waitFor(() => {
-      expect(screen.getByTestId('whenExpression')).toBeInTheDocument();
-      expect(screen.getByTestId('ofExpressionPopover')).toBeInTheDocument();
-    });
+    await screen.findByTestId('whenExpression');
+    await screen.findByTestId('ofExpressionPopover');
     expect(screen.getByTestId('groupByExpression')).toBeInTheDocument();
     expect(screen.getByTestId('thresholdPopover')).toBeInTheDocument();
     expect(screen.getByTestId('forLastExpression')).toBeInTheDocument();
     expect(screen.getByTestId('sizeValueExpression')).toBeInTheDocument();
     expect(screen.getByTestId('excludeHitsFromPreviousRunExpression')).toBeInTheDocument();
-    expect(
-      (screen.getByTestId('excludeHitsFromPreviousRunExpression') as HTMLInputElement).checked
-    ).toBe(true);
+    expect(screen.getByTestId('excludeHitsFromPreviousRunExpression')).toBeChecked();
 
     expect(screen.getByTestId('testQuery')).toBeInTheDocument();
     expect(screen.getByTestId('testQuery')).not.toBeDisabled();
@@ -155,19 +149,19 @@ describe('RuleCommonExpressions', () => {
       }),
     });
 
-    expect(screen.getByTestId('whenExpression').textContent).toEqual(
+    expect(screen.getByTestId('whenExpression')).toHaveTextContent(
       `when ${builtInAggregationTypes[DEFAULT_VALUES.AGGREGATION_TYPE].text}`
     );
-    expect(screen.getByTestId('groupByExpression').textContent).toEqual(
-      `over ${DEFAULT_VALUES.GROUP_BY} documents `
+    expect(screen.getByTestId('groupByExpression')).toHaveTextContent(
+      `over ${DEFAULT_VALUES.GROUP_BY} documents`
     );
     expect(screen.queryByTestId('ofExpressionPopover')).not.toBeInTheDocument();
-    expect(screen.getByTestId('thresholdPopover').textContent).toEqual(
+    expect(screen.getByTestId('thresholdPopover')).toHaveTextContent(
       `${builtInComparators[DEFAULT_VALUES.THRESHOLD_COMPARATOR].text} ${
         DEFAULT_VALUES.THRESHOLD[0]
       }`
     );
-    expect(screen.getByTestId('forLastExpression').textContent).toEqual(
+    expect(screen.getByTestId('forLastExpression')).toHaveTextContent(
       `for the last ${DEFAULT_VALUES.TIME_WINDOW_SIZE} ${getTimeUnitLabel(
         DEFAULT_VALUES.TIME_WINDOW_UNIT as TIME_UNITS,
         DEFAULT_VALUES.TIME_WINDOW_SIZE.toString()
@@ -198,17 +192,17 @@ describe('RuleCommonExpressions', () => {
       }),
     });
 
-    expect(screen.getByTestId('whenExpression').textContent).toEqual(
+    expect(screen.getByTestId('whenExpression')).toHaveTextContent(
       `when ${builtInAggregationTypes[aggType].text}`
     );
-    expect(screen.getByTestId('groupByExpression').textContent).toEqual(
+    expect(screen.getByTestId('groupByExpression')).toHaveTextContent(
       `grouped over ${groupBy} ${termSize} '${termField}'`
     );
 
-    expect(screen.getByTestId('thresholdPopover').textContent).toEqual(
+    expect(screen.getByTestId('thresholdPopover')).toHaveTextContent(
       `${builtInComparators[thresholdComparator].text} ${threshold[0]} AND ${threshold[1]}`
     );
-    expect(screen.getByTestId('forLastExpression').textContent).toEqual(
+    expect(screen.getByTestId('forLastExpression')).toHaveTextContent(
       `for the last ${timeWindowSize} ${getTimeUnitLabel(
         timeWindowUnit as TIME_UNITS,
         timeWindowSize.toString()
@@ -238,7 +232,7 @@ describe('RuleCommonExpressions', () => {
         threshold,
       }),
     });
-    expect(screen.getByTestId('groupByExpression').textContent).toEqual(
+    expect(screen.getByTestId('groupByExpression')).toHaveTextContent(
       `grouped over ${groupBy} ${termSize} 'term,term2'`
     );
   });
@@ -275,9 +269,7 @@ describe('RuleCommonExpressions', () => {
       excludeHitsFromPreviousRun: false,
     });
     expect(screen.getByTestId('excludeHitsFromPreviousRunExpression')).toBeInTheDocument();
-    expect(
-      (screen.getByTestId('excludeHitsFromPreviousRunExpression') as HTMLInputElement).checked
-    ).toBe(false);
+    expect(screen.getByTestId('excludeHitsFromPreviousRunExpression')).not.toBeChecked();
 
     await userEvent.click(screen.getByTestId('excludeHitsFromPreviousRunExpression'));
     expect(onChangeExcludeHitsFromPreviousRunFn).toHaveBeenCalledWith(true);

@@ -44,7 +44,7 @@ describe('SlackParamsFields renders', () => {
         index={0}
       />
     );
-    expect((screen.getByTestId('messageTextArea') as HTMLTextAreaElement).value).toEqual(
+    expect(screen.getByTestId('messageTextArea')).toHaveValue(
       'not the default message'
     );
 
@@ -77,7 +77,7 @@ describe('SlackParamsFields renders', () => {
         index={0}
       />
     );
-    expect((screen.getByTestId('messageTextArea') as HTMLTextAreaElement).value).toEqual(
+    expect(screen.getByTestId('messageTextArea')).toHaveValue(
       'not the default message'
     );
 

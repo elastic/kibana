@@ -211,15 +211,15 @@ describe('CollapsedItemActions', () => {
 
       const disableBtn = screen.getByTestId('disableButton');
       expect(disableBtn).not.toBeDisabled();
-      expect(disableBtn.textContent).toEqual('Disable');
+      expect(disableBtn).toHaveTextContent('Disable');
 
       const editBtn = screen.getByTestId('editRule');
       expect(editBtn).toBeDisabled();
-      expect(editBtn.textContent).toEqual('Edit rule');
+      expect(editBtn).toHaveTextContent('Edit rule');
 
       const deleteBtn = screen.getByTestId('deleteRule');
       expect(deleteBtn).not.toBeDisabled();
-      expect(deleteBtn.textContent).toEqual('Delete rule');
+      expect(deleteBtn).toHaveTextContent('Delete rule');
     });
   });
 
@@ -271,22 +271,22 @@ describe('CollapsedItemActions', () => {
 
       const disableBtn = screen.getByTestId('disableButton');
       expect(disableBtn).not.toBeDisabled();
-      expect(disableBtn.textContent).toEqual('Disable');
+      expect(disableBtn).toHaveTextContent('Disable');
 
       const snoozeBtn = screen.getByTestId('snoozeButton');
-      expect(snoozeBtn.textContent).toEqual('Snooze');
+      expect(snoozeBtn).toHaveTextContent('Snooze');
 
       const editBtn = screen.getByTestId('editRule');
       expect(editBtn).not.toBeDisabled();
-      expect(editBtn.textContent).toEqual('Edit rule');
+      expect(editBtn).toHaveTextContent('Edit rule');
 
       const deleteBtn = screen.getByTestId('deleteRule');
       expect(deleteBtn).not.toBeDisabled();
-      expect(deleteBtn.textContent).toEqual('Delete rule');
+      expect(deleteBtn).toHaveTextContent('Delete rule');
 
-      expect(screen.getByTestId('updateApiKey').textContent).toEqual('Update API key');
-      expect(screen.getByTestId('runRule').textContent).toEqual('Run rule');
-      expect(screen.getByTestId('cloneRule').textContent).toEqual('Clone rule');
+      expect(screen.getByTestId('updateApiKey')).toHaveTextContent('Update API key');
+      expect(screen.getByTestId('runRule')).toHaveTextContent('Run rule');
+      expect(screen.getByTestId('cloneRule')).toHaveTextContent('Clone rule');
     });
 
     test('handles case when run rule is clicked', async () => {
@@ -362,15 +362,15 @@ describe('CollapsedItemActions', () => {
 
       const disableBtn = screen.getByTestId('disableButton');
       expect(disableBtn).not.toBeDisabled();
-      expect(disableBtn.textContent).toEqual('Enable');
+      expect(disableBtn).toHaveTextContent('Enable');
 
       const editBtn = screen.getByTestId('editRule');
       expect(editBtn).not.toBeDisabled();
-      expect(editBtn.textContent).toEqual('Edit rule');
+      expect(editBtn).toHaveTextContent('Edit rule');
 
       const deleteBtn = screen.getByTestId('deleteRule');
       expect(deleteBtn).not.toBeDisabled();
-      expect(deleteBtn.textContent).toEqual('Delete rule');
+      expect(deleteBtn).toHaveTextContent('Delete rule');
     });
 
     test('renders actions correctly when rule is not enabled due to license', async () => {
@@ -383,15 +383,15 @@ describe('CollapsedItemActions', () => {
 
       const disableBtn = screen.getByTestId('disableButton');
       expect(disableBtn).toBeDisabled();
-      expect(disableBtn.textContent).toEqual('Disable');
+      expect(disableBtn).toHaveTextContent('Disable');
 
       const editBtn = screen.getByTestId('editRule');
       expect(editBtn).not.toBeDisabled();
-      expect(editBtn.textContent).toEqual('Edit rule');
+      expect(editBtn).toHaveTextContent('Edit rule');
 
       const deleteBtn = screen.getByTestId('deleteRule');
       expect(deleteBtn).not.toBeDisabled();
-      expect(deleteBtn.textContent).toEqual('Delete rule');
+      expect(deleteBtn).toHaveTextContent('Delete rule');
     });
 
     test('renders actions correctly when rule is muted', async () => {
@@ -400,19 +400,19 @@ describe('CollapsedItemActions', () => {
       await userEvent.click(screen.getByTestId('selectActionButton'));
       await waitForEuiPopoverOpen();
 
-      expect(screen.getByTestId('snoozeButton').textContent).toEqual('Snoozed indefinitely');
+      expect(screen.getByTestId('snoozeButton')).toHaveTextContent('Snoozed indefinitely');
 
       const disableBtn = screen.getByTestId('disableButton');
       expect(disableBtn).not.toBeDisabled();
-      expect(disableBtn.textContent).toEqual('Disable');
+      expect(disableBtn).toHaveTextContent('Disable');
 
       const editBtn = screen.getByTestId('editRule');
       expect(editBtn).not.toBeDisabled();
-      expect(editBtn.textContent).toEqual('Edit rule');
+      expect(editBtn).toHaveTextContent('Edit rule');
 
       const deleteBtn = screen.getByTestId('deleteRule');
       expect(deleteBtn).not.toBeDisabled();
-      expect(deleteBtn.textContent).toEqual('Delete rule');
+      expect(deleteBtn).toHaveTextContent('Delete rule');
     });
 
     test('renders snooze text correctly if the rule is snoozed', async () => {
@@ -426,7 +426,7 @@ describe('CollapsedItemActions', () => {
       await userEvent.click(screen.getByTestId('selectActionButton'));
       await waitForEuiPopoverOpen();
 
-      expect(screen.getByTestId('snoozeButton').textContent).toEqual('Snoozed until Feb 1');
+      expect(screen.getByTestId('snoozeButton')).toHaveTextContent('Snoozed until Feb 1');
     });
 
     test('snooze is disabled for SIEM rules', async () => {

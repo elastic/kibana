@@ -50,10 +50,10 @@ describe('ruleActionsNotifyWhen', () => {
 
   const expectDefaultFrequency = () => {
     const summaryOrPerRuleSelect = screen.getByTestId('summaryOrPerRuleSelect');
-    expect(summaryOrPerRuleSelect.textContent).toContain('For each alert');
+    expect(summaryOrPerRuleSelect).toHaveTextContent('For each alert');
 
     const notifyWhenSelect = screen.getByTestId('notifyWhenSelect');
-    expect(notifyWhenSelect.textContent).toContain('On status changes');
+    expect(notifyWhenSelect).toHaveTextContent('On status changes');
   };
 
   it('renders the passed-in frequency on load', () => {
@@ -95,17 +95,16 @@ describe('ruleActionsNotifyWhen', () => {
     );
     {
       const summaryOrPerRuleSelect = screen.getByTestId('summaryOrPerRuleSelect');
-      expect(summaryOrPerRuleSelect.textContent).toContain('For each alert');
+      expect(summaryOrPerRuleSelect).toHaveTextContent('For each alert');
 
       const notifyWhenSelect = screen.getByTestId('notifyWhenSelect');
-      expect(notifyWhenSelect.textContent).toContain('On custom action intervals');
+      expect(notifyWhenSelect).toHaveTextContent('On custom action intervals');
     }
 
-    const throttleInput = screen.getByTestId('throttleInput') as HTMLInputElement;
-    expect(Number(throttleInput.value)).toEqual(5);
+    expect(screen.getByTestId('throttleInput')).toHaveValue(5);
 
     const throttleUnitInput = screen.getByTestId('throttleUnitInput') as HTMLSelectElement;
-    expect(throttleUnitInput.value).toEqual('h');
+    expect(throttleUnitInput).toHaveValue('h');
   });
 
   it('hides the summary selector when hasAlertsMappings is false', () => {

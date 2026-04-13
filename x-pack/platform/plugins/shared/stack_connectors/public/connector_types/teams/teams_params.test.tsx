@@ -45,7 +45,7 @@ describe('TeamsParamsFields renders', () => {
         index={0}
       />
     );
-    expect((screen.getByTestId('messageTextArea') as HTMLTextAreaElement).value).toEqual(
+    expect(screen.getByTestId('messageTextArea')).toHaveValue(
       'not the default message'
     );
 
@@ -78,7 +78,7 @@ describe('TeamsParamsFields renders', () => {
         index={0}
       />
     );
-    expect((screen.getByTestId('messageTextArea') as HTMLTextAreaElement).value).toEqual(
+    expect(screen.getByTestId('messageTextArea')).toHaveValue(
       'not the default message'
     );
 

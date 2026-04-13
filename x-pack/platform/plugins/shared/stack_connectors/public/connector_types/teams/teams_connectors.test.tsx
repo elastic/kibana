@@ -39,7 +39,7 @@ describe('TeamsActionFields renders', () => {
 
     const teamsWebhookUrlInput = screen.getByTestId('teamsWebhookUrlInput') as HTMLInputElement;
     expect(teamsWebhookUrlInput).toBeInTheDocument();
-    expect(teamsWebhookUrlInput.value).toBe('https://test.com');
+    expect(teamsWebhookUrlInput).toHaveValue('https://test.com');
   });
 
   describe('Validation', () => {

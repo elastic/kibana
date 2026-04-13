@@ -262,13 +262,13 @@ describe('rule_details', () => {
     it('renders the API key owner badge when user can manage API keys', () => {
       const rule = mockRule({ apiKeyOwner: 'elastic' });
       renderPage(rule);
-      expect(screen.getByTestId('apiKeyOwnerLabel').textContent).toBe('elastic');
+      expect(screen.getByTestId('apiKeyOwnerLabel')).toHaveTextContent('elastic');
     });
 
     it('renders the user-managed icon when apiKeyCreatedByUser is true', async () => {
       const rule = mockRule({ apiKeyOwner: 'elastic', apiKeyCreatedByUser: true });
       renderPage(rule);
-      expect(screen.getByTestId('apiKeyOwnerLabel').textContent).toContain('elastic');
+      expect(screen.getByTestId('apiKeyOwnerLabel')).toHaveTextContent('elastic');
     });
     // 'renders the user-managed icon when apiKeyCreatedByUser is true' is tested above via renderPage
     /* REMOVED_ENZYME_DEAD:
@@ -327,8 +327,8 @@ describe('rule_details', () => {
       renderPage(rule);
       const ruleErrorBanner = screen.getByTestId('ruleErrorBanner');
       expect(ruleErrorBanner).toBeInTheDocument();
-      expect(ruleErrorBanner.textContent).toContain('Cannot run rule');
-      expect(ruleErrorBanner.textContent).toContain('test');
+      expect(ruleErrorBanner).toHaveTextContent('Cannot run rule');
+      expect(ruleErrorBanner).toHaveTextContent('test');
     });
 
     it('renders the rule warning banner with warning message, when rule status is a warning', () => {
@@ -346,7 +346,7 @@ describe('rule_details', () => {
       renderPage(rule);
       const ruleWarningBanner = screen.getByTestId('ruleWarningBanner');
       expect(ruleWarningBanner).toBeInTheDocument();
-      expect(ruleWarningBanner.textContent).toContain('warning message');
+      expect(ruleWarningBanner).toHaveTextContent('warning message');
     });
 
     it('displays a toast message when interval is less than configured minimum', async () => {

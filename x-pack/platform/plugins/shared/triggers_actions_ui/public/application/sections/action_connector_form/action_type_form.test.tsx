@@ -303,10 +303,8 @@ describe('action_type_form', () => {
       </IntlProvider>
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId('alertsFilterQueryToggle')).toBeInTheDocument();
-      expect(screen.getByTestId('alertsFilterTimeframeToggle')).toBeInTheDocument();
-    });
+    await screen.findByTestId('alertsFilterQueryToggle');
+    await screen.findByTestId('alertsFilterTimeframeToggle');
   });
 
   it('does not call "setActionParamsProperty" because dedupKey is not empty', async () => {
@@ -430,7 +428,7 @@ describe('action_type_form', () => {
     // Run the timers so the EuiTooltip will be visible
     jest.runOnlyPendingTimers();
     await waitFor(() => {
-      expect(document.querySelector('.euiToolTipPopover')?.textContent).toBe(
+      expect(document.querySelector('.euiToolTipPopover')).toHaveTextContent(
         'Action contains errors.'
       );
     });

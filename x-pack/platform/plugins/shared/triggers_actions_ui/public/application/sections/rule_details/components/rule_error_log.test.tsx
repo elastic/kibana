@@ -326,7 +326,7 @@ describe('rule_error_log', () => {
     await waitFor(() => expect(loadActionErrorLogMock).toHaveBeenCalledTimes(2));
 
     // Prompt is shown
-    expect(screen.getByTestId('refineSearchPrompt').textContent).toContain(
+    expect(screen.getByTestId('refineSearchPrompt')).toHaveTextContent(
       'These are the first 1000 documents matching your search, refine your search to see others.'
     );
 

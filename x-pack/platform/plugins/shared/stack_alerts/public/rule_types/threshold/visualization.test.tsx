@@ -172,7 +172,7 @@ describe('ThresholdVisualization', () => {
 
     await screen.findByTestId('errorCallout');
 
-    expect(screen.getByTestId('errorCallout').textContent).toBe(
+    expect(screen.getByTestId('errorCallout')).toHaveTextContent(
       `Cannot load alert visualization${errorMessage}`
     );
   });
@@ -185,7 +185,7 @@ describe('ThresholdVisualization', () => {
 
     await screen.findByTestId('errorCallout');
 
-    expect(screen.getByTestId('errorCallout').textContent).toBe(`Cannot load alert visualization`);
+    expect(screen.getByTestId('errorCallout')).toHaveTextContent(`Cannot load alert visualization`);
   });
 
   test('renders no data message when visualization results are empty', async () => {
@@ -194,7 +194,7 @@ describe('ThresholdVisualization', () => {
 
     await screen.findByTestId('alertVisualizationChart');
     expect(screen.getByTestId('noDataCallout')).toBeInTheDocument();
-    expect(screen.getByTestId('noDataCallout').textContent).toBe(
+    expect(screen.getByTestId('noDataCallout')).toHaveTextContent(
       `No data matches this queryCheck that your time range and filters are correct.`
     );
   });

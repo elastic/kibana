@@ -48,9 +48,9 @@ describe('TinesConnectorFields renders', () => {
     const urlInput = screen.getByTestId('config.url-input') as HTMLInputElement;
     const emailInput = screen.getByTestId('secrets.email-input') as HTMLInputElement;
     expect(urlInput).toBeInTheDocument();
-    expect(urlInput.value).toBe(url);
+    expect(urlInput).toHaveValue(url);
     expect(emailInput).toBeInTheDocument();
-    expect(emailInput.value).toBe(email);
+    expect(emailInput).toHaveValue(email);
     expect(screen.getByTestId('secrets.token-input')).toBeInTheDocument();
   });
 

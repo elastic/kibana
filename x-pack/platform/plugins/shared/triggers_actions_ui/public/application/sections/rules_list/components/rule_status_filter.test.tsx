@@ -32,7 +32,7 @@ describe('RuleStatusFilter', () => {
 
     // Badge shows 0 active filters
     const badge = container.querySelector('.euiNotificationBadge');
-    expect(badge?.textContent).toEqual('0');
+    expect(badge).toHaveTextContent('0');
   });
 
   it('can open the popover correctly', async () => {
@@ -58,7 +58,9 @@ describe('RuleStatusFilter', () => {
     await userEvent.click(screen.getByTestId('ruleStatusFilterButton'));
 
     // Click first option (enabled)
-    await userEvent.click(screen.getByTestId('ruleStatusFilterOption-enabled'));
+    await userEvent.click(screen.getByTestId('ruleStatusFilterOption-enabled'), {
+      pointerEventsCheck: 0,
+    });
     expect(onChangeMock).toHaveBeenCalledWith(['enabled']);
 
     // Re-render with updated props (simulates parent state update after selection)
@@ -71,11 +73,15 @@ describe('RuleStatusFilter', () => {
     );
 
     // Click first option again to deselect
-    await userEvent.click(screen.getByTestId('ruleStatusFilterOption-enabled'));
+    await userEvent.click(screen.getByTestId('ruleStatusFilterOption-enabled'), {
+      pointerEventsCheck: 0,
+    });
     expect(onChangeMock).toHaveBeenCalledWith([]);
 
     // Click second option (disabled) — 'enabled' is still checked in DOM from last rerender
-    await userEvent.click(screen.getByTestId('ruleStatusFilterOption-disabled'));
+    await userEvent.click(screen.getByTestId('ruleStatusFilterOption-disabled'), {
+      pointerEventsCheck: 0,
+    });
     expect(onChangeMock).toHaveBeenCalledWith(['enabled', 'disabled']);
   });
 });

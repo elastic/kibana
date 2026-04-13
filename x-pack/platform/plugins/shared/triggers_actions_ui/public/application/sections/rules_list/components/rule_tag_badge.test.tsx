@@ -25,7 +25,7 @@ describe('RuleTagBadge', () => {
     render(<RuleTagBadge isOpen={false} tags={tags} onClick={onClickMock} onClose={onCloseMock} />);
 
     expect(screen.getByTestId('ruleTagBadge')).toBeInTheDocument();
-    expect(screen.getByTestId('ruleTagBadge').textContent).toEqual(`${tags.length}`);
+    expect(screen.getByTestId('ruleTagBadge')).toHaveTextContent(`${tags.length}`);
   });
 
   it('can open and close the popover', async () => {

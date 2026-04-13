@@ -40,7 +40,7 @@ describe('SlackActionFields renders', () => {
 
     const slackWebhookUrlInput = screen.getByTestId('slackWebhookUrlInput') as HTMLInputElement;
     expect(slackWebhookUrlInput).toBeInTheDocument();
-    expect(slackWebhookUrlInput.value).toBe('http://test.com');
+    expect(slackWebhookUrlInput).toHaveValue('http://test.com');
   });
 
   describe('Validation', () => {

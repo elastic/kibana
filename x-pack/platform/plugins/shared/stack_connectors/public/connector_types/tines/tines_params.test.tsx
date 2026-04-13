@@ -160,7 +160,7 @@ describe('TinesParamsFields renders', () => {
       await userEvent.click(toggleButton);
 
       expect(screen.getByTestId(/tines-storySelector-optionsList/)).toBeInTheDocument();
-      expect(screen.getByTestId(/tines-storySelector-optionsList/).textContent).toContain(
+      expect(screen.getByTestId(/tines-storySelector-optionsList/)).toHaveTextContent(
         story.name
       );
       expect(
@@ -189,7 +189,7 @@ describe('TinesParamsFields renders', () => {
       );
       await userEvent.click(toggleButton);
 
-      expect(screen.getByTestId(/tines-storySelector-optionsList/).textContent).toContain(
+      expect(screen.getByTestId(/tines-storySelector-optionsList/)).toHaveTextContent(
         'Published'
       );
     });
@@ -230,7 +230,7 @@ describe('TinesParamsFields renders', () => {
         within(screen.getByTestId('tines-webhookSelector')).getByTestId('comboBoxToggleListButton')
       );
 
-      expect(screen.getByTestId(/tines-webhookSelector-optionsList/).textContent).toContain(
+      expect(screen.getByTestId(/tines-webhookSelector-optionsList/)).toHaveTextContent(
         webhook.name
       );
     });
@@ -475,7 +475,7 @@ describe('TinesParamsFields renders', () => {
         );
         expect(screen.queryByTestId('tines-fallbackCallout')).not.toBeInTheDocument();
         expect(screen.getByTestId('tines-webhookUrlInput')).toBeInTheDocument();
-        expect((screen.getByTestId('tines-webhookUrlInput') as HTMLInputElement).value).toBe(
+        expect(screen.getByTestId('tines-webhookUrlInput')).toHaveValue(
           webhookUrl
         );
       });

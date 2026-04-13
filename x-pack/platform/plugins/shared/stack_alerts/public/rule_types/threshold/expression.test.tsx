@@ -167,27 +167,27 @@ describe('IndexThresholdRuleTypeExpression', () => {
       })
     );
 
-    expect(screen.getByTestId('selectIndexExpression').textContent).toEqual('index test-index');
-    expect(screen.getByTestId('whenExpression').textContent).toEqual(
+    expect(screen.getByTestId('selectIndexExpression')).toHaveTextContent('index test-index');
+    expect(screen.getByTestId('whenExpression')).toHaveTextContent(
       `when ${builtInAggregationTypes[DEFAULT_VALUES.AGGREGATION_TYPE].text}`
     );
-    expect(screen.getByTestId('groupByExpression').textContent).toEqual(
-      `over ${DEFAULT_VALUES.GROUP_BY} documents `
+    expect(screen.getByTestId('groupByExpression')).toHaveTextContent(
+      `over ${DEFAULT_VALUES.GROUP_BY} documents`
     );
     expect(screen.queryByTestId('ofExpressionPopover')).not.toBeInTheDocument();
-    expect(screen.getByTestId('thresholdPopover').textContent).toEqual(
-      `${builtInComparators[DEFAULT_VALUES.THRESHOLD_COMPARATOR].text} `
+    expect(screen.getByTestId('thresholdPopover')).toHaveTextContent(
+      `${builtInComparators[DEFAULT_VALUES.THRESHOLD_COMPARATOR].text}`
     );
-    expect(screen.getByTestId('forLastExpression').textContent).toEqual(
+    expect(screen.getByTestId('forLastExpression')).toHaveTextContent(
       `for the last ${DEFAULT_VALUES.TIME_WINDOW_SIZE} ${getTimeUnitLabel(
         DEFAULT_VALUES.TIME_WINDOW_UNIT as TIME_UNITS,
         DEFAULT_VALUES.TIME_WINDOW_SIZE.toString()
       )}`
     );
-    expect(screen.getByTestId('visualizationPlaceholder').textContent).toEqual(
+    expect(screen.getByTestId('visualizationPlaceholder')).toHaveTextContent(
       `Complete the expression to generate a preview.`
     );
-    expect((screen.getByTestId('filterKuery') as HTMLInputElement).value).toEqual('');
+    expect(screen.getByTestId('filterKuery')).toHaveValue('');
   });
 
   test(`should use alert params when params are defined`, () => {
@@ -213,23 +213,23 @@ describe('IndexThresholdRuleTypeExpression', () => {
       })
     );
 
-    expect(screen.getByTestId('whenExpression').textContent).toEqual(
+    expect(screen.getByTestId('whenExpression')).toHaveTextContent(
       `when ${builtInAggregationTypes[aggType].text}`
     );
-    expect(screen.getByTestId('groupByExpression').textContent).toEqual(
+    expect(screen.getByTestId('groupByExpression')).toHaveTextContent(
       `grouped over ${groupBy} ${termSize} '${termField}'`
     );
 
-    expect(screen.getByTestId('thresholdPopover').textContent).toEqual(
+    expect(screen.getByTestId('thresholdPopover')).toHaveTextContent(
       `${builtInComparators[thresholdComparator].text} ${threshold[0]} AND ${threshold[1]}`
     );
-    expect(screen.getByTestId('forLastExpression').textContent).toEqual(
+    expect(screen.getByTestId('forLastExpression')).toHaveTextContent(
       `for the last ${timeWindowSize} ${getTimeUnitLabel(
         timeWindowUnit as TIME_UNITS,
         timeWindowSize.toString()
       )}`
     );
-    expect(screen.getByTestId('visualizationPlaceholder').textContent).toEqual(
+    expect(screen.getByTestId('visualizationPlaceholder')).toHaveTextContent(
       `Complete the expression to generate a preview.`
     );
   });

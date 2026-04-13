@@ -180,6 +180,6 @@ describe.skip('UpdateConnector renders', () => {
     const applicationCallout = screen.getByTestId('snApplicationCallout');
 
     expect(applicationCallout).toBeInTheDocument();
-    expect(applicationCallout.textContent).toContain(updateErrorMessage);
+    expect(applicationCallout).toHaveTextContent(updateErrorMessage);
   });
 });

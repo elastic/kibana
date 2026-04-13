@@ -70,7 +70,7 @@ describe('rule_execution_summary_and_chart', () => {
     expect(screen.getByTestId('avgExecutionDurationPanel')).toBeInTheDocument();
     expect(screen.queryByTestId('ruleDurationWarning')).not.toBeInTheDocument();
     expect(screen.getByTestId('executionDurationChartPanel')).toBeInTheDocument();
-    expect(screen.getByTestId('ruleEventLogListAvgDuration').textContent).toEqual('00:00:00.100');
+    expect(screen.getByTestId('ruleEventLogListAvgDuration')).toHaveTextContent('00:00:00.100');
   });
 
   it('becomes a container component when "fetchRuleSummary" is true', async () => {
@@ -99,7 +99,7 @@ describe('rule_execution_summary_and_chart', () => {
 
     expect(screen.queryByTestId('ruleDurationWarning')).not.toBeInTheDocument();
     expect(screen.getByTestId('executionDurationChartPanel')).toBeInTheDocument();
-    expect(screen.getByTestId('ruleEventLogListAvgDuration').textContent).toEqual('00:00:00.100');
+    expect(screen.getByTestId('ruleEventLogListAvgDuration')).toHaveTextContent('00:00:00.100');
   });
 
   it('should show error if loadRuleSummary fails', async () => {

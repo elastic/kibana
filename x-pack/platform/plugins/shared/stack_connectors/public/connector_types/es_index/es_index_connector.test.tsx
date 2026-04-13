@@ -185,9 +185,7 @@ describe('IndexActionConnectorFields', () => {
     });
 
     // time field switch should be unchecked
-    expect(
-      (screen.getByTestId('hasTimeFieldCheckbox') as HTMLInputElement).checked ?? false
-    ).toEqual(false);
+    expect(screen.getByTestId('hasTimeFieldCheckbox')).not.toBeChecked();
   });
 
   test('renders correctly when editing connector - with date type field mapping and selected time field', async () => {
@@ -225,7 +223,7 @@ describe('IndexActionConnectorFields', () => {
     const switchEl = screen.getByTestId('hasTimeFieldCheckbox');
     expect(switchEl).toBeChecked();
 
-    expect((screen.getByTestId('executionTimeFieldSelect') as HTMLSelectElement).value).toEqual(
+    expect(screen.getByTestId('executionTimeFieldSelect')).toHaveValue(
       'test1'
     );
   });

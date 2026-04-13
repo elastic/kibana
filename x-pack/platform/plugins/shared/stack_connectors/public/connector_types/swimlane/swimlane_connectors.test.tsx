@@ -233,7 +233,7 @@ describe('SwimlaneActionConnectorFields renders', () => {
     // Verify the selected values are displayed in each combobox input instead.
     const verifyComboBoxValue = (testId: string, expectedValue: string) => {
       const input = within(screen.getByTestId(testId)).getByRole('combobox') as HTMLInputElement;
-      expect(input.value).toBe(expectedValue);
+      expect(input).toHaveValue(expectedValue);
     };
 
     verifyComboBoxValue('swimlaneAlertIdInput', 'Alert Id (alert-id)');

@@ -24,7 +24,7 @@ describe('Search', () => {
       <Search isSearching={false} onSearchInputChange={jest.fn()} searchInput={searchInput} />
     );
 
-    expect((screen.getByRole('searchbox') as HTMLInputElement).value).toEqual(searchInput);
+    expect(screen.getByRole('searchbox')).toHaveValue(searchInput);
   });
 
   test('it renders the field search input with a spinner when isSearching is true', () => {

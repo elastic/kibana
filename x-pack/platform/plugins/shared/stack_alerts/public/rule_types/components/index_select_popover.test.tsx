@@ -147,10 +147,10 @@ describe('IndexSelectPopover', () => {
     await screen.findByTestId('thresholdIndexesComboBox');
 
     const searchInput = screen.getByTestId('comboBoxSearchInput') as HTMLInputElement;
-    expect((searchInput as HTMLInputElement).value).toEqual('');
+    expect(searchInput).toHaveValue('');
 
     await userEvent.type(searchInput, 'indexPattern1');
-    expect(searchInput.value).toEqual('indexPattern1');
+    expect(searchInput).toHaveValue('indexPattern1');
 
     // Options should be loaded - click first available option in the combobox options list
     // (scoped to avoid matching <select><option> elements from the time field selector)
@@ -184,7 +184,7 @@ describe('IndexSelectPopover', () => {
       </I18nProvider>
     );
     const selectIndexExpression = screen.getByTestId('selectIndexExpression');
-    expect(selectIndexExpression.textContent).toEqual(`index ${index}`);
+    expect(selectIndexExpression).toHaveTextContent(`index ${index}`);
 
     await userEvent.click(selectIndexExpression);
 

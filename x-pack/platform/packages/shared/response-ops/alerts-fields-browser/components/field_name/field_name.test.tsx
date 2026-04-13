@@ -20,7 +20,7 @@ describe('FieldName', () => {
   test('it renders the field name', () => {
     render(<FieldName {...defaultProps} />);
 
-    expect(screen.getByTestId(`field-${timestampFieldId}-name`).textContent).toEqual(
+    expect(screen.getByTestId(`field-${timestampFieldId}-name`)).toHaveTextContent(
       timestampFieldId
     );
   });
@@ -30,6 +30,6 @@ describe('FieldName', () => {
 
     render(<FieldName {...{ ...defaultProps, highlight }} />);
 
-    expect(screen.getByText(highlight, { selector: 'mark' }).textContent).toEqual(highlight);
+    expect(screen.getByText(highlight, { selector: 'mark' })).toHaveTextContent(highlight);
   });
 });
