@@ -9,7 +9,11 @@ import type { ApplicationStart } from '@kbn/core/public';
 import type { ESQLSourceResult } from '@kbn/esql-types';
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
+import type { Streams as StreamsSchema } from '@kbn/streams-schema';
+import { LRUCache } from 'lru-cache';
 import type { StreamsRepositoryClient } from '../api';
+
+export const STREAMS_CACHE_TTL_MS = 60_000;
 
 /**
  * Creates a source enricher function that adds Streams metadata to ES|QL source suggestions.
@@ -20,25 +24,37 @@ import type { StreamsRepositoryClient } from '../api';
  *
  * @param repositoryClient - Streams repository client for fetching stream definitions
  * @param application - Promise resolving to the Core Application service
+ * @param perf - Optional performance-like object with a `now()` method; defaults to `performance`.
+ *               Injectable for testing to control TTL expiry without global timer mocks.
  */
 export function createStreamsSourceEnricher(
   repositoryClient: StreamsRepositoryClient,
-  application: Promise<Pick<ApplicationStart, 'getUrlForApp'>>
+  application: Promise<Pick<ApplicationStart, 'getUrlForApp'>>,
+  perf: { now: () => number } = performance
 ): (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]> {
+  const streamsCache = new LRUCache<'streams', Map<string, StreamsSchema.all.Definition>>({
+    max: 1,
+    ttl: STREAMS_CACHE_TTL_MS,
+    perf,
+    fetchMethod: async (_key, _staleValue, { signal }) => {
+      const { streams } = await repositoryClient.fetch('GET /api/streams 2023-10-31', {
+        signal,
+      });
+      return new Map(streams.map((stream) => [stream.name, stream]));
+    },
+  });
+
+  const streamsSchemaPromise = import('@kbn/streams-schema');
+
   return async (sources: ESQLSourceResult[]): Promise<ESQLSourceResult[]> => {
     try {
       const app = await application;
-      const { streams } = await repositoryClient.fetch('GET /api/streams 2023-10-31', {
-        signal: new AbortController().signal,
-      });
+      const { Streams } = await streamsSchemaPromise;
 
-      // Build a lookup map by stream name for O(1) matching
-      const streamsByName = new Map(streams.map((stream) => [stream.name, stream]));
-
-      const { Streams } = await import('@kbn/streams-schema');
+      const streams = await streamsCache.forceFetch('streams');
 
       return sources.map((source) => {
-        const stream = streamsByName.get(source.name);
+        const stream = streams.get(source.name);
         if (!stream) {
           return source;
         }

@@ -10,7 +10,7 @@ import type { ESQLSourceResult } from '@kbn/esql-types';
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import type { Streams } from '@kbn/streams-schema';
 import type { StreamsRepositoryClient } from '../api';
-import { createStreamsSourceEnricher } from './esql_source_enricher';
+import { createStreamsSourceEnricher, STREAMS_CACHE_TTL_MS } from './esql_source_enricher';
 
 const NOW = '2024-01-01T00:00:00.000Z';
 
@@ -181,5 +181,60 @@ describe('createStreamsSourceEnricher', () => {
     const result = await enricher([]);
 
     expect(result).toEqual([]);
+  });
+
+  describe('caching', () => {
+    const makeFakePerf = () => {
+      // Must start above 0: lru-cache stores the start timestamp and guards with `!!s`,
+      // so a start of 0 would cause isStale() to always return false.
+      let now = 1;
+      return { now: () => now, tick: (ms: number) => (now += ms) };
+    };
+
+    it('calls the streams API only once across multiple enricher invocations within the TTL', async () => {
+      const client = makeRepositoryClient([wiredStreamDefinition]);
+      const enricher = createStreamsSourceEnricher(client, makeApplication(), makeFakePerf());
+
+      await enricher([makeSource('logs')]);
+      await enricher([makeSource('logs')]);
+
+      expect(client.fetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('re-fetches streams from the API after the cache TTL expires', async () => {
+      const client = makeRepositoryClient([wiredStreamDefinition]);
+      const perf = makeFakePerf();
+      const enricher = createStreamsSourceEnricher(client, makeApplication(), perf);
+
+      await enricher([makeSource('logs')]);
+
+      perf.tick(STREAMS_CACHE_TTL_MS + 1);
+
+      await enricher([makeSource('logs')]);
+
+      expect(client.fetch).toHaveBeenCalledTimes(2);
+    });
+
+    it('reflects updated stream data after the cache TTL expires', async () => {
+      const updatedStream: Streams.WiredStream.Definition = {
+        ...wiredStreamDefinition,
+        description: 'Updated description',
+      };
+
+      const client = makeRepositoryClient([wiredStreamDefinition]);
+      const perf = makeFakePerf();
+      const enricher = createStreamsSourceEnricher(client, makeApplication(), perf);
+
+      const [firstResult] = await enricher([makeSource('logs')]);
+      expect(firstResult.description).toBe('All logs');
+
+      client.fetch.mockResolvedValue({ streams: [updatedStream] });
+
+      perf.tick(STREAMS_CACHE_TTL_MS + 1);
+
+      const [secondResult] = await enricher([makeSource('logs')]);
+      expect(secondResult.description).toBe('Updated description');
+      expect(client.fetch).toHaveBeenCalledTimes(2);
+    });
   });
 });
