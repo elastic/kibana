@@ -15,6 +15,7 @@ import {
   INITIALIZATION_FLOW_STATUS_READY,
   INITIALIZATION_FLOW_STATUS_ERROR,
 } from '../../../common/api/initialization';
+import type { SecuritySolutionRequestHandlerContext } from '../../types';
 import type { InitializationFlowContext } from './types';
 import { FlowInitializationError, runInitializationFlows } from './flow_registry';
 
@@ -22,8 +23,7 @@ jest.mock('./flows/create_list_indices', () => ({
   createListIndicesInitializationFlow: {
     id: 'create-list-indices',
     spaceAware: true,
-    resolveProvisionContext: jest.fn().mockResolvedValue({}),
-    provision: jest.fn().mockResolvedValue({ status: 'ready' as const, payload: null }),
+    runFlow: jest.fn().mockResolvedValue({ status: 'ready' as const, payload: null }),
   },
 }));
 
@@ -31,8 +31,7 @@ jest.mock('./flows/initialize_security_data_views', () => ({
   initializeSecurityDataViewsFlow: {
     id: 'security-data-views' as const,
     spaceAware: true,
-    resolveProvisionContext: jest.fn().mockResolvedValue({}),
-    provision: jest.fn().mockResolvedValue({ status: 'ready' as const, payload: null }),
+    runFlow: jest.fn().mockResolvedValue({ status: 'ready' as const, payload: null }),
   },
 }));
 
@@ -40,41 +39,37 @@ jest.mock('./flows/init_prebuilt_rules', () => ({
   initPrebuiltRulesFlow: {
     id: 'init-prebuilt-rules' as const,
     runFirst: true,
-    resolveProvisionContext: jest.fn().mockResolvedValue({}),
-    provision: jest.fn().mockResolvedValue({ status: 'ready' as const, payload: null }),
+    runFlow: jest.fn().mockResolvedValue({ status: 'ready' as const, payload: null }),
   },
 }));
 
 jest.mock('./flows/init_endpoint_protection', () => ({
   initEndpointProtectionFlow: {
     id: 'init-endpoint-protection' as const,
-    resolveProvisionContext: jest.fn().mockResolvedValue({}),
-    provision: jest.fn().mockResolvedValue({ status: 'ready' as const, payload: null }),
+    runFlow: jest.fn().mockResolvedValue({ status: 'ready' as const, payload: null }),
   },
 }));
 
 jest.mock('./flows/init_ai_prompts', () => ({
   initAiPromptsFlow: {
     id: 'init-ai-prompts' as const,
-    resolveProvisionContext: jest.fn().mockResolvedValue({}),
-    provision: jest.fn().mockResolvedValue({ status: 'ready' as const, payload: null }),
+    runFlow: jest.fn().mockResolvedValue({ status: 'ready' as const, payload: null }),
   },
 }));
 
 jest.mock('./flows/init_detection_engine_rule_monitoring', () => ({
   initDetectionEngineRuleMonitoringFlow: {
     id: 'init-detection-engine-rule-monitoring' as const,
-    resolveProvisionContext: jest.fn().mockResolvedValue({}),
-    provision: jest.fn().mockResolvedValue({ status: 'ready' as const }),
+    runFlow: jest.fn().mockResolvedValue({ status: 'ready' as const }),
   },
 }));
 
-const createMockContext = (): InitializationFlowContext =>
-  ({
-    requestHandlerContext: {
-      securitySolution: Promise.resolve({ getSpaceId: () => 'default' }),
-    },
-  } as unknown as InitializationFlowContext);
+const createMockContext = (): InitializationFlowContext => ({
+  requestHandlerContext: {
+    securitySolution: Promise.resolve({ getSpaceId: () => 'default' }),
+  } as unknown as SecuritySolutionRequestHandlerContext,
+  logger: loggerMock.create(),
+});
 
 describe('runInitializationFlows', () => {
   let logger: ReturnType<typeof loggerMock.create>;
@@ -96,23 +91,17 @@ describe('runInitializationFlows', () => {
     });
   });
 
-  it('resolves the provision context before calling provision', async () => {
+  it('calls runFlow with the context containing requestHandlerContext and logger', async () => {
     const { createListIndicesInitializationFlow } = jest.requireMock('./flows/create_list_indices');
-    const mockProvisionContext = { internalListClient: {} };
-    createListIndicesInitializationFlow.resolveProvisionContext.mockResolvedValueOnce(
-      mockProvisionContext
-    );
 
     const context = createMockContext();
     await runInitializationFlows([flowA], context, logger);
 
-    expect(createListIndicesInitializationFlow.resolveProvisionContext).toHaveBeenCalledWith(
-      context,
-      logger
-    );
-    expect(createListIndicesInitializationFlow.provision).toHaveBeenCalledWith(
-      mockProvisionContext,
-      logger
+    expect(createListIndicesInitializationFlow.runFlow).toHaveBeenCalledWith(
+      expect.objectContaining({
+        requestHandlerContext: expect.anything(),
+        logger: expect.anything(),
+      })
     );
   });
 
@@ -138,7 +127,7 @@ describe('runInitializationFlows', () => {
       const { createListIndicesInitializationFlow } = jest.requireMock(
         './flows/create_list_indices'
       );
-      createListIndicesInitializationFlow.resolveProvisionContext.mockRejectedValueOnce(
+      createListIndicesInitializationFlow.runFlow.mockRejectedValueOnce(
         new FlowInitializationError('lists plugin is not available')
       );
 
@@ -154,11 +143,11 @@ describe('runInitializationFlows', () => {
       );
     });
 
-    it('returns an opaque error message for unexpected errors from resolveProvisionContext', async () => {
+    it('returns an opaque error message for unexpected errors', async () => {
       const { createListIndicesInitializationFlow } = jest.requireMock(
         './flows/create_list_indices'
       );
-      createListIndicesInitializationFlow.resolveProvisionContext.mockRejectedValueOnce(
+      createListIndicesInitializationFlow.runFlow.mockRejectedValueOnce(
         new Error('ES connection failed')
       );
 
@@ -173,33 +162,13 @@ describe('runInitializationFlows', () => {
         "Initialization flow 'create-list-indices' failed: ES connection failed"
       );
     });
-
-    it('returns an opaque error message for unexpected errors from provision', async () => {
-      const { createListIndicesInitializationFlow } = jest.requireMock(
-        './flows/create_list_indices'
-      );
-      createListIndicesInitializationFlow.provision.mockRejectedValueOnce(
-        new Error('cluster unavailable')
-      );
-
-      const context = createMockContext();
-      const response = await runInitializationFlows([flowA], context, logger);
-
-      expect(response.flows[flowA]).toEqual({
-        status: INITIALIZATION_FLOW_STATUS_ERROR,
-        error: 'internal initialization flow error',
-      });
-      expect(logger.error).toHaveBeenCalledWith(
-        "Initialization flow 'create-list-indices' failed: cluster unavailable"
-      );
-    });
   });
 
   it('runs multiple flows and returns all results', async () => {
     const { createListIndicesInitializationFlow } = jest.requireMock('./flows/create_list_indices');
     const nonExistingFlow = 'non-existing-flow' as InitializationFlowId;
 
-    createListIndicesInitializationFlow.provision.mockResolvedValueOnce({
+    createListIndicesInitializationFlow.runFlow.mockResolvedValueOnce({
       status: INITIALIZATION_FLOW_STATUS_READY,
       payload: null,
     });
@@ -225,15 +194,15 @@ describe('runInitializationFlows', () => {
       const { initEndpointProtectionFlow } = jest.requireMock('./flows/init_endpoint_protection');
       const { initAiPromptsFlow } = jest.requireMock('./flows/init_ai_prompts');
 
-      initPrebuiltRulesFlow.provision.mockImplementation(async () => {
+      initPrebuiltRulesFlow.runFlow.mockImplementation(async () => {
         executionOrder.push('prebuilt-rules');
         return { status: INITIALIZATION_FLOW_STATUS_READY, payload: null };
       });
-      initEndpointProtectionFlow.provision.mockImplementation(async () => {
+      initEndpointProtectionFlow.runFlow.mockImplementation(async () => {
         executionOrder.push('endpoint');
         return { status: INITIALIZATION_FLOW_STATUS_READY, payload: null };
       });
-      initAiPromptsFlow.provision.mockImplementation(async () => {
+      initAiPromptsFlow.runFlow.mockImplementation(async () => {
         executionOrder.push('ai-prompts');
         return { status: INITIALIZATION_FLOW_STATUS_READY, payload: null };
       });
@@ -264,13 +233,13 @@ describe('runInitializationFlows', () => {
       // Temporarily make create-list-indices runFirst for this test
       createListIndicesInitializationFlow.runFirst = true;
 
-      createListIndicesInitializationFlow.provision.mockImplementation(async () => {
+      createListIndicesInitializationFlow.runFlow.mockImplementation(async () => {
         // Simulate slow execution
         await new Promise((resolve) => setTimeout(resolve, 50));
         executionOrder.push('list-indices');
         return { status: INITIALIZATION_FLOW_STATUS_READY, payload: null };
       });
-      initPrebuiltRulesFlow.provision.mockImplementation(async () => {
+      initPrebuiltRulesFlow.runFlow.mockImplementation(async () => {
         executionOrder.push('prebuilt-rules');
         return { status: INITIALIZATION_FLOW_STATUS_READY, payload: null };
       });
@@ -298,14 +267,14 @@ describe('runInitializationFlows', () => {
       const { initEndpointProtectionFlow } = jest.requireMock('./flows/init_endpoint_protection');
       const { initAiPromptsFlow } = jest.requireMock('./flows/init_ai_prompts');
 
-      initEndpointProtectionFlow.provision.mockImplementation(
+      initEndpointProtectionFlow.runFlow.mockImplementation(
         () =>
           new Promise<{ status: string; payload: null }>((resolve) => {
             endpointStarted();
             resolveEndpoint = () => resolve({ status: 'ready', payload: null });
           })
       );
-      initAiPromptsFlow.provision.mockImplementation(
+      initAiPromptsFlow.runFlow.mockImplementation(
         () =>
           new Promise<{ status: string; payload: null }>((resolve) => {
             aiPromptsStarted();
@@ -335,15 +304,15 @@ describe('runInitializationFlows', () => {
 
   describe('deduplication', () => {
     it('deduplicates concurrent executions of the same flow in the same space', async () => {
-      let resolveProvision: (value: { status: string; payload: null }) => void;
+      let resolveRunFlow: (value: { status: string; payload: null }) => void;
       const { createListIndicesInitializationFlow } = jest.requireMock(
         './flows/create_list_indices'
       );
 
-      createListIndicesInitializationFlow.provision.mockImplementation(
+      createListIndicesInitializationFlow.runFlow.mockImplementation(
         () =>
           new Promise((resolve) => {
-            resolveProvision = resolve;
+            resolveRunFlow = resolve;
           })
       );
 
@@ -351,12 +320,12 @@ describe('runInitializationFlows', () => {
 
       // Fire two concurrent requests for the same flow
       const promise1 = runInitializationFlows([flowA], context, logger);
-      // Allow the first call to reach the inflight map (resolveProvisionContext is async)
+      // Allow the first call to reach the inflight map
       await new Promise((r) => setImmediate(r));
       const promise2 = runInitializationFlows([flowA], context, logger);
 
       // Resolve the single underlying execution
-      resolveProvision!({ status: 'ready', payload: null });
+      resolveRunFlow!({ status: 'ready', payload: null });
 
       const [response1, response2] = await Promise.all([promise1, promise2]);
 
@@ -370,8 +339,8 @@ describe('runInitializationFlows', () => {
         payload: null,
       });
 
-      // provision was called only once
-      expect(createListIndicesInitializationFlow.provision).toHaveBeenCalledTimes(1);
+      // runFlow was called only once
+      expect(createListIndicesInitializationFlow.runFlow).toHaveBeenCalledTimes(1);
     });
 
     it('executes independently for the same flow in different spaces', async () => {
@@ -379,7 +348,7 @@ describe('runInitializationFlows', () => {
         './flows/create_list_indices'
       );
 
-      createListIndicesInitializationFlow.provision.mockResolvedValue({
+      createListIndicesInitializationFlow.runFlow.mockResolvedValue({
         status: INITIALIZATION_FLOW_STATUS_READY,
         payload: null,
       });
@@ -401,18 +370,18 @@ describe('runInitializationFlows', () => {
         runInitializationFlows([flowA], contextSpaceB, logger),
       ]);
 
-      // provision was called twice — once per space
-      expect(createListIndicesInitializationFlow.provision).toHaveBeenCalledTimes(2);
+      // runFlow was called twice -- once per space
+      expect(createListIndicesInitializationFlow.runFlow).toHaveBeenCalledTimes(2);
     });
 
     it('deduplicates non-space-aware flows across different spaces', async () => {
-      let resolveProvision: (value: { status: string; payload: null }) => void;
+      let resolveRunFlow: (value: { status: string; payload: null }) => void;
       const { initEndpointProtectionFlow } = jest.requireMock('./flows/init_endpoint_protection');
 
-      initEndpointProtectionFlow.provision.mockImplementation(
+      initEndpointProtectionFlow.runFlow.mockImplementation(
         () =>
           new Promise((resolve) => {
-            resolveProvision = resolve;
+            resolveRunFlow = resolve;
           })
       );
 
@@ -440,7 +409,7 @@ describe('runInitializationFlows', () => {
         logger
       );
 
-      resolveProvision!({ status: 'ready', payload: null });
+      resolveRunFlow!({ status: 'ready', payload: null });
 
       const [response1, response2] = await Promise.all([promise1, promise2]);
 
@@ -453,8 +422,8 @@ describe('runInitializationFlows', () => {
         payload: null,
       });
 
-      // provision was called only once — non-space-aware flows deduplicate across spaces
-      expect(initEndpointProtectionFlow.provision).toHaveBeenCalledTimes(1);
+      // runFlow was called only once -- non-space-aware flows deduplicate across spaces
+      expect(initEndpointProtectionFlow.runFlow).toHaveBeenCalledTimes(1);
     });
 
     it('executes a new request after a previous one completes', async () => {
@@ -462,7 +431,7 @@ describe('runInitializationFlows', () => {
         './flows/create_list_indices'
       );
 
-      createListIndicesInitializationFlow.provision.mockResolvedValue({
+      createListIndicesInitializationFlow.runFlow.mockResolvedValue({
         status: INITIALIZATION_FLOW_STATUS_READY,
         payload: null,
       });
@@ -474,20 +443,20 @@ describe('runInitializationFlows', () => {
       // Second request after the first completed — should execute fresh
       await runInitializationFlows([flowA], context, logger);
 
-      // provision was called twice — no stale caching
-      expect(createListIndicesInitializationFlow.provision).toHaveBeenCalledTimes(2);
+      // runFlow was called twice — no stale caching
+      expect(createListIndicesInitializationFlow.runFlow).toHaveBeenCalledTimes(2);
     });
 
     it('deduplicates even when the flow errors', async () => {
-      let rejectProvision: (error: Error) => void;
+      let rejectRunFlow: (error: Error) => void;
       const { createListIndicesInitializationFlow } = jest.requireMock(
         './flows/create_list_indices'
       );
 
-      createListIndicesInitializationFlow.provision.mockImplementation(
+      createListIndicesInitializationFlow.runFlow.mockImplementation(
         () =>
           new Promise((_resolve, reject) => {
-            rejectProvision = reject;
+            rejectRunFlow = reject;
           })
       );
 
@@ -498,7 +467,7 @@ describe('runInitializationFlows', () => {
       await new Promise((r) => setImmediate(r));
       const promise2 = runInitializationFlows([flowA], context, logger);
 
-      rejectProvision!(new Error('something broke'));
+      rejectRunFlow!(new Error('something broke'));
 
       const [response1, response2] = await Promise.all([promise1, promise2]);
 
@@ -506,8 +475,8 @@ describe('runInitializationFlows', () => {
       expect(response1.flows[flowA]?.status).toBe(INITIALIZATION_FLOW_STATUS_ERROR);
       expect(response2.flows[flowA]?.status).toBe(INITIALIZATION_FLOW_STATUS_ERROR);
 
-      // provision was called only once
-      expect(createListIndicesInitializationFlow.provision).toHaveBeenCalledTimes(1);
+      // runFlow was called only once
+      expect(createListIndicesInitializationFlow.runFlow).toHaveBeenCalledTimes(1);
     });
   });
 });

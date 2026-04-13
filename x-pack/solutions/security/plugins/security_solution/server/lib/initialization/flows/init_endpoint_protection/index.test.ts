@@ -38,6 +38,7 @@ const createMockInitializationFlowContext = ({
     requestHandlerContext: {
       securitySolution: Promise.resolve(createMockSecurityContext({ isExternalDetectionsEnabled })),
     },
+    logger: loggerMock.create(),
   } as unknown as InitializationFlowContext);
 
 describe('initEndpointProtectionFlow', () => {
@@ -53,43 +54,13 @@ describe('initEndpointProtectionFlow', () => {
     expect(initEndpointProtectionFlow.runFirst).toBeUndefined();
   });
 
-  describe('resolveProvisionContext', () => {
-    it('resolves isExternalDetectionsEnabled from the product feature service', async () => {
-      const logger = loggerMock.create();
-
-      const contextDisabled = createMockInitializationFlowContext({
-        isExternalDetectionsEnabled: false,
-      });
-      const provisionDisabled = await initEndpointProtectionFlow.resolveProvisionContext(
-        contextDisabled,
-        logger
-      );
-      expect(provisionDisabled.isExternalDetectionsEnabled).toBe(false);
-
-      const contextEnabled = createMockInitializationFlowContext({
+  describe('runFlow', () => {
+    it('skips installation when external detections is enabled', async () => {
+      const context = createMockInitializationFlowContext({
         isExternalDetectionsEnabled: true,
       });
-      const provisionEnabled = await initEndpointProtectionFlow.resolveProvisionContext(
-        contextEnabled,
-        logger
-      );
-      expect(provisionEnabled.isExternalDetectionsEnabled).toBe(true);
-    });
-  });
 
-  describe('provision', () => {
-    it('skips installation when external detections is enabled', async () => {
-      const logger = loggerMock.create();
-
-      const result = await initEndpointProtectionFlow.provision(
-        {
-          securityContext: createMockSecurityContext({
-            isExternalDetectionsEnabled: true,
-          }) as never,
-          isExternalDetectionsEnabled: true,
-        },
-        logger
-      );
+      const result = await initEndpointProtectionFlow.runFlow(context);
 
       expect(result).toEqual({
         status: INITIALIZATION_FLOW_STATUS_READY,
@@ -100,25 +71,19 @@ describe('initEndpointProtectionFlow', () => {
         },
       });
       expect(installEndpointPackageMock).not.toHaveBeenCalled();
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(context.logger.debug).toHaveBeenCalledWith(
         'Endpoint package installation skipped: external detections is enabled'
       );
     });
 
     it('installs the endpoint package when external detections is disabled', async () => {
-      const logger = loggerMock.create();
       installEndpointPackageMock.mockResolvedValue({
         status: 'installed',
         package: { name: 'endpoint', version: '8.15.0' } as never,
       });
 
-      const result = await initEndpointProtectionFlow.provision(
-        {
-          securityContext: createMockSecurityContext() as never,
-          isExternalDetectionsEnabled: false,
-        },
-        logger
-      );
+      const context = createMockInitializationFlowContext();
+      const result = await initEndpointProtectionFlow.runFlow(context);
 
       expect(result).toEqual({
         status: INITIALIZATION_FLOW_STATUS_READY,
@@ -132,19 +97,13 @@ describe('initEndpointProtectionFlow', () => {
     });
 
     it('returns already_installed status when package is up to date', async () => {
-      const logger = loggerMock.create();
       installEndpointPackageMock.mockResolvedValue({
         status: 'already_installed',
         package: { name: 'endpoint', version: '8.15.0' } as never,
       });
 
-      const result = await initEndpointProtectionFlow.provision(
-        {
-          securityContext: createMockSecurityContext() as never,
-          isExternalDetectionsEnabled: false,
-        },
-        logger
-      );
+      const context = createMockInitializationFlowContext();
+      const result = await initEndpointProtectionFlow.runFlow(context);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -155,36 +114,26 @@ describe('initEndpointProtectionFlow', () => {
     });
 
     it('logs a message on successful installation', async () => {
-      const logger = loggerMock.create();
       installEndpointPackageMock.mockResolvedValue({
         status: 'installed',
         package: { name: 'endpoint', version: '8.15.0' } as never,
       });
 
-      await initEndpointProtectionFlow.provision(
-        {
-          securityContext: createMockSecurityContext() as never,
-          isExternalDetectionsEnabled: false,
-        },
-        logger
-      );
+      const context = createMockInitializationFlowContext();
+      await initEndpointProtectionFlow.runFlow(context);
 
-      expect(logger.info).toHaveBeenCalledWith('Endpoint package initialized: "endpoint" v8.15.0');
+      expect(context.logger.info).toHaveBeenCalledWith(
+        'Endpoint package initialized: "endpoint" v8.15.0'
+      );
     });
 
     it('propagates errors from installEndpointPackage', async () => {
-      const logger = loggerMock.create();
       installEndpointPackageMock.mockRejectedValue(new Error('Fleet unavailable'));
 
-      await expect(
-        initEndpointProtectionFlow.provision(
-          {
-            securityContext: createMockSecurityContext() as never,
-            isExternalDetectionsEnabled: false,
-          },
-          logger
-        )
-      ).rejects.toThrow('Fleet unavailable');
+      const context = createMockInitializationFlowContext();
+      await expect(initEndpointProtectionFlow.runFlow(context)).rejects.toThrow(
+        'Fleet unavailable'
+      );
     });
   });
 });

@@ -29,6 +29,7 @@ const createMockInitializationFlowContext = (
         getDetectionEngineHealthClient: () => healthClient,
       }),
     },
+    logger: loggerMock.create(),
   } as unknown as InitializationFlowContext);
 
 describe('initDetectionEngineRuleMonitoringFlow', () => {
@@ -46,53 +47,33 @@ describe('initDetectionEngineRuleMonitoringFlow', () => {
     expect(initDetectionEngineRuleMonitoringFlow.runFirst).toBeUndefined();
   });
 
-  describe('resolveProvisionContext', () => {
-    it('resolves the health client from the security context', async () => {
-      const logger = loggerMock.create();
-      const healthClient = createMockHealthClient();
-      const context = createMockInitializationFlowContext(healthClient);
-
-      const provisionContext = await initDetectionEngineRuleMonitoringFlow.resolveProvisionContext(
-        context,
-        logger
-      );
-
-      expect(provisionContext.healthClient).toBe(healthClient);
-    });
-  });
-
-  describe('provision', () => {
+  describe('runFlow', () => {
     it('returns ready on successful asset installation', async () => {
-      const logger = loggerMock.create();
-      const healthClient = createMockHealthClient();
+      const context = createMockInitializationFlowContext();
+      const result = await initDetectionEngineRuleMonitoringFlow.runFlow(context);
 
-      const result = await initDetectionEngineRuleMonitoringFlow.provision(
-        { healthClient },
-        logger
-      );
-
-      expect(result).toEqual({ status: INITIALIZATION_FLOW_STATUS_READY });
+      expect(result).toEqual({ status: INITIALIZATION_FLOW_STATUS_READY, payload: null });
     });
 
     it('calls installAssetsForMonitoringHealth on the health client', async () => {
-      const logger = loggerMock.create();
       const healthClient = createMockHealthClient();
+      const context = createMockInitializationFlowContext(healthClient);
 
-      await initDetectionEngineRuleMonitoringFlow.provision({ healthClient }, logger);
+      await initDetectionEngineRuleMonitoringFlow.runFlow(context);
 
       expect(healthClient.installAssetsForMonitoringHealth).toHaveBeenCalledTimes(1);
     });
 
     it('propagates errors from installAssetsForMonitoringHealth', async () => {
-      const logger = loggerMock.create();
       const healthClient = createMockHealthClient();
       healthClient.installAssetsForMonitoringHealth.mockRejectedValue(
         new Error('Failed to import saved objects')
       );
 
-      await expect(
-        initDetectionEngineRuleMonitoringFlow.provision({ healthClient }, logger)
-      ).rejects.toThrow('Failed to import saved objects');
+      const context = createMockInitializationFlowContext(healthClient);
+      await expect(initDetectionEngineRuleMonitoringFlow.runFlow(context)).rejects.toThrow(
+        'Failed to import saved objects'
+      );
     });
   });
 });

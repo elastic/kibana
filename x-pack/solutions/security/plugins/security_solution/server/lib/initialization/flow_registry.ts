@@ -9,11 +9,6 @@ import type { Logger } from '@kbn/core/server';
 import type {
   InitializationFlowId,
   InitializeSecuritySolutionResponse,
-  InitializationFlowErrorResult,
-  CreateListIndicesReadyResult,
-  PackageInstallReadyResult,
-  SecurityDataViewsReadyResult,
-  InstallDetectionEngineRuleMonitoringAssetsReadyResult,
 } from '../../../common/api/initialization';
 import {
   INITIALIZATION_FLOW_CREATE_LIST_INDICES,
@@ -24,14 +19,11 @@ import {
   INITIALIZATION_FLOW_INIT_DETECTION_ENGINE_RULE_MONITORING,
   INITIALIZATION_FLOW_STATUS_ERROR,
 } from '../../../common/api/initialization';
-
-type FlowResult =
-  | CreateListIndicesReadyResult
-  | SecurityDataViewsReadyResult
-  | PackageInstallReadyResult
-  | InstallDetectionEngineRuleMonitoringAssetsReadyResult
-  | InitializationFlowErrorResult;
-import type { InitializationFlowContext, InitializationFlowDefinition } from './types';
+import type {
+  InitializationFlowContext,
+  InitializationFlowDefinition,
+  InitializationFlowResult,
+} from './types';
 import { createListIndicesInitializationFlow } from './flows/create_list_indices';
 import { initializeSecurityDataViewsFlow } from './flows/initialize_security_data_views';
 import { initPrebuiltRulesFlow } from './flows/init_prebuilt_rules';
@@ -39,7 +31,7 @@ import { initEndpointProtectionFlow } from './flows/init_endpoint_protection';
 import { initAiPromptsFlow } from './flows/init_ai_prompts';
 import { initDetectionEngineRuleMonitoringFlow } from './flows/init_detection_engine_rule_monitoring';
 
-// Each flow has a different ProvisionContext type, so `any` is needed to store
+// Each flow has a different TPayload type, so `any` is needed to store
 // them in a single map. Type safety is preserved inside each flow definition.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const flows: Record<InitializationFlowId, InitializationFlowDefinition<any>> = {
@@ -56,7 +48,7 @@ export class FlowInitializationError extends Error {}
 
 interface FlowRunResult {
   id: InitializationFlowId;
-  result: FlowResult;
+  result: InitializationFlowResult<unknown>;
 }
 
 // Deduplicates concurrent server-side executions of the same flow.
@@ -66,8 +58,7 @@ const inflightFlows = new Map<string, Promise<FlowRunResult>>();
 
 const runSingleFlow = async (
   flowId: InitializationFlowId,
-  context: InitializationFlowContext,
-  logger: Logger
+  context: InitializationFlowContext
 ): Promise<FlowRunResult> => {
   const definition = flows[flowId];
 
@@ -92,7 +83,7 @@ const runSingleFlow = async (
     return inflight;
   }
 
-  const promise = executeSingleFlow(definition, context, logger);
+  const promise = executeSingleFlow(definition, context);
   inflightFlows.set(key, promise);
 
   try {
@@ -102,22 +93,20 @@ const runSingleFlow = async (
   }
 };
 
-const executeSingleFlow = async (
-  definition: InitializationFlowDefinition<InitializationFlowId>,
-  context: InitializationFlowContext,
-  logger: Logger
+const executeSingleFlow = async <TPayload>(
+  definition: InitializationFlowDefinition<TPayload>,
+  context: InitializationFlowContext
 ): Promise<FlowRunResult> => {
   const flowId = definition.id;
   try {
-    const provisionContext = await definition.resolveProvisionContext(context, logger);
-    const result = await definition.provision(provisionContext, logger);
+    const result = await definition.runFlow(context);
 
     return {
       id: flowId,
       result,
     };
   } catch (err) {
-    logger.error(`Initialization flow '${flowId}' failed: ${err.message}`);
+    context.logger.error(`Initialization flow '${flowId}' failed: ${err.message}`);
     const errMessage =
       err instanceof FlowInitializationError ? err.message : 'internal initialization flow error';
     return {
@@ -141,25 +130,26 @@ export const runInitializationFlows = async (
   context: InitializationFlowContext,
   logger: Logger
 ): Promise<InitializeSecuritySolutionResponse> => {
+  const flowContext: InitializationFlowContext = { ...context, logger };
   const sequential = requestedFlows.filter((id) => flows[id]?.runFirst);
   const parallel = requestedFlows.filter((id) => !flows[id]?.runFirst);
 
   // Run runFirst flows sequentially
-  const sequentialResults: Array<{ id: InitializationFlowId; result: FlowResult }> = [];
+  const sequentialResults: FlowRunResult[] = [];
   for (const flowId of sequential) {
-    sequentialResults.push(await runSingleFlow(flowId, context, logger));
+    sequentialResults.push(await runSingleFlow(flowId, flowContext));
   }
 
   // Then run remaining flows in parallel
   const parallelResults = await Promise.all(
-    parallel.map((flowId) => runSingleFlow(flowId, context, logger))
+    parallel.map((flowId) => runSingleFlow(flowId, flowContext))
   );
 
   const allResults = [...sequentialResults, ...parallelResults];
   const flowResults = allResults.reduce((acc, { id, result }) => {
     acc[id] = result;
     return acc;
-  }, {} as Record<InitializationFlowId, FlowResult>);
+  }, {} as Record<InitializationFlowId, InitializationFlowResult<unknown>>);
 
   // Each flow's runtime routing ensures the correct result type per flow ID.
   // The static type cannot capture this, so we cast at the boundary.

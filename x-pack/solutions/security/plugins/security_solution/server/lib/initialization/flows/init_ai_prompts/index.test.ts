@@ -31,6 +31,7 @@ const createMockInitializationFlowContext = (): InitializationFlowContext =>
     requestHandlerContext: {
       securitySolution: Promise.resolve(createMockSecurityContext()),
     },
+    logger: loggerMock.create(),
   } as unknown as InitializationFlowContext);
 
 describe('initAiPromptsFlow', () => {
@@ -46,29 +47,15 @@ describe('initAiPromptsFlow', () => {
     expect(initAiPromptsFlow.runFirst).toBeUndefined();
   });
 
-  describe('resolveProvisionContext', () => {
-    it('resolves the security solution context', async () => {
-      const logger = loggerMock.create();
-      const context = createMockInitializationFlowContext();
-
-      const provisionContext = await initAiPromptsFlow.resolveProvisionContext(context, logger);
-
-      expect(provisionContext.securityContext).toBeDefined();
-    });
-  });
-
-  describe('provision', () => {
+  describe('runFlow', () => {
     it('returns ready with package info on successful installation', async () => {
-      const logger = loggerMock.create();
       installSecurityAiPromptsPackageMock.mockResolvedValue({
         status: 'installed',
         package: { name: 'security_ai_prompts', version: '1.0.0' } as never,
       });
 
-      const result = await initAiPromptsFlow.provision(
-        { securityContext: createMockSecurityContext() as never },
-        logger
-      );
+      const context = createMockInitializationFlowContext();
+      const result = await initAiPromptsFlow.runFlow(context);
 
       expect(result).toEqual({
         status: INITIALIZATION_FLOW_STATUS_READY,
@@ -81,16 +68,13 @@ describe('initAiPromptsFlow', () => {
     });
 
     it('returns already_installed status when package is up to date', async () => {
-      const logger = loggerMock.create();
       installSecurityAiPromptsPackageMock.mockResolvedValue({
         status: 'already_installed',
         package: { name: 'security_ai_prompts', version: '1.0.0' } as never,
       });
 
-      const result = await initAiPromptsFlow.provision(
-        { securityContext: createMockSecurityContext() as never },
-        logger
-      );
+      const context = createMockInitializationFlowContext();
+      const result = await initAiPromptsFlow.runFlow(context);
 
       expect(result).toEqual({
         status: INITIALIZATION_FLOW_STATUS_READY,
@@ -99,13 +83,10 @@ describe('initAiPromptsFlow', () => {
     });
 
     it('returns ready with skipped status when the package is not available', async () => {
-      const logger = loggerMock.create();
       installSecurityAiPromptsPackageMock.mockResolvedValue(null);
 
-      const result = await initAiPromptsFlow.provision(
-        { securityContext: createMockSecurityContext() as never },
-        logger
-      );
+      const context = createMockInitializationFlowContext();
+      const result = await initAiPromptsFlow.runFlow(context);
 
       expect(result).toEqual({
         status: INITIALIZATION_FLOW_STATUS_READY,
@@ -118,33 +99,27 @@ describe('initAiPromptsFlow', () => {
     });
 
     it('logs a debug message when the package is not available', async () => {
-      const logger = loggerMock.create();
       installSecurityAiPromptsPackageMock.mockResolvedValue(null);
 
-      await initAiPromptsFlow.provision(
-        { securityContext: createMockSecurityContext() as never },
-        logger
-      );
+      const context = createMockInitializationFlowContext();
+      await initAiPromptsFlow.runFlow(context);
 
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(context.logger.debug).toHaveBeenCalledWith(
         'AI prompts package installation skipped: package is not available'
       );
-      expect(logger.info).not.toHaveBeenCalled();
+      expect(context.logger.info).not.toHaveBeenCalled();
     });
 
     it('logs a message on successful installation', async () => {
-      const logger = loggerMock.create();
       installSecurityAiPromptsPackageMock.mockResolvedValue({
         status: 'installed',
         package: { name: 'security_ai_prompts', version: '2.0.0' } as never,
       });
 
-      await initAiPromptsFlow.provision(
-        { securityContext: createMockSecurityContext() as never },
-        logger
-      );
+      const context = createMockInitializationFlowContext();
+      await initAiPromptsFlow.runFlow(context);
 
-      expect(logger.info).toHaveBeenCalledWith(
+      expect(context.logger.info).toHaveBeenCalledWith(
         'AI prompts package initialized: "security_ai_prompts" v2.0.0'
       );
     });

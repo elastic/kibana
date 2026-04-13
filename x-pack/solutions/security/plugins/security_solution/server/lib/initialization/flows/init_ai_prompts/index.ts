@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
+import type { PackageInstallReadyResult } from '../../../../../common/api/initialization';
 import {
   INITIALIZATION_FLOW_INIT_AI_PROMPTS,
   INITIALIZATION_FLOW_STATUS_READY,
 } from '../../../../../common/api/initialization';
-import type { InitializationFlowContext, InitializationFlowDefinition } from '../../types';
-import type { InstallAiPromptsPackageProvisionContext } from './types';
+import type {
+  InitializationFlowContext,
+  InitializationFlowDefinition,
+  InitializationFlowResult,
+} from '../../types';
 import { installSecurityAiPromptsPackage } from '../../../detection_engine/prebuilt_rules/logic/integrations/install_ai_prompts';
 
-export const initAiPromptsFlow: InitializationFlowDefinition<InstallAiPromptsPackageProvisionContext> =
+export const initAiPromptsFlow: InitializationFlowDefinition<PackageInstallReadyResult['payload']> =
   {
     id: INITIALIZATION_FLOW_INIT_AI_PROMPTS,
-    resolveProvisionContext: async (
+    runFlow: async (
       context: InitializationFlowContext
-    ): Promise<InstallAiPromptsPackageProvisionContext> => {
+    ): Promise<InitializationFlowResult<PackageInstallReadyResult['payload']>> => {
       const securityContext = await context.requestHandlerContext.securitySolution;
-      return { securityContext };
-    },
-    provision: async ({ securityContext }, logger: Logger) => {
-      const result = await installSecurityAiPromptsPackage(securityContext, logger);
+      const result = await installSecurityAiPromptsPackage(securityContext, context.logger);
 
       if (result === null) {
-        logger.debug('AI prompts package installation skipped: package is not available');
+        context.logger.debug('AI prompts package installation skipped: package is not available');
         return {
           status: INITIALIZATION_FLOW_STATUS_READY,
           payload: {
@@ -38,7 +38,7 @@ export const initAiPromptsFlow: InitializationFlowDefinition<InstallAiPromptsPac
         };
       }
 
-      logger.info(
+      context.logger.info(
         `AI prompts package initialized: "${result.package.name}" v${result.package.version}`
       );
 
