@@ -11,6 +11,7 @@
     "browser": true,
     "configPath": ["xpack", "query_activity"],
     "requiredPlugins": [
+      "data",
       "features",
       "management",
       "share"
