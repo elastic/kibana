@@ -465,6 +465,7 @@ export interface DocLinks {
     slackAction: string;
     slackApiAction: string;
     teamsAction: string;
+    casesWebhookAction: string;
     connectors: string;
   }>;
   readonly taskManager: Readonly<{
