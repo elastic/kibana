@@ -80,7 +80,7 @@ export interface ChromeNextHeaderBadge {
   tooltip?: string;
   onClick?: () => void;
   onClickAriaLabel?: string;
-  testId?: string;
+  'data-test-subj'?: string;
 }
 
 /**

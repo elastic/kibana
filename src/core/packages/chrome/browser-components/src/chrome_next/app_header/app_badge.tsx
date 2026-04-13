@@ -49,8 +49,8 @@ export const AppBadge = ({ badge }: { badge: ChromeNextHeaderBadge }) => {
     <EuiBadge
       onClick={handleBadgeClick}
       onClickAriaLabel={badgeOnClickAriaLabel}
-      color={badge.color ?? 'hollow'}
-      data-test-subj={badge.testId}
+      color={badge?.color ?? 'hollow'}
+      data-test-subj={badge?.['data-test-subj']}
       css={badgeStyle}
     >
       {badge.label}
