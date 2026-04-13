@@ -29,9 +29,7 @@ const useFetchActiveAlertsMock = useFetchActiveAlerts as jest.Mock;
 
 type CompositeSLOItem = FindCompositeSLOResponse['results'][number];
 
-const buildCompositeSloItem = (
-  overrides: Partial<CompositeSLOItem> = {}
-): CompositeSLOItem => ({
+const buildCompositeSloItem = (overrides: Partial<CompositeSLOItem> = {}): CompositeSLOItem => ({
   id: 'composite-slo-1',
   name: 'My Composite SLO',
   description: 'A test composite SLO',

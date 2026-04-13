@@ -44,10 +44,13 @@ export function CompositeSloObjectiveSection() {
                     defaultMessage: 'Time window',
                   })}{' '}
                   <EuiIconTip
-                    content={i18n.translate('xpack.slo.compositeSloEdit.timeWindowDuration.tooltip', {
-                      defaultMessage:
-                        'Rolling time window duration used to compute the composite SLO. Only rolling windows are supported.',
-                    })}
+                    content={i18n.translate(
+                      'xpack.slo.compositeSloEdit.timeWindowDuration.tooltip',
+                      {
+                        defaultMessage:
+                          'Rolling time window duration used to compute the composite SLO. Only rolling windows are supported.',
+                      }
+                    )}
                     position="top"
                   />
                 </span>
