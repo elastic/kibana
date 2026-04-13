@@ -39,6 +39,7 @@ import {
   QUERIES_COLUMN_HEADER,
   RUN_STREAM_ONBOARDING_BUTTON_LABEL,
   SIGNIFICANT_EVENTS_COLUMN_HEADER,
+  SIGNIFICANT_EVENTS_COLUMN_TOOLTIP,
   STOP_STREAM_ONBOARDING_BUTTON_LABEL,
   STREAMS_TABLE_CAPTION_ARIA_LABEL,
 } from './translations';
@@ -391,8 +392,20 @@ export function StreamsTreeTable({
               ),
             },
             {
-              name: SIGNIFICANT_EVENTS_COLUMN_HEADER,
-              width: '200px',
+              name: (
+                <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                  <EuiFlexItem grow={false}>{SIGNIFICANT_EVENTS_COLUMN_HEADER}</EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiIconTip
+                      type="info"
+                      color="subdued"
+                      content={SIGNIFICANT_EVENTS_COLUMN_TOOLTIP}
+                      size="s"
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ),
+              width: '210px',
               align: 'left',
               render: (item: TableRow) => <SignificantEventsColumn streamName={item.stream.name} />,
             },
