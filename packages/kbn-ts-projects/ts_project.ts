@@ -248,6 +248,13 @@ export class TsProject {
   }
 
   /**
+   * Returns true if this project has opted into bundled .d.ts generation via api-extractor
+   */
+  public hasBundledTypes() {
+    return this.pkg?.manifest.bundledTypes === true;
+  }
+
+  /**
    * Resolve a path relative to the directory containing this tsconfig.json file
    */
   public resolve(projectRel: string) {

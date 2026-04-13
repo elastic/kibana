@@ -109,6 +109,11 @@ export interface PackageManifestBaseFields {
    * Specifies the package visibility, i.e. whether it can be accessed by everybody or only packages in the same group
    */
   visibility?: ModuleVisibility;
+  /**
+   * When true, api-extractor will generate bundled .d.ts output for this package
+   * during the type_check pipeline.
+   */
+  bundledTypes?: boolean;
 }
 
 export interface PluginPackageManifest extends PackageManifestBaseFields {
