@@ -127,8 +127,7 @@ function wrapSearchBarInContext(
   );
 }
 
-// FLAKY: https://github.com/elastic/kibana/issues/253342
-describe.skip('SearchBar', () => {
+describe('SearchBar', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -164,6 +163,40 @@ describe.skip('SearchBar', () => {
       // Check for filter-related elements that are actually rendered
       expect(screen.getByTestId('addFilter')).toBeInTheDocument();
       expect(screen.getByTestId('kbnQueryBar')).toBeInTheDocument();
+    });
+  });
+
+  it('Should render filter bar when filters exist but no index patterns are provided', async () => {
+    const dslFilter = {
+      meta: {
+        key: 'query',
+        value: '{"wildcard":{"kibana.alert.rule.name":"example*"}}',
+        type: 'custom',
+        disabled: false,
+        negate: false,
+        alias: null,
+      },
+      query: {
+        wildcard: {
+          'kibana.alert.rule.name': 'example*',
+        },
+      },
+    };
+
+    render(
+      wrapSearchBarInContext({
+        indexPatterns: [],
+        showDatePicker: false,
+        showQueryInput: true,
+        showFilterBar: true,
+        onFiltersUpdated: noop,
+        filters: [dslFilter],
+      })
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('globalQueryBar')).toBeInTheDocument();
+      expect(screen.getByTestId('filter-items-group')).toBeInTheDocument();
     });
   });
 

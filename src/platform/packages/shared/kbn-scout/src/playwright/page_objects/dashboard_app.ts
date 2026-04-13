@@ -136,10 +136,10 @@ export class DashboardApp {
     await this.waitForRenderComplete();
   }
 
-  /** Clicks "Create new dashboard" on the listing page and waits for the editor toolbar to load. */
+  /** Navigates to the new dashboard creation page and waits for the editor toolbar to load. */
   async openNewDashboard() {
-    await this.page.testSubj.click('newItemButton');
-    await expect(this.addTopNavButton).toBeVisible();
+    await this.page.gotoApp('dashboards', { hash: '/create' });
+    await expect(this.addTopNavButton).toBeVisible({ timeout: 20_000 });
   }
 
   private getSettingsFlyout() {
@@ -916,6 +916,7 @@ export class DashboardApp {
   /** Clicks the "Save and return" button in the legacy Visualize editor. */
   async clickVisualizeSaveAndReturn() {
     await this.visualizeSaveAndReturnButton.click();
+    await expect(this.visualizeSaveAndReturnButton).toBeHidden();
   }
 
   /** Navigates to a dashboard by clicking its title link on the listing page. */

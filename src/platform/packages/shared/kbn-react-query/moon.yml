@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/react-query'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/react-query'
+  title: '@kbn/react-query'
   description: Moon project for @kbn/react-query
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-react-query
+  sourceRoot: src/platform/packages/shared/kbn-react-query
 tags:
   - shared-common
   - package

@@ -29,3 +29,6 @@ yaml-language-server
 lightningcss
 tar-fs
 browserslist
+@atlaskit/pragmatic-drag-and-drop
+@atlaskit/pragmatic-drag-and-drop-hitbox
+@langchain/classic
