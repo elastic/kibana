@@ -554,7 +554,7 @@ const NO_OCCURRENCES_STATS_DESCRIPTION = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.noOccurrencesStatsDescription',
   {
     defaultMessage:
-      'This STATS query is not yet monitored in the background. Use the Discover action in the table row to preview its results.',
+      'This STATS query is not monitored in the background. Use the Open in Discover action to preview its results.',
   }
 );
 
