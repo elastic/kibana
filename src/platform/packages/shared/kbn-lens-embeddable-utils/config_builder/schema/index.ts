@@ -16,35 +16,55 @@ import type {
 } from '@kbn/config-schema/src/types';
 import type { ObjectUnionType } from './charts/utils/object_union';
 import { objectUnion } from './charts/utils/object_union';
-import type { MetricState, MetricStateNoESQL } from './charts/metric';
-import { metricStateSchema, metricStateSchemaNoESQL } from './charts/metric';
+import type { MetricState, MetricStateESQL, MetricStateNoESQL } from './charts/metric';
+import { esqlMetricState, metricStateSchema, metricStateSchemaNoESQL } from './charts/metric';
 import type { LegacyMetricState, LegacyMetricStateNoESQL } from './charts/legacy_metric';
 import { legacyMetricStateSchema, legacyMetricStateSchemaNoESQL } from './charts/legacy_metric';
-import type { GaugeState, GaugeStateNoESQL } from './charts/gauge';
-import { gaugeStateSchema, gaugeStateSchemaNoESQL } from './charts/gauge';
-import type { HeatmapState, HeatmapStateNoESQL } from './charts/heatmap';
-import { heatmapStateSchema, heatmapStateSchemaNoESQL } from './charts/heatmap';
-import type { TagcloudState, TagcloudStateNoESQL } from './charts/tagcloud';
-import { tagcloudStateSchema, tagcloudStateSchemaNoESQL } from './charts/tagcloud';
-import type { XYState, XYStateNoESQL } from './charts/xy';
-import { xyStateSchema, xyStateSchemaNoESQL } from './charts/xy';
-import type { RegionMapState, RegionMapStateNoESQL } from './charts/region_map';
-import { regionMapStateSchema, regionMapStateSchemaNoESQL } from './charts/region_map';
-import type { DatatableState, DatatableStateNoESQL } from './charts/datatable';
-import { datatableStateSchema, datatableStateSchemaNoESQL } from './charts/datatable';
+import type { GaugeState, GaugeStateESQL, GaugeStateNoESQL } from './charts/gauge';
+import { gaugeStateSchema, gaugeStateSchemaESQL, gaugeStateSchemaNoESQL } from './charts/gauge';
+import type { HeatmapState, HeatmapStateESQL, HeatmapStateNoESQL } from './charts/heatmap';
+import {
+  heatmapStateSchema,
+  heatmapStateSchemaESQL,
+  heatmapStateSchemaNoESQL,
+} from './charts/heatmap';
+import type { TagcloudState, TagcloudStateESQL, TagcloudStateNoESQL } from './charts/tagcloud';
+import {
+  tagcloudStateSchema,
+  tagcloudStateSchemaESQL,
+  tagcloudStateSchemaNoESQL,
+} from './charts/tagcloud';
+import type { XYState, XYStateESQL, XYStateNoESQL } from './charts/xy';
+import { xyStateSchema, xyStateSchemaESQL, xyStateSchemaNoESQL } from './charts/xy';
+import type { RegionMapState, RegionMapStateESQL, RegionMapStateNoESQL } from './charts/region_map';
+import {
+  regionMapStateSchema,
+  regionMapStateSchemaESQL,
+  regionMapStateSchemaNoESQL,
+} from './charts/region_map';
+import type { DatatableState, DatatableStateESQL, DatatableStateNoESQL } from './charts/datatable';
+import {
+  datatableStateSchema,
+  datatableStateSchemaESQL,
+  datatableStateSchemaNoESQL,
+} from './charts/datatable';
 import type {
   LensApiAllMetricOrFormulaOperations,
   LensApiStaticValueOperation,
 } from './metric_ops';
 import type { LensApiBucketOperations } from './bucket_ops';
-import type { MosaicState, MosaicStateNoESQL } from './charts/mosaic';
-import { mosaicStateSchema, mosaicStateSchemaNoESQL } from './charts/mosaic';
-import type { TreemapState, TreemapStateNoESQL } from './charts/treemap';
-import { treemapStateSchema, treemapStateSchemaNoESQL } from './charts/treemap';
-import type { WaffleState, WaffleStateNoESQL } from './charts/waffle';
-import { waffleStateSchema, waffleStateSchemaNoESQL } from './charts/waffle';
-import type { PieState, PieStateNoESQL } from './charts/pie';
-import { pieStateSchema, pieStateSchemaNoESQL } from './charts/pie';
+import type { MosaicState, MosaicStateESQL, MosaicStateNoESQL } from './charts/mosaic';
+import { mosaicStateSchema, mosaicStateSchemaESQL, mosaicStateSchemaNoESQL } from './charts/mosaic';
+import type { TreemapState, TreemapStateESQL, TreemapStateNoESQL } from './charts/treemap';
+import {
+  treemapStateSchema,
+  treemapStateSchemaESQL,
+  treemapStateSchemaNoESQL,
+} from './charts/treemap';
+import type { WaffleState, WaffleStateESQL, WaffleStateNoESQL } from './charts/waffle';
+import { waffleStateSchema, waffleStateSchemaESQL, waffleStateSchemaNoESQL } from './charts/waffle';
+import type { PieState, PieStateESQL, PieStateNoESQL } from './charts/pie';
+import { pieStateSchema, pieStateSchemaESQL, pieStateSchemaNoESQL } from './charts/pie';
 
 /**
  * We need to break the type inference here to avoid exceeding the ts compiler serialization limit.
@@ -129,6 +149,46 @@ export type LensApiStateNoESQL =
   | WaffleStateNoESQL;
 
 export const lensApiStateSchemaNoESQL: Type<LensApiStateNoESQL> = _lensApiStateSchemaNoESQL;
+
+/**
+ * We need to break the type inference here to avoid exceeding the ts compiler serialization limit.
+ *
+ * This requires:
+ *  - Casting the schema as any
+ *  - Defining the `LensApiState` type from the schema types
+ *  - Exporting this value as `Type<LensApiState>`
+ */
+export const _lensApiStateSchemaESQL: any = objectUnion(
+  [
+    esqlMetricState,
+    xyStateSchemaESQL,
+    gaugeStateSchemaESQL,
+    heatmapStateSchemaESQL,
+    tagcloudStateSchemaESQL,
+    regionMapStateSchemaESQL,
+    datatableStateSchemaESQL,
+    pieStateSchemaESQL,
+    mosaicStateSchemaESQL,
+    treemapStateSchemaESQL,
+    waffleStateSchemaESQL,
+  ],
+  { meta: { id: 'lensApiStateESQL', title: 'Visualizations (ES|QL)' } }
+);
+
+export type LensApiStateESQL =
+  | MetricStateESQL
+  | GaugeStateESQL
+  | XYStateESQL
+  | HeatmapStateESQL
+  | TagcloudStateESQL
+  | RegionMapStateESQL
+  | DatatableStateESQL
+  | PieStateESQL
+  | MosaicStateESQL
+  | TreemapStateESQL
+  | WaffleStateESQL;
+
+export const lensApiStateSchemaESQL: Type<LensApiStateESQL> = _lensApiStateSchemaESQL;
 
 /**
  * Extends `lensApiStateSchema` with extra props and options.
