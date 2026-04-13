@@ -9,6 +9,7 @@
 
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
+  createReturnFocus,
   getDisplayedItemsAllowedAmount,
   getShouldOverflow,
   getAppMenuItems,
@@ -21,6 +22,56 @@ import { APP_MENU_ITEM_LIMIT } from './constants';
 import type { AppMenuPopoverItem } from './types';
 
 describe('utils', () => {
+  describe('createReturnFocus', () => {
+    let triggerElement: HTMLButtonElement;
+    let overflowButton: HTMLButtonElement;
+
+    beforeEach(() => {
+      triggerElement = document.createElement('button');
+      overflowButton = document.createElement('button');
+      overflowButton.setAttribute('data-test-subj', 'app-menu-overflow-button');
+    });
+
+    afterEach(() => {
+      triggerElement.remove();
+      overflowButton.remove();
+    });
+
+    it('should focuse the trigger element when it is still in the DOM', () => {
+      document.body.appendChild(triggerElement);
+      const returnFocus = createReturnFocus(triggerElement);
+      returnFocus();
+      expect(document.activeElement).toBe(triggerElement);
+    });
+
+    it('should focuse the parent element when the trigger has been removed but the parent is still in the DOM', () => {
+      const parentElement = document.createElement('button');
+      document.body.appendChild(parentElement);
+      // triggerElement is NOT appended — simulates a popover item that was unmounted
+      const returnFocus = createReturnFocus(triggerElement, parentElement);
+      returnFocus();
+      expect(document.activeElement).toBe(parentElement);
+      parentElement.remove();
+    });
+
+    it('should focuse the overflow button when both trigger and parent element have been removed from the DOM', () => {
+      // neither triggerElement nor parentElement is appended
+      document.body.appendChild(overflowButton);
+      const parentElement = document.createElement('button');
+      const returnFocus = createReturnFocus(triggerElement, parentElement);
+      returnFocus();
+      expect(document.activeElement).toBe(overflowButton);
+    });
+
+    it('should focuse the overflow button when the trigger element has been removed from the DOM', () => {
+      // triggerElement is NOT appended — simulates a popover item that was unmounted
+      document.body.appendChild(overflowButton);
+      const returnFocus = createReturnFocus(triggerElement);
+      returnFocus();
+      expect(document.activeElement).toBe(overflowButton);
+    });
+  });
+
   describe('getDisplayedItemsAllowedAmount', () => {
     it('should return full limit when items fit within limit', () => {
       const result = getDisplayedItemsAllowedAmount({
