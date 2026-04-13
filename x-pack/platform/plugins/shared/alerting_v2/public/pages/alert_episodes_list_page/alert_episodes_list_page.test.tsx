@@ -23,9 +23,9 @@ jest.mock('@kbn/alerting-v2-episodes-ui/components/actions/bulk_snooze_modal', (
   )),
 }));
 
-jest.mock('@kbn/alerting-v2-episodes-ui/components/actions/alert_episode_tags_flyout', () => ({
-  AlertEpisodeTagsFlyout: jest.fn(({ onSave, onClose }) => (
-    <div data-test-subj="alertingEpisodeTagsFlyout">
+jest.mock('@kbn/alerting-v2-episodes-ui/components/actions/bulk_tags_modal', () => ({
+  BulkTagsModal: jest.fn(({ onSave, onClose }) => (
+    <div data-test-subj="bulkTagsModal">
       <button onClick={() => onSave(['tag-a'])}>Save</button>
       <button onClick={onClose}>Close</button>
     </div>
@@ -176,13 +176,13 @@ describe('AlertEpisodesListPage bulk actions', () => {
     expect(screen.getByTestId('bulkSnoozeModal')).toBeInTheDocument();
   });
 
-  it('edit-tags sets pendingBulkAction — renders AlertEpisodeTagsFlyout', () => {
+  it('edit-tags sets pendingBulkAction — renders BulkTagsModal', () => {
     const actions = getCapturedBulkActions();
     const editTags = actions.find((a) => a.key === 'edit-tags')!;
     act(() => {
       editTags.onClick({ selectedDocIds: ['0'] });
     });
-    expect(screen.getByTestId('alertingEpisodeTagsFlyout')).toBeInTheDocument();
+    expect(screen.getByTestId('bulkTagsModal')).toBeInTheDocument();
   });
 
   it('shows success toast when all episodes are updated', () => {
