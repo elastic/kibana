@@ -9,8 +9,6 @@
 
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export const OPTIONS_LIST_DASHBOARD_NAME = 'Test Options List Control';
-
 export default function ({ loadTestFile, getService, getPageObjects }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const esArchiver = getService('esArchiver');
