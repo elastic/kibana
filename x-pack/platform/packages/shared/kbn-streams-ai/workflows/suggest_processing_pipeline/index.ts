@@ -30,9 +30,19 @@ export interface SuggestProcessingPipelineResult {
   };
 }
 
+interface PipelineStep {
+  action?: string;
+  [key: string]: unknown;
+}
+
+interface SubmittedPipeline {
+  steps?: PipelineStep[];
+  [key: string]: unknown;
+}
+
 interface SimulationFeedback {
   valid: boolean;
-  errors?: string[];
+  errors?: (string | ZodIssueWithPath)[];
   metrics?: {
     sampled: number;
     fields: string[];
@@ -46,6 +56,79 @@ interface SimulationFeedback {
     }
   >;
   [key: string]: unknown;
+}
+
+interface CommitFeedback {
+  committed: boolean;
+  errors?: ZodIssueWithPath[];
+  [key: string]: unknown;
+}
+
+interface ZodIssueWithPath {
+  message: string;
+  path: PropertyKey[];
+}
+
+/**
+ * Filters Zod validation errors to return only those relevant to the processors
+ * actually present in the submitted pipeline. This avoids confusing the model
+ * with union discriminator errors for processor types it didn't intend to use.
+ *
+ * @param issues - Array of Zod validation issues from safeParse
+ * @param submittedPipeline - The raw pipeline object submitted by the model
+ * @returns Filtered array of issues relevant to the submitted pipeline
+ */
+function formatZodPipelineErrors(
+  issues: ZodIssueWithPath[],
+  submittedPipeline: SubmittedPipeline
+): ZodIssueWithPath[] {
+  const steps = submittedPipeline.steps ?? [];
+  const actionsInPipeline = new Set(steps.map((step) => step.action).filter(Boolean));
+
+  return issues.filter((issue) => {
+    // Check if this is a union discriminator error for a processor type not in the pipeline
+    const path = issue.path;
+    // Union errors typically have a path like ['steps', <index>, 'action'] or similar
+    if (path.length >= 3 && path[0] === 'steps' && path[2] === 'action') {
+      const stepIndex = path[1];
+      if (typeof stepIndex === 'number') {
+        const step = steps[stepIndex];
+        if (step && step.action) {
+          // Keep the error if it's about the action actually used in this step
+          const errorMessage = issue.message.toLowerCase();
+          const stepAction = step.action.toLowerCase();
+          // If the error message mentions the actual action used, keep it
+          if (errorMessage.includes(stepAction)) {
+            return true;
+          }
+          // If the error is about an action NOT in the pipeline, filter it out
+          return false;
+        }
+      }
+    }
+
+    // For errors in step-specific fields (not the action discriminator),
+    // check if the step at that index has an action that's in the pipeline
+    if (path.length >= 2 && path[0] === 'steps') {
+      const stepIndex = path[1];
+      if (typeof stepIndex === 'number') {
+        const step = steps[stepIndex];
+        // If we can't determine the action, keep the error to be safe
+        if (!step || !step.action) {
+          return true;
+        }
+        // Keep errors for steps with actions that are in the pipeline
+        if (actionsInPipeline.has(step.action)) {
+          return true;
+        }
+        // Filter out errors for steps with actions not in the pipeline
+        return false;
+      }
+    }
+
+    // Keep all other errors (non-step-related)
+    return true;
+  });
 }
 
 /**
@@ -128,13 +211,16 @@ export async function suggestProcessingPipeline({
         // 1. Validate the pipeline schema
         const pipeline = agentPipelineSchema.safeParse(toolCall.function.arguments.pipeline);
         if (!pipeline.success) {
-          return {
-            response: {
-              valid: false,
-              errors: pipeline.error.issues,
-              metrics: undefined,
-            },
+          const filteredErrors = formatZodPipelineErrors(
+            pipeline.error.issues,
+            toolCall.function.arguments.pipeline as SubmittedPipeline
+          );
+          const feedback: SimulationFeedback = {
+            valid: false,
+            errors: filteredErrors,
+            metrics: undefined,
           };
+          return { response: feedback };
         }
 
         // 2. Add customIdentifiers to steps for proper tracking in simulation results
@@ -154,30 +240,29 @@ export async function suggestProcessingPipeline({
         // Collect unique errors from simulation
         const uniqueErrors = getUniqueDocumentErrors(simulateResult);
 
-        // Build simulation feedback using the shared function
+        // Build structured feedback with per-processor attribution
         const feedback = buildSimulationFeedback(simulateResult, metrics, uniqueErrors);
-
-        return {
-          response: feedback,
-        };
+        return { response: feedback };
       },
       commit_pipeline: async (toolCall) => {
         const pipeline = agentPipelineSchema.safeParse(toolCall.function.arguments.pipeline);
         if (!pipeline.success) {
-          return {
-            response: {
-              committed: false,
-              errors: pipeline.error.issues,
-            },
+          const filteredErrors = formatZodPipelineErrors(
+            pipeline.error.issues,
+            toolCall.function.arguments.pipeline as SubmittedPipeline
+          );
+          const feedback: CommitFeedback = {
+            committed: false,
+            errors: filteredErrors,
           };
+          return { response: feedback };
         }
 
-        return {
-          response: {
-            committed: true,
-            errors: undefined,
-          },
+        const feedback: CommitFeedback = {
+          committed: true,
+          errors: undefined,
         };
+        return { response: feedback };
       },
     },
     finalToolChoice: {
@@ -289,123 +374,104 @@ function detectTemporaryFields(simulationResult: ProcessingSimulationResponse): 
 }
 
 /**
- * Builds simulation feedback from simulation result.
- * Returns a consistent shape with per-processor metrics and validation status.
+ * Collects errors attributed to a specific processor from the simulation results.
  */
-function buildSimulationFeedback(
-  simulateResult: ProcessingSimulationResponse,
-  metrics: {
-    sampled: number;
-    fields: string[];
-    parse_rate: number;
-  },
-  uniqueErrors: string[]
-): SimulationFeedback {
-  // Build per-processor feedback
-  const processors: Record<string, { failed_rate: number; errors?: string[] }> = {};
-
-  if (simulateResult.processors_metrics) {
-    for (const [processorId, processorMetrics] of Object.entries(
-      simulateResult.processors_metrics
-    )) {
-      if (!processorMetrics) continue;
-
-      // Get top errors for this processor
-      const processorErrors: string[] = [];
-      if (processorMetrics.errors && processorMetrics.errors.length > 0) {
-        const errorMap = new Map<string, number>();
-        for (const error of processorMetrics.errors) {
-          const key = error.type + ': ' + error.message;
-          errorMap.set(key, (errorMap.get(key) ?? 0) + 1);
-        }
-
-        // Sort by count and take top 3 errors
-        const sortedErrors = Array.from(errorMap.entries())
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 3);
-
-        for (const [errorKey, count] of sortedErrors) {
-          const countStr = count > 1 ? ' (occurred ' + count + ' times)' : '';
-          processorErrors.push('[' + processorId + '] ' + errorKey + countStr);
+function collectErrorsForProcessor(
+  simulationResult: ProcessingSimulationResponse,
+  processorId: string
+): string[] {
+  const errors: string[] = [];
+  if (!simulationResult.documents) {
+    return errors;
+  }
+  for (const doc of simulationResult.documents) {
+    if (doc.errors && doc.errors.length > 0) {
+      for (const error of doc.errors) {
+        if ('processor_id' in error && error.processor_id === processorId) {
+          const errorMsg = error.type + ': ' + error.message;
+          if (!errors.includes(errorMsg)) {
+            errors.push(errorMsg);
+          }
         }
       }
+    }
+  }
+  return errors;
+}
 
+/**
+ * Builds structured feedback from simulation results with per-processor attribution.
+ */
+function buildSimulationFeedback(
+  simulationResult: ProcessingSimulationResponse,
+  metrics: { sampled: number; fields: string[]; parse_rate: number },
+  uniqueErrors: string[]
+): SimulationFeedback {
+  const minParseRate = 80;
+  const maxFailureRate = 0.2;
+  const errors: string[] = [];
+  const processors: Record<string, { failed_rate: number; errors?: string[] }> = {};
+
+  if (metrics.parse_rate < minParseRate) {
+    errors.push(
+      'Parse rate is too low: ' +
+        metrics.parse_rate.toFixed(2) +
+        '% (minimum required: ' +
+        minParseRate +
+        '%). The pipeline is not extracting fields from enough documents.'
+    );
+  }
+
+  if (simulationResult.processors_metrics) {
+    for (const [processorId, processorMetrics] of Object.entries(
+      simulationResult.processors_metrics
+    )) {
+      if (!processorMetrics) continue;
+      const processorErrors: string[] = [];
+      if (processorMetrics.failed_rate > maxFailureRate) {
+        const failurePercentage = (processorMetrics.failed_rate * 100).toFixed(2);
+        const errorMsg =
+          '[' +
+          processorId +
+          '] Failure rate is ' +
+          failurePercentage +
+          '% (maximum allowed: 20%).';
+        processorErrors.push(errorMsg);
+        errors.push(errorMsg);
+      }
+      const docErrors = collectErrorsForProcessor(simulationResult, processorId);
+      for (const docError of docErrors.slice(0, 3)) {
+        const prefixedError = '[' + processorId + '] ' + docError;
+        if (!processorErrors.includes(prefixedError)) processorErrors.push(prefixedError);
+        if (!errors.includes(prefixedError)) errors.push(prefixedError);
+      }
       processors[processorId] = {
-        failed_rate: parseFloat((processorMetrics.failed_rate * 100).toFixed(2)),
-        ...(processorErrors.length > 0 ? { errors: processorErrors } : {}),
+        failed_rate: processorMetrics.failed_rate,
+        errors: processorErrors.length > 0 ? processorErrors : undefined,
       };
     }
   }
 
-  // Validate parse rate - if below 80%, mark as invalid
-  const parseRate = metrics.parse_rate;
-  if (parseRate < 80) {
-    return {
-      valid: false,
-      errors: [
-        'Parse rate is too low: ' +
-          parseRate.toFixed(2) +
-          '% (minimum required: 80%). The pipeline is not extracting fields from enough documents. Review the processors and ensure they handle the document structure correctly.',
-        ...uniqueErrors,
-      ],
-      metrics,
-      processors,
-    };
+  for (const uniqueError of uniqueErrors) {
+    if (!errors.includes(uniqueError)) errors.push(uniqueError);
   }
 
-  // Validate processor failure rates - each processor should have < 20% failure rate
-  const maxFailureRate = 0.2; // 20%
-  const processorFailures: string[] = [];
-  if (simulateResult.processors_metrics) {
-    for (const [processorId, processorMetrics] of Object.entries(
-      simulateResult.processors_metrics
-    )) {
-      if (!processorMetrics) continue;
-      if (processorMetrics.failed_rate > maxFailureRate) {
-        const failurePercentage = (processorMetrics.failed_rate * 100).toFixed(2);
-        processorFailures.push(
-          '[' +
-            processorId +
-            '] Processor has a failure rate of ' +
-            failurePercentage +
-            '% (maximum allowed: 20%). This processor is failing on too many documents. Review the processor configuration and ensure it handles the document structure correctly.'
-        );
-      }
-    }
-  }
-  if (processorFailures.length > 0) {
-    return {
-      valid: false,
-      errors: [...processorFailures, ...uniqueErrors],
-      metrics,
-      processors,
-    };
-  }
-
-  // Check for temporary fields in output
-  const temporaryFields = detectTemporaryFields(simulateResult);
+  const temporaryFields = detectTemporaryFields(simulationResult);
   if (temporaryFields.length > 0) {
-    return {
-      valid: false,
-      errors: [
-        'Temporary fields detected: [' +
-          temporaryFields.join(', ') +
-          "]. Add a 'remove' processor to clean up these intermediate parsing artifacts.",
-        ...uniqueErrors,
-      ],
-      metrics,
-      processors,
-    };
+    const tempFieldMsg =
+      'Temporary fields detected: ' +
+      temporaryFields.join(', ') +
+      '. These should be removed or renamed.';
+    errors.push(tempFieldMsg);
   }
 
   return {
-    valid: true,
-    errors: uniqueErrors.length > 0 ? uniqueErrors : undefined,
+    valid: errors.length === 0,
+    errors: errors.length > 0 ? errors : undefined,
     metrics,
-    processors,
+    processors: Object.keys(processors).length > 0 ? processors : undefined,
   };
 }
-
 export function getUniqueDocumentErrors(simulationResult: ProcessingSimulationResponse): string[] {
   if (!simulationResult.documents || simulationResult.documents.length === 0) {
     return [];
