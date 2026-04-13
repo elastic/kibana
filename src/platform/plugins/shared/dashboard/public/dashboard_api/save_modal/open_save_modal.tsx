@@ -69,9 +69,9 @@ export async function openSaveModal({
      */
     const getShouldAddAccessControl = async () => {
       try {
-        const currentUser = await coreServices.userProfile.getCurrent();
+        const currentProfileUid = (await coreServices.security.authc.getCurrentUser()).profile_uid;
         const isCreatingNewDashboard = Boolean(!lastSavedId);
-        return isCreatingNewDashboard && Boolean(currentUser);
+        return isCreatingNewDashboard && Boolean(currentProfileUid);
       } catch {
         return false;
       }
@@ -169,7 +169,7 @@ export async function openSaveModal({
             showCopyOnSave={false}
             onSave={onSaveAttempt}
             accessControl={accessControl}
-            customModalTitle={getCustomModalTitle(viewMode)}
+            customModalTitle={getCustomModalTitle(viewMode, lastSavedId)}
             showAccessContainer={shouldAddAccessControl}
           />
         );
@@ -183,8 +183,8 @@ export async function openSaveModal({
   }
 }
 
-function getCustomModalTitle(viewMode: ViewMode) {
-  if (viewMode === 'edit')
+function getCustomModalTitle(viewMode: ViewMode, lastSavedId: string | undefined) {
+  if (!lastSavedId || viewMode === 'edit')
     return i18n.translate('dashboard.topNav.editModeInteractiveSave.modalTitle', {
       defaultMessage: 'Save as new dashboard',
     });

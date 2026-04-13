@@ -16,6 +16,7 @@ import {
   getCurrentConversationOwner,
   ConversationSharedState,
 } from '@kbn/elastic-assistant-common';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import { ShareSelect } from '../../share_conversation/share_select';
 import { useAssistantContext, type Conversation } from '../../../..';
 import * as i18n from './translations';
@@ -25,7 +26,6 @@ import type { AIConnector } from '../../../connectorland/connector_selector';
 import { ConnectorSelector } from '../../../connectorland/connector_selector';
 import { SelectSystemPrompt } from '../../prompt_editor/system_prompt/select_system_prompt';
 import { ModelSelector } from '../../../connectorland/models/model_selector/model_selector';
-import { useLoadConnectors } from '../../../connectorland/use_load_connectors';
 import { getGenAiConfig } from '../../../connectorland/helpers';
 import type { ConversationsBulkActions } from '../../api';
 import { getDefaultSystemPrompt } from '../../use_conversation/helpers';
@@ -60,6 +60,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
     const { settings } = useAssistantContext();
     const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({
       http,
+      featureId: 'elastic_assistant',
       settings,
     });
     const [conversationUpdates, setConversationUpdates] =
@@ -279,13 +280,13 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
           label={i18n.CONNECTOR_TITLE}
           helpText={
             <EuiLink
-              href={`${http.basePath.get()}/app/management/insightsAndAlerting/triggersActionsConnectors/connectors`}
+              href={`${http.basePath.get()}/app/management/modelManagement/model_settings`}
               target="_blank"
               external
             >
               <FormattedMessage
                 id="xpack.elasticAssistant.assistant.settings.connectorHelpTextTitle"
-                defaultMessage="The default LLM connector for this conversation type."
+                defaultMessage="The default LLM for this conversation type."
               />
             </EuiLink>
           }

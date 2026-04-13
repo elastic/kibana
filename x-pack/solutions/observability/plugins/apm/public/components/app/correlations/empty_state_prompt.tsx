@@ -15,7 +15,7 @@ export function CorrelationsEmptyStatePrompt() {
     <>
       <EuiSpacer size="m" />
       <EuiEmptyPrompt
-        iconType="minusInCircle"
+        iconType="minusCircle"
         title={
           <EuiText size="s">
             <h2>

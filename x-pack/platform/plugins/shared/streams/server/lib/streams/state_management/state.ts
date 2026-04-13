@@ -22,6 +22,8 @@ import { streamFromDefinition } from './stream_active_record/stream_from_definit
 import type { StateDependencies, StreamChange } from './types';
 import { ConcurrentAccessError } from './errors/concurrent_access_error';
 import { InsufficientPermissionsError } from '../errors/insufficient_permissions_error';
+import { getErrorMessage } from '../errors/parse_error';
+import { StatusError } from '../errors/status_error';
 
 interface Changes {
   created: string[];
@@ -96,8 +98,10 @@ export class State {
               throw error;
             }
             throw new FailedToChangeStateError(
-              `Failed to change state: ${error.message}. The stream state may be inconsistent. Revert your last change, or use the resync API to restore a consistent state.`,
-              error.statusCode ?? 500
+              `Failed to change state: ${getErrorMessage(
+                error
+              )}. The stream state may be inconsistent. Revert your last change, or use the resync API to restore a consistent state.`,
+              error instanceof StatusError ? error.statusCode : 500
             );
           }
         })
@@ -136,7 +140,7 @@ export class State {
       return new State(streams, dependencies);
     } catch (error) {
       throw new FailedToLoadCurrentStateError(
-        `Failed to load current Streams state: ${error.message}`
+        `Failed to load current Streams state: ${getErrorMessage(error)}`
       );
     }
   }
@@ -164,8 +168,8 @@ export class State {
       return desiredState;
     } catch (error) {
       throw new FailedToApplyRequestedChangesError(
-        `Failed to apply requested changes to Stream state: ${[error.message]}`,
-        error.statusCode
+        `Failed to apply requested changes to Stream state: ${getErrorMessage(error)}`,
+        error instanceof StatusError ? error.statusCode : 500
       );
     }
   }
@@ -258,7 +262,7 @@ export class State {
       return actions.flat();
     } catch (error) {
       throw new FailedToDetermineElasticsearchActionsError(
-        `Failed to determine Elasticsearch actions: ${error.message}`
+        `Failed to determine Elasticsearch actions: ${getErrorMessage(error)}`
       );
     }
   }

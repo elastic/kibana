@@ -9,22 +9,39 @@
 
 import { EsArchiver } from '@kbn/es-archiver';
 import { REPO_ROOT } from '@kbn/repo-info';
+import type { EsClient } from '../../types';
 import type { ScoutLogger } from './logger';
-import type { EsClient, KbnClient } from '../../types';
 
 let esArchiverInstance: EsArchiver | undefined;
 
-export function getEsArchiver(esClient: EsClient, kbnClient: KbnClient, log: ScoutLogger) {
+export function getEsArchiver(esClient: EsClient, log: ScoutLogger) {
   if (!esArchiverInstance) {
     esArchiverInstance = new EsArchiver({
       log,
       client: esClient,
-      kbnClient,
       baseDir: REPO_ROOT,
+      dataOnly: true,
     });
 
     log.serviceLoaded('esArchiver');
   }
 
   return esArchiverInstance;
+}
+
+let linkedEsArchiverInstance: EsArchiver | undefined;
+
+export function getLinkedEsArchiver(esClient: EsClient, log: ScoutLogger) {
+  if (!linkedEsArchiverInstance) {
+    linkedEsArchiverInstance = new EsArchiver({
+      log,
+      client: esClient,
+      baseDir: REPO_ROOT,
+      dataOnly: true,
+    });
+
+    log.serviceLoaded('linkedEsArchiver');
+  }
+
+  return linkedEsArchiverInstance;
 }

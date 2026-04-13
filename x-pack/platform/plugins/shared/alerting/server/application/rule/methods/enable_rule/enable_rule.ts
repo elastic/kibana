@@ -12,6 +12,7 @@ import { resetMonitoringLastRun, getNextRun } from '../../../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
+import { addMissingUiamKeyTagIfNeeded } from '../../../../rules_client/common';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import {
   updateMeta,
@@ -139,29 +140,43 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
 
     const username = await context.getUserName();
     const now = new Date();
+    const nowIso = now.toISOString();
 
     const schedule = attributes.schedule as IntervalSchedule;
 
-    const updateAttributes = updateMeta(context, {
-      ...attributes,
-      ...(!existingApiKey &&
-        (await createNewAPIKeySet(context, {
+    const apiKeyAttributes = !existingApiKey
+      ? await createNewAPIKeySet(context, {
           id: attributes.alertTypeId,
           ruleName: attributes.name,
           username,
           shouldUpdateApiKey: true,
-        }))),
+        })
+      : ({} as Awaited<ReturnType<typeof createNewAPIKeySet>>);
+
+    const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(
+      attributes.tags,
+      existingApiKey ? attributes.uiamApiKey : apiKeyAttributes.uiamApiKey,
+      existingApiKey ? attributes.apiKeyCreatedByUser : apiKeyAttributes.apiKeyCreatedByUser,
+      context.isServerless,
+      context.featureFlags
+    );
+
+    const updateAttributes = updateMeta(context, {
+      ...attributes,
+      ...apiKeyAttributes,
+      tags: tagsWithUiamCheck,
       ...(attributes.monitoring && {
         monitoring: resetMonitoringLastRun(attributes.monitoring),
       }),
       nextRun: getNextRun({ interval: schedule.interval }),
       enabled: true,
       updatedBy: username,
-      updatedAt: now.toISOString(),
+      updatedAt: nowIso,
+      lastEnabledAt: nowIso,
       executionStatus: {
         status: 'pending',
         lastDuration: 0,
-        lastExecutionDate: now.toISOString(),
+        lastExecutionDate: nowIso,
         error: null,
         warning: null,
       },

@@ -8,16 +8,21 @@
  */
 
 import { monaco } from '@kbn/monaco';
+import { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from '@kbn/esql-language';
 import {
   ESQLVariableType,
   QuerySource,
   type ESQLControlsContext,
   ControlTriggerSource,
   type ESQLControlVariable,
+  type ESQLSourceResult,
+  type IndexAutocompleteItem,
 } from '@kbn/esql-types';
 import type { CoreStart } from '@kbn/core/public';
 import type { ESQLEditorDeps } from './types';
 import type { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
+import { IndicesBrowserOpenMode } from './resource_browser/types';
+import { getRangeFromOffsets } from './resource_browser/utils';
 
 export interface MonacoCommandDependencies {
   application?: CoreStart['application'];
@@ -28,7 +33,57 @@ export interface MonacoCommandDependencies {
   esqlVariables: React.RefObject<ESQLControlVariable[] | undefined>;
   controlsContext: React.RefObject<ESQLControlsContext | undefined>;
   openTimePickerPopover: () => void;
+  openIndicesBrowser?: (options?: {
+    openedFrom?: IndicesBrowserOpenMode;
+    preloadedSources?: ESQLSourceResult[];
+    preloadedTimeSeriesSources?: IndexAutocompleteItem[];
+  }) => void;
+  openFieldsBrowser?: (options?: {
+    preloadedFields?: Array<{ name: string; type?: string }>;
+  }) => void;
 }
+
+interface TextReplacementCommandPayload {
+  replacementText?: string;
+  replaceStart?: string;
+  replaceEnd?: string;
+}
+
+const applyTextReplacement = (
+  editor: monaco.editor.IStandaloneCodeEditor,
+  payload: TextReplacementCommandPayload | undefined
+) => {
+  if (!payload?.replacementText) {
+    return;
+  }
+
+  const model = editor.getModel();
+
+  if (!model) {
+    return;
+  }
+
+  // Suggestion command arguments are serialized as string maps by contract.
+  const replaceStart = Number(payload.replaceStart);
+  const replaceEnd = Number(payload.replaceEnd);
+
+  if (!Number.isFinite(replaceStart) || !Number.isFinite(replaceEnd) || replaceStart > replaceEnd) {
+    return;
+  }
+
+  const modelLength = model.getValue().length;
+  const boundedStart = Math.max(0, Math.min(replaceStart, modelLength));
+  const boundedEnd = Math.max(boundedStart, Math.min(replaceEnd, modelLength));
+
+  editor.executeEdits('applyTextReplacement', [
+    {
+      range: getRangeFromOffsets(model, boundedStart, boundedEnd),
+      text: payload.replacementText,
+    },
+  ]);
+
+  editor.setPosition(model.getPositionAt(boundedStart + payload.replacementText.length));
+};
 
 const triggerControl = async (
   queryString: string,
@@ -40,7 +95,7 @@ const triggerControl = async (
   onSaveControl?: ESQLControlsContext['onSaveControl'],
   onCancelControl?: ESQLControlsContext['onCancelControl']
 ) => {
-  await uiActions.getTrigger('ESQL_CONTROL_TRIGGER').exec({
+  await uiActions.executeTriggerActions('ESQL_CONTROL_TRIGGER', {
     queryString,
     variableType,
     cursorPosition: position,
@@ -61,6 +116,8 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
     esqlVariables,
     controlsContext,
     openTimePickerPopover,
+    openIndicesBrowser,
+    openFieldsBrowser,
   } = deps;
 
   const commandDisposables: monaco.IDisposable[] = [];
@@ -82,11 +139,99 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
     })
   );
 
+  commandDisposables.push(
+    monaco.editor.registerCommand(ESQL_APPLY_TEXT_REPLACEMENT_COMMAND, (...args) => {
+      const [, payload] = args;
+      const editor = editorRef.current;
+
+      if (!editor) {
+        return;
+      }
+
+      applyTextReplacement(editor, payload);
+    })
+  );
+
+  // Open indices browser command
+  if (openIndicesBrowser) {
+    commandDisposables.push(
+      monaco.editor.registerCommand('esql.indicesBrowser.open', (...args) => {
+        const [, payload] = args;
+        let preloadedSources: ESQLSourceResult[] | undefined;
+        let preloadedTimeSeriesSources: IndexAutocompleteItem[] | undefined;
+
+        if (payload?.sources) {
+          try {
+            preloadedSources = JSON.parse(payload.sources) as ESQLSourceResult[];
+          } catch {
+            preloadedSources = undefined;
+          }
+        }
+
+        if (payload?.timeSeriesSources) {
+          try {
+            preloadedTimeSeriesSources = JSON.parse(
+              payload.timeSeriesSources
+            ) as IndexAutocompleteItem[];
+          } catch {
+            preloadedTimeSeriesSources = undefined;
+          }
+        }
+
+        openIndicesBrowser({
+          openedFrom: IndicesBrowserOpenMode.Autocomplete,
+          preloadedSources,
+          preloadedTimeSeriesSources,
+        });
+      })
+    );
+  }
+
+  // Open fields browser command (triggered by the "Browse fields" autocomplete item)
+  if (openFieldsBrowser) {
+    commandDisposables.push(
+      monaco.editor.registerCommand('esql.fieldsBrowser.open', (...args) => {
+        const [, payload] = args;
+        let preloadedFields: Array<{ name: string; type?: string }> | undefined;
+
+        if (payload?.fields) {
+          try {
+            const parsed = JSON.parse(payload.fields) as unknown;
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              preloadedFields = parsed as Array<{ name: string; type?: string }>;
+            }
+          } catch {
+            preloadedFields = undefined;
+          }
+        }
+
+        openFieldsBrowser({
+          preloadedFields,
+        });
+      })
+    );
+  }
+
   // Accept recommended query command
   commandDisposables.push(
     monaco.editor.registerCommand('esql.recommendedQuery.accept', (...args) => {
-      const [, { queryLabel }] = args;
+      const [, { queryLabel, queryText }] = args;
       telemetryService.trackRecommendedQueryClicked(QuerySource.AUTOCOMPLETE, queryLabel);
+
+      // When queryText is provided (standalone queries), replaces the entire editor content.
+      // If the queryText is not provided, the recommended query is inserted at the current cursor position
+      // acting as a snippet.
+      if (queryText) {
+        const editor = editorRef.current;
+        const model = editor?.getModel();
+        if (editor && model) {
+          const fullRange = model.getFullModelRange();
+          editor.executeEdits('standaloneQuery', [{ range: fullRange, text: queryText }]);
+          const lastLine = model.getLineCount();
+          const lastColumn = model.getLineMaxColumn(lastLine);
+          editor.setPosition({ lineNumber: lastLine, column: lastColumn });
+        }
+      }
     })
   );
 
@@ -102,9 +247,11 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
   commandDisposables.push(
     monaco.editor.registerCommand('esql.multiCommands', (...args) => {
       const [, { commands }] = args;
-      const commandsToExecute: { id: string; payload?: unknown }[] = JSON.parse(commands);
+      const commandsToExecute: { id: string; payload?: unknown; arguments?: unknown[] }[] =
+        JSON.parse(commands);
       commandsToExecute.forEach((command) => {
-        editorRef.current?.trigger(undefined, command.id, command.payload ?? {});
+        const payload = command.payload ?? command.arguments?.[0] ?? {};
+        editorRef.current?.trigger(undefined, command.id, payload);
       });
     })
   );

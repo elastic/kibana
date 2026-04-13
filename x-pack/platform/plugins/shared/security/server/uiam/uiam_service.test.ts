@@ -9,6 +9,7 @@ import fs from 'fs';
 import undici from 'undici';
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 
 import {
   type GrantUiamApiKeyRequestBody,
@@ -16,7 +17,6 @@ import {
   UiamService,
 } from './uiam_service';
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
-import { HTTPAuthorizationHeader } from '../authentication';
 import { ConfigSchema } from '../config';
 
 const AGENT_MOCK = { name: "I'm the danger. I'm the one who knocks." };
@@ -45,7 +45,11 @@ describe('UiamService', () => {
           },
         },
         { serverless: true }
-      ).uiam
+      ).uiam,
+      {
+        kibanaServerURL: 'https://my-project.kb.us-east-1.cloud.es.io:9243',
+        elasticsearchUrl: 'https://es.example.com',
+      }
     );
   });
 
@@ -59,56 +63,76 @@ describe('UiamService', () => {
     it('fails if UIAM functionality is not enabled', () => {
       expect(
         () =>
-          new UiamService(loggingSystemMock.createLogger(), {
-            enabled: false,
-            url: 'https://uiam.service',
-            sharedSecret: 'secret',
-            ssl: { verificationMode: 'none' },
-          })
+          new UiamService(
+            loggingSystemMock.createLogger(),
+            {
+              enabled: false,
+              url: 'https://uiam.service',
+              sharedSecret: 'secret',
+              ssl: { verificationMode: 'none' },
+            },
+            { kibanaServerURL: 'https://kibana.test' }
+          )
       ).toThrowError('UIAM is not enabled.');
     });
 
     it('fails if UIAM service URL is not configured', () => {
       expect(
         () =>
-          new UiamService(loggingSystemMock.createLogger(), {
-            enabled: true,
-            sharedSecret: 'secret',
-            ssl: { verificationMode: 'none' },
-          })
+          new UiamService(
+            loggingSystemMock.createLogger(),
+            {
+              enabled: true,
+              sharedSecret: 'secret',
+              ssl: { verificationMode: 'none' },
+            },
+            { kibanaServerURL: 'https://kibana.test' }
+          )
       ).toThrowError('UIAM URL is not configured.');
     });
 
     it('fails if UIAM service shared secret is not configured', () => {
       expect(
         () =>
-          new UiamService(loggingSystemMock.createLogger(), {
-            enabled: true,
-            url: 'https://uiam.service',
-            ssl: { verificationMode: 'none' },
-          })
+          new UiamService(
+            loggingSystemMock.createLogger(),
+            {
+              enabled: true,
+              url: 'https://uiam.service',
+              ssl: { verificationMode: 'none' },
+            },
+            { kibanaServerURL: 'https://kibana.test' }
+          )
       ).toThrowError('UIAM shared secret is not configured.');
     });
 
-    it('does not create custom dispatcher for `full` verification without custom CAs', () => {
+    it('does not create custom dispatcher for `full` verification without custom TLS settings', () => {
       agentSpy.mockClear();
-      new UiamService(loggingSystemMock.createLogger(), {
-        enabled: true,
-        url: 'https://uiam.service',
-        sharedSecret: 'secret',
-        ssl: { verificationMode: 'full' },
-      });
+      new UiamService(
+        loggingSystemMock.createLogger(),
+        {
+          enabled: true,
+          url: 'https://uiam.service',
+          sharedSecret: 'secret',
+          ssl: { verificationMode: 'full' },
+        },
+        { kibanaServerURL: 'https://kibana.test' }
+      );
       expect(agentSpy).not.toHaveBeenCalled();
     });
 
     it('creates a custom dispatcher for `full` verification when custom CAs are needed', () => {
       agentSpy.mockClear();
-      new UiamService(loggingSystemMock.createLogger(), {
-        enabled: true,
-        url: 'https://uiam.service',
-        sharedSecret: 'secret',
-        ssl: { verificationMode: 'full', certificateAuthorities: '/some/ca/path' },
-      });
+      new UiamService(
+        loggingSystemMock.createLogger(),
+        {
+          enabled: true,
+          url: 'https://uiam.service',
+          sharedSecret: 'secret',
+          ssl: { verificationMode: 'full', certificateAuthorities: '/some/ca/path' },
+        },
+        { kibanaServerURL: 'https://kibana.test' }
+      );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
         connect: {
@@ -119,15 +143,19 @@ describe('UiamService', () => {
       });
 
       agentSpy.mockClear();
-      new UiamService(loggingSystemMock.createLogger(), {
-        enabled: true,
-        url: 'https://uiam.service',
-        sharedSecret: 'secret',
-        ssl: {
-          verificationMode: 'full',
-          certificateAuthorities: ['/some/ca/path-1', '/some/ca/path-2'],
+      new UiamService(
+        loggingSystemMock.createLogger(),
+        {
+          enabled: true,
+          url: 'https://uiam.service',
+          sharedSecret: 'secret',
+          ssl: {
+            verificationMode: 'full',
+            certificateAuthorities: ['/some/ca/path-1', '/some/ca/path-2'],
+          },
         },
-      });
+        { kibanaServerURL: 'https://kibana.test' }
+      );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
         connect: {
@@ -143,12 +171,16 @@ describe('UiamService', () => {
 
     it('creates a custom dispatcher for `certificate` verification', () => {
       agentSpy.mockClear();
-      new UiamService(loggingSystemMock.createLogger(), {
-        enabled: true,
-        url: 'https://uiam.service',
-        sharedSecret: 'secret',
-        ssl: { verificationMode: 'certificate', certificateAuthorities: '/some/ca/path' },
-      });
+      new UiamService(
+        loggingSystemMock.createLogger(),
+        {
+          enabled: true,
+          url: 'https://uiam.service',
+          sharedSecret: 'secret',
+          ssl: { verificationMode: 'certificate', certificateAuthorities: '/some/ca/path' },
+        },
+        { kibanaServerURL: 'https://kibana.test' }
+      );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
         connect: {
@@ -160,12 +192,16 @@ describe('UiamService', () => {
       });
 
       agentSpy.mockClear();
-      new UiamService(loggingSystemMock.createLogger(), {
-        enabled: true,
-        url: 'https://uiam.service',
-        sharedSecret: 'secret',
-        ssl: { verificationMode: 'certificate' },
-      });
+      new UiamService(
+        loggingSystemMock.createLogger(),
+        {
+          enabled: true,
+          url: 'https://uiam.service',
+          sharedSecret: 'secret',
+          ssl: { verificationMode: 'certificate' },
+        },
+        { kibanaServerURL: 'https://kibana.test' }
+      );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
         connect: {
@@ -178,15 +214,75 @@ describe('UiamService', () => {
 
     it('creates a custom dispatcher for `none` verification', () => {
       agentSpy.mockClear();
-      new UiamService(loggingSystemMock.createLogger(), {
-        enabled: true,
-        url: 'https://uiam.service',
-        sharedSecret: 'secret',
-        ssl: { verificationMode: 'none' },
-      });
+      new UiamService(
+        loggingSystemMock.createLogger(),
+        {
+          enabled: true,
+          url: 'https://uiam.service',
+          sharedSecret: 'secret',
+          ssl: { verificationMode: 'none' },
+        },
+        { kibanaServerURL: 'https://kibana.test' }
+      );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
         connect: { allowPartialTrustChain: true, rejectUnauthorized: false },
+      });
+    });
+
+    it('creates a custom dispatcher with client certificate and key for mTLS', () => {
+      agentSpy.mockClear();
+      new UiamService(
+        loggingSystemMock.createLogger(),
+        {
+          enabled: true,
+          url: 'https://uiam.service',
+          sharedSecret: 'secret',
+          ssl: {
+            verificationMode: 'full',
+            certificate: '/path/to/cert.pem',
+            key: '/path/to/key.pem',
+          },
+        },
+        { kibanaServerURL: 'https://kibana.test' }
+      );
+      expect(agentSpy).toHaveBeenCalledTimes(1);
+      expect(agentSpy).toHaveBeenCalledWith({
+        connect: {
+          cert: 'mocked file content for /path/to/cert.pem',
+          key: 'mocked file content for /path/to/key.pem',
+          allowPartialTrustChain: true,
+          rejectUnauthorized: true,
+        },
+      });
+    });
+
+    it('creates a custom dispatcher with mTLS client cert and CAs', () => {
+      agentSpy.mockClear();
+      new UiamService(
+        loggingSystemMock.createLogger(),
+        {
+          enabled: true,
+          url: 'https://uiam.service',
+          sharedSecret: 'secret',
+          ssl: {
+            verificationMode: 'full',
+            certificate: '/path/to/cert.pem',
+            key: '/path/to/key.pem',
+            certificateAuthorities: '/some/ca/path',
+          },
+        },
+        { kibanaServerURL: 'https://kibana.test' }
+      );
+      expect(agentSpy).toHaveBeenCalledTimes(1);
+      expect(agentSpy).toHaveBeenCalledWith({
+        connect: {
+          ca: ['mocked file content for /some/ca/path'],
+          cert: 'mocked file content for /path/to/cert.pem',
+          key: 'mocked file content for /path/to/key.pem',
+          allowPartialTrustChain: true,
+          rejectUnauthorized: true,
+        },
       });
     });
   });
@@ -205,14 +301,6 @@ describe('UiamService', () => {
       expect(uiamService.getClientAuthentication()).toEqual({
         scheme: 'SharedSecret',
         value: 'secret',
-      });
-    });
-  });
-
-  describe('#getEsClientAuthenticationHeader', () => {
-    it('returns the ES client authentication header with shared secret', () => {
-      expect(uiamService.getEsClientAuthenticationHeader()).toEqual({
-        [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
       });
     });
   });
@@ -311,6 +399,69 @@ describe('UiamService', () => {
         body: JSON.stringify({ tokens: ['old-token', 'old-refresh'] }),
         dispatcher: AGENT_MOCK,
       });
+    });
+  });
+
+  describe('#exchangeOAuthToken', () => {
+    it('properly calls UIAM service to exchange an OAuth token for an ephemeral token', async () => {
+      const mockResponse = {
+        token: 'essu_ephemeral_token_value',
+        credentials: {
+          oauth: {
+            audience: 'https://my-project.kb.us-east-1.cloud.es.io:9243',
+          },
+        },
+      };
+
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      await expect(uiamService.exchangeOAuthToken('essu_oauth_access_token')).resolves.toBe(
+        'essu_ephemeral_token_value'
+      );
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/authentication/_authenticate?include_token=true&audience=https%3A%2F%2Fmy-project.kb.us-east-1.cloud.es.io%3A9243',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            Authorization: 'Bearer essu_oauth_access_token',
+          },
+          dispatcher: AGENT_MOCK,
+        }
+      );
+    });
+
+    it('throws when audience in response does not match expected audience', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          token: 'essu_ephemeral_token_value',
+          credentials: {
+            oauth: { audience: 'https://wrong-kibana.example.com' },
+          },
+        }),
+      });
+
+      await expect(uiamService.exchangeOAuthToken('essu_oauth_access_token')).rejects.toThrow(
+        'OAuth token audience mismatch'
+      );
+    });
+
+    it('throws and logs error when UIAM service returns an error', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 401,
+        json: async () => ({ error: { message: 'Invalid token' } }),
+        headers: new Headers(),
+      });
+
+      await expect(uiamService.exchangeOAuthToken('essu_invalid_token')).rejects.toThrow();
     });
   });
 
@@ -591,6 +742,150 @@ describe('UiamService', () => {
           dispatcher: AGENT_MOCK,
         }
       );
+    });
+  });
+
+  describe('#convertApiKeys', () => {
+    it('properly calls UIAM service to convert API keys with injected endpoint', async () => {
+      const mockResponse = {
+        results: [
+          {
+            status: 'success',
+            id: 'converted-key-id',
+            key: 'essu_converted_key',
+            description: 'converted key',
+            organization_id: 'org-123',
+            internal: true,
+            role_assignments: {},
+            creation_date: '2026-01-01T00:00:00Z',
+            expiration_date: null,
+          },
+        ],
+      };
+
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      await expect(uiamService.convertApiKeys(['es-api-key-base64'])).resolves.toEqual(
+        mockResponse
+      );
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/api-keys/_convert', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+        },
+        body: JSON.stringify({
+          keys: [
+            { type: 'elasticsearch', key: 'es-api-key-base64', endpoint: 'https://es.example.com' },
+          ],
+        }),
+        dispatcher: AGENT_MOCK,
+      });
+    });
+
+    it('properly calls UIAM service to convert multiple API keys with injected endpoint', async () => {
+      const mockResponse = {
+        results: [
+          {
+            status: 'success',
+            id: 'key-1',
+            key: 'essu_key_1',
+            description: 'key 1',
+            organization_id: 'org-1',
+            internal: true,
+            role_assignments: {},
+            creation_date: '2026-01-01T00:00:00Z',
+            expiration_date: null,
+          },
+          {
+            status: 'failed',
+            code: 'ES_API_KEY_AUTHENTICATION_FAILED',
+            message: 'Auth failed',
+            resource: null,
+            type: 'UNKNOWN',
+          },
+        ],
+      };
+
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      await expect(uiamService.convertApiKeys(['valid-key', 'invalid-key'])).resolves.toEqual(
+        mockResponse
+      );
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/api-keys/_convert', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+        },
+        body: JSON.stringify({
+          keys: [
+            { type: 'elasticsearch', key: 'valid-key', endpoint: 'https://es.example.com' },
+            { type: 'elasticsearch', key: 'invalid-key', endpoint: 'https://es.example.com' },
+          ],
+        }),
+        dispatcher: AGENT_MOCK,
+      });
+    });
+
+    it('throws when elasticsearchUrl is not configured', async () => {
+      const serviceWithoutUrl = new UiamService(
+        loggingSystemMock.createLogger(),
+        ConfigSchema.validate(
+          {
+            uiam: {
+              enabled: true,
+              url: 'https://uiam.service',
+              sharedSecret: 'secret',
+              ssl: { certificateAuthorities: '/some/ca/path' },
+            },
+          },
+          { serverless: true }
+        ).uiam,
+        { kibanaServerURL: 'https://kibana.test' }
+      );
+
+      await expect(serviceWithoutUrl.convertApiKeys(['es-api-key'])).rejects.toThrowError(
+        'Cannot convert API keys: Elasticsearch URL could not be resolved from cloud.id'
+      );
+
+      expect(fetchSpy).not.toHaveBeenCalled();
+    });
+
+    it('throws error if conversion fails with 400 status code', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 400,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'Must authenticate using mTLS' } }),
+      });
+
+      await expect(uiamService.convertApiKeys(['es-api-key'])).rejects.toThrowError(
+        'Must authenticate using mTLS'
+      );
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/api-keys/_convert', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+        },
+        body: JSON.stringify({
+          keys: [{ type: 'elasticsearch', key: 'es-api-key', endpoint: 'https://es.example.com' }],
+        }),
+        dispatcher: AGENT_MOCK,
+      });
     });
   });
 });

@@ -8,7 +8,6 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFieldPassword,
   EuiFieldText,
   EuiFlexGroup,
@@ -37,12 +36,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { LoginValidator } from './validate_login';
 import type { LoginSelector, LoginSelectorProvider } from '../../../../../common/login_state';
+import type { FormMessage } from '../../../components';
+import { MessageType, renderMessage } from '../../../components';
 
 export interface LoginFormProps {
   http: HttpStart;
   notifications: NotificationsStart;
   selector: LoginSelector;
-  message?: { type: MessageType.Danger | MessageType.Info; content: string };
+  message?: FormMessage;
   loginAssistanceMessage: string;
   loginHelp?: string;
   authProviderHint?: string;
@@ -54,9 +55,7 @@ interface State {
     | { type: LoadingStateType.Selector; providerName: string };
   username: string;
   password: string;
-  message:
-    | { type: MessageType.None }
-    | { type: MessageType.Danger | MessageType.Info; content: string };
+  message: FormMessage;
   mode: PageMode;
   previousMode: PageMode;
 }
@@ -66,12 +65,6 @@ enum LoadingStateType {
   Form,
   Selector,
   AutoLogin,
-}
-
-export enum MessageType {
-  None,
-  Info,
-  Danger,
 }
 
 export enum PageMode {
@@ -200,7 +193,7 @@ export class LoginForm extends Component<LoginFormProps, State> {
     return (
       <Fragment>
         {this.renderLoginAssistanceMessage()}
-        {this.renderMessage()}
+        {renderMessage(this.state.message)}
         {this.renderContent()}
         {this.renderPageModeSwitchLink()}
       </Fragment>
@@ -220,43 +213,6 @@ export class LoginForm extends Component<LoginFormProps, State> {
         </EuiText>
       </div>
     );
-  };
-
-  private renderMessage = () => {
-    const { message } = this.state;
-    if (message.type === MessageType.Danger) {
-      return (
-        <Fragment>
-          <EuiCallOut
-            announceOnMount
-            size="s"
-            color="danger"
-            data-test-subj="loginErrorMessage"
-            title={message.content}
-            role="alert"
-          />
-          <EuiSpacer size="l" />
-        </Fragment>
-      );
-    }
-
-    if (message.type === MessageType.Info) {
-      return (
-        <Fragment>
-          <EuiCallOut
-            announceOnMount
-            size="s"
-            color="primary"
-            data-test-subj="loginInfoMessage"
-            title={message.content}
-            role="status"
-          />
-          <EuiSpacer size="l" />
-        </Fragment>
-      );
-    }
-
-    return null;
   };
 
   public renderContent() {

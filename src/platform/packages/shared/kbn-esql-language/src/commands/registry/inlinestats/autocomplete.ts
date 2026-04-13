@@ -8,8 +8,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import type { ESQLAstAllCommands } from '../../../types';
 import type { ISuggestionItem, ICommandCallbacks, ICommandContext } from '../types';
 import { autocomplete as statsAutocomplete } from '../stats/autocomplete';
 
@@ -43,7 +43,6 @@ export async function autocomplete(
           detail: i18n.translate('kbn-esql-language.esql.autocomplete.inlineStats.statsKeyword', {
             defaultMessage: 'STATS keyword',
           }),
-          sortText: 'A',
         }),
       ];
     }
@@ -64,7 +63,6 @@ export async function autocomplete(
             defaultMessage: 'INLINE STATS command',
           }
         ),
-        sortText: 'A',
       }),
     ];
   }

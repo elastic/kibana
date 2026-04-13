@@ -6,6 +6,8 @@
  */
 
 export interface UserIdAndName {
-  id: string;
+  /** profile UUID */
+  id?: string;
+  /** username */
   username: string;
 }

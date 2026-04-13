@@ -1,0 +1,45 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        exportWorkflowsRequestExample:
+          description: 'Example request to export workflows'
+          value:
+            ids:
+              - workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+              - workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901
+responses:
+  200:
+    description: 'JSON containing exported workflow YAML entries and manifest metadata'
+    content:
+      application/json:
+        examples:
+          exportWorkflowsResponseExample:
+            description: 'Workflow entries with YAML content and export manifest'
+            value:
+              entries:
+                - id: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                  yaml: "name: My Workflow\nsteps:\n  - type: http.request\n    with:\n      url: https://example.com"
+                - id: workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901
+                  yaml: "name: Another Workflow\nsteps:\n  - type: http.request\n    with:\n      url: https://example.com"
+              manifest:
+                exportedCount: 2
+                exportedAt: '2026-03-26T12:00:00.000Z'
+                version: '1'
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X POST "${KIBANA_URL}/api/workflows/export" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "ids": ["workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890", "workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901"]
+        }'
+  - lang: Console
+    source: |
+      POST kbn://api/workflows/export
+      {
+        "ids": ["workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890", "workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901"]
+      }

@@ -9,16 +9,17 @@ import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { parse as parseCookie } from 'tough-cookie';
 
 import { createSAMLResponse } from '@kbn/mock-idp-utils';
-import { apiTest } from '@kbn/scout';
+import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
-import { COMMON_HEADERS } from '../fixtures/constants';
+import { COMMON_HEADERS } from '../fixtures';
 
 // These tests cannot be run on MKI because we cannot control the UIAM session lifetime to reduce it (it's 1h by default).
-apiTest.describe('[NON-MKI] Refresh UIAM session', { tag: ['@svlSecurity'] }, () => {
+apiTest.describe('[NON-MKI] Refresh UIAM session', { tag: tags.serverless.all }, () => {
   let userSessionCookieFactory: (params: {
     lifetime: { accessToken: number; refreshToken?: number };
   }) => Promise<string>;
+
   apiTest.beforeAll(async ({ apiClient, kbnUrl, config: { organizationId, projectType } }) => {
     userSessionCookieFactory = async ({ lifetime: { accessToken, refreshToken } }) =>
       parseCookie(

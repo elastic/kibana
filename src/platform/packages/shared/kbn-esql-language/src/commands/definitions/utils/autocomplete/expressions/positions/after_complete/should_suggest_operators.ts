@@ -10,7 +10,6 @@
 import type { SupportedDataType } from '../../../../../types';
 import { supportsArithmeticOperations } from '../../../../../types';
 import type { ExpressionContext, FunctionParameterContext } from '../../types';
-import { SignatureAnalyzer } from '../../signature_analyzer';
 import {
   arithmeticOperators,
   comparisonFunctions,
@@ -19,11 +18,21 @@ import {
   inOperators,
   nullCheckOperators,
 } from '../../../../../all_operators';
+import { normalizePreferredExpressionTypes } from '../../utils';
+import {
+  areParamsHomogeneous,
+  hasBooleanSignature,
+  getAcceptedParamTypes,
+} from '../../../../signatures';
 
 export interface OperatorRuleContext {
   expressionType: SupportedDataType | 'unknown';
   functionParameterContext?: FunctionParameterContext;
   ctx: ExpressionContext;
+}
+
+interface EvaluatedOperatorRuleContext extends OperatorRuleContext {
+  isHomogeneous: boolean;
 }
 
 export interface OperatorDecision {
@@ -34,8 +43,16 @@ export interface OperatorDecision {
 
 /** Determines whether operators should be suggested for the current context. */
 export function shouldSuggestOperators(context: OperatorRuleContext): OperatorDecision {
+  const evaluatedContext: EvaluatedOperatorRuleContext = {
+    ...context,
+    isHomogeneous: !!(
+      context.functionParameterContext &&
+      areParamsHomogeneous(context.functionParameterContext.signatures)
+    ),
+  };
+
   for (const rule of rules) {
-    const decision = rule(context);
+    const decision = rule(evaluatedContext);
 
     if (decision !== null) {
       return decision;
@@ -46,7 +63,7 @@ export function shouldSuggestOperators(context: OperatorRuleContext): OperatorDe
   return { shouldSuggest: true, reason: 'fallback' };
 }
 
-type Rule = (context: OperatorRuleContext) => OperatorDecision | null;
+type Rule = (context: EvaluatedOperatorRuleContext) => OperatorDecision | null;
 
 // Rules are evaluated in order. The first rule that returns a decision (non-null) wins.
 // Order matters: specific rules must come before general rules to avoid being shadowed.
@@ -62,10 +79,20 @@ const rules: Rule[] = [
   (ctx) => {
     if (!ctx.functionParameterContext) {
       const { expressionType } = ctx;
-      const preferredType = ctx.ctx.options.preferredExpressionType;
+      const preferredTypes = normalizePreferredExpressionTypes(
+        ctx.ctx.options.preferredExpressionType
+      );
 
       if (expressionType === 'text' || expressionType === 'keyword') {
-        const isBooleanContext = preferredType === 'boolean' || preferredType === 'any';
+        const isBooleanContext =
+          preferredTypes.includes('boolean') || preferredTypes.includes('any');
+
+        if (!isBooleanContext && preferredTypes.length > 0) {
+          return {
+            shouldSuggest: false,
+            reason: 'Strict type context - no operators for text/keyword (all produce boolean)',
+          };
+        }
 
         const stringOperators = [
           ...(isBooleanContext ? comparisonFunctions.map(({ name }) => name) : []),
@@ -100,25 +127,23 @@ const rules: Rule[] = [
     }
 
     // functionParameterContext is guaranteed to exist (Rule 1 already handled the case where it doesn't)
-    const analyzer = SignatureAnalyzer.from(functionParameterContext);
-    if (!analyzer) {
+    if (!functionParameterContext?.functionDefinition) {
       return null;
     }
 
-    const acceptedTypes = analyzer.getAcceptedTypes();
+    const acceptedTypes = getAcceptedParamTypes(functionParameterContext);
     const acceptsBoolean = acceptedTypes.includes('boolean');
     const acceptsAny = acceptedTypes.includes('any');
 
     // Special case: for homogeneous functions at first parameter, check if ANY signature accepts boolean
     // (not just validSignatures which may be filtered by current field type)
     const isFirstParamOfHomogeneous =
-      analyzer.isHomogeneous && (functionParameterContext?.currentParameterIndex ?? 0) === 0;
+      ctx.isHomogeneous && functionParameterContext.currentParameterIndex === 0;
 
-    if (isFirstParamOfHomogeneous && functionParameterContext) {
-      const allSignatures = functionParameterContext.functionDefinition?.signatures || [];
-      const hasBooleanSignature = allSignatures.some((sig) => sig.params[0]?.type === 'boolean');
+    if (isFirstParamOfHomogeneous) {
+      const allSignatures = functionParameterContext.functionDefinition?.signatures;
 
-      if (hasBooleanSignature) {
+      if (allSignatures && hasBooleanSignature(allSignatures)) {
         const stringOperators = [
           ...patternMatchOperators.map(({ name }) => name),
           ...inOperators.map(({ name }) => name),
@@ -189,12 +214,15 @@ const rules: Rule[] = [
       return null;
     }
 
-    const analyzer = SignatureAnalyzer.from(functionParameterContext);
-    if (!analyzer?.isHomogeneous) {
+    if (!functionParameterContext.functionDefinition) {
       return null;
     }
 
-    const isFirstParam = (functionParameterContext.currentParameterIndex ?? 0) === 0;
+    if (!ctx.isHomogeneous) {
+      return null;
+    }
+
+    const isFirstParam = functionParameterContext.currentParameterIndex === 0;
     if (!isFirstParam) {
       return null;
     }
@@ -208,9 +236,7 @@ const rules: Rule[] = [
       return { shouldSuggest: false, reason: 'Missing validSignatures' };
     }
 
-    const hasBooleanSig = signatures.some((sig) => sig.params[0]?.type === 'boolean');
-
-    if (!hasBooleanSig) {
+    if (!hasBooleanSignature(signatures)) {
       return {
         shouldSuggest: false,
         reason: 'No boolean signature available',
@@ -246,12 +272,15 @@ const rules: Rule[] = [
       return null;
     }
 
-    const analyzer = SignatureAnalyzer.from(functionParameterContext);
-    if (!analyzer?.isHomogeneous) {
+    if (!functionParameterContext.functionDefinition) {
       return null;
     }
 
-    const isAfterFirst = (functionParameterContext.currentParameterIndex ?? 0) > 0;
+    if (!ctx.isHomogeneous) {
+      return null;
+    }
+
+    const isAfterFirst = functionParameterContext.currentParameterIndex > 0;
     if (!isAfterFirst) {
       return null;
     }
@@ -283,20 +312,13 @@ const rules: Rule[] = [
 
     // Special case: editing the first parameter (expressionType matches firstParamType)
     if (firstType === expressionType) {
-      const signatures = functionParameterContext.validSignatures;
+      const matchingSignatures = functionParameterContext.validSignatures;
 
-      if (!signatures) {
+      if (!matchingSignatures) {
         return { shouldSuggest: false, reason: 'Missing validSignatures' };
       }
 
-      const hasBooleanSignature = signatures.some((sig) => {
-        if (sig.params.length === 0) {
-          return false;
-        }
-        return sig.params[0].type === 'boolean';
-      });
-
-      if (hasBooleanSignature) {
+      if (hasBooleanSignature(matchingSignatures)) {
         return {
           shouldSuggest: true,
           reason: 'Can still switch signature at subsequent param',
@@ -328,19 +350,18 @@ const rules: Rule[] = [
       return null;
     }
 
-    const analyzer = SignatureAnalyzer.from(functionParameterContext);
-    if (!analyzer) {
+    if (!functionParameterContext?.functionDefinition) {
       return null;
     }
 
     // Do not constrain the first parameter for homogeneous functions
-    if (analyzer.isHomogeneous && (functionParameterContext?.currentParameterIndex ?? 0) === 0) {
+    if (ctx.isHomogeneous && functionParameterContext.currentParameterIndex === 0) {
       return null;
     }
 
-    const acceptedTypes = analyzer.getAcceptedTypes();
+    const acceptedTypes = getAcceptedParamTypes(functionParameterContext);
     const acceptsBooleanOrAny = acceptedTypes.includes('boolean') || acceptedTypes.includes('any');
-    const allNumeric = acceptedTypes.every((type) => supportsArithmeticOperations(type));
+    const allNumeric = acceptedTypes.every((paramType) => supportsArithmeticOperations(paramType));
 
     if (allNumeric && !acceptsBooleanOrAny) {
       return {

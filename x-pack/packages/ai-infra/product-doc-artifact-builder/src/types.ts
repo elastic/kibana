@@ -13,8 +13,20 @@ export interface TaskConfig {
   buildFolder: string;
   targetFolder: string;
   sourceClusterUrl: string;
-  sourceClusterUsername: string;
-  sourceClusterPassword: string;
+  sourceClusterUsername?: string;
+  sourceClusterPassword?: string;
+  sourceClusterApiKey?: string;
+  sourceClusterIndex?: string;
+  embeddingClusterUrl: string;
+  embeddingClusterUsername: string;
+  embeddingClusterPassword: string;
+  inferenceId?: string;
+}
+
+export interface OpenAPITaskConfig {
+  stackVersion: string;
+  buildFolder: string;
+  targetFolder: string;
   embeddingClusterUrl: string;
   embeddingClusterUsername: string;
   embeddingClusterPassword: string;

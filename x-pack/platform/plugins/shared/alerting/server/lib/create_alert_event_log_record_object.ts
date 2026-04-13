@@ -8,6 +8,7 @@
 import type { IEvent } from '@kbn/event-log-plugin/server';
 import type { AlertInstanceState } from '../types';
 import type { UntypedNormalizedRuleType } from '../rule_type_registry';
+import type { GapReason } from '../../common/constants';
 
 export type Event = Exclude<IEvent, undefined>;
 
@@ -50,6 +51,7 @@ interface CreateAlertEventLogRecordParams {
       gte: string;
       lte: string;
     };
+    reason?: GapReason;
   };
 }
 

@@ -15,13 +15,13 @@ import type {
   TypedLensSerializedState,
 } from '@kbn/lens-common';
 import { HEATMAP_GRID_NAME, LENS_HEATMAP_ID } from '@kbn/lens-common';
-import type { LegendSize } from '@kbn/chart-expressions-common';
 import type {
   HeatmapGridConfigResult,
   HeatmapLegendConfigResult,
 } from '@kbn/lens-common/visualizations/heatmap/types';
 
 import { DEFAULT_LAYER_ID } from '../../../constants';
+import { legendSizeCompat } from '../legend_sizes';
 import { getSharedChartAPIToLensState, stripUndefined } from '../utils';
 import type { HeatmapState } from '../../../schema';
 import { fromColorByValueAPIToLensState } from '../../coloring';
@@ -37,6 +37,7 @@ import { fromMetricAPItoLensState } from '../../columns/metric';
 import { fromBucketLensApiToLensState } from '../../columns/buckets';
 import type { LensApiBucketOperations } from '../../../schema/bucket_ops';
 import { getValueColumn } from '../../columns/esql_column';
+import { axisLabelOrientationCompat } from '../common';
 
 const ACCESSOR = 'heatmap_value_accessor';
 
@@ -44,16 +45,11 @@ function getAccessorName(type: 'x' | 'y' | 'value') {
   return `${ACCESSOR}_${type}`;
 }
 
-function getRotationFromOrientation(orientation?: 'angled' | 'vertical' | 'horizontal') {
-  if (!orientation) return;
-  return orientation === 'angled' ? -45 : orientation === 'vertical' ? -90 : 0;
-}
-
 function buildVisualizationState(config: HeatmapState): HeatmapVisualizationState {
   const layer = config;
   const valueAccessor = getAccessorName('value');
   const basePalette = layer.metric.color && fromColorByValueAPIToLensState(layer.metric.color);
-  const xAxisLabelRotation = getRotationFromOrientation(layer.axes?.x?.labels?.orientation);
+  const xAxisLabelRotation = axisLabelOrientationCompat.toState(layer.axes?.x?.labels?.orientation);
 
   return {
     layerId: DEFAULT_LAYER_ID,
@@ -61,7 +57,7 @@ function buildVisualizationState(config: HeatmapState): HeatmapVisualizationStat
     shape: 'heatmap',
     valueAccessor,
     xAccessor: getAccessorName('x'),
-    ...(layer.yAxis ? { yAccessor: getAccessorName('y') } : {}),
+    ...(layer.y ? { yAccessor: getAccessorName('y') } : {}),
     gridConfig: {
       type: HEATMAP_GRID_NAME,
       isCellLabelVisible: layer.cells?.labels?.visible ?? false,
@@ -70,18 +66,21 @@ function buildVisualizationState(config: HeatmapState): HeatmapVisualizationStat
       isYAxisLabelVisible: layer.axes?.y?.labels?.visible ?? true,
       isYAxisTitleVisible: layer.axes?.y?.title?.visible ?? false,
       ...stripUndefined<HeatmapGridConfigResult>({
-        xTitle: layer.axes?.x?.title?.value,
-        yTitle: layer.axes?.y?.title?.value,
+        xTitle: layer.axes?.x?.title?.text,
+        yTitle: layer.axes?.y?.title?.text,
         xAxisLabelRotation,
+        xSortPredicate: layer.axes?.x?.sort,
+        ySortPredicate: layer.axes?.y?.sort,
       }),
     },
     legend: {
-      isVisible: layer.legend?.visible ?? true,
-      position: layer.legend?.position ?? 'right',
+      isVisible: layer.legend?.visibility !== 'hidden',
       type: 'heatmap_legend',
+      position: 'right',
       ...stripUndefined<HeatmapLegendConfigResult>({
         maxLines: layer.legend?.truncate_after_lines,
-        legendSize: layer.legend?.size as LegendSize,
+        legendSize: legendSizeCompat.toState(layer.legend?.size),
+        shouldTruncate: Boolean(layer.legend?.truncate_after_lines),
       }),
     },
     ...(basePalette && {
@@ -102,22 +101,22 @@ function buildFormBasedLayer(layer: HeatmapStateNoESQL): FormBasedPersistedState
 
   addLayerColumn(defaultLayer, getAccessorName('value'), metricColumns);
 
-  if (layer.xAxis) {
+  if (layer.x) {
     const columnName = getAccessorName('x');
-    const xAxisColumn = fromBucketLensApiToLensState(
-      layer.xAxis as LensApiBucketOperations,
+    const xColumn = fromBucketLensApiToLensState(
+      layer.x as LensApiBucketOperations,
       metricColumns.map((col) => ({ column: col, id: getAccessorName('value') }))
     );
-    addLayerColumn(defaultLayer, columnName, xAxisColumn, true);
+    addLayerColumn(defaultLayer, columnName, xColumn, true);
   }
 
-  if (layer.yAxis) {
+  if (layer.y) {
     const columnName = getAccessorName('y');
-    const yAxisColumn = fromBucketLensApiToLensState(
-      layer.yAxis as LensApiBucketOperations,
+    const yColumn = fromBucketLensApiToLensState(
+      layer.y as LensApiBucketOperations,
       metricColumns.map((col) => ({ column: col, id: getAccessorName('value') }))
     );
-    addLayerColumn(defaultLayer, columnName, yAxisColumn, true);
+    addLayerColumn(defaultLayer, columnName, yColumn, true);
   }
 
   return layers;
@@ -125,9 +124,9 @@ function buildFormBasedLayer(layer: HeatmapStateNoESQL): FormBasedPersistedState
 
 function getValueColumns(layer: HeatmapStateESQL) {
   return [
-    getValueColumn(getAccessorName('value'), layer.metric.column, 'number'),
-    ...(layer.xAxis ? [getValueColumn(getAccessorName('x'), layer.xAxis.column)] : []),
-    ...(layer.yAxis ? [getValueColumn(getAccessorName('y'), layer.yAxis.column)] : []),
+    getValueColumn(getAccessorName('value'), layer.metric, 'number'),
+    ...(layer.x ? [getValueColumn(getAccessorName('x'), layer.x)] : []),
+    ...(layer.y ? [getValueColumn(getAccessorName('y'), layer.y)] : []),
   ];
 }
 
@@ -141,8 +140,7 @@ type HeatmapAttributesWithoutFiltersAndQuery = Omit<HeatmapAttributes, 'state'> 
 };
 
 export function fromAPItoLensState(config: HeatmapState): HeatmapAttributesWithoutFiltersAndQuery {
-  const _buildDataLayer = (cfg: unknown, i: number) =>
-    buildFormBasedLayer(cfg as HeatmapStateNoESQL);
+  const _buildDataLayer = (cfg: unknown) => buildFormBasedLayer(cfg as HeatmapStateNoESQL);
 
   const { layers, usedDataviews } = buildDatasourceStates(config, _buildDataLayer, getValueColumns);
 
@@ -164,7 +162,7 @@ export function fromAPItoLensState(config: HeatmapState): HeatmapAttributesWitho
       datasourceStates: layers,
       internalReferences,
       visualization,
-      adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
+      adHocDataViews,
     },
   };
 }

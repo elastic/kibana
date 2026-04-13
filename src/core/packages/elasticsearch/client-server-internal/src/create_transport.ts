@@ -16,8 +16,28 @@ import {
   type TransportResult,
 } from '@elastic/elasticsearch';
 import { isUnauthorizedError } from '@kbn/es-errors';
+import type { Logger } from '@kbn/logging';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InternalUnauthorizedErrorHandler } from './retry_unauthorized';
 import { isRetryResult } from './retry_unauthorized';
+
+/**
+ * Timing context stored in Transport request options for instrumentation
+ * @internal
+ */
+export interface TimingContext {
+  startTime: number;
+  kibanaRequest: KibanaRequest;
+}
+
+/**
+ * Extended context type for Transport request options
+ * @internal
+ */
+export interface TransportContext {
+  cpsRoutingContext?: any;
+  timingContext?: TimingContext;
+}
 
 type TransportClass = typeof Transport;
 
@@ -30,7 +50,9 @@ export interface OnRequestContext {
 export type OnRequestHandler = (
   ctx: OnRequestContext,
   params: TransportRequestParams,
-  options?: TransportRequestOptions
+  //  guaranteed to exist because the transport layer normalizes it before handler invocation
+  options: TransportRequestOptions,
+  logger: Logger
 ) => void;
 
 const noop = () => undefined;
@@ -40,11 +62,13 @@ export const createTransport = ({
   getExecutionContext = noop,
   getUnauthorizedErrorHandler,
   onRequest,
+  logger,
 }: {
   scoped?: boolean;
   getExecutionContext?: () => string | undefined;
   getUnauthorizedErrorHandler?: ErrorHandlerAccessor;
-  onRequest?: OnRequestHandler;
+  onRequest: OnRequestHandler;
+  logger: Logger;
 }): TransportClass => {
   class KibanaTransport extends Transport {
     private headers: IncomingHttpHeaders = {};
@@ -83,7 +107,7 @@ export const createTransport = ({
         ...options?.headers,
       };
 
-      onRequest?.({ scoped }, params, opts);
+      onRequest({ scoped }, params, opts, logger);
 
       try {
         return (await super.request(params, opts)) as TransportResult<any, any>;

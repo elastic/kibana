@@ -86,7 +86,7 @@
           "\nThe savedObjects repository contract.\n"
         ],
         "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-        "lineNumber": 75,
+        "lineNumber": 77,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -114,7 +114,7 @@
               "<T>>"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-            "lineNumber": 81,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -132,7 +132,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 95,
+                "lineNumber": 97,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -151,7 +151,7 @@
                   "T"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 96,
+                "lineNumber": 98,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -163,15 +163,13 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "{@link SavedObjectsCreateOptions } - options for the create operation"
-                ],
+                "description": [],
                 "signature": [
                   "SavedObjectsCreateOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 97,
+                "lineNumber": 99,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -205,7 +203,7 @@
               "<T>>"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-            "lineNumber": 100,
+            "lineNumber": 102,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -224,7 +222,7 @@
                   "<T>[]"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 111,
+                "lineNumber": 113,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -236,15 +234,13 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "{@link SavedObjectsCreateOptions } - options for the bulk create operation"
-                ],
+                "description": [],
                 "signature": [
                   "SavedObjectsCreateOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 112,
+                "lineNumber": 114,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -274,7 +270,7 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-            "lineNumber": 115,
+            "lineNumber": 117,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -293,7 +289,7 @@
                   "[]"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 124,
+                "lineNumber": 126,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -306,14 +302,14 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsBaseOptions } - options for the check conflict operation"
+                  "{@link SavedObjectsBaseOptions} - options for the check conflict operation"
                 ],
                 "signature": [
                   "SavedObjectsBaseOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 125,
+                "lineNumber": 127,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -341,7 +337,7 @@
               " | undefined) => Promise<{}>"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-            "lineNumber": 128,
+            "lineNumber": 130,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -359,7 +355,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 136,
+                "lineNumber": 138,
                 "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -378,7 +374,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 136,
+                "lineNumber": 138,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -390,15 +386,13 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "{@link SavedObjectsDeleteOptions } - options for the delete operation"
-                ],
+                "description": [],
                 "signature": [
                   "SavedObjectsDeleteOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 136,
+                "lineNumber": 138,
                 "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -426,7 +420,7 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-            "lineNumber": 138,
+            "lineNumber": 140,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -445,7 +439,7 @@
                   "[]"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 145,
+                "lineNumber": 147,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -457,15 +451,13 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "{@link SavedObjectsBulkDeleteOptions } - options for the bulk delete operation"
-                ],
+                "description": [],
                 "signature": [
                   "SavedObjectsBulkDeleteOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 146,
+                "lineNumber": 148,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -491,7 +483,7 @@
               " | undefined) => Promise<any>"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-            "lineNumber": 149,
+            "lineNumber": 151,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -509,7 +501,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 157,
+                "lineNumber": 159,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -522,14 +514,14 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsDeleteByNamespaceOptions } - options for the delete by namespace operation"
+                  "{@link SavedObjectsDeleteByNamespaceOptions} - options for the delete by namespace operation"
                 ],
                 "signature": [
                   "SavedObjectsDeleteByNamespaceOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 158,
+                "lineNumber": 160,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -574,7 +566,7 @@
               "<T, A>>"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-            "lineNumber": 161,
+            "lineNumber": 163,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -585,14 +577,12 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "{@link SavedObjectsFindOptions } - options for the find operation"
-                ],
+                "description": [],
                 "signature": [
                   "SavedObjectsFindOptions"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 184,
+                "lineNumber": 186,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -605,14 +595,14 @@
                 "tags": [],
                 "label": "internalOptions",
                 "description": [
-                  "{@link SavedObjectsFindInternalOptions } - internal-only options for the find operation"
+                  "{@link SavedObjectsFindInternalOptions} - internal-only options for the find operation"
                 ],
                 "signature": [
                   "SavedObjectsFindInternalOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 185,
+                "lineNumber": 187,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -644,7 +634,7 @@
               "<T, A>>"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-            "lineNumber": 188,
+            "lineNumber": 190,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -656,13 +646,13 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsSearchOptions } - options for the search operation"
+                  "{@link SavedObjectsSearchOptions} - options for the search operation"
                 ],
                 "signature": [
                   "SavedObjectsSearchOptions"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 197,
+                "lineNumber": 199,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -671,6 +661,52 @@
             ],
             "returnComment": [
               "the {@link SavedObjectsSearchResponse }"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.ISavedObjectsRepository.esql",
+            "type": "Function",
+            "tags": [],
+            "label": "esql",
+            "description": [
+              "\nPerforms an ES|QL query against the saved objects indices, returning the raw Elasticsearch response.\nCallers provide only the processing pipeline (everything after `FROM`) via `options.pipeline`.\nThe `FROM` clause is auto-generated from `options.type` via index resolution, and source commands\n(`FROM`, `ROW`, `SHOW`, `METRICS`) in the pipeline are rejected."
+            ],
+            "signature": [
+              "(options: ",
+              "SavedObjectsEsqlOptions",
+              ") => Promise<",
+              "EsqlEsqlResult",
+              ">"
+            ],
+            "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
+            "lineNumber": 202,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server",
+                "id": "def-server.ISavedObjectsRepository.esql.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "{@link SavedObjectsEsqlOptions} - options for the ES|QL query operation"
+                ],
+                "signature": [
+                  "SavedObjectsEsqlOptions"
+                ],
+                "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
+                "lineNumber": 213,
+                "columnNumber": 8,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "the {@link SavedObjectsEsqlResponse }"
             ]
           },
           {
@@ -695,7 +731,7 @@
               "<T>>"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-            "lineNumber": 200,
+            "lineNumber": 215,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -714,7 +750,7 @@
                   "[]"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 216,
+                "lineNumber": 231,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -726,15 +762,13 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "{@link SavedObjectsGetOptions } - options for the bulk get operation"
-                ],
+                "description": [],
                 "signature": [
                   "SavedObjectsGetOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 217,
+                "lineNumber": 232,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -767,7 +801,7 @@
               "<T>>"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-            "lineNumber": 220,
+            "lineNumber": 235,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -786,7 +820,7 @@
                   "[]"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 236,
+                "lineNumber": 251,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -798,15 +832,13 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "{@link SavedObjectsResolveOptions } - options for the bulk resolve operation"
-                ],
+                "description": [],
                 "signature": [
                   "SavedObjectsResolveOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 237,
+                "lineNumber": 252,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -837,7 +869,7 @@
               "<T>>"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-            "lineNumber": 240,
+            "lineNumber": 255,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -855,7 +887,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 251,
+                "lineNumber": 266,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -874,7 +906,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 252,
+                "lineNumber": 267,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -886,15 +918,13 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "{@link SavedObjectsGetOptions } - options for the get operation"
-                ],
+                "description": [],
                 "signature": [
                   "SavedObjectsGetOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 253,
+                "lineNumber": 268,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -925,7 +955,7 @@
               "<T>>"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-            "lineNumber": 256,
+            "lineNumber": 271,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -943,7 +973,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 267,
+                "lineNumber": 282,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -962,7 +992,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 268,
+                "lineNumber": 283,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -974,15 +1004,13 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "{@link SavedObjectsResolveOptions } - options for the resolve operation"
-                ],
+                "description": [],
                 "signature": [
                   "SavedObjectsResolveOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 269,
+                "lineNumber": 284,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1014,7 +1042,7 @@
               "<T>>"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-            "lineNumber": 272,
+            "lineNumber": 287,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1032,7 +1060,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 285,
+                "lineNumber": 300,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1051,7 +1079,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 286,
+                "lineNumber": 301,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1070,7 +1098,7 @@
                   "Partial<T>"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 287,
+                "lineNumber": 302,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1082,15 +1110,13 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "{@link SavedObjectsUpdateOptions } - options for the update operation"
-                ],
+                "description": [],
                 "signature": [
                   "SavedObjectsUpdateOptions",
                   "<T> | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 288,
+                "lineNumber": 303,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1120,7 +1146,7 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-            "lineNumber": 291,
+            "lineNumber": 306,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1139,7 +1165,7 @@
                   "[]"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 300,
+                "lineNumber": 315,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1152,14 +1178,14 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsCollectMultiNamespaceReferencesOptions } - the options for the operation"
+                  "{@link SavedObjectsCollectMultiNamespaceReferencesOptions} - the options for the operation"
                 ],
                 "signature": [
                   "SavedObjectsCollectMultiNamespaceReferencesOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 301,
+                "lineNumber": 316,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1189,7 +1215,7 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-            "lineNumber": 304,
+            "lineNumber": 319,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1208,7 +1234,7 @@
                   "[]"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 314,
+                "lineNumber": 329,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1227,7 +1253,7 @@
                   "string[]"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 315,
+                "lineNumber": 330,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1246,7 +1272,7 @@
                   "string[]"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 316,
+                "lineNumber": 331,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1259,14 +1285,14 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsUpdateObjectsSpacesOptions } - options for the operation"
+                  "{@link SavedObjectsUpdateObjectsSpacesOptions} - options for the operation"
                 ],
                 "signature": [
                   "SavedObjectsUpdateObjectsSpacesOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 317,
+                "lineNumber": 332,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1299,7 +1325,7 @@
               "<T>>"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-            "lineNumber": 320,
+            "lineNumber": 335,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1318,7 +1344,7 @@
                   "<T>[]"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 330,
+                "lineNumber": 345,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1331,14 +1357,14 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsBulkUpdateOptions } - options for the bulk update operation"
+                  "{@link SavedObjectsBulkUpdateOptions} - options for the bulk update operation"
                 ],
                 "signature": [
                   "SavedObjectsBulkUpdateOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 331,
+                "lineNumber": 346,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1366,7 +1392,7 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-            "lineNumber": 334,
+            "lineNumber": 349,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1384,7 +1410,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 355,
+                "lineNumber": 370,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1403,7 +1429,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 356,
+                "lineNumber": 371,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1416,14 +1442,14 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsRemoveReferencesToOptions } - options for the remove references operation"
+                  "{@link SavedObjectsRemoveReferencesToOptions} - options for the remove references operation"
                 ],
                 "signature": [
                   "SavedObjectsRemoveReferencesToOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 357,
+                "lineNumber": 372,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1453,7 +1479,7 @@
               "<T>>"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-            "lineNumber": 360,
+            "lineNumber": 375,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1471,7 +1497,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 414,
+                "lineNumber": 429,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1490,7 +1516,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 415,
+                "lineNumber": 430,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1503,7 +1529,7 @@
                 "tags": [],
                 "label": "counterFields",
                 "description": [
-                  "- An array of field names to increment or an array of {@link SavedObjectsIncrementCounterField }"
+                  "- An array of field names to increment or an array of {@link SavedObjectsIncrementCounterField}"
                 ],
                 "signature": [
                   "(string | ",
@@ -1511,7 +1537,7 @@
                   ")[]"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 416,
+                "lineNumber": 431,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1524,14 +1550,14 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsIncrementCounterOptions }"
+                  "{@link SavedObjectsIncrementCounterOptions}"
                 ],
                 "signature": [
                   "SavedObjectsIncrementCounterOptions",
                   "<T> | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 417,
+                "lineNumber": 432,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1564,7 +1590,7 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-            "lineNumber": 420,
+            "lineNumber": 435,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1582,7 +1608,7 @@
                   "string | string[]"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 458,
+                "lineNumber": 473,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1594,15 +1620,13 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "{@link SavedObjectsOpenPointInTimeOptions } - options for the open PIT operation"
-                ],
+                "description": [],
                 "signature": [
                   "SavedObjectsOpenPointInTimeOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 459,
+                "lineNumber": 474,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1615,14 +1639,14 @@
                 "tags": [],
                 "label": "internalOptions",
                 "description": [
-                  "{@link SavedObjectsFindInternalOptions } - internal options for the open PIT operation"
+                  "{@link SavedObjectsFindInternalOptions} - internal options for the open PIT operation"
                 ],
                 "signature": [
                   "SavedObjectsFindInternalOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 460,
+                "lineNumber": 475,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1652,7 +1676,7 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-            "lineNumber": 463,
+            "lineNumber": 478,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1670,7 +1694,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 506,
+                "lineNumber": 521,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1682,15 +1706,13 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "{@link SavedObjectsClosePointInTimeOptions } - options for the close PIT operation"
-                ],
+                "description": [],
                 "signature": [
                   "SavedObjectsBaseOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 507,
+                "lineNumber": 522,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1703,14 +1725,14 @@
                 "tags": [],
                 "label": "internalOptions",
                 "description": [
-                  "{@link SavedObjectsFindInternalOptions } - internal options for the close PIT operation"
+                  "{@link SavedObjectsFindInternalOptions} - internal options for the close PIT operation"
                 ],
                 "signature": [
                   "SavedObjectsFindInternalOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 508,
+                "lineNumber": 523,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1740,7 +1762,7 @@
               "<T, A>"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-            "lineNumber": 511,
+            "lineNumber": 526,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1752,13 +1774,13 @@
                 "tags": [],
                 "label": "findOptions",
                 "description": [
-                  "- {@link SavedObjectsCreatePointInTimeFinderOptions } - the options for creating the point-in-time finder"
+                  "- {@link SavedObjectsCreatePointInTimeFinderOptions} - the options for creating the point-in-time finder"
                 ],
                 "signature": [
                   "SavedObjectsCreatePointInTimeFinderOptions"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 561,
+                "lineNumber": 576,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1771,14 +1793,14 @@
                 "tags": [],
                 "label": "dependencies",
                 "description": [
-                  "- {@link SavedObjectsCreatePointInTimeFinderDependencies } - the dependencies for creating the point-in-time finder"
+                  "- {@link SavedObjectsCreatePointInTimeFinderDependencies} - the dependencies for creating the point-in-time finder"
                 ],
                 "signature": [
                   "SavedObjectsCreatePointInTimeFinderDependencies",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 562,
+                "lineNumber": 577,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1802,7 +1824,7 @@
               "(namespace?: string | undefined) => string | undefined"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-            "lineNumber": 565,
+            "lineNumber": 580,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1818,7 +1840,7 @@
                   "string | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 573,
+                "lineNumber": 588,
                 "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1841,7 +1863,7 @@
               "ISavedObjectsRepository"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-            "lineNumber": 575,
+            "lineNumber": 590,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1859,7 +1881,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 579,
+                "lineNumber": 594,
                 "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1887,7 +1909,7 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-            "lineNumber": 581,
+            "lineNumber": 596,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1899,14 +1921,14 @@
                 "tags": [],
                 "label": "objects",
                 "description": [
-                  "{@link SavedObjectsChangeAccessControlObject } - the objects to update"
+                  "{@link SavedObjectsChangeAccessControlObject} - the objects to update"
                 ],
                 "signature": [
                   "SavedObjectsChangeAccessControlObject",
                   "[]"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 589,
+                "lineNumber": 604,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1919,13 +1941,13 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsChangeOwnershipOptions } - object containing owner profile_uid that will be the new owner"
+                  "{@link SavedObjectsChangeOwnershipOptions} - object containing owner profile_uid that will be the new owner"
                 ],
                 "signature": [
                   "SavedObjectsChangeOwnershipOptions"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 590,
+                "lineNumber": 605,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1955,7 +1977,7 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-            "lineNumber": 593,
+            "lineNumber": 608,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1967,14 +1989,14 @@
                 "tags": [],
                 "label": "objects",
                 "description": [
-                  "{@link SavedObjectsChangeAccessControlObject } - the objects to update"
+                  "{@link SavedObjectsChangeAccessControlObject} - the objects to update"
                 ],
                 "signature": [
                   "SavedObjectsChangeAccessControlObject",
                   "[]"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 600,
+                "lineNumber": 615,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1987,13 +2009,13 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsChangeAccessControlOptions } - object containing access mode. If empty, is considered to be marked as editable"
+                  "{@link SavedObjectsChangeAccessControlOptions} - object containing access mode. If empty, is considered to be marked as editable"
                 ],
                 "signature": [
                   "SavedObjectsChangeAccessModeOptions"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-                "lineNumber": 601,
+                "lineNumber": 616,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2256,6 +2278,10 @@
               {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/read_pack_route.ts"
+              },
+              {
+                "plugin": "searchInferenceEndpoints",
+                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/utils/inference_settings.test.ts"
               },
               {
                 "plugin": "fleet",
@@ -2565,7 +2591,39 @@
           },
           {
             "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+            "path": "x-pack/platform/plugins/shared/actions/server/lib/user_connector_token_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/lib/user_connector_token_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/lib/user_connector_token_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/lib/user_connector_token_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/lib/user_connector_token_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/lib/connector_token_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/lib/connector_token_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/lib/connector_token_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/lib/connector_token_client.ts"
           },
           {
             "plugin": "actions",
@@ -2574,6 +2632,14 @@
           {
             "plugin": "actions",
             "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
           },
           {
             "plugin": "actions",
@@ -2654,14 +2720,6 @@
           {
             "plugin": "savedSearch",
             "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search_migrations.ts"
-          },
-          {
-            "plugin": "dataCatalog",
-            "path": "x-pack/platform/plugins/shared/data_catalog/common/data_source_spec.ts"
-          },
-          {
-            "plugin": "dataCatalog",
-            "path": "x-pack/platform/plugins/shared/data_catalog/common/data_source_spec.ts"
           },
           {
             "plugin": "canvas",
@@ -4166,7 +4224,7 @@
           "\nSaved Objects is Kibana's data persistence mechanism allowing plugins to\nuse Elasticsearch for storing plugin state.\n\n## SavedObjectsClient errors\n\nSince the SavedObjectsClient has its hands in everything we\nare a little paranoid about the way we present errors back to\nto application code. Ideally, all errors will be either:\n\n  1. Caused by bad implementation (ie. undefined is not a function) and\n     as such unpredictable\n  2. An error that has been classified and decorated appropriately\n     by the decorators in {@link SavedObjectsErrorHelpers}\n\nType 1 errors are inevitable, but since all expected/handle-able errors\nshould be Type 2 the `isXYZError()` helpers exposed at\n`SavedObjectsErrorHelpers` should be used to understand and manage error\nresponses from the `SavedObjectsClient`.\n\nType 2 errors are decorated versions of the source error, so if\nthe elasticsearch client threw an error it will be decorated based\non its type. That means that rather than looking for `error.body.error.type` or\ndoing substring checks on `error.body.error.reason`, just use the helpers to\nunderstand the meaning of the error:\n\n  ```js\n  if (SavedObjectsErrorHelpers.isNotFoundError(error)) {\n     // handle 404\n  }\n\n  if (SavedObjectsErrorHelpers.isNotAuthorizedError(error)) {\n     // 401 handling should be automatic, but in case you wanted to know\n  }\n\n  // always rethrow the error unless you handle it\n  throw error;\n  ```\n\n### 404s from missing index\n\nFrom the perspective of application code and APIs the SavedObjectsClient is\na black box that persists objects. One of the internal details that users have\nno control over is that we use an elasticsearch index for persistence and that\nindex might be missing.\n\nAt the time of writing we are in the process of transitioning away from the\noperating assumption that the SavedObjects index is always available. Part of\nthis transition is handling errors resulting from an index missing. These used\nto trigger a 500 error in most cases, and in others cause 404s with different\nerror messages.\n\nFrom my (Spencer) perspective, a 404 from the SavedObjectsApi is a 404; The\nobject the request/call was targeting could not be found. This is why #14141\ntakes special care to ensure that 404 errors are generic and don't distinguish\nbetween index missing or document missing.\n\nSee {@link SavedObjectsClient}\nSee {@link SavedObjectsErrorHelpers}\n"
         ],
         "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-        "lineNumber": 58,
+        "lineNumber": 60,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4188,7 +4246,7 @@
               "<T>>"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-            "lineNumber": 121,
+            "lineNumber": 123,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4206,7 +4264,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 130,
+                "lineNumber": 132,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4225,7 +4283,7 @@
                   "T"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 131,
+                "lineNumber": 133,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4238,14 +4296,14 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsCreateOptions } - options for the create operation"
+                  "{@link SavedObjectsCreateOptions} - options for the create operation"
                 ],
                 "signature": [
                   "SavedObjectsCreateOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 132,
+                "lineNumber": 134,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4275,7 +4333,7 @@
               "<T>>"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-            "lineNumber": 135,
+            "lineNumber": 137,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4294,7 +4352,7 @@
                   "<T>[]"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 143,
+                "lineNumber": 145,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4307,14 +4365,14 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsCreateOptions } - options for the bulk create operation"
+                  "{@link SavedObjectsCreateOptions} - options for the bulk create operation"
                 ],
                 "signature": [
                   "SavedObjectsCreateOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 144,
+                "lineNumber": 146,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4344,7 +4402,7 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-            "lineNumber": 147,
+            "lineNumber": 149,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4363,7 +4421,7 @@
                   "[]"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 156,
+                "lineNumber": 158,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4376,14 +4434,14 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsBaseOptions } - options for the check conflicts operation"
+                  "{@link SavedObjectsBaseOptions} - options for the check conflicts operation"
                 ],
                 "signature": [
                   "SavedObjectsBaseOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 157,
+                "lineNumber": 159,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4409,7 +4467,7 @@
               " | undefined) => Promise<{}>"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-            "lineNumber": 160,
+            "lineNumber": 162,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4427,7 +4485,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 167,
+                "lineNumber": 169,
                 "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4446,7 +4504,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 167,
+                "lineNumber": 169,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4459,14 +4517,14 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsDeleteOptions } - options for the delete operation"
+                  "{@link SavedObjectsDeleteOptions} - options for the delete operation"
                 ],
                 "signature": [
                   "SavedObjectsDeleteOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 167,
+                "lineNumber": 169,
                 "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4494,7 +4552,7 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-            "lineNumber": 169,
+            "lineNumber": 171,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4513,7 +4571,7 @@
                   "[]"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 177,
+                "lineNumber": 179,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4526,14 +4584,14 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsBulkDeleteOptions } - options for the bulk delete operation"
+                  "{@link SavedObjectsBulkDeleteOptions} - options for the bulk delete operation"
                 ],
                 "signature": [
                   "SavedObjectsBulkDeleteOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 178,
+                "lineNumber": 180,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4561,7 +4619,7 @@
               "<T, A>>"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-            "lineNumber": 180,
+            "lineNumber": 182,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4573,13 +4631,13 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsFindOptions } - options for the find operation"
+                  "{@link SavedObjectsFindOptions} - options for the find operation"
                 ],
                 "signature": [
                   "SavedObjectsFindOptions"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 192,
+                "lineNumber": 194,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4611,7 +4669,7 @@
               "<T, A>>"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-            "lineNumber": 195,
+            "lineNumber": 197,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4623,13 +4681,13 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsSearchOptions } - options for the search operation"
+                  "{@link SavedObjectsSearchOptions} - options for the search operation"
                 ],
                 "signature": [
                   "SavedObjectsSearchOptions"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 207,
+                "lineNumber": 209,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4638,6 +4696,52 @@
             ],
             "returnComment": [
               "the {@link SavedObjectsSearchResponse }"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsClientContract.esql",
+            "type": "Function",
+            "tags": [],
+            "label": "esql",
+            "description": [
+              "\nPerforms an ES|QL query against the saved objects indices, returning the raw Elasticsearch response"
+            ],
+            "signature": [
+              "(options: ",
+              "SavedObjectsEsqlOptions",
+              ") => Promise<",
+              "EsqlEsqlResult",
+              ">"
+            ],
+            "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
+            "lineNumber": 212,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server",
+                "id": "def-server.SavedObjectsClientContract.esql.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "{@link SavedObjectsEsqlOptions} - options for the ES|QL query operation"
+                ],
+                "signature": [
+                  "SavedObjectsEsqlOptions"
+                ],
+                "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
+                "lineNumber": 220,
+                "columnNumber": 8,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "the {@link SavedObjectsEsqlResponse }"
             ]
           },
           {
@@ -4659,7 +4763,7 @@
               "<T>>"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-            "lineNumber": 210,
+            "lineNumber": 222,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4678,7 +4782,7 @@
                   "[]"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 224,
+                "lineNumber": 236,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4691,14 +4795,14 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsGetOptions } - options for the bulk get operation"
+                  "{@link SavedObjectsGetOptions} - options for the bulk get operation"
                 ],
                 "signature": [
                   "SavedObjectsGetOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 225,
+                "lineNumber": 237,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4726,7 +4830,7 @@
               "<T>>"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-            "lineNumber": 228,
+            "lineNumber": 240,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4744,7 +4848,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 236,
+                "lineNumber": 248,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4763,7 +4867,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 237,
+                "lineNumber": 249,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4776,14 +4880,14 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsGetOptions } - options for the get operation"
+                  "{@link SavedObjectsGetOptions} - options for the get operation"
                 ],
                 "signature": [
                   "SavedObjectsGetOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 238,
+                "lineNumber": 250,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4813,7 +4917,7 @@
               "<T>>"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-            "lineNumber": 241,
+            "lineNumber": 253,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4832,7 +4936,7 @@
                   "[]"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 261,
+                "lineNumber": 273,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4845,14 +4949,14 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsResolveOptions } - options for the bulk resolve operation"
+                  "{@link SavedObjectsResolveOptions} - options for the bulk resolve operation"
                 ],
                 "signature": [
                   "SavedObjectsResolveOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 262,
+                "lineNumber": 274,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4880,7 +4984,7 @@
               "<T>>"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-            "lineNumber": 265,
+            "lineNumber": 277,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4898,7 +5002,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 282,
+                "lineNumber": 294,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4917,7 +5021,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 283,
+                "lineNumber": 295,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4930,14 +5034,14 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsResolveOptions } - options for the resolve operation"
+                  "{@link SavedObjectsResolveOptions} - options for the resolve operation"
                 ],
                 "signature": [
                   "SavedObjectsResolveOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 284,
+                "lineNumber": 296,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4965,7 +5069,7 @@
               "<T>>"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-            "lineNumber": 287,
+            "lineNumber": 299,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4983,7 +5087,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 297,
+                "lineNumber": 309,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5002,7 +5106,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 298,
+                "lineNumber": 310,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5021,7 +5125,7 @@
                   "Partial<T>"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 299,
+                "lineNumber": 311,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5034,14 +5138,14 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsUpdateOptions } - options for the update operation"
+                  "{@link SavedObjectsUpdateOptions} - options for the update operation"
                 ],
                 "signature": [
                   "SavedObjectsUpdateOptions",
                   "<T> | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 300,
+                "lineNumber": 312,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5071,7 +5175,7 @@
               "<T>>"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-            "lineNumber": 303,
+            "lineNumber": 315,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5090,7 +5194,7 @@
                   "<T>[]"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 318,
+                "lineNumber": 330,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5103,14 +5207,14 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsBulkUpdateOptions } - options for the bulkUpdate operation"
+                  "{@link SavedObjectsBulkUpdateOptions} - options for the bulkUpdate operation"
                 ],
                 "signature": [
                   "SavedObjectsBulkUpdateOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 319,
+                "lineNumber": 331,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5138,7 +5242,7 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-            "lineNumber": 322,
+            "lineNumber": 334,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5156,7 +5260,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 331,
+                "lineNumber": 343,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5175,7 +5279,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 332,
+                "lineNumber": 344,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5188,14 +5292,14 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsRemoveReferencesToOptions } - options for the remove references operation"
+                  "{@link SavedObjectsRemoveReferencesToOptions} - options for the remove references operation"
                 ],
                 "signature": [
                   "SavedObjectsRemoveReferencesToOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 333,
+                "lineNumber": 345,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5223,7 +5327,7 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-            "lineNumber": 336,
+            "lineNumber": 348,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5241,7 +5345,7 @@
                   "string | string[]"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 349,
+                "lineNumber": 361,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5254,14 +5358,14 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsOpenPointInTimeOptions } - options for the open PIT for type operation"
+                  "{@link SavedObjectsOpenPointInTimeOptions} - options for the open PIT for type operation"
                 ],
                 "signature": [
                   "SavedObjectsOpenPointInTimeOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 350,
+                "lineNumber": 362,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5289,7 +5393,7 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-            "lineNumber": 353,
+            "lineNumber": 365,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5307,7 +5411,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 366,
+                "lineNumber": 378,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5320,14 +5424,14 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsClosePointInTimeOptions } - options for the close PIT operation"
+                  "{@link SavedObjectsClosePointInTimeOptions} - options for the close PIT operation"
                 ],
                 "signature": [
                   "SavedObjectsBaseOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 367,
+                "lineNumber": 379,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5357,7 +5461,7 @@
               "<T, A>"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-            "lineNumber": 370,
+            "lineNumber": 382,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5369,13 +5473,13 @@
                 "tags": [],
                 "label": "findOptions",
                 "description": [
-                  "{@link SavedObjectsCreatePointInTimeFinderOptions } - options for the create PIT finder operation"
+                  "{@link SavedObjectsCreatePointInTimeFinderOptions} - options for the create PIT finder operation"
                 ],
                 "signature": [
                   "SavedObjectsCreatePointInTimeFinderOptions"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 420,
+                "lineNumber": 432,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5388,14 +5492,14 @@
                 "tags": [],
                 "label": "dependencies",
                 "description": [
-                  "{@link SavedObjectsCreatePointInTimeFinderDependencies } - dependencies for the create PIT finder operation"
+                  "{@link SavedObjectsCreatePointInTimeFinderDependencies} - dependencies for the create PIT finder operation"
                 ],
                 "signature": [
                   "SavedObjectsCreatePointInTimeFinderDependencies",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 421,
+                "lineNumber": 433,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5425,7 +5529,7 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-            "lineNumber": 424,
+            "lineNumber": 436,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5444,7 +5548,7 @@
                   "[]"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 432,
+                "lineNumber": 444,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5457,14 +5561,14 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsCollectMultiNamespaceReferencesOptions } - options for the collect multi namespace references operation"
+                  "{@link SavedObjectsCollectMultiNamespaceReferencesOptions} - options for the collect multi namespace references operation"
                 ],
                 "signature": [
                   "SavedObjectsCollectMultiNamespaceReferencesOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 433,
+                "lineNumber": 445,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5494,7 +5598,7 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-            "lineNumber": 436,
+            "lineNumber": 448,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5513,7 +5617,7 @@
                   "[]"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 446,
+                "lineNumber": 458,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5532,7 +5636,7 @@
                   "string[]"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 447,
+                "lineNumber": 459,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5551,7 +5655,7 @@
                   "string[]"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 448,
+                "lineNumber": 460,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5564,14 +5668,14 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsUpdateObjectsSpacesOptions } - options for the update spaces operation"
+                  "{@link SavedObjectsUpdateObjectsSpacesOptions} - options for the update spaces operation"
                 ],
                 "signature": [
                   "SavedObjectsUpdateObjectsSpacesOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 449,
+                "lineNumber": 461,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5595,7 +5699,7 @@
               "() => string | undefined"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-            "lineNumber": 452,
+            "lineNumber": 464,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5616,7 +5720,7 @@
               "SavedObjectsClientContract"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-            "lineNumber": 457,
+            "lineNumber": 469,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5634,7 +5738,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 461,
+                "lineNumber": 473,
                 "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5662,7 +5766,7 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-            "lineNumber": 463,
+            "lineNumber": 475,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5681,7 +5785,7 @@
                   "[]"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 471,
+                "lineNumber": 483,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5694,13 +5798,13 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsChangeAccessControlOptions } - options for the change ownership operation"
+                  "{@link SavedObjectsChangeAccessControlOptions} - options for the change ownership operation"
                 ],
                 "signature": [
                   "SavedObjectsChangeOwnershipOptions"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 472,
+                "lineNumber": 484,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5730,7 +5834,7 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-            "lineNumber": 475,
+            "lineNumber": 487,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5749,7 +5853,7 @@
                   "[]"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 482,
+                "lineNumber": 494,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5762,13 +5866,13 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsChangeAccessModeOptions } - options for the change access mode operation"
+                  "{@link SavedObjectsChangeAccessModeOptions} - options for the change access mode operation"
                 ],
                 "signature": [
                   "SavedObjectsChangeAccessModeOptions"
                 ],
                 "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-                "lineNumber": 483,
+                "lineNumber": 495,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6391,6 +6495,99 @@
             ],
             "path": "src/core/packages/saved-objects/api-server/src/apis/delete.ts",
             "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-api-server",
+        "id": "def-server.SavedObjectsEsqlOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsEsqlOptions",
+        "description": [
+          "\nOptions for the saved objects ES|QL query operation.\n\nThis interface extends the Elasticsearch `EsqlQueryRequest` type, omitting fields that are\ncontrolled server-side (`query`, `format`, `columnar`, `delimiter`), and adding saved-object-specific\noptions. The `FROM` clause is auto-generated from the `type` parameter via index resolution,\nand security filters (namespace + type) are injected via the `filter` parameter.\n\nConsumers write only the ES|QL processing pipeline (everything after `FROM`).\n"
+        ],
+        "signature": [
+          "SavedObjectsEsqlOptions",
+          " extends Omit<",
+          "EsqlQueryRequest",
+          ", \"format\" | \"query\" | \"columnar\" | \"delimiter\">"
+        ],
+        "path": "src/core/packages/saved-objects/api-server/src/apis/esql.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsEsqlOptions.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "The type or types of saved objects to query. Used for index resolution and security filtering."
+            ],
+            "signature": [
+              "string | string[]"
+            ],
+            "path": "src/core/packages/saved-objects/api-server/src/apis/esql.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsEsqlOptions.namespaces",
+            "type": "Array",
+            "tags": [],
+            "label": "namespaces",
+            "description": [
+              "The namespaces to query within."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/core/packages/saved-objects/api-server/src/apis/esql.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsEsqlOptions.pipeline",
+            "type": "string",
+            "tags": [],
+            "label": "pipeline",
+            "description": [
+              "\nThe ES|QL processing pipeline (everything after the `FROM` clause).\nThe `FROM` clause is auto-generated from the `type` parameter.\n"
+            ],
+            "path": "src/core/packages/saved-objects/api-server/src/apis/esql.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsEsqlOptions.metadata",
+            "type": "Array",
+            "tags": [],
+            "label": "metadata",
+            "description": [
+              "\nOptional METADATA fields to include on the auto-generated `FROM` clause.\n"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/api-server/src/apis/esql.ts",
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8488,13 +8685,13 @@
         "signature": [
           "{ type: string | string[]; search?: string | undefined; filter?: any; aggs?: Record<string, ",
           "AggregationsAggregationContainer",
-          "> | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: ",
+          "> | undefined; namespaces?: string[] | undefined; fields?: string[] | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: ",
           "SortOrder",
           " | undefined; hasReference?: ",
           "SavedObjectsFindOptionsReference",
           " | ",
           "SavedObjectsFindOptionsReference",
-          "[] | undefined; fields?: string[] | undefined; preference?: string | undefined; rootSearchFields?: string[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
+          "[] | undefined; preference?: string | undefined; rootSearchFields?: string[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
           "SavedObjectsFindOptionsReference",
           " | ",
           "SavedObjectsFindOptionsReference",
@@ -8502,6 +8699,25 @@
         ],
         "path": "src/core/packages/saved-objects/api-server/src/apis/create_point_in_time_finder.ts",
         "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-api-server",
+        "id": "def-server.SavedObjectsEsqlResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectsEsqlResponse",
+        "description": [
+          "\nResponse from the saved objects ES|QL query operation."
+        ],
+        "signature": [
+          "EsqlEsqlResult"
+        ],
+        "path": "src/core/packages/saved-objects/api-server/src/apis/esql.ts",
+        "lineNumber": 66,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

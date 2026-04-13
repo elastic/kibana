@@ -42,7 +42,6 @@ export const AlertActionsCell: GetAlertsTableProp<'renderActionsCell'> = (props)
       <DefaultAlertActions<AdditionalContext>
         key="defaultRowActions"
         onActionExecuted={closeActionsPopover}
-        isAlertDetailsEnabled={false}
         resolveRulePagePath={(alertRuleId) =>
           alertRuleId ? `${STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX}${alertRuleId}` : null
         }
@@ -67,7 +66,7 @@ export const AlertActionsCell: GetAlertsTableProp<'renderActionsCell'> = (props)
                 color="text"
                 data-test-subj="alertsTableRowActionMore"
                 display="empty"
-                iconType="boxesHorizontal"
+                iconType="boxesVertical"
                 onClick={toggleActionsPopover}
                 size="s"
               />

@@ -6,13 +6,6 @@
  */
 
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
-import type { ApmDocumentType } from '@kbn/apm-data-access-plugin/common';
-import {
-  calculateFailedTransactionRate,
-  getOutcomeAggregation,
-  calculateThroughputWithRange,
-  getDurationFieldForTransactions,
-} from '@kbn/apm-data-access-plugin/server/utils';
 import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
   ObservabilityAgentBuilderPluginStart,
@@ -22,15 +15,37 @@ import { parseDatemath } from '../../utils/time';
 import { buildApmResources } from '../../utils/build_apm_resources';
 import { timeRangeFilter, kqlFilter as buildKqlFilter } from '../../utils/dsl_filters';
 import { getPreferredDocumentSource } from '../../utils/get_preferred_document_source';
+import {
+  type LatencyAggregationType,
+  type DocumentType,
+  getLatencyAggregation,
+  getLatencyValue,
+  getFailureRateAggregation,
+  getThroughputAggregation,
+} from '../../utils/trace_metrics_aggregations';
 
 export interface TraceMetricsItem {
   group: string;
-  latency: number | null;
+  latency: number;
   throughput: number;
   failureRate: number;
 }
 
 const MAX_NUMBER_OF_GROUPS = 100;
+
+function getTermsOrderAggregationPath(
+  sortBy: 'latency' | 'throughput' | 'failureRate',
+  latencyType: LatencyAggregationType
+): string {
+  switch (sortBy) {
+    case 'latency':
+      return latencyType === 'avg' ? 'latency' : `latency.${latencyType === 'p95' ? '95' : '99'}`;
+    case 'throughput':
+      return 'throughput';
+    case 'failureRate':
+      return 'failure_rate';
+  }
+}
 
 export async function getToolHandler({
   core,
@@ -41,6 +56,8 @@ export async function getToolHandler({
   end,
   kqlFilter,
   groupBy,
+  latencyType = 'avg',
+  sortBy = 'latency',
 }: {
   core: CoreSetup<
     ObservabilityAgentBuilderPluginStartDependencies,
@@ -53,8 +70,11 @@ export async function getToolHandler({
   end: string;
   groupBy: string;
   kqlFilter?: string;
+  latencyType: LatencyAggregationType | undefined;
+  sortBy: 'latency' | 'throughput' | 'failureRate';
 }): Promise<{
   items: TraceMetricsItem[];
+  latencyType: LatencyAggregationType;
 }> {
   const { apmEventClient, apmDataAccessServices } = await buildApmResources({
     core,
@@ -74,13 +94,7 @@ export async function getToolHandler({
   });
 
   const { rollupInterval, hasDurationSummaryField } = source;
-  const documentType = source.documentType as
-    | ApmDocumentType.ServiceTransactionMetric
-    | ApmDocumentType.TransactionMetric
-    | ApmDocumentType.TransactionEvent;
-
-  const durationField = getDurationFieldForTransactions(documentType, hasDurationSummaryField);
-  const outcomeAggs = getOutcomeAggregation(documentType);
+  const documentType = source.documentType as DocumentType;
 
   const response = await apmEventClient.search('get_trace_metrics', {
     apm: {
@@ -103,12 +117,19 @@ export async function getToolHandler({
           size: MAX_NUMBER_OF_GROUPS,
         },
         aggs: {
-          avg_latency: {
-            avg: {
-              field: durationField,
+          ...getLatencyAggregation({
+            latencyAggregationType: latencyType,
+            hasDurationSummaryField,
+            documentType,
+          }),
+          ...getFailureRateAggregation(documentType),
+          ...getThroughputAggregation((endMs - startMs) / 1000 / 60),
+          sort_by: {
+            bucket_sort: {
+              sort: [{ [getTermsOrderAggregationPath(sortBy, latencyType)]: { order: 'desc' } }],
+              size: MAX_NUMBER_OF_GROUPS,
             },
           },
-          ...outcomeAggs,
         },
       },
     },
@@ -117,29 +138,24 @@ export async function getToolHandler({
   const buckets = response.aggregations?.groups?.buckets ?? [];
 
   const items: TraceMetricsItem[] = buckets.map((bucket) => {
-    const docCount = bucket.doc_count;
-    const latencyValue = bucket.avg_latency?.value;
+    const latencyValue = getLatencyValue({
+      latencyAggregationType: latencyType,
+      aggregation: bucket.latency,
+    });
 
     const latencyMs =
-      latencyValue !== null && latencyValue !== undefined ? latencyValue / 1000 : null;
-
-    const failureRate = calculateFailedTransactionRate(bucket);
-
-    const throughput = calculateThroughputWithRange({
-      start: startMs,
-      end: endMs,
-      value: docCount,
-    });
+      latencyValue !== null && latencyValue !== undefined ? latencyValue / 1000 : -1;
 
     return {
       group: bucket.key as string,
       latency: latencyMs,
-      throughput,
-      failureRate,
+      throughput: bucket.throughput.value as number,
+      failureRate: bucket.failure_rate.value as number,
     };
   });
 
   return {
     items,
+    latencyType,
   };
 }

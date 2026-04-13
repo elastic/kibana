@@ -59,12 +59,12 @@ export type {
   ISearchSessionService,
   SearchRequestHandlerContext,
   DataRequestHandlerContext,
-  AsyncSearchStatusResponse,
 } from './search';
 export {
   SearchSessionService,
   NoSearchIdInSessionError,
   INITIAL_SEARCH_SESSION_REST_VERSION,
+  INTERNAL_ENHANCED_ES_SEARCH_STRATEGY,
 } from './search';
 
 export { shimHitsTotal } from '../common/search';

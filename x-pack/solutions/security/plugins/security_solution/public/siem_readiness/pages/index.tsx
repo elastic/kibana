@@ -5,13 +5,28 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { EuiPageHeader, EuiPageSection, EuiSpacer } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import {
+  EuiPageHeader,
+  EuiPageSection,
+  EuiSpacer,
+  EuiButtonEmpty,
+  EuiBetaBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory, useParams } from 'react-router-dom';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import type { MainCategories } from '@kbn/siem-readiness';
+import { ALL_CATEGORIES } from '@kbn/siem-readiness';
 import { SIEM_READINESS_PATH } from '../../../common/constants';
 import { VisibilitySectionBoxes, type VisibilityTabId } from './visibility_section_boxes';
 import { VisibilitySectionTabs } from './visibility_section_tabs';
+import {
+  CategoryConfigurationPanel,
+  ACTIVE_CATEGORIES_STORAGE_KEY,
+} from './components/configuration_panel';
 
 const VALID_TABS: VisibilityTabId[] = ['coverage', 'quality', 'continuity', 'retention'];
 const DEFAULT_TAB: VisibilityTabId = 'coverage';
@@ -19,6 +34,15 @@ const DEFAULT_TAB: VisibilityTabId = 'coverage';
 const SiemReadinessDashboard = () => {
   const history = useHistory();
   const { tab } = useParams<{ tab?: string }>();
+
+  // Persistent state for category filtering (shared with configuration panel)
+  const [activeCategories, setActiveCategories] = useLocalStorage<MainCategories[]>(
+    ACTIVE_CATEGORIES_STORAGE_KEY,
+    ALL_CATEGORIES
+  );
+
+  // State for showing configuration modal
+  const [isConfigModalVisible, setIsConfigModalVisible] = useState(false);
 
   // Get selected tab from URL path params
   const selectedTabId = useMemo<VisibilityTabId>(() => {
@@ -38,19 +62,60 @@ const SiemReadinessDashboard = () => {
   return (
     <div>
       <EuiPageHeader
-        pageTitle={i18n.translate('xpack.securitySolution.siemReadiness.pageTitle', {
-          defaultMessage: 'SIEM Readiness',
-        })}
+        pageTitle={
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              {i18n.translate('xpack.securitySolution.siemReadiness.pageTitle', {
+                defaultMessage: 'SIEM Readiness',
+              })}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge
+                label={i18n.translate('xpack.securitySolution.siemReadiness.betaBadgeLabel', {
+                  defaultMessage: 'Beta',
+                })}
+                data-test-subj="siemReadinessBetaBadge"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
         bottomBorder={true}
+        rightSideItems={[
+          <EuiButtonEmpty
+            iconSide="right"
+            size="s"
+            iconType="gear"
+            onClick={() => setIsConfigModalVisible(true)}
+            data-test-subj="configurationsButton"
+          >
+            {i18n.translate('xpack.securitySolution.siemReadiness.configurations', {
+              defaultMessage: 'Configurations',
+            })}
+          </EuiButtonEmpty>,
+        ]}
       />
       <EuiSpacer />
       <EuiPageSection paddingSize="none">
-        <VisibilitySectionBoxes selectedTabId={selectedTabId} onTabSelect={handleTabSelect} />
+        <VisibilitySectionBoxes
+          selectedTabId={selectedTabId}
+          onTabSelect={handleTabSelect}
+          activeCategories={activeCategories ?? ALL_CATEGORIES}
+        />
       </EuiPageSection>
       <EuiSpacer />
       <EuiPageSection paddingSize="none">
-        <VisibilitySectionTabs selectedTabId={selectedTabId} onTabSelect={handleTabSelect} />
+        <VisibilitySectionTabs
+          selectedTabId={selectedTabId}
+          onTabSelect={handleTabSelect}
+          activeCategories={activeCategories ?? ALL_CATEGORIES}
+        />
       </EuiPageSection>
+      {isConfigModalVisible && (
+        <CategoryConfigurationPanel
+          onClose={() => setIsConfigModalVisible(false)}
+          onSave={setActiveCategories}
+        />
+      )}
     </div>
   );
 };

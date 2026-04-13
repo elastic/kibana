@@ -65,12 +65,16 @@ export const createMockPluginStats = (overrides: Partial<ApiStats> = {}): ApiSta
   missingComments: [],
   isAnyType: [],
   noReferences: [],
+  paramDocMismatches: [],
+  missingComplexTypeInfo: [],
+  missingReturns: [],
   missingExports: 0,
   deprecatedAPIsReferencedCount: 0,
   unreferencedDeprecatedApisCount: 0,
   adoptionTrackedAPIs: [],
   adoptionTrackedAPIsCount: 0,
   adoptionTrackedAPIsUnreferencedCount: 0,
+  unnamedExports: [],
   ...overrides,
 });
 
@@ -95,6 +99,9 @@ export const createMockPluginMetaInfo = (
   missingComments: [],
   isAnyType: [],
   noReferences: [],
+  paramDocMismatches: [],
+  missingComplexTypeInfo: [],
+  missingReturns: [],
   missingExports: 0,
   deprecatedAPIsReferencedCount: 0,
   unreferencedDeprecatedApisCount: 0,
@@ -104,5 +111,6 @@ export const createMockPluginMetaInfo = (
   owner: { name: 'Test Team', githubTeam: 'test-team' },
   description: 'A test plugin',
   isPlugin: true,
+  unnamedExports: [],
   ...overrides,
 });

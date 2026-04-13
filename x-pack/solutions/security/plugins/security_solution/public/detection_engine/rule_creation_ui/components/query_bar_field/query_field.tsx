@@ -12,6 +12,7 @@ import deepEqual from 'fast-deep-equal';
 import type { DataViewBase, Query } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { FilterManager } from '@kbn/data-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { OpenTimelineModal } from '../../../../timelines/components/open_timeline/open_timeline_modal';
 import type { ActionTimelineToShow } from '../../../../timelines/components/open_timeline/types';
@@ -89,9 +90,8 @@ export const QueryBarField = ({
   const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>(defaultSavedQuery);
   const [isSavedQueryFailedToLoad, setIsSavedQueryFailedToLoad] = useState(false);
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-
-  const { uiSettings } = useKibana().services;
-  const [filterManager] = useState<FilterManager>(new FilterManager(uiSettings));
+  const kibanaServices = useKibana().services;
+  const [filterManager] = useState<FilterManager>(new FilterManager(kibanaServices.uiSettings));
 
   const savedQueryServices = useSavedQueryServices();
 
@@ -257,7 +257,7 @@ export const QueryBarField = ({
   };
 
   return (
-    <>
+    <KibanaContextProvider services={{ core: kibanaServices }}>
       <EuiFormRow
         label={field.label}
         labelAppend={field.labelAppend}
@@ -302,6 +302,6 @@ export const QueryBarField = ({
           onOpen={onOpenTimelineCb}
         />
       ) : null}
-    </>
+    </KibanaContextProvider>
   );
 };

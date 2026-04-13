@@ -1,0 +1,68 @@
+openapi: 3.0.0
+info:
+  title: Get Evaluation Run API endpoint
+  version: "1"
+paths:
+  /internal/evals/runs/{runId}:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: GetEvaluationRun
+      description: Get details and statistics for a single evaluation run
+      summary: Get evaluation run detail
+      tags:
+        - Evals API
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: suite_id
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter stats by suite ID
+        - name: model_id
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter stats by task model ID
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  run_id:
+                    type: string
+                  task_model:
+                    $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
+                  evaluator_model:
+                    $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
+                  total_repetitions:
+                    type: integer
+                  stats:
+                    type: array
+                    items:
+                      $ref: '../common_attributes.schema.yaml#/components/schemas/EvaluatorStats'
+                required:
+                  - run_id
+                  - stats
+        "404":
+          description: Run not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string

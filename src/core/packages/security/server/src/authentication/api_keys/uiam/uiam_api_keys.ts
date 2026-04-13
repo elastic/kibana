@@ -8,7 +8,6 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 import type { GrantAPIKeyResult, InvalidateAPIKeyResult } from '../api_keys';
 
@@ -41,16 +40,12 @@ export interface UiamAPIKeysType {
   ): Promise<InvalidateAPIKeyResult | null>;
 
   /**
-   * Creates a scoped Elasticsearch client authenticated with an API key.
+   * Converts Elasticsearch API keys into UIAM API keys.
    *
-   * This method creates a scoped cluster client that authenticates using the provided API key.
-   * If the API key is a UIAM credential (starts with 'essu_'), it adds the appropriate UIAM
-   * authentication headers.
-   *
-   * @param apiKey The API key secret.
-   * @returns A scoped cluster client configured with API key authentication
+   * @param keys The base64-encoded Elasticsearch API key values to convert.
+   * @returns A promise that resolves to a response containing per-key success/failure results, or null if the license is not enabled.
    */
-  getScopedClusterClientWithApiKey(apiKey: string): IScopedClusterClient | null;
+  convert(keys: string[]): Promise<ConvertUiamAPIKeysResponse | null>;
 }
 
 /**
@@ -76,4 +71,44 @@ export interface InvalidateUiamAPIKeyParams {
    * ID of the API key to invalidate
    */
   id: string;
+}
+
+/**
+ * A successful result from converting an Elasticsearch API key into a UIAM API key.
+ */
+export interface ConvertUiamAPIKeyResultSuccess {
+  status: 'success';
+  id: string;
+  key: string;
+  description: string;
+  organization_id: string;
+  internal: boolean;
+  role_assignments: Record<string, unknown>;
+  creation_date: string;
+  expiration_date: string | null;
+}
+
+/**
+ * A failed result from converting an Elasticsearch API key into a UIAM API key.
+ */
+export interface ConvertUiamAPIKeyResultFailed {
+  status: 'failed';
+  code: string;
+  message: string;
+  resource: string | null;
+  type: string;
+}
+
+/**
+ * A single result entry from the convert API keys operation; either success or failure.
+ */
+export type ConvertUiamAPIKeyResult =
+  | ConvertUiamAPIKeyResultSuccess
+  | ConvertUiamAPIKeyResultFailed;
+
+/**
+ * Response from the UIAM convert API keys operation.
+ */
+export interface ConvertUiamAPIKeysResponse {
+  results: ConvertUiamAPIKeyResult[];
 }

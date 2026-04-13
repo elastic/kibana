@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import type { ESQLAstAllCommands } from '@elastic/esql/types';
+import { Parser } from '@elastic/esql';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import type { ESQLAstAllCommands } from '../../../types';
 import type { ICommandCallbacks } from '../types';
 import { pipeCompleteItem, colonCompleteItem, semiColonCompleteItem } from '../complete_items';
 import { type ISuggestionItem, type ICommandContext } from '../types';
 import { buildConstantsDefinitions } from '../../definitions/utils/literals';
 import { ESQL_STRING_TYPES } from '../../definitions/types';
 import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
-import { Parser } from '../../../parser';
 
 const appendSeparatorCompletionItem: ISuggestionItem = withAutoSuggest({
   detail: i18n.translate('kbn-esql-language.esql.definitions.appendSeparatorDoc', {
@@ -24,7 +24,6 @@ const appendSeparatorCompletionItem: ISuggestionItem = withAutoSuggest({
   }),
   kind: 'Reference',
   label: 'APPEND_SEPARATOR',
-  sortText: '1',
   text: 'APPEND_SEPARATOR = ',
 });
 
@@ -54,7 +53,6 @@ export async function autocomplete(
       i18n.translate('kbn-esql-language.esql.autocomplete.aPatternString', {
         defaultMessage: 'A pattern string',
       }),
-      undefined,
       {
         advanceCursorAndOpenSuggestions: true,
       }

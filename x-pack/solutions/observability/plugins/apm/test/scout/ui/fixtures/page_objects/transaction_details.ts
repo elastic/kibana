@@ -6,6 +6,7 @@
  */
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { waitForApmSettingsHeaderLink } from '../page_helpers';
 import { EXTENDED_TIMEOUT } from '../constants';
 
@@ -31,6 +32,58 @@ export class TransactionDetailsPage {
       )}`
     );
     await waitForApmSettingsHeaderLink(this.page);
+  }
+
+  /**
+   * Navigate to transaction view URL without transactionName (invalid URL).
+   */
+  async goToTransactionViewWithoutTransactionName(params: {
+    serviceName: string;
+    start: string;
+    end: string;
+  }) {
+    const { serviceName, start, end } = params;
+    const urlServiceName = encodeURIComponent(serviceName);
+
+    await this.page.goto(
+      `${this.kbnUrl.app('apm')}/services/${urlServiceName}/transactions/view?${new URLSearchParams(
+        {
+          rangeFrom: start,
+          rangeTo: end,
+          comparisonEnabled: 'false',
+          showCriticalPath: '',
+          environment: 'ENVIRONMENT_ALL',
+          kuery: '',
+          serviceGroup: '',
+        }
+      )}`
+    );
+    await waitForApmSettingsHeaderLink(this.page);
+  }
+
+  /**
+   * From the current page URL (must be transaction details view), remove the
+   * transactionName query param and navigate to that URL. Used to simulate
+   * a user editing the URL or following a bad link. The app should redirect
+   * to the transaction list instead of showing 404.
+   */
+  async removeTransactionNameFromUrlAndNavigate() {
+    const url = new URL(this.page.url());
+    url.searchParams.delete('transactionName');
+    await this.page.goto(url.toString());
+    await waitForApmSettingsHeaderLink(this.page);
+  }
+
+  /**
+   * Assert the current page is the transaction list (not 404, not view).
+   * Use after removeTransactionNameFromUrlAndNavigate to verify redirect.
+   */
+  async expectTransactionListPageLoaded(serviceName: string) {
+    await this.page
+      .getByRole('heading', { name: 'Transactions', exact: true })
+      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await expect(this.page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText(serviceName);
+    await expect(this.page.getByTestId('appNotFoundPageContent')).toBeHidden();
   }
 
   /**

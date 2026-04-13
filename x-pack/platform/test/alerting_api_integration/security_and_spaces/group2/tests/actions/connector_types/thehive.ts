@@ -119,7 +119,7 @@ export default function theHiveTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type config: Field \"url\": Required`,
+              message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at url`,
             });
           });
       });
@@ -161,7 +161,7 @@ export default function theHiveTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type secrets: Field \"apiKey\": Required`,
+              message: `error validating connector type secrets: ✖ Invalid input: expected string, received undefined\n  → at apiKey`,
             });
           });
       });
@@ -197,7 +197,7 @@ export default function theHiveTest({ getService }: FtrProviderContext) {
           expect(body).to.eql({
             status: 'error',
             connector_id: theHiveActionId,
-            message: `error validating action params: Field \"subAction\": Required`,
+            message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subAction`,
             retry: false,
             errorSource: TaskErrorSource.USER,
           });
@@ -376,7 +376,7 @@ export default function theHiveTest({ getService }: FtrProviderContext) {
             expect(body).to.eql({
               status: 'error',
               connector_id: theHiveActionId,
-              message: `error validating action params: Field \"subAction\": Required`,
+              message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subAction`,
               retry: false,
               errorSource: TaskErrorSource.USER,
             });

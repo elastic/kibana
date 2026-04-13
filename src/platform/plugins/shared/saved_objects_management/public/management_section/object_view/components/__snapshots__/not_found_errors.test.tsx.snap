@@ -35,8 +35,8 @@ exports[`NotFoundErrors component renders correctly for index-pattern type 1`] =
       >
         Saved objects APIs
         <span
-          class="emotion-EuiExternalLinkIcon"
-          data-euiicon-type="popout"
+          class="css-1j75qc1"
+          data-euiicon-type="external"
           role="presentation"
         />
         <span
@@ -86,8 +86,8 @@ exports[`NotFoundErrors component renders correctly for index-pattern-field type
       >
         Saved objects APIs
         <span
-          class="emotion-EuiExternalLinkIcon"
-          data-euiicon-type="popout"
+          class="css-1j75qc1"
+          data-euiicon-type="external"
           role="presentation"
         />
         <span
@@ -137,8 +137,8 @@ exports[`NotFoundErrors component renders correctly for search type 1`] = `
       >
         Saved objects APIs
         <span
-          class="emotion-EuiExternalLinkIcon"
-          data-euiicon-type="popout"
+          class="css-1j75qc1"
+          data-euiicon-type="external"
           role="presentation"
         />
         <span
@@ -186,8 +186,8 @@ exports[`NotFoundErrors component renders correctly for unknown type 1`] = `
       >
         Saved objects APIs
         <span
-          class="emotion-EuiExternalLinkIcon"
-          data-euiicon-type="popout"
+          class="css-1j75qc1"
+          data-euiicon-type="external"
           role="presentation"
         />
         <span

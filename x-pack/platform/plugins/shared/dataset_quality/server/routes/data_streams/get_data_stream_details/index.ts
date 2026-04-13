@@ -27,24 +27,26 @@ export async function getDataStreamDetails({
   start,
   end,
   isServerless,
+  isSecurityEnabled,
 }: {
   esClient: IScopedClusterClient;
   dataStream: string;
   start: number;
   end: number;
   isServerless: boolean;
+  isSecurityEnabled: boolean;
 }): Promise<DataStreamDetails> {
   throwIfInvalidDataStreamParams(dataStream);
 
   // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
   const esClientAsCurrentUser = esClient.asCurrentUser;
-  const esClientAsSecondaryAuthUser = esClient.asSecondaryAuthUser;
 
   const dataStreamPrivileges = (
     await datasetQualityPrivileges.getHasIndexPrivileges(
       esClientAsCurrentUser,
       [dataStream],
-      ['monitor', FAILURE_STORE_PRIVILEGE, MANAGE_FAILURE_STORE_PRIVILEGE]
+      ['monitor', FAILURE_STORE_PRIVILEGE, MANAGE_FAILURE_STORE_PRIVILEGE],
+      isSecurityEnabled
     )
   )[dataStream];
 
@@ -53,6 +55,7 @@ export async function getDataStreamDetails({
         await getDataStreams({
           esClient: esClientAsCurrentUser,
           datasetQuery: dataStream,
+          isSecurityEnabled,
         })
       ).dataStreams[0]
     : undefined;
@@ -80,7 +83,7 @@ export async function getDataStreamDetails({
     const avgDocSizeInBytes =
       dataStreamPrivileges.monitor && dataStreamSummaryStats.docsCount > 0
         ? isServerless
-          ? await getMeteringAvgDocSizeInBytes(esClientAsSecondaryAuthUser, dataStream)
+          ? await getMeteringAvgDocSizeInBytes(esClient.asSecondaryAuthUser, dataStream)
           : await getAvgDocSizeInBytes(esClientAsCurrentUser, dataStream)
         : 0;
 
@@ -191,8 +194,14 @@ async function getDataStreamSummaryStats(
   return {
     docsCount,
     degradedDocsCount,
-    services: getTermsFromAgg(serviceNamesAgg, response.aggregations),
-    hosts: getTermsFromAgg(hostsAgg, response.aggregations),
+    services: getTermsFromAgg(
+      serviceNamesAgg,
+      response.aggregations as Record<string, TermsAggregationResult> | undefined
+    ),
+    hosts: getTermsFromAgg(
+      hostsAgg,
+      response.aggregations as Record<string, TermsAggregationResult> | undefined
+    ),
   };
 }
 
@@ -216,15 +225,26 @@ async function getAvgDocSizeInBytes(esClient: ElasticsearchClient, index: string
   return docCount ? sizeInBytes / docCount : 0;
 }
 
-function getTermsFromAgg(termAgg: TermAggregation, aggregations: any) {
+interface TermsAggregationBucket {
+  key: string;
+}
+
+interface TermsAggregationResult {
+  buckets?: TermsAggregationBucket[];
+}
+
+function getTermsFromAgg(
+  termAgg: TermAggregation,
+  aggregations: Record<string, TermsAggregationResult> | undefined
+) {
   if (!aggregations) {
     return {};
   }
 
   return Object.entries(termAgg).reduce((acc, [key, _value]) => {
-    const values = aggregations[key]?.buckets.map((bucket: any) => bucket.key) as string[];
+    const values = aggregations[key]?.buckets?.map((bucket) => bucket.key) ?? [];
     return { ...acc, [key]: values };
-  }, {});
+  }, {} as Record<string, string[]>);
 }
 
 function throwIfInvalidDataStreamParams(dataStream?: string) {

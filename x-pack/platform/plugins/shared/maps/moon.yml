@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/maps-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-presentation'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/maps-plugin'
+  title: '@kbn/maps-plugin'
   description: Moon project for @kbn/maps-plugin
   channel: ''
   owner: '@elastic/kibana-presentation'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/maps
+  sourceRoot: x-pack/platform/plugins/shared/maps
 dependsOn:
   - '@kbn/core'
   - '@kbn/maps-ems-plugin'
@@ -76,7 +75,6 @@ dependsOn:
   - '@kbn/content-management-table-list-view-table'
   - '@kbn/content-management-table-list-view'
   - '@kbn/serverless'
-  - '@kbn/logging'
   - '@kbn/chart-expressions-common'
   - '@kbn/search-errors'
   - '@kbn/search-response-warnings'
@@ -92,8 +90,6 @@ dependsOn:
   - '@kbn/apm-data-view'
   - '@kbn/shared-ux-utility'
   - '@kbn/react-kibana-context-render'
-  - '@kbn/embeddable-enhanced-plugin'
-  - '@kbn/presentation-containers'
   - '@kbn/field-utils'
   - '@kbn/react-hooks'
   - '@kbn/scout'
@@ -108,6 +104,7 @@ dependsOn:
   - '@kbn/crypto-browser'
   - '@kbn/cps'
   - '@kbn/kql'
+  - '@kbn/cps-utils'
 tags:
   - plugin
   - prod
@@ -123,16 +120,6 @@ fileGroups:
     - server/config.ts
     - test/scout/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

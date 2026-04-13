@@ -6,6 +6,8 @@
  */
 
 import type { EsqlEsqlColumnInfo, FieldValue } from '@elastic/elasticsearch/lib/api/types';
+import { errors as EsErrors } from '@elastic/elasticsearch';
+import pRetry from 'p-retry';
 import { apiTest } from '@kbn/scout';
 
 export interface EsqlFixtureOptions {
@@ -57,10 +59,32 @@ export const esqlFixture = apiTest.extend<{}, EsqlFixture & EsqlFixtureOptions>(
           throw new Error('ES|QL query must start with a "from" clause.');
         }
 
-        const response = await esClient.esql.query({
-          query,
-          drop_null_columns: esqlDropNullColumns,
-        });
+        // Retry ES|QL queries to handle cluster state propagation delays.
+        // There can be a delay between index creation and
+        // when ES|QL can resolve column names from the mapping.
+        const response = await pRetry(
+          () =>
+            esClient.esql.query({
+              query,
+              drop_null_columns: esqlDropNullColumns,
+            }),
+          {
+            retries: 3,
+            minTimeout: 500,
+            onFailedAttempt: (error) => {
+              // Only retry verification_exception with "Unknown column" errors
+              // which indicate mapping propagation delays
+              const isUnknownColumnError =
+                error instanceof EsErrors.ResponseError &&
+                error.body?.error?.type === 'verification_exception' &&
+                error.message?.includes('Unknown column');
+
+              if (!isUnknownColumnError) {
+                throw error; // Don't retry other errors
+              }
+            },
+          }
+        );
 
         const documents = response.values.map((valueRow: FieldValue[]) => {
           const doc: Record<string, unknown> = {};

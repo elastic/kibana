@@ -124,7 +124,7 @@ export const SearchButton = ({
           ) : (
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
-                iconType="search"
+                iconType="magnify"
                 aria-label={searchButtonLabel}
                 title={searchButtonLabel}
                 onClick={onShowSearch}

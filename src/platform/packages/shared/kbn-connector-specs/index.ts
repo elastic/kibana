@@ -8,8 +8,11 @@
  */
 
 export * as connectorsSpecs from './src/all_specs';
-export * from './src/connector_spec';
+export type * from './src/connector_spec';
 export * as authTypeSpecs from './src/all_auth_types';
+export { EARS_PROVIDERS } from './src/auth_types/ears';
+export { getConnectorSpec } from './src/get_connector_spec';
+export { isToolAction } from './src/connector_spec';
 export * from './src/lib';
-export { getMeta, setMeta, addMeta } from './src/connector_spec_ui';
+export { setMeta, addMeta } from './src/connector_spec_ui';
 export type { BaseMetadata } from './src/connector_spec_ui';

@@ -36,7 +36,6 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
 > & {
   options?: Pick<
     RouteConfigOptions<Method>,
-    | 'authRequired'
     | 'xsrfRequired'
     | 'tags'
     | 'body'

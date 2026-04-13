@@ -21,8 +21,7 @@
       "uiActions"
     ],
     "requiredBundles": [
-      "kibanaReact",
-      "embeddable"
+      "kibanaReact"
     ]
   }
 }

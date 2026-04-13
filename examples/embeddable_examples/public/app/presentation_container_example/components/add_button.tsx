@@ -10,8 +10,9 @@
 import type { ReactElement } from 'react';
 import React, { useEffect, useState } from 'react';
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { PublishingSubject, ViewMode } from '@kbn/presentation-publishing';
 import { apiPublishesViewMode, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { of } from 'rxjs';
@@ -79,6 +80,9 @@ export function AddButton({ pageApi, uiActions }: { pageApi: unknown; uiActions:
       }}
       panelPaddingSize="none"
       anchorPosition="downLeft"
+      aria-label={i18n.translate('embeddableExamples.addPanelPopover.ariaLabel', {
+        defaultMessage: 'Add panel',
+      })}
     >
       <EuiContextMenuPanel items={items} />
     </EuiPopover>

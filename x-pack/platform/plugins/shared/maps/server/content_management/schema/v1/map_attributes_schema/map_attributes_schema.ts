@@ -33,6 +33,7 @@ export const adhocDataViewSchema = schema.object({
         'Contrary to its name, this property sets the index pattern of the data view. (e.g. `logs-*,metrics-*`)',
     },
   }),
+  // TODO runtime fields is missing
 });
 
 export const mapAttributesSchema = schema.object(

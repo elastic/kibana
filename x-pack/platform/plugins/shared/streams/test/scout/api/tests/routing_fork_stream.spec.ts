@@ -6,19 +6,25 @@
  */
 
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import { streamsApiTest as apiTest } from '../fixtures';
 import { PUBLIC_API_HEADERS } from '../fixtures/constants';
 
 apiTest.describe(
   'Stream data routing - fork stream API (CRUD)',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    // Stream names must be exactly one level deep when forking from 'logs'
-    // Format: logs.<name> where name uses hyphens, not dots
-    const streamNamePrefix = 'logs.rt';
+    // Use logs.otel as it's guaranteed to exist after enableStreams() in fresh installs
+    // Stream names must be exactly one level deep when forking from 'logs.otel'
+    // Format: logs.otel.<name> where name uses hyphens, not dots
+    const rootStream = 'logs.otel';
+    const streamNamePrefix = `${rootStream}.rt`;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    type StreamWhere = any;
 
     apiTest.afterEach(async ({ apiServices }) => {
-      // Cleanup test streams - matches any stream starting with 'logs.rt'
+      // Cleanup test streams - matches any stream starting with 'logs.otel.rt'
       await apiServices.streamsTest.cleanupTestStreams(streamNamePrefix);
     });
 
@@ -29,7 +35,7 @@ apiTest.describe(
         const { cookieHeader } = await samlAuth.asStreamsAdmin();
         const childStreamName = `${streamNamePrefix}-child-eq`;
 
-        const { statusCode, body } = await apiClient.post('api/streams/logs/_fork', {
+        const { statusCode, body } = await apiClient.post(`api/streams/${rootStream}/_fork`, {
           headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
           body: {
             stream: { name: childStreamName },
@@ -60,7 +66,7 @@ apiTest.describe(
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
       const childStreamName = `${streamNamePrefix}-child-neq`;
 
-      const { statusCode, body } = await apiClient.post('api/streams/logs/_fork', {
+      const { statusCode, body } = await apiClient.post(`api/streams/${rootStream}/_fork`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         body: {
           stream: { name: childStreamName },
@@ -80,7 +86,7 @@ apiTest.describe(
         const { cookieHeader } = await samlAuth.asStreamsAdmin();
         const childStreamName = `${streamNamePrefix}-child-contains`;
 
-        const { statusCode, body } = await apiClient.post('api/streams/logs/_fork', {
+        const { statusCode, body } = await apiClient.post(`api/streams/${rootStream}/_fork`, {
           headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
           body: {
             stream: { name: childStreamName },
@@ -101,7 +107,7 @@ apiTest.describe(
         const { cookieHeader } = await samlAuth.asStreamsAdmin();
         const childStreamName = `${streamNamePrefix}-child-starts`;
 
-        const { statusCode, body } = await apiClient.post('api/streams/logs/_fork', {
+        const { statusCode, body } = await apiClient.post(`api/streams/${rootStream}/_fork`, {
           headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
           body: {
             stream: { name: childStreamName },
@@ -122,7 +128,7 @@ apiTest.describe(
         const { cookieHeader } = await samlAuth.asStreamsAdmin();
         const childStreamName = `${streamNamePrefix}-child-ends`;
 
-        const { statusCode, body } = await apiClient.post('api/streams/logs/_fork', {
+        const { statusCode, body } = await apiClient.post(`api/streams/${rootStream}/_fork`, {
           headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
           body: {
             stream: { name: childStreamName },
@@ -143,7 +149,7 @@ apiTest.describe(
         const { cookieHeader } = await samlAuth.asStreamsAdmin();
         const childStreamName = `${streamNamePrefix}-child-exists`;
 
-        const { statusCode, body } = await apiClient.post('api/streams/logs/_fork', {
+        const { statusCode, body } = await apiClient.post(`api/streams/${rootStream}/_fork`, {
           headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
           body: {
             stream: { name: childStreamName },
@@ -165,7 +171,7 @@ apiTest.describe(
         const childStreamName = `${streamNamePrefix}-child-numeric`;
 
         // Test gte (greater than or equal)
-        const { statusCode } = await apiClient.post('api/streams/logs/_fork', {
+        const { statusCode } = await apiClient.post(`api/streams/${rootStream}/_fork`, {
           headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
           body: {
             stream: { name: childStreamName },
@@ -184,7 +190,7 @@ apiTest.describe(
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
       const childStreamName = `${streamNamePrefix}-disabled`;
 
-      const { statusCode } = await apiClient.post('api/streams/logs/_fork', {
+      const { statusCode } = await apiClient.post(`api/streams/${rootStream}/_fork`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         body: {
           stream: { name: childStreamName },
@@ -197,7 +203,7 @@ apiTest.describe(
       expect(statusCode).toBe(200);
 
       // Verify the parent stream has the routing rule as disabled
-      const { body: parentBody } = await apiClient.get('api/streams/logs', {
+      const { body: parentBody } = await apiClient.get(`api/streams/${rootStream}`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         responseType: 'json',
       });
@@ -215,7 +221,7 @@ apiTest.describe(
         const { cookieHeader } = await samlAuth.asStreamsAdmin();
         const childStreamName = `${streamNamePrefix}-dflt-enabled`;
 
-        const { statusCode } = await apiClient.post('api/streams/logs/_fork', {
+        const { statusCode } = await apiClient.post(`api/streams/${rootStream}/_fork`, {
           headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
           body: {
             stream: { name: childStreamName },
@@ -228,7 +234,7 @@ apiTest.describe(
         expect(statusCode).toBe(200);
 
         // Verify the routing rule status
-        const { body: parentBody } = await apiClient.get('api/streams/logs', {
+        const { body: parentBody } = await apiClient.get(`api/streams/${rootStream}`, {
           headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
           responseType: 'json',
         });
@@ -244,21 +250,24 @@ apiTest.describe(
     // Nested streams tests
     apiTest('should create nested child streams (2 levels)', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
-      // Level 1: logs.rt-level1 (forked from logs)
+      // Level 1: logs.otel.rt-level1 (forked from logs.otel)
       const level1Stream = `${streamNamePrefix}-level1`;
-      // Level 2: logs.rt-level1.level2 (forked from logs.rt-level1)
+      // Level 2: logs.otel.rt-level1.level2 (forked from logs.otel.rt-level1)
       const level2Stream = `${level1Stream}.level2`;
 
       // Create first level child
-      const { statusCode: l1CreateStatus } = await apiClient.post('api/streams/logs/_fork', {
-        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-        body: {
-          stream: { name: level1Stream },
-          where: { field: 'service.name', eq: 'level1' },
-          status: 'enabled',
-        },
-        responseType: 'json',
-      });
+      const { statusCode: l1CreateStatus } = await apiClient.post(
+        `api/streams/${rootStream}/_fork`,
+        {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          body: {
+            stream: { name: level1Stream },
+            where: { field: 'service.name', eq: 'level1' },
+            status: 'enabled',
+          },
+          responseType: 'json',
+        }
+      );
       expect(l1CreateStatus).toBe(200);
 
       // Create second level child (forked from level1)
@@ -300,7 +309,7 @@ apiTest.describe(
         [sibling2, 'service-b'],
         [sibling3, 'service-c'],
       ]) {
-        const { statusCode } = await apiClient.post('api/streams/logs/_fork', {
+        const { statusCode } = await apiClient.post(`api/streams/${rootStream}/_fork`, {
           headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
           body: {
             stream: { name: streamName },
@@ -313,7 +322,7 @@ apiTest.describe(
       }
 
       // Verify parent has all routing rules
-      const { body: parentBody } = await apiClient.get('api/streams/logs', {
+      const { body: parentBody } = await apiClient.get(`api/streams/${rootStream}`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         responseType: 'json',
       });
@@ -332,7 +341,7 @@ apiTest.describe(
       const childStreamName = `${streamNamePrefix}-to-delete`;
 
       // Create stream first
-      const { statusCode: createStatus } = await apiClient.post('api/streams/logs/_fork', {
+      const { statusCode: createStatus } = await apiClient.post(`api/streams/${rootStream}/_fork`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         body: {
           stream: { name: childStreamName },
@@ -364,7 +373,7 @@ apiTest.describe(
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
       const childStreamName = `${streamNamePrefix}-cplx-and`;
 
-      const { statusCode, body } = await apiClient.post('api/streams/logs/_fork', {
+      const { statusCode, body } = await apiClient.post(`api/streams/${rootStream}/_fork`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         body: {
           stream: { name: childStreamName },
@@ -387,7 +396,7 @@ apiTest.describe(
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
       const childStreamName = `${streamNamePrefix}-cplx-or`;
 
-      const { statusCode, body } = await apiClient.post('api/streams/logs/_fork', {
+      const { statusCode, body } = await apiClient.post(`api/streams/${rootStream}/_fork`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         body: {
           stream: { name: childStreamName },
@@ -410,7 +419,7 @@ apiTest.describe(
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
       const childStreamName = `${streamNamePrefix}-cplx-not`;
 
-      const { statusCode, body } = await apiClient.post('api/streams/logs/_fork', {
+      const { statusCode, body } = await apiClient.post(`api/streams/${rootStream}/_fork`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         body: {
           stream: { name: childStreamName },
@@ -430,7 +439,7 @@ apiTest.describe(
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
       const childStreamName = `${streamNamePrefix}-cplx-nested`;
 
-      const { statusCode, body } = await apiClient.post('api/streams/logs/_fork', {
+      const { statusCode, body } = await apiClient.post(`api/streams/${rootStream}/_fork`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         body: {
           stream: { name: childStreamName },
@@ -458,7 +467,7 @@ apiTest.describe(
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
       const childStreamName = `${streamNamePrefix}-always`;
 
-      const { statusCode, body } = await apiClient.post('api/streams/logs/_fork', {
+      const { statusCode, body } = await apiClient.post(`api/streams/${rootStream}/_fork`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         body: {
           stream: { name: childStreamName },
@@ -476,7 +485,7 @@ apiTest.describe(
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
       const childStreamName = `${streamNamePrefix}-never`;
 
-      const { statusCode } = await apiClient.post('api/streams/logs/_fork', {
+      const { statusCode } = await apiClient.post(`api/streams/${rootStream}/_fork`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         body: {
           stream: { name: childStreamName },
@@ -489,7 +498,7 @@ apiTest.describe(
       expect(statusCode).toBe(200);
 
       // Verify the routing rule is disabled
-      const { body: parentBody } = await apiClient.get('api/streams/logs', {
+      const { body: parentBody } = await apiClient.get(`api/streams/${rootStream}`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         responseType: 'json',
       });
@@ -505,7 +514,7 @@ apiTest.describe(
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
       const childStreamName = `${streamNamePrefix}-range`;
 
-      const { statusCode, body } = await apiClient.post('api/streams/logs/_fork', {
+      const { statusCode, body } = await apiClient.post(`api/streams/${rootStream}/_fork`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         body: {
           stream: { name: childStreamName },
@@ -526,7 +535,7 @@ apiTest.describe(
     apiTest('should fail to fork with empty condition object', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
-      const { statusCode } = await apiClient.post('api/streams/logs/_fork', {
+      const { statusCode } = await apiClient.post(`api/streams/${rootStream}/_fork`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         body: {
           stream: { name: `${streamNamePrefix}-invalid-cond` },
@@ -544,7 +553,7 @@ apiTest.describe(
       const childStreamName = `${streamNamePrefix}-duplicate`;
 
       // Create stream first
-      await apiClient.post('api/streams/logs/_fork', {
+      await apiClient.post(`api/streams/${rootStream}/_fork`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         body: {
           stream: { name: childStreamName },
@@ -555,7 +564,7 @@ apiTest.describe(
       });
 
       // Try to create stream with same name - should fail
-      const { statusCode } = await apiClient.post('api/streams/logs/_fork', {
+      const { statusCode } = await apiClient.post(`api/streams/${rootStream}/_fork`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         body: {
           stream: { name: childStreamName },
@@ -592,7 +601,7 @@ apiTest.describe(
     apiTest('should fail with missing stream name', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
-      const { statusCode } = await apiClient.post('api/streams/logs/_fork', {
+      const { statusCode } = await apiClient.post(`api/streams/${rootStream}/_fork`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         body: {
           stream: {},
@@ -608,7 +617,7 @@ apiTest.describe(
     apiTest('should fail with invalid status value', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
-      const { statusCode } = await apiClient.post('api/streams/logs/_fork', {
+      const { statusCode } = await apiClient.post(`api/streams/${rootStream}/_fork`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         body: {
           stream: { name: `${streamNamePrefix}-invalid-sts` },
@@ -620,5 +629,307 @@ apiTest.describe(
 
       expect(statusCode).toBe(400);
     });
+
+    // Routing rule update tests
+    apiTest('should update routing rule condition', async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asStreamsAdmin();
+      const childStreamName = `${streamNamePrefix}-update-cond`;
+
+      // Create stream first
+      const { statusCode: createStatus } = await apiClient.post(`api/streams/${rootStream}/_fork`, {
+        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+        body: {
+          stream: { name: childStreamName },
+          where: { field: 'service.name', eq: 'original-service' },
+          status: 'enabled',
+        },
+        responseType: 'json',
+      });
+      expect(createStatus).toBe(200);
+
+      // Get the parent stream to get current routing rules
+      const { body: parentBody } = await apiClient.get(`api/streams/${rootStream}`, {
+        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+
+      // Find and update the routing rule
+      const updatedRouting = parentBody.stream.ingest.wired.routing.map(
+        (rule: { destination: string; where: StreamWhere; status: string }) => {
+          if (rule.destination === childStreamName) {
+            return {
+              ...rule,
+              where: { field: 'service.name', eq: 'updated-service' },
+            };
+          }
+          return rule;
+        }
+      );
+
+      // Update parent stream with new routing
+      const { updated_at: _, ...processingWithoutUpdatedAt } =
+        parentBody.stream.ingest.processing || {};
+      const updateResponse = await apiClient.put(`api/streams/${rootStream}/_ingest`, {
+        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+        body: {
+          ingest: {
+            ...parentBody.stream.ingest,
+            processing: processingWithoutUpdatedAt,
+            wired: {
+              ...parentBody.stream.ingest.wired,
+              routing: updatedRouting,
+            },
+          },
+        },
+        responseType: 'json',
+      });
+
+      expect(updateResponse.statusCode).toBe(200);
+
+      // Verify the routing rule was updated
+      const { body: verifyBody } = await apiClient.get(`api/streams/${rootStream}`, {
+        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+
+      const updatedRule = verifyBody.stream.ingest.wired.routing.find(
+        (r: { destination: string }) => r.destination === childStreamName
+      );
+      expect(updatedRule).toBeDefined();
+      expect(updatedRule.where.eq).toBe('updated-service');
+    });
+
+    apiTest(
+      'should update routing rule status from enabled to disabled',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asStreamsAdmin();
+        const childStreamName = `${streamNamePrefix}-toggle-status`;
+
+        // Create stream with enabled status
+        await apiClient.post(`api/streams/${rootStream}/_fork`, {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          body: {
+            stream: { name: childStreamName },
+            where: { field: 'service.name', eq: 'toggle-test' },
+            status: 'enabled',
+          },
+          responseType: 'json',
+        });
+
+        // Get parent stream
+        const { body: parentBody } = await apiClient.get(`api/streams/${rootStream}`, {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          responseType: 'json',
+        });
+
+        // Update status to disabled
+        const updatedRouting = parentBody.stream.ingest.wired.routing.map(
+          (rule: { destination: string; where: StreamWhere; status: string }) => {
+            if (rule.destination === childStreamName) {
+              return { ...rule, status: 'disabled' };
+            }
+            return rule;
+          }
+        );
+
+        const { updated_at: _, ...processingWithoutUpdatedAt } =
+          parentBody.stream.ingest.processing || {};
+        const updateResponse = await apiClient.put(`api/streams/${rootStream}/_ingest`, {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          body: {
+            ingest: {
+              ...parentBody.stream.ingest,
+              processing: processingWithoutUpdatedAt,
+              wired: {
+                ...parentBody.stream.ingest.wired,
+                routing: updatedRouting,
+              },
+            },
+          },
+          responseType: 'json',
+        });
+
+        expect(updateResponse.statusCode).toBe(200);
+
+        // Verify status was updated
+        const { body: verifyBody } = await apiClient.get(`api/streams/${rootStream}`, {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          responseType: 'json',
+        });
+
+        const updatedRule = verifyBody.stream.ingest.wired.routing.find(
+          (r: { destination: string }) => r.destination === childStreamName
+        );
+        expect(updatedRule.status).toBe('disabled');
+      }
+    );
+
+    apiTest('should reorder routing rules', async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asStreamsAdmin();
+      const stream1 = `${streamNamePrefix}-reorder1`;
+      const stream2 = `${streamNamePrefix}-reorder2`;
+      const stream3 = `${streamNamePrefix}-reorder3`;
+
+      // Create three streams in order
+      for (const [streamName, serviceName] of [
+        [stream1, 'service-1'],
+        [stream2, 'service-2'],
+        [stream3, 'service-3'],
+      ]) {
+        await apiClient.post(`api/streams/${rootStream}/_fork`, {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          body: {
+            stream: { name: streamName },
+            where: { field: 'service.name', eq: serviceName },
+            status: 'enabled',
+          },
+          responseType: 'json',
+        });
+      }
+
+      // Get parent stream
+      const { body: parentBody } = await apiClient.get(`api/streams/${rootStream}`, {
+        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+
+      // Reorder: move stream3 to first position among our test streams
+      const testStreamRoutes = parentBody.stream.ingest.wired.routing.filter(
+        (r: { destination: string }) =>
+          r.destination === stream1 || r.destination === stream2 || r.destination === stream3
+      );
+
+      const otherRoutes = parentBody.stream.ingest.wired.routing.filter(
+        (r: { destination: string }) =>
+          r.destination !== stream1 && r.destination !== stream2 && r.destination !== stream3
+      );
+
+      // Reorder test routes: stream3, stream1, stream2
+      const reorderedTestRoutes = [
+        testStreamRoutes.find((r: { destination: string }) => r.destination === stream3),
+        testStreamRoutes.find((r: { destination: string }) => r.destination === stream1),
+        testStreamRoutes.find((r: { destination: string }) => r.destination === stream2),
+      ];
+
+      const reorderedRouting = [...otherRoutes, ...reorderedTestRoutes];
+
+      const { updated_at: _, ...processingWithoutUpdatedAt } =
+        parentBody.stream.ingest.processing || {};
+      const updateResponse = await apiClient.put(`api/streams/${rootStream}/_ingest`, {
+        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+        body: {
+          ingest: {
+            ...parentBody.stream.ingest,
+            processing: processingWithoutUpdatedAt,
+            wired: {
+              ...parentBody.stream.ingest.wired,
+              routing: reorderedRouting,
+            },
+          },
+        },
+        responseType: 'json',
+      });
+
+      expect(updateResponse.statusCode).toBe(200);
+
+      // Verify the order was updated
+      const { body: verifyBody } = await apiClient.get(`api/streams/${rootStream}`, {
+        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+
+      const testRoutes = verifyBody.stream.ingest.wired.routing.filter(
+        (r: { destination: string }) =>
+          r.destination === stream1 || r.destination === stream2 || r.destination === stream3
+      );
+
+      // stream3 should come before stream1 and stream2
+      const stream3Index = testRoutes.findIndex(
+        (r: { destination: string }) => r.destination === stream3
+      );
+      const stream1Index = testRoutes.findIndex(
+        (r: { destination: string }) => r.destination === stream1
+      );
+      const stream2Index = testRoutes.findIndex(
+        (r: { destination: string }) => r.destination === stream2
+      );
+
+      expect(stream3Index).toBeLessThan(stream1Index);
+      expect(stream1Index).toBeLessThan(stream2Index);
+    });
+
+    apiTest(
+      'should update routing rule to use complex condition',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asStreamsAdmin();
+        const childStreamName = `${streamNamePrefix}-complex-upd`;
+
+        // Create stream with simple condition
+        await apiClient.post(`api/streams/${rootStream}/_fork`, {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          body: {
+            stream: { name: childStreamName },
+            where: { field: 'service.name', eq: 'simple' },
+            status: 'enabled',
+          },
+          responseType: 'json',
+        });
+
+        // Get parent stream
+        const { body: parentBody } = await apiClient.get(`api/streams/${rootStream}`, {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          responseType: 'json',
+        });
+
+        // Update to complex AND condition
+        const updatedRouting = parentBody.stream.ingest.wired.routing.map(
+          (rule: { destination: string; where: StreamWhere; status: string }) => {
+            if (rule.destination === childStreamName) {
+              return {
+                ...rule,
+                where: {
+                  and: [
+                    { field: 'service.name', eq: 'api-gateway' },
+                    { field: 'log.level', eq: 'error' },
+                  ],
+                },
+              };
+            }
+            return rule;
+          }
+        );
+
+        const { updated_at: _, ...processingWithoutUpdatedAt } =
+          parentBody.stream.ingest.processing || {};
+        const updateResponse = await apiClient.put(`api/streams/${rootStream}/_ingest`, {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          body: {
+            ingest: {
+              ...parentBody.stream.ingest,
+              processing: processingWithoutUpdatedAt,
+              wired: {
+                ...parentBody.stream.ingest.wired,
+                routing: updatedRouting,
+              },
+            },
+          },
+          responseType: 'json',
+        });
+
+        expect(updateResponse.statusCode).toBe(200);
+
+        // Verify the complex condition was saved
+        const { body: verifyBody } = await apiClient.get(`api/streams/${rootStream}`, {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          responseType: 'json',
+        });
+
+        const updatedRule = verifyBody.stream.ingest.wired.routing.find(
+          (r: { destination: string }) => r.destination === childStreamName
+        );
+        expect(updatedRule.where.and).toBeDefined();
+        expect(updatedRule.where.and).toHaveLength(2);
+      }
+    );
   }
 );

@@ -9,7 +9,7 @@
 
 import type React from 'react';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import type { IUiSettingsClient, Capabilities } from '@kbn/core/public';
+import type { IUiSettingsClient, Capabilities, AnalyticsServiceStart } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -34,8 +34,9 @@ import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { SerializedStyles } from '@emotion/serialize';
 import type { ResizableLayoutProps } from '@kbn/resizable-layout';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 
 /**
  * The fetch status of a Unified Histogram request
@@ -62,6 +63,7 @@ export interface UnifiedHistogramServices {
   capabilities: Capabilities;
   dataViews: DataViewsPublicPluginStart;
   fieldsMetadata?: FieldsMetadataPublicStart;
+  analytics?: AnalyticsServiceStart;
 }
 
 /**
@@ -218,7 +220,7 @@ export interface UnifiedHistogramFetchParamsExternal {
   /**
    * The controls state to use for the chart
    */
-  controlsState?: ControlPanelsState<ESQLControlState>;
+  controlsState?: ControlPanelsState<OptionsListESQLControlState>;
   /**
    * The current columns
    */

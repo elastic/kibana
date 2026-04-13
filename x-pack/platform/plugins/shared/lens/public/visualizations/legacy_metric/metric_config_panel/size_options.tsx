@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiSuperSelect } from '@elastic/eui';
+import { EuiFormAppend, EuiFormPrepend, EuiSuperSelect } from '@elastic/eui';
 import type { LegacyMetricState } from '@kbn/lens-common';
 
 export interface TitlePositionProps {
@@ -68,8 +68,8 @@ export const SizeOptions: React.FC<TitlePositionProps> = ({ state, setState }) =
   return (
     <EuiSuperSelect
       append={
-        <EuiButtonIcon
-          iconType="plus"
+        <EuiFormAppend
+          iconLeft="plus"
           onClick={() => changeSize(1)}
           isDisabled={currSizeIndex === titleSizes.length - 1}
           aria-label={i18n.translate('xpack.lens.legacyMetric.sizeOptions.increaseSizeAriaLabel', {
@@ -78,8 +78,8 @@ export const SizeOptions: React.FC<TitlePositionProps> = ({ state, setState }) =
         />
       }
       prepend={
-        <EuiButtonIcon
-          iconType="minus"
+        <EuiFormPrepend
+          iconLeft="minus"
           onClick={() => changeSize(-1)}
           isDisabled={currSizeIndex === 0}
           aria-label={i18n.translate('xpack.lens.legacyMetric.sizeOptions.decreaseSizeAriaLabel', {

@@ -204,7 +204,8 @@ export class TaskScheduling {
 
   public async bulkUpdateState(
     taskIds: string[],
-    stateMapFn: (s: ConcreteTaskInstance['state'], id: string) => ConcreteTaskInstance['state']
+    stateMapFn: (s: ConcreteTaskInstance['state'], id: string) => ConcreteTaskInstance['state'],
+    options?: ApiKeyOptions
   ) {
     return await retryableBulkUpdate({
       taskIds,
@@ -216,6 +217,7 @@ export class TaskScheduling {
         state: stateMapFn(task.state, task.id),
       }),
       validate: false,
+      options,
     });
   }
 
@@ -340,7 +342,11 @@ export class TaskScheduling {
         // if so,try to update the just the schedule
         // only works for interval schedule
         if (taskInstance.schedule && taskInstance.schedule.interval) {
-          const result = await this.bulkUpdateSchedules([taskInstance.id], taskInstance.schedule);
+          const result = await this.bulkUpdateSchedules(
+            [taskInstance.id],
+            taskInstance.schedule,
+            options
+          );
           if (
             result.errors.length &&
             result.errors[0].error.statusCode !== VERSION_CONFLICT_STATUS &&

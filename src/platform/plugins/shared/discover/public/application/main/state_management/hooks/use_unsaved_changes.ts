@@ -7,15 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  type BehaviorSubject,
-  combineLatest,
-  distinctUntilChanged,
-  from,
-  map,
-  switchMap,
-} from 'rxjs';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { distinctUntilChanged, from, map } from 'rxjs';
 import { useEffect, useState } from 'react';
 import type { AppMountParameters } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -23,7 +15,6 @@ import {
   internalStateActions,
   selectAllTabs,
   selectHasUnsavedChanges,
-  selectTabRuntimeState,
   type InternalStateStore,
   type RuntimeStateManager,
 } from '../redux';
@@ -44,26 +35,6 @@ export const useUnsavedChanges = ({
       map((state) => [selectAllTabs(state), state.persistedDiscoverSession] as const),
       distinctUntilChanged(([prevTabs, prevSession], [currTabs, currSession]) => {
         return prevTabs === currTabs && prevSession === currSession;
-      }),
-      switchMap(([allTabs]) => {
-        const stateContainerObservables = allTabs.map(
-          (tab) => selectTabRuntimeState(runtimeStateManager, tab.id).stateContainer$
-        );
-
-        return combineLatest(stateContainerObservables);
-      }),
-      switchMap((allTabStateContainers) => {
-        const savedSearchObservables: Array<BehaviorSubject<SavedSearch>> = [];
-
-        for (const tabStateContainer of allTabStateContainers) {
-          const savedSearch$ = tabStateContainer?.savedSearchState.getCurrent$();
-
-          if (savedSearch$) {
-            savedSearchObservables.push(savedSearch$);
-          }
-        }
-
-        return combineLatest(savedSearchObservables);
       })
     )
   );

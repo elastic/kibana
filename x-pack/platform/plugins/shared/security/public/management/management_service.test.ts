@@ -42,6 +42,7 @@ describe('ManagementService', () => {
           } as DefinedSections,
         },
         locator: {} as any,
+        registerAutoOpsStatusHook: jest.fn(),
       };
 
       const service = new ManagementService({} as unknown as ConfigType);
@@ -95,6 +96,7 @@ describe('ManagementService', () => {
           } as DefinedSections,
         },
         locator: {} as any,
+        registerAutoOpsStatusHook: jest.fn(),
       };
 
       const config = {
@@ -175,6 +177,7 @@ describe('ManagementService', () => {
           } as DefinedSections,
         },
         locator: {} as any,
+        registerAutoOpsStatusHook: jest.fn(),
       };
 
       service.setup({

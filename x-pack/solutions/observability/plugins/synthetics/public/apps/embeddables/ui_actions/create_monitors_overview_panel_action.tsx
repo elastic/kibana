@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import {
   IncompatibleActionError,
   type UiActionsActionDefinition,
@@ -14,7 +14,7 @@ import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { COMMON_OBSERVABILITY_GROUPING } from '@kbn/observability-shared-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
 import type { ClientPluginsStart } from '../../../plugin';
-import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../constants';
+import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../common/embeddables/monitors_overview/constants';
 import { ADD_SYNTHETICS_MONITORS_OVERVIEW_ACTION_ID } from './constants';
 import { openMonitorConfiguration } from '../common/monitors_open_configuration';
 

@@ -55,7 +55,7 @@ export function SecuritySolutionServerlessUtils({
   });
 
   const createSuperTest = async (role = 'admin') => {
-    cleanCredentials(role);
+    await cleanCredentials(role);
     const credentials = await svlUserManager.createM2mApiKeyWithRoleScope(role);
     rolesCredentials.set(role, credentials);
 

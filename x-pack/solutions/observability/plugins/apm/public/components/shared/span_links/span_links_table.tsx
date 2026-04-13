@@ -177,7 +177,7 @@ export function SpanLinksTable({ items }: Props) {
                 aria-label={i18n.translate('xpack.apm.spanLinks.table.actions.edit.ariaLabel', {
                   defaultMessage: 'Edit',
                 })}
-                iconType="boxesHorizontal"
+                iconType="boxesVertical"
                 onClick={() => {
                   setIdActionMenuOpen(id);
                 }}
@@ -271,5 +271,15 @@ export function SpanLinksTable({ items }: Props) {
     },
   ];
 
-  return <EuiInMemoryTable items={items} columns={columns} sorting={true} pagination={true} />;
+  return (
+    <EuiInMemoryTable
+      items={items}
+      columns={columns}
+      sorting={true}
+      pagination={true}
+      tableCaption={i18n.translate('xpack.apm.spanLinks.table.caption', {
+        defaultMessage: 'Span links list',
+      })}
+    />
+  );
 }

@@ -202,11 +202,11 @@ describe('convertToWorkflowGraph', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as WorkflowYaml);
       const topSort = graphlib.alg.topsort(executionGraph);
       expect(topSort).toEqual([
-        'enterForeach_foreach_testAtomicStep1',
         'enterTimeoutZone_testAtomicStep1',
+        'enterForeach_foreach_testAtomicStep1',
         'testAtomicStep1',
-        'exitTimeoutZone_testAtomicStep1',
         'exitForeach_foreach_testAtomicStep1',
+        'exitTimeoutZone_testAtomicStep1',
       ]);
     });
 

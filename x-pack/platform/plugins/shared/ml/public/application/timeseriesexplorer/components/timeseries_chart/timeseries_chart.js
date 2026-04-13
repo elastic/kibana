@@ -2010,9 +2010,9 @@ class TimeseriesChartIntl extends Component {
     return (
       <>
         <RuleEditorFlyout
-          selectedJob={this.props.selectedJob}
           setShowFunction={this.setShowRuleEditorFlyoutFunction}
           unsetShowFunction={this.unsetShowRuleEditorFlyoutFunction}
+          telemetrySource={this.props.telemetrySource}
         />
         {this.state.alertFlyoutVisible && this.state.alertFlyoutParams && (
           <MlAnomalyAlertFlyout

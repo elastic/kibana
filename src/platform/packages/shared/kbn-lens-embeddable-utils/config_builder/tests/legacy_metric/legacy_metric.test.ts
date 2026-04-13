@@ -8,8 +8,14 @@
  */
 
 import { legacyMetricStateSchema } from '../../schema/charts/legacy_metric';
+import type { LensApiState } from '../../schema';
 import { validateConverter, validateAPIConverter } from '../validate';
-import { simpleLegacyMetricAttributes } from './lens_state_config.mock';
+import {
+  customColorByValueAttributes,
+  defaultColorByValueAttributes,
+  selectorColorByValueAttributes,
+  simpleLegacyMetricAttributes,
+} from './lens_state_config.mock';
 import {
   basicLegacyMetricWithAdHocDataView,
   basicLegacyMetricWithDataView,
@@ -26,6 +32,18 @@ describe('Legacy Metric', () => {
     it('should convert a simple legacy metric', () => {
       validateConverter(simpleLegacyMetricAttributes, legacyMetricStateSchema);
     });
+
+    it('should convert a default color by value palette', () => {
+      validateConverter(defaultColorByValueAttributes, legacyMetricStateSchema);
+    });
+
+    it('should convert a selector color by value palette', () => {
+      validateConverter(selectorColorByValueAttributes, legacyMetricStateSchema);
+    });
+
+    it('should convert a custom metric with a color by value palette', () => {
+      validateConverter(customColorByValueAttributes, legacyMetricStateSchema);
+    });
   });
 
   describe('validateAPIConverter', () => {
@@ -37,8 +55,10 @@ describe('Legacy Metric', () => {
       validateAPIConverter(basicLegacyMetricWithDataView, legacyMetricStateSchema);
     });
 
-    it('should convert a ESQL-based legacy metric chart', () => {
-      validateAPIConverter(esqlLegacyMetric, legacyMetricStateSchema);
+    it('should reject a ESQL-based legacy metric chart', () => {
+      expect(() =>
+        validateAPIConverter(esqlLegacyMetric as unknown as LensApiState, legacyMetricStateSchema)
+      ).toThrow();
     });
 
     it('should convert a comprehensive legacy metric chart with ad hoc data view', () => {
@@ -49,8 +69,13 @@ describe('Legacy Metric', () => {
       validateAPIConverter(comprehensiveLegacyMetricWithDataView, legacyMetricStateSchema);
     });
 
-    it('should convert a comprehensive ESQL-based legacy metric chart', () => {
-      validateAPIConverter(comprehensiveEsqlLegacyMetric, legacyMetricStateSchema);
+    it('should reject a comprehensive ESQL-based legacy metric chart', () => {
+      expect(() =>
+        validateAPIConverter(
+          comprehensiveEsqlLegacyMetric as unknown as LensApiState,
+          legacyMetricStateSchema
+        )
+      ).toThrow();
     });
 
     it('should convert a legacy metric chart with apply_color_to, but without color', () => {

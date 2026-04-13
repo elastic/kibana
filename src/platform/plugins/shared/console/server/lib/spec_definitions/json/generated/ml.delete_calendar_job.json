@@ -13,6 +13,7 @@
       "_ml/calendars/{calendar_id}/jobs/{job_id}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-calendar-job",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-ml-delete-calendar-job",
     "availability": {
       "stack": true,
       "serverless": true

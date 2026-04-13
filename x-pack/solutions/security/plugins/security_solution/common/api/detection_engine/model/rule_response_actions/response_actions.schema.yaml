@@ -130,6 +130,45 @@ components:
       required:
         - command
 
+    RunScriptOsConfigValues:
+      type: object
+      minProperties: 1
+      properties:
+        scriptId:
+          type: string
+        scriptInput:
+          type: string
+        timeout:
+          type: integer
+          description: Specify the timeout in seconds for the script execution
+          example: 60
+
+
+    RunscriptParams:
+      type: object
+      description: |
+        > warn
+        > This functionality is currently not available
+      required:
+        - command
+      properties:
+        command:
+          type: string
+          enum:
+            - runscript
+        comment:
+          type: string
+          description: Add a note that explains or describes the action. You can find your comment in the response actions history log
+        config:
+          type: object
+          properties:
+            linux:
+              $ref: '#/components/schemas/RunScriptOsConfigValues'
+            macos:
+              $ref: '#/components/schemas/RunScriptOsConfigValues'
+            windows:
+              $ref: '#/components/schemas/RunScriptOsConfigValues'
+
     ProcessesParams:
       type: object
       properties:
@@ -169,6 +208,7 @@ components:
           oneOf:
             - $ref: '#/components/schemas/DefaultParams'
             - $ref: '#/components/schemas/ProcessesParams'
+            - $ref: '#/components/schemas/RunscriptParams'
       required:
         - action_type_id
         - params
@@ -185,17 +225,28 @@ components:
           oneOf:
             - $ref: '#/components/schemas/DefaultParams'
             - $ref: '#/components/schemas/ProcessesParams'
+            - $ref: '#/components/schemas/RunscriptParams'
       required:
         - actionTypeId
         - params
 
     ResponseAction:
+      discriminator:
+        propertyName: action_type_id
+        mapping:
+          .osquery: '#/components/schemas/OsqueryResponseAction'
+          .endpoint: '#/components/schemas/EndpointResponseAction'
       oneOf:
         - $ref: '#/components/schemas/OsqueryResponseAction'
         - $ref: '#/components/schemas/EndpointResponseAction'
 
     # Camel Cased versions of ResponseAction
     RuleResponseAction:
+      discriminator:
+        propertyName: actionTypeId
+        mapping:
+          .osquery: '#/components/schemas/RuleResponseOsqueryAction'
+          .endpoint: '#/components/schemas/RuleResponseEndpointAction'
       oneOf:
         - $ref: '#/components/schemas/RuleResponseOsqueryAction'
         - $ref: '#/components/schemas/RuleResponseEndpointAction'

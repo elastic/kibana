@@ -18,12 +18,22 @@ import {
   EuiIconTip,
   EuiButtonIcon,
   EuiTourStep,
+  EuiBetaBadge,
+  EuiBadge,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common';
-import { Streams } from '@kbn/streams-schema';
+import {
+  Streams,
+  type RootStreamName,
+  LOGS_ROOT_STREAM_NAME,
+  ROOT_STREAM_NAMES,
+  isRoot,
+} from '@kbn/streams-schema';
 import useAsync from 'react-use/lib/useAsync';
+import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
 import { useStreamsTour } from '../streams_tour';
 import type { TableRow, SortableField } from './utils';
 import {
@@ -33,12 +43,17 @@ import {
   shouldComposeTree,
   filterStreamsByQuery,
   filterCollapsedStreamRows,
+  getLegacyLogsStatus,
 } from './utils';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { DocumentsColumn } from './documents_column';
 import { DataQualityColumn } from './data_quality_column';
+import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
-import { useStreamDocCountsFetch } from '../../hooks/use_streams_doc_counts_fetch';
+import {
+  STREAMS_HISTOGRAM_NUM_DATA_POINTS,
+  useStreamDocCountsFetch,
+} from '../../hooks/use_streams_doc_counts_fetch';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { RetentionColumn } from './retention_column';
@@ -51,10 +66,11 @@ import {
   RETENTION_COLUMN_HEADER_ARIA_LABEL,
   NO_STREAMS_MESSAGE,
   DATA_QUALITY_COLUMN_HEADER,
+  CPS_DOCUMENTS_WARNING,
   DOCUMENTS_COLUMN_HEADER,
   FAILURE_STORE_PERMISSIONS_ERROR,
 } from './translations';
-import { DiscoverBadgeButton, QueryStreamBadge } from '../stream_badges';
+import { DeprecatedLogsBadge, DiscoverBadgeButton, QueryStreamBadge } from '../stream_badges';
 
 const datePickerStyle = css`
   .euiFormControlLayout,
@@ -64,16 +80,37 @@ const datePickerStyle = css`
   }
 `;
 
+const TechnicalPreviewBadge = () => (
+  <EuiBetaBadge
+    tooltipContent={i18n.translate('xpack.streams.technicalPreviewTooltip', {
+      defaultMessage: 'This feature is in technical preview. We are working on it...',
+    })}
+    label={i18n.translate('xpack.streams.technicalPreviewLabel', {
+      defaultMessage: 'Technical preview',
+    })}
+    iconType="flask"
+    size="s"
+    css={{ display: 'block' }}
+  />
+);
+
 export function StreamsTreeTable({
   loading,
   streams = [],
   canReadFailureStore = false,
+  wiredStreamsStatus,
+  openFlyout,
 }: {
   streams?: ListStreamDetail[];
   canReadFailureStore?: boolean;
   loading?: boolean;
+  wiredStreamsStatus?: WiredStreamsStatus;
+  openFlyout?: () => void;
 }) {
   const router = useStreamsAppRouter();
+  const { dependencies } = useKibana();
+  const cpsHasLinkedProjects =
+    (dependencies.start.cps?.cpsManager?.getTotalProjectCount() ?? 0) > 1;
   const { rangeFrom, rangeTo } = useTimeRange();
   const { euiTheme } = useEuiTheme();
   const { timeState } = useTimefilter();
@@ -89,12 +126,10 @@ export function StreamsTreeTable({
     pageSize: 25,
   });
 
-  const numDataPoints = 25;
-
   const { getStreamDocCounts, getStreamHistogram } = useStreamDocCountsFetch({
     groupTotalCountByTimestamp: true,
     canReadFailureStore,
-    numDataPoints,
+    numDataPoints: STREAMS_HISTOGRAM_NUM_DATA_POINTS,
   });
 
   const docCountsFetch = getStreamDocCounts();
@@ -192,7 +227,12 @@ export function StreamsTreeTable({
       ) ?? [];
     return qualityFiters.length > 0
       ? rows.filter((row) =>
-          qualityFiters.some((filter: any) => filter.value.includes(row.dataQuality))
+          qualityFiters.some(
+            (filter) =>
+              'value' in filter &&
+              typeof filter.value === 'string' &&
+              filter.value.includes(row.dataQuality)
+          )
         )
       : rows;
   }, [enrichedStreams, sortField, sortDirection, qualityByStream, searchQuery?.ast?.clauses]);
@@ -355,7 +395,7 @@ export function StreamsTreeTable({
                 {treeMode && item.children && hasChildren && (
                   <EuiFlexItem grow={false}>
                     <EuiIcon
-                      type={isCollapsed ? 'arrowRight' : 'arrowDown'}
+                      type={isCollapsed ? 'chevronSingleRight' : 'chevronSingleDown'}
                       color="text"
                       size="m"
                       data-test-subj={`${isCollapsed ? 'expand' : 'collapse'}Button-${
@@ -412,7 +452,37 @@ export function StreamsTreeTable({
                   >
                     <EuiHighlight search={searchQuery?.text ?? ''}>{item.stream.name}</EuiHighlight>
                   </EuiLink>
+                  {(ROOT_STREAM_NAMES.includes(item.stream.name as RootStreamName) ||
+                    Streams.QueryStream.Definition.is(item.stream)) && <TechnicalPreviewBadge />}
                   {Streams.QueryStream.Definition.is(item.stream) && <QueryStreamBadge />}
+                  {item.stream.name === LOGS_ROOT_STREAM_NAME &&
+                    !Streams.QueryStream.Definition.is(item.stream) && (
+                      <DeprecatedLogsBadge
+                        openFlyout={openFlyout}
+                        hasNewStreams={getLegacyLogsStatus(wiredStreamsStatus).hasNewStreams}
+                      />
+                    )}
+                  {isRoot(item.stream.name) &&
+                    item.stream.name !== LOGS_ROOT_STREAM_NAME &&
+                    !item.data_stream &&
+                    !Streams.QueryStream.Definition.is(item.stream) && (
+                      <EuiToolTip
+                        position="right"
+                        content={i18n.translate(
+                          'xpack.streams.streamsTable.pendingDataStream.tooltip',
+                          {
+                            defaultMessage:
+                              'This stream is configured but has no backing data stream yet. Start sending data and the data stream will be created automatically on first ingest.',
+                          }
+                        )}
+                      >
+                        <EuiBadge color="default">
+                          {i18n.translate('xpack.streams.streamsTable.pendingDataStream.label', {
+                            defaultMessage: 'Pending',
+                          })}
+                        </EuiBadge>
+                      </EuiToolTip>
+                    )}
                 </EuiFlexGroup>
               </EuiFlexGroup>
             );
@@ -421,7 +491,15 @@ export function StreamsTreeTable({
         {
           field: 'documentsCount',
           name: (
-            <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexGroup alignItems="center" gutterSize="m">
+              {cpsHasLinkedProjects && (
+                <EuiIconTip
+                  content={CPS_DOCUMENTS_WARNING}
+                  type="info"
+                  size="s"
+                  data-test-subj="cpsDocumentsWarningTip"
+                />
+              )}
               {DOCUMENTS_COLUMN_HEADER}
               {!canReadFailureStore && (
                 <EuiIconTip
@@ -443,7 +521,7 @@ export function StreamsTreeTable({
                 indexPattern={item.stream.name}
                 histogramQueryFetch={getStreamHistogram(item.stream.name)}
                 timeState={timeState}
-                numDataPoints={numDataPoints}
+                numDataPoints={STREAMS_HISTOGRAM_NUM_DATA_POINTS}
               />
             ) : null,
         },
@@ -492,6 +570,7 @@ export function StreamsTreeTable({
           render: (_: unknown, item: TableRow) => (
             <RetentionColumn
               lifecycle={item.effective_lifecycle!}
+              streamName={item.stream.name}
               aria-label={i18n.translate('xpack.streams.streamsTreeTable.retentionCellAriaLabel', {
                 defaultMessage: 'Retention policy for {name}',
                 values: { name: item.stream.name },
@@ -507,13 +586,20 @@ export function StreamsTreeTable({
           align: 'left',
           sortable: false,
           dataType: 'string',
-          render: (_: unknown, item: TableRow) => (
-            <DiscoverBadgeButton
-              hasDataStream={!!item.data_stream || Streams.QueryStream.Definition.is(item.stream)}
-              indexMode={item.data_stream?.index_mode}
-              stream={item.stream}
-            />
-          ),
+          render: (_: unknown, item: TableRow) => {
+            const hasDataStream =
+              !!item.data_stream || Streams.QueryStream.Definition.is(item.stream);
+            if (Streams.QueryStream.Definition.is(item.stream)) {
+              return <DiscoverBadgeButton hasDataStream={hasDataStream} stream={item.stream} />;
+            }
+            return (
+              <DiscoverBadgeButton
+                hasDataStream={hasDataStream}
+                indexMode={item.data_stream?.index_mode ?? 'standard'}
+                stream={item.stream}
+              />
+            );
+          },
         },
       ]}
       itemId="name"

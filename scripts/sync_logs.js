@@ -168,6 +168,10 @@ function parseConfig(log) {
     opts['translate-timestamps'] !== undefined
       ? opts['translate-timestamps']
       : process.env.SYNC_TRANSLATE_TIMESTAMPS;
+  // getopts sets '' for missing string options; treat empty as unset so translation stays off by default
+  if (translateTimestampsRaw === '') {
+    translateTimestampsRaw = undefined;
+  }
   var translateTimestamps;
 
   if (translateTimestampsRaw !== undefined) {
@@ -309,7 +313,7 @@ function search(sourceClient, config, cycleNumber, log, startTime, endTime) {
 
   var query = {
     bool: {
-      must: [{ match_all: {} }, { range: { '@timestamp': timeRange } }],
+      filter: [{ range: { '@timestamp': timeRange } }],
     },
   };
 
@@ -328,7 +332,7 @@ function search(sourceClient, config, cycleNumber, log, startTime, endTime) {
         function_score: {
           query: query,
           functions: [{ random_score: { seed: seed } }],
-          score_mode: 'sum',
+          boost_mode: 'replace',
         },
       },
       size: size,

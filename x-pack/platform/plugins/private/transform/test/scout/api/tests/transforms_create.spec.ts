@@ -15,7 +15,7 @@ import { COMMON_HEADERS } from '../constants';
 
 apiTest.describe(
   '/internal/transform/transforms/{transformId} create',
-  { tag: tags.ESS_ONLY },
+  { tag: tags.stateful.all },
   () => {
     let dataViewToBeDeletedTitle: string | undefined;
     let transformManagerCookieHeader: CookieHeader;

@@ -221,6 +221,9 @@ export function MetricsSection({ bucketSize }: Props) {
           items={viewData?.series ?? []}
           columns={columns}
           loading={isLoading}
+          tableCaption={i18n.translate('xpack.observability.overview.metrics.tableCaption', {
+            defaultMessage: 'Host metrics',
+          })}
         />
       )}
     </SectionContainer>

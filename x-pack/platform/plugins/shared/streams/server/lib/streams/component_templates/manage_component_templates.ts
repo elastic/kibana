@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import { getErrorMessage } from '../errors/parse_error';
 import { retryTransientEsErrors } from '../helpers/retry';
 
 interface DeleteComponentOptions {
@@ -28,8 +29,8 @@ export async function deleteComponent({ esClient, name, logger }: DeleteComponen
       () => esClient.cluster.deleteComponentTemplate({ name }, { ignore: [404] }),
       { logger }
     );
-  } catch (error: any) {
-    logger.error(`Error deleting component template: ${error.message}`);
+  } catch (error) {
+    logger.error(`Error deleting component template: ${getErrorMessage(error)}`);
     throw error;
   }
 }
@@ -40,8 +41,8 @@ export async function upsertComponent({ esClient, component, logger }: Component
       logger,
     });
     logger.debug(() => `Installed component template: ${JSON.stringify(component)}`);
-  } catch (error: any) {
-    logger.error(`Error updating component template: ${error.message}`);
+  } catch (error) {
+    logger.error(`Error updating component template: ${getErrorMessage(error)}`);
     throw error;
   }
 }

@@ -14,15 +14,15 @@ import { stubFields } from '@kbn/data-views-plugin/common/field.stub';
 import type { CreateControlTypeAction } from '../../../actions/control_panel_actions';
 
 interface ControlTypeContext {
-  state: { fieldName: string };
+  state: { field_name: string };
 }
 
 const mockIsCompatible = (
-  { state: { fieldName } }: ControlTypeContext,
+  { state: { field_name } }: ControlTypeContext,
   isFieldCompatible: (field: DataViewField) => boolean
 ) => {
   const field =
-    stubFields.find((f) => f.name === fieldName) ??
+    stubFields.find((f) => f.name === field_name) ??
     new DataViewField({
       name: 'none',
       type: 'string',

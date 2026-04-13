@@ -10,12 +10,12 @@ import { readFileSync } from 'fs';
 import { Agent } from 'undici';
 
 import type { Logger } from '@kbn/core/server';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type {
   ClientAuthentication,
   GrantUiamAPIKeyParams,
 } from '@kbn/security-plugin-types-server';
 
-import { HTTPAuthorizationHeader } from '..';
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 import type { UiamConfigType } from '../config';
 import { getDetailedErrorMessage } from '../errors';
@@ -55,6 +55,42 @@ export interface GrantUiamApiKeyResponse {
 }
 
 /**
+ * Represents a single key entry in the convert API keys request body.
+ */
+export interface ConvertUiamApiKeyRequestEntry {
+  type: 'elasticsearch';
+  key: string;
+  endpoint: string;
+}
+
+/**
+ * Represents the request body for converting API keys via UIAM.
+ */
+export interface ConvertUiamApiKeysRequestBody {
+  keys: ConvertUiamApiKeyRequestEntry[];
+}
+
+/**
+ * Represents the response from converting API keys via UIAM, containing per-key results.
+ */
+export interface ConvertUiamApiKeysResponse {
+  results: Array<
+    | {
+        status: 'success';
+        id: string;
+        key: string;
+        description: string;
+        organization_id: string;
+        internal: boolean;
+        role_assignments: Record<string, unknown>;
+        creation_date: string;
+        expiration_date: string | null;
+      }
+    | { status: 'failed'; code: string; message: string; resource: string | null; type: string }
+  >;
+}
+
+/**
  * The service that integrates with UIAM for user authentication and session management.
  */
 export interface UiamServicePublic {
@@ -69,12 +105,6 @@ export interface UiamServicePublic {
    * `client_authentication` option in Elasticsearch client.
    */
   getClientAuthentication(): ClientAuthentication;
-
-  /**
-   * Returns the Elasticsearch client authentication header (`x-client-authentication`) with the shared secret value.
-   * This header is used to authenticate requests from Kibana to Elasticsearch when using UIAM credentials.
-   */
-  getEsClientAuthenticationHeader(): Record<string, string>;
 
   /**
    * Refreshes the UIAM user session and returns new access and refresh session tokens.
@@ -103,11 +133,34 @@ export interface UiamServicePublic {
   ): Promise<GrantUiamApiKeyResponse>;
 
   /**
+   * Exchanges an OAuth access token for an ephemeral UIAM token. Validates that the audience
+   * returned by UIAM matches the expected Kibana server audience and throws if there is a mismatch.
+   * @param accessToken The OAuth access token.
+   * @returns The ephemeral token.
+   */
+  exchangeOAuthToken(accessToken: string): Promise<string>;
+
+  /**
    * Revokes a UIAM API key by its ID.
    * @param apiKeyId The ID of the API key to revoke.
    * @param apiKey The API key to revoke; will be used for authentication on this request.
    */
   revokeApiKey(apiKeyId: string, apiKey: string): Promise<void>;
+
+  /**
+   * Converts Elasticsearch API keys into UIAM API keys. The Elasticsearch endpoint is injected
+   * automatically from the cloud.id configuration.
+   * @param keys The base64-encoded Elasticsearch API key values to convert.
+   * @returns A promise that resolves to a response containing per-key success/failure results.
+   */
+  convertApiKeys(keys: string[]): Promise<ConvertUiamApiKeysResponse>;
+}
+
+interface UiamServiceOptions {
+  /** The base URL of the Kibana server. */
+  kibanaServerURL: string;
+  /** The URL of the Elasticsearch cluster. */
+  elasticsearchUrl?: string;
 }
 
 /**
@@ -117,9 +170,13 @@ export class UiamService implements UiamServicePublic {
   readonly #logger: Logger;
   readonly #config: Required<UiamConfigType>;
   readonly #dispatcher: Agent | undefined;
+  readonly #kibanaServerURL: string;
+  readonly #elasticsearchUrl?: string;
 
-  constructor(logger: Logger, config: UiamConfigType) {
+  constructor(logger: Logger, config: UiamConfigType, options: UiamServiceOptions) {
     this.#logger = logger;
+    this.#kibanaServerURL = options.kibanaServerURL;
+    this.#elasticsearchUrl = options.elasticsearchUrl;
 
     // Destructure existing config and re-create it again after validation to make TypeScript can infer the proper types.
     const { enabled, url, sharedSecret, ssl } = config;
@@ -154,13 +211,6 @@ export class UiamService implements UiamServicePublic {
    */
   getClientAuthentication(): ClientAuthentication {
     return { scheme: 'SharedSecret', value: this.#config.sharedSecret };
-  }
-
-  /**
-   * See {@link UiamServicePublic.getEsClientAuthenticationHeader}.
-   */
-  getEsClientAuthenticationHeader(): Record<string, string> {
-    return { [ES_CLIENT_AUTHENTICATION_HEADER]: this.getClientAuthentication().value };
   }
 
   /**
@@ -215,6 +265,48 @@ export class UiamService implements UiamServicePublic {
     } catch (err) {
       this.#logger.error(
         () => `Failed to invalidate session tokens: ${getDetailedErrorMessage(err)}`
+      );
+
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamServicePublic.exchangeOAuthToken}.
+   */
+  async exchangeOAuthToken(accessToken: string): Promise<string> {
+    this.#logger.debug('Attempting to exchange OAuth access token for ephemeral token.');
+
+    const expectedAudience = this.#kibanaServerURL;
+    const url = new URL(`${this.#config.url}/uiam/api/v1/authentication/_authenticate`);
+    url.searchParams.set('include_token', 'true');
+    url.searchParams.set('audience', expectedAudience);
+
+    try {
+      const response = await UiamService.#parseUiamResponse(
+        await fetch(url.toString(), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+            Authorization: `Bearer ${accessToken}`,
+          },
+          // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+          dispatcher: this.#dispatcher,
+        })
+      );
+
+      const audience = response.credentials?.oauth?.audience;
+      if (audience !== expectedAudience) {
+        throw Boom.badRequest(
+          `OAuth token audience mismatch: expected "${expectedAudience}" but got "${audience}".`
+        );
+      }
+
+      return response.token;
+    } catch (err) {
+      this.#logger.error(
+        () => `Failed to exchange OAuth access token: ${getDetailedErrorMessage(err)}`
       );
 
       throw err;
@@ -297,28 +389,79 @@ export class UiamService implements UiamServicePublic {
   }
 
   /**
+   * See {@link UiamServicePublic.convertApiKeys}.
+   */
+  async convertApiKeys(keys: string[]): Promise<ConvertUiamApiKeysResponse> {
+    if (!this.#elasticsearchUrl) {
+      throw new Error(
+        'Cannot convert API keys: Elasticsearch URL could not be resolved from cloud.id'
+      );
+    }
+
+    try {
+      this.#logger.debug(`Attempting to convert ${keys.length} API key(s).`);
+
+      const body: ConvertUiamApiKeysRequestBody = {
+        keys: keys.map((key) => ({
+          type: 'elasticsearch' as const,
+          key,
+          endpoint: this.#elasticsearchUrl!,
+        })),
+      };
+
+      const response = await UiamService.#parseUiamResponse(
+        await fetch(`${this.#config.url}/uiam/api/v1/api-keys/_convert`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+          },
+          body: JSON.stringify(body),
+          // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+          dispatcher: this.#dispatcher,
+        })
+      );
+
+      this.#logger.debug(`Successfully converted API key(s).`);
+      return response;
+    } catch (err) {
+      this.#logger.error(() => `Failed to convert API keys: ${getDetailedErrorMessage(err)}`);
+
+      throw err;
+    }
+  }
+
+  /**
    * Creates a custom dispatcher for the native `fetch` to use custom TLS connection settings.
    */
   #createFetchDispatcher() {
     const { certificateAuthorities, verificationMode } = this.#config.ssl;
+
+    const readFile = (file: string) => readFileSync(file, 'utf8');
+
+    // Read client certificate and key for mTLS from PEM files.
+    const cert = this.#config.ssl.certificate ? readFile(this.#config.ssl.certificate) : undefined;
+    const key = this.#config.ssl.key ? readFile(this.#config.ssl.key) : undefined;
 
     // Read CA certificate(s) from the file paths defined in the config.
     const ca = certificateAuthorities
       ? (Array.isArray(certificateAuthorities)
           ? certificateAuthorities
           : [certificateAuthorities]
-        ).map((caPath) => readFileSync(caPath, 'utf8'))
+        ).map((caPath) => readFile(caPath))
       : undefined;
 
-    // If we don't have custom CAs and the full verification is required, we don't need custom
-    // dispatcher as it's a default `fetch` behavior.
-    if (!ca && verificationMode === 'full') {
+    // If we don't have any custom TLS settings and the full verification is required, we don't
+    // need a custom dispatcher as it's the default `fetch` behavior.
+    if (!ca && !cert && !key && verificationMode === 'full') {
       return;
     }
 
     return new Agent({
       connect: {
         ca,
+        cert,
+        key,
         // The applications, including Kibana, running inside the MKI cluster should not need access to things like the
         // root CA and should be able to work with the CAs related to that particular cluster. The trust bundle we
         // currently deploy in the Kibana pods includes only the intermediate CA that is scoped to the application

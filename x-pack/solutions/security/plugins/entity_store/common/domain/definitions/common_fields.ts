@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import type { EntityType, EntityField } from './entity_schema';
-import { oldestValue, newestValue } from './field_retention_operations';
+import type { Condition } from '@kbn/streamlang';
+import type { EntityType, EntityField, FieldEvaluation } from './entity_schema';
+import { collectValues, newestValue, oldestValue } from './field_retention_operations';
 
+export const ENTITY_ID_FIELD = 'entity.id';
+export const ENTITY_SOURCE_FIELD = 'entity.source';
 // Copied from x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_definitions/entity_descriptions/common.ts
 
 export const getCommonFieldDescriptions = (
   ecsField: Omit<EntityType, 'generic'> | 'entity'
 ): EntityField[] => [
-  oldestValue({
-    source: '_index',
-    destination: 'entity.source',
-  }),
   newestValue({ source: 'asset.id' }),
   newestValue({ source: 'asset.name' }),
   newestValue({ source: 'asset.owner' }),
@@ -28,15 +27,18 @@ export const getCommonFieldDescriptions = (
   newestValue({ source: 'asset.business_unit' }),
   newestValue({
     source: `${ecsField}.risk.calculated_level`,
+    destination: 'entity.risk.calculated_level',
   }),
   newestValue({
     source: `${ecsField}.risk.calculated_score`,
+    destination: 'entity.risk.calculated_score',
     mapping: {
       type: 'float',
     },
   }),
   newestValue({
     source: `${ecsField}.risk.calculated_score_norm`,
+    destination: 'entity.risk.calculated_score_norm',
     mapping: {
       type: 'float',
     },
@@ -47,84 +49,175 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
   const prefix = rootField ? `${rootField}.entity` : 'entity';
 
   return [
-    newestValue({ source: `${prefix}.source`, destination: 'entity.source' }),
+    collectValues({ source: 'event.module' }),
+    collectValues({ source: 'event.dataset' }),
+    collectValues({ source: 'data_stream.dataset', fieldHistoryLength: 50 }),
+    collectValues({ source: ENTITY_SOURCE_FIELD, fieldHistoryLength: 50 }),
     newestValue({ source: `${prefix}.type`, destination: 'entity.type' }),
     newestValue({ source: `${prefix}.sub_type`, destination: 'entity.sub_type' }),
     newestValue({ source: `${prefix}.url`, destination: 'entity.url' }),
 
+    // ATTRIBUTES ------------------------------------------------------------
+    collectValues({
+      source: `${prefix}.attributes.watchlists`,
+      destination: 'entity.attributes.watchlists',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
     newestValue({
-      source: `${prefix}.attributes.Privileged`,
-      destination: 'entity.attributes.Privileged',
+      source: `${prefix}.attributes.asset`,
+      destination: 'entity.attributes.asset',
       mapping: { type: 'boolean' },
       allowAPIUpdate: true,
     }),
     newestValue({
-      source: `${prefix}.attributes.Asset`,
-      destination: 'entity.attributes.Asset',
+      source: `${prefix}.attributes.managed`,
+      destination: 'entity.attributes.managed',
       mapping: { type: 'boolean' },
       allowAPIUpdate: true,
     }),
     newestValue({
-      source: `${prefix}.attributes.Managed`,
-      destination: 'entity.attributes.Managed',
-      mapping: { type: 'boolean' },
-      allowAPIUpdate: true,
-    }),
-    newestValue({
-      source: `${prefix}.attributes.Mfa_enabled`,
-      destination: 'entity.attributes.Mfa_enabled',
+      source: `${prefix}.attributes.mfa_enabled`,
+      destination: 'entity.attributes.mfa_enabled',
       mapping: { type: 'boolean' },
       allowAPIUpdate: true,
     }),
 
-    /* Lifecycle fields should not allow update via the API */
-    newestValue({
-      source: `${prefix}.lifecycle.First_seen`,
-      destination: 'entity.lifecycle.First_seen',
+    // LIFECYCLE ------------------------------------------------------------
+    oldestValue({
+      source: '@timestamp',
+      destination: 'entity.lifecycle.first_seen',
       mapping: { type: 'date' },
     }),
     newestValue({
-      source: `${prefix}.lifecycle.Last_activity`,
-      destination: 'entity.lifecycle.Last_activity',
+      source: '@timestamp',
+      destination: 'entity.lifecycle.last_seen',
+      mapping: { type: 'date' },
+    }),
+    // Raw indices have no entity.lifecycle.*; derive from @timestamp like last_seen.
+    newestValue({
+      source: `${prefix}.lifecycle.last_activity`,
+      destination: 'entity.lifecycle.last_activity',
       mapping: { type: 'date' },
     }),
 
-    newestValue({
-      source: `${prefix}.behaviors.Brute_force_victim`,
-      destination: 'entity.behaviors.Brute_force_victim',
-      mapping: { type: 'boolean' },
+    // BEHAVIORS ------------------------------------------------------------
+    // Behaviors are reset periodically by the history snapshot feature
+    // The current reset implementation only resets lists and strings
+    // if we ever add a boolean, reset via snapshot needs to be updated
+    collectValues({
+      source: `${prefix}.behaviors.rule_names`,
+      destination: 'entity.behaviors.rule_names',
+      mapping: { type: 'keyword' },
+      fieldHistoryLength: 100,
       allowAPIUpdate: true,
     }),
-    newestValue({
-      source: `${prefix}.behaviors.New_country_login`,
-      destination: 'entity.behaviors.New_country_login',
-      mapping: { type: 'boolean' },
-      allowAPIUpdate: true,
-    }),
-    newestValue({
-      source: `${prefix}.behaviors.Used_usb_device`,
-      destination: 'entity.behaviors.Used_usb_device',
-      mapping: { type: 'boolean' },
+    collectValues({
+      source: `${prefix}.behaviors.anomaly_job_ids`,
+      destination: 'entity.behaviors.anomaly_job_ids',
+      mapping: { type: 'keyword' },
+      fieldHistoryLength: 100,
       allowAPIUpdate: true,
     }),
 
-    newestValue({
-      source: `${prefix}.risk.calculated_level`,
-      destination: 'entity.risk.calculated_level',
+    // RELATIONSHIPS ------------------------------------------------------------
+    collectValues({
+      source: `${prefix}.relationships.communicates_with`,
+      destination: 'entity.relationships.communicates_with',
+      mapping: { type: 'keyword' },
+      fieldHistoryLength: 50,
+      allowAPIUpdate: true,
+    }),
+    collectValues({
+      source: `${prefix}.relationships.depends_on`,
+      destination: 'entity.relationships.depends_on',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    collectValues({
+      source: `${prefix}.relationships.owns_inferred`,
+      destination: 'entity.relationships.owns_inferred',
+      mapping: { type: 'keyword' },
+    }),
+    collectValues({
+      source: `${prefix}.relationships.accesses_infrequently`,
+      destination: 'entity.relationships.accesses_infrequently',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    collectValues({
+      source: `${prefix}.relationships.accesses_frequently`,
+      destination: 'entity.relationships.accesses_frequently',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    collectValues({
+      source: `${prefix}.relationships.owns`,
+      destination: 'entity.relationships.owns',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    collectValues({
+      source: `${prefix}.relationships.supervises`,
+      destination: 'entity.relationships.supervises',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
     }),
     newestValue({
-      source: `${prefix}.risk.calculated_score`,
-      destination: 'entity.risk.calculated_score',
-      mapping: {
-        type: 'float',
-      },
+      source: `${prefix}.relationships.resolution.resolved_to`,
+      destination: 'entity.relationships.resolution.resolved_to',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
     }),
     newestValue({
-      source: `${prefix}.risk.calculated_score_norm`,
-      destination: 'entity.risk.calculated_score_norm',
-      mapping: {
-        type: 'float',
-      },
+      source: `${prefix}.relationships.resolution.risk.calculated_level`,
+      destination: 'entity.relationships.resolution.risk.calculated_level',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    newestValue({
+      source: `${prefix}.relationships.resolution.risk.calculated_score`,
+      destination: 'entity.relationships.resolution.risk.calculated_score',
+      mapping: { type: 'float' },
+      allowAPIUpdate: true,
+    }),
+    newestValue({
+      source: `${prefix}.relationships.resolution.risk.calculated_score_norm`,
+      destination: 'entity.relationships.resolution.risk.calculated_score_norm',
+      mapping: { type: 'float' },
+      allowAPIUpdate: true,
     }),
   ];
 };
+
+export const ENTITY_SOURCE_FIELD_EVALUATION: FieldEvaluation = {
+  destination: ENTITY_SOURCE_FIELD,
+  sources: [
+    { field: 'event.module' },
+    { field: 'event.dataset' },
+    { field: 'data_stream.dataset' },
+  ],
+  fallbackValue: null,
+  whenClauses: [],
+};
+
+export function isNotEmptyCondition(field: string): Condition {
+  return {
+    and: [
+      { field, exists: true },
+      { field, neq: '' },
+    ],
+  };
+}
+
+/** Returns a condition that is true when the field value is not one of the given values. */
+export function fieldNotOneOfCondition(field: string, values: string[]): Condition {
+  if (values.length === 0) {
+    return { always: {} };
+  }
+  return {
+    not: {
+      or: values.map((v) => ({ field, eq: v })),
+    },
+  };
+}

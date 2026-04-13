@@ -12,7 +12,8 @@ import type { LensPublicStart, TypedLensByValueInput } from '@kbn/lens-plugin/pu
 import type { ChartType } from '@kbn/visualization-utils';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
-import type { TabularDataResult } from '@kbn/agent-builder-common/tools/tool_result';
+import type { EsqlResults } from '@kbn/agent-builder-common/tools/tool_result';
+import type { TimeRange } from '@kbn/agent-builder-common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import useAsync from 'react-use/lib/useAsync';
@@ -21,8 +22,9 @@ interface Params {
   esqlQuery: string;
   dataViews: DataViewsServicePublic;
   lens: LensPublicStart;
-  esqlColumns: TabularDataResult['data']['columns'] | undefined;
+  esqlColumns: EsqlResults['data']['columns'] | undefined;
   preferredChartType?: ChartType;
+  timeRange?: TimeRange;
 }
 
 interface ReturnValue {
@@ -38,6 +40,7 @@ export function useLensInput({
   lens,
   esqlColumns,
   preferredChartType,
+  timeRange,
 }: Params): ReturnValue {
   const [lensInput, setLensInput] = useState<TypedLensByValueInput>();
 
@@ -90,7 +93,7 @@ export function useLensInput({
           suggestion,
           dataView: dataViewAsync.value,
         }) as TypedLensByValueInput['attributes'];
-        setLensInput({ attributes, id: uuidv4() });
+        setLensInput({ attributes, id: uuidv4(), timeRange });
       }
     }
   }, [
@@ -100,6 +103,7 @@ export function useLensInput({
     columns,
     esqlQuery,
     preferredChartType,
+    timeRange,
     error,
   ]);
 

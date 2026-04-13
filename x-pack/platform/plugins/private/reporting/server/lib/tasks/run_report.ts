@@ -403,6 +403,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
           taskInstanceFields,
           cancellationToken,
           stream,
+          useInternalUser: task.useInternalUser,
         })
       ).pipe(timeout(this.queueTimeout)) // throw an error if a value is not emitted before timeout
     );
@@ -559,6 +560,13 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                 );
                 eventLog.logExecutionStart();
 
+                // Listen for stream errors so they and reject to prevent unhandled rejections
+                let streamErrorReject: (err: Error) => void;
+                const rejectIfStreamError = new Promise<never>((_, reject) => {
+                  streamErrorReject = reject;
+                  stream.once('error', reject);
+                });
+
                 const output = await Promise.race<TaskRunResult>([
                   this.performJob({
                     task,
@@ -568,7 +576,12 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                     stream,
                   }),
                   this.throwIfKibanaShutsDown(),
+                  rejectIfStreamError,
                 ]);
+
+                // Removing so errors in _final are handled only by finishedWithNoPendingCallbacks
+                // and don't cause unhandled rejections
+                stream.removeListener('error', streamErrorReject!);
 
                 stream.end();
 

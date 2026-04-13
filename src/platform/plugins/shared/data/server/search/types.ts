@@ -25,6 +25,7 @@ import type {
   IEsSearchRequest,
 } from '@kbn/search-types';
 
+import type { AsScopedOptions } from '@kbn/core-elasticsearch-server';
 import type { ISearchStartSearchSource, SearchSourceService } from '../../common/search';
 import type { AggsSetup, AggsStart } from './aggs';
 import type { SearchUsage } from './collectors/search';
@@ -103,6 +104,7 @@ export interface ISearchStart<
   /**
    * Search as the internal Kibana system user. This is not a registered search strategy as we don't
    * want to allow access from the client.
+   * @deprecated Use {@link INTERNAL_ENHANCED_ES_SEARCH_STRATEGY} instead.
    */
   searchAsInternalUser: ISearchStrategy;
   /**
@@ -111,11 +113,11 @@ export interface ISearchStart<
    * use this function to accomplish that.
    */
   getSearchStrategy: (
-    name?: string // Name of the search strategy (defaults to the Elasticsearch strategy)
+    name?: string | symbol // Name of the search strategy (defaults to the Elasticsearch strategy)
   ) => ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>;
-  asScoped: (request: KibanaRequest) => IScopedSearchClient;
+  asScoped: (request: KibanaRequest, opts?: AsScopedOptions) => IScopedSearchClient;
   searchSource: {
-    asScoped: (request: KibanaRequest) => Promise<ISearchStartSearchSource>;
+    asScoped: (request: KibanaRequest, opts?: AsScopedOptions) => Promise<ISearchStartSearchSource>;
   };
 }
 

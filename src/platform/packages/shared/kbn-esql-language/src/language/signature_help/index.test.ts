@@ -183,4 +183,73 @@ describe('getSignatureHelp', () => {
       expect(result?.activeParameter).toBe(1);
     });
   });
+
+  describe('PromQL functions', () => {
+    it('should return signature help for PromQL function without parens wrapper', async () => {
+      const query = 'PROMQL rate(';
+      const offset = query.length;
+
+      const result = await getSignatureHelp(query, offset, mockCallbacks);
+
+      expect(result).toBeDefined();
+      expect(result?.signatures[0].label).toContain('rate');
+      expect(result?.activeParameter).toBe(0);
+    });
+
+    it('should return signature help with label and description for PromQL function', async () => {
+      const query = 'PROMQL step="5m" (rate(';
+      const offset = query.length;
+
+      const result = await getSignatureHelp(query, offset, mockCallbacks);
+
+      expect(result).toBeDefined();
+      expect(result?.signatures[0].label).toContain('rate');
+      expect(result?.signatures[0].label).toContain('range_vector');
+      expect(result?.signatures[0].documentation).toContain('per-second');
+      expect(result?.activeParameter).toBe(0);
+    });
+
+    it('should keep signature help after a trailing comma', async () => {
+      const query = 'PROMQL step="5m" round(bytes, ';
+      const offset = query.length;
+
+      const result = await getSignatureHelp(query, offset, mockCallbacks);
+
+      expect(result).toBeDefined();
+      expect(result?.signatures[0].label).toContain('round');
+      expect(result?.activeParameter).toBe(1);
+    });
+
+    it('should return signature help for the innermost PromQL function', async () => {
+      const query = 'PROMQL step="5m" (sum(rate(bytes[5m])))';
+      const offset = query.indexOf('rate(') + 'rate('.length;
+
+      const result = await getSignatureHelp(query, offset, mockCallbacks);
+
+      expect(result).toBeDefined();
+      expect(result?.signatures[0].label).toContain('rate');
+    });
+
+    it('should return innermost function after comma in nested function', async () => {
+      const query = 'PROMQL step="5m" sum(quantile_over_time(0.9,';
+      const offset = query.length;
+
+      const result = await getSignatureHelp(query, offset, mockCallbacks);
+
+      expect(result).toBeDefined();
+      expect(result?.signatures[0].label).toContain('quantile_over_time');
+      expect(result?.activeParameter).toBe(1);
+    });
+  });
+
+  it('should return signature help for PromQL assignment form', async () => {
+    const query = 'PROMQL col0 = (rate(';
+    const offset = query.length;
+
+    const result = await getSignatureHelp(query, offset, mockCallbacks);
+
+    expect(result).toBeDefined();
+    expect(result?.signatures[0].label).toContain('rate');
+    expect(result?.activeParameter).toBe(0);
+  });
 });

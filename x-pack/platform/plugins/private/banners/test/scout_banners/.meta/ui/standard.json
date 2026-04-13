@@ -1,0 +1,61 @@
+{
+  "sha1": "657b31e1084b78e57340c5a825aaa793b6709f88",
+  "tests": [
+    {
+      "id": "eea7c4462a87227-22c66376801ebaf",
+      "title": "global pages displays the global banner on the login page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/banners/test/scout_banners/ui/tests/global.spec.ts",
+        "line": 13,
+        "column": 7
+      }
+    },
+    {
+      "id": "6a38dc61304ae22-4baa903d0b1913a",
+      "title": "per-spaces banners displays the space-specific banner within the space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/banners/test/scout_banners/ui/tests/spaces.spec.ts",
+        "line": 36,
+        "column": 7
+      }
+    },
+    {
+      "id": "6a38dc61304ae22-6f47a785e146b6a",
+      "title": "per-spaces banners displays the global banner within another space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/banners/test/scout_banners/ui/tests/spaces.spec.ts",
+        "line": 47,
+        "column": 7
+      }
+    },
+    {
+      "id": "6a38dc61304ae22-e99540c846b16da",
+      "title": "per-spaces banners displays the global banner on the login page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/banners/test/scout_banners/ui/tests/spaces.spec.ts",
+        "line": 54,
+        "column": 7
+      }
+    }
+  ]
+}

@@ -34,6 +34,7 @@
       "{index}/_mapping"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-mapping",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-indices-put-mapping",
     "availability": {
       "stack": true,
       "serverless": true

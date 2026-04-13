@@ -11,7 +11,9 @@ import { z } from '@kbn/zod/v4';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { SingleOptionUnionWidget } from './single_option_union_widget';
-import { addMeta, getMeta } from '../../../schema_connector_metadata';
+import { getMeta, setMeta, addMeta } from '../../../schema_connector_metadata';
+
+const meta = { getMeta, setMeta };
 
 const meta = { getMeta, addMeta };
 
@@ -133,9 +135,9 @@ describe('SingleOptionUnionWidget', () => {
       );
 
       const discriminatorField = option.shape.authType as z.ZodType;
-      const meta = getMeta(discriminatorField);
-      expect(meta.hidden).toBe(true);
-      expect(meta.disabled).toBe(true);
+      const discriminatorMeta = getMeta(discriminatorField);
+      expect(discriminatorMeta.hidden).toBe(true);
+      expect(discriminatorMeta.disabled).toBe(true);
     });
   });
 
@@ -187,6 +189,7 @@ describe('SingleOptionUnionWidget', () => {
       render(
         <TestFormWrapper>
           <SingleOptionUnionWidget
+            meta={meta}
             formConfig={{ disabled: true }}
             path="auth"
             schema={schema}
@@ -222,6 +225,7 @@ describe('SingleOptionUnionWidget', () => {
       render(
         <TestFormWrapper>
           <SingleOptionUnionWidget
+            meta={meta}
             formConfig={{ disabled: true }}
             path="auth"
             schema={schema}
@@ -340,6 +344,7 @@ describe('SingleOptionUnionWidget', () => {
     render(
       <TestFormWrapper>
         <SingleOptionUnionWidget
+          meta={meta}
           formConfig={{}}
           path="auth"
           schema={schema}
@@ -375,6 +380,7 @@ describe('SingleOptionUnionWidget', () => {
     render(
       <TestFormWrapper>
         <SingleOptionUnionWidget
+          meta={meta}
           formConfig={{}}
           path="auth"
           schema={schema}

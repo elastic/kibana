@@ -8,10 +8,18 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { scan, takeUntil, finalize, Observable } from 'rxjs';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
+import type { ConnectorInfo } from '../../common';
+
+export type { ConnectorInfo };
 
 interface ContextEvent {
   type: 'context';
   context: string;
+}
+
+interface ConnectorInfoEvent {
+  type: 'connectorInfo';
+  connector: ConnectorInfo;
 }
 
 interface ChatCompletionChunkEvent {
@@ -26,12 +34,14 @@ interface ChatCompletionMessageEvent {
 
 export type InsightStreamEvent =
   | ContextEvent
+  | ConnectorInfoEvent
   | ChatCompletionChunkEvent
   | ChatCompletionMessageEvent;
 
 export interface InsightResponse {
   summary: string;
   context: string;
+  connectorInfo?: ConnectorInfo;
 }
 
 const handleStreamError = (err: unknown, setError: (error: string | undefined) => void): void => {
@@ -48,6 +58,7 @@ export function useStreamingAiInsight(
   const [error, setError] = useState<string | undefined>(undefined);
   const [summary, setSummary] = useState('');
   const [context, setContext] = useState('');
+  const [connectorInfo, setConnectorInfo] = useState<ConnectorInfo | undefined>(undefined);
   const [wasStopped, setWasStopped] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const cleanupRef = useRef<() => void>();
@@ -67,6 +78,7 @@ export function useStreamingAiInsight(
     setWasStopped(false);
     setSummary('');
     setContext('');
+    setConnectorInfo(undefined);
 
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
@@ -92,6 +104,9 @@ export function useStreamingAiInsight(
             if (event.type === 'context') {
               return { ...acc, context: event.context };
             }
+            if (event.type === 'connectorInfo') {
+              return { ...acc, connectorInfo: event.connector };
+            }
             if (event.type === 'chatCompletionChunk') {
               return { ...acc, summary: acc.summary + event.content };
             }
@@ -112,6 +127,9 @@ export function useStreamingAiInsight(
         next: (state: InsightResponse) => {
           setSummary(state.summary);
           setContext(state.context);
+          if (state.connectorInfo) {
+            setConnectorInfo(state.connectorInfo);
+          }
         },
         error: (err: unknown) => handleStreamError(err, setError),
       });
@@ -133,6 +151,7 @@ export function useStreamingAiInsight(
     error,
     summary,
     context,
+    connectorInfo,
     wasStopped,
     fetch,
     stop,

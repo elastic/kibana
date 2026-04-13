@@ -71,7 +71,7 @@ describe('BannersPlugin', () => {
 
       expect(coreStart.chrome.setHeaderBanner).toHaveBeenCalledTimes(1);
       expect(coreStart.chrome.setHeaderBanner).toHaveBeenCalledWith({
-        content: expect.any(Function),
+        content: expect.objectContaining({ type: expect.any(Function) }),
       });
     });
 

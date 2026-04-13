@@ -7,6 +7,7 @@
 
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { parse as parseCookie } from 'tough-cookie';
+import { Agent } from 'undici';
 
 import {
   createSAMLResponse,
@@ -15,17 +16,18 @@ import {
   MOCK_IDP_UIAM_SERVICE_URL,
   MOCK_IDP_UIAM_SHARED_SECRET,
 } from '@kbn/mock-idp-utils';
-import { apiTest } from '@kbn/scout';
+import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../../../common/constants';
-import { COMMON_HEADERS } from '../fixtures/constants';
+import { COMMON_HEADERS, extractAttributeValue } from '../fixtures';
 
 // These tests cannot be run on MKI because we cannot obtain the raw UIAM tokens required to verify their invalidation.
-apiTest.describe('[NON-MKI] Invalidate UIAM session', { tag: ['@svlSecurity'] }, () => {
+apiTest.describe('[NON-MKI] Invalidate UIAM session', { tag: tags.serverless.all }, () => {
   let userSessionCookieFactory: () => Promise<
     [string, { accessToken: string; refreshToken: string }]
   >;
+
   apiTest.beforeAll(async ({ apiClient, kbnUrl, config: { organizationId, projectType } }) => {
     userSessionCookieFactory = async () => {
       const samlResponse = await createSAMLResponse({
@@ -100,19 +102,6 @@ apiTest.describe('[NON-MKI] Invalidate UIAM session', { tag: ['@svlSecurity'] },
   );
 });
 
-const extractAttributeValue = (xmlDocument: string, attributeName: string) => {
-  const [, attributeValue] =
-    xmlDocument.match(
-      new RegExp(
-        `Name="${attributeName}"[\\s\\S]*?<saml:AttributeValue[^>]*>([\\s\\S]*?)<\\/saml:AttributeValue>`
-      )
-    ) ?? [];
-  if (!attributeValue) {
-    throw new Error(`Attribute ${attributeName} isn't found in SAML response.`);
-  }
-  return attributeValue.trim();
-};
-
 const checkUiamAccessToken = async (accessToken: string) =>
   await fetch(`${MOCK_IDP_UIAM_SERVICE_URL}/uiam/api/v1/authentication/_authenticate`, {
     method: 'POST',
@@ -123,6 +112,8 @@ const checkUiamAccessToken = async (accessToken: string) =>
       Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({}),
+    // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+    dispatcher: new Agent({ connect: { rejectUnauthorized: false } }),
   });
 
 const checkUiamRefreshToken = async (refreshToken: string) =>
@@ -134,4 +125,6 @@ const checkUiamRefreshToken = async (refreshToken: string) =>
       [ES_CLIENT_AUTHENTICATION_HEADER]: MOCK_IDP_UIAM_SHARED_SECRET,
     },
     body: JSON.stringify({ refresh_token: refreshToken }),
+    // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+    dispatcher: new Agent({ connect: { rejectUnauthorized: false } }),
   });

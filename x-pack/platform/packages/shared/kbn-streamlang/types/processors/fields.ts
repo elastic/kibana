@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { NonEmptyString } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
 
 /**
  * String schema that rejects Mustache template syntax.
@@ -14,9 +13,13 @@ import { NonEmptyString } from '@kbn/zod-helpers';
  * validation APIs, and prevents invalid DSL creation entirely.
  * Checks for `{{` anywhere in the string which makes Mustache active in Ingest Pipelines.
  */
-const NoMustacheString = NonEmptyString.refine((val) => !val.includes('{{'), {
-  message: 'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names',
-});
+const NoMustacheString = z
+  .string()
+  .nonempty()
+  .refine((val) => val.trim() !== '', 'No empty strings allowed')
+  .refine((val) => !val.includes('{{'), {
+    message: 'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names',
+  });
 
 /**
  * Smart validation that rejects Mustache templates only if the value is a string.

@@ -25,7 +25,7 @@ export const WorkflowConfiguration = () => {
         isInvalid={!!errors.workflow_id}
         error={errors.workflow_id?.message}
       >
-        <WorkflowPicker />
+        <WorkflowPicker name="workflow_id" />
       </EuiFormRow>
       <EuiFormRow
         label={i18nMessages.configuration.form.workflow.waitForCompletionLabel}

@@ -1,0 +1,90 @@
+---
+id: kibDevDocsFeedbackPlugin
+slug: /kibana-dev-docs/feedback/plugin
+title: Feedback Plugin
+description: How to use the Feedback Plugin (One Feedback) in your Kibana application.
+date: 2026-02-07
+tags: ['kibana', 'dev', 'contributor', 'feedback', 'plugin', 'shared-ux']
+---
+
+## Introduction
+
+Feedback plugin (also known as One Feedback) is a universal way of giving feedback about Elastic in Kibana. It allows users to easily provide feedback and CSAT scores directly from the UI.
+
+## How it works
+
+Feedback plugin registers a button in the Chrome global header area which is shown when all of these criteria are met:
+
+- feedback is globally enabled (`core.notifications.feedback.isEnabled()`)
+- telemetry is enabled (`telemetry.telemetryService.canSendTelemetry()`)
+- telemetry is opted in (`telemetry.telemetryService.getIsOptedIn()`)
+
+It also respects the global `Usage Collection` advanced setting.
+
+Once clicked, a modal containing feedback questions and CSAT score buttons are displayed to the user. The questions are context-aware and are defined per application in `@kbn/feedback-registry` package. In case when an application has no defined questions a default set of questions is displayed.
+
+Feedback, along with other session data, is sent using the server-side EBT `feedback_submitted` event to Elastic's telemetry cluster, where it is stored in the `ebt-kibana-server` index.
+
+## Defining application specific questions
+
+To define application-specific questions, add them to the `@kbn/feedback-registry` package.
+
+1. Go to: `x-pack/platform/packages/private/feedback-registry/src/registry.ts`
+2. Define up to two questions.
+
+```ts
+/**
+ * The id of the application associated with this feedback entry, e.g. 'dashboard', 'discover'
+ * or in case of deep links, the deep link id e.g. 'ml:dataVisualizer'.
+ */
+type FeedbackRegistryEntryId = string;
+
+/**
+ * Definition of a feedback question entry in the feedback registry.
+ */
+interface FeedbackRegistryEntry {
+  /**
+   * Unique identifier for the feedback entry.
+   */
+  id: string;
+  /**
+   * Sort order for displaying the feedback entry. The lower the number, the higher it appears in the UI.
+   */
+  order: number;
+  /**
+   * The question text to be submitted with telemetry.
+   */
+  question: string;
+  /**
+   * The question text which appears in the UI.
+   */
+  label?: {
+    i18nId: string;
+    defaultMessage: string;
+  };
+  /**
+   * Optional placeholder to show in the UI.
+   */
+  placeholder?: {
+    i18nId: string;
+    defaultMessage: string;
+  };
+  /**
+   * Optional aria-label.
+   */
+  ariaLabel?: {
+    i18nId: string;
+    defaultMessage: string;
+  };
+}
+
+type FeedbackRegistry = Map<FeedbackRegistryEntryId, FeedbackRegistryEntry[]>;
+```
+
+3. If you're unsure of your application ID:
+  - Open your application's page in a browser.
+  - Open the feedback form.
+  - Open the browser's developer console and paste:
+    `document.querySelector('[data-app-id]')?.getAttribute('data-app-id')`
+  - Press ENTER. The value returned is your application's ID.
+4. Open a PR with your changes - all questions must be approved by the SharedUX team.

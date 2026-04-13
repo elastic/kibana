@@ -16,7 +16,11 @@ export interface RuleActionsPopoverProps {
   onDelete: (ruleId: string) => void;
   onApiKeyUpdate: (ruleId: string) => void;
   onEnableDisable: (enable: boolean) => void;
+  onSnooze: () => void;
   onRunRule: (ruleId: string) => void;
+  onEdit: (ruleId: string) => void;
+  canEdit: boolean;
+  isEditDisabled: boolean;
   isInternallyManaged: boolean;
 }
 
@@ -25,7 +29,11 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
   onDelete,
   onApiKeyUpdate,
   onEnableDisable,
+  onSnooze,
   onRunRule,
+  onEdit,
+  canEdit,
+  isEditDisabled,
   isInternallyManaged,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
@@ -64,6 +72,33 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
     };
   };
 
+  const getEditPanelItem = (testId: string) => {
+    return {
+      'data-test-subj': testId,
+      onClick: () => {
+        setIsPopoverOpen(false);
+        onEdit(rule.id);
+      },
+      name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel', {
+        defaultMessage: 'Edit rule',
+      }),
+      disabled: isEditDisabled,
+    };
+  };
+
+  const getSnoozePanelItem = (testId: string) => {
+    return {
+      'data-test-subj': testId,
+      onClick: () => {
+        setIsPopoverOpen(false);
+        onSnooze();
+      },
+      name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.manageSnoozeButtonLabel', {
+        defaultMessage: 'Manage snooze notifications',
+      }),
+    };
+  };
+
   return (
     <EuiPopover
       button={
@@ -71,7 +106,7 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
           disabled={false}
           data-test-subj="ruleActionsButton"
           data-testid="ruleActionsButton"
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
           aria-label={i18n.translate(
             'xpack.triggersActionsUI.sections.ruleDetails.popoverButtonTitle',
@@ -92,10 +127,12 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
             items: isInternallyManaged
               ? [
                   getDisableEnablePanelItem('disableButtonInternallyManaged'),
+                  getSnoozePanelItem('snoozeRuleButtonInternallyManaged'),
                   getUpdateApiKeyPanelItem('updateAPIKeyButtonInternallyManaged'),
                 ]
               : [
                   getDisableEnablePanelItem('disableButton'),
+                  getSnoozePanelItem('snoozeRuleButton'),
                   getUpdateApiKeyPanelItem('updateAPIKeyButton'),
                   {
                     'data-test-subj': 'runRuleButton',
@@ -108,6 +145,9 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
                       { defaultMessage: 'Run rule' }
                     ),
                   },
+                  ...(canEdit
+                    ? [{ isSeparator: true as const }, getEditPanelItem('openEditRuleFlyoutButton')]
+                    : []),
                   {
                     className: 'ruleActionsPopover__deleteButton',
                     'data-test-subj': 'deleteRuleButton',

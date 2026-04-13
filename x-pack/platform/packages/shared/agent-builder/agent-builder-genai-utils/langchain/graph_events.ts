@@ -48,6 +48,7 @@ export const createToolCallEvent = (data: {
   toolCallId: string;
   toolId: string;
   params: Record<string, unknown>;
+  toolCallGroupId?: string;
 }): ToolCallEvent => {
   return {
     type: ChatEventType.toolCall,
@@ -55,6 +56,7 @@ export const createToolCallEvent = (data: {
       tool_call_id: data.toolCallId,
       tool_id: data.toolId,
       params: data.params,
+      tool_call_group_id: data.toolCallGroupId,
     },
   };
 };
@@ -134,13 +136,19 @@ export const createMessageEvent = (
 
 export const createReasoningEvent = (
   reasoning: string,
-  { transient }: { transient?: boolean } = {}
+  {
+    transient,
+    toolCallId,
+    toolCallGroupId,
+  }: { transient?: boolean; toolCallId?: string; toolCallGroupId?: string } = {}
 ): ReasoningEvent => {
   return {
     type: ChatEventType.reasoning,
     data: {
       reasoning,
       transient,
+      tool_call_id: toolCallId,
+      tool_call_group_id: toolCallGroupId,
     },
   };
 };

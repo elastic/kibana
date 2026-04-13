@@ -119,6 +119,24 @@ describe('buildHeadersFromSecrets', () => {
       });
     });
 
+    it('should return Authorization header with apiKeyHeaderValue template (e.g. PagerDuty)', () => {
+      const config: MCPConnectorConfig = {
+        ...baseConfig,
+        authType: MCPAuthType.ApiKey,
+        apiKeyHeaderName: 'Authorization',
+        apiKeyHeaderValue: 'Token token={{apiKey}}',
+      };
+      const secrets: MCPConnectorSecrets = {
+        apiKey: 'pagerduty-token-abc',
+      };
+
+      const headers = buildHeadersFromSecrets(secrets, config);
+
+      expect(headers).toEqual({
+        Authorization: 'Token token=pagerduty-token-abc',
+      });
+    });
+
     it('should return empty headers when apiKey is missing', () => {
       const config: MCPConnectorConfig = {
         ...baseConfig,

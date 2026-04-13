@@ -103,7 +103,7 @@
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+                  "React.ReactNode"
                 ],
                 "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/breadcrumbs/context.tsx",
                 "lineNumber": 40,
@@ -226,7 +226,7 @@
             "section": "def-public.Route",
             "text": "Route"
           },
-          ">; element: React.ReactElement<any, string | React.JSXElementConstructor<any>>; children: React.ReactElement<any, string | React.JSXElementConstructor<any>>; }) => React.JSX.Element"
+          ">; element: React.ReactElement<any>; children: React.ReactElement<any>; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/use_current_route.tsx",
         "lineNumber": 18,
@@ -286,7 +286,7 @@
                 "label": "element",
                 "description": [],
                 "signature": [
-                  "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+                  "React.ReactElement<any>"
                 ],
                 "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/use_current_route.tsx",
                 "lineNumber": 24,
@@ -302,7 +302,7 @@
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+                  "React.ReactElement<any>"
                 ],
                 "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/use_current_route.tsx",
                 "lineNumber": 25,
@@ -378,7 +378,7 @@
         "label": "Outlet",
         "description": [],
         "signature": [
-          "() => React.ReactElement<any, string | React.JSXElementConstructor<any>> | null"
+          "() => React.ReactElement<any> | null"
         ],
         "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/outlet.tsx",
         "lineNumber": 24,
@@ -397,7 +397,7 @@
         "label": "OutletContextProvider",
         "description": [],
         "signature": [
-          "({\n  element,\n  children,\n}: { element: React.ReactElement<any, string | React.JSXElementConstructor<any>>; children: React.ReactNode; }) => React.JSX.Element"
+          "({\n  element,\n  children,\n}: { element: React.ReactElement<any>; children: React.ReactNode; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/outlet.tsx",
         "lineNumber": 14,
@@ -426,7 +426,7 @@
                 "label": "element",
                 "description": [],
                 "signature": [
-                  "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+                  "React.ReactElement<any>"
                 ],
                 "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/outlet.tsx",
                 "lineNumber": 18,
@@ -442,7 +442,7 @@
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+                  "React.ReactNode"
                 ],
                 "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/outlet.tsx",
                 "lineNumber": 19,
@@ -540,7 +540,7 @@
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+                  "React.ReactNode"
                 ],
                 "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/use_router.tsx",
                 "lineNumber": 20,
@@ -676,7 +676,7 @@
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+                  "React.ReactNode"
                 ],
                 "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/router_provider.tsx",
                 "lineNumber": 24,
@@ -714,7 +714,7 @@
             "section": "def-public.Route",
             "text": "Route"
           },
-          ">; element: React.ReactElement<any, string | React.JSXElementConstructor<any>>; }"
+          ">; element: React.ReactElement<any>; }"
         ],
         "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/use_current_route.tsx",
         "lineNumber": 34,
@@ -940,7 +940,7 @@
             "label": "element",
             "description": [],
             "signature": [
-              "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+              "React.ReactElement<any>"
             ],
             "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/types/index.ts",
             "lineNumber": 28,
@@ -1012,7 +1012,7 @@
             "label": "pre",
             "description": [],
             "signature": [
-              "React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
+              "React.ReactElement<any> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/types/index.ts",
             "lineNumber": 32,

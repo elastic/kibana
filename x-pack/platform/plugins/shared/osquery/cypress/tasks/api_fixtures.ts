@@ -17,7 +17,7 @@ import type { LiveQueryDetailsItem } from '@kbn/osquery-plugin/public/actions/us
 import type { PackSavedObject, PackItem } from '@kbn/osquery-plugin/public/packs/types';
 import type { SavedQuerySO } from '@kbn/osquery-plugin/public/routes/saved_queries/list';
 import { generateRandomStringName } from './integrations';
-import { request } from './common';
+import { request, esRequest } from './common';
 import { ServerlessRoleName } from '../support/roles';
 
 // Minimal type definitions to avoid direct import from security-solution
@@ -145,6 +145,22 @@ export const cleanupSavedQuery = (id: string) => {
       'Elastic-Api-Version': API_VERSIONS.public.v1,
     },
     failOnStatusCode: false,
+  });
+};
+
+export const cleanupSavedQueryByName = (name: string) => {
+  request<{ data: SavedQuerySO[] }>({
+    method: 'GET',
+    url: `/api/osquery/saved_queries?id=${encodeURIComponent(name)}&pageSize=1`,
+    headers: {
+      'Elastic-Api-Version': API_VERSIONS.public.v1,
+    },
+    failOnStatusCode: false,
+  }).then((response) => {
+    const match = response.body?.data?.[0];
+    if (match?.saved_object_id) {
+      cleanupSavedQuery(match.saved_object_id);
+    }
   });
 };
 
@@ -433,12 +449,95 @@ export const addOsqueryToAgentPolicy = (
     },
   });
 
-export const cleanupAgentPolicy = (agentPolicyId: string) =>
-  request({
+export const cleanupAgentPolicy = (agentPolicyId: string | undefined) => {
+  if (!agentPolicyId) {
+    return;
+  }
+
+  return request({
     method: 'POST',
     body: { agentPolicyId },
     headers: {
       'Elastic-Api-Version': API_VERSIONS.public.v1,
     },
     url: '/api/fleet/agent_policies/delete',
+  });
+};
+
+export const addTagsToLiveQuery = (actionId: string, tags: string[]) =>
+  request({
+    method: 'PUT',
+    body: { tags },
+    headers: {
+      'Elastic-Api-Version': API_VERSIONS.public.v1,
+    },
+    url: `/api/osquery/history/${actionId}/tags`,
+  });
+
+/**
+ * Reads the raw pack saved object to get schedule_id values (which are stripped
+ * from the public REST API response).
+ */
+export const getPackSavedObject = (packId: string) =>
+  request<{
+    id: string;
+    attributes: {
+      name: string;
+      queries: Array<{ schedule_id: string; name: string; query: string; interval: number }>;
+    };
+  }>({
+    method: 'GET',
+    url: `/api/saved_objects/osquery-pack/${packId}`,
+  }).then((response) => response.body);
+
+/**
+ * Creates a mock scheduled query response document in the action responses data stream.
+ * This simulates a pack query execution result from an agent, which shows up as
+ * "Scheduled" source type in the unified history table.
+ *
+ * Requires a pack with a matching schedule_id to exist for the history table
+ * to resolve the query name and pack context.
+ */
+const ACTION_RESPONSES_INDEX = 'logs-osquery_manager.action.responses-default';
+
+export const loadScheduledResponse = ({
+  scheduleId,
+  executionCount = 1,
+  agentId = 'mock-agent-001',
+  packId,
+  resultCount = 5,
+}: {
+  scheduleId: string;
+  executionCount?: number;
+  agentId?: string;
+  packId: string;
+  resultCount?: number;
+}) => {
+  const now = new Date().toISOString();
+
+  return esRequest<{ _id: string }>({
+    method: 'POST',
+    url: `/${ACTION_RESPONSES_INDEX}/_doc`,
+    body: {
+      '@timestamp': now,
+      agent_id: agentId,
+      schedule_id: scheduleId,
+      schedule_execution_count: executionCount,
+      planned_schedule_time: now,
+      pack_id: packId,
+      action_response: {
+        osquery: {
+          count: resultCount,
+        },
+      },
+    },
+    failOnStatusCode: false,
+  });
+};
+
+export const cleanupScheduledResponse = (docId: string) =>
+  esRequest({
+    method: 'DELETE',
+    url: `/${ACTION_RESPONSES_INDEX}/_doc/${docId}`,
+    failOnStatusCode: false,
   });

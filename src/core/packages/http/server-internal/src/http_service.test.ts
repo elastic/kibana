@@ -17,6 +17,7 @@ import { ConfigService, Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { Router } from '@kbn/core-http-router-server-internal';
@@ -61,6 +62,7 @@ const prebootDeps = {
 const setupDeps = {
   context: contextSetup,
   executionContext: executionContextServiceMock.createInternalSetupContract(),
+  userActivity: userActivityServiceMock.createInternalSetupContract(),
 };
 const fakeHapiServer = {
   start: noop,

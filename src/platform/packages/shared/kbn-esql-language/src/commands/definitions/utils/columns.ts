@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ESQLColumn, ESQLIdentifier } from '@elastic/esql/types';
 import type { ICommandContext } from '../../registry/types';
-import type { ESQLColumn, ESQLIdentifier } from '../../../types';
 import { fuzzySearch } from './shared';
 
 export function getColumnExists(

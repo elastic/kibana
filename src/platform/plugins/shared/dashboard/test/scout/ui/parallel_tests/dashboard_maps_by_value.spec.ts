@@ -15,7 +15,7 @@ import { LENS_BASIC_KIBANA_ARCHIVE } from '../constants';
 const MAPS_LAYER_GROUP_TITLE = 'Layer group';
 const MAPS_LIBRARY_NAME_PREFIX = 'my map';
 
-spaceTest.describe('Maps by-value panels (dashboard)', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+spaceTest.describe('Maps by-value panels (dashboard)', { tag: tags.deploymentAgnostic }, () => {
   let mapCounter = 0;
   let dashboardUrl = '';
 
@@ -25,7 +25,6 @@ spaceTest.describe('Maps by-value panels (dashboard)', { tag: tags.DEPLOYMENT_AG
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects, page }) => {
     await browserAuth.loginAsPrivilegedUser();
-    await pageObjects.dashboard.goto();
     await pageObjects.dashboard.openNewDashboard();
     dashboardUrl = page.url();
   });

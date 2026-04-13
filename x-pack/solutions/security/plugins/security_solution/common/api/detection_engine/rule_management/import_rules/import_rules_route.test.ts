@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers/v4';
 import type { ErrorSchema } from '../../model/error_schema.gen';
 import { ImportRulesResponse } from './import_rules_route.gen';
 
@@ -129,7 +129,7 @@ describe('Import rules schema', () => {
       const result = ImportRulesResponse.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        'success_count: Number must be greater than or equal to 0'
+        'success_count: Too small: expected number to be >=0'
       );
     });
 
@@ -150,7 +150,7 @@ describe('Import rules schema', () => {
       const result = ImportRulesResponse.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        'exceptions_success_count: Number must be greater than or equal to 0'
+        'exceptions_success_count: Too small: expected number to be >=0'
       );
     });
 
@@ -170,7 +170,9 @@ describe('Import rules schema', () => {
       };
       const result = ImportRulesResponse.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toEqual('success: Expected boolean, received string');
+      expect(stringifyZodError(result.error)).toEqual(
+        'success: Invalid input: expected boolean, received string'
+      );
     });
 
     test('it should NOT validate a exceptions_success that is not a boolean', () => {
@@ -192,7 +194,7 @@ describe('Import rules schema', () => {
       const result = ImportRulesResponse.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        'exceptions_success: Expected boolean, received string'
+        'exceptions_success: Invalid input: expected boolean, received string'
       );
     });
 
@@ -213,9 +215,7 @@ describe('Import rules schema', () => {
       };
       const result = ImportRulesResponse.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toEqual(
-        "Unrecognized key(s) in object: 'invalid_field'"
-      );
+      expect(stringifyZodError(result.error)).toEqual('Unrecognized key: "invalid_field"');
     });
 
     test('it should NOT validate an extra field in the second position of the errors array', () => {
@@ -240,9 +240,7 @@ describe('Import rules schema', () => {
       };
       const result = ImportRulesResponse.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toEqual(
-        "errors.1: Unrecognized key(s) in object: 'invalid_data'"
-      );
+      expect(stringifyZodError(result.error)).toEqual('errors.1: Unrecognized key: "invalid_data"');
     });
 
     test('it should validate an empty import response with a single connectors error', () => {
@@ -305,7 +303,7 @@ describe('Import rules schema', () => {
       const result = ImportRulesResponse.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        'action_connectors_success: Expected boolean, received string'
+        'action_connectors_success: Invalid input: expected boolean, received string'
       );
     });
 
@@ -326,7 +324,7 @@ describe('Import rules schema', () => {
       const result = ImportRulesResponse.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        'action_connectors_success_count: Number must be greater than or equal to 0'
+        'action_connectors_success_count: Too small: expected number to be >=0'
       );
     });
     test('it should validate a action_connectors_warnings after importing successfully', () => {
@@ -369,7 +367,7 @@ describe('Import rules schema', () => {
       const result = ImportRulesResponse.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        'action_connectors_warnings: Expected array, received string'
+        'action_connectors_warnings: Invalid input: expected array, received string'
       );
     });
   });

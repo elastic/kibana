@@ -6,6 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ProductFeatureKeyType } from '@kbn/security-solution-features';
+import { ProductFeatureKey } from '@kbn/security-solution-features/src/product_features_keys';
 import { Milestone } from '../../common/trial_companion/types';
 
 export interface NBAAction {
@@ -22,6 +24,7 @@ export interface NBA {
 export interface NBATODOItem {
   milestoneId: Milestone;
   translate: NBA;
+  features?: ProductFeatureKeyType[];
 }
 const SUFFIX_MESSAGE = 'message';
 const SUFFIX_TITLE = 'title';
@@ -111,7 +114,11 @@ const NBA_M6: NBA = toNBA(
 export const NBA_TODO_LIST: NBATODOItem[] = [
   { milestoneId: Milestone.M1, translate: NBA_M1 },
   { milestoneId: Milestone.M2, translate: NBA_M2 },
-  { milestoneId: Milestone.M3, translate: NBA_M3 },
-  { milestoneId: Milestone.M5, translate: NBA_M5 },
+  { milestoneId: Milestone.M3, translate: NBA_M3, features: [ProductFeatureKey.detections] },
+  {
+    milestoneId: Milestone.M5,
+    translate: NBA_M5,
+    features: [ProductFeatureKey.attackDiscovery, ProductFeatureKey.assistant],
+  },
   { milestoneId: Milestone.M6, translate: NBA_M6 },
 ];

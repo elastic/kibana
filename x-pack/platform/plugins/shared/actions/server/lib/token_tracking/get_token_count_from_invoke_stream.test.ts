@@ -237,9 +237,23 @@ describe('getTokenCountFromInvokeStream', () => {
         logger,
       });
 
-      expect(tokens.promptTokenCount).toBe(23);
-      expect(tokens.candidatesTokenCount).toBe(50);
-      expect(tokens.totalTokenCount).toBe(73);
+      expect(tokens).not.toBeNull();
+      expect(tokens!.promptTokenCount).toBe(23);
+      expect(tokens!.candidatesTokenCount).toBe(50);
+      expect(tokens!.totalTokenCount).toBe(73);
+    });
+
+    it('returns null when response body has no valid data chunks', async () => {
+      const emptyStream = createStreamMock();
+      emptyStream.write('data: [DONE]\n');
+      emptyStream.complete();
+
+      const tokens = await parseGeminiStreamForUsageMetadata({
+        responseStream: emptyStream.transform,
+        logger,
+      });
+
+      expect(tokens).toBeNull();
     });
   });
 });

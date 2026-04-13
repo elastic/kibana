@@ -48,13 +48,27 @@ export const getConfigurationRequest = ({
   };
 };
 
+export const elasticUserProfileId = 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0';
+
 export const getConfigurationOutput = (update = false, overwrite = {}): Partial<Configuration> => {
   return {
     ...getConfigurationRequest(),
     error: null,
     mappings: [],
-    created_by: { email: null, full_name: null, username: 'elastic' },
-    updated_by: update ? { email: null, full_name: null, username: 'elastic' } : null,
+    created_by: {
+      email: null,
+      full_name: null,
+      username: 'elastic',
+      profile_uid: elasticUserProfileId,
+    },
+    updated_by: update
+      ? {
+          email: null,
+          full_name: null,
+          username: 'elastic',
+          profile_uid: elasticUserProfileId,
+        }
+      : null,
     customFields: [],
     observableTypes: [],
     ...overwrite,

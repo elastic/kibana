@@ -6,13 +6,14 @@
  */
 
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { RemoveByPrefixProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
   'Cross-compatibility - RemoveByPrefix Processor',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest(
       'should remove nested fields in both ingest pipeline and ES|QL',
@@ -26,8 +27,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [
           {
@@ -73,8 +74,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [
           {
@@ -128,10 +129,10 @@ apiTest.describe(
           };
 
           // Both transpilers should throw validation errors for Mustache templates
-          expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
+          await expect(transpileIngestPipeline(streamlangDSL)).rejects.toThrow(
             'Mustache template syntax {{ }} or {{{ }}} is not allowed'
           );
-          expect(() => transpileEsql(streamlangDSL)).toThrow(
+          await expect(transpileEsql(streamlangDSL)).rejects.toThrow(
             'Mustache template syntax {{ }} or {{{ }}} is not allowed'
           );
         }
@@ -150,8 +151,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [
           {

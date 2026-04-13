@@ -28,6 +28,8 @@ const createMockProcessorResult = (
 });
 
 describe('computeSimulationDocDiff', () => {
+  const conditionProcessorTags = new Set<string>();
+
   describe('detected_fields filtering', () => {
     it('should NOT include a field that is created then deleted in detected_fields', () => {
       // Scenario: Processor 1 adds 'temp_field', Processor 2 removes it
@@ -39,7 +41,13 @@ describe('computeSimulationDocDiff', () => {
         ],
       };
 
-      const result = computeSimulationDocDiff(base, docResult, true, []);
+      const result = computeSimulationDocDiff({
+        base,
+        docResult,
+        isWiredStream: true,
+        forbiddenFields: [],
+        conditionProcessorTags,
+      });
 
       // temp_field should NOT be in detected_fields (not in final output)
       expect(result.detected_fields.map((f) => f.name)).not.toContain('temp_field');
@@ -73,7 +81,13 @@ describe('computeSimulationDocDiff', () => {
         ],
       };
 
-      const result = computeSimulationDocDiff(base, docResult, true, []);
+      const result = computeSimulationDocDiff({
+        base,
+        docResult,
+        isWiredStream: true,
+        forbiddenFields: [],
+        conditionProcessorTags,
+      });
 
       // detected_fields should be EMPTY - no new fields in final output vs input
       expect(result.detected_fields).toHaveLength(0);
@@ -99,7 +113,13 @@ describe('computeSimulationDocDiff', () => {
         ],
       };
 
-      const result = computeSimulationDocDiff(base, docResult, true, []);
+      const result = computeSimulationDocDiff({
+        base,
+        docResult,
+        isWiredStream: true,
+        forbiddenFields: [],
+        conditionProcessorTags,
+      });
 
       // new_field should be in detected_fields (exists in final output)
       expect(result.detected_fields.map((f) => f.name)).toContain('new_field');
@@ -120,7 +140,13 @@ describe('computeSimulationDocDiff', () => {
         ],
       };
 
-      const result = computeSimulationDocDiff(base, docResult, true, []);
+      const result = computeSimulationDocDiff({
+        base,
+        docResult,
+        isWiredStream: true,
+        forbiddenFields: [],
+        conditionProcessorTags,
+      });
 
       // to_be_deleted should NOT be in detected_fields (not in final output)
       expect(result.detected_fields.map((f) => f.name)).not.toContain('to_be_deleted');
@@ -138,7 +164,13 @@ describe('computeSimulationDocDiff', () => {
         ],
       };
 
-      const result = computeSimulationDocDiff(base, docResult, true, []);
+      const result = computeSimulationDocDiff({
+        base,
+        docResult,
+        isWiredStream: true,
+        forbiddenFields: [],
+        conditionProcessorTags,
+      });
 
       // new_field should be in detected_fields (exists in final output)
       expect(result.detected_fields.map((f) => f.name)).toContain('new_field');
@@ -172,7 +204,13 @@ describe('computeSimulationDocDiff', () => {
         ],
       };
 
-      const result = computeSimulationDocDiff(base, docResult, true, []);
+      const result = computeSimulationDocDiff({
+        base,
+        docResult,
+        isWiredStream: true,
+        forbiddenFields: [],
+        conditionProcessorTags,
+      });
 
       // Only 'kept' and 'new_in_p2' should be in detected_fields
       const detectedFieldNames = result.detected_fields.map((f) => f.name);
@@ -201,7 +239,13 @@ describe('computeSimulationDocDiff', () => {
         ],
       };
 
-      const result = computeSimulationDocDiff(base, docResult, true, []);
+      const result = computeSimulationDocDiff({
+        base,
+        docResult,
+        isWiredStream: true,
+        forbiddenFields: [],
+        conditionProcessorTags,
+      });
 
       // Both new fields should be detected
       const detectedFieldNames = result.detected_fields.map((f) => f.name);
@@ -216,7 +260,13 @@ describe('computeSimulationDocDiff', () => {
         processor_results: [],
       };
 
-      const result = computeSimulationDocDiff(base, docResult, true, []);
+      const result = computeSimulationDocDiff({
+        base,
+        docResult,
+        isWiredStream: true,
+        forbiddenFields: [],
+        conditionProcessorTags,
+      });
 
       expect(result.detected_fields).toHaveLength(0);
       expect(result.intermediate_field_changes).toHaveLength(0);
@@ -238,7 +288,13 @@ describe('computeSimulationDocDiff', () => {
         ],
       };
 
-      const result = computeSimulationDocDiff(base, docResult, true, []);
+      const result = computeSimulationDocDiff({
+        base,
+        docResult,
+        isWiredStream: true,
+        forbiddenFields: [],
+        conditionProcessorTags,
+      });
 
       // processor1 should have field_a attributed to it
       expect(result.intermediate_field_changes).toContainEqual({
@@ -262,7 +318,13 @@ describe('computeSimulationDocDiff', () => {
         ],
       };
 
-      const result = computeSimulationDocDiff(base, docResult, true, ['reserved_field']);
+      const result = computeSimulationDocDiff({
+        base,
+        docResult,
+        isWiredStream: true,
+        forbiddenFields: ['reserved_field'],
+        conditionProcessorTags,
+      });
 
       expect(result.errors).toHaveLength(1);
       expect(result.errors[0]).toMatchObject({
@@ -277,7 +339,13 @@ describe('computeSimulationDocDiff', () => {
         processor_results: [createMockProcessorResult('processor1', { normal_field: 'modified' })],
       };
 
-      const result = computeSimulationDocDiff(base, docResult, true, ['reserved_field']);
+      const result = computeSimulationDocDiff({
+        base,
+        docResult,
+        isWiredStream: true,
+        forbiddenFields: ['reserved_field'],
+        conditionProcessorTags,
+      });
 
       expect(result.errors).toHaveLength(0);
     });
@@ -297,7 +365,13 @@ describe('computeSimulationDocDiff', () => {
         ],
       };
 
-      const result = computeSimulationDocDiff(base, docResult, true, []);
+      const result = computeSimulationDocDiff({
+        base,
+        docResult,
+        isWiredStream: true,
+        forbiddenFields: [],
+        conditionProcessorTags,
+      });
 
       // parent.temp should NOT be in detected_fields
       expect(result.detected_fields.map((f) => f.name)).not.toContain('parent.temp');
@@ -317,7 +391,13 @@ describe('computeSimulationDocDiff', () => {
         ],
       };
 
-      const result = computeSimulationDocDiff(base, docResult, true, []);
+      const result = computeSimulationDocDiff({
+        base,
+        docResult,
+        isWiredStream: true,
+        forbiddenFields: [],
+        conditionProcessorTags,
+      });
 
       // parent.permanent should be in detected_fields
       expect(result.detected_fields.map((f) => f.name)).toContain('parent.permanent');

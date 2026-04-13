@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
-import { Parser } from '../../../parser';
+import { Parser } from '@elastic/esql';
 import { mockContext, getMockCallbacks } from '../../../__tests__/commands/context_fixtures';
 import { autocomplete } from './autocomplete';
 import { expectSuggestions } from '../../../__tests__/commands/autocomplete';
@@ -79,14 +79,14 @@ describe('INLINE STATS Multi-token Autocomplete', () => {
       previousCommandFields,
       queryString,
       additionalFieldsMock,
-      UnmappedFieldsStrategy.FAIL
+      UnmappedFieldsStrategy.DEFAULT
     );
     const statsResult = statsColumnsAfter(
       statsCommand,
       previousCommandFields,
       statsQueryString,
       additionalFieldsMock,
-      UnmappedFieldsStrategy.FAIL
+      UnmappedFieldsStrategy.DEFAULT
     );
 
     expect(inlineStatsResult).toEqual<ESQLColumnData[]>([

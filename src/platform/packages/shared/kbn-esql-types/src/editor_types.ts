@@ -10,7 +10,11 @@ import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { ILicense } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { RecommendedField, RecommendedQuery } from './extensions_autocomplete_types';
-import type { ESQLSourceResult, IndexAutocompleteItem } from './sources_autocomplete_types';
+import type {
+  ESQLSourceResult,
+  EsqlViewsResult,
+  IndexAutocompleteItem,
+} from './sources_autocomplete_types';
 import type { ESQLControlVariable } from './variables_types';
 import type { InferenceEndpointsAutocompleteResult } from './inference_endpoint_autocomplete_types';
 
@@ -73,7 +77,17 @@ export type EsqlFieldType = (typeof esqlFieldTypes)[number];
  *  Partial fields metadata client, used to avoid circular dependency with @kbn/monaco
  **/
 export interface PartialFieldsMetadataClient {
-  find: ({ fieldNames, attributes }: { fieldNames?: string[]; attributes: string[] }) => Promise<{
+  find: ({
+    fieldNames,
+    attributes,
+    streamNames,
+    source,
+  }: {
+    fieldNames?: string[];
+    attributes: string[];
+    streamNames?: string[];
+    source?: string[];
+  }) => Promise<{
     fields: Record<
       string,
       {
@@ -81,6 +95,10 @@ export interface PartialFieldsMetadataClient {
         source: string;
         description?: string;
       }
+    >;
+    streamFields: Record<
+      string,
+      Record<string, { type: string; source: string; description?: string }>
     >;
   }>;
 }
@@ -131,6 +149,7 @@ export interface ESQLCallbacks {
     forceRefresh?: boolean;
   }) => Promise<{ indices: IndexAutocompleteItem[] }>;
   getTimeseriesIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
+  getViews?: () => Promise<EsqlViewsResult>;
   getEditorExtensions?: (queryString: string) => Promise<{
     recommendedQueries: RecommendedQuery[];
     recommendedFields: RecommendedField[];
@@ -143,6 +162,8 @@ export interface ESQLCallbacks {
   getHistoryStarredItems?: () => Promise<string[]>;
   canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
   isServerless?: boolean;
+  /** Enables the "Browse indices" suggestion and command integration. */
+  canSuggestResourceBrowser?: () => Promise<boolean>;
   getKqlSuggestions?: (
     kqlQuery: string,
     cursorPositionInKql: number

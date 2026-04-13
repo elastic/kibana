@@ -17,4 +17,16 @@ export const CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: string[] = [
   // task types requiring a concurrency
   'report:execute',
   'report:execute-scheduled',
+  'ad_hoc_run-backfill',
 ];
+
+export const EVENT_LOG_PROVIDER = 'taskManager';
+export const EVENT_LOG_ACTIONS = {
+  taskRun: 'task-run',
+  taskCancel: 'task-cancel',
+};
+
+export enum EventLogOutcomes {
+  success = 'success',
+  failure = 'failure',
+}

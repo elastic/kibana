@@ -86,6 +86,7 @@ export function ErrorSampleAiInsight({
       title={i18n.translate('xpack.observabilityAgentBuilder.errorAiInsight.titleLabel', {
         defaultMessage: "What's this error?",
       })}
+      insightType="error"
       createStream={createStream}
       buildAttachments={buildAttachments}
     />

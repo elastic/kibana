@@ -4,28 +4,27 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/streamlang'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-onboarding-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/streamlang'
+  title: '@kbn/streamlang'
   description: Moon project for @kbn/streamlang
   channel: ''
   owner: '@elastic/obs-onboarding-team'
-  metadata:
-    sourceRoot: x-pack/platform/packages/shared/kbn-streamlang
+  sourceRoot: x-pack/platform/packages/shared/kbn-streamlang
 dependsOn:
   - '@kbn/zod'
   - '@kbn/zod-helpers'
   - '@kbn/i18n'
   - '@kbn/tinymath'
   - '@kbn/datemath'
-  - '@kbn/esql-language'
   - '@kbn/tinymath'
   - '@kbn/grok-ui'
+  - '@kbn/index-management-shared-types'
 tags:
   - shared-common
   - package
@@ -37,16 +36,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

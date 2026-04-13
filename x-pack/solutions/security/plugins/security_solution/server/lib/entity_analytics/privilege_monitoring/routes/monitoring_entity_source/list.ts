@@ -8,7 +8,7 @@
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
   API_VERSIONS,
   APP_ID,

@@ -79,9 +79,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
       await unifiedFieldList.waitUntilSidebarHasLoaded();
 
-      await testSubjects.click('ESQLEditor-toggle-query-history-button');
+      await testSubjects.click('ESQLEditor-toggle-query-history-icon');
       const historyItem = await esql.getHistoryItem(0);
-      await testSubjects.moveMouseTo('~ESQLFavoriteButton');
       const button = await historyItem.findByTestSubject('ESQLFavoriteButton');
       await button.click();
 
@@ -98,7 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
       await unifiedFieldList.waitUntilSidebarHasLoaded();
 
-      await testSubjects.click('ESQLEditor-toggle-query-history-button');
+      await testSubjects.click('ESQLEditor-toggle-query-history-icon');
       await testSubjects.click('starred-queries-tab');
       const starredItems = await esql.getStarredItems();
       await esql.isQueryPresentInTable('FROM logstash-*', starredItems);
@@ -111,7 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
       await unifiedFieldList.waitUntilSidebarHasLoaded();
 
-      await testSubjects.click('ESQLEditor-toggle-query-history-button');
+      await testSubjects.click('ESQLEditor-toggle-query-history-icon');
       await testSubjects.click('starred-queries-tab');
 
       await esql.clickStarredItem(0);
@@ -128,7 +127,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
       await unifiedFieldList.waitUntilSidebarHasLoaded();
 
-      await testSubjects.click('ESQLEditor-toggle-query-history-button');
+      await testSubjects.click('ESQLEditor-toggle-query-history-icon');
       await testSubjects.click('starred-queries-tab');
 
       const starredItem = await esql.getStarredItem(0);

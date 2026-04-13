@@ -23,12 +23,14 @@ This approach focuses on testing that the UI sends correctly shaped requests.
 ```bash
 # Stateful mode
 node scripts/scout.js run-tests \
-  --stateful \
+  --arch stateful \
+  --domain classic \
   --config x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel.playwright.config.ts
 
 # Serverless Security mode
 node scripts/scout.js run-tests \
-  --serverless=security \
+  --arch serverless \
+  --domain security_complete \
   --config x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel.playwright.config.ts
 ```
 

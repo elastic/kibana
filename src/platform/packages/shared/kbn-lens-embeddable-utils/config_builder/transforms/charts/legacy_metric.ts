@@ -20,7 +20,7 @@ import type { LensAttributes } from '../../types';
 import { DEFAULT_LAYER_ID } from '../../constants';
 import {
   addLayerColumn,
-  buildDatasetState,
+  buildDataSourceState,
   buildDatasourceStates,
   buildReferences,
   generateApiLayer,
@@ -42,8 +42,12 @@ import {
   getLensStateLayer,
   getDatasourceLayers,
 } from './utils';
-import { fromColorByValueAPIToLensState, fromColorByValueLensStateToAPI } from '../coloring';
-import { isEsqlTableTypeDataset } from '../../utils';
+import {
+  fromColorByValueAPIToLensState,
+  fromColorByValueLensStateToAPI,
+  isColorByValueAbsolute,
+} from '../coloring';
+import { isEsqlTableTypeDataSource } from '../../utils';
 
 const ACCESSOR = 'legacy_metric_accessor';
 
@@ -55,8 +59,8 @@ function buildVisualizationState(config: LegacyMetricState): LegacyMetricVisuali
     layerType: 'data',
     accessor: ACCESSOR,
     size: layer.metric.size,
-    titlePosition: layer.metric.alignments?.labels,
-    textAlign: layer.metric.alignments?.value,
+    titlePosition: layer.metric.labels?.alignment,
+    textAlign: layer.metric.values?.alignment,
     ...(layer.metric.apply_color_to && layer.metric.color
       ? {
           colorMode: layer.metric.apply_color_to === 'background' ? 'Background' : 'Labels',
@@ -78,15 +82,21 @@ function reverseBuildVisualizationState(
     throw new Error('Metric accessor is missing in the visualization state');
   }
 
-  const dataset = buildDatasetState(layer, layerId, adHocDataViews, references, adhocReferences);
+  const dataSource = buildDataSourceState(
+    layer,
+    layerId,
+    adHocDataViews,
+    references,
+    adhocReferences
+  );
 
-  if (!dataset || dataset.type == null) {
-    throw new Error('Unsupported dataset type');
+  if (!dataSource || dataSource.type == null || isEsqlTableTypeDataSource(dataSource)) {
+    throw new Error('Unsupported DataSource type');
   }
 
   const props: DeepPartial<DeepMutable<LegacyMetricState>> = {
     ...generateApiLayer(layer),
-    metric: isEsqlTableTypeDataset(dataset)
+    metric: isEsqlTableTypeDataSource(dataSource)
       ? getValueApiColumn(visualization.accessor, layer as TextBasedLayer)
       : operationFromColumn(visualization.accessor, layer as FormBasedLayer),
   } as LegacyMetricState;
@@ -97,10 +107,16 @@ function reverseBuildVisualizationState(
     }
 
     if (visualization.titlePosition || visualization.textAlign) {
-      props.metric.alignments = {
-        ...(visualization.titlePosition ? { labels: visualization.titlePosition } : {}),
-        ...(visualization.textAlign ? { value: visualization.textAlign } : {}),
-      };
+      if (visualization.titlePosition) {
+        props.metric.labels = {
+          alignment: visualization.titlePosition,
+        };
+      }
+      if (visualization.textAlign) {
+        props.metric.values = {
+          alignment: visualization.textAlign,
+        };
+      }
     }
 
     if (visualization.colorMode && visualization.colorMode !== 'None' && visualization.palette) {
@@ -108,7 +124,7 @@ function reverseBuildVisualizationState(
         visualization.colorMode === 'Background' ? 'background' : 'value';
 
       const colorByValue = fromColorByValueLensStateToAPI(visualization.palette);
-      if (colorByValue?.range === 'absolute') {
+      if (isColorByValueAbsolute(colorByValue)) {
         props.metric.color = colorByValue;
       }
     }
@@ -116,7 +132,7 @@ function reverseBuildVisualizationState(
 
   return {
     type: 'legacy_metric',
-    dataset: dataset satisfies LegacyMetricState['dataset'],
+    data_source: dataSource satisfies LegacyMetricState['data_source'],
     ...props,
   } as LegacyMetricState;
 }
@@ -133,7 +149,7 @@ function buildFormBasedLayer(layer: LegacyMetricStateNoESQL): FormBasedPersisted
 }
 
 function getValueColumns(layer: LegacyMetricStateESQL) {
-  return [getValueColumn(ACCESSOR, layer.metric.column, 'number')];
+  return [getValueColumn(ACCESSOR, layer.metric, 'number')];
 }
 
 type LegacyMetricAttributes = Extract<
@@ -171,7 +187,7 @@ export function fromAPItoLensState(
       datasourceStates: layers,
       internalReferences,
       visualization,
-      adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
+      adHocDataViews,
     },
   };
 }

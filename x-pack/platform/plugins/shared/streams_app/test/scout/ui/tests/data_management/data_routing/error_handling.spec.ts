@@ -6,20 +6,21 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { test } from '../../../fixtures';
 
 test.describe(
   'Stream data routing - error handling and recovery',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
-      await pageObjects.streams.gotoPartitioningTab('logs');
+      await pageObjects.streams.gotoPartitioningTab('logs.otel');
     });
 
     test.afterAll(async ({ apiServices }) => {
       // Clear existing rules
-      await apiServices.streams.clearStreamChildren('logs');
+      await apiServices.streams.clearStreamChildren('logs.otel');
     });
 
     test('should handle network failures during rule creation', async ({
@@ -46,18 +47,26 @@ test.describe(
       await pageObjects.streams.saveRoutingRule();
 
       // Should succeed
-      await pageObjects.streams.expectRoutingRuleVisible('logs.network-test');
+      await pageObjects.streams.expectRoutingRuleVisible('logs.otel.network-test');
     });
 
     test('should recover from API errors during rule updates', async ({ context, pageObjects }) => {
-      // Create a rule first
+      // Create a rule first with a field condition (not the default "always" condition)
       await pageObjects.streams.clickCreateRoutingRule();
       await pageObjects.streams.fillRoutingRuleName('error-test');
+      await pageObjects.streams.fillConditionEditor({
+        field: 'log.level',
+        value: 'error',
+        operator: 'equals',
+      });
       await pageObjects.streams.saveRoutingRule();
       await pageObjects.toasts.closeAll();
 
       // Edit the rule
-      await pageObjects.streams.clickEditRoutingRule('logs.error-test');
+      await pageObjects.streams.clickEditRoutingRule('logs.otel.error-test');
+
+      // Make a change to enable the Update button (hasRoutingChanges guard)
+      await pageObjects.streams.fillConditionEditor({ value: 'info' });
 
       // Simulate network failure
       await context.setOffline(true);

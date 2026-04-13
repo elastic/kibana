@@ -13,6 +13,7 @@
       "_query/queries/{id}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-esql-get-query",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-esql-get-query",
     "availability": {
       "stack": true,
       "serverless": true

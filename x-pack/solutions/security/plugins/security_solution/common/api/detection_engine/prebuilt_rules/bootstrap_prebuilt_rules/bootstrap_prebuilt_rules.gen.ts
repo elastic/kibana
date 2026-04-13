@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type PackageInstallStatus = z.infer<typeof PackageInstallStatus>;
 export const PackageInstallStatus = z.object({

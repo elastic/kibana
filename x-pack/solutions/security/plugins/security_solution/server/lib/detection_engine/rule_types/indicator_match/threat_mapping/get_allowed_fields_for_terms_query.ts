@@ -69,7 +69,7 @@ export const getAllowedFieldsForTermQuery = async ({
       ),
     };
   } catch (e) {
-    ruleExecutionLogger.debug(`Can't get allowed fields for terms query: ${e}`);
+    ruleExecutionLogger.debug(`Error getting allowed fields for the terms query\nError: ${e}`);
     return allowedFieldsForTermsQuery;
   }
 

@@ -38,14 +38,10 @@ export const esqlSearchStrategyProvider = (
         // `columns` contain only columns with data
         // `all_columns` contain everything
         const { terminateAfter, dropNullColumns, ...requestParams } = request.params ?? {};
-        const { headers, body, meta } = await esClient.asCurrentUser.transport.request(
+        const { headers, body, meta } = await esClient.asCurrentUser.esql.query(
           {
-            method: 'POST',
-            path: `/_query`,
-            querystring: dropNullColumns ? 'drop_null_columns' : '',
-            body: {
-              ...requestParams,
-            },
+            ...requestParams,
+            ...(dropNullColumns ? { drop_null_columns: true } : {}),
           },
           {
             signal: abortSignal,

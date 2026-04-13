@@ -27,6 +27,8 @@
     "optionalPlugins": [
       "cloud",
       "usageCollection",
+      "streams",
+      "ingestHub",
     ],
     "requiredBundles": [
       "kibanaReact"

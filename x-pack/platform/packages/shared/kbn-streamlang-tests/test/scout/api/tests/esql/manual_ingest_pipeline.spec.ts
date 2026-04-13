@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { StreamlangDSL } from '@kbn/streamlang';
 import type { ManualIngestPipelineProcessor } from '@kbn/streamlang';
 import { transpileEsql as transpile } from '@kbn/streamlang';
@@ -13,7 +14,7 @@ import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
   'Streamlang to ES|QL - Manual Ingest Pipeline Processor (Not Supported)',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest(
       'should handle manual_ingest_pipeline by showing warning message',
@@ -36,7 +37,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         // Verify that the ES|QL query contains a warning about manual_ingest_pipeline not being supported
         expect(query).toContain('WARNING: Manual ingest pipeline not supported in ES|QL');
@@ -89,7 +90,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         expect(query).toContain('WARNING: Manual ingest pipeline not supported in ES|QL');
 
@@ -149,7 +150,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         // Should contain the warning for manual processor
         expect(query).toContain('WARNING: Manual ingest pipeline not supported in ES|QL');

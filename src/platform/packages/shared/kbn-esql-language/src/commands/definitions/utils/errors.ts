@@ -15,12 +15,12 @@ import type {
   ESQLFunction,
   ESQLIdentifier,
   ESQLLocation,
-  ESQLMessage,
   ESQLSource,
-} from '../../../types';
+} from '@elastic/esql/types';
 import type {
   ErrorTypes,
   ErrorValues,
+  ESQLMessage,
   FunctionDefinition,
   Signature,
   SupportedDataType,
@@ -57,6 +57,13 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.unknownIndex', {
           defaultMessage: 'Unknown index "{name}"',
+          values: { name: out.name },
+        }),
+      };
+    case 'unknownDataSource':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.unknownDataSource', {
+          defaultMessage: 'Unknown data source "{name}"',
           values: { name: out.name },
         }),
       };
@@ -265,35 +272,19 @@ Expected one of:
         }),
         type: 'error',
       };
-    case 'promqlMissingParam':
+    case 'promqlInvalidParam':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.promqlMissingParam', {
-          defaultMessage: '[PROMQL] Missing required param "{param}"',
-          values: { param: out.param },
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlInvalidParam', {
+          defaultMessage: '[PROMQL] {reason}',
+          values: { reason: out.reason },
         }),
         type: 'error',
       };
-    case 'promqlMissingParamValue':
+    case 'promqlMutuallyExclusiveParams':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.promqlMissingParamValue', {
-          defaultMessage: '[PROMQL] Missing value for "{param}"',
-          values: { param: out.param },
-        }),
-        type: 'error',
-      };
-    case 'promqlInvalidDateParam':
-      return {
-        message: i18n.translate('kbn-esql-language.esql.validation.promqlInvalidDateParam', {
-          defaultMessage:
-            '[PROMQL] Invalid {param} value. Use ISO 8601 with Z (e.g. 2024-01-15T10:00:00Z) or ?_tstart/?_tend',
-          values: { param: out.param },
-        }),
-        type: 'error',
-      };
-    case 'promqlInvalidStepParam':
-      return {
-        message: i18n.translate('kbn-esql-language.esql.validation.promqlInvalidStepParam', {
-          defaultMessage: '[PROMQL] Invalid step value',
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlMutuallyExclusiveParams', {
+          defaultMessage: '[PROMQL] Parameters "{param1}" and "{param2}" are mutually exclusive',
+          values: { param1: out.param1, param2: out.param2 },
         }),
         type: 'error',
       };
@@ -495,6 +486,22 @@ Expected one of:
         }),
         type: 'error',
       };
+    case 'mmrQueryVectorWrongType':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.mmrQueryVectorWrongType', {
+          defaultMessage: '[MMR] Query vector must be of type dense_vector. Found {type}',
+          values: { type: out.type },
+        }),
+        type: 'error',
+      };
+    case 'mmrOnFieldWrongType':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.mmrOnFieldWrongType', {
+          defaultMessage: '[MMR] ON field must be of type dense_vector. Found {type}',
+          values: { type: out.type },
+        }),
+        type: 'error',
+      };
   }
   return { message: '' };
 }
@@ -601,6 +608,12 @@ export const errors = {
   unknownIndex: (source: ESQLSource): ESQLMessage =>
     tagSemanticError(
       errors.byId('unknownIndex', source.location, { name: source.name }),
+      'getSources'
+    ),
+
+  unknownDataSource: (source: ESQLSource): ESQLMessage =>
+    tagSemanticError(
+      errors.byId('unknownDataSource', source.location, { name: source.name }),
       'getSources'
     ),
 

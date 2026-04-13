@@ -13,5 +13,6 @@ export interface ConsoleTutorial {
   semanticSearch: string;
   timeSeriesDataStreams: string;
   hybridSearch: string;
-  vectorSearch: string;
+  vectorDatabase: string;
+  agentBuilder: string;
 }

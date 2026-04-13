@@ -161,6 +161,7 @@
       "_cat/ml/anomaly_detectors/{job_id}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-ml-jobs",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-cat-ml-jobs",
     "availability": {
       "stack": true,
       "serverless": true

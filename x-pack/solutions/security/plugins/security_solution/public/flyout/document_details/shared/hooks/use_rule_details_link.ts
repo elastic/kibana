@@ -13,6 +13,7 @@ import {
 } from '../../../../common/components/link_to';
 import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
 import type { TimelineUrl } from '../../../../timelines/store/model';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 export interface UseRuleDetailsLinkParams {
   /**
@@ -30,8 +31,9 @@ export const useRuleDetailsLink = (
   override?: Record<string, unknown>
 ): string | null => {
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl(override);
+  const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
 
-  if (!ruleId) return null;
+  if (!ruleId || !canReadRules) return null;
 
   const path = getRuleDetailsUrl(ruleId);
   let href = getSecuritySolutionUrl({ deepLinkId: SecurityPageName.rules, path });

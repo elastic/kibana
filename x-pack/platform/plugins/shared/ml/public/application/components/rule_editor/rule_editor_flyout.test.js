@@ -6,43 +6,43 @@
  */
 
 // Mock the services required for reading and writing job data.
+const mockGetJob = jest.fn(() => ({
+  job_id: 'farequote_no_by',
+  description: 'Overall response time',
+  analysis_config: {
+    bucket_span: '5m',
+    detectors: [
+      {
+        detector_description: 'mean(responsetime)',
+        function: 'mean',
+        field_name: 'responsetime',
+        detector_index: 0,
+      },
+      {
+        detector_description: 'min(responsetime)',
+        function: 'max',
+        field_name: 'responsetime',
+        detector_index: 1,
+        custom_rules: [
+          {
+            actions: ['skip_result'],
+            conditions: [
+              {
+                applies_to: 'diff_from_typical',
+                operator: 'lte',
+                value: 123,
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+}));
+
 jest.mock('../../services/job_service', () => ({
   mlJobServiceFactory: () => ({
-    getJob: () => {
-      return {
-        job_id: 'farequote_no_by',
-        description: 'Overall response time',
-        analysis_config: {
-          bucket_span: '5m',
-          detectors: [
-            {
-              detector_description: 'mean(responsetime)',
-              function: 'mean',
-              field_name: 'responsetime',
-              detector_index: 0,
-            },
-            {
-              detector_description: 'min(responsetime)',
-              function: 'max',
-              field_name: 'responsetime',
-              detector_index: 1,
-              custom_rules: [
-                {
-                  actions: ['skip_result'],
-                  conditions: [
-                    {
-                      applies_to: 'diff_from_typical',
-                      operator: 'lte',
-                      value: 123,
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      };
-    },
+    getJob: mockGetJob,
   }),
 }));
 jest.mock('../../capabilities/check_capabilities', () => ({
@@ -95,8 +95,31 @@ describe('RuleEditorFlyout', () => {
     },
   });
 
+  const anomaly = {
+    jobId: 'farequote_no_by',
+    detectorIndex: 0,
+    source: { function: 'mean' },
+  };
+
   test(`don't render when not opened`, () => {
     const { container } = renderWithI18n(<RuleEditorFlyout {...getRequiredProps()} />);
     expect(container.firstChild).toMatchSnapshot();
+  });
+
+  test('showFlyout reads job from mlJobService using the anomaly jobId', () => {
+    let capturedShowFlyout;
+    const props = {
+      ...getRequiredProps(),
+      setShowFunction: (fn) => {
+        capturedShowFlyout = fn;
+      },
+    };
+
+    renderWithI18n(<RuleEditorFlyout {...props} />);
+
+    capturedShowFlyout(anomaly, {});
+
+    // mlJobService.getJob should have been called with the anomaly's jobId
+    expect(mockGetJob).toHaveBeenCalledWith(anomaly.jobId);
   });
 });

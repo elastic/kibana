@@ -21,11 +21,7 @@ import { addLog } from '../../../../../utils/add_log';
 import { selectTab } from './tabs';
 import { selectTabRuntimeState, type RuntimeStateManager } from '../runtime_state';
 import type { DiscoverInternalState } from '../types';
-import {
-  fromSavedObjectTabToTabState,
-  fromSavedSearchToSavedObjectTab,
-  fromTabStateToSavedObjectTab,
-} from '../tab_mapping_utils';
+import { fromSavedObjectTabToTabState, fromTabStateToSavedObjectTab } from '../tab_mapping_utils';
 import type { DiscoverServices } from '../../../../../build_services';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
 import { getSerializedSearchSourceDataViewDetails } from '../utils';
@@ -87,26 +83,23 @@ export const selectHasUnsavedChanges = (
             state.savedDataViews
           ),
           services,
+          defaultProfileEsqlQuery: state.defaultProfileEsqlQuery,
         }),
       }),
-      timeRestore: Boolean(persistedTab.timeRestore),
+      overridenTimeRestore: Boolean(persistedTab.timeRestore),
       services,
+      currentDataView: undefined,
     });
 
     const tabState = selectTab(state, tabId);
     const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
-    const tabStateContainer = tabRuntimeState?.stateContainer$.getValue();
-    const normalizedTab = tabStateContainer
-      ? fromSavedSearchToSavedObjectTab({
-          tab: tabState,
-          savedSearch: tabStateContainer.savedSearchState.getState(),
-          services,
-        })
-      : fromTabStateToSavedObjectTab({
-          tab: tabState,
-          timeRestore: Boolean(persistedTab.timeRestore),
-          services,
-        });
+    const currentDataView = tabRuntimeState?.currentDataView$.getValue();
+
+    const normalizedTab = fromTabStateToSavedObjectTab({
+      tab: tabState,
+      currentDataView,
+      services,
+    });
 
     for (const stringKey of Object.keys(TAB_COMPARATORS)) {
       const key = stringKey as keyof DiscoverSessionTab;
@@ -182,7 +175,7 @@ const getAdjustedDataViewId = (searchSource: SerializedSearchSourceFields) =>
     ? searchSource.index.id
     : searchSource.index;
 
-const searchSourceComparator: TabComparators['serializedSearchSource'] = (
+export const searchSourceComparator: TabComparators['serializedSearchSource'] = (
   searchSourceA,
   searchSourceB
 ) => {
@@ -215,6 +208,7 @@ const TAB_COMPARATORS: TabComparators = {
   columns: fieldComparator('columns', []),
   grid: fieldComparator('grid', {}),
   hideChart: fieldComparator('hideChart', false),
+  hideTable: fieldComparator('hideTable', false),
   // isTextBasedQuery is derived from the query itself and can be ignored
   isTextBasedQuery: NOOP_COMPARATOR,
   // usesAdHocDataView is derived from the data view itself and can be ignored
