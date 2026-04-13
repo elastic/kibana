@@ -8,7 +8,7 @@
  */
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
-import type { ESQLMessage, ESQLCommand, ESQLAstAllCommands } from '@elastic/esql/types';
+import type { ESQLCommand, ESQLAstAllCommands } from '@elastic/esql/types';
 import type {
   ISuggestionItem,
   ICommandCallbacks,
@@ -17,6 +17,7 @@ import type {
   ESQLCommandSummary,
   UnmappedFieldsStrategy,
 } from './types';
+import type { ESQLMessage } from '../definitions/types';
 
 /**
  * Interface defining the methods that each ES|QL command should register.
