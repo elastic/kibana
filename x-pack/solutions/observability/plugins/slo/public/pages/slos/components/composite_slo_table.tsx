@@ -237,9 +237,9 @@ export function CompositeSloTable({
           if (!details) return <EuiSkeletonText lines={1} />;
           if (details.summary.status === 'NO_DATA') return NOT_AVAILABLE_LABEL;
 
-          const total = details.members.length;
+          const memberCount = details.members.length;
           const healthyCount = details.members.filter((m) => m.status === 'HEALTHY').length;
-          const allHealthy = healthyCount === total;
+          const allHealthy = healthyCount === memberCount;
           const isOpen = openMemberHealthPopoverId === item.id;
 
           const kqlQuery = `slo.id: (${item.members.map((m) => `"${m.sloId}"`).join(' OR ')})`;
@@ -247,13 +247,18 @@ export function CompositeSloTable({
 
           const label = i18n.translate('xpack.slo.compositeSloList.columns.memberHealthValue', {
             defaultMessage: '{healthy} of {total}',
-            values: { healthy: healthyCount, total },
+            values: { healthy: healthyCount, total: memberCount },
           });
 
           return (
             <EuiPopover
+              aria-label={i18n.translate(
+                'xpack.slo.compositeSloList.memberHealth.popoverAriaLabel',
+                { defaultMessage: 'Member SLO health details' }
+              )}
               button={
                 <EuiLink
+                  data-test-subj={`compositeSloMemberHealthToggle-${item.id}`}
                   color={allHealthy ? 'success' : 'danger'}
                   onClick={() => setOpenMemberHealthPopoverId(isOpen ? null : item.id)}
                 >
@@ -267,17 +272,27 @@ export function CompositeSloTable({
             >
               <EuiFlexGroup direction="column" gutterSize="xs" css={{ minWidth: 240 }}>
                 {details.members.map((m) => {
-                  const statusInfo = displayStatus[m.status];
+                  const statusInfo = displayStatus[m.status as keyof typeof displayStatus];
                   return (
                     <EuiFlexItem key={m.id}>
                       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                         <EuiFlexItem grow={false}>
-                          <EuiBadge color={statusInfo.badgeColor}>
-                            {statusInfo.displayText}
-                          </EuiBadge>
+                          {statusInfo ? (
+                            <EuiBadge color={statusInfo.badgeColor}>
+                              {statusInfo.displayText}
+                            </EuiBadge>
+                          ) : null}
                         </EuiFlexItem>
                         <EuiFlexItem>
-                          <EuiText size="s" css={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 180 }}>
+                          <EuiText
+                            size="s"
+                            css={{
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                              maxWidth: 180,
+                            }}
+                          >
                             {m.name}
                           </EuiText>
                         </EuiFlexItem>
@@ -287,7 +302,7 @@ export function CompositeSloTable({
                 })}
                 <EuiFlexItem>
                   <EuiHorizontalRule margin="xs" />
-                  <EuiLink href={href}>
+                  <EuiLink data-test-subj="compositeSloMemberHealthViewMembers" href={href}>
                     {i18n.translate('xpack.slo.compositeSloList.memberHealth.viewMembers', {
                       defaultMessage: 'View members',
                     })}
@@ -368,8 +383,7 @@ export function CompositeSloTable({
         render: (item: CompositeSLOItem) => {
           const alertCount = item.members.reduce((sum, m) => {
             return (
-              sum +
-              (activeAlerts.get({ id: m.sloId, instanceId: m.instanceId ?? ALL_VALUE }) ?? 0)
+              sum + (activeAlerts.get({ id: m.sloId, instanceId: m.instanceId ?? ALL_VALUE }) ?? 0)
             );
           }, 0);
 
@@ -396,9 +410,7 @@ export function CompositeSloTable({
                 iconType="warning"
                 color="danger"
                 onClick={() =>
-                  navigateToUrl(
-                    `${basePath.prepend(observabilityPaths.alerts)}?_a=${encodedKuery}`
-                  )
+                  navigateToUrl(`${basePath.prepend(observabilityPaths.alerts)}?_a=${encodedKuery}`)
                 }
                 onClickAriaLabel={i18n.translate(
                   'xpack.slo.compositeSloList.activeAlerts.ariaLabel',
@@ -415,8 +427,13 @@ export function CompositeSloTable({
       {
         name: (
           <EuiPopover
+            aria-label={i18n.translate(
+              'xpack.slo.compositeSloList.burnRate.windowSelectorAriaLabel',
+              { defaultMessage: 'Select burn rate window' }
+            )}
             button={
               <EuiButtonEmpty
+                data-test-subj="compositeSloListBurnRateWindowSelector"
                 size="xs"
                 iconType="arrowDown"
                 iconSide="right"
@@ -542,6 +559,9 @@ export function CompositeSloTable({
     <EuiBasicTable
       css={{ overflowX: 'auto' }}
       data-test-subj="compositeSloList"
+      tableCaption={i18n.translate('xpack.slo.compositeSloList.tableCaption', {
+        defaultMessage: 'Composite SLOs',
+      })}
       items={results}
       columns={columns}
       itemId="id"
