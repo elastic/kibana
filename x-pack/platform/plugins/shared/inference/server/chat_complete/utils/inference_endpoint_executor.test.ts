@@ -40,7 +40,11 @@ describe('createInferenceEndpointExecutor', () => {
         querystring: { timeout: '3m' },
         body,
       },
-      { asStream: true }
+      {
+        asStream: true,
+        requestTimeout: 180_000,
+        headers: { 'X-Elastic-Product-Use-Case': 'inference' },
+      }
     );
   });
 
@@ -118,13 +122,16 @@ describe('createInferenceEndpointExecutor', () => {
     );
   });
 
-  it('does not include requestTimeout when timeout is not provided', async () => {
+  it('uses the default requestTimeout when timeout is not provided', async () => {
     const stream = new PassThrough();
     mockTransportRequest.mockResolvedValue(stream);
 
     await executor.invoke({ body: {} });
 
-    expect(mockTransportRequest).toHaveBeenCalledWith(expect.anything(), { asStream: true });
+    expect(mockTransportRequest).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ requestTimeout: 180_000 })
+    );
   });
 
   it('returns the stream from the response', async () => {

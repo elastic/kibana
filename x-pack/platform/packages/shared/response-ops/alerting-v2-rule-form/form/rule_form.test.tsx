@@ -17,9 +17,13 @@ jest.mock('./fields/rule_preview_panel', () => ({
   RulePreviewPanel: () => <div data-test-subj="mockRulePreviewPanel">Preview Panel</div>,
 }));
 
-// Mock NameField to avoid rendering inline edit title setup
+// Mock NameField to avoid rendering full field setup
 jest.mock('./fields/name_field', () => ({
   NameField: () => <div data-test-subj="mockNameField">Rule Name</div>,
+}));
+
+jest.mock('./error_callout', () => ({
+  ErrorCallOut: () => <div data-test-subj="mockErrorCallOut">Error CallOut</div>,
 }));
 const mockCreateRule = jest.fn();
 const mockUpdateRule = jest.fn();
@@ -96,6 +100,12 @@ describe('RuleForm', () => {
       expect(screen.getByText('GUI Form')).toBeInTheDocument();
     });
 
+    it('renders ErrorCallOut from RuleFormContent', () => {
+      render(<RuleForm {...defaultProps} />, { wrapper: createFormWrapper() });
+
+      expect(screen.getByTestId('mockErrorCallOut')).toBeInTheDocument();
+    });
+
     it('passes includeQueryEditor to GuiRuleForm', () => {
       render(<RuleForm {...defaultProps} includeQueryEditor />, { wrapper: createFormWrapper() });
 
@@ -130,6 +140,18 @@ describe('RuleForm', () => {
       expect(screen.getByTestId('ruleV2FormEditModeToggle')).toBeInTheDocument();
       expect(screen.getByTestId('ruleV2FormEditModeFormButton')).toBeInTheDocument();
       expect(screen.getByTestId('ruleV2FormEditModeYamlButton')).toBeInTheDocument();
+    });
+
+    it('shows Rule configuration heading when includeYaml is true', () => {
+      render(<RuleForm {...defaultProps} includeYaml />, { wrapper: createFormWrapper() });
+
+      expect(screen.getByText('Rule configuration')).toBeInTheDocument();
+    });
+
+    it('does not show Rule configuration heading when includeYaml is false', () => {
+      render(<RuleForm {...defaultProps} includeYaml={false} />, { wrapper: createFormWrapper() });
+
+      expect(screen.queryByText('Rule configuration')).not.toBeInTheDocument();
     });
 
     it('starts in form mode by default', () => {

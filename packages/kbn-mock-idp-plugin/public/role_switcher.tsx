@@ -12,6 +12,7 @@ import React, { useEffect, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MOCK_IDP_REALM_NAME, MOCK_IDP_REALM_TYPE } from '@kbn/mock-idp-utils/src/constants';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
@@ -93,7 +94,7 @@ export const RoleSwitcher = () => {
         <EuiButton
           color="text"
           size="s"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           minWidth={false}
           onClick={() => setIsOpen((toggle) => !toggle)}
@@ -109,6 +110,9 @@ export const RoleSwitcher = () => {
       repositionToCrossAxis={false}
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
+      aria-label={i18n.translate('kbnMockIdpPlugin.roleSwitcher.popoverAriaLabel', {
+        defaultMessage: 'Switch role',
+      })}
     >
       <EuiContextMenu
         initialPanelId={0}

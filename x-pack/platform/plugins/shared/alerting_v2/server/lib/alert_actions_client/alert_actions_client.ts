@@ -11,11 +11,13 @@ import { inject, injectable } from 'inversify';
 import { groupBy, omit } from 'lodash';
 import type {
   BulkCreateAlertActionItemBody,
-  BulkGetAlertActionsResponse,
   CreateAlertActionBody,
 } from '@kbn/alerting-v2-schemas';
-import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../resources/alert_actions';
-import { ALERT_EVENTS_DATA_STREAM } from '../../resources/alert_events';
+import {
+  ALERT_ACTIONS_DATA_STREAM,
+  type AlertAction,
+} from '../../resources/datastreams/alert_actions';
+import { ALERT_EVENTS_DATA_STREAM } from '../../resources/datastreams/alert_events';
 import { queryResponseToRecords } from '../services/query_service/query_response_to_records';
 import { type QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
@@ -23,7 +25,6 @@ import type { StorageServiceContract } from '../services/storage_service/storage
 import { StorageServiceScopedToken } from '../services/storage_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
-import { getBulkGetAlertActionsQuery } from './queries';
 
 @injectable()
 export class AlertActionsClient {
@@ -45,40 +46,13 @@ export class AlertActionsClient {
       }),
     ]);
 
-    await this.storageService.bulkIndexDocs({
-      index: ALERT_ACTIONS_DATA_STREAM,
-      docs: [
-        this.buildAlertActionDocument({
-          action: params.action,
-          alertEvent,
-          userProfileUid,
-        }),
-      ],
-    });
-  }
-
-  public async bulkGet(episodeIds: string[]): Promise<BulkGetAlertActionsResponse> {
-    const query = getBulkGetAlertActionsQuery(episodeIds);
-    const records = queryResponseToRecords<BulkGetAlertActionsResponse[number]>(
-      await this.queryService.executeQuery({ query: query.query })
-    );
-
-    const returnedEpisodeIds = new Set(records.map((r) => r.episode_id));
-    for (const episodeId of episodeIds) {
-      if (!returnedEpisodeIds.has(episodeId)) {
-        records.push({
-          episode_id: episodeId,
-          rule_id: null,
-          group_hash: null,
-          last_ack_action: null,
-          last_deactivate_action: null,
-          last_snooze_action: null,
-          tags: null,
-        });
-      }
-    }
-
-    return records;
+    await this.bulkIndexActions([
+      this.buildAlertActionDocument({
+        action: params.action,
+        alertEvent,
+        userProfileUid,
+      }),
+    ]);
   }
 
   public async createBulkActions(
@@ -113,10 +87,19 @@ export class AlertActionsClient {
       .filter((doc): doc is AlertAction => doc !== undefined);
 
     if (docs.length > 0) {
-      await this.storageService.bulkIndexDocs({ index: ALERT_ACTIONS_DATA_STREAM, docs });
+      await this.bulkIndexActions(docs);
     }
 
     return { processed: docs.length, total: actions.length };
+  }
+
+  private async bulkIndexActions(docs: readonly AlertAction[]): Promise<void> {
+    await this.storageService.bulkIndexDocs({
+      index: ALERT_ACTIONS_DATA_STREAM,
+      docs,
+      // this ensures that the action is immediately visible to the user in the UI
+      refresh: 'wait_for',
+    });
   }
 
   private async fetchLastAlertEventRecordsForActions(
@@ -136,8 +119,8 @@ export class AlertActionsClient {
         last_event_timestamp = MAX(@timestamp),
         last_episode_id = LAST(episode.id, @timestamp),
         rule_id = VALUES(rule.id)
-        BY group_hash
-      | KEEP last_event_timestamp, rule_id, group_hash, last_episode_id
+        BY group_hash, space_id
+      | KEEP last_event_timestamp, rule_id, group_hash, last_episode_id, space_id
       | RENAME last_event_timestamp AS @timestamp, last_episode_id AS episode_id
     `.toRequest();
 
@@ -166,6 +149,7 @@ export class AlertActionsClient {
       rule_id: alertEvent.rule_id,
       group_hash: alertEvent.group_hash,
       episode_id: alertEvent.episode_id,
+      space_id: alertEvent.space_id,
       ...actionData,
     };
   }
@@ -182,7 +166,7 @@ export class AlertActionsClient {
     }
       | SORT @timestamp DESC
       | RENAME rule.id AS rule_id, episode.id AS episode_id
-      | KEEP @timestamp, group_hash, episode_id, rule_id
+      | KEEP @timestamp, group_hash, episode_id, rule_id, space_id
       | LIMIT 1`.toRequest();
 
     const result = queryResponseToRecords<AlertEventRecord>(
@@ -204,4 +188,5 @@ interface AlertEventRecord {
   group_hash: string;
   episode_id: string;
   rule_id: string;
+  space_id: string;
 }

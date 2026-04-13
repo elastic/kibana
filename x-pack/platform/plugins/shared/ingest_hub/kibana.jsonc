@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/ingest-hub-plugin",
+  "owner": "@elastic/obs-onboarding-team",
+  "description": "Cross-solution onboarding page for adding data sources and integrations.",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "ingestHub",
+    "browser": true,
+    "server": false,
+    "configPath": ["xpack", "ingestHub"],
+    "optionalPlugins": ["spaces", "cloud"]
+  }
+}

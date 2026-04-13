@@ -63,7 +63,7 @@ export const TakeAction = ({ kqlQuery, isDisabled }: TakeActionProps) => {
       isLoading={isLoading}
       isDisabled={isDisabled}
       fill
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={() => setPopoverOpen(!isPopoverOpen)}
     >

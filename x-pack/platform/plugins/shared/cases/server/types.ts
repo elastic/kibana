@@ -6,6 +6,17 @@
  */
 
 import type { IRouter, CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
+
+/**
+ * Validates a close reason.
+ * Register via {@link CasesServerSetup.registerCloseReasonValidator}.
+ * @param closeReason - the close reason provided in the request
+ * @param request - the originating Kibana request, for scoping services
+ */
+export type CloseReasonValidator = (
+  closeReason: string,
+  request: KibanaRequest
+) => Promise<boolean>;
 import type {
   ActionTypeConfig,
   ActionTypeSecrets,
@@ -105,6 +116,11 @@ export interface CasesServerStart {
 export interface CasesServerSetup {
   attachmentFramework: AttachmentFramework;
   config: ConfigType;
+  /**
+   * Registers a validator for close reasons for a specific case owner.
+   * Cases with the given owner will be allowed to use any close reason accepted by the validator.
+   */
+  registerCloseReasonValidator: (owner: string, validator: CloseReasonValidator) => void;
 }
 
 export type PartialField<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;

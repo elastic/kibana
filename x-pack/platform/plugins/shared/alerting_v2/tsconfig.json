@@ -5,6 +5,7 @@
     "outDir": "target/types"
   },
   "include": [
+    "common/**/*",
     "server/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
@@ -74,7 +75,26 @@
     "@kbn/lens-plugin",
     "@kbn/core-security-server-mocks",
     "@kbn/kql",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/object-utils",
+    "@kbn/alerting-v2-constants",
+    "@kbn/alerting-v2-episodes-ui",
+    "@kbn/kibana-react-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/expressions-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/charts-plugin",
+    "@kbn/unified-data-table",
+    "@kbn/cell-actions",
+    "@kbn/discover-utils",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/core-http-browser",
+    "@kbn/utility-types",
+    "@kbn/usage-collection-plugin",
+    "@kbn/share-plugin",
+    "@kbn/deeplinks-analytics"
   ],
   "exclude": ["target/**/*"]
 }

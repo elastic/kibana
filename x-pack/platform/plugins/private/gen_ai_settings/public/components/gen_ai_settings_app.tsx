@@ -50,6 +50,8 @@ const isAIChatExperience = (value: unknown): value is AIChatExperience =>
   typeof value === 'string' &&
   (value === AIChatExperience.Classic || value === AIChatExperience.Agent);
 
+const MODEL_SETTINGS_FEATURE_FLAG_ID = 'searchInferenceEndpoints:modelSettingsEnabled';
+
 export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrumbs }) => {
   const { services } = useKibana();
   const { application, http, docLinks, productDocBase, analytics } = services;
@@ -63,6 +65,11 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
   } = useEnabledFeatures();
   const { euiTheme } = useEuiTheme();
   const { fields, unsavedChanges, isSaving, cleanUnsavedChanges, saveAll } = useSettingsContext();
+
+  const isModelSettingsPageEnabled = services.settings?.client?.get<boolean>(
+    MODEL_SETTINGS_FEATURE_FLAG_ID,
+    true
+  );
 
   // Determine current chat experience (including unsaved changes)
   const chatExperienceField = fields[AI_CHAT_EXPERIENCE_TYPE];
@@ -123,22 +130,20 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
         <p>
           <FormattedMessage
             id="genAiSettings.aiConnectorDescription"
-            defaultMessage={`AI-powered features require a large language model (LLM) connector. You can use the Elastic Managed LLM ({atAdditionalCost}) or configure a third-party connector.
-              When you set a default AI connector, it is pre-selected for all of these features in this space.
-              If you haven't set a default, the most recently used connector is selected automatically. {manageConnectors}`}
+            defaultMessage={`AI-powered features require a large language model (LLM) connection. You can use Elastic Inference Service models ({atAdditionalCost}) or configure a third-party model.
+              When you set a default AI model, it is pre-selected for all of these features in this space.
+              If you haven't set a default, the most recently used model is selected automatically. {manageConnectors}`}
             values={{
               manageConnectors: (
                 <EuiLink
                   href={application.getUrlForApp('management', {
-                    path: 'insightsAndAlerting/triggersActionsConnectors/connectors',
+                    path: 'modelManagement/model_settings',
                   })}
                   target="_blank"
                 >
                   <FormattedMessage
                     id="genAiSettings.manage.connectors"
-                    defaultMessage={
-                      hasConnectorsAllPrivilege ? 'Manage connectors' : 'View connectors'
-                    }
+                    defaultMessage={'Manage models'}
                   />
                 </EuiLink>
               ),
@@ -167,7 +172,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
           id="genAiSettings.aiConnectorDescriptionWithLink"
           defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-powered features. By default, Elastic uses its {preconfiguredConnectors} ({link}) when no custom connectors are available. When available, Elastic uses the last used custom connector.${
             showSpacesNote
-              ? ' Set up your own connectors or disable the AI Assistant from the {aiFeatureVisibility} setting below.'
+              ? ' Set up your own models or disable the AI Assistant from the {aiFeatureVisibility} setting below.'
               : ''
           } {manageConnectors}`}
           values={{
@@ -185,13 +190,13 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
             manageConnectors: (
               <EuiLink
                 href={application.getUrlForApp('management', {
-                  path: 'insightsAndAlerting/triggersActionsConnectors/connectors',
+                  path: 'modelManagement/model_settings',
                 })}
                 target="_blank"
               >
                 <FormattedMessage
                   id="genAiSettings.manage.connectors"
-                  defaultMessage="Manage connectors"
+                  defaultMessage="Manage models"
                 />
               </EuiLink>
             ),
@@ -310,38 +315,41 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
               </EuiTitle>
             </EuiSplitPanel.Inner>
             <EuiSplitPanel.Inner>
-              <EuiDescribedFormGroup
-                data-test-subj="connectorsSection"
-                fullWidth
-                title={
-                  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <EuiTitle size="xs">
-                        <h3 data-test-subj="connectorsTitle">
-                          <FormattedMessage
-                            id="genAiSettings.aiConnectorLabel"
-                            defaultMessage="Default AI Connector"
-                          />
-                        </h3>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <AiIcon iconType="sparkles" size="m" aria-hidden={true} />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                }
-                description={connectorDescription}
-              >
-                <EuiFormRow fullWidth>
-                  <EuiFlexGroup gutterSize="m" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <DefaultAIConnector connectors={connectors} />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFormRow>
-              </EuiDescribedFormGroup>
-
-              {showSpacesIntegration && canManageSpaces && <EuiSpacer size="l" />}
+              {!isModelSettingsPageEnabled && (
+                <>
+                  <EuiDescribedFormGroup
+                    data-test-subj="connectorsSection"
+                    fullWidth
+                    title={
+                      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <EuiTitle size="xs">
+                            <h3 data-test-subj="connectorsTitle">
+                              <FormattedMessage
+                                id="genAiSettings.aiConnectorLabel"
+                                defaultMessage="Default AI Connector"
+                              />
+                            </h3>
+                          </EuiTitle>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <AiIcon iconType="sparkles" size="m" aria-hidden={true} />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    }
+                    description={connectorDescription}
+                  >
+                    <EuiFormRow fullWidth>
+                      <EuiFlexGroup gutterSize="m" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <DefaultAIConnector connectors={connectors} />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFormRow>
+                  </EuiDescribedFormGroup>
+                  {showSpacesIntegration && canManageSpaces && <EuiSpacer size="l" />}
+                </>
+              )}
 
               {showSpacesIntegration && canManageSpaces && (
                 <EuiDescribedFormGroup
@@ -424,7 +432,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                   <ChatExperience />
                 </EuiFlexItem>
               )}
-              {showAiAssistantsVisibilitySetting && (
+              {showAiAssistantsVisibilitySetting && !isAgentExperience && (
                 <EuiFlexItem>
                   <AIAssistantVisibility />
                 </EuiFlexItem>

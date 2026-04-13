@@ -6,9 +6,20 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
+import { useFormContext } from 'react-hook-form';
 import { RecoveryDelayField } from './recovery_delay_field';
-import { createFormWrapper } from '../../test_utils';
+import { AlertDelayField } from './alert_delay_field';
+import type { FormValues } from '../types';
+import { mapFormValuesToUpdateRequest } from '../utils/rule_request_mappers';
+import { createFormWrapper, createMockServices } from '../../test_utils';
+
+let getFormValues: (() => FormValues) | undefined;
+
+const CaptureFormGetValues = () => {
+  getFormValues = useFormContext<FormValues>().getValues;
+  return null;
+};
 
 describe('RecoveryDelayField', () => {
   it('renders the recovery delay form row', () => {
@@ -36,10 +47,11 @@ describe('RecoveryDelayField', () => {
     expect(screen.getByText('No delay - Recovers on first non-breach')).toBeInTheDocument();
   });
 
-  it('derives breaches mode from form state with recoveringCount', () => {
+  it('shows recoveries controls when recovery delay mode is recoveries', () => {
     render(<RecoveryDelayField />, {
       wrapper: createFormWrapper({
         kind: 'alert',
+        stateTransitionRecoveryDelayMode: 'recoveries',
         stateTransition: { recoveringCount: 4 },
       }),
     });
@@ -47,10 +59,11 @@ describe('RecoveryDelayField', () => {
     expect(screen.getByTestId('recoveryTransitionCountInput')).toBeInTheDocument();
   });
 
-  it('derives duration mode from form state with recoveringTimeframe', () => {
+  it('shows duration controls when recovery delay mode is duration', () => {
     render(<RecoveryDelayField />, {
       wrapper: createFormWrapper({
         kind: 'alert',
+        stateTransitionRecoveryDelayMode: 'duration',
         stateTransition: { recoveringTimeframe: '20m' },
       }),
     });
@@ -58,12 +71,12 @@ describe('RecoveryDelayField', () => {
     expect(screen.getByTestId('recoveryTransitionTimeframeNumberInput')).toBeInTheDocument();
   });
 
-  it('switches to breaches mode when Breaches button is clicked', () => {
+  it('switches to recoveries mode when Recoveries button is clicked', () => {
     render(<RecoveryDelayField />, {
       wrapper: createFormWrapper({ kind: 'alert' }),
     });
 
-    fireEvent.click(screen.getByText('Breaches'));
+    fireEvent.click(screen.getByText('Recoveries'));
 
     expect(screen.getByTestId('recoveryTransitionCountInput')).toBeInTheDocument();
     expect(screen.queryByTestId('recoveryDelayImmediateDescription')).not.toBeInTheDocument();
@@ -84,11 +97,12 @@ describe('RecoveryDelayField', () => {
     render(<RecoveryDelayField />, {
       wrapper: createFormWrapper({
         kind: 'alert',
+        stateTransitionRecoveryDelayMode: 'recoveries',
         stateTransition: { recoveringCount: 4 },
       }),
     });
 
-    // Start in breaches mode, switch to immediate
+    // Start in recoveries mode, switch to immediate
     fireEvent.click(screen.getByText('Immediate'));
 
     expect(screen.getByTestId('recoveryDelayImmediateDescription')).toBeInTheDocument();
@@ -101,5 +115,50 @@ describe('RecoveryDelayField', () => {
     });
 
     expect(screen.getByTestId('recoveryDelayMode')).toBeInTheDocument();
+  });
+
+  it('renders correctly in flyout layout', () => {
+    render(<RecoveryDelayField />, {
+      wrapper: createFormWrapper({ kind: 'alert' }, createMockServices(), { layout: 'flyout' }),
+    });
+
+    expect(screen.getByTestId('recoveryDelayMode')).toBeInTheDocument();
+  });
+
+  it('clears recovery delay (recovering) when switching to immediate while alert delay stays on breaches', () => {
+    getFormValues = undefined;
+    render(
+      <>
+        <CaptureFormGetValues />
+        <AlertDelayField />
+        <RecoveryDelayField />
+      </>,
+      {
+        wrapper: createFormWrapper({
+          kind: 'alert',
+          stateTransitionAlertDelayMode: 'breaches',
+          stateTransitionRecoveryDelayMode: 'recoveries',
+          stateTransition: {
+            pendingCount: 2,
+            pendingTimeframe: null,
+            recoveringCount: 3,
+            recoveringTimeframe: null,
+          },
+        }),
+      }
+    );
+
+    const recoveryRow = screen.getByTestId('recoveryDelayFormRow');
+    fireEvent.click(within(recoveryRow).getByText('Immediate'));
+
+    const values = getFormValues!();
+    expect(values.stateTransitionRecoveryDelayMode).toBe('immediate');
+    expect(values.stateTransition?.recoveringCount).toBeNull();
+    expect(values.stateTransition?.recoveringTimeframe).toBeNull();
+    expect(values.stateTransition?.pendingCount).toBe(2);
+
+    expect(mapFormValuesToUpdateRequest(values).state_transition).toEqual({
+      pending_count: 2,
+    });
   });
 });
