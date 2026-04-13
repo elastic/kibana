@@ -8,7 +8,6 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
-import type { WorkflowDetailDto } from '@kbn/workflows/types/latest';
 
 /**
  * Thin, context-free API helpers for workflow CRUD operations.
@@ -16,12 +15,12 @@ import type { WorkflowDetailDto } from '@kbn/workflows/types/latest';
  * (e.g. in attachment renderers).
  */
 
-export const createWorkflow = (http: HttpSetup, yaml: string): Promise<WorkflowDetailDto> =>
-  http.post<WorkflowDetailDto>('/api/workflows', {
+export const createWorkflow = (http: HttpSetup, yaml: string) =>
+  http.post('/api/workflows', {
     body: JSON.stringify({ yaml }),
   });
 
-export const updateWorkflow = (http: HttpSetup, id: string, yaml: string): Promise<void> =>
+export const updateWorkflow = (http: HttpSetup, id: string, yaml: string) =>
   http.put<void>(`/api/workflows/${id}`, {
     body: JSON.stringify({ yaml }),
   });

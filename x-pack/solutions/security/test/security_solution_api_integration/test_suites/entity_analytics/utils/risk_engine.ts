@@ -61,7 +61,9 @@ export const sanitizeScores = (
 export const normalizeScores = (
   scores: Array<Partial<EcsRiskScore>>
 ): Array<Partial<EntityRiskScoreRecord>> =>
-  scores.map((score) => sanitizeScore(score.host?.risk ?? score.user?.risk ?? {}));
+  scores.map((score) =>
+    sanitizeScore(score.host?.risk ?? score.user?.risk ?? score.service?.risk ?? {})
+  );
 
 export const buildDocument = (body: object, id?: string) => {
   const firstTimestamp = Date.now();
@@ -81,10 +83,12 @@ export const createAndSyncRuleAndAlertsFactory =
     supertest,
     log,
     namespace,
+    indices = ['ecs_compliant'],
   }: {
     supertest: SuperTest.Agent;
     log: ToolingLog;
     namespace?: string;
+    indices?: string[];
   }) =>
   async ({
     alerts = 1,
@@ -99,7 +103,7 @@ export const createAndSyncRuleAndAlertsFactory =
     query: string;
     riskScoreOverride?: string;
   }): Promise<void> => {
-    const rule = getRuleForAlertTesting(['ecs_compliant'], uuidv4());
+    const rule = getRuleForAlertTesting(indices, uuidv4());
     const { id } = await createRule(
       supertest,
       log,
@@ -218,11 +222,13 @@ export const deleteAllRiskScores = async (
 export const readRiskScores = async (
   es: Client,
   index: string[] = ['risk-score.risk-score-default'],
-  size: number = 1000
+  size: number = 1000,
+  query?: Record<string, any>
 ): Promise<EcsRiskScore[]> => {
   const results = await es.search({
     index,
     size,
+    ...(query ? { query } : {}),
   });
   return results.hits.hits.map((hit) => hit._source as EcsRiskScore);
 };
@@ -240,20 +246,131 @@ export const waitForRiskScoresToBePresent = async ({
   log,
   index = ['risk-score.risk-score-default'],
   scoreCount = 1,
+  maxPolls = 150,
 }: {
   es: Client;
   log: ToolingLog;
   index?: string[];
   scoreCount?: number;
+  maxPolls?: number;
 }): Promise<void> => {
+  let pollCount = 0;
   await waitFor(
     async () => {
-      const riskScores = await readRiskScores(es, index, scoreCount + 10);
-      return riskScores.length >= scoreCount;
+      pollCount += 1;
+      if (pollCount > maxPolls) {
+        throw new Error(
+          `waitForRiskScoresToBePresent exceeded max polls (${maxPolls}) for index=${index.join(
+            ','
+          )}; expected at least ${scoreCount} risk score docs`
+        );
+      }
+      try {
+        const riskScores = await readRiskScores(es, index, scoreCount + 10);
+        return riskScores.length >= scoreCount;
+      } catch (e) {
+        if (e?.meta?.statusCode === 404) {
+          return false;
+        }
+        throw e;
+      }
     },
     'waitForRiskScoresToBePresent',
     log
   );
+};
+
+/**
+ * Waits for a risk score document for a specific id_value and optional score condition.
+ * Useful in rerunnable tests where multiple docs for the same entity can exist in the stream.
+ */
+export const waitForRiskScoreForId = async ({
+  es,
+  log,
+  idValue,
+  index = ['risk-score.risk-score-default'],
+  maxPolls = 150,
+  expectedCalculatedScore,
+  minCalculatedScore,
+}: {
+  es: Client;
+  log: ToolingLog;
+  idValue: string;
+  index?: string[];
+  maxPolls?: number;
+  expectedCalculatedScore?: number;
+  minCalculatedScore?: number;
+}): Promise<Partial<EntityRiskScoreRecord>> => {
+  let pollCount = 0;
+  let bestMatch: Partial<EntityRiskScoreRecord> | undefined;
+
+  await waitFor(
+    async () => {
+      pollCount += 1;
+      if (pollCount > maxPolls) {
+        throw new Error(
+          `waitForRiskScoreForId exceeded max polls (${maxPolls}) for id_value=${idValue} index=${index.join(
+            ','
+          )}`
+        );
+      }
+
+      try {
+        const query = {
+          bool: {
+            should: [
+              { term: { 'host.risk.id_value': idValue } },
+              { term: { 'user.risk.id_value': idValue } },
+              { term: { 'service.risk.id_value': idValue } },
+            ],
+            minimum_should_match: 1,
+          },
+        };
+        const riskScores = await readRiskScores(es, index, 1000, query);
+        const normalized = sanitizeScores(normalizeScores(riskScores));
+        const matches = normalized.filter(({ id_value: candidateId }) => candidateId === idValue);
+
+        if (matches.length === 0) {
+          return false;
+        }
+
+        if (typeof expectedCalculatedScore === 'number') {
+          const exactMatch = matches.find((m) => m.calculated_score === expectedCalculatedScore);
+          if (exactMatch) {
+            bestMatch = exactMatch;
+            return true;
+          }
+          return false;
+        }
+
+        bestMatch = matches.reduce((best, candidate) => {
+          const bestValue = typeof best.calculated_score === 'number' ? best.calculated_score : -1;
+          const candidateValue =
+            typeof candidate.calculated_score === 'number' ? candidate.calculated_score : -1;
+          return candidateValue > bestValue ? candidate : best;
+        });
+
+        const calculatedScore = bestMatch.calculated_score;
+        if (typeof minCalculatedScore === 'number') {
+          return typeof calculatedScore === 'number' && calculatedScore >= minCalculatedScore;
+        }
+        return true;
+      } catch (e) {
+        if (e?.meta?.statusCode === 404) {
+          return false;
+        }
+        throw e;
+      }
+    },
+    'waitForRiskScoreForId',
+    log
+  );
+
+  if (!bestMatch) {
+    throw new Error(`waitForRiskScoreForId failed to find a score for id_value=${idValue}`);
+  }
+
+  return bestMatch;
 };
 
 /**

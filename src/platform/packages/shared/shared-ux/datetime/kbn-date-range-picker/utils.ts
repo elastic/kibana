@@ -9,15 +9,19 @@
 
 import type { RefObject } from 'react';
 
+import moment from 'moment';
+
 import type {
+  TimePrecision,
   TimeRange,
   TimeRangeBoundsOption,
+  TimeRangeTransformOptions,
   InitialFocus,
   AutoRefreshIntervalUnit,
 } from './types';
-import { DATE_RANGE_INPUT_DELIMITER } from './constants';
-import { textToTimeRange } from './parse';
-import { dateMathToRelativeParts, timeRangeToDisplayText } from './format';
+import { DATE_RANGE_INPUT_DELIMITER, DEFAULT_DATE_FORMAT, UNIT_DISPLAY_ABBREV } from './constants';
+import { textToTimeRange, getNamedRangeAlias } from './parse';
+import { dateMathToRelativeParts, timeRangeToDisplayText, applyTimePrecision } from './format';
 import { MS_PER } from './format/format_duration';
 
 /**
@@ -134,11 +138,19 @@ export function msToSeconds(intervalMs: number): number {
 }
 
 /**
+ * Formats a Date using the default DateRangePicker format, adjusted for the
+ * requested sub-minute precision. Uses moment so the result respects whatever
+ * global timezone Kibana has configured via `moment.tz.setDefault(...)`.
+ */
+export function formatAbsoluteDate(d: Date, precision: TimePrecision = 's'): string {
+  return moment(d).format(applyTimePrecision(DEFAULT_DATE_FORMAT, precision));
+}
+
+/**
  * Formats a Date as a local ISO-8601 string with full precision but no UTC offset ("Z").
  * e.g. a local 14:12:59.531 → "2026-03-04T14:12:59.531"
  *
- * Use this for display strings that should match what the user sees in their timezone,
- * rather than `.toISOString()` which always emits UTC.
+ * @deprecated Use `formatAbsoluteDate` instead, which respects moment's configured timezone.
  */
 export function toLocalPreciseString(d: Date): string {
   return (
@@ -164,6 +176,20 @@ export function isValidTimeRange(range: TimeRange): boolean {
 }
 
 /**
+ * Returns `true` when the range label already conveys its duration, making
+ * the badge redundant. This includes relative-to-now ranges (e.g. "Last 15
+ * minutes") and named ranges (e.g. "today", "yesterday", "this week").
+ */
+export function isRelativeToNow(range: TimeRange): boolean {
+  if (range.isNaturalLanguage) return true;
+  const [startType, endType] = range.type;
+  return (
+    (startType === 'RELATIVE' && endType === 'NOW') ||
+    (startType === 'NOW' && endType === 'RELATIVE')
+  );
+}
+
+/**
  * Resolve the `initialFocus` target within the panel.
  * A string is treated as a CSS selector; a ref as a direct element handle.
  * Falls back to the panel div itself when unset.
@@ -186,12 +212,15 @@ export function resolveInitialFocus(
  * Uses the existing label when present, otherwise generates one using the same
  * pipeline as the control button: build text → parse → format.
  */
-export function getOptionDisplayLabel(option: TimeRangeBoundsOption): string {
+export function getOptionDisplayLabel(
+  option: TimeRangeBoundsOption,
+  options?: Pick<TimeRangeTransformOptions, 'timePrecision'>
+): string {
   if (option.label) return option.label;
 
   const text = `${option.start} ${DATE_RANGE_INPUT_DELIMITER} ${option.end}`;
   const timeRange = textToTimeRange(text);
-  return timeRangeToDisplayText(timeRange);
+  return timeRangeToDisplayText(timeRange, options);
 }
 
 /**
@@ -206,12 +235,19 @@ export function getOptionDisplayLabel(option: TimeRangeBoundsOption): string {
  * getOptionShorthand({ start: '2025-01-01', end: 'now' }) // null
  */
 export function getOptionShorthand(option: TimeRangeBoundsOption): string | null {
-  const startOffset = boundToRelativeShorthand(option.start);
+  // Named range alias (e.g. "today" → "td", "yesterday" → "yd")
+  const alias = getNamedRangeAlias(option.start, option.end);
+  if (alias) return alias;
+
+  let startOffset = boundToRelativeShorthand(option.start);
   const endOffset = boundToRelativeShorthand(option.end);
 
   if (startOffset === null || endOffset === null) return null;
   if (startOffset === 'now' && endOffset === 'now') return null;
-  if (startOffset !== 'now' && startOffset.includes('/')) return null;
+  if (startOffset !== 'now' && startOffset.includes('/')) {
+    if (endOffset !== 'now') return null;
+    startOffset = startOffset.replace(/\/[smhdwMy]$/, '');
+  }
   if (endOffset !== 'now' && endOffset.includes('/')) return null;
   if (startOffset === 'now') return endOffset;
   if (endOffset === 'now') return startOffset;
@@ -254,13 +290,16 @@ export function getEndDate(date: Date): Date {
 }
 
 /**
- * Formats a date range as a local ISO-8601 string pair with the standard delimiter.
- * e.g. "2026-03-04T10:00:00.000 to 2026-03-05T23:30:00.000"
+ * Formats a date range using the default DateRangePicker format with the standard delimiter.
+ * e.g. "Mar 4, 2026, 10:00:00 - Mar 5, 2026, 23:30:00"
+ *
+ * Uses moment so the result respects Kibana's configured timezone.
  */
-export function formatDateRange(start: Date, end: Date): string {
-  return `${toLocalPreciseString(start)} ${DATE_RANGE_INPUT_DELIMITER} ${toLocalPreciseString(
-    end
-  )}`;
+export function formatDateRange(start: Date, end: Date, precision: TimePrecision = 's'): string {
+  return `${formatAbsoluteDate(
+    start,
+    precision
+  )} ${DATE_RANGE_INPUT_DELIMITER} ${formatAbsoluteDate(end, precision)}`;
 }
 
 /**
@@ -281,8 +320,9 @@ function boundToRelativeShorthand(bound: string): string | 'now' | null {
   if (!parts) return null;
 
   const sign = parts.isFuture ? '+' : '-';
+  const displayUnit = UNIT_DISPLAY_ABBREV[parts.unit] ?? parts.unit;
   const round = parts.round ? `/${parts.round}` : '';
-  return `${sign}${parts.count}${parts.unit}${round}`;
+  return `${sign}${parts.count}${displayUnit}${round}`;
 }
 
 /**

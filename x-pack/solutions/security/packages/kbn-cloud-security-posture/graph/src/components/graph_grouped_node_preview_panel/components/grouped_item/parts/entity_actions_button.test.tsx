@@ -26,7 +26,7 @@ describe('EntityActionsButton', () => {
     itemType: 'entity',
     icon: 'user',
     label: 'Test Entity',
-    availableInEntityStore: true,
+    entity: { availableInEntityStore: true },
   };
 
   const scopeId = 'test-scope-id';
@@ -81,7 +81,7 @@ describe('EntityActionsButton', () => {
     describe('when entity is not available in entity store', () => {
       const notInStoreItem: EntityItem = {
         ...mockEntityItem,
-        availableInEntityStore: false,
+        entity: { availableInEntityStore: false },
       };
 
       it('should render entity details item as disabled', () => {

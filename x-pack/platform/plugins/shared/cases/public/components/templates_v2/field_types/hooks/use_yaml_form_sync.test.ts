@@ -6,440 +6,714 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
+import type React from 'react';
+import moment from 'moment-timezone';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { useYamlFormSync } from './use_yaml_form_sync';
+import { useYamlToFormSync, useFormToYamlSync, useYamlFormSync } from './use_yaml_form_sync';
+import type { FieldInfo, OnFieldDefaultChange } from './use_yaml_form_sync';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
+import type { FieldDefaultValue } from '../../utils/update_yaml_field_default';
 
-describe('useYamlFormSync', () => {
-  let mockForm: jest.Mocked<FormHook>;
-  let mockSubscriptionCallback: (data: { data: { internal: Record<string, unknown> } }) => void;
-  let mockUnsubscribe: jest.Mock;
+const createMockForm = () => {
+  let subscriptionCallback: (data: { data: { internal: Record<string, unknown> } }) => void;
+  const unsubscribe = jest.fn();
+  const form = {
+    setFieldValue: jest.fn(),
+    subscribe: jest.fn((cb) => {
+      subscriptionCallback = cb;
+      return { unsubscribe };
+    }),
+  } as unknown as jest.Mocked<FormHook>;
 
-  const createMockForm = () => {
-    mockUnsubscribe = jest.fn();
-    return {
-      setFieldValue: jest.fn(),
-      subscribe: jest.fn((callback) => {
-        mockSubscriptionCallback = callback;
-        return { unsubscribe: mockUnsubscribe };
-      }),
-    } as unknown as jest.Mocked<FormHook>;
+  return {
+    form,
+    unsubscribe,
+    fireSubscription: (internal: Record<string, unknown>) => {
+      subscriptionCallback({ data: { internal } });
+    },
   };
+};
 
-  const createParsedFields = (
-    fields: Array<{
-      name: string;
-      type: string;
-      control: string;
-      defaultValue?: string | number;
-    }>
-  ) =>
-    fields.map((f) => ({
-      name: f.name,
-      type: f.type,
-      control: f.control,
-      metadata: f.defaultValue !== undefined ? { default: f.defaultValue } : undefined,
-    }));
+const createParsedFields = (
+  fields: Array<{
+    name: string;
+    type: string;
+    control: string;
+    defaultValue?: FieldDefaultValue;
+  }>
+): FieldInfo[] =>
+  fields.map((f) => ({
+    name: f.name,
+    type: f.type,
+    control: f.control,
+    metadata: f.defaultValue !== undefined ? { default: f.defaultValue } : undefined,
+  }));
+
+describe('useYamlToFormSync', () => {
+  let mockForm: jest.Mocked<FormHook>;
+  let syncingFromYamlRef: React.MutableRefObject<boolean>;
+  let lastSyncedRef: React.MutableRefObject<Record<string, string>>;
 
   beforeEach(() => {
-    jest.useFakeTimers();
-    mockForm = createMockForm();
+    ({ form: mockForm } = createMockForm());
+    syncingFromYamlRef = { current: false };
+    lastSyncedRef = { current: {} };
   });
 
-  afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
-    jest.clearAllMocks();
+  afterEach(() => jest.clearAllMocks());
+
+  it('sets form field values from parsed fields on mount', () => {
+    const fields = createParsedFields([
+      { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'Default text' },
+      { name: 'count', type: 'integer', control: 'INPUT_NUMBER', defaultValue: 42 },
+    ]);
+
+    renderHook(() => useYamlToFormSync(mockForm, fields, syncingFromYamlRef, lastSyncedRef));
+
+    expect(mockForm.setFieldValue).toHaveBeenCalledWith(
+      `${CASE_EXTENDED_FIELDS}.summary_as_keyword`,
+      'Default text'
+    );
+    expect(mockForm.setFieldValue).toHaveBeenCalledWith(
+      `${CASE_EXTENDED_FIELDS}.count_as_integer`,
+      '42'
+    );
   });
 
-  describe('YAML to form sync', () => {
-    it('sets form field values from parsed fields on mount', () => {
-      const parsedFields = createParsedFields([
-        { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'Default text' },
-        { name: 'count', type: 'integer', control: 'INPUT_NUMBER', defaultValue: 42 },
-      ]);
+  it('converts number defaults to strings', () => {
+    const fields = createParsedFields([
+      { name: 'effort', type: 'integer', control: 'INPUT_NUMBER', defaultValue: 100 },
+    ]);
 
-      renderHook(() => useYamlFormSync(mockForm, parsedFields));
+    renderHook(() => useYamlToFormSync(mockForm, fields, syncingFromYamlRef, lastSyncedRef));
 
-      expect(mockForm.setFieldValue).toHaveBeenCalledWith(
-        `${CASE_EXTENDED_FIELDS}.summary_as_keyword`,
-        'Default text'
-      );
-      expect(mockForm.setFieldValue).toHaveBeenCalledWith(
-        `${CASE_EXTENDED_FIELDS}.count_as_integer`,
-        '42'
-      );
+    expect(mockForm.setFieldValue).toHaveBeenCalledWith(
+      `${CASE_EXTENDED_FIELDS}.effort_as_integer`,
+      '100'
+    );
+  });
+
+  it('sets empty string for fields without default', () => {
+    const fields = createParsedFields([
+      { name: 'summary', type: 'keyword', control: 'INPUT_TEXT' },
+    ]);
+
+    renderHook(() => useYamlToFormSync(mockForm, fields, syncingFromYamlRef, lastSyncedRef));
+
+    expect(mockForm.setFieldValue).toHaveBeenCalledWith(
+      `${CASE_EXTENDED_FIELDS}.summary_as_keyword`,
+      ''
+    );
+  });
+
+  it('sets JSON string for array defaults (CHECKBOX_GROUP)', () => {
+    const fields = createParsedFields([
+      {
+        name: 'systems',
+        type: 'keyword',
+        control: 'CHECKBOX_GROUP',
+        defaultValue: ['api', 'database'],
+      },
+    ]);
+
+    renderHook(() => useYamlToFormSync(mockForm, fields, syncingFromYamlRef, lastSyncedRef));
+
+    expect(mockForm.setFieldValue).toHaveBeenCalledWith(
+      `${CASE_EXTENDED_FIELDS}.systems_as_keyword`,
+      '["api","database"]'
+    );
+  });
+
+  it('sets empty JSON array string for empty array default', () => {
+    const fields = createParsedFields([
+      { name: 'systems', type: 'keyword', control: 'CHECKBOX_GROUP', defaultValue: [] },
+    ]);
+
+    renderHook(() => useYamlToFormSync(mockForm, fields, syncingFromYamlRef, lastSyncedRef));
+
+    expect(mockForm.setFieldValue).toHaveBeenCalledWith(
+      `${CASE_EXTENDED_FIELDS}.systems_as_keyword`,
+      '[]'
+    );
+  });
+
+  it('sets syncingFromYamlRef to true during sync', () => {
+    const fields = createParsedFields([
+      { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'text' },
+    ]);
+
+    renderHook(() => useYamlToFormSync(mockForm, fields, syncingFromYamlRef, lastSyncedRef));
+
+    // Flag is set synchronously, then cleared via setTimeout
+    // After the effect runs synchronously, the flag should still be true (before setTimeout fires)
+    expect(syncingFromYamlRef.current).toBe(true);
+  });
+
+  it('clears syncingFromYamlRef after microtask', async () => {
+    const fields = createParsedFields([
+      { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'text' },
+    ]);
+
+    renderHook(() => useYamlToFormSync(mockForm, fields, syncingFromYamlRef, lastSyncedRef));
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
     });
 
-    it('converts number defaults to strings', () => {
-      const parsedFields = createParsedFields([
-        { name: 'effort', type: 'integer', control: 'INPUT_NUMBER', defaultValue: 100 },
-      ]);
+    expect(syncingFromYamlRef.current).toBe(false);
+  });
 
-      renderHook(() => useYamlFormSync(mockForm, parsedFields));
+  it('updates lastSyncedRef with synced values', () => {
+    const fields = createParsedFields([
+      { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'Hello' },
+    ]);
 
-      expect(mockForm.setFieldValue).toHaveBeenCalledWith(
-        `${CASE_EXTENDED_FIELDS}.effort_as_integer`,
-        '100'
-      );
+    renderHook(() => useYamlToFormSync(mockForm, fields, syncingFromYamlRef, lastSyncedRef));
+
+    expect(lastSyncedRef.current.summary).toBe('Hello');
+  });
+
+  it('skips setFieldValue when YAML default has not changed (deduplication)', () => {
+    const fields = createParsedFields([
+      { name: 'env', type: 'keyword', control: 'RADIO_GROUP', defaultValue: 'production' },
+    ]);
+
+    const { rerender } = renderHook(
+      ({ f }) => useYamlToFormSync(mockForm, f, syncingFromYamlRef, lastSyncedRef),
+      { initialProps: { f: fields } }
+    );
+
+    expect(mockForm.setFieldValue).toHaveBeenCalledTimes(1);
+    mockForm.setFieldValue.mockClear();
+
+    const identicalFields = createParsedFields([
+      { name: 'env', type: 'keyword', control: 'RADIO_GROUP', defaultValue: 'production' },
+    ]);
+    rerender({ f: identicalFields });
+
+    expect(mockForm.setFieldValue).not.toHaveBeenCalled();
+  });
+
+  it('calls setFieldValue when the YAML default genuinely changes', () => {
+    const fields = createParsedFields([
+      { name: 'env', type: 'keyword', control: 'RADIO_GROUP', defaultValue: 'production' },
+    ]);
+
+    const { rerender } = renderHook(
+      ({ f }) => useYamlToFormSync(mockForm, f, syncingFromYamlRef, lastSyncedRef),
+      { initialProps: { f: fields } }
+    );
+
+    mockForm.setFieldValue.mockClear();
+
+    const updated = createParsedFields([
+      { name: 'env', type: 'keyword', control: 'RADIO_GROUP', defaultValue: 'staging' },
+    ]);
+    rerender({ f: updated });
+
+    expect(mockForm.setFieldValue).toHaveBeenCalledWith(
+      `${CASE_EXTENDED_FIELDS}.env_as_keyword`,
+      'staging'
+    );
+  });
+
+  it('does nothing for empty parsedFields', () => {
+    renderHook(() => useYamlToFormSync(mockForm, [], syncingFromYamlRef, lastSyncedRef));
+
+    expect(mockForm.setFieldValue).not.toHaveBeenCalled();
+    expect(syncingFromYamlRef.current).toBe(false);
+  });
+});
+
+describe('useFormToYamlSync', () => {
+  let syncingFromYamlRef: React.MutableRefObject<boolean>;
+  let yamlDefaultsRef: React.MutableRefObject<Record<string, string>>;
+  let mockOnChange: jest.MockedFunction<OnFieldDefaultChange>;
+  let fireSubscription: (internal: Record<string, unknown>) => void;
+  let unsubscribe: jest.Mock;
+  let mockForm: jest.Mocked<FormHook>;
+
+  beforeEach(() => {
+    syncingFromYamlRef = { current: false };
+    yamlDefaultsRef = { current: {} };
+    mockOnChange = jest.fn();
+    ({ form: mockForm, unsubscribe, fireSubscription } = createMockForm());
+  });
+
+  afterEach(() => jest.clearAllMocks());
+
+  it('subscribes to form changes', () => {
+    const fields = createParsedFields([
+      { name: 'summary', type: 'keyword', control: 'INPUT_TEXT' },
+    ]);
+
+    renderHook(() =>
+      useFormToYamlSync(mockForm, fields, syncingFromYamlRef, yamlDefaultsRef, mockOnChange)
+    );
+
+    expect(mockForm.subscribe).toHaveBeenCalled();
+  });
+
+  it('unsubscribes on unmount', () => {
+    const fields = createParsedFields([
+      { name: 'summary', type: 'keyword', control: 'INPUT_TEXT' },
+    ]);
+
+    const { unmount } = renderHook(() =>
+      useFormToYamlSync(mockForm, fields, syncingFromYamlRef, yamlDefaultsRef, mockOnChange)
+    );
+
+    unmount();
+    expect(unsubscribe).toHaveBeenCalled();
+  });
+
+  it('calls onFieldDefaultChange when form value differs from YAML value', () => {
+    const fields = createParsedFields([
+      { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'Original' },
+    ]);
+    yamlDefaultsRef.current = { summary: 'Original' };
+
+    renderHook(() =>
+      useFormToYamlSync(mockForm, fields, syncingFromYamlRef, yamlDefaultsRef, mockOnChange)
+    );
+
+    act(() => {
+      fireSubscription({
+        [CASE_EXTENDED_FIELDS]: { summary_as_keyword: 'User typed value' },
+      });
     });
 
-    it('sets empty string for fields without default', () => {
-      const parsedFields = createParsedFields([
-        { name: 'summary', type: 'keyword', control: 'INPUT_TEXT' },
-      ]);
+    expect(mockOnChange).toHaveBeenCalledWith('summary', 'User typed value', 'INPUT_TEXT');
+  });
 
-      renderHook(() => useYamlFormSync(mockForm, parsedFields));
+  it('does not call onFieldDefaultChange when form value matches YAML value', () => {
+    const fields = createParsedFields([
+      { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'Same' },
+    ]);
+    yamlDefaultsRef.current = { summary: 'Same' };
 
-      expect(mockForm.setFieldValue).toHaveBeenCalledWith(
-        `${CASE_EXTENDED_FIELDS}.summary_as_keyword`,
-        ''
-      );
+    renderHook(() =>
+      useFormToYamlSync(mockForm, fields, syncingFromYamlRef, yamlDefaultsRef, mockOnChange)
+    );
+
+    act(() => {
+      fireSubscription({
+        [CASE_EXTENDED_FIELDS]: { summary_as_keyword: 'Same' },
+      });
     });
 
-    it('updates form fields when parsedFields change', () => {
-      const initialFields = createParsedFields([
-        { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'Initial' },
-      ]);
+    expect(mockOnChange).not.toHaveBeenCalled();
+  });
 
-      const { rerender } = renderHook(({ fields }) => useYamlFormSync(mockForm, fields), {
-        initialProps: { fields: initialFields },
+  it('skips subscription callback when syncingFromYamlRef is true', () => {
+    const fields = createParsedFields([
+      { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'Initial' },
+    ]);
+    yamlDefaultsRef.current = { summary: 'Initial' };
+    syncingFromYamlRef.current = true;
+
+    renderHook(() =>
+      useFormToYamlSync(mockForm, fields, syncingFromYamlRef, yamlDefaultsRef, mockOnChange)
+    );
+
+    act(() => {
+      fireSubscription({
+        [CASE_EXTENDED_FIELDS]: { summary_as_keyword: 'Changed' },
+      });
+    });
+
+    expect(mockOnChange).not.toHaveBeenCalled();
+  });
+
+  it('does not throw when onFieldDefaultChange is undefined', () => {
+    const fields = createParsedFields([
+      { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'Value' },
+    ]);
+    yamlDefaultsRef.current = { summary: 'Value' };
+
+    renderHook(() =>
+      useFormToYamlSync(mockForm, fields, syncingFromYamlRef, yamlDefaultsRef, undefined)
+    );
+
+    expect(() => {
+      act(() => {
+        fireSubscription({
+          [CASE_EXTENDED_FIELDS]: { summary_as_keyword: 'Changed' },
+        });
+      });
+    }).not.toThrow();
+  });
+
+  it('handles missing extendedFields in form data', () => {
+    const fields = createParsedFields([
+      { name: 'summary', type: 'keyword', control: 'INPUT_TEXT' },
+    ]);
+
+    renderHook(() =>
+      useFormToYamlSync(mockForm, fields, syncingFromYamlRef, yamlDefaultsRef, mockOnChange)
+    );
+
+    act(() => {
+      fireSubscription({});
+    });
+
+    expect(mockOnChange).not.toHaveBeenCalled();
+  });
+
+  it('serializes a raw array to JSON string (Array.isArray branch)', () => {
+    const fields = createParsedFields([
+      { name: 'systems', type: 'keyword', control: 'CHECKBOX_GROUP', defaultValue: ['api'] },
+    ]);
+    yamlDefaultsRef.current = { systems: '["api"]' };
+
+    renderHook(() =>
+      useFormToYamlSync(mockForm, fields, syncingFromYamlRef, yamlDefaultsRef, mockOnChange)
+    );
+
+    act(() => {
+      fireSubscription({
+        [CASE_EXTENDED_FIELDS]: { systems_as_keyword: ['api', 'ui'] },
+      });
+    });
+
+    expect(mockOnChange).toHaveBeenCalledWith('systems', '["api","ui"]', 'CHECKBOX_GROUP');
+  });
+
+  it('does not fire when CHECKBOX_GROUP JSON string matches YAML array', () => {
+    const fields = createParsedFields([
+      {
+        name: 'systems',
+        type: 'keyword',
+        control: 'CHECKBOX_GROUP',
+        defaultValue: ['api', 'database'],
+      },
+    ]);
+    yamlDefaultsRef.current = { systems: '["api","database"]' };
+
+    renderHook(() =>
+      useFormToYamlSync(mockForm, fields, syncingFromYamlRef, yamlDefaultsRef, mockOnChange)
+    );
+
+    act(() => {
+      fireSubscription({
+        [CASE_EXTENDED_FIELDS]: { systems_as_keyword: '["api","database"]' },
+      });
+    });
+
+    expect(mockOnChange).not.toHaveBeenCalled();
+  });
+
+  describe('DATE_PICKER serialization', () => {
+    const dateFields = createParsedFields([
+      {
+        name: 'scheduled_at',
+        type: 'date',
+        control: 'DATE_PICKER',
+        defaultValue: '2024-06-01T09:00:00.000Z',
+      },
+    ]);
+
+    beforeEach(() => {
+      yamlDefaultsRef.current = { scheduled_at: '2024-06-01T09:00:00.000Z' };
+    });
+
+    it('serializes a Moment object to a UTC ISO string', () => {
+      renderHook(() =>
+        useFormToYamlSync(mockForm, dateFields, syncingFromYamlRef, yamlDefaultsRef, mockOnChange)
+      );
+
+      act(() => {
+        fireSubscription({
+          [CASE_EXTENDED_FIELDS]: { scheduled_at_as_date: moment.utc('2024-06-15T14:30:00.000Z') },
+        });
       });
 
-      expect(mockForm.setFieldValue).toHaveBeenCalledWith(
-        `${CASE_EXTENDED_FIELDS}.summary_as_keyword`,
-        'Initial'
+      expect(mockOnChange).toHaveBeenCalledWith(
+        'scheduled_at',
+        '2024-06-15T14:30:00.000Z',
+        'DATE_PICKER'
+      );
+    });
+
+    it('converts a local-timezone Moment to UTC ISO string', () => {
+      const localMoment = moment('2024-06-15T14:30:00.000').tz('America/New_York');
+
+      renderHook(() =>
+        useFormToYamlSync(mockForm, dateFields, syncingFromYamlRef, yamlDefaultsRef, mockOnChange)
       );
 
-      const updatedFields = createParsedFields([
-        { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'Updated' },
-      ]);
+      act(() => {
+        fireSubscription({
+          [CASE_EXTENDED_FIELDS]: { scheduled_at_as_date: localMoment },
+        });
+      });
 
-      rerender({ fields: updatedFields });
+      const [[, isoValue]] = mockOnChange.mock.calls;
+      expect(isoValue).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+      expect(isoValue).toBe(localMoment.utc().toISOString());
+    });
 
-      expect(mockForm.setFieldValue).toHaveBeenCalledWith(
-        `${CASE_EXTENDED_FIELDS}.summary_as_keyword`,
-        'Updated'
+    it('does not fire when Moment value matches YAML default', () => {
+      renderHook(() =>
+        useFormToYamlSync(mockForm, dateFields, syncingFromYamlRef, yamlDefaultsRef, mockOnChange)
+      );
+
+      act(() => {
+        fireSubscription({
+          [CASE_EXTENDED_FIELDS]: { scheduled_at_as_date: moment.utc('2024-06-01T09:00:00.000Z') },
+        });
+      });
+
+      expect(mockOnChange).not.toHaveBeenCalled();
+    });
+
+    it('serializes a native Date object to an ISO string', () => {
+      renderHook(() =>
+        useFormToYamlSync(mockForm, dateFields, syncingFromYamlRef, yamlDefaultsRef, mockOnChange)
+      );
+
+      act(() => {
+        fireSubscription({
+          [CASE_EXTENDED_FIELDS]: { scheduled_at_as_date: new Date('2024-06-15T14:30:00.000Z') },
+        });
+      });
+
+      expect(mockOnChange).toHaveBeenCalledWith(
+        'scheduled_at',
+        '2024-06-15T14:30:00.000Z',
+        'DATE_PICKER'
       );
     });
   });
 
-  describe('form to YAML sync', () => {
-    it('subscribes to form changes', () => {
-      const parsedFields = createParsedFields([
-        { name: 'summary', type: 'keyword', control: 'INPUT_TEXT' },
-      ]);
+  it('handles multiple fields, only notifying changed ones', () => {
+    const fields = createParsedFields([
+      { name: 'text', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'text' },
+      { name: 'number', type: 'integer', control: 'INPUT_NUMBER', defaultValue: 10 },
+    ]);
+    yamlDefaultsRef.current = { text: 'text', number: '10' };
 
-      renderHook(() => useYamlFormSync(mockForm, parsedFields));
+    renderHook(() =>
+      useFormToYamlSync(mockForm, fields, syncingFromYamlRef, yamlDefaultsRef, mockOnChange)
+    );
 
-      expect(mockForm.subscribe).toHaveBeenCalled();
+    act(() => {
+      fireSubscription({
+        [CASE_EXTENDED_FIELDS]: { text_as_keyword: 'text', number_as_integer: '20' },
+      });
     });
 
-    it('unsubscribes on unmount', () => {
-      const parsedFields = createParsedFields([
-        { name: 'summary', type: 'keyword', control: 'INPUT_TEXT' },
-      ]);
+    expect(mockOnChange).toHaveBeenCalledTimes(1);
+    expect(mockOnChange).toHaveBeenCalledWith('number', '20', 'INPUT_NUMBER');
+  });
+});
 
-      const { unmount } = renderHook(() => useYamlFormSync(mockForm, parsedFields));
+describe('useYamlFormSync (composed)', () => {
+  let mockForm: jest.Mocked<FormHook>;
+  let fireSubscription: (internal: Record<string, unknown>) => void;
 
-      unmount();
+  beforeEach(() => {
+    ({ form: mockForm, fireSubscription } = createMockForm());
+  });
 
-      expect(mockUnsubscribe).toHaveBeenCalled();
-    });
+  afterEach(() => jest.clearAllMocks());
 
-    it('calls onFieldDefaultChange when form value differs from YAML value', () => {
-      const mockOnFieldDefaultChange = jest.fn();
-      const parsedFields = createParsedFields([
-        { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'Original' },
-      ]);
+  it('syncs YAML defaults to form and subscribes to form changes', () => {
+    const mockOnChange = jest.fn();
+    const fields = createParsedFields([
+      { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'Hello' },
+    ]);
 
-      renderHook(() => useYamlFormSync(mockForm, parsedFields, mockOnFieldDefaultChange));
+    renderHook(() => useYamlFormSync(mockForm, fields, mockOnChange));
 
-      // Wait for syncingFromYamlRef to be reset
-      act(() => {
-        jest.advanceTimersByTime(0);
-      });
+    expect(mockForm.setFieldValue).toHaveBeenCalledWith(
+      `${CASE_EXTENDED_FIELDS}.summary_as_keyword`,
+      'Hello'
+    );
+    expect(mockForm.subscribe).toHaveBeenCalled();
+  });
 
-      // Simulate form change
-      act(() => {
-        mockSubscriptionCallback({
-          data: {
-            internal: {
-              [CASE_EXTENDED_FIELDS]: {
-                summary_as_keyword: 'User typed value',
-              },
-            },
-          },
-        });
-      });
+  it('returns yamlDefaults with current values', () => {
+    const fields = createParsedFields([
+      { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'Default' },
+      { name: 'count', type: 'integer', control: 'INPUT_NUMBER', defaultValue: 5 },
+    ]);
 
-      expect(mockOnFieldDefaultChange).toHaveBeenCalledWith(
-        'summary',
-        'User typed value',
-        'INPUT_TEXT'
-      );
-    });
+    const { result } = renderHook(() => useYamlFormSync(mockForm, fields));
 
-    it('does not call onFieldDefaultChange when form value matches YAML value', () => {
-      const mockOnFieldDefaultChange = jest.fn();
-      const parsedFields = createParsedFields([
-        { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'Same value' },
-      ]);
-
-      renderHook(() => useYamlFormSync(mockForm, parsedFields, mockOnFieldDefaultChange));
-
-      // Wait for syncingFromYamlRef to be reset
-      act(() => {
-        jest.advanceTimersByTime(0);
-      });
-
-      // Simulate form reporting the same value as YAML
-      act(() => {
-        mockSubscriptionCallback({
-          data: {
-            internal: {
-              [CASE_EXTENDED_FIELDS]: {
-                summary_as_keyword: 'Same value',
-              },
-            },
-          },
-        });
-      });
-
-      expect(mockOnFieldDefaultChange).not.toHaveBeenCalled();
-    });
-
-    it('does not call onFieldDefaultChange when syncing from YAML', () => {
-      const mockOnFieldDefaultChange = jest.fn();
-      const parsedFields = createParsedFields([
-        { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'YAML value' },
-      ]);
-
-      renderHook(() => useYamlFormSync(mockForm, parsedFields, mockOnFieldDefaultChange));
-
-      // Do NOT advance timers - syncingFromYamlRef is still true
-      // Simulate form change while syncing
-      act(() => {
-        mockSubscriptionCallback({
-          data: {
-            internal: {
-              [CASE_EXTENDED_FIELDS]: {
-                summary_as_keyword: 'Different value',
-              },
-            },
-          },
-        });
-      });
-
-      // Should not be called because we're still syncing from YAML
-      expect(mockOnFieldDefaultChange).not.toHaveBeenCalled();
+    expect(result.current.yamlDefaults).toEqual({
+      summary: 'Default',
+      count: '5',
     });
   });
 
-  describe('feedback loop prevention', () => {
-    it('prevents feedback loop by ignoring form changes during YAML sync', () => {
-      const mockOnFieldDefaultChange = jest.fn();
-      const parsedFields = createParsedFields([
-        { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'Initial' },
-      ]);
+  it('returns JSON-stringified array in yamlDefaults for CHECKBOX_GROUP', () => {
+    const fields = createParsedFields([
+      { name: 'systems', type: 'keyword', control: 'CHECKBOX_GROUP', defaultValue: ['api', 'ui'] },
+    ]);
 
-      renderHook(() => useYamlFormSync(mockForm, parsedFields, mockOnFieldDefaultChange));
+    const { result } = renderHook(() => useYamlFormSync(mockForm, fields));
 
-      // Simulate subscription firing immediately after setFieldValue (before setTimeout callback)
-      act(() => {
-        mockSubscriptionCallback({
-          data: {
-            internal: {
-              [CASE_EXTENDED_FIELDS]: {
-                summary_as_keyword: 'Initial',
-              },
-            },
-          },
-        });
-      });
+    expect(result.current.yamlDefaults).toEqual({ systems: '["api","ui"]' });
+  });
 
-      // Should not trigger callback during sync
-      expect(mockOnFieldDefaultChange).not.toHaveBeenCalled();
+  it('updates yamlDefaults when parsedFields change', () => {
+    const initial = createParsedFields([
+      { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'Initial' },
+    ]);
 
-      // Now advance timers to allow sync flag to reset
-      act(() => {
-        jest.advanceTimersByTime(0);
-      });
+    const { result, rerender } = renderHook(({ f }) => useYamlFormSync(mockForm, f), {
+      initialProps: { f: initial },
+    });
 
-      // Now form changes should trigger callback
-      act(() => {
-        mockSubscriptionCallback({
-          data: {
-            internal: {
-              [CASE_EXTENDED_FIELDS]: {
-                summary_as_keyword: 'User changed',
-              },
-            },
-          },
-        });
-      });
+    expect(result.current.yamlDefaults.summary).toBe('Initial');
 
-      expect(mockOnFieldDefaultChange).toHaveBeenCalledWith(
-        'summary',
-        'User changed',
-        'INPUT_TEXT'
-      );
+    const updated = createParsedFields([
+      { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'Updated' },
+    ]);
+    rerender({ f: updated });
+
+    expect(result.current.yamlDefaults.summary).toBe('Updated');
+  });
+
+  it('returns empty object for empty parsedFields', () => {
+    const { result } = renderHook(() => useYamlFormSync(mockForm, []));
+
+    expect(mockForm.setFieldValue).not.toHaveBeenCalled();
+    expect(result.current.yamlDefaults).toEqual({});
+  });
+
+  it('handles null and undefined default values', () => {
+    const fields = [
+      { name: 'field1', type: 'keyword', control: 'INPUT_TEXT', metadata: { default: null } },
+      { name: 'field2', type: 'keyword', control: 'INPUT_TEXT', metadata: { default: undefined } },
+      { name: 'field3', type: 'keyword', control: 'INPUT_TEXT', metadata: undefined },
+    ] as FieldInfo[];
+
+    const { result } = renderHook(() => useYamlFormSync(mockForm, fields));
+
+    expect(result.current.yamlDefaults).toEqual({
+      field1: '',
+      field2: '',
+      field3: '',
     });
   });
 
-  describe('return value', () => {
-    it('returns current yamlDefaults', () => {
-      const parsedFields = createParsedFields([
-        { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'Default' },
-        { name: 'count', type: 'integer', control: 'INPUT_NUMBER', defaultValue: 5 },
-      ]);
+  it('prevents feedback loop: form subscription does not fire onFieldDefaultChange during YAML sync', () => {
+    const mockOnChange = jest.fn();
+    const fields = createParsedFields([
+      { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'Initial' },
+    ]);
 
-      const { result } = renderHook(() => useYamlFormSync(mockForm, parsedFields));
+    renderHook(() => useYamlFormSync(mockForm, fields, mockOnChange));
 
-      expect(result.current.yamlDefaults).toEqual({
-        summary: 'Default',
-        count: '5',
+    // The subscription fires with the YAML default value — should not trigger callback
+    act(() => {
+      fireSubscription({
+        [CASE_EXTENDED_FIELDS]: { summary_as_keyword: 'Initial' },
       });
     });
 
-    it('updates yamlDefaults when parsedFields change', () => {
-      const initialFields = createParsedFields([
-        { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'Initial' },
-      ]);
-
-      const { result, rerender } = renderHook(({ fields }) => useYamlFormSync(mockForm, fields), {
-        initialProps: { fields: initialFields },
-      });
-
-      expect(result.current.yamlDefaults.summary).toBe('Initial');
-
-      const updatedFields = createParsedFields([
-        { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'Updated' },
-      ]);
-
-      rerender({ fields: updatedFields });
-
-      expect(result.current.yamlDefaults.summary).toBe('Updated');
-    });
+    expect(mockOnChange).not.toHaveBeenCalled();
   });
 
-  describe('edge cases', () => {
-    it('handles empty parsedFields array', () => {
-      const { result } = renderHook(() => useYamlFormSync(mockForm, []));
+  it('fires onFieldDefaultChange when user changes a form value', async () => {
+    const mockOnChange = jest.fn();
+    const fields = createParsedFields([
+      { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'Initial' },
+    ]);
 
-      expect(mockForm.setFieldValue).not.toHaveBeenCalled();
-      expect(result.current.yamlDefaults).toEqual({});
+    renderHook(() => useYamlFormSync(mockForm, fields, mockOnChange));
+
+    // Wait for setTimeout to clear syncingFromYamlRef
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
     });
 
-    it('handles undefined onFieldDefaultChange callback', () => {
-      const parsedFields = createParsedFields([
-        { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'Value' },
-      ]);
-
-      renderHook(() => useYamlFormSync(mockForm, parsedFields, undefined));
-
-      act(() => {
-        jest.advanceTimersByTime(0);
+    act(() => {
+      fireSubscription({
+        [CASE_EXTENDED_FIELDS]: { summary_as_keyword: 'User changed' },
       });
-
-      // Should not throw when callback is undefined
-      expect(() => {
-        act(() => {
-          mockSubscriptionCallback({
-            data: {
-              internal: {
-                [CASE_EXTENDED_FIELDS]: {
-                  summary_as_keyword: 'Changed',
-                },
-              },
-            },
-          });
-        });
-      }).not.toThrow();
     });
 
-    it('handles missing extendedFields in form data', () => {
-      const mockOnFieldDefaultChange = jest.fn();
-      const parsedFields = createParsedFields([
-        { name: 'summary', type: 'keyword', control: 'INPUT_TEXT' },
-      ]);
+    expect(mockOnChange).toHaveBeenCalledWith('summary', 'User changed', 'INPUT_TEXT');
+  });
 
-      renderHook(() => useYamlFormSync(mockForm, parsedFields, mockOnFieldDefaultChange));
+  it('does NOT re-sync form fields when parsedFields re-renders with same content', () => {
+    const fields = createParsedFields([
+      { name: 'env', type: 'keyword', control: 'RADIO_GROUP', defaultValue: 'production' },
+    ]);
 
-      act(() => {
-        jest.advanceTimersByTime(0);
-      });
-
-      // Simulate form data without extendedFields
-      act(() => {
-        mockSubscriptionCallback({
-          data: {
-            internal: {},
-          },
-        });
-      });
-
-      expect(mockOnFieldDefaultChange).not.toHaveBeenCalled();
+    const { rerender } = renderHook(({ f }) => useYamlFormSync(mockForm, f), {
+      initialProps: { f: fields },
     });
 
-    it('handles null and undefined default values', () => {
-      const parsedFields = [
-        { name: 'field1', type: 'keyword', control: 'INPUT_TEXT', metadata: { default: null } },
-        {
-          name: 'field2',
-          type: 'keyword',
-          control: 'INPUT_TEXT',
-          metadata: { default: undefined },
+    expect(mockForm.setFieldValue).toHaveBeenCalledTimes(1);
+    mockForm.setFieldValue.mockClear();
+
+    const identical = createParsedFields([
+      { name: 'env', type: 'keyword', control: 'RADIO_GROUP', defaultValue: 'production' },
+    ]);
+    rerender({ f: identical });
+
+    expect(mockForm.setFieldValue).not.toHaveBeenCalled();
+  });
+
+  it('handles multiple field types with mixed changes', async () => {
+    const mockOnChange = jest.fn();
+    const fields = createParsedFields([
+      { name: 'text', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'text' },
+      { name: 'number', type: 'integer', control: 'INPUT_NUMBER', defaultValue: 10 },
+      { name: 'area', type: 'keyword', control: 'TEXTAREA', defaultValue: 'area' },
+      { name: 'select', type: 'keyword', control: 'SELECT_BASIC', defaultValue: 'option1' },
+    ]);
+
+    renderHook(() => useYamlFormSync(mockForm, fields, mockOnChange));
+
+    expect(mockForm.setFieldValue).toHaveBeenCalledTimes(4);
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    act(() => {
+      fireSubscription({
+        [CASE_EXTENDED_FIELDS]: {
+          text_as_keyword: 'text',
+          number_as_integer: '20',
+          area_as_keyword: 'area',
+          select_as_keyword: 'option1',
         },
-        { name: 'field3', type: 'keyword', control: 'INPUT_TEXT', metadata: undefined },
-      ];
-
-      const { result } = renderHook(() =>
-        useYamlFormSync(mockForm, parsedFields as Parameters<typeof useYamlFormSync>[1])
-      );
-
-      expect(result.current.yamlDefaults).toEqual({
-        field1: '',
-        field2: '',
-        field3: '',
       });
     });
 
-    it('handles multiple fields with different controls', () => {
-      const mockOnFieldDefaultChange = jest.fn();
-      const parsedFields = createParsedFields([
-        { name: 'text', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'text' },
-        { name: 'number', type: 'integer', control: 'INPUT_NUMBER', defaultValue: 10 },
-        { name: 'area', type: 'keyword', control: 'TEXTAREA', defaultValue: 'area' },
-        { name: 'select', type: 'keyword', control: 'SELECT_BASIC', defaultValue: 'option1' },
-      ]);
+    expect(mockOnChange).toHaveBeenCalledTimes(1);
+    expect(mockOnChange).toHaveBeenCalledWith('number', '20', 'INPUT_NUMBER');
+  });
 
-      renderHook(() => useYamlFormSync(mockForm, parsedFields, mockOnFieldDefaultChange));
+  it('handles CHECKBOX_GROUP alongside other fields, only notifying changed ones', async () => {
+    const mockOnChange = jest.fn();
+    const fields = createParsedFields([
+      { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'text' },
+      { name: 'systems', type: 'keyword', control: 'CHECKBOX_GROUP', defaultValue: ['api'] },
+    ]);
 
-      expect(mockForm.setFieldValue).toHaveBeenCalledTimes(4);
+    renderHook(() => useYamlFormSync(mockForm, fields, mockOnChange));
 
-      act(() => {
-        jest.advanceTimersByTime(0);
-      });
-
-      // Change the number field
-      act(() => {
-        mockSubscriptionCallback({
-          data: {
-            internal: {
-              [CASE_EXTENDED_FIELDS]: {
-                text_as_keyword: 'text',
-                number_as_integer: '20',
-                area_as_keyword: 'area',
-                select_as_keyword: 'option1',
-              },
-            },
-          },
-        });
-      });
-
-      expect(mockOnFieldDefaultChange).toHaveBeenCalledWith('number', '20', 'INPUT_NUMBER');
-      expect(mockOnFieldDefaultChange).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
     });
+
+    act(() => {
+      fireSubscription({
+        [CASE_EXTENDED_FIELDS]: {
+          summary_as_keyword: 'text',
+          systems_as_keyword: '["api","database"]',
+        },
+      });
+    });
+
+    expect(mockOnChange).toHaveBeenCalledTimes(1);
+    expect(mockOnChange).toHaveBeenCalledWith('systems', '["api","database"]', 'CHECKBOX_GROUP');
   });
 });

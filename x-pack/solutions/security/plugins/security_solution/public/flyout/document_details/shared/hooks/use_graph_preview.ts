@@ -5,18 +5,20 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { get } from 'lodash/fp';
 import {
-  GRAPH_ACTOR_ENTITY_FIELDS,
-  GRAPH_TARGET_ENTITY_FIELDS,
+  type EuidSourceFields,
+  getGraphActorEuidSourceFields,
+  getGraphTargetEuidSourceFields,
 } from '@kbn/cloud-security-posture-common';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { GetFieldsData } from './use_get_fields_data';
 import { getField, getFieldArray } from '../utils';
 import { useBasicDataFromDetailsData } from './use_basic_data_from_details_data';
-import { useHasGraphVisualizationLicense } from '../../../../common/hooks/use_has_graph_visualization_license';
-import { useEntityStoreStatus } from '../../../../entity_analytics/components/entity_store/hooks/use_entity_store';
+import { useShouldShowGraph } from '../../../shared/hooks/use_should_show_graph';
 
 export interface UseGraphPreviewParams {
   /**
@@ -34,6 +36,7 @@ export interface UseGraphPreviewParams {
    */
   dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
 }
+
 /**
  * Interface for the result of the useGraphPreview hook
  */
@@ -88,33 +91,56 @@ export const useGraphPreview = ({
   ecsData,
   dataFormattedForFieldBrowser,
 }: UseGraphPreviewParams): UseGraphPreviewResult => {
+  const euidApi = useEntityStoreEuidApi();
+  const euid = euidApi?.euid;
+  const EMPTY_EUID_SOURCE_FIELDS: EuidSourceFields = useMemo(
+    () => ({
+      user: [],
+      host: [],
+      service: [],
+      generic: [],
+      all: [],
+    }),
+    []
+  );
+  const GRAPH_ACTOR_EUID_SOURCE_FIELDS = useMemo(
+    () => (euid ? getGraphActorEuidSourceFields(euid) : EMPTY_EUID_SOURCE_FIELDS),
+    [euid, EMPTY_EUID_SOURCE_FIELDS]
+  );
+  const GRAPH_TARGET_EUID_SOURCE_FIELDS = useMemo(
+    () => (euid ? getGraphTargetEuidSourceFields(euid) : EMPTY_EUID_SOURCE_FIELDS),
+    [euid, EMPTY_EUID_SOURCE_FIELDS]
+  );
   const timestamp = getField(getFieldsData('@timestamp'));
   const originalEventId = getFieldsData('kibana.alert.original_event.id');
   const eventId = getFieldsData('event.id');
   const eventIds = originalEventId ? getFieldArray(originalEventId) : getFieldArray(eventId);
 
-  // Get actor IDs from new ECS schema fields only
+  // Get actor IDs from EUID source fields (raw ECS fields used to compute actor EUIDs)
   const actorIds: string[] = [];
-  GRAPH_ACTOR_ENTITY_FIELDS.forEach((field) => {
+  [
+    ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.user,
+    ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.host,
+    ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.service,
+    ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.generic,
+  ].forEach((field) => {
     const fieldValues = getFieldArray(getFieldsData(field));
     actorIds.push(...fieldValues);
   });
 
-  // Get target IDs from new ECS schema fields only
+  // Get target IDs from EUID source fields (raw ECS fields used to compute target EUIDs)
   const targetIds: string[] = [];
-  GRAPH_TARGET_ENTITY_FIELDS.forEach((field) => {
+  [
+    ...GRAPH_TARGET_EUID_SOURCE_FIELDS.user,
+    ...GRAPH_TARGET_EUID_SOURCE_FIELDS.host,
+    ...GRAPH_TARGET_EUID_SOURCE_FIELDS.service,
+    ...GRAPH_TARGET_EUID_SOURCE_FIELDS.generic,
+  ].forEach((field) => {
     const fieldValues = getFieldArray(getFieldsData(field));
     targetIds.push(...fieldValues);
   });
 
   const action: string[] | undefined = get(['event', 'action'], ecsData);
-
-  // Check if user license is high enough to access graph visualization
-  const hasRequiredLicense = useHasGraphVisualizationLicense();
-
-  // Check if entity store is running
-  const { data: entityStoreStatus } = useEntityStoreStatus();
-  const isEntityStoreRunning = entityStoreStatus?.status === 'running';
 
   // Check if graph has all required data fields for graph visualization
   const hasGraphData =
@@ -125,7 +151,7 @@ export const useGraphPreview = ({
     targetIds.length > 0;
 
   // Combine all conditions: data availability + license + entity store running
-  const shouldShowGraph = hasGraphData && hasRequiredLicense && isEntityStoreRunning;
+  const shouldShowGraph = useShouldShowGraph() && hasGraphData;
 
   const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
 

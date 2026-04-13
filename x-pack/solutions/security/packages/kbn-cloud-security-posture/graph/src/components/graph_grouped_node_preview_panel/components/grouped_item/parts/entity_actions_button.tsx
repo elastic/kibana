@@ -8,21 +8,26 @@
 import React, { useCallback, useState } from 'react';
 import { EuiButtonIcon, EuiPopover, EuiListGroup, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { PopoverListItem } from '../../../../popovers/primitives/popover_list_item';
 import {
   GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID,
   GROUPED_ITEM_ACTIONS_POPOVER_TEST_ID,
 } from '../../../test_ids';
 import type { EntityItem } from '../types';
-import { getEntityExpandItems } from '../../../../popovers/node_expand/get_entity_expand_items';
+import {
+  getEntityExpandItems,
+  fieldForRole,
+} from '../../../../popovers/node_expand/get_entity_expand_items';
+import type { EntityFilterActions } from '../../../../popovers/node_expand/get_entity_expand_items';
 import {
   emitFilterToggle,
   isFilterActiveForScope,
   emitEntityRelationshipToggle,
   isEntityRelationshipExpandedForScope,
+  emitPinnedEuidToggle,
 } from '../../../../filters/filter_store';
-import { GenericEntityPanelKey, GENERIC_ENTITY_PREVIEW_BANNER } from '../../../constants';
+import { RELATED_ENTITY } from '../../../../../common/constants';
+import { useOpenEntityPreviewPanel } from '../../../hooks/use_open_entity_preview_panel';
 
 const actionsButtonAriaLabel = i18n.translate(
   'securitySolutionPackages.csp.graph.groupedItem.actionsButton.ariaLabel',
@@ -47,32 +52,52 @@ export interface EntityActionsButtonProps {
  */
 export const EntityActionsButton = ({ item, scopeId }: EntityActionsButtonProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const { openPreviewPanel } = useExpandableFlyoutApi();
-
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
 
-  const handleShowEntityDetails = useCallback(() => {
-    openPreviewPanel({
-      id: GenericEntityPanelKey,
-      params: {
-        entityId: item.id,
-        scopeId,
-        isPreviewMode: true,
-        banner: GENERIC_ENTITY_PREVIEW_BANNER,
-        isEngineMetadataExist: !!item.availableInEntityStore,
-      },
-    });
-  }, [item.id, item.availableInEntityStore, openPreviewPanel, scopeId]);
+  const openEntityPreviewPanel = useOpenEntityPreviewPanel();
+  const sourceFields = (item.entity.sourceFields ?? {}) as Record<string, string | string[]>;
+
+  const entityFilterActions: EntityFilterActions = {
+    toggleEntityFilter: (role, action) => {
+      for (const [field, value] of Object.entries(sourceFields)) {
+        // Flatten string | string[] to string[] so each value gets its own OR'd phrase filter
+        for (const v of ([] as string[]).concat(value)) {
+          emitFilterToggle(scopeId, fieldForRole(field, role), v, action);
+        }
+      }
+      if (action === 'show') {
+        emitPinnedEuidToggle(scopeId, item.id, 'show');
+      } else {
+        // Only unpin when no entity filters remain active for either role
+        const hasRemainingFilters = (['actor', 'target'] as const).some((r) =>
+          Object.entries(sourceFields).some(([field, value]) =>
+            ([] as string[])
+              .concat(value)
+              .some((v) => isFilterActiveForScope(scopeId, fieldForRole(field, r), v))
+          )
+        );
+        if (!hasRemainingFilters) {
+          emitPinnedEuidToggle(scopeId, item.id, 'hide');
+        }
+      }
+    },
+    isEntityFilterActive: (role) =>
+      Object.entries(sourceFields).some(([field, value]) =>
+        ([] as string[])
+          .concat(value)
+          .some((v) => isFilterActiveForScope(scopeId, fieldForRole(field, role), v))
+      ),
+    toggleRelatedEvents: (action) => emitFilterToggle(scopeId, RELATED_ENTITY, item.id, action),
+    isRelatedEventsActive: () => isFilterActiveForScope(scopeId, RELATED_ENTITY, item.id),
+  };
 
   // Generate items fresh on each render to reflect current filter state
   const items = getEntityExpandItems({
     nodeId: item.id,
-    sourceNamespace: item.ecsParentField,
-    onShowEntityDetails: handleShowEntityDetails,
+    entityFilterActions,
+    onShowEntityDetails: () => openEntityPreviewPanel(item.id, scopeId, item.entity),
     onClose: closePopover,
-    isFilterActive: (field, value) => isFilterActiveForScope(scopeId, field, value),
-    toggleFilter: (field, value, action) => emitFilterToggle(scopeId, field, value, action),
     shouldRender: {
       showEntityRelationships: true,
       showActionsByEntity: true,
@@ -80,14 +105,15 @@ export const EntityActionsButton = ({ item, scopeId }: EntityActionsButtonProps)
       showRelatedEvents: true,
       showEntityDetails: true,
     },
-    showEntityDetailsDisabled: !item.availableInEntityStore,
+    showEntityDetailsDisabled: !item.entity.availableInEntityStore,
     isEntityRelationshipsExpanded: isEntityRelationshipExpandedForScope(scopeId, item.id),
     toggleEntityRelationships: (action) => emitEntityRelationshipToggle(scopeId, item.id, action),
-    showEntityRelationshipsDisabled: !item.availableInEntityStore,
+    showEntityRelationshipsDisabled: !item.entity.availableInEntityStore,
   });
 
   return (
     <EuiPopover
+      aria-label={actionsButtonAriaLabel}
       button={
         <EuiButtonIcon
           iconType="boxesHorizontal"

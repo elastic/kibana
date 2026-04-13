@@ -242,10 +242,17 @@ const setProcessorSchema = processorBaseWithWhereSchema
       .optional(StreamlangSourceField)
       .describe('Copy value from another field instead of providing a literal'),
   })
-  .refine((obj) => (obj.value && !obj.copy_from) || (!obj.value && obj.copy_from), {
-    message: 'Set processor must have either value or copy_from, but not both.',
-    path: ['value', 'copy_from'],
-  })
+  .refine(
+    (obj) => {
+      const hasValue = obj.value !== undefined;
+      const hasCopyFrom = obj.copy_from !== undefined;
+      return (hasValue && !hasCopyFrom) || (!hasValue && hasCopyFrom);
+    },
+    {
+      message: 'Set processor must have either value or copy_from, but not both.',
+      path: ['value', 'copy_from'],
+    }
+  )
   .describe(
     'Set processor - Assign a literal or copied value to a field (mutually exclusive inputs)'
   ) satisfies z.Schema<SetProcessor>;
@@ -718,6 +725,26 @@ export const networkDirectionProcessorSchema = z.intersection(
   ])
 ) satisfies z.Schema<NetworkDirectionProcessor>;
 
+/**
+ * Enrich processor
+ */
+
+export interface EnrichProcessor extends ProcessorBaseWithWhere {
+  action: 'enrich';
+  policy_name: string;
+  to: string;
+  ignore_missing?: boolean;
+  override?: boolean;
+}
+
+export const enrichProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('enrich'),
+  policy_name: NonEmptyString,
+  to: StreamlangTargetField,
+  ignore_missing: z.optional(z.boolean()),
+  override: z.optional(z.boolean()),
+}) satisfies z.Schema<EnrichProcessor>;
+
 export type StreamlangProcessorDefinition =
   | DateProcessor
   | DissectProcessor
@@ -741,6 +768,7 @@ export type StreamlangProcessorDefinition =
   | ConcatProcessor
   | NetworkDirectionProcessor
   | JsonExtractProcessor
+  | EnrichProcessor
   | ManualIngestPipelineProcessor;
 
 export const streamlangProcessorSchema = z.union([
@@ -766,12 +794,13 @@ export const streamlangProcessorSchema = z.union([
   concatProcessorSchema,
   networkDirectionProcessorSchema,
   jsonExtractProcessorSchema,
+  enrichProcessorSchema,
   manualIngestPipelineProcessorSchema,
 ]);
 
 export const isProcessWithOverrideOption = createIsNarrowSchema(
   processorBaseSchema,
-  z.union([renameProcessorSchema, setProcessorSchema])
+  z.union([renameProcessorSchema, setProcessorSchema, enrichProcessorSchema])
 );
 
 export const isProcessWithIgnoreMissingOption = createIsNarrowSchema(
@@ -786,6 +815,7 @@ export const isProcessWithIgnoreMissingOption = createIsNarrowSchema(
     mathProcessorSchema,
     splitProcessorSchema,
     jsonExtractProcessorSchema,
+    enrichProcessorSchema,
   ])
 );
 
