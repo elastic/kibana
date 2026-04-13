@@ -40,8 +40,13 @@ export const queryKeys = {
   },
   tracing: {
     all: ['evals', 'tracing'] as const,
-    projects: (filters?: { from?: string; to?: string; page?: number; perPage?: number }) =>
-      ['evals', 'tracing', 'projects', filters] as const,
+    projects: (filters?: {
+      from?: string;
+      to?: string;
+      name?: string;
+      page?: number;
+      perPage?: number;
+    }) => ['evals', 'tracing', 'projects', filters] as const,
     projectTraces: (
       projectName: string,
       filters?: {
