@@ -128,8 +128,8 @@ actions:
             "grid": {
               "x": 0,
               "y": 0,
-              "w": 24,
-              "h": 10
+              "w": 12,
+              "h": 8
             },
             "type": "vis",
             "config": {
@@ -158,8 +158,8 @@ actions:
             "grid": {
               "x": 0,
               "y": 0,
-              "w": 24,
-              "h": 10
+              "w": 12,
+              "h": 8
             },
             "type": "vis",
             "config": {
