@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ZodDiscriminatedUnion, ZodObject, type ZodType } from '@kbn/zod/v4';
+import { ZodDiscriminatedUnion, ZodObject, type ZodRawShape } from '@kbn/zod/v4';
 import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 
 interface ConnectorShape {
-  config: ZodObject<Record<string, ZodType>>;
+  config: ZodObject<ZodRawShape>;
   secrets: ZodDiscriminatedUnion;
 }
 
-export type ConnectorZodSchema = ZodObject<ConnectorShape> & {
+export type ConnectorZodSchema = ZodObject<ZodRawShape> & {
   shape: ConnectorShape;
 };
 
@@ -35,6 +35,5 @@ export function fromConnectorSpecSchema(
   ) {
     return undefined;
   }
-
-  return schema as ConnectorZodSchema;
+  return schema.strict() as ConnectorZodSchema;
 }

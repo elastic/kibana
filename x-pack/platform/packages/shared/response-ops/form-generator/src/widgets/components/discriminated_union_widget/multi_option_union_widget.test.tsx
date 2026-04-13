@@ -12,7 +12,7 @@ import { z } from '@kbn/zod/v4';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { MultiOptionUnionWidget } from './multi_option_union_widget';
-import { addMeta, getMeta } from '../../../schema_connector_metadata';
+import { addMeta, getMeta } from '@kbn/connector-specs/src/connector_spec_ui';
 
 const meta = { getMeta, addMeta };
 

@@ -14,14 +14,9 @@ import type { BaseMetadata } from './schema_connector_metadata';
 export type GetMetaFn = (schema: z.ZodType) => BaseMetadata;
 
 /**
- * Function type for setting metadata on a Zod schema.
+ * Function type for setting/replacing metadata on a Zod schema.
  */
 export type SetMetaFn = <T extends z.ZodType>(schema: T, meta: BaseMetadata) => T;
-
-/**
- * Function type for adding/merging metadata on a Zod schema.
- */
-export type AddMetaFn = <T extends z.ZodType>(schema: T, meta: Partial<BaseMetadata>) => T;
 
 /**
  * Interface for meta functions that can be provided to the form generator.
@@ -31,5 +26,4 @@ export type AddMetaFn = <T extends z.ZodType>(schema: T, meta: Partial<BaseMetad
 export interface MetaFunctions {
   getMeta: GetMetaFn;
   setMeta: SetMetaFn;
-  addMeta: AddMetaFn;
 }

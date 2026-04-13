@@ -10,12 +10,7 @@ import type { HttpSetup } from '@kbn/core/public';
 import type { IconType } from '@elastic/eui';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
-import {
-  fromConnectorSpecSchema,
-  getMeta,
-  setMeta,
-  addMeta,
-} from '@kbn/connector-specs';
+import { fromConnectorSpecSchema, getMeta, setMeta } from '@kbn/connector-specs';
 import { generateFormFields } from '@kbn/response-ops-form-generator';
 import type { ActionTypeModel } from '../../types';
 
@@ -87,7 +82,7 @@ export function transformSpecToActionTypeModel(spec: ConnectorSpecResponse): Act
           return generateFormFields({
             schema: zodSchema,
             formConfig: { disabled: props.readOnly, isEdit: props.isEdit },
-            metaFunctions: { getMeta, setMeta, addMeta },
+            metaFunctions: { getMeta, setMeta },
           });
         },
       });

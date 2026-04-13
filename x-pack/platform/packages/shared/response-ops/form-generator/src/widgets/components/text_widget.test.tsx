@@ -13,7 +13,7 @@ import { z } from '@kbn/zod/v4';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextWidget } from './text_widget';
-import { getMeta, addMeta } from '../../schema_connector_metadata';
+import { getMeta, addMeta } from '@kbn/connector-specs/src/connector_spec_ui';
 
 const meta = { getMeta, addMeta };
 
@@ -35,6 +35,7 @@ describe('TextWidget', () => {
     render(
       <TestFormWrapper>
         <TextWidget
+          meta={meta}
           formConfig={{}}
           path="username"
           schema={z.string()}
