@@ -32,10 +32,9 @@ apiTest.describe(
         responseType: 'json',
       });
 
-      // Not a client error — the request is valid.
-      // Without enrolled agents the server may return 500 (cannot dispatch).
-      expect(response.statusCode).not.toBe(400);
-      expect(response.statusCode).not.toBe(403);
+      // 200 = agents available, query dispatched. 500 = no enrolled agents, cannot dispatch.
+      // Both are valid outcomes. 400/403 would indicate a request/permission issue.
+      expect([200, 500]).toContain(response.statusCode);
     });
   }
 );

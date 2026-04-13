@@ -36,13 +36,12 @@ apiTest.describe(
       adminCredentials = await samlAuth.asInteractiveUser('admin');
     });
 
-    apiTest.afterAll(async ({ apiClient }) => {
+    apiTest.afterAll(async ({ kbnClient }) => {
       if (ruleId) {
-        await apiClient.delete(`${testData.API_PATHS.DETECTION_RULES}?id=${ruleId}`, {
-          headers: {
-            ...testData.COMMON_HEADERS,
-            ...adminCredentials.cookieHeader,
-          },
+        await kbnClient.request({
+          method: 'DELETE',
+          path: `${testData.API_PATHS.DETECTION_RULES}?id=${ruleId}`,
+          ignoreErrors: [404],
         });
       }
     });

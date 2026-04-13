@@ -13,9 +13,6 @@ const OSQUERY_PACKS_URL = '/api/osquery/packs';
 const OSQUERY_SAVED_QUERIES_URL = '/api/osquery/saved_queries';
 const OSQUERY_LIVE_QUERIES_URL = '/api/osquery/live_queries';
 
-const DEFAULT_POLL_INTERVAL_MS = 2000;
-const DEFAULT_POLL_TIMEOUT_MS = 60_000;
-
 export interface OsqueryApiService {
   packs: {
     create: (body: Record<string, unknown>, space?: string) => Promise<any>;
@@ -30,8 +27,6 @@ export interface OsqueryApiService {
     create: (body: Record<string, unknown>) => Promise<any>;
     getDetails: (id: string) => Promise<any>;
     getResults: (id: string, actionId: string) => Promise<any>;
-    waitForResults: (id: string, options?: { timeoutMs?: number }) => Promise<any>;
-    deleteAll: (ids: string[]) => Promise<void>;
   };
 }
 
@@ -151,50 +146,6 @@ export const getOsqueryApiService = ({
               headers,
             })
         ),
-
-      waitForResults: async (id: string, options?: { timeoutMs?: number }) => {
-        const timeoutMs = options?.timeoutMs ?? DEFAULT_POLL_TIMEOUT_MS;
-        const startTime = Date.now();
-
-        return await measurePerformanceAsync(
-          log,
-          `osquery.liveQueries.waitForResults [${id}]`,
-          async () => {
-            while (Date.now() - startTime < timeoutMs) {
-              const response = await kbnClient.request({
-                method: 'GET',
-                path: `${OSQUERY_LIVE_QUERIES_URL}/${id}`,
-                headers,
-              });
-
-              const status = (response.data as Record<string, Record<string, string>>)?.data
-                ?.status;
-              if (status === 'completed' || status === 'error') {
-                return response;
-              }
-
-              await new Promise((resolve) => setTimeout(resolve, DEFAULT_POLL_INTERVAL_MS));
-            }
-
-            throw new Error(`Timed out waiting for live query ${id} results after ${timeoutMs}ms`);
-          }
-        );
-      },
-
-      deleteAll: async (ids: string[]) => {
-        for (const id of ids) {
-          try {
-            await kbnClient.request({
-              method: 'DELETE',
-              path: `${OSQUERY_LIVE_QUERIES_URL}/${id}`,
-              headers,
-              ignoreErrors: [404],
-            });
-          } catch {
-            // ignore cleanup errors
-          }
-        }
-      },
     },
   };
 };

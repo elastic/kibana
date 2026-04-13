@@ -15,7 +15,7 @@
  * If the YAML source changes, update these definitions accordingly.
  */
 
-import type { KibanaRole } from '@kbn/scout/src/common/services/custom_role';
+import type { KibanaRole } from '@kbn/scout';
 
 const SECURITY_ALERT_INDICES = ['.alerts-security*', '.siem-signals-*'];
 

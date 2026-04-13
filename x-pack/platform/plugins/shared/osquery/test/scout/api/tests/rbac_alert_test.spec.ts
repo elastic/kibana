@@ -7,6 +7,7 @@
 
 import type { RoleApiCredentials, RoleSessionCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import { apiTest, testData } from '../fixtures';
 import { T1_ANALYST_ROLE } from '../fixtures/roles';
 
@@ -20,7 +21,7 @@ import { T1_ANALYST_ROLE } from '../fixtures/roles';
  */
 apiTest.describe(
   'Osquery RBAC - alert test (investigation guide)',
-  { tag: ['@local-stateful-classic'] },
+  { tag: ['@local-stateful-classic', ...tags.serverless.security.complete] },
   () => {
     let t1Credentials: RoleApiCredentials;
     let adminCredentials: RoleSessionCredentials;

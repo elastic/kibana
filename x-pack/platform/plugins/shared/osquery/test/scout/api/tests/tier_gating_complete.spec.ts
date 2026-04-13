@@ -29,15 +29,13 @@ apiTest.describe(
     let adminCredentials: RoleSessionCredentials;
     let ruleId: string;
 
-    apiTest.beforeAll(async ({ samlAuth, apiClient }) => {
+    apiTest.beforeAll(async ({ samlAuth, kbnClient }) => {
       adminCredentials = await samlAuth.asInteractiveUser('admin');
 
       // Create a detection rule with osquery response action
-      const ruleResponse = await apiClient.post(testData.API_PATHS.DETECTION_RULES, {
-        headers: {
-          ...testData.COMMON_HEADERS,
-          ...adminCredentials.cookieHeader,
-        },
+      const ruleResponse = await kbnClient.request({
+        method: 'POST',
+        path: testData.API_PATHS.DETECTION_RULES,
         body: testData.getMinimalRule({
           enabled: false,
           response_actions: [
@@ -49,20 +47,17 @@ apiTest.describe(
             },
           ],
         }),
-        responseType: 'json',
       });
 
-      expect(ruleResponse).toHaveStatusCode(200);
-      ruleId = ruleResponse.body.id;
+      ruleId = (ruleResponse.data as Record<string, any>).id;
     });
 
-    apiTest.afterAll(async ({ apiClient }) => {
+    apiTest.afterAll(async ({ kbnClient }) => {
       if (ruleId) {
-        await apiClient.delete(`${testData.API_PATHS.DETECTION_RULES}?id=${ruleId}`, {
-          headers: {
-            ...testData.COMMON_HEADERS,
-            ...adminCredentials.cookieHeader,
-          },
+        await kbnClient.request({
+          method: 'DELETE',
+          path: `${testData.API_PATHS.DETECTION_RULES}?id=${ruleId}`,
+          ignoreErrors: [404],
         });
       }
     });

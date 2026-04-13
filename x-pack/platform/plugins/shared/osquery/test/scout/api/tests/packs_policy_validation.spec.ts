@@ -21,25 +21,20 @@ apiTest.describe(
     let packagePolicyId: string;
     const createdPackIds: string[] = [];
 
-    apiTest.beforeAll(async ({ samlAuth, apiClient }) => {
+    apiTest.beforeAll(async ({ samlAuth, kbnClient }) => {
       adminCredentials = await samlAuth.asInteractiveUser('admin');
 
       // Get installed osquery_manager version (pre-installed as bundled package)
-      const versionResponse = await apiClient.get(
-        `${testData.API_PATHS.FLEET_EPM_PACKAGES}/osquery_manager`,
-        {
-          headers: { ...testData.COMMON_HEADERS, ...adminCredentials.cookieHeader },
-          responseType: 'json',
-        }
-      );
-      const integrationVersion = versionResponse.body?.item?.version;
+      const versionResponse = await kbnClient.request({
+        method: 'GET',
+        path: `${testData.API_PATHS.FLEET_EPM_PACKAGES}/osquery_manager`,
+      });
+      const integrationVersion = (versionResponse.data as Record<string, any>)?.item?.version;
 
       // Create a real agent policy to use as a valid policy_id
-      const policyResponse = await apiClient.post(testData.API_PATHS.FLEET_AGENT_POLICIES, {
-        headers: {
-          ...testData.COMMON_HEADERS,
-          ...adminCredentials.cookieHeader,
-        },
+      const policyResponse = await kbnClient.request({
+        method: 'POST',
+        path: testData.API_PATHS.FLEET_AGENT_POLICIES,
         body: {
           name: `osquery-test-policy-${Date.now()}`,
           description: 'Test policy for osquery pack validation',
@@ -47,53 +42,48 @@ apiTest.describe(
           monitoring_enabled: ['logs', 'metrics'],
           inactivity_timeout: 1209600,
         },
-        responseType: 'json',
       });
-      expect(policyResponse).toHaveStatusCode(200);
-      agentPolicyId = policyResponse.body.item.id;
+      agentPolicyId = (policyResponse.data as Record<string, any>).item.id;
 
       // Add osquery_manager integration to the agent policy (required for pack association)
-      const packagePolicyResponse = await apiClient.post(
-        testData.API_PATHS.FLEET_PACKAGE_POLICIES,
-        {
-          headers: { ...testData.COMMON_HEADERS, ...adminCredentials.cookieHeader },
-          body: {
-            policy_id: agentPolicyId,
-            package: { name: 'osquery_manager', version: integrationVersion },
-            name: `osquery-integration-${Date.now()}`,
-            description: '',
-            namespace: 'default',
-            inputs: {
-              'osquery_manager-osquery': { enabled: true, streams: {} },
-            },
+      const packagePolicyResponse = await kbnClient.request({
+        method: 'POST',
+        path: testData.API_PATHS.FLEET_PACKAGE_POLICIES,
+        body: {
+          policy_id: agentPolicyId,
+          package: { name: 'osquery_manager', version: integrationVersion },
+          name: `osquery-integration-${Date.now()}`,
+          description: '',
+          namespace: 'default',
+          inputs: {
+            'osquery_manager-osquery': { enabled: true, streams: {} },
           },
-          responseType: 'json',
-        }
-      );
-      expect(packagePolicyResponse).toHaveStatusCode(200);
-      packagePolicyId = packagePolicyResponse.body.item.id;
+        },
+      });
+      packagePolicyId = (packagePolicyResponse.data as Record<string, any>).item.id;
     });
 
-    apiTest.afterAll(async ({ apiClient, apiServices }) => {
+    apiTest.afterAll(async ({ kbnClient, apiServices }) => {
       for (const packId of createdPackIds) {
         await apiServices.osquery.packs.delete(packId);
       }
 
       // Clean up package policy
       if (packagePolicyId) {
-        await apiClient.delete(`${testData.API_PATHS.FLEET_PACKAGE_POLICIES}/${packagePolicyId}`, {
-          headers: { ...testData.COMMON_HEADERS, ...adminCredentials.cookieHeader },
+        await kbnClient.request({
+          method: 'DELETE',
+          path: `${testData.API_PATHS.FLEET_PACKAGE_POLICIES}/${packagePolicyId}`,
+          ignoreErrors: [404],
         });
       }
 
       // Clean up agent policy
       if (agentPolicyId) {
-        await apiClient.post(`${testData.API_PATHS.FLEET_AGENT_POLICIES}/delete`, {
-          headers: {
-            ...testData.COMMON_HEADERS,
-            ...adminCredentials.cookieHeader,
-          },
+        await kbnClient.request({
+          method: 'POST',
+          path: `${testData.API_PATHS.FLEET_AGENT_POLICIES}/delete`,
           body: { agentPolicyId },
+          ignoreErrors: [404],
         });
       }
     });
@@ -102,7 +92,7 @@ apiTest.describe(
       const createResponse = await apiClient.post(testData.API_PATHS.OSQUERY_PACKS, {
         headers: { ...testData.COMMON_HEADERS, ...adminCredentials.cookieHeader },
         body: testData.getMinimalPack({
-          policy_ids: Array(100).fill(agentPolicyId),
+          policy_ids: Array(1000).fill(agentPolicyId),
         }),
         responseType: 'json',
       });
