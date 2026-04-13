@@ -102,7 +102,7 @@ function ErrorsWarningsContent({
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="s" alignItems="center">
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type={type} color={color} size="s" />
+                      <EuiIcon type={type} color={color} size="s" aria-hidden={true} />
                     </EuiFlexItem>
                     <EuiFlexItem css={{ whiteSpace: 'nowrap' }}>
                       {i18n.translate('esqlEditor.query.lineNumber', {
