@@ -17,63 +17,36 @@ import type { DashboardState } from '@kbn/dashboard-plugin/server';
 import { DEFAULT_TIME_RANGE } from '@kbn/dashboard-agent-common';
 
 interface UseDashboardPreviewUnifiedSearchParams {
-  attachmentId: string;
   dashboardApi: DashboardApi | undefined;
   dashboardState: DashboardState;
   filterManager: DataPublicPluginStart['query']['filterManager'];
 }
 
+const normalizeQuery = (nextQuery: Query | undefined) => {
+  if (!nextQuery) {
+    return undefined;
+  }
+
+  if (typeof nextQuery.query !== 'string') {
+    return nextQuery;
+  }
+
+  return nextQuery.query.trim() === '' ? undefined : nextQuery;
+};
+
 export const useDashboardPreviewUnifiedSearch = ({
-  attachmentId,
   dashboardApi,
   dashboardState,
   filterManager,
 }: UseDashboardPreviewUnifiedSearchParams) => {
-  const initialQuery = useMemo(() => toStoredQuery(dashboardState.query), [dashboardState.query]);
-  const initialFilters = useMemo(
-    () => toStoredFilters(dashboardState.filters) ?? [],
-    [dashboardState.filters]
+  const [timeRange, setTimeRange] = useState<TimeRange>(
+    dashboardState.time_range ?? DEFAULT_TIME_RANGE
   );
-  const initialTimeRange = useMemo<TimeRange>(
-    () => dashboardState.time_range ?? DEFAULT_TIME_RANGE,
-    [dashboardState.time_range]
+  const [query, setQuery] = useState<Query | undefined>(
+    normalizeQuery(toStoredQuery(dashboardState.query))
   );
-
-  const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
-  const [query, setQuery] = useState<Query | undefined>(initialQuery);
-  const [filters, setFilters] = useState<Filter[]>(initialFilters);
+  const [filters, setFilters] = useState<Filter[]>(toStoredFilters(dashboardState.filters) ?? []);
   const [dataViews, setDataViews] = useState<DataView[]>([]);
-
-  const normalizeQuery = useCallback((nextQuery: Query | undefined) => {
-    if (!nextQuery) {
-      return undefined;
-    }
-
-    if (typeof nextQuery.query !== 'string') {
-      return nextQuery;
-    }
-
-    return nextQuery.query.trim() === '' ? undefined : nextQuery;
-  }, []);
-
-  useEffect(() => {
-    setQuery(initialQuery);
-    setFilters(initialFilters);
-    setTimeRange(initialTimeRange);
-  }, [attachmentId, initialFilters, initialQuery, initialTimeRange]);
-
-  useEffect(() => {
-    const filterManagerSubscription = filterManager.getUpdates$().subscribe(() => {
-      const nextFilters = filterManager.getFilters();
-      setFilters((currentFilters) =>
-        isEqual(currentFilters, nextFilters) ? currentFilters : nextFilters
-      );
-    });
-
-    return () => {
-      filterManagerSubscription.unsubscribe();
-    };
-  }, [filterManager]);
 
   useEffect(() => {
     if (!dashboardApi) {
@@ -81,23 +54,9 @@ export const useDashboardPreviewUnifiedSearch = ({
     }
 
     dashboardApi.setQuery(query);
-  }, [dashboardApi, query]);
-
-  useEffect(() => {
-    if (!dashboardApi) {
-      return;
-    }
-
     dashboardApi.setFilters(filters);
-  }, [dashboardApi, filters]);
-
-  useEffect(() => {
-    if (!dashboardApi) {
-      return;
-    }
-
     dashboardApi.setTimeRange(timeRange);
-  }, [dashboardApi, timeRange]);
+  }, [dashboardApi, query, filters, timeRange]);
 
   useEffect(() => {
     if (!dashboardApi) {
@@ -121,12 +80,6 @@ export const useDashboardPreviewUnifiedSearch = ({
         isEqual(currentDataViews, resolvedDataViews) ? currentDataViews : resolvedDataViews
       );
     });
-    const filtersSubscription = dashboardApi.filters$.subscribe((nextFilters) => {
-      const resolvedFilters = nextFilters ?? [];
-      setFilters((currentFilters) =>
-        isEqual(currentFilters, resolvedFilters) ? currentFilters : resolvedFilters
-      );
-    });
     const timeRangeSubscription = dashboardApi.timeRange$.subscribe((nextTimeRange) => {
       if (!nextTimeRange) {
         return;
@@ -140,34 +93,43 @@ export const useDashboardPreviewUnifiedSearch = ({
     return () => {
       querySubscription.unsubscribe();
       dataViewsSubscription.unsubscribe();
-      filtersSubscription.unsubscribe();
       timeRangeSubscription.unsubscribe();
     };
-  }, [dashboardApi, normalizeQuery]);
+  }, [dashboardApi]);
+
+  useEffect(() => {
+    const filterManagerSubscription = filterManager.getUpdates$().subscribe(() => {
+      const nextFilters = filterManager.getFilters();
+      setFilters((currentFilters) =>
+        isEqual(currentFilters, nextFilters) ? currentFilters : nextFilters
+      );
+    });
+
+    return () => {
+      filterManagerSubscription.unsubscribe();
+    };
+  }, [filterManager]);
+
+  const onRefresh = useCallback(() => {
+    dashboardApi?.forceRefresh();
+  }, [dashboardApi]);
 
   const onQuerySubmit = useCallback(
     ({ dateRange, query: nextQuery }: { dateRange: TimeRange; query?: Query }) => {
       const resolvedQuery = normalizeQuery(nextQuery);
       setTimeRange(dateRange);
       setQuery(resolvedQuery);
-      dashboardApi?.setTimeRange(dateRange);
-      dashboardApi?.setQuery(resolvedQuery);
       dashboardApi?.forceRefresh();
     },
-    [dashboardApi, normalizeQuery]
+    [dashboardApi]
   );
 
   const onFiltersUpdated = useCallback(
     (nextFilters: Filter[]) => {
-      setFilters(nextFilters);
       filterManager.setFilters(nextFilters);
     },
     [filterManager]
   );
-
-  const onRefresh = useCallback(() => {
-    dashboardApi?.forceRefresh();
-  }, [dashboardApi]);
 
   const searchBarProps = useMemo(
     () => ({

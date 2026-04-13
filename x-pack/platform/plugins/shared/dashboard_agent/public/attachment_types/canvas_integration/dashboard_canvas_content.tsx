@@ -121,7 +121,6 @@ export const DashboardCanvasContent = ({
     [attachment.data]
   );
   const { filters, query, searchBarProps, timeRange } = useDashboardPreviewUnifiedSearch({
-    attachmentId: attachment.id,
     dashboardApi,
     dashboardState,
     filterManager,
