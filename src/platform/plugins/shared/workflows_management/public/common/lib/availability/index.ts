@@ -8,4 +8,4 @@
  */
 
 export { AvailabilityService } from './availability_service';
-export * from './types';
+export type * from './types';

@@ -9,7 +9,8 @@
 
 import { of } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { AvailabilityService, AvailabilityStatus } from './availability_service';
+import type { AvailabilityService } from './availability_service';
+import type { AvailabilityStatus } from './types';
 
 const defaultAvailabilityStatus: AvailabilityStatus = { isAvailable: true };
 
