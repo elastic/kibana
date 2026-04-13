@@ -7,12 +7,13 @@
 
 import expect from '@kbn/expect';
 
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { registerHelpers as registerIndexHelpers } from './indices.helpers';
 import { registerHelpers as registerPoliciesHelpers } from './policies.helpers';
 import { initElasticsearchHelpers, getRandomString } from './lib';
 import { getPolicyPayload } from './fixtures';
 
-export default function ({ getService }) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   const {
@@ -45,11 +46,7 @@ export default function ({ getService }) {
 
         // Fetch the index and verify that the policy has been attached
         const indexFetched = await getIndex(indexName);
-        const {
-          settings: {
-            index: { lifecycle },
-          },
-        } = indexFetched[indexName];
+        const lifecycle = indexFetched[indexName].settings?.index?.lifecycle!;
         expect(lifecycle.name).to.equal(policyName);
         expect(lifecycle.rollover_alias).to.equal(rolloverAlias);
       });
@@ -68,13 +65,15 @@ export default function ({ getService }) {
 
         // Make sure policy is attached
         let indexFetched = await getIndex(indexName);
-        expect(indexFetched[indexName].settings.index.lifecycle.name).to.equal(policyName);
+        const lifecycleBeforeRemove = indexFetched[indexName].settings?.index?.lifecycle!;
+        expect(lifecycleBeforeRemove.name).to.equal(policyName);
 
         // Remove policy
         await removePolicyFromIndex(indexName);
 
         indexFetched = await getIndex(indexName);
-        expect(indexFetched[indexName].settings.index.lifecycle).be(undefined);
+        const { lifecycle: lifecycleAfterRemove } = indexFetched[indexName].settings?.index ?? {};
+        expect(lifecycleAfterRemove).be(undefined);
       });
     });
 

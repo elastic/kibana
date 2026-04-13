@@ -8,7 +8,7 @@
 import { INDEX_TEMPLATE_PATTERN_PREFIX } from './constants';
 
 // ILM policy with minimal configuration
-export const getPolicyPayload = (name) => ({
+export const getPolicyPayload = (name: string) => ({
   name,
   phases: {
     hot: {
@@ -37,7 +37,7 @@ export const getPolicyPayload = (name) => ({
 });
 
 // ILM policy with full configuration; includes searchable_snapshot configuration, which requires a valid repository and SLM policy
-export const getPolicyPayloadWithSearchableSnapshots = (name) => ({
+export const getPolicyPayloadWithSearchableSnapshots = (name: string) => ({
   name,
   phases: {
     hot: {
