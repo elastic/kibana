@@ -94,12 +94,17 @@ export class NamespacedCache<T = unknown> {
     this.inflightRequests.set(namespace, promise);
 
     // Auto-cleanup when promise settles
+    // Only delete if this promise is still the current one (prevents race conditions)
     promise
       .then(() => {
-        this.inflightRequests.delete(namespace);
+        if (this.inflightRequests.get(namespace) === promise) {
+          this.inflightRequests.delete(namespace);
+        }
       })
       .catch(() => {
-        this.inflightRequests.delete(namespace);
+        if (this.inflightRequests.get(namespace) === promise) {
+          this.inflightRequests.delete(namespace);
+        }
       });
   }
 

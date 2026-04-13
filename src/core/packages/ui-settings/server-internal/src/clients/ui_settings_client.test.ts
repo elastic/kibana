@@ -956,23 +956,23 @@ describe('ui settings', () => {
       it('shares cache within same namespace', async () => {
         const sharedCache = new NamespacedCache<Record<string, any>>();
 
-        const { uiSettings: client1, savedObjectsClient } = setupWithSharedCache({
+        const { uiSettings: client1, savedObjectsClient: soClient1 } = setupWithSharedCache({
           namespace: 'space-a',
           sharedCache,
           esDocSource: { setting1: 'value1' },
         });
 
-        const { uiSettings: client2 } = setupWithSharedCache({
+        const { uiSettings: client2, savedObjectsClient: soClient2 } = setupWithSharedCache({
           namespace: 'space-a',
           sharedCache,
           esDocSource: { setting1: 'value1' },
         });
 
         await client1.getUserProvided();
-        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+        expect(soClient1.get).toHaveBeenCalledTimes(1);
 
         await client2.getUserProvided();
-        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+        expect(soClient2.get).toHaveBeenCalledTimes(0);
       });
     });
 
@@ -1255,6 +1255,44 @@ describe('ui settings', () => {
         await Promise.all([inflightCall, newCallPromise]);
 
         expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      });
+
+      it('does not allow old promise cleanup to delete new promise', async () => {
+        const sharedCache = new NamespacedCache<Record<string, any>>();
+
+        let resolveOld: (value: any) => void;
+        let resolveNew: (value: any) => void;
+
+        const oldPromise = new Promise<Record<string, any>>((resolve) => {
+          resolveOld = resolve;
+        });
+
+        const newPromise = new Promise<Record<string, any>>((resolve) => {
+          resolveNew = resolve;
+        });
+
+        sharedCache.setInflight('test-namespace', oldPromise);
+        expect(sharedCache.getInflight('test-namespace')).toBe(oldPromise);
+
+        sharedCache.del('test-namespace');
+        expect(sharedCache.getInflight('test-namespace')).toBeNull();
+
+        sharedCache.setInflight('test-namespace', newPromise);
+        expect(sharedCache.getInflight('test-namespace')).toBe(newPromise);
+
+        resolveOld!('old-value');
+        await oldPromise;
+
+        await new Promise((resolve) => setTimeout(resolve, 10));
+
+        expect(sharedCache.getInflight('test-namespace')).toBe(newPromise);
+
+        resolveNew!('new-value');
+        await newPromise;
+
+        await new Promise((resolve) => setTimeout(resolve, 10));
+
+        expect(sharedCache.getInflight('test-namespace')).toBeNull();
       });
     });
   });
