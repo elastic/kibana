@@ -15,9 +15,13 @@ git checkout -B "$BRANCH" "origin/$BRANCH"
 echo "Updating branch property in package.json to '$BRANCH'"
 jq --arg branch "$BRANCH" '.branch = $branch' package.json > package.json.tmp && mv package.json.tmp package.json
 
+# See https://github.com/elastic/kibana/pull/199404
+# Prevent backport assignments
+printf '\n# See https://github.com/elastic/kibana/pull/199404\n# Prevent backport assignments\n* @kibanamachine \n' >> .github/CODEOWNERS
+
 head_branch="update-release-branch-$(date +%F_%H-%M-%S)"
 git checkout -b "$head_branch"
-git add package.json
+git add package.json .github/CODEOWNERS
 git commit -m "[release branch setup] Set branch to ${BRANCH}"
 
 git push origin "$head_branch"
