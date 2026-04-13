@@ -6,8 +6,11 @@
  */
 
 import type { SmlTypeDefinition } from '@kbn/agent-builder-plugin/server';
-import type { LensAttributes } from '@kbn/lens-embeddable-utils/config_builder';
-import { LensConfigBuilder, type LensApiConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import {
+  LensConfigBuilder,
+  type LensApiConfig,
+  type LensAttributes,
+} from '@kbn/lens-embeddable-utils';
 
 const VISUALIZATION_SML_TYPE = 'visualization';
 

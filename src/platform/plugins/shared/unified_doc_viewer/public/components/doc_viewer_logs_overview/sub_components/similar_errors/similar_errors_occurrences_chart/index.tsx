@@ -12,11 +12,11 @@ import { i18n } from '@kbn/i18n';
 import { from, stats, sort } from '@kbn/esql-composer';
 import {
   LensConfigBuilder,
-  type LensXYConfig,
-  type LensSeriesLayer,
   type LensAnnotationLayer,
-} from '@kbn/lens-embeddable-utils/config_builder';
-import type { LensAttributes } from '@kbn/lens-embeddable-utils/config_builder';
+  type LensAttributes,
+  type LensSeriesLayer,
+  type LensXYConfig,
+} from '@kbn/lens-embeddable-utils';
 import { EuiCallOut, EuiLoadingChart, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { fieldConstants } from '@kbn/discover-utils';

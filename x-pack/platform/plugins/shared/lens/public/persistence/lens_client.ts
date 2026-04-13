@@ -8,8 +8,7 @@
 import type { HttpStart } from '@kbn/core/public';
 import { buildPath } from '@kbn/core-http-browser';
 import type { Reference } from '@kbn/content-management-utils';
-import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
-import type { LensApiConfig } from '@kbn/lens-embeddable-utils/config_builder/schema';
+import type { LensApiConfig, LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 
 import type { LensSavedObjectAttributes } from '@kbn/lens-common';
 import { LENS_INTERNAL_VIS_API_PATH, LENS_INTERNAL_API_VERSION } from '../../common/constants';

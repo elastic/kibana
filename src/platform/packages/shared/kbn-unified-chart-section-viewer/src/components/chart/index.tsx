@@ -9,10 +9,9 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensSeriesLayer, LensYBoundsConfig } from '@kbn/lens-embeddable-utils';
 import { useBoolean } from '@kbn/react-hooks';
 import React, { useRef } from 'react';
-import type { LensYBoundsConfig } from '@kbn/lens-embeddable-utils/config_builder/types';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import { useLensProps } from './hooks/use_lens_props';
 import type { LensWrapperProps } from './lens_wrapper';

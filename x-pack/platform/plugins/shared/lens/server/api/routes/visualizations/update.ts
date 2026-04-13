@@ -7,10 +7,7 @@
 
 import { boomify, isBoom } from '@hapi/boom';
 
-import {
-  isLensESQLConfig,
-  isLensLegacyAttributes,
-} from '@kbn/lens-embeddable-utils/config_builder/utils';
+import { isLensESQLConfig, isLensLegacyAttributes } from '@kbn/lens-embeddable-utils';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 
 import {

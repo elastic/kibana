@@ -18,7 +18,7 @@ import {
   LensConfigBuilder,
   type LensApiConfig,
   type LensAttributes,
-} from '@kbn/lens-embeddable-utils/config_builder';
+} from '@kbn/lens-embeddable-utils';
 
 /**
  * Creates the definition for the unified `visualization` attachment type.

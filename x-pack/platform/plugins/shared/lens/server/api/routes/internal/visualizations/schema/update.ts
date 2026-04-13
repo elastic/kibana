@@ -8,7 +8,7 @@
 import { omit } from 'lodash';
 
 import { schema } from '@kbn/config-schema';
-import { lensApiConfigSchema } from '@kbn/lens-embeddable-utils/config_builder';
+import { lensApiConfigSchema } from '@kbn/lens-embeddable-utils';
 
 import { lensCMUpdateOptionsSchema, lensItemDataSchemaV2 } from '../../../../../content_management';
 import { lensItemDataSchemaV0 } from '../../../../../content_management/v0';

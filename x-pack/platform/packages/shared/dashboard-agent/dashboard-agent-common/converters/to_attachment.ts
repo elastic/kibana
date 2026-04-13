@@ -14,7 +14,7 @@ import {
   LensConfigBuilder,
   type LensApiConfig,
   type LensAttributes,
-} from '@kbn/lens-embeddable-utils/config_builder';
+} from '@kbn/lens-embeddable-utils';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type { AttachmentPanel, DashboardSection as DashboardAttachmentSection } from '../types';
 import type { DashboardAttachmentData } from '../types';
