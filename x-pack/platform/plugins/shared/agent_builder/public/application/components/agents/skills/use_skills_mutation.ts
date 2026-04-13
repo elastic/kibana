@@ -16,7 +16,6 @@ import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_servic
 import { queryKeys } from '../../../query_keys';
 import { labels } from '../../../utils/i18n';
 import { useToasts } from '../../../hooks/use_toasts';
-import { useSkillsService } from '../../../hooks/skills/use_skills';
 
 export const useSkillsMutation = ({ agent }: { agent: AgentDefinition | null }) => {
   const { agentService } = useAgentBuilderServices();
@@ -24,7 +23,6 @@ export const useSkillsMutation = ({ agent }: { agent: AgentDefinition | null }) 
   const { addSuccessToast, addErrorToast } = useToasts();
   const { id: agentId, configuration } = agent ?? {};
   const { skill_ids: agentSkillIds } = configuration ?? {};
-  const { skills: allSkills } = useSkillsService();
 
   const agentQueryKey = queryKeys.agentProfiles.byId(agentId);
 
@@ -70,7 +68,7 @@ export const useSkillsMutation = ({ agent }: { agent: AgentDefinition | null }) 
       skill: PublicSkillSummary | PublicSkillDefinition,
       { onSuccess }: { onSuccess?: (skillId: string) => void } = {}
     ) => {
-      const currentIds = agentSkillIds ?? allSkills.map((s) => s.id);
+      const currentIds = agentSkillIds ?? [];
       if (currentIds.includes(skill.id)) return;
       const newIds = [...currentIds, skill.id];
 
@@ -81,12 +79,12 @@ export const useSkillsMutation = ({ agent }: { agent: AgentDefinition | null }) 
         },
       });
     },
-    [agentSkillIds, allSkills, updateSkillsMutation, addSuccessToast]
+    [agentSkillIds, updateSkillsMutation, addSuccessToast]
   );
 
   const handleRemoveSkill = useCallback(
     (skill: PublicSkillSummary) => {
-      const currentIds = agentSkillIds ?? allSkills.map((s) => s.id);
+      const currentIds = agentSkillIds ?? [];
       const newIds = currentIds.filter((id) => id !== skill.id);
       updateSkillsMutation.mutate(newIds, {
         onSuccess: () => {
@@ -94,7 +92,7 @@ export const useSkillsMutation = ({ agent }: { agent: AgentDefinition | null }) 
         },
       });
     },
-    [agentSkillIds, allSkills, updateSkillsMutation, addSuccessToast]
+    [agentSkillIds, updateSkillsMutation, addSuccessToast]
   );
 
   const handlers = useMemo(

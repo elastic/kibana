@@ -43,6 +43,7 @@ import { SkillCreateFlyout } from './skill_create_flyout';
 import { SkillDetailPanel } from './skill_detail_panel';
 import { SkillEditFlyout } from './skill_edit_flyout';
 import { SkillLibraryPanel } from './skill_library_panel';
+import { SkillsCustomizeEmptyState } from './skills_customize_empty_state';
 import { useSkillsMutation } from './use_skills_mutation';
 
 export const AgentSkills: React.FC = () => {
@@ -96,7 +97,9 @@ export const AgentSkills: React.FC = () => {
   const builtinSkillIdSet = useMemo(() => new Set(builtinSkills.map((s) => s.id)), [builtinSkills]);
 
   const activeSkills = useMemo(() => {
-    if (!agentSkillIdSet) return allSkills;
+    if (!agentSkillIdSet) {
+      return enableElasticCapabilities ? builtinSkills : [];
+    }
     if (enableElasticCapabilities) {
       const explicitSkills = allSkills.filter((s) => agentSkillIdSet.has(s.id));
       const builtinNotExplicit = builtinSkills.filter((s) => !agentSkillIdSet.has(s.id));
@@ -160,10 +163,14 @@ export const AgentSkills: React.FC = () => {
   };
 
   const libraryActiveSkillIdSet = useMemo(() => {
-    if (!agentSkillIdSet) return new Set(allSkills.map((s) => s.id));
+    if (!agentSkillIdSet) {
+      return enableElasticCapabilities ? builtinSkillIdSet : new Set<string>();
+    }
     if (enableElasticCapabilities) return new Set([...agentSkillIdSet, ...builtinSkillIdSet]);
     return agentSkillIdSet;
-  }, [agentSkillIdSet, allSkills, enableElasticCapabilities, builtinSkillIdSet]);
+  }, [agentSkillIdSet, enableElasticCapabilities, builtinSkillIdSet]);
+
+  const showCustomizeEmptyState = activeSkills.length === 0 && !searchQuery.trim();
 
   const isLoading = agentLoading || skillsLoading;
 
@@ -172,6 +179,52 @@ export const AgentSkills: React.FC = () => {
       <EuiFlexGroup alignItems="center" justifyContent="center" css={styles.loadingSpinner}>
         <EuiLoadingSpinner size="xl" />
       </EuiFlexGroup>
+    );
+  }
+
+  const skillModals = (
+    <>
+      {isLibraryOpen ? (
+        <SkillLibraryPanel
+          onClose={closeLibrary}
+          allSkills={allSkills}
+          activeSkillIdSet={libraryActiveSkillIdSet}
+          onToggleSkill={handleToggleSkill}
+          enableElasticCapabilities={enableElasticCapabilities}
+          builtinSkillIdSet={builtinSkillIdSet}
+        />
+      ) : null}
+      {editingSkillId ? (
+        <SkillEditFlyout
+          skillId={editingSkillId}
+          onClose={() => setEditingSkillId(null)}
+          onSaved={() => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.skills.byId(editingSkillId) });
+            setSelectedSkillId(editingSkillId);
+          }}
+        />
+      ) : null}
+      {isCreateFlyoutOpen ? (
+        <SkillCreateFlyout
+          onClose={() => setIsCreateFlyoutOpen(false)}
+          onSkillCreated={(skill) =>
+            handleAddSkill(skill, {
+              onSuccess: () => {
+                pendingSelectSkillIdRef.current = skill.id;
+              },
+            })
+          }
+        />
+      ) : null}
+    </>
+  );
+
+  if (showCustomizeEmptyState) {
+    return (
+      <PageWrapper>
+        <SkillsCustomizeEmptyState canEditAgent={canEditAgent} onOpenLibrary={openLibrary} />
+        {skillModals}
+      </PageWrapper>
     );
   }
 
@@ -315,40 +368,7 @@ export const AgentSkills: React.FC = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {isLibraryOpen && (
-        <SkillLibraryPanel
-          onClose={closeLibrary}
-          allSkills={allSkills}
-          activeSkillIdSet={libraryActiveSkillIdSet}
-          onToggleSkill={handleToggleSkill}
-          enableElasticCapabilities={enableElasticCapabilities}
-          builtinSkillIdSet={builtinSkillIdSet}
-        />
-      )}
-
-      {editingSkillId && (
-        <SkillEditFlyout
-          skillId={editingSkillId}
-          onClose={() => setEditingSkillId(null)}
-          onSaved={() => {
-            queryClient.invalidateQueries({ queryKey: queryKeys.skills.byId(editingSkillId) });
-            setSelectedSkillId(editingSkillId);
-          }}
-        />
-      )}
-
-      {isCreateFlyoutOpen && (
-        <SkillCreateFlyout
-          onClose={() => setIsCreateFlyoutOpen(false)}
-          onSkillCreated={(skill) =>
-            handleAddSkill(skill, {
-              onSuccess: () => {
-                pendingSelectSkillIdRef.current = skill.id;
-              },
-            })
-          }
-        />
-      )}
+      {skillModals}
     </PageWrapper>
   );
 };
