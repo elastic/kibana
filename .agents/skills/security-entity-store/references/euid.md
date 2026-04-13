@@ -176,21 +176,6 @@ Service EUIDs are the simplest: a direct mapping from one field, no ranking, no 
 
 **Example:** `service:nginx` or `service:elastic-agent`.
 
-## entity.namespace Computation
-
-`entity.namespace` is computed from `event.module` / `data_stream.dataset` via a mapping table:
-
-| Integration module/dataset | Namespace |
-|---------------------------|-----------|
-| `okta`, `entityanalytics_okta` | `okta` |
-| `azure`, `entityanalytics_entra_id` | `entra_id` |
-| `o365`, `o365_metrics` | `microsoft_365` |
-| `entityanalytics_ad` | `active_directory` |
-| `google_workspace` | `google_workspace` |
-| (no match) | `unknown` |
-
-Full mapping: `user.ts` → `entityNamespaceMapping` in `whenConditionTrueSetFieldsPreAgg`.
-
 ## Key Implementation Details
 
 - **Branch selection**: `entity.namespace == 'local'` → MC ranking; otherwise → HC ranking
