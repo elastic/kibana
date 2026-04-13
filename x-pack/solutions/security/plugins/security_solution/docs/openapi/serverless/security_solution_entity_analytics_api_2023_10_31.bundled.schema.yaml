@@ -680,12 +680,64 @@ paths:
                   managed: false
                   name: High Risk Vendors
                   riskModifier: 1.5
+              CreateWatchlistWithSourcesRequest:
+                summary: Create watchlist with entity sources
+                value:
+                  description: High risk vendor watchlist
+                  entitySources:
+                    - enabled: true
+                      identifierField: user.name
+                      indexPattern: my-sync-index
+                      name: My User Index Source
+                      type: index
+                  managed: false
+                  name: High Risk Vendors
+                  riskModifier: 1.5
             schema:
               type: object
               properties:
                 description:
                   description: Description of the watchlist
                   type: string
+                entitySources:
+                  description: Optional entity sources to create and link to the watchlist
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      enabled:
+                        type: boolean
+                      filter:
+                        $ref: '#/components/schemas/Filter'
+                      identifierField:
+                        description: >-
+                          Field used to query the entity store for index-type
+                          sources
+                        type: string
+                      indexPattern:
+                        type: string
+                      integrationName:
+                        description: >-
+                          Required when type is entity_analytics_integration.
+                          One of entityanalytics_okta, entityanalytics_ad.
+                        type: string
+                      matchers:
+                        items:
+                          $ref: '#/components/schemas/Matcher'
+                        type: array
+                      name:
+                        type: string
+                      queryRule:
+                        description: >-
+                          KQL query used to filter data from the provided index
+                          patterns
+                        type: string
+                      type:
+                        $ref: '#/components/schemas/EntitySourceType'
+                    required:
+                      - type
+                      - name
+                  type: array
                 managed:
                   description: Indicates if the watchlist is managed by the system
                   type: boolean
@@ -717,7 +769,14 @@ paths:
                     riskModifier: 1.5
                     updatedAt: '2026-01-28T12:00:00.000Z'
               schema:
-                $ref: '#/components/schemas/WatchlistObject'
+                allOf:
+                  - $ref: '#/components/schemas/WatchlistObject'
+                  - type: object
+                    properties:
+                      entitySources:
+                        items:
+                          $ref: '#/components/schemas/MonitoringEntitySource'
+                        type: array
           description: Watchlist created successfully
       summary: Create a new watchlist
       tags:
@@ -815,6 +874,112 @@ paths:
                 $ref: '#/components/schemas/WatchlistObject'
           description: Watchlist updated successfully
       summary: Update an existing watchlist
+      tags:
+        - Security Entity Analytics API
+      x-state: Technical Preview
+  /api/entity_analytics/watchlists/{watchlist_id}/csv_upload:
+    post:
+      description: >
+        Uploads a CSV file to add entities to a watchlist. The CSV must contain
+        a header row
+
+        with a "type" column (user, host, service, or generic) and one or more
+        ECS identity
+
+        fields (e.g. "user.name", "host.hostname") used to match entities in the
+        entity store.
+
+
+        Matched entities are added to the watchlist and their
+        `entity.attributes.watchlists`
+
+        field is updated in the entity store.
+
+
+        Each row will match up to 10,000 entities.
+      operationId: UploadWatchlistCsv
+      parameters:
+        - description: The ID of the watchlist to add entities to
+          example: high-risk-vendors
+          in: path
+          name: watchlist_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            examples:
+              csvUpload:
+                summary: CSV file with user entities
+                value:
+                  file: |
+                    type,user.name
+                    user,john.doe
+                    user,jane.smith
+            schema:
+              type: object
+              properties:
+                file:
+                  description: The CSV file to upload.
+                  format: binary
+                  type: string
+              required:
+                - file
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                CsvUploadResponse:
+                  summary: CSV upload response with mixed results
+                  value:
+                    failed: 1
+                    items:
+                      - matchedEntities: 1
+                        status: success
+                      - error: Invalid entity type
+                        matchedEntities: 0
+                        status: failure
+                      - matchedEntities: 0
+                        status: unmatched
+                    successful: 1
+                    total: 3
+                    unmatched: 1
+              schema:
+                type: object
+                properties:
+                  failed:
+                    description: Number of rows that failed to process
+                    example: 1
+                    type: integer
+                  items:
+                    items:
+                      $ref: '#/components/schemas/WatchlistCsvUploadResponseItem'
+                    type: array
+                  successful:
+                    description: Number of rows that matched at least one entity
+                    example: 1
+                    type: integer
+                  total:
+                    description: Total number of rows processed
+                    example: 3
+                    type: integer
+                  unmatched:
+                    description: Number of rows that matched no entities
+                    example: 1
+                    type: integer
+                required:
+                  - successful
+                  - failed
+                  - total
+                  - unmatched
+                  - items
+          description: Upload successful
+        '413':
+          description: File too large
+      summary: Upload a CSV file to add entities to a watchlist
       tags:
         - Security Entity Analytics API
       x-state: Technical Preview
@@ -1645,6 +1810,7 @@ components:
           type: string
         criticality:
           $ref: '#/components/schemas/AssetCriticalityLevel'
+          nullable: true
         environment:
           type: string
         id:
@@ -2100,6 +2266,10 @@ components:
               items:
                 type: string
               type: array
+            accesses_infrequently:
+              items:
+                type: string
+              type: array
             communicates_with:
               items:
                 type: string
@@ -2188,6 +2358,9 @@ components:
           maximum: 100
           minimum: 0
           type: number
+        calculation_run_id:
+          description: Unique identifier for the scoring run that produced this document.
+          type: string
         category_1_count:
           description: >-
             The number of risk input documents that contributed to the Category
@@ -2254,6 +2427,22 @@ components:
           items:
             type: string
           type: array
+        related_entities:
+          items:
+            type: object
+            properties:
+              entity_id:
+                type: string
+              relationship_type:
+                type: string
+          type: array
+        score_type:
+          description: Distinguishes base, propagated, and resolution scores.
+          enum:
+            - base
+            - propagated
+            - resolution
+          type: string
       required:
         - '@timestamp'
         - id_field
@@ -2265,6 +2454,12 @@ components:
         - category_1_count
         - inputs
         - notes
+    EntitySourceType:
+      enum:
+        - index
+        - entity_analytics_integration
+        - store
+      type: string
     EntityType:
       enum:
         - user
@@ -2272,6 +2467,13 @@ components:
         - service
         - generic
       type: string
+    Filter:
+      type: object
+      properties:
+        kuery:
+          oneOf:
+            - type: string
+            - type: object
     GenericEntity:
       additionalProperties: false
       type: object
@@ -2397,6 +2599,24 @@ components:
       required:
         - dsl
         - response
+    Integrations:
+      type: object
+      properties:
+        syncData:
+          description: integrations latest full sync and update syncData
+          type: object
+          properties:
+            lastFullSync:
+              description: Timestamp of the last full sync from integrations
+              format: date-time
+              type: string
+            lastUpdateProcessed:
+              description: Timestamp of the last update processed from integrations
+              format: date-time
+              type: string
+        syncMarkerIndex:
+          description: Index to read latest sync markers from
+          type: string
     Interval:
       description: >-
         Interval in which enrich policy runs. For example, `"1h"` means the rule
@@ -2405,6 +2625,29 @@ components:
       example: 1h
       pattern: ^[1-9]\d*[smh]$
       type: string
+    Matcher:
+      type: object
+      properties:
+        fields:
+          items:
+            type: string
+          type: array
+        values:
+          description: >
+            Matcher values. Must be either an array of strings (e.g. group or
+            role names) or an array of booleans (e.g. integration-derived flags
+            like privileged_group_member). Mixed types are intentionally not
+            supported for simplicity and predictability.
+          oneOf:
+            - items:
+                type: string
+              type: array
+            - items:
+                type: boolean
+              type: array
+      required:
+        - fields
+        - values
     Metadata:
       $ref: '#/components/schemas/TransformStatsMetadata'
     MonitoredUserDoc:
@@ -2494,6 +2737,27 @@ components:
           $ref: '#/components/schemas/PrivilegeMonitoringEngineStatus'
       required:
         - status
+    MonitoringEntitySource:
+      allOf:
+        - $ref: '#/components/schemas/MonitoringEntitySourceProperties'
+        - type: object
+          properties:
+            id:
+              type: string
+          required:
+            - type
+            - name
+            - id
+            - managed
+    MonitoringEntitySourceProperties:
+      allOf:
+        - $ref: '#/components/schemas/UpdateableMonitoringEntitySourceProperties'
+        - type: object
+          properties:
+            managed:
+              type: boolean
+            type:
+              $ref: '#/components/schemas/EntitySourceType'
     MonitoringLabel:
       type: object
       properties:
@@ -2575,6 +2839,9 @@ components:
         description:
           description: A human-readable description of the risk input document.
           example: 'Generated from Detection Engine Rule: Malware Prevention Alert'
+          type: string
+        entity_id:
+          description: The EUID of the entity within the graph that generated this alert.
           type: string
         id:
           description: The unique identifier (`_id`) of the original source document
@@ -2705,6 +2972,31 @@ components:
         - exponential_avg_checkpoint_duration_ms
         - exponential_avg_documents_indexed
         - exponential_avg_documents_processed
+    UpdateableMonitoringEntitySourceProperties:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+        filter:
+          $ref: '#/components/schemas/Filter'
+        identifierField:
+          description: Field used to query the entity store for index-type sources
+          type: string
+        indexPattern:
+          type: string
+        integrationName:
+          type: string
+        integrations:
+          $ref: '#/components/schemas/Integrations'
+        matchers:
+          items:
+            $ref: '#/components/schemas/Matcher'
+          type: array
+        name:
+          type: string
+        queryRule:
+          description: KQL query used to filter data from the provided index patterns
+          type: string
     UserEntity:
       additionalProperties: false
       type: object
@@ -2795,6 +3087,30 @@ components:
             name:
               description: The name of the user.
               type: string
+    WatchlistCsvUploadResponseItem:
+      example:
+        matchedEntities: 1
+        status: success
+      type: object
+      properties:
+        error:
+          description: Error message if the row failed to process
+          example: Invalid entity type
+          type: string
+        matchedEntities:
+          description: Number of entities matched for this row
+          example: 1
+          type: integer
+        status:
+          enum:
+            - success
+            - failure
+            - unmatched
+          example: success
+          type: string
+      required:
+        - status
+        - matchedEntities
     WatchlistObject:
       example:
         createdAt: '2026-01-28T12:00:00.000Z'
@@ -2813,6 +3129,9 @@ components:
         description:
           description: Description of the watchlist
           type: string
+        entityCount:
+          description: Number of entities in the watchlist
+          type: number
         entitySourceIds:
           description: List of entity source IDs associated with the watchlist
           items:

@@ -175,7 +175,7 @@ export const SyncsContextMenu: React.FC<SyncsContextMenuProps> = ({ disabled = f
           disabled={disabled || isWaitingForConnector}
           data-test-subj="enterpriseSearchSyncsContextMenuButton"
           data-telemetry-id="entSearchContent-connector-header-sync-openSyncMenu"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={togglePopover}
           fill
