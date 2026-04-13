@@ -98,7 +98,7 @@ export const CustomizeLandingEmptyState: React.FC<CustomizeLandingEmptyStateProp
   `;
 
   const mainPadding = css`
-    padding: ${euiTheme.size.m} ${euiTheme.size.l};
+    padding: ${euiTheme.size.l};
   `;
 
   return (
