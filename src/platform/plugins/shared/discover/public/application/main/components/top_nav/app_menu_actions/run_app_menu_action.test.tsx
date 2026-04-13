@@ -32,6 +32,7 @@ describe('run app menu actions', () => {
         appMenuItem,
         anchorElement,
         services: discoverServiceMock,
+        returnFocus: jest.fn(),
       });
 
       expect(mockRun).toHaveBeenCalledTimes(1);
@@ -63,6 +64,7 @@ describe('run app menu actions', () => {
         appMenuItem,
         anchorElement,
         services: discoverServiceMock,
+        returnFocus: jest.fn(),
       });
 
       expect(mockRun).toHaveBeenCalled();
