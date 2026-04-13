@@ -80,9 +80,9 @@ const useAppMenuBarStyles = (
       alignItems: 'stretch',
       justifyContent: 'flex-start',
       gap: 0,
-      paddingTop: euiTheme.size.s,
-      paddingInline: euiTheme.size.s,
-      paddingBottom: hasHeaderTabs ? 0 : euiTheme.size.s,
+      paddingTop: euiTheme.size.m,
+      paddingInline: euiTheme.size.m,
+      paddingBottom: hasHeaderTabs ? 0 : euiTheme.size.m,
       background: euiTheme.colors.backgroundBasePlain,
       borderBottom: euiTheme.border.thin,
       marginBottom: `-${euiTheme.border.width.thin}`,
@@ -103,7 +103,7 @@ const useAppMenuBarStyles = (
       flexDirection: 'row' as const,
       alignItems: 'center',
       justifyContent: 'flex-start',
-      gap: euiTheme.size.s,
+      gap: euiTheme.size.m,
       flex: hasSecondaryRow ? ('0 0 auto' as const) : ('1 1 auto' as const),
       minHeight: hasSecondaryRow ? undefined : 0,
       minWidth: 0,
@@ -115,7 +115,7 @@ const useAppMenuBarStyles = (
       display: 'flex',
       flexDirection: 'row' as const,
       alignItems: 'center',
-      gap: euiTheme.size.s,
+      gap: euiTheme.size.m,
     };
 
     const titleSection = {
@@ -159,7 +159,7 @@ const useAppMenuBarStyles = (
       flexShrink: 0,
       display: 'flex',
       alignItems: 'center',
-      gap: euiTheme.size.s,
+      gap: euiTheme.size.m,
       marginLeft: 'auto',
     };
 
@@ -264,9 +264,7 @@ export const AppMenuBar = React.memo(({ globalBanners }: AppMenuBarProps) => {
     breadcrumbs.length >= 2 ? breadcrumbs[breadcrumbs.length - 2] : undefined;
   const hideBackFromAppMenu = appMenuConfig?.hideProjectHeaderBackButton === true;
   const showBackToParent =
-    !hideBackFromAppMenu &&
-    Boolean(parentBreadcrumb) &&
-    canNavigateToParent(parentBreadcrumb);
+    !hideBackFromAppMenu && Boolean(parentBreadcrumb) && canNavigateToParent(parentBreadcrumb);
   const styles = useAppMenuBarStyles(euiTheme, hasSecondaryRow, showBackToParent, hasHeaderTabs);
   const hasLegacyActionMenu = useHasLegacyActionMenu();
 
@@ -423,7 +421,10 @@ export const AppMenuBar = React.memo(({ globalBanners }: AppMenuBarProps) => {
               )}
             </div>
             {hasHeaderBadges ? (
-              <ProjectHeaderBadgeGroup badges={headerBadgeItems} badgeGroupCss={styles.badgeGroup} />
+              <ProjectHeaderBadgeGroup
+                badges={headerBadgeItems}
+                badgeGroupCss={styles.badgeGroup}
+              />
             ) : null}
             <div
               className="appMenuBar__globalActions"
@@ -499,7 +500,7 @@ export const AppMenuBar = React.memo(({ globalBanners }: AppMenuBarProps) => {
               minWidth: 0,
               // Avoid a gap when no banners are registered (BannersList renders null).
               '& #globalBannerList .kbnGlobalBannerList': {
-                marginTop: euiTheme.size.s,
+                marginTop: euiTheme.size.m,
               },
             }}
             data-test-subj="kibanaProjectHeaderGlobalBannersWrap"

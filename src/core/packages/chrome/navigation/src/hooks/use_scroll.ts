@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiOverflowScroll } from '@elastic/eui';
+import { useEuiOverflowScroll, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 /**
@@ -17,11 +17,11 @@ import { css } from '@emotion/react';
  * @returns the scroll styles.
  */
 export const useScroll = (withMask: boolean = false) => {
-  const scrollStyles = css`
-    ${useEuiOverflowScroll('y', withMask)}
-    --secondary-menu-header-height: 50px;
-    scroll-padding-top: var(--secondary-menu-header-height);
-  `;
+  const { euiTheme } = useEuiTheme();
 
-  return scrollStyles;
+  return css`
+    ${useEuiOverflowScroll('y', withMask)}
+    /* Approx sticky secondary menu title: vertical padding + one title line (header height is content-based). */
+    scroll-padding-top: calc(${euiTheme.size.base} + ${euiTheme.size.base} + ${euiTheme.size.l});
+  `;
 };

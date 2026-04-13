@@ -39,10 +39,11 @@ const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
 
     const titleWithBadgeStyles = css`
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: ${euiTheme.size.xs};
       min-width: 0;
       width: 100%;
+      text-align: start;
 
       h4 {
         margin-block: 0;
@@ -53,11 +54,11 @@ const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
       ${headerStyle}
       box-sizing: border-box;
       display: flex;
-      align-items: center;
-      padding-block: 0;
+      align-items: flex-start;
       background: ${euiTheme.colors.backgroundBasePlain};
       border-radius: 0;
       border-bottom: ${euiTheme.border.thin};
+      text-align: start;
     `;
 
     return (

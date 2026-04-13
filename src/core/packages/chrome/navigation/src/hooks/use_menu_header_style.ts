@@ -18,16 +18,13 @@ export function useMenuHeaderStyle() {
   const { euiTheme } = useEuiTheme();
 
   return css`
-    --border-width: ${euiTheme.border.width.thin};
-    // 20px is forced by section dividers
-    --horizontal-padding: calc(20px - var(--border-width));
-
     position: sticky;
     top: 0;
     z-index: 1;
-    padding: ${euiTheme.size.base} var(--horizontal-padding) ${euiTheme.size.xs}
-      var(--horizontal-padding);
+    box-sizing: border-box;
+    padding: ${euiTheme.size.base} 20px ${euiTheme.size.base} 20px;
     margin: 0 1px;
-    height: var(--secondary-menu-header-height);
+    height: auto;
+    min-height: 0;
   `;
 }

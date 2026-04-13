@@ -8,36 +8,40 @@ exports[`Expanded mode should render the side navigation 1`] = `
     id="kbnChromeNav-root"
   >
     <div
-      class="kbnChromeNav-root css-11j07lt-getNavWrapperStyles"
+      class="kbnChromeNav-root css-1xxy1qf-getNavWrapperStyles"
     >
       <div
-        class="css-rficnh-wrapperStyles"
-        data-test-subj="kbnChromeNav-logoWrapper"
+        class="css-1hfs4d5-sideNavRailAndLogoStackStyles"
       >
-        <a
-          aria-label="Solution homepage"
-          class="css-14y7a8u-buttonStyles"
-          data-highlighted="false"
-          data-menu-item="true"
-          data-test-subj="kbnChromeNav-logo"
-          href="/"
-          id="home"
+        <div
+          class="css-rficnh-wrapperStyles"
+          data-test-subj="kbnChromeNav-logoWrapper"
         >
-          <div
-            class="kbnChromeNav-iconWrapper"
+          <a
+            aria-label="Solution homepage"
+            class="css-14y7a8u-buttonStyles"
+            data-highlighted="false"
+            data-menu-item="true"
+            data-test-subj="kbnChromeNav-logo"
+            href="/"
+            id="home"
           >
-            <span
-              aria-hidden="true"
-              color="currentColor"
-              data-euiicon-type="logoElastic"
-            />
-          </div>
-          <div
-            class="euiText emotion-euiText-m-euiTextAlign-center-textStyles-labelStyles"
-          >
-            Solution
-          </div>
-        </a>
+            <div
+              class="kbnChromeNav-iconWrapper"
+            >
+              <span
+                aria-hidden="true"
+                color="currentColor"
+                data-euiicon-type="logoElastic"
+              />
+            </div>
+            <div
+              class="euiText emotion-euiText-m-euiTextAlign-center-textStyles-labelStyles"
+            >
+              Solution
+            </div>
+          </a>
+        </div>
       </div>
       <p
         class="emotion-euiScreenReaderOnly"
@@ -47,7 +51,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
       </p>
       <nav
         aria-label="Main"
-        class="css-175v8l8-getPrimaryMenuStyles"
+        class="css-gv1mmy-getPrimaryMenuStyles"
         data-test-subj="kbnChromeNav-primaryNavigation"
         id="kbnChromeNav-primaryNavigation"
       >
@@ -177,9 +181,18 @@ exports[`Expanded mode should render the side navigation 1`] = `
       </p>
       <footer
         aria-label="Side navigation"
-        class="css-18gcnxt-root"
+        class="css-1iluzpd-getFooterWrapperStyles"
         data-test-subj="kbnChromeNav-footer"
       >
+        <div
+          class="css-59ccr7-wrapperStyles-SideNavRailRule"
+        >
+          <div
+            aria-hidden="true"
+            class="css-15nif75-ruleBaseStyles-SideNavRailRule"
+            data-test-subj="kbnChromeNav-footerTopSeparator"
+          />
+        </div>
         <div
           class="css-1y7bpvk-wrapperStyles"
         >
@@ -363,9 +376,15 @@ exports[`Expanded mode should render the side navigation 1`] = `
             </span>
           </div>
         </div>
-        <hr
-          class="euiHorizontalRule emotion-euiHorizontalRule-full-xs-collapseDivider"
-        />
+        <div
+          class="css-59ccr7-wrapperStyles-SideNavRailRule"
+        >
+          <div
+            aria-hidden="true"
+            class="css-15nif75-ruleBaseStyles-SideNavRailRule"
+            data-test-subj="kbnChromeNav-footerCollapseSeparator"
+          />
+        </div>
         <div
           class="sideNavCollapseButtonWrapper css-1y5smli-sideNavCollapseButtonWrapper"
         >

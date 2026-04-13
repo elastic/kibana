@@ -21,7 +21,7 @@ const baseTheme = {
   border: {
     width: { thin: '1px' },
   },
-  size: { base: '16px', xs: '8px' },
+  size: { base: '16px', s: '8px', xs: '8px' },
   colors: {},
 };
 

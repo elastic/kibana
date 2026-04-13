@@ -13,17 +13,24 @@ import { useScroll } from './use_scroll';
 
 jest.mock('@elastic/eui', () => ({
   useEuiOverflowScroll: jest.fn(),
+  useEuiTheme: jest.fn(),
 }));
 
-const { useEuiOverflowScroll } = jest.requireMock('@elastic/eui');
+const { useEuiOverflowScroll, useEuiTheme } = jest.requireMock('@elastic/eui');
 
 describe('useScroll', () => {
   beforeEach(() => {
     useEuiOverflowScroll.mockReturnValue('overflow: auto;');
+    useEuiTheme.mockReturnValue({
+      euiTheme: {
+        size: { base: '16px', l: '24px' },
+      },
+    });
   });
 
   afterEach(() => {
     useEuiOverflowScroll.mockReset();
+    useEuiTheme.mockReset();
   });
 
   it('provides vertical overflow styles by default', () => {
