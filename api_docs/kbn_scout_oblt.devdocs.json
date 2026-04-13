@@ -10127,10 +10127,6 @@
                         "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/date_picker.ts"
                       },
                       {
-                        "plugin": "@kbn/scout",
-                        "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/date_picker.ts"
-                      },
-                      {
                         "plugin": "apm",
                         "path": "x-pack/solutions/observability/plugins/apm/test/scout/ui/fixtures/page_objects/agent_configurations.ts"
                       },
