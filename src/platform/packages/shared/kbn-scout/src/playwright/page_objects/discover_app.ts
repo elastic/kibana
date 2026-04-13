@@ -26,7 +26,9 @@ export class DiscoverApp {
   }
 
   private async waitForDiscoverPage() {
-    await expect(this.page.testSubj.locator('dscPage')).toBeVisible();
+    // Discover initialization in serverless CI environments regularly exceeds the default 10s,
+    // likely due to additional plugin overhead and root profile resolution.
+    await expect(this.page.testSubj.locator('dscPage')).toBeVisible({ timeout: 30_000 });
   }
 
   private async getVisibleDataViewSwitch() {
@@ -185,11 +187,11 @@ export class DiscoverApp {
   // Waits for the document table to be fully rendered and stable
   async waitForDocTableRendered() {
     const table = this.page.testSubj.locator('discoverDocTable');
-    await expect(table).toBeVisible();
-
     const minDurationMs = 2_000;
     const pollIntervalMs = 100;
     const totalTimeoutMs = 30_000;
+
+    await expect(table).toBeVisible({ timeout: totalTimeoutMs });
 
     let stableSince: number | null = null;
 

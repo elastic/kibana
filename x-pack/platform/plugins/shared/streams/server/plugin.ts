@@ -16,7 +16,10 @@ import type {
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management-settings-ids';
+import {
+  OBSERVABILITY_STREAMS_ENABLE_MEMORY,
+  OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
+} from '@kbn/management-settings-ids';
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
@@ -52,7 +55,10 @@ import { backfillWiredStreamViews } from './lib/streams/esql_views/backfill_wire
 import { FeatureService } from './lib/streams/feature/feature_service';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
+import { MemoryTriggerRegistry, discoveryCompletedTrigger } from './lib/memory/triggers';
 import { TaskService } from './lib/tasks/task_service';
+import { CONVERSATION_SCRAPER_TASK_TYPE } from './lib/tasks/task_definitions/conversation_scraper';
+import { MEMORY_CONSOLIDATION_TASK_TYPE } from './lib/tasks/task_definitions/memory_consolidation';
 import { InsightService } from './lib/sig_events/insights/client/insight_service';
 import { baseFields } from './lib/streams/component_templates/logs_layer';
 import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
@@ -60,6 +66,7 @@ import { registerStreamsAgentBuilder } from './agent_builder/register';
 import { registerSignificantEventsInferenceFeatures } from './register_significant_events_inference_features';
 import { registerSuggestionsInferenceFeatures } from './register_suggestions_inference_features';
 import { PatternExtractionService } from './lib/pattern_extraction/pattern_extraction_service';
+import { registerFieldsMetadataExtractors } from './register_fields_metadata_extractors';
 import { createStreamsSettingsStorageClient } from './lib/streams/storage/streams_settings_storage_client';
 import {
   createContinuousKiExtractionWorkflowService,
@@ -233,7 +240,23 @@ export class StreamsPlugin
         getScopedClients,
         server: this.server,
         logger: this.logger,
-      });
+        isMemoryEnabled: async () => {
+          try {
+            const [coreStart] = await core.getStartServices();
+            const soClient = coreStart.savedObjects.createInternalRepository();
+            const uiSettings = coreStart.uiSettings.asScopedToClient(soClient);
+            return await uiSettings.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
+          } catch {
+            return false;
+          }
+        },
+      })
+        .then(({ ensureMemorySkillRegistered }) => {
+          this.server!.ensureMemorySkillRegistered = ensureMemorySkillRegistered;
+        })
+        .catch((err) => {
+          this.logger.error(`Failed to register agent builder: ${err.message}`);
+        });
     }
 
     let continuousKiExtractionWorkflowService: ContinuousKiExtractionWorkflowService | undefined;
@@ -251,6 +274,14 @@ export class StreamsPlugin
       getScopedClients,
       logger: this.logger,
       telemetry: telemetryClient,
+      getInternalEsClient: () => this.server!.core.elasticsearch.client.asInternalUser,
+      getConversationsClient: async (request) => {
+        const [, startPlugins] = await core.getStartServices();
+        if (!startPlugins.agentBuilder) {
+          return undefined;
+        }
+        return startPlugins.agentBuilder.conversations.getScopedClient({ request });
+      },
       server: this.server,
     });
 
@@ -393,10 +424,8 @@ export class StreamsPlugin
               isSecurityEnabled: false,
             });
 
-            await streamsClient.enableStreams({ defer: true });
-
-            await streamsClient.bulkUpsert(
-              this.config.preconfigured.stream_definitions.map(({ name, ...definition }) => ({
+            const streamDefinitions = this.config.preconfigured.stream_definitions.map(
+              ({ name, ...definition }) => ({
                 name,
                 request: Streams.all.UpsertRequest.parse(
                   ROOT_STREAM_NAMES.includes(name)
@@ -415,8 +444,17 @@ export class StreamsPlugin
                       }
                     : definition
                 ),
-              }))
+              })
             );
+
+            if (streamDefinitions.length > 0) {
+              await streamsClient.enableStreams();
+
+              await streamsClient.bulkUpsert(streamDefinitions);
+            } else {
+              await streamsClient.enableStreams({ defer: true });
+            }
+
             this.logger.info('Streams preconfigured successfully');
           }
         }
@@ -440,6 +478,11 @@ export class StreamsPlugin
         this.logger.error(`Error preconfiguring streams: ${error}`);
       });
 
+    registerFieldsMetadataExtractors({
+      fieldsMetadata: plugins.fieldsMetadata,
+      logger: this.logger,
+    });
+
     return {};
   }
 
@@ -454,6 +497,39 @@ export class StreamsPlugin
       this.server.licensing = plugins.licensing;
       this.server.taskManager = plugins.taskManager;
       this.server.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
+
+      // Set up memory trigger registry with all built-in triggers
+      const memoryTriggerRegistry = new MemoryTriggerRegistry({ logger: this.logger });
+      memoryTriggerRegistry.register(discoveryCompletedTrigger);
+      this.server.memoryTriggerRegistry = memoryTriggerRegistry;
+
+      // Set up recurring memory tasks (conversation scraper + consolidation).
+      // These are scheduled only when useMemory is enabled.
+      const taskManager = plugins.taskManager;
+      const logger = this.logger;
+      this.server.ensureMemoryTasksScheduled = async () => {
+        try {
+          await taskManager.ensureScheduled({
+            id: 'streams_conversation_scraper_recurring',
+            taskType: CONVERSATION_SCRAPER_TASK_TYPE,
+            params: {},
+            state: {},
+            scope: ['streams'],
+            schedule: { interval: '4h' },
+          });
+          await taskManager.ensureScheduled({
+            id: 'streams_memory_consolidation_recurring',
+            taskType: MEMORY_CONSOLIDATION_TASK_TYPE,
+            params: {},
+            state: {},
+            scope: ['streams'],
+            schedule: { interval: '24h' },
+          });
+          logger.info('Recurring memory tasks scheduled');
+        } catch (err) {
+          logger.error(`Failed to schedule recurring memory tasks: ${(err as Error).message}`);
+        }
+      };
     }
 
     this.processorSuggestionsService.setConsoleStart(plugins.console);

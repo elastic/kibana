@@ -168,7 +168,9 @@ export const AgentSelectorDropdown: React.FC<AgentSelectorDropdownProps> = ({
       onClick={() => setIsPopoverOpen((v) => !v)}
       data-test-subj="agentBuilderAgentSelectorButton"
     >
-      {selectedAgent?.name ?? fallbackLabel}
+      <EuiText size="m">
+        <strong>{selectedAgent?.name ?? fallbackLabel}</strong>
+      </EuiText>
     </EuiButtonEmpty>
   );
 
@@ -178,7 +180,6 @@ export const AgentSelectorDropdown: React.FC<AgentSelectorDropdownProps> = ({
       panelProps={{
         css: css`
           ${selectorPopoverPanelStyles}
-          block-size: ${SELECTOR_POPOVER_HEIGHT}px;
         `,
       }}
       panelPaddingSize="none"
