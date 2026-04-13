@@ -24,6 +24,14 @@ describe('FigmaConnector', () => {
     jest.clearAllMocks();
   });
 
+  it('should define every action (except test) as a tool for agent exposure', () => {
+    for (const actionName of Object.keys(FigmaConnector.actions)) {
+      if (actionName !== 'test') {
+        expect(FigmaConnector.actions[actionName].isTool).toBe(true);
+      }
+    }
+  });
+
   describe('auth', () => {
     it('supports api_key_header auth', () => {
       const types = (FigmaConnector.auth?.types as Array<string | { type: string }>).map((t) =>
