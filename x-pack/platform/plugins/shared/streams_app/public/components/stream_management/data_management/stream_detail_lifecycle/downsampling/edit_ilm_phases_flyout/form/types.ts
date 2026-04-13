@@ -20,11 +20,6 @@ export interface MinAgeMetaFields {
    * `micros`, `nanos`). We preserve and round-trip the unit as-is.
    */
   minAgeUnit: PreservedTimeUnit;
-  /**
-   * Derived field used for cross-phase min_age validation.
-   * -1 means "unset / invalid / not computed".
-   */
-  minAgeToMilliSeconds: number;
 }
 
 export interface DownsampleMetaFields {
