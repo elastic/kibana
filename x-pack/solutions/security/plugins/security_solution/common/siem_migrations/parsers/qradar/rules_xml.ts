@@ -10,6 +10,29 @@ import type { XmlElement } from '../xml/xml';
 import { XmlParser } from '../xml/xml';
 import type { QradarRule, ResourceDetailType, ResourceTypeMap } from './types';
 
+// Matches double-encoded entities (e.g. &amp;quot;) first, then single-encoded.
+// Longer patterns must come first so the regex engine prefers them over the
+// shorter &amp; match, decoding both layers in a single atomic pass.
+const ENTITY_PATTERN = /&amp;(?:lt|gt|amp|quot|apos|#39);|&(?:lt|gt|amp|quot|apos|#39);/g;
+const ENTITY_MAP: Record<string, string> = {
+  '&amp;lt;': '<',
+  '&amp;gt;': '>',
+  '&amp;amp;': '&',
+  '&amp;quot;': '"',
+  '&amp;#39;': "'",
+  '&amp;apos;': "'",
+  '&lt;': '<',
+  '&gt;': '>',
+  '&amp;': '&',
+  '&quot;': '"',
+  '&#39;': "'",
+  '&apos;': "'",
+};
+
+const decodeEntities = (text: string): string => {
+  return text.replace(ENTITY_PATTERN, (match) => ENTITY_MAP[match] ?? match);
+};
+
 export class QradarRulesXmlParser extends XmlParser {
   private async processRuleXml(qradarRule: XmlElement): Promise<QradarRule | undefined> {
     const ruleData = this.getStrValue(
@@ -109,20 +132,18 @@ export class QradarRulesXmlParser extends XmlParser {
    * @returns Sanitized plain text
    */
   private sanitizeHtmlText(text: string): string {
-    // First, decode common HTML entities
-    let decoded = text
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&amp;/g, '&')
-      .replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'")
-      .replace(/&apos;/g, "'");
+    // A single atomic regex decodes all entities in one pass, avoiding the
+    // chained-replace ordering issue where one replacement feeds into the next.
+    let decoded = decodeEntities(text);
 
-    // Remove all HTML tags and keep only the text content
-    // This regex matches opening tags, closing tags, and self-closing tags
-    decoded = decoded.replace(/<[^>]*>/g, '');
+    // Remove all HTML tags, looping until stable to handle crafted
+    // nested fragments that could survive a single pass
+    let previous;
+    do {
+      previous = decoded;
+      decoded = decoded.replace(/<[^>]*>/g, '');
+    } while (decoded !== previous);
 
-    // Clean up any extra whitespace that might result from tag removal
     decoded = decoded.replace(/\s+/g, ' ').trim();
 
     return decoded;
