@@ -13,7 +13,7 @@ import { filter } from 'rxjs';
 import type { Subscription } from 'rxjs';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiButton, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
 
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
@@ -68,6 +68,7 @@ export class UserBannerService {
           ReactDOM.render(
             <KibanaRenderContextProvider {...startServices}>
               <EuiCallOut
+                size="s"
                 title={
                   <FormattedMessage
                     id="core.ui.overlays.banner.attentionTitle"
@@ -75,6 +76,7 @@ export class UserBannerService {
                   />
                 }
                 iconType="question"
+                onDismiss={dismiss}
               >
                 <React.Suspense
                   fallback={
@@ -85,13 +87,6 @@ export class UserBannerService {
                 >
                   <ReactMarkdownLazy>{content.trim()}</ReactMarkdownLazy>
                 </React.Suspense>
-
-                <EuiButton color="primary" size="s" onClick={() => banners.remove(id!)}>
-                  <FormattedMessage
-                    id="core.ui.overlays.banner.closeButtonLabel"
-                    defaultMessage="Close"
-                  />
-                </EuiButton>
               </EuiCallOut>
             </KibanaRenderContextProvider>,
             el

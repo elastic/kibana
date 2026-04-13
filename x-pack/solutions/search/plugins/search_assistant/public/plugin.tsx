@@ -62,7 +62,7 @@ export class SearchAssistantPlugin
     }
 
     coreStart.chrome.navControls.registerRight({
-      projectChrome: 'appBar',
+      projectChrome: 'projectHeader',
       mount: (element) => {
         ReactDOM.render(
           <NavControlInitiator

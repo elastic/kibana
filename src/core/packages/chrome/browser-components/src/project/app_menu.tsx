@@ -18,6 +18,7 @@ import {
   type UseEuiTheme,
 } from '@elastic/eui';
 
+import type { ReactNode } from 'react';
 import React, { useLayoutEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
@@ -231,7 +232,15 @@ const AppMenuBarHeaderTabs = ({ tabs }: { tabs: AppMenuHeaderTab[] }) => (
   </EuiTabs>
 );
 
-export const AppMenuBar = React.memo(() => {
+export interface AppMenuBarProps {
+  /**
+   * Global overlay banners (e.g. telemetry notices), shown below the title row and above header tabs.
+   * In project chrome these replace the default `#globalBannerList` placement in the scrollable app body.
+   */
+  globalBanners?: ReactNode;
+}
+
+export const AppMenuBar = React.memo(({ globalBanners }: AppMenuBarProps) => {
   const { euiTheme } = useEuiTheme();
   const updateLayout = useLayoutUpdate();
   const appMenuConfig = useAppMenu();
@@ -481,6 +490,22 @@ export const AppMenuBar = React.memo(() => {
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
+        ) : null}
+        {globalBanners !== undefined ? (
+          <div
+            css={{
+              width: '100%',
+              flexShrink: 0,
+              minWidth: 0,
+              // Avoid a gap when no banners are registered (BannersList renders null).
+              '& #globalBannerList .kbnGlobalBannerList': {
+                marginTop: euiTheme.size.s,
+              },
+            }}
+            data-test-subj="kibanaProjectHeaderGlobalBannersWrap"
+          >
+            {globalBanners}
+          </div>
         ) : null}
         {headerTabs && headerTabs.length > 0 ? (
           <div css={styles.tabsRow}>

@@ -174,10 +174,13 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     const uploadUrl = coreStart.http.basePath.prepend(
       '/app/management/stack/license_management/upload_license'
     );
-    coreStart.overlays.banners.add(
+    const bannerId = coreStart.overlays.banners.add(
       mountExpiredBanner({
         type: license.type!,
         uploadUrl,
+        onDismiss: () => {
+          coreStart.overlays.banners.remove(bannerId);
+        },
         ...coreStart,
       })
     );

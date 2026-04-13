@@ -10,6 +10,7 @@ import React from 'react';
 import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isMac } from '@kbn/shared-ux-utility';
+import { i18nStrings } from '../strings';
 
 export const PopoverFooter: FC = () => {
   return (
@@ -53,17 +54,9 @@ export const PopoverFooter: FC = () => {
                 ),
                 commandDescription: (
                   <EuiCode>
-                    {isMac ? (
-                      <FormattedMessage
-                        id="xpack.globalSearchBar.searchBar.shortcutDescription.macCommandDescription"
-                        defaultMessage="Command + /"
-                      />
-                    ) : (
-                      <FormattedMessage
-                        id="xpack.globalSearchBar.searchBar.shortcutDescription.windowsCommandDescription"
-                        defaultMessage="Control + /"
-                      />
-                    )}
+                    {isMac
+                      ? i18nStrings.keyboardShortcutTooltip.onMac
+                      : i18nStrings.keyboardShortcutTooltip.onNotMac}
                   </EuiCode>
                 ),
               }}

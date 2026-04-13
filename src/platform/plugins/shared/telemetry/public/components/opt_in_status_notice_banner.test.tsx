@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { mockTelemetryConstants, mockTelemetryService } from '../mocks';
@@ -42,25 +42,21 @@ describe('OptInStatusNoticeBanner', () => {
     ).toBe(true);
   });
 
-  it('fires the "onSeenBanner" prop when a link is clicked', () => {
-    const onLinkClick = jest.fn();
+  it('fires the "onSeenBanner" prop when the callout is dismissed', () => {
+    const onDismiss = jest.fn();
     const component = shallowWithIntl(
       <OptInStatusNoticeBanner
-        onSeenBanner={onLinkClick}
+        onSeenBanner={onDismiss}
         http={mockHttp}
         telemetryConstants={telemetryConstants}
         telemetryService={telemetryService}
       />
     );
 
-    const button = component.findWhere((n) => n.type() === EuiButton);
+    const callOut = component.find(EuiCallOut);
+    expect(callOut.prop('onDismiss')).toBe(onDismiss);
+    callOut.prop('onDismiss')!();
 
-    if (!button) {
-      throw new Error(`Couldn't find any buttons in opt-in notice`);
-    }
-
-    button.simulate('click');
-
-    expect(onLinkClick).toHaveBeenCalled();
+    expect(onDismiss).toHaveBeenCalled();
   });
 });

@@ -30,12 +30,15 @@ export const i18nStrings = {
     prefix: i18n.translate('xpack.globalSearchBar.searchBar.shortcutTooltip.description', {
       defaultMessage: 'Keyboard shortcut',
     }),
-    onMac: i18n.translate('xpack.globalSearchBar.searchBar.shortcutTooltip.macCommandDescription', {
-      defaultMessage: 'Cmd + /',
-    }),
+    onMac: i18n.translate(
+      'xpack.globalSearchBar.searchBar.shortcutDescription.macCommandDescription',
+      {
+        defaultMessage: 'Cmd + /',
+      }
+    ),
 
     onNotMac: i18n.translate(
-      'xpack.globalSearchBar.searchBar.shortcutTooltip.windowsCommandDescription',
+      'xpack.globalSearchBar.searchBar.shortcutDescription.windowsCommandDescription',
       {
         defaultMessage: 'Control + /',
       }

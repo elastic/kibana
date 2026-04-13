@@ -15,6 +15,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 interface Props {
   type: string;
   uploadUrl: string;
+  onDismiss: () => void;
 }
 
 const ExpiredBanner: React.FunctionComponent<Props> = (props) => (
@@ -22,6 +23,8 @@ const ExpiredBanner: React.FunctionComponent<Props> = (props) => (
     iconType="question"
     color="warning"
     data-test-subj="licenseExpiredBanner"
+    size="s"
+    onDismiss={props.onDismiss}
     title={
       <FormattedMessage
         id="xpack.licensing.welcomeBanner.licenseIsExpiredTitle"
@@ -49,5 +52,8 @@ const ExpiredBanner: React.FunctionComponent<Props> = (props) => (
 
 type MountProps = Props & Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile'>;
 
-export const mountExpiredBanner = ({ type, uploadUrl, ...startServices }: MountProps) =>
-  toMountPoint(<ExpiredBanner type={type!} uploadUrl={uploadUrl} />, startServices);
+export const mountExpiredBanner = ({ type, uploadUrl, onDismiss, ...startServices }: MountProps) =>
+  toMountPoint(
+    <ExpiredBanner type={type!} uploadUrl={uploadUrl} onDismiss={onDismiss} />,
+    startServices
+  );

@@ -440,6 +440,7 @@ describe('licensing plugin', () => {
         expect.objectContaining({
           type: 'gold',
           uploadUrl: '/app/management/stack/license_management/upload_license',
+          onDismiss: expect.any(Function),
           analytics: expect.any(Object),
           i18n: expect.any(Object),
           theme: expect.any(Object),

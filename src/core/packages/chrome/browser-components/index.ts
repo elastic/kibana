@@ -15,5 +15,6 @@ export { ProjectHeader } from './src/project';
 export { GridLayoutProjectSideNav } from './src/project/sidenav/grid_layout_sidenav';
 export { Sidebar } from './src/sidebar';
 export { AppMenuBar } from './src/project/app_menu';
+export type { AppMenuBarProps } from './src/project/app_menu';
 export { HeaderBreadcrumbsBadges, HeaderTopBanner, ChromelessHeader } from './src/shared';
 export { useHasAppMenu } from './src/shared/chrome_hooks';

@@ -79,7 +79,7 @@ export class ElasticAssistantPublicPlugin
 
     coreStart.chrome.navControls.registerRight({
       order: 1001,
-      projectChrome: 'appBar',
+      projectChrome: 'projectHeader',
       mount: (target) => {
         const startService = startServices();
         return this.mountAIAssistantButton(target, coreStart, startService);

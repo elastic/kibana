@@ -386,7 +386,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         max-inline-size: 280px !important;
         background-color: transparent !important;
         color: ${euiTheme.colors.textSubdued} !important;
-        font-weight: ${euiTheme.font.weight.regular} !important;
+        font-weight: ${euiTheme.font.weight.semiBold} !important;
         border: ${euiTheme.border.width.thin} solid ${euiTheme.components.forms.border} !important;
         /* Figma: frame radius = space xs → 4px */
         border-radius: 4px !important;
@@ -412,6 +412,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        font-weight: ${euiTheme.font.weight.regular} !important;
       }
 
       /* EuiButton base+text uses an overlay ::before for hover/active; remove so background never changes */
@@ -503,8 +504,8 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       &&& {
         background-color: transparent !important;
         box-shadow: none !important;
-        color: ${euiTheme.colors.subduedText} !important;
-        font-weight: ${euiTheme.font.weight.regular} !important;
+        color: ${euiTheme.colors.textParagraph} !important;
+        font-weight: ${euiTheme.font.weight.bold} !important;
         border-radius: 0 !important;
         border: none !important;
         padding-block: 0 !important;

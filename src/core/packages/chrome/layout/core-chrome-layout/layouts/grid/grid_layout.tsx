@@ -106,7 +106,11 @@ export class GridLayout implements LayoutService {
           header = <ClassicHeader />;
         } else {
           header = <ProjectHeader />;
-          applicationTopBar = <AppMenuBar />;
+          applicationTopBar = (
+            <AppMenuBar
+              globalBanners={<div id="globalBannerList">{appBannerComponent}</div>}
+            />
+          );
           navigation = <GridLayoutProjectSideNav />;
         }
       }
@@ -130,7 +134,9 @@ export class GridLayout implements LayoutService {
               <>
                 {!chromeVisible && <ChromelessHeader />}
 
-                <div id="globalBannerList">{appBannerComponent}</div>
+                {!(chromeVisible && chromeStyle === 'project') ? (
+                  <div id="globalBannerList">{appBannerComponent}</div>
+                ) : null}
                 <AppWrapper chromeVisible={chromeVisible}>
                   <div id={APP_FIXED_VIEWPORT_ID} />
                   {appComponent}
