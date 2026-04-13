@@ -16,6 +16,34 @@
 
 import { z } from '@kbn/zod/v4';
 
+/**
+ * One relationship direction: `raw_identifiers` holds ECS-style dotted keys → keyword arrays (aligned with ENTITY_RELATIONSHIP_IDENTIFIER_FIELDS plus entity.id), and canonical target EUIDs under `ids`.
+ */
+export type EntityRelationship = z.infer<typeof EntityRelationship>;
+export const EntityRelationship = z
+  .object({
+    /**
+     * Raw identifier dimensions for graph / resolution hints. Keys match the entity store relationship identifier field set (see ENTITY_RELATIONSHIP_IDENTIFIER_FIELDS in code).
+     */
+    raw_identifiers: z
+      .object({
+        'entity.id': z.array(z.string()).optional(),
+        'host.id': z.array(z.string()).optional(),
+        'host.name': z.array(z.string()).optional(),
+        'user.email': z.array(z.string()).optional(),
+        'user.id': z.array(z.string()).optional(),
+        'user.name': z.array(z.string()).optional(),
+        'service.name': z.array(z.string()).optional(),
+      })
+      .strict()
+      .optional(),
+    /**
+     * Target entity EUIDs for this relationship; used for graph LOOKUP JOIN and DSL filters.
+     */
+    ids: z.array(z.string()).optional(),
+  })
+  .strict();
+
 export type EngineMetadata = z.infer<typeof EngineMetadata>;
 export const EngineMetadata = z
   .object({
@@ -48,6 +76,22 @@ export const EntityField = z
         asset: z.boolean().optional(),
         managed: z.boolean().optional(),
         mfa_enabled: z.boolean().optional(),
+        /**
+         * Storage tier or class assigned to a storage resource (e.g. hot, warm, cold, standard, archive).
+         */
+        storage_class: z.string().optional(),
+        /**
+         * Action-level permissions granted to this entity (not roles or groups).
+         */
+        permissions: z.array(z.string()).optional(),
+        /**
+         * Known redirect URIs or URLs (e.g. OAuth application callbacks).
+         */
+        known_redirects: z.array(z.string()).optional(),
+        /**
+         * OAuth consent restriction (e.g. admin_only, verified_only, unrestricted).
+         */
+        oauth_consent_restriction: z.string().optional(),
       })
       .strict()
       .optional(),
@@ -74,13 +118,14 @@ export const EntityField = z
       .optional(),
     relationships: z
       .object({
-        communicates_with: z.array(z.string()).optional(),
-        depends_on: z.array(z.string()).optional(),
-        owns: z.array(z.string()).optional(),
-        accesses_frequently: z.array(z.string()).optional(),
-        accesses_infrequently: z.array(z.string()).optional(),
-        owns_inferred: z.array(z.string()).optional(),
-        supervises: z.array(z.string()).optional(),
+        administers: EntityRelationship.optional(),
+        communicates_with: EntityRelationship.optional(),
+        depends_on: EntityRelationship.optional(),
+        owns_inferred: EntityRelationship.optional(),
+        accesses_infrequently: EntityRelationship.optional(),
+        accesses_frequently: EntityRelationship.optional(),
+        owns: EntityRelationship.optional(),
+        supervises: EntityRelationship.optional(),
         resolution: z
           .object({
             /**
@@ -153,7 +198,7 @@ export const Asset = z
     model: z.string().optional(),
     vendor: z.string().optional(),
     environment: z.string().optional(),
-    criticality: AssetCriticalityLevel.optional(),
+    criticality: AssetCriticalityLevel.nullable().optional(),
     business_unit: z.string().optional(),
   })
   .strict();
