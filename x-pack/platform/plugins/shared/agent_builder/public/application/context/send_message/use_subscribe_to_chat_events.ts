@@ -73,6 +73,8 @@ export const useSubscribeToChatEvents = ({
         step: createReasoningStep({
           reasoning: event.data.reasoning,
           transient: event.data.transient,
+          tool_call_id: event.data.tool_call_id,
+          tool_call_group_id: event.data.tool_call_group_id,
         }),
       });
       setAgentReasoning(event.data.reasoning);

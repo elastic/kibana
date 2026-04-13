@@ -88,22 +88,22 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
         >
           <EuiFlexItem grow={false}>
             {dashboardContainer && dashboardInternalApi && (
-              <HeaderPage
-                border
-                title={
-                  <DashboardTitle
-                    dashboardContainer={dashboardContainer}
-                    onTitleLoaded={setDashboardTitle}
-                  />
-                }
-                subtitle={
-                  <DashboardToolBar
-                    dashboardContainer={dashboardContainer}
-                    dashboardInternalApi={dashboardInternalApi}
-                    onLoad={onDashboardToolBarLoad}
-                  />
-                }
-              />
+              <>
+                <HeaderPage
+                  border
+                  title={
+                    <DashboardTitle
+                      dashboardContainer={dashboardContainer}
+                      onTitleLoaded={setDashboardTitle}
+                    />
+                  }
+                />
+                <DashboardToolBar
+                  dashboardContainer={dashboardContainer}
+                  dashboardInternalApi={dashboardInternalApi}
+                  onLoad={onDashboardToolBarLoad}
+                />
+              </>
             )}
           </EuiFlexItem>
           {!errorState && (

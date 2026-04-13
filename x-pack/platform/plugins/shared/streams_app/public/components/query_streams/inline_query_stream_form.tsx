@@ -58,6 +58,18 @@ export interface InlineQueryStreamFormProps {
    * Whether the form fields should be read-only
    */
   readOnly?: boolean;
+  /**
+   * Whether the stream name field should be read-only (independent of `readOnly`)
+   */
+  nameReadOnly?: boolean;
+  /**
+   * Custom label for the save button (defaults to "Create query stream")
+   */
+  saveButtonLabel?: string;
+  /**
+   * Callback when delete is clicked. The delete button is only shown when this is provided.
+   */
+  onDelete?: () => void;
 }
 
 /**
@@ -86,6 +98,9 @@ export function InlineQueryStreamForm({
   onQueryChange,
   isSaving = false,
   readOnly = false,
+  saveButtonLabel,
+  onDelete,
+  nameReadOnly = false,
 }: InlineQueryStreamFormProps) {
   const { euiTheme } = useEuiTheme();
   const prefix = `${parentStreamName}.`;
@@ -130,7 +145,7 @@ export function InlineQueryStreamForm({
 
   const handleSave = () => onSave({ name, esqlQuery });
 
-  const canSave = name && name.trim() !== '';
+  const canSave = name && name.trim() !== '' && esqlQuery && esqlQuery.trim() !== '';
 
   return (
     <EuiPanel
@@ -147,7 +162,7 @@ export function InlineQueryStreamForm({
           partitionName={name}
           onChange={handleNameChange}
           prefix={`${parentStreamName}.`}
-          readOnly={readOnly || isSaving}
+          readOnly={nameReadOnly || readOnly || isSaving}
         />
         <QueryStreamForm.ESQLEditor
           isLoading={isSaving}
@@ -159,26 +174,46 @@ export function InlineQueryStreamForm({
 
       <EuiSpacer size="m" />
 
-      <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={onCancel} disabled={isSaving || readOnly}>
-            {i18n.translate('xpack.streams.inlineQueryStreamForm.cancelButton', {
-              defaultMessage: 'Cancel',
-            })}
-          </EuiButtonEmpty>
+          {onDelete && (
+            <EuiButton
+              color="danger"
+              size="s"
+              onClick={onDelete}
+              disabled={isSaving || readOnly}
+              data-test-subj="streamsAppQueryStreamFormDeleteButton"
+            >
+              {i18n.translate('xpack.streams.inlineQueryStreamForm.deleteButton', {
+                defaultMessage: 'Remove',
+              })}
+            </EuiButton>
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            onClick={handleSave}
-            isLoading={isSaving}
-            disabled={!canSave || isSaving || readOnly}
-            data-test-subj="streamsAppQueryStreamFormCreateButton"
-          >
-            {i18n.translate('xpack.streams.inlineQueryStreamForm.createButton', {
-              defaultMessage: 'Create query stream',
-            })}
-          </EuiButton>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={onCancel} disabled={isSaving || readOnly}>
+                {i18n.translate('xpack.streams.inlineQueryStreamForm.cancelButton', {
+                  defaultMessage: 'Cancel',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                onClick={handleSave}
+                isLoading={isSaving}
+                disabled={!canSave || isSaving || readOnly}
+                data-test-subj="streamsAppQueryStreamFormSaveButton"
+              >
+                {saveButtonLabel ??
+                  i18n.translate('xpack.streams.inlineQueryStreamForm.createButton', {
+                    defaultMessage: 'Create query stream',
+                  })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
