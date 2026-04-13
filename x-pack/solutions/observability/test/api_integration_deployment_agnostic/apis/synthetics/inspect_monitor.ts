@@ -278,6 +278,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               fields: {
                 meta: { space_id: 'default' },
                 'monitor.fleet_managed': true,
+                'monitor.interval': 300,
               },
             },
           },
