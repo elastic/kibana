@@ -29,13 +29,18 @@ import { GET_STARTED_URL } from '../../../../urls/navigation';
 import { role } from '../common/role';
 
 // TODO: https://github.com/elastic/kibana/issues/228940 remove @skipInServerlessMKI tag when privileges issue is fixed
-// Remove this test file when we remove the old logic and make securityClassicNavUpdate the default experience for everyone.
-describe.skip(
-  'Rule Migrations - Translated Rules Page',
-  { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
+describe(
+  'Rule Migrations - Translated Rules Page (securityClassicNavUpdate enabled)',
+  {
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
+  },
   () => {
     before(() => {
       role.setup();
+    });
+
+    after(() => {
+      role.teardown();
     });
 
     beforeEach(() => {
@@ -53,12 +58,10 @@ describe.skip(
       role.login();
       visit(`${GET_STARTED_URL}/siem_migrations`);
       selectMigrationConnector();
-      navigateToTranslatedRulesPage(false);
+      navigateToTranslatedRulesPage(true);
     });
 
-    after(() => {
-      role.teardown();
-
+    afterEach(() => {
       cy.task('esArchiverUnload', {
         archiveName: 'siem_migrations/rules',
       });
@@ -67,6 +70,7 @@ describe.skip(
         archiveName: 'siem_migrations/rule_migrations',
       });
     });
+
     it('should be able to see the result of the completed migration', () => {
       cy.get(TRANSLATED_RULES_RESULT_TABLE.ROWS).should('have.length', 6);
       cy.get(TRANSLATED_RULES_RESULT_TABLE.STATUS('partial')).should('have.length', 4);
@@ -92,7 +96,6 @@ describe.skip(
         url: '**/start',
       }).as('reprocessFailedRules');
       openReprocessDialog();
-      // cy.wait(50000);
       reprocessWithoutPrebuiltRulesMatching();
       cy.wait('@reprocessFailedRules')
         .its('request.body.settings')
