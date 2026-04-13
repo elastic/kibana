@@ -16,104 +16,112 @@ import type {
 } from '@kbn/config-schema/src/types';
 import type { ObjectUnionType } from './charts/utils/object_union';
 import { objectUnion } from './charts/utils/object_union';
-import type { MetricState } from './charts/metric';
-import { metricStateSchema } from './charts/metric';
-import type { LegacyMetricState } from './charts/legacy_metric';
-import { legacyMetricStateSchema } from './charts/legacy_metric';
-import type { GaugeState } from './charts/gauge';
-import { gaugeStateSchema } from './charts/gauge';
-import type { HeatmapState } from './charts/heatmap';
-import { heatmapStateSchema } from './charts/heatmap';
-import type { TagcloudState } from './charts/tagcloud';
-import { tagcloudStateSchema } from './charts/tagcloud';
-import type { XYState } from './charts/xy';
-import { xyStateSchema } from './charts/xy';
-import type { RegionMapState } from './charts/region_map';
-import { regionMapStateSchema } from './charts/region_map';
-import type { DatatableState } from './charts/datatable';
-import { datatableStateSchema } from './charts/datatable';
+import type { MetricConfig } from './charts/metric';
+import { metricConfigSchema } from './charts/metric';
+import type { LegacyMetricConfig } from './charts/legacy_metric';
+import { legacyMetricConfigSchema } from './charts/legacy_metric';
+import type { GaugeConfig } from './charts/gauge';
+import { gaugeConfigSchema } from './charts/gauge';
+import type { HeatmapConfig } from './charts/heatmap';
+import { heatmapConfigSchema } from './charts/heatmap';
+import type { TagcloudConfig } from './charts/tagcloud';
+import { tagcloudConfigSchema } from './charts/tagcloud';
+import type { XYConfig } from './charts/xy';
+import { xyConfigSchema } from './charts/xy';
+import type { RegionMapConfig } from './charts/region_map';
+import { regionMapConfigSchema } from './charts/region_map';
+import type { DatatableConfig } from './charts/datatable';
+import { datatableConfigSchema } from './charts/datatable';
 import type {
   LensApiAllMetricOrFormulaOperations,
   LensApiStaticValueOperation,
 } from './metric_ops';
 import type { LensApiBucketOperations } from './bucket_ops';
-import type { MosaicState } from './charts/mosaic';
-import { mosaicStateSchema } from './charts/mosaic';
-import type { TreemapState } from './charts/treemap';
-import { treemapStateSchema } from './charts/treemap';
-import type { WaffleState } from './charts/waffle';
-import { waffleStateSchema } from './charts/waffle';
-import type { PieState } from './charts/pie';
-import { pieStateSchema } from './charts/pie';
+import type { MosaicConfig } from './charts/mosaic';
+import { mosaicConfigSchema } from './charts/mosaic';
+import type { TreemapConfig } from './charts/treemap';
+import { treemapConfigSchema } from './charts/treemap';
+import type { WaffleConfig } from './charts/waffle';
+import { waffleConfigSchema } from './charts/waffle';
+import type { PieConfig } from './charts/pie';
+import { pieConfigSchema } from './charts/pie';
 
 /**
  * We need to break the type inference here to avoid exceeding the ts compiler serialization limit.
  *
  * This requires:
  *  - Casting the schema as any
- *  - Defining the `LensApiState` type from the schema types
- *  - Exporting this value as `Type<LensApiState>`
+ *  - Defining the `LensApiConfig` type from the schema types
+ *  - Exporting this value as `Type<LensApiConfig>`
  */
-export const _lensApiStateSchema: any = objectUnion(
+export const _lensApiConfigSchema: any = objectUnion(
   [
-    ...metricStateSchema.getUnionTypes(),
-    ...legacyMetricStateSchema.getUnionTypes(),
-    ...xyStateSchema.getUnionTypes(),
-    ...gaugeStateSchema.getUnionTypes(),
-    ...heatmapStateSchema.getUnionTypes(),
-    ...tagcloudStateSchema.getUnionTypes(),
-    ...regionMapStateSchema.getUnionTypes(),
-    ...datatableStateSchema.getUnionTypes(),
-    ...pieStateSchema.getUnionTypes(),
-    ...mosaicStateSchema.getUnionTypes(),
-    ...treemapStateSchema.getUnionTypes(),
-    ...waffleStateSchema.getUnionTypes(),
+    ...metricConfigSchema.getUnionTypes(),
+    ...legacyMetricConfigSchema.getUnionTypes(),
+    ...xyConfigSchema.getUnionTypes(),
+    ...gaugeConfigSchema.getUnionTypes(),
+    ...heatmapConfigSchema.getUnionTypes(),
+    ...tagcloudConfigSchema.getUnionTypes(),
+    ...regionMapConfigSchema.getUnionTypes(),
+    ...datatableConfigSchema.getUnionTypes(),
+    ...pieConfigSchema.getUnionTypes(),
+    ...mosaicConfigSchema.getUnionTypes(),
+    ...treemapConfigSchema.getUnionTypes(),
+    ...waffleConfigSchema.getUnionTypes(),
   ],
-  { meta: { id: 'lensApiState', title: 'Visualizations' } }
+  { meta: { id: 'lensApiConfig', title: 'Visualizations' } }
 );
 
-export type LensApiState =
-  | MetricState
-  | LegacyMetricState
-  | GaugeState
-  | XYState
-  | HeatmapState
-  | TagcloudState
-  | RegionMapState
-  | DatatableState
-  | PieState
-  | MosaicState
-  | TreemapState
-  | WaffleState;
+export type LensApiConfig =
+  | MetricConfig
+  | LegacyMetricConfig
+  | GaugeConfig
+  | XYConfig
+  | HeatmapConfig
+  | TagcloudConfig
+  | RegionMapConfig
+  | DatatableConfig
+  | PieConfig
+  | MosaicConfig
+  | TreemapConfig
+  | WaffleConfig;
 
-export const lensApiStateSchema: Type<LensApiState> = _lensApiStateSchema;
+export const lensApiConfigSchema: Type<LensApiConfig> = _lensApiConfigSchema;
 
 /**
- * Extends `lensApiStateSchema` with extra props and options.
+ * Extends `lensApiConfigSchema` with extra props and options.
  *
- * This type will be be union of all `LensApiState` intersected with the new props.
+ * This type will be be union of all `LensApiConfig` intersected with the new props.
  */
-export function extendLensApiStateSchema<T extends Props>(
+export function extendLensApiConfigSchema<T extends Props>(
   props: T,
-  options?: TypeOptions<LensApiState & T>
-): Type<LensApiState & ObjectResultType<T>> {
+  options?: TypeOptions<LensApiConfig & T>
+): Type<LensApiConfig & ObjectResultType<T>> {
   // these types are a bit of a hack mainly due to the tsc compiler limit
   // but baseSchema can extend with any props correctly and return the correct `Type` wrapper
-  const baseSchema = _lensApiStateSchema as ObjectUnionType<[ObjectType<any>], LensApiState & T>;
+  const baseSchema = _lensApiConfigSchema as ObjectUnionType<[ObjectType<any>], LensApiConfig & T>;
   return baseSchema.extends(props, options as any).toType();
 }
 
-export type { MetricState, metricStateSchemaNoESQL } from './charts/metric';
-export type { LegacyMetricState, legacyMetricStateSchemaNoESQL } from './charts/legacy_metric';
-export type { XYState, XYStateNoESQL, XYStateESQL, XYLayer } from './charts/xy';
-export type { GaugeState, gaugeStateSchemaNoESQL } from './charts/gauge';
-export type { HeatmapState, heatmapStateSchemaNoESQL } from './charts/heatmap';
-export type { TagcloudState, TagcloudStateNoESQL, TagcloudStateESQL } from './charts/tagcloud';
-export type { RegionMapState, RegionMapStateNoESQL, RegionMapStateESQL } from './charts/region_map';
-export type { DatatableState, DatatableStateNoESQL, DatatableStateESQL } from './charts/datatable';
-export { tagcloudStateSchema } from './charts/tagcloud';
-export { regionMapStateSchema } from './charts/region_map';
-export { datatableStateSchema } from './charts/datatable';
+export type { MetricConfig, metricConfigSchemaNoESQL } from './charts/metric';
+export type { LegacyMetricConfig, legacyMetricConfigSchemaNoESQL } from './charts/legacy_metric';
+export type { XYConfig, XYConfigNoESQL, XYConfigESQL, XYLayer } from './charts/xy';
+export type { GaugeConfig, gaugeConfigSchemaNoESQL } from './charts/gauge';
+export type { HeatmapConfig, heatmapConfigSchemaNoESQL } from './charts/heatmap';
+export type { TagcloudConfig, TagcloudConfigNoESQL, TagcloudConfigESQL } from './charts/tagcloud';
+export type {
+  RegionMapConfig,
+  RegionMapConfigNoESQL,
+  RegionMapConfigESQL,
+} from './charts/region_map';
+export type {
+  DatatableConfig,
+  DatatableConfigNoESQL,
+  DatatableConfigESQL,
+} from './charts/datatable';
+export { tagcloudConfigSchema } from './charts/tagcloud';
+export { regionMapConfigSchema } from './charts/region_map';
+export { datatableConfigSchema } from './charts/datatable';
 
 export type {
   LensApiFieldMetricOrFormulaOperation,

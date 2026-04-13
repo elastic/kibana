@@ -39,5 +39,5 @@ export type {
   LensBreakdownConfig,
 } from './types';
 
-export { lensApiStateSchema } from './schema';
-export type { LensApiState as LensApiSchemaType } from './schema';
+export { lensApiConfigSchema } from './schema';
+export type { LensApiConfig } from './schema';

@@ -21,7 +21,7 @@ import { mergeAllMetricsWithChartDimensionSchema } from './shared';
 import { builderEnums } from '../enums';
 import { objectUnion } from './utils/object_union';
 
-const gaugeStateSharedOptionsSchema = {
+const gaugeConfigSharedOptionsSchema = {
   shape: schema.maybe(
     schema.oneOf(
       [
@@ -62,7 +62,7 @@ const gaugeStateSharedOptionsSchema = {
   ),
 };
 
-const gaugeStateMetricInnerNoESQLOpsSchema = {
+const gaugeConfigMetricInnerNoESQLOpsSchema = {
   /**
    * Minimum value for the gauge
    * Note: label, format and other visual options are ignored
@@ -80,7 +80,7 @@ const gaugeStateMetricInnerNoESQLOpsSchema = {
   goal: schema.maybe(metricOperationDefinitionSchema),
 };
 
-const gaugeStateMetricInnerESQLOpsSchema = {
+const gaugeConfigMetricInnerESQLOpsSchema = {
   /**
    * Minimum value for the gauge
    */
@@ -95,7 +95,7 @@ const gaugeStateMetricInnerESQLOpsSchema = {
   goal: schema.maybe(esqlColumnSchema),
 };
 
-const gaugeStateMetricOptionsSchema = {
+const gaugeConfigMetricOptionsSchema = {
   /**
    * Title configuration
    */
@@ -147,47 +147,47 @@ const gaugeStateMetricOptionsSchema = {
   ),
 };
 
-export const gaugeStateSchemaNoESQL = schema.object(
+export const gaugeConfigSchemaNoESQL = schema.object(
   {
     type: schema.literal('gauge'),
     ...sharedPanelInfoSchema,
     ...dslOnlyPanelInfoSchema,
     ...layerSettingsSchema,
     ...dataSourceSchema,
-    ...gaugeStateSharedOptionsSchema,
+    ...gaugeConfigSharedOptionsSchema,
     /**
      * Primary value configuration, must define operation.
      */
     metric: mergeAllMetricsWithChartDimensionSchema({
-      ...gaugeStateMetricOptionsSchema,
-      ...gaugeStateMetricInnerNoESQLOpsSchema,
+      ...gaugeConfigMetricOptionsSchema,
+      ...gaugeConfigMetricInnerNoESQLOpsSchema,
     }),
   },
   { meta: { id: 'gaugeNoESQL', title: 'Gauge Chart (DSL)' } }
 );
 
-export const gaugeStateSchemaESQL = schema.object(
+export const gaugeConfigSchemaESQL = schema.object(
   {
     type: schema.literal('gauge'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
     ...dataSourceEsqlTableSchema,
-    ...gaugeStateSharedOptionsSchema,
+    ...gaugeConfigSharedOptionsSchema,
     /**
      * Primary value configuration, must define operation.
      */
     metric: esqlColumnWithFormatSchema.extends({
-      ...gaugeStateMetricOptionsSchema,
-      ...gaugeStateMetricInnerESQLOpsSchema,
+      ...gaugeConfigMetricOptionsSchema,
+      ...gaugeConfigMetricInnerESQLOpsSchema,
     }),
   },
   { meta: { id: 'gaugeESQL', title: 'Gauge Chart (ES|QL)' } }
 );
 
-export const gaugeStateSchema = objectUnion([gaugeStateSchemaNoESQL, gaugeStateSchemaESQL], {
+export const gaugeConfigSchema = objectUnion([gaugeConfigSchemaNoESQL, gaugeConfigSchemaESQL], {
   meta: { id: 'gaugeChart', title: 'Gauge Chart' },
 });
 
-export type GaugeState = TypeOf<typeof gaugeStateSchema>;
-export type GaugeStateNoESQL = TypeOf<typeof gaugeStateSchemaNoESQL>;
-export type GaugeStateESQL = TypeOf<typeof gaugeStateSchemaESQL>;
+export type GaugeConfig = TypeOf<typeof gaugeConfigSchema>;
+export type GaugeConfigNoESQL = TypeOf<typeof gaugeConfigSchemaNoESQL>;
+export type GaugeConfigESQL = TypeOf<typeof gaugeConfigSchemaESQL>;

@@ -27,8 +27,8 @@ import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import {
-  type LensApiState,
-  lensApiStateSchema,
+  type LensApiConfig,
+  lensApiConfigSchema,
 } from '@kbn/lens-embeddable-utils/config_builder/schema';
 import type { StartDependencies } from './plugin';
 
@@ -47,7 +47,7 @@ export const App = (props: {
     props.plugins.data.search.session.start()
   );
 
-  const [lensConfig, setLensConfig] = useState<LensApiState>({
+  const [lensConfig, setLensConfig] = useState<LensApiConfig>({
     type: 'metric',
     title: 'Total Sales',
     data_source: {
@@ -69,7 +69,7 @@ export const App = (props: {
     },
     ignore_global_filters: true,
     sampling: 1,
-  } satisfies LensApiState);
+  } satisfies LensApiConfig);
   const [lensConfigString, setLensConfigString] = useState(JSON.stringify(lensConfig));
 
   const LensComponent = props.plugins.lens.EmbeddableComponent;
@@ -80,7 +80,7 @@ export const App = (props: {
       const configBuilder = new LensConfigBuilder(props.dataViews);
       // eslint-disable-next-line no-console
       console.log('lensConfig', lensConfig);
-      const validatedConfig = lensApiStateSchema.validate(lensConfig);
+      const validatedConfig = lensApiConfigSchema.validate(lensConfig);
       // eslint-disable-next-line no-console
       console.log('validatedConfig', validatedConfig);
       const lensState = configBuilder.fromAPIFormat(validatedConfig);

@@ -55,7 +55,7 @@ const heatmapSortPredicateSchema = schema.oneOf([schema.literal('asc'), schema.l
   meta: { description: 'Axis sort order; omit or use undefined for no sorting' },
 });
 
-const heatmapSharedStateSchema = {
+const heatmapSharedConfigSchema = {
   type: schema.literal('heatmap'),
   legend: schema.maybe(
     schema.object(legendSchemaProps, {
@@ -133,47 +133,50 @@ const heatmapSharedStateSchema = {
   ),
 };
 
-const heatmapAxesStateSchemaProps = {
+const heatmapAxesConfigSchemaProps = {
   x: bucketOperationDefinitionSchema,
   y: schema.maybe(bucketOperationDefinitionSchema),
 };
 
-const heatmapAxesStateESQLSchemaProps = {
+const heatmapAxesConfigESQLSchemaProps = {
   x: esqlColumnWithFormatSchema,
   y: schema.maybe(esqlColumnWithFormatSchema),
 };
 
-const heatmapStateMetricOptionsSchemaProps = {
+const heatmapConfigMetricOptionsSchemaProps = {
   color: schema.maybe(colorByValueSchema),
 };
 
-export const heatmapStateSchemaNoESQL = schema.object(
+export const heatmapConfigSchemaNoESQL = schema.object(
   {
-    ...heatmapSharedStateSchema,
-    ...heatmapAxesStateSchemaProps,
+    ...heatmapSharedConfigSchema,
+    ...heatmapAxesConfigSchemaProps,
     ...dslOnlyPanelInfoSchema,
     ...dataSourceSchema,
     metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
-      heatmapStateMetricOptionsSchemaProps
+      heatmapConfigMetricOptionsSchemaProps
     ),
   },
   { meta: { id: 'heatmapNoESQL', title: 'Heatmap Chart (DSL)' } }
 );
 
-export const heatmapStateSchemaESQL = schema.object(
+export const heatmapConfigSchemaESQL = schema.object(
   {
-    ...heatmapSharedStateSchema,
-    ...heatmapAxesStateESQLSchemaProps,
+    ...heatmapSharedConfigSchema,
+    ...heatmapAxesConfigESQLSchemaProps,
     ...dataSourceEsqlTableSchema,
-    metric: esqlColumnWithFormatSchema.extends(heatmapStateMetricOptionsSchemaProps),
+    metric: esqlColumnWithFormatSchema.extends(heatmapConfigMetricOptionsSchemaProps),
   },
   { meta: { id: 'heatmapESQL', title: 'Heatmap Chart (ES|QL)' } }
 );
 
-export const heatmapStateSchema = objectUnion([heatmapStateSchemaNoESQL, heatmapStateSchemaESQL], {
-  meta: { id: 'heatmapChart', title: 'Heatmap Chart' },
-});
+export const heatmapConfigSchema = objectUnion(
+  [heatmapConfigSchemaNoESQL, heatmapConfigSchemaESQL],
+  {
+    meta: { id: 'heatmapChart', title: 'Heatmap Chart' },
+  }
+);
 
-export type HeatmapState = TypeOf<typeof heatmapStateSchema>;
-export type HeatmapStateNoESQL = TypeOf<typeof heatmapStateSchemaNoESQL>;
-export type HeatmapStateESQL = TypeOf<typeof heatmapStateSchemaESQL>;
+export type HeatmapConfig = TypeOf<typeof heatmapConfigSchema>;
+export type HeatmapConfigNoESQL = TypeOf<typeof heatmapConfigSchemaNoESQL>;
+export type HeatmapConfigESQL = TypeOf<typeof heatmapConfigSchemaESQL>;

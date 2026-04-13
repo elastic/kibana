@@ -23,7 +23,7 @@ import type {
 import { DEFAULT_LAYER_ID } from '../../../constants';
 import { legendSizeCompat } from '../legend_sizes';
 import { getSharedChartAPIToLensState, stripUndefined } from '../utils';
-import type { HeatmapState } from '../../../schema';
+import type { HeatmapConfig } from '../../../schema';
 import { fromColorByValueAPIToLensState } from '../../coloring';
 import {
   addLayerColumn,
@@ -32,7 +32,7 @@ import {
   generateLayer,
   getAdhocDataviews,
 } from '../../utils';
-import type { HeatmapStateESQL, HeatmapStateNoESQL } from '../../../schema/charts/heatmap';
+import type { HeatmapConfigESQL, HeatmapConfigNoESQL } from '../../../schema/charts/heatmap';
 import { fromMetricAPItoLensState } from '../../columns/metric';
 import { fromBucketLensApiToLensState } from '../../columns/buckets';
 import type { LensApiBucketOperations } from '../../../schema/bucket_ops';
@@ -45,7 +45,7 @@ function getAccessorName(type: 'x' | 'y' | 'value') {
   return `${ACCESSOR}_${type}`;
 }
 
-function buildVisualizationState(config: HeatmapState): HeatmapVisualizationState {
+function buildVisualizationState(config: HeatmapConfig): HeatmapVisualizationState {
   const layer = config;
   const valueAccessor = getAccessorName('value');
   const basePalette = layer.metric.color && fromColorByValueAPIToLensState(layer.metric.color);
@@ -92,7 +92,7 @@ function buildVisualizationState(config: HeatmapState): HeatmapVisualizationStat
   };
 }
 
-function buildFormBasedLayer(layer: HeatmapStateNoESQL): FormBasedPersistedState['layers'] {
+function buildFormBasedLayer(layer: HeatmapConfigNoESQL): FormBasedPersistedState['layers'] {
   const metricColumns = fromMetricAPItoLensState(layer.metric);
 
   const layers: Record<string, PersistedIndexPatternLayer> = generateLayer(DEFAULT_LAYER_ID, layer);
@@ -122,7 +122,7 @@ function buildFormBasedLayer(layer: HeatmapStateNoESQL): FormBasedPersistedState
   return layers;
 }
 
-function getValueColumns(layer: HeatmapStateESQL) {
+function getValueColumns(layer: HeatmapConfigESQL) {
   return [
     getValueColumn(getAccessorName('value'), layer.metric, 'number'),
     ...(layer.x ? [getValueColumn(getAccessorName('x'), layer.x)] : []),
@@ -139,8 +139,8 @@ type HeatmapAttributesWithoutFiltersAndQuery = Omit<HeatmapAttributes, 'state'> 
   state: Omit<HeatmapAttributes['state'], 'filters' | 'query'>;
 };
 
-export function fromAPItoLensState(config: HeatmapState): HeatmapAttributesWithoutFiltersAndQuery {
-  const _buildDataLayer = (cfg: unknown) => buildFormBasedLayer(cfg as HeatmapStateNoESQL);
+export function fromAPItoLensState(config: HeatmapConfig): HeatmapAttributesWithoutFiltersAndQuery {
+  const _buildDataLayer = (cfg: unknown) => buildFormBasedLayer(cfg as HeatmapConfigNoESQL);
 
   const { layers, usedDataviews } = buildDatasourceStates(config, _buildDataLayer, getValueColumns);
 

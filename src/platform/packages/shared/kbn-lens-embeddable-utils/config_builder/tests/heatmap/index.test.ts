@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { heatmapStateSchema } from '../../schema/charts/heatmap';
+import { heatmapConfigSchema } from '../../schema/charts/heatmap';
 import { validateConverter } from '../validate';
 import * as dslMocks from './dsl.mocks';
 import * as esqlMocks from './esql.mocks';
@@ -15,41 +15,41 @@ import * as esqlMocks from './esql.mocks';
 describe('Heatmap', () => {
   describe('DSL', () => {
     it('should convert a simple heatmap', () => {
-      validateConverter(dslMocks.simple, heatmapStateSchema);
+      validateConverter(dslMocks.simple, heatmapConfigSchema);
     });
 
     it('should convert a heatmap with x and y axes', () => {
-      validateConverter(dslMocks.withXAndYAxes, heatmapStateSchema);
+      validateConverter(dslMocks.withXAndYAxes, heatmapConfigSchema);
     });
 
     it('should convert a heatmap with dynamic colors', () => {
-      validateConverter(dslMocks.withDynamicColors, heatmapStateSchema);
+      validateConverter(dslMocks.withDynamicColors, heatmapConfigSchema);
     });
 
     it('should convert a heatmap with sort predicates', () => {
-      validateConverter(dslMocks.withSortPredicates, heatmapStateSchema);
+      validateConverter(dslMocks.withSortPredicates, heatmapConfigSchema);
     });
 
     it('should convert a default color by value palette', () => {
-      validateConverter(dslMocks.defaultColorByValueAttributes, heatmapStateSchema);
+      validateConverter(dslMocks.defaultColorByValueAttributes, heatmapConfigSchema);
     });
 
     it('should convert a selector color by value palette', () => {
-      validateConverter(dslMocks.selectorColorByValueAttributes, heatmapStateSchema);
+      validateConverter(dslMocks.selectorColorByValueAttributes, heatmapConfigSchema);
     });
   });
 
   describe('ESQL', () => {
     it('should convert a simple heatmap', () => {
-      validateConverter(esqlMocks.simple, heatmapStateSchema);
+      validateConverter(esqlMocks.simple, heatmapConfigSchema);
     });
 
     it('should convert a heatmap with x and y axes', () => {
-      validateConverter(esqlMocks.withXAndYAxes, heatmapStateSchema);
+      validateConverter(esqlMocks.withXAndYAxes, heatmapConfigSchema);
     });
 
     it('should convert a heatmap with sort predicates', () => {
-      validateConverter(esqlMocks.withSortPredicates, heatmapStateSchema);
+      validateConverter(esqlMocks.withSortPredicates, heatmapConfigSchema);
     });
   });
 });

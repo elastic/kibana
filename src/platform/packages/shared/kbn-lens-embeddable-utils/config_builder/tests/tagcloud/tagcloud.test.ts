@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { tagcloudStateSchema } from '../../schema';
+import { tagcloudConfigSchema } from '../../schema';
 import { validateAPIConverter, validateConverter } from '../validate';
 import {
   basicTagcloudWithAdHocDataView,
@@ -26,38 +26,38 @@ import {
 describe('Tagcloud', () => {
   describe('validateConverter', () => {
     it('should convert a simple tag cloud', () => {
-      validateConverter(tagcloudAttributes, tagcloudStateSchema);
+      validateConverter(tagcloudAttributes, tagcloudConfigSchema);
     });
     it('should convert a tag cloud with full config', () => {
-      validateConverter(tagcloudAttributesWithFullConfig, tagcloudStateSchema);
+      validateConverter(tagcloudAttributesWithFullConfig, tagcloudConfigSchema);
     });
     it('should convert an esql tagcloud', () => {
-      validateConverter(tagcloudESQLAttributes, tagcloudStateSchema);
+      validateConverter(tagcloudESQLAttributes, tagcloudConfigSchema);
     });
   });
   describe('validateAPIConverter', () => {
     it('should convert a basic tagcloud chart with ad hoc dataView', () => {
-      validateAPIConverter(basicTagcloudWithAdHocDataView, tagcloudStateSchema);
+      validateAPIConverter(basicTagcloudWithAdHocDataView, tagcloudConfigSchema);
     });
 
     it('should convert a basic tagcloud chart with dataView', () => {
-      validateAPIConverter(basicTagcloudWithDataView, tagcloudStateSchema);
+      validateAPIConverter(basicTagcloudWithDataView, tagcloudConfigSchema);
     });
 
     it('should convert a ESQL-based tagcloud chart', () => {
-      validateAPIConverter(basicEsqlTagcloud, tagcloudStateSchema);
+      validateAPIConverter(basicEsqlTagcloud, tagcloudConfigSchema);
     });
 
     it('should convert a comprehensive tagcloud chart with ad hoc data view', () => {
-      validateAPIConverter(comprehensiveTagcloudWithAdHocDataView, tagcloudStateSchema);
+      validateAPIConverter(comprehensiveTagcloudWithAdHocDataView, tagcloudConfigSchema);
     });
 
     it('should convert a comprehensive tagcloud chart with data view', () => {
-      validateAPIConverter(comprehensiveTagcloudWithDataView, tagcloudStateSchema);
+      validateAPIConverter(comprehensiveTagcloudWithDataView, tagcloudConfigSchema);
     });
 
     it('should convert a comprehensive ESQL-based tagcloud chart', () => {
-      validateAPIConverter(comprehensiveEsqlTagcloud, tagcloudStateSchema);
+      validateAPIConverter(comprehensiveEsqlTagcloud, tagcloudConfigSchema);
     });
   });
 });

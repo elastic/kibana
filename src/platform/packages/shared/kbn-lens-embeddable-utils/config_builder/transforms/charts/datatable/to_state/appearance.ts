@@ -9,12 +9,12 @@
 import type { DatatableVisualizationState } from '@kbn/lens-common';
 import { LENS_DATAGRID_DENSITY } from '@kbn/lens-common';
 import { getTransposeId, TRANSPOSE_SEPARATOR } from '@kbn/transpose-utils';
-import type { DatatableState } from '../../../../schema';
+import type { DatatableConfig } from '../../../../schema';
 import { stripUndefined } from '../../utils';
 import { getAccessorName } from '../helpers';
 import { METRIC_ACCESSOR_PREFIX, ROW_ACCESSOR_PREFIX } from '../constants';
 
-function getSortingColumnId(sortBy: NonNullable<DatatableState['sort_by']>): string | undefined {
+function getSortingColumnId(sortBy: NonNullable<DatatableConfig['sort_by']>): string | undefined {
   switch (sortBy.column_type) {
     case 'metric':
       return getAccessorName(METRIC_ACCESSOR_PREFIX, sortBy.index);
@@ -29,7 +29,7 @@ function getSortingColumnId(sortBy: NonNullable<DatatableState['sort_by']>): str
   }
 }
 
-function buildSortingState(config: DatatableState): Pick<DatatableVisualizationState, 'sorting'> {
+function buildSortingState(config: DatatableConfig): Pick<DatatableVisualizationState, 'sorting'> {
   if (!config.sort_by) {
     return {};
   }
@@ -48,7 +48,7 @@ function buildSortingState(config: DatatableState): Pick<DatatableVisualizationS
 }
 
 function buildDensityState(
-  config: DatatableState
+  config: DatatableConfig
 ): Pick<
   DatatableVisualizationState,
   'headerRowHeight' | 'headerRowHeightLines' | 'rowHeight' | 'rowHeightLines' | 'density'
@@ -80,7 +80,7 @@ function buildDensityState(
   });
 }
 
-function buildPagingState(config: DatatableState): Pick<DatatableVisualizationState, 'paging'> {
+function buildPagingState(config: DatatableConfig): Pick<DatatableVisualizationState, 'paging'> {
   if (!config.paging) {
     return {};
   }
@@ -88,7 +88,7 @@ function buildPagingState(config: DatatableState): Pick<DatatableVisualizationSt
 }
 
 function buildShowRowNumbers(
-  config: DatatableState
+  config: DatatableConfig
 ): Pick<DatatableVisualizationState, 'showRowNumbers'> {
   if (config.row_numbers == null) {
     return {};
@@ -97,7 +97,7 @@ function buildShowRowNumbers(
 }
 
 export function buildAppearanceState(
-  config: DatatableState
+  config: DatatableConfig
 ): Pick<
   DatatableVisualizationState,
   | 'headerRowHeight'

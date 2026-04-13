@@ -21,14 +21,14 @@ import {
 } from './shared';
 import { objectUnion } from './utils/object_union';
 
-const tagcloudStateTagsByOptionsSchema = {
+const tagcloudConfigTagsByOptionsSchema = {
   /**
    * Color configuration
    */
   color: schema.maybe(colorMappingSchema),
 };
 
-const tagcloudStateSharedOptionsSchema = {
+const tagcloudConfigSharedOptionsSchema = {
   orientation: schema.maybe(
     builderEnums.orientation({
       meta: { description: 'Orientation of the tagcloud' },
@@ -73,14 +73,14 @@ const tagcloudStateSharedOptionsSchema = {
   ),
 };
 
-export const tagcloudStateSchemaNoESQL = schema.object(
+export const tagcloudConfigSchemaNoESQL = schema.object(
   {
     type: schema.literal('tag_cloud'),
     ...sharedPanelInfoSchema,
     ...dslOnlyPanelInfoSchema,
     ...layerSettingsSchema,
     ...dataSourceSchema,
-    ...tagcloudStateSharedOptionsSchema,
+    ...tagcloudConfigSharedOptionsSchema,
     /**
      * Primary value configuration, must define operation.
      */
@@ -88,18 +88,18 @@ export const tagcloudStateSchemaNoESQL = schema.object(
     /**
      * Configure how to break down to tags
      */
-    tag_by: mergeAllBucketsWithChartDimensionSchema(tagcloudStateTagsByOptionsSchema),
+    tag_by: mergeAllBucketsWithChartDimensionSchema(tagcloudConfigTagsByOptionsSchema),
   },
   { meta: { id: 'tagcloudNoESQL', title: 'Tag Cloud Chart (DSL)' } }
 );
 
-export const tagcloudStateSchemaESQL = schema.object(
+export const tagcloudConfigSchemaESQL = schema.object(
   {
     type: schema.literal('tag_cloud'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
     ...dataSourceEsqlTableSchema,
-    ...tagcloudStateSharedOptionsSchema,
+    ...tagcloudConfigSharedOptionsSchema,
     /**
      * Primary value configuration, must define operation.
      */
@@ -107,18 +107,18 @@ export const tagcloudStateSchemaESQL = schema.object(
     /**
      * Configure how to break down the metric (e.g. show one metric per term).
      */
-    tag_by: esqlColumnWithFormatSchema.extends(tagcloudStateTagsByOptionsSchema),
+    tag_by: esqlColumnWithFormatSchema.extends(tagcloudConfigTagsByOptionsSchema),
   },
   { meta: { id: 'tagcloudESQL', title: 'Tag Cloud Chart (ES|QL)' } }
 );
 
-export const tagcloudStateSchema = objectUnion(
-  [tagcloudStateSchemaNoESQL, tagcloudStateSchemaESQL],
+export const tagcloudConfigSchema = objectUnion(
+  [tagcloudConfigSchemaNoESQL, tagcloudConfigSchemaESQL],
   {
     meta: { id: 'tagcloudChart', title: 'Tag Cloud Chart' },
   }
 );
 
-export type TagcloudState = TypeOf<typeof tagcloudStateSchema>;
-export type TagcloudStateNoESQL = TypeOf<typeof tagcloudStateSchemaNoESQL>;
-export type TagcloudStateESQL = TypeOf<typeof tagcloudStateSchemaESQL>;
+export type TagcloudConfig = TypeOf<typeof tagcloudConfigSchema>;
+export type TagcloudConfigNoESQL = TypeOf<typeof tagcloudConfigSchemaNoESQL>;
+export type TagcloudConfigESQL = TypeOf<typeof tagcloudConfigSchemaESQL>;

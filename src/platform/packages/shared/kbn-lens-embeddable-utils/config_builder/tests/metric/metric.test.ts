@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { metricStateSchema } from '../../schema/charts/metric';
+import { metricConfigSchema } from '../../schema/charts/metric';
 import { dynamicColorsMetricAttributes } from './dynamic_colors.mock';
 import { validateAPIConverter, validateConverter } from '../validate';
 import {
@@ -29,52 +29,52 @@ import {
 describe('Metric', () => {
   describe('validateConverter', () => {
     it('should convert a simple metric', () => {
-      validateConverter(simpleMetricAttributes, metricStateSchema);
+      validateConverter(simpleMetricAttributes, metricConfigSchema);
     });
 
     it('should convert a complex metric', () => {
-      validateConverter(complexMetricAttributes, metricStateSchema);
+      validateConverter(complexMetricAttributes, metricConfigSchema);
     });
 
     it('should convert a breakdown-by metric', () => {
-      validateConverter(breakdownMetricAttributes, metricStateSchema);
+      validateConverter(breakdownMetricAttributes, metricConfigSchema);
     });
 
     it('should convert a default color by value palette', () => {
-      validateConverter(defaultColorByValueAttributes, metricStateSchema);
+      validateConverter(defaultColorByValueAttributes, metricConfigSchema);
     });
 
     it('should convert a selector color by value palette', () => {
-      validateConverter(selectorColorByValueAttributes, metricStateSchema);
+      validateConverter(selectorColorByValueAttributes, metricConfigSchema);
     });
   });
   describe('validateAPIConverter', () => {
     it('should convert a simple metric', () => {
-      validateAPIConverter(simpleMetricAPIAttributes, metricStateSchema);
+      validateAPIConverter(simpleMetricAPIAttributes, metricConfigSchema);
     });
 
     it('should convert a complex metric', () => {
-      validateAPIConverter(complexMetricAPIAttributes, metricStateSchema);
+      validateAPIConverter(complexMetricAPIAttributes, metricConfigSchema);
     });
 
     it('should convert a breakdown-by metric', () => {
-      validateAPIConverter(breakdownMetricAPIAttributes, metricStateSchema);
+      validateAPIConverter(breakdownMetricAPIAttributes, metricConfigSchema);
     });
 
     it('should convert a complex ESQL metric chart', () => {
-      validateAPIConverter(complexESQLMetricAPIAttributes, metricStateSchema);
+      validateAPIConverter(complexESQLMetricAPIAttributes, metricConfigSchema);
     });
 
     it('should convert a metric with a terms agg ranked by secondary metric', () => {
-      validateAPIConverter(metricAPIWithTermsRankedBySecondary, metricStateSchema);
+      validateAPIConverter(metricAPIWithTermsRankedBySecondary, metricConfigSchema);
     });
   });
 
   it('should convert a breakdown-by metric with formula reference columns and rank_by in the terms bucket operation', () => {
-    validateConverter(breakdownMetricWithFormulaRefColumnsAttributes, metricStateSchema);
+    validateConverter(breakdownMetricWithFormulaRefColumnsAttributes, metricConfigSchema);
   });
 
   it('should convert a dynamic colors metric', () => {
-    validateConverter(dynamicColorsMetricAttributes, metricStateSchema);
+    validateConverter(dynamicColorsMetricAttributes, metricConfigSchema);
   });
 });

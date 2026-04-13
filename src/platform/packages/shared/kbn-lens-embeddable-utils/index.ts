@@ -40,5 +40,5 @@ export type {
 } from './config_builder';
 export { isLensESQLConfig } from './config_builder/utils';
 
-export { lensApiStateSchema } from './config_builder';
-export type { LensApiSchemaType } from './config_builder';
+export { lensApiConfigSchema } from './config_builder';
+export type { LensApiConfig } from './config_builder';

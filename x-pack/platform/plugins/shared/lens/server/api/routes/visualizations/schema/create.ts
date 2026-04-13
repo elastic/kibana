@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { lensApiStateSchema } from '@kbn/lens-embeddable-utils/config_builder';
+import { lensApiConfigSchema } from '@kbn/lens-embeddable-utils/config_builder';
 
 import { lensCMCreateOptionsSchema } from '../../../../content_management';
 import { pickFromObjectSchema } from '../../../../utils';
@@ -19,6 +19,6 @@ export const lensCreateRequestQuerySchema = schema.object(
   { unknowns: 'forbid' }
 );
 
-export const lensCreateRequestBodySchema = lensApiStateSchema;
+export const lensCreateRequestBodySchema = lensApiConfigSchema;
 
 export const lensCreateResponseBodySchema = lensResponseItemSchema;

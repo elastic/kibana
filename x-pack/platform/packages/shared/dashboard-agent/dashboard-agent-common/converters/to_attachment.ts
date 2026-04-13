@@ -12,7 +12,7 @@ import type {
 } from '@kbn/dashboard-plugin/server';
 import {
   LensConfigBuilder,
-  type LensApiSchemaType,
+  type LensApiConfig,
   type LensAttributes,
 } from '@kbn/lens-embeddable-utils/config_builder';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
@@ -21,10 +21,10 @@ import type { DashboardAttachmentData } from '../types';
 
 /**
  * Type guard to check if attributes are in LensAttributes format (internal).
- * LensAttributes have a `visualizationType` property, while LensApiSchemaType does not.
+ * LensAttributes have a `visualizationType` property, while LensApiConfig does not.
  */
 export const isLensAttributes = (
-  attributes: LensApiSchemaType | LensAttributes | undefined
+  attributes: LensApiConfig | LensAttributes | undefined
 ): attributes is LensAttributes => {
   return Boolean(attributes && typeof attributes === 'object' && 'visualizationType' in attributes);
 };
@@ -35,9 +35,7 @@ export const isLensAttributes = (
  */
 export const toAttachmentPanel = (panel: DashboardPanel): AttachmentPanel | undefined => {
   if (panel.type === LENS_EMBEDDABLE_TYPE) {
-    const panelConfig = panel.config as
-      | { attributes?: LensApiSchemaType | LensAttributes }
-      | undefined;
+    const panelConfig = panel.config as { attributes?: LensApiConfig | LensAttributes } | undefined;
     const attributes = panelConfig?.attributes;
 
     if (isLensAttributes(attributes)) {

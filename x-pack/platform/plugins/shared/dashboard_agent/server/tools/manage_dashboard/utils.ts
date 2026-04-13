@@ -11,7 +11,7 @@ import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/dashboard-ag
 import { DASHBOARD_ATTACHMENT_TYPE, isDashboardAttachment } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
 import { type AttachmentVersion, getLatestVersion } from '@kbn/agent-builder-common/attachments';
-import type { LensApiSchemaType } from '@kbn/lens-embeddable-utils';
+import type { LensApiConfig } from '@kbn/lens-embeddable-utils';
 import { z } from '@kbn/zod/v4';
 import { toEmbeddablePanel, type VisualizationContent } from '@kbn/dashboard-agent-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
@@ -46,7 +46,7 @@ const resolvePanelsFromVisualizationAttachment = (data: unknown): VisualizationC
   return [
     {
       type: LENS_EMBEDDABLE_TYPE,
-      config: visualization as LensApiSchemaType,
+      config: visualization as LensApiConfig,
     },
   ];
 };

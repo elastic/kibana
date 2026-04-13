@@ -28,13 +28,13 @@ import {
   operationFromColumn,
 } from '../utils';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
-import type { LensApiState, LegacyMetricState } from '../../schema';
+import type { LensApiConfig, LegacyMetricConfig } from '../../schema';
 import { fromMetricAPItoLensState } from '../columns/metric';
 import type { DeepMutable, DeepPartial } from '../utils';
 import { generateLayer } from '../utils';
 import type {
-  LegacyMetricStateESQL,
-  LegacyMetricStateNoESQL,
+  LegacyMetricConfigESQL,
+  LegacyMetricConfigNoESQL,
 } from '../../schema/charts/legacy_metric';
 import {
   getSharedChartLensStateToAPI,
@@ -51,7 +51,7 @@ import { isEsqlTableTypeDataSource } from '../../utils';
 
 const ACCESSOR = 'legacy_metric_accessor';
 
-function buildVisualizationState(config: LegacyMetricState): LegacyMetricVisualizationState {
+function buildVisualizationState(config: LegacyMetricConfig): LegacyMetricVisualizationState {
   const layer = config;
 
   return {
@@ -77,7 +77,7 @@ function reverseBuildVisualizationState(
   adHocDataViews: Record<string, DataViewSpec>,
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
-): LegacyMetricState {
+): LegacyMetricConfig {
   if (visualization.accessor == null) {
     throw new Error('Metric accessor is missing in the visualization state');
   }
@@ -94,16 +94,16 @@ function reverseBuildVisualizationState(
     throw new Error('Unsupported DataSource type');
   }
 
-  const props: DeepPartial<DeepMutable<LegacyMetricState>> = {
+  const props: DeepPartial<DeepMutable<LegacyMetricConfig>> = {
     ...generateApiLayer(layer),
     metric: isEsqlTableTypeDataSource(dataSource)
       ? getValueApiColumn(visualization.accessor, layer as TextBasedLayer)
       : operationFromColumn(visualization.accessor, layer as FormBasedLayer),
-  } as LegacyMetricState;
+  } as LegacyMetricConfig;
 
   if (props.metric) {
     if (visualization.size) {
-      props.metric.size = visualization.size as LegacyMetricState['metric']['size'];
+      props.metric.size = visualization.size as LegacyMetricConfig['metric']['size'];
     }
 
     if (visualization.titlePosition || visualization.textAlign) {
@@ -132,12 +132,12 @@ function reverseBuildVisualizationState(
 
   return {
     type: 'legacy_metric',
-    data_source: dataSource satisfies LegacyMetricState['data_source'],
+    data_source: dataSource satisfies LegacyMetricConfig['data_source'],
     ...props,
-  } as LegacyMetricState;
+  } as LegacyMetricConfig;
 }
 
-function buildFormBasedLayer(layer: LegacyMetricStateNoESQL): FormBasedPersistedState['layers'] {
+function buildFormBasedLayer(layer: LegacyMetricConfigNoESQL): FormBasedPersistedState['layers'] {
   const columns = fromMetricAPItoLensState(layer.metric);
 
   const layers: Record<string, PersistedIndexPatternLayer> = generateLayer(DEFAULT_LAYER_ID, layer);
@@ -148,7 +148,7 @@ function buildFormBasedLayer(layer: LegacyMetricStateNoESQL): FormBasedPersisted
   return layers;
 }
 
-function getValueColumns(layer: LegacyMetricStateESQL) {
+function getValueColumns(layer: LegacyMetricConfigESQL) {
   return [getValueColumn(ACCESSOR, layer.metric, 'number')];
 }
 
@@ -162,10 +162,10 @@ type LegacyMetricAttributesWithoutFiltersAndQuery = Omit<LegacyMetricAttributes,
 };
 
 export function fromAPItoLensState(
-  config: LegacyMetricState
+  config: LegacyMetricConfig
 ): LegacyMetricAttributesWithoutFiltersAndQuery {
   const _buildDataLayer = (cfg: unknown, i: number) =>
-    buildFormBasedLayer(cfg as LegacyMetricStateNoESQL);
+    buildFormBasedLayer(cfg as LegacyMetricConfigNoESQL);
 
   const { layers, usedDataviews } = buildDatasourceStates(config, _buildDataLayer, getValueColumns);
 
@@ -194,7 +194,7 @@ export function fromAPItoLensState(
 
 export function fromLensStateToAPI(
   config: LensAttributes
-): Extract<LensApiState, { type: 'legacy_metric' }> {
+): Extract<LensApiConfig, { type: 'legacy_metric' }> {
   const { state } = config;
   const visualization = state.visualization as LegacyMetricVisualizationState;
   const layers = getDatasourceLayers(state);
