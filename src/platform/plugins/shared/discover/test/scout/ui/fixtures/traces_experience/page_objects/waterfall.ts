@@ -34,7 +34,7 @@ export function getWaterfallItem(scope: Locator, name: string): WaterfallItem {
 }
 
 export function createWaterfall(page: ScoutPage): Waterfall {
-  const container = page.testSubj.locator('waterfall');
+  const container = page.testSubj.locator('waterfallContainer');
   return {
     container,
     sizeWarning: page.testSubj.locator('waterfallSizeWarning'),
