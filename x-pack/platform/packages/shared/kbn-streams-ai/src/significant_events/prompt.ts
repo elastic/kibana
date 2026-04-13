@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { createPrompt } from '@kbn/inference-common';
+import { createPrompt, type ToolDefinition } from '@kbn/inference-common';
 import significantEventsSystemPrompt from './system_prompt.text';
 import significantEventsUserPrompt from './user_prompt.text';
 import {
@@ -20,7 +20,13 @@ import { SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES } from './tools/features_tool';
 
 export { significantEventsSystemPrompt as significantEventsPrompt };
 
-export function createGenerateSignificantEventsPrompt({ systemPrompt }: { systemPrompt: string }) {
+export function createGenerateSignificantEventsPrompt({
+  systemPrompt,
+  additionalTools,
+}: {
+  systemPrompt: string;
+  additionalTools?: Record<string, ToolDefinition>;
+}) {
   return createPrompt({
     name: 'generate_significant_events',
     input: z.object({
@@ -117,6 +123,7 @@ export function createGenerateSignificantEventsPrompt({ systemPrompt }: { system
             required: ['queries'],
           },
         },
+        ...(additionalTools ?? {}),
       } as const,
     })
     .get();
