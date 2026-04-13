@@ -57,7 +57,7 @@ export const DeprecatedRulesCallout: React.FC<DeprecatedRulesCalloutProps> = ({
           ))}
         </EuiFlexGroup>
       </EuiCallOut>
-      <EuiSpacer size="l" />
+      <EuiSpacer size="s" />
     </>
   );
 };
