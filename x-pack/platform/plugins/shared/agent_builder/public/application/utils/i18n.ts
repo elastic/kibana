@@ -12,6 +12,18 @@ export const labels = {
     optional: i18n.translate('xpack.agentBuilder.common.optional', {
       defaultMessage: 'Optional',
     }),
+    markdownViewModeLegend: i18n.translate('xpack.agentBuilder.common.markdownViewModeLegend', {
+      defaultMessage: 'Markdown view mode',
+    }),
+    markdownViewRenderedLabel: i18n.translate(
+      'xpack.agentBuilder.common.markdownViewRenderedLabel',
+      {
+        defaultMessage: 'Rendered',
+      }
+    ),
+    markdownViewRawLabel: i18n.translate('xpack.agentBuilder.common.markdownViewRawLabel', {
+      defaultMessage: 'Raw',
+    }),
   },
   conversations: {
     title: i18n.translate('xpack.agentBuilder.conversations.title', {
@@ -888,24 +900,6 @@ export const labels = {
         defaultMessage: 'Instructions',
       }
     ),
-    instructionsViewModeLegend: i18n.translate(
-      'xpack.agentBuilder.agentSkills.instructionsViewModeLegend',
-      {
-        defaultMessage: 'Instructions view mode',
-      }
-    ),
-    instructionsViewRenderedLabel: i18n.translate(
-      'xpack.agentBuilder.agentSkills.instructionsViewRenderedLabel',
-      {
-        defaultMessage: 'Rendered',
-      }
-    ),
-    instructionsViewRawLabel: i18n.translate(
-      'xpack.agentBuilder.agentSkills.instructionsViewRawLabel',
-      {
-        defaultMessage: 'Raw',
-      }
-    ),
     noSkillSelectedMessage: i18n.translate(
       'xpack.agentBuilder.agentSkills.noSkillSelectedMessage',
       {
@@ -1107,8 +1101,14 @@ export const labels = {
         values: { source },
       }),
     pluginDetailIdLabel: i18n.translate('xpack.agentBuilder.agentPlugins.pluginDetailIdLabel', {
-      defaultMessage: 'ID',
+      defaultMessage: 'Plugin ID',
     }),
+    pluginDetailIdCopyLabel: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.pluginDetailIdCopyLabel',
+      {
+        defaultMessage: 'Copy plugin ID',
+      }
+    ),
     pluginDetailNameLabel: i18n.translate('xpack.agentBuilder.agentPlugins.pluginDetailNameLabel', {
       defaultMessage: 'Name',
     }),
@@ -1121,7 +1121,7 @@ export const labels = {
     pluginDetailSkillsLabel: i18n.translate(
       'xpack.agentBuilder.agentPlugins.pluginDetailSkillsLabel',
       {
-        defaultMessage: 'Skills',
+        defaultMessage: 'Skills included',
       }
     ),
     pluginDetailAuthorLabel: i18n.translate(
@@ -1134,6 +1134,12 @@ export const labels = {
       'xpack.agentBuilder.agentPlugins.pluginDetailSourceLabel',
       {
         defaultMessage: 'Source',
+      }
+    ),
+    pluginDetailInstructionsLabel: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.pluginDetailInstructionsLabel',
+      {
+        defaultMessage: 'Instructions',
       }
     ),
     installPluginFlyoutTitle: i18n.translate(

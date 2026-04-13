@@ -10,8 +10,8 @@ import { esql } from '@elastic/esql';
 import { escapeStringValue } from '@kbn/esql-utils/src/utils/append_to_query/utils';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import {
-  ALERT_ACTIONS_DATA_STREAM,
   ALERT_EVENTS_DATA_STREAM,
+  ALERT_ACTIONS_DATA_STREAM,
   PAGE_SIZE_ESQL_VARIABLE,
 } from '../constants';
 
@@ -115,6 +115,7 @@ export const buildEpisodesBaseQuery = (search?: string): ComposerQuery => {
   addGroupHashActionStats(query);
   query.where`type == "alert"`;
   addEpisodeAggregation(query);
+  // Derive effective status: overridden to "inactive" when the latest action is "deactivate"
   query.pipe`EVAL effective_status = CASE(last_deactivate_action == "deactivate", "inactive", \`episode.status\`)`;
 
   return query;
@@ -122,6 +123,9 @@ export const buildEpisodesBaseQuery = (search?: string): ComposerQuery => {
 
 /**
  * Builds an ES|QL query for episodes request with sorting and filtering.
+ *
+ * Joins `.rule-events` and `.alert-actions` so that user-driven deactivation
+ * is reflected in an `effective_status` column used for status filtering.
  */
 export const buildEpisodesQuery = (
   sortState: EpisodesSortState = { sortField: '@timestamp', sortDirection: 'desc' },

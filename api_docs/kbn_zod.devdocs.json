@@ -18562,38 +18562,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_monitoring/model/execution_event.gen.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_events/get_rule_execution_events_route.gen.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_events/get_rule_execution_events_route.gen.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_monitoring/model/execution_result.gen.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_monitoring/model/execution_result.gen.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_monitoring/model/execution_result.gen.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.gen.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.gen.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/signals_migration/read_signals_migration_status/read_signals_migration_status.gen.ts"
               },
               {
@@ -18671,6 +18639,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/common/api/endpoint/model/schema/common.gen.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_monitoring/model/execution_event.gen.ts"
               },
               {
                 "plugin": "@kbn/securitysolution-lists-common",
@@ -30791,6 +30763,10 @@
           {
             "plugin": "cases",
             "path": "x-pack/platform/plugins/shared/cases/server/connectors/cases/schema.ts"
+          },
+          {
+            "plugin": "agentBuilder",
+            "path": "x-pack/platform/plugins/shared/agent_builder/common/step_types/run_agent_step.ts"
           },
           {
             "plugin": "@kbn/agent-builder-common",
