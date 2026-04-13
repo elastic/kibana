@@ -23,6 +23,7 @@ import { TableHeader, useCascadeTable, type Table, type CellContext } from '../.
 import {
   useCascadeVirtualizer,
   VirtualizedCascadeRowList,
+  calculateActiveStickyIndex,
   type VirtualizedCascadeListProps,
 } from '../../lib/core/virtualizer';
 import {
@@ -143,7 +144,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   const {
     getVirtualItems,
     getTotalSize,
-    activeStickyIndex,
+    range,
     measureElement,
     virtualizedRowComputedTranslateValue,
     scrollToVirtualizedIndex,
@@ -151,13 +152,21 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     isScrolling,
   } = virtualizerInstance.current;
 
+  // Calculate activeStickyIndex directly from the virtualizer's current range.
+  // This ensures the value is always current and never stale from intermediate memoization.
+  const activeStickyIndex = calculateActiveStickyIndex(
+    rows,
+    range?.startIndex ?? 0,
+    enableStickyGroupHeader
+  );
+
   useRegisterCascadeAccessibilityHelpers<G>({
     tableRows: rows,
     tableWrapperElement: cascadeWrapperRef.current!,
     scrollToRowIndex: scrollToVirtualizedIndex,
   });
 
-  const virtualCascadeRowRenderer = useCallback<VirtualizedCascadeListProps<G>['children']>(
+  const virtualCascadeRowRenderer = useCallback<VirtualizedCascadeListProps<G>['listItemRenderer']>(
     ({ row, isActiveSticky, virtualItem, virtualRowStyle }) => (
       <CascadeRowPrimitive<G, L>
         {...{
@@ -178,6 +187,19 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
 
   const treeGridContainerARIAAttributes = useTreeGridContainerARIAAttributes(headerId);
 
+  const shouldRenderStickyHeader = useMemo(() => {
+    return (
+      enableStickyGroupHeader &&
+      activeStickyIndex !== null &&
+      (virtualizerScrollOffset ?? 0) > (virtualizedRowComputedTranslateValue.get(0) ?? 0)
+    );
+  }, [
+    activeStickyIndex,
+    enableStickyGroupHeader,
+    virtualizerScrollOffset,
+    virtualizedRowComputedTranslateValue,
+  ]);
+
   return (
     <div ref={cascadeWrapperRef} data-test-subj="data-cascade" css={styles.container}>
       <EuiFlexGroup direction="column" gutterSize="none" css={styles.containerInner}>
@@ -194,16 +216,17 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                   ...scrollContainerSize,
                 }}
               >
-                <>
-                  {activeStickyIndex !== null &&
-                    enableStickyGroupHeader &&
-                    (virtualizerScrollOffset ?? 0) >
-                      (virtualizedRowComputedTranslateValue.get(0) ?? 0) && (
-                      <div css={styles.cascadeTreeGridHeaderStickyRenderSlot}>
-                        <div ref={activeStickyRenderSlotRef} />
-                      </div>
-                    )}
-                </>
+                {/* Always render the slot so the ref is available immediately.
+                    Use hidden style when not visible to avoid layout impact. */}
+                <div
+                  css={
+                    shouldRenderStickyHeader
+                      ? styles.cascadeTreeGridHeaderStickyRenderSlot
+                      : styles.cascadeTreeGridHeaderStickyRenderSlotHidden
+                  }
+                >
+                  <div ref={activeStickyRenderSlotRef} />
+                </div>
                 <div css={styles.cascadeTreeGridWrapper} style={{ height: getTotalSize() }}>
                   <div {...treeGridContainerARIAAttributes} css={relativePosition}>
                     <ScrollSyncProvider disableScrollSync={isScrolling}>
@@ -213,10 +236,9 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                           getVirtualItems,
                           virtualizedRowComputedTranslateValue,
                           rows,
+                          listItemRenderer: virtualCascadeRowRenderer,
                         }}
-                      >
-                        {virtualCascadeRowRenderer}
-                      </VirtualizedCascadeRowList>
+                      />
                     </ScrollSyncProvider>
                   </div>
                 </div>
