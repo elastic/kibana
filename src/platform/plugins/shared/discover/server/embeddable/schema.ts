@@ -11,7 +11,7 @@ import type { ObjectType, Props, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { DataGridDensity } from '@kbn/discover-utils';
 import { asCodeQuerySchema } from '@kbn/as-code-shared-schemas';
-import { aggregateQuerySchema } from '@kbn/es-query-server';
+import { esqlDataSourceSchema } from '@kbn/as-code-data-views-schema';
 import {
   BY_REF_SCHEMA_META,
   BY_VALUE_SCHEMA_META,
@@ -317,10 +317,12 @@ const classicTabSchema = schema.allOf([
 const esqlTabSchema = schema.allOf([
   dataTableSchema,
   schema.object(
-    { query: aggregateQuerySchema },
+    {
+      data_source: esqlDataSourceSchema,
+    },
     {
       meta: {
-        description: 'ES|QL (Elasticsearch Query Language) statement.',
+        description: 'ES|QL (Elasticsearch Query Language) data source.',
       },
     }
   ),
