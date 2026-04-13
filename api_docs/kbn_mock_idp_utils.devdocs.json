@@ -220,7 +220,7 @@
           "({\n  username,\n  organizationId,\n  projectType,\n  roles,\n  audience,\n  fullName,\n  email,\n  accessTokenLifetimeSec = 3600,\n}: { username: string; organizationId: string; projectType: string; roles: string[]; audience: string; fullName?: string | undefined; email?: string | undefined; accessTokenLifetimeSec?: number | undefined; }) => Promise<string>"
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-        "lineNumber": 427,
+        "lineNumber": 430,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -233,7 +233,7 @@
             "label": "{\n  username,\n  organizationId,\n  projectType,\n  roles,\n  audience,\n  fullName,\n  email,\n  accessTokenLifetimeSec = 3600,\n}",
             "description": [],
             "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-            "lineNumber": 442,
+            "lineNumber": 445,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -246,7 +246,7 @@
                 "label": "username",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-                "lineNumber": 443,
+                "lineNumber": 446,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -259,7 +259,7 @@
                 "label": "organizationId",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-                "lineNumber": 444,
+                "lineNumber": 447,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -272,7 +272,7 @@
                 "label": "projectType",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-                "lineNumber": 445,
+                "lineNumber": 448,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -288,7 +288,7 @@
                   "string[]"
                 ],
                 "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-                "lineNumber": 446,
+                "lineNumber": 449,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -301,7 +301,7 @@
                 "label": "audience",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-                "lineNumber": 447,
+                "lineNumber": 450,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -317,7 +317,7 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-                "lineNumber": 448,
+                "lineNumber": 451,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -333,7 +333,7 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-                "lineNumber": 449,
+                "lineNumber": 452,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -349,7 +349,7 @@
                   "number | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-                "lineNumber": 450,
+                "lineNumber": 453,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -371,7 +371,7 @@
           "({\n  username,\n  organizationId,\n  projectType: rawProjectType,\n  roles,\n  fullName,\n  email,\n  // 1H\n  accessTokenLifetimeSec = 3600,\n  // 3D\n  refreshTokenLifetimeSec = 3 * 24 * 3600,\n}: { username: string; organizationId: string; projectType: string; roles: string[]; fullName?: string | undefined; email?: string | undefined; accessTokenLifetimeSec?: number | undefined; refreshTokenLifetimeSec?: number | undefined; }) => Promise<{ accessToken: string; accessTokenExpiresAt: number; refreshToken: string; refreshTokenExpiresAt: number; }>"
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-        "lineNumber": 314,
+        "lineNumber": 317,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -384,7 +384,7 @@
             "label": "{\n  username,\n  organizationId,\n  projectType: rawProjectType,\n  roles,\n  fullName,\n  email,\n  // 1H\n  accessTokenLifetimeSec = 3600,\n  // 3D\n  refreshTokenLifetimeSec = 3 * 24 * 3600,\n}",
             "description": [],
             "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-            "lineNumber": 325,
+            "lineNumber": 328,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -397,7 +397,7 @@
                 "label": "username",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-                "lineNumber": 326,
+                "lineNumber": 329,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -410,7 +410,7 @@
                 "label": "organizationId",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-                "lineNumber": 327,
+                "lineNumber": 330,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -423,7 +423,7 @@
                 "label": "projectType",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-                "lineNumber": 328,
+                "lineNumber": 331,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -439,7 +439,7 @@
                   "string[]"
                 ],
                 "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-                "lineNumber": 329,
+                "lineNumber": 332,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -455,7 +455,7 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-                "lineNumber": 330,
+                "lineNumber": 333,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -471,7 +471,7 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-                "lineNumber": 331,
+                "lineNumber": 334,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -487,7 +487,7 @@
                   "number | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-                "lineNumber": 332,
+                "lineNumber": 335,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -503,7 +503,7 @@
                   "number | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-                "lineNumber": 333,
+                "lineNumber": 336,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -637,7 +637,7 @@
           "(requestUrl: string) => Promise<string | undefined>"
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-        "lineNumber": 537,
+        "lineNumber": 540,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -653,7 +653,7 @@
               "string"
             ],
             "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-            "lineNumber": 537,
+            "lineNumber": 540,
             "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
