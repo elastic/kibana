@@ -87,7 +87,11 @@ export const optionsListESQLControlSchema = schema.discriminatedUnion('control_t
         maxSize: MAX_OPTIONS_LIST_REQUEST_SIZE,
       }),
     },
-    { meta: { id: 'dashboard-esql-control-static-values' } }
+    {
+      meta: {
+        id: 'kbn-controls-schemas-options-list-esql-control-schema-static-values',
+      },
+    }
   ),
   schema.object(
     {
@@ -95,6 +99,10 @@ export const optionsListESQLControlSchema = schema.discriminatedUnion('control_t
       control_type: schema.literal('VALUES_FROM_QUERY'),
       esql_query: schema.string(),
     },
-    { meta: { id: 'dashboard-esql-control-values-from-query' } }
+    {
+      meta: {
+        id: 'kbn-controls-schemas-options-list-esql-control-schema-values-from-query',
+      },
+    }
   ),
 ]);
