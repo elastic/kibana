@@ -765,6 +765,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
         'Comma-separated index patterns used for Significant Events stream filtering and analysis.',
     },
   },
+  'observability:streamsEnableMemory': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable memory in Streams',
+    },
+  },
   'observability:enableDiagnosticMode': {
     type: 'boolean',
     _meta: {

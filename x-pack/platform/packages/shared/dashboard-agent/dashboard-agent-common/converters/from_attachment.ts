@@ -12,15 +12,13 @@ import type {
 } from '@kbn/dashboard-plugin/server';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
 import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type {
   AttachmentPanel,
   DashboardSection as AgentDashboardSection,
   DashboardAttachmentData,
 } from '../types';
 import { isSection } from '../types';
-
-// TODO: update this when LENS_EMBEDDABLE_TYPE is moved to @kbn/lens-common
-const LENS_EMBEDDABLE_TYPE = 'lens';
 
 /**
  * Converts an AttachmentPanel to a DashboardPanel.

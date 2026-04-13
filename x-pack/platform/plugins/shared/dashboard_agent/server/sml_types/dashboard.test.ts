@@ -13,13 +13,14 @@ import {
   attachmentDataToDashboardState,
 } from '@kbn/dashboard-agent-common';
 import { createDashboardSmlType } from './dashboard';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 const dashboardAttachmentData: DashboardAttachmentData = {
   title: 'System Overview',
   description: 'Main dashboard for key metrics',
   panels: [
     {
-      type: 'lens',
+      type: LENS_EMBEDDABLE_TYPE,
       id: 'panel-1',
       grid: { x: 0, y: 0, w: 24, h: 15 },
       config: {
@@ -61,7 +62,7 @@ const dashboardStateWithLensApi = {
   description: 'Dashboard with API-format lens panel',
   panels: [
     {
-      type: 'lens',
+      type: LENS_EMBEDDABLE_TYPE,
       id: 'panel-3',
       grid: { x: 0, y: 0, w: 24, h: 12 },
       config: {
@@ -234,7 +235,7 @@ describe('dashboardSmlType', () => {
       expect.arrayContaining([
         expect.objectContaining({
           id: 'panel-1',
-          type: 'lens',
+          type: LENS_EMBEDDABLE_TYPE,
         }),
         expect.objectContaining({
           id: 'section-1',
@@ -293,7 +294,7 @@ describe('dashboardSmlType', () => {
     expect(attachmentData?.panels).toEqual([
       expect.objectContaining({
         id: 'panel-3',
-        type: 'lens',
+        type: LENS_EMBEDDABLE_TYPE,
         config: expect.objectContaining({
           attributes: expect.objectContaining({
             type: 'lnsXY',

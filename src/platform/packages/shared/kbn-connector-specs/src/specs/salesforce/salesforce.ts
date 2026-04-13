@@ -67,9 +67,18 @@ export const SalesforceConnector: ConnectorSpec = {
       {
         type: 'oauth_authorization_code',
         defaults: {
-          authorizationUrl: 'https://login.salesforce.com/services/oauth2/authorize',
-          tokenUrl: 'https://login.salesforce.com/services/oauth2/token',
           scope: 'api refresh_token',
+        },
+        overrides: {
+          meta: {
+            authorizationUrl: {
+              placeholder: 'https://login.salesforce.com/services/oauth2/authorize',
+            },
+            tokenUrl: {
+              placeholder: 'https://login.salesforce.com/services/oauth2/token',
+            },
+            scope: { hidden: true },
+          },
         },
       },
     ],
@@ -77,6 +86,7 @@ export const SalesforceConnector: ConnectorSpec = {
 
   actions: {
     query: {
+      isTool: true,
       input: z.object({
         soql: z
           .string()
@@ -102,6 +112,7 @@ export const SalesforceConnector: ConnectorSpec = {
     },
 
     get_record: {
+      isTool: true,
       input: z.object({
         sobjectName: z
           .string()
@@ -127,6 +138,7 @@ export const SalesforceConnector: ConnectorSpec = {
     },
 
     list_records: {
+      isTool: true,
       input: z.object({
         sobjectName: z.string().describe('SObject API name (e.g. Account, Contact, MyObject__c)'),
         limit: z
@@ -159,6 +171,7 @@ export const SalesforceConnector: ConnectorSpec = {
     },
 
     search: {
+      isTool: true,
       input: z.object({
         searchTerm: z
           .string()
@@ -196,6 +209,7 @@ export const SalesforceConnector: ConnectorSpec = {
     },
 
     describe: {
+      isTool: true,
       input: z.object({
         sobjectName: z
           .string()

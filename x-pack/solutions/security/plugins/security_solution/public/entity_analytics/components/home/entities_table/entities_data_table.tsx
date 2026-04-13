@@ -7,6 +7,7 @@
 
 import React, { useContext, useState, useMemo, useEffect, useCallback } from 'react';
 import _ from 'lodash';
+import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import {
   UnifiedDataTable,
@@ -107,7 +108,7 @@ const COLUMN_HEADERS: Record<string, string> = {
   ),
   [ENTITY_FIELDS.ENTITY_ID]: i18n.translate(
     'xpack.securitySolution.entityAnalytics.entitiesTable.columnEntityId',
-    { defaultMessage: 'Entity id' }
+    { defaultMessage: 'Entity ID' }
   ),
   [ENTITY_FIELDS.ENTITY_SOURCE]: i18n.translate(
     'xpack.securitySolution.entityAnalytics.entitiesTable.columnDataSource',
@@ -527,7 +528,9 @@ export const EntitiesDataTable = ({
     <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
       <div
         data-test-subj={TEST_SUBJ_DATA_GRID}
-        className={styles.gridContainer}
+        className={classNames(styles.gridContainer, {
+          [styles.gridContainerLoading]: isLoadingGridData,
+        })}
         style={{
           height: computeDataTableRendering.wrapperHeight,
         }}
