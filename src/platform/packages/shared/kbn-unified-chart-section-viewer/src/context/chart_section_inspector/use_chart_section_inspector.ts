@@ -14,9 +14,7 @@ export const useChartSectionInspector = () => {
   const context = useContext(ChartSectionInspectorContext);
 
   if (!context) {
-    throw new Error(
-      'useChartSectionInspector must be used within a ChartSectionInspectorProvider'
-    );
+    throw new Error('useChartSectionInspector must be used within a ChartSectionInspectorProvider');
   }
 
   return context;
