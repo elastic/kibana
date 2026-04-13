@@ -34,7 +34,12 @@ import {
   type InventoryLocatorParams,
 } from '@kbn/observability-shared-plugin/common';
 import type { NavigationEntry } from '@kbn/observability-shared-plugin/public';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability/constants';
+import {
+  OBSERVABILITY_INFRA_CPS_ENABLED_DEFAULT,
+  OBSERVABILITY_INFRA_CPS_ENABLED_FEATURE_FLAG,
+} from '../common/cps_feature_flag';
 import type { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
@@ -308,6 +313,16 @@ export class Plugin implements InfraClientPluginClass {
   }
 
   start(core: InfraClientCoreStart, plugins: InfraClientStartDeps) {
+    if (
+      core.featureFlags.getBooleanValue(
+        OBSERVABILITY_INFRA_CPS_ENABLED_FEATURE_FLAG,
+        OBSERVABILITY_INFRA_CPS_ENABLED_DEFAULT
+      )
+    ) {
+      plugins.cps?.cpsManager?.registerAppAccess('logs', () => ProjectRoutingAccess.EDITABLE);
+      plugins.cps?.cpsManager?.registerAppAccess('metrics', () => ProjectRoutingAccess.EDITABLE);
+    }
+
     const { http } = core;
     const inventoryViews = this.inventoryViews.start({ http });
     const metricsExplorerViews = this.metricsExplorerViews?.start({ http });
