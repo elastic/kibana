@@ -723,18 +723,11 @@ export class DataGridService extends FtrService {
     const cellSelector = ['addFilterForValueButton', 'addFilterOutValueButton'].includes(actionName)
       ? `tableDocViewRow-${fieldName}-value`
       : `tableDocViewRow-${fieldName}-name`;
-    await this.retry.try(async () => {
-      const cell = await this.testSubjects.find(cellSelector);
-      await cell.pressKeys(Key.ENTER);
+    await this.testSubjects.moveMouseTo(cellSelector);
+    await this.testSubjects.click(cellSelector);
 
-      const actionVisible = await this.testSubjects.exists(`${actionName}-${fieldName}`);
-      if (!actionVisible) {
-        await cell.pressKeys(Key.ENTER);
-      }
-
-      if (!(await this.testSubjects.exists(`${actionName}-${fieldName}`))) {
-        throw new Error(`Unable to show flyout action ${actionName} for ${fieldName}`);
-      }
+    await this.retry.waitFor('grid cell actions to appear', async () => {
+      return this.testSubjects.exists(`${actionName}-${fieldName}`);
     });
   }
 
@@ -742,10 +735,8 @@ export class DataGridService extends FtrService {
     await this.showFieldCellActionInFlyout(fieldName, actionName);
 
     const actionSelector = `${actionName}-${fieldName}`;
-    await this.retry.try(async () => {
-      const action = await this.testSubjects.find(actionSelector);
-      await action.pressKeys(Key.ENTER);
-    });
+    await this.testSubjects.moveMouseTo(actionSelector);
+    await this.testSubjects.click(actionSelector);
   }
 
   public async isFieldPinnedInFlyout(fieldName: string): Promise<boolean> {

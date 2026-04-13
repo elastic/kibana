@@ -112,6 +112,8 @@ export default function (ctx: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
+        await security.forceLogout();
         await securityService.role.delete('global_discover_all_role');
         await securityService.user.delete('global_discover_all_user');
       });
@@ -175,15 +177,6 @@ export default function (ctx: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        // Ensure auth/session state from previous privilege scenarios is fully cleared
-        await security.forceLogout();
-
-        // Avoid stale app redirects/chrome-hidden states before switching users.
-        await common.navigateToUrl('home', '', {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
-
         await security.login('global_discover_read_user', 'global_discover_read_user-password', {
           expectSpaceSelector: false,
         });
@@ -196,6 +189,8 @@ export default function (ctx: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
+        await security.forceLogout();
         await securityService.role.delete('global_discover_read_role');
         await securityService.user.delete('global_discover_read_user');
         await spaces.delete('readonly-solution-space');
@@ -307,6 +302,8 @@ export default function (ctx: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
+        await security.forceLogout();
         await securityService.user.delete('global_discover_read_url_create_user');
         await securityService.role.delete('global_discover_read_url_create_role');
       });
@@ -384,6 +381,8 @@ export default function (ctx: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
+        await security.forceLogout();
         await securityService.role.delete('global_discover_visualize_read_role');
         await securityService.user.delete('global_discover_visualize_read_user');
       });
@@ -437,6 +436,8 @@ export default function (ctx: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
+        await security.forceLogout();
         await securityService.role.delete('no_discover_privileges_role');
         await securityService.user.delete('no_discover_privileges_user');
       });
@@ -504,6 +505,8 @@ export default function (ctx: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
+        await security.forceLogout();
         await kibanaServer.uiSettings.unset('defaultIndex');
         await esSupertest
           .post('/_aliases')
