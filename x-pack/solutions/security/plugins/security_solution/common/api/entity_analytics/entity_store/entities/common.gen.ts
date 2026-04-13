@@ -231,7 +231,7 @@ export const Asset = z
     /**
      * The criticality level assigned to this asset.
      */
-    criticality: AssetCriticalityLevel.optional(),
+    criticality: AssetCriticalityLevel.nullable().optional(),
     /**
      * Business unit the asset belongs to.
      */

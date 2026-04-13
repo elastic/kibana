@@ -194,6 +194,7 @@ components:
           type: string
           description: Deployment environment (for example, production, staging).
         criticality:
+          nullable: true
           $ref: '../../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
           description: The criticality level assigned to this asset.
         business_unit:
