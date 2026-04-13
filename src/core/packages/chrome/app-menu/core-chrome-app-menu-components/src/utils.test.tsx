@@ -37,14 +37,14 @@ describe('utils', () => {
       overflowButton.remove();
     });
 
-    it('focuses the trigger element when it is still in the DOM', () => {
+    it('should focuse the trigger element when it is still in the DOM', () => {
       document.body.appendChild(triggerElement);
       const returnFocus = createReturnFocus(triggerElement);
       returnFocus();
       expect(document.activeElement).toBe(triggerElement);
     });
 
-    it('focuses the parent element when the trigger has been removed but the parent is still in the DOM', () => {
+    it('should focuse the parent element when the trigger has been removed but the parent is still in the DOM', () => {
       const parentElement = document.createElement('button');
       document.body.appendChild(parentElement);
       // triggerElement is NOT appended — simulates a popover item that was unmounted
@@ -54,7 +54,7 @@ describe('utils', () => {
       parentElement.remove();
     });
 
-    it('focuses the overflow button when both trigger and parent element have been removed from the DOM', () => {
+    it('should focuse the overflow button when both trigger and parent element have been removed from the DOM', () => {
       // neither triggerElement nor parentElement is appended
       document.body.appendChild(overflowButton);
       const parentElement = document.createElement('button');
@@ -63,7 +63,7 @@ describe('utils', () => {
       expect(document.activeElement).toBe(overflowButton);
     });
 
-    it('focuses the overflow button when the trigger element has been removed from the DOM', () => {
+    it('should focuse the overflow button when the trigger element has been removed from the DOM', () => {
       // triggerElement is NOT appended — simulates a popover item that was unmounted
       document.body.appendChild(overflowButton);
       const returnFocus = createReturnFocus(triggerElement);
