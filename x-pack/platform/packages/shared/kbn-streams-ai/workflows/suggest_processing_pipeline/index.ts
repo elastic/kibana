@@ -21,6 +21,13 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { SuggestIngestPipelinePrompt } from './prompt';
 import { getPipelineDefinitionJsonSchema, type SuggestPipelineAgentSchema } from './schema';
+import { formatZodPipelineErrors, type SubmittedPipeline } from './format_zod_errors';
+import {
+  buildSimulationFeedback,
+  getUniqueDocumentErrors,
+  type SimulationFeedback,
+  type CommitFeedback,
+} from './simulation_feedback';
 
 export interface SuggestProcessingPipelineResult {
   pipeline: StreamlangDSL | null;
@@ -28,107 +35,6 @@ export interface SuggestProcessingPipelineResult {
     stepsUsed: number;
     maxSteps: number;
   };
-}
-
-interface PipelineStep {
-  action?: string;
-  [key: string]: unknown;
-}
-
-interface SubmittedPipeline {
-  steps?: PipelineStep[];
-  [key: string]: unknown;
-}
-
-interface SimulationFeedback {
-  valid: boolean;
-  errors?: (string | ZodIssueWithPath)[];
-  metrics?: {
-    sampled: number;
-    fields: string[];
-    parse_rate: number;
-  };
-  processors?: Record<
-    string,
-    {
-      failed_rate: number;
-      errors?: string[];
-    }
-  >;
-  [key: string]: unknown;
-}
-
-interface CommitFeedback {
-  committed: boolean;
-  errors?: ZodIssueWithPath[];
-  [key: string]: unknown;
-}
-
-interface ZodIssueWithPath {
-  message: string;
-  path: PropertyKey[];
-}
-
-/**
- * Filters Zod validation errors to return only those relevant to the processors
- * actually present in the submitted pipeline. This avoids confusing the model
- * with union discriminator errors for processor types it didn't intend to use.
- *
- * @param issues - Array of Zod validation issues from safeParse
- * @param submittedPipeline - The raw pipeline object submitted by the model
- * @returns Filtered array of issues relevant to the submitted pipeline
- */
-function formatZodPipelineErrors(
-  issues: ZodIssueWithPath[],
-  submittedPipeline: SubmittedPipeline
-): ZodIssueWithPath[] {
-  const steps = submittedPipeline.steps ?? [];
-  const actionsInPipeline = new Set(steps.map((step) => step.action).filter(Boolean));
-
-  return issues.filter((issue) => {
-    // Check if this is a union discriminator error for a processor type not in the pipeline
-    const path = issue.path;
-    // Union errors typically have a path like ['steps', <index>, 'action'] or similar
-    if (path.length >= 3 && path[0] === 'steps' && path[2] === 'action') {
-      const stepIndex = path[1];
-      if (typeof stepIndex === 'number') {
-        const step = steps[stepIndex];
-        if (step && step.action) {
-          // Keep the error if it's about the action actually used in this step
-          const errorMessage = issue.message.toLowerCase();
-          const stepAction = step.action.toLowerCase();
-          // If the error message mentions the actual action used, keep it
-          if (errorMessage.includes(stepAction)) {
-            return true;
-          }
-          // If the error is about an action NOT in the pipeline, filter it out
-          return false;
-        }
-      }
-    }
-
-    // For errors in step-specific fields (not the action discriminator),
-    // check if the step at that index has an action that's in the pipeline
-    if (path.length >= 2 && path[0] === 'steps') {
-      const stepIndex = path[1];
-      if (typeof stepIndex === 'number') {
-        const step = steps[stepIndex];
-        // If we can't determine the action, keep the error to be safe
-        if (!step || !step.action) {
-          return true;
-        }
-        // Keep errors for steps with actions that are in the pipeline
-        if (actionsInPipeline.has(step.action)) {
-          return true;
-        }
-        // Filter out errors for steps with actions not in the pipeline
-        return false;
-      }
-    }
-
-    // Keep all other errors (non-step-related)
-    return true;
-  });
 }
 
 /**
@@ -316,6 +222,7 @@ export {
 } from './schema';
 export { mergeSeedParsingProcessorIntoSuggestedPipeline } from './merge_seed_parsing_into_suggested_pipeline';
 export { formatUpstreamSeedParsingContextForPromptMarkdown } from './upstream_seed_parsing_prompt';
+export { getUniqueDocumentErrors } from './simulation_feedback';
 
 /**
  * Builds a JSON-serializable overview of sample document structure (fields, example values, schema hints)
@@ -345,189 +252,6 @@ export async function fetchMappedFieldsForStreamProcessingSuggestions(
   streamIndexName: string
 ) {
   return getMappedFields(esClient, streamIndexName);
-}
-
-/**
- * Detects temporary fields (custom.* or attributes.custom.*) in the simulation output.
- * Returns an array of temporary field names found across all documents.
- */
-function detectTemporaryFields(simulationResult: ProcessingSimulationResponse): string[] {
-  if (!simulationResult.documents || simulationResult.documents.length === 0) {
-    return [];
-  }
-
-  const temporaryFields = new Set<string>();
-
-  for (const doc of simulationResult.documents) {
-    if (!doc.value || typeof doc.value !== 'object') {
-      continue;
-    }
-
-    for (const fieldName of Object.keys(doc.value)) {
-      if (fieldName.startsWith('custom.') || fieldName.startsWith('attributes.custom.')) {
-        temporaryFields.add(fieldName);
-      }
-    }
-  }
-
-  return Array.from(temporaryFields);
-}
-
-/**
- * Collects errors attributed to a specific processor from the simulation results.
- */
-function collectErrorsForProcessor(
-  simulationResult: ProcessingSimulationResponse,
-  processorId: string
-): string[] {
-  const errors: string[] = [];
-  if (!simulationResult.documents) {
-    return errors;
-  }
-  for (const doc of simulationResult.documents) {
-    if (doc.errors && doc.errors.length > 0) {
-      for (const error of doc.errors) {
-        if ('processor_id' in error && error.processor_id === processorId) {
-          const errorMsg = error.type + ': ' + error.message;
-          if (!errors.includes(errorMsg)) {
-            errors.push(errorMsg);
-          }
-        }
-      }
-    }
-  }
-  return errors;
-}
-
-/**
- * Builds structured feedback from simulation results with per-processor attribution.
- */
-function buildSimulationFeedback(
-  simulationResult: ProcessingSimulationResponse,
-  metrics: { sampled: number; fields: string[]; parse_rate: number },
-  uniqueErrors: string[]
-): SimulationFeedback {
-  const minParseRate = 80;
-  const maxFailureRate = 0.2;
-  const errors: string[] = [];
-  const processors: Record<string, { failed_rate: number; errors?: string[] }> = {};
-
-  if (metrics.parse_rate < minParseRate) {
-    errors.push(
-      'Parse rate is too low: ' +
-        metrics.parse_rate.toFixed(2) +
-        '% (minimum required: ' +
-        minParseRate +
-        '%). The pipeline is not extracting fields from enough documents.'
-    );
-  }
-
-  if (simulationResult.processors_metrics) {
-    for (const [processorId, processorMetrics] of Object.entries(
-      simulationResult.processors_metrics
-    )) {
-      if (!processorMetrics) continue;
-      const processorErrors: string[] = [];
-      if (processorMetrics.failed_rate > maxFailureRate) {
-        const failurePercentage = (processorMetrics.failed_rate * 100).toFixed(2);
-        const errorMsg =
-          '[' +
-          processorId +
-          '] Failure rate is ' +
-          failurePercentage +
-          '% (maximum allowed: 20%).';
-        processorErrors.push(errorMsg);
-        errors.push(errorMsg);
-      }
-      const docErrors = collectErrorsForProcessor(simulationResult, processorId);
-      for (const docError of docErrors.slice(0, 3)) {
-        const prefixedError = '[' + processorId + '] ' + docError;
-        if (!processorErrors.includes(prefixedError)) processorErrors.push(prefixedError);
-        if (!errors.includes(prefixedError)) errors.push(prefixedError);
-      }
-      processors[processorId] = {
-        failed_rate: processorMetrics.failed_rate,
-        errors: processorErrors.length > 0 ? processorErrors : undefined,
-      };
-    }
-  }
-
-  for (const uniqueError of uniqueErrors) {
-    if (!errors.includes(uniqueError)) errors.push(uniqueError);
-  }
-
-  const temporaryFields = detectTemporaryFields(simulationResult);
-  if (temporaryFields.length > 0) {
-    const tempFieldMsg =
-      'Temporary fields detected: ' +
-      temporaryFields.join(', ') +
-      '. These should be removed or renamed.';
-    errors.push(tempFieldMsg);
-  }
-
-  return {
-    valid: errors.length === 0,
-    errors: errors.length > 0 ? errors : undefined,
-    metrics,
-    processors: Object.keys(processors).length > 0 ? processors : undefined,
-  };
-}
-export function getUniqueDocumentErrors(simulationResult: ProcessingSimulationResponse): string[] {
-  if (!simulationResult.documents || simulationResult.documents.length === 0) {
-    return [];
-  }
-
-  // Collect all unique error messages
-  const errorMap = new Map<string, { count: number; type: string; exampleDoc?: FlattenRecord }>();
-
-  for (const doc of simulationResult.documents) {
-    if (doc.errors && doc.errors.length > 0) {
-      for (const error of doc.errors) {
-        const key = `${error.type}: ${error.message}`;
-        if (!errorMap.has(key)) {
-          errorMap.set(key, {
-            count: 1,
-            type: error.type,
-            exampleDoc: doc.value,
-          });
-        } else {
-          errorMap.get(key)!.count++;
-        }
-      }
-    }
-  }
-
-  // Format errors with counts and example context
-  const uniqueErrors: string[] = [];
-  const maxErrors = 5;
-  const maxErrorLength = 250;
-  let errorIndex = 0;
-
-  for (const [errorKey, errorInfo] of errorMap.entries()) {
-    if (errorIndex >= maxErrors) {
-      break;
-    }
-
-    const countStr = errorInfo.count > 1 ? ` (occurred in ${errorInfo.count} documents)` : '';
-    const fullError = `${errorKey}${countStr}`;
-
-    // Truncate error message if it exceeds max length
-    const truncatedError =
-      fullError.length > maxErrorLength
-        ? `${fullError.substring(0, maxErrorLength)}...`
-        : fullError;
-
-    uniqueErrors.push(truncatedError);
-    errorIndex++;
-  }
-
-  // Add message if there are more errors
-  const remainingErrors = errorMap.size - maxErrors;
-  if (remainingErrors > 0) {
-    uniqueErrors.push(`... and ${remainingErrors} more error(s)`);
-  }
-
-  return uniqueErrors;
 }
 
 async function getMappedFields(esClient: ElasticsearchClient, index: string) {
