@@ -17,6 +17,7 @@ import {
 import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { i18n } from '@kbn/i18n';
+import type { StreamlangUIBranch } from '@kbn/streamlang';
 import {
   useInteractiveModeSelector,
   useStreamEnrichmentEvents,
@@ -54,12 +55,14 @@ const createText = i18n.translate(
 
 interface AddStepProps {
   parentId?: string;
+  branch?: StreamlangUIBranch;
   mode: 'inline' | 'subdued' | 'prominent';
   nestingDisabled?: boolean;
 }
 
 export const CreateStepButton: React.FC<AddStepProps> = ({
   parentId,
+  branch,
   mode,
   nestingDisabled = false,
 }) => {
@@ -86,7 +89,7 @@ export const CreateStepButton: React.FC<AddStepProps> = ({
       disabled={nestingDisabled}
       onClick={() => {
         togglePopover(false);
-        addCondition(undefined, { parentId: parentId ?? null });
+        addCondition(undefined, { parentId: parentId ?? null, branch });
       }}
     >
       {createConditionText}
@@ -98,7 +101,7 @@ export const CreateStepButton: React.FC<AddStepProps> = ({
       icon="processor"
       onClick={() => {
         togglePopover(false);
-        addProcessor(undefined, { parentId: parentId ?? null });
+        addProcessor(undefined, { parentId: parentId ?? null, branch });
       }}
     >
       {createProcessorText}
