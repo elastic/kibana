@@ -20,6 +20,8 @@ export const SuggestIngestPipelinePrompt = createPrompt({
     fields_schema: z.string(),
     content_field: z.string(),
     severity_field: z.string(),
+    /** JSON summary of sample document structure (fields, example values, schema hints) */
+    initial_dataset_analysis: z.string(),
     /**
      * When set, explains an upstream grok/dissect step already applied before these samples.
      * Empty when the agent may propose grok/dissect (full pipeline schema).

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { formatZodPipelineErrors, ZodIssueWithPath, SubmittedPipeline } from './format_zod_errors';
+import type { ZodIssueWithPath, SubmittedPipeline } from './format_zod_errors';
+import { formatZodPipelineErrors } from './format_zod_errors';
 
 describe('formatZodPipelineErrors', () => {
   describe('union discriminator filtering', () => {
