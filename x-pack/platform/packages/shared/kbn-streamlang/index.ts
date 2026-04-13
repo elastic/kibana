@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export type { StreamlangDSL, StreamType, StreamlangConditionBlock } from './types/streamlang';
+export type {
+  StreamlangDSL,
+  StreamlangDSLWithUpdatedAt,
+  StreamType,
+  StreamlangConditionBlock,
+} from './types/streamlang';
 export {
   streamlangDSLSchema,
   streamlangDSLSchemaStrict,

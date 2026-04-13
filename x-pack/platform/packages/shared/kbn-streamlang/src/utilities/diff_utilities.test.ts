@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import type { StreamlangDSL, StreamlangStep } from '../../types/streamlang';
-import { isConditionBlock } from '../../types/streamlang';
+import type {
+  StreamlangDSL,
+  StreamlangDSLWithUpdatedAt,
+  StreamlangStep,
+} from '../../types/streamlang';
+import { isConditionBlock, streamlangDSLSchemaStrict } from '../../types/streamlang';
 import {
   addDeterministicCustomIdentifiers,
+  addDeterministicCustomIdentifiersFromIngestProcessing,
   checkAdditiveChanges,
   getProcessorsCount,
   stripCustomIdentifiers,
@@ -65,6 +70,18 @@ describe('addDeterministicCustomIdentifiers', () => {
     expect('customIdentifier' in result1.steps[0] && result1.steps[0].customIdentifier).toBe(
       'customIdentifier' in result2.steps[0] && result2.steps[0].customIdentifier
     );
+  });
+
+  it('drops ingest processing updated_at so DeepStrict streamlang schema validation passes', () => {
+    const processingFromApi: StreamlangDSLWithUpdatedAt = {
+      steps: [{ action: 'set', to: 'field1', value: 'value1' }],
+      updated_at: '2025-01-01T00:00:00.000Z',
+    };
+
+    const result = addDeterministicCustomIdentifiersFromIngestProcessing(processingFromApi);
+
+    expect(result).not.toHaveProperty('updated_at');
+    expect(streamlangDSLSchemaStrict.safeParse(result).success).toBe(true);
   });
 });
 
