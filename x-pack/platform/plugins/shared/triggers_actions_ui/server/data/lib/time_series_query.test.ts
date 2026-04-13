@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/core/server';
 import type { TimeSeriesQuery } from './time_series_query';
-import { timeSeriesQuery, getResultFromEs } from './time_series_query';
+import { timeSeriesQuery, getResultFromEs, fetchDataViewBase } from './time_series_query';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 
 const DefaultQueryParams: TimeSeriesQuery = {
@@ -57,18 +57,133 @@ describe('timeSeriesQuery', () => {
   });
 
   it('filters the results when filter param is passed', async () => {
+    esClient.fieldCaps.mockResolvedValueOnce({
+      indices: ['index-name'] as estypes.Indices,
+      fields: {
+        'event.provider': {
+          keyword: {
+            type: 'keyword',
+            metadata_field: false,
+            searchable: true,
+            aggregatable: true,
+          },
+        },
+      },
+    } as estypes.FieldCapsResponse);
     await timeSeriesQuery({
       ...params,
       query: { ...params.query, filterKuery: 'event.provider: alerting' },
     });
+    expect(esClient.fieldCaps).toHaveBeenCalledWith(
+      expect.objectContaining({ fields: ['event.provider'] })
+    );
     // @ts-ignore
     expect(esClient.search.mock.calls[0]![0].query.bool.filter[1]).toEqual({
       bool: {
         minimum_should_match: 1,
         should: [
           {
-            match: {
-              'event.provider': 'alerting',
+            term: {
+              'event.provider': {
+                value: 'alerting',
+              },
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  it('forwards project_routing to search and fieldCaps when set', async () => {
+    esClient.fieldCaps.mockResolvedValueOnce({
+      indices: ['index-name'] as estypes.Indices,
+      fields: {
+        'event.provider': {
+          keyword: {
+            type: 'keyword',
+            metadata_field: false,
+            searchable: true,
+            aggregatable: true,
+          },
+        },
+      },
+    } as estypes.FieldCapsResponse);
+    await timeSeriesQuery({
+      ...params,
+      query: {
+        ...params.query,
+        filterKuery: 'event.provider: alerting',
+        project_routing: '_alias:*',
+      },
+    });
+    expect(esClient.fieldCaps).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fields: ['event.provider'],
+        project_routing: '_alias:*',
+      })
+    );
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({ project_routing: '_alias:*' }),
+      expect.any(Object)
+    );
+  });
+
+  it('generates a wildcard query for keyword fields with wildcard patterns', async () => {
+    esClient.fieldCaps.mockResolvedValueOnce({
+      indices: ['index-name'] as estypes.Indices,
+      fields: {
+        'host.name': {
+          keyword: {
+            type: 'keyword',
+            metadata_field: false,
+            searchable: true,
+            aggregatable: true,
+          },
+        },
+      },
+    } as estypes.FieldCapsResponse);
+    await timeSeriesQuery({
+      ...params,
+      query: { ...params.query, filterKuery: 'host.name: *prod*' },
+    });
+    expect(esClient.fieldCaps).toHaveBeenCalledWith(
+      expect.objectContaining({ fields: ['host.name'] })
+    );
+    // @ts-ignore
+    expect(esClient.search.mock.calls[0]![0].query.bool.filter[1]).toEqual({
+      bool: {
+        minimum_should_match: 1,
+        should: [
+          {
+            wildcard: {
+              'host.name': {
+                value: '*prod*',
+              },
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  it('falls back to untyped conversion when fieldCaps fails', async () => {
+    esClient.fieldCaps.mockRejectedValueOnce(new Error('unauthorized'));
+    await timeSeriesQuery({
+      ...params,
+      query: { ...params.query, filterKuery: 'host.name: *prod*' },
+    });
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('failed to fetch field caps for filter')
+    );
+    // @ts-ignore
+    expect(esClient.search.mock.calls[0]![0].query.bool.filter[1]).toEqual({
+      bool: {
+        minimum_should_match: 1,
+        should: [
+          {
+            query_string: {
+              fields: ['host.name'],
+              query: '*prod*',
             },
           },
         ],
@@ -718,6 +833,91 @@ describe('timeSeriesQuery', () => {
         },
       },
     });
+  });
+});
+
+describe('fetchDataViewBase', () => {
+  const esClient = alertsMock.createRuleExecutorServices().scopedClusterClient.asCurrentUser;
+
+  it('builds a DataViewBase from fieldCaps response', async () => {
+    esClient.fieldCaps.mockResolvedValueOnce({
+      indices: ['my-index'] as estypes.Indices,
+      fields: {
+        'host.name': {
+          keyword: {
+            type: 'keyword',
+            metadata_field: false,
+            searchable: true,
+            aggregatable: true,
+          },
+        },
+        message: {
+          text: {
+            type: 'text',
+            metadata_field: false,
+            searchable: true,
+            aggregatable: false,
+          },
+        },
+        _id: {
+          _id: {
+            type: '_id',
+            metadata_field: true,
+            searchable: false,
+            aggregatable: false,
+          },
+        },
+      },
+    } as estypes.FieldCapsResponse);
+
+    const result = await fetchDataViewBase(esClient, 'my-index', ['host.name', 'message']);
+
+    expect(result.title).toBe('my-index');
+    expect(result.fields).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: 'host.name',
+          type: 'keyword',
+          esTypes: ['keyword'],
+          scripted: false,
+        }),
+        expect.objectContaining({
+          name: 'message',
+          type: 'text',
+          esTypes: ['text'],
+          scripted: false,
+        }),
+      ])
+    );
+    expect(result.fields.find((f) => f.name === '_id')).toBeUndefined();
+  });
+
+  it('joins multiple indices into the title', async () => {
+    esClient.fieldCaps.mockResolvedValueOnce({
+      indices: ['index-a', 'index-b'] as estypes.Indices,
+      fields: {},
+    } as estypes.FieldCapsResponse);
+
+    const result = await fetchDataViewBase(esClient, ['index-a', 'index-b'], ['some-field']);
+    expect(result.title).toBe('index-a,index-b');
+    expect(result.fields).toEqual([]);
+  });
+
+  it('passes project_routing to fieldCaps when provided', async () => {
+    esClient.fieldCaps.mockResolvedValueOnce({
+      indices: ['my-index'] as estypes.Indices,
+      fields: {},
+    } as estypes.FieldCapsResponse);
+
+    await fetchDataViewBase(esClient, 'my-index', ['host.name'], '_alias:*');
+
+    expect(esClient.fieldCaps).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: ['my-index'],
+        fields: ['host.name'],
+        project_routing: '_alias:*',
+      })
+    );
   });
 });
 

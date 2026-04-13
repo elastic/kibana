@@ -65,8 +65,8 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = (props) => {
     ? {
         name: props.agent.name,
         symbol: props.agent.avatar_symbol,
-        // Agent color can be overriden
-        color: props.color ?? props.agent.avatar_color,
+        // Agent color takes priority over the prop override
+        color: props.agent.avatar_color ?? props.color,
         readonly: props.agent.readonly,
         icon: props.agent.avatar_icon,
         agentId: props.agent.id,
@@ -87,6 +87,7 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = (props) => {
   const shouldUseIcon = !symbol && (isBuiltIn || isDefaultAgent || Boolean(icon));
 
   const borderAndShapeStyles = css`
+    line-height: 1;
     border: 1px solid ${euiTheme.colors.borderBaseSubdued};
     ${shape === 'circle' ? 'border-radius: 50%;' : roundedBorderRadiusStyles}
   `;
@@ -100,7 +101,7 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = (props) => {
     `;
     return (
       <EuiPanel hasBorder={false} hasShadow={false} css={panelStyles} paddingSize="xs">
-        <EuiIcon type={iconType} size={iconSize} />
+        <EuiIcon type={iconType} size={iconSize} aria-hidden={true} />
       </EuiPanel>
     );
   }

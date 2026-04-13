@@ -18,10 +18,11 @@ import {
   replaySignificantEventsSnapshot,
 } from '../../src/data_generators/replay';
 import { evaluate } from '../../src/evaluate';
+import type { KIFeatureExtractionOutput } from '../../src/evaluators/ki_feature_extraction';
 import {
   createKIFeatureExtractionEvaluators,
   getFeaturesFromOutput,
-} from '../../src/evaluators/ki_feature_extraction/evaluators';
+} from '../../src/evaluators/ki_feature_extraction';
 import { createCorrectnessEvaluators } from '../../src/evaluators/correctness/evaluators';
 import {
   getActiveDatasets,
@@ -84,7 +85,11 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
 
         await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
 
-        sampleDocuments = await collectSampleDocuments({ esClient, scenario, log });
+        sampleDocuments = await collectSampleDocuments({
+          esClient,
+          scenario,
+          log,
+        });
         if (sampleDocuments.length === 0) {
           throw new Error(`No log documents found after replaying snapshot ${source.snapshotName}`);
         }
@@ -109,7 +114,9 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
             {
               dataset: {
                 name: `sigevents: KI feature extraction: ${scenario.input.scenario_id} (${dataset.id})`,
-                description: `[${dataset.id}] KI feature extraction from ${scenario.metadata.failure_domain} / ${scenario.metadata.failure_mode}`,
+                description: `[${dataset.id}] KI feature extraction from ${
+                  scenario.metadata.failure_domain
+                }${scenario.metadata.failure_mode ? ` / ${scenario.metadata.failure_mode}` : ''}`,
                 examples: [
                   {
                     input: { sample_documents: sampleDocuments },
@@ -149,9 +156,11 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
                 log,
                 extractContext: (_input, metadata) => {
                   const meta = metadata as Record<string, unknown>;
-                  return `Identify key infrastructure features from log data. Failure domain: ${meta.failure_domain}, failure mode: ${meta.failure_mode}`;
+                  return `Identify key infrastructure features from log data. Failure domain: ${
+                    meta.failure_domain
+                  }${meta.failure_mode ? `, failure mode: ${meta.failure_mode}` : ''}`;
                 },
-                extractResponse: (output) => {
+                extractResponse: (output: KIFeatureExtractionOutput) => {
                   const features = getFeaturesFromOutput(output);
                   return features
                     .map(
