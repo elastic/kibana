@@ -12,6 +12,7 @@ import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { i18n } from '@kbn/i18n';
 import useLatest from 'react-use/lib/useLatest';
+import { handleEditInDashboard } from '../handle_edit_in_dashboard';
 
 export type SavedObjectStatus =
   | { status: 'idle' }
@@ -24,7 +25,6 @@ interface UseRegisterCanvasActionButtonsParams {
   updateOrigin: (origin: string) => Promise<unknown>;
   dashboardLocatorParams: DashboardLocatorParams;
   getExistingDashboardId: () => string | undefined;
-  isSidebar: boolean;
   closeCanvas: () => void;
   openSidebarConversation?: () => void;
 }
@@ -37,7 +37,6 @@ export const useRegisterCanvasActionButtons = ({
   openSidebarConversation,
   dashboardLocatorParams,
   getExistingDashboardId,
-  isSidebar,
 }: UseRegisterCanvasActionButtonsParams) => {
   const dashboardLocatorParamsRef = useLatest(dashboardLocatorParams);
   const getExistingDashboardIdRef = useLatest(getExistingDashboardId);
@@ -59,16 +58,13 @@ export const useRegisterCanvasActionButtons = ({
         }),
         type: ActionButtonType.PRIMARY,
         handler: async () => {
-          const existingAttachmentOrigin = getExistingDashboardIdRef.current();
-          await locator.navigate({
-            ...dashboardLocatorParamsRef.current,
-            dashboardId: existingAttachmentOrigin,
-            viewMode: 'edit',
+          await handleEditInDashboard({
+            locator,
+            getExistingDashboardId: async () => getExistingDashboardIdRef.current(),
+            dashboardLocatorParams: dashboardLocatorParamsRef.current,
           });
           closeCanvas();
-          if (!isSidebar) {
-            openSidebarConversationRef.current?.();
-          }
+          openSidebarConversationRef.current?.();
         },
       });
     }
@@ -100,6 +96,5 @@ export const useRegisterCanvasActionButtons = ({
     openSidebarConversationRef,
     dashboardLocatorParamsRef,
     getExistingDashboardIdRef,
-    isSidebar,
   ]);
 };

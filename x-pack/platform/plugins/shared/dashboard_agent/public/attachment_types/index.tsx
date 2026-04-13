@@ -13,6 +13,7 @@ import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
+import { attachmentDataToDashboardState } from '@kbn/dashboard-agent-common';
 import type {
   DashboardApi,
   DashboardRendererProps,
@@ -25,6 +26,7 @@ import { clearUnifiedSearchPersistedState } from './canvas_integration/use_dashb
 import { createDashboardAppIntegration$ } from './dashboard_integration/dashboard_app_integration';
 import { previewAttachmentInDashboard } from './dashboard_integration/preview_attachment';
 import { selectDashboardAttachmentForSync } from './dashboard_integration/select_dashboard_attachment_for_sync';
+import { handleEditInDashboard } from './handle_edit_in_dashboard';
 
 export const registerDashboardAttachmentUiDefinition = ({
   agentBuilder,
@@ -108,7 +110,7 @@ export const registerDashboardAttachmentUiDefinition = ({
         checkSavedDashboardExist={checkSavedDashboardExist}
       />
     ),
-    getActionButtons: ({ attachment, openCanvas, isCanvas, updateOrigin }) => {
+    getActionButtons: ({ attachment, openCanvas, isCanvas, isSidebar, updateOrigin }) => {
       if (isCanvas) {
         return [];
       }
@@ -120,6 +122,7 @@ export const registerDashboardAttachmentUiDefinition = ({
           icon: 'eye',
           type: ActionButtonType.SECONDARY,
           handler: () => {
+            // sidebar in dashboard experience - syncronize dashboard app to attachmen
             if (dashboardApi) {
               return previewAttachmentInDashboard({
                 attachment,
@@ -128,7 +131,25 @@ export const registerDashboardAttachmentUiDefinition = ({
                 updateOrigin,
               });
             }
-
+            // sidebar preview - open dashboard in sidebar if possible, otherwise open canvas preview
+            if (isSidebar && dashboardLocator) {
+              const dashboardState = attachmentDataToDashboardState(attachment.data);
+              return handleEditInDashboard({
+                locator: dashboardLocator,
+                getExistingDashboardId: async () => {
+                  if (!attachment.origin) {
+                    return undefined;
+                  }
+                  const exists = await checkSavedDashboardExist(attachment.origin);
+                  return exists ? attachment.origin : undefined;
+                },
+                dashboardLocatorParams: {
+                  ...dashboardState,
+                  viewMode: 'edit',
+                },
+              });
+            }
+            // full screen - open canvas
             openCanvas?.();
           },
         },

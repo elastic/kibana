@@ -61,7 +61,6 @@ const dashboardCanvasContentStyles = {
 };
 
 export const DashboardCanvasContent = ({
-  isSidebar,
   attachment,
   registerActionButtons,
   updateOrigin,
@@ -160,7 +159,6 @@ export const DashboardCanvasContent = ({
     openSidebarConversation,
     dashboardLocatorParams,
     getExistingDashboardId,
-    isSidebar,
     closeCanvas,
   });
 
