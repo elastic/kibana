@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-export * from './management';
-export * from './sync';
-export * from './csv_upload';
-export * from './entities';
-export * as WatchlistDataSources from './data_source';
+export const mockAssign = jest.fn();
+export const mockUnassign = jest.fn();
+
+export const createManualEntityService = jest.fn(() => ({
+  assign: mockAssign,
+  unassign: mockUnassign,
+}));

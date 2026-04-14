@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export * from './management';
-export * from './sync';
-export * from './csv_upload';
-export * from './entities';
-export * as WatchlistDataSources from './data_source';
+export const bulkRemoveSourceOperationsFactory = jest
+  .fn()
+  .mockReturnValue(() => [{ update: {} }, { script: {} }]);
+export const applyBulkRemoveSource = jest.fn().mockResolvedValue(undefined);

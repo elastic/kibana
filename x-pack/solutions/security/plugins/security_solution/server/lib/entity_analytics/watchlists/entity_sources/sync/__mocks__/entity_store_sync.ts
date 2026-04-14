@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-export * from './management';
-export * from './sync';
-export * from './csv_upload';
-export * from './entities';
-export * as WatchlistDataSources from './data_source';
+export const addWatchlistAttributeToStore = jest.fn().mockResolvedValue(undefined);
+export const removeWatchlistAttributeFromStore = jest.fn().mockResolvedValue(undefined);
