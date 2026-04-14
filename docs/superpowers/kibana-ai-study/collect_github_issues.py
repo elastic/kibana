@@ -6,6 +6,7 @@ import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Optional
 
 DATA_DIR = Path(__file__).parent / "data"
 OUTPUT_FILE = DATA_DIR / "issues.json"
@@ -27,7 +28,7 @@ def extract_impact(labels: list) -> str:
     return "unknown"
 
 
-def extract_defect_level(labels: list) -> int | None:
+def extract_defect_level(labels: list) -> Optional[int]:
     """Extract defect level from defect-level-* labels."""
     for label in labels:
         if label.startswith("defect-level-"):
