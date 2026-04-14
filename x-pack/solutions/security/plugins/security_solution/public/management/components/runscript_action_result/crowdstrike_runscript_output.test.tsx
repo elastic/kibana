@@ -32,11 +32,7 @@ describe('CrowdstrikeRunscriptOutput component', () => {
 
     render = () => {
       renderResult = appTestContext.render(
-        <CrowdstrikeRunscriptOutput
-          action={action}
-          agentId={'agent-a'}
-          data-test-subj="test"
-        />
+        <CrowdstrikeRunscriptOutput action={action} agentId={'agent-a'} data-test-subj="test" />
       );
 
       return renderResult;
@@ -105,9 +101,7 @@ describe('CrowdstrikeRunscriptOutput component', () => {
 
     const noOutput = renderResult.getByTestId('test-no-output');
     expect(noOutput).toBeInTheDocument();
-    expect(noOutput).toHaveTextContent(
-      'No output was returned for this runscript action.'
-    );
+    expect(noOutput).toHaveTextContent('No output was returned for this runscript action.');
   });
 
   it('should not reference file download in no-output message', () => {
