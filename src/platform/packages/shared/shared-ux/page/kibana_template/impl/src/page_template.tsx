@@ -18,6 +18,7 @@ import {
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template-types';
 
 import { KibanaPageTemplateInner, KibanaPageTemplateWithSolutionNav } from './page_template_inner';
+import { KibanaPageTemplateSection } from './kibana_page_template_section';
 
 export const _KibanaPageTemplate: FC<KibanaPageTemplateProps> = ({
   className,
@@ -70,7 +71,7 @@ export const _KibanaPageTemplate: FC<KibanaPageTemplateProps> = ({
 export const KibanaPageTemplate = Object.assign(_KibanaPageTemplate, {
   Sidebar: EuiPageTemplate.Sidebar,
   Header: EuiPageTemplate.Header,
-  Section: EuiPageTemplate.Section,
+  Section: KibanaPageTemplateSection,
   BottomBar: EuiPageTemplate.BottomBar,
   EmptyPrompt: EuiPageTemplate.EmptyPrompt,
 });

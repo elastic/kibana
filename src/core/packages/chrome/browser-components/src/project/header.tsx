@@ -308,18 +308,22 @@ export const ProjectHeader = React.memo(() => {
         font-weight: ${euiTheme.font.weight.regular};
       }
 
-      &&& .euiButtonEmpty__text,
+      &&& .euiButtonEmpty__content,
+      &&& .euiButtonEmpty__text {
+        color: ${euiTheme.colors.textSubdued};
+      }
+
       &&& .euiIcon {
         color: inherit;
       }
 
       &&& .projectHeaderSearchMultiple-countSuffix {
-        color: ${euiTheme.colors.textDisabled};
+        color: ${euiTheme.colors.textSubdued};
       }
 
       &&&:hover .projectHeaderSearchMultiple-countSuffix,
       &&&:focus .projectHeaderSearchMultiple-countSuffix {
-        color: ${euiTheme.colors.textDisabled};
+        color: ${euiTheme.colors.textSubdued};
       }
 
       &&& .euiIcon,
