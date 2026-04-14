@@ -14509,6 +14509,10 @@
               },
               {
                 "plugin": "slo",
+                "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_fetch_composite_slo_list.ts"
+              },
+              {
+                "plugin": "slo",
                 "path": "x-pack/solutions/observability/plugins/slo/public/pages/slos/hooks/use_fetch_slos_overview.ts"
               },
               {

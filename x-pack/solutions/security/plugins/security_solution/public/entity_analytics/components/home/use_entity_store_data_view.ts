@@ -6,16 +6,22 @@
  */
 
 import { useEffect, useState, useRef } from 'react';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/public';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';
+
 import { getEntitiesAlias, ENTITY_LATEST } from './constants';
+
+const INITIAL_DV = new DataView({
+  fieldFormats: {} as FieldFormatsStartCommon,
+});
 
 export const useEntityStoreDataView = (spaceId: string | undefined) => {
   const {
     data: { dataViews },
   } = useKibana().services;
 
-  const [dataView, setDataView] = useState<DataView | undefined>(undefined);
+  const [dataView, setDataView] = useState<DataView>(INITIAL_DV);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | undefined>(undefined);
   const createdRef = useRef<string | undefined>(undefined);

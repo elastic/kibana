@@ -7,7 +7,8 @@
     "__mocks__/**/*",
     "common/**/*",
     "public/**/*",
-    "server/**/*"
+    "server/**/*",
+    "test/scout_inference_test/**/*"
   ],
   "kbn_references": [
     "@kbn/config-schema",
@@ -45,7 +46,8 @@
     "@kbn/core-security-server",
     "@kbn/inference-common",
     "@kbn/inference-plugin",
-    "@kbn/management-settings-ids"
+    "@kbn/management-settings-ids",
+    "@kbn/scout"
   ],
   "exclude": [
     "target/**/*"
