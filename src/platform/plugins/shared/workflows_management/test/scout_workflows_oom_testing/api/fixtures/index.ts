@@ -36,8 +36,10 @@ export const spaceTest = spaceBaseTest.extend<{}, WorkflowsWorkerFixtures>({
       },
       use: (extendedApiServices: WorkflowsApiServicesFixture) => Promise<void>
     ) => {
-      const extendedApiServices = apiServices as WorkflowsApiServicesFixture;
-      extendedApiServices.workflowsApi = new WorkflowsApiService(scoutSpace.id, kbnClient);
+      const extendedApiServices: WorkflowsApiServicesFixture = {
+        ...apiServices,
+        workflowsApi: new WorkflowsApiService(scoutSpace.id, kbnClient),
+      };
       await use(extendedApiServices);
     },
     { scope: 'worker' },

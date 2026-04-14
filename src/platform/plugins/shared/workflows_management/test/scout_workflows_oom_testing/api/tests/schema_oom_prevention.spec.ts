@@ -97,6 +97,7 @@ steps:
 `;
     const result = await workflowsApi.validate(invalidYaml);
     expect(result.valid).toBe(false);
+    expect(result.diagnostics.length).toBeGreaterThan(0);
   });
 
   spaceTest('create multi-step workflow succeeds under 1 GB heap', async () => {
