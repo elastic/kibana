@@ -547,7 +547,9 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               showDescriptionColumn={!isSingleInputAndStreams}
               streamAdvancedVars={consolidatedStreamAdvancedVars}
             />
-            {hasInputStreams && !shouldConsolidateAdvancedSections ? (
+            {hasInputStreams &&
+            !shouldConsolidateAdvancedSections &&
+            packageInput.show_divider !== false ? (
               <ShortenedHorizontalRule margin="m" />
             ) : (
               <EuiSpacer size="l" />
