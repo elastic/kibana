@@ -24,12 +24,9 @@ tags:
   - dev
   - group-platform
   - private
-  - jest-unit-tests
 fileGroups:
   src:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}
