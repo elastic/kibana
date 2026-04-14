@@ -215,9 +215,10 @@ export const createLeadDataClient = ({
             `[LeadGeneration] Bulk indexing had ${failedItems.length}/${leads.length} failures ` +
               `(executionId=${executionId}, index=${indexName}): ${JSON.stringify(failedIds)}`
           );
-        } else {
-          logger.debug(`[LeadGeneration] Persisted ${leads.length} leads to "${indexName}"`);
+          return;
         }
+
+        logger.debug(`[LeadGeneration] Persisted ${leads.length} leads to "${indexName}"`);
       }
 
       await esClient.deleteByQuery({
