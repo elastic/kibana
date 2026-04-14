@@ -47,6 +47,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server/plugin';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
@@ -145,6 +146,7 @@ import { getPackageSpecTagId } from './services/epm/kibana/assets/tag_assets';
 import { FleetMetricsTask } from './services/metrics/fleet_metrics_task';
 import { fetchAgentMetrics } from './services/metrics/fetch_agent_metrics';
 import { registerFieldsMetadataExtractors } from './services/register_fields_metadata_extractors';
+import { registerAgentBuilderTools } from './agent_builder/register_tools';
 import { registerUpgradeManagedPackagePoliciesTask } from './services/setup/managed_package_policies';
 import { registerDeployAgentPoliciesTask } from './services/agent_policies/deploy_agent_policies_task';
 import { DeleteUnenrolledAgentsTask } from './tasks/delete_unenrolled_agents_task';
@@ -178,6 +180,7 @@ import { registerReassignAgentsToVersionSpecificPoliciesTask } from './services/
 import { VersionSpecificPolicyAssignmentTask } from './tasks/version_specific_policy_assignment_task';
 
 export interface FleetSetupDeps {
+  agentBuilder?: AgentBuilderPluginSetup;
   security: SecurityPluginSetup;
   features?: FeaturesPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
@@ -699,6 +702,11 @@ export class FleetPlugin
     registerRoutes(fleetAuthzRouter, config, isServerless);
 
     this.telemetryEventsSender.setup(deps.telemetry);
+
+    if (deps.agentBuilder) {
+      registerAgentBuilderTools({ agentBuilder: deps.agentBuilder, core });
+    }
+
     // Register tasks
     registerUpgradeManagedPackagePoliciesTask(deps.taskManager);
     registerDeployAgentPoliciesTask(deps.taskManager);

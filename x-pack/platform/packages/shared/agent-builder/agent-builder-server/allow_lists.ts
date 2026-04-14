@@ -21,6 +21,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // Alerting
   `${internalNamespaces.platformAlerting}.manage_rule`,
 
+  // Fleet
+  `${internalNamespaces.fleet}.list_installed_integrations`,
+
   // Observability
   `${internalNamespaces.observability}.get_anomaly_detection_jobs`,
   `${internalNamespaces.observability}.run_log_rate_analysis`,
