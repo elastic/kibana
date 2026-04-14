@@ -21,6 +21,57 @@
     "functions": [
       {
         "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.AgentBuilderAnnouncementModal",
+        "type": "Function",
+        "tags": [],
+        "label": "AgentBuilderAnnouncementModal",
+        "description": [],
+        "signature": [
+          "({ onRevert, onContinue, canRevertToAssistant, }: ",
+          {
+            "pluginId": "@kbn/agent-builder-browser",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderBrowserPluginApi",
+            "section": "def-common.AgentBuilderAnnouncementModalProps",
+            "text": "AgentBuilderAnnouncementModalProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/announcement_modal/agent_builder_announcement_modal.tsx",
+        "lineNumber": 39,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.AgentBuilderAnnouncementModal.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  onRevert,\n  onContinue,\n  canRevertToAssistant = true,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-browser",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                "section": "def-common.AgentBuilderAnnouncementModalProps",
+                "text": "AgentBuilderAnnouncementModalProps"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/announcement_modal/agent_builder_announcement_modal.tsx",
+            "lineNumber": 39,
+            "columnNumber": 93,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
         "id": "def-common.formatAgentBuilderErrorMessage",
         "type": "Function",
         "tags": [],
@@ -109,6 +160,76 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.AgentBuilderAnnouncementModalProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "AgentBuilderAnnouncementModalProps",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/announcement_modal/agent_builder_announcement_modal.tsx",
+        "lineNumber": 29,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.AgentBuilderAnnouncementModalProps.onRevert",
+            "type": "Function",
+            "tags": [],
+            "label": "onRevert",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/announcement_modal/agent_builder_announcement_modal.tsx",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.AgentBuilderAnnouncementModalProps.onContinue",
+            "type": "Function",
+            "tags": [],
+            "label": "onContinue",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/announcement_modal/agent_builder_announcement_modal.tsx",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.AgentBuilderAnnouncementModalProps.canRevertToAssistant",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "canRevertToAssistant",
+            "description": [
+              "\nWhen false, the revert action is hidden and copy explains that only admins with\nGen AI / space settings access can switch the space back to the legacy Assistant."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/announcement_modal/agent_builder_announcement_modal.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/agent-builder-browser",
         "id": "def-common.AgentsServiceStartContract",
