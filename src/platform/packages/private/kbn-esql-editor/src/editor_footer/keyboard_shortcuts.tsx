@@ -97,6 +97,7 @@ export function KeyboardShortcuts() {
   return (
     <>
       <EuiPopover
+        aria-labelledby={labelId}
         data-test-subj="editorKeyboardShortcutsPopover"
         isOpen={isOpen}
         closePopover={() => setIsOpen(false)}

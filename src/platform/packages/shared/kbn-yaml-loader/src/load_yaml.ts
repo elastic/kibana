@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrProviderContext } from '../../../../ftr_provider_context';
-
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('create_runtime_field', () => {
-    loadTestFile(require.resolve('./errors'));
-    loadTestFile(require.resolve('./main'));
-  });
-}
+/**
+ * Loads the yaml package asynchronously. Use this in browser code to avoid
+ * pulling the full yaml library into the initial bundle.
+ * The returned promise resolves to the yaml module (parse, stringify, Document, etc.).
+ */
+export const loadYaml = (): Promise<typeof import('yaml')> => {
+  return import('yaml');
+};
