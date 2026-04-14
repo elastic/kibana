@@ -234,8 +234,6 @@ export default function oauthFullFlowTests({ getService }: FtrProviderContext) {
       });
 
       it('connector execution refreshes expired token', async function () {
-        this.timeout(3000);
-
         const simulatorBaseRaw = kibanaServer.resolveUrl(
           getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
         );
