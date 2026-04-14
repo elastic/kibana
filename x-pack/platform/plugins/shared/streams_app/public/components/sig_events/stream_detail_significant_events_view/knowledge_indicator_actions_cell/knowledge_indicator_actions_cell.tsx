@@ -7,9 +7,8 @@
 
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Streams } from '@kbn/streams-schema';
-import { QUERY_TYPE_STATS } from '@kbn/streams-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
+import { isComputedFeature, QUERY_TYPE_STATS } from '@kbn/streams-schema';
 import React, { useMemo, useState } from 'react';
 import {
   useKnowledgeIndicatorActions,
@@ -21,66 +20,78 @@ import {
 import { STATS_PROMOTE_DISABLED_TOOLTIP } from '../../significant_events_discovery/components/queries_table/translations';
 
 interface Props {
-  definition: Streams.all.Definition;
+  streamName: string;
   knowledgeIndicator: KnowledgeIndicator;
   onDeleteRequest: (knowledgeIndicator: KnowledgeIndicator) => void;
 }
 
 export function KnowledgeIndicatorActionsCell({
-  definition,
+  streamName,
   knowledgeIndicator,
   onDeleteRequest,
 }: Props) {
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
   const { excludeFeature, restoreFeature, promoteQuery, isMutating } = useKnowledgeIndicatorActions(
-    { definition }
+    { streamName }
   );
 
-  const featureActionItems = useMemo(
-    () =>
-      knowledgeIndicator.kind === 'feature'
-        ? [
-            knowledgeIndicator.feature.excluded_at ? (
-              <EuiContextMenuItem
-                key="feature-restore"
-                icon="eye"
-                disabled={isMutating}
-                onClick={() => {
-                  setIsActionsMenuOpen(false);
-                  restoreFeature(knowledgeIndicator.feature.uuid);
-                }}
-              >
-                {RESTORE_LABEL}
-              </EuiContextMenuItem>
-            ) : (
-              <EuiContextMenuItem
-                key="feature-exclude"
-                icon="eyeClosed"
-                disabled={isMutating}
-                onClick={() => {
-                  setIsActionsMenuOpen(false);
-                  excludeFeature(knowledgeIndicator.feature.uuid);
-                }}
-              >
-                {EXCLUDE_LABEL}
-              </EuiContextMenuItem>
-            ),
-            <EuiContextMenuItem
-              key="feature-delete"
-              icon="trash"
-              color="danger"
-              disabled={isMutating}
-              onClick={() => {
-                setIsActionsMenuOpen(false);
-                onDeleteRequest(knowledgeIndicator);
-              }}
-            >
-              {DELETE_LABEL}
-            </EuiContextMenuItem>,
-          ]
-        : [],
-    [excludeFeature, isMutating, knowledgeIndicator, onDeleteRequest, restoreFeature]
-  );
+  const featureActionItems = useMemo(() => {
+    if (knowledgeIndicator.kind !== 'feature') {
+      return [];
+    }
+
+    const items: React.ReactElement[] = [];
+    const computed = isComputedFeature(knowledgeIndicator.feature);
+
+    if (!computed) {
+      if (knowledgeIndicator.feature.excluded_at) {
+        items.push(
+          <EuiContextMenuItem
+            key="feature-restore"
+            icon="eye"
+            disabled={isMutating}
+            onClick={() => {
+              setIsActionsMenuOpen(false);
+              restoreFeature(knowledgeIndicator.feature.uuid);
+            }}
+          >
+            {RESTORE_LABEL}
+          </EuiContextMenuItem>
+        );
+      } else {
+        items.push(
+          <EuiContextMenuItem
+            key="feature-exclude"
+            icon="eyeClosed"
+            disabled={isMutating}
+            onClick={() => {
+              setIsActionsMenuOpen(false);
+              excludeFeature(knowledgeIndicator.feature.uuid);
+            }}
+          >
+            {EXCLUDE_LABEL}
+          </EuiContextMenuItem>
+        );
+      }
+    }
+
+    items.push(
+      <EuiContextMenuItem
+        key="feature-delete"
+        icon="trash"
+        color="danger"
+        disabled={isMutating}
+        onClick={() => {
+          setIsActionsMenuOpen(false);
+          onDeleteRequest(knowledgeIndicator);
+        }}
+      >
+        {DELETE_LABEL}
+      </EuiContextMenuItem>
+    );
+
+    return items;
+  }, [excludeFeature, isMutating, knowledgeIndicator, onDeleteRequest, restoreFeature]);
 
   const queryActionItems = useMemo(() => {
     if (knowledgeIndicator.kind !== 'query') return [];
