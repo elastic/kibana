@@ -6,11 +6,11 @@
  */
 
 import React, { useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { useCreateAlertAction } from '../../hooks/use_create_alert_action';
 import { EpisodeActionButton } from './episode_action_button';
+import * as i18n from './translations';
 
 export interface AlertEpisodeAcknowledgeActionButtonProps {
   lastAckAction?: string | null;
@@ -34,12 +34,8 @@ export function AlertEpisodeAcknowledgeActionButton({
   const { mutate: createAlertAction, isLoading } = useCreateAlertAction(http);
 
   const label = isAcknowledged
-    ? i18n.translate('xpack.alertingV2.episodesUi.acknowledgeAction.unacknowledge', {
-        defaultMessage: 'Unacknowledge',
-      })
-    : i18n.translate('xpack.alertingV2.episodesUi.acknowledgeAction.acknowledge', {
-        defaultMessage: 'Acknowledge',
-      });
+    ? i18n.ACKNOWLEDGE_ACTION_UNACKNOWLEDGE
+    : i18n.ACKNOWLEDGE_ACTION_ACKNOWLEDGE;
 
   const handleClick = useCallback(() => {
     if (!episodeId || !groupHash) {

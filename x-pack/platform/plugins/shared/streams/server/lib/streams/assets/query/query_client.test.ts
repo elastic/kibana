@@ -75,6 +75,7 @@ const createQueryClient = ({
 
 const createQuery = (overrides: Partial<StreamQuery> = {}): StreamQuery => ({
   id: 'test-query-id',
+  type: 'match',
   title: 'SSH Brute Force Detection',
   description: 'Detects repeated failed SSH login attempts from a single source IP',
   esql: { query: 'FROM logs-* | WHERE event.action == "ssh_login" AND event.outcome == "failure"' },
@@ -192,6 +193,7 @@ describe('QueryClient backward compatibility', () => {
         rule_id: 'rule-old-1',
         query: {
           id: 'query-old-1',
+          type: 'match',
           title: 'SSH Failed Logins',
           description: 'Detects failed SSH login attempts',
           esql: {
