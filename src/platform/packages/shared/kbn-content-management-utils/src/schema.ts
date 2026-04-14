@@ -77,7 +77,14 @@ export const objectTypeToGetResultSchema = <T extends ObjectType<any>>(soSchema:
 export const createOptionsSchemas = {
   id: schema.maybe(schema.string()),
   references: schema.maybe(referencesSchema),
-  overwrite: schema.maybe(schema.boolean()),
+  overwrite: schema.maybe(
+    schema.boolean({
+      meta: {
+        description:
+          'When `true`, replaces an existing saved object with the same ID. Defaults to `false`.',
+      },
+    })
+  ),
   version: schema.maybe(schema.string()),
   refresh: schema.maybe(schema.boolean()),
   initialNamespaces: schema.maybe(schema.arrayOf(schema.string())),
@@ -88,13 +95,21 @@ export const schemaAndOr = schema.oneOf([schema.literal('AND'), schema.literal('
 
 // its recommended to create a subset of this schema for stricter validation
 export const searchOptionsSchemas = {
-  page: schema.maybe(schema.number()),
-  perPage: schema.maybe(schema.number()),
+  page: schema.maybe(schema.number({ meta: { description: 'Page number.' } })),
+  perPage: schema.maybe(schema.number({ meta: { description: 'Number of results per page.' } })),
   sortField: schema.maybe(schema.string()),
   sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
-  fields: schema.maybe(schema.arrayOf(schema.string())),
+  fields: schema.maybe(
+    schema.arrayOf(schema.string(), {
+      meta: { description: 'Fields to include in each result. When omitted, all fields are returned.' },
+    })
+  ),
   search: schema.maybe(schema.string()),
-  searchFields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+  searchFields: schema.maybe(
+    schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+      meta: { description: 'Fields to search within. Has no effect when no search query is specified.' },
+    })
+  ),
   rootSearchFields: schema.maybe(schema.arrayOf(schema.string())),
 
   hasReference: schema.maybe(schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema)])),
