@@ -43,16 +43,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
 
       /* start by adding some incomplete data so that we can test `exists` query */
-      await common.navigateToApp('console');
-      await console.skipTourIfExists();
-      await console.clearEditorText();
-      await addDocument(
-        'animals-cats-2018-01-01',
-        '"@timestamp": "2018-01-01T16:00:00.000Z", \n"animal": "cat"'
-      );
-      await addDocument(
-        'animals-dogs-2018-01-01',
-        '"@timestamp": "2018-01-01T16:00:00.000Z", \n"name": "Max", \n"sound": "woof"'
+      await esArchiver.load(
+        'src/platform/test/functional/fixtures/es_archiver/dashboard_elements/controls/chaining'
       );
 
       /* then, create our testing dashboard */
