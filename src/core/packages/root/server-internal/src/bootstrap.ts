@@ -14,6 +14,7 @@ import { Env, RawConfigService } from '@kbn/config';
 import { CriticalError } from '@kbn/core-base-server-internal';
 import { Root } from './root';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
+import { maybeStartMemoryProfileCsv } from './memory_profile';
 
 interface BootstrapArgs {
   configs: string[];
@@ -53,7 +54,7 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   const cliLogger = root.logger.get('cli');
   const rootLogger = root.logger.get('root');
 
-  rootLogger.info('Kibana is starting');
+  rootLogger.info('Kibana is starting (HERE)');
 
   cliLogger.debug('Kibana configurations evaluated in this order: ' + env.configs.join(', '));
 
@@ -97,6 +98,8 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   }
 
   try {
+    maybeStartMemoryProfileCsv(rootLogger);
+
     const prebootContract = await root.preboot();
     let isSetupOnHold = false;
 
