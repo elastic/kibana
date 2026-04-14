@@ -11,6 +11,7 @@ import { SCOUT_SERVERS_ROOT } from '@kbn/scout-info';
 import {
   generateTestRunId,
   scoutFailedTestsReporter,
+  scoutFailureSummaryReporter,
   scoutPlaywrightReporter,
 } from '@kbn/scout-reporting';
 import { VALID_CONFIG_MARKER } from '../types';
@@ -21,6 +22,7 @@ jest.mock('@kbn/scout-reporting', () => ({
   generateTestRunId: jest.fn(),
   scoutPlaywrightReporter: jest.fn(),
   scoutFailedTestsReporter: jest.fn(),
+  scoutFailureSummaryReporter: jest.fn(),
 }));
 
 describe('createPlaywrightConfig', () => {
@@ -28,6 +30,7 @@ describe('createPlaywrightConfig', () => {
   const mockGenerateTestRunId = generateTestRunId as jest.Mock;
   const mockedScoutPlaywrightReporter = scoutPlaywrightReporter as jest.Mock;
   const mockedScoutFailedTestsReporter = scoutFailedTestsReporter as jest.Mock;
+  const mockedScoutFailureSummaryReporter = scoutFailureSummaryReporter as jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -39,6 +42,7 @@ describe('createPlaywrightConfig', () => {
     // Scout reporters are disabled by default
     mockedScoutPlaywrightReporter.mockReturnValueOnce(['null']);
     mockedScoutFailedTestsReporter.mockReturnValueOnce(['null']);
+    mockedScoutFailureSummaryReporter.mockReturnValueOnce(['null']);
 
     const testDir = './my_tests';
     const config = createPlaywrightConfig({ testDir });
@@ -66,6 +70,7 @@ describe('createPlaywrightConfig', () => {
       ['json', { outputFile: './.scout/reports/test-results.json' }],
       ['null'],
       ['null'],
+      ['null'],
     ]);
     expect(config.timeout).toBe(60000);
     expect(config.expect?.timeout).toBe(10000);
@@ -84,6 +89,10 @@ describe('createPlaywrightConfig', () => {
       '@kbn/scout-reporting/src/reporting/playwright/failed_test',
       { name: 'scout-playwright-failed-tests', runId: mockedRunId },
     ]);
+    mockedScoutFailureSummaryReporter.mockReturnValueOnce([
+      '@kbn/scout-reporting/src/reporting/playwright/failure_summary',
+      { name: 'scout-failure-summary', runId: mockedRunId },
+    ]);
 
     const testDir = './my_tests';
     const config = createPlaywrightConfig({ testDir });
@@ -99,6 +108,10 @@ describe('createPlaywrightConfig', () => {
       [
         '@kbn/scout-reporting/src/reporting/playwright/failed_test',
         { name: 'scout-playwright-failed-tests', runId: mockedRunId },
+      ],
+      [
+        '@kbn/scout-reporting/src/reporting/playwright/failure_summary',
+        { name: 'scout-failure-summary', runId: mockedRunId },
       ],
     ]);
   });
