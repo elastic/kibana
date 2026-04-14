@@ -12,10 +12,7 @@ import { queryKeys } from '../query_keys';
 import type { UseAlertingEpisodesDataViewOptions } from './use_alerting_episodes_data_view';
 import { useAlertingEpisodesDataView } from './use_alerting_episodes_data_view';
 import { fetchAlertingEpisodes } from '../apis/fetch_alerting_episodes';
-import {
-  type EpisodesFilterState,
-  type EpisodesSortState,
-} from '../utils/build_episodes_esql_query';
+import { type EpisodesFilterState, type EpisodesSortState } from '../queries/episodes_query';
 
 export interface UseFetchAlertingEpisodesQueryOptions {
   pageSize: number;
@@ -32,6 +29,9 @@ const DEFAULT_SORT: EpisodesSortState = { sortField: '@timestamp', sortDirection
 /**
  * Hook to fetch alerting episodes data with filters and sort.
  * Returns an ad-hoc data view too, constructed from the query columns.
+ *
+ * Deactivation state is resolved server-side in the ESQL query via an
+ * `effective_status` column, so no separate pre-fetch is needed.
  */
 export const useFetchAlertingEpisodesQuery = ({
   pageSize,
@@ -43,22 +43,19 @@ export const useFetchAlertingEpisodesQuery = ({
   const dataView = useAlertingEpisodesDataView({ services });
 
   const queryKey = queryKeys.list(pageSize, filterState, sortState, timeRange ?? undefined);
+
   const query = useQuery({
     enabled: dataView != null,
     queryKey,
-    queryFn: async ({ signal: abortSignal }) => {
-      if (!dataView) {
-        return { type: 'datatable' as const, columns: [], rows: [], total: 0 };
-      }
-      return await fetchAlertingEpisodes({
+    queryFn: ({ signal: abortSignal }) =>
+      fetchAlertingEpisodes({
         abortSignal,
         pageSize,
         services,
         filterState,
         sortState,
         timeRange,
-      });
-    },
+      }),
     keepPreviousData: true,
   });
 

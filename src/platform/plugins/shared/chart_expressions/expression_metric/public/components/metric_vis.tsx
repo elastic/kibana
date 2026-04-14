@@ -360,7 +360,6 @@ export const MetricVis = ({
                   iconAlign: config.metric.iconAlign,
                   valueFontSize: config.metric.valueFontSize,
                   valuePosition: config.metric.primaryPosition,
-                  titleWeight: config.metric.titleWeight,
                 },
               },
               ...(Array.isArray(settingsThemeOverrides)

@@ -27,11 +27,23 @@ import { getOrCreateFilterStore, destroyFilterStore } from './filter_store';
  */
 export const useGraphFilters = (
   scopeId: string,
+  initialEntityIds: Array<{
+    /**
+     * The ID of the entity.
+     */
+    id: string;
+
+    /**
+     * Whether this entity is the origin of the graph (for centering).
+     */
+    isOrigin: boolean;
+  }>,
   dataViewId: string
 ): {
   searchFilters: Filter[];
   setSearchFilters: (filters: Filter[]) => void;
   entityIdsForApi: Array<{ id: string; isOrigin: boolean }> | undefined;
+  pinnedEuids: string[];
 } => {
   // Get or create the FilterStore for this scopeId
   const store = useMemo(() => getOrCreateFilterStore(scopeId), [scopeId]);
@@ -39,7 +51,8 @@ export const useGraphFilters = (
   // Update dataViewId when it changes
   useEffect(() => {
     store.setDataViewId(dataViewId);
-  }, [store, dataViewId]);
+    store.setInitialEntityIds(initialEntityIds);
+  }, [store, dataViewId, initialEntityIds]);
 
   // Clean up store on unmount or when scopeId changes
   useEffect(() => {
@@ -89,19 +102,44 @@ export const useGraphFilters = (
     [store]
   );
 
+  // Subscribe function for useSyncExternalStore (pinned EUIDs)
+  const subscribeToPinnedEuids = useCallback(
+    (onStoreChange: () => void) => {
+      const subscription = store.subscribeToPinnedEuids(onStoreChange);
+      return () => subscription.unsubscribe();
+    },
+    [store]
+  );
+
+  // Snapshot function for useSyncExternalStore (pinned EUIDs)
+  const getPinnedEuidsSnapshot = useCallback(() => store.getPinnedEuids(), [store]);
+
+  const pinnedEuidsSet = useSyncExternalStore(
+    subscribeToPinnedEuids,
+    getPinnedEuidsSnapshot,
+    getPinnedEuidsSnapshot
+  );
+
+  const pinnedEuids = useMemo(() => Array.from(pinnedEuidsSet), [pinnedEuidsSet]);
+
   // Convert expandedEntityIds Set to API format
   const entityIdsForApi = useMemo(() => {
-    if (expandedEntityIds.size === 0) return undefined;
+    if (expandedEntityIds.size === 0) return initialEntityIds;
 
-    return Array.from(expandedEntityIds).map((id) => ({
-      id,
-      isOrigin: false, // User-expanded entities are not the graph origin
-    }));
-  }, [expandedEntityIds]);
+    return initialEntityIds.concat(
+      Array.from(expandedEntityIds)
+        .filter((id) => !initialEntityIds.some((entity) => entity.id === id))
+        .map((id) => ({
+          id,
+          isOrigin: false, // User-expanded entities are not the graph origin
+        }))
+    );
+  }, [expandedEntityIds, initialEntityIds]);
 
   return {
     searchFilters,
     setSearchFilters,
     entityIdsForApi,
+    pinnedEuids,
   };
 };

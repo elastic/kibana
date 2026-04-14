@@ -4419,18 +4419,19 @@
           {
             "parentPluginId": "@kbn/streams-schema",
             "id": "def-common.IngestBase.processing",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "processing",
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/streams-schema",
+                "pluginId": "@kbn/streamlang",
                 "scope": "common",
-                "docId": "kibKbnStreamsSchemaPluginApi",
-                "section": "def-common.IngestStreamProcessing",
-                "text": "IngestStreamProcessing"
-              }
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.StreamlangDSL",
+                "text": "StreamlangDSL"
+              },
+              " & { updated_at: string; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/base.ts",
             "lineNumber": 62,
@@ -4606,52 +4607,6 @@
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
             "lineNumber": 32,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/streams-schema",
-        "id": "def-common.IngestStreamProcessing",
-        "type": "Interface",
-        "tags": [],
-        "label": "IngestStreamProcessing",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.IngestStreamProcessing",
-            "text": "IngestStreamProcessing"
-          },
-          " extends ",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.StreamlangDSL",
-            "text": "StreamlangDSL"
-          }
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/processing.ts",
-        "lineNumber": 11,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/streams-schema",
-            "id": "def-common.IngestStreamProcessing.updated_at",
-            "type": "string",
-            "tags": [],
-            "label": "updated_at",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/processing.ts",
-            "lineNumber": 12,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6180,11 +6135,11 @@
           "StrictOmit",
           "<",
           {
-            "pluginId": "@kbn/streams-schema",
+            "pluginId": "@kbn/streamlang",
             "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.IngestStreamProcessing",
-            "text": "IngestStreamProcessing"
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangDSLWithUpdatedAt",
+            "text": "StreamlangDSLWithUpdatedAt"
           },
           ", \"updated_at\">; } & ",
           "IngestClassic"
@@ -6852,6 +6807,32 @@
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
         "lineNumber": 54,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.IngestStreamProcessing",
+        "type": "Type",
+        "tags": [],
+        "label": "IngestStreamProcessing",
+        "description": [
+          "Streamlang on ingest plus the `updated_at` cursor managed by the stack."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangDSL",
+            "text": "StreamlangDSL"
+          },
+          " & { updated_at: string; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/processing.ts",
+        "lineNumber": 11,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7676,6 +7657,63 @@
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/stream_name_validation.ts",
         "lineNumber": 70,
         "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.STREAMS_INFERENCE_PARENT_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "STREAMS_INFERENCE_PARENT_FEATURE_ID",
+        "description": [
+          "Parent feature for Streams (Inference Feature Registry)."
+        ],
+        "signature": [
+          "\"streams\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/inference_feature_ids.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.STREAMS_PARTITIONING_SUGGESTIONS_INFERENCE_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "STREAMS_PARTITIONING_SUGGESTIONS_INFERENCE_FEATURE_ID",
+        "description": [
+          "Partitioning suggestions."
+        ],
+        "signature": [
+          "\"streams_partitioning_suggestions\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/inference_feature_ids.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.STREAMS_PROCESSING_SUGGESTIONS_INFERENCE_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "STREAMS_PROCESSING_SUGGESTIONS_INFERENCE_FEATURE_ID",
+        "description": [
+          "Processing suggestions (pipelines, grok/dissect processors)."
+        ],
+        "signature": [
+          "\"streams_processing_suggestions\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/inference_feature_ids.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8555,11 +8593,11 @@
           "StrictOmit",
           "<",
           {
-            "pluginId": "@kbn/streams-schema",
+            "pluginId": "@kbn/streamlang",
             "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.IngestStreamProcessing",
-            "text": "IngestStreamProcessing"
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangDSLWithUpdatedAt",
+            "text": "StreamlangDSLWithUpdatedAt"
           },
           ", \"updated_at\">; } & IngestWired"
         ],

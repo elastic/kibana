@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import {
   waitForPluginInitialized,
-  cleanupEntityStore,
   waitForEntityDataIndexed,
   dataViewRouteHelpersFactory,
-  initEntityEnginesWithRetry,
+  installEntityStoreV2,
+  uninstallEntityStoreV2,
+  waitForEntityStoreV2Running,
 } from '../../../cloud_security_posture_api/utils';
 import type { SecurityTelemetryFtrProviderContext } from '../../config.base';
 
@@ -62,24 +62,23 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await waitForPluginInitialized({ retry, supertest, logger });
       await ebtUIHelper.setOptIn(true); // starts the recording of events from this moment
 
-      // Enable asset inventory setting (required for entity store with 'generic' type)
-      await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });
+      // Enable asset inventory and entity store v2 settings
+      await kibanaServer.uiSettings.update({
+        'securitySolution:enableAssetInventory': true,
+        'securitySolution:entityStoreEnableV2': true,
+      });
 
       // Initialize security-solution-default data-view (required by entity store)
       const dataView = dataViewRouteHelpersFactory(supertest);
       await dataView.create('security-solution');
 
-      // Initialize entity engine (required for graph visualization)
-      await initEntityEnginesWithRetry({
-        supertest,
-        retry,
-        logger,
-        entityTypes: ['generic'],
-      });
+      // Install Entity Store V2 (required for graph visualization)
+      await installEntityStoreV2({ supertest, logger });
+      await waitForEntityStoreV2Running({ supertest, retry, logger });
     });
 
     after(async () => {
-      await cleanupEntityStore({ supertest, logger });
+      await uninstallEntityStoreV2({ supertest, logger });
       await es.deleteByQuery({
         index: '.internal.alerts-*',
         query: { match_all: {} },
@@ -284,8 +283,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
     });
 
     describe('ECS fields only', function () {
-      // Entity store engine is already initialized at the parent level — reused here.
-      // Tests run sequentially: first v1 (ENRICH), then v2 (LOOKUP JOIN)
+      // Entity store v2 is installed at the parent level for graph visibility.
+      // Enrichment tests use LOOKUP JOIN (v2) with custom entity data loaded via esArchiver.
       before(async () => {
         await es.deleteByQuery({
           index: '.internal.alerts-*',
@@ -293,24 +292,10 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           conflicts: 'proceed',
         });
 
-        try {
-          // delete v2 index manually since its not being deleted by the cleanupEntityStore function
-          await es.indices.delete({
-            index: getEntitiesLatestIndexName(),
-            ignore_unavailable: true,
-          });
-        } catch (e) {
-          // Ignore if index doesn't exist
-        }
-
-        // Load alerts data (shared by both v1 and v2 tests)
+        // Load alerts data
         await esArchiver.load(
           'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/security_alerts_ecs_only_mappings'
         );
-      });
-
-      after(async () => {
-        // Entity store cleanup is handled by the parent after hook
       });
 
       // Shared test suite that registers all test cases - called from both v1 and v2 describe blocks
@@ -350,11 +335,11 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
           await expandedFlyoutGraph.expectFilterTextEquals(
             0,
-            'user.email: serviceaccount@example.com OR user.id: serviceaccount@example.com OR user.name: Service Account'
+            'user.name: Service Account OR user.email: serviceaccount@example.com OR user.id: serviceaccount@example.com'
           );
           await expandedFlyoutGraph.expectFilterPreviewEquals(
             0,
-            'user.email: serviceaccount@example.com OR user.id: serviceaccount@example.com OR user.name: Service Account'
+            'user.name: Service Account OR user.email: serviceaccount@example.com OR user.id: serviceaccount@example.com'
           );
 
           await expandedFlyoutGraph.showEntityDetails('d45b28b33930cc202a6c9d8d8eab3ae6');
@@ -438,17 +423,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       describe('via LOOKUP JOIN (v2)', () => {
         before(async () => {
-          // Delete v2 manually since its not being deleted by the cleanupEntityStore function
-          try {
-            await es.indices.delete({
-              index: getEntitiesLatestIndexName(),
-              ignore_unavailable: true,
-            });
-          } catch (e) {
-            // Ignore if index doesn't exist
-          }
-
-          // Load v2 entity data
+          // Load v2 entity data into the entity store index created by v2 install
           await esArchiver.load(
             'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store_v2'
           );

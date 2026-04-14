@@ -27,6 +27,10 @@ import type {
 import { RequestContextFactory } from './request_context_factory';
 import { AutomaticImportService } from './services';
 import { AUTOMATIC_IMPORT_FEATURE } from './feature';
+import {
+  automaticImportInferenceFeature,
+  automaticImportParentInferenceFeature,
+} from './inference_feature';
 import { registerRoutes } from './routes/register_routes';
 import {
   INTEGRATION_SAVED_OBJECT_TYPE,
@@ -77,6 +81,11 @@ export class AutomaticImportPlugin
     });
 
     plugins.features.registerKibanaFeature(AUTOMATIC_IMPORT_FEATURE);
+
+    if (plugins.searchInferenceEndpoints) {
+      plugins.searchInferenceEndpoints.features.register(automaticImportParentInferenceFeature);
+      plugins.searchInferenceEndpoints.features.register(automaticImportInferenceFeature);
+    }
 
     this.automaticImportService = new AutomaticImportService(
       this.loggerFactory,

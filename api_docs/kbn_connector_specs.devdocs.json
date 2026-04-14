@@ -75,7 +75,7 @@
           ") => string[]"
         ],
         "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
-        "lineNumber": 300,
+        "lineNumber": 299,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -97,7 +97,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
-            "lineNumber": 300,
+            "lineNumber": 299,
             "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
@@ -156,45 +156,6 @@
       },
       {
         "parentPluginId": "@kbn/connector-specs",
-        "id": "def-common.getWorkflowTemplatesForConnector",
-        "type": "Function",
-        "tags": [],
-        "label": "getWorkflowTemplatesForConnector",
-        "description": [
-          "\nReturns the workflow YAML template strings for a connector type.\n\nReturns an empty array if the connector type has no workflows or doesn't exist."
-        ],
-        "signature": [
-          "(connectorTypeId: string) => string[]"
-        ],
-        "path": "src/platform/packages/shared/kbn-connector-specs/src/get_workflow_templates.ts",
-        "lineNumber": 12,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/connector-specs",
-            "id": "def-common.getWorkflowTemplatesForConnector.$1",
-            "type": "string",
-            "tags": [],
-            "label": "connectorTypeId",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/platform/packages/shared/kbn-connector-specs/src/get_workflow_templates.ts",
-            "lineNumber": 17,
-            "columnNumber": 50,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/connector-specs",
         "id": "def-common.isToolAction",
         "type": "Function",
         "tags": [],
@@ -212,7 +173,7 @@
           ", actionName: string) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
-        "lineNumber": 304,
+        "lineNumber": 303,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -234,7 +195,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
-            "lineNumber": 304,
+            "lineNumber": 303,
             "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
@@ -251,7 +212,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
-            "lineNumber": 304,
+            "lineNumber": 303,
             "columnNumber": 56,
             "deprecated": false,
             "trackAdoption": false,
@@ -272,7 +233,7 @@
           "(auth: { method: string; }) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
-        "lineNumber": 292,
+        "lineNumber": 291,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -285,7 +246,7 @@
             "label": "auth",
             "description": [],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
-            "lineNumber": 292,
+            "lineNumber": 291,
             "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
@@ -298,7 +259,7 @@
                 "label": "method",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
-                "lineNumber": 292,
+                "lineNumber": 291,
                 "columnNumber": 45,
                 "deprecated": false,
                 "trackAdoption": false
@@ -328,7 +289,7 @@
           ") => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
-        "lineNumber": 296,
+        "lineNumber": 295,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -350,7 +311,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
-            "lineNumber": 296,
+            "lineNumber": 295,
             "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
@@ -1604,16 +1565,16 @@
           },
           {
             "parentPluginId": "@kbn/connector-specs",
-            "id": "def-common.ConnectorSpec.agentBuilderWorkflows",
-            "type": "Array",
+            "id": "def-common.ConnectorSpec.skill",
+            "type": "string",
             "tags": [],
-            "label": "agentBuilderWorkflows",
+            "label": "skill",
             "description": [],
             "signature": [
-              "string[] | undefined"
+              "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
-            "lineNumber": 285,
+            "lineNumber": 284,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2194,7 +2155,7 @@
             "label": "strategy",
             "description": [],
             "signature": [
-              "\"header\" | \"status_code\" | \"response_body\""
+              "\"status_code\" | \"header\" | \"response_body\""
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
             "lineNumber": 136,
@@ -2852,7 +2813,7 @@
           "\nPre-configured schema types for common field patterns\nWHY: Reduces boilerplate for frequently used field types\nThese use Zod's built-in .meta() to attach UI metadata\n"
         ],
         "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
-        "lineNumber": 94,
+        "lineNumber": 95,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2871,7 +2832,7 @@
               "ZodString"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
-            "lineNumber": 95,
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2887,7 +2848,7 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
-                "lineNumber": 100,
+                "lineNumber": 101,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2910,7 +2871,7 @@
               "ZodString"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
-            "lineNumber": 107,
+            "lineNumber": 108,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2923,7 +2884,7 @@
                 "label": "options",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
-                "lineNumber": 112,
+                "lineNumber": 113,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2939,7 +2900,7 @@
                       "number | undefined"
                     ],
                     "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
-                    "lineNumber": 112,
+                    "lineNumber": 113,
                     "columnNumber": 26,
                     "deprecated": false,
                     "trackAdoption": false
@@ -2963,7 +2924,7 @@
               "ZodString"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
-            "lineNumber": 118,
+            "lineNumber": 119,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2984,7 +2945,7 @@
               "ZodString"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
-            "lineNumber": 128,
+            "lineNumber": 129,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3000,7 +2961,7 @@
                   "\"python\" | \"javascript\" | \"typescript\""
                 ],
                 "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
-                "lineNumber": 133,
+                "lineNumber": 134,
                 "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3023,7 +2984,7 @@
               "ZodURL"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
-            "lineNumber": 139,
+            "lineNumber": 140,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3039,7 +3000,7 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
-                "lineNumber": 144,
+                "lineNumber": 145,
                 "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,

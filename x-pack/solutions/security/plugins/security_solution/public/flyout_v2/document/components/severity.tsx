@@ -11,7 +11,7 @@ import { getFieldValue } from '@kbn/discover-utils';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { upperFirst } from 'lodash/fp';
-import { EuiBadge, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { SEVERITY_VALUE_TEST_ID } from './test_ids';
 import { useRiskSeverityColors } from '../../../common/utils/risk_color_palette';
 
@@ -70,9 +70,12 @@ export const DocumentSeverity = memo(({ hit }: DocumentSeverityProps) => {
   return (
     <>
       {displayValue != null && (
-        <EuiBadge color={color} data-test-subj={SEVERITY_VALUE_TEST_ID}>
-          {displayValue}
-        </EuiBadge>
+        <>
+          <EuiBadge color={color} data-test-subj={SEVERITY_VALUE_TEST_ID}>
+            {displayValue}
+          </EuiBadge>
+          <EuiSpacer size="m" />
+        </>
       )}
     </>
   );

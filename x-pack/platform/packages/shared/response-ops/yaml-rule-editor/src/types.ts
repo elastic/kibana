@@ -80,6 +80,6 @@ export interface YamlRuleEditorProps {
    */
   esqlPropertyNames?: string[];
   isReadOnly?: boolean;
-  height?: number;
+  height?: number | string;
   dataTestSubj?: string;
 }

@@ -22,6 +22,7 @@ const INITIAL_LAST_RUN_METRICS: RuleMonitoringLastRunMetrics = {
   total_alerts_created: null,
   gap_duration_s: null,
   gap_range: null,
+  gap_reason: null,
 };
 
 export const getDefaultMonitoring = (timestamp: string): RawRuleMonitoring => {
