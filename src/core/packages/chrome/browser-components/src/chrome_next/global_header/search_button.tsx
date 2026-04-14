@@ -84,7 +84,7 @@ export const SearchButton = React.memo(() => {
   if (!config) return null;
 
   const shortcutLabel = config.shortcutKey
-    ? `${MODIFIER_KEY} + ${config.shortcutKey.toUpperCase()}`
+    ? `${MODIFIER_KEY} ${config.shortcutKey.toUpperCase()}`
     : undefined;
 
   return (
