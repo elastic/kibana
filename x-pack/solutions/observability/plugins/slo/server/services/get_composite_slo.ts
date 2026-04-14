@@ -72,7 +72,6 @@ export class GetCompositeSLO {
       slo: memberDefinitionMap.get(member.sloId)!,
       instanceId: member.instanceId ?? ALL_VALUE,
       timeWindowOverride: compositeSlo.timeWindow,
-      budgetingMethodOverride: compositeSlo.budgetingMethod,
     }));
 
     const summaryResults = await this.summaryClient.computeSummaries(summaryParams);
