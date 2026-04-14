@@ -28,8 +28,11 @@ const addUniqueHits = ({
   limit: number;
 }): void => {
   for (const hit of hits) {
-    if (!hit._id || docs.length >= limit) {
+    if (docs.length >= limit) {
       break;
+    }
+    if (!hit._id) {
+      continue;
     }
     if (seen.has(hit._id)) {
       continue;
