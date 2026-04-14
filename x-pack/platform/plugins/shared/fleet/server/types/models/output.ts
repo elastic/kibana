@@ -71,6 +71,7 @@ const BaseSchema = {
   ca_trusted_fingerprint: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   config_yaml: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   otel_exporter_config_yaml: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  otel_disable_beatsauth: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
   ssl: schema.maybe(
     schema.oneOf([
       schema.literal(null),

@@ -145,6 +145,7 @@ export interface OutputFormInputsType {
   kafkaSslKeySecretInput: ReturnType<typeof useSecretInput>;
   kafkaSslCertificateAuthoritiesInput: ReturnType<typeof useComboInput>;
   writeToStreams: ReturnType<typeof useSwitchInput>;
+  otelDisableBeatsauthInput: ReturnType<typeof useSwitchInput>;
 }
 
 function extractKafkaOutputSecrets(
@@ -249,6 +250,11 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     (output as NewElasticsearchOutput)?.otel_exporter_config_yaml ?? '',
     validateYamlConfigFn,
     isDisabled('otel_exporter_config_yaml')
+  );
+
+  const otelDisableBeatsauthInput = useSwitchInput(
+    (output as NewElasticsearchOutput)?.otel_disable_beatsauth ?? false,
+    isDisabled('otel_disable_beatsauth')
   );
 
   const defaultOutputInput = useSwitchInput(
@@ -621,6 +627,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     presetInput,
     additionalYamlConfigInput,
     otelExporterConfigInput,
+    otelDisableBeatsauthInput,
     defaultOutputInput,
     defaultMonitoringOutputInput,
     caTrustedFingerprintInput,
@@ -1055,6 +1062,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
               preset: presetInput.value,
               config_yaml: additionalYamlConfigInput.value,
               otel_exporter_config_yaml: otelExporterConfigInput.value || null,
+              otel_disable_beatsauth: otelDisableBeatsauthInput.value || null,
               ca_trusted_fingerprint: caTrustedFingerprintInput.value,
               proxy_id: proxyIdValue,
               write_to_logs_streams: writeToStreams.value,
@@ -1173,6 +1181,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     syncUninstalledIntegrationsInput.value,
     writeToStreams.value,
     otelExporterConfigInput.value,
+    otelDisableBeatsauthInput.value,
     caTrustedFingerprintInput.value,
     confirm,
     notifications.toasts,

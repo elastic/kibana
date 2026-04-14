@@ -612,6 +612,21 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                 paddingSize="none"
               >
                 <EuiPanel color="subdued" borderRadius="none" hasShadow={false} paddingSize="m">
+                  <EuiFormRow fullWidth>
+                    <EuiSwitch
+                      label={
+                        <FormattedMessage
+                          id="xpack.fleet.settings.editOutputFlyout.otelDisableBeatsauthLabel"
+                          defaultMessage="Do not use beatsauth extension to translate output parameters"
+                        />
+                      }
+                      checked={inputs.otelDisableBeatsauthInput.value}
+                      onChange={(e) => inputs.otelDisableBeatsauthInput.setValue(e.target.checked)}
+                      disabled={inputs.otelDisableBeatsauthInput.props.disabled}
+                      data-test-subj="settingsOutputsFlyout.otelDisableBeatsauthToggle"
+                    />
+                  </EuiFormRow>
+                  <EuiSpacer size="m" />
                   <EuiFormRow
                     fullWidth
                     label={
