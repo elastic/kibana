@@ -108,6 +108,8 @@ export const globalSetupHook = globalSetupWithSynthtrace.extend({
 
     const clean = async () => await infraEsClient.clean();
 
-    await use({ index, clean });
+    const refresh = async () => await infraEsClient.refresh();
+
+    await use({ index, clean, refresh });
   },
 });
