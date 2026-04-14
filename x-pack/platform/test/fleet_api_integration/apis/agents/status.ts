@@ -265,9 +265,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should return offline status for agent with disconnected last_checkin_status', async () => {
       const { body: apiResponse } = await supertest
-        .get(
-          `/api/fleet/agents?kuery=fleet-agents.local_metadata.host.hostname:host-disconnected`
-        )
+        .get(`/api/fleet/agents?kuery=fleet-agents.local_metadata.host.hostname:host-disconnected`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
       expect(apiResponse.items.length).to.eql(1);
