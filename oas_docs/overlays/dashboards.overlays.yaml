@@ -1112,12 +1112,14 @@ actions:
   - target: "$.paths['/api/dashboards/{id}']['put']"
     description: Add description note and examples to update endpoint
     update:
-      description: >-
+      description: |
         Creates a new dashboard with the given ID if none exists, or replaces the complete state of an
-        existing one. This is a full replacement, not a partial update — any panels not included in the
-        request body are permanently removed from the dashboard. To make targeted changes, retrieve the
-        current state first with GET /api/dashboards/{id}, apply your changes, and submit the full
-        updated object.
+        existing one. This is a full replacement, not a partial update. To make targeted changes,
+        retrieve the current state first with GET /api/dashboards/{id}, apply your changes, and submit
+        the full updated object.
+
+        > warning
+        > Any panels not included in the request body are permanently removed from the dashboard.
       responses:
         '200':
           content:
