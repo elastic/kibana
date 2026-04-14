@@ -190,8 +190,7 @@ const getEisApiKeyFromVault = async (vaultAddr: string, log: ToolingLog): Promis
         firstError && typeof firstError === 'object' && 'stderr' in firstError
           ? String((firstError as { stderr: unknown }).stderr).trim()
           : '';
-      const secondMsg =
-        secondError instanceof Error ? secondError.message : String(secondError);
+      const secondMsg = secondError instanceof Error ? secondError.message : String(secondError);
       const parts = [
         'Failed to read EIS API key from vault.',
         ...(vaultStderr ? [`First attempt: ${vaultStderr}`] : []),
