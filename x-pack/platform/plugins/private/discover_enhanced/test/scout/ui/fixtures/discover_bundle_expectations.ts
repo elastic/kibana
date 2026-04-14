@@ -14,7 +14,8 @@ export function evaluateDiscoverBundlePluginAssertion(
   expectedPlugins: string[],
   rspackOnlyBundleLabels: readonly string[]
 ): { ok: true } | { ok: false; detail: string } {
-  const usesRspackBundles = process.env.KBN_USE_RSPACK === 'true' || process.env.KBN_USE_RSPACK === '1';
+  const usesRspackBundles =
+    process.env.KBN_USE_RSPACK === 'true' || process.env.KBN_USE_RSPACK === '1';
   const sortedExpected = [...expectedPlugins].sort((a, b) => a.localeCompare(b));
 
   if (usesRspackBundles) {
