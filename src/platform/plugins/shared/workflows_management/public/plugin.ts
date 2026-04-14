@@ -36,7 +36,7 @@ import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { stepSchemas } from '../common/step_schemas';
 
 const VisibleIn: AppDeepLinkLocations[] = ['globalSearch', 'home', 'kibanaOverview', 'sideNav'];
-const VisibleInNotAvailable: AppDeepLinkLocations[] = ['globalSearch'];
+const VisibleInNotAvailable: AppDeepLinkLocations[] = ['globalSearch', 'sideNav'];
 export class WorkflowsPlugin
   implements
     Plugin<

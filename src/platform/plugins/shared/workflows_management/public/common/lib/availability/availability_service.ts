@@ -61,7 +61,7 @@ export class AvailabilityService {
       this.licenseSubscription.unsubscribe();
     }
     this.licenseSubscription = license$.subscribe((license) => {
-      if (license.hasAtLeast('enterprise')) {
+      if (license.isActive && license.isAvailable && license.hasAtLeast('enterprise')) {
         this.licenseIsValid$.next(true);
       } else {
         this.licenseIsValid$.next(false);
