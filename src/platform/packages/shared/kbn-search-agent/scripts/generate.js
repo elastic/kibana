@@ -116,72 +116,6 @@ function findFiles(dir, filename) {
 }
 
 // ---------------------------------------------------------------------------
-// Agent generation
-// ---------------------------------------------------------------------------
-function generateAgents() {
-  const agentsDir = path.join(ELASTIC_AGENT_DIR, 'agents');
-  const agentFiles = findFiles(agentsDir, 'AGENTS.md');
-  const outDir = path.join(SRC_DIR, 'agents');
-  fs.mkdirSync(outDir, { recursive: true });
-
-  const exports = [];
-
-  for (const filePath of agentFiles) {
-    const dirName = path.basename(path.dirname(filePath)); // e.g. "elasticsearch-onboarding"
-    const { meta, body } = parseFrontmatter(fs.readFileSync(filePath, 'utf-8'));
-
-    const camelName = kebabToCamel(dirName); // elasticsearchOnboarding
-    const snakeName = kebabToSnake(dirName); // elasticsearch_onboarding
-    const varName = `${camelName}Agent`;
-    const outFile = path.join(outDir, `${snakeName}.ts`);
-
-    const id = meta.id || dirName;
-    const name = meta.name || dirName;
-    const description = meta.description || '';
-    const labels = meta.labels ? JSON.stringify(meta.labels) : undefined;
-    const avatarIcon = meta.avatar_icon;
-    const avatarSymbol = meta.avatar_symbol;
-    const avatarColor = meta.avatar_color;
-
-    const optionalFields = [
-      labels && `  labels: ${labels},`,
-      avatarIcon && `  avatar_icon: '${avatarIcon}',`,
-      avatarSymbol && `  avatar_symbol: '${avatarSymbol}',`,
-      avatarColor && `  avatar_color: '${avatarColor}',`,
-    ]
-      .filter(Boolean)
-      .join('\n');
-
-    const instructions = escapeTemplateLiteral(body);
-
-    const content = [
-      LICENSE_HEADER,
-      '',
-      generatedNotice(filePath),
-      '',
-      `export const ${varName} = {`,
-      `  id: '${id}',`,
-      `  name: '${name}',`,
-      `  description: '${description.replace(/'/g, "\\'")}',`,
-      optionalFields,
-      `  configuration: {`,
-      `    instructions: \`${instructions}\`,`,
-      `  },`,
-      `};`,
-      '',
-    ]
-      .filter((line) => line !== false && line !== undefined)
-      .join('\n');
-
-    fs.writeFileSync(outFile, content);
-    exports.push({ varName, snakeName });
-    console.log('Generated', path.relative(PKG_ROOT, outFile));
-  }
-
-  return exports;
-}
-
-// ---------------------------------------------------------------------------
 // Skill generation
 // ---------------------------------------------------------------------------
 function generateSkills() {
@@ -224,6 +158,19 @@ function generateSkills() {
     console.log('Generated', path.relative(PKG_ROOT, outFile));
   }
 
+  const generatedSkillFiles = new Set(exports.map((e) => `${e.snakeName}.ts`));
+  if (fs.existsSync(outDir)) {
+    for (const file of fs.readdirSync(outDir)) {
+      if (file === 'index.ts') continue;
+      if (!file.endsWith('.ts')) continue;
+      if (!generatedSkillFiles.has(file)) {
+        const fullPath = path.join(outDir, file);
+        fs.unlinkSync(fullPath);
+        console.log('Removed stale', path.relative(PKG_ROOT, fullPath));
+      }
+    }
+  }
+
   return exports;
 }
 
@@ -238,8 +185,7 @@ function generateBarrel(outDir, sourceDir, exports, label) {
     generatedNotice(sourceDir),
     '',
     ...exports.map(({ varName, snakeName }) => `import { ${varName} } from './${snakeName}';`),
-    `export { ${varNames.join(', ')} };`,
-    '',
+    ...(varNames.length > 0 ? [`export { ${varNames.join(', ')} };`, ''] : []),
     `export const ${label} = [${varNames.join(', ')}];`,
     '',
   ];
@@ -251,14 +197,6 @@ function generateBarrel(outDir, sourceDir, exports, label) {
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
-const agentExports = generateAgents();
-generateBarrel(
-  path.join(SRC_DIR, 'agents'),
-  path.join(ELASTIC_AGENT_DIR, 'agents'),
-  agentExports,
-  'agents'
-);
-
 const skillExports = generateSkills();
 generateBarrel(
   path.join(SRC_DIR, 'skills'),
