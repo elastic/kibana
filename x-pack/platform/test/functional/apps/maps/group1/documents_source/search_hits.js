@@ -12,7 +12,7 @@ export default function ({ getPageObjects, getService }) {
   const inspector = getService('inspector');
   const security = getService('security');
 
-  describe.only('search hits', () => {
+  describe('search hits', () => {
     before(async () => {
       await security.testUser.setRoles(
         [
