@@ -94,15 +94,15 @@ export function mergeJsonDefinitionsFromDirectories<T extends Record<string, any
 /**
  * Returns the list of project names in the generated directory.
  */
-function listSortedProjectNames(generatedRoot: string): string[] {
+function listProjectNames(generatedRoot: string): string[] {
   return readdirSync(generatedRoot, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name);
 }
 
 /**
- * Returns the list of directories that contains JSON definitions for a given category.
- * Searching on all projects: `.../esql/kibana/generated/<project>/definition/<category>/`
+ * Returns the list of directories that contains JSON definitions for a given definition type.
+ * Searching on all projects: `.../esql/kibana/generated/<project>/definition/<definitionType>/`
  */
 export function listEsqlDefinitionDirectories(
   pathToElasticsearch: string,
@@ -115,7 +115,7 @@ export function listEsqlDefinitionDirectories(
 
   if (existsSync(generatedRoot)) {
     const directories: string[] = [];
-    for (const projectName of listSortedProjectNames(generatedRoot)) {
+    for (const projectName of listProjectNames(generatedRoot)) {
       const dir = join(generatedRoot, projectName, 'definition', definitionType);
       if (existsSync(dir) && statSync(dir).isDirectory()) {
         directories.push(dir);
