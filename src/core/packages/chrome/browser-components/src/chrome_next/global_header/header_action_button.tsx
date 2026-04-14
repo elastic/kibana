@@ -12,32 +12,43 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 
-const ACTION_BUTTON_SIZE = 32;
-
-const baseStyles = css({
+export const headerButtonBaseStyles = css({
   display: 'inline-flex',
   alignItems: 'center',
-  justifyContent: 'center',
   boxSizing: 'border-box',
-  width: ACTION_BUTTON_SIZE,
-  height: ACTION_BUTTON_SIZE,
-  padding: 0,
+  height: 32,
   background: 'transparent',
   cursor: 'pointer',
-  '&:hover': { background: 'var(--action-btn-hover)' },
+  '&:hover': { background: 'var(--header-btn-hover)' },
   '&:focus-visible': {
-    outline: '2px solid var(--action-btn-focus)',
+    outline: '2px solid var(--header-btn-focus)',
     outlineOffset: -2,
   },
 });
 
-const borderedStyles = css({
-  border: '1px solid var(--action-btn-border)',
+export const headerButtonBorderedStyles = css({
+  border: '1px solid var(--header-btn-border)',
 });
 
 const plainStyles = css({
   border: 'none',
 });
+
+const squareStyles = css({
+  width: 32,
+  padding: 0,
+  justifyContent: 'center',
+});
+
+export const useHeaderButtonStyleVars = () => {
+  const { euiTheme } = useEuiTheme();
+  return {
+    '--header-btn-border': euiTheme.colors.borderBasePlain,
+    '--header-btn-hover': euiTheme.colors.backgroundBaseInteractiveHover,
+    '--header-btn-focus': euiTheme.colors.primary,
+    borderRadius: euiTheme.border.radius.medium,
+  } as React.CSSProperties;
+};
 
 export interface HeaderActionButtonProps
   extends Pick<React.AriaAttributes, 'aria-expanded' | 'aria-haspopup'> {
@@ -61,7 +72,7 @@ export const HeaderActionButton = React.forwardRef<HTMLButtonElement, HeaderActi
     },
     ref
   ) => {
-    const { euiTheme } = useEuiTheme();
+    const styleVars = useHeaderButtonStyleVars();
 
     return (
       <button
@@ -72,17 +83,11 @@ export const HeaderActionButton = React.forwardRef<HTMLButtonElement, HeaderActi
         aria-label={ariaLabel}
         data-test-subj={dataTestSubj}
         css={[
-          baseStyles,
-          variant === 'bordered' ? borderedStyles : plainStyles,
-          { borderRadius: euiTheme.border.radius.medium },
+          headerButtonBaseStyles,
+          squareStyles,
+          variant === 'bordered' ? headerButtonBorderedStyles : plainStyles,
         ]}
-        style={
-          {
-            '--action-btn-border': euiTheme.colors.borderBasePlain,
-            '--action-btn-hover': euiTheme.colors.backgroundBaseInteractiveHover,
-            '--action-btn-focus': euiTheme.colors.primary,
-          } as React.CSSProperties
-        }
+        style={styleVars}
         onClick={onClick}
       >
         {children}

@@ -16,7 +16,7 @@ export const SEARCH_MODAL_SELECTOR_PREFIX = 'chromeProjectNextSearchModal';
 export const SEARCH_MODAL_HEIGHT = 50;
 export const SEARCH_MODAL_WIDTH = 800;
 export const SEARCH_MODAL_ROW_HEIGHT = 68;
-export const SEARCH_MODAL_KEYBOARD_SHORTCUT = 'k';
+export const SEARCH_MODAL_KEYBOARD_SHORTCUT = '/';
 
 /* @internal */
 export interface SearchProps {

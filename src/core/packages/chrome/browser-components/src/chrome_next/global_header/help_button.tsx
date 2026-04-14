@@ -28,7 +28,7 @@ export const HelpButton = React.memo(() => {
         aria-label={HELP_ARIA_LABEL}
         data-test-subj="chromeNextGlobalHeaderHelpButton"
       >
-        <EuiIcon type="question" size="m" aria-hidden />
+        <EuiIcon type="question" size="m" color="subdued" aria-hidden />
       </HeaderActionButton>
     ),
     []

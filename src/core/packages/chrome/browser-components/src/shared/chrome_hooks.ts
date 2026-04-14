@@ -15,6 +15,7 @@ import type {
   ChromeBreadcrumb,
   ChromeNavControl,
   ChromeNavLink,
+  ChromeNextGlobalSearchConfig,
   ChromeNextHeaderConfig,
 } from '@kbn/core-chrome-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
@@ -248,6 +249,12 @@ export function useHasAppMenu(): boolean {
 export function useNextHeader(): ChromeNextHeaderConfig | undefined {
   const chrome = useChromeService();
   const config$ = useMemo(() => chrome.next.header.get$(), [chrome]);
+  return useObservable(config$, undefined);
+}
+
+export function useGlobalSearch(): ChromeNextGlobalSearchConfig | undefined {
+  const chrome = useChromeService();
+  const config$ = useMemo(() => chrome.next.globalSearch.get$(), [chrome]);
   return useObservable(config$, undefined);
 }
 
