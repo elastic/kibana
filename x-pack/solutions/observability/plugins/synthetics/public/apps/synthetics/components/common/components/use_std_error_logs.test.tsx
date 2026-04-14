@@ -35,21 +35,23 @@ describe('useStdErrorLogs', () => {
     expect(searchHookSpy).toHaveBeenCalledWith(
       {
         index: SYNTHETICS_INDEX_PATTERN,
-        size: 1000,
-        query: {
-          bool: {
-            filter: [
-              {
-                terms: {
-                  'synthetics.type': ['stderr', 'stdout'],
+        body: {
+          size: 1000,
+          query: {
+            bool: {
+              filter: [
+                {
+                  terms: {
+                    'synthetics.type': ['stderr', 'stdout'],
+                  },
                 },
-              },
-              {
-                term: {
-                  'monitor.check_group': 'test-check-group',
+                {
+                  term: {
+                    'monitor.check_group': 'test-check-group',
+                  },
                 },
-              },
-            ],
+              ],
+            },
           },
         },
       },
@@ -116,9 +118,11 @@ describe('useStdErrorLogs', () => {
 
     expect(searchHookSpy).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        query: expect.objectContaining({
-          bool: expect.objectContaining({
-            filter: expect.arrayContaining([{ term: { 'monitor.check_group': 'group-1' } }]),
+        body: expect.objectContaining({
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              filter: expect.arrayContaining([{ term: { 'monitor.check_group': 'group-1' } }]),
+            }),
           }),
         }),
       }),
@@ -130,9 +134,11 @@ describe('useStdErrorLogs', () => {
 
     expect(searchHookSpy).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        query: expect.objectContaining({
-          bool: expect.objectContaining({
-            filter: expect.arrayContaining([{ term: { 'monitor.check_group': 'group-2' } }]),
+        body: expect.objectContaining({
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              filter: expect.arrayContaining([{ term: { 'monitor.check_group': 'group-2' } }]),
+            }),
           }),
         }),
       }),
