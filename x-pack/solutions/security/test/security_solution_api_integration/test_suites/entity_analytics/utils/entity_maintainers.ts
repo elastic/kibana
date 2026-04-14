@@ -152,6 +152,26 @@ export const waitForMaintainerRun = async ({
   timeoutMs?: number;
   triggerRun?: boolean;
 }): Promise<void> => {
+  // Wait for the runs count to stabilise across two consecutive polls so the
+  // task is idle before we capture the baseline and trigger a new run.
+  // This prevents race conditions where runSoon silently swallows a 409 conflict
+  // if the task is already running.
+  let lastSeenRuns = -1;
+  await retry.waitForWithTimeout(
+    `Entity maintainer "${maintainerId}" to settle before run`,
+    30_000,
+    async () => {
+      const response = await routes.getMaintainers(200, [maintainerId]);
+      const maintainer = response.body.maintainers.find(
+        (m: { id: string; runs: number }) => m.id === maintainerId
+      );
+      const runs = maintainer?.runs ?? 0;
+      if (runs === lastSeenRuns) return true;
+      lastSeenRuns = runs;
+      return false;
+    }
+  );
+
   // Capture current runs count so we wait for an actual NEW run,
   // not a stale count from a previous test.
   let baselineRuns = 0;

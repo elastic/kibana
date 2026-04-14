@@ -454,9 +454,8 @@ export default ({ getService }: FtrProviderContext): void => {
           });
           await waitForEntityStoreDoc({ es, retry, entityId: testHost.expectedEuid });
 
-          // Stop the maintainer while we update criticality so a stale run
-          // doesn't score the entity before the modifier is in place.
-          await maintainerRoutes.stopMaintainer('risk-score');
+          // The maintainer is not auto-started, so we can safely set up the criticality
+          // relationship before running it.
 
           await maintainerScenario.setEntityCriticality({
             testEntity: testHost,
@@ -469,7 +468,6 @@ export default ({ getService }: FtrProviderContext): void => {
             requireCriticality: 'high_impact',
           });
 
-          await maintainerRoutes.startMaintainer('risk-score');
           await maintainerRoutes.runMaintainerSync('risk-score');
           const score = await waitForRiskScoreForId({
             es,
@@ -619,11 +617,11 @@ export default ({ getService }: FtrProviderContext): void => {
           });
           expect(firstScore.calculated_score_norm).to.be.greaterThan(0);
 
-          await maintainerRoutes.stopMaintainer('risk-score');
+          // The maintainer is not auto-started, so we can safely set up the rules
+          // before running it.
           await deleteAllRules(supertest, log);
           await deleteAllAlerts(supertest, log, es);
 
-          await maintainerRoutes.startMaintainer('risk-score');
           await maintainerRoutes.runMaintainerSync('risk-score');
           await waitForEntityScoreResetToZero({ es, retry, entityId: host.expectedEuid });
         });
@@ -658,10 +656,10 @@ export default ({ getService }: FtrProviderContext): void => {
             .send({ enable_reset_to_zero: false })
             .expect(200);
 
-          await maintainerRoutes.stopMaintainer('risk-score');
+          // The maintainer is not auto-started, so we can safely set up the rules
+          // before running it.
           await deleteAllRules(supertest, log);
           await deleteAllAlerts(supertest, log, es);
-          await maintainerRoutes.startMaintainer('risk-score');
           await maintainerRoutes.runMaintainerSync('risk-score');
 
           // The entity should NOT have been reset to zero — only positive scores should exist

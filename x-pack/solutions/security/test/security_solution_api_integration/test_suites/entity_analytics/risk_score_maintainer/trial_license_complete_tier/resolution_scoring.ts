@@ -133,9 +133,8 @@ export default ({ getService }: FtrProviderContext): void => {
         });
         await waitForEntityStoreEntities({ es, log, count: 2 });
 
-        // Stop the maintainer so the scheduled run doesn't complete before
-        // the resolution relationship is in place.
-        await maintainerRoutes.stopMaintainer('risk-score');
+        // The maintainer is not auto-started, so we can safely set up the resolution
+        // relationship before running it.
 
         await maintainerScenario.setEntityResolutionTarget({
           testEntity: aliasUser,
@@ -143,7 +142,6 @@ export default ({ getService }: FtrProviderContext): void => {
         });
         await waitForResolutionRelationship(aliasUser.expectedEuid, targetUser.expectedEuid);
 
-        await maintainerRoutes.startMaintainer('risk-score');
         await maintainerRoutes.runMaintainerSync('risk-score');
 
         let allScores: ReturnType<typeof normalizeScores> = [];
@@ -272,7 +270,8 @@ export default ({ getService }: FtrProviderContext): void => {
         });
         await waitForEntityStoreEntities({ es, log, count: 3 });
 
-        await maintainerRoutes.stopMaintainer('risk-score');
+        // The maintainer is not auto-started, so we can safely set up the resolution
+        // relationships before running it.
 
         await maintainerScenario.setEntityResolutionTarget({
           testEntity: alias1,
@@ -285,7 +284,6 @@ export default ({ getService }: FtrProviderContext): void => {
         await waitForResolutionRelationship(alias1.expectedEuid, target.expectedEuid);
         await waitForResolutionRelationship(alias2.expectedEuid, target.expectedEuid);
 
-        await maintainerRoutes.startMaintainer('risk-score');
         await maintainerRoutes.runMaintainerSync('risk-score');
 
         let allScores: ReturnType<typeof normalizeScores> = [];
@@ -389,8 +387,8 @@ export default ({ getService }: FtrProviderContext): void => {
           });
           await waitForEntityStoreEntities({ es, log, count: 2 });
 
-          // Stop the maintainer to prevent premature runs during modifier setup
-          await maintainerRoutes.stopMaintainer('risk-score');
+          // The maintainer is not auto-started, so we can safely set up the resolution
+          // relationships before running it.
 
           // Target: low_impact criticality, on watchlist-a
           // Alias: high_impact criticality, on watchlist-b
@@ -481,7 +479,6 @@ export default ({ getService }: FtrProviderContext): void => {
           );
 
           // Resume the maintainer and trigger a fresh run
-          await maintainerRoutes.startMaintainer('risk-score');
           await maintainerRoutes.runMaintainerSync('risk-score');
 
           // Wait for the resolution score to include both modifier types
