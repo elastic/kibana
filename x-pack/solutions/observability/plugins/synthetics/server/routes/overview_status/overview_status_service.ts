@@ -46,7 +46,10 @@ type LocationStatus = Array<{
   monitorUrl?: string;
 }>;
 
-export const SUMMARIES_PAGE_SIZE = 5000;
+import { SUMMARIES_PAGE_SIZE } from './constants';
+
+// Re-export for backwards compatibility
+export { SUMMARIES_PAGE_SIZE };
 
 export class OverviewStatusService {
   filterData: {

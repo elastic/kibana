@@ -8,6 +8,11 @@ import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server'
 import type { EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
 import { getUptimeESMockClient } from '../../queries/test_helpers';
 
+const TEST_PAGE_SIZE = 10;
+jest.mock('./constants', () => ({
+  SUMMARIES_PAGE_SIZE: TEST_PAGE_SIZE,
+}));
+
 import * as allLocationsFn from '../../synthetics_service/get_all_locations';
 import { OverviewStatusService, SUMMARIES_PAGE_SIZE } from './overview_status_service';
 import times from 'lodash/times';
