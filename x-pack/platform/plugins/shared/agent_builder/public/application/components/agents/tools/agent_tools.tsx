@@ -44,6 +44,7 @@ import { ToolDetailPanel } from './tool_detail_panel';
 import { PageWrapper } from '../common/page_wrapper';
 import { useListDetailPageStyles } from '../common/styles';
 import { useCanEditAgent } from '../../../hooks/agents/use_can_edit_agent';
+import { ToolsCustomizeEmptyState } from './tools_customize_empty_state';
 
 const ActiveToolsList: React.FC<{
   filteredActiveTools: ToolDefinition[];
@@ -242,6 +243,8 @@ export const AgentTools: React.FC = () => {
     }
   }, [selectedToolId, activeTools, handleRemoveTool, enableElasticCapabilities, defaultToolIdSet]);
 
+  const showCustomizeEmptyState = activeTools.length === 0 && !searchQuery.trim();
+
   const isLoading = agentLoading || toolsLoading;
 
   if (isLoading) {
@@ -249,6 +252,27 @@ export const AgentTools: React.FC = () => {
       <EuiFlexGroup alignItems="center" justifyContent="center" css={styles.loadingSpinner}>
         <EuiLoadingSpinner size="xl" />
       </EuiFlexGroup>
+    );
+  }
+
+  const toolModals = isLibraryOpen ? (
+    <ToolLibraryPanel
+      onClose={closeLibrary}
+      allTools={allTools}
+      activeToolIdSet={libraryActiveToolIdSet}
+      onToggleTool={handleToggleTool}
+      mutatingToolId={mutatingToolId}
+      enableElasticCapabilities={enableElasticCapabilities}
+      builtinToolIdSet={defaultToolIdSet}
+    />
+  ) : null;
+
+  if (showCustomizeEmptyState) {
+    return (
+      <PageWrapper>
+        <ToolsCustomizeEmptyState canEditAgent={canEditAgent} onOpenLibrary={openLibrary} />
+        {toolModals}
+      </PageWrapper>
     );
   }
 
@@ -334,17 +358,7 @@ export const AgentTools: React.FC = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {isLibraryOpen && (
-        <ToolLibraryPanel
-          onClose={closeLibrary}
-          allTools={allTools}
-          activeToolIdSet={libraryActiveToolIdSet}
-          onToggleTool={handleToggleTool}
-          mutatingToolId={mutatingToolId}
-          enableElasticCapabilities={enableElasticCapabilities}
-          builtinToolIdSet={defaultToolIdSet}
-        />
-      )}
+      {toolModals}
     </PageWrapper>
   );
 };
