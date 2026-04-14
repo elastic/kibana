@@ -5,12 +5,13 @@ steps:
     async: false
     build:
       branch: $BRANCH
+      env:
+        PARENT_TRIGGER_JOB_ID: '${BUILDKITE_JOB_ID}'
 
   - name: 'Upload promote step'
     depends_on: build-es-snapshot
     command: |
-      buildkite-agent artifact download "snapshot_info-$${BUILDKITE_BUILD_ID}.env" .
-      source "snapshot_info-${BUILDKITE_BUILD_ID}.env"
+      ES_SNAPSHOT_MANIFEST="$(buildkite-agent meta-data get es_snapshot_manifest)"
 
       buildkite-agent pipeline upload << PIPELINE
       steps:
