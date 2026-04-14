@@ -12,7 +12,7 @@ import { test } from '../fixtures';
 const FIRST_TAG = 'a';
 const SECOND_TAG = 'b';
 
-test.describe('FilterMonitors', { tag: tags.stateful.classic }, () => {
+test.describe('FilterMonitors', { tag: [...tags.stateful.classic] }, () => {
   test.beforeAll(async ({ syntheticsServices }) => {
     await syntheticsServices.cleanUp();
   });
