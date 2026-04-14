@@ -103,10 +103,11 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
   var loadingMessage = document.getElementById('kbn_loading_message');
   loadingMessage.style.display = 'flex';
 
-  // Legacy: window.onload waits for ALL resources (fonts, favicons, images).
-  // RSPack: IIFE executes immediately -- safe because this script is at the
-  // bottom of <body> (DOM parsed) and <head> CSS is parser-blocking (loaded).
-  // Avoids blocking on font/favicon downloads before starting bundle loads.
+  // RSPack: start loading scripts immediately via IIFE for faster downloads,
+  // but defer __kbnBootstrap__() until window.onload to match legacy timing.
+  // This ensures fonts and other page resources are loaded before React renders,
+  // preventing layout shifts from font swaps that cause flaky test interactions.
+  // Legacy: window.onload waits for ALL resources before starting script loads.
   ${useRspack ? '(function () {' : 'window.onload = function () {'}
     function failure() {
       // make subsequent calls to failure() noop
@@ -199,6 +200,13 @@ ${reactDevtoolsHookStub}
       // RSPack progressive loading: wait for async plugin chunks to load
       if (window.__kbnPluginsLoaded) {
         await window.__kbnPluginsLoaded;
+      }
+      // Ensure all page resources (fonts, favicons) are loaded before React
+      // renders, matching the legacy window.onload timing. Scripts download
+      // in parallel with these resources via the IIFE, but React only starts
+      // once everything is ready.
+      if (document.readyState !== 'complete') {
+        await new Promise(function (r) { window.addEventListener('load', r); });
       }
       __kbnBundles__.get('entry/core/public').__kbnBootstrap__();
     });
