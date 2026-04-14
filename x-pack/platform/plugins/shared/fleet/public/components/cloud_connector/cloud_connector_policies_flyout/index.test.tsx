@@ -281,6 +281,26 @@ describe('CloudConnectorPoliciesFlyout', () => {
     ).toHaveTextContent('Federated Identity ID: subscription-123');
   });
 
+  it('should display GCP service account email with Service Account Email label', () => {
+    renderFlyout({
+      provider: 'gcp',
+      cloudConnectorVars: {
+        'gcp.credentials.service_account_email': {
+          value: 'cspm-sa@my-project.iam.gserviceaccount.com',
+        },
+        'gcp.credentials.audience': {
+          value:
+            '//iam.googleapis.com/projects/123/locations/global/workloadIdentityPools/pool/providers/provider',
+        },
+        gcp_credentials_cloud_connector_id: { value: { isSecretRef: true, id: 'secret-1' } },
+      },
+    });
+
+    expect(
+      screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IDENTIFIER_TEXT)
+    ).toHaveTextContent('Service Account Email: cspm-sa@my-project.iam.gserviceaccount.com');
+  });
+
   describe('pagination', () => {
     it('should call useCloudConnectorUsage with initial pagination parameters', () => {
       renderFlyout();

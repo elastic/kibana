@@ -14,6 +14,12 @@ export class IntegrationManagementPage {
     await this.page.gotoApp('automaticImport');
   }
 
+  async navigateToEdit(integrationId: string) {
+    await this.page.gotoApp('automaticImport');
+    const { origin } = new URL(this.page.url());
+    await this.page.goto(`${origin}/app/automaticImport/edit/${encodeURIComponent(integrationId)}`);
+  }
+
   getConnectorSelector() {
     return this.page.testSubj.locator('connector-selector');
   }
