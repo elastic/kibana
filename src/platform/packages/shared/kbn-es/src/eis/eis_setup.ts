@@ -74,22 +74,48 @@ export const eisHttpRequest = (
     req.end();
   });
 
-const createBasicAuth = (username: string, password: string): string =>
+export const createBasicAuth = (username: string, password: string): string =>
   Buffer.from(`${username}:${password}`).toString('base64');
 
-/** Returns true when the local Vault token is still valid. */
+const VAULT_NOT_INSTALLED_MESSAGE = [
+  'Vault is not installed or not in PATH.',
+  'Install it from https://developer.hashicorp.com/vault/install or follow the Elastic guide:',
+  '  https://docs.elastic.dev/vault',
+  '',
+  'Alternatively, set the CCM API key manually:',
+  '',
+  `  export KIBANA_EIS_CCM_API_KEY="<key>"`,
+].join('\n');
+
+/**
+ * Returns true when the local Vault token is still valid.
+ * Throws with a helpful install message when vault is not found in PATH.
+ */
 const isVaultAuthenticated = async (vaultAddr: string): Promise<boolean> => {
   try {
     await execa('vault', ['token', 'lookup', '-format=json'], {
       env: { VAULT_ADDR: vaultAddr },
     });
     return true;
-  } catch {
+  } catch (error: unknown) {
+    if (
+      error &&
+      typeof error === 'object' &&
+      'code' in error &&
+      (error as NodeJS.ErrnoException).code === 'ENOENT'
+    ) {
+      throw new Error(VAULT_NOT_INSTALLED_MESSAGE);
+    }
     return false;
   }
 };
 
-/** Spawns `vault login --method oidc` with inherited stdio so the user can complete the OAuth flow in the terminal. */
+/**
+ * Spawns `vault login --method oidc` with inherited stdio so the user can
+ * complete the OAuth flow in the terminal.
+ * Handles the `error` event from spawn so the process does not hang when
+ * vault is not in PATH.
+ */
 const vaultLogin = async (vaultAddr: string, log: ToolingLog): Promise<void> => {
   log.info('Opening browser for Vault OIDC login...');
   const child = spawn('vault', ['login', '--method', 'oidc'], {
@@ -97,9 +123,16 @@ const vaultLogin = async (vaultAddr: string, log: ToolingLog): Promise<void> => 
     stdio: 'inherit',
   });
 
-  const exitCode = await new Promise<number | null>((resolve) =>
-    child.on('exit', (code) => resolve(code))
-  );
+  const exitCode = await new Promise<number | null>((resolve, reject) => {
+    child.on('error', (err) => {
+      if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
+        reject(new Error(VAULT_NOT_INSTALLED_MESSAGE));
+      } else {
+        reject(err);
+      }
+    });
+    child.on('exit', (code) => resolve(code));
+  });
 
   if (exitCode !== 0) {
     throw new Error(
@@ -132,7 +165,14 @@ const getEisApiKeyFromVault = async (vaultAddr: string, log: ToolingLog): Promis
   const authenticated = await isVaultAuthenticated(vaultAddr);
 
   if (!authenticated) {
-    log.warning('Vault session expired or not authenticated.');
+    log.warning(
+      [
+        'Vault session expired or not found. Launching OIDC login in your browser...',
+        'If no browser opens, run: vault login --method oidc',
+        'For setup help, see: https://docs.elastic.dev/vault',
+        `You can also skip Vault by setting: export KIBANA_EIS_CCM_API_KEY="<key>"`,
+      ].join('\n')
+    );
     await vaultLogin(vaultAddr, log);
   }
 
@@ -145,14 +185,17 @@ const getEisApiKeyFromVault = async (vaultAddr: string, log: ToolingLog): Promis
     try {
       await vaultLogin(vaultAddr, log);
       return await readVaultSecret(vaultAddr);
-    } catch {
+    } catch (secondError: unknown) {
       const vaultStderr =
         firstError && typeof firstError === 'object' && 'stderr' in firstError
           ? String((firstError as { stderr: unknown }).stderr).trim()
           : '';
+      const secondMsg =
+        secondError instanceof Error ? secondError.message : String(secondError);
       const parts = [
         'Failed to read EIS API key from vault.',
-        ...(vaultStderr ? [`Vault output: ${vaultStderr}`] : []),
+        ...(vaultStderr ? [`First attempt: ${vaultStderr}`] : []),
+        ...(secondMsg ? [`Second attempt: ${secondMsg}`] : []),
         '',
         'You can also set the key manually:',
         '',

@@ -207,7 +207,7 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions, keystoreC
   // Inject EIS connectors discovered by bootstrap.ts (--eis flag) into the
   // Kibana config as preconfigured action connectors.
   const eisConnectorsJson = process.env.__KIBANA_EIS_CONNECTORS;
-  if (eisConnectorsJson) {
+  if (opts.eis && eisConnectorsJson) {
     try {
       const eisConnectors = JSON.parse(eisConnectorsJson);
       if (eisConnectors && typeof eisConnectors === 'object' && !Array.isArray(eisConnectors)) {
@@ -299,7 +299,8 @@ export default function (program) {
       )
       .option(
         '--eis',
-        'Auto-discover EIS inference endpoints and configure preconfigured connectors (requires ES running with --eis)'
+        'Auto-discover EIS inference endpoints and configure preconfigured connectors (requires ES running with --eis). ' +
+          'Override ES credentials via KIBANA_EIS_ES_USERNAME (default: elastic) and KIBANA_EIS_ES_PASSWORD (default: changeme).'
       );
   }
 

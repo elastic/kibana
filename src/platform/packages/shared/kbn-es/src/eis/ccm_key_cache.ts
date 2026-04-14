@@ -89,5 +89,5 @@ export const writeCachedKey = (key: string, vaultAddr: string): void => {
     fs.mkdirSync(CACHE_DIR, { recursive: true });
   }
 
-  fs.writeFileSync(CACHE_PATH, JSON.stringify(entry, null, 2), 'utf-8');
+  fs.writeFileSync(CACHE_PATH, JSON.stringify(entry, null, 2), { encoding: 'utf-8', mode: 0o600 });
 };

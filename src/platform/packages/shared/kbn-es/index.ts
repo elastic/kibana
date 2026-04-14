@@ -29,6 +29,7 @@ export { SERVERLESS_ROLES_ROOT_PATH, STATEFUL_ROLES_ROOT_PATH } from './src/path
 export {
   EIS_QA_URL,
   EIS_ES_ARG,
+  createBasicAuth,
   resolveCcmApiKey,
   setCcmApiKey,
   eisHttpRequest,

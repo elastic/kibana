@@ -81,6 +81,10 @@ export const snapshot: Command = {
     });
 
     // --eis implies trial license and the EIS inference URL ES argument.
+    // Resolve the CCM API key up front so any Vault login prompt appears before
+    // the snapshot download and ES startup, not buried after them.
+    let eisApiKey: string | undefined;
+
     if (options.eis) {
       options.license = 'trial';
       const userEsArgs = options.esArgs
@@ -89,6 +93,12 @@ export const snapshot: Command = {
           : [options.esArgs]
         : [];
       options.esArgs = [EIS_ES_ARG, ...userEsArgs];
+
+      // Skip key resolution for download-only runs — the key is only needed
+      // when starting ES and setting up CCM.
+      if (!options['download-only']) {
+        eisApiKey = await resolveCcmApiKey(log);
+      }
     }
 
     const cluster = new Cluster({ ssl: options.ssl });
@@ -136,10 +146,10 @@ export const snapshot: Command = {
       });
 
       if (options.eis) {
-        // EIS mode: start ES, resolve the CCM API key, set it, then wait for
-        // shutdown. We use cluster.start() (returns when ES is ready) instead of
-        // cluster.run() (blocks until exit) so we can perform the CCM setup
-        // in between.
+        // EIS mode.
+        // Start ES, set the key, then wait for shutdown. We use cluster.start()
+        // (returns when ES is ready) instead of cluster.run() (blocks until
+        // exit) so we can perform the CCM setup in between.
         await cluster.start(installPath, {
           reportTime,
           startTime: runStartTime,
@@ -160,8 +170,7 @@ export const snapshot: Command = {
             ssl: !!options.ssl,
           };
 
-          const apiKey = await resolveCcmApiKey(log);
-          await setCcmApiKey(apiKey, es, log);
+          await setCcmApiKey(eisApiKey as string, es, log);
           log.success('EIS: CCM API key set in Elasticsearch');
         } catch (error) {
           log.error('EIS setup failed, stopping Elasticsearch...');
