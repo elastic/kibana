@@ -15,6 +15,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const esClient = getService('es');
   const config = getService('config');
+  const retry = getService('retry');
   const isServerless = !!config.get('serverless');
 
   let apiClient: StreamsSupertestRepositoryClient;
@@ -22,42 +23,46 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('Deferred data stream materialization', function () {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
+      // Wait for startup enableStreams to finish (may hold a lock)
+      await retry.tryForTime(30000, async () => {
+        await enableStreams(apiClient);
+      });
     });
 
     after(async () => {
       await disableStreams(apiClient);
     });
 
-    it('materializes missing backing data streams for root streams on enable', async () => {
-      await enableStreams(apiClient);
-
-      for (const rootStream of ['logs.otel', 'logs.ecs']) {
-        const dsBefore = await esClient.indices.getDataStream({ name: rootStream });
-        expect(dsBefore.data_streams).to.have.length(1);
-        expect(dsBefore.data_streams[0].name).to.be(rootStream);
-      }
-
-      await esClient.indices.deleteDataStream({ name: 'logs.otel' });
-      await esClient.indices.deleteDataStream({ name: 'logs.ecs' });
-
-      for (const rootStream of ['logs.otel', 'logs.ecs']) {
-        const dsCheck = await esClient.indices.exists({ index: rootStream });
-        expect(dsCheck).to.be(false);
-      }
-
-      const enableResponse = await apiClient
-        .fetch('POST /api/streams/_enable 2023-10-31')
-        .expect(200);
-      expect(enableResponse.body.result).to.eql('created');
-
-      for (const rootStream of ['logs.otel', 'logs.ecs']) {
-        const dsAfter = await esClient.indices.getDataStream({ name: rootStream });
-        expect(dsAfter.data_streams).to.have.length(1);
-        expect(dsAfter.data_streams[0].name).to.be(rootStream);
-      }
-    });
-
     if (!isServerless) {
+      it('materializes missing backing data streams for root streams on enable', async () => {
+        await enableStreams(apiClient);
+
+        for (const rootStream of ['logs.otel', 'logs.ecs']) {
+          const dsBefore = await esClient.indices.getDataStream({ name: rootStream });
+          expect(dsBefore.data_streams).to.have.length(1);
+          expect(dsBefore.data_streams[0].name).to.be(rootStream);
+        }
+
+        await esClient.indices.deleteDataStream({ name: 'logs.otel' });
+        await esClient.indices.deleteDataStream({ name: 'logs.ecs' });
+
+        for (const rootStream of ['logs.otel', 'logs.ecs']) {
+          const dsCheck = await esClient.indices.exists({ index: rootStream });
+          expect(dsCheck).to.be(false);
+        }
+
+        const enableResponse = await apiClient
+          .fetch('POST /api/streams/_enable 2023-10-31')
+          .expect(200);
+        expect(enableResponse.body.result).to.eql('created');
+
+        for (const rootStream of ['logs.otel', 'logs.ecs']) {
+          const dsAfter = await esClient.indices.getDataStream({ name: rootStream });
+          expect(dsAfter.data_streams).to.have.length(1);
+          expect(dsAfter.data_streams[0].name).to.be(rootStream);
+        }
+      });
+
       it('returns noop when all backing data streams already exist', async () => {
         await enableStreams(apiClient);
 
