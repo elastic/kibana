@@ -11,7 +11,7 @@ import Path from 'path';
 import Fs from 'fs';
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { parse } from 'yaml';
+import JsYaml from 'js-yaml';
 
 interface FtrConfigWithOptions {
   [configPath: string]: {
@@ -45,7 +45,7 @@ export const getAllFtrConfigsAndManifests = () => {
   const ftrConfigEntries = new Map<string, string[]>();
 
   for (const manifestRelPath of manifestPaths.all) {
-    const manifest = parse(
+    const manifest = JsYaml.load(
       Fs.readFileSync(Path.resolve(REPO_ROOT, manifestRelPath), 'utf8')
     ) as FtrConfigsManifest;
 
