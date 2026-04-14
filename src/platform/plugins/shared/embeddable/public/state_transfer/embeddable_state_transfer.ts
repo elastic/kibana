@@ -10,6 +10,7 @@
 import { cloneDeep } from 'lodash';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ApplicationStart, PublicAppInfo } from '@kbn/core/public';
+import { map, Subject } from 'rxjs';
 import type { EmbeddableEditorState, EmbeddablePackageState } from './types';
 import {
   isEmbeddableEditorState,
@@ -30,6 +31,7 @@ export class EmbeddableStateTransfer {
   public isTransferInProgress: boolean;
   private storage: Storage;
   private appList: ReadonlyMap<string, PublicAppInfo> | undefined;
+  private incomingPackagesState$: Subject<any>;
 
   constructor(
     private navigateToApp: ApplicationStart['navigateToApp'],
@@ -43,6 +45,7 @@ export class EmbeddableStateTransfer {
     currentAppId$.subscribe(() => {
       this.isTransferInProgress = false;
     });
+    this.incomingPackagesState$ = new Subject();
   }
 
   /**
@@ -184,9 +187,10 @@ export class EmbeddableStateTransfer {
     key: string,
     options?: {
       keysToRemoveAfterFetch?: string[];
-    }
+    },
+    stateObject?: any
   ): IncomingStateType[] | undefined {
-    const embeddableState = this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY);
+    const embeddableState = stateObject ?? this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY);
     if (!embeddableState) {
       return undefined;
     }
@@ -233,5 +237,26 @@ export class EmbeddableStateTransfer {
       openInNewTab: options?.openInNewTab,
       skipAppLeave: options?.skipAppLeave,
     });
+    // If navigateToApp ends up attempting to transfer state to the exact same page that's currently open, it will end up
+    // being a no-op. For this case, emit the incoming packages to incomingPackagesState$.
+    // If navigateToApp successfully redirects, downstream subscribers will get unsubscribed before receiving the state transfer. It will only
+    // affect them in cases where navigateToApp doesn't end up doing anything.
+    this.incomingPackagesState$.next(stateObject);
+  }
+
+  public onTransferEmbeddablePackage$(appId: string, removeAfterFetch?: boolean) {
+    return this.incomingPackagesState$.pipe(
+      map((stateObject: any) => {
+        return this.getIncomingPackagesState<EmbeddablePackageState>(
+          isEmbeddablePackageState,
+          appId,
+          EMBEDDABLE_PACKAGE_STATE_KEY,
+          {
+            keysToRemoveAfterFetch: removeAfterFetch ? [EMBEDDABLE_PACKAGE_STATE_KEY] : undefined,
+          },
+          stateObject
+        );
+      })
+    );
   }
 }

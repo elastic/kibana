@@ -11,6 +11,7 @@ import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
 import React, { useEffect } from 'react';
 import { render, waitFor } from '@testing-library/react';
+import { Subject } from 'rxjs';
 
 import type { DashboardRendererProps } from '../dashboard_renderer/dashboard_renderer';
 import { DashboardRenderer } from '../dashboard_renderer/dashboard_renderer';
@@ -116,28 +117,29 @@ describe('Dashboard App', () => {
     const addIncomingEmbeddablesSpy = jest.spyOn(dashboardApi, 'addIncomingEmbeddables');
     const setViewModeSpy = jest.spyOn(dashboardApi, 'setViewMode');
     const stateTransferMock = embeddableService.getStateTransfer();
-    const mockGetIncomingEmbeddablePackage =
-      stateTransferMock.getIncomingEmbeddablePackage as jest.Mock;
+    const transferSubject$ = new Subject<unknown>();
 
     beforeAll(() => {
+      (stateTransferMock.onTransferEmbeddablePackage$ as jest.Mock).mockReturnValue(
+        transferSubject$
+      );
       (embeddableService.getStateTransfer as jest.Mock).mockReturnValue(stateTransferMock);
     });
 
     beforeEach(() => {
       addIncomingEmbeddablesSpy.mockClear();
       setViewModeSpy.mockClear();
-      mockGetIncomingEmbeddablePackage.mockReset();
+      if (dashboardApi.expandedPanelId$.value) {
+        dashboardApi.expandPanel(dashboardApi.expandedPanelId$.value);
+      }
     });
 
-    it('adds incoming embeddables directly when navigating to the same dashboard', async () => {
-      const savedDashboardId = 'test-dashboard-123';
-      mockHistory = createMemoryHistory({ initialEntries: [`/view/${savedDashboardId}`] });
-
+    it('adds incoming embeddables when received via the state transfer observable', async () => {
       render(
         <DashboardApp
           redirectTo={jest.fn()}
           history={mockHistory}
-          savedDashboardId={savedDashboardId}
+          savedDashboardId="test-dashboard-123"
           setDashboardAppApi={jest.fn()}
         />
       );
@@ -152,9 +154,7 @@ describe('Dashboard App', () => {
           serializedState: { title: 'Chart from the AI sidebar' },
         },
       ];
-      mockGetIncomingEmbeddablePackage.mockReturnValueOnce(incomingEmbeddables);
-
-      mockHistory.push(`/view/${savedDashboardId}`);
+      transferSubject$.next(incomingEmbeddables);
 
       await waitFor(() => {
         expect(addIncomingEmbeddablesSpy).toHaveBeenCalledTimes(1);
@@ -163,15 +163,15 @@ describe('Dashboard App', () => {
       });
     });
 
-    it('adds incoming embeddables directly when navigating to the same dashboard with a maximized panel', async () => {
-      const savedDashboardId = 'test-dashboard-123';
-      mockHistory = createMemoryHistory({ initialEntries: [`/view/${savedDashboardId}/panel`] });
+    it('minimizes expanded panel when receiving incoming embeddables', async () => {
+      dashboardApi.expandPanel('maximized-panel-id');
+      expandPanelSpy.mockClear();
 
       render(
         <DashboardApp
           redirectTo={jest.fn()}
           history={mockHistory}
-          savedDashboardId={savedDashboardId}
+          savedDashboardId="test-dashboard-123"
           setDashboardAppApi={jest.fn()}
         />
       );
@@ -186,26 +186,22 @@ describe('Dashboard App', () => {
           serializedState: { title: 'Chart from the AI sidebar' },
         },
       ];
-      mockGetIncomingEmbeddablePackage.mockReturnValueOnce(incomingEmbeddables);
-
-      mockHistory.push(`/view/${savedDashboardId}/panel`);
+      transferSubject$.next(incomingEmbeddables);
 
       await waitFor(() => {
+        expect(expandPanelSpy).toHaveBeenCalledWith('maximized-panel-id');
         expect(addIncomingEmbeddablesSpy).toHaveBeenCalledTimes(1);
         expect(addIncomingEmbeddablesSpy).toHaveBeenCalledWith(incomingEmbeddables);
         expect(setViewModeSpy).toHaveBeenCalledWith('edit');
       });
     });
 
-    it('does not consume embeddables when navigating to a different dashboard', async () => {
-      const savedDashboardId = 'dashboard-a';
-      mockHistory = createMemoryHistory({ initialEntries: [`/view/${savedDashboardId}`] });
-
+    it('does nothing when the state transfer observable emits undefined', async () => {
       render(
         <DashboardApp
           redirectTo={jest.fn()}
           history={mockHistory}
-          savedDashboardId={savedDashboardId}
+          savedDashboardId="test-dashboard-456"
           setDashboardAppApi={jest.fn()}
         />
       );
@@ -214,29 +210,20 @@ describe('Dashboard App', () => {
         expect(addIncomingEmbeddablesSpy).not.toHaveBeenCalled();
       });
 
-      mockGetIncomingEmbeddablePackage.mockReturnValueOnce([
-        {
-          type: 'lens',
-          serializedState: { title: 'Some panel' },
-        },
-      ]);
-
-      mockHistory.push('/view/dashboard-b');
+      transferSubject$.next(undefined);
 
       await waitFor(() => {
         expect(addIncomingEmbeddablesSpy).not.toHaveBeenCalled();
+        expect(setViewModeSpy).not.toHaveBeenCalled();
       });
     });
 
-    it('does nothing when there are no incoming embeddables in session storage', async () => {
-      const savedDashboardId = 'test-dashboard-456';
-      mockHistory = createMemoryHistory({ initialEntries: [`/view/${savedDashboardId}`] });
-
+    it('does nothing when the state transfer observable emits an empty array', async () => {
       render(
         <DashboardApp
           redirectTo={jest.fn()}
           history={mockHistory}
-          savedDashboardId={savedDashboardId}
+          savedDashboardId="test-dashboard-789"
           setDashboardAppApi={jest.fn()}
         />
       );
@@ -245,9 +232,7 @@ describe('Dashboard App', () => {
         expect(addIncomingEmbeddablesSpy).not.toHaveBeenCalled();
       });
 
-      mockGetIncomingEmbeddablePackage.mockReturnValueOnce(undefined);
-
-      mockHistory.push(`/view/${savedDashboardId}`);
+      transferSubject$.next([]);
 
       await waitFor(() => {
         expect(addIncomingEmbeddablesSpy).not.toHaveBeenCalled();

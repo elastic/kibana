@@ -29,11 +29,7 @@ import {
   screenshotModeService,
   shareService,
 } from '../services/kibana_services';
-import {
-  DASHBOARD_STATE_STORAGE_KEY,
-  VIEW_DASHBOARD_URL,
-  createDashboardEditUrl,
-} from '../utils/urls';
+import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../utils/urls';
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
 import { useObservabilityAIAssistantContext } from './hooks/use_observability_ai_assistant_context';
@@ -146,28 +142,21 @@ export function DashboardApp({
    */
   useEffect(() => {
     if (!dashboardApi) return;
-    const unlisten = history.listen((location) => {
-      const dashboardPath = `${VIEW_DASHBOARD_URL}/${savedDashboardId}`;
-      const isNavigatingToSameDashboard =
-        savedDashboardId && location.pathname.match(`^${dashboardPath}/?$`);
-      // Bail out if the history update is navigating to a different dashboard. Otherwise the following code
-      // will eat the state transfer intended for the next dashboard
-      if (!isNavigatingToSameDashboard) return;
-
-      const lateEmbeddables = embeddableService
-        .getStateTransfer()
-        .getIncomingEmbeddablePackage(DASHBOARD_APP_ID, true);
-
-      if (lateEmbeddables?.length) {
-        // If a panel is expanded, minimize it so that the user can see the newly added embeddables
-        if (dashboardApi.expandedPanelId$.value) {
-          dashboardApi.expandPanel(dashboardApi.expandedPanelId$.value);
+    const embeddableStateTransferSubscription = embeddableService
+      .getStateTransfer()
+      .onTransferEmbeddablePackage$(DASHBOARD_APP_ID, true)
+      .subscribe((lateEmbeddables) => {
+        if (lateEmbeddables?.length) {
+          // If a panel is expanded, minimize it so that the user can see the newly added embeddables
+          if (dashboardApi.expandedPanelId$.value) {
+            dashboardApi.expandPanel(dashboardApi.expandedPanelId$.value);
+          }
+          dashboardApi.addIncomingEmbeddables(lateEmbeddables);
+          dashboardApi.setViewMode('edit');
         }
-        dashboardApi.addIncomingEmbeddables(lateEmbeddables);
-        dashboardApi.setViewMode('edit');
-      }
-    });
-    return unlisten;
+      });
+
+    return () => embeddableStateTransferSubscription.unsubscribe();
   }, [dashboardApi, history, savedDashboardId]);
 
   /**
