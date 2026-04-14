@@ -32,7 +32,7 @@ export function readLimits(path: string): Limits {
     }
   }
 
-  return yaml ? parse(yaml) : {};
+  return yaml ? (parse(yaml) ?? {}) : {};
 }
 
 export function validateLimitsForAllBundles(
