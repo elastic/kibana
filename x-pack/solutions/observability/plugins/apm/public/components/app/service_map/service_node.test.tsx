@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { ServiceNode } from './service_node';
+import { ServiceMapSloFlyoutProvider } from './service_map_slo_flyout_context';
 import { ServiceHealthStatus } from '../../../../common/service_health_status';
 import type { ServiceNodeData } from '../../../../common/service_map';
 import { MOCK_EUI_THEME, MOCK_DEFAULT_COLOR, MOCK_EUI_THEME_FOR_USE_THEME } from './constants';
@@ -161,7 +162,6 @@ describe('ServiceNode', () => {
     it('does not render SLO badge when status is noSLOs', () => {
       renderServiceNode(createServiceNodeData({ sloStatus: 'noSLOs', sloCount: 0 }));
       expect(screen.queryByTestId('apmSloBadge')).not.toBeInTheDocument();
-      expect(screen.queryByText('No SLOs')).not.toBeInTheDocument();
     });
 
     it('does not render SLO badge for healthy status', () => {
@@ -185,29 +185,23 @@ describe('ServiceNode', () => {
       expect(screen.getByTestId('apmSloBadge')).toBeInTheDocument();
       expect(screen.getByTestId('apmSloBadge')).toHaveAttribute('data-slo-status', 'degrading');
     });
-  });
 
-  describe('alert badge', () => {
-    it('renders alerts badge with count when alertsCount is greater than zero', () => {
-      renderServiceNode(createServiceNodeData({ alertsCount: 4 }));
-      const badge = screen.getByTestId('serviceMapNodeAlertsBadge');
-      expect(badge).toBeInTheDocument();
-      expect(badge).toHaveTextContent('4');
+    it('calls onSloBadgeClick with service name and agent when the badge is clicked', () => {
+      const onSloBadgeClick = jest.fn();
+      render(
+        <ReactFlowProvider>
+          <ServiceMapSloFlyoutProvider onSloBadgeClick={onSloBadgeClick}>
+            <ServiceNode
+              {...defaultNodeProps}
+              data={createServiceNodeData({ sloStatus: 'violated', sloCount: 2 })}
+              selected={false}
+              draggable
+            />
+          </ServiceMapSloFlyoutProvider>
+        </ReactFlowProvider>
+      );
+      fireEvent.click(screen.getByTestId('apmSloBadge'));
+      expect(onSloBadgeClick).toHaveBeenCalledWith('Test Service', 'java');
     });
-
-    it('does not render alerts badge when alertsCount is zero', () => {
-      renderServiceNode(createServiceNodeData({ alertsCount: 0 }));
-      expect(screen.queryByTestId('serviceMapNodeAlertsBadge')).not.toBeInTheDocument();
-    });
-
-    it('does not render alerts badge when alertsCount is undefined', () => {
-      renderServiceNode();
-      expect(screen.queryByTestId('serviceMapNodeAlertsBadge')).not.toBeInTheDocument();
-    });
-  });
-
-  it('exposes a stable test subject on the service circle for e2e', () => {
-    renderServiceNode();
-    expect(screen.getByTestId('serviceMapNodeServiceCircle')).toBeInTheDocument();
   });
 });

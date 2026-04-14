@@ -111,6 +111,10 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
                 taskLogger.info(`Found ${allEntries.length} existing memory entries total`);
 
                 for (const { streamName, indicators } of streamGroups) {
+                  if (runContext.abortController.signal.aborted) {
+                    throw new Error('Request was aborted');
+                  }
+
                   taskLogger.info(
                     `Processing stream "${streamName}" with ${indicators.length} indicator(s) via reasoning agent`
                   );
@@ -136,6 +140,7 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
                       existingPages,
                     },
                     maxSteps: 10,
+                    abortSignal: runContext.abortController.signal,
                     toolCallbacks: {
                       get_indicator_details: async (toolCall) => {
                         const { index } = toolCall.function.arguments;
