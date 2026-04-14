@@ -59,7 +59,6 @@ steps:
  */
 spaceTest.describe('Workflow schema OOM prevention', { tag: tags.deploymentAgnostic }, () => {
   let workflowsApi: WorkflowsApiService;
-  let workflowId: string;
 
   spaceTest.beforeAll(async ({ apiServices }) => {
     workflowsApi = apiServices.workflowsApi;
@@ -69,21 +68,16 @@ spaceTest.describe('Workflow schema OOM prevention', { tag: tags.deploymentAgnos
     await workflowsApi.deleteAll();
   });
 
-  spaceTest('create workflow succeeds under 1 GB heap', async () => {
+  spaceTest('create and update workflow succeeds under 1 GB heap', async () => {
     const created = await workflowsApi.create(WORKFLOW_YAML);
     expect(created.id).toBeDefined();
     expect(created.valid).toBe(true);
     expect(created.name).toBe('OOM Prevention Test Workflow');
-    workflowId = created.id;
-  });
 
-  spaceTest('update workflow succeeds under 1 GB heap', async () => {
-    expect(workflowId, 'workflowId must be set by the create test').toBeDefined();
-
-    const updated = await workflowsApi.update(workflowId, {
+    const updated = await workflowsApi.update(created.id, {
       yaml: WORKFLOW_YAML.replace('hello', 'updated'),
     });
-    expect(updated.id).toBe(workflowId);
+    expect(updated.id).toBe(created.id);
     expect(updated.valid).toBe(true);
   });
 

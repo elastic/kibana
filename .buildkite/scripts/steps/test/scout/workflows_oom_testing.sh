@@ -18,7 +18,7 @@ for mode in "${RUN_MODES[@]}"; do
   start=$(date +%s)
 
   set +e
-  node scripts/scout run-tests --location local $mode --config "$CONFIG_PATH" --kibanaInstallDir "$KIBANA_BUILD_LOCATION"
+  node scripts/scout run-tests --location local --serverConfigSet workflows_oom_testing $mode --config "$CONFIG_PATH" --kibanaInstallDir "$KIBANA_BUILD_LOCATION"
   EXIT_CODE=$?
   set -e
 
