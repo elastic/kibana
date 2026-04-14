@@ -7,6 +7,7 @@
 
 import { get, has } from 'lodash';
 import { map, type Observable } from 'rxjs';
+import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
 
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../../common/constants/search';
 import type { Job } from '../../../../common/types/anomaly_detection_jobs';
@@ -46,17 +47,18 @@ export interface FetchAnomaliesTableDataParams {
   enrichment: AnomaliesTableEnrichment;
 }
 
+/** In-place fields written by {@link enrichAnomalies} for the anomalies table UI. */
+type EnrichableAnomalyRow = MlAnomaliesTableRecord & {
+  detector?: string;
+  rulesLength?: number;
+};
+
 function enrichAnomalies(
-  anomalies: Array<
-    Record<string, unknown> & {
-      jobId: string;
-      detectorIndex: number;
-      source: { function_description?: string };
-    }
-  >,
+  anomalies: MlAnomaliesTableRecord[],
   enrichment: AnomaliesTableEnrichment
 ) {
-  anomalies.forEach((anomaly) => {
+  anomalies.forEach((row) => {
+    const anomaly = row as EnrichableAnomalyRow;
     const jobId = anomaly.jobId;
     let detector: { detector_description?: string; custom_rules?: unknown[] } | undefined;
 
@@ -76,7 +78,9 @@ function enrichAnomalies(
 
     if (enrichment.source === 'jobService') {
       if (has(enrichment.customUrlsByJob, jobId)) {
-        anomaly.customUrls = enrichment.customUrlsByJob[jobId];
+        anomaly.customUrls = enrichment.customUrlsByJob[
+          jobId
+        ] as MlAnomaliesTableRecord['customUrls'];
       }
     } else if (
       enrichment.selectedJob.custom_settings &&
@@ -128,7 +132,7 @@ export function fetchAnomaliesTableData$({
     )
     .pipe(
       map((resp) => {
-        const anomalies = resp.anomalies as Parameters<typeof enrichAnomalies>[0];
+        const anomalies = resp.anomalies;
         enrichAnomalies(anomalies, enrichment);
         return {
           tableData: {

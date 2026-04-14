@@ -85,7 +85,7 @@ describe('loadSingleMetricContextData', () => {
       errorMessages: {
         metric: 'metric-err',
         swimlane: 'swim-err',
-        details: 'details-err',
+        entityCounts: 'details-err',
         forecast: 'fc-err',
       },
       deps: {
@@ -124,7 +124,7 @@ describe('loadSingleMetricContextData', () => {
       errorMessages: {
         metric: 'metric-err',
         swimlane: 'swim-err',
-        details: 'details-err',
+        entityCounts: 'details-err',
         forecast: 'fc-err',
       },
       deps: baseDeps,
@@ -155,7 +155,7 @@ describe('loadSingleMetricContextData', () => {
       errorMessages: {
         metric: 'metric-err',
         swimlane: 'swim-err',
-        details: 'details-err',
+        entityCounts: 'details-err',
         forecast: 'fc-err',
       },
       deps: {
@@ -192,7 +192,7 @@ describe('loadSingleMetricContextData', () => {
       errorMessages: {
         metric: 'metric-err',
         swimlane: 'swim-err',
-        details: 'details-err',
+        entityCounts: 'details-err',
         forecast: 'fc-err',
       },
       deps: baseDeps,
