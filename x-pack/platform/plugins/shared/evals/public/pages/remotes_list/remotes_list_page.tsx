@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiAccordion,
   EuiBasicTable,
@@ -154,7 +154,7 @@ export const RemotesListPage: React.FC = () => {
     setFlyout({ mode: 'create' });
   };
 
-  const openEdit = (remote: EvalsRemoteSummary) => {
+  const openEdit = useCallback((remote: EvalsRemoteSummary) => {
     setDisplayName(remote.displayName);
     setUrl(remote.url);
     setApiKey('');
@@ -163,7 +163,7 @@ export const RemotesListPage: React.FC = () => {
     setFormError(null);
     setTestResult(null);
     setFlyout({ mode: 'edit', remote });
-  };
+  }, []);
 
   const closeFlyout = () => {
     setFlyout(null);
@@ -279,31 +279,34 @@ export const RemotesListPage: React.FC = () => {
 
   const isSaving = createRemote.isLoading || updateRemote.isLoading;
 
-  const columns: Array<EuiBasicTableColumn<EvalsRemoteSummary>> = [
-    { field: 'displayName', name: i18n.COLUMN_NAME },
-    { field: 'url', name: i18n.COLUMN_URL },
-    {
-      name: i18n.COLUMN_ACTIONS,
-      width: '120px',
-      actions: [
-        {
-          name: i18n.EDIT_BUTTON,
-          description: i18n.EDIT_BUTTON,
-          icon: 'pencil',
-          type: 'icon',
-          onClick: (item) => openEdit(item),
-        },
-        {
-          name: i18n.DELETE_BUTTON,
-          description: i18n.DELETE_BUTTON,
-          icon: 'trash',
-          color: 'danger',
-          type: 'icon',
-          onClick: (item) => setConfirmDelete(item),
-        },
-      ],
-    },
-  ];
+  const columns = useMemo<Array<EuiBasicTableColumn<EvalsRemoteSummary>>>(
+    () => [
+      { field: 'displayName', name: i18n.COLUMN_NAME },
+      { field: 'url', name: i18n.COLUMN_URL },
+      {
+        name: i18n.COLUMN_ACTIONS,
+        width: '120px',
+        actions: [
+          {
+            name: i18n.EDIT_BUTTON,
+            description: i18n.EDIT_BUTTON,
+            icon: 'pencil',
+            type: 'icon',
+            onClick: (item) => openEdit(item),
+          },
+          {
+            name: i18n.DELETE_BUTTON,
+            description: i18n.DELETE_BUTTON,
+            icon: 'trash',
+            color: 'danger',
+            type: 'icon',
+            onClick: (item) => setConfirmDelete(item),
+          },
+        ],
+      },
+    ],
+    [openEdit]
+  );
 
   const items = data?.remotes ?? [];
 

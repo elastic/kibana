@@ -275,6 +275,7 @@ export function AddToDatasetFlyout({
       } catch (error) {
         if (!didCancel) {
           setFormError(`${LOAD_DATASETS_ERROR}: ${String(error)}`);
+          setDatasets([]);
         }
       } finally {
         if (!didCancel) {
