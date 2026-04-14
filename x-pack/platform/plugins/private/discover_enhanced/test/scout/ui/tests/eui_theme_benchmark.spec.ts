@@ -31,13 +31,14 @@ test.describe(
     test.beforeEach(async ({ browserAuth, page, context }) => {
       await browserAuth.loginAsAdmin();
 
-      // Set localStorage flag before any Kibana code runs so the CSS vars
-      // prototype activates in the browser (process.env is not available at runtime)
+      // Set localStorage flag so the CSS vars prototype activates in the browser
+      // (process.env is not available at runtime due to webpack DefinePlugin)
       const useCssVars = process.env.EUI_CSS_VARS === 'true';
       if (useCssVars) {
+        // Navigate to Kibana origin first so localStorage is accessible
+        await page.gotoApp('home');
         await page.evaluate(() => localStorage.setItem('EUI_CSS_VARS', 'true'));
         await page.reload();
-        await browserAuth.loginAsAdmin();
       }
 
       cdp = await context.newCDPSession(page);

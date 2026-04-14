@@ -9,9 +9,10 @@
 
 import * as Rx from 'rxjs';
 import type { FC, PropsWithChildren } from 'react';
-import React, { useMemo } from 'react';
+import React, { useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import createCache from '@emotion/cache';
+import { EuiThemeContext } from '@elastic/eui';
 
 // We can't use the import directly because the package isn't included in the shared bundle, so below the value is hardcoded.
 // However, we import this directly in the test to ensure our hardcoded selector is correct.
@@ -95,17 +96,69 @@ const componentDefaults: EuiProviderProps<unknown>['componentDefaults'] = {
   },
 };
 
-// TODO(elastic/eui#8902): Re-enable useEuiTheme() context override with CSS variable references.
-//
-// The intent is to wrap EuiProvider children with a component that reads the computed theme from
-// EuiThemeContext and re-provides it with all string values replaced by var(--euiTheme-<path>)
-// references. This would eliminate Emotion style recomputation on theme changes for ~3,945 files.
-//
-// Currently blocked: EUI components internally call JS functions on theme values
-// (transparentize, parseInt, shade, tint, etc.) which break when receiving var() strings.
-// EUI must first migrate to CSS-native equivalents (color-mix, calc) before this override is safe.
-//
-// See: Phase B, section 2.4 in the benchmark plan for the full implementation.
+const EUI_CSS_VARS_ENABLED =
+  (typeof process !== 'undefined' &&
+    typeof process.env !== 'undefined' &&
+    process.env.EUI_CSS_VARS === 'true') ||
+  (typeof localStorage !== 'undefined' && localStorage.getItem('EUI_CSS_VARS') === 'true');
+
+/**
+ * String values in the computed theme that are identifiers (dictionary keys,
+ * unit names, feature flags) rather than CSS values. These must NOT be
+ * converted to var() references because EUI code uses them as JS values
+ * (object lookups, === comparisons, string concatenation for units).
+ *
+ * Derived from the EUI theme types — see elastic/eui#8902.
+ */
+const CSS_VAR_EXCLUDED_PATHS = new Set([
+  'font-body-scale', // Index key: font.scale[font.body.scale]
+  'font-body-weight', // Index key: font.weight[font.body.weight]
+  'font-title-weight', // Index key: font.weight[font.title.weight]
+  'font-defaultUnits', // Unit identifier: === 'px', concatenated as `}${font.defaultUnits}`
+  'flags-shadowVariant', // Feature flag: === 'refresh'
+  'themeName', // Metadata, not a CSS value
+]);
+
+const deepMapToCssVars = (
+  obj: Record<string, unknown>,
+  prefix: string
+): Record<string, unknown> => {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    const varPath = prefix ? `${prefix}-${key}` : key;
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      result[key] = deepMapToCssVars(value as Record<string, unknown>, varPath);
+    } else if (typeof value === 'string' && !CSS_VAR_EXCLUDED_PATHS.has(varPath)) {
+      result[key] = `var(--euiTheme-${varPath})`;
+    } else {
+      result[key] = value;
+    }
+  }
+  return result;
+};
+
+/**
+ * When EUI_CSS_VARS is enabled, overrides the EuiThemeContext with CSS variable references.
+ * All string values in the computed theme become var(--euiTheme-<path>) references,
+ * so Emotion styles contain stable strings that don't change on theme switch.
+ * Requires EUI components to use CSS-native functions (color-mix, calc) instead of
+ * JS manipulation on theme values — see elastic/eui#8902.
+ */
+const CssVarThemeOverride: FC<PropsWithChildren> = ({ children }) => {
+  const computedTheme = useContext(EuiThemeContext);
+
+  const overriddenTheme = useMemo(() => {
+    if (!EUI_CSS_VARS_ENABLED) {
+      return computedTheme;
+    }
+    return deepMapToCssVars(
+      computedTheme as unknown as Record<string, unknown>,
+      ''
+    ) as typeof computedTheme;
+  }, [computedTheme]);
+
+  return <EuiThemeContext.Provider value={overriddenTheme}>{children}</EuiThemeContext.Provider>;
+};
 
 /**
  * Prepares and returns a configured `EuiProvider` for use in Kibana roots.  In most cases, this utility context
@@ -167,7 +220,7 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
         componentDefaults,
       }}
     >
-      {children}
+      <CssVarThemeOverride>{children}</CssVarThemeOverride>
     </EuiProvider>
   );
 };
