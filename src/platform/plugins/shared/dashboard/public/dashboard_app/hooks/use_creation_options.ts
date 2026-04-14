@@ -7,19 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type { ScopedHistory } from '@kbn/core-application-browser';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { History } from 'history';
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 
 import type { DashboardState } from '../../../common/types';
 import { DASHBOARD_APP_ID } from '../../../common/page_bundle_constants';
 import type { DashboardCreationOptions } from '../..';
-import { coreServices, screenshotModeService } from '../../services/kibana_services';
+import { screenshotModeService } from '../../services/kibana_services';
 import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../../utils/urls';
 import type { DashboardEmbedSettings } from '../types';
-import { useDashboardMountContext } from './dashboard_mount_context';
 import {
   createSessionRestorationDataProvider,
   getSearchSessionIdFromURL,
@@ -32,6 +32,8 @@ type IncomingEmbeddables = EmbeddablePackageState[] | undefined;
 
 interface UseCreationOptionsProps {
   history: History;
+  getScopedHistory: () => ScopedHistory;
+  kbnUrlStateStorage: IKbnUrlStateStorage;
   embedSettings?: DashboardEmbedSettings;
   incomingEmbeddables: IncomingEmbeddables;
   validateOutcome: DashboardCreationOptions['validateLoadedSavedObject'];
@@ -39,21 +41,12 @@ interface UseCreationOptionsProps {
 
 export const useCreationOptions = ({
   history,
+  getScopedHistory,
+  kbnUrlStateStorage,
   embedSettings,
   incomingEmbeddables,
   validateOutcome,
 }: UseCreationOptionsProps) => {
-  const { scopedHistory: getScopedHistory } = useDashboardMountContext();
-
-  const kbnUrlStateStorage = useMemo(
-    () =>
-      createKbnUrlStateStorage({
-        history,
-        useHash: coreServices.uiSettings.get('state:storeInSessionStorage'),
-      }),
-    [history]
-  );
-
   return useCallback((): Promise<DashboardCreationOptions> => {
     const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
 

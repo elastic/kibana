@@ -7,15 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PropsWithChildren } from 'react';
-import React from 'react';
 import type { ScopedHistory } from '@kbn/core-application-browser';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { renderHook } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { BehaviorSubject } from 'rxjs';
 
-import { coreServices, screenshotModeService } from '../../services/kibana_services';
-import { DashboardMountContext } from './dashboard_mount_context';
+import { screenshotModeService } from '../../services/kibana_services';
 import { useCreationOptions } from './use_creation_options';
 import { extractDashboardState, loadAndRemoveDashboardState } from '../url';
 import {
@@ -25,23 +23,7 @@ import {
 
 const mockKbnUrlStateStorage = {
   get: jest.fn(),
-};
-
-jest.mock('@kbn/kibana-utils-plugin/public', () => ({
-  createKbnUrlStateStorage: jest.fn(() => mockKbnUrlStateStorage),
-}));
-
-jest.mock('../../services/kibana_services', () => ({
-  coreServices: {
-    uiSettings: {
-      get: jest.fn(),
-    },
-  },
-  screenshotModeService: {
-    isScreenshotMode: jest.fn(),
-    getScreenshotContext: jest.fn(),
-  },
-}));
+} as unknown as IKbnUrlStateStorage;
 
 jest.mock('../url', () => ({
   extractDashboardState: jest.fn(),
@@ -58,29 +40,12 @@ jest.mock('../url/search_sessions_integration', () => ({
 describe('useCreationOptions', () => {
   const validateOutcome = jest.fn().mockReturnValue('valid');
 
-  const createWrapper = (history: ReturnType<typeof createMemoryHistory>) => {
-    return ({ children }: PropsWithChildren) => (
-      <DashboardMountContext.Provider
-        value={{
-          restorePreviousUrl: jest.fn(),
-          scopedHistory: () => history as unknown as ScopedHistory,
-          onAppLeave: jest.fn(),
-          setHeaderActionMenu: jest.fn(),
-          getListingTabs: () => [],
-        }}
-      >
-        {children}
-      </DashboardMountContext.Provider>
-    );
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (coreServices.uiSettings.get as jest.Mock).mockReturnValue(false);
-    (screenshotModeService.isScreenshotMode as jest.Mock).mockReturnValue(false);
-    (screenshotModeService.getScreenshotContext as jest.Mock).mockReturnValue(undefined);
-    mockKbnUrlStateStorage.get.mockReturnValue(undefined);
+    jest.spyOn(screenshotModeService, 'isScreenshotMode').mockReturnValue(false);
+    jest.spyOn(screenshotModeService, 'getScreenshotContext').mockReturnValue(undefined);
+    (mockKbnUrlStateStorage.get as jest.Mock).mockReturnValue(undefined);
     (extractDashboardState as jest.Mock).mockReturnValue({});
     (loadAndRemoveDashboardState as jest.Mock).mockReturnValue({});
     (getSearchSessionIdFromURL as jest.Mock).mockReturnValue(undefined);
@@ -107,14 +72,14 @@ describe('useCreationOptions', () => {
       viewMode: 'edit',
     });
 
-    const { result } = renderHook(
-      () =>
-        useCreationOptions({
-          history,
-          validateOutcome,
-          incomingEmbeddables: undefined,
-        }),
-      { wrapper: createWrapper(history) }
+    const { result } = renderHook(() =>
+      useCreationOptions({
+        history,
+        getScopedHistory: () => history as unknown as ScopedHistory,
+        kbnUrlStateStorage: mockKbnUrlStateStorage,
+        validateOutcome,
+        incomingEmbeddables: undefined,
+      })
     );
 
     const creationOptions = await result.current();
@@ -144,14 +109,14 @@ describe('useCreationOptions', () => {
     });
     replaceSpy.mockClear();
 
-    const { result } = renderHook(
-      () =>
-        useCreationOptions({
-          history,
-          validateOutcome,
-          incomingEmbeddables: undefined,
-        }),
-      { wrapper: createWrapper(history) }
+    const { result } = renderHook(() =>
+      useCreationOptions({
+        history,
+        getScopedHistory: () => history as unknown as ScopedHistory,
+        kbnUrlStateStorage: mockKbnUrlStateStorage,
+        validateOutcome,
+        incomingEmbeddables: undefined,
+      })
     );
 
     const creationOptions = await result.current();

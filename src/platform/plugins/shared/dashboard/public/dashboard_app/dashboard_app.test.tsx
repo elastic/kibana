@@ -32,14 +32,6 @@ describe('Dashboard App', () => {
   // this is in the dashboard app for the renderer when provided an expanded panel id
   const expandPanelSpy = jest.spyOn(dashboardApi, 'expandPanel');
 
-  function DefaultDashboardRendererMock({ onApiAvailable }: DashboardRendererProps) {
-    useEffect(() => {
-      onApiAvailable?.(dashboardApi, dashboardInternalApi);
-    }, [onApiAvailable]);
-
-    return <div>Test renderer</div>;
-  }
-
   beforeAll(() => {
     mockHistory = createMemoryHistory();
     historySpy = jest.spyOn(mockHistory, 'replace');
@@ -49,7 +41,16 @@ describe('Dashboard App', () => {
      * and hitting errors that aren't relevant
      */
     (DashboardTopNav as jest.Mock).mockImplementation(() => <>Top nav</>);
-    (DashboardRenderer as jest.Mock).mockImplementation(DefaultDashboardRendererMock);
+    (DashboardRenderer as jest.Mock).mockImplementation(
+      ({ onApiAvailable }: DashboardRendererProps) => {
+        // we need overwrite the onApiAvailable prop to get access to the dashboard API in this test
+        useEffect(() => {
+          onApiAvailable?.(dashboardApi, dashboardInternalApi);
+        }, [onApiAvailable]);
+
+        return <div>Test renderer</div>;
+      }
+    );
   });
 
   beforeEach(() => {

@@ -27,6 +27,7 @@ import {
 } from '../services/kibana_services';
 import { DASHBOARD_STATE_STORAGE_KEY } from '../utils/urls';
 import { useCreationOptions } from './hooks/use_creation_options';
+import { useDashboardMountContext } from './hooks/dashboard_mount_context';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
 import { useObservabilityAIAssistantContext } from './hooks/use_observability_ai_assistant_context';
 import {
@@ -90,6 +91,7 @@ export function DashboardApp({
     DashboardInternalApi | undefined
   >(undefined);
   const showPlainSpinner = useObservable(coreServices.customBranding.hasCustomBranding$, false);
+  const { scopedHistory: getScopedHistory } = useDashboardMountContext();
 
   useObservabilityAIAssistantContext({
     dashboardApi,
@@ -125,6 +127,8 @@ export function DashboardApp({
   const { validateOutcome, getLegacyConflictWarning } = useDashboardOutcomeValidation();
   const getCreationOptions = useCreationOptions({
     history,
+    getScopedHistory,
+    kbnUrlStateStorage,
     embedSettings,
     incomingEmbeddables,
     validateOutcome,
