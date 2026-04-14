@@ -5,7 +5,19 @@
  * 2.0.
  */
 
-import { EuiComboBox, EuiFormRow, EuiText } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiInputPopover,
+  EuiPanel,
+  EuiSelectable,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
 import type { KibanaApiOperationConfig } from '@kbn/agent-builder-common/tools';
 import { debounce } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -15,6 +27,9 @@ import type { KibanaOpenApiOperationSummaryDto } from '../../../../../../../comm
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 import { i18nMessages } from '../../i18n';
 import type { KibanaApiToolFormData } from '../../types/tool_form_types';
+import { MAX_KIBANA_API_OPERATIONS } from '../../validation/kibana_api_tool_form_validation';
+
+const SELECTABLE_LIST_HEIGHT = 280;
 
 function humanizeOperationId(operationId: string): string {
   return operationId
@@ -24,35 +39,33 @@ function humanizeOperationId(operationId: string): string {
     .join(' ');
 }
 
-function toOption(r: KibanaOpenApiOperationSummaryDto) {
-  const title =
+function selectableTitleFromRow(r: KibanaOpenApiOperationSummaryDto): string {
+  return (
     (r.summary && r.summary.trim().length > 0 ? r.summary.trim() : undefined) ??
-    humanizeOperationId(r.operation_id);
+    humanizeOperationId(r.operation_id)
+  );
+}
+
+function selectableDisplayLineFromRow(r: KibanaOpenApiOperationSummaryDto): string {
+  return `${r.method} ${r.path} — ${selectableTitleFromRow(r)}`;
+}
+
+function toOption(r: KibanaOpenApiOperationSummaryDto) {
   return {
-    label: `${r.method} ${r.path} — ${title}`,
+    label: selectableDisplayLineFromRow(r),
     value: r.operation_id,
   };
 }
 
-function summaryFromRow(r: KibanaOpenApiOperationSummaryDto): string {
-  if (r.description && r.description !== r.summary) {
-    return r.description;
-  }
-  return r.summary ?? humanizeOperationId(r.operation_id);
-}
-
-function operationToOption(
+function selectableDisplayLineForOperation(
   op: KibanaApiOperationConfig,
-  known: ReadonlyMap<string, KibanaOpenApiOperationSummaryDto>
-) {
-  const row = known.get(op.operation_id);
+  row: KibanaOpenApiOperationSummaryDto | undefined
+): string {
   if (row) {
-    return toOption(row);
+    return selectableDisplayLineFromRow(row);
   }
-  return {
-    label: `${op.method} ${op.path_template} — ${humanizeOperationId(op.operation_id)}`,
-    value: op.operation_id,
-  };
+  const title = humanizeOperationId(op.operation_id);
+  return `${op.method} ${op.path_template} — ${title}`.trim();
 }
 
 function rowToOperation(row: KibanaOpenApiOperationSummaryDto): KibanaApiOperationConfig {
@@ -66,26 +79,35 @@ function rowToOperation(row: KibanaOpenApiOperationSummaryDto): KibanaApiOperati
 const EMPTY_OPERATIONS: KibanaApiOperationConfig[] = [];
 
 export const KibanaApiConfiguration = () => {
-  const { control, watch } = useFormContext<KibanaApiToolFormData>();
+  const {
+    control,
+    watch,
+    getValues,
+    setValue,
+    formState: { errors },
+  } = useFormContext<KibanaApiToolFormData>();
   const { toolsService } = useAgentBuilderServices();
+  const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<KibanaOpenApiOperationSummaryDto[]>([]);
-  const [comboOptions, setComboOptions] = useState<Array<{ label: string; value: string }>>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const [knownById, setKnownById] = useState(
     () => new Map<string, KibanaOpenApiOperationSummaryDto>()
   );
+  const [isOperationsPopoverOpen, setIsOperationsPopoverOpen] = useState(false);
   /** Undefined when switching tool type before `operations` is merged from registry defaults. */
   const operations = watch('operations') ?? EMPTY_OPERATIONS;
 
   const runSearch = useMemo(
     () =>
       debounce(async (q: string) => {
+        setIsSearching(true);
         try {
           const { results } = await toolsService.listKibanaOpenApiOperations({ q, limit: 80 });
           setSearchResults(results);
-          setComboOptions(results.map(toOption));
         } catch {
           setSearchResults([]);
-          setComboOptions([]);
+        } finally {
+          setIsSearching(false);
         }
       }, 250),
     [toolsService]
@@ -133,79 +155,218 @@ export const KibanaApiConfiguration = () => {
     return () => runSearch.cancel();
   }, [runSearch]);
 
-  const onSearchChange = useCallback(
-    (searchValue: string) => {
-      runSearch(searchValue);
+  const isAtOperationLimit = operations.length >= MAX_KIBANA_API_OPERATIONS;
+
+  const selectableOptions: EuiSelectableOption[] = useMemo(() => {
+    const selectedIds = new Set(
+      operations.map((o) => o.operation_id).filter((id): id is string => id.length > 0)
+    );
+    return searchResults.map((r) => {
+      const { label, value } = toOption(r);
+      const isChecked = selectedIds.has(r.operation_id);
+      return {
+        key: value,
+        label,
+        checked: isChecked ? ('on' as const) : undefined,
+        disabled: isAtOperationLimit && !isChecked,
+        'data-test-subj': `agentBuilderKibanaApiOperationOption-${r.operation_id}`,
+      };
+    });
+  }, [searchResults, operations, isAtOperationLimit]);
+
+  const onSearchQueryChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const next = e.target.value;
+      setSearchQuery(next);
+      runSearch(next);
     },
     [runSearch]
   );
+
+  const removeOperation = useCallback(
+    (operationId: string) => {
+      const current = getValues('operations') ?? [];
+      setValue(
+        'operations',
+        current.filter((o) => o.operation_id !== operationId),
+        { shouldDirty: true, shouldTouch: true, shouldValidate: true }
+      );
+    },
+    [getValues, setValue]
+  );
+
+  const closeOperationsPopover = useCallback(() => {
+    setIsOperationsPopoverOpen(false);
+  }, []);
 
   return (
     <>
       <EuiFormRow
         label={i18nMessages.configuration.form.kibanaApi.operationsLabel}
-        helpText={i18nMessages.configuration.form.kibanaApi.operationsHelp}
+        helpText={
+          <>
+            {i18nMessages.configuration.form.kibanaApi.operationsHelp}{' '}
+            {i18nMessages.configuration.form.kibanaApi.operationsLimitNotice(
+              MAX_KIBANA_API_OPERATIONS
+            )}
+          </>
+        }
+        isInvalid={Boolean(errors.operations)}
       >
         <Controller
           control={control}
           name="operations"
-          render={({ field, fieldState }) => {
-            const selectedOperations = field.value ?? [];
-            return (
-              <EuiComboBox
+          render={({ field }) => (
+            <EuiInputPopover
+              data-test-subj="agentBuilderKibanaApiOperationsPopover"
+              isOpen={isOperationsPopoverOpen}
+              closePopover={() => {
+                closeOperationsPopover();
+                field.onBlur();
+              }}
+              disableFocusTrap
+              closeOnScroll
+              repositionOnScroll
+              fullWidth
+              panelPaddingSize="none"
+              hasArrow={false}
+              input={
+                <EuiFieldSearch
+                  aria-label={i18nMessages.configuration.form.kibanaApi.operationsSearchAriaLabel}
+                  aria-expanded={isOperationsPopoverOpen}
+                  role="combobox"
+                  data-test-subj="agentBuilderKibanaApiOperationSearch"
+                  placeholder={i18nMessages.configuration.form.kibanaApi.operationsPlaceholder}
+                  value={searchQuery}
+                  onChange={onSearchQueryChange}
+                  onFocus={() => {
+                    setIsOperationsPopoverOpen(true);
+                  }}
+                  onClick={() => {
+                    setIsOperationsPopoverOpen(true);
+                  }}
+                  fullWidth
+                  isLoading={isSearching}
+                />
+              }
+            >
+              <EuiSelectable
                 aria-label={i18nMessages.configuration.form.kibanaApi.operationsLabel}
-                data-test-subj="agentBuilderKibanaApiOperationCombo"
-                placeholder={i18nMessages.configuration.form.kibanaApi.operationsPlaceholder}
-                isClearable
-                options={comboOptions}
-                selectedOptions={selectedOperations.map((op) => operationToOption(op, knownById))}
-                onChange={(choices) => {
-                  field.onChange(
-                    choices
-                      .filter(
-                        (choice): choice is typeof choice & { value: string } =>
-                          typeof choice.value === 'string' && choice.value.length > 0
-                      )
-                      .map((choice) => {
-                        const row = knownById.get(choice.value);
-                        if (row) {
-                          return rowToOperation(row);
-                        }
-                        const existing = selectedOperations.find(
-                          (o) => o.operation_id === choice.value
-                        );
-                        return (
-                          existing ?? {
-                            operation_id: choice.value,
-                            method: '',
-                            path_template: '',
-                          }
-                        );
-                      })
-                  );
+                data-test-subj="agentBuilderKibanaApiOperationSelectable"
+                options={selectableOptions}
+                isPreFiltered
+                emptyMessage={i18nMessages.configuration.form.kibanaApi.operationsEmptyMessage}
+                height={SELECTABLE_LIST_HEIGHT}
+                listProps={{
+                  onFocusBadge: false,
+                  isVirtualized: searchResults.length > 24,
                 }}
-                onSearchChange={onSearchChange}
-                onBlur={field.onBlur}
-                isInvalid={Boolean(fieldState.error)}
-                fullWidth
-              />
-            );
-          }}
+                onChange={(newOptions) => {
+                  const idsInCurrentSearch = new Set(
+                    searchResults.map((r) => r.operation_id).filter(Boolean)
+                  );
+                  const checkedIds = new Set(
+                    newOptions
+                      .filter(
+                        (o) => o.checked === 'on' && o.key != null && String(o.key).length > 0
+                      )
+                      .map((o) => String(o.key))
+                  );
+                  const previous = field.value ?? [];
+                  const kept = previous.filter((op) => !idsInCurrentSearch.has(op.operation_id));
+                  const fromResults = searchResults
+                    .filter((r) => checkedIds.has(r.operation_id))
+                    .map(rowToOperation);
+                  const allowedAdds = Math.max(0, MAX_KIBANA_API_OPERATIONS - kept.length);
+                  const cappedFromResults = fromResults.slice(0, allowedAdds);
+                  field.onChange([...kept, ...cappedFromResults]);
+                }}
+              >
+                {(list) => (
+                  <EuiPanel paddingSize="none" hasBorder hasShadow={false}>
+                    {list}
+                  </EuiPanel>
+                )}
+              </EuiSelectable>
+            </EuiInputPopover>
+          )}
         />
       </EuiFormRow>
+      {isAtOperationLimit ? (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiText
+            size="xs"
+            color="warning"
+            data-test-subj="agentBuilderKibanaApiOperationsMaxNotice"
+          >
+            {i18nMessages.configuration.form.kibanaApi.operationsMaxReachedNotice(
+              MAX_KIBANA_API_OPERATIONS
+            )}
+          </EuiText>
+        </>
+      ) : null}
       {operations.length > 0 ? (
-        <EuiText size="s" color="subdued" data-test-subj="agentBuilderKibanaApiSelectionSummary">
-          {operations.map((op) => {
-            const row = knownById.get(op.operation_id);
-            const line = row ? summaryFromRow(row) : `${op.method} ${op.path_template}`.trim();
-            return (
-              <div key={op.operation_id}>
-                <strong>{op.operation_id}</strong>
-                {line ? ` — ${line}` : null}
-              </div>
-            );
-          })}
-        </EuiText>
+        <>
+          <EuiSpacer size="m" />
+          <EuiText size="xs" color="subdued">
+            <strong data-test-subj="agentBuilderKibanaApiSelectedHeading">
+              {i18nMessages.configuration.form.kibanaApi.operationsSelectedCountOfMax(
+                operations.length,
+                MAX_KIBANA_API_OPERATIONS
+              )}
+            </strong>
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <EuiPanel
+            paddingSize="s"
+            hasBorder
+            hasShadow={false}
+            grow={false}
+            data-test-subj="agentBuilderKibanaApiSelectionSummary"
+          >
+            <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+              {operations.map((op) => {
+                const row = knownById.get(op.operation_id);
+                const line = selectableDisplayLineForOperation(op, row);
+                return (
+                  <EuiFlexGroup
+                    key={op.operation_id}
+                    alignItems="center"
+                    gutterSize="s"
+                    responsive={false}
+                  >
+                    <EuiFlexItem
+                      grow
+                      css={{
+                        minWidth: 0,
+                      }}
+                    >
+                      <EuiText size="s" color="default">
+                        {line}
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonIcon
+                        iconType="cross"
+                        size="s"
+                        color="danger"
+                        display="empty"
+                        aria-label={i18nMessages.configuration.form.kibanaApi.operationsRemoveAriaLabel(
+                          op.operation_id
+                        )}
+                        data-test-subj={`agentBuilderKibanaApiRemoveOperation-${op.operation_id}`}
+                        onClick={() => {
+                          removeOperation(op.operation_id);
+                        }}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                );
+              })}
+            </EuiFlexGroup>
+          </EuiPanel>
+        </>
       ) : null}
     </>
   );

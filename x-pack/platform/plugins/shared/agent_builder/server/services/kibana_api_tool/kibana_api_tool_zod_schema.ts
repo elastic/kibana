@@ -9,16 +9,6 @@ import { z } from '@kbn/zod/v4';
 import type { KibanaApiOperationConfig } from '@kbn/agent-builder-common/tools';
 import type { KibanaOpenApiIndexedOperation } from './openapi_kibana_catalog';
 
-function pathTemplateParamNames(pathTemplate: string): string[] {
-  const names: string[] = [];
-  const re = /\{([^}]+)\}/g;
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(pathTemplate)) !== null) {
-    names.push(m[1]);
-  }
-  return names;
-}
-
 function deref(root: Record<string, unknown>, node: unknown): unknown {
   if (!node || typeof node !== 'object') {
     return node;
@@ -42,344 +32,195 @@ function deref(root: Record<string, unknown>, node: unknown): unknown {
   return node;
 }
 
-function openApiDocsFromSchemaNode(root: Record<string, unknown>, schemaNode: unknown): string {
-  const node = deref(root, schemaNode) as Record<string, unknown> | null;
-  if (!node || typeof node !== 'object') {
-    return '';
+const METHODS_THAT_MAY_SEND_JSON_BODY = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+
+const MAX_OPENAPI_BODY_SCHEMA_CHARS = 12_000;
+const MAX_OPENAPI_EXAMPLES_CHARS = 8_000;
+
+function jsonSchemaLooksInformative(schema: unknown): boolean {
+  if (schema === undefined || schema === null) {
+    return false;
   }
-  const title = typeof node.title === 'string' ? node.title.trim() : '';
-  const description = typeof node.description === 'string' ? node.description.trim() : '';
-  if (title && description) {
-    return `${title}: ${description}`;
+  if (typeof schema !== 'object') {
+    return true;
   }
-  return title || description;
+  if (Array.isArray(schema)) {
+    return schema.length > 0;
+  }
+  const keys = Object.keys(schema as object);
+  if (keys.length === 0) {
+    return false;
+  }
+  const o = schema as Record<string, unknown>;
+  if (keys.length === 1 && o.type === 'object' && !('properties' in o)) {
+    return false;
+  }
+  return true;
 }
 
-function withOpenApiFieldDocs(
+function stableStringifySnippet(value: unknown, maxChars: number): string {
+  try {
+    let s = JSON.stringify(value, null, 2);
+    if (s.length > maxChars) {
+      s = `${s.slice(0, maxChars)}…`;
+    }
+    return s;
+  } catch {
+    const s = String(value);
+    return s.length > maxChars ? `${s.slice(0, maxChars)}…` : s;
+  }
+}
+
+function formatJsonContentExamples(
   root: Record<string, unknown>,
-  schemaNode: unknown,
-  zodType: z.ZodTypeAny
-): z.ZodTypeAny {
-  const doc = openApiDocsFromSchemaNode(root, schemaNode);
-  return doc ? zodType.describe(doc) : zodType;
-}
-
-/**
- * OpenAPI often composes request bodies with `allOf: [ { $ref: ... }, { type: object, properties: { id: ... } } ]`.
- * Taking only the first branch drops required top-level fields (e.g. `id`) after Zod parse.
- */
-function mergeAllOfObjectBranches(
-  root: Record<string, unknown>,
-  branches: unknown[]
-): { type: 'object'; properties: Record<string, unknown>; required: string[] } | null {
-  const mergedProps: Record<string, unknown> = {};
-  const mergedRequired = new Set<string>();
-  let hasProps = false;
-
-  for (const branch of branches) {
-    const resolved = deref(root, branch) as Record<string, unknown> | null;
-    if (!resolved || typeof resolved !== 'object') {
-      continue;
-    }
-
-    if (Array.isArray(resolved.allOf) && resolved.allOf.length > 0) {
-      const nested = mergeAllOfObjectBranches(root, resolved.allOf as unknown[]);
-      if (nested?.properties && Object.keys(nested.properties).length > 0) {
-        hasProps = true;
-        Object.assign(mergedProps, nested.properties);
-        for (const r of nested.required) {
-          mergedRequired.add(r);
-        }
-      }
-    }
-
-    const props = resolved.properties as Record<string, unknown> | undefined;
-    if (props && typeof props === 'object' && Object.keys(props).length > 0) {
-      hasProps = true;
-      Object.assign(mergedProps, props);
-    }
-    if (Array.isArray(resolved.required)) {
-      for (const r of resolved.required as string[]) {
-        mergedRequired.add(r);
-      }
+  jsonBody: Record<string, unknown>
+): string | undefined {
+  const chunks: string[] = [];
+  if ('example' in jsonBody && jsonBody.example !== undefined) {
+    chunks.push(
+      `OpenAPI \`example\`:\n${stableStringifySnippet(
+        jsonBody.example,
+        MAX_OPENAPI_EXAMPLES_CHARS
+      )}`
+    );
+  }
+  const examples = jsonBody.examples;
+  if (examples && typeof examples === 'object' && !Array.isArray(examples)) {
+    for (const [name, ex] of Object.entries(examples as Record<string, unknown>)) {
+      const exRes = deref(root, ex) as Record<string, unknown>;
+      const summary = typeof exRes.summary === 'string' ? exRes.summary.trim() : '';
+      const desc = typeof exRes.description === 'string' ? exRes.description.trim() : '';
+      const value = exRes.value;
+      const header = [name, summary, desc].filter(Boolean).join(' — ');
+      chunks.push(
+        `${header ? `**${header}**\n` : ''}${stableStringifySnippet(
+          value,
+          MAX_OPENAPI_EXAMPLES_CHARS
+        )}`
+      );
     }
   }
-
-  if (!hasProps || Object.keys(mergedProps).length === 0) {
-    return null;
+  if (chunks.length === 0) {
+    return undefined;
   }
-
-  return {
-    type: 'object',
-    properties: mergedProps,
-    required: [...mergedRequired],
-  };
-}
-
-function jsonSchemaToZod(root: Record<string, unknown>, schema: unknown): z.ZodTypeAny {
-  const resolved = deref(root, schema) as Record<string, unknown> | null;
-  if (!resolved || typeof resolved !== 'object') {
-    return withOpenApiFieldDocs(root, schema, z.any());
-  }
-
-  if (Array.isArray(resolved.allOf) && resolved.allOf.length > 0) {
-    const merged = mergeAllOfObjectBranches(root, resolved.allOf as unknown[]);
-    if (merged) {
-      return jsonSchemaToZod(root, merged);
-    }
-    return withOpenApiFieldDocs(root, schema, jsonSchemaToZod(root, resolved.allOf[0]));
-  }
-
-  if (Array.isArray(resolved.oneOf) && resolved.oneOf.length > 0) {
-    return withOpenApiFieldDocs(root, schema, jsonSchemaToZod(root, resolved.oneOf[0]));
-  }
-  if (Array.isArray(resolved.anyOf) && resolved.anyOf.length > 0) {
-    return withOpenApiFieldDocs(root, schema, jsonSchemaToZod(root, resolved.anyOf[0]));
-  }
-
-  const t = resolved.type;
-  if (t === 'string') {
-    if (
-      Array.isArray(resolved.enum) &&
-      resolved.enum.length > 0 &&
-      resolved.enum.every((x) => typeof x === 'string')
-    ) {
-      const strs = resolved.enum as string[];
-      if (strs.length === 1) {
-        return withOpenApiFieldDocs(root, schema, z.literal(strs[0]));
-      }
-      return withOpenApiFieldDocs(root, schema, z.enum(strs as [string, ...string[]]));
-    }
-    return withOpenApiFieldDocs(root, schema, z.string());
-  }
-  if (t === 'number') {
-    return withOpenApiFieldDocs(root, schema, z.number());
-  }
-  if (t === 'integer') {
-    return withOpenApiFieldDocs(root, schema, z.number().int());
-  }
-  if (t === 'boolean') {
-    return withOpenApiFieldDocs(root, schema, z.boolean());
-  }
-  if (t === 'array') {
-    const items = resolved.items;
-    if (items) {
-      return withOpenApiFieldDocs(root, schema, z.array(jsonSchemaToZod(root, items)));
-    }
-    return withOpenApiFieldDocs(root, schema, z.array(z.unknown()));
-  }
-  if (t === 'object') {
-    const props = resolved.properties as Record<string, unknown> | undefined;
-    if (props) {
-      const req = new Set(Array.isArray(resolved.required) ? (resolved.required as string[]) : []);
-      const shape: Record<string, z.ZodTypeAny> = {};
-      for (const [key, propSchema] of Object.entries(props)) {
-        let field = jsonSchemaToZod(root, propSchema);
-        if (!req.has(key)) {
-          field = field.optional();
-        }
-        shape[key] = field;
-      }
-      // OpenAPI often uses oneOf/allOf or omits fields; stripping unknown keys breaks real APIs.
-      return withOpenApiFieldDocs(root, schema, z.object(shape).passthrough());
-    }
-    if (resolved.additionalProperties) {
-      return withOpenApiFieldDocs(root, schema, z.record(z.string(), z.unknown()));
-    }
-    return withOpenApiFieldDocs(root, schema, z.record(z.string(), z.unknown()));
-  }
-  return withOpenApiFieldDocs(root, schema, z.unknown());
-}
-
-function resolveParameters(
-  root: Record<string, unknown>,
-  parameters: unknown[]
-): Array<{
-  name: string;
-  in: string;
-  required: boolean;
-  schema?: unknown;
-  description?: string;
-}> {
-  const out: Array<{
-    name: string;
-    in: string;
-    required: boolean;
-    schema?: unknown;
-    description?: string;
-  }> = [];
-  for (const raw of parameters) {
-    const p = deref(root, raw) as Record<string, unknown>;
-    const name = typeof p.name === 'string' ? p.name : '';
-    const inn = typeof p.in === 'string' ? p.in : '';
-    if (!name || !inn) {
-      continue;
-    }
-    const required = Boolean(p.required);
-    const schema = p.schema;
-    const description = typeof p.description === 'string' ? p.description.trim() : undefined;
-    out.push({ name, in: inn, required, schema, description });
+  let out = chunks.join('\n\n');
+  if (out.length > MAX_OPENAPI_EXAMPLES_CHARS) {
+    out = `${out.slice(0, MAX_OPENAPI_EXAMPLES_CHARS)}…`;
   }
   return out;
 }
 
-function describePathParam(name: string, openApiDescription?: string): string {
-  const bits = [
-    openApiDescription,
-    `Substitutes \`{${name}}\` in the operation path template (URL segment).`,
-  ].filter(Boolean);
-  return bits.join(' ');
-}
-
-function describeQueryParam(name: string, openApiDescription?: string): string {
-  const bits = [openApiDescription, `Query string key \`${name}\`.`].filter(Boolean);
-  return bits.join(' ');
-}
-
-const METHODS_THAT_MAY_SEND_JSON_BODY = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
-
-const MAX_OPENAPI_BODY_SCHEMA_CHARS = 12_000;
-
-/**
- * Request bodies in oas_docs often use `oneOf` / `allOf` / `$ref` trees. A strict `jsonSchemaToZod`
- * parse can drop fields (e.g. `id`) even with `.passthrough()`. We validate body as a loose record and
- * attach the OpenAPI schema as documentation for the model.
- */
-function describeHttpJsonBodyFromOpenApi(opts: {
-  methodUpper: string;
-  pathTemplate: string;
-  jsonSchema?: unknown;
-  hasJsonSchema: boolean;
+function getApplicationJsonRequestBodyParts(
+  root: Record<string, unknown>,
+  op: Record<string, unknown>,
+  methodUpper: string
+): {
+  jsonBody: Record<string, unknown> | undefined;
   bodyRequired: boolean;
-}): string {
-  const base = `Raw JSON object for the HTTP request body of ${opts.methodUpper} \`${opts.pathTemplate}\`. Every key you include is forwarded unchanged to Kibana (no field is dropped by the tool).`;
-  if (!opts.hasJsonSchema || opts.jsonSchema === undefined) {
-    return `${base} (${opts.bodyRequired ? 'required' : 'optional'}).`;
-  }
-  let excerpt: string;
-  try {
-    excerpt = JSON.stringify(opts.jsonSchema, null, 2);
-  } catch {
-    excerpt = String(opts.jsonSchema);
-  }
-  if (excerpt.length > MAX_OPENAPI_BODY_SCHEMA_CHARS) {
-    excerpt = `${excerpt.slice(0, MAX_OPENAPI_BODY_SCHEMA_CHARS)}…`;
-  }
-  return `${base}\n\nOpenAPI \`application/json\` schema (reference — include required fields such as \`id\` when the API expects them):\n${excerpt}\n\n(${
-    opts.bodyRequired ? 'required' : 'optional'
-  }).`;
+  hasDeclaredRequestBody: boolean;
+  needsBodyDocumentation: boolean;
+} {
+  const requestBody = deref(root, op.requestBody) as Record<string, unknown> | undefined;
+  const hasDeclaredRequestBody = Boolean(requestBody && typeof requestBody === 'object');
+  const content =
+    requestBody && typeof requestBody === 'object'
+      ? (requestBody.content as Record<string, Record<string, unknown>> | undefined)
+      : undefined;
+  const jsonBody = content?.['application/json'];
+  const bodyRequired = Boolean(requestBody && (requestBody as { required?: boolean }).required);
+  const hasJsonSchemaBody = Boolean(jsonBody && typeof jsonBody === 'object' && jsonBody.schema);
+  const mayHaveBody = METHODS_THAT_MAY_SEND_JSON_BODY.has(methodUpper);
+  const needsBodyDocumentation =
+    mayHaveBody &&
+    (hasJsonSchemaBody ||
+      (hasDeclaredRequestBody && Boolean(jsonBody) && typeof jsonBody === 'object'));
+  return {
+    jsonBody: jsonBody && typeof jsonBody === 'object' ? jsonBody : undefined,
+    bodyRequired,
+    hasDeclaredRequestBody,
+    needsBodyDocumentation,
+  };
 }
 
 /**
- * Zod schema for tool call arguments. Only includes `path`, `query`, and/or `body` when the OpenAPI
- * operation actually uses them, so the model is not forced to pass empty objects.
+ * Human-readable reference for the `application/json` request body of one OpenAPI operation.
+ * Embeds the JSON Schema when informative; otherwise falls back to OpenAPI `example` / `examples`.
  */
-export function buildKibanaApiToolParamsSchema(
+export function formatOpenApiApplicationJsonBodyHelp(
   root: Record<string, unknown>,
   indexed: KibanaOpenApiIndexedOperation
-): z.ZodObject<Record<string, z.ZodTypeAny>> {
+): string | null {
   const op = indexed.operation;
   const pathTemplate = indexed.path_template;
   const methodUpper = indexed.method.toUpperCase();
-
-  const rawParams = Array.isArray(op.parameters) ? op.parameters : [];
-  const resolvedParams = resolveParameters(root, rawParams as unknown[]);
-
-  const pathParamDefs = resolvedParams.filter((p) => p.in === 'path');
-  const queryParamDefs = resolvedParams.filter((p) => p.in === 'query');
-
-  const pathShape: Record<string, z.ZodTypeAny> = {};
-  for (const name of pathTemplateParamNames(pathTemplate)) {
-    const def = pathParamDefs.find((p) => p.name === name);
-    let zField = def?.schema ? jsonSchemaToZod(root, def.schema) : z.string();
-    zField = zField.describe(describePathParam(name, def?.description));
-    pathShape[name] = zField;
+  const { jsonBody, bodyRequired, needsBodyDocumentation } = getApplicationJsonRequestBodyParts(
+    root,
+    op,
+    methodUpper
+  );
+  if (!needsBodyDocumentation) {
+    return null;
   }
 
-  const queryShape: Record<string, z.ZodTypeAny> = {};
-  for (const q of queryParamDefs) {
-    let zField = q.schema ? jsonSchemaToZod(root, q.schema) : z.string();
-    zField = zField.describe(describeQueryParam(q.name, q.description));
-    if (!q.required) {
-      zField = zField.optional();
-    }
-    queryShape[q.name] = zField;
-  }
-
-  const requestBody = deref(root, op.requestBody) as Record<string, unknown> | undefined;
-  const content =
-    requestBody && typeof requestBody === 'object'
-      ? (requestBody.content as Record<string, { schema?: unknown }> | undefined)
+  const base = `Raw JSON object for the HTTP request body of ${methodUpper} \`${pathTemplate}\`. Every key you include is forwarded unchanged to Kibana (no field is dropped by the tool).`;
+  const schemaNode = jsonBody?.schema;
+  const hasInformativeSchema = jsonSchemaLooksInformative(schemaNode);
+  const examplesBlock =
+    jsonBody && typeof jsonBody === 'object'
+      ? formatJsonContentExamples(root, jsonBody as Record<string, unknown>)
       : undefined;
-  const jsonBody = content?.['application/json'];
-  const hasDeclaredRequestBody = Boolean(requestBody && typeof requestBody === 'object');
-  const hasJsonSchemaBody = Boolean(jsonBody?.schema);
 
-  const mayHaveBody = METHODS_THAT_MAY_SEND_JSON_BODY.has(methodUpper);
-  const needsBody =
-    mayHaveBody && (hasJsonSchemaBody || (hasDeclaredRequestBody && Boolean(jsonBody)));
+  const parts: string[] = [base];
 
-  let bodyZod: z.ZodTypeAny | undefined;
-  if (needsBody) {
-    const bodyRequired = Boolean(requestBody && (requestBody as { required?: boolean }).required);
-    const bodyDescribe = describeHttpJsonBodyFromOpenApi({
-      methodUpper,
-      pathTemplate,
-      jsonSchema: hasJsonSchemaBody ? jsonBody!.schema : undefined,
-      hasJsonSchema: hasJsonSchemaBody,
-      bodyRequired,
-    });
-    let inner: z.ZodTypeAny = z.record(z.string(), z.unknown()).describe(bodyDescribe);
-    if (!bodyRequired) {
-      inner = inner.optional();
+  if (hasInformativeSchema && schemaNode !== undefined) {
+    let excerpt: string;
+    try {
+      excerpt = JSON.stringify(schemaNode, null, 2);
+    } catch {
+      excerpt = String(schemaNode);
     }
-    bodyZod = inner;
+    if (excerpt.length > MAX_OPENAPI_BODY_SCHEMA_CHARS) {
+      excerpt = `${excerpt.slice(0, MAX_OPENAPI_BODY_SCHEMA_CHARS)}…`;
+    }
+    parts.push(
+      `OpenAPI \`application/json\` schema (reference — include required fields when the API expects them):\n${excerpt}`
+    );
+  } else if (examplesBlock) {
+    parts.push(
+      `No informative JSON Schema on this operation; use these OpenAPI examples instead:\n${examplesBlock}`
+    );
   }
 
-  const hasPath = Object.keys(pathShape).length > 0;
-  const hasQuery = Object.keys(queryShape).length > 0;
+  parts.push(`(${bodyRequired ? 'required' : 'optional'}).`);
+  return parts.join('\n\n');
+}
 
-  const pathZod = hasPath
-    ? z
-        .object(pathShape)
-        .describe('Path parameters — each value replaces the matching `{name}` in the API path.')
-    : undefined;
-
-  const queryZod = hasQuery
-    ? z.object(queryShape).describe('Query string parameters for this operation.')
-    : undefined;
-
-  const shape: Record<string, z.ZodTypeAny> = {};
-  if (pathZod) {
-    shape.path = pathZod;
+/**
+ * Markdown-style block documenting JSON request bodies for all configured operations.
+ * Used in the tool parameter schema root description and in `getLlmDescription`.
+ */
+export function buildOpenApiBodyDocumentationForKibanaApiOperations(
+  root: Record<string, unknown>,
+  entries: KibanaApiIndexedOperationEntry[]
+): string {
+  const sections: string[] = [];
+  for (const { operation, indexed } of entries) {
+    const help = formatOpenApiApplicationJsonBodyHelp(root, indexed);
+    if (!help) {
+      continue;
+    }
+    const methodUpper = indexed.method.toUpperCase();
+    sections.push(
+      [
+        `#### \`${operation.operation_id}\` — ${methodUpper} \`${indexed.path_template}\``,
+        help,
+      ].join('\n\n')
+    );
   }
-  if (queryZod) {
-    shape.query = queryZod;
+  if (sections.length === 0) {
+    return '';
   }
-  if (bodyZod) {
-    shape.body = bodyZod;
-  }
-
-  const opSummary =
-    typeof op.summary === 'string'
-      ? op.summary.trim()
-      : typeof op.description === 'string'
-      ? op.description.trim().slice(0, 240)
-      : '';
-
-  const topDescribeParts = [
-    `Kibana REST call: ${methodUpper} \`${pathTemplate}\`.`,
-    opSummary ? `API summary: ${opSummary}` : '',
-    !hasPath && !hasQuery && !bodyZod
-      ? 'This operation takes no path, query, or JSON body arguments — call with an empty object {}.'
-      : '',
-  ].filter(Boolean);
-
-  if (Object.keys(shape).length === 0) {
-    return z.object({}).describe(topDescribeParts.join('\n') || 'Kibana API tool parameters.');
-  }
-
-  return z.object(shape).describe(topDescribeParts.join('\n'));
+  return ['**Request body (`application/json`) per operation**', '', ...sections].join('\n');
 }
 
 export interface KibanaApiIndexedOperationEntry {
@@ -388,10 +229,10 @@ export interface KibanaApiIndexedOperationEntry {
 }
 
 /**
- * Builds a Zod input schema for calling one of several configured OpenAPI operations.
- * Multiple operations use one object schema with **operation_id** plus optional **path** / **query**
- * / **body** (Bedrock-safe root `type: "object"`). A single configured operation still uses a
- * merged object with a literal **operation_id** and OpenAPI-typed fields where available.
+ * Bedrock-safe tool input: root `{ type: "object" }` with **operation_id** plus optional
+ * **path** / **query** / **body** (same shape for one or many operations). Per-operation OpenAPI
+ * JSON body schema (and examples when the schema is empty) is appended to the root schema
+ * `description` via {@link buildOpenApiBodyDocumentationForKibanaApiOperations}.
  */
 export function buildKibanaApiMultiOperationToolParamsSchema(
   root: Record<string, unknown>,
@@ -399,41 +240,6 @@ export function buildKibanaApiMultiOperationToolParamsSchema(
 ): z.ZodType {
   if (entries.length === 0) {
     return z.object({}).describe('No Kibana API operations are configured for this tool.');
-  }
-
-  const branchForEntry = (entry: KibanaApiIndexedOperationEntry) => {
-    const { operation, indexed } = entry;
-    const inner = buildKibanaApiToolParamsSchema(root, indexed);
-    const op = indexed.operation;
-    const apiSummary =
-      typeof op.summary === 'string'
-        ? op.summary.trim()
-        : typeof op.description === 'string'
-        ? op.description.trim().slice(0, 200)
-        : '';
-
-    const opDescribe = [
-      `Use this **operation_id** to execute \`${indexed.method} ${indexed.path_template}\`.`,
-      apiSummary ? `Summary: ${apiSummary}` : '',
-      `OpenAPI operationId: \`${operation.operation_id}\`.`,
-      `Only include \`path\`, \`query\`, and \`body\` keys that exist on this branch — they match this operation's OpenAPI contract.`,
-    ]
-      .filter(Boolean)
-      .join('\n');
-
-    return z
-      .object({
-        operation_id: z.literal(operation.operation_id).describe(opDescribe),
-      })
-      .merge(inner);
-  };
-
-  if (entries.length === 1) {
-    const { indexed, operation } = entries[0]!;
-    const methodUpper = indexed.method.toUpperCase();
-    return branchForEntry(entries[0]!).describe(
-      `Calls one Kibana REST operation: ${methodUpper} \`${indexed.path_template}\`. **operation_id** must be \`${operation.operation_id}\`; supply path/query/body only as required for that operation (see field descriptions).`
-    );
   }
 
   const idList = entries.map((e) => e.operation.operation_id);
@@ -456,20 +262,25 @@ export function buildKibanaApiMultiOperationToolParamsSchema(
     }`;
   });
 
-  const topDescribe = [
-    `This tool exposes **${entries.length}** Kibana REST operations from the OpenAPI catalog.`,
-    'Set **operation_id** to the exact id of the operation to run, then include only the **path**, **query**, and/or **body** fields that operation expects (see OpenAPI for each id below).',
+  const bodyDoc = buildOpenApiBodyDocumentationForKibanaApiOperations(root, entries);
+
+  const topDescribeParts = [
+    `This tool exposes **${entries.length}** Kibana REST operation(s) from the OpenAPI catalog.`,
+    'Set **operation_id** to the exact id of the operation to run, then include only the **path**, **query**, and/or **body** fields that operation expects.',
     '',
     '**Configured operations**',
     ...operationSummaries,
-  ].join('\n');
+  ];
+  if (bodyDoc) {
+    topDescribeParts.push('', bodyDoc);
+  } else {
+    topDescribeParts.push(
+      '',
+      'When the selected operation uses a JSON body, shape it according to that operation’s OpenAPI contract (declare `body` only for POST/PUT/PATCH/DELETE when applicable).'
+    );
+  }
+  const topDescribe = topDescribeParts.join('\n');
 
-  /**
-   * Use a single top-level object schema (not `z.discriminatedUnion`) so JSON Schema for tool
-   * parameters keeps root `{ "type": "object" }`. Some inference providers (e.g. Amazon Bedrock
-   * Converse) reject root `oneOf` / missing object type; runtime validation still happens in the
-   * tool handler via the operation allowlist and OpenAPI-backed request build.
-   */
   return z
     .object({
       operation_id: z
@@ -493,7 +304,7 @@ export function buildKibanaApiMultiOperationToolParamsSchema(
         .unknown()
         .optional()
         .describe(
-          "JSON body for the selected operation when the HTTP method expects a body. Values are forwarded to Kibana as JSON (include keys required by that operation's OpenAPI contract)."
+          'JSON body for the selected operation when the HTTP method expects a body. Shape is documented under **Request body** in the tool schema description (from OpenAPI).'
         ),
     })
     .describe(topDescribe);

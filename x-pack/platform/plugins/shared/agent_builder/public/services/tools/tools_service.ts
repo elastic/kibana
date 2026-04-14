@@ -116,7 +116,7 @@ export class ToolsService {
 
   async listKibanaOpenApiOperations({ q = '', limit = 50 }: { q?: string; limit?: number }) {
     return await this.http.get<ListKibanaOpenApiOperationsResponse>(
-      `${internalApiPath}/tools/_kibana_openapi_operations`,
+      `${publicApiPath}/tools/_kibana_openapi_operation`,
       { query: { q, limit } }
     );
   }

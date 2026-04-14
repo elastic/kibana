@@ -16,10 +16,21 @@ const kibanaApiOperationSchema = schema.object(
   { unknowns: 'ignore' }
 );
 
+/** Max operations per Kibana API tool (matches UI / zod form validation). */
+const MAX_KIBANA_API_OPERATIONS = 10;
+
 export const configurationSchema = schema.object({
-  operations: schema.arrayOf(kibanaApiOperationSchema, { minSize: 1 }),
+  operations: schema.arrayOf(kibanaApiOperationSchema, {
+    minSize: 1,
+    maxSize: MAX_KIBANA_API_OPERATIONS,
+  }),
 });
 
 export const configurationUpdateSchema = schema.object({
-  operations: schema.maybe(schema.arrayOf(kibanaApiOperationSchema, { minSize: 1 })),
+  operations: schema.maybe(
+    schema.arrayOf(kibanaApiOperationSchema, {
+      minSize: 1,
+      maxSize: MAX_KIBANA_API_OPERATIONS,
+    })
+  ),
 });

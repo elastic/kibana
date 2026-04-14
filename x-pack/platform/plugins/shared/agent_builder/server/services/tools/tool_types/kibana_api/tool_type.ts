@@ -17,7 +17,11 @@ import { otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results'
 import type { Logger } from '@kbn/logging';
 import type { ToolTypeDefinition } from '../definitions';
 import { buildKibanaApiHttpRequest } from '../../../kibana_api_tool/kibana_api_build_request';
-import { buildKibanaApiMultiOperationToolParamsSchema } from '../../../kibana_api_tool/kibana_api_tool_zod_schema';
+import {
+  buildKibanaApiMultiOperationToolParamsSchema,
+  buildOpenApiBodyDocumentationForKibanaApiOperations,
+  type KibanaApiIndexedOperationEntry,
+} from '../../../kibana_api_tool/kibana_api_tool_zod_schema';
 import { executeKibanaApiHttp } from '../../../kibana_api_tool/execute_kibana_api_http';
 import {
   getCachedOpenApiDocument,
@@ -142,6 +146,8 @@ export const getKibanaApiToolType = ({
           return buildKibanaApiMultiOperationToolParamsSchema(root, entries);
         },
         getLlmDescription: ({ description, config: toolConfig }) => {
+          const root = getCachedOpenApiDocument(logger);
+          const entries: KibanaApiIndexedOperationEntry[] = [];
           const blocks: string[] = [];
           for (const op of toolConfig.operations) {
             const indexed = getKibanaOpenApiOperation(logger, op.operation_id);
@@ -149,6 +155,7 @@ export const getKibanaApiToolType = ({
               blocks.push(`- **${op.operation_id}** (catalog entry missing)`);
               continue;
             }
+            entries.push({ operation: op, indexed });
             const api = indexed.operation;
             const apiSummary = typeof api.summary === 'string' ? api.summary.trim() : '';
             const apiDescription =
@@ -161,18 +168,21 @@ export const getKibanaApiToolType = ({
                 apiDescription && apiDescription !== apiSummary
                   ? `- **OpenAPI description:**\n${apiDescription}`
                   : '',
-                `- Tool arguments use **operation_id** (exactly this string) plus operation-specific \`path\`, \`query\`, and/or \`body\` as in the JSON Schema.`,
+                `- Pass **operation_id** exactly as shown, then optional \`path\`, \`query\`, and/or \`body\` for that operation (see OpenAPI body section below when present).`,
               ]
                 .filter(Boolean)
                 .join('\n')
             );
           }
 
+          const bodyDoc = buildOpenApiBodyDocumentationForKibanaApiOperations(root, entries);
+
           return cleanPrompt(`${description}
 
 ## Kibana API bundle (${toolConfig.operations.length} operation(s))
 ${blocks.join('\n\n')}
-- The parameter schema is a discriminated union on **operation_id**: pick one operation, then supply only the path/query/body fields defined for that branch (types come from OpenAPI).
+${bodyDoc ? `\n${bodyDoc}\n` : ''}
+- Parameters use one flat object: **operation_id** plus optional **path**, **query**, and **body**. JSON body shape per operation is documented above and in the tool input schema description (from OpenAPI).
 `);
         },
         getHandler: () => {

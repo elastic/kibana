@@ -241,16 +241,66 @@ export const i18nMessages = {
         operationsHelp: i18n.translate(
           'xpack.agentBuilder.tools.newTool.configuration.form.kibanaApi.operationsHelp',
           {
-            defaultMessage:
-              'Pick one or more documented Kibana APIs (from OpenAPI). The agent must pass operation_id to choose which call to make; path, query, and body types depend on that operation. Requires oas_docs/output/kibana.yaml for the catalog; execution uses this Kibana instance.',
+            defaultMessage: 'Pick one or more documented Kibana APIs (from OpenAPI).',
           }
         ),
         operationsPlaceholder: i18n.translate(
           'xpack.agentBuilder.tools.newTool.configuration.form.kibanaApi.operationsPlaceholder',
           {
-            defaultMessage: 'Search and select APIs (path, method, or operation id)…',
+            defaultMessage: 'Search by path, HTTP method, or operation id…',
           }
         ),
+        operationsSearchAriaLabel: i18n.translate(
+          'xpack.agentBuilder.tools.newTool.configuration.form.kibanaApi.operationsSearchAriaLabel',
+          {
+            defaultMessage: 'Search Kibana OpenAPI operations',
+          }
+        ),
+        operationsEmptyMessage: i18n.translate(
+          'xpack.agentBuilder.tools.newTool.configuration.form.kibanaApi.operationsEmptyMessage',
+          {
+            defaultMessage: 'No operations match this search.',
+          }
+        ),
+        operationsSelectedLabel: i18n.translate(
+          'xpack.agentBuilder.tools.newTool.configuration.form.kibanaApi.operationsSelectedLabel',
+          {
+            defaultMessage: 'Selected operations',
+          }
+        ),
+        operationsRemoveAriaLabel: (operationId: string) =>
+          i18n.translate(
+            'xpack.agentBuilder.tools.newTool.configuration.form.kibanaApi.operationsRemoveAriaLabel',
+            {
+              defaultMessage: 'Remove {operationId} from selected operations',
+              values: { operationId },
+            }
+          ),
+        operationsLimitNotice: (max: number) =>
+          i18n.translate(
+            'xpack.agentBuilder.tools.newTool.configuration.form.kibanaApi.operationsLimitNotice',
+            {
+              defaultMessage: 'You can select up to {max, number} operations.',
+              values: { max },
+            }
+          ),
+        operationsSelectedCountOfMax: (current: number, max: number) =>
+          i18n.translate(
+            'xpack.agentBuilder.tools.newTool.configuration.form.kibanaApi.operationsSelectedCountOfMax',
+            {
+              defaultMessage: 'Selected operations ({current, number} of {max, number})',
+              values: { current, max },
+            }
+          ),
+        operationsMaxReachedNotice: (max: number) =>
+          i18n.translate(
+            'xpack.agentBuilder.tools.newTool.configuration.form.kibanaApi.operationsMaxReachedNotice',
+            {
+              defaultMessage:
+                'Maximum of {max, number} operations reached. Remove one to select another from the list.',
+              values: { max },
+            }
+          ),
       },
       workflow: {
         workflowLabel: i18n.translate(

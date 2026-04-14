@@ -20,11 +20,13 @@ import type {
   UpdateToolPayload,
   CreateToolResponse,
   UpdateToolResponse,
+  ListKibanaOpenApiOperationsResponse,
 } from '../../common/http_api/tools';
 import { publicApiPath } from '../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY, TOOLS_WRITE_SECURITY } from './route_security';
 import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
 import { asError } from '../utils/as_error';
+import { searchKibanaOpenApiOperations } from '../services/kibana_api_tool/openapi_kibana_catalog';
 
 export function registerToolsRoutes({
   router,
@@ -66,6 +68,58 @@ export function registerToolsRoutes({
           body: {
             results: tools.map(toDescriptor),
           },
+        });
+      })
+    );
+
+  // search documented Kibana OpenAPI operations (Kibana API tool catalog)
+  router.versioned
+    .get({
+      path: `${publicApiPath}/tools/_kibana_openapi_operation`,
+      security: AGENT_BUILDER_READ_SECURITY,
+      access: 'public',
+      summary: 'Search Kibana OpenAPI operations',
+      description:
+        'Search operations from the Kibana OpenAPI catalog bundled with this deployment. Use this endpoint to discover `operation_id` values and HTTP details when configuring Kibana API tools. Results are derived from the published API specification.',
+      options: {
+        tags: ['tools', 'oas-tag:agent builder'],
+        availability: {
+          since: '9.2.0',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            query: schema.object({
+              q: schema.string({
+                defaultValue: '',
+                meta: {
+                  description:
+                    'Case-insensitive search string matched against operation id, path, method, summary, and description.',
+                },
+              }),
+              limit: schema.number({
+                defaultValue: 50,
+                min: 1,
+                max: 200,
+                meta: { description: 'Maximum number of operations to return.' },
+              }),
+            }),
+          },
+        },
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/tools_kibana_openapi_operation.yaml'),
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { q, limit } = request.query;
+        const results = searchKibanaOpenApiOperations(logger, q, limit);
+        return response.ok<ListKibanaOpenApiOperationsResponse>({
+          body: { results },
         });
       })
     );

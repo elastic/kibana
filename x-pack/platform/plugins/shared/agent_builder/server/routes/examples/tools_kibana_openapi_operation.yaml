@@ -1,0 +1,25 @@
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          searchOpenApiOperationsExample:
+            description: "Example response returning matching OpenAPI operations"
+            value:
+              results:
+                - operation_id: get-agent-builder-tools
+                  method: get
+                  path: /api/agent_builder/tools
+                  summary: List tools
+                  description: "List all available tools."
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+      -X GET "https://${KIBANA_URL}/api/agent_builder/tools/_kibana_openapi_operation?q=agents&limit=20" \
+      -H "Authorization: ApiKey ${API_KEY}" \
+      -H "elastic-api-version: 2023-10-31"
+- lang: Console
+  source: |
+    GET kbn:/api/agent_builder/tools/_kibana_openapi_operation?q=agents&limit=20

@@ -9,6 +9,9 @@ import { ToolType } from '@kbn/agent-builder-common/tools';
 import { z } from '@kbn/zod/v4';
 import { sharedValidationSchemas } from './shared_tool_validation';
 
+/** UI and form validation cap for Kibana API tools (keep in sync with server `configurationSchema`). */
+export const MAX_KIBANA_API_OPERATIONS = 10;
+
 const kibanaApiOperationFormSchema = z.object({
   operation_id: z.string().min(1),
   method: z.string().min(1),
@@ -23,5 +26,8 @@ export const createKibanaApiFormValidationSchema = () =>
     type: z.literal(ToolType.kibana_api),
     operations: z
       .array(kibanaApiOperationFormSchema)
-      .min(1, { message: 'Select at least one Kibana API operation' }),
+      .min(1, { message: 'Select at least one Kibana API operation' })
+      .max(MAX_KIBANA_API_OPERATIONS, {
+        message: `Select at most ${MAX_KIBANA_API_OPERATIONS} Kibana API operations`,
+      }),
   });
