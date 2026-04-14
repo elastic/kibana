@@ -396,13 +396,13 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
   ]);
 
   return !hasData && !isLoadingSuggestions && !isRefreshing ? (
-    <NoDataEmptyPrompt
-      createNewRule={createNewRule}
-      isLoading={!!aiFeatures?.loading}
-      isAiEnabled={!!aiFeatures?.enabled}
-    >
-      {aiFeatures?.enabled && (
-        <>
+    <>
+      <NoDataEmptyPrompt
+        createNewRule={createNewRule}
+        isLoading={!!aiFeatures?.loading}
+        isAiEnabled={!!aiFeatures?.enabled}
+      >
+        {aiFeatures?.enabled && (
           <GenerateSuggestionButton
             size="s"
             onClick={getSuggestionsForStream}
@@ -412,15 +412,15 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
           >
             {suggestPartitionsText}
           </GenerateSuggestionButton>
-          {showAdditionalChargesCallout && (
-            <>
-              <EuiSpacer size="s" />
-              <AdditionalChargesCallout aiFeatures={aiFeatures} />
-            </>
-          )}
+        )}
+      </NoDataEmptyPrompt>
+      {showAdditionalChargesCallout && (
+        <>
+          <EuiSpacer size="s" />
+          <AdditionalChargesCallout aiFeatures={aiFeatures} />
         </>
       )}
-    </NoDataEmptyPrompt>
+    </>
   ) : (
     <>
       {showBulkAcceptModal && suggestions && (
