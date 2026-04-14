@@ -193,6 +193,7 @@ export interface UsageStats {
   'observability:streamsEnableQueryStreams': boolean;
   'observability:streamsEnableWiredStreamViews': boolean;
   'observability:streamsEnableOverviewPage': boolean;
+  'observability:streamsEnableDraftStreams': boolean;
   'observability:streamsSigEventsIndexPatterns': string;
   'observability:streamsEnableMemory': boolean;
   'securitySolution:entityStoreEnableV2': boolean;

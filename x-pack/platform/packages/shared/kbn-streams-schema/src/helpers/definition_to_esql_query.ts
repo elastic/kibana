@@ -5,10 +5,19 @@
  * 2.0.
  */
 
-import { type Condition, conditionToESQL, transpileEsql, isAlwaysCondition } from '@kbn/streamlang';
+import { BasicPrettyPrinter, Builder } from '@elastic/esql';
+import type { ESQLAstCommand } from '@elastic/esql/types';
+import {
+  type Condition,
+  conditionToESQLAst,
+  transpileEsql,
+  isAlwaysCondition,
+} from '@kbn/streamlang';
 import type { WiredStream } from '../models/ingest/wired';
 import { getEsqlViewName } from '../models/query/view_name';
 import { getParentId } from '../shared/hierarchy';
+
+const UNMAPPED_FIELDS_DIRECTIVE = 'SET unmapped_fields="LOAD"';
 
 export interface DefinitionToESQLQueryOptions {
   definition: WiredStream.Definition;
@@ -39,17 +48,32 @@ export async function definitionToESQLQuery(
 
   const parentViewName = getEsqlViewName(parentId);
 
-  const commands: string[] = [`FROM ${parentViewName}`];
+  const commands: ESQLAstCommand[] = [
+    Builder.command({
+      name: 'from',
+      args: [Builder.expression.source.index(parentViewName)],
+    }),
+  ];
 
   if (!isAlwaysCondition(routingCondition)) {
-    commands.push(`WHERE ${conditionToESQL(routingCondition)}`);
+    commands.push(
+      Builder.command({
+        name: 'where',
+        args: [conditionToESQLAst(routingCondition)],
+      })
+    );
   }
+
+  let query = BasicPrettyPrinter.multiline(Builder.expression.query(commands), {
+    pipeTab: '',
+  });
 
   if (definition.ingest.processing.steps.length > 0) {
     const result = await transpileEsql(definition.ingest.processing);
-    commands.push(...result.commands);
+    if (result.commands.length > 0) {
+      query += `\n| ${result.commands.join('\n| ')}`;
+    }
   }
 
-  const pipeline = commands.join('\n| ');
-  return `SET unmapped_fields="LOAD";\n${pipeline}`;
+  return `${UNMAPPED_FIELDS_DIRECTIVE};\n${query}`;
 }
