@@ -9,19 +9,22 @@
 
 /* eslint-disable no-console */
 
-import { readdirSync, readFileSync } from 'fs';
+import { readdirSync, readFileSync, existsSync, statSync } from 'fs';
 import { join } from 'path';
+
+export type EsqlDefinitionType = 'functions' | 'operators' | 'commands' | 'settings';
 
 export interface ReadDefinitionsOptions {
   pathToElasticsearch: string;
-  definitionsPath: string;
-  definitionType: string;
+  definitionType: EsqlDefinitionType;
 }
+
+export const ELASTICSEARCH_ESQL_KIBANA_ROOT = 'docs/reference/query-languages/esql/kibana';
 
 export function readElasticsearchDefinitions<T extends Record<string, any>>(
   options: ReadDefinitionsOptions
 ): T[] {
-  const { pathToElasticsearch, definitionsPath, definitionType } = options;
+  const { pathToElasticsearch, definitionType: definitionCategory } = options;
 
   if (!pathToElasticsearch) {
     console.error('Error: Path to Elasticsearch is required.');
@@ -29,36 +32,115 @@ export function readElasticsearchDefinitions<T extends Record<string, any>>(
     process.exit(1);
   }
 
-  const esDirectory = join(pathToElasticsearch, definitionsPath);
+  const definitionDirectories = listEsqlDefinitionDirectories(
+    pathToElasticsearch,
+    definitionCategory
+  );
+
   let definitions: T[] = [];
 
   try {
-    // Read and parse all Elasticsearch definition files
-    definitions = readdirSync(esDirectory)
-      .map((fileName) => {
-        const filePath = join(esDirectory, fileName);
-        const fileContent = readFileSync(filePath, 'utf-8');
-        return JSON.parse(fileContent);
-      })
-      .map(({ comment, ...rest }) => rest);
-  } catch (error: any) {
-    const errorMessage =
-      error.code === 'ENOENT'
-        ? `${definitionType} directory not found at "${esDirectory}".`
-        : `An error occurred while reading ${definitionType.toLowerCase()} definitions from "${esDirectory}": ${
-            error.message
-          }`;
+    definitions = mergeJsonDefinitionsFromDirectories<T>(definitionDirectories, definitionCategory);
+  } catch (error) {
+    const errorMessage = `An error occurred while reading ${definitionCategory} definitions: ${error.message}`;
 
     console.warn(
-      `Warning: ${errorMessage} Skipping ${definitionType.toLowerCase()} definitions generation.`
+      `Warning: ${errorMessage} \n Skipping ${definitionCategory} definitions generation.`
     );
     process.exit(0);
   }
 
   if (definitions.length === 0) {
-    console.log(`No ${definitionType.toLowerCase()} definitions found.`);
+    console.log(`No ${definitionCategory} definitions found.`);
     process.exit(0);
   }
 
   return definitions;
+}
+
+export function mergeJsonDefinitionsFromDirectories<T extends Record<string, any>>(
+  definitionDirectories: string[],
+  definitionCategory: EsqlDefinitionType
+): T[] {
+  const definitions: T[] = [];
+
+  try {
+    for (const esDirectory of definitionDirectories) {
+      const jsonFiles = readdirSync(esDirectory).filter((fileName) => fileName.endsWith('.json'));
+
+      for (const fileName of jsonFiles) {
+        const filePath = join(esDirectory, fileName);
+        const fileContent = readFileSync(filePath, 'utf-8');
+        const parsed = JSON.parse(fileContent);
+        const { comment, ...rest } = parsed;
+        definitions.push(rest);
+      }
+    }
+  } catch (error) {
+    const errorMessage = `An error occurred while merging ${definitionCategory} definitions: ${error.message}`;
+    console.warn(
+      `Warning: ${errorMessage} \n Skipping ${definitionCategory} definitions generation.`
+    );
+    process.exit(0);
+  }
+
+  return definitions;
+}
+
+/**
+ * Returns the list of project names in the generated directory.
+ */
+function listSortedProjectNames(generatedRoot: string): string[] {
+  return readdirSync(generatedRoot, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name);
+}
+
+/**
+ * Returns the list of directories that contains JSON definitions for a given category.
+ * Searching on all projects: `.../esql/kibana/generated/<project>/definition/<category>/`
+ */
+export function listEsqlDefinitionDirectories(
+  pathToElasticsearch: string,
+  category: EsqlDefinitionType
+): string[] {
+  const generatedRoot = join(pathToElasticsearch, ELASTICSEARCH_ESQL_KIBANA_ROOT, 'generated');
+
+  if (existsSync(generatedRoot)) {
+    const directories: string[] = [];
+    for (const projectName of listSortedProjectNames(generatedRoot)) {
+      const dir = join(generatedRoot, projectName, 'definition', category);
+      if (existsSync(dir) && statSync(dir).isDirectory()) {
+        directories.push(dir);
+      }
+    }
+    return directories;
+  }
+
+  return [];
+}
+
+/**
+ * Absolute paths to `inline_cast.json` for every generated project that defines one (sorted by project name).
+ */
+export function listEsqlInlineCastJsonPaths(pathToElasticsearch: string): string[] {
+  const generatedRoot = join(ELASTICSEARCH_ESQL_KIBANA_ROOT, 'generated');
+  const paths: string[] = [];
+
+  if (existsSync(generatedRoot)) {
+    for (const projectName of listSortedProjectNames(generatedRoot)) {
+      const candidate = join(generatedRoot, projectName, 'definition', 'inline_cast.json');
+      if (existsSync(candidate) && statSync(candidate).isFile()) {
+        paths.push(candidate);
+      }
+    }
+    return paths;
+  }
+
+  const legacy = join(ELASTICSEARCH_ESQL_KIBANA_ROOT, 'definition', 'inline_cast.json');
+  if (existsSync(legacy) && statSync(legacy).isFile()) {
+    return [legacy];
+  }
+
+  return [];
 }
