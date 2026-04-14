@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiIcon, useEuiBreakpoint, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isMac } from '@kbn/shared-ux-utility';
+import { isMac, useKeyboardShortcut } from '@kbn/shared-ux-utility';
 import { useGlobalSearch } from '../../shared/chrome_hooks';
-import { useKeyboardShortcut } from '../../shared/use_keyboard_shortcut';
 import {
   headerButtonBaseStyles,
   headerButtonBorderedStyles,
@@ -79,7 +78,11 @@ export const SearchButton = React.memo(() => {
     },
   });
 
-  useKeyboardShortcut(config?.shortcutKey, config?.onClick);
+  const shortcut = useMemo(
+    () => (config?.shortcutKey ? { key: config.shortcutKey, meta: true } : undefined),
+    [config?.shortcutKey]
+  );
+  useKeyboardShortcut(shortcut, config?.onClick);
 
   if (!config) return null;
 
