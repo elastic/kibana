@@ -18,3 +18,24 @@ export interface CustomDurationState {
   unit: SnoozeUnit;
   dateTime: Moment | null;
 }
+
+export type AlertSeverityLevel = 'critical' | 'high' | 'medium' | 'low';
+
+/**
+ * Temporary UI-facing condition model aligned with the current Figma design.
+ * This does not yet reflect the final per-alert snooze API contract.
+ */
+export type SnoozeCondition =
+  | { type: 'severity_change' }
+  | { type: 'severity_equals'; value: AlertSeverityLevel }
+  | { type: 'field_change'; field: string }
+  | { type: 'field_equals'; field: string; value: string; negate?: boolean };
+
+/**
+ * Temporary conditional snooze schedule shape used by the current UI.
+ */
+export interface ConditionalSnoozeSchedule {
+  expires_at?: string | null;
+  conditions?: SnoozeCondition[];
+  condition_operator?: 'any' | 'all';
+}
