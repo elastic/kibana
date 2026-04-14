@@ -24,6 +24,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const supertest = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');
     const samlAuth = getService('samlAuth');
+    const retry = getService('retry');
 
     const TOTAL_MONITORS = 30;
     const PER_PAGE = 20;
@@ -118,32 +119,38 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       try {
         await createProjectMonitors(monitors, project);
 
-        const firstPageResponse = await supertest
-          .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .query({ per_page: PER_PAGE })
-          .send()
-          .expect(200);
+        await retry.try(async () => {
+          const firstPageResponse = await supertest
+            .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
+            .query({ per_page: PER_PAGE })
+            .send()
+            .expect(200);
 
-        const { monitors: firstPageMonitors, total, after_key: afterKey } = firstPageResponse.body;
-        expect(firstPageMonitors.length).to.eql(PER_PAGE);
-        expect(total).to.eql(TOTAL_MONITORS);
-        expect(afterKey).to.be.a('string');
+          const {
+            monitors: firstPageMonitors,
+            total,
+            after_key: afterKey,
+          } = firstPageResponse.body;
+          expect(firstPageMonitors.length).to.eql(PER_PAGE);
+          expect(total).to.eql(TOTAL_MONITORS);
+          expect(afterKey).to.be.a('string');
 
-        const secondPageResponse = await supertest
-          .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .query({
-            search_after: afterKey,
-            per_page: PER_PAGE,
-          })
-          .send()
-          .expect(200);
-        const { monitors: secondPageMonitors } = secondPageResponse.body;
-        expect(secondPageMonitors.length).to.eql(TOTAL_MONITORS - PER_PAGE);
-        checkFields([...firstPageMonitors, ...secondPageMonitors], monitors);
+          const secondPageResponse = await supertest
+            .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
+            .query({
+              search_after: afterKey,
+              per_page: PER_PAGE,
+            })
+            .send()
+            .expect(200);
+          const { monitors: secondPageMonitors } = secondPageResponse.body;
+          expect(secondPageMonitors.length).to.eql(TOTAL_MONITORS - PER_PAGE);
+          checkFields([...firstPageMonitors, ...secondPageMonitors], monitors);
+        });
       } finally {
         try {
           await deleteProjectMonitors(
@@ -170,36 +177,38 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       try {
         await createProjectMonitors(monitors, project);
 
-        const firstPageResponse = await supertest
-          .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .query({ per_page: PER_PAGE })
-          .send()
-          .expect(200);
+        await retry.try(async () => {
+          const firstPageResponse = await supertest
+            .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
+            .query({ per_page: PER_PAGE })
+            .send()
+            .expect(200);
 
-        const {
-          monitors: firstPageProjectMonitors,
-          after_key: afterKey,
-          total,
-        } = firstPageResponse.body;
-        expect(firstPageProjectMonitors.length).to.eql(PER_PAGE);
-        expect(total).to.eql(TOTAL_MONITORS);
-        expect(afterKey).to.be.a('string');
+          const {
+            monitors: firstPageProjectMonitors,
+            after_key: afterKey,
+            total,
+          } = firstPageResponse.body;
+          expect(firstPageProjectMonitors.length).to.eql(PER_PAGE);
+          expect(total).to.eql(TOTAL_MONITORS);
+          expect(afterKey).to.be.a('string');
 
-        const secondPageResponse = await supertest
-          .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .query({
-            search_after: afterKey,
-            per_page: PER_PAGE,
-          })
-          .send()
-          .expect(200);
-        const { monitors: secondPageProjectMonitors } = secondPageResponse.body;
-        expect(secondPageProjectMonitors.length).to.eql(TOTAL_MONITORS - PER_PAGE);
-        checkFields([...firstPageProjectMonitors, ...secondPageProjectMonitors], monitors);
+          const secondPageResponse = await supertest
+            .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
+            .query({
+              search_after: afterKey,
+              per_page: PER_PAGE,
+            })
+            .send()
+            .expect(200);
+          const { monitors: secondPageProjectMonitors } = secondPageResponse.body;
+          expect(secondPageProjectMonitors.length).to.eql(TOTAL_MONITORS - PER_PAGE);
+          checkFields([...firstPageProjectMonitors, ...secondPageProjectMonitors], monitors);
+        });
       } finally {
         try {
           await deleteProjectMonitors(
@@ -226,36 +235,38 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       try {
         await createProjectMonitors(monitors, project);
 
-        const firstPageResponse = await supertest
-          .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-          .set(editorUser.apiKeyHeader)
-          .query({ per_page: PER_PAGE })
-          .set(samlAuth.getInternalRequestHeader())
-          .send()
-          .expect(200);
+        await retry.try(async () => {
+          const firstPageResponse = await supertest
+            .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+            .set(editorUser.apiKeyHeader)
+            .query({ per_page: PER_PAGE })
+            .set(samlAuth.getInternalRequestHeader())
+            .send()
+            .expect(200);
 
-        const {
-          monitors: firstPageProjectMonitors,
-          after_key: afterKey,
-          total,
-        } = firstPageResponse.body;
-        expect(firstPageProjectMonitors.length).to.eql(PER_PAGE);
-        expect(total).to.eql(TOTAL_MONITORS);
-        expect(afterKey).to.be.a('string');
+          const {
+            monitors: firstPageProjectMonitors,
+            after_key: afterKey,
+            total,
+          } = firstPageResponse.body;
+          expect(firstPageProjectMonitors.length).to.eql(PER_PAGE);
+          expect(total).to.eql(TOTAL_MONITORS);
+          expect(afterKey).to.be.a('string');
 
-        const secondPageResponse = await supertest
-          .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .query({
-            search_after: afterKey,
-            per_page: PER_PAGE,
-          })
-          .send()
-          .expect(200);
-        const { monitors: secondPageProjectMonitors } = secondPageResponse.body;
-        expect(secondPageProjectMonitors.length).to.eql(TOTAL_MONITORS - PER_PAGE);
-        checkFields([...firstPageProjectMonitors, ...secondPageProjectMonitors], monitors);
+          const secondPageResponse = await supertest
+            .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
+            .query({
+              search_after: afterKey,
+              per_page: PER_PAGE,
+            })
+            .send()
+            .expect(200);
+          const { monitors: secondPageProjectMonitors } = secondPageResponse.body;
+          expect(secondPageProjectMonitors.length).to.eql(TOTAL_MONITORS - PER_PAGE);
+          checkFields([...firstPageProjectMonitors, ...secondPageProjectMonitors], monitors);
+        });
       } finally {
         try {
           await deleteProjectMonitors(
@@ -282,37 +293,39 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       try {
         await createProjectMonitors(monitors, project);
 
-        const firstPageResponse = await supertest
-          .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-          .set(editorUser.apiKeyHeader)
-          .query({ per_page: PER_PAGE })
-          .set(samlAuth.getInternalRequestHeader())
-          .send()
-          .expect(200);
+        await retry.try(async () => {
+          const firstPageResponse = await supertest
+            .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+            .set(editorUser.apiKeyHeader)
+            .query({ per_page: PER_PAGE })
+            .set(samlAuth.getInternalRequestHeader())
+            .send()
+            .expect(200);
 
-        const {
-          monitors: firstPageProjectMonitors,
-          after_key: afterKey,
-          total,
-        } = firstPageResponse.body;
-        expect(firstPageProjectMonitors.length).to.eql(PER_PAGE);
-        expect(total).to.eql(TOTAL_MONITORS);
-        expect(afterKey).to.be.a('string');
+          const {
+            monitors: firstPageProjectMonitors,
+            after_key: afterKey,
+            total,
+          } = firstPageResponse.body;
+          expect(firstPageProjectMonitors.length).to.eql(PER_PAGE);
+          expect(total).to.eql(TOTAL_MONITORS);
+          expect(afterKey).to.be.a('string');
 
-        const secondPageResponse = await supertest
-          .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .query({
-            search_after: afterKey,
-            per_page: PER_PAGE,
-          })
-          .send()
-          .expect(200);
-        const { monitors: secondPageProjectMonitors } = secondPageResponse.body;
-        expect(secondPageProjectMonitors.length).to.eql(TOTAL_MONITORS - PER_PAGE);
+          const secondPageResponse = await supertest
+            .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
+            .query({
+              search_after: afterKey,
+              per_page: PER_PAGE,
+            })
+            .send()
+            .expect(200);
+          const { monitors: secondPageProjectMonitors } = secondPageResponse.body;
+          expect(secondPageProjectMonitors.length).to.eql(TOTAL_MONITORS - PER_PAGE);
 
-        checkFields([...firstPageProjectMonitors, ...secondPageProjectMonitors], monitors);
+          checkFields([...firstPageProjectMonitors, ...secondPageProjectMonitors], monitors);
+        });
       } finally {
         try {
           await deleteProjectMonitors(
@@ -339,47 +352,49 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       try {
         await createProjectMonitors(monitors, projectName);
 
-        const firstPageResponse = await supertest
-          .get(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace(
-              '{projectName}',
-              encodeURI(projectName)
+        await retry.try(async () => {
+          const firstPageResponse = await supertest
+            .get(
+              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace(
+                '{projectName}',
+                encodeURI(projectName)
+              )
             )
-          )
-          .query({ per_page: PER_PAGE })
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send()
-          .expect(200);
+            .query({ per_page: PER_PAGE })
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
+            .send()
+            .expect(200);
 
-        const {
-          monitors: firstPageProjectMonitors,
-          after_key: afterKey,
-          total,
-        } = firstPageResponse.body;
-        expect(firstPageProjectMonitors.length).to.eql(PER_PAGE);
-        expect(total).to.eql(TOTAL_MONITORS);
-        expect(afterKey).to.be.a('string');
+          const {
+            monitors: firstPageProjectMonitors,
+            after_key: afterKey,
+            total,
+          } = firstPageResponse.body;
+          expect(firstPageProjectMonitors.length).to.eql(PER_PAGE);
+          expect(total).to.eql(TOTAL_MONITORS);
+          expect(afterKey).to.be.a('string');
 
-        const secondPageResponse = await supertest
-          .get(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace(
-              '{projectName}',
-              encodeURI(projectName)
+          const secondPageResponse = await supertest
+            .get(
+              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace(
+                '{projectName}',
+                encodeURI(projectName)
+              )
             )
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .query({
-            search_after: afterKey,
-            per_page: PER_PAGE,
-          })
-          .send()
-          .expect(200);
-        const { monitors: secondPageProjectMonitors } = secondPageResponse.body;
-        expect(secondPageProjectMonitors.length).to.eql(TOTAL_MONITORS - PER_PAGE);
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
+            .query({
+              search_after: afterKey,
+              per_page: PER_PAGE,
+            })
+            .send()
+            .expect(200);
+          const { monitors: secondPageProjectMonitors } = secondPageResponse.body;
+          expect(secondPageProjectMonitors.length).to.eql(TOTAL_MONITORS - PER_PAGE);
 
-        checkFields([...firstPageProjectMonitors, ...secondPageProjectMonitors], monitors);
+          checkFields([...firstPageProjectMonitors, ...secondPageProjectMonitors], monitors);
+        });
       } finally {
         try {
           await deleteProjectMonitors(
@@ -408,37 +423,41 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       try {
         await createProjectMonitors(monitors, project);
 
-        let afterId;
-        const fullResponse: ProjectMonitorMetaData[] = [];
-        let page = 1;
-        let count: number;
-        do {
-          const response: SuperTest.Response = await supertest
-            .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-            .set(editorUser.apiKeyHeader)
-            .set(samlAuth.getInternalRequestHeader())
-            .query({
-              per_page: perPage,
-              search_after: afterId,
-            })
-            .send()
-            .expect(200);
+        await retry.try(async () => {
+          let afterId;
+          const fullResponse: ProjectMonitorMetaData[] = [];
+          let page = 1;
+          let count: number;
+          do {
+            const response: SuperTest.Response = await supertest
+              .get(
+                SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project)
+              )
+              .set(editorUser.apiKeyHeader)
+              .set(samlAuth.getInternalRequestHeader())
+              .query({
+                per_page: perPage,
+                search_after: afterId,
+              })
+              .send()
+              .expect(200);
 
-          const { monitors: monitorsResponse, after_key: afterKey, total } = response.body;
-          expect(total).to.eql(totalMonitors);
-          count = monitorsResponse.length;
-          fullResponse.push(...monitorsResponse);
-          if (page < 3) {
-            expect(count).to.eql(perPage);
-          } else {
-            expect(count).to.eql(totalMonitors - perPage * 2);
-          }
-          page++;
+            const { monitors: monitorsResponse, after_key: afterKey, total } = response.body;
+            expect(total).to.eql(totalMonitors);
+            count = monitorsResponse.length;
+            fullResponse.push(...monitorsResponse);
+            if (page < 3) {
+              expect(count).to.eql(perPage);
+            } else {
+              expect(count).to.eql(totalMonitors - perPage * 2);
+            }
+            page++;
 
-          afterId = afterKey;
-        } while (count === perPage);
-        expect(fullResponse.length).to.eql(totalMonitors);
-        checkFields(fullResponse, monitors);
+            afterId = afterKey;
+          } while (count === perPage);
+          expect(fullResponse.length).to.eql(totalMonitors);
+          checkFields(fullResponse, monitors);
+        });
       } finally {
         try {
           await deleteProjectMonitors(
