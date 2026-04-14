@@ -14,8 +14,7 @@ import type {
 } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
-import { BehaviorSubject, combineLatest, type Subscription } from 'rxjs';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import { BehaviorSubject, type Subscription } from 'rxjs';
 import { createLazyObservabilityPageTemplate } from './components/page_template';
 import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
 import { registerProfilingComponent } from './components/profiling/helpers/component_registry';
@@ -151,33 +150,6 @@ export class ObservabilitySharedPlugin implements Plugin {
     if (!agentBuilder) {
       return;
     }
-
-    this.appChangeSubscription = combineLatest([
-      application.currentAppId$,
-      application.applications$,
-    ]).subscribe(([currentAppId, registeredApps]) => {
-      if (!currentAppId) {
-        return;
-      }
-
-      const currentApp = registeredApps.get(currentAppId);
-      const isObservabilityApp =
-        currentApp?.category?.id === DEFAULT_APP_CATEGORIES.observability.id;
-
-      if (isObservabilityApp === this.lastIsObservabilityApp) {
-        return;
-      }
-      this.lastIsObservabilityApp = isObservabilityApp;
-
-      if (isObservabilityApp) {
-        agentBuilder.setChatConfig({
-          sessionTag: OBSERVABILITY_SESSION_TAG,
-          newConversation: false,
-        });
-      } else {
-        agentBuilder.clearChatConfig?.();
-      }
-    });
   }
 
   private createLocators(urlService: BrowserUrlService): ObservabilitySharedLocators {
