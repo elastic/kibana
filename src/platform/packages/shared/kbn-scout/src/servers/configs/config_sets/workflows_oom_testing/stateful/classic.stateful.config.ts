@@ -8,6 +8,7 @@
  */
 
 import type { ScoutServerConfig } from '../../../../../types';
+import { defaultConfig } from '../../default/stateful/base.config';
 import { servers as workflowsUiConfig } from '../../workflows_ui/stateful/classic.stateful.config';
 
 /**
@@ -20,6 +21,15 @@ import { servers as workflowsUiConfig } from '../../workflows_ui/stateful/classi
  */
 export const servers: ScoutServerConfig = {
   ...workflowsUiConfig,
+  esTestCluster: {
+    ...defaultConfig.esTestCluster,
+    serverArgs: [
+      ...defaultConfig.esTestCluster.serverArgs,
+      // ML native code can crash on certain macOS snapshot builds; disable it
+      // since these tests only exercise Kibana workflow schema paths.
+      'xpack.ml.enabled=false',
+    ],
+  },
   kbnTestServer: {
     ...workflowsUiConfig.kbnTestServer,
     env: {
