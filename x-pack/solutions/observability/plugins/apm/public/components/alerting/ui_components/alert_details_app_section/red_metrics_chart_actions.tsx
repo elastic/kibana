@@ -10,8 +10,8 @@ import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } f
 import { i18n } from '@kbn/i18n';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { ObservabilityPublicPluginsStart } from '@kbn/observability-plugin/public';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import type { ApmPluginStartDeps } from '../../../../plugin';
 import type { ESQLQueryParams } from '../../../shared/links/discover_links/get_esql_query';
 import { getESQLQuery } from '../../../shared/links/discover_links/get_esql_query';
 import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
@@ -47,10 +47,10 @@ export function RedMetricsChartActions({
 }: RedMetricsChartActionsProps) {
   const {
     services: { share, apmSourcesAccess },
-  } = useKibana<ObservabilityPublicPluginsStart>();
+  } = useKibana<ApmPluginStartDeps>();
 
   const { data, status: indexSettingsStatus } = useFetcher(
-    (_, signal) => apmSourcesAccess?.getApmIndexSettings({ signal }),
+    (_, signal) => apmSourcesAccess.getApmIndexSettings({ signal }),
     [apmSourcesAccess]
   );
 

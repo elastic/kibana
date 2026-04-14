@@ -511,7 +511,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     import('./components/alerting/rule_types/register_apm_rule_types').then(
       ({ registerApmRuleTypes }) => {
-        registerApmRuleTypes(observabilityRuleTypeRegistry);
+        registerApmRuleTypes(observabilityRuleTypeRegistry, core);
       }
     );
     import('./embeddable/register_embeddables').then(({ registerEmbeddables }) => {
