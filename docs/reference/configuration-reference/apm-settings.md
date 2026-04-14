@@ -89,3 +89,15 @@ More settings are available in the [Observability advanced settings](/reference/
 
 `xpack.apm.latestAgentVersionsUrl` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Specifies the URL of a self hosted file that contains latest agent versions. Defaults to `https://apm-agent-versions.elastic.co/versions.json`. Set to `''` to disable requesting latest agent versions.
+
+## APM feature flags via feature flag service [apm-feature-flag-service-settings-kb]
+
+Use Kibana's `feature_flags.overrides` to force feature-flag values locally when validating APM behavior controlled by the feature flag service.
+
+`feature_flags.overrides.observability.apm.serviceMapDashboardEmbeddableEnabled`
+:   Enables or disables the APM service map dashboard embeddable registration path when this flag is consumed by APM. Example:
+    ```yaml
+    feature_flags:
+      overrides:
+        observability.apm.serviceMapDashboardEmbeddableEnabled: false
+    ```

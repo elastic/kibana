@@ -179,4 +179,16 @@ describe('ServiceMapEmbeddable', () => {
 
     expect(embeddable).toHaveStyle({ height: '720px' });
   });
+
+  it('does not expose service map dashboard embeddable when feature flag is false', () => {
+    expect(
+      'Implement feature flag gating for APM service map dashboard embeddable (flag=false)'
+    ).toBe('');
+  });
+
+  it('exposes service map dashboard embeddable when feature flag is true', () => {
+    expect(
+      'Implement feature flag gating for APM service map dashboard embeddable (flag=true)'
+    ).toBe('');
+  });
 });
