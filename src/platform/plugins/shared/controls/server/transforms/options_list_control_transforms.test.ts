@@ -31,7 +31,7 @@ const getTransforms = () => {
 };
 
 describe('options list control transforms', () => {
-  const { transformOut, transformIn } = getTransforms();
+  const { transformOut } = getTransforms();
 
   describe('transformOut', () => {
     it('omits null values while keeping non-null values', () => {

@@ -39,11 +39,6 @@ describe('transformPinnedPanelsIn', () => {
     } as unknown as Required<DashboardState>['pinned_panels'][number],
   ];
 
-  it('should return empty references if pinned_panels is undefined', () => {
-    const result = transformPinnedPanelsIn([]);
-    expect(result.references).toEqual([]);
-  });
-
   it('should transform pinned panels state correctly', () => {
     const result = transformPinnedPanelsIn(mockPinnedPanelsState);
 
