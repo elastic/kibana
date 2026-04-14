@@ -25,26 +25,8 @@ import { useKibana } from '../../../../../../../common/lib/kibana';
 import { MlCapabilitiesProvider } from '../../../../../../../common/components/ml/permissions/ml_capabilities_provider';
 import { UpsellingProvider } from '../../../../../../../common/components/upselling_provider';
 import { MockAssistantProviderComponent } from '../../../../../../../common/mock/mock_assistant_provider';
-import {
-  InitializationContext,
-  type InitializationContextValue,
-} from '../../../../../../../common/components/initialization/initialization_context';
-import {
-  INITIALIZATION_FLOW_STATUS_READY,
-  INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
-} from '../../../../../../../../common/api/initialization';
 
 const MockKibanaContextProvider = createKibanaContextProviderMock();
-
-const mockInitializationContextValue: InitializationContextValue = {
-  settledState: {
-    [INITIALIZATION_FLOW_INIT_PREBUILT_RULES]: {
-      status: INITIALIZATION_FLOW_STATUS_READY,
-      payload: null,
-    },
-  },
-  requestInitialization: () => {},
-};
 
 function UpsellingProviderMock({ children }: React.PropsWithChildren<{}>): JSX.Element {
   return (
@@ -99,13 +81,11 @@ export function RuleUpgradeTestProviders({ children }: PropsWithChildren<{}>): J
                   <ReduxStoreProvider store={store}>
                     <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
                       <QueryClientProvider client={queryClient}>
-                        <InitializationContext.Provider value={mockInitializationContextValue}>
-                          <MockAssistantProviderComponent>
-                            <MockDiscoverInTimelineContext>
-                              <EuiProvider highContrastMode={false}>{children}</EuiProvider>
-                            </MockDiscoverInTimelineContext>
-                          </MockAssistantProviderComponent>
-                        </InitializationContext.Provider>
+                        <MockAssistantProviderComponent>
+                          <MockDiscoverInTimelineContext>
+                            <EuiProvider highContrastMode={false}>{children}</EuiProvider>
+                          </MockDiscoverInTimelineContext>
+                        </MockAssistantProviderComponent>
                       </QueryClientProvider>
                     </ThemeProvider>
                   </ReduxStoreProvider>

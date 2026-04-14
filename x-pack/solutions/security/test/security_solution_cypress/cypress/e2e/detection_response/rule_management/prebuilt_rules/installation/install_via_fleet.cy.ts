@@ -4,11 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { times } from 'lodash';
-import {
-  INITIALIZE_SECURITY_SOLUTION_URL,
-  INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
-} from '@kbn/security-solution-plugin/common/api/initialization';
+
+import { BOOTSTRAP_PREBUILT_RULES_URL } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { installSinglePrebuiltRule } from '../../../../../tasks/prebuilt_rules/install_prebuilt_rules';
 import { resetRulesTableState } from '../../../../../tasks/common';
 import { RULE_NAME } from '../../../../../screens/alerts_detection_rules';
@@ -33,15 +30,7 @@ describe(
         resetRulesTableState();
         deleteAlertsAndRules();
 
-        cy.intercept('POST', INITIALIZE_SECURITY_SOLUTION_URL, (req) => {
-          // Only alias the call that includes the prebuilt rules package flow.
-          // The frontend fires multiple initialization calls with different flows
-          // and cy.wait would otherwise match the wrong one.
-          if (!req.body?.flows?.includes(INITIALIZATION_FLOW_INIT_PREBUILT_RULES)) {
-            return;
-          }
-          req.alias = 'initializeSecuritySolution';
-        });
+        cy.intercept('POST', BOOTSTRAP_PREBUILT_RULES_URL).as('bootstrapPrebuiltRules');
 
         login();
       });
@@ -49,38 +38,40 @@ describe(
       it('installs prebuilt rules from the "security_detection_engine" Fleet package', () => {
         visitAddRulesPage();
 
-        // Expect the initialization endpoint to install the prebuilt rules package
-        cy.wait('@initializeSecuritySolution', {
+        // Expect the package to be installed
+        cy.wait('@bootstrapPrebuiltRules', {
           timeout: PREBUILT_RULES_PACKAGE_INSTALLATION_TIMEOUT_MS,
         }).then(({ response }) => {
           cy.wrap(response?.statusCode).should('eql', 200);
 
-          const prebuiltRulesResult = response?.body.flows[INITIALIZATION_FLOW_INIT_PREBUILT_RULES];
+          const securityDetectionEnginePackage = response?.body.packages.find(
+            (pkg: { name: string }) => pkg.name === 'security_detection_engine'
+          );
 
-          cy.wrap(prebuiltRulesResult).should('have.property', 'status', 'ready');
-          cy.wrap(prebuiltRulesResult)
-            .its('payload.name')
-            .should('eql', 'security_detection_engine');
+          // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+          expect(
+            securityDetectionEnginePackage,
+            'Bootstrap endpoint must return "security_detection_engine" package info.'
+          ).to.exist;
+          expect(
+            securityDetectionEnginePackage,
+            '"security_detection_engine" package must be just installed'
+          ).includes({
+            name: 'security_detection_engine',
+            status: 'installed',
+          });
 
-          // Install the first 3 visible prebuilt rules one at a time.
-          const installedRuleNames: string[] = [];
+          // Install some prebuilt rules
+          cy.get<JQuery<HTMLElement>>(RULE_NAME).then(($ruleNames) => {
+            const ruleNames = $ruleNames.get().map((x) => x.innerText);
 
-          const installFirstVisibleRule = () => {
-            cy.get<HTMLElement>(RULE_NAME)
-              .first()
-              .invoke('text')
-              .then((name) => {
-                installedRuleNames.push(name);
-                installSinglePrebuiltRule(name);
-              });
-          };
+            installSinglePrebuiltRule(ruleNames[0]);
+            installSinglePrebuiltRule(ruleNames[1]);
+            installSinglePrebuiltRule(ruleNames[2]);
 
-          times(3, installFirstVisibleRule);
+            visitRulesManagementTable();
 
-          visitRulesManagementTable();
-
-          cy.then(() => {
-            expectManagementTableRules(installedRuleNames);
+            expectManagementTableRules([ruleNames[0], ruleNames[1], ruleNames[2]]);
           });
         });
       });

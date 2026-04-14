@@ -12,8 +12,7 @@ import { RuleUpgradeEventTypes } from '../../../common/lib/telemetry/events/rule
 import type { ReviewPrebuiltRuleUpgradeFilter } from '../../../../common/api/detection_engine/prebuilt_rules/common/review_prebuilt_rules_upgrade_filter';
 import { FieldUpgradeStateEnum, type RuleUpgradeState } from '../model/prebuilt_rule_upgrade';
 import { PerFieldRuleDiffTab } from '../components/rule_details/per_field_rule_diff_tab';
-import { useSecuritySolutionInitialization } from '../../../common/components/initialization/use_security_solution_initialization';
-import { INITIALIZATION_FLOW_INIT_PREBUILT_RULES } from '../../../../common/api/initialization';
+import { useIsUpgradingSecurityPackages } from '../logic/use_upgrade_security_packages';
 import { usePrebuiltRulesCustomizationStatus } from '../logic/prebuilt_rules/use_prebuilt_rules_customization_status';
 import { usePerformUpgradeRules } from '../logic/prebuilt_rules/use_perform_rule_upgrade';
 import { usePrebuiltRulesUpgradeReview } from '../logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
@@ -72,8 +71,7 @@ export function usePrebuiltRulesUpgrade({
   onUpgrade,
 }: UsePrebuiltRulesUpgradeParams) {
   const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
-  const initState = useSecuritySolutionInitialization([INITIALIZATION_FLOW_INIT_PREBUILT_RULES]);
-  const isUpgradingSecurityPackages = initState[INITIALIZATION_FLOW_INIT_PREBUILT_RULES].loading;
+  const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
   const [loadingRules, setLoadingRules] = useState<RuleSignatureId[]>([]);
   const { telemetry } = useKibana().services;
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
