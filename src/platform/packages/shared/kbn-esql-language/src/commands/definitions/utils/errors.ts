@@ -23,6 +23,7 @@ import type { ESQLCallbacks } from '@kbn/esql-types';
 import type {
   ErrorTypes,
   ErrorValues,
+  ESQLMessage,
   FunctionDefinition,
   Signature,
   SupportedDataType,
@@ -88,6 +89,13 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.unknownIndex', {
           defaultMessage: 'Unknown index "{name}"',
+          values: { name: out.name },
+        }),
+      };
+    case 'unknownDataSource':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.unknownDataSource', {
+          defaultMessage: 'Unknown data source "{name}"',
           values: { name: out.name },
         }),
       };
@@ -634,6 +642,12 @@ export const errors = {
   unknownIndex: (source: ESQLSource): ESQLMessage =>
     tagSemanticError(
       errors.byId('unknownIndex', source.location, { name: source.name }),
+      'getSources'
+    ),
+
+  unknownDataSource: (source: ESQLSource): ESQLMessage =>
+    tagSemanticError(
+      errors.byId('unknownDataSource', source.location, { name: source.name }),
       'getSources'
     ),
 

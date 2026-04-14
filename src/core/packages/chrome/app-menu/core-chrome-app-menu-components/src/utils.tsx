@@ -111,11 +111,27 @@ export const getTooltip = ({
   };
 };
 
+export const createReturnFocus =
+  (triggerElement: HTMLElement, parentElement?: HTMLElement) => () => {
+    if (document.body.contains(triggerElement)) {
+      triggerElement.focus();
+      return;
+    }
+    // triggerElement is no longer in the DOM (e.g. it was inside a popover that closed).
+    // Try the parent button that opened the popover first, then fall back to the overflow button.
+    if (parentElement && document.body.contains(parentElement)) {
+      parentElement.focus();
+      return;
+    }
+    document.querySelector<HTMLElement>('[data-test-subj="app-menu-overflow-button"]')?.focus();
+  };
+
 export const mapAppMenuItemToPanelItem = (
   item: AppMenuPopoverItem,
   childPanelId?: number,
   onClose?: () => void,
-  onCloseOverflowButton?: () => void
+  onCloseOverflowButton?: () => void,
+  anchorDomElement?: HTMLElement
 ): EuiContextMenuPanelItemDescriptor => {
   const { content, title } = getTooltip({
     tooltipContent: item?.tooltipContent,
@@ -129,7 +145,11 @@ export const mapAppMenuItemToPanelItem = (
 
     const shouldClosePopover = !item?.href && childPanelId === undefined && onClose;
 
-    item.run?.({ triggerElement: event?.currentTarget as HTMLElement });
+    const triggerElement = event.currentTarget as HTMLElement;
+    item.run?.({
+      triggerElement,
+      returnFocus: createReturnFocus(triggerElement, anchorDomElement),
+    });
 
     if (shouldClosePopover) {
       onClose();
@@ -235,6 +255,7 @@ export const getPopoverPanels = ({
   rootPopoverTestId,
   onClose,
   onCloseOverflowButton,
+  anchorDomElement,
 }: {
   items: AppMenuPopoverItem[];
   primaryActionItem?: AppMenuPrimaryActionItem;
@@ -243,6 +264,7 @@ export const getPopoverPanels = ({
   rootPopoverTestId?: string;
   onClose?: () => void;
   onCloseOverflowButton?: () => void;
+  anchorDomElement?: HTMLElement;
 }): EuiContextMenuPanelDescriptor[] => {
   const panels: EuiContextMenuPanelDescriptor[] = [];
   const hasActionItems = Boolean(primaryActionItem);
@@ -285,10 +307,24 @@ export const getPopoverPanels = ({
           parentPopoverWidth: itemPopoverWidth ?? DEFAULT_POPOVER_WIDTH,
         });
         panelItems.push(
-          mapAppMenuItemToPanelItem(item, childPanelId, onClose, onCloseOverflowButton)
+          mapAppMenuItemToPanelItem(
+            item,
+            childPanelId,
+            onClose,
+            onCloseOverflowButton,
+            anchorDomElement
+          )
         );
       } else {
-        panelItems.push(mapAppMenuItemToPanelItem(item, undefined, onClose, onCloseOverflowButton));
+        panelItems.push(
+          mapAppMenuItemToPanelItem(
+            item,
+            undefined,
+            onClose,
+            onCloseOverflowButton,
+            anchorDomElement
+          )
+        );
       }
 
       if (item.separator === 'below') {

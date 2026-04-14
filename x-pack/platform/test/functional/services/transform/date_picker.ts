@@ -29,6 +29,16 @@ export function TransformDatePickerProvider({ getService, getPageObjects }: FtrP
     },
 
     async quickSelect(timeValue: number = 15, timeUnit: string = 'y') {
+      if (await testSubjects.exists('dateRangePickerControlButton', { timeout: 2000 })) {
+        // New DateRangePicker (e.g. Discover) — type the relative range directly into the input.
+        await testSubjects.click('dateRangePickerControlButton');
+        await testSubjects.existOrFail('dateRangePickerInput', { timeout: 5000 });
+        await testSubjects.setValue('dateRangePickerInput', `now-${timeValue}${timeUnit} to now`);
+        await testSubjects.pressEnter('dateRangePickerInput');
+        await testSubjects.missingOrFail('dateRangePickerPopoverPanel', { timeout: 5000 });
+        return;
+      }
+
       await this.openSuperDatePicker();
       const quickMenuElement = await testSubjects.find('superDatePickerQuickMenu');
 

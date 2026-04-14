@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLColumn, ESQLIdentifier, ESQLMessage } from '@elastic/esql/types';
+import type { ESQLColumn, ESQLIdentifier } from '@elastic/esql/types';
 import { isParametrized } from '@elastic/esql';
 import { UnmappedFieldsStrategy, type ICommandContext } from '../../../registry/types';
 import { errors } from '../errors';
 import { getColumnExists, getColumnName } from '../columns';
+import type { ESQLMessage } from '../../types';
 
 export function validateColumnForCommand(
   column: ESQLColumn | ESQLIdentifier,

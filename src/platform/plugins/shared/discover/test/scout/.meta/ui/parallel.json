@@ -1,5 +1,5 @@
 {
-  "sha1": "aa110322c607758a30cc461d2f9dc7a49cd1b5dc",
+  "sha1": "41dd5406acf83e56458f23719256b6e836bd7a5d",
   "tests": [
     {
       "id": "71242d88739937b-70753e6cedbcd4d",
@@ -8,7 +8,7 @@
       "tags": [],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 15,
+        "line": 21,
         "column": 16
       }
     },
@@ -25,10 +25,8 @@
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
         "@cloud-stateful-security_complete",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/add_to_case_privileged.spec.ts",
@@ -49,10 +47,8 @@
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
         "@cloud-stateful-security_complete",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/breakdown_by_dimension.spec.ts",
@@ -73,10 +69,8 @@
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
         "@cloud-stateful-security_complete",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/brush_to_zoom.spec.ts",
@@ -97,10 +91,8 @@
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
         "@cloud-stateful-security_complete",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/fullscreen.spec.ts",
@@ -121,10 +113,8 @@
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
         "@cloud-stateful-security_complete",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/fullscreen.spec.ts",
@@ -145,10 +135,8 @@
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
         "@cloud-stateful-security_complete",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/fullscreen.spec.ts",
@@ -169,14 +157,34 @@
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
         "@cloud-stateful-security_complete",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/fullscreen.spec.ts",
         "line": 128,
+        "column": 14
+      }
+    },
+    {
+      "id": "4758a5d0dc16621-2eb4af6d08d70ba",
+      "title": "Metrics in Discover - Fullscreen Mode should show insights flyout without clipping in fullscreen mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-security_complete",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/fullscreen.spec.ts",
+        "line": 153,
         "column": 14
       }
     },
@@ -193,10 +201,8 @@
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
         "@cloud-stateful-security_complete",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid.navigation.spec.ts",
@@ -217,10 +223,8 @@
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
         "@cloud-stateful-security_complete",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid.navigation.spec.ts",
@@ -241,10 +245,8 @@
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
         "@cloud-stateful-security_complete",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid.navigation.spec.ts",
@@ -265,10 +267,8 @@
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
         "@cloud-stateful-security_complete",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid.navigation.spec.ts",
@@ -289,10 +289,8 @@
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
         "@cloud-stateful-security_complete",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid.spec.ts",
@@ -313,10 +311,8 @@
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
         "@cloud-stateful-security_complete",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid.spec.ts",
@@ -337,10 +333,8 @@
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
         "@cloud-stateful-security_complete",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid.spec.ts",
@@ -361,10 +355,8 @@
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
         "@cloud-stateful-security_complete",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid.spec.ts",
@@ -385,10 +377,8 @@
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
         "@cloud-stateful-security_complete",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid.spec.ts",
@@ -409,10 +399,8 @@
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
         "@cloud-stateful-security_complete",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid.spec.ts",
@@ -433,10 +421,8 @@
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
         "@cloud-stateful-security_complete",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid.spec.ts",
@@ -457,10 +443,8 @@
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
         "@cloud-stateful-security_complete",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid.spec.ts",
@@ -481,10 +465,8 @@
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
         "@cloud-stateful-security_complete",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/insights_flyout.spec.ts",
@@ -505,10 +487,8 @@
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
         "@cloud-stateful-security_complete",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/insights_flyout.spec.ts",
@@ -529,10 +509,8 @@
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
         "@cloud-stateful-security_complete",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/inspect.spec.ts",
@@ -593,10 +571,8 @@
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
         "@cloud-stateful-security_complete",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/save_session.spec.ts",
@@ -617,10 +593,8 @@
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
         "@cloud-stateful-security_complete",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/share_session.spec.ts",
@@ -822,7 +796,29 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
-        "line": 300,
+        "line": 301,
+        "column": 14
+      }
+    },
+    {
+      "id": "d324c688bbf2d2c-a83e03e8b613d0b",
+      "title": "Traces in Discover - Explore from SLO SLO Details - \"Traces in Discover\" from SLI chart opens traces experience",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_slo.spec.ts",
+        "line": 82,
         "column": 14
       }
     },
@@ -1154,6 +1150,28 @@
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/overview_tab.spec.ts",
         "line": 102,
         "column": 16
+      }
+    },
+    {
+      "id": "5c74bf7c77d0456-a8fa231cec07a74",
+      "title": "Traces in Discover - Overview tab ES|QL mode - logs section shows only logs correlated to the opened trace",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/overview_tab.spec.ts",
+        "line": 127,
+        "column": 14
       }
     },
     {
