@@ -227,7 +227,7 @@ export const waitForMaintainerRun = async ({
   // state, a version_conflict_engine_exception wedges the task permanently.
   // Wait for the runs count to stabilise across two consecutive polls so the
   // task is idle before we hand control back.
-  let lastSeenRuns = -1;
+  lastSeenRuns = -1;
   await retry.waitForWithTimeout(
     `Entity maintainer "${maintainerId}" to settle after run`,
     30_000,
