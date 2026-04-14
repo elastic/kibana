@@ -30,6 +30,7 @@ import {
   RESOLUTION_ERROR_TITLE,
   ENTITY_HAS_ALIASES_ERROR,
   GROUP_RISK_SCORE_LABEL,
+  RISK_SCORE_NOT_AVAILABLE,
   RESOLUTION_GROUP_CREATED_TOAST,
   RESOLUTION_GROUP_CREATED_TOAST_TEXT,
 } from './translations';
@@ -195,7 +196,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
                     <RiskScoreCell riskScore={resolutionRiskScore} />
                   ) : (
                     <EuiBadge>
-                      <EuiText size="xs">{'N/A'}</EuiText>
+                      <EuiText size="xs">{RISK_SCORE_NOT_AVAILABLE}</EuiText>
                     </EuiBadge>
                   )}
                 </EuiFlexItem>

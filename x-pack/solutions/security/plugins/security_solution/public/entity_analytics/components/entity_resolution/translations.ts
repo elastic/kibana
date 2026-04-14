@@ -119,7 +119,7 @@ export const ENTITY_REMOVED_TOAST = i18n.translate(
 
 export const ENTITY_REMOVED_TOAST_TEXT = i18n.translate(
   'xpack.securitySolution.entityResolution.entityRemovedText',
-  { defaultMessage: 'Resolution group risk score will be re-calculated within 1 hour.' }
+  { defaultMessage: 'Resolution group risk score will be recalculated within 1 hour.' }
 );
 
 export const CONFIRM_MODAL_TITLE = i18n.translate(
@@ -145,6 +145,11 @@ export const RESOLUTION_ERROR_TITLE = i18n.translate(
 export const RESOLUTION_FETCH_ERROR = i18n.translate(
   'xpack.securitySolution.entityResolution.fetchError',
   { defaultMessage: 'Unable to load resolution group' }
+);
+
+export const RISK_SCORE_NOT_AVAILABLE = i18n.translate(
+  'xpack.securitySolution.entityResolution.riskScoreNotAvailable',
+  { defaultMessage: 'N/A' }
 );
 
 export const LAST_SEEN_COLUMN = i18n.translate(

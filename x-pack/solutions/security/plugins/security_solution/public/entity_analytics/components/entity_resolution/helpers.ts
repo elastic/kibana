@@ -39,10 +39,6 @@ export const getEntitySource = (entity: Record<string, unknown>): string => {
   return String(getEntityField(entity, 'entity.source') ?? '');
 };
 
-export const getEntityType = (entity: Record<string, unknown>): string => {
-  return String(getEntityField(entity, 'entity.type') ?? '');
-};
-
 export const getEntityRiskScore = (entity: Record<string, unknown>): number | undefined => {
   const score = getEntityField(entity, 'entity.risk.calculated_score_norm');
   return typeof score === 'number' ? score : undefined;
@@ -51,7 +47,6 @@ export const getEntityRiskScore = (entity: Record<string, unknown>): number | un
 /** Row data type for the resolution group table. Defined here to avoid ESLint false positives. */
 export interface TableEntityRow {
   entity: Record<string, unknown>;
-  isSummary: boolean;
 }
 
 export const truncatedCellCss = css`

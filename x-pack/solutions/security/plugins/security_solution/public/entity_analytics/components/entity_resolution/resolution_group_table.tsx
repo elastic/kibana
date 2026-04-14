@@ -71,10 +71,7 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
   const items: TableEntityRow[] = useMemo(() => {
     if (!hasGroup) return [];
 
-    return [
-      { entity: group.target, isSummary: false },
-      ...group.aliases.map((alias) => ({ entity: alias, isSummary: false })),
-    ];
+    return [{ entity: group.target }, ...group.aliases.map((alias) => ({ entity: alias }))];
   }, [group, hasGroup]);
 
   const columns: Array<EuiBasicTableColumn<TableEntityRow>> = useMemo(() => {
@@ -162,7 +159,7 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiToolTip content={TARGET_ENTITY_TOOLTIP}>
-                    <EuiIcon type="aggregate" size="s" />
+                    <EuiIcon type="aggregate" size="s" aria-hidden={true} />
                   </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>

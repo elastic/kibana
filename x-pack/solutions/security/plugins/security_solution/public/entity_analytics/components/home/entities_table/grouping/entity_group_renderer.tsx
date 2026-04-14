@@ -25,6 +25,7 @@ import {
   EntityPanelParamByType,
 } from '../../../../../flyout/entity_details/shared/constants';
 import { ENTITY_ANALYTICS_TABLE_ID } from '../../constants';
+import { RISK_SCORE_NOT_AVAILABLE } from '../../../entity_resolution/translations';
 import { getRiskLevel } from '../../../../../../common/entity_analytics/risk_engine';
 import { formatRiskScore } from '../../../../common/utils';
 import { getRiskScoreColors } from '../risk_score_cell';
@@ -90,7 +91,7 @@ const ResolutionGroupPanel = ({
     <EuiFlexGroup alignItems="center" gutterSize="s">
       {canOpenFlyout && (
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={openEntityFlyoutLabel}>
+          <EuiToolTip content={openEntityFlyoutLabel} disableScreenReaderOutput>
             <EuiButtonIcon
               aria-label={openEntityFlyoutLabel}
               iconType="expand"
@@ -153,7 +154,7 @@ const GroupRiskScoreBadge = ({ riskScore }: { riskScore: number | null | undefin
   if (riskScore == null) {
     return (
       <EuiBadge css={badgeCss}>
-        <EuiText size="xs">{'N/A'}</EuiText>
+        <EuiText size="xs">{RISK_SCORE_NOT_AVAILABLE}</EuiText>
       </EuiBadge>
     );
   }
