@@ -39,6 +39,7 @@ import {
 import { registerFeatureFlags } from './feature_flags';
 import { ContentService } from './lib/content/content_service';
 import { registerRules } from './lib/sig_events/rules/register_rules';
+import { getSigEventsTuningConfig } from './lib/sig_events/helpers/get_sig_events_tuning_config';
 import { AttachmentService } from './lib/streams/attachments/attachment_service';
 import { QueryService } from './lib/streams/assets/query/query_service';
 import { StreamsService } from './lib/streams/service';
@@ -53,6 +54,8 @@ import type {
 import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
 import { backfillWiredStreamViews } from './lib/streams/esql_views/backfill_wired_stream_views';
 import { FeatureService } from './lib/streams/feature/feature_service';
+import type { FeatureClient } from './lib/streams/feature/feature_client';
+import type { QueryClient } from './lib/streams/assets/query/query_client';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 import { MemoryTriggerRegistry, discoveryCompletedTrigger } from './lib/memory/triggers';
@@ -177,32 +180,46 @@ export class StreamsPlugin
         this.logger
       );
 
-      const [attachmentClient, featureClient, insightClient, contentClient, queryClient] =
-        await Promise.all([
-          attachmentService.getClient({
-            soClient,
-            rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
-          }),
-          featureService.getClient(),
-          insightService.getInternalClient(),
-          contentService.getClient(),
-          queryService.getClient({
+      const [attachmentClient, insightClient, contentClient, tuningConfig] = await Promise.all([
+        attachmentService.getClient({
+          soClient,
+          rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
+        }),
+        insightService.getInternalClient(),
+        contentService.getClient(),
+        getSigEventsTuningConfig(globalUiSettingsClient, this.logger),
+      ]);
+
+      let featureClientPromise: Promise<FeatureClient> | undefined;
+      const getFeatureClient = (): Promise<FeatureClient> => {
+        featureClientPromise ??= featureService.getClient(tuningConfig);
+        return featureClientPromise;
+      };
+
+      let queryClientPromise: Promise<QueryClient> | undefined;
+      const getQueryClient = (): Promise<QueryClient> => {
+        queryClientPromise ??= (async () => {
+          const rulesClient = await pluginsStart.alerting.getRulesClientWithRequestInSpace(
+            request,
+            DEFAULT_SPACE_ID
+          );
+          return queryService.getClient({
             esClient: coreStart.elasticsearch.client.asInternalUser,
             soClient,
-            rulesClient: await pluginsStart.alerting.getRulesClientWithRequestInSpace(
-              request,
-              DEFAULT_SPACE_ID
-            ),
-          }),
-        ]);
+            rulesClient,
+            config: tuningConfig,
+          });
+        })();
+        return queryClientPromise;
+      };
 
       const license = await licensing.getLicense();
       const isSecurityEnabled = license.getFeature('security').isEnabled;
 
       const streamsClient = await streamsService.getClient({
         attachmentClient,
-        queryClient,
-        featureClient,
+        getQueryClient,
+        getFeatureClient,
         esClient: scopedClusterClient.asCurrentUser,
         esClientAsInternalUser: coreStart.elasticsearch.client.asInternalUser,
         uiSettingsClient,
@@ -219,11 +236,11 @@ export class StreamsPlugin
         soClient,
         attachmentClient,
         streamsClient,
-        featureClient,
+        getFeatureClient,
         insightClient,
         inferenceClient,
         contentClient,
-        queryClient,
+        getQueryClient,
         fieldsMetadataClient,
         licensing,
         uiSettingsClient,
@@ -231,6 +248,7 @@ export class StreamsPlugin
         taskClient,
         streamsSettingsStorageClient,
         isSecurityEnabled,
+        tuningConfig,
       };
     };
 
