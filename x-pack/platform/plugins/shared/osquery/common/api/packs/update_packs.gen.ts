@@ -36,4 +36,39 @@ export const UpdatePacksRequestBody = z.object({
 });
 
 export type UpdatePacksResponse = z.infer<typeof UpdatePacksResponse>;
-export const UpdatePacksResponse = z.object({});
+export const UpdatePacksResponse = z.object({
+  data: z
+    .object({
+      /**
+       * The saved object ID of the pack.
+       */
+      saved_object_id: z.string().optional(),
+      name: PackName.optional(),
+      description: PackDescriptionOrUndefined.optional(),
+      queries: ObjectQueries.optional(),
+      /**
+       * The pack version number.
+       */
+      version: z.number().int().optional(),
+      enabled: EnabledOrUndefined.optional(),
+      created_at: z.string().datetime().optional(),
+      created_by: z.string().nullable().optional(),
+      created_by_profile_uid: z.string().optional(),
+      updated_at: z.string().datetime().optional(),
+      updated_by: z.string().nullable().optional(),
+      updated_by_profile_uid: z.string().optional(),
+      policy_ids: PolicyIdsOrUndefined.optional(),
+      /**
+       * Shard configuration as an array of key-value pairs.
+       */
+      shards: z
+        .array(
+          z.object({
+            key: z.string().optional(),
+            value: z.number().optional(),
+          })
+        )
+        .optional(),
+    })
+    .optional(),
+});
