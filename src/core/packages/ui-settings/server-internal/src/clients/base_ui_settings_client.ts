@@ -56,7 +56,13 @@ export abstract class BaseUiSettingsClient implements IUiSettingsClient {
     // Fall back to default value
     const definition = this.defaults[key];
     if (definition?.getValue) {
-      return definition.getValue(context) as Promise<T>;
+      try {
+        return (await definition.getValue(context)) as T;
+      } catch (error) {
+        this.log.error(`[UiSettingsClient] Failed to get value for key "${key}": ${error}`);
+        // Fallback to `value` prop if `getValue()` fails
+        return definition.value as T;
+      }
     }
     return definition?.value as T;
   }

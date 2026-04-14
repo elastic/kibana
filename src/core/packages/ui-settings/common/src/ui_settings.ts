@@ -140,17 +140,6 @@ export interface UiSettingsParams<T = unknown> {
    * Note: this does not affect serverless settings, since spaces in serverless don't have solution views.
    * */
   solutionViews?: UiSettingsSolutions;
-  /**
-   * Cache time-to-live in milliseconds for this setting's value.
-   * When specified, the setting's value will be cached for this duration
-   * after retrieval from Elasticsearch, reducing queries for frequently-accessed settings.
-   *
-   * The cache is shared across requests but isolated per-space.
-   *
-   * @example
-   * cacheTTL: 30_000  // Cache for 30 seconds
-   */
-  cacheTTL?: number;
 }
 
 /**

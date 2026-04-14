@@ -684,6 +684,27 @@ describe('ui settings', () => {
         ]
       `);
     });
+
+    it('returns the fallback value if getValue() throws an error', async () => {
+      const defaults = {
+        dynamicSetting: {
+          value: 'fallback-value',
+          getValue: jest.fn().mockRejectedValue(new Error('getValue failed')),
+        },
+      };
+
+      const { uiSettings } = setup({ defaults });
+      const result = await uiSettings.get('dynamicSetting');
+
+      expect(result).toBe('fallback-value');
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "[UiSettingsClient] Failed to get value for key \\"dynamicSetting\\": Error: getValue failed",
+          ],
+        ]
+      `);
+    });
   });
 
   describe('#isSensitive()', () => {
