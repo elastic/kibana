@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
@@ -16,6 +16,7 @@ import {
   EuiBadge,
   EuiButtonEmpty,
 } from '@elastic/eui';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaVersionBadge } from '@kbn/search-shared-ui';
 
@@ -24,26 +25,41 @@ import { useKibana } from '../../hooks/use_kibana';
 import { ElasticsearchConnectionDetails } from '../elasticsearch_connection_details';
 import { TrialBadgeContainerStyle } from './styles';
 
+function getCloudBaseWhenInTrial(cloud?: CloudStart): string | undefined {
+  if (!cloud) return undefined;
+  if (!cloud.isInTrial()) return undefined;
+  const cloudUrls = cloud.getUrls();
+  return cloudUrls.baseUrl;
+}
+
 export const SearchGettingStartedHeader: React.FC = () => {
   const currentBreakpoint = useCurrentEuiBreakpoint();
   const {
     services: { cloud, kibanaVersion },
   } = useKibana();
-  const cloudHomeHref = useMemo(() => {
-    if (!cloud) return undefined;
-    if (!cloud.isInTrial()) return undefined;
-    const cloudUrls = cloud.getUrls();
-    if (!cloudUrls.baseUrl) return undefined;
-    return cloudUrls.baseUrl;
-  }, [cloud]);
+  const cloudHomeHref = getCloudBaseWhenInTrial(cloud);
 
   return (
     <EuiFlexGroup gutterSize={currentBreakpoint === 'xl' ? 'l' : 'xl'} direction="column">
       <EuiFlexGroup gutterSize="l" alignItems="flexStart" direction="column">
-        <EuiFlexItem css={css({ alignSelf: 'stretch' })}>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              {cloudHomeHref ? (
+        <EuiFlexItem
+          css={css({
+            // ensures the trial badge and version badge fill parent with space between
+            alignSelf: 'stretch',
+          })}
+        >
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent={cloudHomeHref ? 'spaceBetween' : 'flexEnd'}
+          >
+            {cloudHomeHref && (
+              <EuiFlexItem
+                grow={false}
+                css={css({
+                  // Ensure trial badge does not grow to fill space when on smaller screens
+                  alignItems: 'flex-start',
+                })}
+              >
                 <EuiFlexGroup
                   alignItems="center"
                   gutterSize="s"
@@ -72,10 +88,8 @@ export const SearchGettingStartedHeader: React.FC = () => {
                     </EuiButtonEmpty>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              ) : (
-                <span />
-              )}
-            </EuiFlexItem>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <KibanaVersionBadge
                 docLink={
