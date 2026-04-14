@@ -791,6 +791,300 @@ describe('current status route', () => {
       expect(result.pending).toEqual(pending);
     });
   });
+
+  describe('CCS remote monitor detection', () => {
+    const ccsServer = {
+      isElasticsearchServerless: false,
+      config: { experimental: { ccs: { enabled: true } } },
+    };
+
+    const localMonitor = {
+      namespaces: ['default'],
+      attributes: {
+        config_id: 'local-id',
+        id: 'local-id',
+        type: 'browser',
+        enabled: true,
+        name: 'local monitor',
+        project_id: 'project-id',
+        tags: ['local'],
+        schedule: { number: '1', unit: 'm' },
+        locations: [japanLoc],
+      },
+    };
+
+    it('adds remote monitors to upConfigs when CCS is enabled', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: { monitorId: 'local-id', locationId: japanLoc.id },
+              status: {
+                key: japanLoc.id,
+                top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2022-09-15T16:19:16.724Z'] }],
+              },
+            },
+            {
+              key: { monitorId: 'remote-mon-1', locationId: japanLoc.id },
+              status: {
+                key: japanLoc.id,
+                top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2022-09-15T16:19:16.724Z'] }],
+              },
+            },
+          ],
+        })
+      );
+
+      esClient.search.mockResponseOnce({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          hits: [
+            {
+              _id: 'hit1',
+              _index: 'cluster1:synthetics-browser-default',
+              _source: {
+                monitor: { id: 'remote-mon-1', name: 'Remote Monitor 1', type: 'http' },
+                tags: ['remote-tag'],
+              },
+            },
+          ],
+        },
+      } as any);
+
+      const routeContext: any = {
+        request: { query: {} },
+        syntheticsEsClient,
+        server: ccsServer,
+        remoteKibanaUrls: { cluster1: 'https://cluster1.example.com' },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([localMonitor] as any);
+
+      const result = await overviewStatusService.getOverviewStatus();
+
+      expect(result.up).toBe(2);
+      expect(result.upConfigs).toHaveProperty('local-id-asia_japan');
+      expect(result.upConfigs).toHaveProperty('remote-remote-mon-1-asia_japan');
+
+      const remoteMeta = result.upConfigs['remote-remote-mon-1-asia_japan'];
+      expect(remoteMeta.remote).toEqual({
+        remoteName: 'cluster1',
+        kibanaUrl: 'https://cluster1.example.com',
+      });
+      expect(remoteMeta.name).toBe('Remote Monitor 1');
+      expect(remoteMeta.type).toBe('http');
+      expect(remoteMeta.tags).toEqual(['remote-tag']);
+
+      expect(esClient.search).toHaveBeenCalledTimes(2);
+    });
+
+    it('adds remote monitors to downConfigs when status is down', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: { monitorId: 'remote-down-1', locationId: japanLoc.id },
+              status: {
+                key: japanLoc.id,
+                top: [
+                  { metrics: { 'monitor.status': 'down' }, sort: ['2022-09-15T16:19:16.724Z'] },
+                ],
+              },
+            },
+          ],
+        })
+      );
+
+      esClient.search.mockResponseOnce({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          hits: [
+            {
+              _id: 'hit1',
+              _index: 'cluster2:synthetics-http-default',
+              _source: {
+                monitor: { id: 'remote-down-1', name: 'Remote Down', type: 'http' },
+                tags: [],
+              },
+            },
+          ],
+        },
+      } as any);
+
+      const routeContext: any = {
+        request: { query: {} },
+        syntheticsEsClient,
+        server: ccsServer,
+        remoteKibanaUrls: {},
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+
+      const result = await overviewStatusService.getOverviewStatus();
+
+      expect(result.down).toBe(1);
+      expect(result.downConfigs).toHaveProperty('remote-remote-down-1-asia_japan');
+
+      const remoteMeta = result.downConfigs['remote-remote-down-1-asia_japan'];
+      expect(remoteMeta.remote).toEqual({
+        remoteName: 'cluster2',
+        kibanaUrl: '',
+      });
+    });
+
+    it('skips remote detection when CCS is disabled', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: { monitorId: 'remote-mon-1', locationId: japanLoc.id },
+              status: {
+                key: japanLoc.id,
+                top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2022-09-15T16:19:16.724Z'] }],
+              },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: {} },
+        syntheticsEsClient,
+        server: { isElasticsearchServerless: false, config: {} },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+
+      const result = await overviewStatusService.getOverviewStatus();
+
+      expect(result.up).toBe(0);
+      expect(result.upConfigs).toEqual({});
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+    });
+
+    it('skips remote detection in serverless mode even when ccs config is set', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: { monitorId: 'remote-mon-1', locationId: japanLoc.id },
+              status: {
+                key: japanLoc.id,
+                top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2022-09-15T16:19:16.724Z'] }],
+              },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: {} },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: true,
+          config: { experimental: { ccs: { enabled: true } } },
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+
+      const result = await overviewStatusService.getOverviewStatus();
+
+      expect(result.up).toBe(0);
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not issue second-pass query when there are no unmatched monitors', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: { monitorId: 'local-id', locationId: japanLoc.id },
+              status: {
+                key: japanLoc.id,
+                top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2022-09-15T16:19:16.724Z'] }],
+              },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: {} },
+        syntheticsEsClient,
+        server: ccsServer,
+        remoteKibanaUrls: {},
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([localMonitor] as any);
+
+      const result = await overviewStatusService.getOverviewStatus();
+
+      expect(result.up).toBe(1);
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('getEsDataFilters with CCS', () => {
+    it('drops space_id filter when CCS is enabled', () => {
+      const { syntheticsEsClient } = getUptimeESMockClient();
+
+      const routeContext: any = {
+        request: { query: {} },
+        syntheticsEsClient,
+        spaceId: 'test-space',
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: true } } },
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      const filters = overviewStatusService.getEsDataFilters();
+
+      const hasSpaceFilter = filters.some((f: any) => f.terms?.['meta.space_id'] !== undefined);
+      expect(hasSpaceFilter).toBe(false);
+    });
+
+    it('includes space_id filter when CCS is disabled', () => {
+      const { syntheticsEsClient } = getUptimeESMockClient();
+
+      const routeContext: any = {
+        request: { query: {} },
+        syntheticsEsClient,
+        spaceId: 'test-space',
+        server: {
+          isElasticsearchServerless: false,
+          config: {},
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      const filters = overviewStatusService.getEsDataFilters();
+
+      const hasSpaceFilter = filters.some((f: any) => f.terms?.['meta.space_id'] !== undefined);
+      expect(hasSpaceFilter).toBe(true);
+    });
+  });
 });
 
 function getEsResponse({ buckets, after }: { buckets: any[]; after?: any }) {
