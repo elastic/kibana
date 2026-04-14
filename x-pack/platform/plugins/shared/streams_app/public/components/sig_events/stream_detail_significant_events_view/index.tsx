@@ -305,6 +305,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
       </EuiFlexGroup>
       {selectedKnowledgeIndicator ? (
         <KnowledgeIndicatorDetailsFlyout
+          definition={definition.stream}
           knowledgeIndicator={selectedKnowledgeIndicator}
           occurrencesByQueryId={occurrencesByQueryId}
           onClose={() => setSelectedKnowledgeIndicator(null)}

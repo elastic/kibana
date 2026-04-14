@@ -41,7 +41,7 @@ export const useCreateSkillService = ({ onSuccess, onError }: UseCreateSkillServ
     mutationFn: (skill) => skillsService.create(skill),
     onSuccess,
     onError,
-    onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.skills.all }),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.skills.list }),
   });
 
   return { createSkillSync: mutate, createSkill: mutateAsync, isLoading };
