@@ -35,7 +35,7 @@ const ErrorRateChartContent = ({
 }: ErrorRateChartContentProps) => {
   const { services, fetchParams, discoverFetch$, onBrushEnd, onFilter, actions } =
     useTraceMetricsContext();
-  const { abortController, timeRange } = fetchParams;
+  const { abortController, timeRange, esqlVariables } = fetchParams;
 
   const {
     layers: chartLayers,
@@ -49,6 +49,7 @@ const ErrorRateChartContent = ({
     unit,
     color,
     abortController,
+    variables: esqlVariables,
   });
 
   return (

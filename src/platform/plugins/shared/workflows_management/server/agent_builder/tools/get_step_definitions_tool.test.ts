@@ -36,6 +36,9 @@ describe('registerGetStepDefinitionsTool', () => {
         type: 'kibana.createCase',
         description: 'Create a case in Kibana',
         summary: 'Creates a case',
+        deprecation: {
+          replacementStepType: 'cases.createCase',
+        },
         paramsSchema: z.object({ title: z.string(), description: z.string().optional() }),
         outputSchema: z.object({ id: z.string() }),
         hasConnectorId: 'required',
@@ -72,6 +75,7 @@ describe('registerGetStepDefinitionsTool', () => {
     const data = result.results[0].data as any;
     expect(data.count).toBeGreaterThan(0);
     expect(data.stepTypes.length).toBe(data.count);
+    expect(data.stepTypes.some((step: any) => step.id === 'kibana.createCase')).toBe(false);
   });
 
   it('returns condensed results when many steps match', async () => {
@@ -211,7 +215,7 @@ describe('registerGetStepDefinitionsTool', () => {
   it('filters by search term', async () => {
     const result = await invokeHandler(
       registeredTool,
-      { search: 'case' },
+      { search: 'case', includeDeprecated: true },
       { spaceId: 'default', request: {} }
     );
     const data = result.results[0].data as any;
@@ -222,6 +226,43 @@ describe('registerGetStepDefinitionsTool', () => {
         return concat.includes('case');
       })
     ).toBe(true);
+  });
+
+  it('excludes deprecated steps from search results by default', async () => {
+    const result = await invokeHandler(
+      registeredTool,
+      { search: 'case' },
+      { spaceId: 'default', request: {} }
+    );
+    const data = result.results[0].data as any;
+
+    expect((data.stepTypes ?? []).some((step: any) => step.id === 'kibana.createCase')).toBe(false);
+  });
+
+  it('returns deprecated steps for exact stepType lookups', async () => {
+    const result = await invokeHandler(
+      registeredTool,
+      { stepType: 'kibana.createCase' },
+      { spaceId: 'default', request: {} }
+    );
+    const data = result.results[0].data as any;
+    const step = data.stepTypes[0];
+
+    expect(step.id).toBe('kibana.createCase');
+    expect(step.deprecated).toBe(true);
+    expect(step.replacementStepType).toBe('cases.createCase');
+    expect(step.deprecationMessage).toContain('Step type "kibana.createCase" is deprecated');
+  });
+
+  it('includes deprecated steps in discovery when includeDeprecated is true', async () => {
+    const result = await invokeHandler(
+      registeredTool,
+      { includeDeprecated: true },
+      { spaceId: 'default', request: {} }
+    );
+    const data = result.results[0].data as any;
+
+    expect(data.stepTypes.some((step: any) => step.id === 'kibana.createCase')).toBe(true);
   });
 
   it('filters by category', async () => {

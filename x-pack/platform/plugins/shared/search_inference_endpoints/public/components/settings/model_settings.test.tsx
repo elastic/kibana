@@ -93,8 +93,8 @@ describe('ModelSettings', () => {
     mockUseModelSettingsForm.mockReturnValue(defaultFormState);
     mockUseDefaultModelSettings.mockReturnValue(defaultModelSettingsState);
     mockUseConnectors.mockReturnValue({
-      connectors: [{ connectorId: 'test-connector', name: 'Test', isPreconfigured: true }],
-      loading: false,
+      data: [{ connectorId: 'test-connector', name: 'Test', isPreconfigured: true }],
+      isLoading: false,
     });
   });
 
@@ -317,7 +317,7 @@ describe('ModelSettings', () => {
   });
 
   it('renders no-models empty prompt when connectors are empty', () => {
-    mockUseConnectors.mockReturnValue({ connectors: [], loading: false });
+    mockUseConnectors.mockReturnValue({ data: [], isLoading: false });
 
     render(
       <Wrapper>
@@ -330,7 +330,7 @@ describe('ModelSettings', () => {
   });
 
   it('renders loading spinner when connectors are loading', () => {
-    mockUseConnectors.mockReturnValue({ connectors: undefined, loading: true });
+    mockUseConnectors.mockReturnValue({ data: undefined, isLoading: true });
 
     render(
       <Wrapper>
