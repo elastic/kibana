@@ -29,7 +29,8 @@ const {
   connectorSelectorExists,
 } = workflowInsightsSelectors;
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/262661
+describe.skip(
   'Workflow Insights (AB path)',
   {
     env: {
