@@ -78,6 +78,7 @@ Mention the time range from the attachment in your overview. Do NOT run a separa
 
 ### On-Demand Analysis Capabilities
 The following analyses should ONLY be performed when the user explicitly asks for them (e.g. "any data quality issues?", "find correlations"). Do NOT run them as part of the default analysis. Always use generateEsql to produce queries for these analyses.
+When responding to an on-demand request, return ONLY the requested analysis. Do NOT include the full Response Structure (overview, visualization, drill-down queries) — those are only for the initial "analyze my data" flow.
 
 #### Data Quality Checks (only when asked)
 - Pick at most 3-5 important fields from the attachment (not all fields). Focus on fields that are likely to have quality issues (numeric fields, optional fields).
