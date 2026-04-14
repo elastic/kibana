@@ -17,6 +17,8 @@ import type {
 /** Auth code sent by tests that need a token with `expires_in: 1` to exercise refresh flows. */
 export const SHORT_EXPIRY_AUTH_CODE = 'fake-auth-code-short-expiry';
 
+const TOKEN_EXPIRES_IN_SEC = 3660;
+
 let authorizationCodeExchangeSeq = 0;
 let refreshTokenExchangeSeq = 0;
 
@@ -120,7 +122,7 @@ export function initPlugin(router: IRouter, path: string) {
         return jsonResponse(res, 200, {
           access_token: `sim-oauth-access-${seq}`,
           refresh_token: `sim-oauth-refresh-${seq}`,
-          expires_in: shortLived ? 1 : 3600, // conventional oauth expiry time
+          expires_in: shortLived ? 1 : TOKEN_EXPIRES_IN_SEC,
           token_type: 'Bearer',
         });
       }
@@ -136,7 +138,7 @@ export function initPlugin(router: IRouter, path: string) {
         const seq = refreshTokenExchangeSeq;
         return jsonResponse(res, 200, {
           access_token: `sim-oauth-access-refreshed-${seq}`,
-          expires_in: 3600,
+          expires_in: TOKEN_EXPIRES_IN_SEC,
           token_type: 'Bearer',
         });
       }
@@ -144,7 +146,7 @@ export function initPlugin(router: IRouter, path: string) {
       // Grant types we do not branch on (e.g. JWT bearer) keep the legacy fixed token response.
       return jsonResponse(res, 200, {
         access_token: 'tokentokentoken',
-        expires_in: 3600,
+        expires_in: TOKEN_EXPIRES_IN_SEC,
         token_type: 'Bearer',
       });
     }
