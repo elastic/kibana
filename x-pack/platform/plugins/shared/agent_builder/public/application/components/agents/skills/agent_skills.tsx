@@ -19,7 +19,6 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiText,
-  EuiIcon,
   EuiTitle,
 } from '@elastic/eui';
 import type { PublicSkillDefinition, PublicSkillSummary } from '@kbn/agent-builder-common';
@@ -41,7 +40,6 @@ import { SkillDetailPanel } from './skill_detail_panel';
 import { SkillEditFlyout } from './skill_edit_flyout';
 import { SkillCreateFlyout } from './skill_create_flyout';
 import { PageWrapper } from '../common/page_wrapper';
-import { ICON_DIMENSIONS } from '../common/constants';
 import { useListDetailPageStyles } from '../common/styles';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { useCanEditAgent } from '../../../hooks/agents/use_can_edit_agent';
@@ -227,16 +225,9 @@ export const AgentSkills: React.FC = () => {
       <div css={styles.header}>
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="bolt" aria-hidden={true} css={ICON_DIMENSIONS} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="l">
-                  <h1>{labels.skills.title}</h1>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiTitle size="l">
+              <h1>{labels.skills.title}</h1>
+            </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
@@ -293,8 +284,8 @@ export const AgentSkills: React.FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        <EuiSpacer size="s" />
-        <EuiText size="s" color="subdued">
+        <EuiSpacer size="m" />
+        <EuiText size="m" color="default">
           {labels.agentSkills.pageDescription}
         </EuiText>
       </div>

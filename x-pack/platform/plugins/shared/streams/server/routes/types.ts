@@ -39,11 +39,11 @@ export interface RouteHandlerScopedClients {
   soClient: SavedObjectsClientContract;
   attachmentClient: AttachmentClient;
   streamsClient: StreamsClient;
-  featureClient: FeatureClient;
+  getFeatureClient: () => Promise<FeatureClient>;
   insightClient: InsightClient;
   inferenceClient: InferenceClient;
   contentClient: ContentClient;
-  queryClient: QueryClient;
+  getQueryClient: () => Promise<QueryClient>;
   licensing: LicensingPluginStart;
   uiSettingsClient: IUiSettingsClient;
   globalUiSettingsClient: IUiSettingsClient;
