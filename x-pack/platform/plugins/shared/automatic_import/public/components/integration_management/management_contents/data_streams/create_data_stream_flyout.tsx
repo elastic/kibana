@@ -501,7 +501,10 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
       onClose();
 
       if (!currentIntegrationId && result.integration_id) {
-        application.navigateToApp(PLUGIN_ID, { path: `/edit/${result.integration_id}` });
+        application.navigateToApp(PLUGIN_ID, {
+          path: `/edit/${result.integration_id}`,
+          state: { isNew: true },
+        });
       }
     } catch (error) {
       notifications.toasts.addError(error instanceof Error ? error : new Error('Unknown error'), {
