@@ -265,12 +265,6 @@ export class OverviewStatusService {
     const enabledMonitors = monitors.filter((monitor) => monitor.attributes[ConfigKey.ENABLED]);
     const disabledMonitors = monitors.filter((monitor) => !monitor.attributes[ConfigKey.ENABLED]);
 
-    // Track all local monitor IDs so we can identify remote-only monitors later
-    const localMonitorIds = new Set<string>();
-    monitors.forEach((monitor) => {
-      localMonitorIds.add(monitor.attributes[ConfigKey.MONITOR_QUERY_ID]);
-    });
-
     const queryLocIds = this.filterData?.locationIds;
 
     disabledMonitors.forEach((monitor) => {
@@ -333,60 +327,73 @@ export class OverviewStatusService {
       });
     });
 
-    // Identify monitor IDs from ES data that don't match any local saved object — these are remote monitors
-    const unmatchedMonitorIds: string[] = [];
-    statusData.forEach((_locationStatuses, monitorId) => {
-      if (!localMonitorIds.has(monitorId)) {
-        unmatchedMonitorIds.push(monitorId);
-      }
-    });
+    // When CCS is enabled, identify monitor IDs from ES data that don't match any local
+    // saved object — these are remote monitors from federated clusters.
+    // Skip entirely when CCS is disabled to avoid unnecessary iteration over statusData.
+    const { server } = this.routeContext;
+    const isCCSEnabled =
+      !server.isElasticsearchServerless && server.config.experimental?.ccs?.enabled;
 
-    // If there are unmatched IDs, run a second-pass query to get remote monitor details
-    if (unmatchedMonitorIds.length > 0) {
-      const remoteDetails = await this.getRemoteMonitorDetails(unmatchedMonitorIds);
-      const remoteKibanaUrls = this.routeContext.remoteKibanaUrls ?? {};
-
-      remoteDetails.forEach((hit) => {
-        const monitorId = hit._source?.monitor?.id;
-        const index = hit._index;
-        if (!monitorId || !index) return;
-
-        const remote = getRemoteMonitorInfo(index, remoteKibanaUrls);
-        if (!remote) return;
-
-        const locationStatuses = statusData.get(monitorId);
-        if (!locationStatuses) return;
-
-        locationStatuses.forEach((locStatus) => {
-          const monLocId = `remote-${monitorId}-${locStatus.locationId}`;
-          const meta: OverviewStatusMetaData = {
-            configId: monitorId,
-            monitorQueryId: monitorId,
-            name: hit._source?.monitor?.name ?? monitorId,
-            status: locStatus.status as 'up' | 'down' | 'unknown',
-            locationId: locStatus.locationId,
-            locationLabel: locStatus.locationId,
-            timestamp: locStatus.timestamp,
-            type: hit._source?.monitor?.type ?? 'browser',
-            isEnabled: true,
-            schedule: '',
-            tags: hit._source?.tags ?? [],
-            isStatusAlertEnabled: false,
-            urls: locStatus.monitorUrl,
-            remote,
-          };
-
-          if (locStatus.status === 'down') {
-            down += 1;
-            downConfigs[monLocId] = meta;
-          } else if (locStatus.status === 'up') {
-            up += 1;
-            upConfigs[monLocId] = meta;
-          } else {
-            pendingConfigs[monLocId] = { ...meta, status: 'unknown' };
-          }
-        });
+    if (isCCSEnabled) {
+      const localMonitorIds = new Set<string>();
+      monitors.forEach((monitor) => {
+        localMonitorIds.add(monitor.attributes[ConfigKey.MONITOR_QUERY_ID]);
       });
+
+      const unmatchedMonitorIds: string[] = [];
+      statusData.forEach((_locationStatuses, monitorId) => {
+        if (!localMonitorIds.has(monitorId)) {
+          unmatchedMonitorIds.push(monitorId);
+        }
+      });
+
+      // If there are unmatched IDs, run a second-pass query to get remote monitor details
+      if (unmatchedMonitorIds.length > 0) {
+        const remoteDetails = await this.getRemoteMonitorDetails(unmatchedMonitorIds);
+        const remoteKibanaUrls = this.routeContext.remoteKibanaUrls ?? {};
+
+        remoteDetails.forEach((hit) => {
+          const monitorId = hit._source?.monitor?.id;
+          const index = hit._index;
+          if (!monitorId || !index) return;
+
+          const remote = getRemoteMonitorInfo(index, remoteKibanaUrls);
+          if (!remote) return;
+
+          const locationStatuses = statusData.get(monitorId);
+          if (!locationStatuses) return;
+
+          locationStatuses.forEach((locStatus) => {
+            const monLocId = `remote-${monitorId}-${locStatus.locationId}`;
+            const meta: OverviewStatusMetaData = {
+              configId: monitorId,
+              monitorQueryId: monitorId,
+              name: hit._source?.monitor?.name ?? monitorId,
+              status: locStatus.status as 'up' | 'down' | 'unknown',
+              locationId: locStatus.locationId,
+              locationLabel: locStatus.locationId,
+              timestamp: locStatus.timestamp,
+              type: hit._source?.monitor?.type ?? 'browser',
+              isEnabled: true,
+              schedule: '',
+              tags: hit._source?.tags ?? [],
+              isStatusAlertEnabled: false,
+              urls: locStatus.monitorUrl,
+              remote,
+            };
+
+            if (locStatus.status === 'down') {
+              down += 1;
+              downConfigs[monLocId] = meta;
+            } else if (locStatus.status === 'up') {
+              up += 1;
+              upConfigs[monLocId] = meta;
+            } else {
+              pendingConfigs[monLocId] = { ...meta, status: 'unknown' };
+            }
+          });
+        });
+      }
     }
 
     return {
