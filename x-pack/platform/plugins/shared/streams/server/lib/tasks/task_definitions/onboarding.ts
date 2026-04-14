@@ -75,8 +75,8 @@ async function areFeaturesUpToDate({
 
   return Boolean(
     featuresTask.last_completed_at &&
-    Date.now() - new Date(featuresTask.last_completed_at).getTime() <
-      FEATURES_IDENTIFICATION_RECENCY_MS
+      Date.now() - new Date(featuresTask.last_completed_at).getTime() <
+        FEATURES_IDENTIFICATION_RECENCY_MS
   );
 }
 
