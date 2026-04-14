@@ -1,9 +1,9 @@
 {
-  "sha1": "f6377eaf537b9990bd87ee3d0d7474a35cf92f0b",
+  "sha1": "03e069fcc73bffc266d059c218288270fe463d38",
   "tests": [
     {
-      "id": "30ebe9a34bf659d-a1567c5f112eb4c",
-      "title": "GenAI Settings - Agent Mode Complete Flow should switch to Agent mode and show Agent button",
+      "id": "30ebe9a34bf659d-a632a3af2fa3cab",
+      "title": "GenAI Settings - Agent Mode Complete Flow should show Agent mode as default and display Agent button",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -15,6 +15,23 @@
       "location": {
         "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/agent_mode_complete_flow.spec.ts",
         "line": 33,
+        "column": 14
+      }
+    },
+    {
+      "id": "30ebe9a34bf659d-6172cbc896e0e79",
+      "title": "GenAI Settings - Agent Mode Complete Flow should switch to Classic mode from Agent default",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/agent_mode_complete_flow.spec.ts",
+        "line": 54,
         "column": 14
       }
     },
@@ -55,8 +72,8 @@
       }
     },
     {
-      "id": "41648fafd99df04-2f777a05c614670",
-      "title": "GenAI Settings - AI Assistant Visibility should hide AI Assistant Visibility setting in Agent mode",
+      "id": "41648fafd99df04-e8ac973f90b0492",
+      "title": "GenAI Settings - AI Assistant Visibility should hide AI Assistant Visibility setting in Agent mode and restore it in Classic mode",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -81,13 +98,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/confirmation_modal.spec.ts",
-        "line": 34,
+        "line": 35,
         "column": 14
       }
     },
     {
-      "id": "09dd6e1d637aebe-90a30207a358704",
-      "title": "GenAI Settings - Documentation Section should show Documentation section in Agent mode",
+      "id": "09dd6e1d637aebe-0af9efa5c0eb18a",
+      "title": "GenAI Settings - Documentation Section should show Documentation section in Agent mode and hide it in Classic mode",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -168,7 +185,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/selection_modal.no_ab_privilege.spec.ts",
-        "line": 21,
+        "line": 28,
         "column": 14
       }
     },
@@ -181,7 +198,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/selection_modal.no_assistant_privilege.spec.ts",
-        "line": 20,
+        "line": 27,
         "column": 14
       }
     },
@@ -195,13 +212,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/selection_modal.spec.ts",
-        "line": 28,
+        "line": 29,
         "column": 14
       }
     },
     {
-      "id": "75d3cbd6024f87a-9778307a26a7782",
-      "title": "GenAI Settings - Change Chat Experience to Agent in Observability Space should change Chat Experience to Agent",
+      "id": "75d3cbd6024f87a-543496071231464",
+      "title": "GenAI Settings - Change Chat Experience to Agent in Observability Space should show Agent as default and display Agent UI",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -210,6 +227,20 @@
       "location": {
         "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/solution_space.observability.spec.ts",
         "line": 32,
+        "column": 14
+      }
+    },
+    {
+      "id": "75d3cbd6024f87a-5883d3315102f6e",
+      "title": "GenAI Settings - Change Chat Experience to Agent in Observability Space should switch to Classic mode from Agent default",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/solution_space.observability.spec.ts",
+        "line": 58,
         "column": 14
       }
     },
@@ -228,8 +259,8 @@
       }
     },
     {
-      "id": "3808f991759e937-dc2fc3a60f810d3",
-      "title": "GenAI Settings - Change Chat Experience to Agent in Security Space should change Chat Experience to Agent",
+      "id": "3808f991759e937-cc258fb533afd80",
+      "title": "GenAI Settings - Change Chat Experience to Agent in Security Space should show Agent as default and display Agent UI",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -238,6 +269,20 @@
       "location": {
         "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/solution_space.security.spec.ts",
         "line": 32,
+        "column": 14
+      }
+    },
+    {
+      "id": "3808f991759e937-f23e4703d3fbf16",
+      "title": "GenAI Settings - Change Chat Experience to Agent in Security Space should switch to Classic mode from Agent default",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/solution_space.security.spec.ts",
+        "line": 58,
         "column": 14
       }
     }

@@ -125,7 +125,7 @@ const upsertQueryStreamRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients, context, logger }) => {
-    const { streamsClient, queryClient, attachmentClient } = await getScopedClients({
+    const { streamsClient, getQueryClient, attachmentClient } = await getScopedClients({
       request,
     });
 
@@ -178,6 +178,7 @@ const upsertQueryStreamRoute = createServerRoute({
     }
 
     // Get existing assets and attachments to preserve them
+    const queryClient = await getQueryClient();
     const [assets, attachments] = await Promise.all([
       queryClient.getAssets(name),
       attachmentClient.getAttachments(name),
