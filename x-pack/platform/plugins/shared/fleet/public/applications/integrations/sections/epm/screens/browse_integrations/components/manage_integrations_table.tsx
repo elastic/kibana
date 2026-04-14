@@ -22,6 +22,7 @@ import {
   EuiSelectable,
   EuiInMemoryTable,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
   EuiCallOut,
 } from '@elastic/eui';
@@ -422,7 +423,7 @@ export const ManageIntegrationsTable: React.FC<{
     }
   }, [selectedItems, installToCluster, installedPackageVersions]);
 
-  const hasApprovedSelected = selectedItems.some((item) => item.status === 'approved');
+  const canBulkInstall = selectedItems.every((item) => item.status === 'approved');
 
   const columns = useMemo<Array<EuiBasicTableColumn<CreatedIntegrationRow>>>(
     () => [
@@ -816,22 +817,37 @@ export const ManageIntegrationsTable: React.FC<{
               />
             </EuiButton>
           </EuiFlexItem>
-          {hasApprovedSelected && (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                iconType="exportAction"
-                isLoading={isBulkInstalling}
-                onClick={handleBulkInstall}
-                data-test-subj="manageIntegrationsBulkInstallBtn"
-              >
-                <FormattedMessage
-                  id="xpack.fleet.epmList.manageIntegrations.bulkInstall"
-                  defaultMessage="Install"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={
+                !canBulkInstall
+                  ? i18n.translate(
+                      'xpack.fleet.epmList.manageIntegrations.bulkInstallDisabledTooltip',
+                      {
+                        defaultMessage:
+                          'Not all selected integrations are approved. Deselect unapproved integrations to install.',
+                      }
+                    )
+                  : undefined
+              }
+            >
+              <span>
+                <EuiButton
+                  size="s"
+                  iconType="exportAction"
+                  isLoading={isBulkInstalling}
+                  isDisabled={!canBulkInstall}
+                  onClick={handleBulkInstall}
+                  data-test-subj="manageIntegrationsBulkInstallBtn"
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.epmList.manageIntegrations.bulkInstall"
+                    defaultMessage="Install"
+                  />
+                </EuiButton>
+              </span>
+            </EuiToolTip>
+          </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
         <EuiText size="s">

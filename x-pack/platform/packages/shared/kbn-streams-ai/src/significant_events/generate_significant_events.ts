@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-import type { Feature, Streams } from '@kbn/streams-schema';
-import { ensureMetadata, getSourcesForStream, replaceFromSources } from '@kbn/streams-schema';
+import type { Feature, QueryType, Streams } from '@kbn/streams-schema';
+import {
+  QUERY_TYPE_MATCH,
+  QUERY_TYPE_STATS,
+  deriveQueryType,
+  ensureMetadata,
+  getSourcesForStream,
+  getStatsQueryHints,
+  replaceFromSources,
+} from '@kbn/streams-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   ChatCompletionTokenCount,
@@ -32,7 +40,13 @@ import {
   type SignificantEventsToolUsage,
 } from './tools/tool_usage';
 
-interface Query {
+/**
+ * Intermediate representation of a query as produced by the LLM tool output.
+ * Uses a flat `esql` string (vs the wrapped `EsqlQuery` in the wire type)
+ * and carries the `category` from the tool schema.
+ */
+interface ParsedToolQuery {
+  type: QueryType;
   esql: string;
   title: string;
   description: string;
@@ -52,8 +66,6 @@ function getErrorMessage(error: unknown): string {
 export async function generateSignificantEvents({
   stream,
   esClient,
-  start,
-  end,
   getFeatures,
   inferenceClient,
   signal,
@@ -64,8 +76,6 @@ export async function generateSignificantEvents({
 }: {
   stream: Streams.all.Definition;
   esClient: ElasticsearchClient;
-  start: number;
-  end: number;
   getFeatures(params?: {
     type?: string[];
     minConfidence?: number;
@@ -78,7 +88,7 @@ export async function generateSignificantEvents({
   additionalTools?: Record<string, ToolDefinition>;
   additionalToolCallbacks?: Record<string, ToolCallback>;
 }): Promise<{
-  queries: Query[];
+  queries: ParsedToolQuery[];
   tokensUsed: ChatCompletionTokenCount;
   toolUsage: SignificantEventsToolUsage;
 }> {
@@ -146,23 +156,49 @@ export async function generateSignificantEvents({
           const startTime = Date.now();
 
           const queries = toolCall.function.arguments.queries;
+          if (!Array.isArray(queries)) {
+            toolUsage.add_queries.failures += 1;
+            return {
+              response: {
+                queries: [],
+                error: 'Invalid payload: "queries" must be an array.',
+              },
+            };
+          }
           let hasFailures = false;
 
           const queryValidationResults = await Promise.all(
             queries.map(async (query) => {
               try {
-                const rewritten = ensureMetadata(replaceFromSources(query.esql, targetSources));
+                const derivedType: QueryType = deriveQueryType(query.esql);
+                const warnings: string[] = [];
+
+                if (query.type && query.type !== derivedType) {
+                  warnings.push(
+                    `Type mismatch: declared "${query.type}" but ES|QL content is "${derivedType}". Using derived type.`
+                  );
+                }
+
+                const sourceRewritten = replaceFromSources(query.esql, targetSources);
+                const rewritten =
+                  derivedType === QUERY_TYPE_STATS
+                    ? sourceRewritten
+                    : ensureMetadata(sourceRewritten);
+
+                const hints = getStatsQueryHints(rewritten);
 
                 await esClient.esql.query({
                   query: `${rewritten}\n| LIMIT 0`,
                   format: 'json',
                 });
 
+                const allHints = [...warnings, ...hints];
                 return {
-                  query: { ...query, esql: rewritten },
+                  query: { ...query, type: derivedType, esql: rewritten },
                   valid: true,
                   status: 'Added',
                   error: undefined,
+                  hints: allHints.length > 0 ? allHints : undefined,
                 };
               } catch (error) {
                 hasFailures = true;
@@ -192,9 +228,18 @@ export async function generateSignificantEvents({
     })
   );
 
-  const queries = response.input.flatMap((message) => {
+  const queries: ParsedToolQuery[] = response.input.flatMap((message) => {
     if (message.role === MessageRole.Tool && message.name === 'add_queries') {
-      return message.response.queries.flatMap(({ valid, query }) => (valid ? [query] : []));
+      const toolQueries = message.response?.queries;
+      if (!Array.isArray(toolQueries)) return [];
+      return toolQueries.flatMap(({ valid, query }) => {
+        if (!valid || !query?.esql) return [];
+        const type: QueryType =
+          query.type === QUERY_TYPE_MATCH || query.type === QUERY_TYPE_STATS
+            ? query.type
+            : deriveQueryType(query.esql);
+        return [{ ...query, type }];
+      });
     }
 
     return [];
