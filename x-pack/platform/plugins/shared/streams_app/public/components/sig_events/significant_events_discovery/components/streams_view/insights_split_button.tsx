@@ -64,6 +64,7 @@ export const InsightsSplitButton = ({
     <ContextMenuSplitButton
       primaryLabel={DISCOVER_INSIGHTS_BUTTON_LABEL}
       onPrimaryClick={onRun}
+      primaryIconType="sparkles"
       isPrimaryDisabled={isDisabled || isLoading}
       primaryDataTestSubj="significant_events_discover_insights_button"
       secondaryAriaLabel={DISCOVER_INSIGHTS_CONFIG_ARIA_LABEL}
@@ -71,7 +72,8 @@ export const InsightsSplitButton = ({
       buildPanels={buildPanels}
       error={connectorError}
       errorTitle={CONNECTOR_LOAD_ERROR}
-      color="text"
+      color="primary"
+      size="s"
       isLoading={isLoading}
       data-test-subj="significant_events_discover_insights_split_button"
     />
